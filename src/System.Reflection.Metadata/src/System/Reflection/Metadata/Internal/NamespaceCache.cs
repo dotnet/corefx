@@ -13,8 +13,8 @@ namespace System.Reflection.Metadata.Ecma335
     {
         private readonly MetadataReader _metadataReader;
         private readonly object _namespaceTableAndListLock = new object();
-        private Dictionary<NamespaceDefinitionHandle, NamespaceData> _namespaceTable;
-        private volatile NamespaceData _rootNamespace;
+        private volatile Dictionary<NamespaceDefinitionHandle, NamespaceData> _namespaceTable;
+        private NamespaceData _rootNamespace;
         private uint _virtualNamespaceCounter;
 
         internal NamespaceCache(MetadataReader reader)
@@ -24,12 +24,12 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Returns whether the rootNamespace has been created. If it hasn't, calling a GetXXX method
+        /// Returns whether the namespaceTable has been created. If it hasn't, calling a GetXXX method
         /// on this will probably have a very high amount of overhead.
         /// </summary>
         internal bool CacheIsRealized
         {
-            get { return _rootNamespace != null; }
+            get { return _namespaceTable != null; }
         }
 
         internal string GetFullName(NamespaceDefinitionHandle handle)
@@ -106,7 +106,7 @@ namespace System.Reflection.Metadata.Ecma335
         {
             lock (_namespaceTableAndListLock)
             {
-                if (_rootNamespace != null)
+                if (_namespaceTable != null)
                 {
                     return;
                 }
@@ -154,8 +154,8 @@ namespace System.Reflection.Metadata.Ecma335
                     }
                 }
 
-                _namespaceTable = namespaceTable;
                 _rootNamespace = namespaceTable[rootNamespace];
+                _namespaceTable = namespaceTable;
             }
         }
 
@@ -384,17 +384,16 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// If the rootNamespace doesn't exist, we populate namespaceTable!
+        /// If the namespace table doesn't exist, populates it!
         /// </summary>
         private void EnsureNamespaceTableIsPopulated()
         {
             // PERF: Branch will rarely be taken; do work in PopulateNamespaceList() so this can be inlined easily.
-            if (_rootNamespace == null)
+            if (_namespaceTable == null)
             {
                 PopulateNamespaceTable();
             }
             Debug.Assert(_namespaceTable != null);
-            Debug.Assert(_rootNamespace != null);
         }
 
         /// <summary>
