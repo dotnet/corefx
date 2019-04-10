@@ -459,7 +459,7 @@ int32_t AppleCryptoNative_SslGetCipherSuite(SSLContextRef sslContext, uint16_t* 
 
 int32_t AppleCryptoNative_SslSetEnabledCipherSuites(SSLContextRef sslContext, const uint32_t* cipherSuites, int32_t numCipherSuites)
 {
-    // Max numCipherSuites is 2^16 (all cipher suites)
+    // Max numCipherSuites is 2^16 (all possible cipher suites)
     assert(numCipherSuites < (1 << 16));
 
     if (sizeof(SSLCipherSuite) == sizeof(uint32_t))
