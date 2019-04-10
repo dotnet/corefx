@@ -50,16 +50,19 @@ namespace System.Net
                 if (sslAuthenticationOptions.CipherSuitesPolicy != null)
                 {
                     uint[] tlsCipherSuites = sslAuthenticationOptions.CipherSuitesPolicy.TlsCipherSuites;
-                    unsafe (uint* cipherSuites = tlsCipherSuites)
+                    unsafe
                     {
-                        int osStatus = Interop.AppleCrypto.SslSetEnabledCipherSuites(
-                            _sslContext,
-                            cipherSuites,
-                            tlsCipherSuites.Length);
-
-                        if (osStatus != 0)
+                        fixed (uint* cipherSuites = tlsCipherSuites)
                         {
-                            throw Interop.AppleCrypto.CreateExceptionForOSStatus(osStatus);
+                            int osStatus = Interop.AppleCrypto.SslSetEnabledCipherSuites(
+                                _sslContext,
+                                cipherSuites,
+                                tlsCipherSuites.Length);
+
+                            if (osStatus != 0)
+                            {
+                                throw Interop.AppleCrypto.CreateExceptionForOSStatus(osStatus);
+                            }
                         }
                     }
                 }
