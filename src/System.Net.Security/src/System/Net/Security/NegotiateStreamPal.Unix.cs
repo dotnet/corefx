@@ -24,7 +24,7 @@ namespace System.Net.Security
     {
         internal static IIdentity GetIdentity(NTAuthentication context)
         {
-            Debug.Assert(!context.IsServer, "GetIdentity: Server is not supported");
+            if (context.IsServer) throw new PlatformNotSupportedException("GetIdentity: Server is not supported");
 
             string name = context.Spn;
             string protocol = context.ProtocolName;

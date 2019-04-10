@@ -8,6 +8,8 @@ using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Security;
 using System.Security.Authentication;
+using System.Security.Authentication.ExtendedProtection;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -160,10 +162,10 @@ namespace System.Net.Security.Tests
         }
 
         [OuterLoop]
-        [Theory]
+        // [Theory]
         // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
         [MemberData(nameof(GoodCredentialsData))]
-        public async Task NegotiateStream_ServerAuthenticationRemote_Success(object credentialObject)
+        public async Task NegotiateStream_LocalServerAuthentication_Success(object credentialObject)
         {
             var credential = (NetworkCredential)credentialObject;
             await VerifyLocalServerAuthentication(credential);
@@ -173,7 +175,7 @@ namespace System.Net.Security.Tests
         // [Theory]
         // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
         [MemberData(nameof(BadCredentialsData))]
-        public async Task NegotiateStream_ServerAuthenticationRemote_Fails(object credentialObject)
+        public async Task NegotiateStream_LocalServerAuthentication_Fails(object credentialObject)
         {
             var credential = (NetworkCredential)credentialObject;
             await Assert.ThrowsAsync<AuthenticationException>(() => VerifyLocalServerAuthentication(credential));
@@ -203,22 +205,22 @@ namespace System.Net.Security.Tests
 */
             using (var client = new TcpClient())
             {
-                var server = new TcpListener(IPAddress.Loopback, port);
+                var server = new TcpListener(IPAddress.Parse("10.121.100.113"), port);
                 server.Start();
                 try
                 {
                     var acceptTask = server.AcceptTcpClientAsync();
-                    await client.ConnectAsync(IPAddress.Loopback, port);
+                    await client.ConnectAsync(IPAddress.Parse("10.121.100.113"), port);
 
                     var serverConnection = await acceptTask;
                     var serverStream = serverConnection.GetStream();
-
+/*
             var loop = true;
             while (loop)
             {
                 await Task.Delay(1000);
             }
-
+*/
                     using (var serverAuth = new NegotiateStream(serverStream, leaveInnerStreamOpen: false))
                     {
                         var clientStream = client.GetStream();
@@ -261,6 +263,85 @@ namespace System.Net.Security.Tests
                 {
                     server.Stop();
                 }
+            }
+        }
+
+        [OuterLoop]
+        [Theory]
+        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
+        [MemberData(nameof(GoodCredentialsData))]
+        public async Task NegotiateStream_RemoteServerAuthentication_Success(object credentialObject)
+        {
+            var credential = (NetworkCredential)credentialObject;
+            await VerifyRemoteServerAuthentication(credential);
+        }
+
+        [OuterLoop]
+        // [Theory]
+        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
+        [MemberData(nameof(BadCredentialsData))]
+        public async Task NegotiateStream_RemoteServerAuthentication_Fails(object credentialObject)
+        {
+            var credential = (NetworkCredential)credentialObject;
+            await Assert.ThrowsAsync<AuthenticationException>(() => VerifyRemoteServerAuthentication(credential));
+        }
+
+        private async Task VerifyRemoteServerAuthentication(NetworkCredential credential)
+        {
+            string serverName = "chrross-udesk.crkerberos.com";// Configuration.Security.NegotiateServer.Host;
+            int port = 54321;// Configuration.Security.NegotiateServer.Port;
+            string serverSPN = "HTTP/" + serverName;
+            
+            string expectedAuthenticationType = "Kerberos";
+            bool mutualAuthenitcated = true;
+/*
+            if (credential != CredentialCache.DefaultNetworkCredentials && 
+                (string.IsNullOrEmpty(credential.UserName) || string.IsNullOrEmpty(credential.Password)))
+            {
+                // Anonymous authentication.
+                expectedAuthenticationType = "NTLM";
+                mutualAuthenitcated = false;
+            }
+*/
+            var server = new TcpListener(IPAddress.Parse("10.121.100.113"), port);
+            server.Start();
+            try
+            {                
+                var acceptTask = server.AcceptTcpClientAsync();
+                // TODO: Signal client to connect
+
+                var serverConnection = await acceptTask;
+                var serverStream = serverConnection.GetStream();
+/*
+                var loop = true;
+                while (loop)
+                {
+                    await Task.Delay(1000);
+                }
+*/
+                using (var serverAuth = new NegotiateStream(serverStream, leaveInnerStreamOpen: false))
+                {
+                    serverAuth.AuthenticateAsServer(
+                        CredentialCache.DefaultNetworkCredentials,
+                        ProtectionLevel.None,
+                        TokenImpersonationLevel.Identification);
+
+                    Assert.Equal(expectedAuthenticationType, serverAuth.RemoteIdentity.AuthenticationType);
+                    Assert.Equal(serverSPN, serverAuth.RemoteIdentity.Name);
+
+                    Assert.True(serverAuth.IsAuthenticated, "IsAuthenticated");
+                    Assert.True(serverAuth.IsEncrypted, "IsEncrypted");
+                    Assert.True(serverAuth.IsSigned, "IsSigned");
+                    Assert.Equal(mutualAuthenitcated, serverAuth.IsMutuallyAuthenticated);
+
+                    // Send a message to the server. Encode the test data into a byte array.
+                    byte[] message = Encoding.UTF8.GetBytes("Hello from the server.");
+                    await serverAuth.WriteAsync(message, 0, message.Length);
+                }
+            }
+            finally
+            {
+                server.Stop();
             }
         }
 
