@@ -3,12 +3,22 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 
 namespace System.Net.Security
 {
     public sealed partial class CipherSuitesPolicy
     {
-        private void Initialize(IEnumerable<TlsCipherSuite> allowedCipherSuites) => throw new PlatformNotSupportedException(SR.net_ssl_ciphersuites_policy_not_supported);
-        private IEnumerable<TlsCipherSuite> GetCipherSuites() => null;
+        internal uint[] TlsCipherSuites { get; private set; }
+
+        private void Initialize(IEnumerable<TlsCipherSuite> allowedCipherSuites)
+        {
+            TlsCipherSuites = allowedCipherSuites.Select((cs) => (uint)cs).ToArray();
+        }
+
+        private IEnumerable<TlsCipherSuite> GetCipherSuites()
+        {
+            return TlsCipherSuites.Select((cs) => (TlsCipherSuite)cs);
+        }
     }
 }

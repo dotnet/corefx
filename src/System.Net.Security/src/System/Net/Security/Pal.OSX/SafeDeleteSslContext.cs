@@ -47,6 +47,23 @@ namespace System.Net
                     throw Interop.AppleCrypto.CreateExceptionForOSStatus(osStatus);
                 }
 
+                if (sslAuthenticationOptions.CipherSuitesPolicy != null)
+                {
+                    uint[] tlsCipherSuites = sslAuthenticationOptions.CipherSuitesPolicy.TlsCipherSuites;
+                    unsafe (uint* cipherSuites = tlsCipherSuites)
+                    {
+                        int osStatus = Interop.AppleCrypto.SslSetEnabledCipherSuites(
+                            _sslContext,
+                            cipherSuites,
+                            tlsCipherSuites.Length);
+
+                        if (osStatus != 0)
+                        {
+                            throw Interop.AppleCrypto.CreateExceptionForOSStatus(osStatus);
+                        }
+                    }
+                }
+
                 if (sslAuthenticationOptions.ApplicationProtocols != null)
                 {
                     // On OSX coretls supports only client side. For server, we will silently ignore the option.
@@ -314,7 +331,7 @@ namespace System.Net
             // If we didn't find an unset protocol after the min, go all the way to the last one.
             if (maxProtocolId == (SslProtocols)(-1))
             {
-                maxProtocolId = orderedSslProtocols[orderedSslProtocols.Length - 1]; 
+                maxProtocolId = orderedSslProtocols[orderedSslProtocols.Length - 1];
             }
 
             // Finally set this min and max.
