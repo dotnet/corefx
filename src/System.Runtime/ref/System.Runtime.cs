@@ -1984,7 +1984,7 @@ namespace System
         public override bool Equals(object value) { throw null; }
         public bool Equals(System.Range other) { throw null; }
         public override int GetHashCode() { throw null; }
-        public (int offset, int rangeLength) GetOffsetAndLength(int length) { throw null; }
+        public (int Offset, int Length) GetOffsetAndLength(int length) { throw null; }
         public static System.Range StartAt(System.Index start) { throw null; }
         public override string ToString() { throw null; }
     }
