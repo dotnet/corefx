@@ -225,7 +225,7 @@ namespace System.Net.Security.Tests
         }
 
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
-        public void CipherSuitesPolicy_ClientOrderingWinsOverServerOrderingTwoCipherSuitesWithAllOverlapping_Success()
+        public void CipherSuitesPolicy_TwoCipherSuitesWithAllOverlapping_Success()
         {
             CheckPrereqsForNonTls13Tests(2);
             var a = new ConnectionParams()
@@ -247,12 +247,13 @@ namespace System.Net.Security.Tests
                     ConnectAndGetNegotiatedParams(a, b);
 
                 ret.Succeeded();
-                ret.CheckCipherSuite(SupportedNonTls13CipherSuites[isAClient ? 0 : 1]);
+                Assert.True(ret.CipherSuite == SupportedNonTls13CipherSuites[0] ||
+                            ret.CipherSuite == SupportedNonTls13CipherSuites[1]);
             }
         }
 
         [ConditionalFact(nameof(CipherSuitesPolicySupported))]
-        public void CipherSuitesPolicy_ClientOrderingWinsOverServerOrderingThreeCipherSuitesWithTwoOverlapping_Success()
+        public void CipherSuitesPolicy_ThreeCipherSuitesWithTwoOverlapping_Success()
         {
             CheckPrereqsForNonTls13Tests(4);
             var a = new ConnectionParams()
@@ -276,7 +277,9 @@ namespace System.Net.Security.Tests
                     ConnectAndGetNegotiatedParams(a, b);
 
                 ret.Succeeded();
-                ret.CheckCipherSuite(SupportedNonTls13CipherSuites[isAClient ? 1 : 2]);
+
+                Assert.True(ret.CipherSuite == SupportedNonTls13CipherSuites[1] ||
+                            ret.CipherSuite == SupportedNonTls13CipherSuites[2]);
             }
         }
 
