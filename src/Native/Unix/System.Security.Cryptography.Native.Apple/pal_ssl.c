@@ -459,21 +459,26 @@ int32_t AppleCryptoNative_SslGetCipherSuite(SSLContextRef sslContext, uint16_t* 
 
 int32_t AppleCryptoNative_SslSetEnabledCipherSuites(SSLContextRef sslContext, const uint32_t* cipherSuites, int32_t numCipherSuites)
 {
+    assert(numCipherSuites < (1 << 16), "Max numCipherSuites is 2^16 (all cipher suites)");
+
     if (sizeof(SSLCipherSuite) == sizeof(uint32_t))
     {
         // macOS
-        return SSLSetEnabledCiphers(sslContext, cipherSuites, numCipherSuites);
+        return SSLSetEnabledCiphers(sslContext, cipherSuites, (int32_t)numCipherSuites);
     }
     else if (sizeof(SSLCipherSuite) == sizeof(uint16_t))
     {
         // iOS, tvOS, watchOS
-        uint16_t* cipherSuites16 = new uint16_t[numCipherSuites];
+        uint16_t* cipherSuites16 = (uint16_t*)malloc(sizeof(uint16_t) * numCipherSuites);
         for (int i = 0; i < numCipherSuites; i++)
         {
             cipherSuites16[i] = (uint16_t)cipherSuites[i];
         }
 
-        return SSLSetEnabledCiphers(sslContext, cipherSuites16, numCipherSuites);
+        OSStatus status = SSLSetEnabledCiphers(sslContext, cipherSuites16, numCipherSuites);
+
+        free(cipherSuites16);
+        return status;
     }
     else
     {
