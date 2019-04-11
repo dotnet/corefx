@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace System
 {
@@ -184,6 +185,12 @@ namespace System
             bool havePrefix = false;
             bool expectingNumber = true;
             int lastSequence = 1;
+
+            // Starting with a colon character is only valid if another colon follows.
+            if (name[start] == ':' && (start + 1 >= end || name[start + 1] != ':'))
+            {
+                return false;
+            }
 
             int i;
             for (i = start; i < end; ++i)
@@ -432,6 +439,7 @@ namespace System
 
             for (int i = start; i < address.Length && address[i] != ']';)
             {
+                ValidateIndex(index);
                 switch (address[i])
                 {
                     case '%':
@@ -501,7 +509,9 @@ namespace System
                                     ++j;
                                 }
                                 number = IPv4AddressHelper.ParseHostNumber(address, i, j);
+                                ValidateIndex(index);
                                 numbers[index++] = (ushort)(number >> 16);
+                                ValidateIndex(index);
                                 numbers[index++] = (ushort)number;
                                 i = j;
 
@@ -548,6 +558,7 @@ namespace System
 
             if (numberIsValid)
             {
+                ValidateIndex(index);
                 numbers[index++] = (ushort)number;
             }
 
@@ -563,7 +574,9 @@ namespace System
 
                 for (int i = index - compressorIndex; i > 0; --i)
                 {
+                    ValidateIndex(fromIndex);
                     numbers[toIndex--] = numbers[fromIndex];
+                    ValidateIndex(toIndex);
                     numbers[fromIndex--] = 0;
                 }
             }
@@ -589,5 +602,11 @@ namespace System
                                    && ((numbers[5] == 0)
                                        || (numbers[5] == 0xFFFF))));
         }
+
+       [Conditional("DEBUG")]
+       public static void ValidateIndex(int index)
+       {
+           Debug.Assert(index >= 0 && index < NumberOfLabels, $"index = {index}");
+       }
     }
 }
