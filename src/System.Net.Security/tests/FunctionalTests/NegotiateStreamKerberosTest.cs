@@ -323,16 +323,16 @@ namespace System.Net.Security.Tests
                 {
                     serverAuth.AuthenticateAsServer(
                         CredentialCache.DefaultNetworkCredentials,
-                        ProtectionLevel.None,
+                        ProtectionLevel.EncryptAndSign,
                         TokenImpersonationLevel.Identification);
-
-                    Assert.Equal(expectedAuthenticationType, serverAuth.RemoteIdentity.AuthenticationType);
-                    Assert.Equal(serverSPN, serverAuth.RemoteIdentity.Name);
 
                     Assert.True(serverAuth.IsAuthenticated, "IsAuthenticated");
                     Assert.True(serverAuth.IsEncrypted, "IsEncrypted");
                     Assert.True(serverAuth.IsSigned, "IsSigned");
                     Assert.Equal(mutualAuthenitcated, serverAuth.IsMutuallyAuthenticated);
+
+                    Assert.Equal(expectedAuthenticationType, serverAuth.RemoteIdentity.AuthenticationType);
+                    Assert.Equal(serverSPN, serverAuth.RemoteIdentity.Name);
 
                     // Send a message to the server. Encode the test data into a byte array.
                     byte[] message = Encoding.UTF8.GetBytes("Hello from the server.");

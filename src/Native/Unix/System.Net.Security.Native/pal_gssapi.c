@@ -247,7 +247,8 @@ uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                             GssCtxId** contextHandle,
                                             uint8_t* inputBytes,
                                             uint32_t inputLength,
-                                            PAL_GssBuffer* outBuffer)
+                                            PAL_GssBuffer* outBuffer,
+                                            uint32_t* retFlags)
 {
     assert(minorStatus != NULL);
     assert(contextHandle != NULL);
@@ -266,7 +267,7 @@ uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                                   NULL,
                                                   NULL,
                                                   &gssBuffer,
-                                                  0,
+                                                  retFlags,
                                                   NULL,
                                                   NULL);
 

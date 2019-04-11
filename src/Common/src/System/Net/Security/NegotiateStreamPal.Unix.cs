@@ -168,7 +168,8 @@ namespace System.Net.Security
         private static bool GssAcceptSecurityContext(
             ref SafeGssContextHandle context,
             byte[] buffer,
-            out byte[] outputBuffer)
+            out byte[] outputBuffer,
+            out uint outFlags)
         {
             // do we need to initalize this?
             if (context == null)
@@ -183,10 +184,11 @@ namespace System.Net.Security
             {
                 Interop.NetSecurityNative.Status minorStatus;
                 status = Interop.NetSecurityNative.AcceptSecContext(out minorStatus,
-                                                          ref context,
-                                                          buffer,
-                                                          buffer?.Length ?? 0,
-                                                          ref token);
+                                                                    ref context,
+                                                                    buffer,
+                                                                    buffer?.Length ?? 0,
+                                                                    ref token,
+                                                                    out outFlags);
 
                 if ((status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE) &&
                     (status != Interop.NetSecurityNative.Status.GSS_S_CONTINUE_NEEDED))
@@ -366,7 +368,8 @@ namespace System.Net.Security
                 bool done = GssAcceptSecurityContext(
                    ref contextHandle,
                    incomingBlob,
-                   out resultBlob);
+                   out resultBlob,
+                   out uint outputFlags);
 /*
                 if (done)
                 {
@@ -390,6 +393,8 @@ namespace System.Net.Security
                     negoContext.SetGssContext(contextHandle);
                 }
 
+                contextFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop(
+                    (Interop.NetSecurityNative.GssFlags)outputFlags, isServer: true);
                 SecurityStatusPalErrorCode errorCode = done ?
                     (negoContext.IsNtlmUsed && resultBlob.Length > 0 ? SecurityStatusPalErrorCode.OK : SecurityStatusPalErrorCode.CompleteNeeded) :
                     SecurityStatusPalErrorCode.ContinueNeeded;

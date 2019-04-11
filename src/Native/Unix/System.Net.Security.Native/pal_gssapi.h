@@ -124,7 +124,8 @@ DLLEXPORT uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                                       GssCtxId** contextHandle,
                                                       uint8_t* inputBytes,
                                                       uint32_t inputLength,
-                                                      PAL_GssBuffer* outBuffer);
+                                                      PAL_GssBuffer* outBuffer,
+                                                      uint32_t* retFlags);
 
 /*
 
