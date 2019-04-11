@@ -465,6 +465,15 @@ namespace System.Reflection.Tests
             string simpleName = typeof(AssemblyTests).Assembly.GetName().Name;
             var assembly = Assembly.LoadWithPartialName(simpleName);
             Assert.Equal(typeof(AssemblyTests).Assembly, assembly);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFromWithPartialName() not supported on UapAot")]
+        public void LoadWithPartialName_Neg()
+        {
+            Assert.Throws<ArgumentNullException>(() => Assembly.LoadWithPartialName(null));
+            Assert.Throws<ArgumentException>(() => Assembly.LoadWithPartialName(""));
+            Assert.Null(Assembly.LoadWithPartialName("no such assembly"));
         }        
 #pragma warning restore 618
 
@@ -680,6 +689,8 @@ namespace System.Reflection.Tests
         
             string emptyCName = new string('\0', 1);
             AssertExtensions.Throws<ArgumentException>(null, () => Assembly.Load(emptyCName));
+
+            Assert.Throws<FileNotFoundException>(() => Assembly.Load("no such assembly")); // No such assembly
         }
 
         [Fact]
