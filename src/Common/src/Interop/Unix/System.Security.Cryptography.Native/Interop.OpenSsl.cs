@@ -107,7 +107,11 @@ internal static partial class Interop
                 Ssl.SetProtocolOptions(innerContext.DangerousGetHandle(), protocols);
 
                 // Sets policy and security level
-                Ssl.SetEncryptionPolicy(innerContext, policy);
+                if (!Ssl.SetEncryptionPolicy(innerContext, policy))
+                {
+                    throw new SslException(
+                        SR.Format(SR.net_ssl_encryptionpolicy_notsupported, policy));
+                }
 
                 // The logic in SafeSslHandle.Disconnect is simple because we are doing a quiet
                 // shutdown (we aren't negotiating for session close to enable later session

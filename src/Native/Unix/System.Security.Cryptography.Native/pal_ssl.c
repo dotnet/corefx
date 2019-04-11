@@ -319,7 +319,7 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
     SSL_CTX_set_cert_verify_callback(ctx, callback, arg);
 }
 
-void CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
+int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
 {
     switch (policy)
     {
@@ -327,11 +327,12 @@ void CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy)
         case NoEncryption:
             // No minimum security policy, same as OpenSSL 1.0
             SSL_CTX_set_security_level(ctx, 0);
-            break;
+            return true;
         case RequireEncryption:
-            // get rid of warning
-            break;
+            return true;
     }
+
+    return false;
 }
 
 int32_t CryptoNative_SetCiphers(SSL_CTX* ctx, const char* cipherList, const char* cipherSuites)

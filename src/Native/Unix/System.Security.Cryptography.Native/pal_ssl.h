@@ -326,7 +326,7 @@ CryptoNative_SslCtxSetCertVerifyCallback(SSL_CTX* ctx, SslCtxSetCertVerifyCallba
 /*
 Sets the specified encryption policy on the SSL_CTX.
 */
-DLLEXPORT void CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy);
+DLLEXPORT int32_t CryptoNative_SetEncryptionPolicy(SSL_CTX* ctx, EncryptionPolicy policy);
 
 /*
 Sets ciphers (< TLS 1.3) and cipher suites (TLS 1.3) on the SSL_CTX
@@ -394,6 +394,7 @@ Shims the SSL_get_current_cipher and SSL_CIPHER_get_id.
 DLLEXPORT int32_t CryptoNative_SslGetCurrentCipherId(SSL* ssl, int32_t* cipherId);
 
 /*
-Shims the SSL_CIPHER_get_name and SSL_CIPHER_get_version
+Looks up a cipher by the IANA identifier, returns a shared string for the OpenSSL name for the cipher,
+and emits a value indicating if the cipher belongs to the SSL2-TLS1.2 list, or the TLS1.3+ list.
 */
 DLLEXPORT const char* CryptoNative_GetOpenSslCipherSuiteName(SSL* ssl, int32_t cipherSuite, int32_t* isTls12OrLower);

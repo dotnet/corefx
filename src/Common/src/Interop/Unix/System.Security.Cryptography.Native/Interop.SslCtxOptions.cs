@@ -34,6 +34,6 @@ internal static partial class Interop
         internal static unsafe extern bool SetCiphers(SafeSslContextHandle ctx, byte* cipherList, byte* cipherSuites);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_SetEncryptionPolicy")]
-        internal static extern void SetEncryptionPolicy(SafeSslContextHandle ctx, EncryptionPolicy policy);
+        internal static extern bool SetEncryptionPolicy(SafeSslContextHandle ctx, EncryptionPolicy policy);
     }
 }

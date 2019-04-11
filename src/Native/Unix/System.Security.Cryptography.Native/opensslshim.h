@@ -437,7 +437,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(RSA_size) \
     REQUIRED_FUNCTION(RSA_up_ref) \
     REQUIRED_FUNCTION(RSA_verify) \
-    LIGHTUP_FUNCTION(SSL_CIPHER_find) \
+    FALLBACK_FUNCTION(SSL_CIPHER_find) \
     REQUIRED_FUNCTION(SSL_CIPHER_get_bits) \
     REQUIRED_FUNCTION(SSL_CIPHER_get_id) \
     LIGHTUP_FUNCTION(SSL_CIPHER_get_name) \
@@ -453,7 +453,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     LIGHTUP_FUNCTION(SSL_CTX_set_alpn_select_cb) \
     REQUIRED_FUNCTION(SSL_CTX_set_cert_verify_callback) \
     REQUIRED_FUNCTION(SSL_CTX_set_cipher_list) \
-    LIGHTUP_FUNCTION(SSL_CTX_set_ciphersuites) \
+    FALLBACK_FUNCTION(SSL_CTX_set_ciphersuites) \
     REQUIRED_FUNCTION(SSL_CTX_set_client_cert_cb) \
     REQUIRED_FUNCTION(SSL_CTX_set_quiet_shutdown) \
     FALLBACK_FUNCTION(SSL_CTX_set_options) \
