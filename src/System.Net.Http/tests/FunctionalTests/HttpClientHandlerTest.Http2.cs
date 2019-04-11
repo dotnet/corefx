@@ -22,7 +22,7 @@ namespace System.Net.Http.Functional.Tests
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
+                Task sendTask = client.GetAsync(server.Address);
 
                 string connectionPreface = await server.AcceptConnectionAsync();
 
@@ -35,7 +35,7 @@ namespace System.Net.Http.Functional.Tests
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
 
@@ -66,7 +66,7 @@ namespace System.Net.Http.Functional.Tests
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
+                Task sendTask = client.GetAsync(server.Address);
 
                 await server.AcceptConnectionAsync();
 
@@ -83,7 +83,7 @@ namespace System.Net.Http.Functional.Tests
             using (var server = Http2LoopbackServer.CreateServer())
             using (var client = CreateHttpClient())
             {
-                Task<HttpResponseMessage> sendTask = client.SendAsync(new HttpRequestMessage(HttpMethod.Get, server.Address){ Version = _version20 });
+                Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
 
                 await server.EstablishConnectionAsync();
 
