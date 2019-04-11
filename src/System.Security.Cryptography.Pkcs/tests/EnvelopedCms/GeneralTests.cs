@@ -287,6 +287,26 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
         }
 
         [Fact]
+        public static void Encrypt_Data_DoesNotIncreaseInSize()
+        {
+            byte[] content = new byte[15]; // One short of AES block size boundary
+            ContentInfo contentInfo = new ContentInfo(content);
+            AlgorithmIdentifier identifier = new AlgorithmIdentifier(new Oid(Oids.Aes128));
+            EnvelopedCms ecms = new EnvelopedCms(contentInfo, identifier);
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                CmsRecipient recipient = new CmsRecipient(cert);
+                ecms.Encrypt(recipient);
+            }
+
+            byte[] encoded = ecms.Encode();
+            EnvelopedCms reDecoded = new EnvelopedCms();
+            reDecoded.Decode(encoded);
+            Assert.Equal(16, reDecoded.ContentInfo.Content.Length);
+        }
+
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         [PlatformSpecific(~TestPlatforms.Windows)] /* Applies to managed PAL only. */
         public static void FromManagedPal_CompatWithOctetStringWrappedContents_Decrypt()
@@ -310,6 +330,7 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
                 {
                     return; //Private key not available.
                 }
+
                 ecms.Decrypt(new X509Certificate2Collection(privateCert));
             }
 
