@@ -77,6 +77,7 @@ namespace System.Net.Http
                     Debug.Assert(port != 0);
                     Debug.Assert(sslHostName == null);
                     Debug.Assert(proxyUri == null);
+                    _http2Enabled = _poolManager.Settings._allowPlainHttp2;
                     break;
 
                 case HttpConnectionKind.Https:
@@ -210,7 +211,7 @@ namespace System.Net.Http
         private ValueTask<(HttpConnectionBase connection, bool isNewConnection, HttpResponseMessage failureResponse)> 
             GetConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            if (_http2Enabled && request.Version.Major == 2 && request.Version.Minor == 0)
+            if (_http2Enabled && request.Version.Major >= 2)
             {
                 return GetHttp2ConnectionAsync(request, cancellationToken);
             }

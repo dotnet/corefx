@@ -12,6 +12,8 @@ namespace System.Net.Http
     {
         private const string Http2SupportEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2SUPPORT";
         private const string Http2SupportAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.Http2Support";
+        private const string Http2PlainSupportEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2PLAINSUPPORT";
+        private const string Http2PlainSupportAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.Http2PlainSupport";
         
         internal DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
 
@@ -40,6 +42,8 @@ namespace System.Net.Http
 
         internal Version _maxHttpVersion;
 
+        internal bool _allowPlainHttp2;
+
         internal SslClientAuthenticationOptions _sslOptions;
 
         internal IDictionary<string, object> _properties;
@@ -47,6 +51,7 @@ namespace System.Net.Http
         public HttpConnectionSettings()
         {
             _maxHttpVersion = AllowHttp2 ? HttpVersion.Version20 : HttpVersion.Version11;
+            _allowPlainHttp2 = AllowPlainHttp2;
         }
 
         /// <summary>Creates a copy of the settings but with some values normalized to suit the implementation.</summary>
@@ -107,6 +112,29 @@ namespace System.Net.Http
 
                 // AppContext switch wasn't used. Check the environment variable.
                 string envVar = Environment.GetEnvironmentVariable(Http2SupportEnvironmentVariableSettingName);
+                if (envVar != null && (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1")))
+                {
+                    // Allow HTTP/2.0 protocol.
+                    return true;
+                }
+
+                // Default to a maximum of HTTP/1.1.
+                return false;
+            }
+        }
+
+        private static bool AllowPlainHttp2
+        {
+            get
+            {
+                // First check for the AppContext switch, giving it priority over the environment variable.
+                if (AppContext.TryGetSwitch(Http2PlainSupportAppCtxSettingName, out bool allowHttp2))
+                {
+                    return allowHttp2;
+                }
+
+                // AppContext switch wasn't used. Check the environment variable.
+                string envVar = Environment.GetEnvironmentVariable(Http2PlainSupportEnvironmentVariableSettingName);
                 if (envVar != null && (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1")))
                 {
                     // Allow HTTP/2.0 protocol.
