@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net.Test.Common;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -367,6 +368,45 @@ namespace System.Net.Security.Tests
                     ConnectAndGetNegotiatedParams(b, a);
                 ret.Failed();
             }
+        }
+
+        [Fact]
+        public void CipherSuitesPolicy_CtorWithNull_Fails()
+        {
+            Assert.Throws<ArgumentNullException>(() => new CipherSuitesPolicy(null));
+        }
+
+        [Fact]
+        public void CipherSuitesPolicy_AllowedCipherSuitesIncludesSubsetOfInput_Success()
+        {
+            TlsCipherSuite[] allCipherSuites = (TlsCipherSuite[])Enum.GetValues(typeof(TlsCipherSuite));
+            var r = new Random(123);
+            int[] numOfCipherSuites = new int[] { 0, 1, 2, 5, 10, 15, 30 };
+
+            foreach (int n in numOfCipherSuites)
+            {
+                HashSet<TlsCipherSuite> cipherSuites = PickRandomValues(allCipherSuites, n, r);
+                var csp = new CipherSuitesPolicy(cipherSuites);
+                Assert.NotNull(csp.AllowedCipherSuites);
+                Assert.InRange(csp.AllowedCipherSuites.Count(), 0, n);
+
+                foreach (var cs in csp.AllowedCipherSuites)
+                {
+                    Assert.True(cipherSuites.Contains(cs));
+                }
+            }
+        }
+
+        private HashSet<TlsCipherSuite> PickRandomValues(TlsCipherSuite[] all, int n, Random r)
+        {
+            var ret = new HashSet<TlsCipherSuite>();
+
+            while (ret.Count != n)
+            {
+                ret.Add(all[r.Next() % n]);
+            }
+
+            return ret;
         }
 
         private static void AllowOneOnOneSide(IEnumerable<TlsCipherSuite> cipherSuites,
