@@ -157,6 +157,7 @@
     <Compile Include="System\Net\Http\SocketsHttpHandler\SocketsHttpHandler.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\RawConnectionStream.cs" />
     <Compile Include="System\Net\Http\SocketsHttpHandler\RedirectHandler.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\TaskCompletionSourceWithCancellation.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs">
       <Link>Common\CoreLib\System\Collections\Concurrent\ConcurrentQueueSegment.cs</Link>
     </Compile>
@@ -306,6 +307,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs">
       <Link>Common\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs">
+      <Link>Common\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\SSPISecureChannelType.cs">
       <Link>Common\Interop\Windows\SspiCli\SSPISecureChannelType.cs</Link>
@@ -609,7 +613,7 @@
   <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
     <Reference Include="System.Net.NameResolution" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'netcoreappaot' OR '$(TargetGroup)' == 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap'">
     <Reference Include="Microsoft.Win32.Primitives" />
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections" />
