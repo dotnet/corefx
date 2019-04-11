@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.Dynamic.Tests
@@ -16,14 +17,18 @@ namespace System.Dynamic.Tests
         {
             var att =
                 (DebuggerTypeProxyAttribute)
-                    type.GetCustomAttributes().Single(at => at.TypeId.Equals(typeof(DebuggerTypeProxyAttribute)));
+                    type.GetCustomAttributes().SingleOrDefault(at => at.TypeId.Equals(typeof(DebuggerTypeProxyAttribute)));
+            if (att == null)
+            {
+                return null;
+            }
             string proxyName = att.ProxyTypeName;
             proxyName = proxyName.Substring(0, proxyName.IndexOf(','));
             return type.GetTypeInfo().Assembly.GetType(proxyName);
         }
 
         private static object GetDebugViewObject(object obj)
-            => GetDebugViewType(obj.GetType()).GetConstructors().Single().Invoke(new[] {obj});
+            => GetDebugViewType(obj.GetType())?.GetConstructors().Single().Invoke(new[] {obj});
 
         private static IEnumerable<IDictionary<string, object>> TestExpandos()
         {
@@ -81,7 +86,12 @@ namespace System.Dynamic.Tests
         [MemberData(nameof(ValueCollections))]
         public void ItemsAreRootHidden(object eo)
         {
-            PropertyInfo itemsProp = GetDebugViewObject(eo).GetType().GetProperty("Items");
+            object view = GetDebugViewObject(eo);
+            if (view == null)
+            {
+                throw new SkipTestException($"Didn't find DebuggerTypeProxyAttribute on {eo}.");
+            }
+            PropertyInfo itemsProp = view.GetType().GetProperty("Items");
             var browsable = (DebuggerBrowsableAttribute)itemsProp.GetCustomAttribute(typeof(DebuggerBrowsableAttribute));
             Assert.Equal(DebuggerBrowsableState.RootHidden, browsable.State);
         }
@@ -90,6 +100,10 @@ namespace System.Dynamic.Tests
         public void KeyCollectionCorrectlyViewed(ICollection<string> keys)
         {
             object view = GetDebugViewObject(keys);
+            if (view == null)
+            {
+                throw new SkipTestException($"Didn't find DebuggerTypeProxyAttribute on {keys}.");
+            }
             PropertyInfo itemsProp = view.GetType().GetProperty("Items");
             string[] items = (string[])itemsProp.GetValue(view);
             AssertSameCollectionIgnoreOrder(keys, items);
@@ -99,6 +113,10 @@ namespace System.Dynamic.Tests
         public void ValueCollectionCorrectlyViewed(ICollection<object> keys)
         {
             object view = GetDebugViewObject(keys);
+            if (view == null)
+            {
+                throw new SkipTestException($"Didn't find DebuggerTypeProxyAttribute on {keys}.");
+            }
             PropertyInfo itemsProp = view.GetType().GetProperty("Items");
             object[] items = (object[])itemsProp.GetValue(view);
             AssertSameCollectionIgnoreOrder(keys, items);
@@ -108,6 +126,10 @@ namespace System.Dynamic.Tests
         public void ViewTypeThrowsOnNull(object collection)
         {
             Type debugViewType = GetDebugViewType(collection.GetType());
+            if (debugViewType == null)
+            {
+                throw new SkipTestException($"Didn't find DebuggerTypeProxyAttribute on {collection.GetType()}.");
+            }
             ConstructorInfo constructor = debugViewType.GetConstructors().Single();
             TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => constructor.Invoke(new object[] {null}));
             var ane = (ArgumentNullException)tie.InnerException;
