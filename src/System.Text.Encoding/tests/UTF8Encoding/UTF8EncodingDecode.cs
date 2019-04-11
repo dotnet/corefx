@@ -252,5 +252,32 @@ namespace System.Text.Tests
             NegativeEncodingTests.Decode_Invalid(new UTF8Encoding(false, true), bytes, index, count);
             NegativeEncodingTests.Decode_Invalid(new UTF8Encoding(true, true), bytes, index, count);
         }
+
+        [Theory]
+        [InlineData("", "ABCDEF")]
+        [InlineData("\uFFFD", "\uFFFDAB\uFFFDCD\uFFFDEF\uFFFD")]
+        [InlineData("?", "?AB?CD?EF?")]
+        [InlineData("\uFFFD?", "\uFFFD?AB\uFFFD?CD\uFFFD?EF\uFFFD?")]
+        public void Decode_InvalidChars_WithCustomReplacementFallback(string replacementString, string expected)
+        {
+            byte[] utf8Input = new byte[]
+            {
+                0xC0, // always an invalid byte
+                (byte)'A', (byte)'B',
+                0xF4, 0x80, 0xBF, // incomplete 4-byte sequence
+                (byte)'C', (byte)'D',
+                0xE0, // incomplete 3-byte sequence
+                (byte)'E', (byte)'F',
+                0xC2, // incomplete 2-byte sequence
+            };
+
+            Encoding utf8Encoding = Encoding.GetEncoding(
+                name: "utf-8",
+                encoderFallback: EncoderFallback.ExceptionFallback,
+                decoderFallback: new DecoderReplacementFallback(replacementString));
+
+            string actualUtf16Output = utf8Encoding.GetString(utf8Input); // pass in an invalid UTF-8 sequence
+            Assert.Equal(expected, actualUtf16Output);
+        }
     }
 }

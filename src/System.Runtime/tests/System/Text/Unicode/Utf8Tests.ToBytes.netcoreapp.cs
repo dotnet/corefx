@@ -190,6 +190,18 @@ namespace System.Text.Unicode.Tests
                 expectedOperationStatus: OperationStatus.InvalidData,
                 expectedNumCharsRead: expectedNumCharsConsumed,
                 expectedUtf8Transcoding: DecodeHex(expectedUtf8TranscodingHex));
+
+            // Now try the tests again with a larger buffer.
+            // This ensures that running out of destination space wasn't the reason we failed.
+
+            ToBytes_Test_Core(
+                utf16Input: utf16Input,
+                destinationSize: (expectedUtf8TranscodingHex.Length) / 2 + 16,
+                replaceInvalidSequences: false,
+                isFinalChunk: false,
+                expectedOperationStatus: OperationStatus.InvalidData,
+                expectedNumCharsRead: expectedNumCharsConsumed,
+                expectedUtf8Transcoding: DecodeHex(expectedUtf8TranscodingHex));
         }
 
         [Theory]

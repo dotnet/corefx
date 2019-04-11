@@ -42,6 +42,18 @@ namespace System.Text.Unicode.Tests
               expectedOperationStatus: OperationStatus.InvalidData,
               expectedNumBytesRead: expectedNumBytesConsumed,
               expectedUtf16Transcoding: expectedUtf16Transcoding);
+
+            // Now try the tests again with a larger buffer.
+            // This ensures that running out of destination space wasn't the reason we failed.
+
+            ToChars_Test_Core(
+              utf8Input: DecodeHex(utf8HexInput),
+              destinationSize: expectedUtf16Transcoding.Length + 16,
+              replaceInvalidSequences: false,
+              isFinalChunk: false,
+              expectedOperationStatus: OperationStatus.InvalidData,
+              expectedNumBytesRead: expectedNumBytesConsumed,
+              expectedUtf16Transcoding: expectedUtf16Transcoding);
         }
 
         [Theory]
@@ -74,6 +86,18 @@ namespace System.Text.Unicode.Tests
               expectedOperationStatus: OperationStatus.NeedMoreData,
               expectedNumBytesRead: expectedNumBytesConsumed,
               expectedUtf16Transcoding: expectedUtf16Transcoding);
+
+            // Now try the tests again with a larger buffer.
+            // This ensures that running out of destination space wasn't the reason we failed.
+
+            ToChars_Test_Core(
+             utf8Input: DecodeHex(utf8HexInput),
+             destinationSize: expectedUtf16Transcoding.Length + 16,
+             replaceInvalidSequences: false,
+             isFinalChunk: false,
+             expectedOperationStatus: OperationStatus.NeedMoreData,
+             expectedNumBytesRead: expectedNumBytesConsumed,
+             expectedUtf16Transcoding: expectedUtf16Transcoding);
         }
 
         [Theory]
@@ -210,6 +234,7 @@ namespace System.Text.Unicode.Tests
         [InlineData("3031" + "E17F80" + EURO_SYMBOL_UTF8 + EURO_SYMBOL_UTF8, 2, "01")] // Improperly terminated 3-byte sequence at start of DWORD
         [InlineData("3031" + "E1C080" + EURO_SYMBOL_UTF8 + EURO_SYMBOL_UTF8, 2, "01")] // Improperly terminated 3-byte sequence at start of DWORD
         [InlineData("3031" + "EDA080" + EURO_SYMBOL_UTF8 + EURO_SYMBOL_UTF8, 2, "01")] // Surrogate 3-byte sequence at start of DWORD
+        [InlineData("3031" + "E69C88" + "E59B" + "E69C88", 5, "01\u6708")] // Incomplete 3-byte sequence surrounded by valid 3-byte sequences
         [InlineData("3031" + "F5808080", 2, "01")] // [ F5 ] is always invalid
         [InlineData("3031" + "F6808080", 2, "01")] // [ F6 ] is always invalid
         [InlineData("3031" + "F7808080", 2, "01")] // [ F7 ] is always invalid
@@ -231,6 +256,18 @@ namespace System.Text.Unicode.Tests
             ToChars_Test_Core(
                 utf8Input: DecodeHex(utf8HexInput),
                 destinationSize: expectedUtf16Transcoding.Length,
+                replaceInvalidSequences: false,
+                isFinalChunk: false,
+                expectedOperationStatus: OperationStatus.InvalidData,
+                expectedNumBytesRead: expectedNumBytesConsumed,
+                expectedUtf16Transcoding: expectedUtf16Transcoding);
+
+            // Now try the tests again with a larger buffer.
+            // This ensures that running out of destination space wasn't the reason we failed.
+
+            ToChars_Test_Core(
+                utf8Input: DecodeHex(utf8HexInput),
+                destinationSize: expectedUtf16Transcoding.Length + 16,
                 replaceInvalidSequences: false,
                 isFinalChunk: false,
                 expectedOperationStatus: OperationStatus.InvalidData,
