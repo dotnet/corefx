@@ -7,12 +7,12 @@ using System.Runtime.InteropServices;
 
 internal partial class Interop
 {
-    internal partial class SspiCli
+    internal partial class Advapi32
     {
         [StructLayout(LayoutKind.Sequential)]
-        internal struct LSA_UNICODE_STRING
+        internal struct LSA_STRING
         {
-            internal LSA_UNICODE_STRING(IntPtr pBuffer, ushort length)
+            internal LSA_STRING(IntPtr pBuffer, ushort length)
             {
                 Length = length;
                 MaximumLength = length;
@@ -30,7 +30,7 @@ internal partial class Interop
             internal ushort MaximumLength;
 
             /// <summary>
-            /// Pointer to a wide character string. Note that strings returned by the LSA may not be null-terminated.
+            /// Pointer to an array of characters. Note that strings returned by the LSA may not be null-terminated.
             /// </summary>
             internal IntPtr Buffer;
         }

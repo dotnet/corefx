@@ -115,6 +115,12 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LsaNtStatusToWinError.cs">
       <Link>Common\Interop\Interop.LsaNtStatusToWinError.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LSA_STRING.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.LSA_STRING.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LSA_UNICODE_STRING.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.LSA_UNICODE_STRING.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalFree.cs">
       <Link>Common\Interop\Interop.LocalFree.cs</Link>
     </Compile>
@@ -144,12 +150,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.LsaLookupAuthenticationPackage.cs">
       <Link>Common\Interop\Windows\SspiCli\Interop.LsaLookupAuthenticationPackage.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.LSA_STRING.cs">
-      <Link>Common\Interop\Windows\SspiCli\Interop.LSA_STRING.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.LSA_UNICODE_STRING.cs">
-      <Link>Common\Interop\Windows\SspiCli\Interop.LSA_UNICODE_STRING.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.QuotaLimits.cs">
       <Link>Common\Interop\Windows\SspiCli\Interop.QuotaLimits.cs</Link>

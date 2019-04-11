@@ -14,8 +14,8 @@ internal partial class Interop
         {
             internal KERB_LOGON_SUBMIT_TYPE MessageType;
             internal KerbS4uLogonFlags Flags;
-            internal LSA_UNICODE_STRING ClientUpn;
-            internal LSA_UNICODE_STRING ClientRealm;
+            internal Advapi32.LSA_UNICODE_STRING ClientUpn;
+            internal Advapi32.LSA_UNICODE_STRING ClientRealm;
         }
 
         [Flags]
