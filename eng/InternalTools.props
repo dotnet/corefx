@@ -14,9 +14,5 @@
   <PropertyGroup>
     <!-- Reset the restore config file set by arcade. -->
     <RestoreConfigFile></RestoreConfigFile>
-    <RestoreSources>
-      https://devdiv.pkgs.visualstudio.com/_packaging/dotnet-core-internal-tooling/nuget/v3/index.json;
-      $(RestoreSources);
-    </RestoreSources>
   </PropertyGroup>
 </Project>

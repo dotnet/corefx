@@ -176,9 +176,9 @@ jobs:
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - allConfigurationsQueues: Windows.10.Amd64.ClientRS5
 
+        _jobFramework: -allConfigurations
         customBuildSteps:
           - script: build.cmd
-                    -restore
                     -build
                     -configuration $(_BuildConfig)
                     -ci
