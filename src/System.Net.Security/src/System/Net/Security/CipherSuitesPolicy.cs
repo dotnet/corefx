@@ -11,6 +11,8 @@ namespace System.Net.Security
     /// </summary>
     public sealed partial class CipherSuitesPolicy
     {
+        internal CipherSuitesPolicyPal Pal { get; private set; }
+
         [CLSCompliant(false)]
         public CipherSuitesPolicy(IEnumerable<TlsCipherSuite> allowedCipherSuites)
         {
@@ -19,7 +21,7 @@ namespace System.Net.Security
                 throw new ArgumentNullException(nameof(allowedCipherSuites));
             }
 
-            Initialize(allowedCipherSuites);
+            Pal = new CipherSuitesPolicyPal(allowedCipherSuites);
         }
 
         [CLSCompliant(false)]
@@ -29,7 +31,7 @@ namespace System.Net.Security
             {
                 // This method is only useful only for diagnostic purposes so perf is not important
                 // We do not want users to be able to cast result to something they can modify
-                foreach (TlsCipherSuite cs in GetCipherSuites())
+                foreach (TlsCipherSuite cs in Pal.GetCipherSuites())
                 {
                     yield return cs;
                 }

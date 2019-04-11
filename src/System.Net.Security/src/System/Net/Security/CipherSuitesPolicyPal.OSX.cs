@@ -7,16 +7,16 @@ using System.Linq;
 
 namespace System.Net.Security
 {
-    public sealed partial class CipherSuitesPolicy
+    internal class CipherSuitesPolicyPal
     {
         internal uint[] TlsCipherSuites { get; private set; }
 
-        private void Initialize(IEnumerable<TlsCipherSuite> allowedCipherSuites)
+        public CipherSuitesPolicyPal(IEnumerable<TlsCipherSuite> allowedCipherSuites)
         {
             TlsCipherSuites = allowedCipherSuites.Select((cs) => (uint)cs).ToArray();
         }
 
-        private IEnumerable<TlsCipherSuite> GetCipherSuites()
+        public IEnumerable<TlsCipherSuite> GetCipherSuites()
         {
             return TlsCipherSuites.Select((cs) => (TlsCipherSuite)cs);
         }

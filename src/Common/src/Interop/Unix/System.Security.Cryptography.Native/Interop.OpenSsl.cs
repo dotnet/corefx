@@ -67,13 +67,13 @@ internal static partial class Interop
                 if (!Interop.Ssl.Tls13Supported)
                 {
                     if (protocols != SslProtocols.None &&
-                        CipherSuitesPolicy.WantsTls13(protocols))
+                        CipherSuitesPolicyPal.WantsTls13(protocols))
                     {
                         protocols = protocols & (~SslProtocols.Tls13);
                     }
                 }
-                else if (CipherSuitesPolicy.WantsTls13(protocols) &&
-                    CipherSuitesPolicy.ShouldOptOutOfTls13(sslAuthenticationOptions.CipherSuitesPolicy, policy))
+                else if (CipherSuitesPolicyPal.WantsTls13(protocols) &&
+                    CipherSuitesPolicyPal.ShouldOptOutOfTls13(sslAuthenticationOptions.CipherSuitesPolicy, policy))
                 {
                     if (protocols == SslProtocols.None)
                     {
@@ -90,9 +90,9 @@ internal static partial class Interop
                     }
                 }
 
-                if (CipherSuitesPolicy.ShouldOptOutOfLowerThanTls13(sslAuthenticationOptions.CipherSuitesPolicy, policy))
+                if (CipherSuitesPolicyPal.ShouldOptOutOfLowerThanTls13(sslAuthenticationOptions.CipherSuitesPolicy, policy))
                 {
-                    if (!CipherSuitesPolicy.WantsTls13(protocols))
+                    if (!CipherSuitesPolicyPal.WantsTls13(protocols))
                     {
                         // We cannot provide neither TLS 1.3 or non TLS 1.3, user disabled all cipher suites
                         throw new SslException(
@@ -123,10 +123,10 @@ internal static partial class Interop
                 Ssl.SslCtxSetQuietShutdown(innerContext);
 
                 byte[] cipherList =
-                    CipherSuitesPolicy.GetOpenSslCipherList(sslAuthenticationOptions.CipherSuitesPolicy, protocols, policy);
+                    CipherSuitesPolicyPal.GetOpenSslCipherList(sslAuthenticationOptions.CipherSuitesPolicy, protocols, policy);
 
                 byte[] cipherSuites =
-                    CipherSuitesPolicy.GetOpenSslCipherSuites(sslAuthenticationOptions.CipherSuitesPolicy, protocols, policy);
+                    CipherSuitesPolicyPal.GetOpenSslCipherSuites(sslAuthenticationOptions.CipherSuitesPolicy, protocols, policy);
 
                 unsafe
                 {

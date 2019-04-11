@@ -51,7 +51,7 @@ namespace System.Net
 
                 if (sslAuthenticationOptions.CipherSuitesPolicy != null)
                 {
-                    uint[] tlsCipherSuites = sslAuthenticationOptions.CipherSuitesPolicy.TlsCipherSuites;
+                    uint[] tlsCipherSuites = sslAuthenticationOptions.CipherSuitesPolicy.Pal.TlsCipherSuites;
 
                     unsafe
                     {

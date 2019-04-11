@@ -143,7 +143,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="System\Net\CertificateValidationPal.Windows.cs" />
-    <Compile Include="System\Net\Security\CipherSuitesPolicy.Windows.cs" />
+    <Compile Include="System\Net\Security\CipherSuitesPolicyPal.Windows.cs" />
     <Compile Include="System\Net\Security\NegotiateStreamPal.Windows.cs" />
     <Compile Include="System\Net\Security\NetEventSource.Security.Windows.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.Windows.cs" />
@@ -320,7 +320,7 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
     <Compile Include="System\Net\CertificateValidationPal.Unix.cs" />
-    <Compile Include="System\Net\Security\CipherSuitesPolicy.Linux.cs" />
+    <Compile Include="System\Net\Security\CipherSuitesPolicyPal.Linux.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.Unix.cs" />
     <Compile Include="System\Net\Security\SslConnectionInfo.Linux.cs" />
     <Compile Include="System\Net\Security\StreamSizes.Unix.cs" />
@@ -440,7 +440,7 @@
     <Compile Include="System\Net\Security\SslConnectionInfo.OSX.cs" />
     <Compile Include="System\Net\Security\SslStreamPal.OSX.cs" />
     <Compile Include="System\Net\Security\StreamSizes.OSX.cs" />
-    <Compile Include="System\Net\Security\CipherSuitesPolicy.OSX.cs" />
+    <Compile Include="System\Net\Security\CipherSuitesPolicyPal.OSX.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Win32.Primitives" />
