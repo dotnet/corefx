@@ -66,7 +66,11 @@ namespace System.Net.Security
             set => _enabledSslProtocols = value;
         }
 
+        /// <summary>
+        /// Specifies cipher suites allowed to be used for TLS.
+        /// When set to null operating system default will be used.
+        /// Use extreme caution when changing this setting.
+        /// </summary>
         public CipherSuitesPolicy CipherSuitesPolicy { get; set; }
     }
 }
-
