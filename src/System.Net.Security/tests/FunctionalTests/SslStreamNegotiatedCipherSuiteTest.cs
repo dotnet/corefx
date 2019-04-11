@@ -376,7 +376,7 @@ namespace System.Net.Security.Tests
             Assert.Throws<ArgumentNullException>(() => new CipherSuitesPolicy(null));
         }
 
-        [Fact]
+        [ConditionalFact(nameof(CipherSuitesPolicySupported))]
         public void CipherSuitesPolicy_AllowedCipherSuitesIncludesSubsetOfInput_Success()
         {
             TlsCipherSuite[] allCipherSuites = (TlsCipherSuite[])Enum.GetValues(typeof(TlsCipherSuite));
