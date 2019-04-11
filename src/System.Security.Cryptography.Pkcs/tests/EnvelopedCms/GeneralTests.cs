@@ -303,7 +303,8 @@ KoZIhvcNAwcECJ01qtX2EKx6oIAEEM7op+R2U3GQbYwlEj5X+h0AAAAAAAAAAAAA
             byte[] encoded = ecms.Encode();
             EnvelopedCms reDecoded = new EnvelopedCms();
             reDecoded.Decode(encoded);
-            Assert.Equal(16, reDecoded.ContentInfo.Content.Length);
+            int expectedSize = PlatformDetection.IsFullFramework ? 22 : 16; //NetFx compat.
+            Assert.Equal(expectedSize, reDecoded.ContentInfo.Content.Length);
         }
 
         [Fact]
