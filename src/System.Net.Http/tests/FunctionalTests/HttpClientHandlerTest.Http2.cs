@@ -13,7 +13,6 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientHandlerTest_Http2 : HttpClientHandlerTestBase
     {
-        private Version _version20 = new Version(2,0);
         protected override bool UseSocketsHttpHandler => true;
         protected override bool UseHttp2LoopbackServer => true;
 
