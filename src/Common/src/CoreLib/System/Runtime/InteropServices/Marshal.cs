@@ -57,7 +57,7 @@ namespace System.Runtime.InteropServices
             }
             if (len < 0)
             {
-                throw new ArgumentException(null, nameof(len));
+                throw new ArgumentOutOfRangeException(nameof(len), len, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             return new string((sbyte*)ptr, 0, len);
@@ -81,27 +81,15 @@ namespace System.Runtime.InteropServices
             }
             if (len < 0)
             {
-                throw new ArgumentException(SR.ArgumentOutOfRange_NeedNonNegNum, nameof(len));
+                throw new ArgumentOutOfRangeException(nameof(len), len, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             return new string((char*)ptr, 0, len);
         }
 
-        public static string PtrToStringAuto(IntPtr ptr, int len)
-        {
-            // Ansi platforms are no longer supported
-            return PtrToStringUni(ptr, len);
-        }
-
-        public static string PtrToStringAuto(IntPtr ptr)
-        {
-            // Ansi platforms are no longer supported
-            return PtrToStringUni(ptr);
-        }
-
         public static unsafe string PtrToStringUTF8(IntPtr ptr)
         {
-            if (ptr == IntPtr.Zero)
+            if (ptr == IntPtr.Zero || IsWin32Atom(ptr))
             {
                 return null;
             }
@@ -112,14 +100,13 @@ namespace System.Runtime.InteropServices
 
         public static unsafe string PtrToStringUTF8(IntPtr ptr, int byteLen)
         {
+            if (ptr == IntPtr.Zero)
+            {
+                throw new ArgumentNullException(nameof(ptr));
+            }
             if (byteLen < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(byteLen), SR.ArgumentOutOfRange_NeedNonNegNum);
-            }
-            
-            if (ptr == IntPtr.Zero || IsWin32Atom(ptr))
-            {
-                return null;
+                throw new ArgumentOutOfRangeException(nameof(byteLen), byteLen, SR.ArgumentOutOfRange_NeedNonNegNum);
             }
 
             return string.CreateStringFromEncoding((byte*)ptr, byteLen, Encoding.UTF8);
@@ -726,10 +713,28 @@ namespace System.Runtime.InteropServices
             return hglobal;
         }
 
-        public static IntPtr StringToHGlobalAuto(string s)
+        private static unsafe IntPtr StringToHGlobalUTF8(string s)
         {
-            // Ansi platforms are no longer supported
-            return StringToHGlobalUni(s);
+            if (s == null)
+            {
+                return IntPtr.Zero;
+            }
+
+            int nb = Encoding.UTF8.GetMaxByteCount(s.Length);
+
+            IntPtr pMem = AllocHGlobal(nb + 1);
+
+            int nbWritten;
+            byte* pbMem = (byte*)pMem;
+
+            fixed (char* firstChar = s)
+            {
+                nbWritten = Encoding.UTF8.GetBytes(firstChar, s.Length, pbMem, nb);
+            }
+
+            pbMem[nbWritten] = 0;
+
+            return pMem;
         }
 
         public static unsafe IntPtr StringToCoTaskMemUni(string s)
@@ -778,12 +783,6 @@ namespace System.Runtime.InteropServices
             pbMem[nbWritten] = 0;
 
             return pMem;
-        }
-
-        public static IntPtr StringToCoTaskMemAuto(string s)
-        {
-            // Ansi platforms are no longer supported
-            return StringToCoTaskMemUni(s);
         }
 
         public static unsafe IntPtr StringToCoTaskMemAnsi(string s)

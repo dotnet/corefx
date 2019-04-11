@@ -13,7 +13,7 @@ using System.Threading.Tasks.Sources;
 
 namespace System.Net.Http
 {
-    internal sealed partial class Http2Connection 
+    internal sealed partial class Http2Connection
     {
         private sealed class Http2Stream : IValueTaskSource, IDisposable
         {
@@ -21,6 +21,7 @@ namespace System.Net.Http
             {
                 ExpectingHeaders,
                 ExpectingData,
+                ExpectingTrailingHeaders,
                 Complete,
                 Aborted
             }
@@ -87,7 +88,7 @@ namespace System.Net.Http
             public HttpRequestMessage Request => _request;
             public HttpResponseMessage Response => _response;
 
-            public async Task SendRequestBodyAsync()
+            public async Task SendRequestBodyAsync(CancellationToken cancellationToken)
             {
                 // TODO: ISSUE 31312: Expect: 100-continue and early response handling
                 // Note that in an "early response" scenario, where we get a response before we've finished sending the request body
@@ -99,8 +100,11 @@ namespace System.Net.Http
                 {
                     using (Http2WriteStream writeStream = new Http2WriteStream(this))
                     {
-                        await _request.Content.CopyToAsync(writeStream).ConfigureAwait(false);
+                        await _request.Content.CopyToAsync(writeStream, null, cancellationToken).ConfigureAwait(false);
                     }
+
+                    // Don't wait for completion, which could happen asynchronously.
+                    Task ignored = _connection.SendEndStreamAsync(_streamId);
                 }
             }
 
@@ -121,13 +125,20 @@ namespace System.Net.Http
 
                 lock (SyncObject)
                 {
-                    if (_state != StreamState.ExpectingHeaders)
+                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
                     {
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
 
                     if (name.SequenceEqual(s_statusHeaderName))
                     {
+                        if (_state == StreamState.ExpectingTrailingHeaders)
+                        {
+                            // Pseudo-headers not allowed in trailers.
+                            if (NetEventSource.IsEnabled) _connection.Trace("Pseudo-header in trailer headers.");
+                            throw new HttpRequestException(SR.net_http_invalid_response);
+                        }
+
                         if (value.Length != 3)
                             throw new Exception("Invalid status code");
 
@@ -150,9 +161,13 @@ namespace System.Net.Http
 
                         string headerValue = descriptor.GetHeaderValue(value);
 
-                        // Note we ignore the return value from TryAddWithoutValidation; 
+                        // Note we ignore the return value from TryAddWithoutValidation;
                         // if the header can't be added, we silently drop it.
-                        if (descriptor.HeaderType == HttpHeaderType.Content)
+                        if (_state == StreamState.ExpectingTrailingHeaders)
+                        {
+                            _response.TrailingHeaders.TryAddWithoutValidation(descriptor, headerValue);
+                        }
+                        else if (descriptor.HeaderType == HttpHeaderType.Content)
                         {
                             _response.Content.Headers.TryAddWithoutValidation(descriptor, headerValue);
                         }
@@ -164,17 +179,40 @@ namespace System.Net.Http
                 }
             }
 
+            public void OnResponseHeadersStart()
+            {
+                lock (SyncObject)
+                {
+                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingData)
+                    {
+                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                    }
+
+                    if (_state == StreamState.ExpectingData)
+                    {
+                        _state = StreamState.ExpectingTrailingHeaders;
+                    }
+                }
+            }
+
             public void OnResponseHeadersComplete(bool endStream)
             {
                 bool signalWaiter;
                 lock (SyncObject)
                 {
-                    if (_state != StreamState.ExpectingHeaders)
+                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
                     {
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
 
-                    _state = endStream ? StreamState.Complete : StreamState.ExpectingData;
+                    if (_state == StreamState.ExpectingTrailingHeaders || endStream)
+                    {
+                        _state = StreamState.Complete;
+                    }
+                    else
+                    {
+                        _state = StreamState.ExpectingData;
+                    }
 
                     signalWaiter = _hasWaiter;
                     _hasWaiter = false;
@@ -273,7 +311,7 @@ namespace System.Net.Http
                         _waitSource.Reset();
                         return (true, false);
                     }
-                    else if (_state == StreamState.ExpectingData)
+                    else if (_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders)
                     {
                         return (false, false);
                     }
@@ -329,7 +367,7 @@ namespace System.Net.Http
                 int windowUpdateSize = _pendingWindowUpdate;
                 _pendingWindowUpdate = 0;
 
-                ValueTask ignored = _connection.SendWindowUpdateAsync(_streamId, windowUpdateSize);
+                Task ignored = _connection.SendWindowUpdateAsync(_streamId, windowUpdateSize);
             }
 
             private (bool wait, int bytesRead) TryReadFromBuffer(Span<byte> buffer)
@@ -360,7 +398,7 @@ namespace System.Net.Http
                         throw new IOException(SR.net_http_invalid_response);
                     }
 
-                    Debug.Assert(_state == StreamState.ExpectingData);
+                    Debug.Assert(_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders);
 
                     Debug.Assert(!_hasWaiter);
                     _hasWaiter = true;
@@ -394,18 +432,18 @@ namespace System.Net.Http
                 return bytesRead;
             }
 
-            private async ValueTask SendDataAsync(ReadOnlyMemory<byte> buffer)
+            private async ValueTask SendDataAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
             {
                 ReadOnlyMemory<byte> remaining = buffer;
 
                 while (remaining.Length > 0)
                 {
-                    int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length).ConfigureAwait(false);
+                    int sendSize = await _streamWindow.RequestCreditAsync(remaining.Length, cancellationToken).ConfigureAwait(false);
 
                     ReadOnlyMemory<byte> current;
                     (current, remaining) = SplitBuffer(remaining, sendSize);
 
-                    await _connection.SendStreamDataAsync(_streamId, current).ConfigureAwait(false);
+                    await _connection.SendStreamDataAsync(_streamId, current, cancellationToken).ConfigureAwait(false);
                 }
             }
 
@@ -423,6 +461,25 @@ namespace System.Net.Http
                         // TODO: ISSUE 31310: If the stream is not complete, we should send RST_STREAM
                     }
                 }
+            }
+
+            public void Cancel()
+            {
+                bool signalWaiter;
+                lock (SyncObject)
+                {
+                    Task ignored = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
+                    _state = StreamState.Aborted;
+
+                    signalWaiter = _hasWaiter;
+                    _hasWaiter = false;
+                }
+                if (signalWaiter)
+                {
+                    _waitSource.SetResult(true);
+                }
+
+                _connection.RemoveStream(this);
             }
 
             // This object is itself usable as a backing source for ValueTask.  Since there's only ever one awaiter
@@ -497,9 +554,6 @@ namespace System.Net.Http
                         return;
                     }
 
-                    // Don't wait for completion, which could happen asynchronously.
-                    ValueTask ignored = http2Stream._connection.SendEndStreamAsync(http2Stream.StreamId);
-
                     base.Dispose(disposing);
                 }
 
@@ -516,7 +570,7 @@ namespace System.Net.Http
                         return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
                     }
 
-                    return http2Stream.SendDataAsync(buffer);
+                    return http2Stream.SendDataAsync(buffer, cancellationToken);
                 }
 
                 public override Task FlushAsync(CancellationToken cancellationToken) => Task.CompletedTask;

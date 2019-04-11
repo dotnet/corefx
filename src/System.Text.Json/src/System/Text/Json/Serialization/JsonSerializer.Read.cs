@@ -13,7 +13,7 @@ namespace System.Text.Json.Serialization
     /// </summary>
     public static partial class JsonSerializer
     {
-        internal static readonly JsonPropertyInfo s_missingProperty = new JsonPropertyInfoNotNullable<object, object>();
+        internal static readonly JsonPropertyInfo s_missingProperty = new JsonPropertyInfoNotNullable<object, object, object>();
         private static readonly JsonSerializerOptions s_defaultSettings = new JsonSerializerOptions();
 
         private static object ReadCore(
@@ -25,12 +25,7 @@ namespace System.Text.Json.Serialization
                 options = s_defaultSettings;
 
             ReadStack state = default;
-            JsonClassInfo classInfo = options.GetOrAddClass(returnType);
-            state.Current.JsonClassInfo = classInfo;
-            if (classInfo.ClassType != ClassType.Object)
-            {
-                state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
-            }
+            state.Current.Initialize(returnType, options);
 
             ReadCore(options, ref reader, ref state);
 
@@ -64,7 +59,7 @@ namespace System.Text.Json.Serialization
                         Debug.Assert(state.Current.JsonClassInfo != default);
 
                         ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-                        state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, state.Current.PropertyIndex);
+                        state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(propertyName, ref state.Current);
                         if (state.Current.JsonPropertyInfo == null)
                         {
                             state.Current.JsonPropertyInfo = s_missingProperty;

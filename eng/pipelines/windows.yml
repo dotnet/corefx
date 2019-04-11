@@ -110,7 +110,8 @@ jobs:
 
       pool:
         ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          name: dotnet-internal-temp
+          name: NetCoreInternal-Int-Pool
+          queue: buildpool.windows.10.amd64.vs2017
         ${{ if eq(parameters.isOfficialBuild, 'false') }}:
           name: Hosted VS2017
 
@@ -159,7 +160,8 @@ jobs:
 
         pool:
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            name: dotnet-internal-temp
+            name: NetCoreInternal-Int-Pool
+            queue: buildpool.windows.10.amd64.vs2017
           ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             name: Hosted VS2017
 
@@ -188,16 +190,6 @@ jobs:
                     $(_windowsOfficialBuildArguments)
                     $(_msbuildCommonParameters)
             displayName: Build Packages and Tests
-          - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            - script: build.cmd
-                      -restore
-                      -build
-                      -configuration $(_BuildConfig)
-                      -ci
-                      -buildtests
-                      -framework netstandard
-                      -arch $(_architecture)
-              displayName: Build Netstandard Test Suite
 
       # TODO: UAPAOT official builds should send to helix using continuation runner.
       # Legs without HELIX testing
@@ -234,7 +226,8 @@ jobs:
 
         pool:
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            name: dotnet-internal-temp
+            name: NetCoreInternal-Int-Pool
+            queue: buildpool.windows.10.amd64.vs2017
           ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             name: Hosted VS2017
 

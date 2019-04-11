@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
@@ -29,6 +30,10 @@ namespace System.Text.Json.Serialization
             return isFinalBlock;
         }
 
+        // There are three conditions to consider for an object (primitive value, enumerable or object) being processed here:
+        // 1) The object type was specified as the root-level return type to a Parse\Read method.
+        // 2) The object is property on a parent object.
+        // 3) The object is an element in an enumerable.
         private static bool Write(
             ref Utf8JsonWriter writer,
             int flushThreshold,
@@ -44,11 +49,17 @@ namespace System.Text.Json.Serialization
                     case ClassType.Enumerable:
                         finishedSerializing = WriteEnumerable(options, ref writer, ref state);
                         break;
+                    case ClassType.Value:
+                        finishedSerializing = WriteValue(options, ref writer, ref state.Current);
+                        break;
                     case ClassType.Object:
                         finishedSerializing = WriteObject(options, ref writer, ref state);
                         break;
                     default:
-                        finishedSerializing = WriteValue(options, ref writer, ref state.Current);
+                        Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
+
+                        // Treat typeof(object) as an empty object.
+                        finishedSerializing = WriteObject(options, ref writer, ref state);
                         break;
                 }
 
@@ -64,6 +75,6 @@ namespace System.Text.Json.Serialization
             } while (continueWriting);
 
             return true;
-        }        
+        }
     }
 }
