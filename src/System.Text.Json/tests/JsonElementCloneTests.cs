@@ -90,6 +90,8 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CloneAtInnerObject()
         {
+            // Very weird whitespace is used here just to ensure that the
+            // clone API isn't making any whitespace assumptions.
             CloneAtInner(
                 @"{
   ""this"":
@@ -110,6 +112,8 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void CloneAtInnerArray()
         {
+            // Very weird whitespace is used here just to ensure that the
+            // clone API isn't making any whitespace assumptions.
             CloneAtInner(
                 @"[
 {

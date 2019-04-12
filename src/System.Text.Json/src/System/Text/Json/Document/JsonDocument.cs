@@ -51,10 +51,8 @@ namespace System.Text.Json
 
             IsDisposable = isDisposable;
 
-            if (!isDisposable)
-            {
-                Debug.Assert(extraRentedBytes == null);
-            }
+            // extraRentedBytes better be null if we're not disposable.
+            Debug.Assert(isDisposable || extraRentedBytes == null);
         }
 
         /// <inheritdoc />
