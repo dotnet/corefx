@@ -712,6 +712,8 @@ namespace System.Net.Tests
         {
             using (MD5 md5 = MD5.Create())
             {
+                // Compute MD5 hash of the data that will be uploaded. We convert the string to UTF-8 since
+                // that is the encoding used by WebClient when serializing the data on the wire.
                 string headerValue = Convert.ToBase64String(md5.ComputeHash(Encoding.UTF8.GetBytes(data)));
                 wc.Headers.Add("Content-MD5", headerValue);
             }
