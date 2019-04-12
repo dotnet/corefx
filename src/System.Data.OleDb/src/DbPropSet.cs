@@ -28,7 +28,7 @@ namespace System.Data.OleDb {
             try {} finally {
                 base.handle = SafeNativeMethods.CoTaskMemAlloc(countOfBytes);
                 if (ADP.PtrZero != base.handle) {
-                    SafeNativeMethods.ZeroMemory(base.handle, countOfBytes);
+                    SafeNativeMethods.ZeroMemory(base.handle, (int)countOfBytes);
                 }
             }
             if (ADP.PtrZero == base.handle) {
@@ -201,7 +201,7 @@ namespace System.Data.OleDb {
                     if (ADP.PtrZero != propset.rgProperties) {
                         // clearing is important so that we don't treat existing
                         // garbage as important information during releaseHandle
-                        SafeNativeMethods.ZeroMemory(propset.rgProperties, countOfBytes);
+                        SafeNativeMethods.ZeroMemory(propset.rgProperties, (int)countOfBytes);
                         
                         // writing the structure to native memory so that it knows to free the referenced pointers
                         Marshal.StructureToPtr(propset, propsetPtr, false/*deleteold*/);

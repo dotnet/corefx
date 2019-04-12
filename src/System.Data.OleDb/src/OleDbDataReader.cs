@@ -72,6 +72,7 @@ namespace System.Data.OleDb {
         // ctor for an ICommandText, IMultipleResults, IRowset, IRow
         // ctor for an ADODB.Recordset, ADODB.Record or Hierarchial resultset
         internal OleDbDataReader(OleDbConnection connection, OleDbCommand command, int depth, CommandBehavior commandBehavior) {
+            OleDbConnection.VerifyExecutePermission();
             
             _connection = connection;
             _command = command;
@@ -223,22 +224,22 @@ namespace System.Data.OleDb {
         }
 
         override public DataTable GetSchemaTable() {
-                DataTable schemaTable = _dbSchemaTable;
-                if (null == schemaTable) {
-                    MetaData[] metadata = MetaData;
-                    if ((null != metadata) && (0 < metadata.Length)) {
-                        if ((0 < metadata.Length) && _useIColumnsRowset && (null != _connection)) {
-                            AppendSchemaInfo();
-                        }
-                        schemaTable = BuildSchemaTable(metadata);
+            DataTable schemaTable = _dbSchemaTable;
+            if (null == schemaTable) {
+                MetaData[] metadata = MetaData;
+                if ((null != metadata) && (0 < metadata.Length)) {
+                    if ((0 < metadata.Length) && _useIColumnsRowset && (null != _connection)) {
+                        AppendSchemaInfo();
                     }
-                    else if (IsClosed) { // MDAC 68331
-                        throw ADP.DataReaderClosed("GetSchemaTable");
-                    }
-                    //GetSchemaTable() is defined to return null after NextResult returns false
-                    //throw ADP.DataReaderNoData();
+                    schemaTable = BuildSchemaTable(metadata);
                 }
-                return schemaTable;
+                else if (IsClosed) { // MDAC 68331
+                    throw ADP.DataReaderClosed("GetSchemaTable");
+                }
+                //GetSchemaTable() is defined to return null after NextResult returns false
+                //throw ADP.DataReaderNoData();
+            }
+            return schemaTable;
         }
 
         internal void BuildMetaInfo() {
@@ -562,75 +563,74 @@ namespace System.Data.OleDb {
         }
 
         override public void Close() {
+            OleDbConnection con = _connection;
+            OleDbCommand cmd = _command;
+            Bindings bindings = _parameterBindings;
+            _connection = null;
+            _command = null;
+            _parameterBindings = null;
 
-                OleDbConnection con = _connection;
-                OleDbCommand cmd = _command;
-                Bindings bindings = _parameterBindings;
-                _connection = null;
-                _command = null;
-                _parameterBindings = null;
+            _isClosed = true;
 
-                _isClosed = true;
+            DisposeOpenResults();
+            _hasRows = false;
 
-                DisposeOpenResults();
-                _hasRows = false;
-
-                if ((null != cmd) && cmd.canceling) { // MDAC 68964                
-                    DisposeNativeMultipleResults();
-                    
-                    if (null != bindings) {
-                        bindings.CloseFromConnection();
-                        bindings = null;
-                    }
+            if ((null != cmd) && cmd.canceling) { // MDAC 68964                
+                DisposeNativeMultipleResults();
+                
+                if (null != bindings) {
+                    bindings.CloseFromConnection();
+                    bindings = null;
                 }
-                else {
-                    UnsafeNativeMethods.IMultipleResults multipleResults = _imultipleResults;
-                    _imultipleResults = null;
+            }
+            else {
+                UnsafeNativeMethods.IMultipleResults multipleResults = _imultipleResults;
+                _imultipleResults = null;
 
-                    if (null != multipleResults) {
-                        // if we don't have a cmd, same as a cancel (don't call NextResults) which is ADODB behavior
+                if (null != multipleResults) {
+                    // if we don't have a cmd, same as a cancel (don't call NextResults) which is ADODB behavior
 
-                        try {
-                            // tricky code path is an exception is thrown
-                            // causing connection to do a ResetState and connection.Close
-                            // resulting in OleDbCommand.CloseFromConnection
-                            if ((null != cmd) && !cmd.canceling) { // MDAC 71435
-                                IntPtr affected = IntPtr.Zero;
-                                OleDbException nextResultsFailure = NextResults(multipleResults, null, cmd, out affected);
-                                _recordsAffected = AddRecordsAffected(_recordsAffected, affected);
-                                if (null != nextResultsFailure) {
-                                    throw nextResultsFailure;
-                                }
-                            }
-                        }
-                        finally {
-                            if (null != multipleResults) {
-                                Marshal.ReleaseComObject(multipleResults);
+                    try {
+                        // tricky code path is an exception is thrown
+                        // causing connection to do a ResetState and connection.Close
+                        // resulting in OleDbCommand.CloseFromConnection
+                        if ((null != cmd) && !cmd.canceling) { // MDAC 71435
+                            IntPtr affected = IntPtr.Zero;
+                            OleDbException nextResultsFailure = NextResults(multipleResults, null, cmd, out affected);
+                            _recordsAffected = AddRecordsAffected(_recordsAffected, affected);
+                            if (null != nextResultsFailure) {
+                                throw nextResultsFailure;
                             }
                         }
                     }
-                }
-
-                if ((null != cmd) && (0 == _depth)) {
-                    // return bindings back to the cmd after closure of root DataReader
-                    cmd.CloseFromDataReader(bindings); // MDAC 52283
-                }
-
-                if (null != con) {
-                    con.RemoveWeakReference(this);
-
-                    // if the DataReader is Finalized it will not close the connection
-                    if (IsCommandBehavior(CommandBehavior.CloseConnection)) {
-                        con.Close();
+                    finally {
+                        if (null != multipleResults) {
+                            Marshal.ReleaseComObject(multipleResults);
+                        }
                     }
                 }
+            }
 
-                // release unmanaged objects
-                RowHandleBuffer rowHandleNativeBuffer = _rowHandleNativeBuffer;
-                _rowHandleNativeBuffer = null;
-                if (null != rowHandleNativeBuffer) {
-                    rowHandleNativeBuffer.Dispose();
+            if ((null != cmd) && (0 == _depth)) {
+                // return bindings back to the cmd after closure of root DataReader
+                cmd.CloseFromDataReader(bindings); // MDAC 52283
+            }
+
+            if (null != con) {
+                con.RemoveWeakReference(this);
+
+                // if the DataReader is Finalized it will not close the connection
+                if (IsCommandBehavior(CommandBehavior.CloseConnection)) {
+                    con.Close();
                 }
+            }
+
+            // release unmanaged objects
+            RowHandleBuffer rowHandleNativeBuffer = _rowHandleNativeBuffer;
+            _rowHandleNativeBuffer = null;
+            if (null != rowHandleNativeBuffer) {
+                rowHandleNativeBuffer.Dispose();
+            }
         }
 
         internal void CloseReaderFromConnection(bool canceling) {

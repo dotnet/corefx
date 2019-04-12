@@ -9,76 +9,48 @@
     <IsPartialFacadeAssembly Condition="'$(TargetsNetFx)' == 'true'">true</IsPartialFacadeAssembly>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(OSGroup)' == 'AnyOS' AND '$(TargetGroup)' == 'netstandard'">SR.PlatformNotSupported_Oledb</GeneratePlatformNotSupportedAssemblyMessage>
     <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' != 'true' AND '$(OSGroup)' != 'AnyOS'">
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Data\Common\AdapterUtil.cs">
-      <Link>System\Data\Common\AdapterUtil.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Data\Common\FieldNameLookup.cs">
-      <Link>Common\System\Data\ProviderBase\FieldNameLookup.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Data\Common\BasicFieldNameLookup.cs">
       <Link>Common\System\Data\ProviderBase\BasicFieldNameLookup.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionClosed.cs">
-      <Link>System\Data\ProviderBase\DbConnectionClosed.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionInternal.cs">
-      <Link>System\Data\ProviderBase\DbConnectionInternal.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionFactory.cs">
-      <Link>System\Data\ProviderBase\DbConnectionFactory.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroup.cs">
-      <Link>System\Data\ProviderBase\DbConnectionPoolGroup.cs</Link>
+    <Compile Include="$(CommonPath)\System\Data\Common\MultipartIdentifier.cs">
+      <Link>Common\System\Data\Common\MultipartIdentifier.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs">
       <Link>System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Data\Common\DbConnectionPoolKey.cs">
-      <Link>System\Data\Common\DbConnectionPoolKey.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs">
       <Link>System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbMetaDataFactory.cs">
-      <Link>System\Data\ProviderBase\DbMetaDataFactory.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbReferenceCollection.cs">
-      <Link>System\Data\ProviderBase\DbReferenceCollection.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Data\Common\NameValuePair.cs">
-      <Link>Common\System\Data\Common\NameValuePair.cs</Link>
-    </Compile>
     <Compile Include="*.cs"/>
-    <!-- TODO move to common -->
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\PoolBlockingPeriod.cs"/>
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIError.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIHandle.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNILoadHandle.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIMarsConnection.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIMarsHandle.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIMarsQueuedPacket.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNINpHandle.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIPacket.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNIProxy.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNITcpHandle.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SslOverTdsStream.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SNICommon.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SspiClientContextStatus.cs" />
-    <Compile Include="..\..\System.Data.SqlClient\src\System\Data\SqlClient\SNI\SSRP.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' and '$(IsUAPAssembly)' != 'true'">
-    <Compile Include="..\..\System.Data.SqlClient\src\Interop\SNINativeMethodWrapper.Windows.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetsWindows)' != 'true'">
-    <Compile Include="..\..\System.Data.SqlClient\src\Interop\SNINativeMethodWrapper.Unix.cs" />
-    <Compile Include="$(CommonPath)\System\Net\Security\Unix\SafeFreeCredentials.cs">
-      <Link>Common\System\Net\Security\Unix\SafeFreeCredentials.cs</Link>
-    </Compile>
+    <Compile Include="System\Data\Common\AdapterUtil.cs" />
+    <Compile Include="System\Data\Common\DataCommonEventSource.cs" />
+    <Compile Include="System\Data\Common\DbConnectionPoolKey.cs" /> 
+    <Compile Include="System\Data\Common\FieldNameLookup.cs" />
+    <Compile Include="System\Data\Common\NameValuePair.cs" /> 
+    <Compile Include="System\Data\Common\SR.cs" />
+    <Compile Include="System\Data\ProviderBase\DataReaderContainer.cs" />
+    <Compile Include="System\Data\ProviderBase\DbBuffer.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionClosed.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionFactory.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionHelper.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionInternal.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionInternal.Shared.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPool.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolAuthenticationContext.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolAuthenticationContextKey.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolCounters.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolGroup.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolOptions.cs" />
+    <Compile Include="System\Data\ProviderBase\DbMetaDataFactory.cs" />
+    <Compile Include="System\Data\ProviderBase\DbReferenceCollection.cs" />
+    <Compile Include="System\Data\ProviderBase\WrappedIUnknown.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\System.Data.OleDb.OleDbMetaData.xml">
@@ -101,10 +73,13 @@
     <Reference Include="System.ComponentModel.TypeConverter" />
     <Reference Include="System.Configuration.ConfigurationManager" />
     <Reference Include="System.Data.Common" />
+    <Reference Include="System.Data.SqlClient" />
     <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.FileVersionInfo" />
     <Reference Include="System.Diagnostics.PerformanceCounter" />
     <Reference Include="System.Diagnostics.Tools" />
     <Reference Include="System.Diagnostics.TraceSource" />
+    <Reference Include="System.Diagnostics.Tracing" />
     <Reference Include="System.IO.Pipes" />
     <Reference Include="System.Memory" />
     <Reference Include="System.Net.Primitives" />

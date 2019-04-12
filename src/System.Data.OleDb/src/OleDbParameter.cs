@@ -114,8 +114,6 @@ namespace System.Data.OleDb {
 
         [
         RefreshProperties(RefreshProperties.All),
-         // ResCategoryAttribute(SR.DataCategory_Data),
-        // ResDescriptionAttribute(SR.OleDbParameter_OleDbType),
         DbProviderSpecificTypeProperty(true),
         ]
         public OleDbType OleDbType {
@@ -142,10 +140,6 @@ namespace System.Data.OleDb {
             }
         }
 
-       // [
-         // ResCategoryAttribute(SR.DataCategory_Data),
-        // ResDescriptionAttribute(SR.DbParameter_ParameterName),
-        //]
         override public string ParameterName { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 string parameterName = _parameterName;
@@ -160,7 +154,6 @@ namespace System.Data.OleDb {
         }
 
         [DefaultValue((Byte)0)] // MDAC 65862
-        //[ResCategoryAttribute(SR.DataCategory_Data)]
         public new Byte Precision {
             get {
                 return PrecisionInternal;
@@ -189,7 +182,6 @@ namespace System.Data.OleDb {
         }
 
         [DefaultValue((Byte)0)] // MDAC 65862
-        //[ResCategoryAttribute(SR.DataCategory_Data)]
         public new Byte Scale {
             get {
                 return ScaleInternal;
@@ -472,8 +464,6 @@ namespace System.Data.OleDb {
 
         [
         RefreshProperties(RefreshProperties.All),
-         // ResCategoryAttribute(SR.DataCategory_Data),
-        // ResDescriptionAttribute(SR.DbParameter_Value),
         TypeConverter(typeof(StringConverter)),
         ]
         override public object Value { // V1.2.3300, XXXParameter V1.0.3300

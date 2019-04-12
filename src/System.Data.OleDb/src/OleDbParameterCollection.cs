@@ -6,14 +6,11 @@ using System.ComponentModel;
 using System.Data.Common;
 
 namespace System.Data.OleDb {
-    [
-    //Editor("Microsoft.VSDesigner.Data.Design.DBParametersEditor, " + AssemblyRef.MicrosoftVSDesigner, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing),
-    ListBindable(false)
-    ]
-    public sealed partial class OleDbParameterCollection : DbParameterCollection {
+    public sealed partial class OleDbParameterCollection : DbParameterCollection
+    {
         private int _changeID;
 
-        private static Type ItemType = typeof(OleDbParameter);
+        private static Type s_itemType = typeof(OleDbParameter);
 
         internal OleDbParameterCollection() : base() {
         }
@@ -28,7 +25,7 @@ namespace System.Data.OleDb {
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)
         ]
-        new public OleDbParameter this[int index] {
+        public new OleDbParameter this[int index] {
             get {
                 return (OleDbParameter)GetParameter(index);
             }
@@ -41,12 +38,12 @@ namespace System.Data.OleDb {
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)
         ]
-        new public OleDbParameter this[string parameterName] {
+        public new OleDbParameter this[string parameterName] {
             get {
-                 return (OleDbParameter)GetParameter(parameterName);
+                return (OleDbParameter)GetParameter(parameterName);
             }
             set {
-                 SetParameter(parameterName, value);
+                SetParameter(parameterName, value);
             }
         }
 
@@ -56,7 +53,7 @@ namespace System.Data.OleDb {
         }
 
         [ EditorBrowsable(EditorBrowsableState.Never) ]
-        [ Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  http://go.microsoft.com/fwlink/?linkid=14202", false) ] // 79027
+        [ Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  https://go.microsoft.com/fwlink/?linkid=14202", false) ] // 79027
         public OleDbParameter Add(string parameterName, object value) { // MDAC 59206
             return Add(new OleDbParameter(parameterName, value));
         }
@@ -81,7 +78,7 @@ namespace System.Data.OleDb {
             AddRange((Array)values);
         }
 
-        override public bool Contains(string value) { // WebData 97349
+        public override bool Contains(string value) { // WebData 97349
             return (-1 != IndexOf(value));
         }
 
@@ -92,11 +89,11 @@ namespace System.Data.OleDb {
         public void CopyTo(OleDbParameter[] array, int index) {
             CopyTo((Array)array, index);
         }
-        
+
         public int IndexOf(OleDbParameter value) {
             return IndexOf((object)value);
         }
-    
+
         public void Insert(int index, OleDbParameter value) {
             Insert(index, (object)value);
         }

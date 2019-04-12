@@ -262,6 +262,19 @@ namespace System.Data.OleDb {
             InnerConnection.NotifyWeakReference(message);
         }
 
+        internal void PermissionDemand() {
+            Debug.Assert(DbConnectionClosedConnecting.SingletonInstance == _innerConnection, "not connecting");
+
+            System.Data.ProviderBase.DbConnectionPoolGroup poolGroup = PoolGroup;
+            DbConnectionOptions connectionOptions = ((null != poolGroup) ? poolGroup.ConnectionOptions : null);
+            if ((null == connectionOptions) || connectionOptions.IsEmpty) {
+                throw ADP.NoConnectionString();
+            }
+
+            DbConnectionOptions userConnectionOptions = UserConnectionOptions;
+            Debug.Assert(null != userConnectionOptions, "null UserConnectionOptions");
+        }
+
         internal void RemoveWeakReference(object value) {
             InnerConnection.RemoveWeakReference(value);
         }
@@ -317,6 +330,18 @@ namespace System.Data.OleDb {
             Debug.Assert(null != _innerConnection, "null InnerConnection");
             Debug.Assert(null != to, "to null InnerConnection");
             _innerConnection = to;
+        }
+
+        [ConditionalAttribute("DEBUG")]
+        internal static void VerifyExecutePermission() {
+            try {
+                // use this to help validate this code path is only used after the following permission has been previously demanded in the current codepath
+                // CONNECTIONOBJECTNAME.ExecutePermission.Demand();
+            }
+            catch(System.Security.SecurityException) {
+                System.Diagnostics.Debug.Assert(false, "unexpected SecurityException for current codepath");
+                throw;
+            }
         }
     }
 }

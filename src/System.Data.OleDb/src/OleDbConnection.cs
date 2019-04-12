@@ -40,9 +40,6 @@ namespace System.Data.OleDb {
 #pragma warning restore 618
         SettingsBindable(true),
         RefreshProperties(RefreshProperties.All),
-        //ResCategoryAttribute(SR.DataCategory_Data),
-        //Editor("Microsoft.VSDesigner.Data.ADO.Design.OleDbConnectionStringEditor, " + AssemblyRef.MicrosoftVSDesigner, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing),
-        //ResDescriptionAttribute(SR.OleDbConnection_ConnectionString),
         ]
         override public string ConnectionString {
             get {
@@ -59,7 +56,6 @@ namespace System.Data.OleDb {
 
         [
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        // ResDescriptionAttribute(SR.OleDbConnection_ConnectionTimeout),
         ]
         override public int ConnectionTimeout {
             get {
@@ -80,6 +76,7 @@ namespace System.Data.OleDb {
             }
         }
 
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),]
         override public string Database {
             get {
                 OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
@@ -108,21 +105,21 @@ namespace System.Data.OleDb {
         ]
         override public string DataSource {
             get {
-                    OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
-                    object value = (null != constr) ? constr.DataSource : ADP.StrEmpty;
-                    if ((null != value) && !((string)value).StartsWith(DbConnectionOptions.DataDirectory, StringComparison.OrdinalIgnoreCase)) {
-                        if (IsOpen) {
-                            value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_DATASOURCE);
-                            if ((null == value) || ((value is string) && (0 == (value as string).Length))) {
-                                value = GetDataSourceValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_DATASOURCENAME); // MDAC 76248
-                            }
-                        }
-                        else {
-                            constr = this.OleDbConnectionStringValue;
-                            value = (null != constr) ? constr.DataSource : ADP.StrEmpty;
+                OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
+                object value = (null != constr) ? constr.DataSource : ADP.StrEmpty;
+                if ((null != value) && !((string)value).StartsWith(DbConnectionOptions.DataDirectory, StringComparison.OrdinalIgnoreCase)) {
+                    if (IsOpen) {
+                        value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_DATASOURCE);
+                        if ((null == value) || ((value is string) && (0 == (value as string).Length))) {
+                            value = GetDataSourceValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_DATASOURCENAME); // MDAC 76248
                         }
                     }
-                    return Convert.ToString(value, CultureInfo.InvariantCulture);
+                    else {
+                        constr = this.OleDbConnectionStringValue;
+                        value = (null != constr) ? constr.DataSource : ADP.StrEmpty;
+                    }
+                }
+                return Convert.ToString(value, CultureInfo.InvariantCulture);
             }
         }
 
@@ -143,8 +140,6 @@ namespace System.Data.OleDb {
         [
         Browsable(true),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        // ResCategoryAttribute(SR.DataCategory_Data),
-        // ResDescriptionAttribute(SR.OleDbConnection_Provider),
         ]
         public String Provider {
             get {
@@ -160,9 +155,6 @@ namespace System.Data.OleDb {
             }
         }
 
-      //  [
-        // ResDescriptionAttribute(SR.OleDbConnection_ServerVersion),
-      //  ]
         override public string ServerVersion { // MDAC 55481
             get {
                 return InnerConnection.ServerVersion;
@@ -180,31 +172,29 @@ namespace System.Data.OleDb {
             }
         }
 
-        [
-        EditorBrowsable(EditorBrowsableState.Advanced),
-        ]
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public void ResetState() { // MDAC 58606
-                if (IsOpen) {
-                    object value = GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_CONNECTIONSTATUS);
-                    if (value is Int32) {
-                        int connectionStatus = (int) value;
-                        switch (connectionStatus) {
-                        case ODB.DBPROPVAL_CS_UNINITIALIZED: // provider closed on us
-                        case ODB.DBPROPVAL_CS_COMMUNICATIONFAILURE: // broken connection
-                            GetOpenConnection().DoomThisConnection();
-                            NotifyWeakReference(OleDbReferenceCollection.Canceling); // MDAC 71435
-                            Close();
-                            break;
+            if (IsOpen) {
+                object value = GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_CONNECTIONSTATUS);
+                if (value is Int32) {
+                    int connectionStatus = (int) value;
+                    switch (connectionStatus) {
+                    case ODB.DBPROPVAL_CS_UNINITIALIZED: // provider closed on us
+                    case ODB.DBPROPVAL_CS_COMMUNICATIONFAILURE: // broken connection
+                        GetOpenConnection().DoomThisConnection();
+                        NotifyWeakReference(OleDbReferenceCollection.Canceling); // MDAC 71435
+                        Close();
+                        break;
 
-                        case ODB.DBPROPVAL_CS_INITIALIZED: // everything is okay
-                            break;
+                    case ODB.DBPROPVAL_CS_INITIALIZED: // everything is okay
+                        break;
 
-                        default: // have to assume everything is okay
-                            Debug.Assert(false, "Unknown 'Connection Status' value " + connectionStatus.ToString("G", CultureInfo.InvariantCulture));
-                            break;
-                        }
+                    default: // have to assume everything is okay
+                        Debug.Assert(false, "Unknown 'Connection Status' value " + connectionStatus.ToString("G", CultureInfo.InvariantCulture));
+                        break;
                     }
                 }
+            }
         }
 
         public event OleDbInfoMessageEventHandler InfoMessage {
@@ -259,6 +249,8 @@ namespace System.Data.OleDb {
             }
             return quotedIdentifierCase;
         }
+
+        internal bool ForceNewConnection { get { return false; } set { ; } }
 
         new public OleDbTransaction BeginTransaction() {
             return BeginTransaction(IsolationLevel.Unspecified);
@@ -323,10 +315,6 @@ namespace System.Data.OleDb {
                 return transaction;
         }
 
-        //public void EnlistDistributedTransaction(System.EnterpriseServices.ITransaction transaction) {
-        //    EnlistDistributedTransactionHelper(transaction);
-        //}
-
         internal object GetDataSourcePropertyValue(Guid propertySet, int propertyID) {
             OleDbConnectionInternal connection = GetOpenConnection();
             return connection.GetDataSourcePropertyValue(propertySet, propertyID);
@@ -367,40 +355,39 @@ namespace System.Data.OleDb {
         }
 
         public DataTable GetOleDbSchemaTable(Guid schema, object[] restrictions) { // MDAC 61846
-            
-                CheckStateOpen(ADP.GetOleDbSchemaTable);
-                OleDbConnectionInternal connection = GetOpenConnection();
+            CheckStateOpen(ADP.GetOleDbSchemaTable);
+            OleDbConnectionInternal connection = GetOpenConnection();
 
-                if (OleDbSchemaGuid.DbInfoLiterals == schema) {
-                    if ((null == restrictions) || (0 == restrictions.Length)) {
-                        return connection.BuildInfoLiterals();
-                    }
-                    throw ODB.InvalidRestrictionsDbInfoLiteral("restrictions");
+            if (OleDbSchemaGuid.DbInfoLiterals == schema) {
+                if ((null == restrictions) || (0 == restrictions.Length)) {
+                    return connection.BuildInfoLiterals();
                 }
-                else if (OleDbSchemaGuid.SchemaGuids == schema) {
-                    if ((null == restrictions) || (0 == restrictions.Length)) {
-                        return connection.BuildSchemaGuids();
-                    }
-                    throw ODB.InvalidRestrictionsSchemaGuids("restrictions");
+                throw ODB.InvalidRestrictionsDbInfoLiteral("restrictions");
+            }
+            else if (OleDbSchemaGuid.SchemaGuids == schema) {
+                if ((null == restrictions) || (0 == restrictions.Length)) {
+                    return connection.BuildSchemaGuids();
                 }
-                else if (OleDbSchemaGuid.DbInfoKeywords == schema) {
-                    if ((null == restrictions) || (0 == restrictions.Length)) {
-                        return connection.BuildInfoKeywords();
-                    }
-                    throw ODB.InvalidRestrictionsDbInfoKeywords("restrictions");
+                throw ODB.InvalidRestrictionsSchemaGuids("restrictions");
+            }
+            else if (OleDbSchemaGuid.DbInfoKeywords == schema) {
+                if ((null == restrictions) || (0 == restrictions.Length)) {
+                    return connection.BuildInfoKeywords();
                 }
+                throw ODB.InvalidRestrictionsDbInfoKeywords("restrictions");
+            }
 
-                if (connection.SupportSchemaRowset(schema)) {
-                    return connection.GetSchemaRowset(schema, restrictions);
-                }
-                else {
-                    using(IDBSchemaRowsetWrapper wrapper = connection.IDBSchemaRowset()) {
-                        if (null == wrapper.Value) {
-                            throw ODB.SchemaRowsetsNotSupported(Provider); // MDAC 72689
-                        }
+            if (connection.SupportSchemaRowset(schema)) {
+                return connection.GetSchemaRowset(schema, restrictions);
+            }
+            else {
+                using(IDBSchemaRowsetWrapper wrapper = connection.IDBSchemaRowset()) {
+                    if (null == wrapper.Value) {
+                        throw ODB.SchemaRowsetsNotSupported(Provider); // MDAC 72689
                     }
-                    throw ODB.NotSupportedSchemaTable(schema, this); // MDAC 63279
                 }
+                throw ODB.NotSupportedSchemaTable(schema, this); // MDAC 63279
+            }
         }
 
         internal DataTable GetSchemaRowset(Guid schema, object[] restrictions) {
@@ -424,7 +411,6 @@ namespace System.Data.OleDb {
                 try {
                     OleDbException exception = OleDbException.CreateException(errorInfo, errorCode, null);
                     OleDbInfoMessageEventArgs e = new OleDbInfoMessageEventArgs(exception);
-
                     handler(this, e);
                 }
                 catch (Exception e) { // eat the exception
@@ -544,11 +530,9 @@ namespace System.Data.OleDb {
 
         // @devnote: should be multithread safe
         static public void ReleaseObjectPool() {
-
-            OleDbConnectionString.ReleaseObjectPool();
-            OleDbConnectionInternal.ReleaseObjectPool();
-            OleDbConnectionFactory.SingletonInstance.ClearAllPools();
-
+                OleDbConnectionString.ReleaseObjectPool();
+                OleDbConnectionInternal.ReleaseObjectPool();
+                OleDbConnectionFactory.SingletonInstance.ClearAllPools();
         }
 
         static private void ResetState(OleDbConnection connection) {

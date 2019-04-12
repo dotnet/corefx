@@ -94,7 +94,8 @@ namespace System.Data.OleDb {
         }
 
         [
-        DefaultValue("")
+        DefaultValue(""),
+        RefreshProperties(RefreshProperties.All)
         ]
         override public string CommandText {
             get {
@@ -259,7 +260,8 @@ namespace System.Data.OleDb {
         }
 
         [
-        Browsable(false)
+        Browsable(false),
+        DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
         ]
         new public OleDbTransaction Transaction {
             get {
@@ -370,33 +372,33 @@ namespace System.Data.OleDb {
         }
 
         override public void Cancel() {
-            unchecked { _changeID++; }
+                unchecked { _changeID++; }
 
-            UnsafeNativeMethods.ICommandText icmdtxt = _icommandText;
-            if (null != icmdtxt) {
-                OleDbHResult hr = OleDbHResult.S_OK;
+                UnsafeNativeMethods.ICommandText icmdtxt = _icommandText;
+                if (null != icmdtxt) {
+                    OleDbHResult hr = OleDbHResult.S_OK;
 
-                lock(icmdtxt) {
-                    // lock the object to avoid race conditions between using the object and releasing the object
-                    // after we acquire the lock, if the class has moved on don't actually call Cancel
-                    if (icmdtxt == _icommandText) {
-                        hr = icmdtxt.Cancel();
+                    lock(icmdtxt) {
+                        // lock the object to avoid race conditions between using the object and releasing the object
+                        // after we acquire the lock, if the class has moved on don't actually call Cancel
+                        if (icmdtxt == _icommandText) {
+                            hr = icmdtxt.Cancel();
+                        }
                     }
+                    if (OleDbHResult.DB_E_CANTCANCEL != hr) {
+                        // if the provider can't cancel the command - don't cancel the DataReader
+                        this.canceling = true;
+                    }
+
+                    // since cancel is allowed to occur at anytime we can't check the connection status
+                    // since if it returns as closed then the connection will close causing the reader to close
+                    // and that would introduce the possilbility of one thread reading and one thread closing at the same time
+                    ProcessResultsNoReset(hr); // MDAC 72667
                 }
-                if (OleDbHResult.DB_E_CANTCANCEL != hr) {
-                    // if the provider can't cancel the command - don't cancel the DataReader
+                else {
                     this.canceling = true;
                 }
-
-                // since cancel is allowed to occur at anytime we can't check the connection status
-                // since if it returns as closed then the connection will close causing the reader to close
-                // and that would introduce the possilbility of one thread reading and one thread closing at the same time
-                ProcessResultsNoReset(hr); // MDAC 72667
             }
-            else {
-                this.canceling = true;
-            }
-        }
 
         public OleDbCommand Clone() {
             OleDbCommand clone = new OleDbCommand(this);
@@ -497,9 +499,8 @@ namespace System.Data.OleDb {
         }
 
         new public OleDbDataReader ExecuteReader(CommandBehavior behavior) {
-
-            _executeQuery = true;
-            return ExecuteReaderInternal(behavior, ADP.ExecuteReader);
+                _executeQuery = true;
+                return ExecuteReaderInternal(behavior, ADP.ExecuteReader);
         }
 
         IDataReader IDbCommand.ExecuteReader(CommandBehavior behavior) {
@@ -772,22 +773,20 @@ namespace System.Data.OleDb {
         }
 
         override public int ExecuteNonQuery() {
-
-            _executeQuery = false;
-            ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteNonQuery);
-            return ADP.IntPtrToInt32(_recordsAffected);
+                _executeQuery = false;
+                ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteNonQuery);
+                return ADP.IntPtrToInt32(_recordsAffected);
         }
 
         override public object ExecuteScalar() {
-
-            object value = null;
-            _executeQuery = true;
-            using(OleDbDataReader reader = ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteScalar)) {
-                if (reader.Read() && (0 < reader.FieldCount)) {
-                    value = reader.GetValue(0);
+                object value = null;
+                _executeQuery = true;
+                using(OleDbDataReader reader = ExecuteReaderInternal(CommandBehavior.Default, ADP.ExecuteScalar)) {
+                    if (reader.Read() && (0 < reader.FieldCount)) {
+                        value = reader.GetValue(0);
+                    }
                 }
-            }
-            return value;
+                return value;
         }
 
         private int ExecuteTableDirect(CommandBehavior behavior, out object executeResult) {
@@ -814,7 +813,6 @@ namespace System.Data.OleDb {
                     using(IOpenRowsetWrapper iopenRowset = _connection.IOpenRowset()) {
                         using(DBPropSet propSet = CommandPropertySets()) {
                             if (null != propSet) {
-
                                 // MDAC 65279
                                 bool mustRelease = false;
                                 RuntimeHelpers.PrepareConstrainedRegions();
@@ -827,7 +825,7 @@ namespace System.Data.OleDb {
                                         propSet.DangerousRelease();
                                     }
                                 }
-
+                                    
                                 if (OleDbHResult.DB_E_ERRORSOCCURRED == hr) {
                                     hr = iopenRowset.Value.OpenRowset(ADP.PtrZero, tableID, ADP.PtrZero, ref ODB.IID_IRowset, 0, IntPtr.Zero, out executeResult);
                                 }
@@ -988,7 +986,6 @@ namespace System.Data.OleDb {
         }
 
         override public void Prepare() {
-
             if (CommandType.TableDirect != CommandType) { // MDAC 70946, 71194
                 ValidateConnectionAndTransaction(ADP.Prepare);
 

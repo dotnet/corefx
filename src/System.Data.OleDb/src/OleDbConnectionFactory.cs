@@ -4,10 +4,24 @@
 
 using System.Collections.Specialized;
 using System.Data.Common;
+using System.Configuration;
 using System.Data.ProviderBase;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.Versioning;
 
+namespace System.Configuration
+{
+    internal static class PrivilegedConfigurationManager
+    {
+        internal static ConnectionStringSettingsCollection ConnectionStrings => ConfigurationManager.ConnectionStrings;
+
+        internal static object GetSection(string sectionName)
+        {
+            return ConfigurationManager.GetSection(sectionName);
+        }
+    }
+}
 namespace System.Data.OleDb
 {
     sealed internal class OleDbConnectionFactory : DbConnectionFactory {
@@ -41,6 +55,8 @@ namespace System.Data.OleDb
         // SxS (VSDD 545786): metadata files are opened from <.NetRuntimeFolder>\CONFIG\<metadatafilename.xml>
         // this operation is safe in SxS because the file is opened in read-only mode and each NDP runtime accesses its own copy of the metadata
         // under the runtime folder.
+        [ResourceExposure(ResourceScope.None)]
+        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         override protected DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory){
 
             Debug.Assert (internalConnection != null,"internalConnection may not be null.");
@@ -51,8 +67,40 @@ namespace System.Data.OleDb
             OleDbConnection oleDbOuterConnection = oleDbInternalConnection.Connection;
             Debug.Assert(oleDbOuterConnection != null,"outer connection may not be null.");
 
-            XMLStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.OleDb.OleDbMetaData.xml");
-            cacheMetaDataFactory = true;
+            NameValueCollection settings = (NameValueCollection)PrivilegedConfigurationManager.GetSection("system.data.oledb");
+            Stream XMLStream =null;
+            String providerFileName =  oleDbOuterConnection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo,ODB.DBPROP_PROVIDERFILENAME) as string;
+
+            if (settings != null){
+
+                string [] values = null;
+                string metaDataXML = null;
+                // first try to get the provider specific xml
+
+                // if providerfilename is not supported we can't build the settings key needed to
+                // get the provider specific XML path
+                if (providerFileName != null){
+                    metaDataXML =  providerFileName + _metaDataXml;
+                    values = settings.GetValues(metaDataXML);
+                }
+
+                // if we did not find provider specific xml see if there is new default xml
+                if (values == null) {
+                    metaDataXML =_defaultMetaDataXml;
+                    values = settings.GetValues(metaDataXML);
+                }
+
+                // If there is new XML get it
+                if (values != null) {
+                    XMLStream = ADP.GetXmlStreamFromValues(values,metaDataXML);
+                }
+            }
+
+            // if the xml was not obtained from machine.config use the embedded XML resource
+            if (XMLStream == null) {
+                XMLStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.OleDb.OleDbMetaData.xml");
+                cacheMetaDataFactory = true;
+            }
             
             Debug.Assert (XMLStream != null,"XMLstream may not be null.");
 
@@ -87,6 +135,21 @@ namespace System.Data.OleDb
                 return c.InnerConnection;
             }
             return null;
+        }
+
+        override protected int GetObjectId(DbConnection connection) {
+            OleDbConnection c = (connection as OleDbConnection);
+            if (null != c) {
+                return c.ObjectID;
+            }
+            return 0;
+        }
+
+        override internal void PermissionDemand(DbConnection outerConnection) {
+            OleDbConnection c = (outerConnection as OleDbConnection);
+            if (null != c) {
+                c.PermissionDemand();
+            }
         }
 
         override internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup) {

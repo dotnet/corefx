@@ -19,9 +19,9 @@ namespace System.Data.ProviderBase
         private const int PruningDueTime = 4 * 60 * 1000;           // 4 minutes
         private const int PruningPeriod = 30 * 1000;           // thirty seconds
 
-
         // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to 
         // a maximum of Environment.ProcessorCount at a time.
+        private static uint s_pendingOpenNonPooledNext = 0;
         private static Task<DbConnectionInternal>[] s_pendingOpenNonPooled = new Task<DbConnectionInternal>[Environment.ProcessorCount];
         private static Task<DbConnectionInternal> s_completedTask;
 
@@ -33,12 +33,10 @@ namespace System.Data.ProviderBase
             _pruningTimer = CreatePruningTimer();
         }
 
-
         abstract public DbProviderFactory ProviderFactory
         {
             get;
         }
-
 
         public void ClearAllPools()
         {
@@ -255,7 +253,6 @@ namespace System.Data.ProviderBase
             return connectionPoolGroup;
         }
 
-
         private void PruneConnectionPoolGroups(object state)
         {
             // First, walk the pool release list and attempt to clear each
@@ -412,6 +409,8 @@ namespace System.Data.ProviderBase
         abstract internal DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection);
 
         abstract internal DbConnectionInternal GetInnerConnection(DbConnection connection);
+
+        abstract internal void PermissionDemand(DbConnection outerConnection);
 
         abstract internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup);
 

@@ -486,7 +486,7 @@ namespace System.Data.OleDb {
                 }
                 else {
                     // second structure same as the first, just clear the field
-                    SafeNativeMethods.ZeroMemory(originalHandle, (IntPtr)ODB.SizeOf_Variant);
+                    SafeNativeMethods.ZeroMemory(originalHandle, ODB.SizeOf_Variant);
                 }
             }
         }
@@ -512,7 +512,7 @@ namespace System.Data.OleDb {
                 }
                 else {
                     // second structure same as the first, just clear the field
-                    SafeNativeMethods.ZeroMemory(originalHandle, (IntPtr)NativeOledbWrapper.SizeOfPROPVARIANT);
+                    SafeNativeMethods.ZeroMemory(originalHandle, NativeOledbWrapper.SizeOfPROPVARIANT);
                 }
             }
         }

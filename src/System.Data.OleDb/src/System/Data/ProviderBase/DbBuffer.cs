@@ -555,7 +555,7 @@ namespace System.Data.ProviderBase
                 DangerousAddRef(ref mustRelease);
 
                 IntPtr ptr = DangerousGetHandle();
-                SafeNativeMethods.ZeroMemory(ptr, (IntPtr)Length);
+                SafeNativeMethods.ZeroMemory(ptr, Length);
             }
             finally {
                 if (mustRelease) {

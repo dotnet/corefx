@@ -8,6 +8,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
+using System.Security.Permissions;
 using System.Text;
 
 namespace System.Data.OleDb {
@@ -36,6 +37,8 @@ namespace System.Data.OleDb {
         private OleDbException(SerializationInfo si, StreamingContext sc) : base(si, sc) {
             oledbErrors = (OleDbErrorCollection) si.GetValue("oledbErrors", typeof(OleDbErrorCollection));
         }
+
+        [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags=System.Security.Permissions.SecurityPermissionFlag.SerializationFormatter)]
         override public void GetObjectData(SerializationInfo si, StreamingContext context) { // MDAC 72003
             if (null == si) {
                 throw new ArgumentNullException("si");

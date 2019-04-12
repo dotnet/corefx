@@ -2,11 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.ComponentModel;
+using System.Data;
 using System.Data.Common;
+using System.Globalization;
 
-namespace System.Data.OleDb
-{
+namespace System.Data.OleDb {
     public sealed partial class OleDbParameter : DbParameter { // V1.2.3300
         private object _value;
 
@@ -25,7 +27,7 @@ namespace System.Data.OleDb
 
         private object _coercedValue;
 
-        private OleDbParameter(OleDbParameter source) : this() { // V1.2.3300, Clone
+        private PARAMETEROBJECTNAME(PARAMETEROBJECTNAME source) : this() { // V1.2.3300, Clone
             ADP.CheckArgumentNull(source, "source");
 
             source.CloneHelper(this);
@@ -45,7 +47,11 @@ namespace System.Data.OleDb
             }
         }
 
-        [RefreshProperties(RefreshProperties.All)]
+        [
+        RefreshProperties(RefreshProperties.All),
+        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Data),
+        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_Direction),
+        ]
         override public ParameterDirection Direction { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 ParameterDirection direction = _direction;
@@ -80,7 +86,9 @@ namespace System.Data.OleDb
 #if USEOFFSET
         [
         Browsable(false),
-        EditorBrowsableAttribute(EditorBrowsableState.Advanced)
+        EditorBrowsableAttribute(EditorBrowsableState.Advanced), // MDAC 69508
+        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Data),
+        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_Offset),
         ]
         public int Offset {
             get {
@@ -101,6 +109,10 @@ namespace System.Data.OleDb
         }
 #endif
 
+        // [
+        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Data),
+        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_Size),
+        // ]
         override public int Size { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 int size = _size;
@@ -131,6 +143,10 @@ namespace System.Data.OleDb
             return (0 != _size);
         }
 
+        // [
+        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Update),
+        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_SourceColumn),
+        // ]
         override public string SourceColumn { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 string sourceColumn = _sourceColumn;
@@ -150,6 +166,10 @@ namespace System.Data.OleDb
             }
         }
 
+        // [
+        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Update),
+        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_SourceVersion),
+        // ]
         override public DataRowVersion SourceVersion { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 DataRowVersion sourceVersion = _sourceVersion;
@@ -169,7 +189,7 @@ namespace System.Data.OleDb
             }
         }
 
-        private void CloneHelperCore(OleDbParameter destination) {
+        private void CloneHelperCore(PARAMETEROBJECTNAME destination) {
             destination._value                     = _value;
             // NOTE: _parent is not cloned
             destination._direction                 = _direction;
@@ -185,7 +205,7 @@ namespace System.Data.OleDb
         
         internal void CopyTo(DbParameter destination) {
             ADP.CheckArgumentNull(destination, "destination");
-            CloneHelper((OleDbParameter)destination);
+            CloneHelper((PARAMETEROBJECTNAME)destination);
         }
 
         internal object CompareExchangeParent(object value, object comparand) {

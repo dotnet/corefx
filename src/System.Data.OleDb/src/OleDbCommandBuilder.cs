@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Globalization;
+    using System.ComponentModel;
+    using System.Data.Common;
+    using System.Diagnostics;
+    using System.Globalization;
 
 namespace System.Data.OleDb {
     public sealed class OleDbCommandBuilder : DbCommandBuilder {
@@ -18,11 +18,7 @@ namespace System.Data.OleDb {
             DataAdapter = adapter;
         }
 
-        [
-        DefaultValue(null),
-         // ResCategoryAttribute(SR.DataCategory_Update),
-        // ResDescriptionAttribute(SR.OleDbCommandBuilder_DataAdapter), // MDAC 60524
-        ]
+        [DefaultValue(null)]
         new public OleDbDataAdapter DataAdapter {
             get {
                 return (base.DataAdapter as OleDbDataAdapter);
@@ -323,9 +319,9 @@ namespace System.Data.OleDb {
             string quoteSuffix = QuoteSuffix;
             if (ADP.IsEmpty(quotePrefix) == true) {
                 if (connection == null) {
-                    // VSTFDEVDIV 479567: use the adapter's connection if QuoteIdentifier was called from 
+                    // Use the adapter's connection if QuoteIdentifier was called from 
                     // DbCommandBuilder instance (which does not have an overload that gets connection object)
-                    connection = base.GetConnection() as OleDbConnection;
+                    connection = DataAdapter?.SelectCommand?.Connection;
                     if (connection == null) {
                         throw ADP.QuotePrefixNotSet(ADP.QuoteIdentifier);
                     }
@@ -366,9 +362,9 @@ namespace System.Data.OleDb {
             string quoteSuffix = QuoteSuffix;
             if (ADP.IsEmpty(quotePrefix) == true) {
                 if (connection == null) {
-                    // VSTFDEVDIV 479567: use the adapter's connection if UnquoteIdentifier was called from 
+                    // Use the adapter's connection if UnquoteIdentifier was called from 
                     // DbCommandBuilder instance (which does not have an overload that gets connection object)
-                    connection = base.GetConnection() as OleDbConnection;
+                    connection = DataAdapter?.SelectCommand?.Connection;
                     if (connection == null) {
                         throw ADP.QuotePrefixNotSet(ADP.UnquoteIdentifier);
                     }

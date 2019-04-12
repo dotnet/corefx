@@ -95,6 +95,7 @@ namespace System.Data.OleDb {
         }
 
         internal OleDbTransaction(OleDbConnection connection, OleDbTransaction transaction, IsolationLevel isolevel) {
+            OleDbConnection.VerifyExecutePermission();
 
             _parentConnection = connection;
             _parentTransaction = transaction;
@@ -191,11 +192,11 @@ namespace System.Data.OleDb {
 
         override public void Commit() {
 
-            if (null == _transaction) {
-                throw ADP.TransactionZombied(this);
+                if (null == _transaction) {
+                    throw ADP.TransactionZombied(this);
+                }
+                CommitInternal();
             }
-            CommitInternal();
-        }
 
         private void CommitInternal() {
             if (null == _transaction) {

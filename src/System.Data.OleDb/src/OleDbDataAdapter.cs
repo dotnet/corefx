@@ -89,7 +89,6 @@ namespace System.Data.OleDb {
             set { _updateCommand = (OleDbCommand)value; }
         }
 
-
         public event OleDbRowUpdatedEventHandler RowUpdated {
             add { Events.AddHandler(EventRowUpdated, value); }
             remove { Events.RemoveHandler(EventRowUpdated, value); }
@@ -141,7 +140,6 @@ namespace System.Data.OleDb {
         }
 
         public int Fill(DataSet dataSet, object ADODBRecordSet, string srcTable) {
-
             if (null == dataSet) {
                 throw ADP.ArgumentNull("dataSet");
             }

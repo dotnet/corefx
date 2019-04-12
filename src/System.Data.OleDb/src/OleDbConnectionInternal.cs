@@ -8,6 +8,7 @@ using System.Data.ProviderBase;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Data.OleDb {
@@ -63,6 +64,20 @@ namespace System.Data.OleDb {
         private bool _unEnlistDuringDeactivate;
 
         internal OleDbConnectionInternal(OleDbConnectionString constr, OleDbConnection connection) : base () {
+#if DEBUG
+            try { // use this to help validate this object is only created after the following permission has been previously demanded in the current codepath
+                if (null != connection) {
+                    connection.UserConnectionOptions.DemandPermission();
+                }
+                else {
+                    constr.DemandPermission();
+                }
+            }
+            catch(System.Security.SecurityException) {
+                System.Diagnostics.Debug.Assert(false, "unexpected SecurityException for current codepath");
+                throw;
+            }
+#endif
             Debug.Assert((null != constr) && !constr.IsEmpty, "empty connectionstring");
             ConnectionString = constr;
 
@@ -212,9 +227,9 @@ namespace System.Data.OleDb {
             return (UnsafeNativeMethods.ICommandText)icommandText;
         }
 
-        //override protected void Activate(SysTx.Transaction transaction) {
-        //    throw ADP.NotSupported();
-        //}
+        override protected void Activate(SysTx.Transaction transaction) {
+            throw ADP.NotSupported();
+        }
 
         override public DbTransaction BeginTransaction(IsolationLevel isolationLevel) {
 
@@ -276,16 +291,18 @@ namespace System.Data.OleDb {
             base.Dispose();
         }
 
-        //override public void EnlistTransaction(SysTx.Transaction transaction) { // MDAC 78997
+        override public void EnlistTransaction(SysTx.Transaction transaction) { // MDAC 78997
+            OleDbConnection.VerifyExecutePermission();
 
-        //    OleDbConnection outerConnection = Connection;
-        //    if (null != LocalTransaction) {
-        //        throw ADP.LocalTransactionPresent();
-        //    }
-        //    EnlistTransactionInternal(transaction);
-        //}
+            OleDbConnection outerConnection = Connection;
+            if (null != LocalTransaction) {
+                throw ADP.LocalTransactionPresent();
+            }
+            EnlistTransactionInternal(transaction);
+        }
 
         internal void EnlistTransactionInternal(SysTx.Transaction transaction) {
+            OleDbConnection.VerifyExecutePermission();
 
             SysTx.IDtcTransaction oleTxTransaction = ADP.GetOletxTransaction(transaction);
 
@@ -296,7 +313,6 @@ namespace System.Data.OleDb {
                     transactionJoin.Value.JoinTransaction(oleTxTransaction, (int) IsolationLevel.Unspecified, 0, IntPtr.Zero);
                     _unEnlistDuringDeactivate = (null != transaction);
                 }
-
             EnlistedTransaction = transaction;
         }
 
@@ -527,39 +543,38 @@ namespace System.Data.OleDb {
         }
 
         internal DataTable GetSchemaRowset(Guid schema, object[] restrictions) {
-
-                if (null == restrictions) { // MDAC 62243
-                    restrictions = new object[0];
+            if (null == restrictions) { // MDAC 62243
+                restrictions = new object[0];
+            }
+            DataTable dataTable = null;
+            using(IDBSchemaRowsetWrapper wrapper = IDBSchemaRowset()) {
+                UnsafeNativeMethods.IDBSchemaRowset dbSchemaRowset = wrapper.Value;
+                if (null == dbSchemaRowset) {
+                    throw ODB.SchemaRowsetsNotSupported(Provider);
                 }
-                DataTable dataTable = null;
-                using(IDBSchemaRowsetWrapper wrapper = IDBSchemaRowset()) {
-                    UnsafeNativeMethods.IDBSchemaRowset dbSchemaRowset = wrapper.Value;
-                    if (null == dbSchemaRowset) {
-                        throw ODB.SchemaRowsetsNotSupported(Provider);
-                    }
 
-                    UnsafeNativeMethods.IRowset rowset = null;
-                    OleDbHResult hr;
-                    hr = dbSchemaRowset.GetRowset(ADP.PtrZero, ref schema, restrictions.Length, restrictions, ref ODB.IID_IRowset, 0, ADP.PtrZero, out rowset);
+                UnsafeNativeMethods.IRowset rowset = null;
+                OleDbHResult hr;
+                hr = dbSchemaRowset.GetRowset(ADP.PtrZero, ref schema, restrictions.Length, restrictions, ref ODB.IID_IRowset, 0, ADP.PtrZero, out rowset);
 
-                    if (hr < 0) { // ignore infomsg
-                        ProcessResults(hr);
-                    }
-
-                    if (null != rowset) {
-                        using(OleDbDataReader dataReader = new OleDbDataReader(Connection, null, 0, CommandBehavior.Default)) {
-                            dataReader.InitializeIRowset(rowset, ChapterHandle.DB_NULL_HCHAPTER, IntPtr.Zero);
-                            dataReader.BuildMetaInfo();
-                            dataReader.HasRowsRead();
-
-                            dataTable = new DataTable();
-                            dataTable.Locale = CultureInfo.InvariantCulture;
-                            dataTable.TableName = OleDbSchemaGuid.GetTextFromValue(schema);
-                            OleDbDataAdapter.FillDataTable(dataReader, dataTable);
-                        }
-                    }
-                    return dataTable;
+                if (hr < 0) { // ignore infomsg
+                    ProcessResults(hr);
                 }
+
+                if (null != rowset) {
+                    using(OleDbDataReader dataReader = new OleDbDataReader(Connection, null, 0, CommandBehavior.Default)) {
+                        dataReader.InitializeIRowset(rowset, ChapterHandle.DB_NULL_HCHAPTER, IntPtr.Zero);
+                        dataReader.BuildMetaInfo();
+                        dataReader.HasRowsRead();
+
+                        dataTable = new DataTable();
+                        dataTable.Locale = CultureInfo.InvariantCulture;
+                        dataTable.TableName = OleDbSchemaGuid.GetTextFromValue(schema);
+                        OleDbDataAdapter.FillDataTable(dataReader, dataTable);
+                    }
+                }
+                return dataTable;
+            }
         }
 
         // returns true if there is an active data reader on the specified command
@@ -590,6 +605,8 @@ namespace System.Data.OleDb {
             }
             return false;
         }
+
+        [SecurityPermission(SecurityAction.Assert, Flags=SecurityPermissionFlag.UnmanagedCode)]
         static private object CreateInstanceDataLinks() {
             Type datalink = Type.GetTypeFromCLSID(ODB.CLSID_DataLinks, true);
             return Activator.CreateInstance(datalink, System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Instance, null, null, CultureInfo.InvariantCulture, null);

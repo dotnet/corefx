@@ -121,7 +121,6 @@ namespace System.Data.OleDb {
         }
 
         [DisplayName(DbConnectionStringKeywords.DataSource)]
-        //[ResCategoryAttribute(SR.DataCategory_Source)]
         [RefreshProperties(RefreshProperties.All)]
         // TODO: hand off to editor VS, if SQL - do database names, if Jet do file picker
         public string DataSource {
@@ -133,7 +132,6 @@ namespace System.Data.OleDb {
         }
 
         [DisplayName(DbConnectionStringKeywords.FileName)]
-        ////[ResCategoryAttribute(SR.DataCategory_NamedConnectionString)]
         [RefreshProperties(RefreshProperties.All)]
         // TODO: hand off to VS, they derive from FileNameEditor and set the OpenDialogFilter to *.UDL
         //[Editor("System.Windows.Forms.Design.FileNameEditor, " + AssemblyRef.SystemDesign, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing)]
@@ -159,7 +157,6 @@ namespace System.Data.OleDb {
         }
 */
         [DisplayName(DbConnectionStringKeywords.OleDbServices)]
-        //[ResCategoryAttribute(SR.DataCategory_Pooling)]
         [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbServicesConverter))]
         public int OleDbServices {
@@ -171,7 +168,6 @@ namespace System.Data.OleDb {
         }
 
         [DisplayName(DbConnectionStringKeywords.PersistSecurityInfo)]
-        //[ResCategoryAttribute(SR.DataCategory_Security)]
         [RefreshProperties(RefreshProperties.All)]
         public bool PersistSecurityInfo {
             get { return _persistSecurityInfo; }
@@ -182,7 +178,6 @@ namespace System.Data.OleDb {
         }
 
         [DisplayName(DbConnectionStringKeywords.Provider)]
-        //[ResCategoryAttribute(SR.DataCategory_Source)]
         [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbProviderConverter))]
         public string Provider {
@@ -465,127 +460,127 @@ namespace System.Data.OleDb {
             return providerInfo;
         }
 
-        protected override void GetProperties(Hashtable propertyDescriptors) {
-            Dictionary<string,OleDbPropertyInfo> providerInfo = GetProviderInfo(Provider);
-            if (0 < providerInfo.Count) {
+//         protected override void GetProperties(Hashtable propertyDescriptors) {
+//             Dictionary<string,OleDbPropertyInfo> providerInfo = GetProviderInfo(Provider);
+//             if (0 < providerInfo.Count) {
 
-                foreach(OleDbPropertyInfo info in providerInfo.Values) {
-                    Keywords index;
-                    if (!_keywords.TryGetValue(info._description, out index)) { // not a strongly typed property
+//                 foreach(OleDbPropertyInfo info in providerInfo.Values) {
+//                     Keywords index;
+//                     if (!_keywords.TryGetValue(info._description, out index)) { // not a strongly typed property
 
-                        bool isReadOnly = false;
-                        bool refreshOnChange = false;
-                        Attribute[] attributes;
-                        if (OleDbPropertySetGuid.DBInit == info._propertySet) {
-                            switch(info._propertyID) {
-#if DEBUG
-                            case ODB.DBPROP_AUTH_PERSIST_SENSITIVE_AUTHINFO:
-                            case ODB.DBPROP_INIT_ASYNCH:
-                            case ODB.DBPROP_INIT_DATASOURCE:
-                            case ODB.DBPROP_INIT_HWND:
-                            case ODB.DBPROP_INIT_OLEDBSERVICES:
-                                Debug.Assert(false, "should be handled via strongly typed property");
-                                goto default;
-#endif
-                            case ODB.DBPROP_INIT_CATALOG:
-                            case ODB.DBPROP_INIT_LOCATION:
-                                attributes = new Attribute[] {
-                                    BrowsableAttribute.Yes,
-                                    new ResCategoryAttribute(SR.DataCategory_Source),
-                                    RefreshPropertiesAttribute.All,
-                                };
-                                break;
-                            case ODB.DBPROP_INIT_TIMEOUT:
-                            case ODB.DBPROP_INIT_GENERALTIMEOUT:
-                                attributes = new Attribute[] {
-                                    BrowsableAttribute.Yes,
-                                    new ResCategoryAttribute(SR.DataCategory_Initialization),
-                                    RefreshPropertiesAttribute.All,
-                                };
-                                break;
-                            // 'Password' & 'User ID' will be readonly if 'Integrated Security' exists
-                            case ODB.DBPROP_AUTH_PASSWORD:
-                                attributes = new Attribute[] {
-                                    BrowsableAttribute.Yes,
-                                    PasswordPropertyTextAttribute.Yes,
-                                    new ResCategoryAttribute(SR.DataCategory_Security),
-                                    RefreshPropertiesAttribute.All,
-                                };
-                                isReadOnly = ContainsKey(DbConnectionStringKeywords.IntegratedSecurity);
-                                refreshOnChange = true;
-                                break;
-                            case ODB.DBPROP_AUTH_USERID:
-                                attributes = new Attribute[] {
-                                    BrowsableAttribute.Yes,
-                                    new ResCategoryAttribute(SR.DataCategory_Security),
-                                    RefreshPropertiesAttribute.All,
-                                };
-                                isReadOnly = ContainsKey(DbConnectionStringKeywords.IntegratedSecurity);
-                                refreshOnChange = true;
-                                break;
-                            case ODB.DBPROP_AUTH_CACHE_AUTHINFO:
-                            case ODB.DBPROP_AUTH_ENCRYPT_PASSWORD:
-                            case ODB.DBPROP_AUTH_INTEGRATED:
-                            case ODB.DBPROP_AUTH_MASK_PASSWORD:
-                            case ODB.DBPROP_AUTH_PERSIST_ENCRYPTED:
-                                attributes = new Attribute[] {
-                                    BrowsableAttribute.Yes,
-                                    new ResCategoryAttribute(SR.DataCategory_Security),
-                                    RefreshPropertiesAttribute.All,
-                                };
-                                refreshOnChange = (ODB.DBPROP_AUTH_INTEGRATED == info._propertyID);
-                                break;
+//                         bool isReadOnly = false;
+//                         bool refreshOnChange = false;
+//                         Attribute[] attributes;
+//                         if (OleDbPropertySetGuid.DBInit == info._propertySet) {
+//                             switch(info._propertyID) {
+// #if DEBUG
+//                             case ODB.DBPROP_AUTH_PERSIST_SENSITIVE_AUTHINFO:
+//                             case ODB.DBPROP_INIT_ASYNCH:
+//                             case ODB.DBPROP_INIT_DATASOURCE:
+//                             case ODB.DBPROP_INIT_HWND:
+//                             case ODB.DBPROP_INIT_OLEDBSERVICES:
+//                                 Debug.Assert(false, "should be handled via strongly typed property");
+//                                 goto default;
+// #endif
+//                             case ODB.DBPROP_INIT_CATALOG:
+//                             case ODB.DBPROP_INIT_LOCATION:
+//                                 attributes = new Attribute[] {
+//                                     BrowsableAttribute.Yes,
+//                                     // new [ResCategoryAttribute(SR.DataCategory_Source),
+//                                     RefreshPropertiesAttribute.All,
+//                                 };
+//                                 break;
+//                             case ODB.DBPROP_INIT_TIMEOUT:
+//                             case ODB.DBPROP_INIT_GENERALTIMEOUT:
+//                                 attributes = new Attribute[] {
+//                                     BrowsableAttribute.Yes,
+//                                     // new [ResCategoryAttribute(SR.DataCategory_Initialization),
+//                                     RefreshPropertiesAttribute.All,
+//                                 };
+//                                 break;
+//                             // 'Password' & 'User ID' will be readonly if 'Integrated Security' exists
+//                             case ODB.DBPROP_AUTH_PASSWORD:
+//                                 attributes = new Attribute[] {
+//                                     BrowsableAttribute.Yes,
+//                                     PasswordPropertyTextAttribute.Yes,
+//                                     // new [ResCategoryAttribute(SR.DataCategory_Security),
+//                                     RefreshPropertiesAttribute.All,
+//                                 };
+//                                 isReadOnly = ContainsKey(DbConnectionStringKeywords.IntegratedSecurity);
+//                                 refreshOnChange = true;
+//                                 break;
+//                             case ODB.DBPROP_AUTH_USERID:
+//                                 attributes = new Attribute[] {
+//                                     BrowsableAttribute.Yes,
+//                                     // new [ResCategoryAttribute(SR.DataCategory_Security),
+//                                     RefreshPropertiesAttribute.All,
+//                                 };
+//                                 isReadOnly = ContainsKey(DbConnectionStringKeywords.IntegratedSecurity);
+//                                 refreshOnChange = true;
+//                                 break;
+//                             case ODB.DBPROP_AUTH_CACHE_AUTHINFO:
+//                             case ODB.DBPROP_AUTH_ENCRYPT_PASSWORD:
+//                             case ODB.DBPROP_AUTH_INTEGRATED:
+//                             case ODB.DBPROP_AUTH_MASK_PASSWORD:
+//                             case ODB.DBPROP_AUTH_PERSIST_ENCRYPTED:
+//                                 attributes = new Attribute[] {
+//                                     BrowsableAttribute.Yes,
+//                                     // new [ResCategoryAttribute(SR.DataCategory_Security),
+//                                     RefreshPropertiesAttribute.All,
+//                                 };
+//                                 refreshOnChange = (ODB.DBPROP_AUTH_INTEGRATED == info._propertyID);
+//                                 break;
 
-                            case ODB.DBPROP_INIT_BINDFLAGS:
-                            case ODB.DBPROP_INIT_IMPERSONATION_LEVEL:
-                            case ODB.DBPROP_INIT_LCID:
-                            case ODB.DBPROP_INIT_MODE:
-                            case ODB.DBPROP_INIT_PROTECTION_LEVEL:
-                            case ODB.DBPROP_INIT_PROVIDERSTRING:
-                            case ODB.DBPROP_INIT_LOCKOWNER:
-                                attributes = new Attribute[] {
-                                    BrowsableAttribute.Yes,
-                                    new ResCategoryAttribute(SR.DataCategory_Advanced),
-                                    RefreshPropertiesAttribute.All,
-                                };
-                                break;
-                            default:
-                                Debug.Assert(false, "new standard propertyid");
-                                attributes = new Attribute[] {
-                                    BrowsableAttribute.Yes,
-                                    RefreshPropertiesAttribute.All,
-                                };
-                                break;
-                            }
-                        }
-                        else if (info._description.EndsWith(" Provider", StringComparison.OrdinalIgnoreCase)) {
-                            attributes = new Attribute[] {
-                                BrowsableAttribute.Yes,
-                                RefreshPropertiesAttribute.All,
-                                new ResCategoryAttribute(SR.DataCategory_Source),
-                                new TypeConverterAttribute(typeof(OleDbConnectionStringBuilder.OleDbProviderConverter)),
-                            };
-                            refreshOnChange = true;
-                        }
-                        else {
-                            attributes = new Attribute[] {
-                                BrowsableAttribute.Yes,
-                                RefreshPropertiesAttribute.All,
-                                new CategoryAttribute(Provider),
-                            };
-                        }
+//                             case ODB.DBPROP_INIT_BINDFLAGS:
+//                             case ODB.DBPROP_INIT_IMPERSONATION_LEVEL:
+//                             case ODB.DBPROP_INIT_LCID:
+//                             case ODB.DBPROP_INIT_MODE:
+//                             case ODB.DBPROP_INIT_PROTECTION_LEVEL:
+//                             case ODB.DBPROP_INIT_PROVIDERSTRING:
+//                             case ODB.DBPROP_INIT_LOCKOWNER:
+//                                 attributes = new Attribute[] {
+//                                     BrowsableAttribute.Yes,
+//                                     // new [ResCategoryAttribute(SR.DataCategory_Advanced),
+//                                     RefreshPropertiesAttribute.All,
+//                                 };
+//                                 break;
+//                             default:
+//                                 Debug.Assert(false, "new standard propertyid");
+//                                 attributes = new Attribute[] {
+//                                     BrowsableAttribute.Yes,
+//                                     RefreshPropertiesAttribute.All,
+//                                 };
+//                                 break;
+//                             }
+//                         }
+//                         else if (info._description.EndsWith(" Provider", StringComparison.OrdinalIgnoreCase)) {
+//                             attributes = new Attribute[] {
+//                                 BrowsableAttribute.Yes,
+//                                 RefreshPropertiesAttribute.All,
+//                                 // new [ResCategoryAttribute(SR.DataCategory_Source),
+//                                 new TypeConverterAttribute(typeof(OleDbConnectionStringBuilder.OleDbProviderConverter)),
+//                             };
+//                             refreshOnChange = true;
+//                         }
+//                         else {
+//                             attributes = new Attribute[] {
+//                                 BrowsableAttribute.Yes,
+//                                 RefreshPropertiesAttribute.All,
+//                                 new CategoryAttribute(Provider),
+//                             };
+//                         }
 
-                        DbConnectionStringBuilderDescriptor descriptor = new DbConnectionStringBuilderDescriptor(info._description,
-                            typeof(OleDbConnectionStringBuilder), info._type, isReadOnly, attributes);
-                        descriptor.RefreshOnChange = refreshOnChange;
+//                         DbConnectionStringBuilderDescriptor descriptor = new DbConnectionStringBuilderDescriptor(info._description,
+//                             typeof(OleDbConnectionStringBuilder), info._type, isReadOnly, attributes);
+//                         descriptor.RefreshOnChange = refreshOnChange;
 
-                        propertyDescriptors[info._description] = descriptor;
-                    }
-                    // else strongly typed property already exists, i.e. DataSource
-                }
-            }
-            base.GetProperties(propertyDescriptors);
-        }
+//                         propertyDescriptors[info._description] = descriptor;
+//                     }
+//                     // else strongly typed property already exists, i.e. DataSource
+//                 }
+//             }
+//             base.GetProperties(propertyDescriptors);
+//         }
 
         private sealed class OleDbProviderConverter : StringConverter {
 

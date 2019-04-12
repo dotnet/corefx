@@ -28,16 +28,18 @@ namespace System.Data.Common
         internal const CompareOptions DefaultCompareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
         internal const int DefaultConnectionTimeout = DbConnectionStringDefaults.ConnectTimeout;
 
-        static partial void TraceException(string trace, Exception e);
+        static partial void TraceException(string trace, Exception e)
+        {
+            Debug.Assert(e != null, "TraceException: null Exception");
+            if (e != null)
+            {
+                DataCommonEventSource.Log.Trace(trace, e);
+            }
+        }
 
         internal static void TraceExceptionAsReturnValue(Exception e)
         {
             TraceException("<comm.ADP.TraceException|ERR|THROW> '{0}'", e);
-        }
-
-        static internal void TraceExceptionForCapture(Exception e) {
-            Debug.Assert(ADP.IsCatchableExceptionType(e), "Invalid exception type, should have been re-thrown!");
-            TraceException("<comm.ADP.TraceException|ERR|CATCH> '%ls'\n", e);
         }
 
         internal static void TraceExceptionWithoutRethrow(Exception e)
@@ -333,15 +335,6 @@ namespace System.Data.Common
             return InvalidCast(SR.Format(SR.ADP_CollectionInvalidType, collection.Name, itemType.Name, invalidValue.GetType().Name));
         }
 
-        //
-        // DbConnection
-        //
-        static internal NotImplementedException MethodNotImplemented() {
-            NotImplementedException e = new NotImplementedException();
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-
         private static string ConnectionStateMsg(ConnectionState state)
         {
             switch (state)
@@ -360,25 +353,6 @@ namespace System.Data.Common
                 default:
                     return SR.Format(SR.ADP_ConnectionStateMsg, state.ToString());
             }
-        }
-
-        //
-        // IDbCommand
-        //
-
-        static internal InvalidOperationException CommandAsyncOperationCompleted() {
-            return InvalidOperation(Res.GetString(Res.SQL_AsyncOperationCompleted));
-        }
-
-        static internal Exception CommandTextRequired(string method) {
-            return InvalidOperation(Res.GetString(Res.ADP_CommandTextRequired, method));
-        }
-
-        static internal InvalidOperationException ConnectionRequired(string method) {
-            return InvalidOperation(Res.GetString(Res.ADP_ConnectionRequired, method));
-        }
-        static internal InvalidOperationException OpenConnectionRequired(string method, ConnectionState state) {
-            return InvalidOperation(Res.GetString(Res.ADP_OpenConnectionRequired, method, ADP.ConnectionStateMsg(state)));
         }
 
         //
@@ -432,20 +406,6 @@ namespace System.Data.Common
             return Argument(SR.Format(SR.ADP_CollectionIsNotParent, parameterType.Name, collection.GetType().Name));
         }
 
-        static internal Exception ConnectionAlreadyOpen(ConnectionState state) {
-            return InvalidOperation(SR.Format(SR.ADP_ConnectionAlreadyOpen, ADP.ConnectionStateMsg(state)));
-        }
-
-        internal enum ConnectionError {
-            BeginGetConnectionReturnsNull,
-            GetConnectionReturnsNull,
-            ConnectionOptionsMissing,
-            CouldNotSwitchToClosedPreviouslyOpenedState,
-        }
-
-        static internal Exception InternalConnectionError(ConnectionError internalError) {
-            return InvalidOperation(SR.Format(SR.ADP_InternalConnectionError, (int)internalError));
-        }
 
         internal enum InternalErrorCode
         {

@@ -42,7 +42,7 @@ namespace System.Data.ProviderBase {
                 DangerousAddRef(ref mustRelease);
                 
                 IntPtr handle = DangerousGetHandle();
-                value = System.Runtime.Remoting.Services.EnterpriseServicesHelper.WrapIUnknownWithComObject(handle);
+                value = Marshal.GetObjectForIUnknown(handle);
             }
             finally {
                 if (mustRelease) {

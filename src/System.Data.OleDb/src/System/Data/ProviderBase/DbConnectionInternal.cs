@@ -6,26 +6,24 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using SysTx = System.Transactions;
 
 namespace System.Data.ProviderBase
 {
     internal abstract partial class DbConnectionInternal
     {
-        
-  //      protected abstract void Activate();
-
-        internal void ActivateConnection()
+        internal void ActivateConnection(SysTx.Transaction transaction)
         {
             // Internal method called from the connection pooler so we don't expose
             // the Activate method publicly.
-
 #if DEBUG
-
             int activateCount = Interlocked.Increment(ref _activateCount);
             Debug.Assert(1 == activateCount, "activated multiple times?");
 #endif // DEBUG
 
-            Activate();
+            Activate(transaction);
+
+            PerformanceCounters.NumberOfActiveConnections.Increment();
         }
 
         internal virtual void CloseConnection(DbConnection owningObject, DbConnectionFactory connectionFactory)
@@ -87,6 +85,8 @@ namespace System.Data.ProviderBase
 
                         DbConnectionPool connectionPool = Pool;
 
+                        // Detach from enlisted transactions that are no longer active on close
+                        DetachCurrentTransactionIfEnded();
 
                         // The singleton closed classes won't have owners and
                         // connection pools, and we won't want to put them back
@@ -102,6 +102,8 @@ namespace System.Data.ProviderBase
                         {
                             Deactivate();   // ensure we de-activate non-pooled connections, or the data readers and transactions may not get cleaned up...
 
+                            PerformanceCounters.HardDisconnectsPerSecond.Increment();
+
                             // To prevent an endless recursion, we need to clear
                             // the owning object before we call dispose so that
                             // we can't get here a second time... Ordinarily, I
@@ -111,7 +113,15 @@ namespace System.Data.ProviderBase
                             // certain.
                             _owningObject.Target = null;
 
-                            Dispose();
+                            if (IsTransactionRoot)
+                            {
+                                SetInStasis();
+                            }
+                            else
+                            {
+                                PerformanceCounters.NumberOfNonPooledConnections.Decrement();
+                                Dispose();
+                            }
                         }
                     }
                     finally
@@ -128,7 +138,18 @@ namespace System.Data.ProviderBase
         public virtual void Dispose()
         {
             _connectionPool = null;
+            _performanceCounters = null;
             _connectionIsDoomed = true;
+            _enlistedTransactionOriginal = null; // should not be disposed
+
+            // Dispose of the _enlistedTransaction since it is a clone
+            // of the original reference.
+            // VSDD 780271 - _enlistedTransaction can be changed by another thread (TX end event)
+            SysTx.Transaction enlistedTransaction = Interlocked.Exchange(ref _enlistedTransaction, null);
+            if (enlistedTransaction != null)
+            {
+                enlistedTransaction.Dispose();
+            }
         }
     }
 }

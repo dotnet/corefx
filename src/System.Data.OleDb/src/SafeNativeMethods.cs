@@ -28,10 +28,11 @@ namespace System.Data.Common {
         [ResourceExposure(ResourceScope.None)]
         static internal extern int GetUserDefaultLCID();
 
-        [DllImport(Interop.Libraries.Kernel32, PreserveSig=true)]
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [ResourceExposure(ResourceScope.None)]
-        static internal extern void ZeroMemory(IntPtr dest, IntPtr length);
+        internal static void ZeroMemory(IntPtr ptr, int length)
+        {
+            var zeroes = new byte[length];
+            Marshal.Copy(zeroes, 0, ptr, length);
+        }
 
         // <WARNING>
         // Using the int versions of the Increment() and Decrement() methods is correct.
@@ -140,7 +141,5 @@ namespace System.Data.Common {
                 SafeNativeMethods.SetErrorInfo(0, ADP.PtrZero);
             }
         }
-
-
     }
 }

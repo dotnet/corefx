@@ -119,9 +119,6 @@ namespace System.Data.ProviderBase {
                         }
                     }
                 }
-
-                if (null != transactedObject) {
-                }
                 return transactedObject;
             }
 
@@ -443,6 +440,7 @@ namespace System.Data.ProviderBase {
                             DbConnectionPoolGroup connectionPoolGroup,
                             DbConnectionPoolIdentity identity,
                             DbConnectionPoolProviderInfo connectionPoolProviderInfo ) {
+            Debug.Assert(ADP.IsWindowsNT, "Attempting to construct a connection pool on Win9x?");
             Debug.Assert(null != connectionPoolGroup, "null connectionPoolGroup");
 
             if ((null != identity) && identity.IsRestricted) {
@@ -470,7 +468,10 @@ namespace System.Data.ProviderBase {
 
             _pooledDbAuthenticationContexts = new ConcurrentDictionary<DbConnectionPoolAuthenticationContextKey, DbConnectionPoolAuthenticationContext>(concurrencyLevel: 4 * Environment.ProcessorCount /* default value in ConcurrentDictionary*/,
                                                                                                                                                         capacity: 2);
-             _transactedConnectionPool = new TransactedConnectionPool(this);
+
+            if(ADP.IsPlatformNT5) {
+                _transactedConnectionPool = new TransactedConnectionPool(this);
+            }
 
             _poolCreateRequest = new WaitCallback(PoolCreateRequest); // used by CleanupCallback
             _state = State.Running;
@@ -713,45 +714,7 @@ namespace System.Data.ProviderBase {
             return (new Timer(new TimerCallback(this.CleanupCallback), null, _cleanupWait, _cleanupWait));
         }
 
-        private bool IsBlockingPeriodEnabled()
-        {
-            var poolGroupConnectionOptions = _connectionPoolGroup.ConnectionOptions as SqlConnectionString;
-            if (poolGroupConnectionOptions == null)
-            {
-                return true;
-            }
-
-            var policy = poolGroupConnectionOptions.PoolBlockingPeriod;
-
-            switch (policy)
-            {
-                case PoolBlockingPeriod.Auto:
-                {
-                    if (ADP.IsAzureSqlServerEndpoint(poolGroupConnectionOptions.DataSource))
-                    {
-                        return false; // in Azure it will be Disabled
-                    }
-                    else
-                    {
-                        return true; // in Non Azure, it will be Enabled
-                    }
-                }
-                case PoolBlockingPeriod.AlwaysBlock:
-                {
-                    return true; //Enabled
-                }
-                case PoolBlockingPeriod.NeverBlock:
-                {
-                    return false; //Disabled
-                }
-                default:
-                {
-                    //we should never get into this path.
-                    Debug.Fail("Unknown PoolBlockingPeriod. Please specify explicit results in above switch case statement.");
-                    return true;
-                }
-            }
-        }
+        private bool IsBlockingPeriodEnabled() => true;
 
         private DbConnectionInternal CreateObject(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection) {
             DbConnectionInternal newObj = null;
@@ -1009,15 +972,10 @@ namespace System.Data.ProviderBase {
         }
 
 
+        // TODO: move this to src/Common and integrate with SqlClient
+        // Note: OleDb connections are not passing through this code
         private Exception TryCloneCachedException()
-        // Cached exception can be of any type, so is not always cloneable.
-        // This functions clones SqlException 
-        // OleDb and Odbc connections are not passing throw this code
-        {   
-            if (_resError==null)
-                return null;
-            if (_resError.GetType()==typeof(SqlClient.SqlException))
-                return ((SqlClient.SqlException)_resError).InternalClone();
+        {
             return _resError;
         }
 
