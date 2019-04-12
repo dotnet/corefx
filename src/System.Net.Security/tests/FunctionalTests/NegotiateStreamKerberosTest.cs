@@ -267,7 +267,7 @@ namespace System.Net.Security.Tests
         }
 
         [OuterLoop]
-        [Theory]
+        // [Theory]
         // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
         [MemberData(nameof(GoodCredentialsData))]
         public async Task NegotiateStream_RemoteServerAuthentication_Success(object credentialObject)
