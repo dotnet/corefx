@@ -70,18 +70,18 @@ namespace System.Text.Json.Serialization.Tests
 
             // Verify default value.
             string json = JsonSerializer.ToString(obj);
-            Assert.DoesNotContain("\r", json);
+            Assert.DoesNotContain(Environment.NewLine, json);
 
             // Verify default value on options.
             var options = new JsonSerializerOptions();
             json = JsonSerializer.ToString(obj, options);
-            Assert.DoesNotContain("\r", json);
+            Assert.DoesNotContain(Environment.NewLine, json);
 
             // Change the value on options.
             options = new JsonSerializerOptions();
             options.WriteIndented = true;
             json = JsonSerializer.ToString(obj, options);
-            Assert.Contains("\r", json);
+            Assert.Contains(Environment.NewLine, json);
         }
 
         [Fact]

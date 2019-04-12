@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -14,10 +15,12 @@ namespace System.Text.Json.Serialization.Tests
             var obj = new ClassWithNoSetter();
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(@"{""MyString"":""DefaultValue""}", json);
+            Assert.Contains(@"""MyString"":""DefaultValue""", json);
+            Assert.Contains(@"""MyInts"":[1,2]", json);
 
-            ClassWithNoSetter objCopy = JsonSerializer.Parse<ClassWithNoSetter>(json);
-            Assert.Equal("DefaultValue", objCopy.MyString);
+            obj = JsonSerializer.Parse<ClassWithNoSetter>(@"{""MyString"":""IgnoreMe"",""MyInts"":[0]}");
+            Assert.Equal("DefaultValue", obj.MyString);
+            Assert.Equal(2, obj.MyInts.Length);
         }
 
         [Fact]
@@ -35,13 +38,14 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void NoGetter()
         {
-            var objNoSetter = new ClassWithNoSetter();
+            ClassWithNoGetter objWithNoGetter = JsonSerializer.Parse<ClassWithNoGetter>(
+                @"{""MyString"":""Hello"",""MyIntArray"":[0],""MyIntList"":[0]}");
 
-            string json = JsonSerializer.ToString(objNoSetter);
-            Assert.Equal(@"{""MyString"":""DefaultValue""}", json);
+            Assert.Equal("Hello", objWithNoGetter.GetMyString());
 
-            ClassWithNoGetter objNoGetter = JsonSerializer.Parse<ClassWithNoGetter>(json);
-            Assert.Equal("DefaultValue", objNoGetter.GetMyString());
+            // Currently we don't support setters without getters.
+            Assert.Equal(0, objWithNoGetter.GetMyIntArray().Length);
+            Assert.Equal(0, objWithNoGetter.GetMyIntList().Count);
         }
 
         [Fact]
@@ -66,16 +70,30 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void JsonIgnoreAttribute()
         {
+            // Verify default state.
             var obj = new ClassWithIgnoreAttributeProperty();
-            Assert.Equal(@"DefaultValue", obj.MyString);
+            Assert.Equal(@"MyString", obj.MyString);
+            Assert.Equal(@"MyStringWithIgnore", obj.MyStringWithIgnore);
+            Assert.Equal(2, obj.MyStringsWithIgnore.Length);
 
             // Verify serialize.
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(@"{}", json);
+            Assert.Contains(@"""MyString""", json);
+            Assert.DoesNotContain(@"MyStringWithIgnore", json);
+            Assert.DoesNotContain(@"MyStringsWithIgnore", json);
 
-            // Verify deserialize is also ignored.
-            obj = JsonSerializer.Parse<ClassWithIgnoreAttributeProperty>(@"{""MyString"":""Hello""}");
-            Assert.Equal(@"DefaultValue", obj.MyString);
+            // Verify deserialize default.
+            obj = JsonSerializer.Parse<ClassWithIgnoreAttributeProperty>(@"{}");
+            Assert.Equal(@"MyString", obj.MyString);
+            Assert.Equal(@"MyStringWithIgnore", obj.MyStringWithIgnore);
+            Assert.Equal(2, obj.MyStringsWithIgnore.Length);
+
+            // Verify deserialize ignores the json for MyStringWithIgnore and MyStringsWithIgnore.
+            obj = JsonSerializer.Parse<ClassWithIgnoreAttributeProperty>(
+                @"{""MyString"":""Hello"", ""MyStringWithIgnore"":""IgnoreMe"", ""MyStringsWithIgnore"":[""IgnoreMe""]}");
+            Assert.Contains(@"Hello", obj.MyString);
+            Assert.Equal(@"MyStringWithIgnore", obj.MyStringWithIgnore);
+            Assert.Equal(2, obj.MyStringsWithIgnore.Length);
         }
 
         // Todo: add tests with missing object property and missing collection property.
@@ -100,14 +118,18 @@ namespace System.Text.Json.Serialization.Tests
             public ClassWithNoSetter()
             {
                 MyString = "DefaultValue";
+                MyInts = new int[] { 1, 2 };
             }
 
             public string MyString { get; }
+            public int[] MyInts { get; }
         }
 
         public class ClassWithNoGetter
         {
             string _myString = "";
+            int[] _myIntArray = new int[] { };
+            List<int> _myIntList = new List<int> { };
 
             public string MyString
             {
@@ -117,9 +139,35 @@ namespace System.Text.Json.Serialization.Tests
                 }
             }
 
+            public int[] MyIntArray
+            {
+                set
+                {
+                    _myIntArray = value;
+                }
+            }
+
+            public List<int> MyList
+            {
+                set
+                {
+                    _myIntList = value;
+                }
+            }
+
             public string GetMyString()
             {
                 return _myString;
+            }
+
+            public int[] GetMyIntArray()
+            {
+                return _myIntArray;
+            }
+
+            public List<int> GetMyIntList()
+            {
+                return _myIntList;
             }
         }
 
@@ -127,11 +175,18 @@ namespace System.Text.Json.Serialization.Tests
         {
             public ClassWithIgnoreAttributeProperty()
             {
-                MyString = "DefaultValue";
+                MyString = "MyString";
+                MyStringWithIgnore = "MyStringWithIgnore";
+                MyStringsWithIgnore = new string[] { "1", "2" };
             }
 
             [JsonIgnore]
+            public string MyStringWithIgnore { get; set; }
+
             public string MyString { get; set; }
+
+            [JsonIgnore]
+            public string[] MyStringsWithIgnore { get; set; }
         }
     }
 }

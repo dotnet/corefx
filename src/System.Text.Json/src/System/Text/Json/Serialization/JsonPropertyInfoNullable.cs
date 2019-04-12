@@ -36,7 +36,7 @@ namespace System.Text.Json.Serialization
                 JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
                 propertyInfo.ReadEnumerable(tokenType, options, ref state, ref reader);
             }
-            else if (UseSetter)
+            else if (ShouldDeserialize)
             {
                 if (ValueConverter != null)
                 {
@@ -82,7 +82,7 @@ namespace System.Text.Json.Serialization
                 JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
                 propertyInfo.WriteEnumerable(options, ref current, ref writer);
             }
-            else if (UseGetter)
+            else if (ShouldSerialize)
             {
                 TProperty? value;
                 if (_isPropertyPolicy)

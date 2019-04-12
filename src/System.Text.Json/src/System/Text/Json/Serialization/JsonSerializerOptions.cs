@@ -34,8 +34,8 @@ namespace System.Text.Json.Serialization
 
         /// <summary>
         /// Defines whether an extra comma at the end of a list of JSON values in an object or array
-        /// are allowed (and ignored) within the JSON payload being read.
-        /// By default, it's set to false, and the reader will throw a <exception cref="JsonReaderException"/> if it encounters a trailing comma.
+        /// is allowed (and ignored) within the JSON payload being read.
+        /// By default, it's set to false, and <exception cref="JsonReaderException"/> is thrown if a trailing comma is encountered.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
@@ -142,8 +142,8 @@ namespace System.Text.Json.Serialization
         }
 
         /// <summary>
-        /// Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
-        /// By default the reader will throw a <exception cref="JsonReaderException"/> if it encounters a comment.
+        /// Defines how the comments are handled during deserialization.
+        /// By default <exception cref="JsonReaderException"/> is thrown if a comment is encountered.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
@@ -162,7 +162,7 @@ namespace System.Text.Json.Serialization
         }
 
         /// <summary>
-        /// Defines whether the <see cref="Utf8JsonWriter"/> should pretty print the JSON which includes:
+        /// Defines whether JSON should pretty print which includes:
         /// indenting nested JSON tokens, adding new lines, and adding white space between property names and values.
         /// By default, the JSON is written without any extra white space.
         /// </summary>
