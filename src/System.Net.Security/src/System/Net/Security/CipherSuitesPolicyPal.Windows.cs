@@ -8,11 +8,11 @@ namespace System.Net.Security
 {
     internal class CipherSuitesPolicyPal
     {
-        public CipherSuitesPolicyPal(IEnumerable<TlsCipherSuite> allowedCipherSuites)
+        internal CipherSuitesPolicyPal(IEnumerable<TlsCipherSuite> allowedCipherSuites)
         {
             throw new PlatformNotSupportedException(SR.net_ssl_ciphersuites_policy_not_supported);
         }
 
-        public IEnumerable<TlsCipherSuite> GetCipherSuites() => null;
+        internal IEnumerable<TlsCipherSuite> GetCipherSuites() => null;
     }
 }

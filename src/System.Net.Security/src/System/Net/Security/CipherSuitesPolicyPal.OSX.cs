@@ -11,12 +11,12 @@ namespace System.Net.Security
     {
         internal uint[] TlsCipherSuites { get; private set; }
 
-        public CipherSuitesPolicyPal(IEnumerable<TlsCipherSuite> allowedCipherSuites)
+        internal CipherSuitesPolicyPal(IEnumerable<TlsCipherSuite> allowedCipherSuites)
         {
             TlsCipherSuites = allowedCipherSuites.Select((cs) => (uint)cs).ToArray();
         }
 
-        public IEnumerable<TlsCipherSuite> GetCipherSuites()
+        internal IEnumerable<TlsCipherSuite> GetCipherSuites()
         {
             return TlsCipherSuites.Select((cs) => (TlsCipherSuite)cs);
         }

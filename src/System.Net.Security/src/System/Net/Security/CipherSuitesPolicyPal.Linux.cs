@@ -28,9 +28,9 @@ namespace System.Net.Security
         private byte[] _tls13CipherSuites;
         private List<TlsCipherSuite> _tlsCipherSuites = new List<TlsCipherSuite>();
 
-        public IEnumerable<TlsCipherSuite> GetCipherSuites() => _tlsCipherSuites;
+        internal IEnumerable<TlsCipherSuite> GetCipherSuites() => _tlsCipherSuites;
 
-        public CipherSuitesPolicyPal(IEnumerable<TlsCipherSuite> allowedCipherSuites)
+        internal CipherSuitesPolicyPal(IEnumerable<TlsCipherSuite> allowedCipherSuites)
         {
             if (!Interop.Ssl.Tls13Supported)
             {
@@ -79,7 +79,7 @@ namespace System.Net.Security
             }
         }
 
-        public static bool ShouldOptOutOfTls13(CipherSuitesPolicy policy, EncryptionPolicy encryptionPolicy)
+        internal static bool ShouldOptOutOfTls13(CipherSuitesPolicy policy, EncryptionPolicy encryptionPolicy)
         {
             // if TLS 1.3 was explicitly requested the underlying code will throw
             // if default option (SslProtocols.None) is used we will opt-out of TLS 1.3
@@ -106,7 +106,7 @@ namespace System.Net.Security
             return policy.Pal._tls13CipherSuites.Length == 1;
         }
 
-        public static bool ShouldOptOutOfLowerThanTls13(CipherSuitesPolicy policy, EncryptionPolicy encryptionPolicy)
+        internal static bool ShouldOptOutOfLowerThanTls13(CipherSuitesPolicy policy, EncryptionPolicy encryptionPolicy)
         {
             if (policy == null)
             {
@@ -126,10 +126,10 @@ namespace System.Net.Security
         private static bool IsOnlyTls13(SslProtocols protocols)
             => protocols == SslProtocols.Tls13;
 
-        public static bool WantsTls13(SslProtocols protocols)
+        internal static bool WantsTls13(SslProtocols protocols)
             => protocols == SslProtocols.None || (protocols & SslProtocols.Tls13) != 0;
 
-        public static byte[] GetOpenSslCipherList(
+        internal static byte[] GetOpenSslCipherList(
             CipherSuitesPolicy policy,
             SslProtocols protocols,
             EncryptionPolicy encryptionPolicy)
@@ -153,7 +153,7 @@ namespace System.Net.Security
             return policy.Pal._cipherSuites;
         }
 
-        public static byte[] GetOpenSslCipherSuites(
+        internal static byte[] GetOpenSslCipherSuites(
             CipherSuitesPolicy policy,
             SslProtocols protocols,
             EncryptionPolicy encryptionPolicy)
