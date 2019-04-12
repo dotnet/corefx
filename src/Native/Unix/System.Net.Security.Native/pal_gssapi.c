@@ -275,6 +275,44 @@ uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
     return majorStatus;
 }
 
+uint32_t NetSecurityNative_GetUser(uint32_t* minorStatus,
+                                   GssCtxId* contextHandle,
+                                   PAL_GssBuffer* outBuffer)
+{
+    assert(minorStatus != NULL);
+    assert(contextHandle != NULL);
+    assert(outBuffer != NULL);
+
+    gss_name_t srcName = GSS_C_NO_NAME;
+
+    uint32_t majorStatus = gss_inquire_context(minorStatus,
+                                               contextHandle,
+                                               &srcName,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL,
+                                               NULL);
+
+    if (majorStatus == GSS_S_COMPLETE)
+    {
+        GssBuffer gssBuffer = {.length = 0, .value = NULL};
+        majorStatus = gss_display_name(minorStatus, srcName, &gssBuffer, NULL);
+        if (majorStatus == GSS_S_COMPLETE)
+        {
+            NetSecurityNative_MoveBuffer(&gssBuffer, outBuffer);
+        }
+    }
+
+    if (srcName != NULL)
+    {
+        majorStatus = gss_release_name(minorStatus, &srcName);
+    }
+
+    return majorStatus;
+}
+
 uint32_t NetSecurityNative_ReleaseCred(uint32_t* minorStatus, GssCredId** credHandle)
 {
     assert(minorStatus != NULL);

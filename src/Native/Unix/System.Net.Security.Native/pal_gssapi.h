@@ -168,3 +168,10 @@ DLLEXPORT uint32_t NetSecurityNative_InitiateCredWithPassword(uint32_t* minorSta
 Shims the gss_indicate_mechs method to detect if NTLM mech is installed.
 */
 DLLEXPORT uint32_t NetSecurityNative_IsNtlmInstalled(void);
+
+/*
+Shims gss_inquire_context and gss_display_name to get the remote user principal name.
+*/
+DLLEXPORT uint32_t NetSecurityNative_GetUser(uint32_t* minorStatus,
+                                             GssCtxId* contextHandle,
+                                             PAL_GssBuffer* outBuffer);

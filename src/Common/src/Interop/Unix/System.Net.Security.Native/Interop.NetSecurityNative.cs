@@ -98,6 +98,12 @@ internal static partial class Interop
             out Status minorStatus,
             ref IntPtr contextHandle);
 
+        [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_GetUser")]
+        internal static extern Status GetUser(
+            out Status minorStatus,
+            SafeGssContextHandle acceptContextHandle,
+            ref GssBuffer token);
+
         [DllImport(Interop.Libraries.NetSecurityNative, EntryPoint="NetSecurityNative_Wrap")]
         private static extern Status Wrap(
             out Status minorStatus,

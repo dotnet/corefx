@@ -332,7 +332,7 @@ namespace System.Net.Security.Tests
                     Assert.Equal(mutualAuthenitcated, serverAuth.IsMutuallyAuthenticated);
 
                     Assert.Equal(expectedAuthenticationType, serverAuth.RemoteIdentity.AuthenticationType);
-                    Assert.Equal(serverSPN, serverAuth.RemoteIdentity.Name);
+                    Assert.Equal("Administrator@CRKERBEROS.COM", serverAuth.RemoteIdentity.Name);
 
                     // Send a message to the server. Encode the test data into a byte array.
                     byte[] message = Encoding.UTF8.GetBytes("Hello from the server.");

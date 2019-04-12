@@ -3,14 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Security;
-using System.Security.Principal;
-using System.Threading;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
+using System.Security.Principal;
+using System.Text;
+using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Net.Security
@@ -204,6 +205,32 @@ namespace System.Net.Security
             }
 
             return status == Interop.NetSecurityNative.Status.GSS_S_COMPLETE;
+        }
+
+        private static string GssGetUser(
+            ref SafeGssContextHandle context)
+        {
+            Interop.NetSecurityNative.GssBuffer token = default(Interop.NetSecurityNative.GssBuffer);
+
+            try
+            {
+
+                Interop.NetSecurityNative.Status minorStatus;
+                var status = Interop.NetSecurityNative.GetUser(out minorStatus,
+                                                               context,
+                                                               ref token);
+
+                if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
+                {
+                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
+                }
+
+                return Encoding.ASCII.GetString(token.ToByteArray());
+            }
+            finally
+            {
+                token.Dispose();
+            }
         }
 
         private static SecurityStatusPal EstablishSecurityContext(
@@ -404,6 +431,27 @@ namespace System.Net.Security
             {
                 if (NetEventSource.IsEnabled) NetEventSource.Error(null, ex);
                 return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
+            }
+        }
+
+        internal static string GetUser(
+            ref SafeDeleteContext securityContext)
+        {
+            if (securityContext == null)
+            {
+                throw new ArgumentNullException(nameof(securityContext));
+            }
+
+            SafeDeleteNegoContext negoContext = (SafeDeleteNegoContext)securityContext;
+            try
+            {
+                SafeGssContextHandle contextHandle = negoContext.GssContext;
+                return GssGetUser(ref contextHandle);
+            }
+            catch (Exception ex)
+            {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(null, ex);
+                throw;
             }
         }
 
