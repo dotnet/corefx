@@ -350,10 +350,12 @@ int32_t CryptoNative_SetCiphers(SSL_CTX* ctx, const char* cipherList, const char
     }
 
     // for TLS 1.3
+#if HAVE_OPENSSL_SET_CIPHERSUITES
     if (CryptoNative_Tls13Supported() && cipherSuites != NULL)
     {
         ret &= SSL_CTX_set_ciphersuites(ctx, cipherSuites);
     }
+#endif
 
     return ret;
 }
