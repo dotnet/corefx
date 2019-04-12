@@ -899,14 +899,7 @@ namespace System.Net.Http
                 WriteIndexedHeader(StaticTable.MethodGet, normalizedMethod.Method);
             }
 
-            if (_stream is SslStream)
-            {
-                WriteIndexedHeader(StaticTable.SchemeHttps);
-            }
-            else
-            {
-                WriteIndexedHeader(StaticTable.SchemeHttp);
-            }
+            WriteIndexedHeader(_stream is SslStream ? StaticTable.SchemeHttps : StaticTable.SchemeHttp);
 
             if (request.HasHeaders && request.Headers.Host != null)
             {

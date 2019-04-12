@@ -18,6 +18,7 @@ namespace System.Net.Http.Functional.Tests
 
         public static bool SupportsAlpn => PlatformDetection.SupportsAlpn;
 
+        [Fact]
         public async Task Http2_ClientPreface_Sent()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -31,6 +32,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
         public async Task Http2_InitialSettings_SentAndAcked()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -62,6 +64,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
         public async Task Http2_DataSentBeforeServerPreface_ProtocolError()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -79,6 +82,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
         public async Task Http2_NoResponseBody_Success()
         {
             using (var server = Http2LoopbackServer.CreateServer())

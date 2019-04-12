@@ -28,7 +28,7 @@ namespace System.Net.Http
         private readonly int _port;
         private readonly Uri _proxyUri;
         internal readonly byte[] _encodedAuthorityHostHeader;
-        
+
         /// <summary>List of idle connections stored in the pool.</summary>
         private readonly List<CachedConnection> _idleConnections = new List<CachedConnection>();
         /// <summary>The maximum number of connections allowed to be associated with the pool.</summary>
@@ -77,7 +77,7 @@ namespace System.Net.Http
                     Debug.Assert(port != 0);
                     Debug.Assert(sslHostName == null);
                     Debug.Assert(proxyUri == null);
-                    _http2Enabled = _poolManager.Settings._allowPlainHttp2;
+                    _http2Enabled = _poolManager.Settings._allowUnencryptedHttp2;
                     break;
 
                 case HttpConnectionKind.Https:
