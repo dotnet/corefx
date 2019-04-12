@@ -103,12 +103,12 @@ namespace Microsoft.VisualBasic
     public sealed partial class ErrObject
     {
         internal ErrObject() { }
+        public void Clear() { }
+        public string Description { get { throw null; } set { } }
         public int Erl { get { throw null; } }
+        public System.Exception GetException() { throw null; }
         public int LastDllError { get { throw null; } }
         public int Number { get { throw null; } set { } }
-        public string Description { get { throw null; } set { } }
-        public void Clear() { }
-        public System.Exception GetException() { throw null; }
         public void Raise(int Number, object Source = null, object Description = null, object HelpFile = null, object HelpContext = null) { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
@@ -478,8 +478,8 @@ namespace Microsoft.VisualBasic.CompilerServices
     public sealed partial class ProjectData
     {
         internal ProjectData() { }
-        public static System.Exception CreateProjectError(int hr) { throw null; }
         public static void ClearProjectError() { }
+        public static System.Exception CreateProjectError(int hr) { throw null; }
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }

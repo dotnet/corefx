@@ -8,9 +8,6 @@ Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 
 Imports System
 Imports System.Runtime.InteropServices
-Imports System.Security
-Imports System.Security.Permissions
-Imports System.Runtime.ConstrainedExecution
 
 Namespace Microsoft.VisualBasic
     
@@ -126,25 +123,15 @@ Namespace Microsoft.VisualBasic
         ''' any On Error statement.
         ''' </summary>
         ''' <remarks></remarks>
-        <SecuritySafeCritical()>
-        <ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)>
         Public Sub Clear()
-
-            ' The Try/Finally and constrained regions calls guarantee success under high
-            ' stress conditions by enabling eager jitting of the finally block
-
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
-            Try
-            Finally
-                'CONSIDER:  do we even care about CLEARING the fields if clearing the flags are enough (aside from m_curException)?
-                m_curException = Nothing
-                m_curNumber = 0
-                m_curDescription = ""
-                m_curErl = 0
-                m_NumberIsSet = False
-                m_DescriptionIsSet = False
-                m_ClearOnCapture = True
-            End Try
+            'CONSIDER:  do we even care about CLEARING the fields if clearing the flags are enough (aside from m_curException)?
+            m_curException = Nothing
+            m_curNumber = 0
+            m_curDescription = ""
+            m_curErl = 0
+            m_NumberIsSet = False
+            m_DescriptionIsSet = False
+            m_ClearOnCapture = True
         End Sub
 
         ''' <summary>
@@ -182,7 +169,6 @@ Namespace Microsoft.VisualBasic
         End Sub
 
         ReadOnly Property LastDllError() As Integer
-            <SecurityCritical()>
             Get
                 Return Marshal.GetLastWin32Error()
             End Get
@@ -209,39 +195,21 @@ Namespace Microsoft.VisualBasic
             Return e
         End Function
 
-        <SecurityCritical()>
-        <ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)>
         Friend Overloads Sub CaptureException(ByVal ex As Exception)
-
-            ' The Try/Finally and constrained regions calls guarantee success under high
-            ' stress conditions by enabling eager jitting of the finally block
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
-
-            Try
-            Finally
-                'if we've already captured this exception, then we're done
-                If ex IsNot m_curException Then
-                    If m_ClearOnCapture Then
-                        Me.Clear()
-                    Else
-                        m_ClearOnCapture = True   'False only used once - set this flag back to the default
-                    End If
-                    m_curException = ex
+            'if we've already captured this exception, then we're done
+            If ex IsNot m_curException Then
+                If m_ClearOnCapture Then
+                    Me.Clear()
+                Else
+                    m_ClearOnCapture = True   'False only used once - set this flag back to the default
                 End If
-            End Try
+                m_curException = ex
+            End If
         End Sub
 
-        <SecurityCritical()>
-        <ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)>
         Friend Overloads Sub CaptureException(ByVal ex As Exception, ByVal lErl As Integer)
-
-            ' The Try/Finally and constrained regions calls guarantee success under high stress conditions by enabling eager jitting of the finally block
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
-            Try
-            Finally
-                CaptureException(ex)
-                m_curErl = lErl  'This is the only place where the line number can be set
-            End Try
+            CaptureException(ex)
+            m_curErl = lErl  'This is the only place where the line number can be set
         End Sub
 
         Private Function MapExceptionToNumber(ByVal e As Exception) As Integer

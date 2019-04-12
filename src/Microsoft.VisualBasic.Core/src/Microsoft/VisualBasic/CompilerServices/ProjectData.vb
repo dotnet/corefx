@@ -3,8 +3,6 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports System
-Imports System.Security
-Imports System.Runtime.ConstrainedExecution
 
 Namespace Global.Microsoft.VisualBasic.CompilerServices
     <Global.System.Diagnostics.DebuggerNonUserCode()>
@@ -63,16 +61,8 @@ Namespace Global.Microsoft.VisualBasic.CompilerServices
         ''' </summary>
         ''' <param name="ex"></param>
         ''' <remarks></remarks>
-        <SecuritySafeCritical()>
-        <ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)>
         Public Overloads Shared Sub SetProjectError(ByVal ex As Exception)
-            ' The Try/Finally and constrained regions calls guarantee success under high
-            ' stress conditions by enabling eager jitting of the finally block
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
-            Try
-            Finally
-                Err.CaptureException(ex)
-            End Try
+            Err.CaptureException(ex)
         End Sub
 
         ''' <summary>
@@ -93,28 +83,12 @@ Namespace Global.Microsoft.VisualBasic.CompilerServices
         ''' <param name="ex"></param>
         ''' <param name="lErl"></param>
         ''' <remarks></remarks>
-        <SecuritySafeCritical()>
-        <ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)>
         Public Overloads Shared Sub SetProjectError(ByVal ex As Exception, ByVal lErl As Integer)
-            ' The Try/Finally and constrained regions calls guarantee success under high
-            ' stress conditions by enabling eager jitting of the finally block
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
-            Try
-            Finally
-                Err.CaptureException(ex, lErl)
-            End Try
+            Err.CaptureException(ex, lErl)
         End Sub
 
-        <SecuritySafeCritical()>
-        <ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)>
         Public Shared Sub ClearProjectError()
-            ' The Try/Finally and constrained regions calls guarantee success under high
-            ' stress conditions by enabling eager jitting of the finally block
-            System.Runtime.CompilerServices.RuntimeHelpers.PrepareConstrainedRegions()
-            Try
-            Finally
-                Err.Clear()
-            End Try
+            Err.Clear()
         End Sub
     End Class
 End Namespace
