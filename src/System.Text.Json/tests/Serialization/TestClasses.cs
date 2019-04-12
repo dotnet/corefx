@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -57,6 +58,12 @@ namespace System.Text.Json.Serialization.Tests
         public DateTime[] MyDateTimeArray { get; set; }
         public DateTimeOffset[] MyDateTimeOffsetArray { get; set; }
         public SampleEnum[] MyEnumArray { get; set; }
+        public List<string> MyStringList { get; set; }
+        public IEnumerable<string> MyStringIEnumerableT { get; set; }
+        public IList<string> MyStringIListT { get; set; }
+        public ICollection<string> MyStringICollectionT { get; set; }
+        public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
+        public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
 
         public static readonly string s_json =
                 @"{" +
@@ -95,7 +102,13 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDecimalArray"" : [3.3]," +
                 @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
                 @"""MyDateTimeOffsetArray"" : [""2019-01-30T12:01:02.0000000+01:00""]," +
-                @"""MyEnumArray"" : [2]" + // int by default
+                @"""MyEnumArray"" : [2]," + // int by default
+                @"""MyStringList"" : [""Hello""]," +
+                @"""MyStringIEnumerableT"" : [""Hello""]," +
+                @"""MyStringIListT"" : [""Hello""]," +
+                @"""MyStringICollectionT"" : [""Hello""]," +
+                @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
+                @"""MyStringIReadOnlyListT"" : [""Hello""]" +
                 @"}";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
@@ -139,6 +152,13 @@ namespace System.Text.Json.Serialization.Tests
             MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
             MyDateTimeOffsetArray = new DateTimeOffset[] { new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)) };
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
+
+            MyStringList = new List<string>() { "Hello" };
+            MyStringIEnumerableT = new string[] { "Hello" };
+            MyStringIListT = new string[] { "Hello" };
+            MyStringICollectionT = new string[] { "Hello" };
+            MyStringIReadOnlyCollectionT = new string[] { "Hello" };
+            MyStringIReadOnlyListT = new string[] { "Hello" };
         }
 
         public void Verify()
@@ -180,6 +200,13 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTimeArray[0]);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffsetArray[0]);
             Assert.Equal(SampleEnum.Two, MyEnumArray[0]);
+
+            Assert.Equal("Hello", MyStringList[0]);
+            Assert.Equal("Hello", MyStringIEnumerableT.First());
+            Assert.Equal("Hello", MyStringIListT[0]);
+            Assert.Equal("Hello", MyStringICollectionT.First());
+            Assert.Equal("Hello", MyStringIReadOnlyCollectionT.First());
+            Assert.Equal("Hello", MyStringIReadOnlyListT[0]);
         }
     }
 
@@ -219,6 +246,12 @@ namespace System.Text.Json.Serialization.Tests
         public object MyDoubleArray { get; set; }
         public object MyDateTimeArray { get; set; }
         public object MyEnumArray { get; set; }
+        public object MyStringList { get; set; }
+        public object MyStringIEnumerableT { get; set; }
+        public object MyStringIListT { get; set; }
+        public object MyStringICollectionT { get; set; }
+        public object MyStringIReadOnlyCollectionT { get; set; }
+        public object MyStringIReadOnlyListT { get; set; }
 
         public static readonly string s_json =
                 @"{" +
@@ -255,7 +288,13 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDoubleArray"" : [2.2]," +
                 @"""MyDecimalArray"" : [3.3]," +
                 @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
-                @"""MyEnumArray"" : [2]" + // int by default
+                @"""MyEnumArray"" : [2]," + // int by default
+                @"""MyStringList"" : [""Hello""]," +
+                @"""MyStringIEnumerableT"" : [""Hello""]," +
+                @"""MyStringIListT"" : [""Hello""]," +
+                @"""MyStringICollectionT"" : [""Hello""]," +
+                @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
+                @"""MyStringIReadOnlyListT"" : [""Hello""]" +
                 @"}";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
@@ -297,6 +336,13 @@ namespace System.Text.Json.Serialization.Tests
             MyDecimalArray = new decimal[] { 3.3m };
             MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
+
+            MyStringList = new List<string>() { "Hello" };
+            MyStringIEnumerableT = new string[] { "Hello" };
+            MyStringIListT = new string[] { "Hello" };
+            MyStringICollectionT = new string[] { "Hello" };
+            MyStringIReadOnlyCollectionT = new string[] { "Hello" };
+            MyStringIReadOnlyListT = new string[] { "Hello" };
         }
 
         public void Verify()
@@ -336,6 +382,13 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2.2d, ((double[])MyDoubleArray)[0]);
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), ((DateTime[])MyDateTimeArray)[0]);
             Assert.Equal(SampleEnum.Two, ((SampleEnum[])MyEnumArray)[0]);
+
+            Assert.Equal("Hello", ((List<string>)MyStringList)[0]);
+            Assert.Equal("Hello", ((IEnumerable<string>)MyStringIEnumerableT).First());
+            Assert.Equal("Hello", ((IList<string>)MyStringIListT)[0]);
+            Assert.Equal("Hello", ((ICollection<string>)MyStringICollectionT).First());
+            Assert.Equal("Hello", ((IReadOnlyCollection<string>)MyStringIReadOnlyCollectionT).First());
+            Assert.Equal("Hello", ((IReadOnlyList<string>)MyStringIReadOnlyListT)[0]);
         }
     }
 
