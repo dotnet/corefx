@@ -22,6 +22,12 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Interop.Libraries.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.UNICODE_STRING.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.OBJECT_ATTRIBUTES.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.OBJECT_ATTRIBUTES.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.TOKENS.cs">
       <Link>Common\Interop\Interop.TOKENS.cs</Link>
     </Compile>
@@ -39,9 +45,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.SECURITY_LOGON_SESSION_DATA.cs">
       <Link>Common\Interop\Interop.SECURITY_LOGON_SESSION_DATA.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\Interop.UNICODE_STRING.cs">
-      <Link>Common\Interop\Interop.UNICODE_STRING.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetCurrentProcess_IntPtr.cs">
       <Link>Common\Interop\Interop.GetCurrentProcess.cs</Link>
@@ -117,9 +120,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LSA_STRING.cs">
       <Link>Common\Interop\Windows\Advapi32\Interop.LSA_STRING.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.LSA_UNICODE_STRING.cs">
-      <Link>Common\Interop\Windows\Advapi32\Interop.LSA_UNICODE_STRING.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalFree.cs">
       <Link>Common\Interop\Interop.LocalFree.cs</Link>

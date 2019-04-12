@@ -12,19 +12,19 @@ internal static partial class Interop
     {
         [DllImport(Interop.Libraries.Advapi32, EntryPoint = "LsaOpenPolicy", SetLastError = true, CharSet = CharSet.Unicode)]
         private static extern uint LsaOpenPolicy(
-            ref LSA_UNICODE_STRING SystemName,
-            ref LSA_OBJECT_ATTRIBUTES ObjectAttributes,
+            ref UNICODE_STRING SystemName,
+            ref OBJECT_ATTRIBUTES ObjectAttributes,
             int AccessMask,
             out SafeLsaPolicyHandle PolicyHandle
         );
 
         internal static unsafe uint LsaOpenPolicy(
             string SystemName,
-            ref LSA_OBJECT_ATTRIBUTES Attributes,
+            ref OBJECT_ATTRIBUTES Attributes,
             int AccessMask,
             out SafeLsaPolicyHandle PolicyHandle)
         {
-            var systemNameUnicode = new LSA_UNICODE_STRING();
+            var systemNameUnicode = new UNICODE_STRING();
             if (SystemName != null)
             {
                 fixed (char* c = SystemName)
