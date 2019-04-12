@@ -355,6 +355,8 @@ int32_t CryptoNative_SetCiphers(SSL_CTX* ctx, const char* cipherList, const char
     {
         ret &= SSL_CTX_set_ciphersuites(ctx, cipherSuites);
     }
+#else
+    (void)cipherSuites;
 #endif
 
     return ret;
