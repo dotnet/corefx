@@ -172,7 +172,6 @@ namespace System.Net.Security
             out byte[] outputBuffer,
             out uint outFlags)
         {
-            // do we need to initalize this?
             if (context == null)
             {
                 context = new SafeGssContextHandle();
@@ -214,9 +213,7 @@ namespace System.Net.Security
 
             try
             {
-
-                Interop.NetSecurityNative.Status minorStatus;
-                var status = Interop.NetSecurityNative.GetUser(out minorStatus,
+                var status = Interop.NetSecurityNative.GetUser(out var minorStatus,
                                                                context,
                                                                ref token);
 
@@ -361,31 +358,9 @@ namespace System.Net.Security
             ref byte[] resultBlob,
             ref ContextFlagsPal contextFlags)
         {
-            // bool isNtlmOnly = credential.IsNtlmOnly;
-
             if (securityContext == null)
             {
-                /*
-                if (NetEventSource.IsEnabled)
-                {
-                    string protocol = isNtlmOnly ? "NTLM" : "SPNEGO";
-                    NetEventSource.Info(null, $"requested protocol = {protocol}, target = {targetName}");
-                }
-                */
                 securityContext = new SafeDeleteNegoContext((SafeFreeNegoCredentials)credentialsHandle);
-            }
-
-            if (credentialsHandle == null)
-            {
-                throw new ArgumentNullException(nameof(credentialsHandle));
-            }
-            if (securityContext == null)
-            {
-                throw new ArgumentNullException(nameof(securityContext));
-            }
-            if (incomingBlob == null)
-            {
-                throw new ArgumentNullException(nameof(incomingBlob));
             }
 
             SafeDeleteNegoContext negoContext = (SafeDeleteNegoContext)securityContext;
@@ -397,19 +372,7 @@ namespace System.Net.Security
                    incomingBlob,
                    out resultBlob,
                    out uint outputFlags);
-/*
-                if (done)
-                {
-                    if (NetEventSource.IsEnabled)
-                    {
-                        string protocol = isNtlmOnly ? "NTLM" : isNtlmUsed ? "SPNEGO-NTLM" : "SPNEGO-Kerberos";
-                        NetEventSource.Info(null, $"actual protocol = {protocol}");
-                    }
 
-                    // Populate protocol used for authentication
-                    negoContext.SetAuthenticationPackage(isNtlmUsed);
-                }
-*/
                 Debug.Assert(resultBlob != null, "Unexpected null buffer returned by GssApi");
                 Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
 
@@ -422,9 +385,11 @@ namespace System.Net.Security
 
                 contextFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop(
                     (Interop.NetSecurityNative.GssFlags)outputFlags, isServer: true);
+
                 SecurityStatusPalErrorCode errorCode = done ?
                     (negoContext.IsNtlmUsed && resultBlob.Length > 0 ? SecurityStatusPalErrorCode.OK : SecurityStatusPalErrorCode.CompleteNeeded) :
                     SecurityStatusPalErrorCode.ContinueNeeded;
+
                 return new SecurityStatusPal(errorCode);
             }
             catch (Exception ex)
@@ -434,14 +399,9 @@ namespace System.Net.Security
             }
         }
 
-        internal static string GetUser(
+        private static string GetUser(
             ref SafeDeleteContext securityContext)
         {
-            if (securityContext == null)
-            {
-                throw new ArgumentNullException(nameof(securityContext));
-            }
-
             SafeDeleteNegoContext negoContext = (SafeDeleteNegoContext)securityContext;
             try
             {
