@@ -114,7 +114,7 @@ namespace System
                 return;
             }
 
-            string timeZoneDisplayName;
+            string? timeZoneDisplayName;
             bool result = Interop.CallStringMethod(
                 (buffer, locale, id, type) =>
                 {
