@@ -2544,7 +2544,7 @@ namespace System
                     }
                     else
                     {
-                        for (ushort i = 0; i < host.Length; ++i)
+                        for (int i = 0; i < host.Length; ++i)
                         {
                             if ((_info.Offset.Host + i) >= _info.Offset.End ||
                                 host[i] != _string[_info.Offset.Host + i])
@@ -2661,7 +2661,7 @@ namespace System
                 else
                 {
                     host = CreateHostStringHelper(host, 0, (ushort)host.Length, ref flags, ref _info.ScopeId);
-                    for (ushort i = 0; i < host.Length; ++i)
+                    for (int i = 0; i < host.Length; ++i)
                     {
                         if ((_info.Offset.Host + i) >= _info.Offset.End || host[i] != _string[_info.Offset.Host + i])
                         {
@@ -3405,6 +3405,12 @@ namespace System
                     throw e;
                 }
 
+                if (_string.Length > ushort.MaxValue)
+                {
+                    UriFormatException e = GetException(ParsingError.SizeLimit);
+                    throw e;
+                }
+
                 length = (ushort)_string.Length;
             }
 
@@ -3532,6 +3538,12 @@ namespace System
                         throw e;
                     }
 
+                    if (_string.Length > ushort.MaxValue)
+                    {
+                        UriFormatException e = GetException(ParsingError.SizeLimit);
+                        throw e;
+                    }
+
                     length = (ushort)_string.Length;
                 }
             }
@@ -3586,6 +3598,12 @@ namespace System
                     catch (ArgumentException)
                     {
                         UriFormatException e = GetException(ParsingError.BadFormat);
+                        throw e;
+                    }
+
+                    if (_string.Length > ushort.MaxValue)
+                    {
+                        UriFormatException e = GetException(ParsingError.SizeLimit);
                         throw e;
                     }
 
@@ -4091,6 +4109,12 @@ namespace System
                                 // Normalize user info
                                 userInfoString = IriHelper.EscapeUnescapeIri(pString, startInput, start + 1, UriComponents.UserInfo);
                                 newHost += userInfoString;
+
+                                if (newHost.Length > ushort.MaxValue)
+                                {
+                                    err = ParsingError.SizeLimit;
+                                    return idx;
+                                }
                             }
                             else
                             {
