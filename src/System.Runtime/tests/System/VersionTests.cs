@@ -151,6 +151,7 @@ namespace System.Tests
                 Assert.False(version1 == version2);
                 Assert.False(version1 >= version2);
                 Assert.False(version1 > version2);
+                Assert.True(version1 != version2);
             }
             else if (expectedSign == 0)
             {
@@ -159,6 +160,7 @@ namespace System.Tests
                 Assert.True(version1 == version2);
                 Assert.True(version1 >= version2);
                 Assert.False(version1 > version2);
+                Assert.False(version1 != version2);
             }
             else
             {
@@ -167,6 +169,7 @@ namespace System.Tests
                 Assert.False(version1 == version2);
                 Assert.True(version1 >= version2);
                 Assert.True(version1 > version2);
+                Assert.True(version1 != version2);
             }
         }
 
