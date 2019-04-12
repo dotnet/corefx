@@ -820,7 +820,7 @@
         "4.0.11",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.1"
     },
     "runtime.unix.System.Net.Sockets": {
       "StableVersions": [
@@ -835,7 +835,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.1"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.unix.System.Runtime.Extensions": {
       "StableVersions": [
@@ -879,7 +879,7 @@
         "4.0.11",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0"
+      "BaselineVersion": "4.3.1"
     },
     "runtime.win.System.Net.Sockets": {
       "StableVersions": [
@@ -939,7 +939,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.1"
+      "BaselineVersion": "4.3.2"
     },
     "runtime.win8-arm.runtime.native.System.IO.Compression": {
       "StableVersions": [
@@ -1652,12 +1652,13 @@
         "4.0.11",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.3.1",
       "AssemblyVersionInPackageVersion": {
         "3.9.0.0": "3.9.0",
         "4.0.0.0": "4.0.0",
         "4.0.10.0": "4.0.10",
-        "4.0.11.0": "4.0.11"
+        "4.0.11.0": "4.0.11",
+        "4.0.12.0": "4.3.0"
       }
     },
     "System.Net.Requests": {
@@ -1803,7 +1804,7 @@
         "4.3.0",
         "4.3.1"
       ],
-      "BaselineVersion": "4.3.1"
+      "BaselineVersion": "4.3.2"
     },
     "System.Reflection": {
       "StableVersions": [
@@ -2413,7 +2414,7 @@
         "4.1.0",
         "4.3.0"
       ],
-      "BaselineVersion": "4.3.0",
+      "BaselineVersion": "4.3.1",
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.0.0",
         "4.0.10.0": "4.0.10",
