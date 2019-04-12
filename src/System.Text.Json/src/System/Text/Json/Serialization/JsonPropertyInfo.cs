@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json.Serialization.Converters;
 using System.Text.Json.Serialization.Policies;
@@ -75,30 +74,9 @@ namespace System.Text.Json.Serialization
             {
                 Type elementType = JsonClassInfo.GetElementType(RuntimePropertyType);
 
-                if (elementType == null)
+                if (RuntimePropertyType.IsAssignableFrom(typeof(JsonEnumerableT<>).MakeGenericType(elementType)))
                 {
-                    return;
-                }
-
-                if (RuntimePropertyType == typeof(IEnumerable<>).MakeGenericType(elementType))
-                {
-                    EnumerableConverter = new DefaultIEnumerableTConverter();
-                }
-                else if (RuntimePropertyType == typeof(IList<>).MakeGenericType(elementType))
-                {
-                    EnumerableConverter = new DefaultIListTConverter();
-                }
-                else if (RuntimePropertyType == typeof(ICollection<>).MakeGenericType(elementType))
-                {
-                    EnumerableConverter = new DefaultICollectionTConverter();
-                }
-                else if (RuntimePropertyType == typeof(IReadOnlyCollection<>).MakeGenericType(elementType))
-                {
-                    EnumerableConverter = new DefaultIReadOnlyCollectionTConverter();
-                }
-                else if (RuntimePropertyType == typeof(IReadOnlyList<>).MakeGenericType(elementType))
-                {
-                    EnumerableConverter = new DefaultIReadOnlyListTConverter();
+                    EnumerableConverter = new DefaultEnumerableConverter();
                 }
             }
         }
