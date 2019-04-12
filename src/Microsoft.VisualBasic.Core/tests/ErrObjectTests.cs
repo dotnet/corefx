@@ -43,5 +43,18 @@ namespace Microsoft.VisualBasic.Tests
             ProjectData.SetProjectError(new InvalidOperationException());
             _ = Assert.Throws<Exception>(() => Information.Err().Raise(1, Description: "MyDescription")).ToString();
         }
+
+        [Fact]
+        public void FilterDefaultMessage()
+        {
+            ProjectData.SetProjectError(new System.IO.FileNotFoundException("Description"));
+            Assert.Equal("Description", Information.Err().Description);
+
+            ProjectData.SetProjectError(new System.IO.FileNotFoundException(""));
+            Assert.Equal("ID53", Information.Err().Description);
+
+            ProjectData.SetProjectError(new System.IO.FileNotFoundException("Exception from HRESULT: 0x80"));
+            Assert.Equal("ID53", Information.Err().Description);
+        }
     }
 }

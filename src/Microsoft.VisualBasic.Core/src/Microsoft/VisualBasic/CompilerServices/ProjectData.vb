@@ -38,7 +38,6 @@ Namespace Global.Microsoft.VisualBasic.CompilerServices
         ''' </summary>
         ''' <param name="hr"></param>
         ''' <returns></returns>
-        ''' <remarks></remarks>
         Public Shared Function CreateProjectError(ByVal hr As Integer) As System.Exception
             '*************************
             '*** PERFORMANCE NOTE: ***
@@ -60,7 +59,6 @@ Namespace Global.Microsoft.VisualBasic.CompilerServices
         '''  is set by this method.
         ''' </summary>
         ''' <param name="ex"></param>
-        ''' <remarks></remarks>
         Public Overloads Shared Sub SetProjectError(ByVal ex As Exception)
             Err.CaptureException(ex)
         End Sub
@@ -82,7 +80,6 @@ Namespace Global.Microsoft.VisualBasic.CompilerServices
         ''' </summary>
         ''' <param name="ex"></param>
         ''' <param name="lErl"></param>
-        ''' <remarks></remarks>
         Public Overloads Shared Sub SetProjectError(ByVal ex As Exception, ByVal lErl As Integer)
             Err.CaptureException(ex, lErl)
         End Sub

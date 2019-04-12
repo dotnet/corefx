@@ -68,7 +68,6 @@ Namespace Microsoft.VisualBasic
         ''' </summary>
         ''' <param name="Msg"></param>
         ''' <returns></returns>
-        ''' <remarks></remarks>
         Private Function FilterDefaultMessage(ByVal Msg As String) As String
             Dim NewMsg As String
 
@@ -122,7 +121,6 @@ Namespace Microsoft.VisualBasic
         ''' VB calls clear whenever it executes any type of Resume statement, Exit Sub, Exit funcion, exit Property, or
         ''' any On Error statement.
         ''' </summary>
-        ''' <remarks></remarks>
         Public Sub Clear()
             'CONSIDER:  do we even care about CLEARING the fields if clearing the flags are enough (aside from m_curException)?
             m_curException = Nothing
@@ -142,7 +140,6 @@ Namespace Microsoft.VisualBasic
         ''' <param name="Description">If not supplied, we try to look one up based on the error code being raised</param>
         ''' <param name="HelpFile"></param>
         ''' <param name="HelpContext"></param>
-        ''' <remarks></remarks>
         Public Sub Raise(ByVal Number As Integer,
                          Optional ByVal Source As Object = Nothing,
                          Optional ByVal Description As Object = Nothing,
