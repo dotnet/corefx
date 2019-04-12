@@ -437,7 +437,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     REQUIRED_FUNCTION(RSA_size) \
     REQUIRED_FUNCTION(RSA_up_ref) \
     REQUIRED_FUNCTION(RSA_verify) \
-    FALLBACK_FUNCTION(SSL_CIPHER_find) \
+    LIGHTUP_FUNCTION(SSL_CIPHER_find) \
     REQUIRED_FUNCTION(SSL_CIPHER_get_bits) \
     REQUIRED_FUNCTION(SSL_CIPHER_get_id) \
     LIGHTUP_FUNCTION(SSL_CIPHER_get_name) \
@@ -453,7 +453,7 @@ void SSL_get0_alpn_selected(const SSL* ssl, const unsigned char** protocol, unsi
     LIGHTUP_FUNCTION(SSL_CTX_set_alpn_select_cb) \
     REQUIRED_FUNCTION(SSL_CTX_set_cert_verify_callback) \
     REQUIRED_FUNCTION(SSL_CTX_set_cipher_list) \
-    FALLBACK_FUNCTION(SSL_CTX_set_ciphersuites) \
+    LIGHTUP_FUNCTION(SSL_CTX_set_ciphersuites) \
     REQUIRED_FUNCTION(SSL_CTX_set_client_cert_cb) \
     REQUIRED_FUNCTION(SSL_CTX_set_quiet_shutdown) \
     FALLBACK_FUNCTION(SSL_CTX_set_options) \
@@ -990,13 +990,6 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #else // FEATURE_DISTRO_AGNOSTIC_SSL
 
 #define API_EXISTS(fn) true
-
-#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_1_RTM
-
-#define SSL_CTX_set_ciphersuites local_SSL_CTX_set_ciphersuites
-#define SSL_CIPHER_find local_SSL_CIPHER_find
-
-#endif
 
 #if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_1_0_RTM
 
