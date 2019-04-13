@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 
@@ -10,7 +11,7 @@ namespace System.Text.Json.Serialization
     /// <summary>
     /// Represents a strongly-typed property that is a <see cref="Nullable{T}"/>.
     /// </summary>
-    internal sealed class JsonPropertyInfoNullable<TClass, TProperty> 
+    internal sealed class JsonPropertyInfoNullable<TClass, TProperty>
         : JsonPropertyInfoCommon<TClass, TProperty?, TProperty>
         where TProperty : struct
     {
@@ -61,16 +62,54 @@ namespace System.Text.Json.Serialization
 
         internal override void ReadEnumerable(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
         {
-            if (ValueConverter != null)
+            if (ValueConverter == null || !ValueConverter.TryRead(typeof(TProperty), ref reader, out TProperty value))
             {
-                if (ValueConverter.TryRead(s_underlyingType, ref reader, out TProperty value))
-                {
-                    ReadStackFrame.SetReturnValue(value, options, ref state.Current);
-                    return;
-                }
+                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state);
+                return;
             }
 
-            ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state);
+            // Converting to TProperty? here lets us share a common ApplyValue() with ApplyNullValue().
+            TProperty? nullableValue = new TProperty?(value);
+            ApplyValue(nullableValue, options, ref state.Current);
+        }
+
+        // If this method is changed, also change JsonPropertyInfoNotNullable.ApplyValue and JsonSerializer.ApplyObjectToEnumerable
+        private void ApplyValue(TProperty? value, JsonSerializerOptions options, ref ReadStackFrame frame)
+        {
+            if (frame.IsEnumerable())
+            {
+                if (frame.TempEnumerableValues != null)
+                {
+                    ((IList<TProperty?>)frame.TempEnumerableValues).Add(value);
+                }
+                else
+                {
+                    ((IList<TProperty?>)frame.ReturnValue).Add(value);
+                }
+            }
+            else if (frame.IsPropertyEnumerable())
+            {
+                Debug.Assert(frame.JsonPropertyInfo != null);
+                Debug.Assert(frame.ReturnValue != null);
+                if (frame.TempEnumerableValues != null)
+                {
+                    ((IList<TProperty?>)frame.TempEnumerableValues).Add(value);
+                }
+                else
+                {
+                    ((IList<TProperty?>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
+                }
+            }
+            else
+            {
+                Debug.Assert(frame.JsonPropertyInfo != null);
+                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
+            }
+        }
+
+        internal override void ApplyNullValue(JsonSerializerOptions options, ref ReadStack state)
+        {
+            ApplyValue(null, options, ref state.Current);
         }
 
         // todo: have the caller check if current.Enumerator != null and call WriteEnumerable of the underlying property directly to avoid an extra virtual call.
@@ -124,7 +163,17 @@ namespace System.Text.Json.Serialization
             if (ValueConverter != null)
             {
                 Debug.Assert(current.Enumerator != null);
-                TProperty? value = (TProperty?)current.Enumerator.Current;
+
+                TProperty? value;
+                if (current.Enumerator is IEnumerator<TProperty?>)
+                {
+                    value = ((IEnumerator<TProperty?>)current.Enumerator).Current;
+                }
+                else
+                {
+                    value = (TProperty?)current.Enumerator.Current;
+                }
+
                 if (value == null)
                 {
                     writer.WriteNullValue();
