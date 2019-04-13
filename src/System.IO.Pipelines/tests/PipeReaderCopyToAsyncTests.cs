@@ -69,21 +69,39 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task MultiSegmentWritesUntilFailure()
         {
-            using (var pool = new TestMemoryPool())
+            using (var pool = new DisposeTrackingBufferPool())
             {
-                var pipe = new Pipe(s_testOptions);
+                var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
                 pipe.Writer.WriteEmpty(4096);
                 pipe.Writer.WriteEmpty(4096);
                 pipe.Writer.WriteEmpty(4096);
                 await pipe.Writer.FlushAsync();
                 pipe.Writer.Complete();
 
+                Assert.Equal(3, pool.CurrentlyRentedBlocks);
+
                 var stream = new ThrowAfterNWritesStream(2);
-                await Assert.ThrowsAsync<InvalidOperationException>(() => pipe.Reader.CopyToAsync(stream));
+                try
+                {
+                    await pipe.Reader.CopyToAsync(stream);
+                    Assert.True(false, $"CopyToAsync should have failed, wrote {stream.Writes} times.");
+                }
+                catch(InvalidOperationException)
+                {
+                    
+                }
+
+                Assert.Equal(2, stream.Writes);
+
+                Assert.Equal(1, pool.CurrentlyRentedBlocks);
+                Assert.Equal(2, pool.DisposedBlocks);
 
                 ReadResult result = await pipe.Reader.ReadAsync();
                 Assert.Equal(4096, result.Buffer.Length);
                 pipe.Reader.Complete();
+
+                Assert.Equal(0, pool.CurrentlyRentedBlocks);
+                Assert.Equal(3, pool.DisposedBlocks);
             }
         }
 
