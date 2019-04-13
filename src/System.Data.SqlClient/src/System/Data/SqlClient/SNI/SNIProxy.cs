@@ -218,21 +218,18 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="sync">true if synchronous, false if asynchronous</param>
         /// <returns>SNI error status</returns>
-        public uint WritePacket(SNIHandle handle, SNIPacket packet, bool sync)
+        public uint WritePacket(SNIHandle handle, SNIPacket packet, bool sync, Span<byte> dataToWrite)
         {
-            SNIPacket clonedPacket = packet.Clone();
-            uint result;
-            if (sync)
-            {
-                result = handle.Send(clonedPacket);
-                clonedPacket.Dispose();
-            }
-            else
-            {
-                result = handle.SendAsync(clonedPacket, true);
-            }
-
+            //SNIPacket clonedPacket = packet.Clone();
+            uint result = handle.Send(packet, dataToWrite);
+            packet.Dispose();
             return result;
+        }
+
+        public uint WritePacketAsync(SNIHandle handle, SNIPacket packet, Memory<byte> dataToWrite)
+        {
+            //SNIPacket clonedPacket = packet.Clone();
+            return  handle.SendAsync(packet, true, dataToWrite);
         }
 
         /// <summary>
@@ -439,7 +436,7 @@ namespace System.Data.SqlClient.SNI
         /// <param name="length">Length</param>
         public void PacketSetData(SNIPacket packet, byte[] data, int length)
         {
-            packet.SetData(data, length);
+            //packet.SetData(data, length);
         }
 
         /// <summary>

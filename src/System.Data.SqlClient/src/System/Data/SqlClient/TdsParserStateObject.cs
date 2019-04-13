@@ -23,7 +23,7 @@ namespace System.Data.SqlClient
 
     internal abstract class TdsParserStateObject
     {
-        private const int AttentionTimeoutSeconds = 5;
+        protected const int AttentionTimeoutSeconds = 5;
 
         // Ticks to consider a connection "good" after a successful I/O (10,000 ticks = 1 ms)
         // The resolution of the timer is typically in the range 10 to 16 milliseconds according to msdn.
@@ -91,7 +91,7 @@ namespace System.Data.SqlClient
         internal volatile bool _attentionSending = false;
         internal bool _internalTimeout = false;               // an internal timeout occurred
 
-        private readonly LastIOTimer _lastSuccessfulIOTimer;
+        protected readonly LastIOTimer _lastSuccessfulIOTimer;
 
         // secure password information to be stored
         //  At maximum number of secure string that need to be stored is two; one for login password and the other for new change password
@@ -179,9 +179,9 @@ namespace System.Data.SqlClient
         internal SqlErrorCollection _preAttentionErrors;
         internal SqlErrorCollection _preAttentionWarnings;
 
-        private volatile TaskCompletionSource<object> _writeCompletionSource = null;
+        protected volatile TaskCompletionSource<object> _writeCompletionSource = null;
         protected volatile int _asyncWriteCount = 0;
-        private volatile Exception _delayedWriteAsyncCallbackException = null; // set by write async callback if completion source is not yet created
+        protected volatile Exception _delayedWriteAsyncCallbackException = null; // set by write async callback if completion source is not yet created
 
         // _readingcount is incremented when we are about to read.
         // We check the parser state afterwards.
@@ -2651,7 +2651,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        private void SetBufferSecureStrings()
+        internal void SetBufferSecureStrings()
         {
             if (_securePasswords != null)
             {
@@ -3216,276 +3216,22 @@ namespace System.Data.SqlClient
             }
         }
 
-        private Task SNIWritePacket(PacketHandle packet, out uint sniError, bool canAccumulate, bool callerHasConnectionLock)
-        {
-            // Check for a stored exception
-            var delayedException = Interlocked.Exchange(ref _delayedWriteAsyncCallbackException, null);
-            if (delayedException != null)
-            {
-                throw delayedException;
-            }
-
-            Task task = null;
-            _writeCompletionSource = null;
-
-            PacketHandle packetPointer = EmptyReadPacket;
-
-            bool sync = !_parser._asyncWrite;
-            if (sync && _asyncWriteCount > 0)
-            { // for example, SendAttention while there are writes pending
-                Task waitForWrites = WaitForAccumulatedWrites();
-                if (waitForWrites != null)
-                {
-                    try
-                    {
-                        waitForWrites.Wait();
-                    }
-                    catch (AggregateException ae)
-                    {
-                        throw ae.InnerException;
-                    }
-                }
-                Debug.Assert(_asyncWriteCount == 0, "All async write should be finished");
-            }
-            if (!sync)
-            {
-                // Add packet to the pending list (since the callback can happen any time after we call SNIWritePacket)
-                packetPointer = AddPacketToPendingList(packet);
-            }
-
-            // Async operation completion may be delayed (success pending).
-            try
-            {
-            }
-            finally
-            {
-                sniError = WritePacket(packet, sync);
-            }
-
-            if (sniError == TdsEnums.SNI_SUCCESS_IO_PENDING)
-            {
-                Debug.Assert(!sync, "Completion should be handled in SniManagedWwrapper");
-                Interlocked.Increment(ref _asyncWriteCount);
-                Debug.Assert(_asyncWriteCount >= 0);
-                if (!canAccumulate)
-                {
-                    // Create completion source (for callback to complete)
-                    _writeCompletionSource = new TaskCompletionSource<object>();
-                    task = _writeCompletionSource.Task;
-
-                    // Ensure that setting _writeCompletionSource completes before checking _delayedWriteAsyncCallbackException
-                    Interlocked.MemoryBarrier();
-
-                    // Check for a stored exception
-                    delayedException = Interlocked.Exchange(ref _delayedWriteAsyncCallbackException, null);
-                    if (delayedException != null)
-                    {
-                        throw delayedException;
-                    }
-
-                    // If there are no outstanding writes, see if we can shortcut and return null
-                    if ((_asyncWriteCount == 0) && ((!task.IsCompleted) || (task.Exception == null)))
-                    {
-                        task = null;
-                    }
-                }
-            }
-#if DEBUG
-            else if (!sync && !canAccumulate && SqlCommand.DebugForceAsyncWriteDelay > 0)
-            {
-                // Executed synchronously - callback will not be called 
-                TaskCompletionSource<object> completion = new TaskCompletionSource<object>();
-                uint error = sniError;
-                new Timer(obj =>
-                {
-                    try
-                    {
-                        if (_parser.MARSOn)
-                        { // Only take reset lock on MARS.
-                            CheckSetResetConnectionState(error, CallbackType.Write);
-                        }
-
-                        if (error != TdsEnums.SNI_SUCCESS)
-                        {
-                            AddError(_parser.ProcessSNIError(this));
-                            ThrowExceptionAndWarning();
-                        }
-                        AssertValidState();
-                        completion.SetResult(null);
-                    }
-                    catch (Exception e)
-                    {
-                        completion.SetException(e);
-                    }
-                }, null, SqlCommand.DebugForceAsyncWriteDelay, Timeout.Infinite);
-                task = completion.Task;
-            }
-#endif
-            else
-            {
-                if (_parser.MARSOn)
-                { // Only take reset lock on MARS.
-                    CheckSetResetConnectionState(sniError, CallbackType.Write);
-                }
-
-                if (sniError == TdsEnums.SNI_SUCCESS)
-                {
-                    _lastSuccessfulIOTimer._value = DateTime.UtcNow.Ticks;
-
-                    if (!sync)
-                    {
-                        // Since there will be no callback, remove the packet from the pending list
-                        Debug.Assert(IsValidPacket(packetPointer), "Packet added to list has an invalid pointer, can not remove from pending list");
-                        RemovePacketFromPendingList(packetPointer);
-                    }
-                }
-                else
-                {
-                    AddError(_parser.ProcessSNIError(this));
-                    ThrowExceptionAndWarning(callerHasConnectionLock);
-                }
-                AssertValidState();
-            }
-            return task;
-        }
+        
 
         internal abstract bool IsValidPacket(PacketHandle packetPointer);
 
         internal abstract uint WritePacket(PacketHandle packet, bool sync);
 
-        // Sends an attention signal - executing thread will consume attn.
-        internal void SendAttention(bool mustTakeWriteLock = false)
-        {
-            if (!_attentionSent)
-            {
-                // Dumps contents of buffer to OOB write (currently only used for
-                // attentions.  There is no body for this message
-                // Doesn't touch this._outBytesUsed
-                if (_parser.State == TdsParserState.Closed || _parser.State == TdsParserState.Broken)
-                {
-                    return;
-                }
-
-                PacketHandle attnPacket = CreateAndSetAttentionPacket();
-
-                try
-                {
-                    // Dev11 #344723: SqlClient stress hang System_Data!Tcp::ReadSync via a call to SqlDataReader::Close
-                    // Set _attentionSending to true before sending attention and reset after setting _attentionSent
-                    // This prevents a race condition between receiving the attention ACK and setting _attentionSent
-                    _attentionSending = true;
-
-#if DEBUG
-                    if (!_skipSendAttention)
-                    {
-#endif
-                        // Take lock and send attention
-                        bool releaseLock = false;
-                        if ((mustTakeWriteLock) && (!_parser.Connection.ThreadHasParserLockForClose))
-                        {
-                            releaseLock = true;
-                            _parser.Connection._parserLock.Wait(canReleaseFromAnyThread: false);
-                            _parser.Connection.ThreadHasParserLockForClose = true;
-                        }
-                        try
-                        {
-                            // Check again (just in case the connection was closed while we were waiting)
-                            if (_parser.State == TdsParserState.Closed || _parser.State == TdsParserState.Broken)
-                            {
-                                return;
-                            }
-
-                            uint sniError;
-                            _parser._asyncWrite = false; // stop async write 
-                            SNIWritePacket(attnPacket, out sniError, canAccumulate: false, callerHasConnectionLock: false);
-                        }
-                        finally
-                        {
-                            if (releaseLock)
-                            {
-                                _parser.Connection.ThreadHasParserLockForClose = false;
-                                _parser.Connection._parserLock.Release();
-                            }
-                        }
-#if DEBUG
-                    }
-#endif
-
-                    SetTimeoutSeconds(AttentionTimeoutSeconds); // Initialize new attention timeout of 5 seconds.
-                    _attentionSent = true;
-                }
-                finally
-                {
-                    _attentionSending = false;
-                }
-
-
-                AssertValidState();
-            }
-        }
+        internal abstract void SendAttention(bool mustTakeWriteLock = false);
+        
 
         internal abstract PacketHandle CreateAndSetAttentionPacket();
 
-        internal abstract void SetPacketData(PacketHandle packet, byte[] buffer, int bytesUsed);
+        //internal abstract void SetPacketData(PacketHandle packet, byte[] buffer, int bytesUsed);
 
-        private Task WriteSni(bool canAccumulate)
-        {
-            // Prepare packet, and write to packet.
-            PacketHandle packet = GetResetWritePacket();
+        internal abstract Task WriteSni(bool canAccumulate);
 
-            SetBufferSecureStrings();
-            SetPacketData(packet, _outBuff, _outBytesUsed);
-
-            uint sniError;
-            Debug.Assert(Parser.Connection._parserLock.ThreadMayHaveLock(), "Thread is writing without taking the connection lock");
-            Task task = SNIWritePacket(packet, out sniError, canAccumulate, callerHasConnectionLock: true);
-
-            // Check to see if the timeout has occurred.  This time out code is special case code to allow BCP writes to timeout. Eventually we should make all writes timeout.
-            if (_bulkCopyOpperationInProgress && 0 == GetTimeoutRemaining())
-            {
-                _parser.Connection.ThreadHasParserLockForClose = true;
-                try
-                {
-                    Debug.Assert(_parser.Connection != null, "SqlConnectionInternalTds handler can not be null at this point.");
-                    AddError(new SqlError(TdsEnums.TIMEOUT_EXPIRED, (byte)0x00, TdsEnums.MIN_ERROR_CLASS, _parser.Server, _parser.Connection.TimeoutErrorInternal.GetErrorMessage(), "", 0, TdsEnums.SNI_WAIT_TIMEOUT));
-                    _bulkCopyWriteTimeout = true;
-                    SendAttention();
-                    _parser.ProcessPendingAck(this);
-                    ThrowExceptionAndWarning();
-                }
-                finally
-                {
-                    _parser.Connection.ThreadHasParserLockForClose = false;
-                }
-            }
-
-            // Special case logic for encryption removal.
-            if (_parser.State == TdsParserState.OpenNotLoggedIn &&
-                _parser.EncryptionOptions == EncryptionOptions.LOGIN)
-            {
-                // If no error occurred, and we are Open but not logged in, and
-                // our encryptionOption state is login, remove the SSL Provider.
-                // We only need encrypt the very first packet of the login message to the server.
-
-                // We wanted to encrypt entire login channel, but there is
-                // currently no mechanism to communicate this.  Removing encryption post 1st packet
-                // is a hard-coded agreement between client and server.  We need some mechanism or
-                // common change to be able to make this change in a non-breaking fashion.
-                _parser.RemoveEncryption();                        // Remove the SSL Provider.
-                _parser.EncryptionOptions = EncryptionOptions.OFF; // Turn encryption off.
-
-                // Since this packet was associated with encryption, dispose and re-create.
-                ClearAllWritePackets();
-            }
-
-            SniWriteStatisticsAndTracing();
-
-            ResetBuffer();
-
-            AssertValidState();
-            return task;
-        }
-
+        
         //////////////////////////////////////////////
         // Statistics, Tracing, and related methods //
         //////////////////////////////////////////////
@@ -3506,7 +3252,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        private void SniWriteStatisticsAndTracing()
+        internal void SniWriteStatisticsAndTracing()
         {
             SqlStatistics statistics = _parser.Statistics;
             if (null != statistics)
@@ -3516,9 +3262,9 @@ namespace System.Data.SqlClient
                 statistics.RequestNetworkServerTimer();
             }
         }
-        [Conditional("DEBUG")]
 
-        private void AssertValidState()
+        [Conditional("DEBUG")]
+        internal void AssertValidState()
         {
             if (_inBytesUsed < 0 || _inBytesRead < 0)
             {

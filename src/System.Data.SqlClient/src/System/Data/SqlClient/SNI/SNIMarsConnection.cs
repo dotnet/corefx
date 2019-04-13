@@ -90,11 +90,11 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        public uint SendAsync(SNIPacket packet, SNIAsyncCallback callback)
+        public uint SendAsync(SNIPacket packet, Memory<byte> data, SNIAsyncCallback callback)
         {
             lock (this)
             {
-                return _lowerHandle.SendAsync(packet, false, callback);
+                return _lowerHandle.SendAsync(packet, false, data, callback);
             }
         }
 

@@ -167,12 +167,42 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
+        /// Send a packet synchronously
+        /// </summary>
+        /// <param name="packet">SNI packet</param>
+        /// <param name="data">Span with data</param>
+        /// <returns>SNI error code</returns>
+        public override uint Send(SNIPacket packet, Span<byte> data)
+        {
+            while (true)
+            {
+                lock (this)
+                {
+                    if (_sequenceNumber < _sendHighwater)
+                    {
+                        break;
+                    }
+                }
+
+                _ackEvent.Wait();
+
+                lock (this)
+                {
+                    _ackEvent.Reset();
+                }
+            }
+            SNIPacket encapsulatedPacket = GetSMUXEncapsulatedPacket(packet);
+
+            return _connection.Send(encapsulatedPacket);
+        }
+
+        /// <summary>
         /// Send packet asynchronously
         /// </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        private uint InternalSendAsync(SNIPacket packet, SNIAsyncCallback callback)
+        private uint InternalSendAsync(SNIPacket packet, Memory<byte> data, SNIAsyncCallback callback)
         {
             lock (this)
             {
@@ -192,7 +222,7 @@ namespace System.Data.SqlClient.SNI
                     encapsulatedPacket.SetCompletionCallback(HandleSendComplete);
                 }
 
-                return _connection.SendAsync(encapsulatedPacket, callback);
+                return _connection.SendAsync(encapsulatedPacket, data, callback);
             }
         }
 
@@ -213,7 +243,7 @@ namespace System.Data.SqlClient.SNI
                         if (_sendPacketQueue.Count != 0)
                         {
                             packet = _sendPacketQueue.Peek();
-                            uint result = InternalSendAsync(packet.Packet, packet.Callback);
+                            uint result = InternalSendAsync(packet.Packet, packet.Data, packet.Callback);
 
                             if (result != TdsEnums.SNI_SUCCESS && result != TdsEnums.SNI_SUCCESS_IO_PENDING)
                             {
@@ -242,11 +272,11 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, Memory<byte> data, SNIAsyncCallback callback = null)
         {
             lock (this)
             {
-                _sendPacketQueue.Enqueue(new SNIMarsQueuedPacket(packet, callback != null ? callback : HandleSendComplete));
+                _sendPacketQueue.Enqueue(new SNIMarsQueuedPacket(packet, callback != null ? callback : HandleSendComplete, data));
             }
 
             SendPendingPackets();

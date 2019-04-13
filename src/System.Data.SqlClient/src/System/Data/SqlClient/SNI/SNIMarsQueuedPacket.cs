@@ -11,6 +11,7 @@ namespace System.Data.SqlClient.SNI
     internal class SNIMarsQueuedPacket
     {
         private SNIPacket _packet;
+        private Memory<byte> _data;
         private SNIAsyncCallback _callback;
 
         /// <summary>
@@ -18,9 +19,10 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
-        public SNIMarsQueuedPacket(SNIPacket packet, SNIAsyncCallback callback)
+        public SNIMarsQueuedPacket(SNIPacket packet, SNIAsyncCallback callback, Memory<byte> data)
         {
             _packet = packet;
+            _data = data;
             _callback = callback;
         }
 
@@ -54,6 +56,11 @@ namespace System.Data.SqlClient.SNI
             {
                 _callback = value;
             }
+        }
+
+        internal Memory<byte> Data
+        {
+            get => this._data;
         }
     }
 }

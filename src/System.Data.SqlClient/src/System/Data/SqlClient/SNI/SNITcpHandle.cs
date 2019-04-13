@@ -443,6 +443,36 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
+        /// Synchronously send data 
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <param name="data"></param>
+        /// <returns>returns error code</returns>
+        public override uint Send(SNIPacket packet, Span<byte> data)
+        {
+            lock (this)
+            {
+                try
+                {
+                    packet.WriteToStream(_stream, data);
+                    return TdsEnums.SNI_SUCCESS;
+                }
+                catch (ObjectDisposedException ode)
+                {
+                    return ReportTcpSNIError(ode);
+                }
+                catch (SocketException se)
+                {
+                    return ReportTcpSNIError(se);
+                }
+                catch (IOException ioe)
+                {
+                    return ReportTcpSNIError(ioe);
+                }
+            }
+        }
+
+        /// <summary>
         /// Receive a packet synchronously
         /// </summary>
         /// <param name="packet">SNI packet</param>
@@ -523,12 +553,12 @@ namespace System.Data.SqlClient.SNI
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, Memory<byte> dataToWrite, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
             lock (this)
             {
-                packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV, disposePacketAfterSendAsync);
+                packet.WriteToStreamAsync(_stream, cb, SNIProviders.TCP_PROV, dataToWrite, disposePacketAfterSendAsync);
             }
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }

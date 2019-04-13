@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,7 +59,7 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Packet validity
         /// </summary>
-        public bool IsInvalid => (_data == null);
+        public bool IsInvalid => false;// (_data == null);
 
         /// <summary>
         /// Packet data
@@ -119,7 +120,8 @@ namespace System.Data.SqlClient.SNI
         public SNIPacket Clone()
         {
             SNIPacket packet = new SNIPacket(_capacity);
-            Buffer.BlockCopy(_data, 0, packet._data, 0, _capacity);
+            if(_data != null)
+                Buffer.BlockCopy(_data, 0, packet._data, 0, _capacity);
             packet._length = _length;
             packet._description = _description;
             packet._completionCallback = _completionCallback;
@@ -260,6 +262,17 @@ namespace System.Data.SqlClient.SNI
         public void WriteToStream(Stream stream)
         {
             stream.Write(_data, 0, _length);
+        }
+
+        /// <summary>
+        /// Write data to a stream synchronously
+        /// </summary>
+        /// <param name="stream">Stream to write to</param>
+        /// <param name="data">Data to write to stream.</param>
+        public void WriteToStream(Stream stream, Span<byte> data)
+        {
+            Debug.Assert(_data == null, "No sni packet data should be set when Span based write is used");
+            stream.Write(data);
         }
 
         /// <summary>

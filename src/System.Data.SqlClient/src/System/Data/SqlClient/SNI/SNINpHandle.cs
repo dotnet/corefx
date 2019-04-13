@@ -211,10 +211,30 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
+        public override uint Send(SNIPacket packet, Span<byte> data)
+        {
+            lock (this)
+            {
+                try
+                {
+                    packet.WriteToStream(_stream, data);
+                    return TdsEnums.SNI_SUCCESS;
+                }
+                catch (ObjectDisposedException ode)
+                {
+                    return ReportErrorAndReleasePacket(packet, ode);
+                }
+                catch (IOException ioe)
+                {
+                    return ReportErrorAndReleasePacket(packet, ioe);
+                }
+            }
+        }
+
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, Memory<byte> dataToWrite, SNIAsyncCallback callback = null)
         {
             SNIAsyncCallback cb = callback ?? _sendCallback;
-            packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV, disposePacketAfterSendAsync);
+            packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV, dataToWrite, disposePacketAfterSendAsync);
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }
 

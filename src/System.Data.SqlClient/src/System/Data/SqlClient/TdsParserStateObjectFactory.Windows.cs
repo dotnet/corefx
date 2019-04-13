@@ -25,7 +25,7 @@ namespace System.Data.SqlClient
         );
         public static bool UseManagedSNI => useManagedSNIOnWindows.Value;
 #else
-        public static bool UseManagedSNI { get; } = false;
+        public static bool UseManagedSNI { get; } = true;
 #endif
 
         public EncryptionOptions EncryptionOptions

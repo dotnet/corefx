@@ -36,12 +36,20 @@ namespace System.Data.SqlClient.SNI
         public abstract uint Send(SNIPacket packet);
 
         /// <summary>
+        /// Send a packet synchronously
+        /// </summary>
+        /// <param name="packet"></param>
+        /// <param name="dataToWrite"></param>
+        /// <returns></returns>
+        public abstract uint Send(SNIPacket packet, Span<byte> dataToWrite);
+
+        /// <summary>
         /// Send a packet asynchronously
         /// </summary>
         /// <param name="packet">SNI packet</param>
         /// <param name="callback">Completion callback</param>
         /// <returns>SNI error code</returns>
-        public abstract uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null);
+        public abstract uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, Memory<byte> dataToWrite, SNIAsyncCallback callback = null);
 
         /// <summary>
         /// Receive a packet synchronously
