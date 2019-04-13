@@ -385,7 +385,16 @@ namespace System.Reflection.Metadata.Ecma335.Tests
             }, builder.Slice(12, -132));
 
             // the default decoder replaces bad byte sequences by U+FFFD
-            Assert.Equal("\u1234\ufffd\ufffd\ufffd", ReadVersion(builder));
+            if (PlatformDetection.IsNetCore)
+            {
+                Assert.Equal("\u1234\ufffd\ufffd\ufffd", ReadVersion(builder));
+            }
+            else
+            {
+                // Versions of .NET prior to Core 3.0 didn't follow Unicode recommendations for U+FFFD substitution,
+                // so they sometimes emitted too few replacement chars.
+                Assert.Equal("\u1234\ufffd\ufffd", ReadVersion(builder));
+            }
         }
     }
 }
