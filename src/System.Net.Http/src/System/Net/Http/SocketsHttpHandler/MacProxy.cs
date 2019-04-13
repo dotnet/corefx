@@ -30,7 +30,7 @@ namespace System.Net.Http
                 proxy.HostName,
                 proxy.PortNumber);
 
-            // FIXME: Handle user name and password
+            // TODO: Issue #26593 - Credentials are not propagated
 
             return uriBuilder.Uri;
         }
