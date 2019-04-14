@@ -4,7 +4,7 @@
     <OutputPath>$(ILLinkDir)</OutputPath>
     <EnableBinPlacing>false</EnableBinPlacing>
     <ILLinkTasksPackageId>illink.tasks</ILLinkTasksPackageId>
-    <ILLinkTasksPackageVersion>0.1.5-preview-1461378</ILLinkTasksPackageVersion>
+    <ILLinkTasksPackageVersion>0.1.6-prerelease.19214.1</ILLinkTasksPackageVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="$(ILLinkTasksPackageId)">
