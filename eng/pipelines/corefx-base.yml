@@ -140,6 +140,7 @@ jobs:
                 projects: 'eng/common/internal/Tools.csproj'
                 nugetConfigPath: 'eng/internal/NuGet.config'
                 restoreDirectory: '$(Build.SourcesDirectory)\.packages'
+                verbosityRestore: 'normal'
                 externalFeedCredentials: 'dotnet-core-internal-tooling'
               env:
                 TargetGroup: $(_framework)
