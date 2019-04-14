@@ -22,12 +22,12 @@ internal partial class Interop
         }
 
         internal unsafe delegate void EtwEnableCallback(
-            [In] ref Guid sourceId,
-            [In] int isEnabled,
-            [In] byte level,
-            [In] long matchAnyKeywords,
-            [In] long matchAllKeywords,
-            [In] EVENT_FILTER_DESCRIPTOR* filterData,
-            [In] void* callbackContext);
+            in Guid sourceId,
+            int isEnabled,
+            byte level,
+            long matchAnyKeywords,
+            long matchAllKeywords,
+            EVENT_FILTER_DESCRIPTOR* filterData,
+            void* callbackContext);
     }
 }

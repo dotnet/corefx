@@ -266,13 +266,13 @@ namespace System.Diagnostics.Tracing
         // <UsesUnsafeCode Name="Parameter callbackContext of type: Void*" />
         // </SecurityKernel>
         unsafe void EtwEnableCallBack(
-                        [In] ref System.Guid sourceId,
-                        [In] int controlCode,
-                        [In] byte setLevel,
-                        [In] long anyKeyword,
-                        [In] long allKeyword,
-                        [In] Interop.Advapi32.EVENT_FILTER_DESCRIPTOR* filterData,
-                        [In] void* callbackContext
+                        in System.Guid sourceId,
+                        int controlCode,
+                        byte setLevel,
+                        long anyKeyword,
+                        long allKeyword,
+                        Interop.Advapi32.EVENT_FILTER_DESCRIPTOR* filterData,
+                        void* callbackContext
                         )
         {
             // This is an optional callback API. We will therefore ignore any failures that happen as a 
