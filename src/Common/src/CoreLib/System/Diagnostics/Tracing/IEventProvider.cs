@@ -25,7 +25,7 @@ namespace System.Diagnostics.Tracing
         uint EventUnregister(long registrationHandle);
 
         // Write an event.
-        unsafe int EventWriteTransfer(
+        unsafe EventProvider.WriteEventErrorCode EventWriteTransfer(
             long registrationHandle,
             in EventDescriptor eventDescriptor,
             IntPtr eventHandle,

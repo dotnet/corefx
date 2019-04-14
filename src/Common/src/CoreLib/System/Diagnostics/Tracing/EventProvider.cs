@@ -92,10 +92,6 @@ namespace System.Diagnostics.Tracing
             { sessionIdBit = sessionIdBit_; etwSessionId = etwSessionId_; }
         }
 
-#if PLATFORM_WINDOWS
-        private static bool m_setInformationMissing;
-#endif
-
         internal IEventProvider m_eventProvider;         // The interface that implements the specific logging mechanism functions.
         Interop.Advapi32.EtwEnableCallback m_etwCallback;     // Trace Callback function
         private long m_regHandle;                        // Trace Registration Handle
@@ -706,18 +702,9 @@ namespace System.Diagnostics.Tracing
         //
         // Helper function to set the last error on the thread
         //
-        private static void SetLastError(int error)
+        private static void SetLastError(WriteEventErrorCode error)
         {
-            switch (error)
-            {
-                case Interop.Errors.ERROR_ARITHMETIC_OVERFLOW:
-                case Interop.Errors.ERROR_MORE_DATA:
-                    s_returnCode = WriteEventErrorCode.EventTooBig;
-                    break;
-                case Interop.Errors.ERROR_NOT_ENOUGH_MEMORY:
-                    s_returnCode = WriteEventErrorCode.NoFreeBuffers;
-                    break;
-            }
+            s_returnCode = error;
         }
 
         // <SecurityKernel Critical="True" Ring="0">
@@ -983,7 +970,7 @@ namespace System.Diagnostics.Tracing
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1045:DoNotPassTypesByReference")]
         internal unsafe bool WriteEvent(ref EventDescriptor eventDescriptor, IntPtr eventHandle, Guid* activityID, Guid* childActivityID, params object[] eventPayload)
         {
-            int status = 0;
+            WriteEventErrorCode status = WriteEventErrorCode.NoError;
 
             if (IsEnabled(eventDescriptor.Level, eventDescriptor.Keywords))
             {
@@ -1147,9 +1134,9 @@ namespace System.Diagnostics.Tracing
                 }
             }
 
-            if (status != 0)
+            if (status != WriteEventErrorCode.NoError)
             {
-                SetLastError((int)status);
+                SetLastError(status);
                 return false;
             }
 
@@ -1190,7 +1177,7 @@ namespace System.Diagnostics.Tracing
                                 (EventOpcode)eventDescriptor.Opcode == EventOpcode.Stop);
             }
 
-            int status = m_eventProvider.EventWriteTransfer(m_regHandle, in eventDescriptor, eventHandle, activityID, childActivityID, dataCount, (EventData*)data);
+            WriteEventErrorCode status = m_eventProvider.EventWriteTransfer(m_regHandle, in eventDescriptor, eventHandle, activityID, childActivityID, dataCount, (EventData*)data);
 
             if (status != 0)
             {
@@ -1209,7 +1196,7 @@ namespace System.Diagnostics.Tracing
             int dataCount,
             IntPtr data)
         {
-            int status;
+            WriteEventErrorCode status;
 
             status = m_eventProvider.EventWriteTransfer(
                 m_regHandle,
@@ -1220,11 +1207,12 @@ namespace System.Diagnostics.Tracing
                 dataCount,
                 (EventData*)data);
 
-            if (status != 0)
+            if (status != WriteEventErrorCode.NoError)
             {
                 SetLastError(status);
                 return false;
             }
+
             return true;
         }
 
@@ -1244,6 +1232,9 @@ namespace System.Diagnostics.Tracing
             return m_eventProvider.EventUnregister(registrationHandle);
         }
 
+#if PLATFORM_WINDOWS
+        private static bool m_setInformationMissing;
+
         internal unsafe int SetInformation(
             Interop.Advapi32.EVENT_INFO_CLASS eventInfoClass,
             IntPtr data,
@@ -1251,7 +1242,6 @@ namespace System.Diagnostics.Tracing
         {
             int status = Interop.Errors.ERROR_NOT_SUPPORTED;
 
-#if PLATFORM_WINDOWS
             if (!m_setInformationMissing)
             {
                 try
@@ -1267,10 +1257,10 @@ namespace System.Diagnostics.Tracing
                     m_setInformationMissing = true;
                 }
             }
-#endif
 
             return status;
         }
+#endif
     }
 
 #if PLATFORM_WINDOWS
@@ -1300,7 +1290,7 @@ namespace System.Diagnostics.Tracing
         }
 
         // Write an event.
-        unsafe int IEventProvider.EventWriteTransfer(
+        unsafe EventProvider.WriteEventErrorCode IEventProvider.EventWriteTransfer(
             long registrationHandle,
             in EventDescriptor eventDescriptor,
             IntPtr eventHandle,
@@ -1309,13 +1299,24 @@ namespace System.Diagnostics.Tracing
             int userDataCount,
             EventProvider.EventData* userData)
         {
-            return Interop.Advapi32.EventWriteTransfer(
+            int error = Interop.Advapi32.EventWriteTransfer(
                 registrationHandle,
                 in eventDescriptor,
                 activityId,
                 relatedActivityId,
                 userDataCount,
                 userData);
+
+            switch (error)
+            {
+                case Interop.Errors.ERROR_ARITHMETIC_OVERFLOW:
+                case Interop.Errors.ERROR_MORE_DATA:
+                    return EventProvider.WriteEventErrorCode.EventTooBig;
+                case Interop.Errors.ERROR_NOT_ENOUGH_MEMORY:
+                    return EventProvider.WriteEventErrorCode.NoFreeBuffers;
+            }
+
+            return EventProvider.WriteEventErrorCode.NoError;
         }
 
         // Get or set the per-thread activity ID.
@@ -1350,7 +1351,7 @@ namespace System.Diagnostics.Tracing
             return 0;
         }
 
-        unsafe int IEventProvider.EventWriteTransfer(
+        unsafe EventProvider.WriteEventErrorCode IEventProvider.EventWriteTransfer(
             long registrationHandle,
             in EventDescriptor eventDescriptor,
             IntPtr eventHandle,
@@ -1359,7 +1360,7 @@ namespace System.Diagnostics.Tracing
             int userDataCount,
             EventProvider.EventData* userData)
         {
-            return 0;
+            return EventProvider.WriteEventErrorCode.NoError;
         }
 
         int IEventProvider.EventActivityIdControl(Interop.Advapi32.ActivityControl ControlCode, ref Guid ActivityId)
