@@ -469,6 +469,7 @@ namespace System.Reflection.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFromWithPartialName() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void LoadWithPartialName_Neg()
         {
             AssertExtensions.Throws<ArgumentNullException>("partialName", () => Assembly.LoadWithPartialName(null));
