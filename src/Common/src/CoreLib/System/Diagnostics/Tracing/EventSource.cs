@@ -2081,20 +2081,6 @@ namespace System.Diagnostics.Tracing
 #endif //!ES_BUILD_PCL
         }
 
-#if !CORERT
-        private int GetParameterCount(EventMetadata eventData)
-        {
-            return eventData.Parameters.Length;
-        }
-
-        private Type GetDataType(EventMetadata eventData, int parameterId)
-        {
-            return eventData.Parameters[parameterId].ParameterType;
-        }
-
-        private static readonly bool m_EventSourcePreventRecursion = false;
-#endif
-
         private unsafe void WriteToAllListeners(int eventId, Guid* activityID, Guid* childActivityID, int eventDataCount, EventSource.EventData* data)
         {
             // We represent a byte[] as a integer denoting the length  and then a blob of bytes in the data pointer. This causes a spurious
@@ -2451,12 +2437,40 @@ namespace System.Diagnostics.Tracing
          root them and modify shared library definition to force export them.
          */
 #if ES_BUILD_PN
-       public
+        public
 #else
-       internal
+        internal
 #endif
         partial struct EventMetadata
         {
+#if ES_BUILD_PN
+            public EventMetadata(EventDescriptor descriptor,
+                EventTags tags,
+                bool enabledForAnyListener,
+                bool enabledForETW,
+                string name,
+                string message,
+                EventParameterType[] parameterTypes)
+            {
+                this.Descriptor = descriptor;
+                this.Tags = tags;
+                this.EnabledForAnyListener = enabledForAnyListener;
+                this.EnabledForETW = enabledForETW;
+#if FEATURE_PERFTRACING
+                this.EnabledForEventPipe = false;
+#endif
+                this.TriggersActivityTracking = 0;
+                this.Name = name;
+                this.Message = message;
+                this.Parameters = null;
+                this.TraceLoggingEventTypes = null;
+                this.ActivityOptions = EventActivityOptions.None;
+                this.ParameterTypes = parameterTypes;
+                this.HasRelatedActivityID = false;
+                this.EventHandle = IntPtr.Zero;
+            }
+#endif
+
             public EventDescriptor Descriptor;
             public IntPtr EventHandle;              // EventPipeEvent handle.
             public EventTags Tags;
@@ -2481,6 +2495,114 @@ namespace System.Diagnostics.Tracing
             public EventParameterType[] ParameterTypes;
 #endif
         };
+
+#if !ES_BUILD_PN
+        private int GetParameterCount(EventMetadata eventData)
+        {
+            return eventData.Parameters.Length;
+        }
+
+        private Type GetDataType(EventMetadata eventData, int parameterId)
+        {
+            return eventData.Parameters[parameterId].ParameterType;
+        }
+
+        private static readonly bool m_EventSourcePreventRecursion = false;
+#else
+        private int GetParameterCount(EventMetadata eventData)
+        {
+            int paramCount;
+            if(eventData.Parameters == null)
+            {
+                paramCount = eventData.ParameterTypes.Length;
+            }
+            else
+            {
+                paramCount = eventData.Parameters.Length;
+            }
+
+            return paramCount;
+        }
+
+        private Type GetDataType(EventMetadata eventData, int parameterId)
+        {
+            Type dataType;
+            if(eventData.Parameters == null)
+            {
+                dataType = EventTypeToType(eventData.ParameterTypes[parameterId]);
+            }
+            else
+            {
+                dataType = eventData.Parameters[parameterId].ParameterType;
+            }
+
+            return dataType;
+        }
+
+        private static readonly bool m_EventSourcePreventRecursion = true;
+
+        public enum EventParameterType
+        {
+            Boolean,
+            Byte,
+            SByte,
+            Char,
+            Int16,
+            UInt16,
+            Int32,
+            UInt32,
+            Int64,
+            UInt64,
+            IntPtr,
+            Single,
+            Double,
+            Decimal,
+            Guid,
+            String
+        }
+
+        private Type EventTypeToType(EventParameterType type)
+        {
+            switch (type)
+            {
+                case EventParameterType.Boolean:
+                    return typeof(bool);
+                case EventParameterType.Byte:
+                    return typeof(byte);
+                case EventParameterType.SByte:
+                    return typeof(sbyte);
+                case EventParameterType.Char:
+                    return typeof(char);
+                case EventParameterType.Int16:
+                    return typeof(short);
+                case EventParameterType.UInt16:
+                    return typeof(ushort);
+                case EventParameterType.Int32:
+                    return typeof(int);
+                case EventParameterType.UInt32:
+                    return typeof(uint);
+                case EventParameterType.Int64:
+                    return typeof(long);
+                case EventParameterType.UInt64:
+                    return typeof(ulong);
+                case EventParameterType.IntPtr:
+                    return typeof(IntPtr);
+                case EventParameterType.Single:
+                    return typeof(float);
+                case EventParameterType.Double:
+                    return typeof(double);
+                case EventParameterType.Decimal:
+                    return typeof(decimal);
+                case EventParameterType.Guid:
+                    return typeof(Guid);
+                case EventParameterType.String:
+                    return typeof(string);
+                default:
+                    // TODO: should I throw an exception here?
+                    return null;
+            }
+        }
+#endif
 
         // This is the internal entry point that code:EventListeners call when wanting to send a command to a
         // eventSource. The logic is as follows
