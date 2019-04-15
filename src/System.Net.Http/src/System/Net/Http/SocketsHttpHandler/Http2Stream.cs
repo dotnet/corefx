@@ -44,6 +44,7 @@ namespace System.Net.Http
 
             private StreamState _state;
             private bool _disposed;
+            private bool _abortRequestBody;
 
             /// <summary>The core logic for the IValueTaskSource implementation.</summary>
             private ManualResetValueTaskSourceCore<bool> _waitSource = new ManualResetValueTaskSourceCore<bool> { RunContinuationsAsynchronously = true }; // mutable struct, do not make this readonly
@@ -106,6 +107,27 @@ namespace System.Net.Http
                     // Don't wait for completion, which could happen asynchronously.
                     Task ignored = _connection.SendEndStreamAsync(_streamId);
                 }
+            }
+
+            public async Task SendRequestContentWithExpect100ContinueAsync(CancellationToken cancellationToken)
+            {
+                TaskCompletionSource<bool> allowExpect100ToContinue = new TaskCompletionSource<bool>();
+                var expect100Timer = new Timer(
+                            s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
+                            allowExpect100ToContinue, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+
+                //await _connection.FlushOutgoingBytesAsync().ConfigureAwait(false);
+                //:w!FinishWrite(mustFlush: true);
+                // Start processing Header frames.
+                Task response1 = ReadResponseHeadersAsync(true, allowExpect100ToContinue);
+                bool sendRequestContent = await allowExpect100ToContinue.Task.ConfigureAwait(false);
+
+                if (sendRequestContent)
+                {
+                    await SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
+                }
+
+                await response1;
             }
 
             public void OnWindowUpdate(int amount)
@@ -195,6 +217,21 @@ namespace System.Net.Http
                 }
             }
 
+            public void OnResponse100Continue()
+            {
+                // This is called when we receive complete set of headers with transient response code - like 100 Continue.
+                // We need to rest state and wait for another final response.
+                lock (SyncObject)
+                {
+                    if (_state != StreamState.ExpectingData)
+                    {
+                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                    }
+
+                   _state = StreamState.ExpectingHeaders;
+                }
+            }
+
             public void OnResponseHeadersComplete(bool endStream)
             {
                 bool signalWaiter;
@@ -205,10 +242,18 @@ namespace System.Net.Http
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
 
+                    if ((uint)Response.StatusCode < 200)
+                    {
+                        // Eat continuations and transient responses.
+                        // TBD should we wait???.
+//                        return;
+                    }
+
                     if (_state == StreamState.ExpectingTrailingHeaders || endStream)
                     {
                         _state = StreamState.Complete;
                     }
+                    //else if ((uint)Response.StatusCode >= 200)
                     else
                     {
                         _state = StreamState.ExpectingData;
@@ -323,15 +368,39 @@ namespace System.Net.Http
                 }
             }
 
-            public async Task ReadResponseHeadersAsync()
+            public async Task ReadResponseHeadersAsync(bool createStream, TaskCompletionSource<bool> tcs = null)
             {
                 // Wait for response headers to be read.
-                (bool wait, bool emptyResponse) = TryEnsureHeaders();
-                if (wait)
+                bool emptyResponse;
+                bool wait;
+
+                do
                 {
-                    await GetWaiterTask().ConfigureAwait(false);
                     (wait, emptyResponse) = TryEnsureHeaders();
-                    Debug.Assert(!wait);
+                    if (wait)
+                    {
+                        await GetWaiterTask().ConfigureAwait(false);
+                        (wait, emptyResponse) = TryEnsureHeaders();
+                        Debug.Assert(!wait);
+                    }
+
+                    if (Response.StatusCode  == HttpStatusCode.Continue)
+                    {
+                        OnResponse100Continue();
+                        if (tcs != null)
+                        {
+                            
+                            tcs.TrySetResult(true);
+                        }
+                    }
+                }
+
+                while ((uint)Response.StatusCode < 200);
+
+                if (tcs != null && (int)Response.StatusCode >= 300)
+                {
+                    tcs.TrySetResult(false);
+                    _abortRequestBody = true;
                 }
 
                 // Start to process the response body.
@@ -539,6 +608,7 @@ namespace System.Net.Http
             private sealed class Http2WriteStream : BaseAsyncStream
             {
                 private Http2Stream _http2Stream;
+                private bool _abortStream;
 
                 public Http2WriteStream(Http2Stream http2Stream)
                 {
@@ -557,6 +627,17 @@ namespace System.Net.Http
                     base.Dispose(disposing);
                 }
 
+                public void Reset()
+                {
+                    Http2Stream http2Stream = Interlocked.Exchange(ref _http2Stream, null);
+                    if (http2Stream == null)
+                    {
+                        return;
+                    }
+
+                    base.Dispose();
+                }
+
                 public override bool CanRead => false;
                 public override bool CanWrite => true;
 
@@ -568,6 +649,19 @@ namespace System.Net.Http
                     if (http2Stream == null)
                     {
                         return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
+                    }
+
+                    if (_abortStream)
+                    {
+                        return new ValueTask();
+                    }
+
+                    if (http2Stream._abortRequestBody)
+                    {
+                        // If are asked to abort sending request body after we started, send RST and ignore test for the stream.
+                        Task ignored = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel); 
+                        _abortStream = true;
+                        return new ValueTask();
                     }
 
                     return http2Stream.SendDataAsync(buffer, cancellationToken);

@@ -659,6 +659,17 @@ namespace System.Net.Test.Common
 
             return requestData;
         }
+
+        public async static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<Http2LoopbackServer, Task> serverFunc)
+        {
+            using (var server = Http2LoopbackServer.CreateServer())
+            {
+                Task clientTask = clientFunc(server.Address);
+                Task serverTask = serverFunc(server);
+
+                await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed();
+            }
+        }
     }
 
     public class Http2Options

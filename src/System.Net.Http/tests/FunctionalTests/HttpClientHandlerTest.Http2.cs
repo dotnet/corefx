@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text;
 
 using Xunit;
 
@@ -1261,6 +1262,38 @@ namespace System.Net.Http.Functional.Tests
 
                 await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await clientTask);
             }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task PostAsyncExpect100Continue_SendRequest_Ok(bool send100Continue)
+        {
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Headers.ExpectContinue = true;
+                    request.Content = new StringContent(new string('*', 3000));
+
+                    HttpResponseMessage response = await client.SendAsync(request);
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            },
+            async server =>
+            {
+                await server.EstablishConnectionAsync();
+
+                (int streamId, HttpRequestData requestData) = await server.ReadAndParseRequestHeaderAsync();
+                Assert.Equal("100-continue", requestData.GetSingleHeaderValue("Expect"));
+                if (send100Continue)
+                {
+                    await server.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.Continue);
+                }
+                await server.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
+                await server.SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes("OK"));
+            });
         }
     }
 }
