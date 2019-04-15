@@ -2688,6 +2688,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData("jp\u30A5")]
         public async Task SendAsync_InvalidHeader_Throw(string value)
         {
+            if (!UseSocketsHttpHandler)
+            {
+                // TODO move this test to HttpClientHandlerTest.Headers when #36708 is merged.
+                return;
+            }
+
             await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
@@ -2696,20 +2702,18 @@ namespace System.Net.Http.Functional.Tests
                     var request = new HttpRequestMessage(HttpMethod.Get, uri);
                     Assert.True(request.Headers.TryAddWithoutValidation("bad", value));
 
-                    Task t  = client.SendAsync(request);
-                   // await Assert.ThrowsAsync<HttpRequestException>(() => t).ConfigureAwait(false);
-                   // await Assert.ThrowsAsync<HttpRequestException>(async () => await t.ConfigureAwait(false));
-             //      await t;
-            //       t.GetAwaiter().GetResult();
-           //        return t;
-           //         await t;
-
-                    await Assert.ThrowsAsync<HttpRequestException>(() => t);
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(request));
                 }
+
             },
             async server =>
             {
-                HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK).ConfigureAwait(false);
+                try
+                {
+                    // Client should abort at some point so this is going to throw.
+                    HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK).ConfigureAwait(false);
+                }
+                catch (IOException) { };
             });
         }
 
