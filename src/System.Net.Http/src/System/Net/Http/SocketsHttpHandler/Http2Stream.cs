@@ -241,11 +241,6 @@ namespace System.Net.Http
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
 
-                    if ((uint)Response.StatusCode < 200)
-                    {
-                        // Eat continuations and transient responses.
-                    }
-
                     if (_state == StreamState.ExpectingTrailingHeaders || endStream)
                     {
                         _state = StreamState.Complete;
