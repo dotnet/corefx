@@ -5,11 +5,11 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal static partial class Interop
+internal partial class Interop
 {
-    internal static partial class Kernel32
+    internal partial class Kernel32
     {
-        [DllImport(Interop.Libraries.Kernel32, ExactSpelling = true)]
-        public static extern int GetCurrentThreadId();
+        [DllImport(Libraries.Kernel32)]
+        internal static unsafe extern Interop.BOOL FileTimeToSystemTime(long* lpFileTime, Interop.Kernel32.SYSTEMTIME* lpSystemTime);
     }
 }
