@@ -28,7 +28,6 @@ namespace System.Text.Json
     /// </remarks>
     public sealed partial class Utf8JsonWriter : IDisposable
     {
-        private const int StackallocThreshold = 256;
         private const int DefaultGrowthSize = 4096;
 
         private IBufferWriter<byte> _output;
@@ -259,8 +258,8 @@ namespace System.Text.Json
                 Debug.Assert(_arrayBufferWriter != null);
                 await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken);
                 _arrayBufferWriter.Clear();
-                _memory = default;
                 await _stream.FlushAsync();
+                _memory = default;
                 BytesCommitted += BytesPending;
                 BytesPending = 0;
             }
@@ -337,7 +336,7 @@ namespace System.Text.Json
         {
             if (_memory.Length - BytesPending < 2)  // 1 start token, and optionally, 1 list separator
             {
-                Grow();
+                Grow(2);
             }
 
             Span<byte> output = _memory.Span;
@@ -509,17 +508,9 @@ namespace System.Text.Json
 
             int length = JsonWriterHelper.GetMaxEscapedLength(utf8PropertyName.Length, firstEscapeIndexProp);
 
-            Span<byte> escapedPropertyName = stackalloc byte[0];
-
-            if (length > StackallocThreshold)
-            {
-                propertyArray = ArrayPool<byte>.Shared.Rent(length);
-                escapedPropertyName = propertyArray;
-            }
-            else
-            {
-                escapedPropertyName = stackalloc byte[length];
-            }
+            Span<byte> escapedPropertyName = length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[length] :
+                (propertyArray = ArrayPool<byte>.Shared.Rent(length));
 
             JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
 
@@ -656,17 +647,9 @@ namespace System.Text.Json
 
             int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndexProp);
 
-            Span<char> escapedPropertyName = stackalloc char[0];
-
-            if (length > StackallocThreshold)
-            {
-                propertyArray = ArrayPool<char>.Shared.Rent(length);
-                escapedPropertyName = propertyArray;
-            }
-            else
-            {
-                escapedPropertyName = stackalloc char[length];
-            }
+            Span<char> escapedPropertyName = length <= JsonConstants.StackallocThreshold ?
+                stackalloc char[length] :
+                (escapedPropertyName = ArrayPool<char>.Shared.Rent(length));
 
             JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
 
@@ -723,9 +706,9 @@ namespace System.Text.Json
 
         private void WriteEndMinimized(byte token)
         {
-            if (_memory.Length < 1) // 1 end token
+            if (_memory.Length - BytesPending < 1) // 1 end token
             {
-                Grow();
+                Grow(1);
             }
 
             Span<byte> output = _memory.Span;
@@ -845,28 +828,33 @@ namespace System.Text.Json
             }
         }
 
-        private void Grow()
+        private void Grow(int minimumSize)
         {
+            Debug.Assert(minimumSize > 0);
+
             FlushHelper();
-            if (_stream != null)
+
+            int requiredSize = Math.Max(DefaultGrowthSize, minimumSize);
+
+            if (_stream == null)
+            {
+                _memory = _output.GetMemory(requiredSize);
+
+                if (_memory.Length < minimumSize)
+                {
+                    ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetMinimumSizeSpan, minimumSize);
+                }
+            }
+            else
             {
                 FlushHelperStream();
+                _memory = _output.GetMemory(requiredSize);
+
+                Debug.Assert(_memory.Length >= minimumSize);
             }
-
-            Debug.Assert(_memory.Length < DefaultGrowthSize);
-
-            _memory = _output.GetMemory(DefaultGrowthSize);
-
-            Debug.Assert(_memory.Length >= DefaultGrowthSize);
 
             BytesCommitted += BytesPending;
             BytesPending = 0;
-        }
-
-        private void Grow(int minimumSize)
-        {
-            Debug.Assert(minimumSize > 0 && minimumSize <= DefaultGrowthSize);
-            Grow();
         }
 
         private void SetFlagToAddListSeparatorBeforeNextItem()

@@ -219,7 +219,7 @@ namespace System.Text.Json
             Debug.Assert(escapedPropertyName.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - 5);
 
             // All ASCII, 2 quotes, 1 colon, and 1 start token => escapedPropertyName.Length + 4
-            // Optionally, 1 list separator, and 3x growth when transcoding
+            // Optionally, 1 list separator, and up to 3x growth when transcoding
             int maxRequired = (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 5;
 
             if (_memory.Length - BytesPending < maxRequired)
@@ -297,7 +297,7 @@ namespace System.Text.Json
             Debug.Assert(escapedPropertyName.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - indent - 8);
 
             // All ASCII, 2 quotes, 1 colon, 1 space, and 1 start token => indent + escapedPropertyName.Length + 5 
-            // Optionally, 1 list separator and 1-2 bytes for new line, and 3x growth when transcoding
+            // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding
             int maxRequired = indent + (escapedPropertyName.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 8; 
 
             if (_memory.Length - BytesPending < maxRequired)

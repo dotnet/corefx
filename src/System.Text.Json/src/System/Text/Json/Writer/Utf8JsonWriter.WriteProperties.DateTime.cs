@@ -287,7 +287,5 @@ namespace System.Text.Json
 
             idx += bytesWritten;
         }
-
-        private static readonly StandardFormat s_dateTimeStandardFormat = new StandardFormat('O');
     }
 }
