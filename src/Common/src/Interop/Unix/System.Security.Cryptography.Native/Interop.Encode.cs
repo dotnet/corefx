@@ -6,6 +6,7 @@ using System;
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
 
 internal static partial class Interop
 {
@@ -59,7 +60,7 @@ internal static partial class Interop
                 throw CreateOpenSslCryptographicException();
             }
 
-            byte[] data = ArrayPool<byte>.Shared.Rent(size);
+            byte[] data = CryptoPool.Rent(size);
 
             int size2 = encode(handle, data);
             if (size2 < 1)
@@ -69,7 +70,7 @@ internal static partial class Interop
 
                 // Since we don't know what was written, assume it was secret and clear the value.
                 // (It doesn't matter much, since we're behind Debug.Fail)
-                ArrayPool<byte>.Shared.Return(data, clearArray: true);
+                CryptoPool.Return(data, CryptoPool.ClearAll);
 
                 // If it ever happens, ensure the error queue gets cleared.
                 // And since it didn't write the data, reporting an exception is good too.

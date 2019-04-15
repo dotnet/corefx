@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Buffers;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Security.Cryptography.Asn1;
@@ -185,7 +184,7 @@ namespace Internal.Cryptography.Pal.AnyOS
 
             try
             {
-                cek = ArrayPool<byte>.Shared.Rent(privateKey.KeySize / 8);
+                cek = CryptoPool.Rent(privateKey.KeySize / 8);
 
                 if (!privateKey.TryDecrypt(encryptedKey, cek, encryptionPadding, out cekLength))
                 {
@@ -206,8 +205,7 @@ namespace Internal.Cryptography.Pal.AnyOS
             {
                 if (cek != null)
                 {
-                    Array.Clear(cek, 0, cekLength);
-                    ArrayPool<byte>.Shared.Return(cek);
+                    CryptoPool.Return(cek, cekLength);
                 }
             }
 #else

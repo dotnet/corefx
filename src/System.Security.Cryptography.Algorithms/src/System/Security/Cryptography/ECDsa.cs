@@ -153,7 +153,7 @@ namespace System.Security.Cryptography
             for (int i = 256; ; i = checked(i * 2))
             {
                 int hashLength = 0;
-                byte[] hash = ArrayPool<byte>.Shared.Rent(i);
+                byte[] hash = CryptoPool.Rent(i);
                 try
                 {
                     if (TryHashData(data, hash, hashAlgorithm, out hashLength))
@@ -163,8 +163,7 @@ namespace System.Security.Cryptography
                 }
                 finally
                 {
-                    Array.Clear(hash, 0, hashLength);
-                    ArrayPool<byte>.Shared.Return(hash);
+                    CryptoPool.Return(hash, hashLength);
                 }
             }
         }
@@ -200,6 +199,7 @@ namespace System.Security.Cryptography
 
         protected virtual bool TryHashData(ReadOnlySpan<byte> data, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten)
         {
+            // Use ArrayPool.Shared because the array is passed out.
             byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
             try
             {

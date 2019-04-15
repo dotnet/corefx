@@ -213,7 +213,7 @@ namespace System.Security.Cryptography
             if (keyParameters != null && algId.Parameters != null)
             {
                 ReadOnlySpan<byte> algIdParameters = algId.Parameters.Value.Span;
-                byte[] verify = ArrayPool<byte>.Shared.Rent(algIdParameters.Length);
+                byte[] verify = CryptoPool.Rent(algIdParameters.Length);
 
                 try
                 {
@@ -234,7 +234,7 @@ namespace System.Security.Cryptography
                 finally
                 {
                     // verify contains public information and does not need to be cleared.
-                    ArrayPool<byte>.Shared.Return(verify);
+                    CryptoPool.Return(verify, clearSize: 0);
                 }
             }
         }
@@ -362,7 +362,7 @@ namespace System.Security.Cryptography
             }
             else
             {
-                publicKeyRented = ArrayPool<byte>.Shared.Rent(publicKeyLength);
+                publicKeyRented = CryptoPool.Rent(publicKeyLength);
                 publicKeyBytes = publicKeyRented.AsSpan(0, publicKeyLength);
             }
 
@@ -380,7 +380,7 @@ namespace System.Security.Cryptography
 
                 if (publicKeyRented != null)
                 {
-                    ArrayPool<byte>.Shared.Return(publicKeyRented);
+                    CryptoPool.Return(publicKeyRented, clearSize: 0);
                 }
             }
         }

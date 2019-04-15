@@ -39,8 +39,7 @@ namespace System.Security.Cryptography
                 {
                     if (arrayToReturnToArrayPool != null)
                     {
-                        Array.Clear(arrayToReturnToArrayPool, 0, source.Length);
-                        ArrayPool<byte>.Shared.Return(arrayToReturnToArrayPool);
+                        CryptoPool.Return(arrayToReturnToArrayPool, source.Length);
                     }
                 }
             }
@@ -59,8 +58,7 @@ namespace System.Security.Cryptography
                 {
                     if (arrayToReturnToArrayPool != null)
                     {
-                        Array.Clear(arrayToReturnToArrayPool, 0, hash.Length);
-                        ArrayPool<byte>.Shared.Return(arrayToReturnToArrayPool);
+                        CryptoPool.Return(arrayToReturnToArrayPool, hash.Length);
                     }
                 }
             }
@@ -96,8 +94,7 @@ namespace System.Security.Cryptography
                 {
                     if (arrayToReturnToArrayPool != null)
                     {
-                        Array.Clear(arrayToReturnToArrayPool, 0, hash.Length);
-                        ArrayPool<byte>.Shared.Return(arrayToReturnToArrayPool);
+                        CryptoPool.Return(arrayToReturnToArrayPool, hash.Length);
                     }
                 }
             }
@@ -126,7 +123,7 @@ namespace System.Security.Cryptography
                 }
                 else
                 {
-                    byte[] arrayPoolPaddedHash = ArrayPool<byte>.Shared.Rent(qLength);
+                    byte[] arrayPoolPaddedHash = CryptoPool.Rent(qLength);
                     hash.CopyTo(new Span<byte>(arrayPoolPaddedHash, qLength - hash.Length, hash.Length));
                     hash = new ReadOnlySpan<byte>(arrayPoolPaddedHash, 0, qLength);
                     return arrayPoolPaddedHash;

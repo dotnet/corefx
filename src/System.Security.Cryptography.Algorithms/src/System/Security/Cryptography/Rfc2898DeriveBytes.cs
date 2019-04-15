@@ -258,7 +258,7 @@ namespace System.Security.Cryptography
             Buffer.BlockCopy(_salt, 0, temp, 0, _salt.Length);
             Helpers.WriteInt(_block, temp, _salt.Length);
 
-            byte[] ui = ArrayPool<byte>.Shared.Rent(_blockSize);
+            byte[] ui = CryptoPool.Rent(_blockSize);
             try
             {
                 Span<byte> uiSpan = new Span<byte>(ui, 0, _blockSize);
@@ -286,8 +286,7 @@ namespace System.Security.Cryptography
             }
             finally
             {
-                Array.Clear(ui, 0, _blockSize);
-                ArrayPool<byte>.Shared.Return(ui);
+                CryptoPool.Return(ui, _blockSize);
             }
         }
     }

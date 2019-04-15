@@ -57,7 +57,8 @@ namespace System.Security.Cryptography.Asn1
             {
                 Array.Clear(_buffer, 0, _offset);
 #if !CHECK_ACCURATE_ENSURE
-                ArrayPool<byte>.Shared.Return(_buffer);
+                // clearSize: 0 because it was already cleared.
+                CryptoPool.Return(_buffer, clearSize: 0);
 #endif
                 _buffer = null;
             }
@@ -226,26 +227,23 @@ namespace System.Security.Cryptography.Asn1
                 // While the ArrayPool may have similar logic, make sure we don't run into a lot of
                 // "grow a little" by asking in 1k steps.
                 int blocks = checked(_offset + pendingCount + (BlockSize - 1)) / BlockSize;
-                var localPool = ArrayPool<byte>.Shared;
-                byte[] newBytes = localPool.Rent(BlockSize * blocks);
+                byte[] oldBytes = _buffer;
+                _buffer = CryptoPool.Rent(BlockSize * blocks);
 
-                if (_buffer != null)
+                if (oldBytes != null)
                 {
-                    Buffer.BlockCopy(_buffer, 0, newBytes, 0, _offset);
-                    Array.Clear(_buffer, 0, _offset);
-                    localPool.Return(_buffer);
+                    Buffer.BlockCopy(oldBytes, 0, _buffer, 0, _offset);
+                    CryptoPool.Return(oldBytes, _offset);
                 }
 #endif
 
 #if DEBUG
                 // Ensure no "implicit 0" is happening
-                for (int i = _offset; i < newBytes.Length; i++)
+                for (int i = _offset; i < _buffer.Length; i++)
                 {
-                    newBytes[i] ^= 0xFF;
+                    _buffer[i] ^= 0xFF;
                 }
 #endif
-
-                _buffer = newBytes;
             }
         }
 
@@ -506,8 +504,7 @@ namespace System.Security.Cryptography.Asn1
             var comparer = new ArrayIndexSetOfValueComparer(buffer);
             positions.Sort(comparer);
 
-            ArrayPool<byte> localPool = ArrayPool<byte>.Shared;
-            byte[] tmp = localPool.Rent(len);
+            byte[] tmp = CryptoPool.Rent(len);
 
             pos = 0;
 
@@ -520,8 +517,7 @@ namespace System.Security.Cryptography.Asn1
             Debug.Assert(pos == len);
 
             Buffer.BlockCopy(tmp, 0, buffer, start, len);
-            Array.Clear(tmp, 0, len);
-            localPool.Return(tmp);
+            CryptoPool.Return(tmp, len);
         }
 
         internal static void Reverse(Span<byte> span)
