@@ -73,7 +73,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task SendAsync_GetWithValidHostHeader_Success(bool withPort)
         {
             var m = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
-            m.Headers.Host = withPort ? Configuration.Http.SecureHost + ":123" : Configuration.Http.SecureHost;
+            m.Headers.Host = withPort ? Configuration.Http.SecureHost + ":443" : Configuration.Http.SecureHost;
 
             using (HttpClient client = CreateHttpClient())
             using (HttpResponseMessage response = await client.SendAsync(m))
