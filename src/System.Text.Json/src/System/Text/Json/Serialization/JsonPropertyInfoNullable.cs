@@ -70,46 +70,13 @@ namespace System.Text.Json.Serialization
 
             // Converting to TProperty? here lets us share a common ApplyValue() with ApplyNullValue().
             TProperty? nullableValue = new TProperty?(value);
-            ApplyValue(nullableValue, options, ref state.Current);
-        }
-
-        // If this method is changed, also change JsonPropertyInfoNotNullable.ApplyValue and JsonSerializer.ApplyObjectToEnumerable
-        private void ApplyValue(TProperty? value, JsonSerializerOptions options, ref ReadStackFrame frame)
-        {
-            if (frame.IsEnumerable())
-            {
-                if (frame.TempEnumerableValues != null)
-                {
-                    ((IList<TProperty?>)frame.TempEnumerableValues).Add(value);
-                }
-                else
-                {
-                    ((IList<TProperty?>)frame.ReturnValue).Add(value);
-                }
-            }
-            else if (frame.IsPropertyEnumerable())
-            {
-                Debug.Assert(frame.JsonPropertyInfo != null);
-                Debug.Assert(frame.ReturnValue != null);
-                if (frame.TempEnumerableValues != null)
-                {
-                    ((IList<TProperty?>)frame.TempEnumerableValues).Add(value);
-                }
-                else
-                {
-                    ((IList<TProperty?>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
-                }
-            }
-            else
-            {
-                Debug.Assert(frame.JsonPropertyInfo != null);
-                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
-            }
+            JsonSerializer.ApplyValueToEnumerable(ref nullableValue, options, ref state.Current);
         }
 
         internal override void ApplyNullValue(JsonSerializerOptions options, ref ReadStack state)
         {
-            ApplyValue(null, options, ref state.Current);
+            TProperty? nullableValue = null;
+            JsonSerializer.ApplyValueToEnumerable(ref nullableValue, options, ref state.Current);
         }
 
         // todo: have the caller check if current.Enumerator != null and call WriteEnumerable of the underlying property directly to avoid an extra virtual call.
@@ -165,9 +132,10 @@ namespace System.Text.Json.Serialization
                 Debug.Assert(current.Enumerator != null);
 
                 TProperty? value;
-                if (current.Enumerator is IEnumerator<TProperty?>)
+                if (current.Enumerator is IEnumerator<TProperty?> enumerator)
                 {
-                    value = ((IEnumerator<TProperty?>)current.Enumerator).Current;
+                    // Avoid boxing for strongly-typed enumerators such as returned from IList<T>.
+                    value = enumerator.Current;
                 }
                 else
                 {

@@ -70,7 +70,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(MyDateTimeOffset);
             Assert.Null(MyEnum);
 
-            Assert.Equal(null, MyInt16Array);
+            Assert.Null(MyInt16Array);
             Assert.Null(MyInt32Array);
             Assert.Null(MyInt64Array);
             Assert.Null(MyUInt16Array);

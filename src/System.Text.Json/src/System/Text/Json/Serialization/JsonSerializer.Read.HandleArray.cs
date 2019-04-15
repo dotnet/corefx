@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization.Policies;
 
@@ -147,7 +148,7 @@ namespace System.Text.Json.Serialization
             return false;
         }
 
-        // If this method is changed, also change JsonPropertyInfoNullable.ApplyValue and JsonPropertyInfoNotNullable.ApplyValue
+        // If this method is changed, also change ApplyValueToEnumerable.
         internal static void ApplyObjectToEnumerable(object value, JsonSerializerOptions options, ref ReadStackFrame frame, bool setPropertyDirectly = false)
         {
             if (frame.IsEnumerable())
@@ -172,6 +173,40 @@ namespace System.Text.Json.Serialization
                 else
                 {
                     ((IList)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
+                }
+            }
+            else
+            {
+                Debug.Assert(frame.JsonPropertyInfo != null);
+                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
+            }
+        }
+
+        // If this method is changed, also change ApplyObjectToEnumerable.
+        internal static void ApplyValueToEnumerable<TProperty>(ref TProperty value, JsonSerializerOptions options, ref ReadStackFrame frame)
+        {
+            if (frame.IsEnumerable())
+            {
+                if (frame.TempEnumerableValues != null)
+                {
+                    ((IList<TProperty>)frame.TempEnumerableValues).Add(value);
+                }
+                else
+                {
+                    ((IList<TProperty>)frame.ReturnValue).Add(value);
+                }
+            }
+            else if (frame.IsPropertyEnumerable())
+            {
+                Debug.Assert(frame.JsonPropertyInfo != null);
+                Debug.Assert(frame.ReturnValue != null);
+                if (frame.TempEnumerableValues != null)
+                {
+                    ((IList<TProperty>)frame.TempEnumerableValues).Add(value);
+                }
+                else
+                {
+                    ((IList<TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
                 }
             }
             else

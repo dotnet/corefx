@@ -72,47 +72,13 @@ namespace System.Text.Json.Serialization
                 return;
             }
 
-            ApplyValue(ref value, options, ref state.Current);
+            JsonSerializer.ApplyValueToEnumerable(ref value, options, ref state.Current);
         }
 
         internal override void ApplyNullValue(JsonSerializerOptions options, ref ReadStack state)
         {
             Debug.Assert(state.Current.JsonPropertyInfo != null);
             state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, null, options);
-        }
-
-        // If this method is changed, also change JsonPropertyInfoNullable.ApplyValue and JsonSerializer.ApplyObjectToEnumerable
-        private void ApplyValue(ref TRuntimeProperty value, JsonSerializerOptions options, ref ReadStackFrame frame)
-        {
-            if (frame.IsEnumerable())
-            {
-                if (frame.TempEnumerableValues != null)
-                {
-                    ((IList<TRuntimeProperty>)frame.TempEnumerableValues).Add(value);
-                }
-                else
-                {
-                    ((IList<TRuntimeProperty>)frame.ReturnValue).Add(value);
-                }
-            }
-            else if (frame.IsPropertyEnumerable())
-            {
-                Debug.Assert(frame.JsonPropertyInfo != null);
-                Debug.Assert(frame.ReturnValue != null);
-                if (frame.TempEnumerableValues != null)
-                {
-                    ((IList<TRuntimeProperty>)frame.TempEnumerableValues).Add(value);
-                }
-                else
-                {
-                    ((IList<TRuntimeProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
-                }
-            }
-            else
-            {
-                Debug.Assert(frame.JsonPropertyInfo != null);
-                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
-            }
         }
 
         // todo: have the caller check if current.Enumerator != null and call WriteEnumerable of the underlying property directly to avoid an extra virtual call.
@@ -168,9 +134,10 @@ namespace System.Text.Json.Serialization
                 Debug.Assert(current.Enumerator != null);
 
                 TRuntimeProperty value;
-                if (current.Enumerator is IEnumerator<TRuntimeProperty>)
+                if (current.Enumerator is IEnumerator<TRuntimeProperty> enumerator)
                 {
-                    value = ((IEnumerator<TRuntimeProperty>)current.Enumerator).Current;
+                    // Avoid boxing for strongly-typed enumerators such as returned from IList<T>.
+                    value = enumerator.Current;
                 }
                 else
                 {
