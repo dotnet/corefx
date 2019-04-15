@@ -89,7 +89,7 @@ jobs:
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
             - group: DotNet-HelixApi-Access
 
-        - _args: -configuration $(_BuildConfig) -ci -arch $(_architecture) $(_finalFrameworkArg) $(_archiveTestsParameter)
+        - _args: -configuration $(_BuildConfig) -ci -arch $(_architecture) $(_finalFrameworkArg) $(_archiveTestsParameter) ${{ job.buildExtraArguments }}
         - _commonArguments: $(_args)
 
         # Windows variables
@@ -151,7 +151,6 @@ jobs:
                     -buildtests
                     $(_commonArguments)
                     /p:OuterLoop=$(_outerloop)
-                    ${{ job.buildExtraArguments }}
                     $(_msbuildCommonParameters)
               displayName: Build Sources and Tests
 
