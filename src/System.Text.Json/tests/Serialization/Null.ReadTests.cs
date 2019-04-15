@@ -9,29 +9,64 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class NullTests
     {
         [Fact]
-        public static void ClassWithNull()
+        public static void ClassWithNullProperty()
         {
             TestClassWithNull obj = JsonSerializer.Parse<TestClassWithNull>(TestClassWithNull.s_json);
             obj.Verify();
         }
 
         [Fact]
-        public static void DefaultReadValue()
+        public static void RootObjectIsNull()
         {
-            TestClassWithNullButInitialized obj = JsonSerializer.Parse<TestClassWithNullButInitialized>(TestClassWithNullButInitialized.s_json);
+            {
+                TestClassWithNull obj = JsonSerializer.Parse<TestClassWithNull>("null");
+                Assert.Null(obj);
+            }
+
+            {
+                object obj = JsonSerializer.Parse<object>("null");
+                Assert.Null(obj);
+            }
+        }
+
+        [Fact]
+        public static void DefaultIgnoreNullValuesOnRead()
+        {
+            TestClassWithInitializedProperties obj = JsonSerializer.Parse<TestClassWithInitializedProperties>(TestClassWithInitializedProperties.s_null_json);
             Assert.Equal(null, obj.MyString);
             Assert.Equal(null, obj.MyInt);
         }
 
         [Fact]
-        public static void OverrideReadOnOption()
+        public static void EnableIgnoreNullValuesOnRead()
         {
             var options = new JsonSerializerOptions();
-            options.IgnoreNullPropertyValueOnRead = true;
+            options.IgnoreNullValues = true;
 
-            TestClassWithNullButInitialized obj = JsonSerializer.Parse<TestClassWithNullButInitialized>(TestClassWithNullButInitialized.s_json, options);
+            TestClassWithInitializedProperties obj = JsonSerializer.Parse<TestClassWithInitializedProperties>(TestClassWithInitializedProperties.s_null_json, options);
             Assert.Equal("Hello", obj.MyString);
             Assert.Equal(1, obj.MyInt);
+        }
+
+        [Fact]
+        public static void ParseNullArgumentFail()
+        {
+            Assert.Throws<ArgumentNullException>(() => JsonSerializer.Parse<string>((string)null));
+            Assert.Throws<ArgumentNullException>(() => JsonSerializer.Parse("1", (Type)null));
+        }
+
+        [Fact]
+        public static void NullLiteralObjectInput()
+        {
+            {
+                string obj = JsonSerializer.Parse<string>("null");
+                Assert.Null(obj);
+            }
+
+            {
+                string obj = JsonSerializer.Parse<string>(@"""null""");
+                Assert.Equal("null", obj);
+            }
         }
     }
 }

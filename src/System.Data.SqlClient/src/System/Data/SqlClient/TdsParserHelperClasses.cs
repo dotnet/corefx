@@ -298,107 +298,6 @@ namespace System.Data.SqlClient
         }
     }
 
-    internal static class SqlEnvChangePool
-    {
-        private static int _count;
-        private static int _capacity;
-        private static SqlEnvChange[] _items;
-#if DEBUG
-        private static string[] _stacks;
-#endif 
-
-        static SqlEnvChangePool()
-        {
-            _capacity = 10;
-            _items = new SqlEnvChange[_capacity];
-            _count = 1;
-#if DEBUG
-            _stacks = new string[_capacity];
-#endif 
-        }
-
-        internal static SqlEnvChange Allocate()
-        {
-            SqlEnvChange retval = null;
-            lock (_items)
-            {
-                while (_count > 0 && retval is null)
-                {
-                    int count = _count; // copy the count we think we have
-                    int newCount = count - 1; // work out the new value we want
-                                              // exchange _count for newCount only if _count is the same as our cached copy
-                    if (count == Interlocked.CompareExchange(ref _count, newCount, count))
-                    {
-                        // count is now the previous value, we're the only thread that has it, so count-1 is safe to access
-                        Interlocked.Exchange(ref retval, _items[count - 1]);
-                    }
-                    else
-                    {
-                        // otherwise the count wasn't what we expected, spin the while and try again.
-                    }
-                }
-            }
-            if (retval is null)
-            {
-                retval = new SqlEnvChange();
-            }
-            return retval;
-        }
-
-        internal static void Release(SqlEnvChange item, [Runtime.CompilerServices.CallerMemberName] string caller = null)
-        {
-            if (item is null)
-            {
-                Debug.Fail("attenpting to release null packet");
-                return;
-            }
-            item.Clear();
-            {
-#if DEBUG
-                if (_count > 0)
-                {
-                    for (int index = 0; index < _count; index += 1)
-                    {
-                        if (object.ReferenceEquals(item, _items[index]))
-                        {
-                            Debug.Assert(false,$"releasing an item which already exists in the pool, count={_count}, index={index}, caller={caller}, released at={_stacks[index]}");
-                        }
-                    }
-                }
-#endif
-                int tries = 0;
-
-                while (!(item is null) && tries < 3 && _count < _capacity)
-                {
-                    int count = _count;
-                    int newCount = count + 1;
-                    if (count == Interlocked.CompareExchange(ref _count, newCount, count))
-                    {
-                        _items[count] = item;
-#if DEBUG
-                        _stacks[count] = caller;
-#endif
-                        item = null;
-                    }
-                    else
-                    {
-                        tries += 1;
-                    }
-                }
-            }
-        }
-
-        internal static int Count => _count;
-
-        internal static int Capacity => _capacity;
-
-        internal static void Clear()
-        {
-            Array.Clear(_items, 0, _capacity);
-            _count = 0;
-        }
-    }
-
     internal sealed class SqlLogin
     {
         internal int timeout;                                                       // login timeout
@@ -808,8 +707,14 @@ namespace System.Data.SqlClient
         internal string rpcName;
         internal ushort ProcID;       // Used instead of name
         internal ushort options;
-        internal SqlParameter[] parameters;
-        internal byte[] paramoptions;
+
+        internal SqlParameter[] systemParams;
+        internal byte[] systemParamOptions;
+        internal int systemParamCount;
+
+        internal SqlParameterCollection userParams;
+        internal long[] userParamMap;
+        internal int userParamCount;
 
         internal int? recordsAffected;
         internal int cumulativeRecordsAffected;
@@ -822,17 +727,23 @@ namespace System.Data.SqlClient
         internal int warningsIndexEnd;
         internal SqlErrorCollection warnings;
 
-        internal string GetCommandTextOrRpcName()
+        internal SqlParameter GetParameterByIndex(int index, out byte options)
         {
-            if (TdsEnums.RPC_PROCID_EXECUTESQL == ProcID)
+            options = 0;
+            SqlParameter retval = null;
+            if (index < systemParamCount)
             {
-                // Param 0 is the actual sql executing
-                return (string)parameters[0].Value;
+                retval = systemParams[index];
+                options = systemParamOptions[index];
             }
             else
             {
-                return rpcName;
+                long data = userParamMap[index - systemParamCount];
+                int paramIndex = (int)(data & int.MaxValue);
+                options = (byte)((data >> 32) & 0xFF);
+                retval = userParams[paramIndex];
             }
+            return retval;
         }
     }
 

@@ -1724,7 +1724,7 @@ namespace System
         public MemberAccessException(string message) { }
         public MemberAccessException(string message, System.Exception inner) { }
     }
-    public readonly partial struct Memory<T>
+    public readonly partial struct Memory<T> : IEquatable<Memory<T>>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
@@ -1984,17 +1984,9 @@ namespace System
         public override bool Equals(object value) { throw null; }
         public bool Equals(System.Range other) { throw null; }
         public override int GetHashCode() { throw null; }
-        public System.Range.OffsetAndLength GetOffsetAndLength(int length) { throw null; }
+        public (int Offset, int Length) GetOffsetAndLength(int length) { throw null; }
         public static System.Range StartAt(System.Index start) { throw null; }
         public override string ToString() { throw null; }
-        public readonly partial struct OffsetAndLength
-        {
-            private readonly int _dummyPrimitive;
-            public OffsetAndLength(int offset, int length) { throw null; }
-            public int Length { get { throw null; } }
-            public int Offset { get { throw null; } }
-            public void Deconstruct(out int offset, out int length) { throw null; }
-        }
     }
     public partial class RankException : System.SystemException
     {
@@ -2003,7 +1995,7 @@ namespace System
         public RankException(string message) { }
         public RankException(string message, System.Exception innerException) { }
     }
-    public readonly partial struct ReadOnlyMemory<T>
+    public readonly partial struct ReadOnlyMemory<T> : IEquatable<ReadOnlyMemory<T>>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
@@ -2372,6 +2364,8 @@ namespace System
         public static int GetHashCode(System.ReadOnlySpan<char> value) { throw null; }
         public static int GetHashCode(System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public int GetHashCode(System.StringComparison comparisonType) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        public ref readonly char GetPinnableReference() { throw null; }
         public System.TypeCode GetTypeCode() { throw null; }
         public int IndexOf(char value) { throw null; }
         public int IndexOf(char value, int startIndex) { throw null; }
@@ -7111,6 +7105,12 @@ namespace System.Runtime.Remoting
 }
 namespace System.Runtime.Serialization
 {
+    public sealed partial class DeserializationBlockedException : System.Exception
+    {
+        public DeserializationBlockedException() { }
+        public DeserializationBlockedException(String message) { }
+        public DeserializationBlockedException(Exception innerException) { }
+    }
     public partial interface IDeserializationCallback
     {
         void OnDeserialization(object sender);

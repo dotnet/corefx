@@ -13,7 +13,7 @@ namespace System.IO.Pipelines.Tests
 {
     public class CopyToAsyncTests
     {
-        private static readonly PipeOptions s_testOptions = new PipeOptions(readerScheduler: PipeScheduler.Inline);
+        private static readonly PipeOptions s_testOptions = new PipeOptions(readerScheduler: PipeScheduler.Inline, useSynchronizationContext: false);
 
         [Fact]
         public async Task CopyToAsyncThrowsArgumentNullExceptionForNullDestination()
@@ -69,21 +69,39 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public async Task MultiSegmentWritesUntilFailure()
         {
-            using (var pool = new TestMemoryPool())
+            using (var pool = new DisposeTrackingBufferPool())
             {
-                var pipe = new Pipe(new PipeOptions(pool: pool, readerScheduler: PipeScheduler.Inline));
+                var pipe = new Pipe(new PipeOptions(pool, readerScheduler: PipeScheduler.Inline, useSynchronizationContext: false));
                 pipe.Writer.WriteEmpty(4096);
                 pipe.Writer.WriteEmpty(4096);
                 pipe.Writer.WriteEmpty(4096);
                 await pipe.Writer.FlushAsync();
                 pipe.Writer.Complete();
 
+                Assert.Equal(3, pool.CurrentlyRentedBlocks);
+
                 var stream = new ThrowAfterNWritesStream(2);
-                await Assert.ThrowsAsync<InvalidOperationException>(() => pipe.Reader.CopyToAsync(stream));
+                try
+                {
+                    await pipe.Reader.CopyToAsync(stream);
+                    Assert.True(false, $"CopyToAsync should have failed, wrote {stream.Writes} times.");
+                }
+                catch(InvalidOperationException)
+                {
+                    
+                }
+
+                Assert.Equal(2, stream.Writes);
+
+                Assert.Equal(1, pool.CurrentlyRentedBlocks);
+                Assert.Equal(2, pool.DisposedBlocks);
 
                 ReadResult result = await pipe.Reader.ReadAsync();
                 Assert.Equal(4096, result.Buffer.Length);
                 pipe.Reader.Complete();
+
+                Assert.Equal(0, pool.CurrentlyRentedBlocks);
+                Assert.Equal(3, pool.DisposedBlocks);
             }
         }
 
@@ -165,107 +183,10 @@ namespace System.IO.Pipelines.Tests
             Assert.Equal(20, result.Buffer.Length);
             pipe.Reader.Complete();
         }
-
-        private class CancelledWritesStream : WriteOnlyStream
-        {
-            public TaskCompletionSource<object> WaitForWriteTask = new TaskCompletionSource<object>(TaskContinuationOptions.RunContinuationsAsynchronously);
-
-            public override void Write(byte[] buffer, int offset, int count)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override async Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-            {
-                await WaitForWriteTask.Task;
-
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-
-#if !netstandard
-            public override async ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
-            {
-                await WaitForWriteTask.Task;
-
-                cancellationToken.ThrowIfCancellationRequested();
-            }
-#endif
-        }
         private class ThrowingStream : ThrowAfterNWritesStream
         {
             public ThrowingStream() : base(0)
             {
-            }
-        }
-
-        private class ThrowAfterNWritesStream : WriteOnlyStream
-        {
-            private readonly int _maxWrites;
-            private int _writes;
-
-            public ThrowAfterNWritesStream(int maxWrites)
-            {
-                _maxWrites = maxWrites;
-            }
-
-            public override void Write(byte[] buffer, int offset, int count)
-            {
-                throw new InvalidOperationException();
-            }
-
-            public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
-            {
-                if (_writes >= _maxWrites)
-                {
-                    throw new InvalidOperationException();
-                }
-                _writes++;
-                return Task.CompletedTask;
-            }
-
-#if !netstandard
-            public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
-            {
-                if (_writes >= _maxWrites)
-                {
-                    throw new InvalidOperationException();
-                }
-                _writes++;
-                return default;
-            }
-#endif
-        }
-
-        private abstract class WriteOnlyStream : Stream
-        {
-            public override bool CanRead => false;
-
-            public override bool CanSeek => false;
-
-            public override bool CanWrite => true;
-
-            public override long Length => throw new NotSupportedException();
-
-            public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
-
-            public override void Flush()
-            {
-                throw new InvalidOperationException();
-            }
-
-            public override int Read(byte[] buffer, int offset, int count)
-            {
-                throw new NotSupportedException();
-            }
-
-            public override long Seek(long offset, SeekOrigin origin)
-            {
-                throw new NotSupportedException();
-            }
-
-            public override void SetLength(long value)
-            {
-                throw new NotSupportedException();
             }
         }
     }

@@ -15,6 +15,7 @@
     <Compile Include="InvalidBufferWriter.cs" />
     <Compile Include="JsonDateTimeTestData.cs" />
     <Compile Include="JsonDocumentTests.cs" />
+    <Compile Include="JsonElementCloneTests.cs" />
     <Compile Include="JsonElementWriteTests.cs" />
     <Compile Include="JsonGuidTestData.cs" />
     <Compile Include="JsonNumberTestData.cs" />
@@ -29,14 +30,14 @@
     <Compile Include="Serialization\EnumTests.cs" />
     <Compile Include="Serialization\Null.ReadTests.cs" />
     <Compile Include="Serialization\Null.WriteTests.cs" />
+    <Compile Include="Serialization\Object.ReadTests.cs" />
+    <Compile Include="Serialization\Object.WriteTests.cs" />
     <Compile Include="Serialization\OptionsTests.cs" />
     <Compile Include="Serialization\PolymorphicTests.cs" />
     <Compile Include="Serialization\PropertyVisibilityTests.cs" />
     <Compile Include="Serialization\SpanTests.cs" />
     <Compile Include="Serialization\Stream.ReadTests.cs" />
     <Compile Include="Serialization\Stream.WriteTests.cs" />
-    <Compile Include="Serialization\String.ReadTests.cs" />
-    <Compile Include="Serialization\String.WriteTests.cs" />
     <Compile Include="Serialization\TestClasses.cs" />
     <Compile Include="Serialization\TestClasses.Polymorphic.cs" />
     <Compile Include="Serialization\TestData.cs" />
@@ -53,6 +54,8 @@
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="Newtonsoft.Json" />
+    <ReferenceFromRuntime Include="Newtonsoft.Json" />    
+    <!-- Copy external dependency into the test output directory. -->
+    <SupplementalTestData Include="$(RuntimePath)Newtonsoft.Json.dll" />
   </ItemGroup>
 </Project>

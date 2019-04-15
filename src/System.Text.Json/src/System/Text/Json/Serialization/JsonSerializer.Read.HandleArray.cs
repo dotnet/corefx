@@ -15,7 +15,10 @@ namespace System.Text.Json.Serialization
             ref Utf8JsonReader reader,
             ref ReadStack state)
         {
-            if (state.Current.Skip())
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            bool skip = jsonPropertyInfo != null && !jsonPropertyInfo.ShouldDeserialize;
+            if (skip || state.Current.Skip())
             {
                 // The array is not being applied to the object.
                 state.Push();
@@ -23,7 +26,12 @@ namespace System.Text.Json.Serialization
                 return;
             }
 
-            Type arrayType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            if (jsonPropertyInfo == null || state.Current.JsonClassInfo.ClassType == ClassType.Unknown)
+            {
+                jsonPropertyInfo = state.Current.JsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, typeof(object), options);
+            }
+
+            Type arrayType = jsonPropertyInfo.RuntimePropertyType;
             if (!typeof(IEnumerable).IsAssignableFrom(arrayType) || (arrayType.IsArray && arrayType.GetArrayRank() > 1))
             {
                 ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(arrayType, reader, state);
@@ -39,8 +47,7 @@ namespace System.Text.Json.Serialization
 
                     state.Push();
 
-                    state.Current.JsonClassInfo = options.GetOrAddClass(elementType);
-                    state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetPolicyProperty();
+                    state.Current.Initialize(elementType, options);
                     state.Current.PopStackOnEndArray = true;
                 }
                 else
@@ -48,8 +55,10 @@ namespace System.Text.Json.Serialization
                     state.Current.EnumerableCreated = true;
                 }
 
+                jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
                 // If current property is already set (from a constructor, for example) leave as-is
-                if (state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue, options) == null)
+                if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue, options) == null)
                 {
                     // Create the enumerable.
                     object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);

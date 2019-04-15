@@ -33,6 +33,7 @@ namespace System.Text.Json
         private readonly int _dummyPrimitive;
         public System.Text.Json.JsonElement this[int index] { get { throw null; } }
         public System.Text.Json.JsonValueType Type { get { throw null; } }
+        public System.Text.Json.JsonElement Clone() { throw null; }
         public System.Text.Json.JsonElement.ArrayEnumerator EnumerateArray() { throw null; }
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
         public int GetArrayLength() { throw null; }
@@ -70,8 +71,8 @@ namespace System.Text.Json
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
-        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, ref Utf8JsonWriter writer) { }
-        public void WriteAsProperty(ReadOnlySpan<char> propertyName, ref Utf8JsonWriter writer) { }
+        public void WriteAsProperty(System.ReadOnlySpan<byte> utf8PropertyName, ref System.Text.Json.Utf8JsonWriter writer) { }
+        public void WriteAsProperty(System.ReadOnlySpan<char> propertyName, ref System.Text.Json.Utf8JsonWriter writer) { }
         public void WriteAsValue(ref System.Text.Json.Utf8JsonWriter writer) { }
         public partial struct ArrayEnumerator : System.Collections.Generic.IEnumerable<System.Text.Json.JsonElement>, System.Collections.Generic.IEnumerator<System.Text.Json.JsonElement>, System.Collections.IEnumerable, System.Collections.IEnumerator, System.IDisposable
         {
@@ -117,6 +118,7 @@ namespace System.Text.Json
     public partial struct JsonReaderOptions
     {
         private int _dummyPrimitive;
+        public bool AllowTrailingCommas { get { throw null; } set { } }
         public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
     }
@@ -309,6 +311,15 @@ namespace System.Text.Json
 }
 namespace System.Text.Json.Serialization
 {
+    public abstract partial class JsonAttribute : System.Attribute
+    {
+        protected JsonAttribute() { }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
+    public sealed partial class JsonIgnoreAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonIgnoreAttribute() { }
+    }
     public static partial class JsonSerializer
     {
         public static object Parse(System.ReadOnlySpan<byte> utf8Json, System.Type returnType, System.Text.Json.Serialization.JsonSerializerOptions options = null) { throw null; }
@@ -327,10 +338,12 @@ namespace System.Text.Json.Serialization
     public sealed partial class JsonSerializerOptions
     {
         public JsonSerializerOptions() { }
+        public bool AllowTrailingCommas { get { throw null; } set { } }
         public int DefaultBufferSize { get { throw null; } set { } }
-        public bool IgnoreNullPropertyValueOnRead { get { throw null; } set { } }
-        public bool IgnoreNullPropertyValueOnWrite { get { throw null; } set { } }
-        public System.Text.Json.JsonReaderOptions ReaderOptions { get { throw null; } set { } }
-        public System.Text.Json.JsonWriterOptions WriterOptions { get { throw null; } set { } }
+        public bool IgnoreNullValues { get { throw null; } set { } }
+        public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
+        public int MaxDepth { get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
+        public bool WriteIndented { get { throw null; } set { } }
     }
 }

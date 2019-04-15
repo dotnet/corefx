@@ -338,9 +338,9 @@ namespace System.Text.Json
         /// <remarks>
         ///   This method does not create a string representation of values other than JSON strings.
         /// </remarks>
-        /// <returns>The value of the element as a <see cref="bool"/>.</returns>
+        /// <returns>The value of the element as a <see cref="string"/>.</returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        ///   This value's <see cref="Type"/> is neither <see cref="JsonValueType.String"/> nor <see cref="JsonValueType.Null"/>.
         /// </exception>
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
@@ -1094,6 +1094,31 @@ namespace System.Text.Json
                     Debug.Fail($"No handler for {nameof(JsonTokenType)}.{TokenType}");
                     return string.Empty;
             }
+        }
+
+        /// <summary>
+        ///   Get a JsonElement which can be safely stored beyond the lifetime of the
+        ///   original <see cref="JsonDocument"/>.
+        /// </summary>
+        /// <returns>
+        ///   A JsonElement which can be safely stored beyond the lifetime of the
+        ///   original <see cref="JsonDocument"/>.
+        /// </returns>
+        /// <remarks>
+        ///   If this JsonElement is itself the output of a previous call to Clone, or
+        ///   a value contained within another JsonElement which was the output of a previous
+        ///   call to Clone, this method results in no additional memory allocation.
+        /// </remarks>
+        public JsonElement Clone()
+        {
+            CheckValidInstance();
+
+            if (!_parent.IsDisposable)
+            {
+                return this;
+            }
+
+            return _parent.CloneElement(_idx);
         }
 
         private void CheckValidInstance()

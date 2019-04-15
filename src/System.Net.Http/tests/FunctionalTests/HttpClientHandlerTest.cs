@@ -367,35 +367,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task SendAsync_Cancel_CancellationTokenPropagates()
-        {
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
-            using (HttpClient client = CreateHttpClient())
-            {
-                var request = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer);
-                Task t = client.SendAsync(request, cts.Token);
-                OperationCanceledException ex;
-                if (PlatformDetection.IsUap)
-                {
-                    ex = await Assert.ThrowsAsync<OperationCanceledException>(() => t);
-                }
-                else
-                {
-                    ex = await Assert.ThrowsAsync<TaskCanceledException>(() => t);
-                }
-
-                Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
-                if (!PlatformDetection.IsFullFramework)
-                {
-                    // .NET Framework has bug where it doesn't propagate token information.
-                    Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
-                }
-            }
-        }
-
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
         [Theory]
         [InlineData("[::1234]")]
@@ -2275,7 +2246,13 @@ namespace System.Net.Http.Functional.Tests
 
         public async Task PostAsync_Redirect_LargePayload_Helper(int statusCode, bool expectRedirectToPost)
         {
-            using (var fs = new FileStream(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
+            using (var fs = new FileStream(
+                Path.Combine(Path.GetTempPath(), Path.GetTempFileName()),
+                FileMode.Create,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                0x1000,
+                FileOptions.DeleteOnClose))
             {
                 string contentString = string.Join("", Enumerable.Repeat("Content", 100000));
                 byte[] contentBytes = Encoding.UTF32.GetBytes(contentString);
@@ -2283,10 +2260,18 @@ namespace System.Net.Http.Functional.Tests
                 fs.Flush(flushToDisk: true);
                 fs.Position = 0;
 
-                Uri redirectUri = Configuration.Http.RedirectUriForDestinationUri(false, statusCode, Configuration.Http.SecureRemoteEchoServer, 1);
+                Uri redirectUri = Configuration.Http.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: statusCode,
+                    destinationUri: Configuration.Http.SecureRemoteVerifyUploadServer,
+                    hops: 1);
+                var content = new StreamContent(fs);
+
+                // Compute MD5 of request body data. This will be verified by the server when it receives the request.
+                content.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(contentBytes);
 
                 using (HttpClient client = CreateHttpClient())
-                using (HttpResponseMessage response = await client.PostAsync(redirectUri, new StreamContent(fs)))
+                using (HttpResponseMessage response = await client.PostAsync(redirectUri, content))
                 {
                     try
                     {
@@ -2300,7 +2285,8 @@ namespace System.Net.Http.Functional.Tests
 
                     if (expectRedirectToPost)
                     {
-                        Assert.InRange(response.Content.Headers.ContentLength.GetValueOrDefault(), contentBytes.Length, int.MaxValue);
+                        IEnumerable<string> headerValue = response.Headers.GetValues("X-HttpRequest-Method");
+                        Assert.Equal("POST", headerValue.First());
                     }
                 }
             }

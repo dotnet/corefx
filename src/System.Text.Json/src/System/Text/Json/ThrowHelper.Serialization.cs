@@ -32,5 +32,11 @@ namespace System.Text.Json
         {
             throw new ObjectDisposedException(name);
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowInvalidOperationException_SerializerOptionsImmutable()
+        {
+            throw new InvalidOperationException(SR.SerializerOptionsImmutable);
+        }
     }
 }

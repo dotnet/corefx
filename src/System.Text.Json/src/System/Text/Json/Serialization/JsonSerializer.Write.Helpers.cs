@@ -9,6 +9,34 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
+        private static void GetRuntimeClassInfo(object value, ref JsonClassInfo jsonClassInfo, JsonSerializerOptions options)
+        {
+            if (value != null)
+            {
+                Type runtimeType = value.GetType();
+
+                // Nothing to do for typeof(object)
+                if (runtimeType != typeof(object))
+                {
+                    jsonClassInfo = options.GetOrAddClass(runtimeType);
+                }
+            }
+        }
+
+        private static void GetRuntimePropertyInfo(object value, JsonClassInfo jsonClassInfo, ref JsonPropertyInfo jsonPropertyInfo, JsonSerializerOptions options)
+        {
+            if (value != null)
+            {
+                Type runtimeType = value.GetType();
+
+                // Nothing to do for typeof(object)
+                if (runtimeType != typeof(object))
+                {
+                    jsonPropertyInfo = jsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, runtimeType, options);
+                }
+            }
+        }
+
         private static void VerifyValueAndType(object value, Type type)
         {
             if (type == null)
@@ -38,8 +66,7 @@ namespace System.Text.Json.Serialization
 
         private static byte[] WriteCoreBytes(object value, Type type, JsonSerializerOptions options)
         {
-            if (options == null)
-                options = s_defaultSettings;
+            options ??= JsonSerializerOptions.s_defaultOptions;
 
             byte[] result;
 
@@ -54,9 +81,7 @@ namespace System.Text.Json.Serialization
 
         private static string WriteCoreString(object value, Type type, JsonSerializerOptions options)
         {
-            if (options == null)
-                options = s_defaultSettings;
-
+            options ??= JsonSerializerOptions.s_defaultOptions;
             string result;
 
             using (var output = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
@@ -72,7 +97,7 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(type != null || value == null);
 
-            var writerState = new JsonWriterState(options.WriterOptions);
+            var writerState = new JsonWriterState(options.GetWriterOptions());
             var writer = new Utf8JsonWriter(output, writerState);
 
             if (value == null)
@@ -88,13 +113,8 @@ namespace System.Text.Json.Serialization
                 }
 
                 WriteStack state = default;
-                JsonClassInfo classInfo = options.GetOrAddClass(type);
-                state.Current.JsonClassInfo = classInfo;
+                state.Current.Initialize(type, options);
                 state.Current.CurrentValue = value;
-                if (classInfo.ClassType != ClassType.Object)
-                {
-                    state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
-                }
 
                 Write(ref writer, -1, options, ref state);
             }
