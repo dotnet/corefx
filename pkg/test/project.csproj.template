@@ -13,5 +13,11 @@
     <PackageReference Include="{PackageId}" Version="{PackageVersion}" />
   </ItemGroup>
 
+  <!-- Temporary till SDK supports transitive framework references. -->
+  <ItemGroup>
+    <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
+    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
+  </ItemGroup>
+
   <Import Project="$(SupportFilesDir)\packageTest.targets" />
 </Project>
