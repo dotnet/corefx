@@ -108,11 +108,11 @@ namespace System.Text.Json
             int indent = Indentation;
             Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            Debug.Assert(escapedValue.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - indent - 8);
+            Debug.Assert(escapedValue.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - indent - 3 - s_newLineLength);
 
             // All ASCII, 2 quotes => indent + escapedValue.Length + 2
             // Optionally, 1 list separator, 1-2 bytes for new line, and up to 3x growth when transcoding
-            int maxRequired = indent + (escapedValue.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 5;
+            int maxRequired = indent + (escapedValue.Length * JsonConstants.MaxExpansionFactorWhileTranscoding) + 3 + s_newLineLength;
 
             if (_memory.Length - BytesPending < maxRequired)
             {
@@ -247,10 +247,10 @@ namespace System.Text.Json
             int indent = Indentation;
             Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            Debug.Assert(escapedValue.Length < int.MaxValue - indent - 5);
+            Debug.Assert(escapedValue.Length < int.MaxValue - indent - 3 - s_newLineLength);
 
             int minRequired = indent + escapedValue.Length + 2; // 2 quotes
-            int maxRequired = minRequired + 3; // Optionally, 1 list separator and 1-2 bytes for new line
+            int maxRequired = minRequired + 1 + s_newLineLength; // Optionally, 1 list separator and 1-2 bytes for new line
 
             if (_memory.Length - BytesPending < maxRequired)
             {

@@ -38,8 +38,7 @@ namespace System.Text.Json
 
         private void WriteStringValueMinimized(Guid value)
         {
-            int minRequired = JsonConstants.MaximumFormatGuidLength + 2; // 2 quotes
-            int maxRequired = minRequired + 1; // Optionally, 1 list separator
+            int maxRequired = JsonConstants.MaximumFormatGuidLength + 3; // 2 quotes, and optionally, 1 list separator
 
             if (_memory.Length - BytesPending < maxRequired)
             {
@@ -67,8 +66,8 @@ namespace System.Text.Json
             int indent = Indentation;
             Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            int minRequired = indent + JsonConstants.MaximumFormatGuidLength + 2; // 2 quotes
-            int maxRequired = minRequired + 3; // Optionally, 1 list separator and 1-2 bytes for new line
+            // 2 quotes, and optionally, 1 list separator and 1-2 bytes for new line
+            int maxRequired = indent + JsonConstants.MaximumFormatGuidLength + 3 + s_newLineLength;
 
             if (_memory.Length - BytesPending < maxRequired)
             {

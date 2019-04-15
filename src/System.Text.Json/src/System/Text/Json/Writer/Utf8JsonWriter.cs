@@ -28,6 +28,9 @@ namespace System.Text.Json
     /// </remarks>
     public sealed partial class Utf8JsonWriter : IDisposable
     {
+        // Depending on OS, either '\r\n' OR '\n'
+        private static int s_newLineLength = Environment.NewLine.Length;
+
         private const int DefaultGrowthSize = 4096;
 
         private IBufferWriter<byte> _output;
@@ -256,8 +259,12 @@ namespace System.Text.Json
             if (_stream != null)
             {
                 Debug.Assert(_arrayBufferWriter != null);
-                await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken);
-                _arrayBufferWriter.Clear();
+                Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
+                if (BytesPending != 0)
+                {
+                    await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken);
+                    _arrayBufferWriter.Clear();
+                }
                 await _stream.FlushAsync();
                 _memory = default;
                 BytesCommitted += BytesPending;
@@ -269,8 +276,12 @@ namespace System.Text.Json
         private void FlushHelperStream()
         {
             Debug.Assert(_arrayBufferWriter != null);
-            _stream.Write(_arrayBufferWriter.WrittenSpan);
-            _arrayBufferWriter.Clear();
+            Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
+            if (BytesPending != 0)
+            {
+                _stream.Write(_arrayBufferWriter.WrittenSpan);
+                _arrayBufferWriter.Clear();
+            }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -805,7 +816,7 @@ namespace System.Text.Json
         private void WriteNewLine(Span<byte> output)
         {
             // Write '\r\n' OR '\n', depending on OS
-            if (Environment.NewLine.Length == 2)
+            if (s_newLineLength == 2)
             {
                 output[BytesPending++] = JsonConstants.CarriageReturn;
             }
@@ -836,7 +847,14 @@ namespace System.Text.Json
 
             int requiredSize = Math.Max(DefaultGrowthSize, minimumSize);
 
-            if (_stream == null)
+            if (_stream != null)
+            {
+                FlushHelperStream();
+                _memory = _output.GetMemory(requiredSize);
+
+                Debug.Assert(_memory.Length >= minimumSize);
+            }
+            else
             {
                 _memory = _output.GetMemory(requiredSize);
 
@@ -844,13 +862,6 @@ namespace System.Text.Json
                 {
                     ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetMinimumSizeSpan, minimumSize);
                 }
-            }
-            else
-            {
-                FlushHelperStream();
-                _memory = _output.GetMemory(requiredSize);
-
-                Debug.Assert(_memory.Length >= minimumSize);
             }
 
             BytesCommitted += BytesPending;
