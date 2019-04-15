@@ -34,7 +34,7 @@ namespace System.Text.Json.Serialization
 
         /// <summary>
         /// Defines whether an extra comma at the end of a list of JSON values in an object or array
-        /// is allowed (and ignored) within the JSON payload being read.
+        /// is allowed (and ignored) within the JSON payload being deserialized.
         /// By default, it's set to false, and <exception cref="JsonReaderException"/> is thrown if a trailing comma is encountered.
         /// </summary>
         /// <exception cref="InvalidOperationException">
@@ -122,8 +122,8 @@ namespace System.Text.Json.Serialization
         }
 
         /// <summary>
-        /// Gets or sets the maximum depth allowed when reading or writing JSON, with the default (i.e. 0) indicating a max depth of 64.
-        /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.
+        /// Gets or sets the maximum depth allowed when serializing or deserializing JSON, with the default (i.e. 0) indicating a max depth of 64.
+        /// Going past this depth will throw a <exception cref="JsonReaderException"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
@@ -140,6 +140,26 @@ namespace System.Text.Json.Serialization
                 _maxDepth = value;
             }
         }
+
+        /// <summary>
+        /// Specifies the policy used to convert a property's name on an object to another format, such as camel-casing.
+        /// The resulting property name is expected to match the JSON payload during deserialization, and
+        /// will be used when writing the property name during serialization.
+        /// </summary>
+        /// <remarks>
+        /// This property can be set to <see cref="JsonPropertyNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// </remarks>
+        public JsonPropertyNamingPolicy PropertyNamingPolicy { get; set; }
+
+        /// <summary>
+        /// Determines whether a property's name uses a case-insensitive comparison during deserialization.
+        /// The default value is false.
+        /// </summary>
+        /// <remarks>There is a performance cost associated when the value is true.</remarks>
+        public bool PropertyNameCaseInsensitive { get; set; }
+
+        // Future: (API approved)
+        // public JsonPropertyNamingPolicy DictionaryKeyPolicy { get; set; }
 
         /// <summary>
         /// Defines how the comments are handled during deserialization.
@@ -164,7 +184,7 @@ namespace System.Text.Json.Serialization
         /// <summary>
         /// Defines whether JSON should pretty print which includes:
         /// indenting nested JSON tokens, adding new lines, and adding white space between property names and values.
-        /// By default, the JSON is written without any extra white space.
+        /// By default, the JSON is serialized without any extra white space.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
