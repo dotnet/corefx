@@ -6,7 +6,7 @@ using System.Buffers;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         /// <summary>
         /// Writes the <see cref="uint"/> value (as a JSON number) as an element of a JSON array.
@@ -36,7 +36,7 @@ namespace System.Text.Json
         public void WriteNumberValue(ulong value)
         {
             ValidateWritingValue();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteNumberValueIndented(value);
             }

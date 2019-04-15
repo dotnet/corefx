@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         /// <summary>
         /// Writes the string text value (as a JSON comment).
@@ -61,7 +61,7 @@ namespace System.Text.Json
 
         private void WriteCommentByOptions(ReadOnlySpan<char> value)
         {
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteCommentIndented(value);
             }
@@ -179,7 +179,7 @@ namespace System.Text.Json
 
         private void WriteCommentByOptions(ReadOnlySpan<byte> utf8Value)
         {
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteCommentIndented(utf8Value);
             }

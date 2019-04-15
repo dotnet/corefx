@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         /// <summary>
         /// Writes the property name and the JSON literal "null" as part of a name/value pair of a JSON object.
@@ -262,7 +262,7 @@ namespace System.Text.Json
         {
             ValidateWritingProperty();
             int idx;
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 idx = WritePropertyNameIndented(propertyName);
             }
@@ -286,7 +286,7 @@ namespace System.Text.Json
         {
             ValidateWritingProperty();
             int idx;
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 idx = WritePropertyNameIndented(utf8PropertyName);
             }

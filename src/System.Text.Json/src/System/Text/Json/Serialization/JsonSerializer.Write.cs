@@ -10,13 +10,13 @@ namespace System.Text.Json.Serialization
     public static partial class JsonSerializer
     {
         private static bool Write(
-            ref JsonWriterState writerState,
+            JsonWriterOptions writerOptions,
             IBufferWriter<byte> bufferWriter,
             int flushThreshold,
             JsonSerializerOptions options,
             ref WriteStack state)
         {
-            Utf8JsonWriter writer = new Utf8JsonWriter(bufferWriter, writerState);
+            var writer = new Utf8JsonWriter(bufferWriter, writerOptions);
 
             bool isFinalBlock = Write(
                 ref writer,
@@ -63,7 +63,7 @@ namespace System.Text.Json.Serialization
                         break;
                 }
 
-                if (flushThreshold >= 0 && writer.BytesWritten > flushThreshold)
+                if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)
                 {
                     return false;
                 }

@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         /// <summary>
         /// Writes the string text value (as a JSON string) as an element of a JSON array.
@@ -70,7 +70,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<char> value)
         {
             ValidateWritingValue();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(value);
             }
@@ -180,7 +180,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(utf8Value);
             }

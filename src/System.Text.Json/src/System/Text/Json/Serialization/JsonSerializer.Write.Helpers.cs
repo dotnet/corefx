@@ -56,10 +56,10 @@ namespace System.Text.Json.Serialization
         }
 
         private static void WriteNull(
-            ref JsonWriterState writerState,
+            JsonWriterOptions writerOptions,
             IBufferWriter<byte> bufferWriter)
         {
-            Utf8JsonWriter writer = new Utf8JsonWriter(bufferWriter, writerState);
+            var writer = new Utf8JsonWriter(bufferWriter, writerOptions);
             writer.WriteNullValue();
             writer.Flush(true);
         }
@@ -70,7 +70,7 @@ namespace System.Text.Json.Serialization
 
             byte[] result;
 
-            using (var output = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
+            using (var output = new PooledBufferWriter<byte>(options.DefaultBufferSize))
             {
                 WriteCore(output, value, type, options);
                 result = output.WrittenMemory.ToArray();
@@ -84,7 +84,7 @@ namespace System.Text.Json.Serialization
             options ??= JsonSerializerOptions.s_defaultOptions;
             string result;
 
-            using (var output = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
+            using (var output = new PooledBufferWriter<byte>(options.DefaultBufferSize))
             {
                 WriteCore(output, value, type, options);
                 result = JsonReaderHelper.TranscodeHelper(output.WrittenMemory.Span);
@@ -93,12 +93,11 @@ namespace System.Text.Json.Serialization
             return result;
         }
 
-        private static void WriteCore(ArrayBufferWriter<byte> output, object value, Type type, JsonSerializerOptions options)
+        private static void WriteCore(PooledBufferWriter<byte> output, object value, Type type, JsonSerializerOptions options)
         {
             Debug.Assert(type != null || value == null);
 
-            var writerState = new JsonWriterState(options.GetWriterOptions());
-            var writer = new Utf8JsonWriter(output, writerState);
+            var writer = new Utf8JsonWriter(output, options.GetWriterOptions());
 
             if (value == null)
             {

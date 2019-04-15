@@ -4,7 +4,7 @@
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         /// <summary>
         /// Writes the JSON literal "null" as an element of a JSON array.
@@ -46,7 +46,7 @@ namespace System.Text.Json
         private void WriteLiteralByOptions(ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingValue();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteLiteralIndented(utf8Value);
             }

@@ -6,11 +6,11 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         private void ValidateWritingValue()
         {
-            if (!_writerOptions.SkipValidation)
+            if (!Options.SkipValidation)
             {
                 if (_inObject)
                 {
@@ -60,7 +60,7 @@ namespace System.Text.Json
             {
                 if (_buffer.Length <= idx)
                 {
-                    GrowAndEnsure();
+                    Grow();
                 }
                 _buffer[idx++] = JsonConstants.ListSeparator;
             }

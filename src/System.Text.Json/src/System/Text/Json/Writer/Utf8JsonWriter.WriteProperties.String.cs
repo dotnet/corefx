@@ -9,7 +9,7 @@ using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         /// <summary>
         /// Writes the property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
@@ -667,7 +667,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)
         {
             ValidateWritingProperty();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(propertyName, value);
             }
@@ -680,7 +680,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingProperty();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(utf8PropertyName, utf8Value);
             }
@@ -693,7 +693,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> utf8Value)
         {
             ValidateWritingProperty();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(propertyName, utf8Value);
             }
@@ -706,7 +706,7 @@ namespace System.Text.Json
         private void WriteStringByOptions(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<char> value)
         {
             ValidateWritingProperty();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteStringIndented(utf8PropertyName, value);
             }

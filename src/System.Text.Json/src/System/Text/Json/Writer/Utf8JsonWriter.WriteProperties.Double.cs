@@ -8,7 +8,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json
 {
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter
     {
         /// <summary>
         /// Writes the property name and <see cref="double"/> value (as a JSON number) as part of a name/value pair of a JSON object.
@@ -195,7 +195,7 @@ namespace System.Text.Json
         private void WriteNumberByOptions(ReadOnlySpan<char> propertyName, double value)
         {
             ValidateWritingProperty();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteNumberIndented(propertyName, value);
             }
@@ -208,7 +208,7 @@ namespace System.Text.Json
         private void WriteNumberByOptions(ReadOnlySpan<byte> utf8PropertyName, double value)
         {
             ValidateWritingProperty();
-            if (_writerOptions.Indented)
+            if (Options.Indented)
             {
                 WriteNumberIndented(utf8PropertyName, value);
             }
