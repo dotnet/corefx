@@ -1875,7 +1875,7 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
-       [Fact]
+        [Fact]
         public void GetProcesses_LongProcessName()
         {
             string commandName = "sleep";
