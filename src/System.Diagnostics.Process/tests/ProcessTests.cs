@@ -1891,7 +1891,7 @@ namespace System.Diagnostics.Tests
             File.Copy(GetProgramPath(commandName), sleepCommandPathFileName);
 
             // start sleep program and wait for some seconds
-            using (Process px = Process.Start(new ProcessStartInfo { FileName = sleepCommandPathFileName , Arguments = "30s", UseShellExecute = true}))
+            using (Process px = Process.Start(new ProcessStartInfo { FileName = sleepCommandPathFileName , Arguments = "30", UseShellExecute = true}))
             {
                 bool processFound = false;
                 foreach (Process process in Process.GetProcesses())
