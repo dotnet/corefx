@@ -122,6 +122,10 @@ namespace System.Diagnostics
         public static void Indent() { }
         public static void Refresh() { }
         [System.Diagnostics.ConditionalAttribute("TRACE")]
+        public static void TraceCritical(string message) { }
+        [System.Diagnostics.ConditionalAttribute("TRACE")]
+        public static void TraceCritical(string format, params object[] args) { }
+        [System.Diagnostics.ConditionalAttribute("TRACE")]
         public static void TraceError(string message) { }
         [System.Diagnostics.ConditionalAttribute("TRACE")]
         public static void TraceError(string format, params object[] args) { }

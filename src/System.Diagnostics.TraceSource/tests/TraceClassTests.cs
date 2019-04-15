@@ -331,7 +331,9 @@ namespace System.Diagnostics.TraceSourceTests
             Trace.IndentSize = 2;
             Trace.IndentLevel = 2;
             Trace.Write("This message should be indented.");
-            Trace.TraceError("This error not be indented.");
+            Trace.TraceCritical("This critical error should not be indented.");
+            Trace.TraceCritical("{0}", "This critical error is indented");
+            Trace.TraceError("This error is indented.");
             Trace.TraceError("{0}", "This error is indented");
             Trace.TraceWarning("This warning is indented");
             Trace.TraceWarning("{0}", "This warning is also indented");
@@ -344,7 +346,7 @@ namespace System.Diagnostics.TraceSourceTests
             string newLine = Environment.NewLine;
             var expected =
                 string.Format(
-                    "Message start." + newLine + "    This message should be indented.{0} Error: 0 : This error not be indented." + newLine + "    {0} Error: 0 : This error is indented" + newLine + "    {0} Warning: 0 : This warning is indented" + newLine + "    {0} Warning: 0 : This warning is also indented" + newLine + "    {0} Information: 0 : This information in indented" + newLine + "    {0} Information: 0 : This information is also indented" + newLine + "Message end." + newLine + "",
+                    "Message start." + newLine + "    This message should be indented.{0} Critical: 0 : This critical error should not be indented." + newLine + "    {0} Critical: 0 : This critical error is indented" + newLine + "    {0} Error: 0 : This error is indented." + newLine + "    {0} Error: 0 : This error is indented" + newLine + "    {0} Warning: 0 : This warning is indented" + newLine + "    {0} Warning: 0 : This warning is also indented" + newLine + "    {0} Information: 0 : This information in indented" + newLine + "    {0} Information: 0 : This information is also indented" + newLine + "Message end." + newLine + "",
                     TestRunnerAssemblyName
                 );
 

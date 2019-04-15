@@ -207,17 +207,17 @@ namespace System.Diagnostics
         {
             TraceInternal.TraceEvent(TraceEventType.Error, 0, format, args);
         }
-        
+
         [System.Diagnostics.Conditional("TRACE")]
         public static void TraceCritical(string message)
         {
-            TraceInternal.TraceCritical(TraceEventType.Critical, 0, message, null);
+            TraceInternal.TraceEvent(TraceEventType.Critical, 0, message, null);
         }
 
         [System.Diagnostics.Conditional("TRACE")]
         public static void TraceCritical(string format, params object[] args)
         {
-            TraceInternal.TraceCritical(TraceEventType.Critical, 0, format, args);
+            TraceInternal.TraceEvent(TraceEventType.Critical, 0, format, args);
         }
 
         /// <devdoc>
