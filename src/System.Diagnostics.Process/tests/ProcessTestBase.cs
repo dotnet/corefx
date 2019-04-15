@@ -101,7 +101,7 @@ namespace System.Diagnostics.Tests
         /// <returns></returns>
         protected static bool IsProgramInstalled(string program)
         {
-            return !(GetProgramPath(program) is null);
+            return GetProgramPath(program) != null;
         }
 
         /// <summary>

@@ -59,53 +59,6 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void GetProcesses_LongProcessName()
-        {
-            string commandName = "sleep";
-
-            // sleep program doesn't exist on some distros
-            if (IsProgramInstalled(commandName))
-            {
-                string tmpDir = Path.Combine(TestDirectory, GetTestFileName());
-                try
-                {
-                    // create tmp folder and copy sleep command inside it renamed
-                    Directory.CreateDirectory(tmpDir);
-                    string longProcessName = "123456789012345678901234567890";
-                    string sleepCommandPathFileName = Path.Combine(tmpDir, longProcessName);
-                    File.Copy(GetProgramPath(commandName), sleepCommandPathFileName);
-                    Assert.True(File.Exists(sleepCommandPathFileName));
-
-                    // start sleep program and wait for some seconds
-                    using (Process px = Process.Start(new ProcessStartInfo { FileName = sleepCommandPathFileName , Arguments = "5s", UseShellExecute = true}))
-                    {
-                        bool processFound = false;
-                        foreach(Process process in Process.GetProcesses())
-                        {
-                            if (process.ProcessName == longProcessName)
-                            {
-                                processFound = true;
-                                break;
-                            }
-                        }
-                        px.Kill();
-                        px.WaitForExit();
-                        Assert.True(px.HasExited);
-
-                        Assert.True(processFound, $"Process named '{longProcessName}' not found");
-                    }
-                }
-                finally
-                {
-                    if (Directory.Exists(tmpDir))
-                    {
-                        Directory.Delete(tmpDir, true);
-                    }
-                }
-            }
-        }
-
-        [Fact]
         public void TestRootGetProcessById()
         {
             Process p = Process.GetProcessById(1);
