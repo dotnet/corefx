@@ -681,11 +681,11 @@ namespace System.Net.Test.Common
     {
         public static readonly Http2LoopbackServerFactory Singleton = new Http2LoopbackServerFactory();
 
-        public override async Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync)
+        public override async Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 30_000)
         {
             using (var server = Http2LoopbackServer.CreateServer())
             {
-                await funcAsync(server, server.Address).ConfigureAwait(false);
+                await funcAsync(server, server.Address).TimeoutAfter(millisecondsTimeout).ConfigureAwait(false);
             }
         }
 
