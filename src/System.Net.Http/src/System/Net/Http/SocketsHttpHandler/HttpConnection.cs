@@ -497,8 +497,6 @@ namespace System.Net.Http
                         var expect100Timer = new Timer(
                             s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
                             allowExpect100ToContinue, _pool.Settings._expect100ContinueTimeout, Timeout.InfiniteTimeSpan);
-
-
                         sendRequestContentTask = SendRequestContentWithExpect100ContinueAsync(
                             request, allowExpect100ToContinue.Task, CreateRequestContentStream(request), expect100Timer, cancellationToken);
                     }

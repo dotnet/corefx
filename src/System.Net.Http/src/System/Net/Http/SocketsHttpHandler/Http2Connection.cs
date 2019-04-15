@@ -952,7 +952,7 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool flush=false)
+        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool flush = false)
         {
             // Ensure we don't exceed the max concurrent streams setting.
             await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
@@ -1344,7 +1344,7 @@ namespace System.Net.Http
             {
                 // Send headers
                 bool hasExpectContinueHeader = request.Content != null && request.HasHeaders && request.Headers.ExpectContinue == true;
-                    if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing it. hasExpectContinueHeader = {hasExpectContinueHeader}");
+
                 if (!hasExpectContinueHeader )
                 {
                 // Send request body, if any
@@ -1352,9 +1352,11 @@ namespace System.Net.Http
                     await http2Stream.SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
                     // Wait for response headers to be read.
                     await http2Stream.ReadResponseHeadersAsync(true).ConfigureAwait(false);
-                } 
-                else 
+                }
+                else
                 {
+                    // Send header and wait a little bit to see if server sends 100, reject or nothing.
+                    if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing 100-Continue.");
                     http2Stream = await SendHeadersAsync(request, cancellationToken, flush : true).ConfigureAwait(false);
                     await http2Stream.SendRequestContentWithExpect100ContinueAsync(cancellationToken).ConfigureAwait(false);
                 }

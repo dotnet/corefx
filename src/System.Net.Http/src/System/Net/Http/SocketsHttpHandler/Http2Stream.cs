@@ -111,15 +111,14 @@ namespace System.Net.Http
 
             public async Task SendRequestContentWithExpect100ContinueAsync(CancellationToken cancellationToken)
             {
+                // Start timer and try to read response headers.
                 TaskCompletionSource<bool> allowExpect100ToContinue = new TaskCompletionSource<bool>();
                 var expect100Timer = new Timer(
                             s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
                             allowExpect100ToContinue, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+                Task response = ReadResponseHeadersAsync(true, allowExpect100ToContinue);
 
-                //await _connection.FlushOutgoingBytesAsync().ConfigureAwait(false);
-                //:w!FinishWrite(mustFlush: true);
-                // Start processing Header frames.
-                Task response1 = ReadResponseHeadersAsync(true, allowExpect100ToContinue);
+                // By now, either we got response from server or timer expired.
                 bool sendRequestContent = await allowExpect100ToContinue.Task.ConfigureAwait(false);
 
                 if (sendRequestContent)
@@ -127,7 +126,7 @@ namespace System.Net.Http
                     await SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                await response1;
+                await response;
             }
 
             public void OnWindowUpdate(int amount)
@@ -245,15 +244,12 @@ namespace System.Net.Http
                     if ((uint)Response.StatusCode < 200)
                     {
                         // Eat continuations and transient responses.
-                        // TBD should we wait???.
-//                        return;
                     }
 
                     if (_state == StreamState.ExpectingTrailingHeaders || endStream)
                     {
                         _state = StreamState.Complete;
                     }
-                    //else if ((uint)Response.StatusCode >= 200)
                     else
                     {
                         _state = StreamState.ExpectingData;
@@ -389,16 +385,15 @@ namespace System.Net.Http
                         OnResponse100Continue();
                         if (tcs != null)
                         {
-                            
                             tcs.TrySetResult(true);
                         }
                     }
                 }
-
                 while ((uint)Response.StatusCode < 200);
 
                 if (tcs != null && (int)Response.StatusCode >= 300)
                 {
+                    // We tried 100-Continue and got rejected.
                     tcs.TrySetResult(false);
                     _abortRequestBody = true;
                 }
@@ -627,17 +622,6 @@ namespace System.Net.Http
                     base.Dispose(disposing);
                 }
 
-                public void Reset()
-                {
-                    Http2Stream http2Stream = Interlocked.Exchange(ref _http2Stream, null);
-                    if (http2Stream == null)
-                    {
-                        return;
-                    }
-
-                    base.Dispose();
-                }
-
                 public override bool CanRead => false;
                 public override bool CanWrite => true;
 
@@ -659,7 +643,7 @@ namespace System.Net.Http
                     if (http2Stream._abortRequestBody)
                     {
                         // If are asked to abort sending request body after we started, send RST and ignore test for the stream.
-                        Task ignored = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel); 
+                        Task ignored = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel);
                         _abortStream = true;
                         return new ValueTask();
                     }
