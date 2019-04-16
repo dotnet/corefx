@@ -69,32 +69,8 @@ namespace System.SpanTests
 
             range = new Range(Index.FromStart(0), Index.FromStart(span.Length + 1));
 
-            // We can't use Assert.Throws because it became obsolete. Using Assert.ThrowsAsync causing a compiler problem
-            // which is under fixing now. So, I had to do this check manually for now to unblock this test.
-            // Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => new Span<char>(s.ToCharArray())[range]).GetAwaiter().GetResult();
-            // Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => s.AsSpan()[range]).GetAwaiter().GetResult();
-
-            bool b = false;
-            try
-            {
-                var sp = new Span<char>(s.ToCharArray())[range];
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                b = true;
-            }
-            Assert.True(b, "new Span<char>(s.ToCharArray())[range] didn't throw");
-
-            b = false;
-            try
-            {
-                var sp = s.AsSpan()[range];
-            }
-            catch (ArgumentOutOfRangeException)
-            {
-                b = true;
-            }
-            Assert.True(b, "s.AsSpan()[range] didn't throw");
+            Assert.Throws<ArgumentOutOfRangeException>(delegate() { var spp = new Span<char>(s.ToCharArray())[range]; });
+            Assert.Throws<ArgumentOutOfRangeException>(delegate() { var spp = s.AsSpan()[range]; });
         }
     }
 }
