@@ -774,7 +774,7 @@ namespace System.Resources
 
         private object DeserializeObject(int typeIndex)
         {
-            if (!_permitDeserialization & GetType() == typeof(ResourceReader))
+            if (!_permitDeserialization && GetType() == typeof(ResourceReader))
             {
                 throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
             }
@@ -1158,11 +1158,15 @@ namespace System.Resources
             if (comma1 != comma2)
                 return false;
 
-            // case sensitive
-            if (String.Compare(typeName1, 0, typeName2, 0, typeName2.Length, StringComparison.Ordinal) != 0)
-                return false;
+            // both are missing assembly name, compare entire string as type name
             if (comma1 == -1)
-                return true;
+                return string.Equals(typeName1, typeName2, StringComparison.Ordinal);
+
+            // compare the type name portion
+            ReadOnlySpan<char> type1 = typeName1.AsSpan(0, comma1);
+            ReadOnlySpan<char> type2 = typeName2.AsSpan(0, comma2);
+            if (!type1.Equals(type2, StringComparison.Ordinal))
+                return false;
 
             // Now, compare assembly display names (IGNORES VERSION AND PROCESSORARCHITECTURE)
             // also, for  mscorlib ignores everything, since that's what the binder is going to do
@@ -1172,33 +1176,19 @@ namespace System.Resources
             // case insensitive
             AssemblyName an1 = new AssemblyName(typeName1.Substring(comma1));
             AssemblyName an2 = new AssemblyName(typeName1.Substring(comma2));
-            if (String.Compare(an1.Name, an2.Name, StringComparison.OrdinalIgnoreCase) != 0)
+            if (!string.Equals(an1.Name, an2.Name, StringComparison.OrdinalIgnoreCase))
                 return false;
 
             // to match IsMscorlib() in VM
-            if (String.Compare(an1.Name, "mscorlib", StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(an1.Name, "mscorlib", StringComparison.OrdinalIgnoreCase))
                 return true;
 
-
-            if ((an1.CultureInfo != null) && (an2.CultureInfo != null) &&
-                (an1.CultureInfo.Name != an2.CultureInfo.Name))
+            if (an1.CultureInfo?.LCID != an2.CultureInfo?.LCID)
                 return false;
 
             byte[] pkt1 = an1.GetPublicKeyToken();
             byte[] pkt2 = an2.GetPublicKeyToken();
-            if ((pkt1 != null) && (pkt2 != null))
-            {
-                if (pkt1.Length != pkt2.Length)
-                    return false;
-
-                for (int i = 0; i < pkt1.Length; i++)
-                {
-                    if (pkt1[i] != pkt2[i])
-                        return false;
-                }
-            }
-
-            return true;
+            return pkt1.AsSpan().SequenceEqual(pkt2);
         }
 
         internal sealed class ResourceEnumerator : IDictionaryEnumerator

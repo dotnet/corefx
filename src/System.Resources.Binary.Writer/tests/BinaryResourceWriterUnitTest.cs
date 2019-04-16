@@ -16,7 +16,7 @@ using System.Resources;
 using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
-namespace System.Resources.Binary.BinaryResourceWriterTests
+namespace System.Resources.Binary.Writer.Tests
 {
     public class BinaryResourceWriterTests
     {
@@ -233,11 +233,15 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
         {
             Dictionary<string, object> values = new Dictionary<string, object>()
                 {
-                    {"bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")) },
                     {"enum", DayOfWeek.Friday },
                     {"point", new Point(4, 8) },
                     {"font", SystemFonts.DefaultFont }
                 };
+
+            if (PlatformDetection.IsDrawingSupported)
+            {
+                values.Add("bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")));
+            }
 
             byte[] writerBuffer, binaryWriterBuffer;
             using (MemoryStream ms = new MemoryStream())
@@ -292,14 +296,21 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
             Assert.Throws<NotSupportedException>(() => new BinaryResourceReader(new MemoryStream(binaryWriterBuffer, false)));
         }
 
+
+
         [Fact]
         public static void TypeConverterByteArrayResources()
         {
             Dictionary<string, object> values = new Dictionary<string, object>()
                 {
-                    {"bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")) },
-                    {"icon", new Icon(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico")) }
+                    { "myResourceType", new MyResourceType(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 }) }
                 };
+
+            if (PlatformDetection.IsDrawingSupported)
+            {
+                values.Add("bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")));
+                values.Add("icon", new Icon(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico")));
+            }
 
             byte[] binaryWriterBuffer;
 
@@ -340,10 +351,14 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
                     { "size", new Size(4, 8) },
                     { "sizeF", new SizeF(4.2f, 8.5f) },
                     { "cultureInfo", new CultureInfo("en-US") },
-                    { "font", SystemFonts.DefaultFont },
-                    { "enum", DayOfWeek.Friday },
-                    { "imageFormat", ImageFormat.Png }
+                    { "enum", DayOfWeek.Friday }
                 };
+
+            if (PlatformDetection.IsDrawingSupported)
+            {
+                values.Add("imageFormat", ImageFormat.Png);
+                values.Add("font", SystemFonts.DefaultFont);
+            }
 
             byte[] binaryWriterBuffer;
 
@@ -377,9 +392,14 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
         {
             Dictionary<string, (Type type, Stream stream)> values = new Dictionary<string, (Type, Stream)>()
                 {
-                    { "icon", (typeof(Icon), File.OpenRead(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico"))) },
-                    { "bitmap", (typeof(Bitmap), File.OpenRead(Path.Combine("bitmaps", "almogaver24bits.bmp"))) },
+                    { "myResourceType", (typeof(MyResourceType),  new MemoryStream(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 })) }
                 };
+
+            if (PlatformDetection.IsDrawingSupported)
+            {
+                values.Add("icon", (typeof(Icon), File.OpenRead(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico"))));
+                values.Add("bitmap", (typeof(Bitmap), File.OpenRead(Path.Combine("bitmaps", "almogaver24bits.bmp"))));
+            }
 
             byte[] binaryWriterBuffer;
 
@@ -410,7 +430,6 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
         }
         private static void ResourceValueEquals(object expected, object actual)
         {
-
             if (actual is Bitmap bitmap)
             {
                 BitmapEquals((Bitmap)expected, bitmap);
