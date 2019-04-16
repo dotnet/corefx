@@ -22,7 +22,7 @@ namespace System.Net.Http.Functional.Tests
 
         public HttpClientHandlerTest_Http2(ITestOutputHelper output) : base(output) { }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        [Fact]
         public async Task Http2_ClientPreface_Sent()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -36,7 +36,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        [Fact]
         public async Task Http2_InitialSettings_SentAndAcked()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -68,7 +68,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        [Fact]
         public async Task Http2_DataSentBeforeServerPreface_ProtocolError()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -86,7 +86,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        [Fact]
         public async Task Http2_NoResponseBody_Success()
         {
             using (var server = Http2LoopbackServer.CreateServer())
