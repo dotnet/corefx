@@ -210,7 +210,7 @@ namespace System.Net.Test.Common
                 {
                     byte[] buffer = new byte[8000];
                     int bytesRead;
-                    while ((bytesRead = await clientStream.ReadAsync(buffer)) > 0)
+                    while ((bytesRead = await clientStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                     {
                         await serverStream.WriteAsync(buffer, 0, bytesRead);
                     }
@@ -228,7 +228,7 @@ namespace System.Net.Test.Common
                 {
                     byte[] buffer = new byte[8000];
                     int bytesRead;
-                    while ((bytesRead = await serverStream.ReadAsync(buffer)) > 0)
+                    while ((bytesRead = await serverStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
                     {
                         await clientStream.WriteAsync(buffer, 0, bytesRead);
                     }
