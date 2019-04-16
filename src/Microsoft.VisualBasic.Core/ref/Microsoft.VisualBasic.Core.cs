@@ -662,6 +662,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         internal ProjectData() { }
         public static void ClearProjectError() { }
         public static System.Exception CreateProjectError(int hr) { throw null; }
+        public static void EndApp() { }
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }

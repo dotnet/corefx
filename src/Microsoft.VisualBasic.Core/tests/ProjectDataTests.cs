@@ -48,5 +48,12 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             Assert.Null(Information.Err().GetException());
             Assert.Equal(0, Information.Err().Erl);
         }
+
+        [Fact]
+        public void EndApp()
+        {
+            // Cannot invoke EndApp because that will exit the process. Simply verify the method exists.
+            _ = new Action(ProjectData.EndApp);
+        }
     }
 }
