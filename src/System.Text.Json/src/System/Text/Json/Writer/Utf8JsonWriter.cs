@@ -24,7 +24,7 @@ namespace System.Text.Json
     /// </remarks>
     /// <remarks>
     /// To be able to format the output with indentation and whitespace OR to skip validation, create an instance of 
-    /// <see cref="JsonWriterState"/> and pass that in to the writer.
+    /// <see cref="JsonWriterOptions"/> and pass that in to the writer.
     /// </remarks>
     public sealed partial class Utf8JsonWriter : IDisposable
     {

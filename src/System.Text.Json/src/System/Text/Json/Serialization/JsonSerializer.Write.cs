@@ -24,8 +24,7 @@ namespace System.Text.Json.Serialization
                 options,
                 ref state);
 
-            writer.Flush(isFinalBlock: isFinalBlock);
-            writerState = writer.GetCurrentState();
+            writer.Flush();
 
             return isFinalBlock;
         }

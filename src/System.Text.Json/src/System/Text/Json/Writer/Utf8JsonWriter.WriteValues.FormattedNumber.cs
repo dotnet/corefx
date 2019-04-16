@@ -24,11 +24,9 @@ namespace System.Text.Json
         /// </remarks>
         internal void WriteNumberValue(ReadOnlySpan<byte> utf8FormattedNumber)
         {
-            JsonWriterHelper.ValidateNumber(utf8FormattedNumber);
-
-            ValidateWritingValue();
-
             JsonWriterHelper.ValidateValue(utf8FormattedNumber);
+            JsonWriterHelper.ValidateNumber(utf8FormattedNumber);
+            ValidateWritingValue();
 
             if (Options.Indented)
             {

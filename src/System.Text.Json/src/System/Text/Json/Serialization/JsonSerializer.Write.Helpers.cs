@@ -61,7 +61,7 @@ namespace System.Text.Json.Serialization
         {
             var writer = new Utf8JsonWriter(bufferWriter, writerOptions);
             writer.WriteNullValue();
-            writer.Flush(true);
+            writer.Flush();
         }
 
         private static byte[] WriteCoreBytes(object value, Type type, JsonSerializerOptions options)
@@ -118,7 +118,7 @@ namespace System.Text.Json.Serialization
                 Write(ref writer, -1, options, ref state);
             }
 
-            writer.Flush(isFinalBlock: true);
+            writer.Flush();
         }
     }
 }

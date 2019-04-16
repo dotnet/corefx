@@ -77,6 +77,7 @@ namespace System.Text.Json
             }
         }
 
+        // TODO: Consider writing in 4KB chunks for IBufferWriter mode instead.
         private void WriteStringMinimized(ReadOnlySpan<char> escapedValue)
         {
             Debug.Assert(escapedValue.Length < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileTranscoding) - 3);
@@ -103,6 +104,7 @@ namespace System.Text.Json
             output[BytesPending++] = JsonConstants.Quote;
         }
 
+        // TODO: Consider writing in 4KB chunks for IBufferWriter mode instead.
         private void WriteStringIndented(ReadOnlySpan<char> escapedValue)
         {
             int indent = Indentation;
@@ -216,6 +218,7 @@ namespace System.Text.Json
             }
         }
 
+        // TODO: Consider writing in 4KB chunks for IBufferWriter mode instead.
         private void WriteStringMinimized(ReadOnlySpan<byte> escapedValue)
         {
             Debug.Assert(escapedValue.Length < int.MaxValue - 3);
@@ -242,6 +245,7 @@ namespace System.Text.Json
             output[BytesPending++] = JsonConstants.Quote;
         }
 
+        // TODO: Consider writing in 4KB chunks for IBufferWriter mode instead.
         private void WriteStringIndented(ReadOnlySpan<byte> escapedValue)
         {
             int indent = Indentation;
