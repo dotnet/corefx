@@ -78,4 +78,5 @@ MembersMustExist : Member 'System.String.Chars.get(System.Index)' does not exist
 MembersMustExist : Member 'System.String.Chars.get(System.Range)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.String.Substring(System.Index)' does not exist in the implementation but it does exist in the contract.
 MembersMustExist : Member 'System.String.Substring(System.Range)' does not exist in the implementation but it does exist in the contract.
-Total Issues: 79
+MembersMustExist : Member 'System.Utf8String.Slice(System.Int32, System.Int32)' does not exist in the implementation but it does exist in the contract.
+Total Issues: 80
