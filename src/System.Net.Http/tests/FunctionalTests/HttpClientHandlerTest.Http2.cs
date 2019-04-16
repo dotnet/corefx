@@ -1277,8 +1277,9 @@ namespace System.Net.Http.Functional.Tests
                 using (HttpClient client = CreateHttpClient())
                 {
                     var request = new HttpRequestMessage(HttpMethod.Post, url);
-                    request.Headers.ExpectContinue = true;
                     request.Content = new StringContent(new string('*', 3000));
+                    request.Headers.ExpectContinue = true;
+                    request.Headers.Add("x-test", $"PostAsyncExpect100Continue_SendRequest_Ok({send100Continue}");
 
                     HttpResponseMessage response = await client.SendAsync(request);
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -1288,14 +1289,18 @@ namespace System.Net.Http.Functional.Tests
             {
                 await server.EstablishConnectionAsync();
 
-                (int streamId, HttpRequestData requestData) = await server.ReadAndParseRequestHeaderAsync();
+                (int streamId, HttpRequestData requestData) = await server.ReadAndParseRequestHeaderAsync(readBody : false);
                 Assert.Equal("100-continue", requestData.GetSingleHeaderValue("Expect"));
+
                 if (send100Continue)
                 {
                     await server.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.Continue);
                 }
+                await server.ReadBodyAsync();
                 await server.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
                 await server.SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes("OK"));
+                await server.SendGoAway(streamId);
+                await server.WaitForConnectionShutdownAsync();
             });
         }
     }

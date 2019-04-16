@@ -968,9 +968,6 @@ namespace System.Net.Http
                 http2Stream = AddStream(request);
                 int streamId = http2Stream.StreamId;
 
-                http2Stream = AddStream(request);
-                streamId = http2Stream.StreamId;
-
                 // Generate the entire header block, without framing, into the connection header buffer.
                 WriteHeaders(request);
 
@@ -1013,7 +1010,12 @@ namespace System.Net.Http
             }
             catch
             {
-                http2Stream?.Dispose();
+                if (http2Stream != null)
+                {
+                    RemoveStream(http2Stream);
+                    http2Stream.Dispose();
+                }
+
                 throw;
             }
             finally
@@ -1347,7 +1349,7 @@ namespace System.Net.Http
 
                 if (!hasExpectContinueHeader )
                 {
-                // Send request body, if any
+                    // Send request body, if any
                     http2Stream = await SendHeadersAsync(request, cancellationToken).ConfigureAwait(false);
                     await http2Stream.SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
                     // Wait for response headers to be read.

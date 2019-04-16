@@ -492,7 +492,40 @@ namespace System.Net.Test.Common
             return bytesGenerated;
         }
 
-        public async Task<(int streamId, HttpRequestData requestData)> ReadAndParseRequestHeaderAsync()
+        public async Task<byte[]> ReadBodyAsync()
+        {
+            byte[] body = null;
+            Frame frame;
+
+            do
+            {
+                frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+                Assert.Equal(FrameType.Data, frame.Type);
+
+                if (frame.Length > 1)
+                {
+                    DataFrame dataFrame = (DataFrame)frame;
+
+                    if (body == null)
+                    {
+                        body = dataFrame.Data.ToArray();
+                    }
+                    else
+                    {
+                        byte[] newBuffer = new byte[body.Length + dataFrame.Data.Length];
+
+                        body.CopyTo(newBuffer, 0);
+                        dataFrame.Data.Span.CopyTo(newBuffer.AsSpan().Slice(body.Length));
+                        body= newBuffer;
+                    }
+                }
+            }
+            while ((frame.Flags & FrameFlags.EndStream) == 0);
+
+            return body;
+        }
+
+        public async Task<(int streamId, HttpRequestData requestData)> ReadAndParseRequestHeaderAsync(bool readBody = true)
         {
             HttpRequestData requestData = new HttpRequestData();
 
@@ -520,32 +553,10 @@ namespace System.Net.Test.Common
             requestData.Method = requestData.GetSingleHeaderValue(":method");
             requestData.Path = requestData.GetSingleHeaderValue(":path");
 
-            byte[] body = null;
-            while ((frame.Flags & FrameFlags.EndStream) == 0)
+            if (readBody && (frame.Flags & FrameFlags.EndStream) == 0)
             {
-                frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
-                Assert.Equal(FrameType.Data, frame.Type);
-                if (frame.Length > 1)
-                {
-                    DataFrame dataFrame = (DataFrame)frame;
-
-                    if (body == null)
-                    {
-                        body = dataFrame.Data.ToArray();
-                    }
-                    else
-                    {
-                        byte[] newBuffer = new byte[body.Length + dataFrame.Data.Length];
-
-                        body.CopyTo(newBuffer, 0);
-                        dataFrame.Data.Span.CopyTo(newBuffer.AsSpan().Slice(body.Length));
-                        body= newBuffer;
-                    }
-                }
-            }
-            if (body != null)
-            {
-                requestData.Body = body;
+                // Read body until end of stream if needed.
+                requestData.Body = await ReadBodyAsync();
             }
 
             return (streamId, requestData);
