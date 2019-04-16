@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1D422B1D-D7C4-41B9-862D-EB3D98DF37DE}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -39,6 +39,7 @@
     <Compile Include="System\Net\Http\HttpResponseMessage.cs" />
     <Compile Include="System\Net\Http\HttpRuleParser.cs" />
     <Compile Include="System\Net\Http\HttpUtilities.cs" />
+    <Compile Include="System\Net\Http\IHttpMessageInvoker.cs" />
     <Compile Include="System\Net\Http\MessageProcessingHandler.cs" />
     <Compile Include="System\Net\Http\MultipartContent.cs" />
     <Compile Include="System\Net\Http\MultipartFormDataContent.cs" />

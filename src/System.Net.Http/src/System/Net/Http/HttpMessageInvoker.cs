@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http
 {
-    public class HttpMessageInvoker : IDisposable
+    public class HttpMessageInvoker : IHttpMessageInvoker, IDisposable
     {
         private volatile bool _disposed;
         private bool _disposeHandler;
