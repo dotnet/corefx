@@ -412,6 +412,11 @@ namespace System.Net.Http
                         Debug.Assert(_http2Connection == null);
                         _http2Connection = http2Connection;
 
+                        if (NetEventSource.IsEnabled)
+                        {
+                            Trace("New unencrypted HTTP2 connection established.");
+                        }
+
                         return (_http2Connection, true, null);
                     }
 
