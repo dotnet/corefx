@@ -324,4 +324,7 @@
   <data name="SerializerOptionsImmutable" xml:space="preserve">
     <value>Serializer options cannot be changed once serialization or deserialization has occurred.</value>
   </data>
+  <data name="StreamNotWritable" xml:space="preserve">
+    <value>Stream was not writable.</value>
+  </data>
 </root>

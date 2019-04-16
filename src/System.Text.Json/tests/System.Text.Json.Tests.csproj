@@ -21,7 +21,7 @@
     <Compile Include="JsonNumberTestData.cs" />
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
-    <Compile Include="JsonWriterStateTests.cs" />
+    <Compile Include="JsonWriterOptionsTests.cs" />
     <Compile Include="ResizableArray.cs" />
     <Compile Include="Serialization\Array.ReadTests.cs" />
     <Compile Include="Serialization\Array.WriteTests.cs" />

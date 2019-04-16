@@ -26,6 +26,8 @@ namespace System.Text.Json.Tests
 
         public byte[] Formatted => _buffer.AsSpan(0, _count).ToArray();
 
+        public int FormattedCount => _count;
+
         public Memory<byte> GetMemory(int minimumLength = 0) => _buffer.AsMemory(_count);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

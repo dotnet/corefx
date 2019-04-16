@@ -122,7 +122,12 @@ namespace System.Text.Json
         /// </exception>
         public Utf8JsonWriter(Stream utf8Json, JsonWriterOptions options = default)
         {
-            _stream = utf8Json ?? throw new ArgumentNullException(nameof(utf8Json));
+            if (utf8Json == null)
+                throw new ArgumentNullException(nameof(utf8Json));
+            if (!utf8Json.CanWrite)
+                throw new ArgumentException(SR.StreamNotWritable);
+
+            _stream = utf8Json;
             _arrayBufferWriter = new ArrayBufferWriter<byte>();
             _output = _arrayBufferWriter;
 
@@ -166,11 +171,16 @@ namespace System.Text.Json
         /// but now write to the passed in <see cref="Stream" /> as the new destination.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
-        /// Thrown when the instance of <see cref="IBufferWriter{Byte}" /> that is passed in is null.
+        /// Thrown when the instance of <see cref="Stream" /> that is passed in is null.
         /// </exception>
         public void Reset(Stream utf8Json)
         {
-            _stream = utf8Json ?? throw new ArgumentNullException(nameof(utf8Json));
+            if (utf8Json == null)
+                throw new ArgumentNullException(nameof(utf8Json));
+            if (!utf8Json.CanWrite)
+                throw new ArgumentException(SR.StreamNotWritable);
+
+            _stream = utf8Json;
             if (_arrayBufferWriter == null)
             {
                 _arrayBufferWriter = new ArrayBufferWriter<byte>();
@@ -193,7 +203,7 @@ namespace System.Text.Json
         /// but now write to the passed in <see cref="IBufferWriter{Byte}" /> as the new destination.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
-        /// Thrown when the instance of <see cref="Stream" /> that is passed in is null.
+        /// Thrown when the instance of <see cref="IBufferWriter{Byte}" /> that is passed in is null.
         /// </exception>
         public void Reset(IBufferWriter<byte> bufferWriter)
         {
@@ -792,7 +802,7 @@ namespace System.Text.Json
                 }
 
                 Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
-                Debug.Assert(_tokenType != JsonTokenType.None);
+                Debug.Assert(Options.SkipValidation || _tokenType != JsonTokenType.None);
 
                 int maxRequired = indent + 3; // 1 end token, 1-2 bytes for new line
 

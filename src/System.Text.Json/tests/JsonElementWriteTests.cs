@@ -831,15 +831,14 @@ null,
             using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_readerOptions))
             {
                 JsonElement root = doc.RootElement;
-                JsonWriterState state = new JsonWriterState(
-                    new JsonWriterOptions
-                    {
-                        SkipValidation = skipValidation,
-                    });
+                var options = new JsonWriterOptions
+                {
+                    SkipValidation = skipValidation,
+                };
 
                 const string CharLabel = "char";
                 byte[] byteUtf8 = Encoding.UTF8.GetBytes("byte");
-                Utf8JsonWriter writer = new Utf8JsonWriter(buffer, state);
+                var writer = new Utf8JsonWriter(buffer, options);
 
                 if (skipValidation)
                 {
@@ -874,11 +873,7 @@ null,
                             (ref Utf8JsonWriter w) => val.WriteAsProperty(byteUtf8, ref w));
                     }
 
-                    JsonTestHelper.AssertThrows<InvalidOperationException>(
-                        ref writer,
-                        (ref Utf8JsonWriter w) => w.Flush());
-
-                    writer.Flush(isFinalBlock: false);
+                    writer.Flush();
 
                     AssertContents("", buffer);
                 }
@@ -894,13 +889,12 @@ null,
             using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_readerOptions))
             {
                 JsonElement root = doc.RootElement;
-                JsonWriterState state = new JsonWriterState(
-                    new JsonWriterOptions
-                    {
-                        SkipValidation = skipValidation,
-                    });
+                var options = new JsonWriterOptions
+                {
+                    SkipValidation = skipValidation,
+                };
 
-                Utf8JsonWriter writer = new Utf8JsonWriter(buffer, state);
+                var writer = new Utf8JsonWriter(buffer, options);
                 writer.WriteStartObject();
 
                 if (skipValidation)
@@ -941,13 +935,12 @@ null,
             {
                 JsonElement target = doc.RootElement[0];
 
-                var state = new JsonWriterState(
-                    new JsonWriterOptions
-                    {
-                        Indented = indented,
-                    });
+                var options = new JsonWriterOptions
+                {
+                    Indented = indented,
+                };
 
-                var writer = new Utf8JsonWriter(buffer, state);
+                var writer = new Utf8JsonWriter(buffer, options);
 
                 target.WriteAsValue(ref writer);
                 writer.Flush();
@@ -967,13 +960,12 @@ null,
             {
                 JsonElement target = doc.RootElement[0];
 
-                var state = new JsonWriterState(
-                    new JsonWriterOptions
-                    {
-                        Indented = indented,
-                    });
+                var options = new JsonWriterOptions
+                {
+                    Indented = indented,
+                };
 
-                var writer = new Utf8JsonWriter(buffer, state);
+                var writer = new Utf8JsonWriter(buffer, options);
 
                 target.WriteAsValue(ref writer);
                 writer.Flush();
@@ -1023,13 +1015,12 @@ null,
             {
                 JsonElement target = doc.RootElement[0];
 
-                var state = new JsonWriterState(
-                    new JsonWriterOptions
-                    {
-                        Indented = indented,
-                    });
+                var options = new JsonWriterOptions
+                {
+                    Indented = indented,
+                };
 
-                var writer = new Utf8JsonWriter(buffer, state);
+                var writer = new Utf8JsonWriter(buffer, options);
 
                 writer.WriteStartObject();
                 target.WriteAsProperty(propertyName, ref writer);
@@ -1059,13 +1050,12 @@ null,
             {
                 JsonElement target = doc.RootElement[0];
 
-                var state = new JsonWriterState(
-                    new JsonWriterOptions
-                    {
-                        Indented = indented,
-                    });
+                var options = new JsonWriterOptions
+                {
+                    Indented = indented,
+                };
 
-                var writer = new Utf8JsonWriter(buffer, state);
+                var writer = new Utf8JsonWriter(buffer, options);
 
                 writer.WriteStartObject();
                 target.WriteAsProperty(propertyName, ref writer);
