@@ -472,13 +472,13 @@ namespace System.PrivateUri.Tests
         public static IEnumerable<object[]> UriIsWellFormedUnwiseStringData =>
         new List<object[]>
         {
-            new object[] { "https://www.contoso.com/?a=%7B%7D&b=%E2%80%99" },
-            new object[] { "https://www.contoso.com/?a=%7B%7D%E2%80%99" },
-            new object[] { "https://www.contoso.com/?b=%E2%80%99" },
+            new object[] { "https://www.contoso.com/?a=%7B%7C%7D&b=%E2%80%99" },
+            new object[] { "https://www.contoso.com/?a=%7B%7C%7D%E2%80%99" }
         };
 
         [Theory]
         [MemberData(nameof(UriIsWellFormedUnwiseStringData))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void UriIsWellFormed_AbsoluteUnicodeWithUnwise_Success(string uriString)
         {
             Assert.True(Uri.IsWellFormedUriString(uriString, UriKind.Absolute));
