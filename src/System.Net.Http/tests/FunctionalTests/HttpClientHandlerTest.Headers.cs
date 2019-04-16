@@ -115,10 +115,10 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData("Thu, 01 Dec 1994 16:00:00 GMT")]
-        [InlineData("-1")]
-        [InlineData("0")]
-        public async Task SendAsync_Expires_Success(string value)
+        [InlineData("Thu, 01 Dec 1994 16:00:00 GMT", true)]
+        [InlineData("-1", false)]
+        [InlineData("0", false)]
+        public async Task SendAsync_Expires_Success(string value, bool isValid)
         {
             await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
@@ -127,6 +127,11 @@ namespace System.Net.Http.Functional.Tests
                     var message = new HttpRequestMessage(HttpMethod.Get, uri);
                     HttpResponseMessage response = await client.SendAsync(message);
                     Assert.NotNull(response.Content.Headers.Expires);
+                    if (!isValid)
+                    {
+                        // Invalid date should be converted to MinValue so everything is expired.
+                        Assert.Equal(DateTimeOffset.MinValue, response.Content.Headers.Expires);
+                    }
                 }
             },
             async server =>
@@ -138,12 +143,17 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Theory]
-        [InlineData("-1")]
-        [InlineData("Thu, 01 Dec 1994 16:00:00 GMT")]
-        public void SendAsync_CustomExpires_Success(string value)
+        [InlineData("-1", false)]
+        [InlineData("Thu, 01 Dec 1994 16:00:00 GMT", true)]
+        public void SendAsync_CustomExpires_Success(string value, bool isValid)
         {
             var headers = new DerivedHttpHeaders();
-            headers.Add("Expires", value);
+            if (!isValid)
+            {
+                Assert.Throws<FormatException>(() => headers.Add("Expires", value));
+            }
+            Assert.True(headers.TryAddWithoutValidation("Expires", value));
+            Assert.Equal(1, Enumerable.Count(headers.GetValues("Expires")));
         }
 
         [OuterLoop("Uses external server")]

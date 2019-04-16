@@ -45,7 +45,7 @@ namespace System.Net.Http.Headers
         }
 
         protected HttpHeaders()
-            : this(HttpHeaderType.None, HttpHeaderType.All)
+            : this(HttpHeaderType.All, HttpHeaderType.None)
         {
         }
 
