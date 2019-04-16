@@ -12,7 +12,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace System.Net.Http.Functional.Tests
+namespace System.Net.Test.Common
 {
     /// <summary>
     /// Provides a test-only HTTP proxy. Handles multiple connections/requests and CONNECT tunneling for HTTPS
