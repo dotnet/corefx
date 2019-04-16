@@ -334,7 +334,7 @@ namespace System.Data.OleDb {
 
         // requires ReliabilityContract to be called by ReleaseHandle
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        private void ResetValues(IntPtr buffer, object iaccessor) {
+        private unsafe void ResetValues(IntPtr buffer, object iaccessor) {
             Debug.Assert(ADP.PtrZero != buffer && _needToReset && _haveData, "shouldn't be calling ResetValues");
             for (int i = 0; i < _bindingCount; ++i) {
                 IntPtr ptr = ADP.IntPtrOffset(buffer, (i * ODB.SizeOf_tagDBBINDING));
@@ -349,11 +349,11 @@ namespace System.Data.OleDb {
                     FreeCoTaskMem(buffer, valueOffset);
                     break;
                 case NativeDBType.PROPVARIANT:
-                    ValidateCheck(valueOffset, 2*NativeOledbWrapper.SizeOfPROPVARIANT);
+                    ValidateCheck(valueOffset, 2 * sizeof(PROPVARIANT));
                     FreePropVariant(buffer, valueOffset);
                     break;
                 case NativeDBType.VARIANT:
-                    ValidateCheck(valueOffset, 2*ODB.SizeOf_Variant);
+                    ValidateCheck(valueOffset, 2 * ODB.SizeOf_Variant);
                     FreeVariant(buffer, valueOffset);
                     break;
                 case NativeDBType.BSTR:
@@ -492,15 +492,15 @@ namespace System.Data.OleDb {
         }
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        static private void FreePropVariant(IntPtr buffer, int valueOffset) {
+        static unsafe private void FreePropVariant(IntPtr buffer, int valueOffset) {
             // two contigous PROPVARIANT structures that need to be freed
             // the second should only be freed if different from the first
-            Debug.Assert(0 == (NativeOledbWrapper.SizeOfPROPVARIANT % 8), "unexpected PROPVARIANT size mutiplier");
+            Debug.Assert(0 == (sizeof(PROPVARIANT) % 8), "unexpected PROPVARIANT size mutiplier");
             Debug.Assert (0 == valueOffset % 8, "unexpected unaligned ptr offset");
 
             IntPtr currentHandle = ADP.IntPtrOffset(buffer, valueOffset);
-            IntPtr originalHandle = ADP.IntPtrOffset(buffer, valueOffset+NativeOledbWrapper.SizeOfPROPVARIANT);
-            bool different = NativeOledbWrapper.MemoryCompare(currentHandle, originalHandle, NativeOledbWrapper.SizeOfPROPVARIANT);
+            IntPtr originalHandle = ADP.IntPtrOffset(buffer, valueOffset + sizeof(PROPVARIANT));
+            bool different = NativeOledbWrapper.MemoryCompare(currentHandle, originalHandle, sizeof(PROPVARIANT));
 
             RuntimeHelpers.PrepareConstrainedRegions();
             try {} finally {
@@ -512,7 +512,7 @@ namespace System.Data.OleDb {
                 }
                 else {
                     // second structure same as the first, just clear the field
-                    SafeNativeMethods.ZeroMemory(originalHandle, NativeOledbWrapper.SizeOfPROPVARIANT);
+                    SafeNativeMethods.ZeroMemory(originalHandle, sizeof(PROPVARIANT));
                 }
             }
         }
