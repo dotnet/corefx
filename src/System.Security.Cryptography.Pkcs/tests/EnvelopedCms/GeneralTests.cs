@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
 using Test.Cryptography;
+using System.Collections.Generic;
 
 namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
