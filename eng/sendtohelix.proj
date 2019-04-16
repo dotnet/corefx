@@ -68,7 +68,7 @@
 
   <!-- Define which workloads require global tools. -->
   <PropertyGroup Condition="'$(UseGlobalTools)' == ''">
-    <UseGlobalTools Condition="'$(CoveraHelixCommandge)' == 'true'">true</UseGlobalTools>
+    <UseGlobalTools Condition="'$(Coverage)' == 'true'">true</UseGlobalTools>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HelixCommand)' == '' and '$(TargetsWindows)' == 'true'">
