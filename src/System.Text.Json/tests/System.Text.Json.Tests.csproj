@@ -15,6 +15,7 @@
     <Compile Include="InvalidBufferWriter.cs" />
     <Compile Include="JsonDateTimeTestData.cs" />
     <Compile Include="JsonDocumentTests.cs" />
+    <Compile Include="JsonElementCloneTests.cs" />
     <Compile Include="JsonElementWriteTests.cs" />
     <Compile Include="JsonGuidTestData.cs" />
     <Compile Include="JsonNumberTestData.cs" />
@@ -39,6 +40,9 @@
     <Compile Include="Serialization\Stream.WriteTests.cs" />
     <Compile Include="Serialization\TestClasses.cs" />
     <Compile Include="Serialization\TestClasses.Polymorphic.cs" />
+    <Compile Include="Serialization\TestClasses.SimpleTestClass.cs" />
+    <Compile Include="Serialization\TestClasses.SimpleTestClassWithNullables.cs" />
+    <Compile Include="Serialization\TestClasses.SimpleTestClassWithObject.cs" />
     <Compile Include="Serialization\TestData.cs" />
     <Compile Include="Serialization\Value.ReadTests.cs" />
     <Compile Include="Serialization\Value.WriteTests.cs" />

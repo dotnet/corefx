@@ -67,7 +67,9 @@ namespace System.Text.Json.Serialization
         private static byte[] WriteCoreBytes(object value, Type type, JsonSerializerOptions options)
         {
             if (options == null)
-                options = s_defaultSettings;
+            {
+                options = JsonSerializerOptions.s_defaultOptions;
+            }
 
             byte[] result;
 
@@ -83,7 +85,9 @@ namespace System.Text.Json.Serialization
         private static string WriteCoreString(object value, Type type, JsonSerializerOptions options)
         {
             if (options == null)
-                options = s_defaultSettings;
+            {
+                options = JsonSerializerOptions.s_defaultOptions;
+            }
 
             string result;
 
@@ -100,7 +104,7 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(type != null || value == null);
 
-            var writerState = new JsonWriterState(options.WriterOptions);
+            var writerState = new JsonWriterState(options.GetWriterOptions());
             var writer = new Utf8JsonWriter(output, writerState);
 
             if (value == null)
