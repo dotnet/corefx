@@ -56,20 +56,45 @@ namespace System.SpanTests
 
             for (int i = 0; i < span.Length; i++)
             {
-                Assert.True(span.Slice(i) == span.Slice(Index.FromStart(i)));
-                Assert.True(span.Slice(span.Length - i - 1) == span.Slice(Index.FromEnd(i + 1)));
+                Assert.True(span.Slice(i) == span[i..]);
+                Assert.True(span.Slice(span.Length - i - 1) == span[^(i + 1)..]);
 
-                Assert.True(roSpan.Slice(i) == roSpan.Slice(Index.FromStart(i)));
-                Assert.True(roSpan.Slice(roSpan.Length - i - 1) == roSpan.Slice(Index.FromEnd(i + 1)));
+                Assert.True(roSpan.Slice(i) == roSpan[i..]);
+                Assert.True(roSpan.Slice(roSpan.Length - i - 1) == roSpan[^(i + 1)..]);
 
                 range = new Range(Index.FromStart(i), Index.FromEnd(0));
-                Assert.True(span.Slice(i, span.Length - i) == span.Slice(range));
-                Assert.True(roSpan.Slice(i, roSpan.Length - i) == roSpan.Slice(range));
+                Assert.True(span.Slice(i, span.Length - i) == span[range]);
+                Assert.True(roSpan.Slice(i, roSpan.Length - i) == roSpan[range]);
             }
 
             range = new Range(Index.FromStart(0), Index.FromStart(span.Length + 1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => new Span<char>(s.ToCharArray()).Slice(range));
-            Assert.Throws<ArgumentOutOfRangeException>(() => s.AsSpan().Slice(range));
+
+            // We can't use Assert.Throws because it became obsolete. Using Assert.ThrowsAsync causing a compiler problem
+            // which is under fixing now. So, I had to do this check manually for now to unblock this test.
+            // Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => new Span<char>(s.ToCharArray())[range]).GetAwaiter().GetResult();
+            // Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => s.AsSpan()[range]).GetAwaiter().GetResult();
+
+            bool b = false;
+            try
+            {
+                var sp = new Span<char>(s.ToCharArray())[range];
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                b = true;
+            }
+            Assert.True(b, "new Span<char>(s.ToCharArray())[range] didn't throw");
+
+            b = false;
+            try
+            {
+                var sp = s.AsSpan()[range];
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                b = true;
+            }
+            Assert.True(b, "s.AsSpan()[range] didn't throw");
         }
     }
 }
