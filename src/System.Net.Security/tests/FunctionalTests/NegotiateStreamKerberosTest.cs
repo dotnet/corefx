@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Net.Test.Common;
@@ -11,6 +13,7 @@ using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Principal;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -29,7 +32,6 @@ namespace System.Net.Security.Tests
             get
             {
                 yield return new object[] { CredentialCache.DefaultNetworkCredentials };
-                /*
                 yield return new object[] { new NetworkCredential(
                     Configuration.Security.ActiveDirectoryUserName,
                     Configuration.Security.ActiveDirectoryUserPassword,
@@ -62,7 +64,6 @@ namespace System.Net.Security.Tests
                     Configuration.Security.ActiveDirectoryUserName,
                     (SecureString)null,
                     null) };
-                */
             }
         }
 
@@ -94,7 +95,7 @@ namespace System.Net.Security.Tests
         }
 
         [OuterLoop]
-        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
+        [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
         [MemberData(nameof(GoodCredentialsData))]
         public async Task NegotiateStream_ClientAuthenticationRemote_Success(object credentialObject)
         {
@@ -103,7 +104,7 @@ namespace System.Net.Security.Tests
         }
 
         [OuterLoop]
-        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
+        [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
         [MemberData(nameof(BadCredentialsData))]
         public async Task NegotiateStream_ClientAuthenticationRemote_Fails(object credentialObject)
         {
@@ -162,169 +163,29 @@ namespace System.Net.Security.Tests
         }
 
         [OuterLoop]
-        // [Theory]
-        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
-        [MemberData(nameof(GoodCredentialsData))]
-        public async Task NegotiateStream_LocalServerAuthentication_Success(object credentialObject)
+        // [Fact]
+        // [ConditionalFact(nameof(IsServerAndDomainAvailable))]
+        public async Task NegotiateStream_RemoteServerAuthentication_Success()
         {
-            var credential = (NetworkCredential)credentialObject;
-            await VerifyLocalServerAuthentication(credential);
-        }
-
-        [OuterLoop]
-        // [Theory]
-        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
-        [MemberData(nameof(BadCredentialsData))]
-        public async Task NegotiateStream_LocalServerAuthentication_Fails(object credentialObject)
-        {
-            var credential = (NetworkCredential)credentialObject;
-            await Assert.ThrowsAsync<AuthenticationException>(() => VerifyLocalServerAuthentication(credential));
-        }
-
-        private async Task VerifyLocalServerAuthentication(NetworkCredential credential)
-        {
-            string serverName = "chrross-udesk.crkerberos.com";// Configuration.Security.NegotiateServer.Host;
-            int port = 54321;// Configuration.Security.NegotiateServer.Port;
-            string serverSPN = "HTTP/" + serverName;
+            string expectedUser = Configuration.Security.NegotiateClientUser;
             
             string expectedAuthenticationType = "Kerberos";
             bool mutualAuthenitcated = true;
-/*
-            bool isLocalhost = false; // await IsLocalHost(serverName);
-            if (credential == CredentialCache.DefaultNetworkCredentials && isLocalhost)
+
+            using (var controlClient = new TcpClient())
             {
-                expectedAuthenticationType = "NTLM";
-            }
-            else if (credential != CredentialCache.DefaultNetworkCredentials && 
-                (string.IsNullOrEmpty(credential.UserName) || string.IsNullOrEmpty(credential.Password)))
-            {
-                // Anonymous authentication.
-                expectedAuthenticationType = "NTLM";
-                mutualAuthenitcated = false;
-            }
-*/
-            using (var client = new TcpClient())
-            {
-                var server = new TcpListener(IPAddress.Parse("10.121.100.113"), port);
-                server.Start();
-                try
-                {
-                    var acceptTask = server.AcceptTcpClientAsync();
-                    await client.ConnectAsync(IPAddress.Parse("10.121.100.113"), port);
+                string clientName = Configuration.Security.NegotiateClient.Host;
+                int clientPort = Configuration.Security.NegotiateClient.Port;
+                await controlClient.ConnectAsync(clientName, clientPort).DefaultTimeout();
+                var serverStream = controlClient.GetStream();
 
-                    var serverConnection = await acceptTask;
-                    var serverStream = serverConnection.GetStream();
-/*
-            var loop = true;
-            while (loop)
-            {
-                await Task.Delay(1000);
-            }
-*/
-                    using (var serverAuth = new NegotiateStream(serverStream, leaveInnerStreamOpen: false))
-                    {
-                        var clientStream = client.GetStream();
-                        using (var clientAuth = new NegotiateStream(clientStream, leaveInnerStreamOpen:false))
-                        {
-                            var serverAuthTask = serverAuth.AuthenticateAsServerAsync();
-                            var clientAuthTask = clientAuth.AuthenticateAsClientAsync(
-                                credential,
-                                serverSPN,
-                                ProtectionLevel.None,
-                                System.Security.Principal.TokenImpersonationLevel.Identification);
-
-                            await serverAuthTask;
-
-                            Assert.Equal(expectedAuthenticationType, serverAuth.RemoteIdentity.AuthenticationType);
-                            Assert.Equal(serverSPN, serverAuth.RemoteIdentity.Name);
-
-                            Assert.Equal(true, serverAuth.IsAuthenticated);
-                            Assert.Equal(true, serverAuth.IsEncrypted);
-                            Assert.Equal(mutualAuthenitcated, serverAuth.IsMutuallyAuthenticated);
-                            Assert.Equal(true, serverAuth.IsSigned);
-
-                            await clientAuthTask;
-
-                            Assert.Equal(expectedAuthenticationType, clientAuth.RemoteIdentity.AuthenticationType);
-                            Assert.Equal(serverSPN, clientAuth.RemoteIdentity.Name);
-
-                            Assert.Equal(true, clientAuth.IsAuthenticated);
-                            Assert.Equal(true, clientAuth.IsEncrypted);
-                            Assert.Equal(mutualAuthenitcated, clientAuth.IsMutuallyAuthenticated);
-                            Assert.Equal(true, clientAuth.IsSigned);
-
-                            // Send a message to the server. Encode the test data into a byte array.
-                            byte[] message = Encoding.UTF8.GetBytes("Hello from the client.");
-                            await clientAuth.WriteAsync(message, 0, message.Length);
-                        }
-                    }
-                }
-                finally
-                {
-                    server.Stop();
-                }
-            }
-        }
-
-        [OuterLoop]
-        // [Theory]
-        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
-        [MemberData(nameof(GoodCredentialsData))]
-        public async Task NegotiateStream_RemoteServerAuthentication_Success(object credentialObject)
-        {
-            var credential = (NetworkCredential)credentialObject;
-            await VerifyRemoteServerAuthentication(credential);
-        }
-
-        [OuterLoop]
-        // [Theory]
-        // [ConditionalTheory(nameof(IsServerAndDomainAvailable))]
-        [MemberData(nameof(BadCredentialsData))]
-        public async Task NegotiateStream_RemoteServerAuthentication_Fails(object credentialObject)
-        {
-            var credential = (NetworkCredential)credentialObject;
-            await Assert.ThrowsAsync<AuthenticationException>(() => VerifyRemoteServerAuthentication(credential));
-        }
-
-        private async Task VerifyRemoteServerAuthentication(NetworkCredential credential)
-        {
-            string serverName = "chrross-udesk.crkerberos.com";// Configuration.Security.NegotiateServer.Host;
-            int port = 54321;// Configuration.Security.NegotiateServer.Port;
-            string serverSPN = "HTTP/" + serverName;
-            
-            string expectedAuthenticationType = "Kerberos";
-            bool mutualAuthenitcated = true;
-/*
-            if (credential != CredentialCache.DefaultNetworkCredentials && 
-                (string.IsNullOrEmpty(credential.UserName) || string.IsNullOrEmpty(credential.Password)))
-            {
-                // Anonymous authentication.
-                expectedAuthenticationType = "NTLM";
-                mutualAuthenitcated = false;
-            }
-*/
-            var server = new TcpListener(IPAddress.Parse("10.121.100.113"), port);
-            server.Start();
-            try
-            {                
-                var acceptTask = server.AcceptTcpClientAsync();
-                // TODO: Signal client to connect
-
-                var serverConnection = await acceptTask;
-                var serverStream = serverConnection.GetStream();
-/*
-                var loop = true;
-                while (loop)
-                {
-                    await Task.Delay(1000);
-                }
-*/
                 using (var serverAuth = new NegotiateStream(serverStream, leaveInnerStreamOpen: false))
                 {
-                    serverAuth.AuthenticateAsServer(
+                    await serverAuth.AuthenticateAsServerAsync(
                         CredentialCache.DefaultNetworkCredentials,
                         ProtectionLevel.EncryptAndSign,
-                        TokenImpersonationLevel.Identification);
+                        TokenImpersonationLevel.Identification)
+                        .DefaultTimeout();
 
                     Assert.True(serverAuth.IsAuthenticated, "IsAuthenticated");
                     Assert.True(serverAuth.IsEncrypted, "IsEncrypted");
@@ -332,16 +193,16 @@ namespace System.Net.Security.Tests
                     Assert.Equal(mutualAuthenitcated, serverAuth.IsMutuallyAuthenticated);
 
                     Assert.Equal(expectedAuthenticationType, serverAuth.RemoteIdentity.AuthenticationType);
-                    Assert.Equal("Administrator@CRKERBEROS.COM", serverAuth.RemoteIdentity.Name);
+                    Assert.Equal(expectedUser, serverAuth.RemoteIdentity.Name);
 
-                    // Send a message to the server. Encode the test data into a byte array.
-                    byte[] message = Encoding.UTF8.GetBytes("Hello from the server.");
-                    await serverAuth.WriteAsync(message, 0, message.Length);
+                    // Receive a message from the client.
+                    var message = "Hello from the client.";
+                    using (var reader = new StreamReader(serverAuth))
+                    {
+                        var response = await reader.ReadToEndAsync().DefaultTimeout();
+                        Assert.Equal(message, response);
+                    }
                 }
-            }
-            finally
-            {
-                server.Stop();
             }
         }
 
@@ -373,6 +234,39 @@ namespace System.Net.Security.Tests
             }
 
             return secureString;
+        }
+    }
+
+    public static class TaskExtensions
+    {
+        public static async Task DefaultTimeout(this Task task)
+        {
+            var timeout = TimeSpan.FromSeconds(10);
+            var cts = new CancellationTokenSource();
+            if (task == await Task.WhenAny(task, Task.Delay(timeout, cts.Token)))
+            {
+                cts.Cancel();
+                await task;
+            }
+            else
+            {
+                throw new TimeoutException();
+            }
+        }
+
+        public static async Task<T> DefaultTimeout<T>(this Task<T> task)
+        {
+            var timeout = TimeSpan.FromSeconds(10);
+            var cts = new CancellationTokenSource();
+            if (task == await Task.WhenAny(task, Task.Delay(timeout, cts.Token)))
+            {
+                cts.Cancel();
+                return await task;
+            }
+            else
+            {
+                throw new TimeoutException();
+            }
         }
     }
 }
