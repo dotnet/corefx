@@ -8,7 +8,7 @@ namespace System.Runtime.InteropServices
 {
     public class StandardOleMarshalObject : MarshalByRefObject, IMarshal
     {
-        private static readonly Guid StdMarshalClsid = new Guid("00000017-0000-0000-c000-000000000046");
+        private static readonly Guid CLSID_StdMarshal = new Guid("00000017-0000-0000-c000-000000000046");
         
         [UnmanagedFunctionPointer(CallingConvention.StdCall)]
         private delegate int GetMarshalSizeMaxDelegate(IntPtr _this, ref Guid riid, IntPtr pv, int dwDestContext, IntPtr pvDestContext, int mshlflags, out int pSize);
@@ -46,7 +46,7 @@ namespace System.Runtime.InteropServices
 
         int IMarshal.GetUnmarshalClass(ref Guid riid, IntPtr pv, int dwDestContext, IntPtr pvDestContext, int mshlflags, out Guid pCid)
         {
-            pCid = StdMarshalClsid;
+            pCid = CLSID_StdMarshal;
             return HResults.S_OK;
         }
 
