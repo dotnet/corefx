@@ -34,7 +34,7 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
         [Fact]
         public static void ExceptionforReadOnlyStream()
         {
-            AssertExtensions.Throws<ArgumentException>("stream", () =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 using (var readOnlyStream = new MemoryStream(new byte[1], false))
                 {
@@ -233,7 +233,7 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
         {
             Dictionary<string, object> values = new Dictionary<string, object>()
                 {
-                    {"bitmap", new Bitmap("bitmaps\\almogaver24bits.bmp") },
+                    {"bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")) },
                     {"enum", DayOfWeek.Friday },
                     {"point", new Point(4, 8) },
                     {"font", SystemFonts.DefaultFont }
@@ -297,8 +297,8 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
         {
             Dictionary<string, object> values = new Dictionary<string, object>()
                 {
-                    {"bitmap", new Bitmap("bitmaps\\almogaver24bits.bmp") },
-                    {"icon", new Icon("bitmaps\\32x32_one_entry_4bit.ico") }
+                    {"bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")) },
+                    {"icon", new Icon(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico")) }
                 };
 
             byte[] binaryWriterBuffer;
@@ -377,8 +377,8 @@ namespace System.Resources.Binary.BinaryResourceWriterTests
         {
             Dictionary<string, (Type type, Stream stream)> values = new Dictionary<string, (Type, Stream)>()
                 {
-                    { "icon", (typeof(Icon), File.OpenRead("bitmaps\\32x32_one_entry_4bit.ico")) },
-                    { "bitmap", (typeof(Bitmap), File.OpenRead("bitmaps\\almogaver24bits.bmp")) },
+                    { "icon", (typeof(Icon), File.OpenRead(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico"))) },
+                    { "bitmap", (typeof(Bitmap), File.OpenRead(Path.Combine("bitmaps", "almogaver24bits.bmp"))) },
                 };
 
             byte[] binaryWriterBuffer;

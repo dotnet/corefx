@@ -69,7 +69,7 @@ namespace System.Resources
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
             if (!stream.CanWrite)
-                throw new ArgumentException(SR.Argument_StreamNotWritable, nameof(stream));
+                throw new ArgumentException(SR.Argument_StreamNotWritable);
 
             _output = stream;
             _resourceList = new SortedDictionary<string, object>(FastResourceComparer.Default);
