@@ -164,7 +164,7 @@ namespace System.Data.Odbc
 
                         //So we have to copy the raw bytes of the string ourself?!
 
-                        char[] rgChars;
+                        Span<char> rgChars;
                         int length;
                         Debug.Assert(value is string || value is char[], "Only string or char[] can be marshaled to WCHAR");
 
@@ -177,10 +177,11 @@ namespace System.Data.Odbc
                                 length = sizeorprecision;
                             }
 
+                            //TODO: Refactor when System.Memory exists, AsReadonlySpan
                             rgChars = ((string)value).ToCharArray(valueOffset, length);
                             Debug.Assert(rgChars.Length < (base.Length - valueOffset), "attempting to extend parameter buffer!");
 
-                            WriteCharArray(offset, rgChars, 0, rgChars.Length);
+                            WriteCharArray(offset, rgChars);
                             WriteInt16(offset + (rgChars.Length * 2), 0); // Add the null terminator
                         }
                         else
@@ -193,7 +194,7 @@ namespace System.Data.Odbc
                             rgChars = (char[])value;
                             Debug.Assert(rgChars.Length < (base.Length - valueOffset), "attempting to extend parameter buffer!");
 
-                            WriteCharArray(offset, rgChars, valueOffset, length);
+                            WriteCharArray(offset, rgChars.Slice(valueOffset, length));
                             WriteInt16(offset + (rgChars.Length * 2), 0); // Add the null terminator
                         }
                         break;
@@ -222,7 +223,7 @@ namespace System.Data.Odbc
                         //buffer = DangerousAllocateAndGetHandle();      // Realloc may have changed buffer address
                         Debug.Assert(length < (base.Length - valueOffset), "attempting to extend parameter buffer!");
 
-                        WriteBytes(offset, rgBytes, valueOffset, length);
+                        WriteBytes(offset, rgBytes.AsSpan(valueOffset, length));
                         break;
                     }
 
@@ -341,7 +342,7 @@ namespace System.Data.Odbc
                 unchecked((short)value.Minute),
                 unchecked((short)value.Second),
             };
-            WriteInt16Array(offset, buffer, 0, 6);
+            WriteInt16Array(offset, buffer);
             WriteInt32(offset + 12, value.Millisecond * 1000000); //fraction
         }
     }

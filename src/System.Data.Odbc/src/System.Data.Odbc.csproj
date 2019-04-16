@@ -155,6 +155,7 @@
     <Reference Include="System.Diagnostics.TraceSource" />
     <Reference Include="System.Globalization" />
     <Reference Include="System.Linq" />
+    <Reference Include="System.Memory" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
     <Reference Include="System.Runtime.Extensions" />
