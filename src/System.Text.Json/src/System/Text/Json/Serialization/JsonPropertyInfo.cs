@@ -131,6 +131,7 @@ namespace System.Text.Json.Serialization
                     {
                         Type elementType = JsonClassInfo.GetElementType(RuntimePropertyType);
 
+                        // If the property type only has interface(s) exposed by JsonEnumerableT<T> then use JsonEnumerableT as the converter.
                         if (RuntimePropertyType.IsAssignableFrom(typeof(JsonEnumerableT<>).MakeGenericType(elementType)))
                         {
                             EnumerableConverter = s_jsonEnumerableConverter;
@@ -151,8 +152,11 @@ namespace System.Text.Json.Serialization
             return (TAttribute)PropertyInfo?.GetCustomAttribute(typeof(TAttribute), inherit: false);
         }
 
-        internal abstract void Read(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader);
+        internal abstract void ApplyNullValue(JsonSerializerOptions options, ref ReadStack state);
+            
+        internal abstract IList CreateConverterList();
 
+        internal abstract void Read(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader);
         internal abstract void ReadEnumerable(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader);
         internal abstract void SetValueAsObject(object obj, object value, JsonSerializerOptions options);
 

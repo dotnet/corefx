@@ -282,6 +282,10 @@ namespace System.Net.Test.Common
         {
             // Receive HEADERS frame for request.
             Frame frame = await ReadFrameAsync(TimeSpan.FromSeconds(30));
+            if (frame == null)
+            {
+                throw new IOException("Failed to read Headers frame.");
+            }
             Assert.Equal(FrameType.Headers, frame.Type);
             Assert.Equal(FrameFlags.EndHeaders | FrameFlags.EndStream, frame.Flags);
             return frame.StreamId;
@@ -498,6 +502,10 @@ namespace System.Net.Test.Common
 
             // Receive HEADERS frame for request.
             Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            if (frame == null)
+            {
+                throw new IOException("Failed to read Headers frame.");
+            }
             Assert.Equal(FrameType.Headers, frame.Type);
             HeadersFrame headersFrame = (HeadersFrame) frame;
 
@@ -619,7 +627,7 @@ namespace System.Net.Test.Common
                 throw new Exception("Response body too long");
             }
 
-            await SendResponseDataAsync(streamId, responseBody, true);
+            await SendResponseDataAsync(streamId, responseBody, true).ConfigureAwait(false);
         }
 
         public override void Dispose()
@@ -637,25 +645,25 @@ namespace System.Net.Test.Common
 
         public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null)
         {
-            await EstablishConnectionAsync();
+            await EstablishConnectionAsync().ConfigureAwait(false);
 
-            (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync();
+            (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync().ConfigureAwait(false);
 
             // We are about to close the connection, after we send the response.
             // So, send a GOAWAY frame now so the client won't inadvertantly try to reuse the connection.
-            await SendGoAway(streamId);
+            await SendGoAway(streamId).ConfigureAwait(false);
 
             if (content == null)
             {
-                await SendResponseHeadersAsync(streamId, endStream: true, statusCode, isTrailingHeader: false, headers);
+                await SendResponseHeadersAsync(streamId, endStream: true, statusCode, isTrailingHeader: false, headers).ConfigureAwait(false);
             }
             else
             {
-                await SendResponseHeadersAsync(streamId, endStream: false, statusCode, isTrailingHeader: false, headers);
-                await SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(content));
+                await SendResponseHeadersAsync(streamId, endStream: false, statusCode, isTrailingHeader: false, headers).ConfigureAwait(false);
+                await SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(content)).ConfigureAwait(false);
             }
 
-            await WaitForConnectionShutdownAsync();
+            await WaitForConnectionShutdownAsync().ConfigureAwait(false);
 
             return requestData;
         }
@@ -665,7 +673,7 @@ namespace System.Net.Test.Common
     {
         public IPAddress Address { get; set; } = IPAddress.Loopback;
         public int ListenBacklog { get; set; } = 1;
-        public bool UseSsl { get; set; } = true;
+        public bool UseSsl { get; set; } = PlatformDetection.SupportsAlpn;
         public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls12;
     }
 
@@ -673,11 +681,11 @@ namespace System.Net.Test.Common
     {
         public static readonly Http2LoopbackServerFactory Singleton = new Http2LoopbackServerFactory();
 
-        public override async Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync)
+        public override async Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 30_000)
         {
             using (var server = Http2LoopbackServer.CreateServer())
             {
-                await funcAsync(server, server.Address);
+                await funcAsync(server, server.Address).TimeoutAfter(millisecondsTimeout).ConfigureAwait(false);
             }
         }
 

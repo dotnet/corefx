@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -18,7 +19,9 @@ namespace System.Net.Http.Functional.Tests
 
         public static bool SupportsAlpn => PlatformDetection.SupportsAlpn;
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        public HttpClientHandlerTest_Http2(ITestOutputHelper output) : base(output) { }
+
+        [Fact]
         public async Task Http2_ClientPreface_Sent()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -32,7 +35,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        [Fact]
         public async Task Http2_InitialSettings_SentAndAcked()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -64,7 +67,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        [Fact]
         public async Task Http2_DataSentBeforeServerPreface_ProtocolError()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -82,7 +85,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
+        [Fact]
         public async Task Http2_NoResponseBody_Success()
         {
             using (var server = Http2LoopbackServer.CreateServer())
