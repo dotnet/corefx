@@ -1701,6 +1701,91 @@ namespace System.Text.Json.Tests
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(false, false)]
+        public void WriteInvalidComment(bool formatted, bool skipValidation)
+        {
+            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
+
+            var output = new ArrayBufferWriter<byte>(32);
+            var jsonUtf8 = new Utf8JsonWriter(output, options);
+
+            string comment = "comment is */ invalid";
+
+            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteCommentValue(comment));
+            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteCommentValue(comment.AsSpan()));
+            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteCommentValue(Encoding.UTF8.GetBytes(comment)));
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
+        public void WriteCommentsInvalidTextAllowed(bool formatted, bool skipValidation)
+        {
+            var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
+
+            var output = new ArrayBufferWriter<byte>(32);
+            var jsonUtf8 = new Utf8JsonWriter(output, options);
+
+            string comment = "comment is * / valid";
+            jsonUtf8.WriteCommentValue(comment);
+            jsonUtf8.WriteCommentValue(comment.AsSpan());
+            jsonUtf8.WriteCommentValue(Encoding.UTF8.GetBytes(comment));
+
+            comment = "comment is /* valid";
+            jsonUtf8.WriteCommentValue(comment);
+            jsonUtf8.WriteCommentValue(comment.AsSpan());
+            jsonUtf8.WriteCommentValue(Encoding.UTF8.GetBytes(comment));
+
+            comment = "comment is / * valid even with unpaired surrogate \udc00 this part no longer visible";
+            jsonUtf8.WriteCommentValue(comment);
+            jsonUtf8.WriteCommentValue(comment.AsSpan());
+
+            jsonUtf8.Flush();
+
+            // Explicitly skipping flushing here
+            var invalidUtf8 = new byte[2] { 0xc3, 0x28 };
+            jsonUtf8.WriteCommentValue(invalidUtf8);
+
+            string expectedStr = GetCommentExpectedString(prettyPrint: formatted);
+            AssertContents(expectedStr, output);
+        }
+
+        private static string GetCommentExpectedString(bool prettyPrint)
+        {
+            var ms = new MemoryStream();
+            TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true);
+
+            var json = new JsonTextWriter(streamWriter)
+            {
+                Formatting = prettyPrint ? Formatting.Indented : Formatting.None,
+                StringEscapeHandling = StringEscapeHandling.EscapeHtml,
+            };
+
+            string comment = "comment is * / valid";
+            json.WriteComment(comment);
+            json.WriteComment(comment);
+            json.WriteComment(comment);
+
+            comment = "comment is /* valid";
+            json.WriteComment(comment);
+            json.WriteComment(comment);
+            json.WriteComment(comment);
+
+            comment = "comment is / * valid even with unpaired surrogate ";
+            json.WriteComment(comment);
+            json.WriteComment(comment);
+
+            json.Flush();
+
+            return Encoding.UTF8.GetString(ms.ToArray());
+        }
+
+        [Theory]
+        [InlineData(true, true)]
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        [InlineData(false, false)]
         public void WriteStrings(bool formatted, bool skipValidation)
         {
             string value = "temp";

@@ -344,6 +344,11 @@ namespace System.Text.Json
             throw GetInvalidOperationException(resource, currentDepth, token, tokenType);
         }
 
+        public static void ThrowArgumentException_InvalidCommentValue()
+        {
+            throw new ArgumentException(SR.CannotWriteCommentWithEmbeddedDelimiter);
+        }
+
         public static void ThrowArgumentException_InvalidUTF8(ReadOnlySpan<byte> value)
         {
             var builder = new StringBuilder();

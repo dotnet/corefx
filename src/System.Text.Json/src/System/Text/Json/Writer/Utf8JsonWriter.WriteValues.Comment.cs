@@ -10,6 +10,9 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        private static char[] s_singleLineCommentDelimiter = new char[2] { '*', '/' };
+        private static ReadOnlySpan<byte> SingleLineCommentDelimiterUtf8 => new byte[2] { (byte)'*', (byte)'/' };
+
         /// <summary>
         /// Writes the string text value (as a JSON comment).
         /// </summary>
@@ -18,7 +21,7 @@ namespace System.Text.Json
         /// The comment value is not escaped before writing.
         /// </remarks>
         /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large.
+        /// Thrown when the specified value is too large OR if the given string text value contains a comment delimiter (i.e. */).
         /// </exception>
         public void WriteCommentValue(string value)
             => WriteCommentValue(value.AsSpan());
@@ -31,17 +34,17 @@ namespace System.Text.Json
         /// The comment value is not escaped before writing.
         /// </remarks>
         /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large.
+        /// Thrown when the specified value is too large OR if the given UTF-16 text value contains a comment delimiter (i.e. */).
         /// </exception>
         public void WriteCommentValue(ReadOnlySpan<char> value)
         {
             JsonWriterHelper.ValidateValue(value);
 
-            WriteComment(value);
-        }
+            if (value.IndexOf(s_singleLineCommentDelimiter) != -1)
+            {
+                ThrowHelper.ThrowArgumentException_InvalidCommentValue();
+            }
 
-        private void WriteComment(ReadOnlySpan<char> value)
-        {
             WriteCommentByOptions(value);
         }
 
@@ -75,7 +78,10 @@ namespace System.Text.Json
             output[BytesPending++] = JsonConstants.Slash;
             output[BytesPending++] = JsonConstants.Asterisk;
 
-            TranscodeAndWrite(value, output);
+            ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(value);
+            OperationStatus status = JsonWriterHelper.ToUtf8(byteSpan, output.Slice(BytesPending), out int _, out int written);
+            Debug.Assert(status != OperationStatus.DestinationTooSmall);
+            BytesPending += written;
 
             output[BytesPending++] = JsonConstants.Asterisk;
             output[BytesPending++] = JsonConstants.Slash;
@@ -110,7 +116,10 @@ namespace System.Text.Json
             output[BytesPending++] = JsonConstants.Slash;
             output[BytesPending++] = JsonConstants.Asterisk;
 
-            TranscodeAndWrite(value, output);
+            ReadOnlySpan<byte> byteSpan = MemoryMarshal.AsBytes(value);
+            OperationStatus status = JsonWriterHelper.ToUtf8(byteSpan, output.Slice(BytesPending), out int _, out int written);
+            Debug.Assert(status != OperationStatus.DestinationTooSmall);
+            BytesPending += written;
 
             output[BytesPending++] = JsonConstants.Asterisk;
             output[BytesPending++] = JsonConstants.Slash;
@@ -124,17 +133,17 @@ namespace System.Text.Json
         /// The comment value is not escaped before writing.
         /// </remarks>
         /// <exception cref="ArgumentException">
-        /// Thrown when the specified value is too large.
+        /// Thrown when the specified value is too large OR if the given UTF-8 text value contains a comment delimiter (i.e. */).
         /// </exception>
         public void WriteCommentValue(ReadOnlySpan<byte> utf8Value)
         {
             JsonWriterHelper.ValidateValue(utf8Value);
 
-            WriteComment(utf8Value);
-        }
+            if (utf8Value.IndexOf(SingleLineCommentDelimiterUtf8) != -1)
+            {
+                ThrowHelper.ThrowArgumentException_InvalidCommentValue();
+            }
 
-        private void WriteComment(ReadOnlySpan<byte> utf8Value)
-        {
             WriteCommentByOptions(utf8Value);
         }
 
