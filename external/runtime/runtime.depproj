@@ -30,7 +30,7 @@
 
   <ItemGroup Condition="'$(TargetsAOT)'!='true'">
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="$(MicrosoftNETCorePlatformsPackageVersion)" />
-    <PackageReference Include="Microsoft.NETCore.Runtime.CoreCLR">
+    <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
       <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
       <!-- Following is version used in release/uwp6.0 -->
       <Version Condition="'$(TargetGroup)'=='uap10.0.16299'">2.1.0-b-uwp6-25707-02</Version>
@@ -87,52 +87,26 @@
     <Exec Command="chmod +x $(TestHostRootPath)%(DotnetExe.Filename)%(DotnetExe.Extension)" Condition="'$(OS)' != 'Windows_NT'"/>
   </Target>
 
-  <PropertyGroup>
-    <SymbolPackagesDir>$(PackagesDir)symbolpackages/</SymbolPackagesDir>
-    <DotNetAssetRootUrl Condition="'$(DotNetAssetRootUrl)' == ''">https://dotnetfeed.blob.core.windows.net/dotnet-coreclr/assets/</DotNetAssetRootUrl>
-  </PropertyGroup>
-
-  <Target Name="CalculateCoreCLRSymbolPackageProperties"
-          BeforeTargets="DownloadAndUnzipSymbolPackage">
-
+  <Target Name="CalculateCoreCLRPackagePath" DependsOnTargets="ResolveAssemblyReferences">
     <ItemGroup>
-      <_CoreCLRSymbolPackagesToDownload Include="@(ReferenceCopyLocalPaths->'%(NuGetPackageId)')" Condition="$([System.String]::Copy('%(Identity)').EndsWith('System.Private.CoreLib.dll'))">
-        <Url>$(DotNetAssetRootUrl)symbols/%(NuGetPackageId).%(NuGetPackageVersion).symbols.nupkg</Url>
-        <DestinationFile>%(NuGetPackageId).%(NuGetPackageVersion).symbols.nupkg.zip</DestinationFile>
-        <UnzipDestinationDir>$(SymbolPackagesDir)/%(NuGetPackageId).%(NuGetPackageVersion)</UnzipDestinationDir>
-      </_CoreCLRSymbolPackagesToDownload>
+      <_CoreLibFile Include="@(ReferenceCopyLocalPaths)" Condition="'%(FileName)' == 'System.Private.CoreLib'" />
     </ItemGroup>
-
-    <!-- Calculate the packages to download incrementally if we haven't downloaded them -->
-    <ItemGroup>
-      <SymbolPackagesToDownload Include="@(_CoreCLRSymbolPackagesToDownload)" Condition="!Exists('%(UnzipDestinationDir)')" />
-    </ItemGroup>
+    <PropertyGroup>
+      <_CoreLibFilePath>%(_CoreLibFile.FullPath)</_CoreLibFilePath>
+      <_CoreLibPackagePath>$(_CoreLibFilePath.SubString(0, $(_CoreLibFilePath.IndexOf('runtimes'))))</_CoreLibPackagePath>
+    </PropertyGroup>
   </Target>
   
-  <Target Name="DownloadAndUnzipSymbolPackage"
-          Condition="'@(SymbolPackagesToDownload)' != ''">
-      <DownloadFile SourceUrl="%(SymbolPackagesToDownload.Url)"
-                    DestinationFolder="$(SymbolPackagesDir)"
-                    DestinationFileName="%(SymbolPackagesToDownload.DestinationFile)"
-                    ContinueOnError="WarnAndContinue" />
-      <Unzip SourceFiles="$(SymbolPackagesDir)\%(SymbolPackagesToDownload.DestinationFile)"
-             DestinationFolder="%(SymbolPackagesToDownload.UnzipDestinationDir)"
-             OverwriteReadOnlyFiles="true"
-             Condition="Exists('$(SymbolPackagesDir)\%(SymbolPackagesToDownload.DestinationFile)')" />
-  </Target>
-          
-
   <Target Name="BinPlaceCoreCLRSymbols"
           AfterTargets="AfterResolveReferences"
-          DependsOnTargets="CalculateCoreCLRSymbolPackageProperties;DownloadAndUnzipSymbolPackage"
+          DependsOnTargets="CalculateCoreCLRPackagePath"
           Condition="'$(CoreCLROverridePath)' == '' AND '$(DownloadCoreCLRSymbols)' != 'false'">
       <ItemGroup>
-        <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(RuntimeIdentifier)/native/*.pdb" />
-        <_CoreCLRSymbolFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(RuntimeIdentifier)/native/*.dbg" />
-        <ReferenceCopyLocalPaths Include="@(_CoreCLRSymbolFiles)"/>
+        <ReferenceCopyLocalPaths Include="$(_CoreLibPackagePath)/**/native/*.pdb;$(_CoreLibPackagePath)/**/native/*.dbg" />
 
-        <CoreCLRILFiles Include="%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(RuntimeIdentifier)/il/*.*">
-          <CrossGenAssemblyPath>%(_CoreCLRSymbolPackagesToDownload.UnzipDestinationDir)/runtimes/$(RuntimeIdentifier)/native/</CrossGenAssemblyPath>
+        <CoreCLRILFiles Include="$(_CoreLibPackagePath)/**/il/*.*" />
+        <CoreCLRILFiles>
+          <CrossGenAssemblyPath>$([System.IO.Path]::GetFullPath('%(RootDir)%(Directory)../native/'))</CrossGenAssemblyPath>
         </CoreCLRILFiles>
         <CoreCLRCrossGenFiles Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename)%(Extension)')" />
         <CoreCLRCrossGenFiles Condition="'$(OSGroup)'=='Windows_NT'" Include="@(CoreCLRILFiles -> '%(CrossGenAssemblyPath)%(Filename).ni.pdb')" />
