@@ -47,8 +47,7 @@ namespace System.Text.Json.Serialization.Tests
         private static string ConvertToCamelCase(string name)
         {
             JsonPropertyNamingPolicy policy = JsonPropertyNamingPolicy.CamelCase;
-            MethodBase convert = typeof(JsonPropertyNamingPolicy).GetMethod("ConvertName", BindingFlags.NonPublic | BindingFlags.Instance);
-            string value = (string)convert.Invoke(policy, new object[] { name });
+            string value = policy.ConvertName(name);
             return value;
         }
     }

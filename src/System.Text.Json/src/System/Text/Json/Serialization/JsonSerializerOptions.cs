@@ -18,6 +18,8 @@ namespace System.Text.Json.Serialization
 
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private ClassMaterializer _classMaterializerStrategy;
+        private JsonPropertyNamingPolicy _dictionayKeyPolicy;
+        private JsonPropertyNamingPolicy _jsonPropertyNamingPolicy;
         private JsonCommentHandling _readCommentHandling;
         private int _defaultBufferSize = BufferSizeDefault;
         private int _maxDepth;
@@ -25,6 +27,7 @@ namespace System.Text.Json.Serialization
         private bool _haveTypesBeenCreated;
         private bool _ignoreNullValues;
         private bool _ignoreReadOnlyProperties;
+        private bool _propertyNameCaseInsensitive;
         private bool _writeIndented;
 
         /// <summary>
@@ -77,6 +80,25 @@ namespace System.Text.Json.Serialization
                 }
 
                 _defaultBufferSize = value;
+            }
+        }
+
+        /// <summary>
+        /// Specifies the policy used to convert a <see cref="System.Collections.IDictionary"/> key's name to another format, such as camel-casing.
+        /// </summary>
+        /// <remarks>
+        /// This property can be set to <see cref="JsonPropertyNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// </remarks>
+        public JsonPropertyNamingPolicy DictionaryKeyPolicy
+        {
+            get
+            {
+                return _dictionayKeyPolicy;
+            }
+            set
+            {
+                VerifyMutable();
+                _dictionayKeyPolicy = value;
             }
         }
 
@@ -147,19 +169,39 @@ namespace System.Text.Json.Serialization
         /// will be used when writing the property name during serialization.
         /// </summary>
         /// <remarks>
+        /// The policy is not used for property that has a <see cref="JsonNameAttribute"/> applied.
         /// This property can be set to <see cref="JsonPropertyNamingPolicy.CamelCase"/> to specify a camel-casing policy.
         /// </remarks>
-        public JsonPropertyNamingPolicy PropertyNamingPolicy { get; set; }
+        public JsonPropertyNamingPolicy PropertyNamingPolicy
+        {
+            get
+            {
+                return _jsonPropertyNamingPolicy;
+            }
+            set
+            {
+                VerifyMutable();
+                _jsonPropertyNamingPolicy = value;
+            }
+        }
 
         /// <summary>
         /// Determines whether a property's name uses a case-insensitive comparison during deserialization.
         /// The default value is false.
         /// </summary>
         /// <remarks>There is a performance cost associated when the value is true.</remarks>
-        public bool PropertyNameCaseInsensitive { get; set; }
-
-        // Future: (API approved)
-        // public JsonPropertyNamingPolicy DictionaryKeyPolicy { get; set; }
+        public bool PropertyNameCaseInsensitive
+        {
+            get
+            {
+                return _propertyNameCaseInsensitive;
+            }
+            set
+            {
+                VerifyMutable();
+                _propertyNameCaseInsensitive = value;
+            }
+        }
 
         /// <summary>
         /// Defines how the comments are handled during deserialization.

@@ -20,12 +20,7 @@ namespace System.Text.Json.Serialization
         /// Converts the provided name.
         /// </summary>
         /// <param name="name">The name to convert.</param>
-        /// <returns>The converted name</returns>
-        protected abstract string ConvertName(string name);
-
-        internal string CallConvertName(string name)
-        {
-            return ConvertName(name);
-        }
+        /// <returns>The converted name, or null to indicate use the existing name.</returns>
+        public abstract string ConvertName(string name);
     }
 }

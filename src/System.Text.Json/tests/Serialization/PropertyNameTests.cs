@@ -45,6 +45,30 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void CustomNamePolicy()
+        {
+            var options = new JsonSerializerOptions();
+            options.PropertyNamingPolicy = new UppercaseNamingPolicy();
+
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(@"{""MYINT16"":1}", options);
+
+            // This is 1 because the data matches the property "MYINT16" that is uppercase of "myInt16".
+            Assert.Equal(1, obj.MyInt16);
+        }
+
+        [Fact]
+        public static void NullNamePolicy()
+        {
+            var options = new JsonSerializerOptions();
+            options.PropertyNamingPolicy = new NullNamingPolicy();
+
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(@"{""MyInt16"":1}", options);
+
+            // This is 1 because returning a null for a name policy indicates use the actual property name.
+            Assert.Equal(1, obj.MyInt16);
+        }
+
+        [Fact]
         public static void IgnoreCase()
         {
             {
@@ -108,17 +132,18 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void JsonNullNameAttributeFail()
+        public static void JsonNullNameAttribute()
         {
-            {
-                var options = new JsonSerializerOptions();
-                Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<NullPropertyName_TestClass>("{}", options));
-            }
+            var options = new JsonSerializerOptions();
+            options.PropertyNamingPolicy = JsonPropertyNamingPolicy.CamelCase;
+            options.PropertyNameCaseInsensitive = true;
 
-            {
-                var options = new JsonSerializerOptions();
-                Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(new NullPropertyName_TestClass(), options));
-            }
+            // A null JsonNameAttribute should use the property name and be unaffected by other policies.
+            NullPropertyName_TestClass obj = JsonSerializer.Parse<NullPropertyName_TestClass>(@"{""MyInt1"":1}", options);
+            Assert.Equal(1, obj.MyInt1);
+
+            string json = JsonSerializer.ToString(obj);
+            Assert.Contains(@"""MyInt1"":1", json);
         }
 
         [Fact]
@@ -240,5 +265,21 @@ namespace System.Text.Json.Serialization.Tests
     {
         public int myInt { get; set; }
         public int MyInt { get; set; }
+    }
+
+    public class UppercaseNamingPolicy : JsonPropertyNamingPolicy
+    {
+        public override string ConvertName(string name)
+        {
+            return name.ToUpperInvariant();
+        }
+    }
+
+    public class NullNamingPolicy : JsonPropertyNamingPolicy
+    {
+        public override string ConvertName(string name)
+        {
+            return null;
+        }
     }
 }

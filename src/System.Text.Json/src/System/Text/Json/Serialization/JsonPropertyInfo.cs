@@ -102,17 +102,13 @@ namespace System.Text.Json.Serialization
                 }
                 else if (options.PropertyNamingPolicy != null)
                 {
-                    NameAsString = options.PropertyNamingPolicy.CallConvertName(PropertyInfo.Name);
-                }
-                else
-                {
-                    NameAsString = PropertyInfo.Name;
+                    NameAsString = options.PropertyNamingPolicy.ConvertName(PropertyInfo.Name);
                 }
 
-                // This is an exception case handled higher.
+                // Allow a null value to indicate to use the property name.
                 if (NameAsString == null)
                 {
-                    return;
+                    NameAsString = PropertyInfo.Name;
                 }
 
                 // At this point propertyName is valid UTF16, so just call the simple UTF16->UTF8 encoder.

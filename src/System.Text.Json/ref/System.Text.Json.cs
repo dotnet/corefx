@@ -331,7 +331,7 @@ namespace System.Text.Json.Serialization
     {
         protected JsonPropertyNamingPolicy() { }
         public static System.Text.Json.Serialization.JsonPropertyNamingPolicy CamelCase { get { throw null; } }
-        protected abstract string ConvertName(string name);
+        public abstract string ConvertName(string name);
     }
     public static partial class JsonSerializer
     {
@@ -353,6 +353,7 @@ namespace System.Text.Json.Serialization
         public JsonSerializerOptions() { }
         public bool AllowTrailingCommas { get { throw null; } set { } }
         public int DefaultBufferSize { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonPropertyNamingPolicy DictionaryKeyPolicy { get { throw null; } set { } }
         public bool IgnoreNullValues { get { throw null; } set { } }
         public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }

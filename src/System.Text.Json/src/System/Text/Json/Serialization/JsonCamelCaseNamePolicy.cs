@@ -6,7 +6,7 @@ namespace System.Text.Json.Serialization
 {
     internal sealed class JsonCamelCaseNamePolicy : JsonPropertyNamingPolicy
     {
-        protected override string ConvertName(string name)
+        public override string ConvertName(string name)
         {
             if (string.IsNullOrEmpty(name) || !char.IsUpper(name[0]))
             {
