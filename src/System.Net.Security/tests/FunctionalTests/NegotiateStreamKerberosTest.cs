@@ -25,6 +25,9 @@ namespace System.Net.Security.Tests
     {
         public static bool IsServerAndDomainAvailable => 
             Capability.IsDomainAvailable() && Capability.IsNegotiateServerAvailable();
+
+        public static bool IsClientAvailable =>
+            Capability.IsNegotiateClientAvailable();
         
         public static IEnumerable<object[]> GoodCredentialsData
         {
@@ -162,9 +165,8 @@ namespace System.Net.Security.Tests
         }
 
         [OuterLoop]
-        // [Fact]
-        // [ConditionalFact(nameof(IsServerAndDomainAvailable))]
-        public async Task NegotiateStream_RemoteServerAuthentication_Success()
+        [ConditionalFact(nameof(IsClientAvailable))]
+        public async Task NegotiateStream_ServerAuthenticationRemote_Success()
         {
             string expectedUser = Configuration.Security.NegotiateClientUser;
             
