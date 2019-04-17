@@ -10,7 +10,6 @@ using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Security;
 using System.Security.Authentication;
-using System.Security.Authentication.ExtendedProtection;
 using System.Security.Principal;
 using System.Text;
 using System.Threading;
@@ -176,7 +175,8 @@ namespace System.Net.Security.Tests
             {
                 string clientName = Configuration.Security.NegotiateClient.Host;
                 int clientPort = Configuration.Security.NegotiateClient.Port;
-                await controlClient.ConnectAsync(clientName, clientPort).DefaultTimeout();
+                await controlClient.ConnectAsync(clientName, clientPort)
+                    .TimeoutAfter(TimeSpan.FromSeconds(15));
                 var serverStream = controlClient.GetStream();
 
                 using (var serverAuth = new NegotiateStream(serverStream, leaveInnerStreamOpen: false))
@@ -185,7 +185,7 @@ namespace System.Net.Security.Tests
                         CredentialCache.DefaultNetworkCredentials,
                         ProtectionLevel.EncryptAndSign,
                         TokenImpersonationLevel.Identification)
-                        .DefaultTimeout();
+                        .TimeoutAfter(TimeSpan.FromSeconds(15));
 
                     Assert.True(serverAuth.IsAuthenticated, "IsAuthenticated");
                     Assert.True(serverAuth.IsEncrypted, "IsEncrypted");
@@ -199,7 +199,7 @@ namespace System.Net.Security.Tests
                     var message = "Hello from the client.";
                     using (var reader = new StreamReader(serverAuth))
                     {
-                        var response = await reader.ReadToEndAsync().DefaultTimeout();
+                        var response = await reader.ReadToEndAsync().TimeoutAfter(TimeSpan.FromSeconds(15));
                         Assert.Equal(message, response);
                     }
                 }
@@ -234,39 +234,6 @@ namespace System.Net.Security.Tests
             }
 
             return secureString;
-        }
-    }
-
-    public static class TaskExtensions
-    {
-        public static async Task DefaultTimeout(this Task task)
-        {
-            var timeout = TimeSpan.FromSeconds(10);
-            var cts = new CancellationTokenSource();
-            if (task == await Task.WhenAny(task, Task.Delay(timeout, cts.Token)))
-            {
-                cts.Cancel();
-                await task;
-            }
-            else
-            {
-                throw new TimeoutException();
-            }
-        }
-
-        public static async Task<T> DefaultTimeout<T>(this Task<T> task)
-        {
-            var timeout = TimeSpan.FromSeconds(10);
-            var cts = new CancellationTokenSource();
-            if (task == await Task.WhenAny(task, Task.Delay(timeout, cts.Token)))
-            {
-                cts.Cancel();
-                return await task;
-            }
-            else
-            {
-                throw new TimeoutException();
-            }
         }
     }
 }
