@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Xunit;
 
 namespace System.IO.Tests
@@ -46,6 +47,30 @@ namespace System.IO.Tests
 
             Assert.Equal("ABCD", sr2.ReadToEnd());
             sr2.Dispose();
+        }
+
+        [Fact]
+        public void StreamReader_WithOptionalArguments()
+        {
+            using (var sr = new StreamReader(new MemoryStream(), leaveOpen: true))
+            {
+                Assert.Equal(Encoding.UTF8, sr.CurrentEncoding);
+            }
+
+            using (var sr = new StreamReader(new MemoryStream(), encoding: null))
+            {
+                Assert.Equal(Encoding.UTF8, sr.CurrentEncoding);
+            }
+
+            using (var sr = new StreamReader(new MemoryStream(), bufferSize: -1))
+            {
+                Assert.Equal(Encoding.UTF8, sr.CurrentEncoding);
+            }
+
+            using (var sr = new StreamReader(new MemoryStream(), detectEncodingFromByteOrderMarks: true))
+            {
+                Assert.Equal(Encoding.UTF8, sr.CurrentEncoding);
+            }
         }
     }
 }

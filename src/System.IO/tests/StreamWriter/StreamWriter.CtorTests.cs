@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Xunit;
 
 namespace System.IO.Tests
@@ -31,15 +32,6 @@ namespace System.IO.Tests
             Assert.Equal("HelloWorld", str2);
         }
 
-        [Fact]
-        public static void NullEncodingThrows()
-        {
-            // [] Check for ArgumentNullException on null encoding
-            //-----------------------------------------------------------------
-
-            Assert.Throws<ArgumentNullException>(() => new StreamWriter(new MemoryStream(), null));
-        }
-        
         [Fact]
         public static void UTF8Encoding()
         {
@@ -73,6 +65,25 @@ namespace System.IO.Tests
             sr2 = new StreamReader(ms2, encoding);
             str2 = sr2.ReadToEnd();
             Assert.Equal(testString, str2);
+        }
+
+        [Fact]
+        public void StreamWriter_WithOptionalArguments()
+        {
+            using (var sw = new StreamWriter(new MemoryStream(), leaveOpen: true))
+            {
+                Assert.Equal(Encoding.UTF8, sw.Encoding);
+            }
+
+            using (var sw = new StreamWriter(new MemoryStream(), encoding: null))
+            {
+                Assert.Equal(Encoding.UTF8, sw.Encoding);
+            }
+
+            using (var sw = new StreamWriter(new MemoryStream(), bufferSize: -1))
+            {
+                Assert.Equal(Encoding.UTF8, sw.Encoding);
+            }
         }
     }
 }
