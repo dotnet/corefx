@@ -209,18 +209,18 @@ namespace System.Text.Json
     }
     public sealed partial class Utf8JsonWriter : System.IDisposable
     {
-        public Utf8JsonWriter(System.Buffers.IBufferWriter<byte> bufferWriter, System.Text.Json.JsonWriterOptions options = default(System.Text.Json.JsonWriterOptions)) { throw null; }
-        public Utf8JsonWriter(System.IO.Stream utf8Json, System.Text.Json.JsonWriterOptions options = default(System.Text.Json.JsonWriterOptions)) { throw null; }
+        public Utf8JsonWriter(System.Buffers.IBufferWriter<byte> bufferWriter, System.Text.Json.JsonWriterOptions options = default(System.Text.Json.JsonWriterOptions)) { }
+        public Utf8JsonWriter(System.IO.Stream utf8Json, System.Text.Json.JsonWriterOptions options = default(System.Text.Json.JsonWriterOptions)) { }
         public long BytesCommitted { get { throw null; } }
         public int BytesPending { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
+        public System.Text.Json.JsonWriterOptions Options { get { throw null; } }
         public void Dispose() { }
         public void Flush() { }
-        public System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken = default) { throw null; }
+        public System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public void Reset() { }
-        public void Reset(System.IO.Stream utf8Json) { }
         public void Reset(System.Buffers.IBufferWriter<byte> bufferWriter) { }
-        public System.Text.Json.JsonWriterOptions Options { get { throw null; } }
+        public void Reset(System.IO.Stream utf8Json) { }
         public void WriteBoolean(System.ReadOnlySpan<byte> utf8PropertyName, bool value) { }
         public void WriteBoolean(System.ReadOnlySpan<char> propertyName, bool value) { }
         public void WriteBoolean(string propertyName, bool value) { }
