@@ -26,8 +26,8 @@ namespace System.Net.Http
 
         internal static bool IsEnabled()
         {
-            //check if someone listens to HttpHandlerDiagnosticListener
-            return s_diagnosticListener.IsEnabled();
+            //check if someone listens to HttpHandlerDiagnosticListener of if there's a current activity
+            return Activity.Current != null || s_diagnosticListener.IsEnabled();
         }
 
         protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
@@ -43,23 +43,20 @@ namespace System.Net.Http
                 throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
             }
 
-            Activity activity = null;
+            Activity activity = new Activity(DiagnosticsHandlerLoggingStrings.ActivityName);
             Guid loggingRequestId = Guid.Empty;
 
             // If System.Net.Http.HttpRequestOut is on see if we should log the start (or just log the activity)
-            if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityName, request))
+            //Only send start event to users who subscribed for it, but start activity anyway
+            if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityStartName))
             {
-                activity = new Activity(DiagnosticsHandlerLoggingStrings.ActivityName);
-                //Only send start event to users who subscribed for it, but start activity anyway
-                if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityStartName))
-                {
-                    s_diagnosticListener.StartActivity(activity, new { Request = request });
-                }
-                else
-                {
-                    activity.Start();
-                }
+                s_diagnosticListener.StartActivity(activity, new { Request = request });
             }
+            else
+            {
+                activity.Start();
+            }
+
             //try to write System.Net.Http.Request event (deprecated)
             if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteNameDeprecated))
             {
