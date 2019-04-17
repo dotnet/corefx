@@ -36,11 +36,11 @@ namespace System.Text.Json.Tests
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Advance(int bytes)
         {
-            _count += bytes;
-            if (_count > _buffer.Length)
+            if (_count > _buffer.Length - bytes)
             {
                 throw new InvalidOperationException("Cannot advance past the end of the buffer.");
             }
+            _count += bytes;
         }
     }
 }

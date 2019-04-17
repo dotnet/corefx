@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Buffers;
 
 namespace System.Text.Json.Tests
 {
@@ -138,7 +139,7 @@ namespace System.Text.Json.Tests
         {
             WriteSimpleValue(indented, "false");
         }
-        
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -386,6 +387,26 @@ null,
   ""ectoplasm"": 42
 }",
                 "{\"ectoplasm\":42}");
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static void WriteNumberAsPropertyWithLargeName(bool indented)
+        {
+            var charArray = new char[300];
+            charArray.AsSpan().Fill('a');
+            charArray[0] = (char)0xEA;
+            var propertyName = new string(charArray);
+
+            WritePropertyValueBothForms(
+                indented,
+                propertyName,
+                "42",
+                @"{
+  ""\u00ea" + propertyName.Substring(1) + @""": 42
+}",
+                $"{{\"\\u00ea{propertyName.Substring(1)}\":42}}");
         }
 
         [Theory]
@@ -806,15 +827,14 @@ null,
             closeBrackets.Fill((byte)']');
             jsonIn.AsSpan(SpacesPre + TargetDepth + SpacesSplit + TargetDepth).Fill((byte)' ');
 
-            using (ArrayBufferWriter buffer = new ArrayBufferWriter(jsonIn.Length))
+            var buffer = new ArrayBufferWriter<byte>(jsonIn.Length);
             using (JsonDocument doc = JsonDocument.Parse(jsonIn, optionsCopy))
             {
                 var writer = new Utf8JsonWriter(buffer);
                 doc.RootElement.WriteAsValue(ref writer);
                 writer.Flush();
 
-                ArraySegment<byte> formattedSegment = buffer.Formatted;
-                ReadOnlySpan<byte> formatted = formattedSegment;
+                ReadOnlySpan<byte> formatted = buffer.WrittenSpan;
 
                 Assert.Equal(TargetDepth + TargetDepth, formatted.Length);
                 Assert.True(formatted.Slice(0, TargetDepth).SequenceEqual(openBrackets), "OpenBrackets match");
@@ -827,7 +847,7 @@ null,
         [InlineData(true)]
         public static void WritePropertyOutsideObject(bool skipValidation)
         {
-            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            var buffer = new ArrayBufferWriter<byte>(1024);
             using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_readerOptions))
             {
                 JsonElement root = doc.RootElement;
@@ -885,7 +905,7 @@ null,
         [InlineData(true)]
         public static void WriteValueInsideObject(bool skipValidation)
         {
-            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            var buffer = new ArrayBufferWriter<byte>(1024);
             using (var doc = JsonDocument.Parse("[ null, false, true, \"hi\", 5, {}, [] ]", s_readerOptions))
             {
                 JsonElement root = doc.RootElement;
@@ -930,7 +950,7 @@ null,
 
         private static void WriteSimpleValue(bool indented, string jsonIn, string jsonOut = null)
         {
-            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            var buffer = new ArrayBufferWriter<byte>(1024);
             using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_readerOptions))
             {
                 JsonElement target = doc.RootElement[0];
@@ -955,7 +975,7 @@ null,
             string expectedIndent,
             string expectedMinimal)
         {
-            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            var buffer = new ArrayBufferWriter<byte>(1024);
             using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_readerOptions))
             {
                 JsonElement target = doc.RootElement[0];
@@ -1010,7 +1030,7 @@ null,
             string expectedIndent,
             string expectedMinimal)
         {
-            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            var buffer = new ArrayBufferWriter<byte>(1024);
             using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_readerOptions))
             {
                 JsonElement target = doc.RootElement[0];
@@ -1045,7 +1065,7 @@ null,
             string expectedIndent,
             string expectedMinimal)
         {
-            using (ArrayBufferWriter buffer = new ArrayBufferWriter(1024))
+            var buffer = new ArrayBufferWriter<byte>(1024);
             using (JsonDocument doc = JsonDocument.Parse($" [  {jsonIn}  ]", s_readerOptions))
             {
                 JsonElement target = doc.RootElement[0];
@@ -1073,14 +1093,14 @@ null,
             }
         }
 
-        private static void AssertContents(string expectedValue, ArrayBufferWriter buffer)
+        private static void AssertContents(string expectedValue, ArrayBufferWriter<byte> buffer)
         {
             Assert.Equal(
                 expectedValue,
                 Encoding.UTF8.GetString(
-                    buffer.Formatted
+                    buffer.WrittenSpan
 #if netstandard
-                        .AsSpan().ToArray()
+                        .ToArray()
 #endif
                     ));
         }

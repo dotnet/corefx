@@ -27,6 +27,9 @@ namespace System.Text.Json
     /// <see cref="JsonWriterOptions"/> and pass that in to the writer.
     /// </remarks>
     public sealed partial class Utf8JsonWriter : IDisposable
+#if BUILDING_INBOX_LIBRARY
+        , IAsyncDisposable
+#endif
     {
         // Depending on OS, either '\r\n' OR '\n'
         private static int s_newLineLength = Environment.NewLine.Length;
@@ -258,28 +261,71 @@ namespace System.Text.Json
             BytesPending = 0;
         }
 
+        /// <summary>
+        /// Commits any left over JSON text that has not yet been flushed which makes it visible to the output destination.
+        /// </summary>
+        /// <remarks>
+        /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
+        /// In the case of Stream, this writes the data to the stream and flushes it.
+        /// </remarks>
+        /// <remarks>
+        /// The <see cref="Utf8JsonWriter"/> can still be re-used after disposing but all its state has been reset.
+        /// </remarks>
         public void Dispose()
         {
             Flush();
+            ResetHelper();
         }
 
+#if BUILDING_INBOX_LIBRARY
+        /// <summary>
+        /// Asynchronously commits any left over JSON text that has not yet been flushed which makes it visible to the output destination.
+        /// </summary>
+        /// <remarks>
+        /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
+        /// In the case of Stream, this writes the data to the stream and flushes it.
+        /// </remarks>
+        /// <remarks>
+        /// The <see cref="Utf8JsonWriter"/> can still be re-used after disposing but all its state has been reset.
+        /// </remarks>
+        public async ValueTask DisposeAsync()
+        {
+            await FlushAsync().ConfigureAwait(false);
+            ResetHelper();
+        }
+#endif
+
+        /// <summary>
+        /// Asynchronously commits the JSON text written so far which makes it visible to the output destination.
+        /// </summary>
+        /// <remarks>
+        /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
+        /// In the case of Stream, this writes the data to the stream and flushes it asynchronously, while monitoring cancellation requests.
+        /// </remarks>
         public async Task FlushAsync(CancellationToken cancellationToken = default)
         {
             FlushHelper();
+
             if (_stream != null)
             {
                 Debug.Assert(_arrayBufferWriter != null);
                 Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
                 if (BytesPending != 0)
                 {
-                    await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken);
+#if BUILDING_INBOX_LIBRARY
+                    await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
+#else
+                    Debug.Assert(_arrayBufferWriter.WrittenMemory.Length == _arrayBufferWriter.WrittenCount);
+                    await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory.ToArray(), 0, _arrayBufferWriter.WrittenCount, cancellationToken).ConfigureAwait(false);
+#endif
                     _arrayBufferWriter.Clear();
                 }
-                await _stream.FlushAsync();
-                _memory = default;
-                BytesCommitted += BytesPending;
-                BytesPending = 0;
+                await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
+
+            _memory = default;
+            BytesCommitted += BytesPending;
+            BytesPending = 0;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -289,7 +335,12 @@ namespace System.Text.Json
             Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
             if (BytesPending != 0)
             {
+#if BUILDING_INBOX_LIBRARY
                 _stream.Write(_arrayBufferWriter.WrittenSpan);
+#else
+                Debug.Assert(_arrayBufferWriter.WrittenSpan.Length == _arrayBufferWriter.WrittenCount);
+                _stream.Write(_arrayBufferWriter.WrittenSpan.ToArray(), 0, _arrayBufferWriter.WrittenCount);
+#endif
                 _arrayBufferWriter.Clear();
             }
         }
@@ -670,7 +721,7 @@ namespace System.Text.Json
 
             Span<char> escapedPropertyName = length <= JsonConstants.StackallocThreshold ?
                 stackalloc char[length] :
-                (escapedPropertyName = ArrayPool<char>.Shared.Rent(length));
+                (propertyArray = ArrayPool<char>.Shared.Rent(length));
 
             JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndexProp, out int written);
 
@@ -849,28 +900,38 @@ namespace System.Text.Json
             }
         }
 
-        private void Grow(int minimumSize)
+        private void Grow(int requiredSize)
         {
-            Debug.Assert(minimumSize > 0);
+            Debug.Assert(requiredSize > 0);
+
+            if (_memory.Length == 0)
+            {
+                Debug.Assert(BytesPending == 0);
+                _memory = _output.GetMemory();
+                if (_memory.Length >= requiredSize)
+                {
+                    return;
+                }
+            }
 
             FlushHelper();
 
-            int requiredSize = Math.Max(DefaultGrowthSize, minimumSize);
+            int sizeHint = Math.Max(DefaultGrowthSize, requiredSize);
 
             if (_stream != null)
             {
                 FlushHelperStream();
-                _memory = _output.GetMemory(requiredSize);
+                _memory = _output.GetMemory(sizeHint);
 
-                Debug.Assert(_memory.Length >= minimumSize);
+                Debug.Assert(_memory.Length >= sizeHint);
             }
             else
             {
-                _memory = _output.GetMemory(requiredSize);
+                _memory = _output.GetMemory(sizeHint);
 
-                if (_memory.Length < minimumSize)
+                if (_memory.Length < sizeHint)
                 {
-                    ThrowHelper.ThrowArgumentException(ExceptionResource.FailedToGetMinimumSizeSpan, minimumSize);
+                    ThrowHelper.ThrowArgumentException_NeedLargerSpan();
                 }
             }
 

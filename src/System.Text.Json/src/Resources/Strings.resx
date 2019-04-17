@@ -204,9 +204,6 @@
   <data name="FailedToGetLargerSpan" xml:space="preserve">
     <value>The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing.</value>
   </data>
-  <data name="FailedToGetMinimumSizeSpan" xml:space="preserve">
-    <value>The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing. Need at least {0} bytes.</value>
-  </data>
   <data name="FoundInvalidCharacter" xml:space="preserve">
     <value>'{0}' is invalid after a value. Expected either ',', '}}', or ']'.</value>
   </data>
