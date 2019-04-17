@@ -51,9 +51,13 @@ namespace System.Text.Json.Serialization
 
             using (var bufferWriter = new PooledBufferWriter<byte>(options.DefaultBufferSize))
             {
+                var writer = new Utf8JsonWriter(bufferWriter, writerOptions);
+
                 if (value == null)
                 {
-                    WriteNull(writerOptions, bufferWriter);
+                    writer.WriteNullValue();
+                    writer.Flush();
+
 #if BUILDING_INBOX_LIBRARY
                     await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
@@ -79,7 +83,9 @@ namespace System.Text.Json.Serialization
                 {
                     flushThreshold = (int)(bufferWriter.Capacity * .9); //todo: determine best value here
 
-                    isFinalBlock = Write(writerOptions, bufferWriter, flushThreshold, options, ref state);
+                    isFinalBlock = Write(writer, flushThreshold, options, ref state);
+                    writer.Flush();
+
 #if BUILDING_INBOX_LIBRARY
                     await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else

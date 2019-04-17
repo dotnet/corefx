@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
@@ -53,15 +52,6 @@ namespace System.Text.Json.Serialization
                     ThrowHelper.ThrowArgumentException_DeserializeWrongType(type, value);
                 }
             }
-        }
-
-        private static void WriteNull(
-            JsonWriterOptions writerOptions,
-            IBufferWriter<byte> bufferWriter)
-        {
-            var writer = new Utf8JsonWriter(bufferWriter, writerOptions);
-            writer.WriteNullValue();
-            writer.Flush();
         }
 
         private static byte[] WriteCoreBytes(object value, Type type, JsonSerializerOptions options)
@@ -115,7 +105,7 @@ namespace System.Text.Json.Serialization
                 state.Current.Initialize(type, options);
                 state.Current.CurrentValue = value;
 
-                Write(ref writer, -1, options, ref state);
+                Write(writer, -1, options, ref state);
             }
 
             writer.Flush();
