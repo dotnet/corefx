@@ -327,4 +327,7 @@
   <data name="SerializerPropertyNameConflict" xml:space="preserve">
     <value>The property '{0}.{1}' has the same name as a previous property based on naming or casing policies.</value>
   </data>
+  <data name="SerializerPropertyNameNull" xml:space="preserve">
+    <value>The property name for '{0}.{1}' cannot be null as a result of naming policies.</value>
+  </data>
 </root>

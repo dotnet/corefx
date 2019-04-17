@@ -99,14 +99,24 @@ namespace System.Text.Json.Serialization
                 if (nameAttribute != null)
                 {
                     NameAsString = nameAttribute.Name;
+                    
+                    // This is detected and thrown by caller.
+                    if (NameAsString == null)
+                    {
+                        return;
+                    }
                 }
                 else if (options.PropertyNamingPolicy != null)
                 {
                     NameAsString = options.PropertyNamingPolicy.ConvertName(PropertyInfo.Name);
-                }
 
-                // Allow a null value to indicate to use the property name.
-                if (NameAsString == null)
+                    // This is detected and thrown by caller.
+                    if (NameAsString == null)
+                    {
+                        return;
+                    }
+                }
+                else
                 {
                     NameAsString = PropertyInfo.Name;
                 }

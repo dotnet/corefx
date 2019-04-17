@@ -96,6 +96,11 @@ namespace System.Text.Json.Serialization
                     {
                         JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
 
+                        if (jsonPropertyInfo.NameAsString == null)
+                        {
+                            ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameNull(this, jsonPropertyInfo);
+                        }
+
                         // If the JsonNameAttribute or naming policy results in collisions, throw an exception.
                         if (!propertyNames.Add(jsonPropertyInfo.CompareNameAsString))
                         {

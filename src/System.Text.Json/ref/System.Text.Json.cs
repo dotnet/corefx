@@ -323,7 +323,6 @@ namespace System.Text.Json.Serialization
     [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
     public sealed partial class JsonNameAttribute : System.Text.Json.Serialization.JsonAttribute
     {
-        public JsonNameAttribute() { }
         public JsonNameAttribute(string name) { }
         public string Name { get { throw null; } set { } }
     }

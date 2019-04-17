@@ -12,13 +12,6 @@ namespace System.Text.Json.Serialization
     public sealed class JsonNameAttribute : JsonAttribute
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="JsonNameAttribute"/>.
-        /// </summary>
-        public JsonNameAttribute()
-        {
-        }
-
-        /// <summary>
         /// Initializes a new instance of <see cref="JsonNameAttribute"/> with the speicified property name.
         /// </summary>
         /// <param name="name">The name of the property.</param>

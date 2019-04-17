@@ -12,7 +12,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ToCamelCaseTest()
         {
-            // These test cases were copied from JSON.NET
+            // These test cases were copied from Json.NET.
             Assert.Equal("urlValue", ConvertToCamelCase("URLValue"));
             Assert.Equal("url", ConvertToCamelCase("URL"));
             Assert.Equal("id", ConvertToCamelCase("ID"));
