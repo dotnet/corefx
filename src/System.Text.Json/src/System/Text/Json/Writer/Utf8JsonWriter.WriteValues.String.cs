@@ -218,7 +218,7 @@ namespace System.Text.Json
             }
         }
 
-        // TODO: Consider writing in 4KB chunks for IBufferWriter mode instead.
+        // TODO: https://github.com/dotnet/corefx/issues/36958
         private void WriteStringMinimized(ReadOnlySpan<byte> escapedValue)
         {
             Debug.Assert(escapedValue.Length < int.MaxValue - 3);
@@ -245,7 +245,7 @@ namespace System.Text.Json
             output[BytesPending++] = JsonConstants.Quote;
         }
 
-        // TODO: Consider writing in 4KB chunks for IBufferWriter mode instead.
+        // TODO: https://github.com/dotnet/corefx/issues/36958
         private void WriteStringIndented(ReadOnlySpan<byte> escapedValue)
         {
             int indent = Indentation;
