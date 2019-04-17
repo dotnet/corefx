@@ -46,7 +46,7 @@ namespace System.Text.Json.Serialization.Tests
         // Use a helper method since the method is not public.
         private static string ConvertToCamelCase(string name)
         {
-            JsonPropertyNamingPolicy policy = JsonPropertyNamingPolicy.CamelCase;
+            JsonNamingPolicy policy = JsonNamingPolicy.CamelCase;
             string value = policy.ConvertName(name);
             return value;
         }

@@ -18,8 +18,8 @@ namespace System.Text.Json.Serialization
 
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
         private ClassMaterializer _classMaterializerStrategy;
-        private JsonPropertyNamingPolicy _dictionayKeyPolicy;
-        private JsonPropertyNamingPolicy _jsonPropertyNamingPolicy;
+        private JsonNamingPolicy _dictionayKeyPolicy;
+        private JsonNamingPolicy _jsonPropertyNamingPolicy;
         private JsonCommentHandling _readCommentHandling;
         private int _defaultBufferSize = BufferSizeDefault;
         private int _maxDepth;
@@ -87,9 +87,9 @@ namespace System.Text.Json.Serialization
         /// Specifies the policy used to convert a <see cref="System.Collections.IDictionary"/> key's name to another format, such as camel-casing.
         /// </summary>
         /// <remarks>
-        /// This property can be set to <see cref="JsonPropertyNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// This property can be set to <see cref="JsonNamingPolicy.CamelCase"/> to specify a camel-casing policy.
         /// </remarks>
-        public JsonPropertyNamingPolicy DictionaryKeyPolicy
+        public JsonNamingPolicy DictionaryKeyPolicy
         {
             get
             {
@@ -169,10 +169,10 @@ namespace System.Text.Json.Serialization
         /// will be used when writing the property name during serialization.
         /// </summary>
         /// <remarks>
-        /// The policy is not used for property that has a <see cref="JsonNameAttribute"/> applied.
-        /// This property can be set to <see cref="JsonPropertyNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// The policy is not used for properties that have a <see cref="JsonPropertyNameAttribute"/> applied.
+        /// This property can be set to <see cref="JsonNamingPolicy.CamelCase"/> to specify a camel-casing policy.
         /// </remarks>
-        public JsonPropertyNamingPolicy PropertyNamingPolicy
+        public JsonNamingPolicy PropertyNamingPolicy
         {
             get
             {

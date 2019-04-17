@@ -320,17 +320,17 @@ namespace System.Text.Json.Serialization
     {
         public JsonIgnoreAttribute() { }
     }
-    [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
-    public sealed partial class JsonNameAttribute : System.Text.Json.Serialization.JsonAttribute
+    public abstract partial class JsonNamingPolicy
     {
-        public JsonNameAttribute(string name) { }
-        public string Name { get { throw null; } set { } }
-    }
-    public abstract partial class JsonPropertyNamingPolicy
-    {
-        protected JsonPropertyNamingPolicy() { }
-        public static System.Text.Json.Serialization.JsonPropertyNamingPolicy CamelCase { get { throw null; } }
+        protected JsonNamingPolicy() { }
+        public static System.Text.Json.Serialization.JsonNamingPolicy CamelCase { get { throw null; } }
         public abstract string ConvertName(string name);
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
+    public sealed partial class JsonPropertyNameAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonPropertyNameAttribute(string propertyName) { }
+        public string Name { get { throw null; } set { } }
     }
     public static partial class JsonSerializer
     {
@@ -352,12 +352,12 @@ namespace System.Text.Json.Serialization
         public JsonSerializerOptions() { }
         public bool AllowTrailingCommas { get { throw null; } set { } }
         public int DefaultBufferSize { get { throw null; } set { } }
-        public System.Text.Json.Serialization.JsonPropertyNamingPolicy DictionaryKeyPolicy { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonNamingPolicy DictionaryKeyPolicy { get { throw null; } set { } }
         public bool IgnoreNullValues { get { throw null; } set { } }
         public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
         public bool PropertyNameCaseInsensitive { get { throw null; } set { } }
-        public System.Text.Json.Serialization.JsonPropertyNamingPolicy PropertyNamingPolicy { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonNamingPolicy PropertyNamingPolicy { get { throw null; } set { } }
         public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
         public bool WriteIndented { get { throw null; } set { } }
     }

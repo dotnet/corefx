@@ -101,7 +101,7 @@ namespace System.Text.Json.Serialization
                             ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameNull(this, jsonPropertyInfo);
                         }
 
-                        // If the JsonNameAttribute or naming policy results in collisions, throw an exception.
+                        // If the JsonPropertyNameAttribute or naming policy results in collisions, throw an exception.
                         if (!propertyNames.Add(jsonPropertyInfo.CompareNameAsString))
                         {
                             ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameConflict(this, jsonPropertyInfo);

@@ -19,7 +19,7 @@ namespace System.Text.Json.Serialization
 
         internal ClassType ClassType;
 
-        // The name of the property with any casing policy or the name specified from JsonNameAttribute.
+        // The name of the property with any casing policy or the name specified from JsonPropertyNameAttribute.
         private byte[] _name { get; set; }
         internal ReadOnlySpan<byte> Name => _name;
         internal string NameAsString { get; private set; }
@@ -95,7 +95,7 @@ namespace System.Text.Json.Serialization
         {
             if (PropertyInfo != null)
             {
-                JsonNameAttribute nameAttribute = GetAttribute<JsonNameAttribute>();
+                JsonPropertyNameAttribute nameAttribute = GetAttribute<JsonPropertyNameAttribute>();
                 if (nameAttribute != null)
                 {
                     NameAsString = nameAttribute.Name;

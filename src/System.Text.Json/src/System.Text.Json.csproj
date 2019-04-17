@@ -71,12 +71,12 @@
     <Compile Include="System\Text\Json\Serialization\JsonClassInfo.AddProperty.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonEnumerableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonIgnoreAttribute.cs" />
-    <Compile Include="System\Text\Json\Serialization\JsonNameAttribute.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonNamingPolicy.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfo.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoCommon.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNotNullable.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNullable.cs" />
-    <Compile Include="System\Text\Json\Serialization\JsonPropertyNamingPolicy.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonPropertyNameAttribute.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.HandleArray.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.Helpers.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.Stream.cs" />

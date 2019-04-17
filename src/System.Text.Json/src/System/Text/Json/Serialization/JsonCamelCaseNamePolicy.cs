@@ -4,7 +4,7 @@
 
 namespace System.Text.Json.Serialization
 {
-    internal sealed class JsonCamelCaseNamePolicy : JsonPropertyNamingPolicy
+    internal sealed class JsonCamelCaseNamePolicy : JsonNamingPolicy
     {
         public override string ConvertName(string name)
         {
