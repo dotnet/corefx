@@ -1,0 +1,6 @@
+<Project>
+  <ItemGroup>
+    <IgnoredTypes Include="System.Resources.ResourceReader" />
+    <IgnoredTypes Include="System.Resources.ResourceWriter" />
+  </ItemGroup>
+</Project>
