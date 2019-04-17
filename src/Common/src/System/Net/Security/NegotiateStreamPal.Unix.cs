@@ -222,7 +222,7 @@ namespace System.Net.Security
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
 
-                return Encoding.ASCII.GetString(token.ToByteArray());
+                return Encoding.UTF8.GetString(token.ToByteArray());
             }
             finally
             {

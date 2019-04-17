@@ -122,7 +122,7 @@ namespace System.Net.Security.Tests
             bool isLocalhost = await IsLocalHost(serverName);
             
             string expectedAuthenticationType = "Kerberos";
-            bool mutualAuthenitcated = true;
+            bool mutuallyAuthenticated = true;
 
             if (credential == CredentialCache.DefaultNetworkCredentials && isLocalhost)
             {
@@ -133,7 +133,7 @@ namespace System.Net.Security.Tests
             {
                 // Anonymous authentication.
                 expectedAuthenticationType = "NTLM";
-                mutualAuthenitcated = false;
+                mutuallyAuthenticated = false;
             }
 
             using (var client = new TcpClient())
@@ -154,7 +154,7 @@ namespace System.Net.Security.Tests
 
                     Assert.Equal(true, auth.IsAuthenticated);
                     Assert.Equal(true, auth.IsEncrypted);
-                    Assert.Equal(mutualAuthenitcated, auth.IsMutuallyAuthenticated);
+                    Assert.Equal(mutuallyAuthenticated, auth.IsMutuallyAuthenticated);
                     Assert.Equal(true, auth.IsSigned);
 
                     // Send a message to the server. Encode the test data into a byte array.
@@ -171,7 +171,7 @@ namespace System.Net.Security.Tests
             string expectedUser = Configuration.Security.NegotiateClientUser;
             
             string expectedAuthenticationType = "Kerberos";
-            bool mutualAuthenitcated = true;
+            bool mutuallyAuthenticated = true;
 
             using (var controlClient = new TcpClient())
             {
@@ -192,7 +192,7 @@ namespace System.Net.Security.Tests
                     Assert.True(serverAuth.IsAuthenticated, "IsAuthenticated");
                     Assert.True(serverAuth.IsEncrypted, "IsEncrypted");
                     Assert.True(serverAuth.IsSigned, "IsSigned");
-                    Assert.Equal(mutualAuthenitcated, serverAuth.IsMutuallyAuthenticated);
+                    Assert.Equal(mutuallyAuthenticated, serverAuth.IsMutuallyAuthenticated);
 
                     Assert.Equal(expectedAuthenticationType, serverAuth.RemoteIdentity.AuthenticationType);
                     Assert.Equal(expectedUser, serverAuth.RemoteIdentity.Name);
