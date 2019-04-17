@@ -137,7 +137,7 @@ namespace System.Text.Json.Serialization
             // If we should compare with case-insensitive, normalize to an uppercase format since that is what is cached on the propertyInfo.
             if (options.PropertyNameCaseInsensitive)
             {
-                string utf16PropertyName = System.Text.Encoding.UTF8.GetString(propertyName);
+                string utf16PropertyName = Encoding.UTF8.GetString(propertyName.ToArray());
                 string upper = utf16PropertyName.ToUpperInvariant();
                 propertyName = Encoding.UTF8.GetBytes(upper);
             }
