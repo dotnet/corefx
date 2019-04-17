@@ -3254,7 +3254,6 @@ namespace System.Text.Json.Tests
 
         private static string GetCommentExpectedString(bool prettyPrint, string comment)
         {
-            string escapedComment = comment.Replace(">", "\\u003e").Replace("<", "\\u003c");
             var ms = new MemoryStream();
             TextWriter streamWriter = new StreamWriter(ms, new UTF8Encoding(false), 1024, true);
 
@@ -3266,9 +3265,9 @@ namespace System.Text.Json.Tests
 
             json.WriteStartArray();
             for (int j = 0; j < 10; j++)
-                json.WriteComment(escapedComment);
+                json.WriteComment(comment);
             json.WriteValue(comment);
-            json.WriteComment(escapedComment);
+            json.WriteComment(comment);
             json.WriteEnd();
 
             json.Flush();
