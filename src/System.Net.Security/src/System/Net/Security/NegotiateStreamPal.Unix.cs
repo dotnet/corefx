@@ -33,7 +33,7 @@ namespace System.Net.Security
                 var safeContext = context.GetContext(out var status);
                 if (status.ErrorCode != SecurityStatusPalErrorCode.OK)
                 {
-                    throw new Exception(status.ErrorCode.ToString()); // TODO?
+                    throw new Win32Exception((int)status.ErrorCode);
                 }
                 name = GetUser(ref safeContext);
             }
