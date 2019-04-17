@@ -234,13 +234,13 @@ namespace System.Resources.Binary.Writer.Tests
             Dictionary<string, object> values = new Dictionary<string, object>()
                 {
                     {"enum", DayOfWeek.Friday },
-                    {"point", new Point(4, 8) },
-                    {"font", SystemFonts.DefaultFont }
+                    {"point", new Point(4, 8) }
                 };
 
             if (PlatformDetection.IsDrawingSupported)
             {
                 values.Add("bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")));
+                values.Add("font", SystemFonts.DefaultFont);
             }
 
             byte[] writerBuffer, binaryWriterBuffer;
@@ -283,7 +283,7 @@ namespace System.Resources.Binary.Writer.Tests
             using (MemoryStream ms = new MemoryStream(writerBuffer, false))
             using (ResourceReader reader = new ResourceReader(ms))
             {
-                typeof(ResourceReader).GetField("_permitDeserialization", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(reader, true);
+                typeof(ResourceReader).GetField("_permitDeserialization", BindingFlags.Instance | BindingFlags.NonPublic)?.SetValue(reader, true);
 
                 IDictionaryEnumerator dictEnum = reader.GetEnumerator();
 
@@ -306,7 +306,8 @@ namespace System.Resources.Binary.Writer.Tests
                     { "myResourceType", new MyResourceType(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 }) }
                 };
 
-            if (PlatformDetection.IsDrawingSupported)
+            // ImageConverter only on windows at the moment https://github.com/dotnet/corefx/issues/36949
+            if (PlatformDetection.IsDrawingSupported && PlatformDetection.IsWindows)  
             {
                 values.Add("bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")));
                 values.Add("icon", new Icon(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico")));
@@ -354,7 +355,8 @@ namespace System.Resources.Binary.Writer.Tests
                     { "enum", DayOfWeek.Friday }
                 };
 
-            if (PlatformDetection.IsDrawingSupported)
+            // ImageConverter only on windows at the moment https://github.com/dotnet/corefx/issues/36949
+            if (PlatformDetection.IsDrawingSupported && PlatformDetection.IsWindows)
             {
                 values.Add("imageFormat", ImageFormat.Png);
                 values.Add("font", SystemFonts.DefaultFont);
