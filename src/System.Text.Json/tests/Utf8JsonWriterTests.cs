@@ -596,7 +596,10 @@ namespace System.Text.Json.Tests
         {
             const int SyncWriteThreshold = 25_000;
 
-            await using var jsonUtf8 = new Utf8JsonWriter(stream, options);
+#if !netstandard
+            await
+#endif
+                using var jsonUtf8 = new Utf8JsonWriter(stream, options);
 
             byte[] utf8String = Encoding.UTF8.GetBytes("some string 1234");
 
