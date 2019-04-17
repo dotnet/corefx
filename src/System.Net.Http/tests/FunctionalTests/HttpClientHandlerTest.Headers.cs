@@ -22,7 +22,7 @@ namespace System.Net.Http.Functional.Tests
     {
         public HttpClientHandlerTest_Headers(ITestOutputHelper output) : base(output) { }
 
-        internal sealed class DerivedHttpHeaders : HttpHeaders { }
+        private sealed class DerivedHttpHeaders : HttpHeaders { }
 
         [Fact]
         public async Task SendAsync_UserAgent_CorrectlyWritten()
