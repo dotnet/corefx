@@ -45,9 +45,9 @@ namespace System.Text.Json
             throw GetArgumentException(SR.SpecialNumberValuesNotSupported);
         }
 
-        public static void ThrowArgumentException_NeedLargerSpan()
+        public static void ThrowInvalidOperationException_NeedLargerSpan()
         {
-            throw GetArgumentException(SR.FailedToGetLargerSpan);
+            throw GetInvalidOperationException(SR.FailedToGetLargerSpan);
         }
 
         public static void ThrowArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)

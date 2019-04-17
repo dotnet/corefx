@@ -571,7 +571,7 @@ namespace System.Text.Json.Tests
 
             var jsonUtf8 = new Utf8JsonWriter(output, options);
 
-            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteNumberValue((ulong)12345678901));
+            Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteNumberValue((ulong)12345678901));
         }
 
         [Theory]
@@ -647,7 +647,7 @@ namespace System.Text.Json.Tests
             var jsonUtf8 = new Utf8JsonWriter(output, options);
             Guid guid = Guid.NewGuid();
 
-            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteStringValue(guid));
+            Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue(guid));
 
             output = new FixedSizedBufferWriter(41);
             jsonUtf8 = new Utf8JsonWriter(output, options);
@@ -672,7 +672,7 @@ namespace System.Text.Json.Tests
             var jsonUtf8 = new Utf8JsonWriter(output, options);
             var date = new DateTime(2019, 1, 1);
 
-            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteStringValue(date));
+            Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue(date));
 
             output = new FixedSizedBufferWriter(38);
             jsonUtf8 = new Utf8JsonWriter(output, options);
@@ -697,7 +697,7 @@ namespace System.Text.Json.Tests
             var jsonUtf8 = new Utf8JsonWriter(output, options);
             DateTimeOffset date = new DateTime(2019, 1, 1);
 
-            Assert.Throws<ArgumentException>(() => jsonUtf8.WriteStringValue(date));
+            Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteStringValue(date));
 
             output = new FixedSizedBufferWriter(38);
             jsonUtf8 = new Utf8JsonWriter(output, options);
@@ -779,7 +779,7 @@ namespace System.Text.Json.Tests
                 decimal value = -0.9999999999999999999999999999m;
                 var jsonUtf8 = new Utf8JsonWriter(output, options);
 
-                Assert.Throws<ArgumentException>(() => jsonUtf8.WriteNumberValue(value));
+                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteNumberValue(value));
 
                 output = new FixedSizedBufferWriter(34);
                 jsonUtf8 = new Utf8JsonWriter(output, options);

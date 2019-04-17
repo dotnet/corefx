@@ -931,7 +931,7 @@ namespace System.Text.Json
 
                 if (_memory.Length < sizeHint)
                 {
-                    ThrowHelper.ThrowArgumentException_NeedLargerSpan();
+                    ThrowHelper.ThrowInvalidOperationException_NeedLargerSpan();
                 }
             }
 
