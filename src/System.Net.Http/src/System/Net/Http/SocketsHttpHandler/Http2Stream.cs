@@ -115,7 +115,7 @@ namespace System.Net.Http
                 TaskCompletionSource<bool> allowExpect100ToContinue = new TaskCompletionSource<bool>();
                 var expect100Timer = new Timer(
                             s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
-                            allowExpect100ToContinue, TimeSpan.FromSeconds(5), Timeout.InfiniteTimeSpan);
+                            allowExpect100ToContinue, _connection._pool.Settings._expect100ContinueTimeout, Timeout.InfiniteTimeSpan);
                 Task response = ReadResponseHeadersAsync(true, allowExpect100ToContinue);
 
                 // By now, either we got response from server or timer expired.
