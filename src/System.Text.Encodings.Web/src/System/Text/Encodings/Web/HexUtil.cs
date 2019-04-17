@@ -24,16 +24,6 @@ namespace System.Text.Encodings.Web
         }
 
         /// <summary>
-        /// Converts a number 0 - 15 to its associated hex character '0' - 'F'.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static char Int32LsbToHexDigit(int value)
-        {
-            Debug.Assert(value < 16);
-            return (char)((value < 10) ? ('0' + value) : ('A' + (value - 10)));
-        }
-
-        /// <summary>
         /// Gets the uppercase hex-encoded form of a byte.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

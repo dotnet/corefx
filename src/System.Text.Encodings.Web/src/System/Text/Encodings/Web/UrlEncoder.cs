@@ -2,8 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text.Internal;
 using System.Text.Unicode;
 
@@ -46,16 +44,11 @@ namespace System.Text.Encodings.Web
 
     internal sealed class DefaultUrlEncoder : UrlEncoder
     {
+        private const int MaxEncodedScalarLength = 12; // "%XX%YY%ZZ%WW" is the longest encoded form (hex-escaped UTF-8 representation of non-BMP scalar)
+
         private AllowedCharactersBitmap _allowedCharacters;
 
         internal static readonly DefaultUrlEncoder Singleton = new DefaultUrlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
-
-        // We perform UTF8 conversion of input, which means that the worst case is
-        // 12 output chars per input surrogate char: [input] U+FFFF U+FFFF -> [output] "%XX%YY%ZZ%WW".
-        public override int MaxOutputCharactersPerInputCharacter
-        {
-            get { return 12; }
-        }
 
         public DefaultUrlEncoder(TextEncoderSettings filter)
         {
@@ -138,53 +131,29 @@ namespace System.Text.Encodings.Web
         public DefaultUrlEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool WillEncode(int unicodeScalar)
+        public override bool RuneMustBeEncoded(Rune value)
         {
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
-            return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
+            return !_allowedCharacters.IsUnicodeScalarAllowed((uint)value.Value);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
+        public override int EncodeSingleRune(Rune value, Span<char> buffer)
         {
-            if (text == null)
+            Span<byte> scalarAsUtf8Bytes = stackalloc byte[4]; // max 4 UTF-8 bytes per scalar
+            Span<char> escapedData = stackalloc char[MaxEncodedScalarLength];
+
+            int utf8ByteLength = value.EncodeToUtf8(scalarAsUtf8Bytes);
+
+            // For each UTF-8 byte, write "%XX"
+
+            for (int i = 0; i < utf8ByteLength; i++)
             {
-                throw new ArgumentNullException(nameof(text));
-            }
-            return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
-        }
-
-        public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
-        {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
+                int escapedDataIndex = 3 * i;
+                escapedData[escapedDataIndex] = '%';
+                HexUtil.ByteToHexDigits(scalarAsUtf8Bytes[i], out escapedData[escapedDataIndex + 1], out escapedData[escapedDataIndex + 2]);
             }
 
-            if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
-
-            numberOfCharactersWritten = 0;
-            uint asUtf8 = unchecked((uint)UnicodeHelpers.GetUtf8RepresentationForScalarValue((uint)unicodeScalar));
-            do
-            {
-                char highNibble, lowNibble;
-                HexUtil.ByteToHexDigits(unchecked((byte)asUtf8), out highNibble, out lowNibble);
-
-                if (numberOfCharactersWritten + 3 > bufferLength)
-                {
-                    numberOfCharactersWritten = 0;
-                    return false;
-                }
-
-                *buffer = '%'; buffer++;
-                *buffer = highNibble; buffer++;
-                *buffer = lowNibble; buffer++;
-
-                numberOfCharactersWritten += 3;
-            }
-            while ((asUtf8 >>= 8) != 0);
-            return true;
+            escapedData = escapedData.Slice(0, utf8ByteLength * 3);
+            return escapedData.TryCopyTo(buffer) ? escapedData.Length : -1;
         }
     }
 }

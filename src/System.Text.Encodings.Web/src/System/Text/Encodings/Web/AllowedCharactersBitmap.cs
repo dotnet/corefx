@@ -71,31 +71,20 @@ namespace System.Text.Internal
         }
 
         // Determines whether the given character can be returned unencoded.
-        public bool IsCharacterAllowed(char character)
-        {
-            int codePoint = character;
-            int index = codePoint >> 5;
-            int offset = codePoint & 0x1F;
-            return ((_allowedCharacters[index] >> offset) & 0x1U) != 0;
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public bool IsCharacterAllowed(char character) => IsUnicodeScalarAllowed(character);
 
         // Determines whether the given character can be returned unencoded.
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool IsUnicodeScalarAllowed(int unicodeScalar)
+        public bool IsUnicodeScalarAllowed(uint unicodeScalar)
         {
-            int index = unicodeScalar >> 5;
-            int offset = unicodeScalar & 0x1F;
-            return ((_allowedCharacters[index] >> offset) & 0x1U) != 0;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe int FindFirstCharacterToEncode(char* text, int textLength)
-        {
-            for (int i = 0; i < textLength; i++)
+            uint index = unicodeScalar >> 5;
+            if (index >= (uint)_allowedCharacters.Length)
             {
-                if (!IsCharacterAllowed(text[i])) { return i; }
+                return false; // would be out-of-bounds read (unicodeScalar isn't BMP char)
             }
-            return -1;
+
+            return ((_allowedCharacters[index] >> ((int)unicodeScalar & 0x1F) /* offset */) & 1U) != 0;
         }
     }
 }

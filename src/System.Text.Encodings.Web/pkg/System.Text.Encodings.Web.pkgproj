@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
     <ProjectReference Include="..\src\System.Text.Encodings.Web.csproj">
-      <SupportedFramework>net45;netcore45;wp8;wpa81;netcoreapp1.0;$(AllXamarinFrameworks)</SupportedFramework>
+      <SupportedFramework>netcoreapp3.0</SupportedFramework>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />

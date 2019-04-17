@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Text.Internal;
 using System.Text.Unicode;
 
@@ -47,6 +45,8 @@ namespace System.Text.Encodings.Web
 
     internal sealed class DefaultHtmlEncoder : HtmlEncoder
     {
+        private const int MaxEncodedScalarLength = 10; // "&#x10FFFF;" is the longest encoded form
+
         private AllowedCharactersBitmap _allowedCharacters;
         internal static readonly DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
@@ -79,22 +79,9 @@ namespace System.Text.Encodings.Web
         public DefaultHtmlEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool WillEncode(int unicodeScalar)
+        public override bool RuneMustBeEncoded(Rune value)
         {
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
-            return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
-        {
-            return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
-        }
-
-        public override int MaxOutputCharactersPerInputCharacter
-        {
-            get { return 10; } // "&#x10FFFF;" is the longest encoded form
+            return !_allowedCharacters.IsUnicodeScalarAllowed((uint)value.Value);
         }
 
         static readonly char[] s_quote = "&quot;".ToCharArray();
@@ -102,66 +89,60 @@ namespace System.Text.Encodings.Web
         static readonly char[] s_lessthan = "&lt;".ToCharArray();
         static readonly char[] s_greaterthan = "&gt;".ToCharArray();
 
-        public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        public override int EncodeSingleRune(Rune value, Span<char> buffer)
         {
-            if (buffer == null)
+            uint scalarValue = (uint)value.Value;
+            Span<char> escapedData = stackalloc char[MaxEncodedScalarLength];
+
+            if (scalarValue == '\"')
             {
-                throw new ArgumentNullException(nameof(buffer));
+                escapedData = s_quote;
+            }
+            else if (scalarValue == '&')
+            {
+                escapedData = s_ampersand;
+            }
+            else if (scalarValue == '<')
+            {
+                escapedData = s_lessthan;
+            }
+            else if (scalarValue == '>')
+            {
+                escapedData = s_greaterthan;
+            }
+            else
+            {
+                escapedData = escapedData.Slice(WriteEncodedScalarToEndOfScratchBufferAsNumericEntity(scalarValue, escapedData));
             }
 
-            if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '\"') { return TryCopyCharacters(s_quote, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '&') { return TryCopyCharacters(s_ampersand, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '<') { return TryCopyCharacters(s_lessthan, buffer, bufferLength, out numberOfCharactersWritten); }
-            else if (unicodeScalar == '>') { return TryCopyCharacters(s_greaterthan, buffer, bufferLength, out numberOfCharactersWritten); }
-            else { return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
+            return escapedData.TryCopyTo(buffer) ? escapedData.Length : -1;
         }
 
-        private static unsafe bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        // Writes a scalar value as "&#xABCDEF;" to the end of the scratch buffer,
+        // then returns the offset in the scratch buffer where the data begins.
+        private static int WriteEncodedScalarToEndOfScratchBufferAsNumericEntity(uint scalarValue, Span<char> buffer)
         {
-            Debug.Assert(buffer != null && bufferLength >= 0);
+            Debug.Assert(buffer.Length >= MaxEncodedScalarLength, "Invalid scratch buffer length provided; might write up to 10 chars.");
 
-            // We're writing the characters in reverse, first determine
-            // how many there are
-            const int nibbleSize = 4;
-            int numberOfHexCharacters = 0;
-            int compareUnicodeScalar = unicodeScalar;
+            int offset = buffer.Length;
+            buffer[--offset] = ';';
 
             do
             {
-                Debug.Assert(numberOfHexCharacters < 8, "Couldn't have written 8 characters out by this point.");
-                numberOfHexCharacters++;
-                compareUnicodeScalar >>= nibbleSize;
-            } while (compareUnicodeScalar != 0);
+                buffer[--offset] = HexUtil.UInt32LsbToHexDigit(scalarValue & 0xF);
+                scalarValue >>= 4;
+                if (scalarValue != 0)
+                {
+                    buffer[--offset] = HexUtil.UInt32LsbToHexDigit(scalarValue & 0xF);
+                    scalarValue >>= 4;
+                }
+            } while (scalarValue != 0);
 
-            numberOfCharactersWritten = numberOfHexCharacters + 4; // four chars are &, #, x, and ;
-            Debug.Assert(numberOfHexCharacters > 0, "At least one character should've been written.");
+            buffer[--offset] = 'x';
+            buffer[--offset] = '#';
+            buffer[--offset] = '&';
 
-            if (numberOfHexCharacters + 4 > bufferLength)
-            {
-                numberOfCharactersWritten = 0;
-                return false;
-            }
-            // Finally, write out the HTML-encoded scalar value.
-            *buffer = '&';
-            buffer++;
-            *buffer = '#';
-            buffer++;
-            *buffer = 'x';
-
-            // Jump to the end of the hex position and write backwards
-            buffer += numberOfHexCharacters;
-            do
-            {
-                *buffer = HexUtil.Int32LsbToHexDigit(unicodeScalar & 0xF);
-                unicodeScalar >>= nibbleSize;
-                buffer--;
-            }
-            while (unicodeScalar != 0);
-
-            buffer += numberOfHexCharacters + 1;
-            *buffer = ';';
-            return true;
+            return offset;
         }
     }
 }

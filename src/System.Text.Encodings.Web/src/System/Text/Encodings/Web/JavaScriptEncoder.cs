@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Text.Internal;
 using System.Text.Unicode;
 
@@ -47,6 +45,8 @@ namespace System.Text.Encodings.Web
 
     internal sealed class DefaultJavaScriptEncoder : JavaScriptEncoder
     {
+        private const int MaxEncodedScalarLength = 12; // "\uFFFF\uFFFF" is the longest encoded form
+
         private AllowedCharactersBitmap _allowedCharacters;
 
         internal static readonly DefaultJavaScriptEncoder Singleton = new DefaultJavaScriptEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
@@ -73,37 +73,17 @@ namespace System.Text.Encodings.Web
 
             _allowedCharacters.ForbidCharacter('\\');
             _allowedCharacters.ForbidCharacter('/');
-            
+
             // Forbid GRAVE ACCENT \u0060 character.
-            _allowedCharacters.ForbidCharacter('`'); 
+            _allowedCharacters.ForbidCharacter('`');
         }
 
         public DefaultJavaScriptEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool WillEncode(int unicodeScalar)
+        public override bool RuneMustBeEncoded(Rune value)
         {
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar)) return true;
-            return !_allowedCharacters.IsUnicodeScalarAllowed(unicodeScalar);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public unsafe override int FindFirstCharacterToEncode(char* text, int textLength)
-        {
-            if (text == null)
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-            return _allowedCharacters.FindFirstCharacterToEncode(text, textLength);
-        }
-
-        // The worst case encoding is 6 output chars per input char: [input] U+FFFF -> [output] "\uFFFF"
-        // We don't need to worry about astral code points since they're represented as encoded
-        // surrogate pairs in the output.
-        public override int MaxOutputCharactersPerInputCharacter
-        {
-            get { return 12; } // "\uFFFF\uFFFF" is the longest encoded form 
+            return !_allowedCharacters.IsUnicodeScalarAllowed((uint)value.Value);
         }
 
         static readonly char[] s_b = new char[] { '\\', 'b' };
@@ -118,12 +98,8 @@ namespace System.Text.Encodings.Web
         // See ECMA-262, Sec. 7.8.4, and ECMA-404, Sec. 9
         // http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.4
         // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
-        public unsafe override bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        public override int EncodeSingleRune(Rune value, Span<char> buffer)
         {
-            if (buffer == null)
-            {
-                throw new ArgumentNullException(nameof(buffer));
-            }
             // ECMA-262 allows encoding U+000B as "\v", but ECMA-404 does not.
             // Both ECMA-262 and ECMA-404 allow encoding U+002F SOLIDUS as "\/".
             // (In ECMA-262 this character is a NonEscape character.)
@@ -131,75 +107,68 @@ namespace System.Text.Encodings.Web
             // be written out as numeric entities for defense-in-depth.
             // See UnicodeEncoderBase ctor comments for more info.
 
-            if (!WillEncode(unicodeScalar)) { return TryWriteScalarAsChar(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
+            Span<char> escapedData = stackalloc char[MaxEncodedScalarLength];
 
-            char[] toCopy = null;
-            switch (unicodeScalar)
+            switch (value.Value)
             {
-                case '\b': toCopy = s_b; break;
-                case '\t': toCopy = s_t; break;
-                case '\n': toCopy = s_n; break;
-                case '\f': toCopy = s_f; break;
-                case '\r': toCopy = s_r; break;
-                case '/': toCopy = s_forward; break;
-                case '\\': toCopy = s_back; break;
-                default: return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); 
+                case '\b':
+                    escapedData = s_b;
+                    break;
+                case '\t':
+                    escapedData = s_t;
+                    break;
+                case '\n':
+                    escapedData = s_n;
+                    break;
+                case '\f':
+                    escapedData = s_f;
+                    break;
+                case '\r':
+                    escapedData = s_r;
+                    break;
+                case '/':
+                    escapedData = s_forward;
+                    break;
+                case '\\':
+                    escapedData = s_back;
+                    break;
+                default:
+                    escapedData = escapedData.Slice(0, WriteRuneAsEncodedNumericEntity(value, escapedData));
+                    break;
             }
-            return TryCopyCharacters(toCopy, buffer, bufferLength, out numberOfCharactersWritten);
+
+            return escapedData.TryCopyTo(buffer) ? escapedData.Length : -1;
         }
 
-        private static unsafe bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int length, out int numberOfCharactersWritten)
+        // Writes a scalar value as "\uAAAA" to the scratch buffer, then returns the number
+        // of chars written.
+        private static int WriteRuneAsEncodedNumericEntity(Rune value, Span<char> buffer)
         {
-            Debug.Assert(buffer != null && length >= 0);
+            Debug.Assert(buffer.Length >= MaxEncodedScalarLength, "Invalid scratch buffer length provided; might write up to 12 chars.");
 
-            if (UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar))
-            {
-                // Convert this back to UTF-16 and write out both characters.
-                char leadingSurrogate, trailingSurrogate;
-                UnicodeHelpers.GetUtf16SurrogatePairFromAstralScalarValue(unicodeScalar, out leadingSurrogate, out trailingSurrogate);
-                int leadingSurrogateCharactersWritten;
-                if (TryWriteEncodedSingleCharacter(leadingSurrogate, buffer, length, out leadingSurrogateCharactersWritten) &&
-                    TryWriteEncodedSingleCharacter(trailingSurrogate, buffer + leadingSurrogateCharactersWritten, length - leadingSurrogateCharactersWritten, out numberOfCharactersWritten)
-                )
-                {
-                    numberOfCharactersWritten += leadingSurrogateCharactersWritten;
-                    return true;
-                }
-                else
-                {
-                    numberOfCharactersWritten = 0;
-                    return false;
-                }
-            }
-            else
-            {
-                // This is only a single character.
-                return TryWriteEncodedSingleCharacter(unicodeScalar, buffer, length, out numberOfCharactersWritten);
-            }
-        }
+            Span<char> scalarAsChars = stackalloc char[2];
+            int scalarCharCount = value.EncodeToUtf16(scalarAsChars);
 
-        // Writes an encoded scalar value (in the BMP) as a JavaScript-escaped character.
-        private static unsafe bool TryWriteEncodedSingleCharacter(int unicodeScalar, char* buffer, int length, out int numberOfCharactersWritten)
-        {
-            Debug.Assert(buffer != null && length >= 0);
-            Debug.Assert(!UnicodeHelpers.IsSupplementaryCodePoint(unicodeScalar), "The incoming value should've been in the BMP.");
+            // BMP chars are also handled by the below
 
-            if (length < 6)
+            buffer[0] = '\\';
+            buffer[1] = 'u';
+
+            bool succeeded = ((uint)scalarAsChars[0]).TryFormat(buffer.Slice(2), out _, "X4");
+            Debug.Assert(succeeded);
+
+            // If we actually got a surrogate pair, write out the second component now.
+
+            if (scalarCharCount > 1)
             {
-                numberOfCharactersWritten = 0;
-                return false;
+                buffer[6] = '\\';
+                buffer[7] = 'u';
+
+                succeeded = ((uint)scalarAsChars[1]).TryFormat(buffer.Slice(8), out _, "X4");
+                Debug.Assert(succeeded);
             }
 
-            // Encode this as 6 chars "\uFFFF".
-            *buffer = '\\'; buffer++;
-            *buffer = 'u'; buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit(unicodeScalar >> 12); buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)((unicodeScalar >> 8) & 0xFU)); buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)((unicodeScalar >> 4) & 0xFU)); buffer++;
-            *buffer = HexUtil.Int32LsbToHexDigit((int)(unicodeScalar & 0xFU)); buffer++;
-
-            numberOfCharactersWritten = 6;
-            return true;
+            return scalarCharCount * 6; // each UTF-16 code unit gets turned into 6 chars after escaping
         }
     }
 }

@@ -2,11 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
-using System.Diagnostics;
+using System.Buffers;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web
 {
@@ -19,60 +16,69 @@ namespace System.Text.Encodings.Web
     /// </remarks>
     public abstract class TextEncoder
     {
-        // The following pragma disables a warning complaining about non-CLS compliant members being abstract, 
-        // and wants me to mark the type as non-CLS compliant. 
-        // It is true that this type cannot be extended by all CLS compliant languages. 
-        // Having said that, if I marked the type as non-CLS all methods that take it as parameter will now have to be marked CLSCompliant(false), 
-        // yet consumption of concrete encoders is totally CLS compliant, 
-        // as it?s mainly to be done by calling helper methods in TextEncoderExtensions class, 
-        // and so I think the warning is a bit too aggressive.  
+        /*
+         * ABSTRACT METHODS
+         * 
+         * There are only two abstract methods that any encoder instance must override.
+         * All other functionality can be built on top of these two methods.
+         */
 
         /// <summary>
-        /// Encodes a Unicode scalar into a buffer.
+        /// Encodes the single scalar value <paramref name="value"/> to <paramref name="buffer"/> as UTF-16.
         /// </summary>
-        /// <param name="unicodeScalar">Unicode scalar.</param>
-        /// <param name="buffer">The destination of the encoded text.</param>
-        /// <param name="bufferLength">Length of the destination <paramref name="buffer"/> in chars.</param>
-        /// <param name="numberOfCharactersWritten">Number of characters written to the <paramref name="buffer"/>.</param>
-        /// <returns>Returns false if <paramref name="bufferLength"/> is too small to fit the encoded text, otherwise returns true.</returns>
-        /// <remarks>This method is seldom called directly. One of the TextEncoder.Encode overloads should be used instead.
-        /// Implementations of <see cref="TextEncoder"/> need to be thread safe and stateless.
-        /// </remarks>
-#pragma warning disable 3011
-        [CLSCompliant(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public unsafe abstract bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten);
-
-        // all subclasses have the same implementation of this method.
-        // but this cannot be made virtual, because it will cause a virtual call to Encodes, and it destroys perf, i.e. makes common scenario 2x slower 
+        /// <param name="value">The scalar value to be encoded.</param>
+        /// <param name="buffer">The buffer which will receive the encoded scalar value.</param>
+        /// <returns>The number of <see cref="char"/> elements written to <paramref name="buffer"/>, or -1
+        /// if <paramref name="buffer"/> is too small to hold the encoded representation of <paramref name="value"/>.</returns>
+        /// <exception cref="ArgumentException">
+        /// If <paramref name="value"/> cannot be encoded using the current encoder.
+        /// </exception>
+        public abstract int EncodeSingleRune(Rune value, Span<char> buffer);
 
         /// <summary>
-        /// Finds index of the first character that needs to be encoded.
+        /// Returns a value indicating whether <paramref name="value"/> would be encoded by the current encoder.
         /// </summary>
-        /// <param name="text">The text buffer to search.</param>
-        /// <param name="textLength">The number of characters in the <paramref name="text"/>.</param>
-        /// <returns></returns>
-        /// <remarks>This method is seldom called directly. It's used by higher level helper APIs.</remarks>
-        [CLSCompliant(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public unsafe abstract int FindFirstCharacterToEncode(char* text, int textLength);
-#pragma warning restore
+        /// <param name="value">The scalar value to query.</param>
+        /// <returns><see langword="true"/> if the current encoder instance would encode <paramref name="value"/>;
+        /// <see langword="false"/> otherwise.</returns>
+        public abstract bool RuneMustBeEncoded(Rune value);
+
+        /*
+         * WRAPPER INSTANCE METHODS
+         * 
+         * These methods are the intended public API surface of any TextEncoder instance.
+         * We can provide default implementations built on top of the two abstract methods,
+         * but derived classes can override these methods to provide optimized implementations
+         * if desired.
+         */
 
         /// <summary>
-        /// Determines if a given Unicode scalar will be encoded.
+        /// Returns the index of the first element in <paramref name="text"/> that would be encoded by
+        /// the current encoder, or -1 if no element of <paramref name="text"/> would be encoded.
         /// </summary>
-        /// <param name="unicodeScalar">Unicode scalar.</param>
-        /// <returns>Returns true if the <paramref name="unicodeScalar"/> will be encoded by this encoder, otherwise returns false.</returns>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public abstract bool WillEncode(int unicodeScalar);
+        public virtual int FindFirstCharacterToEncode(ReadOnlySpan<char> text)
+        {
+            int originalTextLength = text.Length;
 
-        // this could be a field, but I am trying to make the abstraction pure.
+            while (!text.IsEmpty)
+            {
+                // Read off each scalar value from the UTF-16 input stream, breaking when we encounter an
+                // invalid sequence (which will later go through U+FFFD replacement + escaping) or when we
+                // encounter a scalar value that must be encoded. We'll keep slicing text as we pull off
+                // scalar values, so if we must return early a simple subtraction will give us the offset
+                // in the original input data where we found data which must be escaped.
 
-        /// <summary>
-        /// Maximum number of characters that this encoder can generate for each input character.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public abstract int MaxOutputCharactersPerInputCharacter { get; }
+                if (Rune.DecodeFromUtf16(text, out Rune thisRune, out int thisRuneLengthInChars) != OperationStatus.Done
+                    || RuneMustBeEncoded(thisRune))
+                {
+                    return originalTextLength - text.Length;
+                }
+
+                text = text.Slice(thisRuneLengthInChars);
+            }
+
+            return -1; // read all data - nothing required escaping
+        }
 
         /// <summary>
         /// Encodes the supplied string and returns the encoded text as a new string.
@@ -81,125 +87,61 @@ namespace System.Text.Encodings.Web
         /// <returns>Encoded string.</returns>
         public virtual string Encode(string value)
         {
-            if (value == null)
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
 
-            unsafe
+            // Fast path: if no character in the input string requires encoding, we
+            // can return the string as-is without any further work.
+
+            int idxOfFirstCharToEncode = FindFirstCharacterToEncode(value);
+            if (idxOfFirstCharToEncode < 0)
             {
-                fixed (char* valuePointer = value)
-                {
-                    int firstCharacterToEncode = FindFirstCharacterToEncode(valuePointer, value.Length);
-
-                    if (firstCharacterToEncode == -1)
-                    {
-                        return value;
-                    }
-
-                    int bufferSize = MaxOutputCharactersPerInputCharacter * value.Length;
-
-                    string result;
-                    if (bufferSize < 1024)
-                    {
-                        char* wholebuffer = stackalloc char[bufferSize];
-                        int totalWritten = EncodeIntoBuffer(wholebuffer, bufferSize, valuePointer, value.Length, firstCharacterToEncode);
-                        result = new string(wholebuffer, 0, totalWritten);
-                    }
-                    else
-                    {
-                        char[] wholebuffer = new char[bufferSize];
-                        fixed(char* buffer = &wholebuffer[0])
-                        {
-                            int totalWritten = EncodeIntoBuffer(buffer, bufferSize, valuePointer, value.Length, firstCharacterToEncode);
-                            result = new string(wholebuffer, 0, totalWritten);                            
-                        }
-                    }
-
-                    return result;
-                }
-            }
-        }
-
-        // NOTE: The order of the parameters to this method is a work around for https://github.com/dotnet/corefx/issues/4455
-        // and the underlying Mono bug: https://bugzilla.xamarin.com/show_bug.cgi?id=36052.
-        // If changing the signature of this method, ensure this issue isn't regressing on Mono.
-        private unsafe int EncodeIntoBuffer(char* buffer, int bufferLength, char* value, int valueLength, int firstCharacterToEncode)
-        {
-            int totalWritten = 0;
-
-            if (firstCharacterToEncode > 0)
-            {
-                int bytesToCopy = firstCharacterToEncode + firstCharacterToEncode;
-                BufferInternal.MemoryCopy(value, buffer, bytesToCopy, bytesToCopy);
-                totalWritten += firstCharacterToEncode;
-                bufferLength -= firstCharacterToEncode;
-                buffer += firstCharacterToEncode;
+                return value;
             }
 
-            int valueIndex = firstCharacterToEncode;
+            // Slow path: if any character in the input string requires encoding, we'll
+            // copy over verbatim all of the leading chars we knew to be ok, then we'll
+            // start a scalar-by-scalar transcoding sequence.
 
-            char firstChar = value[valueIndex];
-            char secondChar = firstChar;
-            bool wasSurrogatePair = false;
-            int charsWritten;
+            Span<char> scratchBuffer = stackalloc char[16];
 
-            // this loop processes character pairs (in case they are surrogates).
-            // there is an if block below to process single last character.
-            int secondCharIndex;
-            for (secondCharIndex = valueIndex + 1; secondCharIndex < valueLength; secondCharIndex++)
+            StringBuilder builder = new StringBuilder();
+            builder.Append(value, 0, idxOfFirstCharToEncode);
+
+            ReadOnlySpan<char> remainingText = value.AsSpan(idxOfFirstCharToEncode);
+
+            do
             {
-                if (!wasSurrogatePair)
+                // DecodeFromUtf16 performs U+FFFD replacement automatically when presented with invalid data
+                Rune.DecodeFromUtf16(remainingText, out Rune thisRune, out int thisRuneLengthInChars);
+                if (RuneMustBeEncoded(thisRune))
                 {
-                    firstChar = secondChar;
+                    // Escape this scalar value and write the escaped value to the destination.
+
+                    int escapedRuneCharCount = EncodeSingleRune(thisRune, scratchBuffer);
+                    if (escapedRuneCharCount < 0)
+                    {
+                        // TODO: Resize the buffer instead of failing eagerly
+                        throw new ArgumentOutOfRangeException(nameof(value));
+                    }
+
+                    builder.Append(scratchBuffer.Slice(0, escapedRuneCharCount));
                 }
                 else
                 {
-                    firstChar = value[secondCharIndex - 1];
-                }
-                secondChar = value[secondCharIndex];
+                    // Don't escape this scalar value; write it as-is. Since U+FFFD replacement may have
+                    // been performed we're going to bounce the scalar value through the scratch buffer
+                    // first instead of copying data directly from the input stream.
 
-                if (!WillEncode(firstChar))
-                {
-                    wasSurrogatePair = false;
-                    *buffer = firstChar;
-                    buffer++;
-                    bufferLength--;
-                    totalWritten++;
-                }
-                else
-                {
-                    int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, secondChar, out wasSurrogatePair);
-                    if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
-                    {
-                        throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
-                    }
-
-                    buffer += charsWritten;
-                    bufferLength -= charsWritten;
-                    totalWritten += charsWritten;
-                    if (wasSurrogatePair)
-                    {
-                        secondCharIndex++;
-                    }
-                }
-            }
-
-            if (secondCharIndex == valueLength)
-            {
-                firstChar = value[valueLength - 1];
-                int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair);
-                if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
-                {
-                    throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
+                    builder.Append(scratchBuffer.Slice(0, thisRune.EncodeToUtf16(scratchBuffer)));
                 }
 
-                buffer += charsWritten;
-                bufferLength -= charsWritten;
-                totalWritten += charsWritten;
-            }
+                remainingText = remainingText.Slice(thisRuneLengthInChars);
+            } while (!remainingText.IsEmpty);
 
-            return totalWritten;
+            return builder.ToString();
         }
 
         /// <summary>
@@ -221,48 +163,17 @@ namespace System.Text.Encodings.Web
         /// <param name="characterCount">Number of characters in the substring.</param>
         public virtual void Encode(TextWriter output, string value, int startIndex, int characterCount)
         {
-            if (value == null)
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
-            if (output == null)
+            if (output is null)
             {
                 throw new ArgumentNullException(nameof(output));
             }
             ValidateRanges(startIndex, characterCount, actualInputLength: value.Length);
 
-            unsafe
-            {
-                fixed (char* valuePointer = value)
-                {
-                    char* substring = valuePointer + startIndex;
-                    int firstIndexToEncode = FindFirstCharacterToEncode(substring, characterCount);
-
-                    if (firstIndexToEncode == -1) // nothing to encode; 
-                    {
-                        if (startIndex == 0 && characterCount == value.Length) // write whole string
-                        {
-                            output.Write(value);
-                            return;
-                        }
-                        for (int i = 0; i < characterCount; i++) // write substring
-                        {
-                            output.Write(*substring);
-                            substring++;
-                        }
-                        return;
-                    }
-
-                    // write prefix, then encode
-                    for (int i = 0; i < firstIndexToEncode; i++)
-                    {
-                        output.Write(*substring);
-                        substring++;
-                    }
-
-                    EncodeCore(output, substring, characterCount - firstIndexToEncode);
-                }
-            }
+            Encode(output, value.AsSpan(startIndex, characterCount));
         }
 
         /// <summary>
@@ -274,143 +185,62 @@ namespace System.Text.Encodings.Web
         /// <param name="characterCount">Number of characters in the substring.</param>
         public virtual void Encode(TextWriter output, char[] value, int startIndex, int characterCount)
         {
-            if (value == null)
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
-            if (output == null)
+            if (output is null)
             {
                 throw new ArgumentNullException(nameof(output));
             }
             ValidateRanges(startIndex, characterCount, actualInputLength: value.Length);
 
-            unsafe
-            {
-                fixed (char* valuePointer = value)
-                {
-                    char* substring = valuePointer + startIndex;
-                    int firstIndexToEncode = FindFirstCharacterToEncode(substring, characterCount);
-
-                    if (firstIndexToEncode == -1) // nothing to encode; 
-                    {
-                        if (startIndex == 0 && characterCount == value.Length) // write whole string
-                        {
-                            output.Write(value);
-                            return;
-                        }
-                        for (int i = 0; i < characterCount; i++) // write substring
-                        {
-                            output.Write(*substring);
-                            substring++;
-                        }
-                        return;
-                    }
-
-                    // write prefix, then encode
-                    for (int i = 0; i < firstIndexToEncode; i++)
-                    {
-                        output.Write(*substring);
-                        substring++;
-                    }
-
-                    EncodeCore(output, substring, characterCount - firstIndexToEncode);
-                }
-            }
+            Encode(output, value.AsSpan(startIndex, characterCount));
         }
 
-        private unsafe void EncodeCore(TextWriter output, char* value, int valueLength)
+        private void Encode(TextWriter output, ReadOnlySpan<char> remainingText)
         {
-            Debug.Assert(value != null & output != null);
-            Debug.Assert(valueLength >= 0);
-
-            int bufferLength = MaxOutputCharactersPerInputCharacter;
-            char* buffer = stackalloc char[bufferLength];
-
-            char firstChar = *value;
-            char secondChar = firstChar;
-            bool wasSurrogatePair = false;
-            int charsWritten;
-
-            // this loop processes character pairs (in case they are surrogates).
-            // there is an if block below to process single last character.
-            for (int secondCharIndex = 1; secondCharIndex < valueLength; secondCharIndex++)
+            int idxOfFirstCharToEncode = FindFirstCharacterToEncode(remainingText);
+            if (idxOfFirstCharToEncode < 0)
             {
-                if (!wasSurrogatePair)
+                output.Write(remainingText);
+                return;
+            }
+
+            // Slow path: if any character in the input string requires encoding, we'll
+            // copy over verbatim all of the leading chars we knew to be ok, then we'll
+            // start a scalar-by-scalar transcoding sequence.
+
+            Span<char> scratchBuffer = stackalloc char[16];
+
+            do
+            {
+                // DecodeFromUtf16 performs U+FFFD replacement automatically when presented with invalid data
+                Rune.DecodeFromUtf16(remainingText, out Rune thisRune, out int thisRuneLengthInChars);
+                if (RuneMustBeEncoded(thisRune))
                 {
-                    firstChar = secondChar;
+                    // Escape this scalar value and write the escaped value to the destination.
+
+                    int escapedRuneCharCount = EncodeSingleRune(thisRune, scratchBuffer);
+                    if (escapedRuneCharCount < 0)
+                    {
+                        // TODO: Resize the buffer instead of failing eagerly
+                        throw new ArgumentOutOfRangeException("value");
+                    }
+
+                    output.Write(scratchBuffer.Slice(0, escapedRuneCharCount));
                 }
                 else
                 {
-                    firstChar = value[secondCharIndex - 1];
+                    // Don't escape this scalar value; write it as-is. Since U+FFFD replacement may have
+                    // been performed we're going to bounce the scalar value through the scratch buffer
+                    // first instead of copying data directly from the input stream.
+
+                    output.Write(scratchBuffer.Slice(0, thisRune.EncodeToUtf16(scratchBuffer)));
                 }
-                secondChar = value[secondCharIndex];
 
-                if (!WillEncode(firstChar))
-                {
-                    wasSurrogatePair = false;
-                    output.Write(firstChar);
-                }
-                else
-                {
-                    int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, secondChar, out wasSurrogatePair);
-                    if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
-                    {
-                        throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
-                    }
-                    Write(output, buffer, charsWritten);
-
-                    if (wasSurrogatePair)
-                    {
-                        secondCharIndex++;
-                    }
-                }
-            }
-
-            if (!wasSurrogatePair)
-            {
-                firstChar = value[valueLength - 1];
-                int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair);
-                if (!TryEncodeUnicodeScalar(nextScalar, buffer, bufferLength, out charsWritten))
-                {
-                    throw new ArgumentException("Argument encoder does not implement MaxOutputCharsPerInputChar correctly.");
-                }
-                Write(output, buffer, charsWritten);
-            }
-        }
-
-        internal static unsafe bool TryCopyCharacters(char[] source, char* destination, int destinationLength, out int numberOfCharactersWritten)
-        {
-            Debug.Assert(source != null && destination != null && destinationLength >= 0);
-
-            if (destinationLength < source.Length)
-            {
-                numberOfCharactersWritten = 0;
-                return false;
-            }
-
-            for (int i = 0; i < source.Length; i++)
-            {
-                destination[i] = source[i];
-            }
-
-            numberOfCharactersWritten = source.Length;
-            return true;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal static unsafe bool TryWriteScalarAsChar(int unicodeScalar, char* destination, int destinationLength, out int numberOfCharactersWritten)
-        {
-            Debug.Assert(destination != null && destinationLength >= 0);
-
-            Debug.Assert(unicodeScalar < ushort.MaxValue);
-            if (destinationLength < 1)
-            {
-                numberOfCharactersWritten = 0;
-                return false;
-            }
-            *destination = (char)unicodeScalar;
-            numberOfCharactersWritten = 1;
-            return true;
+                remainingText = remainingText.Slice(thisRuneLengthInChars);
+            } while (!remainingText.IsEmpty);
         }
 
         private static void ValidateRanges(int startIndex, int characterCount, int actualInputLength)
@@ -422,17 +252,6 @@ namespace System.Text.Encodings.Web
             if (characterCount < 0 || characterCount > (actualInputLength - startIndex))
             {
                 throw new ArgumentOutOfRangeException(nameof(characterCount));
-            }
-        }
-
-        private static unsafe void Write(TextWriter output, char* input, int inputLength)
-        {
-            Debug.Assert(output != null && input != null && inputLength >= 0);
-
-            while (inputLength-- > 0)
-            {
-                output.Write(*input);
-                input++;
             }
         }
     }

@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Globalization;
-using System.IO;
-using System.Runtime.CompilerServices;
+using System.Text;
 using System.Text.Encodings.Web;
 
 namespace Microsoft.Framework.WebEncoders
@@ -20,38 +18,20 @@ namespace Microsoft.Framework.WebEncoders
         /// <summary>
         /// Returns 0.
         /// </summary>
-        public override unsafe int FindFirstCharacterToEncode(char* text, int textLength)
-        {
-            return text == null ? -1 : 0;
-        }
+        public override int FindFirstCharacterToEncode(ReadOnlySpan<char> text) => text.IsEmpty ? -1 : 0;
 
         /// <summary>
         /// Returns true.
         /// </summary>
-        public override bool WillEncode(int unicodeScalar)
-        {
-            return true;
-        }
-
-        /// <summary>
-        /// Returns 8.
-        /// </summary>
-        public override int MaxOutputCharactersPerInputCharacter
-        {
-            get { return Int32Length; }
-        }
+        public override bool RuneMustBeEncoded(Rune value) => true;
 
         /// <summary>
         /// Encodes scalar as a hexadecimal number.
         /// </summary>
-        public override unsafe bool TryEncodeUnicodeScalar(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        public override int EncodeSingleRune(Rune value, Span<char> buffer)
         {
-            fixed (char* chars = unicodeScalar.ToString("X8"))
-                for (int i = 0; i < Int32Length; i++)
-                    buffer[i] = chars[i];
-
-            numberOfCharactersWritten = Int32Length;
-            return true;
+            string valueAsHex = ((uint)value.Value).ToString("X8");
+            return valueAsHex.AsSpan().TryCopyTo(buffer) ? valueAsHex.Length : -1;
         }
     }
 }

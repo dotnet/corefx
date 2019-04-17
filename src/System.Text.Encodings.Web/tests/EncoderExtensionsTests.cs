@@ -13,12 +13,6 @@ namespace System.Text.Encodings.Web
     public class EncoderExtensionsTests
     {
         [Fact]
-        public void HtmlEncode_ParameterChecks()
-        {
-            Assert.Throws<ArgumentNullException>(() => EncoderExtensions.HtmlEncode(null, "Hello!", new StringWriter()));
-        }
-
-        [Fact]
         public void HtmlEncode_PositiveTestCase()
         {
             // Arrange
@@ -59,46 +53,26 @@ namespace System.Text.Encodings.Web
             Assert.Throws<ArgumentNullException>("settings", () => HtmlEncoder.Create(default(TextEncoderSettings)));
         }
 
-
         [Fact]
-        public unsafe void TryEncodeUnicodeScalar_Null_Buffer()
+        public void EncodeSingleRune_InsufficientRoom()
         {
-            Assert.Throws<ArgumentNullException>("buffer", () => HtmlEncoder.Default.TryEncodeUnicodeScalar(2, null, 1, out int _));
-        }
-
-        [Fact]
-        public unsafe void TryEncodeUnicodeScalar_InsufficientRoom()
-        {
-            char* buffer = stackalloc char[1];
-            int numberWritten;
-            Assert.False(HtmlEncoder.Default.TryEncodeUnicodeScalar(0x10000, buffer, 1, out numberWritten));
-            Assert.Equal(0, numberWritten);
-        }
-
-        [Fact]
-        public void JavaScriptStringEncode_ParameterChecks()
-        {
-            Assert.Throws<ArgumentNullException>(() => EncoderExtensions.JavaScriptStringEncode(null, "Hello!", new StringWriter()));
+            Span<char> buffer = stackalloc char[1];
+            int numberWritten = HtmlEncoder.Default.EncodeSingleRune(new Rune(0x10000), buffer);
+            Assert.Equal(-1, numberWritten);
         }
 
         [Fact]
         public void JavaScriptStringEncode_PositiveTestCase()
         {
             // Arrange
-            IJavaScriptStringEncoder encoder = new JavaScriptStringEncoder(UnicodeRanges.All);
+            JavaScriptEncoder encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
             StringWriter writer = new StringWriter();
 
             // Act
-            encoder.JavaScriptStringEncode("Hello+there!", writer);
+            encoder.Encode(writer, "Hello+there!");
 
             // Assert
             Assert.Equal(@"Hello\u002Bthere!", writer.ToString());
-        }
-
-        [Fact]
-        public void UrlEncode_ParameterChecks()
-        {
-            Assert.Throws<ArgumentNullException>(() => EncoderExtensions.UrlEncode(null, "Hello!", new StringWriter()));
         }
 
         [Fact]
