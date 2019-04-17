@@ -56,7 +56,7 @@ namespace System.Xml.XmlResolver.Tests
             Assert.NotNull(streamResult);
             byte[] data = new byte[streamResult.Length];
             streamResult.Read(data, 0, Convert.ToInt32(streamResult.Length));
-            Assert.Equal("Sample String Data", Encoding.ASCII.GetString(data).Replace("\0", ""));
+            Assert.Equal("Sample String Data", NormalizeContent(Encoding.ASCII.GetString(data)));
             
             uri = new Uri("-//W3C//DTD FAKE 1.0 Not Real//EN", UriKind.RelativeOrAbsolute);
             xmlResolver = GetResolverWithStringData(XmlKnownDtds.Xhtml10, "Sample String Data", uri);
