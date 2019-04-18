@@ -1572,5 +1572,28 @@
       <Version>4.1.2</Version>
     </StablePackage>
 
+    <!-- Servicing 1.0.16 wave -->
+    <StablePackage Include="System.Private.Uri">
+      <Version>4.0.5</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.unix.System.Private.Uri">
+      <Version>4.0.5</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win7.System.Private.Uri">
+      <Version>4.0.5</Version>
+    </StablePackage>
+    <StablePackage Include="System.Net.Primitives">
+      <Version>4.0.12</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.unix.System.Net.Primitives">
+      <Version>4.0.12</Version>
+    </StablePackage>
+    <StablePackage Include="runtime.win.System.Net.Primitives">
+      <Version>4.0.12</Version>
+    </StablePackage>
+    <StablePackage Include="System.Text.RegularExpressions">
+      <Version>4.1.1</Version>
+    </StablePackage>
+
   </ItemGroup>
 </Project>
