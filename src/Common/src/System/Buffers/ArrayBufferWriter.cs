@@ -117,8 +117,7 @@ namespace System.Buffers
         /// Thrown when <paramref name="sizeHint"/> is negative.
         /// </exception>
         /// <remarks>
-        /// This will never return an empty <see cref="Memory{T}"/> but it can throw
-        /// if the requested buffer size is not available.
+        /// This will never return an empty <see cref="Memory{T}"/>.
         /// </remarks>
         /// <remarks>
         /// There is no guarantee that successive calls will return the same buffer or the same-sized buffer.
@@ -129,7 +128,7 @@ namespace System.Buffers
         public Memory<T> GetMemory(int sizeHint = 0)
         {
             CheckAndResizeBuffer(sizeHint);
-            Debug.Assert(_buffer.Length >= _index);
+            Debug.Assert(_buffer.Length > _index);
             return _buffer.AsMemory(_index);
         }
 
@@ -141,8 +140,7 @@ namespace System.Buffers
         /// Thrown when <paramref name="sizeHint"/> is negative.
         /// </exception>
         /// <remarks>
-        /// This will never return an empty <see cref="Span{T}"/> but it can throw
-        /// if the requested buffer size is not available.
+        /// This will never return an empty <see cref="Span{T}"/>.
         /// </remarks>
         /// <remarks>
         /// There is no guarantee that successive calls will return the same buffer or the same-sized buffer.
@@ -153,7 +151,7 @@ namespace System.Buffers
         public Span<T> GetSpan(int sizeHint = 0)
         {
             CheckAndResizeBuffer(sizeHint);
-            Debug.Assert(_buffer.Length >= _index);
+            Debug.Assert(_buffer.Length > _index);
             return _buffer.AsSpan(_index);
         }
 

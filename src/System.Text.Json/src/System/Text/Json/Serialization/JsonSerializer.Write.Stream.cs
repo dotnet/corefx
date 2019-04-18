@@ -53,9 +53,8 @@ namespace System.Text.Json.Serialization
             JsonWriterOptions writerOptions = options.GetWriterOptions();
 
             using (var bufferWriter = new PooledBufferWriter<byte>(options.DefaultBufferSize))
+            using (var writer = new Utf8JsonWriter(bufferWriter, writerOptions))
             {
-                var writer = new Utf8JsonWriter(bufferWriter, writerOptions);
-
                 if (value == null)
                 {
                     writer.WriteNullValue();

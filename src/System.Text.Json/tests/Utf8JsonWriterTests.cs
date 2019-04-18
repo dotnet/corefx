@@ -474,7 +474,7 @@ namespace System.Text.Json.Tests
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(false, false)]
-        public void UseAfterDisposeAllowed(bool formatted, bool skipValidation)
+        public void UseAfterDisposeInvalid(bool formatted, bool skipValidation)
         {
             var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
             var output = new FixedSizedBufferWriter(10);
@@ -482,35 +482,37 @@ namespace System.Text.Json.Tests
             var jsonUtf8 = new Utf8JsonWriter(output, options);
             jsonUtf8.WriteStartObject();
             Assert.Equal(0, jsonUtf8.BytesCommitted);
+            Assert.Equal(1, jsonUtf8.BytesPending);
             Assert.Equal(0, output.FormattedCount);
             jsonUtf8.Dispose();
             Assert.Equal(0, jsonUtf8.BytesCommitted);
+            Assert.Equal(0, jsonUtf8.BytesPending);
             Assert.Equal(1, output.FormattedCount);
-            if (!skipValidation)
-            {
-                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteEndObject());
-            }
-            jsonUtf8.WriteStartObject();
+            Assert.Throws<NullReferenceException>(() => jsonUtf8.Flush());
             jsonUtf8.Dispose();
-            Assert.Equal(0, jsonUtf8.BytesCommitted);
-            Assert.Equal(2, output.FormattedCount);
+            Assert.Throws<NullReferenceException>(() => jsonUtf8.Flush());
+
+            jsonUtf8.Reset();
 
             var stream = new MemoryStream();
+            Assert.Throws<ObjectDisposedException>(() => jsonUtf8.Reset(stream));
+
             var writeToStream = new Utf8JsonWriter(stream, options);
             writeToStream.WriteStartObject();
             Assert.Equal(0, writeToStream.BytesCommitted);
+            Assert.Equal(1, writeToStream.BytesPending);
             Assert.Equal(0, stream.Position);
             writeToStream.Dispose();
             Assert.Equal(0, writeToStream.BytesCommitted);
+            Assert.Equal(0, writeToStream.BytesPending);
             Assert.Equal(1, stream.Position);
-            if (!skipValidation)
-            {
-                Assert.Throws<InvalidOperationException>(() => writeToStream.WriteEndObject());
-            }
-            writeToStream.WriteStartObject();
+            Assert.Throws<NullReferenceException>(() => writeToStream.Flush());
             writeToStream.Dispose();
-            Assert.Equal(0, writeToStream.BytesCommitted);
-            Assert.Equal(2, stream.Position);
+            Assert.Throws<NullReferenceException>(() => writeToStream.Flush());
+
+            writeToStream.Reset();
+
+            Assert.Throws<ObjectDisposedException>(() => jsonUtf8.Reset(output));
         }
 
 #if !netstandard
@@ -519,7 +521,7 @@ namespace System.Text.Json.Tests
         [InlineData(true, false)]
         [InlineData(false, true)]
         [InlineData(false, false)]
-        public async Task UseAfterDisposeAllowedAsync(bool formatted, bool skipValidation)
+        public async Task UseAfterDisposeInvalidAsync(bool formatted, bool skipValidation)
         {
             var options = new JsonWriterOptions { Indented = formatted, SkipValidation = skipValidation };
             var output = new FixedSizedBufferWriter(10);
@@ -527,35 +529,37 @@ namespace System.Text.Json.Tests
             var jsonUtf8 = new Utf8JsonWriter(output, options);
             jsonUtf8.WriteStartObject();
             Assert.Equal(0, jsonUtf8.BytesCommitted);
+            Assert.Equal(1, jsonUtf8.BytesPending);
             Assert.Equal(0, output.FormattedCount);
             await jsonUtf8.DisposeAsync();
             Assert.Equal(0, jsonUtf8.BytesCommitted);
+            Assert.Equal(0, jsonUtf8.BytesPending);
             Assert.Equal(1, output.FormattedCount);
-            if (!skipValidation)
-            {
-                Assert.Throws<InvalidOperationException>(() => jsonUtf8.WriteEndObject());
-            }
-            jsonUtf8.WriteStartObject();
+            await Assert.ThrowsAsync<NullReferenceException>(() => jsonUtf8.FlushAsync());
             await jsonUtf8.DisposeAsync();
-            Assert.Equal(0, jsonUtf8.BytesCommitted);
-            Assert.Equal(2, output.FormattedCount);
+            await Assert.ThrowsAsync<NullReferenceException>(() => jsonUtf8.FlushAsync());
+
+            jsonUtf8.Reset();
 
             var stream = new MemoryStream();
+            Assert.Throws<ObjectDisposedException>(() => jsonUtf8.Reset(stream));
+
             var writeToStream = new Utf8JsonWriter(stream, options);
             writeToStream.WriteStartObject();
             Assert.Equal(0, writeToStream.BytesCommitted);
+            Assert.Equal(1, writeToStream.BytesPending);
             Assert.Equal(0, stream.Position);
             await writeToStream.DisposeAsync();
             Assert.Equal(0, writeToStream.BytesCommitted);
+            Assert.Equal(0, writeToStream.BytesPending);
             Assert.Equal(1, stream.Position);
-            if (!skipValidation)
-            {
-                Assert.Throws<InvalidOperationException>(() => writeToStream.WriteEndObject());
-            }
-            writeToStream.WriteStartObject();
+            await Assert.ThrowsAsync<NullReferenceException>(() => writeToStream.FlushAsync());
             await writeToStream.DisposeAsync();
-            Assert.Equal(0, writeToStream.BytesCommitted);
-            Assert.Equal(2, stream.Position);
+            await Assert.ThrowsAsync<NullReferenceException>(() => writeToStream.FlushAsync());
+
+            writeToStream.Reset();
+
+            Assert.Throws<ObjectDisposedException>(() => jsonUtf8.Reset(output));
         }
 #endif
 

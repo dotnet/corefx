@@ -32,7 +32,7 @@ namespace System.Text.Json
 #endif
     {
         // Depending on OS, either '\r\n' OR '\n'
-        private static int s_newLineLength = Environment.NewLine.Length;
+        private static readonly int s_newLineLength = Environment.NewLine.Length;
 
         private const int DefaultGrowthSize = 4096;
 
@@ -176,8 +176,13 @@ namespace System.Text.Json
         /// <exception cref="ArgumentNullException">
         /// Thrown when the instance of <see cref="Stream" /> that is passed in is null.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The instance of <see cref="Utf8JsonWriter"/> has been disposed.
+        /// </exception>
         public void Reset(Stream utf8Json)
         {
+            CheckNotDisposed();
+
             if (utf8Json == null)
                 throw new ArgumentNullException(nameof(utf8Json));
             if (!utf8Json.CanWrite)
@@ -208,8 +213,13 @@ namespace System.Text.Json
         /// <exception cref="ArgumentNullException">
         /// Thrown when the instance of <see cref="IBufferWriter{Byte}" /> that is passed in is null.
         /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The instance of <see cref="Utf8JsonWriter"/> has been disposed.
+        /// </exception>
         public void Reset(IBufferWriter<byte> bufferWriter)
         {
+            CheckNotDisposed();
+
             _output = bufferWriter ?? throw new ArgumentNullException(nameof(bufferWriter));
             _stream = default;
 
@@ -239,6 +249,14 @@ namespace System.Text.Json
             _bitStack = default;
         }
 
+        private void CheckNotDisposed()
+        {
+            if (_output == null)
+            {
+                throw new ObjectDisposedException(nameof(Utf8JsonWriter));
+            }
+        }
+
         /// <summary>
         /// Commits the JSON text written so far which makes it visible to the output destination.
         /// </summary>
@@ -262,36 +280,54 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Commits any left over JSON text that has not yet been flushed which makes it visible to the output destination.
+        /// Commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
         /// </summary>
         /// <remarks>
         /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
         /// In the case of Stream, this writes the data to the stream and flushes it.
         /// </remarks>
         /// <remarks>
-        /// The <see cref="Utf8JsonWriter"/> can still be re-used after disposing but all its state has been reset.
+        /// The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
         /// </remarks>
         public void Dispose()
         {
+            if (_output == null)
+            {
+                return;
+            }
+
             Flush();
             ResetHelper();
+
+            _stream = null;
+            _arrayBufferWriter = null;
+            _output = null;
         }
 
 #if BUILDING_INBOX_LIBRARY
         /// <summary>
-        /// Asynchronously commits any left over JSON text that has not yet been flushed which makes it visible to the output destination.
+        /// Asynchronously commits any left over JSON text that has not yet been flushed and releases all resources used by the current instance.
         /// </summary>
         /// <remarks>
         /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
         /// In the case of Stream, this writes the data to the stream and flushes it.
         /// </remarks>
         /// <remarks>
-        /// The <see cref="Utf8JsonWriter"/> can still be re-used after disposing but all its state has been reset.
+        /// The <see cref="Utf8JsonWriter"/> instance cannot be re-used after disposing.
         /// </remarks>
         public async ValueTask DisposeAsync()
         {
+            if (_output == null)
+            {
+                return;
+            }
+
             await FlushAsync().ConfigureAwait(false);
             ResetHelper();
+
+            _stream = null;
+            _arrayBufferWriter = null;
+            _output = null;
         }
 #endif
 
