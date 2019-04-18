@@ -30,20 +30,28 @@ namespace System.ComponentModel.DataAnnotations
 
             // only return true if there is only 1 '@' character
             // and it is neither the first nor the last character
-            bool found = false;
-            for (int i = 0; i < valueAsString.Length; i++)
+            var index = valueAsString.IndexOf('@');
+           
+            if (index == 0) //cannot be the first char
             {
-                if (valueAsString[i] == '@')
-                {
-                    if (found || i == 0 || i == valueAsString.Length - 1)
-                    {
-                        return false;
-                    }
-                    found = true;
-                }
+                return false;
             }
-
-            return found;
+            else if (index == -1) //char not found
+            {
+                return false;
+            }
+            else if (index != valueAsString.LastIndexOf('@')) //only one char
+            {
+                return false;
+            }
+            else if (index == valueAsString.Length - 1) //cannot be the last char
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 }
