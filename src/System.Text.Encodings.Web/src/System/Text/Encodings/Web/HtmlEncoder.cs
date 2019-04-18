@@ -13,6 +13,13 @@ namespace System.Text.Encodings.Web
     /// </summary>
     public abstract class HtmlEncoder : TextEncoder
     {
+#if BUILDING_FOR_NETSTANDARD
+        // Don't allow anybody outside of our assembly to subclass this on netstandard
+        internal HtmlEncoder()
+        {
+        }
+#endif
+
         /// <summary>
         /// Returns a default built-in instance of <see cref="HtmlEncoder"/>.
         /// </summary>
@@ -79,7 +86,11 @@ namespace System.Text.Encodings.Web
         public DefaultHtmlEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
+#if !BUILDING_FOR_NETSTANDARD
         public override bool RuneMustBeEncoded(Rune value)
+#else
+        internal override bool RuneMustBeEncoded(Rune value) // Rune is internal on netstandard
+#endif
         {
             return !_allowedCharacters.IsUnicodeScalarAllowed((uint)value.Value);
         }
@@ -89,7 +100,11 @@ namespace System.Text.Encodings.Web
         static readonly char[] s_lessthan = "&lt;".ToCharArray();
         static readonly char[] s_greaterthan = "&gt;".ToCharArray();
 
+#if !BUILDING_FOR_NETSTANDARD
         public override int EncodeSingleRune(Rune value, Span<char> buffer)
+#else
+        internal override int EncodeSingleRune(Rune value, Span<char> buffer) // Rune is internal on netstandard
+#endif
         {
             uint scalarValue = (uint)value.Value;
             Span<char> escapedData = stackalloc char[MaxEncodedScalarLength];

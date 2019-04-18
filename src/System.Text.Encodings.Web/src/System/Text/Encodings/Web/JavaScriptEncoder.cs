@@ -13,6 +13,13 @@ namespace System.Text.Encodings.Web
     /// </summary>
     public abstract class JavaScriptEncoder : TextEncoder
     {
+#if BUILDING_FOR_NETSTANDARD
+        // Don't allow anybody outside of our assembly to subclass this on netstandard
+        internal JavaScriptEncoder()
+        {
+        }
+#endif
+
         /// <summary>
         /// Returns a default built-in instance of <see cref="JavaScriptEncoder"/>.
         /// </summary>
@@ -81,7 +88,11 @@ namespace System.Text.Encodings.Web
         public DefaultJavaScriptEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
+#if !BUILDING_FOR_NETSTANDARD
         public override bool RuneMustBeEncoded(Rune value)
+#else
+        internal override bool RuneMustBeEncoded(Rune value) // Rune is internal on netstandard
+#endif
         {
             return !_allowedCharacters.IsUnicodeScalarAllowed((uint)value.Value);
         }
@@ -98,7 +109,11 @@ namespace System.Text.Encodings.Web
         // See ECMA-262, Sec. 7.8.4, and ECMA-404, Sec. 9
         // http://www.ecma-international.org/ecma-262/5.1/#sec-7.8.4
         // http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf
+#if !BUILDING_FOR_NETSTANDARD
         public override int EncodeSingleRune(Rune value, Span<char> buffer)
+#else
+        internal override int EncodeSingleRune(Rune value, Span<char> buffer) // Rune is internal on netstandard
+#endif
         {
             // ECMA-262 allows encoding U+000B as "\v", but ECMA-404 does not.
             // Both ECMA-262 and ECMA-404 allow encoding U+002F SOLIDUS as "\/".
@@ -154,8 +169,14 @@ namespace System.Text.Encodings.Web
             buffer[0] = '\\';
             buffer[1] = 'u';
 
+#if !BUILDING_FOR_NETSTANDARD
             bool succeeded = ((uint)scalarAsChars[0]).TryFormat(buffer.Slice(2), out _, "X4");
             Debug.Assert(succeeded);
+#else
+            char firstChar = scalarAsChars[0];
+            HexUtil.ByteToHexDigits((byte)firstChar, out buffer[2], out buffer[3]);
+            HexUtil.ByteToHexDigits((byte)(firstChar >> 8), out buffer[4], out buffer[5]);
+#endif
 
             // If we actually got a surrogate pair, write out the second component now.
 
@@ -164,8 +185,14 @@ namespace System.Text.Encodings.Web
                 buffer[6] = '\\';
                 buffer[7] = 'u';
 
+#if !BUILDING_FOR_NETSTANDARD
                 succeeded = ((uint)scalarAsChars[1]).TryFormat(buffer.Slice(8), out _, "X4");
                 Debug.Assert(succeeded);
+#else
+                char secondChar = scalarAsChars[1];
+                HexUtil.ByteToHexDigits((byte)secondChar, out buffer[8], out buffer[9]);
+                HexUtil.ByteToHexDigits((byte)(secondChar >> 8), out buffer[10], out buffer[11]);
+#endif
             }
 
             return scalarCharCount * 6; // each UTF-16 code unit gets turned into 6 chars after escaping

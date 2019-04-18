@@ -16,6 +16,13 @@ namespace System.Text.Encodings.Web
     /// </remarks>
     public abstract class TextEncoder
     {
+#if BUILDING_FOR_NETSTANDARD
+        // Don't allow anybody outside of our assembly to subclass this on netstandard
+        internal TextEncoder()
+        {
+        }
+#endif
+
         /*
          * ABSTRACT METHODS
          * 
@@ -33,7 +40,11 @@ namespace System.Text.Encodings.Web
         /// <exception cref="ArgumentException">
         /// If <paramref name="value"/> cannot be encoded using the current encoder.
         /// </exception>
+#if !BUILDING_FOR_NETSTANDARD
         public abstract int EncodeSingleRune(Rune value, Span<char> buffer);
+#else
+        internal abstract int EncodeSingleRune(Rune value, Span<char> buffer); // Rune is internal on netstandard
+#endif
 
         /// <summary>
         /// Returns a value indicating whether <paramref name="value"/> would be encoded by the current encoder.
@@ -41,7 +52,11 @@ namespace System.Text.Encodings.Web
         /// <param name="value">The scalar value to query.</param>
         /// <returns><see langword="true"/> if the current encoder instance would encode <paramref name="value"/>;
         /// <see langword="false"/> otherwise.</returns>
+#if !BUILDING_FOR_NETSTANDARD
         public abstract bool RuneMustBeEncoded(Rune value);
+#else
+        internal abstract bool RuneMustBeEncoded(Rune value); // Rune is internal on netstandard
+#endif
 
         /*
          * WRAPPER INSTANCE METHODS
@@ -95,7 +110,7 @@ namespace System.Text.Encodings.Web
             // Fast path: if no character in the input string requires encoding, we
             // can return the string as-is without any further work.
 
-            int idxOfFirstCharToEncode = FindFirstCharacterToEncode(value);
+            int idxOfFirstCharToEncode = FindFirstCharacterToEncode(value.AsSpan());
             if (idxOfFirstCharToEncode < 0)
             {
                 return value;

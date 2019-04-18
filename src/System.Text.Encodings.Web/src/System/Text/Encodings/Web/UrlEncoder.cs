@@ -12,6 +12,13 @@ namespace System.Text.Encodings.Web
     /// </summary>
     public abstract class UrlEncoder : TextEncoder
     {
+#if BUILDING_FOR_NETSTANDARD
+        // Don't allow anybody outside of our assembly to subclass this on netstandard
+        internal UrlEncoder()
+        {
+        }
+#endif
+
         /// <summary>
         /// Returns a default built-in instance of <see cref="UrlEncoder"/>.
         /// </summary>
@@ -131,12 +138,20 @@ namespace System.Text.Encodings.Web
         public DefaultUrlEncoder(params UnicodeRange[] allowedRanges) : this(new TextEncoderSettings(allowedRanges))
         { }
 
+#if !BUILDING_FOR_NETSTANDARD
         public override bool RuneMustBeEncoded(Rune value)
+#else
+        internal override bool RuneMustBeEncoded(Rune value) // Rune is internal on netstandard
+#endif
         {
             return !_allowedCharacters.IsUnicodeScalarAllowed((uint)value.Value);
         }
 
+#if !BUILDING_FOR_NETSTANDARD
         public override int EncodeSingleRune(Rune value, Span<char> buffer)
+#else
+        internal override int EncodeSingleRune(Rune value, Span<char> buffer) // Rune is internal on netstandard
+#endif
         {
             Span<byte> scalarAsUtf8Bytes = stackalloc byte[4]; // max 4 UTF-8 bytes per scalar
             Span<char> escapedData = stackalloc char[MaxEncodedScalarLength];

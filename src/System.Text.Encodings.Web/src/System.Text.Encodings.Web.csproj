@@ -4,8 +4,11 @@
     <RootNamespace>System.Text.Encodings.Web</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">BUILDING_FOR_NETSTANDARD;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\..\Common\src\CoreLib\System\Text\UnicodeDebug.cs" Link="System\Text\UnicodeDebug.cs" />
+    <Compile Include="..\..\Common\src\CoreLib\System\Text\UnicodeUtility.cs" Link="System\Text\UnicodeUtility.cs" />
     <Compile Include="System\Text\Encodings\Web\AllowedCharactersBitmap.cs" />
     <Compile Include="System\Text\Encodings\Web\HexUtil.cs" />
     <Compile Include="System\Text\Encodings\Web\HtmlEncoder.cs" />
@@ -20,6 +23,11 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\unicode8definedcharacters.bin" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
+    <Compile Include="System\IO\TextWriterExtensions.cs" />
+    <Compile Include="System\Text\Rune.cs" />
+    <Compile Include="System\Text\StringBuilderExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Diagnostics.Debug" />
