@@ -2837,7 +2837,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartArray();
             while (initialCapacity == output.Capacity)
             {
-                jsonUtf8.WriteNumberValue(12345678);
+                jsonUtf8.WriteNumberValue(1234567);
                 numberOfElements++;
             }
             Assert.Equal(initialCapacity + 4096, output.Capacity);
@@ -2865,7 +2865,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartArray();
             while (initialCapacity == output.Capacity)
             {
-                jsonUtf8.WriteNumberValue((long)12345678);
+                jsonUtf8.WriteNumberValue((long)1234567);
                 numberOfElements++;
             }
             Assert.Equal(initialCapacity + 4096, output.Capacity);
@@ -2893,7 +2893,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartArray();
             while (initialCapacity == output.Capacity)
             {
-                jsonUtf8.WriteNumberValue((uint)12345678);
+                jsonUtf8.WriteNumberValue((uint)1234567);
                 numberOfElements++;
             }
             Assert.Equal(initialCapacity + 4096, output.Capacity);
@@ -2921,7 +2921,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartArray();
             while (initialCapacity == output.Capacity)
             {
-                jsonUtf8.WriteNumberValue((ulong)12345678);
+                jsonUtf8.WriteNumberValue((ulong)1234567);
                 numberOfElements++;
             }
             Assert.Equal(initialCapacity + 4096, output.Capacity);
@@ -2933,7 +2933,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [ActiveIssue(36986, TestPlatforms.Windows)]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
@@ -2950,7 +2949,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartArray();
             while (initialCapacity == output.Capacity)
             {
-                jsonUtf8.WriteNumberValue((float)12345678);
+                jsonUtf8.WriteNumberValue((float)1234567);
                 numberOfElements++;
             }
             Assert.Equal(initialCapacity + 4096, output.Capacity);
@@ -2978,7 +2977,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartArray();
             while (initialCapacity == output.Capacity)
             {
-                jsonUtf8.WriteNumberValue((double)12345678);
+                jsonUtf8.WriteNumberValue((double)1234567);
                 numberOfElements++;
             }
             Assert.Equal(initialCapacity + 4096, output.Capacity);
@@ -3006,7 +3005,7 @@ namespace System.Text.Json.Tests
             jsonUtf8.WriteStartArray();
             while (initialCapacity == output.Capacity)
             {
-                jsonUtf8.WriteNumberValue((decimal)12345678);
+                jsonUtf8.WriteNumberValue((decimal)1234567);
                 numberOfElements++;
             }
             Assert.Equal(initialCapacity + 4096, output.Capacity);
@@ -3749,7 +3748,7 @@ namespace System.Text.Json.Tests
             json.WriteStartArray();
             for (int i = 0; i < numberOfElements; i++)
             {
-                json.WriteValue(12345678);
+                json.WriteValue(1234567);
             }
             json.WriteEnd();
 
