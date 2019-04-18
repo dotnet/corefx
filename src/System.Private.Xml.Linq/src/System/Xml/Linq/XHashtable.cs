@@ -399,7 +399,7 @@ namespace System.Xml.Linq
             private static int ComputeHashCode(string key, int index, int count)
             {
                 Debug.Assert(key != null, "key should have been checked previously for null");
-                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan(index, index + count));
+                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan(index, count));
                 return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
             }
 
