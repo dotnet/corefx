@@ -130,7 +130,7 @@ namespace System.Diagnostics
 
             // Get long process name if possible, otherwise use a fall back method.
             string procName = Path.GetFileName(Process.GetExePath(pid));
-            if (String.IsNullOrEmpty(procName))
+            if (string.IsNullOrEmpty(procName))
             {
                 procName = procFsStat.comm;
             }
