@@ -1804,7 +1804,7 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
-        [PlatformSpecific(TestPlatforms.Any & ~TestPlatforms.OSX)]
+        [PlatformSpecific(~TestPlatforms.OSX)]
         [Fact]
         public void GetProcesses_LongProcessName()
         {
