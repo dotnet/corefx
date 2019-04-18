@@ -9,18 +9,10 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        private static bool WriteEnumerable(
-            JsonSerializerOptions options,
-            ref Utf8JsonWriter writer,
-            ref WriteStack state)
-        {
-            return HandleEnumerable(state.Current.JsonClassInfo.ElementClassInfo, options, ref writer, ref state);
-        }
-
         private static bool HandleEnumerable(
             JsonClassInfo elementClassInfo,
             JsonSerializerOptions options,
-            ref Utf8JsonWriter writer,
+            Utf8JsonWriter writer,
             ref WriteStack state)
         {
             Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
@@ -39,19 +31,19 @@ namespace System.Text.Json.Serialization
                 if (enumerable == null)
                 {
                     // Write a null object or enumerable.
-                    writer.WriteNull(jsonPropertyInfo._name);
+                    writer.WriteNull(jsonPropertyInfo.Name);
                     return true;
                 }
 
                 state.Current.Enumerator = enumerable.GetEnumerator();
 
-                if (jsonPropertyInfo._name == null)
+                if (jsonPropertyInfo.Name == null)
                 {
                     writer.WriteStartArray();
                 }
                 else
                 {
-                    writer.WriteStartArray(jsonPropertyInfo._name);
+                    writer.WriteStartArray(jsonPropertyInfo.Name);
                 }
             }
 
@@ -66,7 +58,7 @@ namespace System.Text.Json.Serialization
 
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
-                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, ref writer);
+                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, writer);
                 }
                 else if (state.Current.Enumerator.Current == null)
                 {
