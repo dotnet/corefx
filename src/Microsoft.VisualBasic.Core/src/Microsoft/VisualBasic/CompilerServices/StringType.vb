@@ -72,7 +72,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             If (TimeTicks = Value.Ticks) OrElse
                 (Value.Year = 1899 AndAlso Value.Month = 12 AndAlso Value.Day = 30) Then 'OA Date with no date is 1899-12-30
                 'No date (1/1/1)
-                'UNDONE: REVIEW OA DATE HACK
                 Return Value.ToString("T", Nothing)
             ElseIf TimeTicks = 0 Then
                 'No time, or is midnight
