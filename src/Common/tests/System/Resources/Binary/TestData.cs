@@ -40,12 +40,14 @@ namespace System.Resources.Binary.Tests
                 ["point_bin"] = new Point(4, 8)
             };
 
-        public static IReadOnlyDictionary<string, object> BinaryFormattedDrawing { get; } =
-            new Dictionary<string, object>(BinaryFormattedWithoutDrawing)
+        public static IReadOnlyDictionary<string, object> BinaryFormattedDrawing
+        {
+            get => new Dictionary<string, object>(BinaryFormattedWithoutDrawing)
             {
                 ["bitmap_bin"] = new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")),
                 ["font_bin"] = SystemFonts.DefaultFont
             };
+        }
 
         public static IReadOnlyDictionary<string, object> ByteArrayConverter
         {
@@ -59,12 +61,14 @@ namespace System.Resources.Binary.Tests
                 ["myResourceType_bytes"] = new MyResourceType(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 })
             };
 
-        public static IReadOnlyDictionary<string, object> ByteArrayConverterDrawing { get; } =
-            new Dictionary<string, object>(ByteArrayConverterWithoutDrawing)
+        public static IReadOnlyDictionary<string, object> ByteArrayConverterDrawing
+        {
+            get => new Dictionary<string, object>(ByteArrayConverterWithoutDrawing)
             {
                 ["bitmap_bytes"] = new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")),
                 ["icon_bytes"] = new Icon(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico"))
             };
+        }
 
         public static IReadOnlyDictionary<string, object> StringConverter
         {
@@ -84,12 +88,14 @@ namespace System.Resources.Binary.Tests
                 ["enum_string"] = DayOfWeek.Friday
             };
 
-        public static IReadOnlyDictionary<string, object> StringConverterDrawing { get; } =
-            new Dictionary<string, object>(StringConverterWithoutDrawing)
+        public static IReadOnlyDictionary<string, object> StringConverterDrawing
+        {
+            get => new Dictionary<string, object>(StringConverterWithoutDrawing)
             {
                 ["imageFormat_string"] = ImageFormat.Png,
                 ["font_string"] = SystemFonts.DefaultFont
             };
+        }
 
         public static IReadOnlyDictionary<string, (Type type, Stream stream)> Stream
         {
@@ -103,12 +109,14 @@ namespace System.Resources.Binary.Tests
                 ["myResourceType_stream"] = (typeof(MyResourceType), new MemoryStream(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 }))
             };
 
-        public static IReadOnlyDictionary<string, (Type type, Stream stream)> StreamDrawing { get; } =
-            new Dictionary<string, (Type type, Stream stream)>(StreamWithoutDrawing)
+        public static IReadOnlyDictionary<string, (Type type, Stream stream)> StreamDrawing
+        {
+            get => new Dictionary<string, (Type type, Stream stream)>(StreamWithoutDrawing)
             {
                 ["icon_stream"] = (typeof(Icon), File.OpenRead(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico"))),
                 ["bitmap_stream"] = (typeof(Bitmap), File.OpenRead(Path.Combine("bitmaps", "almogaver24bits.bmp")))
             };
+        }
         
         public static void WriteResources(string file)
         {
