@@ -51,7 +51,8 @@ namespace System.Resources.Binary.Tests
 
         public static IReadOnlyDictionary<string, object> ByteArrayConverter
         {
-            get => PlatformDetection.IsDrawingSupported ?
+            // ImageConverter is part of System.Windows.Extensions.
+            get => PlatformDetection.IsDrawingSupported && PlatformDetection.IsWindows ?
                 ByteArrayConverterDrawing : ByteArrayConverterWithoutDrawing;
         }
 
@@ -72,7 +73,8 @@ namespace System.Resources.Binary.Tests
 
         public static IReadOnlyDictionary<string, object> StringConverter
         {
-            get => PlatformDetection.IsDrawingSupported ?
+            // ImageFormatConverter is part of System.Windows.Extensions.
+            get => PlatformDetection.IsDrawingSupported && PlatformDetection.IsWindows ?
                 StringConverterDrawing : StringConverterWithoutDrawing;
         }
 
