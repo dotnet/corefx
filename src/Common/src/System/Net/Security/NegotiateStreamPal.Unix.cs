@@ -125,8 +125,10 @@ namespace System.Net.Security
             // EstablishSecurityContext is called multiple times in a session.
             // In each call, we need to pass the context handle from the previous call.
             // For the first call, the context handle will be null.
+            bool newContext = false;
             if (context == null)
             {
+                newContext = true;
                 context = new SafeGssContextHandle();
             }
 
@@ -153,6 +155,11 @@ namespace System.Net.Security
                 if ((status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE) &&
                     (status != Interop.NetSecurityNative.Status.GSS_S_CONTINUE_NEEDED))
                 {
+                    if (newContext)
+                    {
+                        context.Dispose();
+                        context = null;
+                    }
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
 
@@ -172,8 +179,10 @@ namespace System.Net.Security
             out byte[] outputBuffer,
             out uint outFlags)
         {
+            bool newContext = false;
             if (context == null)
             {
+                newContext = true;
                 context = new SafeGssContextHandle();
             }
 
@@ -193,6 +202,11 @@ namespace System.Net.Security
                 if ((status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE) &&
                     (status != Interop.NetSecurityNative.Status.GSS_S_CONTINUE_NEEDED))
                 {
+                    if (newContext)
+                    {
+                        context.Dispose();
+                        context = null;
+                    }
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
 
@@ -213,9 +227,10 @@ namespace System.Net.Security
 
             try
             {
-                var status = Interop.NetSecurityNative.GetUser(out var minorStatus,
-                                                               context,
-                                                               ref token);
+                Interop.NetSecurityNative.Status status
+                    = Interop.NetSecurityNative.GetUser(out var minorStatus,
+                                                        context,
+                                                        ref token);
 
                 if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
                 {
