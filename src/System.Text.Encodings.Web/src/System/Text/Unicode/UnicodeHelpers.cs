@@ -13,7 +13,7 @@ namespace System.Text.Unicode
     /// <summary>
     /// Contains helpers for dealing with Unicode code points.
     /// </summary>
-    internal static unsafe class UnicodeHelpers
+    internal static class UnicodeHelpers
     {
         /// <summary>
         /// Used for invalid Unicode sequences or other unrepresentable values.

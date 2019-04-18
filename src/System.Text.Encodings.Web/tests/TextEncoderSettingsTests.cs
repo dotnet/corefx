@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
@@ -13,10 +14,12 @@ namespace Microsoft.Framework.WebEncoders
 {
     public static class TextEncoderSettingsExtensions
     {
+        private static readonly FieldInfo _allowedCharsBitmapField = typeof(TextEncoderSettings).GetField("_allowedCharactersBitmap", BindingFlags.NonPublic | BindingFlags.Instance);
+
         public static bool IsCharacterAllowed(this TextEncoderSettings settings, char character)
         {
-            var bitmap = settings.GetAllowedCharacters();
-            return bitmap.IsCharacterAllowed(character);
+            object allowedCharsBitmap = _allowedCharsBitmapField.GetValue(settings);
+            return (bool)allowedCharsBitmap.GetType().InvokeMember("IsCharacterAllowed", BindingFlags.InvokeMethod | BindingFlags.Public | BindingFlags.Instance, null, allowedCharsBitmap, new object[] { character });
         }
     }
 

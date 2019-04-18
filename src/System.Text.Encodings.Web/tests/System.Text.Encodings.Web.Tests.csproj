@@ -1,19 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{2337A55E-7077-4FBE-8132-2CD8DDC18671}</ProjectGuid>
-    <FileAlignment>512</FileAlignment>
-    <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\11.0\UITestExtensionPackages</ReferencePath>
-    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
-      <Visible>False</Visible>
-    </CodeAnalysisDependentAssemblyPaths>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="..\src\System\Text\Encodings\Web\AllowedCharactersBitmap.cs" Link="AllowedCharactersBitmap.cs" />
+    <Compile Include="..\src\System\Text\Unicode\UnicodeHelpers.cs" Link="UnicodeHelpers.cs" />
     <Compile Include="AllowedCharsBitmapTests.cs" />
     <Compile Include="CustomTextEncoder.cs" />
     <Compile Include="TextEncoderTests.cs" />
@@ -37,12 +30,5 @@
       <LogicalName>UnicodeData.8.0.txt</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\src\System.Text.Encodings.Web.csproj" />
-    <Reference Include="System.Memory" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Threading" />
   </ItemGroup>
 </Project>

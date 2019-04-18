@@ -16,13 +16,11 @@ namespace Microsoft.Framework.WebEncoders
     {
         private static readonly CustomTextEncoder _default = new CustomTextEncoder(UnicodeRanges.BasicLatin);
 
-        private AllowedCharactersBitmap _bitmap;
+        private readonly HtmlEncoder _innerEncoder;
 
         public CustomTextEncoder(TextEncoderSettings settings)
         {
-            _bitmap = settings.GetAllowedCharacters();
-            _bitmap.ForbidUndefinedCharacters();
-            DefaultHtmlEncoder.ForbidHtmlCharacters(_bitmap);
+            _innerEncoder = HtmlEncoder.Create(settings);
         }
 
         public CustomTextEncoder(params UnicodeRange[] allowedRanges)
@@ -49,7 +47,8 @@ namespace Microsoft.Framework.WebEncoders
 
         public override bool RuneMustBeEncoded(Rune value)
         {
-            return !_bitmap.IsUnicodeScalarAllowed((uint)value.Value);
+            // Use the inner encoder as a proxy for what values are allowed to go through unescaped
+            return _innerEncoder.RuneMustBeEncoded(value);
         }
     }
 }
