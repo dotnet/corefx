@@ -2,15 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Framework.WebEncoders;
-using System;
 using System.IO;
 using Xunit;
 using System.Text.Unicode;
 
 namespace System.Text.Encodings.Web
 {
-    public class EncoderExtensionsTests
+    public partial class EncoderExtensionsTests
     {
         [Fact]
         public void HtmlEncode_PositiveTestCase()
@@ -51,14 +49,6 @@ namespace System.Text.Encodings.Web
         public void HtmlEncode_CreateNullSettings()
         {
             Assert.Throws<ArgumentNullException>("settings", () => HtmlEncoder.Create(default(TextEncoderSettings)));
-        }
-
-        [Fact]
-        public void EncodeSingleRune_InsufficientRoom()
-        {
-            Span<char> buffer = stackalloc char[1];
-            int numberWritten = HtmlEncoder.Default.EncodeSingleRune(new Rune(0x10000), buffer);
-            Assert.Equal(-1, numberWritten);
         }
 
         [Fact]

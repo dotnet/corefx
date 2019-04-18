@@ -174,8 +174,8 @@ namespace System.Text.Encodings.Web
             Debug.Assert(succeeded);
 #else
             char firstChar = scalarAsChars[0];
-            HexUtil.ByteToHexDigits((byte)firstChar, out buffer[2], out buffer[3]);
-            HexUtil.ByteToHexDigits((byte)(firstChar >> 8), out buffer[4], out buffer[5]);
+            HexUtil.ByteToHexDigits((byte)firstChar, out buffer[4], out buffer[5]);
+            HexUtil.ByteToHexDigits((byte)(firstChar >> 8), out buffer[2], out buffer[3]);
 #endif
 
             // If we actually got a surrogate pair, write out the second component now.
@@ -190,8 +190,8 @@ namespace System.Text.Encodings.Web
                 Debug.Assert(succeeded);
 #else
                 char secondChar = scalarAsChars[1];
-                HexUtil.ByteToHexDigits((byte)secondChar, out buffer[8], out buffer[9]);
-                HexUtil.ByteToHexDigits((byte)(secondChar >> 8), out buffer[10], out buffer[11]);
+                HexUtil.ByteToHexDigits((byte)secondChar, out buffer[10], out buffer[11]);
+                HexUtil.ByteToHexDigits((byte)(secondChar >> 8), out buffer[8], out buffer[9]);
 #endif
             }
 
