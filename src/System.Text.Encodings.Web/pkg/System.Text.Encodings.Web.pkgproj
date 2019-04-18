@@ -2,7 +2,7 @@
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
     <ProjectReference Include="..\src\System.Text.Encodings.Web.csproj">
-      <SupportedFramework>netcoreapp3.0;netstandard2.1</SupportedFramework>
+      <SupportedFramework>netcoreapp;netstandard</SupportedFramework>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
