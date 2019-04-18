@@ -159,11 +159,11 @@ namespace System.Xml.XmlResolver.Tests
                 ("-//Netscape Communications//DTD RSS 0.91//EN", "rss-0.91.dtd"),
             };
 
-            string dtdFolderRoot = @"Utils\DTDs\";
+            string dtdFolderRoot = "Utils/DTDs/";
 
             return Enumerable.Concat(
-                GetKnownDtds(xhtmlDtds, "http://www.w3.org/TR/xhtml1/DTD/", Path.Combine(dtdFolderRoot, @"XHTML10\no_comments\")),
-                GetKnownDtds(rssDtds, "http://my.netscape.com/publish/formats/", Path.Combine(dtdFolderRoot, @"RSS091\no_comments\")));
+                GetKnownDtds(xhtmlDtds, "http://www.w3.org/TR/xhtml1/DTD/", Path.Combine(dtdFolderRoot, "XHTML10/no_comments/")),
+                GetKnownDtds(rssDtds, "http://my.netscape.com/publish/formats/", Path.Combine(dtdFolderRoot, "RSS091/no_comments/")));
 
             IEnumerable<(string PublicId, string SystemId, string SourcePath)> GetKnownDtds(
                 IEnumerable<(string PublicId, string RelativeId)> ids,
