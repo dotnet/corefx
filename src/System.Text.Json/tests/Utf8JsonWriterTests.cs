@@ -2933,6 +2933,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [ActiveIssue(36986, TestPlatforms.Windows)]
         [InlineData(true, true)]
         [InlineData(true, false)]
         [InlineData(false, true)]
