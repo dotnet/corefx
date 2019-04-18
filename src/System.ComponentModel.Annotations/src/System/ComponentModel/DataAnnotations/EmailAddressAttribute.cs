@@ -30,7 +30,7 @@ namespace System.ComponentModel.DataAnnotations
 
             // only return true if there is only 1 '@' character
             // and it is neither the first nor the last character
-            var index = valueAsString.IndexOf('@');
+            int index = valueAsString.IndexOf('@');
            
             if (index == 0) //cannot be the first char
             {
