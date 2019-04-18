@@ -183,8 +183,7 @@ namespace System.Xml
             int hashCode = 0;
             if (name != null)
             {
-                string[] splitted = name.Split(":");
-                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(splitted[splitted.Length - 1].AsSpan());
+                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(name.AsSpan(name.LastIndexOf(':') + 1));
                 return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
             }
             return hashCode;
