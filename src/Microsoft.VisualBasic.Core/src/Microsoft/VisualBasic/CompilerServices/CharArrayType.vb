@@ -16,9 +16,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Shared Function FromString(ByVal Value As String) As Char()
 
             If Value Is Nothing Then
-
                 Value = ""
-
             End If
 
             Return Value.ToCharArray()
@@ -28,28 +26,22 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Shared Function FromObject(ByVal Value As Object) As Char()
 
             If Value Is Nothing Then
-
                 Return "".ToCharArray()
-
             End If
 
             Dim CharArray As Char() = TryCast(Value, Char())
 
             If CharArray IsNot Nothing AndAlso CharArray.Rank = 1 Then
-
                 Return CharArray
 
             Else
                 Dim ValueInterface As IConvertible
-
                 ValueInterface = TryCast(Value, IConvertible)
 
                 If Not ValueInterface Is Nothing Then
-
                     If (ValueInterface.GetTypeCode() = TypeCode.String) Then
                         Return ValueInterface.ToString(Nothing).ToCharArray()
                     End If
-
                 End If
 
             End If

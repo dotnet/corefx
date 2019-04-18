@@ -2667,6 +2667,7 @@ namespace Microsoft.VisualBasic.Tests
 
             // string.
             yield return new object[] { "", "" };
+            yield return new object[] { "abc", "abc" };
 
             // null.
             yield return new object[] { null, (string)null };
@@ -2674,10 +2675,11 @@ namespace Microsoft.VisualBasic.Tests
             // char.
             yield return new object[] { char.MinValue, "\0" };
             yield return new object[] { (char)1, "\u0001" };
+            yield return new object[] { 'a', "a" };
             yield return new object[] { char.MaxValue, char.MaxValue.ToString() };
 
             // DateTime.
-            yield return new object[] { new DateTime(10), "12:00:00 AM" };
+            yield return new object[] { new DateTime(10), new DateTime(10).ToString("T", null) };
         }
 
         [Theory]

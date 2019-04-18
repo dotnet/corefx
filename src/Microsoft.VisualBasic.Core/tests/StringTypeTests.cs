@@ -278,6 +278,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         private static IEnumerable<object[]> FromString_TestData()
         {
             yield return new object[] { "", "" };
+            yield return new object[] { "abc", "abc" };
         }
 
         private static IEnumerable<object[]> FromNull_TestData()
@@ -289,6 +290,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         {
             yield return new object[] { char.MinValue, "\0" };
             yield return new object[] { (char)1, "\u0001" };
+            yield return new object[] { 'a', "a" };
             yield return new object[] { char.MaxValue, char.MaxValue.ToString() };
         }
 
@@ -301,7 +303,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
 
         private static IEnumerable<object[]> FromDateTime_TestData()
         {
-            yield return new object[] { new DateTime(10), "12:00:00 AM" };
+            yield return new object[] { new DateTime(10), new DateTime(10).ToString("T", null) };
         }
 
         private static IEnumerable<object[]> FromObject_TestData()
@@ -328,6 +330,7 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         }
 
         [Theory]
+        [InlineData("a", 1, 0, null, "a")]
         [InlineData("a", 1, 0, "", "a")]
         [InlineData("a", 1, 1, "", "a")]
         [InlineData("a", 1, 0, "b", "a")]
@@ -344,11 +347,16 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         }
 
         [Theory]
+        [InlineData(null, 1, 0, null)]
+        [InlineData(null, 1, 0, "")]
+        [InlineData("", 1, 0, null)]
         [InlineData("", -1, 0, "")]
         [InlineData("", 0, 0, "")]
         [InlineData("", 1, 0, "")]
         [InlineData("", 2, 0, "")]
         [InlineData("", 1, -1, "")]
+        [InlineData("abc", -1, 0, "")]
+        [InlineData("abc", 0, 0, "")]
         [InlineData("abc", 4, 0, "")]
         [InlineData("abc", 1, -3, "")]
         public void MidStmtStr_ArgumentException(string str, int start, int length, string insert)
@@ -357,6 +365,13 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         }
 
         [Theory]
+        [InlineData(null, null, 0, 0)]
+        [InlineData(null, "", 0, 0)]
+        [InlineData("", null, 0, 0)]
+        [InlineData(null, "a", -1, -1)]
+        [InlineData("a", null, 1, 1)]
+        [InlineData("", "a", -97, -1)]
+        [InlineData("a", "", 97, 1)]
         [InlineData("a", "a", 0, 0)]
         [InlineData("a", "b", -1, -1)]
         [InlineData("b", "a", 1, 1)]
@@ -370,6 +385,8 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         }
 
         [Theory]
+        [InlineData(null, null, true, true)]
+        [InlineData("", null, true, true)]
         [InlineData("", "*", true, true)]
         [InlineData("", "?", false, false)]
         [InlineData("a", "?", true, true)]
@@ -381,6 +398,16 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             Assert.Equal(expectedTextCompare, StringType.StrLike(source, pattern, CompareMethod.Text));
             Assert.Equal(expectedBinaryCompare, StringType.StrLikeBinary(source, pattern));
             Assert.Equal(expectedTextCompare, StringType.StrLikeText(source, pattern));
+        }
+
+        [Theory]
+        [InlineData(null, "*")]
+        public void StrLike_NullReferenceException(string source, string pattern)
+        {
+            Assert.Throws<NullReferenceException>(() => StringType.StrLike(source, pattern, CompareMethod.Binary));
+            Assert.Throws<NullReferenceException>(() => StringType.StrLike(source, pattern, CompareMethod.Text));
+            Assert.Throws<NullReferenceException>(() => StringType.StrLikeBinary(source, pattern));
+            Assert.Throws<NullReferenceException>(() => StringType.StrLikeText(source, pattern));
         }
     }
 }
