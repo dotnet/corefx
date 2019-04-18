@@ -460,6 +460,7 @@ namespace System.Data
     }
     [System.ComponentModel.DefaultPropertyAttribute("DataSetName")]
     [System.Xml.Serialization.XmlSchemaProviderAttribute("GetDataSetSchema")]
+    [System.Xml.Serialization.XmlRoot(nameof(System.Data.DataSet))]
     public partial class DataSet : System.ComponentModel.MarshalByValueComponent, System.ComponentModel.IListSource, System.ComponentModel.ISupportInitialize, System.ComponentModel.ISupportInitializeNotification, System.Runtime.Serialization.ISerializable, System.Xml.Serialization.IXmlSerializable
     {
         public DataSet() { }
