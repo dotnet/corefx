@@ -161,14 +161,15 @@ namespace System.Net.Test.Common
         }
 
         // Reset and return underlying networking objects.
-        public Tuple<Socket, Stream>ResetNetwork()
+        public (Socket, Stream) ResetNetwork()
         {
-            var ret = Tuple.Create(_connectionSocket, _connectionStream);
+            Socket oldSocket = _connectionSocket;
+            Stream oldStream = _connectionStream;
             _connectionSocket = null;
             _connectionStream = null;
             _ignoreSettingsAck = false;
 
-            return ret;
+            return (oldSocket, oldStream);
         }
 
         // Returns the first 24 bytes read, which should be the connection preface.

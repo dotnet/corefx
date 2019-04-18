@@ -1171,7 +1171,7 @@ namespace System.Net.Http.Functional.Tests
                     // Wait a small amount of time before making the second request, to give the first request time to timeout.
                     await Task.Delay(100);
                     // Grab reference to underlying socket and stream to make sure they are not disposed and closed.
-                    var network = server.ResetNetwork();
+                    (Socket socket, Stream stream) = server.ResetNetwork();
 
                     // Make second request and expect it to be served from a different connection.
                     Task<string> request2 = client.GetStringAsync(url);
@@ -1181,7 +1181,7 @@ namespace System.Net.Http.Functional.Tests
                     await request2;
 
                     // Close underlying socket from first connection.
-                    network.Item1.Close();
+                    socket.Close();
                 }
             });
         }
