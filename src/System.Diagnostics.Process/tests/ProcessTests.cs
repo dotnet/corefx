@@ -1804,6 +1804,7 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
+        [PlatformSpecific(TestPlatforms.Any & ~TestPlatforms.OSX)]
         [Fact]
         public void GetProcesses_LongProcessName()
         {
@@ -1822,20 +1823,15 @@ namespace System.Diagnostics.Tests
             // start sleep program and wait for some seconds
             using (Process px = Process.Start(new ProcessStartInfo { FileName = sleepCommandPathFileName , Arguments = "30", UseShellExecute = true}))
             {
-                bool processFound = false;
-                foreach (Process process in Process.GetProcesses())
+                try
                 {
-                    if (process.ProcessName == longProcessName)
-                    {
-                        processFound = true;
-                        break;
-                    }
+                    Assert.Contains(Process.GetProcesses(), p => p.ProcessName == longProcessName);
                 }
-                px.Kill();
-                px.WaitForExit();
-                Assert.True(px.HasExited);
-
-                Assert.True(processFound, $"Process named '{longProcessName}' not found");
+                finally
+                {
+                    px.Kill();
+                    px.WaitForExit();
+                }
             }
         }
 
