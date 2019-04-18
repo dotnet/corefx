@@ -2957,147 +2957,40 @@ namespace System.Text.Json.Tests
             AssertContents(expectedStr, output);
         }
 
-        [Fact]
-        public void TestWritingFloat1()
+        [Theory]
+        [InlineData("123456790", 123456789)]
+        [InlineData("11111111", 11111111)]
+        [InlineData("12345678", 12345678)]
+        [InlineData("1234567", 1234567)]
+        [InlineData("123456", 123456)]
+        [InlineData("12345", 12345)]
+        public void FormatFloats(string expectedStr, float value)
         {
             var output = new byte[100];
-            Assert.True(WriteNumberValueMinimized((float)12345678, output, out int bytesWritten));
-            
-            string expectedStr = "12345678";
+
+            Assert.True(Utf8Formatter.TryFormat(value, output, out int bytesWritten));
 
             string actualStr = Encoding.UTF8.GetString(output.AsSpan(0, bytesWritten).ToArray());
 
-            string message = $"{bytesWritten}, {expectedStr.Length}, {actualStr.Length}, ";
-            if (expectedStr != actualStr)
-            {
-                int length = Math.Min(bytesWritten, expectedStr.Length);
-                for (int i = 0; i < length; i++)
-                {
-                    if (output[i] != (byte)expectedStr[i])
-                    {
-                        message += $"{i}, {output[i]}, {(byte)expectedStr[i]},";
-                        break;
-                    }
-                }
-            }
-
-            Assert.True(expectedStr == actualStr, message);
-            Assert.True(expectedStr != actualStr, message);
+            Assert.True(expectedStr == actualStr, $"{expectedStr}, {actualStr}, {bytesWritten}, {output[0]}, {output[1]}, {output[2]}, ...");
         }
 
-        [Fact]
-        public void TestWritingFloat2()
+        [Theory]
+        [InlineData("123456789", 123456789)]
+        [InlineData("11111111", 11111111)]
+        [InlineData("12345678", 12345678)]
+        [InlineData("1234567", 1234567)]
+        [InlineData("123456", 123456)]
+        [InlineData("12345", 12345)]
+        public void FormatDoubles(string expectedStr, double value)
         {
             var output = new byte[100];
-            Assert.True(WriteNumberValueMinimized((float)12345680, output, out int bytesWritten));
 
-            string expectedStr = "12345680";
+            Assert.True(Utf8Formatter.TryFormat(value, output, out int bytesWritten));
 
             string actualStr = Encoding.UTF8.GetString(output.AsSpan(0, bytesWritten).ToArray());
 
-            string message = $"{bytesWritten}, {expectedStr.Length}, {actualStr.Length}, ";
-            if (expectedStr != actualStr)
-            {
-                int length = Math.Min(bytesWritten, expectedStr.Length);
-                for (int i = 0; i < length; i++)
-                {
-                    if (output[i] != (byte)expectedStr[i])
-                    {
-                        message += $"{i}, {output[i]}, {(byte)expectedStr[i]},";
-                        break;
-                    }
-                }
-            }
-
-            Assert.True(expectedStr == actualStr, message);
-            Assert.True(expectedStr != actualStr, message);
-        }
-
-        private bool WriteNumberValueMinimized(float value, byte[] output, out int bytesWritten)
-        {
-            return Utf8Formatter.TryFormat(value, output, out bytesWritten);
-        }
-
-        [Fact]
-        public void TestWritingFloatIBW1()
-        {
-            var output = new ArrayBufferWriter<byte>();
-            Span<byte> buffer = output.GetMemory().Span;
-
-            float value = (float)12345678;
-
-            Utf8Formatter.TryFormat(value, buffer, out int bytesWritten);
-
-            output.Advance(bytesWritten);
-
-            string expectedStr = "12345678";
-
-            byte[] result = output.WrittenMemory.ToArray();
-
-            string message = $"{bytesWritten}, {result.Length}, {output.WrittenCount}, ";
-            for (int i = 0; i < result.Length; i++)
-            {
-                if (result[i] != '1' + i)
-                {
-                    message += $"{i}, {result[i]},";
-                    break;
-                }
-            }
-
-            string actualStr = Encoding.UTF8.GetString(result);
-
-            Assert.True(expectedStr == actualStr, message);
-
-            AssertContents(expectedStr, output);
-
-            Assert.True(expectedStr != actualStr, message);
-        }
-
-        [Fact]
-        public void TestWritingFloatIBW2()
-        {
-            var output = new ArrayBufferWriter<byte>();
-            Span<byte> buffer = output.GetMemory().Span;
-
-            float value = (float)12345680;
-
-            Utf8Formatter.TryFormat(value, buffer, out int bytesWritten);
-
-            output.Advance(bytesWritten);
-
-            string expectedStr = "12345680";
-
-            byte[] result = output.WrittenMemory.ToArray();
-
-            string message = $"{bytesWritten}, {result.Length}, {output.WrittenCount}, ";
-
-
-            for (int i = 0; i < 6; i++)
-            {
-                if (result[i] != '1' + i)
-                {
-                    message += $"{i}, {result[i]},";
-                    break;
-                }
-            }
-
-            if (result[6] != '8')
-            {
-                message += $"{6}, {result[6]},";
-            }
-
-            if (result[7] != '0')
-            {
-                message += $"{7}, {result[7]},";
-            }
-
-            string actualStr = Encoding.UTF8.GetString(result);
-
-            Assert.True(expectedStr == actualStr, message);
-
-            AssertContents(expectedStr, output);
-
-            Assert.True(expectedStr != actualStr, message);
+            Assert.True(expectedStr == actualStr, $"{expectedStr}, {actualStr}, {bytesWritten}, {output[0]}, {output[1]}, {output[2]}, ...");
         }
 
         [Theory]
