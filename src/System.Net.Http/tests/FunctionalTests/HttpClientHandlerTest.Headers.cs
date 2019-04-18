@@ -127,11 +127,8 @@ namespace System.Net.Http.Functional.Tests
                     var message = new HttpRequestMessage(HttpMethod.Get, uri);
                     HttpResponseMessage response = await client.SendAsync(message);
                     Assert.NotNull(response.Content.Headers.Expires);
-                    if (!isValid)
-                    {
-                        // Invalid date should be converted to MinValue so everything is expired.
-                        Assert.Equal(DateTimeOffset.MinValue, response.Content.Headers.Expires);
-                    }
+                    // Invalid date should be converted to MinValue so everything is expired.
+                    Assert.Equal(isValid ? DateTime.Parse(value) : DateTimeOffset.MinValue, response.Content.Headers.Expires);
                 }
             },
             async server =>
@@ -145,7 +142,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory]
         [InlineData("-1", false)]
         [InlineData("Thu, 01 Dec 1994 16:00:00 GMT", true)]
-        public void SendAsync_CustomExpires_Success(string value, bool isValid)
+        public void HeadersAdd_CustomExpires_Success(string value, bool isValid)
         {
             var headers = new DerivedHttpHeaders();
             if (!isValid)
@@ -154,6 +151,7 @@ namespace System.Net.Http.Functional.Tests
             }
             Assert.True(headers.TryAddWithoutValidation("Expires", value));
             Assert.Equal(1, Enumerable.Count(headers.GetValues("Expires")));
+            Assert.Equal(value, headers.GetValues("Expires").First());
         }
 
         [OuterLoop("Uses external server")]
