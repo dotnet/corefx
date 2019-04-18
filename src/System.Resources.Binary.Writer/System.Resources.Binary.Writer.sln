@@ -12,6 +12,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Resources.Binary.Rea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Resources.Binary.Writer.Tests", "tests\System.Resources.Binary.Writer.Tests.csproj", "{9359E7DF-50C8-471B-AF9E-706FE2C4B326}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Resources.Binary.Tests", "..\Common\tests\System\Resources\Binary\System.Resources.Binary.Tests.csproj", "{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E893-4E87-987E-04EF0DCEAEFD}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ref", "ref", "{606176E0-E028-42B8-8FBA-3DA36A65E6FC}"
@@ -96,8 +98,8 @@ Global
 		{2E1F8143-A2BA-4441-9593-7CF0B81A7073}.uap-Release|Any CPU.Build.0 = uap-Release|Any CPU
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
-		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.netcoreapp-Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
-		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.netcoreapp-Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
+		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.netcoreapp-Debug|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.netcoreapp-Debug|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.netcoreapp-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.netcoreapp-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
@@ -110,6 +112,22 @@ Global
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.uap-Debug|Any CPU.Build.0 = netstandard-Release|Any CPU
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.uap-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326}.uap-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netcoreapp-Debug|Any CPU.ActiveCfg = netcoreapp-Debug|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netcoreapp-Debug|Any CPU.Build.0 = netcoreapp-Debug|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netcoreapp-Release|Any CPU.ActiveCfg = netcoreapp-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netcoreapp-Release|Any CPU.Build.0 = netcoreapp-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netstandard-Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netstandard-Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netstandard-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.netstandard-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.uap-Debug|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.uap-Debug|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.uap-Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5}.uap-Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -120,6 +138,7 @@ Global
 		{CD6088BF-DDA2-4097-A505-D786E8968A76} = {606176E0-E028-42B8-8FBA-3DA36A65E6FC}
 		{2E1F8143-A2BA-4441-9593-7CF0B81A7073} = {606176E0-E028-42B8-8FBA-3DA36A65E6FC}
 		{9359E7DF-50C8-471B-AF9E-706FE2C4B326} = {E5D875A9-7379-4393-A808-E52B1AB05D66}
+		{C104B773-94FF-4E11-9BC3-1DF22B0E87F5} = {E5D875A9-7379-4393-A808-E52B1AB05D66}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {046617DD-67EB-43A1-BE4E-22CCFC3EC15F}

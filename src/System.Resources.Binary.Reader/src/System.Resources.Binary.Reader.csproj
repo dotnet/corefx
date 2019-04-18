@@ -21,7 +21,9 @@
   <ItemGroup>
     <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="System\Resources\Binary\BinaryResourceReader.cs" />
+    <Compile Include="System\Resources\Binary\RuntimeResourceSet.public.cs" />
     <Compile Include="$(CommonPath)\System\Resources\Binary\SerializationFormat.cs" Link="System\Resources\Binary\SerializationFormat.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\RuntimeResourceSet.cs" Link="System\Resources\Binary\RuntimeResourceSet.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Collections" />
@@ -35,5 +37,7 @@
     <Reference Include="System.Runtime.InteropServices" />
     <Reference Include="System.Runtime.Serialization.Formatters" />
     <Reference Include="System.Threading" />
+  </ItemGroup>
+  <ItemGroup>
   </ItemGroup>
 </Project>

@@ -19,4 +19,8 @@ namespace System.Resources.Binary
         public void GetResourceData(string resourceName, out string resourceType, out byte[] resourceData) { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
     }
+    public sealed partial class RuntimeResourceSet : ResourceSet
+    {
+        public RuntimeResourceSet(IResourceReader reader) : base(reader) { }
+    }
 }

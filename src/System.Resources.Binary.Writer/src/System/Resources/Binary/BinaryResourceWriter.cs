@@ -20,6 +20,10 @@ namespace System.Resources.Binary
             typeof(BinaryResourceReader).AssemblyQualifiedName : 
             base.ResourceReaderTypeName;
 
+        protected override string ResourceSetTypeName => _requiresBinaryResourceReader ?
+            typeof(RuntimeResourceSet).AssemblyQualifiedName :
+            base.ResourceSetTypeName;
+
         public void AddTypeConverterResource(string name, string typeName, string value)
         {
             if (name == null)

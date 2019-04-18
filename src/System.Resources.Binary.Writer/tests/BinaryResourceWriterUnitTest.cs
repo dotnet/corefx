@@ -2,17 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources;
+using System.Resources.Binary.Tests;
 using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
@@ -160,33 +158,11 @@ namespace System.Resources.Binary.Writer.Tests
             Assert.Equal(writerBuffer, binaryWriterBuffer);
         }
 
-        private static IEnumerable<object[]> GetPrimitiveResources()
+        
+        [Fact]
+        public static void PrimitiveResources()
         {
-            yield return new object[]
-            {
-                new Dictionary<string, object>()
-                {
-                    {"string", "value" },
-                    {"bool", true },
-                    {"char", 'b' },
-                    {"int", 42 },
-                    {"byte", (byte)7 },
-                    {"sbyte", (sbyte)-3 },
-                    {"short", (short) 31000 },
-                    {"ushort", (ushort) 61000 },
-                    {"long", 10000000000 },
-                    { "ulong", ulong.MaxValue },
-                    {"float", 3.14f },
-                    {"double", 3.14159 },
-                    {"decimal", 3.141596536897931m }
-                }
-            };
-        }
-
-        [Theory]
-        [MemberData(nameof(GetPrimitiveResources))]
-        public static void PrimitiveResources(IDictionary<string, object> values)
-        {
+            IReadOnlyDictionary<string,object> values = TestData.Primitive;
             Action<IResourceWriter> addData = (writer) =>
             {
                 foreach (var pair in values)
@@ -231,18 +207,7 @@ namespace System.Resources.Binary.Writer.Tests
         [Fact]
         public static void BinaryFormattedResources()
         {
-            Dictionary<string, object> values = new Dictionary<string, object>()
-                {
-                    {"enum", DayOfWeek.Friday },
-                    {"point", new Point(4, 8) }
-                };
-
-            if (PlatformDetection.IsDrawingSupported)
-            {
-                values.Add("bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")));
-                values.Add("font", SystemFonts.DefaultFont);
-            }
-
+            var values = TestData.BinaryFormatted;
             byte[] writerBuffer, binaryWriterBuffer;
             using (MemoryStream ms = new MemoryStream())
             using (ResourceWriter writer = new ResourceWriter(ms))
@@ -301,17 +266,7 @@ namespace System.Resources.Binary.Writer.Tests
         [Fact]
         public static void TypeConverterByteArrayResources()
         {
-            Dictionary<string, object> values = new Dictionary<string, object>()
-                {
-                    { "myResourceType", new MyResourceType(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 }) }
-                };
-
-            // ImageConverter only on windows at the moment https://github.com/dotnet/corefx/issues/36949
-            if (PlatformDetection.IsDrawingSupported && PlatformDetection.IsWindows)  
-            {
-                values.Add("bitmap", new Bitmap(Path.Combine("bitmaps", "almogaver24bits.bmp")));
-                values.Add("icon", new Icon(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico")));
-            }
+            var values = TestData.ByteArrayConverter;
 
             byte[] binaryWriterBuffer;
 
@@ -344,23 +299,7 @@ namespace System.Resources.Binary.Writer.Tests
         [Fact]
         public static void TypeConverterStringResources()
         {
-            Dictionary<string, object> values = new Dictionary<string, object>()
-                {
-                    { "color", Color.AliceBlue },
-                    { "point", new Point(2, 6) },
-                    { "rect", new Rectangle(3, 6, 10, 20) },
-                    { "size", new Size(4, 8) },
-                    { "sizeF", new SizeF(4.2f, 8.5f) },
-                    { "cultureInfo", new CultureInfo("en-US") },
-                    { "enum", DayOfWeek.Friday }
-                };
-
-            // ImageConverter only on windows at the moment https://github.com/dotnet/corefx/issues/36949
-            if (PlatformDetection.IsDrawingSupported && PlatformDetection.IsWindows)
-            {
-                values.Add("imageFormat", ImageFormat.Png);
-                values.Add("font", SystemFonts.DefaultFont);
-            }
+            var values = TestData.StringConverter;
 
             byte[] binaryWriterBuffer;
 
@@ -392,16 +331,7 @@ namespace System.Resources.Binary.Writer.Tests
         [Fact]
         public static void StreamResources()
         {
-            Dictionary<string, (Type type, Stream stream)> values = new Dictionary<string, (Type, Stream)>()
-                {
-                    { "myResourceType", (typeof(MyResourceType),  new MemoryStream(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 })) }
-                };
-
-            if (PlatformDetection.IsDrawingSupported)
-            {
-                values.Add("icon", (typeof(Icon), File.OpenRead(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico"))));
-                values.Add("bitmap", (typeof(Bitmap), File.OpenRead(Path.Combine("bitmaps", "almogaver24bits.bmp"))));
-            }
+            var values = TestData.Stream;
 
             byte[] binaryWriterBuffer;
 
@@ -430,6 +360,42 @@ namespace System.Resources.Binary.Writer.Tests
                 }
             }
         }
+        
+        [Fact]
+        public static void CanReadViaResourceManager()
+        {
+            ResourceManager resourceManager = new ResourceManager(typeof(TestData));
+
+            IEnumerable<KeyValuePair<string, object>> objectPairs = TestData.Primitive
+                .Concat(TestData.BinaryFormattedWithoutDrawing)
+                .Concat(TestData.ByteArrayConverterWithoutDrawing)
+                .Concat(TestData.StringConverterWithoutDrawing);
+
+            foreach(KeyValuePair<string, object> pair in objectPairs) 
+            {
+                var actualValue = resourceManager.GetObject(pair.Key);
+
+                Assert.Equal(pair.Value, actualValue);
+            }
+
+            foreach(KeyValuePair<string, (Type type, Stream stream)> pair in TestData.StreamWithoutDrawing)
+            {
+                var expectedValue = Activator.CreateInstance(pair.Value.type, pair.Value.stream);
+                var actualValue = resourceManager.GetObject(pair.Key);
+
+                Assert.Equal(expectedValue, actualValue);
+            }
+        }
+
+        [Fact]
+        public static void ResourceManagerLoadsCorrectReader()
+        {
+            ResourceManager resourceManager = new ResourceManager(typeof(TestData));
+            ResourceSet resSet = resourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
+            IResourceReader reader = (IResourceReader)typeof(ResourceSet).GetField("Reader", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(resSet);
+            Assert.IsType<BinaryResourceReader>(reader);
+        }
+
         private static void ResourceValueEquals(object expected, object actual)
         {
             if (actual is Bitmap bitmap)

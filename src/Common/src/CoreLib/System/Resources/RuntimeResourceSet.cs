@@ -24,6 +24,9 @@ using System.Runtime.Versioning;
 using System.Diagnostics;
 
 namespace System.Resources
+#if RESOURCES_STANDALONE
+    .Binary
+#endif
 {
     // A RuntimeResourceSet stores all the resources defined in one 
     // particular CultureInfo, with some loading optimizations.
@@ -161,12 +164,12 @@ namespace System.Resources
     // into smaller chunks, each of size sqrt(n), would be substantially better for
     // resource files containing thousands of resources.
     // 
-#if CORERT
+#if CORERT || RESOURCES_STANDALONE
     public  // On CoreRT, this must be public because of need to whitelist past the ReflectionBlock.
 #else
     internal
 #endif
-    sealed class RuntimeResourceSet : ResourceSet, IEnumerable
+    sealed partial class RuntimeResourceSet : ResourceSet, IEnumerable
     {
         // Cache for resources.  Key is the resource name, which can be cached
         // for arbitrarily long times, since the object is usually a string
@@ -190,6 +193,7 @@ namespace System.Resources
         // the resources once, adding them into the table.
         private bool _haveReadFromReader;
 
+#if !RESOURCES_STANDALONE
         internal RuntimeResourceSet(string fileName) : base(false)
         {
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
@@ -204,6 +208,7 @@ namespace System.Resources
             _defaultReader = new ResourceReader(stream, _resCache, permitDeserialization);
             Reader = _defaultReader;
         }
+#endif
 
         protected override void Dispose(bool disposing)
         {
