@@ -472,16 +472,42 @@ namespace System.PrivateUri.Tests
         public static IEnumerable<object[]> UriIsWellFormedUnwiseStringData =>
         new List<object[]>
         {
-            new object[] { "https://www.contoso.com/?a=%7B%7C%7D&b=%E2%80%99" },
-            new object[] { "https://www.contoso.com/?a=%7B%7C%7D%E2%80%99" }
+            // escaped
+            new object[] { "https://www.contoso.com/?a=%7B%7C%7D&b=%E2%80%99", true },
+            new object[] { "https://www.contoso.com/?a=%7B%7C%7D%E2%80%99", true },
+            
+            // unescaped
+            new object[] { "https://www.contoso.com/?a=}", false },
+            new object[] { "https://www.contoso.com/?a=|", false },
+            new object[] { "https://www.contoso.com/?a={", false },
+
+            // not query
+            new object[] { "https://www.%7Bcontoso.com/", false },
+            new object[] { "http%7Bs://www.contoso.com/", false },
+            new object[] { "https://www.contoso.com%7B/", false },
+            new object[] { "htt%7Cps://www.contoso.com/", false },
+            new object[] { "https://www.con%7Ctoso.com/", false },
+            new object[] { "https://www.contoso.com%7C/", false },
+            new object[] { "htt%7Dps://www.contoso.com/", false },
+            new object[] { "https://www.con%7Dtoso.com/", false },
+            new object[] { "https://www.contoso.com%7D/", false },
+            new object[] { "htt{ps://www.contoso.com/", false },
+            new object[] { "https://www.con{toso.com/", false },
+            new object[] { "https://www.contoso.com{/", false },
+            new object[] { "htt|ps://www.contoso.com/", false },
+            new object[] { "https://www.con|toso.com/", false },
+            new object[] { "https://www.contoso.com|/", false },
+            new object[] { "htt}ps://www.contoso.com/", false },
+            new object[] { "https://www.con}toso.com/", false },
+            new object[] { "https://www.contoso.com}/", false },
         };
 
         [Theory]
         [MemberData(nameof(UriIsWellFormedUnwiseStringData))]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
-        public void UriIsWellFormed_AbsoluteUnicodeWithUnwise_Success(string uriString)
+        public void UriIsWellFormed_AbsoluteUnicodeWithUnwise_Success(string uriString, bool expected)
         {
-            Assert.True(Uri.IsWellFormedUriString(uriString, UriKind.Absolute));
+            Assert.Equal(expected, Uri.IsWellFormedUriString(uriString, UriKind.Absolute));
         }
     }
 }
