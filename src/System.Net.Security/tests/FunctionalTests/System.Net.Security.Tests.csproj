@@ -107,6 +107,9 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="IdentityValidator.Windows.cs" />
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.Windows.cs">
+      <Link>Common\System\Net\Capability.Security.Windows.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="IdentityValidator.Unix.cs" />
