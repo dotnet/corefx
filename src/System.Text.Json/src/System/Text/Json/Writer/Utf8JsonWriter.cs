@@ -351,14 +351,6 @@ namespace System.Text.Json
             _output.Advance(BytesPending);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Advance(int count)
-        {
-            Debug.Assert(count >= 0 && BytesPending <= int.MaxValue - count);
-
-            BytesPending += count;
-        }
-
         /// <summary>
         /// Writes the beginning of a JSON array.
         /// </summary>
