@@ -7,7 +7,6 @@ namespace System.Xml
     using System.Text;
     using System.Diagnostics;
     using System.Xml.Schema;
-    using System.Runtime.InteropServices;
 
     internal class XmlName : IXmlSchemaInfo
     {
@@ -183,8 +182,7 @@ namespace System.Xml
             int hashCode = 0;
             if (name != null)
             {
-                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(name.AsSpan(name.LastIndexOf(':') + 1));
-                return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
+                return string.GetHashCode(name.AsSpan(name.LastIndexOf(':') + 1));
             }
             return hashCode;
         }

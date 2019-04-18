@@ -19,9 +19,6 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Text\StringBuilderCache.cs">
       <Link>System\Text\StringBuilderCache.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Marvin.cs">
-      <Link>System\Marvin.cs</Link>
-    </Compile>
     <Compile Include="System\Xml\Linq\BaseUriAnnotation.cs" />
     <Compile Include="System\Xml\Linq\Extensions.cs" />
     <Compile Include="System\Xml\Linq\LineInfoAnnotation.cs" />
@@ -67,6 +64,5 @@
     <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Threading.Thread" />
     <Reference Include="System.Memory" />
-    <Reference Include="System.Security.Cryptography.Algorithms" />
   </ItemGroup>
 </Project>

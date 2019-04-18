@@ -5,7 +5,6 @@
 using System.Threading;
 using Debug = System.Diagnostics.Debug;
 using Interlocked = System.Threading.Interlocked;
-using System.Runtime.InteropServices;
 
 namespace System.Xml.Linq
 {
@@ -63,8 +62,6 @@ namespace System.Xml.Linq
     internal sealed class XHashtable<TValue>
     {
         private XHashtableState _state;                          // SHARED STATE: Contains all XHashtable state, so it can be atomically swapped when resizes occur
-
-        private const int StartingHash = (5381 << 16) + 5381;   // Starting hash code value for string keys to be hashed
 
         /// <summary>
         /// Prototype of function which is called to extract a string key value from a hashed value.
@@ -399,8 +396,7 @@ namespace System.Xml.Linq
             private static int ComputeHashCode(string key, int index, int count)
             {
                 Debug.Assert(key != null, "key should have been checked previously for null");
-                ReadOnlySpan<byte> bytes = MemoryMarshal.AsBytes(key.AsSpan(index, count));
-                return Marvin.ComputeHash32(bytes, Marvin.DefaultSeed);
+                return string.GetHashCode(key.AsSpan(index, count));
             }
 
             /// <summary>
