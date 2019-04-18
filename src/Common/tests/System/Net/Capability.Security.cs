@@ -37,9 +37,9 @@ namespace System.Net.Test.Common
             return !(Configuration.Security.HostsFileNamesInstalled == null);
         }
 
-        public static bool ForceUnencryptedHttp2Loopback()
+        public static bool Http2ForceUnencryptedLoopback()
         {
-            string value = Configuration.Http.Http2ForceUnencrypted;
+            string value = Configuration.Http.Http2ForceUnencryptedLoopback;
             if (value != null && (value.Equals("true", StringComparison.OrdinalIgnoreCase) || value.Equals("1")))
             {
                 return true;

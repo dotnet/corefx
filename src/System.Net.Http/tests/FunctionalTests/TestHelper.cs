@@ -157,7 +157,7 @@ namespace System.Net.Http.Functional.Tests
                 BindingFlags.NonPublic | BindingFlags.Instance);
             field_maxHttpVersion.SetValue(_settings, new Version(2, 0));
 
-            if (useHttp2LoopbackServer && (!PlatformDetection.SupportsAlpn || Capability.ForceUnencryptedHttp2Loopback()))
+            if (useHttp2LoopbackServer && (!PlatformDetection.SupportsAlpn || Capability.Http2ForceUnencryptedLoopback()))
             {
                 // Allow HTTP/2.0 via unencrypted socket if ALPN is not supported on platform.
                 FieldInfo field_allowPlainHttp2 = type_HttpConnectionSettings.GetField(
