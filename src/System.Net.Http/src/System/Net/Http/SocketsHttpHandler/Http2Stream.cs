@@ -217,7 +217,7 @@ namespace System.Net.Http
 
             public void OnResponse100Continue()
             {
-                // This is called when we receive complete set of headers with transient response code - like 100 Continue.
+                // This is called when we receive complete set of headers with status 100 Continue.
                 // We need to rest state and wait for another final response.
                 lock (SyncObject)
                 {
@@ -377,10 +377,7 @@ namespace System.Net.Http
                     if (Response.StatusCode  == HttpStatusCode.Continue)
                     {
                         OnResponse100Continue();
-                        if (tcs != null)
-                        {
-                            tcs.TrySetResult(true);
-                        }
+                        tcs?.TrySetResult(true);
                     }
                 }
                 while ((uint)Response.StatusCode < 200);
@@ -669,7 +666,7 @@ namespace System.Net.Http
 
                     if (http2Stream._abortRequestBody)
                     {
-                        // If are asked to abort sending request body after we started, send RST and ignore test for the stream.
+                        // If asked to abort sending request body after we started, send RST and ignore rest of the stream.
                         Task ignored = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel);
                         _abortStream = true;
                         return new ValueTask();
