@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Test.Common;
-//using System.Threading;
 using System.Threading.Tasks;
 
 using Xunit;
@@ -14,7 +13,7 @@ using Xunit.Abstractions;
 namespace System.Net.Http.Functional.Tests
 {
     // This class is dedicated to SocketHttpHandler tests specific to HTTP/1.x.
-    public abstract class HttpClientHandlerTest_Http1 : HttpClientHandlerTestBase
+    public class HttpClientHandlerTest_Http1 : HttpClientHandlerTestBase
     {
         protected override bool UseSocketsHttpHandler => true;
         protected override bool UseHttp2LoopbackServer => false;

@@ -1677,12 +1677,6 @@ namespace System.Net.Http.Functional.Tests
         }
     }
 
-    public sealed class SocketsHttpHandlerTest_Http1 : HttpClientHandlerTest_Http1
-    {
-        public SocketsHttpHandlerTest_Http1(ITestOutputHelper output) : base(output) { }
-        protected override bool UseSocketsHttpHandler => true;
-    }
-
     public sealed class SocketsHttpHandlerTest_Http2 : HttpClientHandlerTest_Http2
     {
         public SocketsHttpHandlerTest_Http2(ITestOutputHelper output) : base(output) { }
