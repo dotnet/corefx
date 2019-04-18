@@ -3,7 +3,7 @@
     <ProjectGuid>{B7EDBF00-765A-48E8-B593-CD668288E274}</ProjectGuid>
     <RootNamespace>System.Text.Encodings.Web</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">BUILDING_FOR_NETSTANDARD;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>

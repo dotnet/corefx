@@ -1,9 +1,11 @@
 ﻿<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
-    <ProjectReference Include="..\src\System.Text.Encodings.Web.csproj">
-      <SupportedFramework>netcoreapp;netstandard</SupportedFramework>
+    <ProjectReference Include="..\ref\System.Text.Encodings.Web.csproj">
+      <SupportedFramework>netcoreapp2.0;net461;$(UAPvNextTFM);$(AllXamarinFrameworks)</SupportedFramework>
     </ProjectReference>
+    <ProjectReference Include="..\src\System.Text.Encodings.Web.csproj" />
+    <HarvestIncludePaths Include="lib/netstandard1.0" />
   </ItemGroup>
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
