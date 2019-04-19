@@ -1823,10 +1823,15 @@ namespace System.Diagnostics.Tests
             // start sleep program and wait for some seconds
             using (Process px = Process.Start(new ProcessStartInfo { FileName = sleepCommandPathFileName , Arguments = "30", UseShellExecute = true}))
             {
+                var runninProcesses = Process.GetProcesses();
                 try
                 {
                     // on Alpine, sleep is a symlink which points to /bin/busybox
-                    Assert.Contains(Process.GetProcesses(), p => p.ProcessName == longProcessName || ( p.ProcessName == "busybox" && p.Id == px.Id));
+                    Assert.Contains(runninProcesses, p => p.ProcessName == longProcessName || ( p.ProcessName == "busybox" && p.Id == px.Id));
+                }
+                catch(Xunit.Sdk.ContainsException)
+                {
+                    Assert.False(true, $"Expected ID {px.Id} in collection: [" + string.Join(" ,", runninProcesses.Select(p => $"{p.ProcessName}({p.Id})")) + "]");
                 }
                 finally
                 {
