@@ -46,13 +46,6 @@ namespace System.Net.Sockets
             }
         }
 
-        private const int EventBufferCount =
-#if DEBUG
-            32;
-#else
-            1024;
-#endif
-
         private static readonly object s_lock = new object();
 
         //
@@ -62,7 +55,6 @@ namespace System.Net.Sockets
         private static SocketAsyncEngine Current { get; set; } = new SocketAsyncEngine();
 
         private readonly IntPtr _port;
-        private readonly Interop.Sys.SocketEvent* _buffer;
 
         //
         // The read and write ends of a native pipe, used to signal that this instance's event loop should stop 
@@ -85,7 +77,7 @@ namespace System.Net.Sockets
         // In debug builds, force rollover to new SocketAsyncEngine instances so that code doesn't go untested, since
         // it's very unlikely that the "real" limits will ever be reached in test code.
         //
-        private static readonly IntPtr MaxHandles = (IntPtr)(EventBufferCount * 2);
+        private static readonly IntPtr MaxHandles = (IntPtr)64;
 #else
         //
         // In release builds, we use *very* high limits.  No 64-bit process running on release builds should ever
@@ -93,6 +85,9 @@ namespace System.Net.Sockets
         //
         private static readonly IntPtr MaxHandles = IntPtr.Size == 4 ? (IntPtr)int.MaxValue : (IntPtr)long.MaxValue;
 #endif
+
+        // Determine max event buffer count based on nr of processors.
+        private static readonly int MaxEventBufferCount = 512 * Environment.ProcessorCount;
 
         //
         // Sentinel handle value to identify events from the "shutdown pipe," used to signal an event loop to stop
@@ -203,11 +198,6 @@ namespace System.Net.Sockets
                 {
                     throw new InternalException(err);
                 }
-                err = Interop.Sys.CreateSocketEventBuffer(EventBufferCount, out _buffer);
-                if (err != Interop.Error.SUCCESS)
-                {
-                    throw new InternalException(err);
-                }
 
                 //
                 // Create the pipe for signaling shutdown, and register for "read" events for the pipe.  Now writing
@@ -258,11 +248,27 @@ namespace System.Net.Sockets
         {
             try
             {
+                Interop.Sys.SocketEvent* buffer = null;
+#if DEBUG
+                //
+                // In debug builds, force reallocation of event buffers.
+                //
+                int eventBufferCount = 4;
+#else
+                int eventBufferCount = 1024;
+#endif
+
+                Interop.Error err = Interop.Sys.ResizeSocketEventBuffer(eventBufferCount, ref buffer);
+                if (err != Interop.Error.SUCCESS)
+                {
+                    throw new InternalException(err);
+                }
+
                 bool shutdown = false;
                 while (!shutdown)
                 {
-                    int numEvents = EventBufferCount;
-                    Interop.Error err = Interop.Sys.WaitForSocketEvents(_port, _buffer, &numEvents);
+                    int numEvents = eventBufferCount;
+                    err = Interop.Sys.WaitForSocketEvents(_port, buffer, &numEvents);
                     if (err != Interop.Error.SUCCESS)
                     {
                         throw new InternalException(err);
@@ -273,7 +279,7 @@ namespace System.Net.Sockets
 
                     for (int i = 0; i < numEvents; i++)
                     {
-                        IntPtr handle = _buffer[i].Data;
+                        IntPtr handle = buffer[i].Data;
                         if (handle == ShutdownHandle)
                         {
                             shutdown = true;
@@ -284,10 +290,27 @@ namespace System.Net.Sockets
                             _handleToContextMap.TryGetValue(handle, out SocketAsyncContext context);
                             if (context != null)
                             {
-                                context.HandleEvents(_buffer[i].Events);
+                                context.HandleEvents(buffer[i].Events);
                             }
                         }
                     }
+
+                    // Resize the event buffer if it was filled completely.
+                    if (numEvents == eventBufferCount &&
+                        eventBufferCount < MaxEventBufferCount)
+                    {
+                        int desiredEventBufferCount = eventBufferCount * 2;
+                        err = Interop.Sys.ResizeSocketEventBuffer(desiredEventBufferCount, ref buffer);
+                        if (err == Interop.Error.SUCCESS)
+                        {
+                            eventBufferCount = desiredEventBufferCount;
+                        }
+                    }
+                }
+
+                if (buffer != null)
+                {
+                    Interop.Sys.FreeSocketEventBuffer(buffer);
                 }
 
                 FreeNativeResources();
@@ -320,10 +343,6 @@ namespace System.Net.Sockets
             if (_shutdownWritePipe != -1)
             {
                 Interop.Sys.Close((IntPtr)_shutdownWritePipe);
-            }
-            if (_buffer != null)
-            {
-                Interop.Sys.FreeSocketEventBuffer(_buffer);
             }
             if (_port != (IntPtr)(-1))
             {

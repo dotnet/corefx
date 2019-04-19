@@ -394,7 +394,7 @@ DLLEXPORT int32_t SystemNative_CreateSocketEventPort(intptr_t* port);
 
 DLLEXPORT int32_t SystemNative_CloseSocketEventPort(intptr_t port);
 
-DLLEXPORT int32_t SystemNative_CreateSocketEventBuffer(int32_t count, SocketEvent** buffer);
+DLLEXPORT int32_t SystemNative_ResizeSocketEventBuffer(int32_t count, SocketEvent** buffer);
 
 DLLEXPORT int32_t SystemNative_FreeSocketEventBuffer(SocketEvent* buffer);
 

@@ -2373,7 +2373,7 @@ int32_t SystemNative_CloseSocketEventPort(intptr_t port)
     return CloseSocketEventPortInner(ToFileDescriptor(port));
 }
 
-int32_t SystemNative_CreateSocketEventBuffer(int32_t count, SocketEvent** buffer)
+int32_t SystemNative_ResizeSocketEventBuffer(int32_t count, SocketEvent** buffer)
 {
     if (buffer == NULL || count < 0)
     {
@@ -2381,11 +2381,13 @@ int32_t SystemNative_CreateSocketEventBuffer(int32_t count, SocketEvent** buffer
     }
 
     size_t bufferSize;
+    SocketEvent* newBuffer;
     if (!multiply_s(SocketEventBufferElementSize, (size_t)count, &bufferSize) ||
-        (*buffer = (SocketEvent*)malloc(bufferSize)) == NULL)
+        (newBuffer = (SocketEvent*)realloc(*buffer, bufferSize)) == NULL)
     {
         return Error_ENOMEM;
     }
+    *buffer = newBuffer;
 
     return Error_SUCCESS;
 }

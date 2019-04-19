@@ -34,8 +34,8 @@ internal static partial class Interop
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_CloseSocketEventPort")]
         internal static extern Error CloseSocketEventPort(IntPtr port);
 
-        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_CreateSocketEventBuffer")]
-        internal static extern unsafe Error CreateSocketEventBuffer(int count, out SocketEvent* buffer);
+        [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_ResizeSocketEventBuffer")]
+        internal static extern unsafe Error ResizeSocketEventBuffer(int count, ref SocketEvent* buffer);
 
         [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_FreeSocketEventBuffer")]
         internal static extern unsafe Error FreeSocketEventBuffer(SocketEvent* buffer);
