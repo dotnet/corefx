@@ -1826,7 +1826,7 @@ namespace System.Diagnostics.Tests
                 try
                 {
                     // on Alpine, sleep is a symlink which points to /bin/busybox
-                    Assert.Contains(Process.GetProcesses(), p => p.ProcessName == longProcessName || ( p.ProcessName == "busybox" && p.ProcessId == px.ProcessId));
+                    Assert.Contains(Process.GetProcesses(), p => p.ProcessName == longProcessName || ( p.ProcessName == "busybox" && p.Id == px.Id));
                 }
                 finally
                 {
