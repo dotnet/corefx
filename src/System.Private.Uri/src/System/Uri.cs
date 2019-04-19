@@ -4672,10 +4672,9 @@ namespace System
                         res |= Check.NotIriCanonical;
                     }
                 }
-                else if ((c >= '{' && c <= '}'))
+                else if (c >= '{' && c <= '}') // includes '{', '|', '}'
                 {
-                    if (!needsEscaping)
-                        needsEscaping = true;
+                    needsEscaping = true;
                 }
                 else if (c == '%')
                 {
