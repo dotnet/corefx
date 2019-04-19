@@ -6,15 +6,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.ServiceModel.Syndication.cs" />
-    <Compile Include="..\src\System\ServiceModel\Syndication\Atom10Constants.cs">
-      <Link>System\ServiceModel\Syndication\Atom10Constants.cs</Link>
-    </Compile>
-    <Compile Include="..\src\System\ServiceModel\Syndication\App10Constants.cs">
-      <Link>System\ServiceModel\Syndication\App10Constants.cs</Link>
-    </Compile>
-    <Compile Include="..\src\System\ServiceModel\Syndication\Rss20Constants.cs">
-      <Link>System\ServiceModel\Syndication\Rss20Constants.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNETCoreApp)' == 'true'">
     <Compile Include="System.ServiceModel.Syndication.netcoreapp.cs" />

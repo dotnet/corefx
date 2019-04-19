@@ -7,7 +7,7 @@
 
 namespace System.ServiceModel.Syndication
 {
-    [System.Xml.Serialization.XmlRoot(ElementName = Atom10Constants.FeedTag, Namespace = Atom10Constants.Atom10Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="feed", Namespace="http://www.w3.org/2005/Atom")]
     public partial class Atom10FeedFormatter : System.ServiceModel.Syndication.SyndicationFeedFormatter, System.Xml.Serialization.IXmlSerializable
     {
         public Atom10FeedFormatter() { }
@@ -29,14 +29,14 @@ namespace System.ServiceModel.Syndication
         protected virtual void WriteItems(System.Xml.XmlWriter writer, System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem> items, System.Uri feedBaseUri) { }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = Atom10Constants.FeedTag, Namespace = Atom10Constants.Atom10Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="feed", Namespace="http://www.w3.org/2005/Atom")]
     public partial class Atom10FeedFormatter<TSyndicationFeed> : System.ServiceModel.Syndication.Atom10FeedFormatter where TSyndicationFeed : System.ServiceModel.Syndication.SyndicationFeed, new()
     {
         public Atom10FeedFormatter() { }
         public Atom10FeedFormatter(TSyndicationFeed feedToWrite) { }
         protected override System.ServiceModel.Syndication.SyndicationFeed CreateFeedInstance() { throw null; }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = Atom10Constants.EntryTag, Namespace = Atom10Constants.Atom10Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="entry", Namespace="http://www.w3.org/2005/Atom")]
     public partial class Atom10ItemFormatter : System.ServiceModel.Syndication.SyndicationItemFormatter, System.Xml.Serialization.IXmlSerializable
     {
         public Atom10ItemFormatter() { }
@@ -54,14 +54,14 @@ namespace System.ServiceModel.Syndication
         void System.Xml.Serialization.IXmlSerializable.WriteXml(System.Xml.XmlWriter writer) { }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = Atom10Constants.EntryTag, Namespace = Atom10Constants.Atom10Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="entry", Namespace="http://www.w3.org/2005/Atom")]
     public partial class Atom10ItemFormatter<TSyndicationItem> : System.ServiceModel.Syndication.Atom10ItemFormatter where TSyndicationItem : System.ServiceModel.Syndication.SyndicationItem, new()
     {
         public Atom10ItemFormatter() { }
         public Atom10ItemFormatter(TSyndicationItem itemToWrite) { }
         protected override System.ServiceModel.Syndication.SyndicationItem CreateItemInstance() { throw null; }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = App10Constants.Categories, Namespace = App10Constants.Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="categories", Namespace="http://www.w3.org/2007/app")]
     public partial class AtomPub10CategoriesDocumentFormatter : System.ServiceModel.Syndication.CategoriesDocumentFormatter, System.Xml.Serialization.IXmlSerializable
     {
         public AtomPub10CategoriesDocumentFormatter() { }
@@ -77,7 +77,7 @@ namespace System.ServiceModel.Syndication
         void System.Xml.Serialization.IXmlSerializable.WriteXml(System.Xml.XmlWriter writer) { }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = App10Constants.Service, Namespace = App10Constants.Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="service", Namespace="http://www.w3.org/2007/app")]
     public partial class AtomPub10ServiceDocumentFormatter : System.ServiceModel.Syndication.ServiceDocumentFormatter, System.Xml.Serialization.IXmlSerializable
     {
         public AtomPub10ServiceDocumentFormatter() { }
@@ -92,7 +92,7 @@ namespace System.ServiceModel.Syndication
         void System.Xml.Serialization.IXmlSerializable.WriteXml(System.Xml.XmlWriter writer) { }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = App10Constants.Service, Namespace = App10Constants.Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="service", Namespace="http://www.w3.org/2007/app")]
     public partial class AtomPub10ServiceDocumentFormatter<TServiceDocument> : System.ServiceModel.Syndication.AtomPub10ServiceDocumentFormatter where TServiceDocument : System.ServiceModel.Syndication.ServiceDocument, new()
     {
         public AtomPub10ServiceDocumentFormatter() { }
@@ -168,7 +168,7 @@ namespace System.ServiceModel.Syndication
         protected internal virtual void WriteAttributeExtensions(System.Xml.XmlWriter writer, string version) { }
         protected internal virtual void WriteElementExtensions(System.Xml.XmlWriter writer, string version) { }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = Rss20Constants.RssTag, Namespace = Rss20Constants.Rss20Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="rss", Namespace="")]
     public partial class Rss20FeedFormatter : System.ServiceModel.Syndication.SyndicationFeedFormatter, System.Xml.Serialization.IXmlSerializable
     {
         public Rss20FeedFormatter() { }
@@ -193,7 +193,7 @@ namespace System.ServiceModel.Syndication
         protected virtual void WriteItems(System.Xml.XmlWriter writer, System.Collections.Generic.IEnumerable<System.ServiceModel.Syndication.SyndicationItem> items, System.Uri feedBaseUri) { }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = Rss20Constants.RssTag, Namespace = Rss20Constants.Rss20Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="rss", Namespace="")]
     public partial class Rss20FeedFormatter<TSyndicationFeed> : System.ServiceModel.Syndication.Rss20FeedFormatter where TSyndicationFeed : System.ServiceModel.Syndication.SyndicationFeed, new()
     {
         public Rss20FeedFormatter() { }
@@ -201,7 +201,7 @@ namespace System.ServiceModel.Syndication
         public Rss20FeedFormatter(TSyndicationFeed feedToWrite, bool serializeExtensionsAsAtom) { }
         protected override System.ServiceModel.Syndication.SyndicationFeed CreateFeedInstance() { throw null; }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = Rss20Constants.ItemTag, Namespace = Rss20Constants.Rss20Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="item", Namespace="")]
     public partial class Rss20ItemFormatter : System.ServiceModel.Syndication.SyndicationItemFormatter, System.Xml.Serialization.IXmlSerializable
     {
         public Rss20ItemFormatter() { }
@@ -221,7 +221,7 @@ namespace System.ServiceModel.Syndication
         void System.Xml.Serialization.IXmlSerializable.WriteXml(System.Xml.XmlWriter writer) { }
         public override void WriteTo(System.Xml.XmlWriter writer) { }
     }
-    [System.Xml.Serialization.XmlRoot(ElementName = Rss20Constants.ItemTag, Namespace = Rss20Constants.Rss20Namespace)]
+    [System.Xml.Serialization.XmlRootAttribute(ElementName="item", Namespace="")]
     public partial class Rss20ItemFormatter<TSyndicationItem> : System.ServiceModel.Syndication.Rss20ItemFormatter, System.Xml.Serialization.IXmlSerializable where TSyndicationItem : System.ServiceModel.Syndication.SyndicationItem, new()
     {
         public Rss20ItemFormatter() { }
