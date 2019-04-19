@@ -22,12 +22,12 @@ namespace System.Data.SqlClient
     {
         private sealed class ExecuteNonQueryAsyncContext
         {
-            public SqlCommand Command;
-            public Guid OperationId;
-            public TaskCompletionSource<int> Source;
-            public CancellationTokenRegistration Registration;
+            internal SqlCommand Command;
+            internal Guid OperationId;
+            internal TaskCompletionSource<int> Source;
+            internal CancellationTokenRegistration Registration;
 
-            public void Setup(SqlCommand command, Guid operationId, TaskCompletionSource<int> source, CancellationTokenRegistration registration)
+            internal void Setup(SqlCommand command, Guid operationId, TaskCompletionSource<int> source, CancellationTokenRegistration registration)
             {
                 Command = command;
                 OperationId = operationId;
@@ -35,7 +35,7 @@ namespace System.Data.SqlClient
                 Registration = registration;
             }
 
-            public void Clear()
+            internal void Clear()
             {
                 Command = null;
                 OperationId = Guid.Empty;
@@ -43,7 +43,7 @@ namespace System.Data.SqlClient
                 Registration = default;
             }
 
-            public void Deconstruct(out SqlCommand command,out Guid operationId, out TaskCompletionSource<int> source, out CancellationTokenRegistration registration)
+            internal void Deconstruct(out SqlCommand command,out Guid operationId, out TaskCompletionSource<int> source, out CancellationTokenRegistration registration)
             {
                 command = Command;
                 operationId = OperationId;
@@ -57,9 +57,9 @@ namespace System.Data.SqlClient
         {
             private static readonly Action<object> s_cancel = SqlCommand.ExecuteNonQueryAsyncCancel;
 
-            public readonly Func<AsyncCallback, object, IAsyncResult> Begin;
-            public readonly Func<IAsyncResult, T> End;
-            public readonly Action<Task<T>,object> Continuation;
+            internal readonly Func<AsyncCallback, object, IAsyncResult> Begin;
+            internal readonly Func<IAsyncResult, T> End;
+            internal readonly Action<Task<T>,object> Continuation;
 
             private TContext _cachedContext;
 
@@ -70,14 +70,14 @@ namespace System.Data.SqlClient
                 Continuation = continuation;
             }
 
-            public Action<object> Cancel => s_cancel;
+            internal Action<object> Cancel => s_cancel;
 
-            public TContext RentContext()
+            internal TContext RentContext()
             {
                 return Interlocked.Exchange<TContext>(ref _cachedContext, null) ?? new TContext();
             }
 
-            public void ReturnContext(TContext context)
+            internal void ReturnContext(TContext context)
             {
                 Interlocked.CompareExchange<TContext>(ref _cachedContext, context, null);
             }
