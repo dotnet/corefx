@@ -35,6 +35,7 @@ namespace System.Text.Json
         private static readonly int s_newLineLength = Environment.NewLine.Length;
 
         private const int DefaultGrowthSize = 4096;
+        private const int InitialGrowthSize = 256;
 
         private IBufferWriter<byte> _output;
         private Stream _stream;
@@ -997,33 +998,23 @@ namespace System.Text.Json
             Debug.Assert(_memory.Length == 0);
             Debug.Assert(BytesPending == 0);
 
-            int sizeHint = Math.Max(DefaultGrowthSize, requiredSize);
+            int sizeHint = Math.Max(InitialGrowthSize, requiredSize);
 
             if (_stream != null)
             {
                 Debug.Assert(_arrayBufferWriter != null);
                 Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
-                _memory = _arrayBufferWriter.GetMemory();
-
-                if (_memory.Length < requiredSize)
-                {
-                    _memory = _arrayBufferWriter.GetMemory(sizeHint);
-                    Debug.Assert(_memory.Length >= sizeHint);
-                }
+                _memory = _arrayBufferWriter.GetMemory(sizeHint);
+                Debug.Assert(_memory.Length >= sizeHint);
             }
             else
             {
                 Debug.Assert(_output != null);
-                _memory = _output.GetMemory();
+                _memory = _output.GetMemory(sizeHint);
 
-                if (_memory.Length < requiredSize)
+                if (_memory.Length < sizeHint)
                 {
-                    _memory = _output.GetMemory(sizeHint);
-
-                    if (_memory.Length < sizeHint)
-                    {
-                        ThrowHelper.ThrowInvalidOperationException_NeedLargerSpan();
-                    }
+                    ThrowHelper.ThrowInvalidOperationException_NeedLargerSpan();
                 }
             }
         }
