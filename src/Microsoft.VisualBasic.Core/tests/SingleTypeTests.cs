@@ -25,7 +25,6 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         public void FromObject_Other(string value, float expected)
         {
             Assert.Equal(expected, SingleType.FromObject(value));
-            Assert.Throws<InvalidCastException>(() => SingleType.FromObject(value, System.Globalization.NumberFormatInfo.InvariantInfo));
         }
 
         // The following conversions are not supported.
@@ -63,7 +62,6 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         public void FromString_Other(string value, float expected)
         {
             Assert.Equal(expected, SingleType.FromString(value));
-            Assert.Throws<InvalidCastException>(() => SingleType.FromString(value, System.Globalization.NumberFormatInfo.InvariantInfo));
         }
 
         // The following conversions are not supported.
@@ -238,7 +236,6 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
             yield return new object[] { "&o5", (float)5 };
             yield return new object[] { " &o5", (float)5 };
             yield return new object[] { "&o0", (float)0 };
-            yield return new object[] { 1.1.ToString(), (float)1.1 };
             yield return new object[] { "18446744073709551616", 18446744073709551616.0f };
             yield return new object[] { double.NaN.ToString(), float.NaN };
         }
