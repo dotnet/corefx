@@ -89,7 +89,7 @@ namespace System.Resources.Binary
                             throw new TypeLoadException(SR.Format(SR.TypeLoadException_CannotLoadConverter, type));
                         }
 
-                        value = converter.ConvertFrom(stringData);
+                        value = converter.ConvertFromInvariantString(stringData);
                         break;
                     }
                 case SerializationFormat.Stream:

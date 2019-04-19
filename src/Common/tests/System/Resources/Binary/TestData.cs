@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace System.Resources.Binary.Tests
@@ -119,6 +120,17 @@ namespace System.Resources.Binary.Tests
                 ["bitmap_stream"] = (typeof(Bitmap), File.OpenRead(Path.Combine("bitmaps", "almogaver24bits.bmp")))
             };
         }
+
+        public static string GetSerializationTypeName(Type runtimeType)
+        {
+            object[] typeAttributes = runtimeType.GetCustomAttributes(typeof(TypeForwardedFromAttribute), false);
+            if (typeAttributes != null && typeAttributes.Length > 0)
+            {
+                TypeForwardedFromAttribute typeForwardedFromAttribute = (TypeForwardedFromAttribute)typeAttributes[0];
+                return $"{runtimeType.FullName}, {typeForwardedFromAttribute.AssemblyFullName}";
+            }
+            return runtimeType.AssemblyQualifiedName;
+        }
         
         public static void WriteResources(string file)
         {
@@ -135,7 +147,7 @@ namespace System.Resources.Binary.Tests
                     using (MemoryStream memoryStream = new MemoryStream())
                     {
                         formatter.Serialize(memoryStream, pair.Value);
-                        writer.AddBinaryFormattedResource(pair.Key, pair.Value.GetType().AssemblyQualifiedName, memoryStream.ToArray());
+                        writer.AddBinaryFormattedResource(pair.Key, GetSerializationTypeName(pair.Value.GetType()), memoryStream.ToArray());
                     }
                 }
 
@@ -143,19 +155,19 @@ namespace System.Resources.Binary.Tests
                 {
                     TypeConverter converter = TypeDescriptor.GetConverter(pair.Value.GetType());
                     byte[] buffer = (byte[])converter.ConvertTo(pair.Value, typeof(byte[]));
-                    writer.AddTypeConverterResource(pair.Key, pair.Value.GetType().AssemblyQualifiedName, buffer);
+                    writer.AddTypeConverterResource(pair.Key, GetSerializationTypeName(pair.Value.GetType()), buffer);
                 }
 
                 foreach (var pair in StringConverterWithoutDrawing)
                 {
                     TypeConverter converter = TypeDescriptor.GetConverter(pair.Value.GetType());
-                    string value = (string)converter.ConvertTo(pair.Value, typeof(string));
-                    writer.AddTypeConverterResource(pair.Key, pair.Value.GetType().AssemblyQualifiedName, value);
+                    string value = converter.ConvertToInvariantString(pair.Value);
+                    writer.AddTypeConverterResource(pair.Key, GetSerializationTypeName(pair.Value.GetType()), value);
                 }
 
                 foreach(var pair in StreamWithoutDrawing)
                 {
-                    writer.AddStreamResource(pair.Key, pair.Value.type.AssemblyQualifiedName, pair.Value.stream, false);
+                    writer.AddStreamResource(pair.Key, GetSerializationTypeName(pair.Value.type), pair.Value.stream, false);
                 }
 
                 writer.Generate();

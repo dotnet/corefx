@@ -219,7 +219,7 @@ namespace System.Resources.Binary.Writer.Tests
                     using (MemoryStream memoryStream = new MemoryStream())
                     {
                         binaryFormatter.Serialize(memoryStream, pair.Value);
-                        writer.AddResourceData(pair.Key, pair.Value.GetType().AssemblyQualifiedName, memoryStream.ToArray());
+                        writer.AddResourceData(pair.Key, TestData.GetSerializationTypeName(pair.Value.GetType()), memoryStream.ToArray());
                     }
                 }
                 writer.Generate();
@@ -236,7 +236,7 @@ namespace System.Resources.Binary.Writer.Tests
                     using (MemoryStream memoryStream = new MemoryStream())
                     {
                         binaryFormatter.Serialize(memoryStream, pair.Value);
-                        writer.AddBinaryFormattedResource(pair.Key, pair.Value.GetType().AssemblyQualifiedName, memoryStream.ToArray());
+                        writer.AddBinaryFormattedResource(pair.Key, TestData.GetSerializationTypeName(pair.Value.GetType()), memoryStream.ToArray());
                     }
                 }
                 writer.Generate();
@@ -277,7 +277,7 @@ namespace System.Resources.Binary.Writer.Tests
                 {
                     TypeConverter converter = TypeDescriptor.GetConverter(pair.Value.GetType());
                     byte[] buffer = (byte[])converter.ConvertTo(pair.Value, typeof(byte[]));
-                    writer.AddTypeConverterResource(pair.Key, pair.Value.GetType().AssemblyQualifiedName, buffer);
+                    writer.AddTypeConverterResource(pair.Key, TestData.GetSerializationTypeName(pair.Value.GetType()), buffer);
                 }
                 writer.Generate();
                 binaryWriterBuffer = ms.ToArray();
@@ -295,7 +295,6 @@ namespace System.Resources.Binary.Writer.Tests
             }
         }
 
-
         [Fact]
         public static void TypeConverterStringResources()
         {
@@ -309,8 +308,8 @@ namespace System.Resources.Binary.Writer.Tests
                 foreach (var pair in values)
                 {
                     TypeConverter converter = TypeDescriptor.GetConverter(pair.Value.GetType());
-                    string value = (string)converter.ConvertTo(pair.Value, typeof(string));
-                    writer.AddTypeConverterResource(pair.Key, pair.Value.GetType().AssemblyQualifiedName, value);
+                    string value = converter.ConvertToInvariantString(pair.Value);
+                    writer.AddTypeConverterResource(pair.Key, TestData.GetSerializationTypeName(pair.Value.GetType()), value);
                 }
                 writer.Generate();
                 binaryWriterBuffer = ms.ToArray();
@@ -340,7 +339,7 @@ namespace System.Resources.Binary.Writer.Tests
             {
                 foreach (var pair in values)
                 {
-                    writer.AddStreamResource(pair.Key, pair.Value.type.AssemblyQualifiedName, pair.Value.stream, false);
+                    writer.AddStreamResource(pair.Key, TestData.GetSerializationTypeName(pair.Value.type), pair.Value.stream, false);
                 }
                 writer.Generate();
                 binaryWriterBuffer = ms.ToArray();
