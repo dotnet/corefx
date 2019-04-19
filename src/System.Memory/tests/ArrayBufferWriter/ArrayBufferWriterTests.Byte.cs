@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit;
@@ -14,7 +13,7 @@ namespace System.Buffers.Tests
         public override void WriteData(IBufferWriter<byte> bufferWriter, int numBytes)
         {
             Span<byte> outputSpan = bufferWriter.GetSpan(numBytes);
-            Debug.Assert(outputSpan.Length >= numBytes);
+            Assert.True(outputSpan.Length >= numBytes);
             var random = new Random(42);
 
             var data = new byte[numBytes];

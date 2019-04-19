@@ -19,6 +19,8 @@ namespace System.Buffers
         private T[] _buffer;
         private int _index;
 
+        private const int DefaultInitialBufferSize = 256;
+
         /// <summary>
         /// Creates an instance of an <see cref="ArrayBufferWriter{T}"/>, in which data can be written to,
         /// with the default initial capacity.
@@ -166,6 +168,11 @@ namespace System.Buffers
             if (sizeHint > FreeCapacity)
             {
                 int growBy = Math.Max(sizeHint, _buffer.Length);
+
+                if (_buffer.Length == 0)
+                {
+                    growBy = Math.Max(growBy, DefaultInitialBufferSize);
+                }
 
                 int newSize = checked(_buffer.Length + growBy);
 

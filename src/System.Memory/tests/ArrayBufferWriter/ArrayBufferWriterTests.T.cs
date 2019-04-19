@@ -105,7 +105,7 @@ namespace System.Buffers.Tests
                 ReadOnlyMemory<T> previousMemory = output.WrittenMemory;
                 ReadOnlySpan<T> previousSpan = output.WrittenSpan;
                 Assert.True(previousSpan.SequenceEqual(previousMemory.Span));
-                Assert.Throws<InvalidOperationException>(() => output.Advance(15));
+                Assert.Throws<InvalidOperationException>(() => output.Advance(247));
                 output.Advance(10);
                 Assert.False(previousMemory.Span.SequenceEqual(output.WrittenMemory.Span));
                 Assert.False(previousSpan.SequenceEqual(output.WrittenSpan));
@@ -145,33 +145,35 @@ namespace System.Buffers.Tests
             }
         }
 
+        [Fact]
+        public void GetSpan_DefaultCtor()
+        {
+            var output = new ArrayBufferWriter<T>();
+            Span<T> span = output.GetSpan();
+            Assert.Equal(256, span.Length);
+        }
+
         [Theory]
         [MemberData(nameof(SizeHints))]
         public void GetSpan_DefaultCtor(int sizeHint)
         {
-            {
-                var output = new ArrayBufferWriter<T>();
-                Span<T> span = output.GetSpan();
-                Assert.Equal(1, span.Length);
-            }
+            var output = new ArrayBufferWriter<T>();
+            Span<T> span = output.GetSpan(sizeHint);
+            Assert.Equal(sizeHint <= 256 ? 256 : sizeHint, span.Length);
+        }
 
-            {
-                var output = new ArrayBufferWriter<T>();
-                Span<T> span = output.GetSpan(sizeHint);
-                Assert.Equal(sizeHint == 0 ? 1 : sizeHint, span.Length);
-            }
+        [Fact]
+        public void GetSpan_InitSizeCtor()
+        {
+            var output = new ArrayBufferWriter<T>(100);
+            Span<T> span = output.GetSpan();
+            Assert.Equal(100, span.Length);
         }
 
         [Theory]
         [MemberData(nameof(SizeHints))]
         public void GetSpan_InitSizeCtor(int sizeHint)
         {
-            {
-                var output = new ArrayBufferWriter<T>(100);
-                Span<T> span = output.GetSpan();
-                Assert.Equal(100, span.Length);
-            }
-
             {
                 var output = new ArrayBufferWriter<T>(256);
                 Span<T> span = output.GetSpan(sizeHint);
@@ -185,33 +187,35 @@ namespace System.Buffers.Tests
             }
         }
 
+        [Fact]
+        public void GetMemory_DefaultCtor()
+        {
+            var output = new ArrayBufferWriter<T>();
+            Memory<T> memory = output.GetMemory();
+            Assert.Equal(256, memory.Length);
+        }
+
         [Theory]
         [MemberData(nameof(SizeHints))]
         public void GetMemory_DefaultCtor(int sizeHint)
         {
-            {
-                var output = new ArrayBufferWriter<T>();
-                Memory<T> memory = output.GetMemory();
-                Assert.Equal(1, memory.Length);
-            }
+            var output = new ArrayBufferWriter<T>();
+            Memory<T> memory = output.GetMemory(sizeHint);
+            Assert.Equal(sizeHint <= 256 ? 256 : sizeHint, memory.Length);
+        }
 
-            {
-                var output = new ArrayBufferWriter<T>();
-                Memory<T> memory = output.GetMemory(sizeHint);
-                Assert.Equal(sizeHint == 0 ? 1 : sizeHint, memory.Length);
-            }
+        [Fact]
+        public void GetMemory_InitSizeCtor()
+        {
+            var output = new ArrayBufferWriter<T>(100);
+            Memory<T> memory = output.GetMemory();
+            Assert.Equal(100, memory.Length);
         }
 
         [Theory]
         [MemberData(nameof(SizeHints))]
         public void GetMemory_InitSizeCtor(int sizeHint)
         {
-            {
-                var output = new ArrayBufferWriter<T>(100);
-                Memory<T> memory = output.GetMemory();
-                Assert.Equal(100, memory.Length);
-            }
-
             {
                 var output = new ArrayBufferWriter<T>(256);
                 Memory<T> memory = output.GetMemory(sizeHint);
@@ -225,7 +229,7 @@ namespace System.Buffers.Tests
             }
         }
 
-        public bool IsX64 { get; } = IntPtr.Size >= 8;
+        public bool IsX64 { get; } = IntPtr.Size == 8;
 
         [ConditionalFact(nameof(IsX64))]
         [OuterLoop]

@@ -9,6 +9,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
+#if !BUILDING_INBOX_LIBRARY
+using System.Runtime.InteropServices;
+#endif
+
 namespace System.Text.Json
 {
     /// <summary>
@@ -282,8 +286,11 @@ namespace System.Text.Json
 #if BUILDING_INBOX_LIBRARY
                     _stream.Write(_arrayBufferWriter.WrittenSpan);
 #else
-                    Debug.Assert(_arrayBufferWriter.WrittenSpan.Length == _arrayBufferWriter.WrittenCount);
-                    _stream.Write(_arrayBufferWriter.WrittenSpan.ToArray(), 0, _arrayBufferWriter.WrittenCount);
+                    Debug.Assert(_arrayBufferWriter.WrittenMemory.Length == _arrayBufferWriter.WrittenCount);
+                    bool result = MemoryMarshal.TryGetArray(_arrayBufferWriter.WrittenMemory, out ArraySegment<byte> underlyingBuffer);
+                    Debug.Assert(underlyingBuffer.Offset == 0);
+                    Debug.Assert(_arrayBufferWriter.WrittenCount == underlyingBuffer.Count);
+                    _stream.Write(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count);
 #endif
                     _arrayBufferWriter.Clear();
                 }
@@ -315,9 +322,13 @@ namespace System.Text.Json
         /// </remarks>
         public void Dispose()
         {
-            if (_output == null && _stream == null)
+            if (_stream == null)
             {
-                return;
+                // The conditions are ordered with stream first as that would be the most common mode
+                if (_output == null)
+                {
+                    return;
+                }
             }
 
             Flush();
@@ -341,9 +352,13 @@ namespace System.Text.Json
         /// </remarks>
         public async ValueTask DisposeAsync()
         {
-            if (_output == null && _stream == null)
+            if (_stream == null)
             {
-                return;
+                // The conditions are ordered with stream first as that would be the most common mode
+                if (_output == null)
+                {
+                    return;
+                }
             }
 
             await FlushAsync().ConfigureAwait(false);
@@ -380,7 +395,10 @@ namespace System.Text.Json
                     await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
                     Debug.Assert(_arrayBufferWriter.WrittenMemory.Length == _arrayBufferWriter.WrittenCount);
-                    await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory.ToArray(), 0, _arrayBufferWriter.WrittenCount, cancellationToken).ConfigureAwait(false);
+                    bool result = MemoryMarshal.TryGetArray(_arrayBufferWriter.WrittenMemory, out ArraySegment<byte> underlyingBuffer);
+                    Debug.Assert(underlyingBuffer.Offset == 0);
+                    Debug.Assert(_arrayBufferWriter.WrittenCount == underlyingBuffer.Count);
+                    await _stream.WriteAsync(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count, cancellationToken).ConfigureAwait(false);
 #endif
                     _arrayBufferWriter.Clear();
                 }
@@ -966,8 +984,11 @@ namespace System.Text.Json
 #if BUILDING_INBOX_LIBRARY
                 _stream.Write(_arrayBufferWriter.WrittenSpan);
 #else
-                Debug.Assert(_arrayBufferWriter.WrittenSpan.Length == _arrayBufferWriter.WrittenCount);
-                _stream.Write(_arrayBufferWriter.WrittenSpan.ToArray(), 0, _arrayBufferWriter.WrittenCount);
+                Debug.Assert(_arrayBufferWriter.WrittenMemory.Length == _arrayBufferWriter.WrittenCount);
+                bool result = MemoryMarshal.TryGetArray(_arrayBufferWriter.WrittenMemory, out ArraySegment<byte> underlyingBuffer);
+                Debug.Assert(underlyingBuffer.Offset == 0);
+                Debug.Assert(_arrayBufferWriter.WrittenCount == underlyingBuffer.Count);
+                _stream.Write(underlyingBuffer.Array, underlyingBuffer.Offset, underlyingBuffer.Count);
 #endif
                 _arrayBufferWriter.Clear();
 
