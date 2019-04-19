@@ -282,6 +282,10 @@ namespace System.Drawing
                     {
                         name = name.Substring(indexDot + 1);
                     }
+
+                    // All bitmap images from winforms runtime are changed to Icons
+                    // and logical names, now, does not contain any extension.
+                    rawbmpname = name;
                     iconname = name + ".ico";
                     bmpname = name + ".bmp";
                 }
