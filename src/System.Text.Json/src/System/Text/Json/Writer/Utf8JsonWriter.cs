@@ -132,7 +132,7 @@ namespace System.Text.Json
 
             _stream = utf8Json;
             _arrayBufferWriter = new ArrayBufferWriter<byte>();
-            _output = _arrayBufferWriter;
+            _output = default;
 
             BytesPending = default;
             BytesCommitted = default;
@@ -156,12 +156,14 @@ namespace System.Text.Json
         /// The <see cref="Utf8JsonWriter"/> will continue to use the original writer options
         /// and the original output as the destination (either <see cref="IBufferWriter{Byte}" /> or <see cref="Stream" />).
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">
+        ///   The instance of <see cref="Utf8JsonWriter"/> has been disposed.
+        /// </exception>
         public void Reset()
         {
-            if (_arrayBufferWriter != null)
-            {
-                _arrayBufferWriter.Clear();
-            }
+            CheckNotDisposed();
+
+            _arrayBufferWriter?.Clear();
             ResetHelper();
         }
 
@@ -197,7 +199,7 @@ namespace System.Text.Json
             {
                 _arrayBufferWriter.Clear();
             }
-            _output = _arrayBufferWriter;
+            _output = null;
 
             ResetHelper();
         }
@@ -221,14 +223,8 @@ namespace System.Text.Json
             CheckNotDisposed();
 
             _output = bufferWriter ?? throw new ArgumentNullException(nameof(bufferWriter));
-            _stream = default;
-
-            if (_arrayBufferWriter != null)
-            {
-                _arrayBufferWriter.Clear();
-            }
-
-            _arrayBufferWriter = default;
+            _stream = null;
+            _arrayBufferWriter = null;
 
             ResetHelper();
         }
@@ -251,9 +247,13 @@ namespace System.Text.Json
 
         private void CheckNotDisposed()
         {
-            if (_output == null)
+            if (_stream == null)
             {
-                throw new ObjectDisposedException(nameof(Utf8JsonWriter));
+                // The conditions are ordered with stream first as that would be the most common mode
+                if (_output == null)
+                {
+                    throw new ObjectDisposedException(nameof(Utf8JsonWriter));
+                }
             }
         }
 
@@ -264,14 +264,37 @@ namespace System.Text.Json
         /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
         /// In the case of Stream, this writes the data to the stream and flushes it.
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">
+        ///   The instance of <see cref="Utf8JsonWriter"/> has been disposed.
+        /// </exception>
         public void Flush()
         {
-            FlushHelper();
+            CheckNotDisposed();
 
             if (_stream != null)
             {
-                FlushHelperStream();
+                Debug.Assert(_arrayBufferWriter != null);
+                if (BytesPending != 0)
+                {
+                    _arrayBufferWriter.Advance(BytesPending);
+                    Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
+#if BUILDING_INBOX_LIBRARY
+                    _stream.Write(_arrayBufferWriter.WrittenSpan);
+#else
+                    Debug.Assert(_arrayBufferWriter.WrittenSpan.Length == _arrayBufferWriter.WrittenCount);
+                    _stream.Write(_arrayBufferWriter.WrittenSpan.ToArray(), 0, _arrayBufferWriter.WrittenCount);
+#endif
+                    _arrayBufferWriter.Clear();
+                }
                 _stream.Flush();
+            }
+            else
+            {
+                Debug.Assert(_output != null);
+                if (BytesPending != 0)
+                {
+                    _output.Advance(BytesPending);
+                }
             }
 
             _memory = default;
@@ -291,7 +314,7 @@ namespace System.Text.Json
         /// </remarks>
         public void Dispose()
         {
-            if (_output == null)
+            if (_output == null && _stream == null)
             {
                 return;
             }
@@ -317,7 +340,7 @@ namespace System.Text.Json
         /// </remarks>
         public async ValueTask DisposeAsync()
         {
-            if (_output == null)
+            if (_output == null && _stream == null)
             {
                 return;
             }
@@ -338,16 +361,20 @@ namespace System.Text.Json
         /// In the case of IBufferWriter, this advances the underlying <see cref="IBufferWriter{Byte}" /> based on what has been written so far.
         /// In the case of Stream, this writes the data to the stream and flushes it asynchronously, while monitoring cancellation requests.
         /// </remarks>
+        /// <exception cref="ObjectDisposedException">
+        ///   The instance of <see cref="Utf8JsonWriter"/> has been disposed.
+        /// </exception>
         public async Task FlushAsync(CancellationToken cancellationToken = default)
         {
-            FlushHelper();
+            CheckNotDisposed();
 
             if (_stream != null)
             {
                 Debug.Assert(_arrayBufferWriter != null);
-                Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
                 if (BytesPending != 0)
                 {
+                    _arrayBufferWriter.Advance(BytesPending);
+                    Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
 #if BUILDING_INBOX_LIBRARY
                     await _stream.WriteAsync(_arrayBufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
@@ -358,33 +385,18 @@ namespace System.Text.Json
                 }
                 await _stream.FlushAsync(cancellationToken).ConfigureAwait(false);
             }
+            else
+            {
+                Debug.Assert(_output != null);
+                if (BytesPending != 0)
+                {
+                    _output.Advance(BytesPending);
+                }
+            }
 
             _memory = default;
             BytesCommitted += BytesPending;
             BytesPending = 0;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void FlushHelperStream()
-        {
-            Debug.Assert(_arrayBufferWriter != null);
-            Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
-            if (BytesPending != 0)
-            {
-#if BUILDING_INBOX_LIBRARY
-                _stream.Write(_arrayBufferWriter.WrittenSpan);
-#else
-                Debug.Assert(_arrayBufferWriter.WrittenSpan.Length == _arrayBufferWriter.WrittenCount);
-                _stream.Write(_arrayBufferWriter.WrittenSpan.ToArray(), 0, _arrayBufferWriter.WrittenCount);
-#endif
-                _arrayBufferWriter.Clear();
-            }
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void FlushHelper()
-        {
-            _output.Advance(BytesPending);
         }
 
         /// <summary>
@@ -934,27 +946,40 @@ namespace System.Text.Json
 
             if (_memory.Length == 0)
             {
-                Debug.Assert(BytesPending == 0);
-                _memory = _output.GetMemory();
-                if (_memory.Length >= requiredSize)
-                {
-                    return;
-                }
+                FirstCallToGetMemory(requiredSize);
+                return;
             }
-
-            FlushHelper();
 
             int sizeHint = Math.Max(DefaultGrowthSize, requiredSize);
 
+            Debug.Assert(BytesPending != 0);
+
             if (_stream != null)
             {
-                FlushHelperStream();
-                _memory = _output.GetMemory(sizeHint);
+                Debug.Assert(_arrayBufferWriter != null);
+
+                _arrayBufferWriter.Advance(BytesPending);
+
+                Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
+
+#if BUILDING_INBOX_LIBRARY
+                _stream.Write(_arrayBufferWriter.WrittenSpan);
+#else
+                Debug.Assert(_arrayBufferWriter.WrittenSpan.Length == _arrayBufferWriter.WrittenCount);
+                _stream.Write(_arrayBufferWriter.WrittenSpan.ToArray(), 0, _arrayBufferWriter.WrittenCount);
+#endif
+                _arrayBufferWriter.Clear();
+
+                _memory = _arrayBufferWriter.GetMemory(sizeHint);
 
                 Debug.Assert(_memory.Length >= sizeHint);
             }
             else
             {
+                Debug.Assert(_output != null);
+
+                _output.Advance(BytesPending);
+
                 _memory = _output.GetMemory(sizeHint);
 
                 if (_memory.Length < sizeHint)
@@ -965,6 +990,42 @@ namespace System.Text.Json
 
             BytesCommitted += BytesPending;
             BytesPending = 0;
+        }
+
+        private void FirstCallToGetMemory(int requiredSize)
+        {
+            Debug.Assert(_memory.Length == 0);
+            Debug.Assert(BytesPending == 0);
+
+            int sizeHint = Math.Max(DefaultGrowthSize, requiredSize);
+
+            if (_stream != null)
+            {
+                Debug.Assert(_arrayBufferWriter != null);
+                Debug.Assert(BytesPending == _arrayBufferWriter.WrittenCount);
+                _memory = _arrayBufferWriter.GetMemory();
+
+                if (_memory.Length < requiredSize)
+                {
+                    _memory = _arrayBufferWriter.GetMemory(sizeHint);
+                    Debug.Assert(_memory.Length >= sizeHint);
+                }
+            }
+            else
+            {
+                Debug.Assert(_output != null);
+                _memory = _output.GetMemory();
+
+                if (_memory.Length < requiredSize)
+                {
+                    _memory = _output.GetMemory(sizeHint);
+
+                    if (_memory.Length < sizeHint)
+                    {
+                        ThrowHelper.ThrowInvalidOperationException_NeedLargerSpan();
+                    }
+                }
+            }
         }
 
         private void SetFlagToAddListSeparatorBeforeNextItem()
