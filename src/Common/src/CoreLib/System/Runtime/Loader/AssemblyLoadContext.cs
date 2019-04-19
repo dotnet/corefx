@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 
@@ -51,11 +51,11 @@ namespace System.Runtime.Loader
         {
         }
 
-        public AssemblyLoadContext(string name, bool isCollectible = false) : this(false, isCollectible, name)
+        public AssemblyLoadContext(string? name, bool isCollectible = false) : this(false, isCollectible, name)
         {
         }
 
-        private protected AssemblyLoadContext(bool representsTPALoadContext, bool isCollectible, string name)
+        private protected AssemblyLoadContext(bool representsTPALoadContext, bool isCollectible, string? name)
         {
             // Initialize the VM side of AssemblyLoadContext if not already done.
             IsCollectible = isCollectible;
@@ -103,7 +103,7 @@ namespace System.Runtime.Loader
         private void RaiseUnloadEvent()
         {
             // Ensure that we raise the Unload event only once
-            Interlocked.Exchange(ref Unloading, null)?.Invoke(this);
+            Interlocked.Exchange(ref Unloading, null!)?.Invoke(this); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
         }
 
         private void InitiateUnload()
@@ -137,7 +137,7 @@ namespace System.Runtime.Loader
             {
                 foreach (Assembly a in GetLoadedAssemblies())
                 {
-                    AssemblyLoadContext alc = GetLoadContext(a);
+                    AssemblyLoadContext? alc = GetLoadContext(a);
 
                     if (alc == this)
                     {
@@ -150,7 +150,7 @@ namespace System.Runtime.Loader
         // Event handler for resolving native libraries.
         // This event is raised if the native library could not be resolved via
         // the default resolution logic [including AssemblyLoadContext.LoadUnmanagedDll()]
-        // 
+        //
         // Inputs: Invoking assembly, and library name to resolve
         // Returns: A handle to the loaded native library
         public event Func<Assembly, string, IntPtr> ResolvingUnmanagedDll;
@@ -158,7 +158,7 @@ namespace System.Runtime.Loader
         // Event handler for resolving managed assemblies.
         // This event is raised if the managed assembly could not be resolved via
         // the default resolution logic [including AssemblyLoadContext.Load()]
-        // 
+        //
         // Inputs: The AssemblyLoadContext and AssemblyName to be loaded
         // Returns: The Loaded assembly object.
         public event Func<AssemblyLoadContext, AssemblyName, Assembly> Resolving;
@@ -182,7 +182,7 @@ namespace System.Runtime.Loader
 
         public bool IsCollectible { get; }
 
-        public string Name { get; }
+        public string? Name { get; }
 
         public override string ToString() => "\"" + Name + "\" " + GetType().ToString() + " #" + _id;
 
@@ -190,9 +190,9 @@ namespace System.Runtime.Loader
         {
             get
             {
-                AssemblyLoadContext d = AssemblyLoadContext.Default; // Ensure default is initialized
+                _ = AssemblyLoadContext.Default; // Ensure default is initialized
 
-                List<WeakReference<AssemblyLoadContext>> alcList = null;
+                List<WeakReference<AssemblyLoadContext>>? alcList = null;
                 lock (s_allContexts)
                 {
                     // To make this thread safe we need a quick snapshot while locked
@@ -201,7 +201,7 @@ namespace System.Runtime.Loader
 
                 foreach (WeakReference<AssemblyLoadContext> weakAlc in alcList)
                 {
-                    AssemblyLoadContext alc = null;
+                    AssemblyLoadContext? alc = null;
 
                     weakAlc.TryGetTarget(out alc);
 
@@ -227,7 +227,7 @@ namespace System.Runtime.Loader
         // Custom AssemblyLoadContext implementations can override this
         // method to perform custom processing and use one of the protected
         // helpers above to load the assembly.
-        protected virtual Assembly Load(AssemblyName assemblyName)
+        protected virtual Assembly? Load(AssemblyName assemblyName)
         {
             return null;
         }
@@ -243,7 +243,7 @@ namespace System.Runtime.Loader
             return Assembly.Load(assemblyName, ref stackMark, _nativeAssemblyLoadContext);
         }
 
-        // These methods load assemblies into the current AssemblyLoadContext 
+        // These methods load assemblies into the current AssemblyLoadContext
         // They may be used in the implementation of an AssemblyLoadContext derivation
         public Assembly LoadFromAssemblyPath(string assemblyPath)
         {
@@ -265,7 +265,7 @@ namespace System.Runtime.Loader
             }
         }
 
-        public Assembly LoadFromNativeImagePath(string nativeImagePath, string assemblyPath)
+        public Assembly LoadFromNativeImagePath(string nativeImagePath, string? assemblyPath)
         {
             if (nativeImagePath == null)
             {
@@ -288,14 +288,14 @@ namespace System.Runtime.Loader
 
                 return InternalLoadFromPath(assemblyPath, nativeImagePath);
             }
-        }        
+        }
 
         public Assembly LoadFromStream(Stream assembly)
         {
             return LoadFromStream(assembly, null);
         }
 
-        public Assembly LoadFromStream(Stream assembly, Stream assemblySymbols)
+        public Assembly LoadFromStream(Stream assembly, Stream? assemblySymbols)
         {
             if (assembly == null)
             {
@@ -316,7 +316,7 @@ namespace System.Runtime.Loader
             assembly.Read(arrAssembly, 0, iAssemblyStreamLength);
 
             // Get the symbol stream in byte[] if provided
-            byte[] arrSymbols = null;
+            byte[]? arrSymbols = null;
             if (assemblySymbols != null)
             {
                 var iSymbolLength = (int)assemblySymbols.Length;
@@ -362,7 +362,7 @@ namespace System.Runtime.Loader
         {
             //defer to default coreclr policy of loading unmanaged dll
             return IntPtr.Zero;
-        }        
+        }
 
         public void Unload()
         {
@@ -387,7 +387,7 @@ namespace System.Runtime.Loader
                     }
                 }
             }
-        }        
+        }
 
         private void VerifyIsAlive()
         {

@@ -100,6 +100,17 @@ namespace Microsoft.VisualBasic
         public static System.DateTime Now { get { throw null; } }
         public static System.DateTime Today { get { throw null; } }
     }
+    public sealed partial class ErrObject
+    {
+        internal ErrObject() { }
+        public void Clear() { }
+        public string Description { get { throw null; } set { } }
+        public int Erl { get { throw null; } }
+        public System.Exception GetException() { throw null; }
+        public int LastDllError { get { throw null; } }
+        public int Number { get { throw null; } set { } }
+        public void Raise(int Number, object Source = null, object Description = null, object HelpFile = null, object HelpContext = null) { }
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class HideModuleNameAttribute : System.Attribute
@@ -110,6 +121,7 @@ namespace Microsoft.VisualBasic
     public sealed partial class Information
     {
         internal Information() { }
+        public static ErrObject Err() { throw null; }
         public static bool IsArray(object VarName) { throw null; }
         public static bool IsDate(object Expression) { throw null; }
         public static bool IsDBNull(object Expression) { throw null; }
@@ -254,6 +266,13 @@ namespace Microsoft.VisualBasic.CompilerServices
         internal BooleanType() { }
         public static bool FromObject(object Value) { throw null; }
         public static bool FromString(string Value) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class CharArrayType
+    {
+        internal CharArrayType() { }
+        public static char[] FromObject(object Value) { throw null; }
+        public static char[] FromString(string Value) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class Conversions
@@ -467,6 +486,7 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         internal ProjectData() { }
         public static void ClearProjectError() { }
+        public static System.Exception CreateProjectError(int hr) { throw null; }
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }
@@ -481,6 +501,30 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         public short State;
         public StaticLocalInitFlag() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class StringType
+    {
+        internal StringType() { }
+        public static string FromBoolean(bool Value) { throw null; }
+        public static string FromByte(byte Value) { throw null; }
+        public static string FromChar(char Value) { throw null; }
+        public static string FromDate(System.DateTime Value) { throw null; }
+        public static string FromDecimal(decimal Value) { throw null; }
+        public static string FromDecimal(decimal Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static string FromDouble(double Value) { throw null; }
+        public static string FromDouble(double Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static string FromInteger(int Value) { throw null; }
+        public static string FromLong(long Value) { throw null; }
+        public static string FromObject(object Value) { throw null; }
+        public static string FromShort(short Value) { throw null; }
+        public static string FromSingle(float Value) { throw null; }
+        public static string FromSingle(float Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static void MidStmtStr(ref string sDest, int StartPosition, int MaxInsertLength, string sInsert) { throw null; }
+        public static int StrCmp(string sLeft, string sRight, bool TextCompare) { throw null; }
+        public static bool StrLike(string Source, string Pattern, Microsoft.VisualBasic.CompareMethod CompareOption) { throw null; }
+        public static bool StrLikeBinary(string Source, string Pattern) { throw null; }
+        public static bool StrLikeText(string Source, string Pattern) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class Utils

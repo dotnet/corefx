@@ -9,21 +9,28 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class NullTests
     {
         [Fact]
-        public static void DefaultWriteOptions()
+        public static void DefaultIgnoreNullValuesOnWrite()
         {
-            var input = new TestClassWithNull();
-            string json = JsonSerializer.ToString(input);
-            Assert.Equal(@"{""MyString"":null}", json);
+            var obj = new TestClassWithInitializedProperties();
+            obj.MyString = null;
+            obj.MyInt = null;
+
+            string json = JsonSerializer.ToString(obj);
+            Assert.Contains(@"""MyString"":null", json);
+            Assert.Contains(@"""MyInt"":null", json);
         }
 
         [Fact]
-        public static void OverrideWriteOnOption()
+        public static void EnableIgnoreNullValuesOnWrite()
         {
             JsonSerializerOptions options = new JsonSerializerOptions();
-            options.IgnoreNullPropertyValueOnWrite = true;
+            options.IgnoreNullValues = true;
 
-            var input = new TestClassWithNull();
-            string json = JsonSerializer.ToString(input, options);
+            var obj = new TestClassWithInitializedProperties();
+            obj.MyString = null;
+            obj.MyInt = null;
+
+            string json = JsonSerializer.ToString(obj, options);
             Assert.Equal(@"{}", json);
         }
 
@@ -34,6 +41,11 @@ namespace System.Text.Json.Serialization.Tests
             obj.Address = null;
             obj.Array = null;
             obj.List = null;
+            obj.IEnumerableT = null;
+            obj.IListT = null;
+            obj.ICollectionT = null;
+            obj.IReadOnlyCollectionT = null;
+            obj.IReadOnlyListT = null;
             obj.NullableInt = null;
             obj.NullableIntArray = null;
             obj.Object = null;
@@ -42,6 +54,11 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Contains(@"""Address"":null", json);
             Assert.Contains(@"""List"":null", json);
             Assert.Contains(@"""Array"":null", json);
+            Assert.Contains(@"""IEnumerableT"":null", json);
+            Assert.Contains(@"""IListT"":null", json);
+            Assert.Contains(@"""ICollectionT"":null", json);
+            Assert.Contains(@"""IReadOnlyCollectionT"":null", json);
+            Assert.Contains(@"""IReadOnlyListT"":null", json);
             Assert.Contains(@"""NullableInt"":null", json);
             Assert.Contains(@"""Object"":null", json);
             Assert.Contains(@"""NullableIntArray"":null", json);

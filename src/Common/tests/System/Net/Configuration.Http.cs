@@ -42,6 +42,7 @@ namespace System.Net.Test.Common
             public static string RevokedCertRemoteServer => GetValue("COREFX_HTTPHOST_REVOKEDCERT", "https://revoked.badssl.com/");
 
             public static string EchoClientCertificateRemoteServer => GetValue("COREFX_HTTPHOST_ECHOCLIENTCERT", "https://corefx-net-tls.azurewebsites.net/EchoClientCertificate.ashx");
+            public static string Http2ForceUnencryptedLoopback => GetValue("COREFX_HTTP2_FORCEUNENCRYPTEDLOOPBACK");
 
             private const string HttpScheme = "http";
             private const string HttpsScheme = "https";
@@ -61,6 +62,7 @@ namespace System.Net.Test.Common
             public static readonly Uri RemoteVerifyUploadServer = new Uri("http://" + Host + "/" + VerifyUploadHandler);
             public static readonly Uri SecureRemoteVerifyUploadServer = new Uri("https://" + SecureHost + "/" + VerifyUploadHandler);
             public static readonly Uri Http2RemoteVerifyUploadServer = new Uri("https://" + Http2Host + "/" + VerifyUploadHandler);
+            public static readonly Uri[] VerifyUploadServerList = new Uri[] { RemoteVerifyUploadServer, SecureRemoteVerifyUploadServer, Http2RemoteVerifyUploadServer };
 
             public static readonly Uri RemoteEmptyContentServer = new Uri("http://" + Host + "/" + EmptyContentHandler);
             public static readonly Uri RemoteDeflateServer = new Uri("http://" + Host + "/" + DeflateHandler);

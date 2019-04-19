@@ -29,7 +29,6 @@ namespace System.Net.Http.Functional.Tests
     // to separately Dispose (or have a 'using' statement) for the handler.
     public abstract class HttpClientHandlerTest : HttpClientHandlerTestBase
     {
-        readonly ITestOutputHelper _output;
         private const string ExpectedContent = "Test content";
         private const string Username = "testuser";
         private const string Password = "password";
@@ -64,12 +63,11 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        public HttpClientHandlerTest(ITestOutputHelper output)
+        public HttpClientHandlerTest(ITestOutputHelper output) : base(output)
         {
-            _output = output;
             if (PlatformDetection.IsFullFramework)
             {
-                // On .NET Framework, the default limit for connections/server is very low (2). 
+                // On .NET Framework, the default limit for connections/server is very low (2).
                 // On .NET Core, the default limit is higher. Since these tests run in parallel,
                 // the limit needs to be increased to avoid timeouts when running the tests.
                 System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
@@ -249,48 +247,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses external server")]
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task SendAsync_GetWithValidHostHeader_Success(bool withPort)
-        {
-            var m = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
-            m.Headers.Host = withPort ? Configuration.Http.SecureHost + ":123" : Configuration.Http.SecureHost;
-
-            using (HttpClient client = CreateHttpClient())
-            using (HttpResponseMessage response = await client.SendAsync(m))
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                _output.WriteLine(responseContent);
-                TestHelper.VerifyResponseBody(
-                    responseContent,
-                    response.Content.Headers.ContentMD5,
-                    false,
-                    null);
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task SendAsync_GetWithInvalidHostHeader_ThrowsException()
-        {
-            if (PlatformDetection.IsNetCore && (!UseSocketsHttpHandler || LoopbackServerFactory.IsHttp2))
-            {
-                // Only .NET Framework and SocketsHttpHandler with HTTP/1.x use the Host header to influence the SSL auth.
-                // Host header is not used for HTTP2
-                return;
-            }
-
-            var m = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
-            m.Headers.Host = "hostheaderthatdoesnotmatch";
-
-            using (HttpClient client = CreateHttpClient())
-            {
-                await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(m));
-            }
-        }
-
         [ActiveIssue(22158, TargetFrameworkMonikers.Uap)]
         [Fact]
         public async Task GetAsync_IPv6LinkLocalAddressUri_Success()
@@ -364,35 +320,6 @@ namespace System.Net.Http.Functional.Tests
                 string responseContent = await response.Content.ReadAsStringAsync();
                 _output.WriteLine(responseContent);
                 TestHelper.VerifyResponseBody(responseContent, response.Content.Headers.ContentMD5, false, null);
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task SendAsync_Cancel_CancellationTokenPropagates()
-        {
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
-            using (HttpClient client = CreateHttpClient())
-            {
-                var request = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer);
-                Task t = client.SendAsync(request, cts.Token);
-                OperationCanceledException ex;
-                if (PlatformDetection.IsUap)
-                {
-                    ex = await Assert.ThrowsAsync<OperationCanceledException>(() => t);
-                }
-                else
-                {
-                    ex = await Assert.ThrowsAsync<TaskCanceledException>(() => t);
-                }
-
-                Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
-                if (!PlatformDetection.IsFullFramework)
-                {
-                    // .NET Framework has bug where it doesn't propagate token information.
-                    Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
-                }
             }
         }
 
@@ -2275,7 +2202,13 @@ namespace System.Net.Http.Functional.Tests
 
         public async Task PostAsync_Redirect_LargePayload_Helper(int statusCode, bool expectRedirectToPost)
         {
-            using (var fs = new FileStream(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
+            using (var fs = new FileStream(
+                Path.Combine(Path.GetTempPath(), Path.GetTempFileName()),
+                FileMode.Create,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                0x1000,
+                FileOptions.DeleteOnClose))
             {
                 string contentString = string.Join("", Enumerable.Repeat("Content", 100000));
                 byte[] contentBytes = Encoding.UTF32.GetBytes(contentString);
@@ -2283,10 +2216,18 @@ namespace System.Net.Http.Functional.Tests
                 fs.Flush(flushToDisk: true);
                 fs.Position = 0;
 
-                Uri redirectUri = Configuration.Http.RedirectUriForDestinationUri(false, statusCode, Configuration.Http.SecureRemoteEchoServer, 1);
+                Uri redirectUri = Configuration.Http.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: statusCode,
+                    destinationUri: Configuration.Http.SecureRemoteVerifyUploadServer,
+                    hops: 1);
+                var content = new StreamContent(fs);
+
+                // Compute MD5 of request body data. This will be verified by the server when it receives the request.
+                content.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(contentBytes);
 
                 using (HttpClient client = CreateHttpClient())
-                using (HttpResponseMessage response = await client.PostAsync(redirectUri, new StreamContent(fs)))
+                using (HttpResponseMessage response = await client.PostAsync(redirectUri, content))
                 {
                     try
                     {
@@ -2300,7 +2241,8 @@ namespace System.Net.Http.Functional.Tests
 
                     if (expectRedirectToPost)
                     {
-                        Assert.InRange(response.Content.Headers.ContentLength.GetValueOrDefault(), contentBytes.Length, int.MaxValue);
+                        IEnumerable<string> headerValue = response.Headers.GetValues("X-HttpRequest-Method");
+                        Assert.Equal("POST", headerValue.First());
                     }
                 }
             }
@@ -2673,29 +2615,6 @@ namespace System.Net.Http.Functional.Tests
             });
         }
         #endregion
-
-        [Fact]
-        public async Task SendAsync_UserAgent_CorrectlyWritten()
-        {
-            string userAgent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/63.0.3239.18 Safari/537.36";
-
-            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
-            {
-                using (var client = CreateHttpClient())
-                {
-                    var message = new HttpRequestMessage(HttpMethod.Get, uri);
-                    message.Headers.TryAddWithoutValidation("User-Agent", userAgent);
-                    (await client.SendAsync(message).ConfigureAwait(false)).Dispose();
-                }
-            },
-            async server =>
-            {
-                HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK);
-
-                string agent = requestData.GetSingleHeaderValue("User-Agent");
-                Assert.Equal(userAgent, agent);
-            });
-        }
 
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public async Task GetAsync_InvalidUrl_ExpectedExceptionThrown()

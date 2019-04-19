@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -33,13 +34,6 @@ namespace System.Text
         {
             _encoding = encoding;
             _fallback = this._encoding.DecoderFallback;
-            this.Reset();
-        }
-
-        // This is used by our child deserializers
-        internal DecoderNLS()
-        {
-            _encoding = null;
             this.Reset();
         }
 
@@ -90,6 +84,7 @@ namespace System.Text
             _throwOnOverflow = true;
 
             // By default just call the encoding version, no flush by default
+            Debug.Assert(_encoding != null);
             return _encoding.GetCharCount(bytes, count, this);
         }
 
@@ -146,6 +141,7 @@ namespace System.Text
             _throwOnOverflow = true;
 
             // By default just call the encodings version
+            Debug.Assert(_encoding != null);
             return _encoding.GetChars(bytes, byteCount, chars, charCount, this);
         }
 
@@ -208,6 +204,7 @@ namespace System.Text
             _bytesUsed = 0;
 
             // Do conversion
+            Debug.Assert(_encoding != null);
             charsUsed = _encoding.GetChars(bytes, byteCount, chars, charCount, this);
             bytesUsed = _bytesUsed;
 
@@ -266,6 +263,7 @@ namespace System.Text
             // to be in progress. Unlike EncoderNLS, this is simply a Debug.Assert. No exception is thrown.
 
             Debug.Assert(_fallbackBuffer is null || _fallbackBuffer.Remaining == 0, "Should have no data remaining in the fallback buffer.");
+            Debug.Assert(HasLeftoverData, "Caller shouldn't invoke this routine unless there's leftover data in the decoder.");
 
             // Copy the existing leftover data plus as many bytes as possible of the new incoming data
             // into a temporary concated buffer, then get its char count by decoding it.
@@ -274,6 +272,7 @@ namespace System.Text
             combinedBuffer = combinedBuffer.Slice(0, ConcatInto(GetLeftoverData(), bytes, combinedBuffer));
             int charCount = 0;
 
+            Debug.Assert(_encoding != null);
             switch (_encoding.DecodeFirstRune(combinedBuffer, out Rune value, out int combinedBufferBytesConsumed))
             {
                 case OperationStatus.Done:
@@ -302,7 +301,7 @@ namespace System.Text
 
             if (FallbackBuffer.Fallback(combinedBuffer.Slice(0, combinedBufferBytesConsumed).ToArray(), index: 0))
             {
-                charCount = _fallbackBuffer.DrainRemainingDataForGetCharCount();
+                charCount = _fallbackBuffer!.DrainRemainingDataForGetCharCount();
                 Debug.Assert(charCount >= 0, "Fallback buffer shouldn't have returned a negative char count.");
             }
 
@@ -319,6 +318,7 @@ namespace System.Text
             // to be in progress. Unlike EncoderNLS, this is simply a Debug.Assert. No exception is thrown.
 
             Debug.Assert(_fallbackBuffer is null || _fallbackBuffer.Remaining == 0, "Should have no data remaining in the fallback buffer.");
+            Debug.Assert(HasLeftoverData, "Caller shouldn't invoke this routine unless there's leftover data in the decoder.");
 
             // Copy the existing leftover data plus as many bytes as possible of the new incoming data
             // into a temporary concated buffer, then transcode it from bytes to chars.
@@ -329,6 +329,7 @@ namespace System.Text
 
             bool persistNewCombinedBuffer = false;
 
+            Debug.Assert(_encoding != null);
             switch (_encoding.DecodeFirstRune(combinedBuffer, out Rune value, out int combinedBufferBytesConsumed))
             {
                 case OperationStatus.Done:
@@ -363,12 +364,20 @@ namespace System.Text
             // Couldn't decode the buffer. Fallback the buffer instead.
 
             if (FallbackBuffer.Fallback(combinedBuffer.Slice(0, combinedBufferBytesConsumed).ToArray(), index: 0)
-                && !_fallbackBuffer.TryDrainRemainingDataForGetChars(chars, out charsWritten))
+                && !_fallbackBuffer!.TryDrainRemainingDataForGetChars(chars, out charsWritten))
             {
                 goto DestinationTooSmall;
             }
 
         Finish:
+
+            // Report back the number of bytes (from the new incoming span) we consumed just now.
+            // This calculation is simple: it's the difference between the original leftover byte
+            // count and the number of bytes from the combined buffer we needed to decode the first
+            // scalar value. We need to report this before the call to SetLeftoverData /
+            // ClearLeftoverData because those methods will overwrite the _leftoverByteCount field.
+
+            bytesConsumed = combinedBufferBytesConsumed - _leftoverByteCount;
 
             if (persistNewCombinedBuffer)
             {
@@ -380,7 +389,6 @@ namespace System.Text
                 ClearLeftoverData(); // the buffer contains no partial data; we'll go down the normal paths
             }
 
-            bytesConsumed = combinedBufferBytesConsumed - _leftoverByteCount; // amount of 'bytes' buffer consumed just now
             return charsWritten;
 
         DestinationTooSmall:
@@ -391,7 +399,8 @@ namespace System.Text
             // opportunity for any code before us to make forward progress, so we must fail immediately.
 
             _encoding.ThrowCharsOverflow(this, nothingDecoded: true);
-            throw null; // will never reach this point
+            // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            throw null!; // will never reach this point
         }
 
         /// <summary>
