@@ -129,6 +129,12 @@ namespace System.Resources.Binary.Tests
                 TypeForwardedFromAttribute typeForwardedFromAttribute = (TypeForwardedFromAttribute)typeAttributes[0];
                 return $"{runtimeType.FullName}, {typeForwardedFromAttribute.AssemblyFullName}";
             }
+            else if (runtimeType.Assembly == typeof(object).Assembly)
+            {
+                // no attribute and in corelib. Strip the assembly name and hope its in CoreLib on other frameworks
+                return runtimeType.FullName;
+            }
+
             return runtimeType.AssemblyQualifiedName;
         }
         
