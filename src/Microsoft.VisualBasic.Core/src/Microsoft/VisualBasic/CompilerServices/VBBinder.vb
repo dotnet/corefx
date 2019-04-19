@@ -1854,7 +1854,6 @@ NextMethod8:
         ' in the paramOrder array.
         Private Sub ReorderParams(ByVal paramOrder() As Integer, ByVal vars() As Object, ByVal state As VBBinderState)
 
-            'CONSIDER: write more efficient code for this
             Dim i As Integer
             'paramOrder.GetUpperBound(0) should always be the MAX
             Dim ArrayUBound As Integer = Math.Max(vars.GetUpperBound(0), paramOrder.GetUpperBound(0))

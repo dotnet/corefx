@@ -654,7 +654,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                                 Return SourceEndIndex - Count
                             Else
                                 'Pattern uses only literals, so we can directly search for the pattern in the source
-                                'TODO: Handle cases where pattern could be replicated in the source.
                                 TruncatedPattern = Pattern.Substring(0, PatternIndex)    'Remove the second * and everything trailing  
 
                                 If CompareOption = CompareMethod.Binary Then

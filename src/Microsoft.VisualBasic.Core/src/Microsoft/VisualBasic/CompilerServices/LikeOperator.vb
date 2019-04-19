@@ -76,7 +76,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             ByVal Options As CompareOptions
         ) As Integer
 
-            Debug.Assert(Options <> CompareOptions.Ordinal, "Char expansion check unexpected during binary compare!!!")
+            Debug.Assert(Options <> CompareOptions.Ordinal, "Char expansion check unexpected during binary compare")
 
             Dim Index As Byte = LigatureIndex(ch)
 
@@ -452,8 +452,8 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Return AscW(Left.Chars(LeftStart)) - AscW(Right.Chars(RightStart))
             End If
 
-            Debug.Assert(Comparer IsNot Nothing, "Like Operator - Comparer expected for option compare text!!!")
-            Debug.Assert(Not MatchBothCharsOfExpandedCharInRight OrElse Not UseUnexpandedCharForRight, "Conflicting compare options!!!")
+            Debug.Assert(Comparer IsNot Nothing, "Like Operator - Comparer expected for option compare text")
+            Debug.Assert(Not MatchBothCharsOfExpandedCharInRight OrElse Not UseUnexpandedCharForRight, "Conflicting compare options")
 
             If UseUnexpandedCharForRight Then
                 If RightLigatureInfo IsNot Nothing AndAlso RightLigatureInfo(RightEnd).Kind = CharKind.ExpandedChar1 Then
@@ -490,7 +490,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 End If
             End If
 
-            Debug.Assert(LeftEnd < LeftLength AndAlso RightEnd < RightLength, "Comparing chars beyond end of string!!!")
+            Debug.Assert(LeftEnd < LeftLength AndAlso RightEnd < RightLength, "Comparing chars beyond end of string")
 
             If LeftEnd = LeftStart AndAlso RightEnd = RightStart Then
                 Return Comparer.Compare(Left.Chars(LeftStart), Right.Chars(RightStart), Options)
@@ -514,7 +514,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Return AscW(Left.Chars(0)) - AscW(Right.Chars(0))
             End If
 
-            Debug.Assert(Comparer IsNot Nothing, "Like Operator - Comparer expected for option compare text!!!")
+            Debug.Assert(Comparer IsNot Nothing, "Like Operator - Comparer expected for option compare text")
 
             Return Comparer.Compare(Left, Right, Options)
 
@@ -534,7 +534,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Return AscW(Left) - AscW(Right)
             End If
 
-            Debug.Assert(Comparer IsNot Nothing, "Like Operator - Comparer expected for option compare text!!!")
+            Debug.Assert(Comparer IsNot Nothing, "Like Operator - Comparer expected for option compare text")
 
             Return Comparer.Compare(Left, Right, Options)
 
@@ -562,9 +562,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
             Debug.Assert(PatternIndex <= PatternLength AndAlso
                          (Pattern.Chars(PatternIndex) = "[" OrElse Pattern.Chars(PatternIndex) = ChrW(&HFF3B)),
-                            "Like operator - Unexpected range matching!!!")
+                            "Like operator - Unexpected range matching")
 
-            Debug.Assert(RangeList Is Nothing OrElse ValidatePatternWithoutMatching, "Unexpected options to MatchRange!!!")
+            Debug.Assert(RangeList Is Nothing OrElse ValidatePatternWithoutMatching, "Unexpected options to MatchRange")
 
             Dim RangeStart, RangeEnd As String
             Dim Range As Range
@@ -781,7 +781,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                                UseUnexpandedCharForRight:=True) <= 0 Then
                         'Character was within range
 OneCharMatch:
-                        Debug.Assert(Not ValidatePatternWithoutMatching, "Unexpected string matching when validating pattern string!!!")
+                        Debug.Assert(Not ValidatePatternWithoutMatching, "Unexpected string matching when validating pattern string")
 
                         If SeenNot Then
                             Mismatch = True
@@ -909,11 +909,11 @@ OneCharMatch:
             Private m_StringPatternStart As Integer  'For PatternType.[STRING]
             Friend Property StringPatternStart() As Integer
                 Get
-                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type")
                     Return m_StringPatternStart
                 End Get
                 Set(ByVal Value As Integer)
-                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type")
                     m_StringPatternStart = Value
                 End Set
             End Property
@@ -921,11 +921,11 @@ OneCharMatch:
             Private m_StringPatternEnd As Integer  'For PatternType.[STRING]
             Friend Property StringPatternEnd() As Integer
                 Get
-                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type")
                     Return m_StringPatternEnd
                 End Get
                 Set(ByVal Value As Integer)
-                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.STRING, "Unexpected pattern group type")
                     m_StringPatternEnd = Value
                 End Set
             End Property
@@ -939,11 +939,11 @@ OneCharMatch:
             Private m_MinSourceIndex As Integer
             Friend Property MinSourceIndex() As Integer
                 Get
-                    Debug.Assert(PatType = PatternType.STAR OrElse PatType = PatternType.NONE, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.STAR OrElse PatType = PatternType.NONE, "Unexpected pattern group type")
                     Return m_MinSourceIndex
                 End Get
                 Set(ByVal Value As Integer)
-                    Debug.Assert(PatType = PatternType.STAR OrElse PatType = PatternType.NONE, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.STAR OrElse PatType = PatternType.NONE, "Unexpected pattern group type")
                     m_MinSourceIndex = Value
                 End Set
             End Property
@@ -955,11 +955,11 @@ OneCharMatch:
             Private m_RangeStarts As String()
             Property RangeStarts() As String()
                 Get
-                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type")
                     Return m_RangeStarts
                 End Get
                 Set(ByVal value As String())
-                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type")
                     m_RangeStarts = value
                 End Set
             End Property
@@ -968,11 +968,11 @@ OneCharMatch:
             Private m_RangeList As List(Of Range)
             Property RangeList() As List(Of Range)
                 Get
-                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type")
                     Return m_RangeList
                 End Get
                 Set(ByVal Value As List(Of Range))
-                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type!!!")
+                    Debug.Assert(PatType = PatternType.EXCLIST OrElse PatType = PatternType.INCLIST, "Unexpected pattern group type")
                     m_RangeList = Value
                 End Set
             End Property
@@ -1162,7 +1162,7 @@ OneCharMatch:
                         'Can start anywhere
 
                     Case Else
-                        Debug.Assert(False, "Unexpected pattern kind!!!")
+                        Debug.Assert(False, "Unexpected pattern kind")
                 End Select
 
                 PatternGroups(PGIndex).MaxSourceIndex = MaxPossibleStart
@@ -1189,7 +1189,7 @@ OneCharMatch:
 
             Debug.Assert(PatternIndex <= PatternLength AndAlso
                          (Pattern.Chars(PatternIndex) = "*"c OrElse Pattern.Chars(PatternIndex) = ChrW(&HFF0A)),
-                            "Like operator - Unexpected asterisk matching!!!")
+                            "Like operator - Unexpected asterisk matching")
 
             Mismatch = False
             PatternError = False
@@ -1228,7 +1228,7 @@ OneCharMatch:
 
             Debug.Assert(PatternGroups IsNot Nothing AndAlso
                          PatternGroups.Length > 0 AndAlso
-                         PatternGroups(0).PatType = PatternType.STAR, "Pattern parsing failed!!!")
+                         PatternGroups(0).PatType = PatternType.STAR, "Pattern parsing failed")
 
             ' Start the search
             '
@@ -1278,7 +1278,7 @@ OneCharMatch:
                 ' Move the end marker to just after the last asterisk because everything afterwards have been
                 ' matched successfully.
                 '
-                Debug.Assert(PatternGroups(PGIndex).PatType = PatternType.NONE, "Unexpected pattern end!!!")
+                Debug.Assert(PatternGroups(PGIndex).PatType = PatternType.NONE, "Unexpected pattern end")
                 PatternGroups(PGIndex).MaxSourceIndex = SourceLength
                 PatternGroups(PGIndex).MinSourceIndex = SourceLength
                 PatternGroups(PGIndex).StartIndexOfPossibleMatch = 0
@@ -1307,7 +1307,7 @@ OneCharMatch:
                             'Can start anywhere
 
                         Case Else
-                            Debug.Assert(False, "Unexpected pattern kind!!!")
+                            Debug.Assert(False, "Unexpected pattern kind")
                     End Select
 
                     PatternGroups(PGIndex).MaxSourceIndex = MaxPossibleStart
@@ -1353,7 +1353,7 @@ OneCharMatch:
             Dim PGSaved As Integer = -1
             Dim PGRestartAsteriskIndex As Integer = -1
 
-            Debug.Assert(PatternGroups(PGIndex).PatType = PatternType.STAR, "Unexpected start of pattern groups list!!!")
+            Debug.Assert(PatternGroups(PGIndex).PatType = PatternType.STAR, "Unexpected start of pattern groups list")
 
             PatternGroups(PGIndex).MinSourceIndex = SourceIndex
             PatternGroups(PGIndex).StartIndexOfPossibleMatch = SourceIndex
@@ -1495,12 +1495,9 @@ MatchList:
 
                         PatternGroups(PGIndex).StartIndexOfPossibleMatch = PGCurrent.MaxSourceIndex
 
-                        Debug.Assert(SourceIndex <= PGCurrent.MaxSourceIndex, "Pattern matching lost!!!")
+                        Debug.Assert(SourceIndex <= PGCurrent.MaxSourceIndex, "Pattern matching lost")
 
                         If SourceIndex < PGCurrent.MaxSourceIndex Then
-                            'TODO - rename PGPrevMismatchIndex to something more appropriate, it is actually the match before the first mismatch
-                            ' maybe LastForwardShift
-                            '
                             PGPrevMismatchIndex = PGIndex - 1
                             PrevMismatchSourceIndex = PGCurrent.MaxSourceIndex
                         End If
@@ -1524,7 +1521,7 @@ MatchList:
                         ' position.
                         '
 
-                        Debug.Assert(PatternGroups(PGPrevMismatchIndex).PatType <> PatternType.NONE, "Bad previous mismatch index!!!")
+                        Debug.Assert(PatternGroups(PGPrevMismatchIndex).PatType <> PatternType.NONE, "Bad previous mismatch index")
 
                         If PatternGroups(PGPrevMismatchIndex).PatType <> PatternType.STAR Then
 
@@ -1605,21 +1602,19 @@ ShiftPosition:
             ByVal Options As CompareOptions
         ) As Boolean
 
-            Debug.Assert(PG.PatType = PatternType.EXCLIST OrElse PG.PatType = PatternType.INCLIST, "Unexpected pattern group!!!")
-
-            'CONSIDER: - improve performance, maybe store the ranges as a table/array lookup for some special cases.
+            Debug.Assert(PG.PatType = PatternType.EXCLIST OrElse PG.PatType = PatternType.INCLIST, "Unexpected pattern group")
 
             Dim RangeList As List(Of Range) = PG.RangeList
 
             'empty [] match can be ignored
             '
-            Debug.Assert(RangeList IsNot Nothing AndAlso RangeList.Count > 0, "Empty RangeList unexpected!!!")
+            Debug.Assert(RangeList IsNot Nothing AndAlso RangeList.Count > 0, "Empty RangeList unexpected")
 
             Dim SourceNextIndex As Integer = SourceIndex
             Dim Match As Boolean = False
 
             For Each Range As Range In RangeList
-                Debug.Assert(Range.Start >= 0, "NULL Range start unexpected!!!")
+                Debug.Assert(Range.Start >= 0, "NULL Range start unexpected")
                 Dim CompareResultEnd As Integer = 1
                 Dim CompareResultStart As Integer
 
@@ -1731,7 +1726,7 @@ ShiftPosition:
             ByVal InputLigatureInfo As LigatureInfo(),
             ByVal Options As CompareOptions
         )
-            Debug.Assert(Options <> CompareOptions.Ordinal, "This method should not be invoked in Option compare binary mode!!!")
+            Debug.Assert(Options <> CompareOptions.Ordinal, "This method should not be invoked in Option compare binary mode")
 
             If Current >= InputLength Then
                 Current -= 1

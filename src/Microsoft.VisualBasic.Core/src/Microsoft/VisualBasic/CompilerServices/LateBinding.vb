@@ -211,13 +211,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
                                   ByVal args() As Object, ByVal paramnames() As String,
                                   ByVal OptimisticSet As Boolean, ByVal RValueBase As Boolean)
 
-            'CONSIDER  (4/12/2001): rewrite the binder to suppress the exception in this case
             Try
-                ' - We can't change this now -
-                '   this really needs to be done in two steps:
-                '         step 1:  can the Set succeed?
-                '         step 2:  perform the Set
-                '   the rvaluebase check would be done between 1 and 2
                 InternalLateSet(o, objType, name, args, paramnames, OptimisticSet, DefaultCallType)
 
                 If RValueBase AndAlso objType.IsValueType Then
@@ -225,7 +219,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                     'should be valid by the time we get to this point
                     Throw New Exception(GetResourceString(SR.RValueBaseForValueType, VBFriendlyName(objType, o), VBFriendlyName(objType, o)))
                 End If
-                ' UNDONE -  - replace below with 'when IsMissingException' - also why the 'when OptimisticSet = True' clause below ?
             Catch ex As System.MissingMemberException When OptimisticSet = True
                 'A missing member exception means it has no Set member.  Silently handle the exception.
             End Try
@@ -512,7 +505,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
                 'Check for valid dimensions
                 If ArgCount <> ary.Rank Then
-                    'UNDONE: message text
                     Throw New RankException
                 End If
 
@@ -702,13 +694,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Shared Sub LateIndexSetComplex(ByVal o As Object, ByVal args() As Object, ByVal paramnames() As String,
                                        ByVal OptimisticSet As Boolean, ByVal RValueBase As Boolean)
 
-            'CONSIDER  (4/12/2001): rewrite the binder to suppress the exception in this case
             Try
-                'CONSIDER  (5/9/2001):
-                '   this really needs to be done in two steps:
-                '         step 1:  can the Set succeed?
-                '         step 2:  perform the Set
-                '   the rvaluebase check would be done between 1 and 2
                 LateIndexSet(o, args, paramnames)
 
                 If RValueBase AndAlso o.GetType().IsValueType Then
@@ -762,7 +748,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
                 'Check for valid dimensions
                 If ArgCount <> ary.Rank Then
-                    'UNDONE: message text
                     Throw New RankException
                 End If
 
@@ -1067,7 +1052,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Return method.Invoke(o, args)
 
             Else
-                '' UNDONE - passing the binder to user code ok ? seems ok, but check with 
                 Return InvokeMemberOnIReflect(objIReflect, method, BindingFlags.InvokeMethod, o, args)
             End If
 
@@ -1120,7 +1104,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
             Next
 
-            'UNDONE: Add test case to verify this code cannot return invalid value
             For Each ThisMember In mi
                 If Not ThisMember Is Nothing Then
                     If ThisMember.MemberType <> MemberTypes.Field Then
@@ -1150,7 +1133,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                                                        BindingFlags.Public
 
         Friend Shared Function InvokeMemberOnIReflect(ByVal objIReflect As IReflect, ByVal member As MemberInfo, ByVal flags As BindingFlags, ByVal target As Object, ByVal args As Object()) As Object
-            ' UNDONE -  - 06-06-2002 - consider if we can reuse the same binder instance used for the rest of this latebound call
 
             Dim binder As New VBBinder(Nothing)
             binder.CacheMember(member)
