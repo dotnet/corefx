@@ -777,7 +777,7 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { "0", 0.0 };
             yield return new object[] { "&H7F", 127.0 };
             yield return new object[] { "-1e20", -1.0e20 };
-            yield return new object[] { "1e-20", 1.0e-20 };
+            yield return new object[] { "1e-3", 1.0e-3 };
         }
 
         private static IEnumerable<object[]> Val_String_ArgumentException_TestData()
