@@ -138,6 +138,25 @@ namespace System.Net.Http
 
             _expectingSettingsAck = true;
 
+
+            // Receive the initial SETTINGS frame from the peer.
+            try
+            {
+                FrameHeader frameHeader = await ReadFrameAsync(initialFrame : true).ConfigureAwait(false);
+                if (frameHeader.Type != FrameType.Settings || frameHeader.AckFlag)
+                {
+                    throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                }
+
+                // Process the initial SETTINGS frame. This will send an ACK.
+                ProcessSettingsFrame(frameHeader);
+            }
+            catch
+            {
+                // ISSUE 31315: Determine if/how to expose HTTP2 error codes
+                throw new HttpRequestException(SR.net_http_invalid_response);
+            }
+
             ProcessIncomingFrames();
         }
 
@@ -173,17 +192,24 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask<FrameHeader> ReadFrameAsync()
+        private async ValueTask<FrameHeader> ReadFrameAsync(bool initialFrame = false)
         {
             // Read frame header
             await EnsureIncomingBytesAsync(FrameHeader.Size).ConfigureAwait(false);
             FrameHeader frameHeader = FrameHeader.ReadFrom(_incomingBuffer.ActiveSpan);
-            _incomingBuffer.Discard(FrameHeader.Size);
 
             if (frameHeader.Length > FrameHeader.MaxLength)
             {
+                if (initialFrame && NetEventSource.IsEnabled)
+                {
+                    string response = System.Text.Encoding.ASCII.GetString(_incomingBuffer.ActiveSpan.Slice(0, Math.Min(20, _incomingBuffer.ActiveSpan.Length)));
+                    Trace($"HTTP/2 handshake failed. Server returned {response}");
+                }
+
+                _incomingBuffer.Discard(FrameHeader.Size);
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.FrameSizeError);
             }
+            _incomingBuffer.Discard(FrameHeader.Size);
 
             // Read frame contents
             await EnsureIncomingBytesAsync(frameHeader.Length).ConfigureAwait(false);
@@ -195,15 +221,7 @@ namespace System.Net.Http
         {
             try
             {
-                // Receive the initial SETTINGS frame from the peer.
-                FrameHeader frameHeader = await ReadFrameAsync().ConfigureAwait(false);
-                if (frameHeader.Type != FrameType.Settings || frameHeader.AckFlag)
-                {
-                    throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
-                }
-
-                // Process the SETTINGS frame.  This will send an ACK.
-                ProcessSettingsFrame(frameHeader);
+                FrameHeader frameHeader;
 
                 // Keep processing frames as they arrive.
                 while (true)
@@ -1338,8 +1356,6 @@ namespace System.Net.Http
 
         public sealed override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // TODO: ISSUE 31310: Cancellation support
-
             Http2Stream http2Stream = null;
             try
             {
