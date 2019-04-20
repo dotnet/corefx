@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Versioning;
@@ -42,14 +43,14 @@ namespace System
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span(T[] array)
+        public Span(T[]? array)
         {
             if (array == null)
             {
                 this = default;
                 return; // returns default
             }
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
             _pointer = new ByReference<T>(ref Unsafe.As<byte, T>(ref array.GetRawSzArrayData()));
@@ -69,7 +70,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span(T[] array, int start, int length)
+        public Span(T[]? array, int start, int length)
         {
             if (array == null)
             {
@@ -78,7 +79,7 @@ namespace System
                 this = default;
                 return; // returns default
             }
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
                 ThrowHelper.ThrowArrayTypeMismatchException();
 #if BIT64
             // See comment in Span<T>.Slice for how this works.
@@ -158,18 +159,6 @@ namespace System
             }
 #endif
         }
-
-        public ref T this[Index index]
-        {
-            get
-            {
-                // Evaluate the actual index first because it helps performance
-                int actualIndex = index.GetOffset(_length);
-                return ref this [actualIndex];
-            }
-        }
-
-        public Span<T> this[Range range] => Slice(range);
 
         /// <summary>
         /// Returns a reference to the 0th element of the Span. If the Span is empty, returns null reference.
@@ -373,28 +362,6 @@ namespace System
                 ThrowHelper.ThrowArgumentOutOfRangeException();
 #endif
 
-            return new Span<T>(ref Unsafe.Add(ref _pointer.Value, start), length);
-        }
-
-        /// <summary>
-        /// Forms a slice out of the given span, beginning at 'startIndex'
-        /// </summary>
-        /// <param name="startIndex">The index at which to begin this slice.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> Slice(Index startIndex)
-        {
-            int actualIndex = startIndex.GetOffset(_length);
-            return Slice(actualIndex);
-        }
-
-        /// <summary>
-        /// Forms a slice out of the given span, beginning at range start index to the range end
-        /// </summary>
-        /// <param name="range">The range which has the start and end indexes used to slice the span.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<T> Slice(Range range)
-        {
-            (int start, int length) = range.GetOffsetAndLength(_length);
             return new Span<T>(ref Unsafe.Add(ref _pointer.Value, start), length);
         }
 

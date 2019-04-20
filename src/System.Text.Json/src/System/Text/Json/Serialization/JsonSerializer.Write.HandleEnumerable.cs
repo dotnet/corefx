@@ -9,18 +9,10 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        private static bool WriteEnumerable(
-            JsonSerializerOptions options,
-            ref Utf8JsonWriter writer,
-            ref WriteStack state)
-        {
-            return HandleEnumerable(state.Current.JsonClassInfo.ElementClassInfo, options, ref writer, ref state);
-        }
-
         private static bool HandleEnumerable(
             JsonClassInfo elementClassInfo,
             JsonSerializerOptions options,
-            ref Utf8JsonWriter writer,
+            Utf8JsonWriter writer,
             ref WriteStack state)
         {
             Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
@@ -34,24 +26,28 @@ namespace System.Text.Json.Serialization
 
             if (state.Current.Enumerator == null)
             {
-                if (jsonPropertyInfo._name == null)
+                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+
+                if (enumerable == null)
+                {
+                    // Write a null object or enumerable.
+                    writer.WriteNull(jsonPropertyInfo.Name);
+                    return true;
+                }
+
+                state.Current.Enumerator = enumerable.GetEnumerator();
+
+                if (jsonPropertyInfo.Name == null)
                 {
                     writer.WriteStartArray();
                 }
                 else
                 {
-                    writer.WriteStartArray(jsonPropertyInfo._name);
-                }
-
-                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
-
-                if (enumerable != null)
-                {
-                    state.Current.Enumerator = enumerable.GetEnumerator();
+                    writer.WriteStartArray(jsonPropertyInfo.Name);
                 }
             }
 
-            if (state.Current.Enumerator != null && state.Current.Enumerator.MoveNext())
+            if (state.Current.Enumerator.MoveNext())
             {
                 // Check for polymorphism.
                 if (elementClassInfo.ClassType == ClassType.Unknown)
@@ -62,7 +58,7 @@ namespace System.Text.Json.Serialization
 
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
-                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, ref writer);
+                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, writer);
                 }
                 else if (state.Current.Enumerator.Current == null)
                 {

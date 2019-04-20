@@ -45,15 +45,21 @@ namespace System.Text.Json.Serialization
 
         private static async Task WriteAsyncCore(object value, Type type, Stream utf8Json, JsonSerializerOptions options, CancellationToken cancellationToken)
         {
-            options ??= JsonSerializerOptions.s_defaultOptions;
+            if (options == null)
+            {
+                options = JsonSerializerOptions.s_defaultOptions;
+            }
 
-            var writerState = new JsonWriterState(options.GetWriterOptions());
+            JsonWriterOptions writerOptions = options.GetWriterOptions();
 
-            using (var bufferWriter = new ArrayBufferWriter<byte>(options.DefaultBufferSize))
+            using (var bufferWriter = new PooledBufferWriter<byte>(options.DefaultBufferSize))
+            using (var writer = new Utf8JsonWriter(bufferWriter, writerOptions))
             {
                 if (value == null)
                 {
-                    WriteNull(ref writerState, bufferWriter);
+                    writer.WriteNullValue();
+                    writer.Flush();
+
 #if BUILDING_INBOX_LIBRARY
                     await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
@@ -79,7 +85,9 @@ namespace System.Text.Json.Serialization
                 {
                     flushThreshold = (int)(bufferWriter.Capacity * .9); //todo: determine best value here
 
-                    isFinalBlock = Write(ref writerState, bufferWriter, flushThreshold, options, ref state);
+                    isFinalBlock = Write(writer, flushThreshold, options, ref state);
+                    writer.Flush();
+
 #if BUILDING_INBOX_LIBRARY
                     await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else

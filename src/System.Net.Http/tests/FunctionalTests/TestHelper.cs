@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Net.Security;
+using System.Net.Test.Common;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
@@ -118,7 +119,7 @@ namespace System.Net.Http.Functional.Tests
                 .Where(a => a.IsIPv6LinkLocal)
                 .FirstOrDefault();
 
-        public static void EnsureHttp2Feature(HttpClientHandler handler)
+        public static void EnsureHttp2Feature(HttpClientHandler handler, bool useHttp2LoopbackServer = true)
         {
             // All .NET Core implementations of HttpClientHandler have HTTP/2 enabled by default except when using
             // SocketsHttpHandler. Right now, the HTTP/2 feature is disabled on SocketsHttpHandler unless certain
@@ -155,6 +156,15 @@ namespace System.Net.Http.Functional.Tests
                 "_maxHttpVersion",
                 BindingFlags.NonPublic | BindingFlags.Instance);
             field_maxHttpVersion.SetValue(_settings, new Version(2, 0));
+
+            if (useHttp2LoopbackServer && (!PlatformDetection.SupportsAlpn || Capability.Http2ForceUnencryptedLoopback()))
+            {
+                // Allow HTTP/2.0 via unencrypted socket if ALPN is not supported on platform.
+                FieldInfo field_allowPlainHttp2 = type_HttpConnectionSettings.GetField(
+                    "_allowUnencryptedHttp2",
+                    BindingFlags.NonPublic | BindingFlags.Instance);
+                field_allowPlainHttp2.SetValue(_settings, true);
+            }
         }
 
         public static bool NativeHandlerSupportsSslConfiguration()
