@@ -1804,14 +1804,16 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
-        [PlatformSpecific(~TestPlatforms.OSX)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [ActiveIssue(37054, TestPlatforms.OSX)]
         [Fact]
         public void GetProcesses_LongProcessName()
         {
             string commandName = "sleep";
 
             // sleep program doesn't exist on some flavor
-            if (!IsProgramInstalled(commandName))
+            // in flavors such as Alpine, sleep is a busybox command which cannot be renamed
+            if (!IsProgramInstalled(commandName) || IsProgramInstalled("busybox"))
             {
                 return;
             }
@@ -1826,12 +1828,7 @@ namespace System.Diagnostics.Tests
                 var runninProcesses = Process.GetProcesses();
                 try
                 {
-                    // on Alpine, sleep is a symlink which points to /bin/busybox
-                    Assert.Contains(runninProcesses, p => p.ProcessName == longProcessName || ( p.ProcessName == "busybox" && p.Id == px.Id));
-                }
-                catch(Xunit.Sdk.ContainsException)
-                {
-                    Assert.False(true, $"Expected ID {px.Id} in collection: [" + string.Join(" ,", runninProcesses.Select(p => $"{p.ProcessName}({p.Id})")) + "]");
+                    Assert.Contains(runninProcesses, p => p.ProcessName == longProcessName);
                 }
                 finally
                 {
