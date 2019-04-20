@@ -174,7 +174,7 @@ namespace System.DirectoryServices.Protocols
                 _directoryCredential = (value != null) ? new NetworkCredential(value.UserName, value.Password, value.Domain) : null;
             }
         }
-        
+
         public bool AutoBind { get; set; } = true;
 
         internal bool NeedDispose
@@ -321,7 +321,7 @@ namespace System.DirectoryServices.Protocols
             {
                 throw new ObjectDisposedException(GetType().Name);
             }
-            
+
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request));
@@ -377,30 +377,13 @@ namespace System.DirectoryServices.Protocols
 
             if (error == 0 && messageID != -1)
             {
-                if (partialMode == PartialResultProcessing.NoPartialResultSupport)
-                {
-                    var requestState = new LdapRequestState();
-                    var asyncResult = new LdapAsyncResult(callback, state, false);
+                // the user registers to retrieve partial results
+                bool partialCallback = partialMode == PartialResultProcessing.ReturnPartialResultsAndNotifyCallback;
 
-                    requestState._ldapAsync = asyncResult;
-                    asyncResult._resultObject = requestState;
+                var asyncResult = new LdapPartialAsyncResult(messageID, callback, state, true, this, partialCallback, requestTimeout);
+                s_partialResultsProcessor.Add(asyncResult);
 
-                    s_asyncResultTable.Add(asyncResult, messageID);
-
-                    _fd.BeginInvoke(messageID, operation, ResultAll.LDAP_MSG_ALL, requestTimeout, true, new AsyncCallback(ResponseCallback), requestState);
-
-                    return asyncResult;
-                }
-                else
-                {
-                    // the user registers to retrieve partial results
-                    bool partialCallback = partialMode == PartialResultProcessing.ReturnPartialResultsAndNotifyCallback;
-
-                    var asyncResult = new LdapPartialAsyncResult(messageID, callback, state, true, this, partialCallback, requestTimeout);
-                    s_partialResultsProcessor.Add(asyncResult);
-
-                    return asyncResult;
-                }
+                return asyncResult;
             }
 
             if (error == 0)
@@ -784,7 +767,7 @@ namespace System.DirectoryServices.Protocols
                     // Process the scope.
                     int searchScope = (int)searchRequest.Scope;
 
-                    // Process the timelimit.  
+                    // Process the timelimit.
                     int searchTimeLimit = (int)(searchRequest.TimeLimit.Ticks / TimeSpan.TicksPerSecond);
 
                     // Process the alias.
@@ -1055,7 +1038,7 @@ namespace System.DirectoryServices.Protocols
         public void Bind(NetworkCredential newCredential) => BindHelper(newCredential, needSetCredential: true);
 
         private void BindHelper(NetworkCredential newCredential, bool needSetCredential)
-        {            
+        {
             if (_disposed)
             {
                 throw new ObjectDisposedException(GetType().Name);
@@ -1715,7 +1698,7 @@ namespace System.DirectoryServices.Protocols
                 }
                 else
                 {
-                    // we need to take care of one special case, when can't connect to the server, ldap_parse_result fails with local error 
+                    // we need to take care of one special case, when can't connect to the server, ldap_parse_result fails with local error
                     if (resultError == (int)LdapError.LocalError)
                     {
                         int tmpResult = Wldap32.ldap_result2error(_ldapHandle, ldapResult, 0 /* not free it */);
