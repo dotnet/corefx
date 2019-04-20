@@ -24,52 +24,36 @@ namespace System.Runtime.Loader.Tests
         void SetPreConditions();
         void FixtureSetupAssertions();
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Assembly GetExecutingAssembly();
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Assembly AssemblyLoad(AssemblyName name);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Assembly AssemblyLoad(string name);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Assembly AssemblyLoadWithPartialName(string name);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type TypeGetType(string typeName);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type TypeGetType(string typeName, bool throwOnError);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type TypeGetType(string typeName, bool throwOnError, bool ignoreCase);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type TypeGetType(string typeName, Func<AssemblyName,Assembly> assemblyResolver, Func<Assembly, string, Boolean, Type> typeResolver);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type TypeGetType(string typeName, Func<AssemblyName,Assembly> assemblyResolver, Func<Assembly, string, Boolean, Type> typeResolver, bool throwOnError);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type TypeGetType(string typeName, Func<AssemblyName,Assembly> assemblyResolver, Func<Assembly, string, Boolean, Type> typeResolver, bool throwOnError, bool ignoreCase);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type AssemblyGetType(Assembly assembly, string typeName);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type AssemblyGetType(Assembly assembly, string typeName, bool throwOnError);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         Type AssemblyGetType(Assembly assembly, string typeName, bool throwOnError, bool ignoreCase);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         ObjectHandle ActivatorCreateInstance(string assemblyName, string typeName);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         ObjectHandle ActivatorCreateInstance(string assemblyName, string typeName, object[] activationAttributes);
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         ObjectHandle ActivatorCreateInstance(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes);
     }
 }

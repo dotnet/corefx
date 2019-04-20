@@ -34,65 +34,49 @@ namespace System.Runtime.Loader.Tests
         public Assembly defaultAlcAssembly { get; }
         public Type defaultAlcFixtureType { get; }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Assembly GetExecutingAssembly() { return Assembly.GetExecutingAssembly(); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Assembly AssemblyLoad(AssemblyName name) { return Assembly.Load(name); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Assembly AssemblyLoad(string name) { return Assembly.Load(name); }
 
 #pragma warning disable 618
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Assembly AssemblyLoadWithPartialName(string name) { return Assembly.LoadWithPartialName(name); }
 #pragma warning restore 618
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type TypeGetType(string typeName)
         { return Type.GetType(typeName); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type TypeGetType(string typeName, bool throwOnError)
         { return Type.GetType(typeName, throwOnError); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type TypeGetType(string typeName, bool throwOnError, bool ignoreCase)
         { return Type.GetType(typeName, throwOnError, ignoreCase); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type TypeGetType(string typeName, Func<AssemblyName,Assembly> assemblyResolver, Func<Assembly, string, Boolean, Type> typeResolver)
         { return Type.GetType(typeName, assemblyResolver, typeResolver); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type TypeGetType(string typeName, Func<AssemblyName,Assembly> assemblyResolver, Func<Assembly, string, Boolean, Type> typeResolver, bool throwOnError)
         { return Type.GetType(typeName, assemblyResolver, typeResolver, throwOnError); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type TypeGetType(string typeName, Func<AssemblyName,Assembly> assemblyResolver, Func<Assembly, string, Boolean, Type> typeResolver, bool throwOnError, bool ignoreCase)
         { return Type.GetType(typeName, assemblyResolver, typeResolver, throwOnError, ignoreCase); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type AssemblyGetType(Assembly assembly, string typeName)
         { return assembly.GetType(typeName); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type AssemblyGetType(Assembly assembly, string typeName, bool throwOnError)
         { return assembly.GetType(typeName, throwOnError); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public Type AssemblyGetType(Assembly assembly, string typeName, bool throwOnError, bool ignoreCase)
         { return assembly.GetType(typeName, throwOnError, ignoreCase); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public ObjectHandle ActivatorCreateInstance(string assemblyName, string typeName)
         { return Activator.CreateInstance(assemblyName, typeName); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public ObjectHandle ActivatorCreateInstance(string assemblyName, string typeName, object[] activationAttributes)
         { return Activator.CreateInstance(assemblyName, typeName, activationAttributes); }
 
-        [MethodImplAttribute(MethodImplOptions.NoInlining)]
         public ObjectHandle ActivatorCreateInstance(string assemblyName, string typeName, bool ignoreCase, System.Reflection.BindingFlags bindingAttr, System.Reflection.Binder binder, object[] args, System.Globalization.CultureInfo culture, object[] activationAttributes)
         { return Activator.CreateInstance(assemblyName, typeName, ignoreCase, bindingAttr, binder, args, culture, activationAttributes); }
 
