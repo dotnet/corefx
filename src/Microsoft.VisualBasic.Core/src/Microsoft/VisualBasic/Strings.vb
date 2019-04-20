@@ -451,7 +451,6 @@ EmptyMatchString:
                 Dim CharArray As Char() = TryCast(Expression, Char())
 
                 If CharArray IsNot Nothing Then
-                    'REVIEW: Should this be char length or byte length?
                     Return CharArray.Length
                 End If
             End If
