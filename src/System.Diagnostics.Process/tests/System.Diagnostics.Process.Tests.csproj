@@ -5,6 +5,8 @@
     <DefineConstants Condition="'$(TargetsWindows)' == 'true'">$(DefineConstants);TargetsWindows</DefineConstants>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
+    <ParentOutputPath>$([System.IO.Directory]::GetParent($(OutputPath.TrimEnd('\\/'))))</ParentOutputPath>
+    <RootOutputPath>$([System.IO.Directory]::GetParent($(ParentOutputPath)))</RootOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\CoreLib\System\PasteArguments.cs">
@@ -54,5 +56,8 @@
     <Compile Include="$(CommonPath)\CoreLib\System\PasteArguments.Unix.cs">
       <Link>Common\CoreLib\System\PasteArguments.Unix.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <SupplementalTestData Include="$(RootOutputPath)\native\$(BuildConfiguration)\SleepTestAppNative*" />
   </ItemGroup>
 </Project>

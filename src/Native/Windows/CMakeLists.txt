@@ -18,7 +18,7 @@ if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "Binary directory isn't being correctly set before calling Cmake. Tree must be built in separate directory from source.")
 endif()
 
-project(CoreFX)
+project(CoreFX C)
 string(TOUPPER $ENV{CMAKE_BUILD_TYPE} UPPERCASE_CMAKE_BUILD_TYPE)
 
 # The following options are set by the razzle build
@@ -40,7 +40,6 @@ add_compile_options(/MP)          # Build with Multiple Processes (number of pro
 add_compile_options(/GS)          # Buffer Security Check
 add_compile_options(/Zm200)       # Specify Precompiled Header Memory Allocation Limit of 150MB
 add_compile_options(/Zi)          # enable debugging information
-add_compile_options(/Zl)          # enable debugging information
 add_compile_options(/wd4960 /wd4961 /wd4603 /wd4627 /wd4838 /wd4456 /wd4457 /wd4458 /wd4459 /wd4091 /we4640)
 add_compile_options(/ZH:SHA_256) # use SHA256 for generating hashes of compiler processed source files.
 
@@ -97,13 +96,13 @@ set(__LinkArgs "${__LinkArgs} /IGNORE:4197,4013,4254,4070,4221")
 if (UPPERCASE_CMAKE_BUILD_TYPE STREQUAL "RELEASE")
     # Release build specific flags
     set(__LinkArgs "${__LinkArgs} /LTCG /OPT:REF /OPT:ICF /INCREMENTAL:NO")
-    
+
     # Force uCRT to be dynamically linked for Release build (unless env variable CLR_CMAKE_WIN32_FORCE_STATIC_LINK is set to true)
     set(CLR_CMAKE_WIN32_FORCE_STATIC_LINK $ENV{CLR_CMAKE_WIN32_FORCE_STATIC_LINK})
     if(NOT CLR_CMAKE_WIN32_FORCE_STATIC_LINK)
       set(__LinkArgs "${__LinkArgs} /NODEFAULTLIB:libucrt.lib /DEFAULTLIB:ucrt.lib")
     endif()
-    
+
     if ($ENV{__BuildArch} STREQUAL x86)
         set(__LinkArgs "${__LinkArgs} /SAFESEH")
     endif()
@@ -127,3 +126,4 @@ else ()
 endif ()
 
 add_subdirectory(clrcompression)
+add_subdirectory(../AnyOS/SleepTestAppNative build)

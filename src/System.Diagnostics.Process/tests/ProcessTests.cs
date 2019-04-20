@@ -1875,31 +1875,41 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The archive of test project with SupplementalTestData in csproj, does not include the additional test data")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Retrieving information about local processes is not supported on uap")]
         [ActiveIssue(37054, TestPlatforms.OSX)]
         [Fact]
         public void GetProcesses_LongProcessName()
         {
-            string commandName = "sleep";
+            string originalProcessName = "SleepTestAppNative";
+            string longProcessName = $"{originalProcessName}_file_with_quite_a_long_name";
+            string assemblyDirectory = Path.GetDirectoryName(typeof(ProcessTests).Assembly.Location);
 
-            // sleep program doesn't exist on some flavor
-            // in flavors such as Alpine, sleep is a busybox command which cannot be renamed
-            if (!IsProgramInstalled(commandName) || IsProgramInstalled("busybox"))
+            string originalProcessPath = Path.Combine(assemblyDirectory, originalProcessName);
+            string longProcessPath = Path.Combine(TestDirectory, longProcessName);
+
+            if (PlatformDetection.IsWindows)
             {
-                return;
+                File.Copy(originalProcessPath + ".exe", longProcessPath + ".exe");
+            }
+            else
+            {
+                File.Copy(originalProcessName, longProcessPath);
+
+                // set file mode to executable, because it loses the executable flag when extracted (on Helix) from zip archive;
+                // it may not be required once ZipFile APIs support Unix permissions: https://github.com/dotnet/corefx/issues/17342
+                using (var process = Process.Start(new ProcessStartInfo { FileName = "chmod", Arguments = $@"755 ""{longProcessPath}""" }))
+                {
+                    process.WaitForExit();
+                }
             }
 
-            string longProcessName = "123456789012345678901234567890";
-            string sleepCommandPathFileName = Path.Combine(TestDirectory, longProcessName);
-            File.Copy(GetProgramPath(commandName), sleepCommandPathFileName);
-
             // start sleep program and wait for some seconds
-            using (Process px = Process.Start(new ProcessStartInfo { FileName = sleepCommandPathFileName , Arguments = "30", UseShellExecute = true}))
+            using (Process px = Process.Start(new ProcessStartInfo { FileName = longProcessPath, Arguments = "4294967" }))
             {
-                var runninProcesses = Process.GetProcesses();
                 try
                 {
-                    Assert.Contains(runninProcesses, p => p.ProcessName == longProcessName);
+                    Assert.Contains(Process.GetProcesses(), p => p.ProcessName == longProcessName);
                 }
                 finally
                 {

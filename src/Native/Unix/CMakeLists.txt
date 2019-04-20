@@ -267,3 +267,5 @@ endif()
 if(APPLE)
     add_subdirectory(System.Security.Cryptography.Native.Apple)
 endif()
+
+add_subdirectory(../AnyOS/SleepTestAppNative build)

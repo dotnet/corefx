@@ -1,4 +1,4 @@
-project(clrcompression)
+project(clrcompression C)
 
 if("${CMAKE_SOURCE_DIR}" STREQUAL "${CMAKE_BINARY_DIR}")
     message(FATAL_ERROR "Binary directory isn't being correctly set before calling Cmake. Tree must be built in separate directory from source.")
@@ -104,4 +104,3 @@ GENERATE_EXPORT_HEADER( clrcompression
 
 install (TARGETS clrcompression DESTINATION .)
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${CMAKE_BUILD_TYPE}/clrcompression.pdb DESTINATION .)
-
