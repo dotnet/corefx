@@ -911,7 +911,7 @@ namespace System.IO.Compression
                 else
                 {
                     // we know the sizes at this point, so just go ahead and write the headers
-                    if (_uncompressedSize == 0)
+                    if (_uncompressedSize == 0 && _compressedSize == 0)
                         CompressionMethod = CompressionMethodValues.Stored;
                     WriteLocalFileHeader(isEmptyFile: false);
                     foreach (byte[] compressedBytes in _compressedBytes)
