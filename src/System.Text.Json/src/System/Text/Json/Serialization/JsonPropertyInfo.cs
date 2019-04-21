@@ -253,6 +253,7 @@ namespace System.Text.Json.Serialization
 
         internal abstract void Read(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader);
         internal abstract void ReadEnumerable(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader);
+        internal abstract void ReadDictionaryValue(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader);
         internal abstract void SetValueAsObject(object obj, object value, JsonSerializerOptions options);
 
         internal abstract void Write(JsonSerializerOptions options, ref WriteStackFrame current, Utf8JsonWriter writer);

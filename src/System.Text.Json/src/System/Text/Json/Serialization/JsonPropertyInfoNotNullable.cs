@@ -31,7 +31,12 @@ namespace System.Text.Json.Serialization
 
         internal override void Read(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
         {
-            if (ElementClassInfo != null)
+            if (state.Current.IsDictionary())
+            {
+                JsonPropertyInfo propertyInfo = state.Current.JsonClassInfo.ElementClassInfo.GetPolicyProperty();
+                propertyInfo.ReadDictionaryValue(tokenType, options, ref state, ref reader);
+            }
+            else if (ElementClassInfo != null)
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
                 JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
@@ -73,6 +78,17 @@ namespace System.Text.Json.Serialization
             }
 
             JsonSerializer.ApplyValueToEnumerable(ref value, options, ref state.Current);
+        }
+
+        internal override void ReadDictionaryValue(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
+        {
+            if (ValueConverter == null || !ValueConverter.TryRead(RuntimePropertyType, ref reader, out TRuntimeProperty value))
+            {
+                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state);
+                return;
+            }
+
+            JsonSerializer.ApplyValueToDictionary(ref value, options, ref state.Current);
         }
 
         internal override void ApplyNullValue(JsonSerializerOptions options, ref ReadStack state)

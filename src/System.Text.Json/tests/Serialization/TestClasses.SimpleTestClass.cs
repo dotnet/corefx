@@ -52,6 +52,7 @@ namespace System.Text.Json.Serialization.Tests
         public ICollection<string> MyStringICollectionT { get; set; }
         public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
         public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
+        public Dictionary<string, string> MyStringToStringDict { get; set; }
 
         public static readonly string s_json = $"{{{s_partialJsonProperties},{s_partialJsonArrays}}}";
         public static readonly string s_json_flipped = $"{{{s_partialJsonArrays},{s_partialJsonProperties}}}";
@@ -74,7 +75,8 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDecimal"" : 3.3," +
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
-                @"""MyEnum"" : 2"; // int by default
+                @"""MyEnum"" : 2," + // int by default
+                @"""MyStringToStringDict"" : {""key"" : ""value""}";
 
         private const string s_partialJsonArrays =
                 @"""MyInt16Array"" : [1]," +
@@ -150,6 +152,8 @@ namespace System.Text.Json.Serialization.Tests
             MyStringICollectionT = new string[] { "Hello" };
             MyStringIReadOnlyCollectionT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new string[] { "Hello" };
+
+            MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
         }
 
         public void Verify()
@@ -198,6 +202,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyStringICollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyCollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyListT[0]);
+
+            Assert.Equal("value", MyStringToStringDict["key"]);
         }
     }
 }

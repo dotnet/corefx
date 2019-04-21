@@ -14,6 +14,11 @@ namespace System.Text.Json.Serialization
         internal object ReturnValue;
         internal JsonClassInfo JsonClassInfo;
 
+        // Support Dictionary
+        internal List<string> TempDictKeys;
+        internal IList TempDictValues;
+        internal bool IsNestedEnumerableInDict;
+
         // Current property values
         internal JsonPropertyInfo JsonPropertyInfo;
         internal bool PopStackOnEndArray;
@@ -32,7 +37,7 @@ namespace System.Text.Json.Serialization
         internal void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
-            if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable)
+            if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
             }
@@ -61,6 +66,11 @@ namespace System.Text.Json.Serialization
             return JsonClassInfo.ClassType == ClassType.Enumerable;
         }
 
+        internal bool IsDictionary()
+        {
+            return JsonClassInfo.ClassType == ClassType.Dictionary;
+        }
+
         internal bool Skip()
         {
             return Drain || ReferenceEquals(JsonPropertyInfo, JsonSerializer.s_missingProperty);
@@ -76,6 +86,16 @@ namespace System.Text.Json.Serialization
             return false;
         }
 
+        internal bool IsPropertyADictionary()
+        {
+            if (JsonPropertyInfo != null)
+            {
+                return JsonPropertyInfo.ClassType == ClassType.Dictionary;
+            }
+
+            return false;
+        }
+
         public Type GetElementType()
         {
             if (IsPropertyEnumerable())
@@ -84,6 +104,11 @@ namespace System.Text.Json.Serialization
             }
 
             if (IsEnumerable())
+            {
+                return JsonClassInfo.ElementClassInfo.Type;
+            }
+
+            if (IsDictionary())
             {
                 return JsonClassInfo.ElementClassInfo.Type;
             }

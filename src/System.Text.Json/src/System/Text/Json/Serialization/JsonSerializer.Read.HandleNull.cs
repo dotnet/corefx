@@ -30,6 +30,12 @@ namespace System.Text.Json.Serialization
                 ThrowHelper.ThrowJsonReaderException_DeserializeCannotBeNull(reader, state);
             }
 
+            if (state.Current.IsDictionary())
+            {
+                ApplyObjectToDictionary(null, options, ref state.Current);
+                return false;
+            }
+
             if (state.Current.IsEnumerable())
             {
                 ApplyObjectToEnumerable(null, options, ref state.Current);

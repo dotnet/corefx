@@ -16,7 +16,20 @@ namespace System.Text.Json.Serialization
             ref Utf8JsonReader reader,
             ref ReadStack state)
         {
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+            JsonPropertyInfo jsonPropertyInfo;
+
+            if (state.Current.IsDictionary())
+            {
+                JsonClassInfo classInfo = state.Current.JsonClassInfo.ElementClassInfo;
+                JsonPropertyInfo propertyInfo = classInfo.GetPolicyProperty();
+
+                state.Push();
+                state.Current.JsonClassInfo = classInfo;
+                state.Current.JsonPropertyInfo = propertyInfo;
+                state.Current.IsNestedEnumerableInDict = true;
+            }
+
+            jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
             bool skip = jsonPropertyInfo != null && !jsonPropertyInfo.ShouldDeserialize;
             if (skip || state.Current.Skip())
@@ -119,6 +132,16 @@ namespace System.Text.Json.Serialization
             if (state.Current.PopStackOnEndArray)
             {
                 state.Pop();
+            }
+
+            if (state.Current.IsNestedEnumerableInDict)
+            {
+                state.Pop();
+
+                Debug.Assert(state.Current.IsDictionary());
+                ApplyObjectToDictionary(value, options, ref state.Current);
+
+                return false;
             }
 
             if (lastFrame)
