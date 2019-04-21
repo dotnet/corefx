@@ -185,7 +185,7 @@ namespace System.Text.Json.Serialization
             {
                 Debug.Assert(frame.JsonPropertyInfo != null);
                 Debug.Assert(frame.ReturnValue != null);
-                ((IDictionary)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(frame.KeyName, value);
+                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
             }
             else
             {

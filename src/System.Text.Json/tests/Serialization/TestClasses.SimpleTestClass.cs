@@ -53,6 +53,8 @@ namespace System.Text.Json.Serialization.Tests
         public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
         public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
         public Dictionary<string, string> MyStringToStringDict { get; set; }
+        public IDictionary<string, string> MyStringToStringIDict { get; set; }
+        public IReadOnlyDictionary<string, string> MyStringToStringIReadOnlyDict { get; set; }
 
         public static readonly string s_json = $"{{{s_partialJsonProperties},{s_partialJsonArrays}}}";
         public static readonly string s_json_flipped = $"{{{s_partialJsonArrays},{s_partialJsonProperties}}}";
@@ -76,7 +78,9 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
                 @"""MyEnum"" : 2," + // int by default
-                @"""MyStringToStringDict"" : {""key"" : ""value""}";
+                @"""MyStringToStringDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}";
 
         private const string s_partialJsonArrays =
                 @"""MyInt16Array"" : [1]," +
@@ -154,6 +158,8 @@ namespace System.Text.Json.Serialization.Tests
             MyStringIReadOnlyListT = new string[] { "Hello" };
 
             MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringIReadOnlyDict = new Dictionary<string, string> { { "key", "value" } };
         }
 
         public void Verify()
@@ -204,6 +210,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyStringIReadOnlyListT[0]);
 
             Assert.Equal("value", MyStringToStringDict["key"]);
+            Assert.Equal("value", MyStringToStringIDict["key"]);
+            Assert.Equal("value", MyStringToStringIReadOnlyDict["key"]);
         }
     }
 }

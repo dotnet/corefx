@@ -319,7 +319,7 @@ namespace System.Text.Json.Serialization
 
                     if (propertyType.IsGenericType)
                     {
-                        if (typeof(IDictionary).IsAssignableFrom(propertyType))
+                        if (GetClassType(propertyType) == ClassType.Dictionary)
                         {
                             elementType = args[1];
                         }

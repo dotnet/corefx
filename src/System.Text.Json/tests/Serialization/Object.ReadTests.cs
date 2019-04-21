@@ -49,5 +49,12 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<SimpleTestClass>("[]"));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>("[]"));
         }
+
+        [Fact]
+        public static void ReadClassWithStringToPrimitiveDictionary()
+        {
+            TestClassWithStringToPrimitiveDictionary obj = JsonSerializer.Parse<TestClassWithStringToPrimitiveDictionary>(TestClassWithStringToPrimitiveDictionary.s_data);
+            obj.Verify();
+        }
     }
 }

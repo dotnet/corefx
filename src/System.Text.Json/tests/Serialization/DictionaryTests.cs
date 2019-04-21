@@ -18,6 +18,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal("World2", obj["Hello2"]);
 
                 string json = JsonSerializer.ToString(obj);
+                Assert.Equal(@"{""Hello"":""World"",""Hello2"":""World2""}", json);
 
                 // Round-trip the json
                 obj = JsonSerializer.Parse<Dictionary<string, string>>(json);
@@ -30,6 +31,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal("World", obj["Hello"]);
 
                 string json = JsonSerializer.ToString(obj);
+                Assert.Equal(@"{""Hello"":""World""}", json);
 
                 obj = JsonSerializer.Parse<Dictionary<string, string>>(json);
                 Assert.Equal("World", obj["Hello"]);
@@ -40,10 +42,18 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal("World", obj["Hello"]);
 
                 string json = JsonSerializer.ToString(obj);
+                Assert.Equal(@"{""Hello"":""World""}", json);
 
                 obj = JsonSerializer.Parse<Dictionary<string, string>>(json);
                 Assert.Equal("World", obj["Hello"]);
             }
+        }
+
+        [Fact]
+        public static void ThrowsOnDuplicateKeys()
+        {
+            // todo: this should throw a JsonReaderException
+            Assert.Throws<ArgumentException>(() => JsonSerializer.Parse<Dictionary<string, string>>(@"{""Hello"":""World"", ""Hello"":""World""}"));
         }
     }
 }
