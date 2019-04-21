@@ -65,7 +65,7 @@ namespace System.Net.Http
                 _state = StreamState.ExpectingHeaders;
 
                 _request = request;
-                _response = new HttpResponseMessage()
+                _response = new HttpResponseMessage(0)
                 {
                     Version = HttpVersion.Version20,
                     RequestMessage = request,
@@ -129,7 +129,7 @@ namespace System.Net.Http
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
 
-                    if (name.SequenceEqual(s_statusHeaderName))
+                    if (name[0] == 58) // ':'
                     {
                         if (_state == StreamState.ExpectingTrailingHeaders)
                         {
@@ -137,21 +137,49 @@ namespace System.Net.Http
                             if (NetEventSource.IsEnabled) _connection.Trace("Pseudo-header in trailer headers.");
                             throw new HttpRequestException(SR.net_http_invalid_response);
                         }
-
-                        if (value.Length != 3)
-                            throw new Exception("Invalid status code");
-
-                        // Copied from HttpConnection
-                        byte status1 = value[0], status2 = value[1], status3 = value[2];
-                        if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
+                        if (name.SequenceEqual(s_statusHeaderName))
                         {
+                            if (_response.StatusCode != 0)
+                            {
+                                if (NetEventSource.IsEnabled) _connection.Trace("Received duplicate status headers.");
+                                throw new HttpRequestException(SR.net_http_invalid_response);
+                            }
+
+                            if (value.Length != 3)
+                            {
+                                if (NetEventSource.IsEnabled) _connection.Trace($"Received status headers '{System.Text.Encoding.ASCII.GetString(name)}'.");
+                                throw new HttpRequestException(SR.net_http_invalid_response);
+                            }
+
+                            // Copied from HttpConnection
+                            byte status1 = value[0], status2 = value[1], status3 = value[2];
+                            if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
+                            {
+                                if (NetEventSource.IsEnabled) _connection.Trace($"Received status headers '{System.Text.Encoding.ASCII.GetString(name)}'.");
+                                throw new HttpRequestException(SR.net_http_invalid_response);
+                            }
+
+                            int statusValue = (100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0'));
+                            if (statusValue == 0)
+                            {
+                                throw new Exception("Invalid status code zero.");
+                            }
+
+                            _response.SetStatusCodeWithoutValidation((HttpStatusCode)statusValue);
+                        }
+                        else
+                        {
+                            if (NetEventSource.IsEnabled) _connection.Trace("Invalid response pseudo-header '{System.Text.Encoding.ASCII.GetString(name)}'.");
                             throw new HttpRequestException(SR.net_http_invalid_response);
                         }
-
-                        _response.SetStatusCodeWithoutValidation((HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0')));
                     }
                     else
                     {
+                        if (_response.StatusCode == 0)
+                        {
+                            throw new Exception("Received eaders before status pseudo-header.");
+                        }
+
                         if (!HeaderDescriptor.TryGet(name, out HeaderDescriptor descriptor))
                         {
                             // Invalid header name
