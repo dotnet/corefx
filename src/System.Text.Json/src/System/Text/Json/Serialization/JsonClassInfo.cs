@@ -114,10 +114,14 @@ namespace System.Text.Json.Serialization
             else if (ClassType == ClassType.Enumerable || ClassType == ClassType.Dictionary)
             {
                 // Add a single property that maps to the class type so we can have policies applied.
-                AddProperty(type, propertyInfo : null, type, options);
+                JsonPropertyInfo jsonPropertyInfo = AddProperty(type, propertyInfo: null, type, options);
+
+                // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
+                CreateObject = options.ClassMaterializerStrategy.CreateConstructor(jsonPropertyInfo.RuntimePropertyType);
 
                 // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
                 Type elementType = GetElementType(type);
+
                 ElementClassInfo = options.GetOrAddClass(elementType);
             }
             else if (ClassType == ClassType.Value)
@@ -350,7 +354,9 @@ namespace System.Text.Json.Serialization
                 return ClassType.Value;
             }
 
-            if (typeof(IDictionary).IsAssignableFrom(type))
+            if (typeof(IDictionary).IsAssignableFrom(type) || 
+                (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) 
+                || type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
             {
                 return ClassType.Dictionary;
             }

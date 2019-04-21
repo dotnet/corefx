@@ -35,8 +35,10 @@ namespace System.Text.Json.Serialization
                         finishedSerializing = true;
                         break;
                     case ClassType.Object:
-                    case ClassType.Dictionary:
                         finishedSerializing = WriteObject(options, writer, ref state);
+                        break;
+                    case ClassType.Dictionary:
+                        finishedSerializing = HandleDictionary(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                         break;
                     default:
                         Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Unknown);

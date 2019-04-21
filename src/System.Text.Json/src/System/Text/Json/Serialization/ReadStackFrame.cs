@@ -15,9 +15,7 @@ namespace System.Text.Json.Serialization
         internal JsonClassInfo JsonClassInfo;
 
         // Support Dictionary
-        internal List<string> TempDictKeys;
-        internal IList TempDictValues;
-        internal bool IsNestedEnumerableInDict;
+        internal string KeyName;
 
         // Current property values
         internal JsonPropertyInfo JsonPropertyInfo;
@@ -59,6 +57,12 @@ namespace System.Text.Json.Serialization
             PopStackOnEndArray = false;
             EnumerableCreated = false;
             TempEnumerableValues = null;
+            KeyName = null;
+        }
+
+        internal bool IsProcessingEnumerableOrDictionary()
+        {
+            return IsEnumerable() ||IsPropertyEnumerable() || IsDictionary() || IsPropertyADictionary();
         }
 
         internal bool IsEnumerable()

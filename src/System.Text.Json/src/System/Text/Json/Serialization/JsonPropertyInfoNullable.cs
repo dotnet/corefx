@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -31,12 +32,7 @@ namespace System.Text.Json.Serialization
 
         internal override void Read(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
         {
-            if (state.Current.IsDictionary())
-            {
-                JsonPropertyInfo propertyInfo = state.Current.JsonClassInfo.ElementClassInfo.GetPolicyProperty();
-                propertyInfo.ReadDictionaryValue(tokenType, options, ref state, ref reader);
-            }
-            else if (ElementClassInfo != null)
+            if (ElementClassInfo != null)
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
                 JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
@@ -76,19 +72,6 @@ namespace System.Text.Json.Serialization
             // Converting to TProperty? here lets us share a common ApplyValue() with ApplyNullValue().
             TProperty? nullableValue = new TProperty?(value);
             JsonSerializer.ApplyValueToEnumerable(ref nullableValue, options, ref state.Current);
-        }
-
-        internal override void ReadDictionaryValue(JsonTokenType tokenType, JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
-        {
-            if (ValueConverter == null || !ValueConverter.TryRead(typeof(TProperty), ref reader, out TProperty value))
-            {
-                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state);
-                return;
-            }
-
-            // Converting to TProperty? here lets us share a common ApplyValue() with ApplyNullValue().
-            TProperty? nullableValue = new TProperty?(value);
-            JsonSerializer.ApplyValueToDictionary(ref nullableValue, options, ref state.Current);
         }
 
         internal override void ApplyNullValue(JsonSerializerOptions options, ref ReadStack state)
@@ -141,6 +124,11 @@ namespace System.Text.Json.Serialization
                     }
                 }
             }
+        }
+
+        internal override void WriteDictionary(JsonSerializerOptions options, ref WriteStackFrame current, Utf8JsonWriter writer)
+        {
+            JsonSerializer.WriteDictionary(ValueConverter, options, ref current, writer);
         }
 
         internal override void WriteEnumerable(JsonSerializerOptions options, ref WriteStackFrame current, Utf8JsonWriter writer)

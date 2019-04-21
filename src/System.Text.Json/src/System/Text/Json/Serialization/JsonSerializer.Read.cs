@@ -47,13 +47,13 @@ namespace System.Text.Json.Serialization
                         if (state.Current.IsDictionary())
                         {
                             string keyName = reader.GetString();
-
                             if (options.DictionaryKeyPolicy != null)
                             {
                                 keyName = options.DictionaryKeyPolicy.ConvertName(keyName);
                             }
 
-                            state.Current.TempDictKeys.Add(keyName);
+                            state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetPolicyProperty();
+                            state.Current.KeyName = keyName;
                         }
                         else
                         {

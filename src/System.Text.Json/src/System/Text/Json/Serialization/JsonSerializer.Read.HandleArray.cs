@@ -18,17 +18,6 @@ namespace System.Text.Json.Serialization
         {
             JsonPropertyInfo jsonPropertyInfo;
 
-            if (state.Current.IsDictionary())
-            {
-                JsonClassInfo classInfo = state.Current.JsonClassInfo.ElementClassInfo;
-                JsonPropertyInfo propertyInfo = classInfo.GetPolicyProperty();
-
-                state.Push();
-                state.Current.JsonClassInfo = classInfo;
-                state.Current.JsonPropertyInfo = propertyInfo;
-                state.Current.IsNestedEnumerableInDict = true;
-            }
-
             jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
             bool skip = jsonPropertyInfo != null && !jsonPropertyInfo.ShouldDeserialize;
@@ -134,16 +123,6 @@ namespace System.Text.Json.Serialization
                 state.Pop();
             }
 
-            if (state.Current.IsNestedEnumerableInDict)
-            {
-                state.Pop();
-
-                Debug.Assert(state.Current.IsDictionary());
-                ApplyObjectToDictionary(value, options, ref state.Current);
-
-                return false;
-            }
-
             if (lastFrame)
             {
                 if (state.Current.ReturnValue == null)
@@ -198,6 +177,16 @@ namespace System.Text.Json.Serialization
                     ((IList)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
                 }
             }
+            else if (frame.IsDictionary())
+            {
+                ((IDictionary)frame.ReturnValue).Add(frame.KeyName, value);
+            }
+            else if (frame.IsPropertyADictionary())
+            {
+                Debug.Assert(frame.JsonPropertyInfo != null);
+                Debug.Assert(frame.ReturnValue != null);
+                ((IDictionary)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(frame.KeyName, value);
+            }
             else
             {
                 Debug.Assert(frame.JsonPropertyInfo != null);
@@ -206,7 +195,10 @@ namespace System.Text.Json.Serialization
         }
 
         // If this method is changed, also change ApplyObjectToEnumerable.
-        internal static void ApplyValueToEnumerable<TProperty>(ref TProperty value, JsonSerializerOptions options, ref ReadStackFrame frame)
+        internal static void ApplyValueToEnumerable<TProperty>(
+            ref TProperty value,
+            JsonSerializerOptions options,
+            ref ReadStackFrame frame)
         {
             if (frame.IsEnumerable())
             {
@@ -231,6 +223,17 @@ namespace System.Text.Json.Serialization
                 {
                     ((IList<TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
                 }
+            }
+            else if (frame.IsDictionary())
+            {
+                // todo: use TryAdd and throw JsonReaderException
+                ((IDictionary<string, TProperty>)frame.ReturnValue).Add(frame.KeyName, value);
+            }
+            else if (frame.IsPropertyADictionary())
+            {
+                Debug.Assert(frame.JsonPropertyInfo != null);
+                Debug.Assert(frame.ReturnValue != null);
+                ((IDictionary<string, TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(frame.KeyName, value);
             }
             else
             {
