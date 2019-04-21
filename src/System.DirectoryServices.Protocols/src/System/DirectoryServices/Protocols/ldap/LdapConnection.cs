@@ -15,7 +15,6 @@ using System.Security.Cryptography.X509Certificates;
 
 namespace System.DirectoryServices.Protocols
 {
-    internal delegate DirectoryResponse GetLdapResponseCallback(int messageId, LdapOperation operation, ResultAll resultType, TimeSpan requestTimeout, bool exceptionOnTimeOut);
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     internal delegate bool QUERYCLIENTCERT(IntPtr Connection, IntPtr trusted_CAs, ref IntPtr certificateHandle);
@@ -43,7 +42,6 @@ namespace System.DirectoryServices.Protocols
         private bool _needRebind = false;
         internal static Hashtable s_handleTable = null;
         internal static object s_objectLock = null;
-        private GetLdapResponseCallback _fd = null;
         private static Hashtable s_asyncResultTable = null;
         private static LdapPartialResultsProcessor s_partialResultsProcessor = null;
         private static ManualResetEvent s_waitHandle = null;
@@ -84,7 +82,6 @@ namespace System.DirectoryServices.Protocols
 
         public LdapConnection(LdapDirectoryIdentifier identifier, NetworkCredential credential, AuthType authType)
         {
-            _fd = new GetLdapResponseCallback(ConstructResponse);
             _directoryIdentifier = identifier;
             _directoryCredential = (credential != null) ? new NetworkCredential(credential.UserName, credential.Password, credential.Domain) : null;
 
@@ -393,31 +390,6 @@ namespace System.DirectoryServices.Protocols
             }
 
             throw ConstructException(error, operation);
-        }
-
-        private void ResponseCallback(IAsyncResult asyncResult)
-        {
-            LdapRequestState requestState = (LdapRequestState)asyncResult.AsyncState;
-
-            try
-            {
-                DirectoryResponse response = _fd.EndInvoke(asyncResult);
-                requestState._response = response;
-            }
-            catch (Exception e)
-            {
-                requestState._exception = e;
-                requestState._response = null;
-            }
-
-            // Signal waitable object, indicate operation completed and fire callback.
-            requestState._ldapAsync._manualResetEvent.Set();
-            requestState._ldapAsync._completed = true;
-
-            if (requestState._ldapAsync._callback != null && !requestState._abortCalled)
-            {
-                requestState._ldapAsync._callback(requestState._ldapAsync);
-            }
         }
 
         public void Abort(IAsyncResult asyncResult)
