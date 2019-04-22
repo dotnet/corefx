@@ -257,9 +257,12 @@ namespace System.Collections.ObjectModel
             {
                 IList newItems = collection is IList list ? list : new List<T>(collection);
 
-                OnCountPropertyChanged();
-                OnIndexerPropertyChanged();
-                OnCollectionChanged(NotifyCollectionChangedAction.Add, newItems, index);
+                if (newItems.Count > 0)
+                {
+                    OnCountPropertyChanged();
+                    OnIndexerPropertyChanged();
+                    OnCollectionChanged(NotifyCollectionChangedAction.Add, newItems, index);
+                }
             }
         }
 
