@@ -106,7 +106,6 @@ namespace System.Data.OleDb
         public new System.Data.OleDb.OleDbCommand CreateCommand() { throw null; }
         protected override System.Data.Common.DbCommand CreateDbCommand() { throw null; }
         protected override void Dispose(bool disposing) { }
-//TODO  public void EnlistDistributedTransaction(System.EnterpriseServices.ITransaction transaction) { }
         public override void EnlistTransaction(System.Transactions.Transaction transaction) { }
         public System.Data.DataTable GetOleDbSchemaTable(System.Guid schema, object[] restrictions) { throw null; }
         public override System.Data.DataTable GetSchema() { throw null; }
