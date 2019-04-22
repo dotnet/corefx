@@ -142,7 +142,7 @@ namespace System.Net.Http
             // Receive the initial SETTINGS frame from the peer.
             try
             {
-                FrameHeader frameHeader = await ReadFrameAsync(initialFrame : true).ConfigureAwait(false);
+                FrameHeader frameHeader = await ReadFrameAsync(initialFrame: true).ConfigureAwait(false);
                 if (frameHeader.Type != FrameType.Settings || frameHeader.AckFlag)
                 {
                     throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
