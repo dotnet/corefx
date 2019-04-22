@@ -656,15 +656,12 @@ namespace System.Collections.ObjectModel.Tests
         [Fact]
         public static void RemoveRange_NotifyCollectionChanged_IntMaxValueOverflow_Test()
         {
-            int eventCounter = 0;
             int count = 500;
             ObservableCollection<int> collection = new ObservableCollection<int>();
             for (int i = 0; i < count; i++)
             {
                 collection.Add(i);
             }
-
-            collection.CollectionChanged += (o, e) => eventCounter++;
 
             Assert.Throws<ArgumentException>(() => collection.RemoveRange(collection.Count - 2, int.MaxValue));
         }
