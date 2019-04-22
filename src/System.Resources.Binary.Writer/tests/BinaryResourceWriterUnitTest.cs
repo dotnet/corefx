@@ -391,7 +391,7 @@ namespace System.Resources.Binary.Writer.Tests
         {
             ResourceManager resourceManager = new ResourceManager(typeof(TestData));
             ResourceSet resSet = resourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
-            IResourceReader reader = (IResourceReader)typeof(ResourceSet).GetField("Reader", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(resSet);
+            IResourceReader reader = (IResourceReader)typeof(RuntimeResourceSet).GetField("Reader", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(resSet);
             Assert.IsType<BinaryResourceReader>(reader);
         }
 
@@ -434,8 +434,3 @@ namespace System.Resources.Binary.Writer.Tests
     }
 
 }
-
-
-
-
-

@@ -21,6 +21,6 @@ namespace System.Resources.Binary
     }
     public sealed partial class RuntimeResourceSet : ResourceSet
     {
-        public RuntimeResourceSet(IResourceReader reader) : base(reader) { }
+        internal RuntimeResourceSet() { }
     }
 }

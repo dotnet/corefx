@@ -8,23 +8,22 @@ namespace System.Resources.Binary
     {
         private readonly IResourceReader Reader;
 
-        public RuntimeResourceSet(IResourceReader reader) : base(reader)
+        internal RuntimeResourceSet(IResourceReader reader) :
+            // explicitly do not call IResourceReader constructor since it caches all resources
+            // the purpose of RuntimeResourceSet is to lazily load and cache.
+            base()  
         {
             if (reader == null)
                 throw new ArgumentNullException(nameof(reader));
 
-            BinaryResourceReader binaryResourceReader = reader as BinaryResourceReader;
-
-            if (binaryResourceReader == null)
-                throw new ArgumentException(SR.Format(SR.NotSupported_WrongResourceReader_Type, reader.GetType()), nameof(reader));
-
+            _defaultReader = reader as BinaryResourceReader ?? throw new ArgumentException(SR.Format(SR.NotSupported_WrongResourceReader_Type, reader.GetType()), nameof(reader));
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
-            _defaultReader = binaryResourceReader;
             Reader = reader;
 
-            // in the inbox version this type creates the reader and passes this in, in the custom case the reader is passed in,
+            // in the CoreLib version RuntimeResourceSet creates ResourceReader and passes this in, 
+            // in the custom case ManifestBasedResourceReader creates the ResourceReader and passes it in
             // so we must initialize the cache here.
-            binaryResourceReader._resCache = _resCache;
+            _defaultReader._resCache = _resCache;
         }
     }
 }
