@@ -23,5 +23,17 @@ namespace System.Tests
             Assert.True((end - start) > size, $"Allocated too little: start: {start} end: {end} size: {size}");
             Assert.True((end - start) < 5 * size, $"Allocated too much: start: {start} end: {end} size: {size}");
         }
+
+        [Fact]
+        public static void GetGCMemoryInfo()
+        {
+            GCMemoryInfo memoryInfo = GC.GetGCMemoryInfo();
+
+            Assert.True(memoryInfo.HighMemoryLoadThresholdBytes > 0);
+            Assert.True(memoryInfo.MemoryLoadBytes > 0);
+            Assert.True(memoryInfo.TotalAvailableMemoryBytes > 0);
+            Assert.True(memoryInfo.HeapSizeBytes > 0);
+            Assert.True(memoryInfo.FragmentedBytes > 0);
+        }
     }
 }
