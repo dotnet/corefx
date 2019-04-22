@@ -14,8 +14,8 @@ namespace Microsoft.VisualBasic.MyServices.Tests
         public void Properties()
         {
             SpecialDirectoriesProxy specialDirectories = new ServerComputer().FileSystem.SpecialDirectories;
-            Assert.Throws<PlatformNotSupportedException>(() => specialDirectories.AllUsersApplicationData);
-            Assert.Throws<PlatformNotSupportedException>(() => specialDirectories.CurrentUserApplicationData);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.AllUsersApplicationData, () => specialDirectories.AllUsersApplicationData);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.CurrentUserApplicationData, () => specialDirectories.CurrentUserApplicationData);
             VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.Desktop, () => specialDirectories.Desktop);
             VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.MyDocuments, () => specialDirectories.MyDocuments);
             VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.MyMusic, () => specialDirectories.MyMusic);
@@ -32,7 +32,7 @@ namespace Microsoft.VisualBasic.MyServices.Tests
             {
                 expected = getExpected();
             }
-            catch (System.IO.IOException)
+            catch (Exception)
             {
                 return;
             }
