@@ -110,7 +110,7 @@ namespace System.Drawing
             {
                 short signature = MemoryMarshal.Read<short>(rawData);
 
-                if (signature != 0x1c15 || rawData.Length < sizeof(OBJECTHEADER))
+                if (signature != 0x1c15)
                 {
                     return null;
                 }
