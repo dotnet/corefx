@@ -22,8 +22,8 @@ namespace Microsoft.VisualBasic.Devices.Tests
 
             var after = clock.LocalTime;
 
-            Assert.True(before < now);
-            Assert.True(now < after);
+            Assert.True(before <= now);
+            Assert.True(now <= after);
         }
 
         [Fact]
@@ -39,8 +39,8 @@ namespace Microsoft.VisualBasic.Devices.Tests
 
             var after = clock.GmtTime;
 
-            Assert.True(before < now);
-            Assert.True(now < after);
+            Assert.True(before <= now);
+            Assert.True(now <= after);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Microsoft.VisualBasic.Devices.Tests
             System.Threading.Thread.Sleep(10);
 
             var after = clock.TickCount;
-            Assert.True(before <  after);
+            Assert.True(before <=  after);
         }
     }
 }

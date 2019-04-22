@@ -49,7 +49,12 @@ namespace Microsoft.VisualBasic.ApplicationServices.Tests
         public void GetEnvironmentVariable()
         {
             var app = new ApplicationBase();
-            Assert.Equal(System.Environment.GetEnvironmentVariable("TEMP"), app.GetEnvironmentVariable("TEMP"));
+            var variables = System.Environment.GetEnvironmentVariables().Keys;
+            foreach (string variable in variables)
+            {
+                Assert.Equal(System.Environment.GetEnvironmentVariable(variable), app.GetEnvironmentVariable(variable));
+                break;
+            }
         }
     }
 }

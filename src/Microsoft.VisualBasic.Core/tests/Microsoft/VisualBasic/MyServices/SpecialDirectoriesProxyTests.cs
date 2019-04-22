@@ -16,13 +16,28 @@ namespace Microsoft.VisualBasic.MyServices.Tests
             SpecialDirectoriesProxy specialDirectories = new ServerComputer().FileSystem.SpecialDirectories;
             Assert.Throws<PlatformNotSupportedException>(() => specialDirectories.AllUsersApplicationData);
             Assert.Throws<PlatformNotSupportedException>(() => specialDirectories.CurrentUserApplicationData);
-            Assert.Equal(Microsoft.VisualBasic.FileIO.SpecialDirectories.Desktop, specialDirectories.Desktop);
-            Assert.Equal(Microsoft.VisualBasic.FileIO.SpecialDirectories.MyDocuments, specialDirectories.MyDocuments);
-            Assert.Equal(Microsoft.VisualBasic.FileIO.SpecialDirectories.MyMusic, specialDirectories.MyMusic);
-            Assert.Equal(Microsoft.VisualBasic.FileIO.SpecialDirectories.MyPictures, specialDirectories.MyPictures);
-            Assert.Equal(Microsoft.VisualBasic.FileIO.SpecialDirectories.Programs, specialDirectories.Programs);
-            Assert.Equal(Microsoft.VisualBasic.FileIO.SpecialDirectories.ProgramFiles, specialDirectories.ProgramFiles);
-            Assert.Equal(Microsoft.VisualBasic.FileIO.SpecialDirectories.Temp, specialDirectories.Temp);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.Desktop, () => specialDirectories.Desktop);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.MyDocuments, () => specialDirectories.MyDocuments);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.MyMusic, () => specialDirectories.MyMusic);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.MyPictures, () => specialDirectories.MyPictures);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.Programs, () => specialDirectories.Programs);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.ProgramFiles, () => specialDirectories.ProgramFiles);
+            VerifySpecialDirectory(() => Microsoft.VisualBasic.FileIO.SpecialDirectories.Temp, () => specialDirectories.Temp);
+        }
+
+        private static void VerifySpecialDirectory(Func<string> getExpected, Func<string> getActual)
+        {
+            string expected;
+            try
+            {
+                expected = getExpected();
+            }
+            catch (System.IO.IOException)
+            {
+                return;
+            }
+            string actual = getActual();
+            Assert.Equal(expected, actual);
         }
     }
 }
