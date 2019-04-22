@@ -28,16 +28,4 @@ namespace System
         public const double PositiveInfinity = (double)1.0 / (double)(0.0);
         public const double NaN = (double)0.0 / (double)0.0;
     }
-    public readonly struct GCMemoryInfo
-    {
-        public long HighMemoryLoadThresholdBytes { get { throw null; } }
-        public long MemoryLoadBytes { get { throw null; } }
-        public long TotalAvailableMemoryBytes { get { throw null; } }
-        public long HeapSizeBytes { get { throw null; } }
-        public long FragmentedBytes { get { throw null; } }
-    }
-    public static partial class GC
-    {
-        public static GCMemoryInfo GetGCMemoryInfo() { throw null; }
-    }
 }

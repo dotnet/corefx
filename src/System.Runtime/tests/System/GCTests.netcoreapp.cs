@@ -33,7 +33,7 @@ namespace System.Tests
             Assert.True(memoryInfo.MemoryLoadBytes > 0);
             Assert.True(memoryInfo.TotalAvailableMemoryBytes > 0);
             Assert.True(memoryInfo.HeapSizeBytes > 0);
-            Assert.True(memoryInfo.FragmentedBytes > 0);
+            Assert.True(memoryInfo.FragmentedBytes >= 0);
         }
     }
 }
