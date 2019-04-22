@@ -615,7 +615,7 @@ namespace System.Collections.ObjectModel.Tests
             Assert.NotNull(collection);
             Assert.Equal(initialData.Length - itemsToRemove, collection.Count);
             Assert.Equal(1, eventCounter);
-            Assert.Equal(initialData.AsSpan(2, 2).ToArray(), collection.ToArray());
+            Assert.Equal(initialData.AsSpan(2).ToArray(), collection.ToArray());
         }
 
         [Fact]
