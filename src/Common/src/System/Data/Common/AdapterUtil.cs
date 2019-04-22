@@ -328,6 +328,9 @@ namespace System.Data.Common
             return InvalidCast(SR.Format(SR.ADP_CollectionInvalidType, collection.Name, itemType.Name, invalidValue.GetType().Name));
         }
 
+        //
+        // DbConnection
+        //
         private static string ConnectionStateMsg(ConnectionState state)
         {
             switch (state)

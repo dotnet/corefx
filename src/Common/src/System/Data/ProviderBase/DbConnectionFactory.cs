@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Diagnostics;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +18,7 @@ namespace System.Data.ProviderBase
         private readonly Timer _pruningTimer;
         private const int PruningDueTime = 4 * 60 * 1000;           // 4 minutes
         private const int PruningPeriod = 30 * 1000;           // thirty seconds
+
 
         // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to 
         // a maximum of Environment.ProcessorCount at a time.
@@ -33,10 +34,12 @@ namespace System.Data.ProviderBase
             _pruningTimer = CreatePruningTimer();
         }
 
+
         abstract public DbProviderFactory ProviderFactory
         {
             get;
         }
+
 
         public void ClearAllPools()
         {
@@ -252,6 +255,7 @@ namespace System.Data.ProviderBase
             }
             return connectionPoolGroup;
         }
+
 
         private void PruneConnectionPoolGroups(object state)
         {
