@@ -108,33 +108,32 @@ namespace System.Drawing
         {
             try
             {
+                short signature = MemoryMarshal.Read<short>(rawData);
+
+                if (signature != 0x1c15 || rawData.Length < sizeof(OBJECTHEADER))
+                {
+                    return null;
+                }
+
                 // The data is in the form of OBJECTHEADER. It's an encoded format that Access uses to push imagesinto the DB.
                 OBJECTHEADER pHeader = MemoryMarshal.Read<OBJECTHEADER>(rawData);
 
                 // pHeader.signature will always be 0x1c15.
                 // "PBrush" should be the 6 chars after position 12 as well.
-                if (pHeader.signature != 0x1c15 ||
-                    rawData.Length <= pHeader.headersize + 18 ||
+                if ( rawData.Length <= pHeader.headersize + 18 ||
                     !rawData.Slice(pHeader.headersize + 12, 6).SequenceEqual(PBrush))
                 {
                     return null;
                 }
 
                 // We can safely trust that we've got a bitmap.
-                // search for "BM" in the data which is the start of our bitmap data.
-                // 18 is from (12+6) above.
-                ReadOnlySpan<byte> rawDataWithoutHeader = rawData.Slice(pHeader.headersize + 18);
-                int index = rawDataWithoutHeader.IndexOf(BMBytes);
-
-                if (index >= 0 && index < pHeader.headersize + 510)
-                {
-                    return new MemoryStream(rawDataWithoutHeader.Slice(index).ToArray());
-                }
+                // The start of our bitmap data in the rawdata is always 78.
+                return new MemoryStream(rawData.Slice(78).ToArray());
             }
             catch (OutOfMemoryException) // This exception may be caused by creating a new MemoryStream.
             {
             }
-            catch (ArgumentOutOfRangeException) // This exception may get thrown when input array size is less than the size of the OBJECTHEADER.
+            catch (ArgumentOutOfRangeException) // This exception may get thrown by MemoryMarshal when input array size is less than the size of the output type.
             {
             }
 
