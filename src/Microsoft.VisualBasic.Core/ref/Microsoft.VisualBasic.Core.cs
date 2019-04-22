@@ -304,10 +304,10 @@ namespace Microsoft.VisualBasic.ApplicationServices
     public partial class ApplicationBase
     {
         public ApplicationBase() { }
-        public System.Globalization.CultureInfo Culture { get { throw null; } }
-        public System.Globalization.CultureInfo UICulture { get { throw null; } }
         public void ChangeCulture(string cultureName) { throw null; }
         public void ChangeUICulture(string cultureName) { throw null; }
+        public System.Globalization.CultureInfo Culture { get { throw null; } }
+        public System.Globalization.CultureInfo UICulture { get { throw null; } }
         public string GetEnvironmentVariable(string name) { throw null; }
     }
     public partial class StartupEventArgs : System.ComponentModel.CancelEventArgs
@@ -331,12 +331,12 @@ namespace Microsoft.VisualBasic.ApplicationServices
     public partial class User
     {
         public User() { }
-        public string Name { get { throw null; } }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
         public System.Security.Principal.IPrincipal CurrentPrincipal { get { throw null; } set { } }
-        public bool IsAuthenticated { get { throw null; } }
         protected virtual System.Security.Principal.IPrincipal InternalPrincipal { get { throw null; } set { } }
+        public bool IsAuthenticated { get { throw null; } }
         public bool IsInRole(string role) { throw null; }
+        public string Name { get { throw null; } }
     }
 }
 namespace Microsoft.VisualBasic.CompilerServices
@@ -744,8 +744,8 @@ namespace Microsoft.VisualBasic.Devices
     public partial class Clock
     {
         public Clock() { }
-        public System.DateTime LocalTime { get { throw null; } }
         public System.DateTime GmtTime { get { throw null; } }
+        public System.DateTime LocalTime { get { throw null; } }
         public int TickCount { get { throw null; } }
     }
     public partial class Computer : ServerComputer
@@ -791,8 +791,8 @@ namespace Microsoft.VisualBasic.Devices
         public Clock Clock { get { throw null; } }
         public Microsoft.VisualBasic.MyServices.FileSystemProxy FileSystem { get { throw null; } }
         public ComputerInfo Info { get { throw null; } }
-        public Network Network { get { throw null; } }
         public string Name { get { throw null; } }
+        public Network Network { get { throw null; } }
         public Microsoft.VisualBasic.MyServices.RegistryProxy Registry { get { throw null; } }
     }
 }

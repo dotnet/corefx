@@ -87,7 +87,6 @@ Namespace Microsoft.VisualBasic.ApplicationServices
         'Remarks:
         '   CultureInfo constructor will throw exceptions if CultureName is Nothing 
         '   or an invalid CultureInfo ID. We are not catching those exceptions.
-        '   Because SQL uses fibers, you can't change the culture of a thread.
         '**********************************************************************
         Public Sub ChangeCulture(ByVal cultureName As String)
             System.Threading.Thread.CurrentThread.CurrentCulture = New System.Globalization.CultureInfo(cultureName)

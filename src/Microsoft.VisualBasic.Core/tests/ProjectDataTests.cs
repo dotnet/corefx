@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.VisualBasic.CompilerServices;
+using Microsoft.DotNet.RemoteExecutor;
 using System;
 using Xunit;
 
@@ -52,8 +52,12 @@ namespace Microsoft.VisualBasic.CompilerServices.Tests
         [Fact]
         public void EndApp()
         {
-            // Cannot invoke EndApp because that will exit the process. Simply verify the method exists.
-            _ = new Action(ProjectData.EndApp);
+            RemoteExecutor.Invoke(new Action(() =>
+            {
+                ProjectData.EndApp();
+                throw new Exception(); // Shouldn't reach here.
+            }),
+            new RemoteInvokeOptions() { ExpectedExitCode = 0 }).Dispose();
         }
     }
 }
