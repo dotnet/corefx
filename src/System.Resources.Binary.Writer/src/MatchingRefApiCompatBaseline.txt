@@ -1,4 +1,0 @@
-Compat issues with assembly System.Resources.Binary.Writer:
-TypesMustExist : Type 'System.Resources.ResourceWriter' does not exist in the reference but it does exist in the implementation.
-CannotRemoveBaseTypeOrInterface : Type 'System.Resources.Binary.BinaryResourceWriter' does not inherit from base type 'System.Resources.ResourceWriter' in the reference but it does in the implementation.
-Total Issues: 2

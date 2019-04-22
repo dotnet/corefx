@@ -1,3 +1,0 @@
-// We intentionally hide ResourceReader, we're carrying a local copy so that we can share the code
-TypesMustExist : Type 'System.Resources.ResourceReader' does not exist in the reference but it does exist in the implementation.
-CannotRemoveBaseTypeOrInterface : Type 'System.Resources.Binary.BinaryResourceReader' does not inherit from base type 'System.Resources.ResourceReader' in the reference but it does in the implementation.

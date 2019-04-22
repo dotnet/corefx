@@ -25,7 +25,7 @@ using System.Diagnostics;
 
 namespace System.Resources
 #if RESOURCES_STANDALONE
-    .Binary
+    .Extensions
 #endif
 {
     // A RuntimeResourceSet stores all the resources defined in one 
