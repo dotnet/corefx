@@ -467,7 +467,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.InsertRange(0, dataToInsert);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToInsert.Length + initialData.Length, collection.Count);
             Assert.Equal(1, eventCounter);
 
@@ -487,7 +486,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.InsertRange(2, dataToInsert);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToInsert.Length + initialData.Length, collection.Count);
             Assert.Equal(1, eventCounter);
 
@@ -508,7 +506,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.InsertRange(4, dataToInsert);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToInsert.Length + initialData.Length, collection.Count);
             Assert.Equal(1, eventCounter);
 
@@ -528,7 +525,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.AddRange(dataToInsert);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToInsert.Length + initialData.Length, collection.Count);
             Assert.Equal(1, eventCounter);
 
@@ -547,7 +543,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.AddRange(dataToAdd);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToAdd, actualDataAdded);
         }
 
@@ -561,7 +556,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.InsertRange(0, dataToAdd);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToAdd, actualDataAdded);
         }
 
@@ -579,7 +573,6 @@ namespace System.Collections.ObjectModel.Tests
             collection.CollectionChanged += (o, e) => actualDataAdded = e.NewItems.Cast<int>().ToArray();
             collection.InsertRange(2, dataToAdd);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToAdd, actualDataAdded);
         }
 
@@ -597,7 +590,6 @@ namespace System.Collections.ObjectModel.Tests
             collection.CollectionChanged += (o, e) => actualDataAdded = e.NewItems.Cast<int>().ToArray();
             collection.InsertRange(4, dataToAdd);
 
-            Assert.NotNull(collection);
             Assert.Equal(dataToAdd, actualDataAdded);
         }
 
@@ -612,7 +604,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.RemoveRange(0, itemsToRemove);
 
-            Assert.NotNull(collection);
             Assert.Equal(initialData.Length - itemsToRemove, collection.Count);
             Assert.Equal(1, eventCounter);
             Assert.Equal(initialData.AsSpan(2).ToArray(), collection.ToArray());
@@ -629,7 +620,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.RemoveRange(1, itemsToRemove);
 
-            Assert.NotNull(collection);
             Assert.Equal(initialData.Length - itemsToRemove, collection.Count);
             Assert.Equal(1, eventCounter);
             Assert.Equal(initialData[0], collection[0]);
@@ -647,7 +637,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.RemoveRange(2, itemsToRemove);
 
-            Assert.NotNull(collection);
             Assert.Equal(initialData.Length - itemsToRemove, collection.Count);
             Assert.Equal(1, eventCounter);
             Assert.Equal(initialData.AsSpan(0, 2).ToArray(), collection.ToArray());
@@ -681,7 +670,6 @@ namespace System.Collections.ObjectModel.Tests
             collection.CollectionChanged += (o, e) => actualDataRemoved = e.OldItems.Cast<int>().ToArray();
             collection.RemoveRange(0, numberOfItemsToRemove);
 
-            Assert.NotNull(collection);
             Assert.Equal(initialData.Length - numberOfItemsToRemove, collection.Count);
             Assert.Equal(initialData.AsSpan(0, numberOfItemsToRemove).ToArray(), actualDataRemoved);
         }
@@ -702,7 +690,6 @@ namespace System.Collections.ObjectModel.Tests
             collection.CollectionChanged += (o, e) => actualDataRemoved = e.OldItems.Cast<int>().ToArray();
             collection.RemoveRange(startIndex, numberOfItemsToRemove);
 
-            Assert.NotNull(collection);
             Assert.Equal(initialData.Length - numberOfItemsToRemove, collection.Count);
             Assert.Equal(initialData.AsSpan(startIndex, numberOfItemsToRemove).ToArray(), actualDataRemoved);
         }
@@ -718,7 +705,6 @@ namespace System.Collections.ObjectModel.Tests
 
             collection.ReplaceRange(0, 2, dataToReplace);
 
-            Assert.NotNull(collection);
             Assert.Equal(initialData.Length, collection.Count);
             Assert.Equal(1, eventCounter);
 
