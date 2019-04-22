@@ -64,20 +64,6 @@ namespace System.Data.OleDb {
         private bool _unEnlistDuringDeactivate;
 
         internal OleDbConnectionInternal(OleDbConnectionString constr, OleDbConnection connection) : base () {
-#if DEBUG
-            try { // use this to help validate this object is only created after the following permission has been previously demanded in the current codepath
-                if (null != connection) {
-                    connection.UserConnectionOptions.DemandPermission();
-                }
-                else {
-                    constr.DemandPermission();
-                }
-            }
-            catch(System.Security.SecurityException) {
-                System.Diagnostics.Debug.Assert(false, "unexpected SecurityException for current codepath");
-                throw;
-            }
-#endif
             Debug.Assert((null != constr) && !constr.IsEmpty, "empty connectionstring");
             ConnectionString = constr;
 

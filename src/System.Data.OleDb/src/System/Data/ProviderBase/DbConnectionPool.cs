@@ -1020,27 +1020,12 @@ namespace System.Data.ProviderBase {
                         Exception caughtException = null;
 
                         RuntimeHelpers.PrepareConstrainedRegions();
-                        try {
-#if DEBUG
-                            System.Data.SqlClient.TdsParser.ReliabilitySection tdsReliabilitySection = new System.Data.SqlClient.TdsParser.ReliabilitySection();
-
-                            RuntimeHelpers.PrepareConstrainedRegions();
-                            try {
-                                tdsReliabilitySection.Start();
-#else
-                            {
-#endif //DEBUG
-
-                                bool allowCreate = true;
-                                bool onlyOneCheckConnection = false;
-                                ADP.SetCurrentTransaction(next.Completion.Task.AsyncState as Transactions.Transaction);
-                                timeout = !TryGetConnection(next.Owner, delay, allowCreate, onlyOneCheckConnection, next.UserOptions, out connection);
-                            }
-#if DEBUG
-                            finally {
-                                tdsReliabilitySection.Stop();
-                            }
-#endif //DEBUG
+                        try
+                        {
+                            bool allowCreate = true;
+                            bool onlyOneCheckConnection = false;
+                            ADP.SetCurrentTransaction(next.Completion.Task.AsyncState as Transactions.Transaction);
+                            timeout = !TryGetConnection(next.Owner, delay, allowCreate, onlyOneCheckConnection, next.UserOptions, out connection);
                         }
                         catch (System.OutOfMemoryException) {
                             if (connection != null) { connection.DoomThisConnection(); }

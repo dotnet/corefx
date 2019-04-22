@@ -28,14 +28,7 @@ namespace System.Data.Common
         internal const CompareOptions DefaultCompareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
         internal const int DefaultConnectionTimeout = DbConnectionStringDefaults.ConnectTimeout;
 
-        static partial void TraceException(string trace, Exception e)
-        {
-            Debug.Assert(e != null, "TraceException: null Exception");
-            if (e != null)
-            {
-                DataCommonEventSource.Log.Trace(trace, e);
-            }
-        }
+        static partial void TraceException(string trace, Exception e);
 
         internal static void TraceExceptionAsReturnValue(Exception e)
         {

@@ -2,17 +2,17 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27213.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Data.Oledb.Tests", "tests\System.Data.Oledb.Tests.csproj", "{20A2BA2C-5517-483F-8FFE-643441A59852}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Data.OleDb.Tests", "tests\System.Data.OleDb.Tests.csproj", "{73C7A14F-C3C5-44EA-AB02-05BFBA55722C}"
 	ProjectSection(ProjectDependencies) = postProject
-		{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F} = {D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}
+		{D909B69D-8F3B-4551-A355-8FFF6A308CF6} = {D909B69D-8F3B-4551-A355-8FFF6A308CF6}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Data.Oledb", "src\System.Data.Oledb.csproj", "{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Data.OleDb", "src\System.Data.OleDb.csproj", "{D909B69D-8F3B-4551-A355-8FFF6A308CF6}"
 	ProjectSection(ProjectDependencies) = postProject
-		{EEC02D4E-217E-4B4D-A7DA-5038FAD44A18} = {EEC02D4E-217E-4B4D-A7DA-5038FAD44A18}
+		{EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78} = {EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Data.Oledb", "ref\System.Data.Oledb.csproj", "{EEC02D4E-217E-4B4D-A7DA-5038FAD44A18}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "System.Data.OleDb", "ref\System.Data.OleDb.csproj", "{EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{1A2F9F4A-A032-433E-B914-ADD5992BB178}"
 EndProject
@@ -26,28 +26,28 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{20A2BA2C-5517-483F-8FFE-643441A59852}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
-		{20A2BA2C-5517-483F-8FFE-643441A59852}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
-		{20A2BA2C-5517-483F-8FFE-643441A59852}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
-		{20A2BA2C-5517-483F-8FFE-643441A59852}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
-		{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
-		{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
-		{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
-		{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
-		{EEC02D4E-217E-4B4D-A7DA-5038FAD44A18}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
-		{EEC02D4E-217E-4B4D-A7DA-5038FAD44A18}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
-		{EEC02D4E-217E-4B4D-A7DA-5038FAD44A18}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
-		{EEC02D4E-217E-4B4D-A7DA-5038FAD44A18}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
+		{73C7A14F-C3C5-44EA-AB02-05BFBA55722C}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
+		{73C7A14F-C3C5-44EA-AB02-05BFBA55722C}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
+		{73C7A14F-C3C5-44EA-AB02-05BFBA55722C}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
+		{73C7A14F-C3C5-44EA-AB02-05BFBA55722C}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
+		{D909B69D-8F3B-4551-A355-8FFF6A308CF6}.Debug|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Debug|Any CPU
+		{D909B69D-8F3B-4551-A355-8FFF6A308CF6}.Debug|Any CPU.Build.0 = netcoreapp-Windows_NT-Debug|Any CPU
+		{D909B69D-8F3B-4551-A355-8FFF6A308CF6}.Release|Any CPU.ActiveCfg = netcoreapp-Windows_NT-Release|Any CPU
+		{D909B69D-8F3B-4551-A355-8FFF6A308CF6}.Release|Any CPU.Build.0 = netcoreapp-Windows_NT-Release|Any CPU
+		{EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78}.Debug|Any CPU.ActiveCfg = netstandard-Debug|Any CPU
+		{EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78}.Debug|Any CPU.Build.0 = netstandard-Debug|Any CPU
+		{EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78}.Release|Any CPU.ActiveCfg = netstandard-Release|Any CPU
+		{EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78}.Release|Any CPU.Build.0 = netstandard-Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{20A2BA2C-5517-483F-8FFE-643441A59852} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
-		{D3F18ACC-D327-4ABB-BA6C-E9C34A041B2F} = {E107E9C1-E893-4E87-987E-04EF0DCEAEFD}
-		{EEC02D4E-217E-4B4D-A7DA-5038FAD44A18} = {2E666815-2EDB-464B-9DF6-380BF4789AD4}
+		{73C7A14F-C3C5-44EA-AB02-05BFBA55722C} = {1A2F9F4A-A032-433E-B914-ADD5992BB178}
+		{D909B69D-8F3B-4551-A355-8FFF6A308CF6} = {E107E9C1-E893-4E87-987E-04EF0DCEAEFD}
+		{EF4F0844-7AAD-4B0C-A29C-37E1F92D2D78} = {2E666815-2EDB-464B-9DF6-380BF4789AD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {1ED9DC79-D6FD-4791-A7D5-C09573807723}
+		SolutionGuid = {04C9232C-0656-4BA5-9836-7DAE3DD4057C}
 	EndGlobalSection
 EndGlobal

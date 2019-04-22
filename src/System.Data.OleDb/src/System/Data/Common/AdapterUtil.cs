@@ -65,16 +65,7 @@ namespace System.Data.Common
         }
 
         internal const CompareOptions DefaultCompareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
-        
-        // [BidMethod] // this method accepts BID format as an argument, this attribute allows FXCopBid rule to validate calls to it
-        // static private void TraceException(
-        //         string trace,
-        //         [BidArgumentType(typeof(String))] Exception e) {
-        //     Debug.Assert(null != e, "TraceException: null Exception");
-        //     if (null != e) {
-        //         Bid.Trace(trace, e.ToString()); // will include callstack if permission is available
-        //     }
-        // }
+
         static void TraceException(string trace, Exception e)
         {
             Debug.Assert(e != null, "TraceException: null Exception");

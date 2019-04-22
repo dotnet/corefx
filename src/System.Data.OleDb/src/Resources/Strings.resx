@@ -438,6 +438,9 @@
   <data name="PlatformNotSupported_OleDb" xml:space="preserve">
     <value>System.Data.OleDb is not supported on this platform.</value>
   </data>
+  <data name="PlatformNotSupported_GetIDispatchForObject" xml:space="preserve">
+    <value>Marshal.GetIDispatchForObject API not available on this plaTform</value>
+  </data>
   <data name="ADP_CalledTwice" xml:space="preserve">
     <value>The method '{0}' cannot be called more than once for the same execution.</value>
   </data>

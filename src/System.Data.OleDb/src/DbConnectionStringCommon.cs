@@ -7,6 +7,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Data.SqlClient;
+
 namespace System.Data.Common {
 
 /*
@@ -250,7 +251,7 @@ namespace System.Data.Common {
         internal const string ApplicationName = "Core .Net SqlClient Data Provider";
         internal const ApplicationIntent ApplicationIntent = System.Data.SqlClient.ApplicationIntent.ReadWrite;
         internal const bool MultiSubnetFailover = false;
-        internal const System.Data.SqlClient.PoolBlockingPeriod PoolBlockingPeriod = System.Data.SqlClient.PoolBlockingPeriod.Auto;
+        // internal const PoolBlockingPeriod PoolBlockingPeriod = PoolBlockingPeriod.Auto;
     }
 
     internal static class DbConnectionOptionKeywords {

@@ -350,10 +350,6 @@ namespace System.Data.Common {
             return _parsetable.ContainsKey(keyword);
         }
 
-        protected internal virtual System.Security.PermissionSet CreatePermissionSet() {
-            return null;
-        }
-
         protected internal virtual string Expand() {
             return _usersConnectionString;
         }

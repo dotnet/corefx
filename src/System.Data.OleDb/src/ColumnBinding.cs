@@ -5,8 +5,10 @@
 using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace System.Data.OleDb {
     sealed internal class ColumnBinding {
@@ -22,6 +24,9 @@ namespace System.Data.OleDb {
         private readonly int _offsetStatus;
         private readonly int _offsetLength;
         private readonly int _offsetValue;
+
+        // Delegate ad hoc created 'Marshal.GetIDispatchForObject' reflection object cache
+        private static Func<object, IntPtr> s_getIDispatchForObject;
 
         private readonly int _ordinal;
         private readonly int _maxLen;
@@ -915,7 +920,21 @@ namespace System.Data.OleDb {
             Debug.Assert(NativeDBType.IDISPATCH == DbType, "Value_IDISPATCH");
             LengthValue(0);
             StatusValue(DBStatus.S_OK);
-            IntPtr ptr = Marshal.GetIDispatchForObject(value); // MDAC 80727
+            
+            IntPtr ptr = IntPtr.Zero;
+            // lazy init reflection objects
+            if (s_getIDispatchForObject == null)
+            {
+                object delegateInstance = null;
+                MethodInfo mi = typeof(Marshal).GetMethod("GetIDispatchForObject", BindingFlags.Public | BindingFlags.Static);
+                if (mi == null)
+                {
+                    throw new NotSupportedException(SR.PlatformNotSupported_GetIDispatchForObject);
+                }
+                Volatile.Write(ref delegateInstance, mi.CreateDelegate(typeof(Func<object, IntPtr>)));
+                s_getIDispatchForObject = delegateInstance as Func<object, IntPtr>;
+                ptr = s_getIDispatchForObject(value);
+            }
             RowBinding.WriteIntPtr(ValueOffset, ptr);
         }
 

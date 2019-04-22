@@ -264,7 +264,6 @@ namespace System.Data.OleDb {
     /// } PROPVARIANT;
     /// </remarks>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    // [FriendAccessAllowed]
     internal struct PROPVARIANT
     {
         /// <summary>
@@ -297,7 +296,6 @@ namespace System.Data.OleDb {
     /// enumeration for all legal types of a PROPVARIANT
     /// </summary>
     /// <remarks>add definitions as needed</remarks>
-    // [FriendAccessAllowed]
     internal enum VARTYPE : short
     {
         /// <summary>
@@ -336,7 +334,6 @@ namespace System.Data.OleDb {
     ///     managed equivalent types.
     /// </remarks>
     [StructLayout(LayoutKind.Explicit)]
-    // [FriendAccessAllowed]
     internal struct PropVariantUnion
     {
         /// <summary>
@@ -666,7 +663,6 @@ namespace System.Data.OleDb {
     /// CY, used in PropVariantUnion.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    // [FriendAccessAllowed]
     internal struct CY
     {
         public uint Lo;
@@ -677,7 +673,6 @@ namespace System.Data.OleDb {
     /// BSTRBLOB, used in PropVariantUnion.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    // [FriendAccessAllowed]
     internal struct BSTRBLOB
     {
         public uint cbSize;
@@ -688,7 +683,6 @@ namespace System.Data.OleDb {
     /// BLOB, used in PropVariantUnion.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    // [FriendAccessAllowed]
     internal struct BLOB
     {
         public uint cbSize;
@@ -699,7 +693,6 @@ namespace System.Data.OleDb {
     /// CArray, used in PropVariantUnion.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, Pack = 0)]
-    // [FriendAccessAllowed]
     internal struct CArray
     {
         public uint cElems;

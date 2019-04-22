@@ -143,10 +143,6 @@ namespace System.Data.OleDb {
             set { _schemaSupport = value; }
         }
 
-        protected internal override System.Security.PermissionSet CreatePermissionSet() {
-            return default(System.Security.PermissionSet);
-        }
-
         protected internal override string Expand() {
             if (null != _expandedConnectionString) {
                 return _expandedConnectionString;
