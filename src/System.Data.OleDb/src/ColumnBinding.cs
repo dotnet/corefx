@@ -388,7 +388,7 @@ namespace System.Data.OleDb {
                     value = DBNull.Value;
                     break;
                 default:
-                    throw CheckTypeValueStatusValue(); // MDAC 71644
+                    throw CheckTypeValueStatusValue();
                 }
                 _value = value;
             }
@@ -448,7 +448,7 @@ namespace System.Data.OleDb {
                     Value_DECIMAL((Decimal) value);
                     break;
                 case NativeDBType.I1:
-                    if (value is Int16) { // MDAC 60430
+                    if (value is Int16) {
                         Value_I1(Convert.ToSByte((Int16)value, CultureInfo.InvariantCulture));
                     }
                     else {
@@ -962,7 +962,7 @@ namespace System.Data.OleDb {
             Debug.Assert(NativeDBType.IUNKNOWN == DbType, "Value_IUNKNOWN");
             LengthValue(0);
             StatusValue(DBStatus.S_OK);
-            IntPtr ptr = Marshal.GetIUnknownForObject(value); // MDAC 80727
+            IntPtr ptr = Marshal.GetIUnknownForObject(value);
             RowBinding.WriteIntPtr(ValueOffset, ptr);
         }
 
@@ -1466,11 +1466,11 @@ namespace System.Data.OleDb {
             return value;
         }
 
-        private Exception CheckTypeValueStatusValue() { // MDAC 71644
+        private Exception CheckTypeValueStatusValue() {
             return CheckTypeValueStatusValue(ExpectedType);
         }
 
-        private Exception CheckTypeValueStatusValue(Type expectedType) { // MDAC 71644
+        private Exception CheckTypeValueStatusValue(Type expectedType) {
             switch (StatusValue()) {
             case DBStatus.S_OK:
                 Debug.Assert(false, "CheckStatusValue: unhandled data with ok status");

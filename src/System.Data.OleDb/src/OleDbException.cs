@@ -26,7 +26,7 @@ namespace System.Data.OleDb {
             this.oledbErrors = previous.oledbErrors;
         }   
 
-        private OleDbException(string message, Exception inner, string source, OleDbHResult errorCode, OleDbErrorCollection errors) : base(message, inner) { // MDAC 84364
+        private OleDbException(string message, Exception inner, string source, OleDbHResult errorCode, OleDbErrorCollection errors) : base(message, inner) {
             Debug.Assert(null != errors, "OleDbException without OleDbErrorCollection");
             Source = source;
             HResult = (int)errorCode;
@@ -39,7 +39,7 @@ namespace System.Data.OleDb {
         }
 
         [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags=System.Security.Permissions.SecurityPermissionFlag.SerializationFormatter)]
-        override public void GetObjectData(SerializationInfo si, StreamingContext context) { // MDAC 72003
+        override public void GetObjectData(SerializationInfo si, StreamingContext context) {
             if (null == si) {
                 throw new ArgumentNullException("si");
             }
@@ -66,12 +66,12 @@ namespace System.Data.OleDb {
             }
         }
 
-        internal bool ShouldSerializeErrors() { // MDAC 65548
+        internal bool ShouldSerializeErrors() {
             OleDbErrorCollection errors = this.oledbErrors;
             return ((null != errors) && (0 < errors.Count));
         }
 
-        static internal OleDbException CreateException(UnsafeNativeMethods.IErrorInfo errorInfo, OleDbHResult errorCode, Exception inner) { // MDAC 84364
+        static internal OleDbException CreateException(UnsafeNativeMethods.IErrorInfo errorInfo, OleDbHResult errorCode, Exception inner) {
             OleDbErrorCollection errors = new OleDbErrorCollection(errorInfo);
             string message = null;
             string source = null;
@@ -88,7 +88,7 @@ namespace System.Data.OleDb {
                 StringBuilder builder = new StringBuilder();
 
                 if ((null != message) && (message != errors[0].Message)) { // WebData 103032
-                    builder.Append(message.TrimEnd(ODB.ErrorTrimCharacters)); // MDAC 73707
+                    builder.Append(message.TrimEnd(ODB.ErrorTrimCharacters));
                     if (1 < count) {
                         builder.Append(Environment.NewLine);
                     }
@@ -97,12 +97,12 @@ namespace System.Data.OleDb {
                     if (0 < i) {
                         builder.Append(Environment.NewLine);
                     }
-                    builder.Append(errors[i].Message.TrimEnd(ODB.ErrorTrimCharacters)); // MDAC 73707
+                    builder.Append(errors[i].Message.TrimEnd(ODB.ErrorTrimCharacters));
                 }
                 message = builder.ToString();
             }
             if (ADP.IsEmpty(message)) {
-                message = ODB.NoErrorMessage(errorCode); // MDAC 71170
+                message = ODB.NoErrorMessage(errorCode);
             }
             return new OleDbException(message, inner, source, errorCode, errors);
         }
@@ -125,7 +125,7 @@ namespace System.Data.OleDb {
             }                
         }
 
-        sealed internal class ErrorCodeConverter : Int32Converter { // MDAC 68557
+        sealed internal class ErrorCodeConverter : Int32Converter {
 
             // converter classes should have public ctor
             public ErrorCodeConverter() {

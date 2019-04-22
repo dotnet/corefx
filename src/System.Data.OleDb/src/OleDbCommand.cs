@@ -36,7 +36,7 @@ namespace System.Data.OleDb {
 
         private Bindings _dbBindings;
 
-        internal bool canceling; // MDAC 68964
+        internal bool canceling;
         private bool _isPrepared;
         private bool _executeQuery;
         private bool _trackingForClose;
@@ -93,10 +93,8 @@ namespace System.Data.OleDb {
             }
         }
 
-        [
-        DefaultValue(""),
-        RefreshProperties(RefreshProperties.All)
-        ]
+        [DefaultValue("")]
+        [RefreshProperties(RefreshProperties.All)]
         override public string CommandText {
             get {
                 string value = _commandText;
@@ -136,10 +134,8 @@ namespace System.Data.OleDb {
             return (ADP.DefaultCommandTimeout != _commandTimeout);
         }
 
-        [
-        DefaultValue(System.Data.CommandType.Text),
-        RefreshProperties(RefreshProperties.All)
-        ]
+        [DefaultValue(System.Data.CommandType.Text)]
+        [RefreshProperties(RefreshProperties.All)]
         override public CommandType CommandType {
             get {
                 CommandType cmdType = _commandType;
@@ -159,9 +155,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        [
-        DefaultValue(null)
-        ]
+        [DefaultValue(null)]
         new public OleDbConnection Connection {
             get {
                 return _connection;
@@ -175,7 +169,7 @@ namespace System.Data.OleDb {
                     _connection = value;
 
                     if (null != value) {
-                        _transaction = OleDbTransaction.TransactionUpdate(_transaction); // MDAC 63226
+                        _transaction = OleDbTransaction.TransactionUpdate(_transaction);
                     }
                 }
             }
@@ -254,7 +248,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        private bool HasParameters() { // MDAC 65548
+        private bool HasParameters() {
             OleDbParameterCollection value = _parameters;
             return (null != value) && (0 < value.Count); // VS 300569
         }
@@ -393,7 +387,7 @@ namespace System.Data.OleDb {
                     // since cancel is allowed to occur at anytime we can't check the connection status
                     // since if it returns as closed then the connection will close causing the reader to close
                     // and that would introduce the possilbility of one thread reading and one thread closing at the same time
-                    ProcessResultsNoReset(hr); // MDAC 72667
+                    ProcessResultsNoReset(hr);
                 }
                 else {
                     this.canceling = true;
@@ -411,7 +405,7 @@ namespace System.Data.OleDb {
 
         // Connection.Close & Connection.Dispose(true) notification
         internal void CloseCommandFromConnection(bool canceling) {
-            this.canceling = canceling; // MDAC 71435
+            this.canceling = canceling;
             CloseInternal();
             _trackingForClose = false;
             _transaction = null;
@@ -471,7 +465,7 @@ namespace System.Data.OleDb {
             return CreateParameter();
         }
 
-        override protected void Dispose(bool disposing) { // MDAC 65459
+        override protected void Dispose(bool disposing) {
             if (disposing) { // release mananged objects
                 // the DataReader takes ownership of the parameter Bindings
                 // this way they don't get destroyed when user calls OleDbCommand.Dispose
@@ -575,7 +569,7 @@ namespace System.Data.OleDb {
 
                         // command stays in the executing state until the connection
                         // has a datareader to track for it being closed
-                        state = ODB.InternalStateOpen; // MDAC 72655
+                        state = ODB.InternalStateOpen;
                     }
                     finally {
                         if (ODB.InternalStateOpen != state) {
@@ -622,7 +616,7 @@ namespace System.Data.OleDb {
             }
             finally { // finally clear executing state
                 try {
-                    if ((null == dataReader) && (ODB.InternalStateOpen != state)) { // MDAC 67218
+                    if ((null == dataReader) && (ODB.InternalStateOpen != state)) {
                         ParameterCleanup();
                     }
                 }
@@ -653,7 +647,7 @@ namespace System.Data.OleDb {
                 }
                 return ExecuteCommandText(out executeResult);
             }
-            return ExecuteTableDirect(behavior, out executeResult); // MDAC 57856
+            return ExecuteTableDirect(behavior, out executeResult);
         }
 
         // dbindings handle can't be freed until the output parameters
@@ -717,7 +711,7 @@ namespace System.Data.OleDb {
         private int ExecuteCommandTextForSingleResult(tagDBPARAMS dbParams, out object executeResult) {
             OleDbHResult hr;
 
-            // MDAC 64465 (Microsoft.Jet.OLEDB.4.0 returns 0 for recordsAffected instead of -1)
+            // (Microsoft.Jet.OLEDB.4.0 returns 0 for recordsAffected instead of -1)
             if (_executeQuery) {
                 hr = _icommandText.Execute(ADP.PtrZero, ref ODB.IID_IRowset, dbParams, out _recordsAffected, out executeResult);
             }
@@ -735,7 +729,7 @@ namespace System.Data.OleDb {
                 OleDbHResult hr;
                 hr = _icommandText.Execute(ADP.PtrZero, ref ODB.IID_IRow, dbParams, out _recordsAffected, out executeResult);
 
-                if (OleDbHResult.DB_E_NOTFOUND == hr) { // MDAC 76110
+                if (OleDbHResult.DB_E_NOTFOUND == hr) {
                     SafeNativeMethods.Wrapper.ClearErrorInfo();
                     return ODB.ExecutedIRow;
                 }
@@ -757,7 +751,7 @@ namespace System.Data.OleDb {
         }
 
         private Exception ExecuteCommandTextSpecialErrorHandling(OleDbHResult hr, Exception e) {
-            if (((OleDbHResult.DB_E_ERRORSOCCURRED == hr) || (OleDbHResult.DB_E_BADBINDINFO == hr)) && (null != _dbBindings)) { // MDAC 66026, 67039
+            if (((OleDbHResult.DB_E_ERRORSOCCURRED == hr) || (OleDbHResult.DB_E_BADBINDINFO == hr)) && (null != _dbBindings)) {
                 //
                 // this code exist to try for a better user error message by post-morten detection
                 // of invalid parameter types being passed to a provider that doesn't understand
@@ -813,7 +807,7 @@ namespace System.Data.OleDb {
                     using(IOpenRowsetWrapper iopenRowset = _connection.IOpenRowset()) {
                         using(DBPropSet propSet = CommandPropertySets()) {
                             if (null != propSet) {
-                                // MDAC 65279
+                               
                                 bool mustRelease = false;
                                 RuntimeHelpers.PrepareConstrainedRegions();
                                 try {
@@ -949,7 +943,7 @@ namespace System.Data.OleDb {
             changeid = _changeID;
 
             if (!PropertiesOnCommand(false)) {
-                return false; // MDAC 57856
+                return false;
             }
 
             if ((null != _dbBindings) && _dbBindings.AreParameterBindingsInvalid(_parameters)) {
@@ -986,7 +980,7 @@ namespace System.Data.OleDb {
         }
 
         override public void Prepare() {
-            if (CommandType.TableDirect != CommandType) { // MDAC 70946, 71194
+            if (CommandType.TableDirect != CommandType) {
                 ValidateConnectionAndTransaction(ADP.Prepare);
 
                 _isPrepared = false;
@@ -1005,7 +999,7 @@ namespace System.Data.OleDb {
                         // @devnote: use IsParameterComputed which is called in the normal case
                         // only to call Prepare to throw the specialized error message
                         // reducing the overall number of methods to actually jit
-                        parameter.Prepare(this); // MDAC 70232
+                        parameter.Prepare(this);
                     }
                 }
             }
@@ -1076,7 +1070,7 @@ namespace System.Data.OleDb {
                 if (throwNotSupported || HasParameters()) {
                     throw ODB.CommandTextNotSupported(connection.Provider, null);
                 }
-                return false; // MDAC 57856
+                return false;
             }
 
             using(DBPropSet propSet = CommandPropertySets()) {
@@ -1109,7 +1103,7 @@ namespace System.Data.OleDb {
 
                 if (_executeQuery) {
                     // 'Microsoft.Jet.OLEDB.4.0' default is DBPROPVAL_AO_SEQUENTIAL
-                    dbprops[1] = new tagDBPROP(ODB.DBPROP_ACCESSORDER, false, ODB.DBPROPVAL_AO_RANDOM); // MDAC 73030
+                    dbprops[1] = new tagDBPROP(ODB.DBPROP_ACCESSORDER, false, ODB.DBPROPVAL_AO_RANDOM);
 
                     if (keyInfo) {
                         // 'Unique Rows' property required for SQLOLEDB to retrieve things like 'BaseTableName'

@@ -25,7 +25,7 @@ namespace System.Data.OleDb {
         public OleDbParameter() : base() { // V1.0 nothing
         }
 
-        public OleDbParameter(string name, object value) : this() { // MDAC 59521
+        public OleDbParameter(string name, object value) : this() {
             Debug.Assert(!(value is OleDbType), "use OleDbParameter(string, OleDbType)");
             Debug.Assert(!(value is SqlDbType), "use OleDbParameter(string, OleDbType)");
 
@@ -51,7 +51,7 @@ namespace System.Data.OleDb {
             SourceColumn = srcColumn;
         }
 
-        [ EditorBrowsable(EditorBrowsableState.Advanced) ] // MDAC 69508
+        [ EditorBrowsable(EditorBrowsableState.Advanced) ]
         public OleDbParameter(string parameterName,
                               OleDbType dbType, int size,
                               ParameterDirection direction, Boolean isNullable,
@@ -70,7 +70,7 @@ namespace System.Data.OleDb {
             Value = value;
         }
 
-        [ EditorBrowsable(EditorBrowsableState.Advanced) ] // MDAC 69508
+        [ EditorBrowsable(EditorBrowsableState.Advanced) ]
         public OleDbParameter(string parameterName,
                               OleDbType dbType, int size,
                               ParameterDirection direction,
@@ -101,7 +101,7 @@ namespace System.Data.OleDb {
             }
             set {
                 NativeDBType dbtype = _metaType;
-                if ((null == dbtype) || (dbtype.enumDbType != value)) { // MDAC 63571
+                if ((null == dbtype) || (dbtype.enumDbType != value)) {
                     PropertyTypeChanging();
                     _metaType = NativeDBType.FromDbType(value);
                 }
@@ -122,7 +122,7 @@ namespace System.Data.OleDb {
             }
             set {
                 NativeDBType dbtype = _metaType;
-                if ((null == dbtype) || (dbtype.enumOleDbType != value)) { // MDAC 63571
+                if ((null == dbtype) || (dbtype.enumOleDbType != value)) {
                     PropertyTypeChanging();
                     _metaType = NativeDBType.FromDataType(value);
                 }
@@ -153,7 +153,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        [DefaultValue((Byte)0)] // MDAC 65862
+        [DefaultValue((Byte)0)]
         public new Byte Precision {
             get {
                 return PrecisionInternal;
@@ -181,7 +181,7 @@ namespace System.Data.OleDb {
             return (0 != _precision);
         }
 
-        [DefaultValue((Byte)0)] // MDAC 65862
+        [DefaultValue((Byte)0)]
         public new Byte Scale {
             get {
                 return ScaleInternal;
@@ -440,13 +440,13 @@ namespace System.Data.OleDb {
                     || ((NativeDBType.DECIMAL == metaType.dbType) || (NativeDBType.NUMERIC == metaType.dbType)
                         && (!ShouldSerializeScale() || !ShouldSerializePrecision())
                         )
-                    ); // MDAC 69299
+                    );
         }
 
         // @devnote: use IsParameterComputed which is called in the normal case
         // only to call Prepare to throw the specialized error message
         // reducing the overall number of methods to actually jit
-        internal void Prepare(OleDbCommand cmd) { // MDAC 70232
+        internal void Prepare(OleDbCommand cmd) {
             Debug.Assert(IsParameterComputed(), "Prepare computed parameter");
             if (null == _metaType) {
                 throw ADP.PrepareParameterType(cmd);
@@ -454,7 +454,7 @@ namespace System.Data.OleDb {
             else if (!ShouldSerializeSize() && _metaType.IsVariableLength) {
                 throw ADP.PrepareParameterSize(cmd);
             }
-            else if (!ShouldSerializePrecision() && !ShouldSerializeScale() && ((NativeDBType.DECIMAL == _metaType.wType) || (NativeDBType.NUMERIC == _metaType.wType))) { // MDAC 71441
+            else if (!ShouldSerializePrecision() && !ShouldSerializeScale() && ((NativeDBType.DECIMAL == _metaType.wType) || (NativeDBType.NUMERIC == _metaType.wType))) {
                 throw ADP.PrepareParameterScale(cmd, _metaType.wType.ToString("G", CultureInfo.InvariantCulture));
             }
 

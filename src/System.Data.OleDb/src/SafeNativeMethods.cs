@@ -137,7 +137,7 @@ namespace System.Data.Common {
             // SxS: clearing error information is considered safe
             [ResourceExposure(ResourceScope.None)]
             [ResourceConsumption(ResourceScope.Process, ResourceScope.Process)]
-            static internal void ClearErrorInfo() { // MDAC 68199
+            static internal void ClearErrorInfo() {
                 SafeNativeMethods.SetErrorInfo(0, ADP.PtrZero);
             }
         }

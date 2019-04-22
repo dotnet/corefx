@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 namespace System.Data.OleDb {
-    public enum OleDbLiteral : int { // MDAC 61846
+    public enum OleDbLiteral : int {
         Invalid = 0,
         Binary_Literal = 1,
         Catalog_Name = 2,

@@ -112,12 +112,12 @@ namespace System.Data.OleDb {
             case IsolationLevel.Snapshot:
                 break;
             default:
-                throw ADP.InvalidIsolationLevel(isolevel); // MDAC 74269
+                throw ADP.InvalidIsolationLevel(isolevel);
             }
             _isolationLevel = isolevel;
         }
 
-        new public OleDbConnection Connection { // MDAC 66655
+        new public OleDbConnection Connection {
             get {
                 return _parentConnection;
             }
@@ -222,7 +222,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        /*public OleDbCommand CreateCommand() { // MDAC 68309
+        /*public OleDbCommand CreateCommand() {
             OleDbCommand cmd = Connection.CreateCommand();
             cmd.Transaction = this;
             return cmd;
@@ -245,7 +245,7 @@ namespace System.Data.OleDb {
                 _parentTransaction._nestedTransaction = null;
                 //_parentTransaction = null;
             }
-            else if (null != _parentConnection) { // MDAC 67287
+            else if (null != _parentConnection) {
                 _parentConnection.LocalTransaction = null;
             }
             _parentConnection = null;

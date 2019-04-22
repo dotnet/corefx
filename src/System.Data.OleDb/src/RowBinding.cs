@@ -87,7 +87,7 @@ namespace System.Data.OleDb {
             int[] rowBindStatus = new int[BindingCount()];
 
             _iaccessor = iaccessor;
-            hr = iaccessor.CreateAccessor(flags, (IntPtr)rowBindStatus.Length, this, (IntPtr)_dataLength, out _accessorHandle, rowBindStatus); // MDAC 69530
+            hr = iaccessor.CreateAccessor(flags, (IntPtr)rowBindStatus.Length, this, (IntPtr)_dataLength, out _accessorHandle, rowBindStatus);
 
             for (int k = 0; k < rowBindStatus.Length; ++k) {
                 if (DBBindStatus.OK != (DBBindStatus)rowBindStatus[k]) {
@@ -141,7 +141,7 @@ namespace System.Data.OleDb {
 
         static internal int AlignDataSize(int value) {
             // buffer data to start on 8-byte boundary
-            return Math.Max(8, (value + 7) & ~0x7); // MDAC 70350
+            return Math.Max(8, (value + 7) & ~0x7);
         }
 
         internal object GetVariantValue(int offset) {

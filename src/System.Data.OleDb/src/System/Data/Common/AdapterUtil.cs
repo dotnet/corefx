@@ -271,7 +271,7 @@ namespace System.Data.Common
         static internal void CheckArgumentLength(string value, string parameterName) {
             CheckArgumentNull(value, parameterName);
             if (0 == value.Length) {
-                throw Argument(SR.GetString(SR.ADP_EmptyString, parameterName)); // MDAC 94859
+                throw Argument(SR.GetString(SR.ADP_EmptyString, parameterName));
             }
         }
         static internal void CheckArgumentNull(object value, string parameterName) {
@@ -488,7 +488,7 @@ namespace System.Data.Common
             return Argument(SR.GetString(SR.ADP_KeywordNotSupported, keyword));
         }
         /*
-        static internal ArgumentException EmptyKeyValue(string keyword) { // MDAC 80715
+        static internal ArgumentException EmptyKeyValue(string keyword) {
             return Argument(SR.GetString(SR.ADP_EmptyKeyValue, keyword));
         }
         */
@@ -554,7 +554,7 @@ namespace System.Data.Common
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        static private string ConnectionStateMsg(ConnectionState state) { // MDAC 82165, if the ConnectionState enum to msg the localization looks weird
+        static private string ConnectionStateMsg(ConnectionState state) {
             switch(state) {
             case (ConnectionState.Closed):
             case (ConnectionState.Connecting|ConnectionState.Broken): // treated the same as closed
@@ -605,7 +605,7 @@ namespace System.Data.Common
         // Generic Data Provider Collection
         //
         static internal ArgumentException CollectionRemoveInvalidObject(Type itemType, ICollection collection) {
-            return Argument(SR.GetString(SR.ADP_CollectionRemoveInvalidObject, itemType.Name, collection.GetType().Name)); // MDAC 68201
+            return Argument(SR.GetString(SR.ADP_CollectionRemoveInvalidObject, itemType.Name, collection.GetType().Name));
         }
         static internal ArgumentNullException CollectionNullValue(string parameter, Type collection, Type itemType) {
             return ArgumentNull(parameter, SR.GetString(SR.ADP_CollectionNullValue, collection.Name, itemType.Name));
@@ -1185,7 +1185,7 @@ namespace System.Data.Common
         // [FileIOPermission(SecurityAction.Assert, AllFiles=FileIOPermissionAccess.PathDiscovery)]
         [ResourceExposure(ResourceScope.Machine)]
         [ResourceConsumption(ResourceScope.Machine)]
-        static internal string GetFullPath(string filename) { // MDAC 77686
+        static internal string GetFullPath(string filename) {
             return Path.GetFullPath(filename);
         }
 
@@ -1205,9 +1205,9 @@ namespace System.Data.Common
         [ResourceExposure(ResourceScope.Machine)]
         [ResourceConsumption(ResourceScope.Machine)]
         static internal FileVersionInfo GetVersionInfo(string filename) {
-            // (new FileIOPermission(FileIOPermissionAccess.Read, filename)).Assert(); // MDAC 62038
+            // (new FileIOPermission(FileIOPermissionAccess.Read, filename)).Assert();
             try {
-                return FileVersionInfo.GetVersionInfo(filename); // MDAC 60411
+                return FileVersionInfo.GetVersionInfo(filename);
             }
             finally {
                 // FileIOPermission.RevertAssert();
@@ -1265,8 +1265,8 @@ namespace System.Data.Common
 
         [ResourceExposure(ResourceScope.Machine)]
         [ResourceConsumption(ResourceScope.Machine)]
-        static internal object ClassesRootRegistryValue(string subkey, string queryvalue) { // MDAC 77697
-            //(new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_CLASSES_ROOT\\" + subkey)).Assert(); // MDAC 62028
+        static internal object ClassesRootRegistryValue(string subkey, string queryvalue) {
+            //(new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_CLASSES_ROOT\\" + subkey)).Assert();
             try {
                 using(RegistryKey key = Registry.ClassesRoot.OpenSubKey(subkey, false)) {
                     return ((null != key) ? key.GetValue(queryvalue) : null);
@@ -1285,8 +1285,8 @@ namespace System.Data.Common
 
         [ResourceExposure(ResourceScope.Machine)]
         [ResourceConsumption(ResourceScope.Machine)]
-        static internal object LocalMachineRegistryValue(string subkey, string queryvalue) { // MDAC 77697
-            // (new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_LOCAL_MACHINE\\" + subkey)).Assert(); // MDAC 62028
+        static internal object LocalMachineRegistryValue(string subkey, string queryvalue) {
+            // (new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_LOCAL_MACHINE\\" + subkey)).Assert();
             try {
                 using(RegistryKey key = Registry.LocalMachine.OpenSubKey(subkey, false)) {
                     return ((null != key) ? key.GetValue(queryvalue) : null);
@@ -1314,7 +1314,7 @@ namespace System.Data.Common
                 version = (string)ADP.LocalMachineRegistryValue("Software\\Microsoft\\DataAccess", "FullInstallVer");
                 if (ADP.IsEmpty(version)) {
                     string filename = (string)ADP.ClassesRootRegistryValue(System.Data.OleDb.ODB.DataLinks_CLSID, ADP.StrEmpty);
-                    FileVersionInfo versionInfo = ADP.GetVersionInfo(filename); // MDAC 60411
+                    FileVersionInfo versionInfo = ADP.GetVersionInfo(filename);
                     major = versionInfo.FileMajorPart;
                     minor = versionInfo.FileMinorPart;
                     build = versionInfo.FileBuildPart;
@@ -1339,7 +1339,7 @@ namespace System.Data.Common
 
             // disallow any MDAC version before MDAC 2.6 rtm
             // include MDAC 2.51 that ships with Win2k
-            if ((major < 2) || ((major == 2) && ((minor < 60) || ((minor == 60) && (build < 6526))))) { // MDAC 66628
+            if ((major < 2) || ((major == 2) && ((minor < 60) || ((minor == 60) && (build < 6526))))) {
                 if (ifodbcelseoledb) {
                     throw ADP.DataAdapter(SR.GetString(SR.Odbc_MDACWrongVersion, version));
                 }
@@ -1412,7 +1412,7 @@ namespace System.Data.Common
         // { "a", "a", "a" } -> { "a", "a1", "a2" }
         // { "a", "a", "a1" } -> { "a", "a2", "a1" }
         // { "a", "A", "a" } -> { "a", "A1", "a2" }
-        // { "a", "A", "a1" } -> { "a", "A2", "a1" } // MDAC 66718
+        // { "a", "A", "a1" } -> { "a", "A2", "a1" }
         static internal void BuildSchemaTableInfoTableNames(string[] columnNameArray) {
             Dictionary<string,int> hash = new Dictionary<string,int>(columnNameArray.Length);
 
@@ -1428,7 +1428,7 @@ namespace System.Data.Common
                     hash[columnName] = i;
                 }
                 else {
-                    columnNameArray[i] = ADP.StrEmpty; // MDAC 66681
+                    columnNameArray[i] = ADP.StrEmpty;
                     startIndex = i;
                 }
             }
@@ -1442,7 +1442,7 @@ namespace System.Data.Common
                 else {
                     columnName = columnName.ToLower(CultureInfo.InvariantCulture);
                     if (i != hash[columnName]) {
-                        GenerateUniqueName(hash, ref columnNameArray[i], i, 1); // MDAC 66718
+                        GenerateUniqueName(hash, ref columnNameArray[i], i, 1);
                     }
                 }
             }
@@ -1451,7 +1451,7 @@ namespace System.Data.Common
         static private int GenerateUniqueName(Dictionary<string,int> hash, ref string columnName, int index, int uniqueIndex) {
             for (;; ++uniqueIndex) {
                 string uniqueName = columnName + uniqueIndex.ToString(CultureInfo.InvariantCulture);
-                string lowerName = uniqueName.ToLower(CultureInfo.InvariantCulture); // MDAC 66978
+                string lowerName = uniqueName.ToLower(CultureInfo.InvariantCulture);
                 if (!hash.ContainsKey(lowerName)) {
 
                     columnName = uniqueName;
@@ -1467,7 +1467,7 @@ namespace System.Data.Common
             if (4 == ADP.PtrSize) {
                 return (IntPtr) checked(pbase.ToInt32() + offset);
             }
-            Debug.Assert(8 == ADP.PtrSize, "8 != IntPtr.Size"); // MDAC 73747
+            Debug.Assert(8 == ADP.PtrSize, "8 != IntPtr.Size");
             return (IntPtr) checked(pbase.ToInt64() + offset);
         }
 

@@ -22,12 +22,6 @@
     <Compile Include="$(CommonPath)\System\Data\Common\MultipartIdentifier.cs">
       <Link>Common\System\Data\Common\MultipartIdentifier.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs">
-      <Link>System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs">
-      <Link>System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs</Link>
-    </Compile>
      <Compile Include="AdapterSwitches.cs"/>
      <Compile Include="ColumnBinding.cs"/>
      <Compile Include="DBBindings.cs"/>
@@ -99,8 +93,10 @@
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolAuthenticationContextKey.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolCounters.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolGroup.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolGroupProviderInfo.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolIdentity.cs" />
     <Compile Include="System\Data\ProviderBase\DbConnectionPoolOptions.cs" />
+    <Compile Include="System\Data\ProviderBase\DbConnectionPoolProviderInfo.cs" />
     <Compile Include="System\Data\ProviderBase\DbMetaDataFactory.cs" />
     <Compile Include="System\Data\ProviderBase\DbReferenceCollection.cs" />
     <Compile Include="System\Data\ProviderBase\WrappedIUnknown.cs" />

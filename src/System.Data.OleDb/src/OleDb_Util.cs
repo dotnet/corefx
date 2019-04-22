@@ -65,7 +65,7 @@ namespace System.Data.OleDb {
                 Debug.Assert(false, "CommandParameterStatus: unexpected E_BADSTATUS");
                 goto default;
 
-            case DBStatus.S_DEFAULT: // MDAC 66626
+            case DBStatus.S_DEFAULT:
                 builder.Append(SR.Format(SR.OleDb_CommandParameterDefault,index.ToString(CultureInfo.InvariantCulture), ""));
                 builder.Append(Environment.NewLine);
                 break;
@@ -165,7 +165,7 @@ namespace System.Data.OleDb {
             return ADP.DataAdapter(SR.Format(SR.OleDb_MDACNotAvailable), inner);
         }
         static internal ArgumentException MSDASQLNotSupported() {
-            return ADP.Argument(SR.Format(SR.OleDb_MSDASQLNotSupported)); // MDAC 69975
+            return ADP.Argument(SR.Format(SR.OleDb_MSDASQLNotSupported));
         }
         static internal InvalidOperationException CommandTextNotSupported(string provider, Exception inner) {
             return ADP.DataAdapter(SR.Format(SR.OleDb_CommandTextNotSupported, provider), inner); // 72632
@@ -536,7 +536,7 @@ namespace System.Data.OleDb {
 
         static internal readonly object DBCOL_SPECIALCOL = new Guid(0xc8b52232,0x5cf3,0x11ce,0xad,0xe5,0x00,0xaa,0x00,0x44,0x77,0x3d);
 
-        static internal readonly char[] ErrorTrimCharacters = new char[] { '\r', '\n', '\0' }; // MDAC 73707
+        static internal readonly char[] ErrorTrimCharacters = new char[] { '\r', '\n', '\0' };
 
         // used by ConnectionString hashtable, must be all lowercase
         internal const string Asynchronous_Processing = "asynchronous processing";

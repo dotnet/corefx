@@ -20,7 +20,7 @@ namespace System.Data.OleDb {
             if (null != errorInfo) {
                 hr = errorInfo.GetDescription(out this.message);
 
-                if (OleDbHResult.DB_E_NOLOCALE == hr) { // MDAC 87303
+                if (OleDbHResult.DB_E_NOLOCALE == hr) {
                     Marshal.ReleaseComObject(errorInfo);
                     lcid = SafeNativeMethods.GetUserDefaultLCID();
                     errorInfo = errorRecords.GetErrorInfo(index, lcid);
@@ -35,7 +35,7 @@ namespace System.Data.OleDb {
                 if (null != errorInfo) {
                     hr = errorInfo.GetSource(out this.source);
 
-                    if (OleDbHResult.DB_E_NOLOCALE == hr) { // MDAC 87303
+                    if (OleDbHResult.DB_E_NOLOCALE == hr) {
                         Marshal.ReleaseComObject(errorInfo);
                         lcid = SafeNativeMethods.GetUserDefaultLCID();
                         errorInfo = errorRecords.GetErrorInfo(index, lcid);

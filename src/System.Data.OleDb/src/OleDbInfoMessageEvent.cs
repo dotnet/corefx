@@ -25,7 +25,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        internal bool ShouldSerializeErrors() { // MDAC 65548
+        internal bool ShouldSerializeErrors() {
             return this.exception.ShouldSerializeErrors();
         }
 

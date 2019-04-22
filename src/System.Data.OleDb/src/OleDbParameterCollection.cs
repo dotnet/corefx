@@ -47,18 +47,18 @@ namespace System.Data.OleDb {
             }
         }
 
-        public OleDbParameter Add(OleDbParameter value) { // MDAC 59206
+        public OleDbParameter Add(OleDbParameter value) {
             Add((object)value);
             return value;
         }
 
         [ EditorBrowsable(EditorBrowsableState.Never) ]
         [ Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  https://go.microsoft.com/fwlink/?linkid=14202", false) ] // 79027
-        public OleDbParameter Add(string parameterName, object value) { // MDAC 59206
+        public OleDbParameter Add(string parameterName, object value) {
             return Add(new OleDbParameter(parameterName, value));
         }
 
-        public OleDbParameter AddWithValue(string parameterName, object value) { // MDAC 79027
+        public OleDbParameter AddWithValue(string parameterName, object value) {
             return Add(new OleDbParameter(parameterName, value));
         }
 

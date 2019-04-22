@@ -111,7 +111,7 @@ namespace System.Data.OleDb {
                     if (IsOpen) {
                         value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_DATASOURCE);
                         if ((null == value) || ((value is string) && (0 == (value as string).Length))) {
-                            value = GetDataSourceValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_DATASOURCENAME); // MDAC 76248
+                            value = GetDataSourceValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_DATASOURCENAME);
                         }
                     }
                     else {
@@ -155,7 +155,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        override public string ServerVersion { // MDAC 55481
+        override public string ServerVersion {
             get {
                 return InnerConnection.ServerVersion;
             }
@@ -173,7 +173,7 @@ namespace System.Data.OleDb {
         }
 
         [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public void ResetState() { // MDAC 58606
+        public void ResetState() {
             if (IsOpen) {
                 object value = GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_CONNECTIONSTATUS);
                 if (value is Int32) {
@@ -182,7 +182,7 @@ namespace System.Data.OleDb {
                     case ODB.DBPROPVAL_CS_UNINITIALIZED: // provider closed on us
                     case ODB.DBPROPVAL_CS_COMMUNICATIONFAILURE: // broken connection
                         GetOpenConnection().DoomThisConnection();
-                        NotifyWeakReference(OleDbReferenceCollection.Canceling); // MDAC 71435
+                        NotifyWeakReference(OleDbReferenceCollection.Canceling);
                         Close();
                         break;
 
@@ -231,12 +231,12 @@ namespace System.Data.OleDb {
             return this.OleDbConnectionStringValue.GetSupportMultipleResults(this);
         }
 
-        internal bool SupportIRow(OleDbCommand cmd) { // MDAC 72902
+        internal bool SupportIRow(OleDbCommand cmd) {
             Debug.Assert(null != this.OleDbConnectionStringValue, "no OleDbConnectionString SupportIRow");
             return this.OleDbConnectionStringValue.GetSupportIRow(this, cmd);
         }
 
-        internal int QuotedIdentifierCase() { // MDAC 67385
+        internal int QuotedIdentifierCase() {
             Debug.Assert(null != this.OleDbConnectionStringValue, "no OleDbConnectionString QuotedIdentifierCase");
             
             int quotedIdentifierCase;
@@ -262,7 +262,7 @@ namespace System.Data.OleDb {
 
         override public void ChangeDatabase(string value) {
             CheckStateOpen(ADP.ChangeDatabase);
-            if ((null == value) || (0 == value.Trim().Length)) { // MDAC 62679
+            if ((null == value) || (0 == value.Trim().Length)) {
                 throw ADP.EmptyDatabaseName();
             }
             SetDataSourcePropertyValue(OleDbPropertySetGuid.DataSource, ODB.DBPROP_CURRENTCATALOG, ODB.Current_Catalog, true, value);
@@ -289,7 +289,7 @@ namespace System.Data.OleDb {
             return new OleDbCommand("", this);
         }
 
-        private void DisposeMe(bool disposing) { // MDAC 65459
+        private void DisposeMe(bool disposing) {
             if (disposing) { // release mananged objects
                 if (DesignMode) {
                     // release the object pool in design-mode so that
@@ -354,7 +354,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        public DataTable GetOleDbSchemaTable(Guid schema, object[] restrictions) { // MDAC 61846
+        public DataTable GetOleDbSchemaTable(Guid schema, object[] restrictions) {
             CheckStateOpen(ADP.GetOleDbSchemaTable);
             OleDbConnectionInternal connection = GetOpenConnection();
 
@@ -383,10 +383,10 @@ namespace System.Data.OleDb {
             else {
                 using(IDBSchemaRowsetWrapper wrapper = connection.IDBSchemaRowset()) {
                     if (null == wrapper.Value) {
-                        throw ODB.SchemaRowsetsNotSupported(Provider); // MDAC 72689
+                        throw ODB.SchemaRowsetsNotSupported(Provider);
                     }
                 }
-                throw ODB.NotSupportedSchemaTable(schema, this); // MDAC 63279
+                throw ODB.NotSupportedSchemaTable(schema, this);
             }
         }
 

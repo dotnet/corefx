@@ -57,7 +57,7 @@ namespace System.Data.OleDb {
         private bool _singleRow;
 
         // cached information for Reading (rowhandles/status)
-        private IntPtr _rowHandleFetchCount; // MDAC 60111 (>1 fails against jet)
+        private IntPtr _rowHandleFetchCount; // (>1 fails against jet)
         private RowHandleBuffer _rowHandleNativeBuffer;
 
         private IntPtr _rowFetchedCount;
@@ -87,8 +87,8 @@ namespace System.Data.OleDb {
         private void Initialize() {
             CommandBehavior behavior = _commandBehavior;
             _useIColumnsRowset = (0 != (CommandBehavior.KeyInfo & behavior));
-            _sequentialAccess  = (0 != (CommandBehavior.SequentialAccess & behavior)); // MDAC 60296
-            if (0 == _depth) { // MDAC 70886
+            _sequentialAccess  = (0 != (CommandBehavior.SequentialAccess & behavior));
+            if (0 == _depth) {
                 _singleRow     = (0 != (CommandBehavior.SingleRow & behavior));
             }
         }
@@ -99,7 +99,7 @@ namespace System.Data.OleDb {
         }
         internal void InitializeIRowset(object result, ChapterHandle chapterHandle, IntPtr recordsAffected) {
             // if from ADODB, connection will be null
-            if ((null == _connection) || (ChapterHandle.DB_NULL_HCHAPTER != chapterHandle)) { // MDAC 59629
+            if ((null == _connection) || (ChapterHandle.DB_NULL_HCHAPTER != chapterHandle)) {
                 _rowHandleFetchCount = new IntPtr(1);
             }
 
@@ -126,7 +126,7 @@ namespace System.Data.OleDb {
 
         override public int Depth {
             get {
-                if (IsClosed) { // MDAC 63669
+                if (IsClosed) {
                     throw ADP.DataReaderClosed("Depth");
                 }
                 return _depth;
@@ -135,7 +135,7 @@ namespace System.Data.OleDb {
 
         override public Int32 FieldCount {
             get {
-                if (IsClosed) { // MDAC 63669
+                if (IsClosed) {
                     throw ADP.DataReaderClosed("FieldCount");
                 }
                 MetaData[] metadata = MetaData;
@@ -143,9 +143,9 @@ namespace System.Data.OleDb {
             }
         }
 
-        override public bool HasRows { // MDAC 78405
+        override public bool HasRows {
             get {
-                if (IsClosed) { // MDAC 63669
+                if (IsClosed) {
                     throw ADP.DataReaderClosed("HasRows");
                 }
                 return _hasRows;
@@ -156,7 +156,7 @@ namespace System.Data.OleDb {
             get { // if we have a rowset or multipleresults, we may have more to read
                 Debug.Assert((_singleRow && !_isClosed && !_isRead && (null == _irow) && (null == _irowset)) ||
                              _isClosed == ((null == _irow) && (null == _irowset) && (null == _imultipleResults)
-                                           && (null == _dbSchemaTable) && (null == _connection) && (null == _command)), // MDAC 59536
+                                           && (null == _dbSchemaTable) && (null == _connection) && (null == _command)),
                                            "IsClosed mismatch");
                 return _isClosed;
             }
@@ -233,7 +233,7 @@ namespace System.Data.OleDb {
                     }
                     schemaTable = BuildSchemaTable(metadata);
                 }
-                else if (IsClosed) { // MDAC 68331
+                else if (IsClosed) {
                     throw ADP.DataReaderClosed("GetSchemaTable");
                 }
                 //GetSchemaTable() is defined to return null after NextResult returns false
@@ -340,11 +340,11 @@ namespace System.Data.OleDb {
 
                 DataRow newRow = schemaTable.NewRow();
                 newRow[name] = info.columnName;
-                newRow[ordinal] = i; // MDAC 68319
+                newRow[ordinal] = i;
                 // @devnote: size is count of characters for WSTR or STR, bytes otherwise
                 // @devnote: see OLEDB spec under IColumnsInfo::GetColumnInfo
-                newRow[size] = ((info.type.enumOleDbType != OleDbType.BSTR) ? info.size : -1); // MDAC 72653
-                newRow[precision] = info.precision; // MDAC 72800
+                newRow[size] = ((info.type.enumOleDbType != OleDbType.BSTR) ? info.size : -1);
+                newRow[precision] = info.precision;
                 newRow[scale] = info.scale;
 
                 newRow[dataType] = info.type.dataType;
@@ -386,7 +386,7 @@ namespace System.Data.OleDb {
             // mark all columns as readonly
             int count = columns.Count;
             for (int i=0; i < count; i++) {
-                columns[i].ReadOnly = true; // MDAC 70943
+                columns[i].ReadOnly = true;
             }
 
             _dbSchemaTable = schemaTable;
@@ -453,7 +453,7 @@ namespace System.Data.OleDb {
                 if (null == dbColumnInfo.pwszName) {
                     dbColumnInfo.pwszName = "";
                 }
-                if (filterITypeInfo && (ODB.DBCOLUMN_TYPEINFO == dbColumnInfo.pwszName)) { // MDAC 65306
+                if (filterITypeInfo && (ODB.DBCOLUMN_TYPEINFO == dbColumnInfo.pwszName)) {
                     continue;
                 }
                 if (filterChapters && (NativeDBType.HCHAPTER == dbColumnInfo.wType)) {
@@ -557,7 +557,7 @@ namespace System.Data.OleDb {
                 }
             }
             else {
-                _useIColumnsRowset = false; // MDAC 72653
+                _useIColumnsRowset = false;
                 BuildSchemaTableInfo(handle, false, false);
             }
         }
@@ -575,7 +575,7 @@ namespace System.Data.OleDb {
             DisposeOpenResults();
             _hasRows = false;
 
-            if ((null != cmd) && cmd.canceling) { // MDAC 68964                
+            if ((null != cmd) && cmd.canceling) {                
                 DisposeNativeMultipleResults();
                 
                 if (null != bindings) {
@@ -594,7 +594,7 @@ namespace System.Data.OleDb {
                         // tricky code path is an exception is thrown
                         // causing connection to do a ResetState and connection.Close
                         // resulting in OleDbCommand.CloseFromConnection
-                        if ((null != cmd) && !cmd.canceling) { // MDAC 71435
+                        if ((null != cmd) && !cmd.canceling) {
                             IntPtr affected = IntPtr.Zero;
                             OleDbException nextResultsFailure = NextResults(multipleResults, null, cmd, out affected);
                             _recordsAffected = AddRecordsAffected(_recordsAffected, affected);
@@ -613,7 +613,7 @@ namespace System.Data.OleDb {
 
             if ((null != cmd) && (0 == _depth)) {
                 // return bindings back to the cmd after closure of root DataReader
-                cmd.CloseFromDataReader(bindings); // MDAC 52283
+                cmd.CloseFromDataReader(bindings);
             }
 
             if (null != con) {
@@ -663,7 +663,7 @@ namespace System.Data.OleDb {
 
             if (null != bindings) {
                 for (int i = 0; i < bindings.Length; ++i) {
-                    if (null != bindings[i]) { // MDAC 77007
+                    if (null != bindings[i]) {
                         bindings[i].Dispose();
                     }
                 }
@@ -694,7 +694,7 @@ namespace System.Data.OleDb {
             ChapterHandle chapter = _chapterHandle;
             _chapterHandle = ChapterHandle.DB_NULL_HCHAPTER;
 
-            if (ChapterHandle.DB_NULL_HCHAPTER != chapter) { // MDAC 81441
+            if (ChapterHandle.DB_NULL_HCHAPTER != chapter) {
                 chapter.Dispose();
             }
 
@@ -756,18 +756,18 @@ namespace System.Data.OleDb {
             }
             int srcIndex = (int) dataIndex;
             int byteCount = Math.Min(value.Length - srcIndex, length);
-            if (srcIndex < 0) { // MDAC 72830
+            if (srcIndex < 0) {
                 throw ADP.InvalidSourceBufferIndex(value.Length, srcIndex, "dataIndex");
             }
-            else if ((bufferIndex < 0) || (bufferIndex >= buffer.Length)) { // MDAC 71013
+            else if ((bufferIndex < 0) || (bufferIndex >= buffer.Length)) {
                 throw ADP.InvalidDestinationBufferIndex(buffer.Length, bufferIndex, "bufferIndex");
             }
             if (0 < byteCount) {
                 // @usernote: user may encounter ArgumentException from Buffer.BlockCopy
                 Buffer.BlockCopy(value, srcIndex, buffer, bufferIndex, byteCount);
-                _sequentialBytesRead = srcIndex + byteCount; // MDAC 71013
+                _sequentialBytesRead = srcIndex + byteCount;
             }
-            else if (length < 0) { // MDAC 71007
+            else if (length < 0) {
                 throw ADP.InvalidDataLength(length);
             }
             else {
@@ -786,18 +786,18 @@ namespace System.Data.OleDb {
 
             int srcIndex = (int) dataIndex;
             int charCount = Math.Min(value.Length - srcIndex, length);
-            if (srcIndex < 0) { // MDAC 72830
+            if (srcIndex < 0) {
                 throw ADP.InvalidSourceBufferIndex(value.Length, srcIndex, "dataIndex");
             }
-            else if ((bufferIndex < 0) || (bufferIndex >= buffer.Length)) { // MDAC 71013
+            else if ((bufferIndex < 0) || (bufferIndex >= buffer.Length)) {
                 throw ADP.InvalidDestinationBufferIndex(buffer.Length, bufferIndex, "bufferIndex");
             }
             if (0 < charCount) {
                 // @usernote: user may encounter ArgumentException from String.CopyTo
                 value.CopyTo(srcIndex, buffer, bufferIndex, charCount);
-                _sequentialBytesRead = srcIndex + charCount; // MDAC 71013
+                _sequentialBytesRead = srcIndex + charCount;
             }
-            else if (length < 0) { // MDAC 71007
+            else if (length < 0) {
                 throw ADP.InvalidDataLength(length);
             }
             else {
@@ -806,7 +806,7 @@ namespace System.Data.OleDb {
             return charCount;
         }
 
-        [ EditorBrowsable(EditorBrowsableState.Never) ] // MDAC 69508
+        [ EditorBrowsable(EditorBrowsableState.Never) ]
         override public Char GetChar(int ordinal) {
             throw ADP.NotSupported();
         }
@@ -924,7 +924,7 @@ namespace System.Data.OleDb {
                 }
                 _fieldNameLookup = new FieldNameLookup(this, -1);
             }
-            return _fieldNameLookup.GetOrdinal(name); // MDAC 71470
+            return _fieldNameLookup.GetOrdinal(name);
         }
 
         override public String GetString(int ordinal) {
@@ -1026,7 +1026,7 @@ namespace System.Data.OleDb {
         }
 
 
-        static private IntPtr AddRecordsAffected(IntPtr recordsAffected, IntPtr affected) { // MDAC 65374
+        static private IntPtr AddRecordsAffected(IntPtr recordsAffected, IntPtr affected) {
 #if WIN32
             if (0 <= (int)affected) {
                 if (0 <= (int)recordsAffected) {
@@ -1051,7 +1051,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        internal void HasRowsRead() { // MDAC 78405
+        internal void HasRowsRead() {
             Debug.Assert(!_hasRowsReadCheck, "_hasRowsReadCheck not reset");
             bool flag = Read();
             _hasRows = flag;
@@ -1071,7 +1071,7 @@ namespace System.Data.OleDb {
                 // MSOLAP provider doesn't move onto the next result when calling GetResult with IID_NULL, but does return S_OK with 0 affected records.
                 // we want to break out of that infinite loop for ExecuteNonQuery and the multiple result Close scenarios
                 for (int loop = 0;; ++loop) {
-                    if ((null != command) && command.canceling) { // MDAC 68964
+                    if ((null != command) && command.canceling) {
                         break;
                     }
                     hr = imultipleResults.GetResult(ADP.PtrZero, ODB.DBRESULTFLAG_DEFAULT, ref ODB.IID_NULL, out affected, out result);
@@ -1079,7 +1079,7 @@ namespace System.Data.OleDb {
                     // If a provider doesn't support IID_NULL and returns E_NOINTERFACE we want to break out
                     // of the loop without throwing an exception.  Our behavior will match ADODB in that scenario
                     // where Recordset.Close just releases the interfaces without proccessing remaining results
-                    if ((OleDbHResult.DB_S_NORESULT == hr) || (OleDbHResult.E_NOINTERFACE == hr)) { // MDAC 70874
+                    if ((OleDbHResult.DB_S_NORESULT == hr) || (OleDbHResult.E_NOINTERFACE == hr)) {
                         break;
                     }
                     if (null != connection) {
@@ -1100,15 +1100,15 @@ namespace System.Data.OleDb {
                     }
                     else if (hr < 0) {
                         SafeNativeMethods.Wrapper.ClearErrorInfo();
-                        break; // MDAC 72694
+                        break;
                     }
                     recordsAffected = AddRecordsAffected(recordsAffected, affected);
 
                     if (0 != (int)affected) {
                         loop = 0;
                     }
-                    else if (2000 <= loop) { // MDAC 72126 (reason for more than 1000 iterations)
-                        NextResultsInfinite(); // MDAC 72738
+                    else if (2000 <= loop) { // (reason for more than 1000 iterations)
+                        NextResultsInfinite();
                         break;
                     }
                 }
@@ -1119,7 +1119,7 @@ namespace System.Data.OleDb {
             return null;
         }
 
-        static private void NextResultsInfinite() { // MDAC 72738
+        static private void NextResultsInfinite() {
 
             // edtriou's suggestion is that we debug assert so that users will learn of MSOLAP's misbehavior and not call ExecuteNonQuery
             Debug.Assert(false, "<oledb.OleDbDataReader.NextResultsInfinite|INFO> System.Data.OleDb.OleDbDataReader: 2000 IMultipleResult.GetResult(NULL, DBRESULTFLAG_DEFAULT, IID_NULL, NULL, NULL) iterations with 0 records affected. Stopping suspect infinite loop. To work-around try using ExecuteReader() and iterating through results with NextResult().\n");
@@ -1146,7 +1146,7 @@ namespace System.Data.OleDb {
                         OleDbHResult hr;
                         IntPtr affected;
 
-                        if ((null != command) && command.canceling) { // MDAC 69986
+                        if ((null != command) && command.canceling) {
                             Close();
                             break;
                         }
@@ -1173,8 +1173,8 @@ namespace System.Data.OleDb {
                     }
                 }
                 else {
-                    DisposeOpenResults(); // MDAC 70934
-                    _hasRows = false; // MDAC 85850
+                    DisposeOpenResults();
+                    _hasRows = false;
                 }
                 return retflag;
         }
@@ -1182,7 +1182,7 @@ namespace System.Data.OleDb {
         override public bool Read() {
                 bool retflag = false;
                 OleDbCommand command = _command;
-                if ((null != command) && command.canceling) { // MDAC 69986
+                if ((null != command) && command.canceling) {
                     DisposeOpenResults();
                 }
                 else if (null != _irowset) {
@@ -1191,7 +1191,7 @@ namespace System.Data.OleDb {
                         _hasRowsReadCheck = false;
                     }
                     else if (_singleRow && _isRead) {
-                        DisposeOpenResults(); // MDAC 66109
+                        DisposeOpenResults();
                     }
                     else {
                         retflag = ReadRowset();
@@ -1478,7 +1478,7 @@ namespace System.Data.OleDb {
                     hr = irowset.GetNextRows(_chapterHandle.HChapter, /*skipCount*/IntPtr.Zero, _rowHandleFetchCount, out _rowFetchedCount, ref rowHandlesPtr);
                     Debug.Assert(rowHandleBuffer.DangerousGetHandle() == rowHandlesPtr, "rowhandlebuffer changed");
                 }
-                catch(System.InvalidCastException e) { // MDAC 64320
+                catch(System.InvalidCastException e) {
                     throw ODB.ThreadApartmentState(e);
                 }
             }
@@ -1499,7 +1499,7 @@ namespace System.Data.OleDb {
                 //if (DB_E_BADSTARTPOSITION != hr)
                 ProcessResults(hr);
             }
-            _isRead = ((OleDbHResult.DB_S_ENDOFROWSET != hr) || (0 < (int)_rowFetchedCount)); // MDAC 59264
+            _isRead = ((OleDbHResult.DB_S_ENDOFROWSET != hr) || (0 < (int)_rowFetchedCount));
             _rowFetchedCount = (IntPtr)Math.Max((int)_rowFetchedCount, 0);
         }
 
@@ -1558,10 +1558,10 @@ namespace System.Data.OleDb {
             }
             _rowFetchedCount = IntPtr.Zero;
             _currentRow = 0;
-            _isRead = false; // MDAC 59264
+            _isRead = false;
         }
 
-        private object GetPropertyValue(int propertyId) { // MDAC 72106
+        private object GetPropertyValue(int propertyId) {
             if (null != _irowset) {
                 return GetPropertyOnRowset(OleDbPropertySetGuid.Rowset, propertyId);
             }
@@ -1646,7 +1646,7 @@ namespace System.Data.OleDb {
             _nextAccessorForRetrieval++;
         }
 
-        private Int32 IndexOf(Hashtable hash, string name) { // MDAC 67385
+        private Int32 IndexOf(Hashtable hash, string name) {
             // via case sensitive search, first match with lowest ordinal matches
             object index = hash[name];
             if (null != index) {
@@ -1669,11 +1669,11 @@ namespace System.Data.OleDb {
 
             int keyCount = 0;
             for (int i = 0; i < _metadata.Length; ++i) {
-                if (_metadata[i].isKeyColumn && !_metadata[i].isHidden) { // MDAC 90411
+                if (_metadata[i].isKeyColumn && !_metadata[i].isHidden) {
                     keyCount++;
                 }
             }
-            if (0 != keyCount) /*|| _connection.IsServer_msdaora || _connection.IsServer_Microsoft_SQL)*/ { // MDAC 60109
+            if (0 != keyCount) /*|| _connection.IsServer_msdaora || _connection.IsServer_Microsoft_SQL)*/ {
                 return;
             }
 
@@ -1682,7 +1682,7 @@ namespace System.Data.OleDb {
             for (int i = 0; i < _metadata.Length; ++i) {
                 MetaData info = _metadata[i];
                 if ((null != info.baseTableName) && (0 < info.baseTableName.Length)) {
-                    catalogName = ((null != info.baseCatalogName) ? info.baseCatalogName : ""); // MDAC 67249
+                    catalogName = ((null != info.baseCatalogName) ? info.baseCatalogName : "");
                     schemaName = ((null != info.baseSchemaName) ? info.baseSchemaName : "");
                     if (null == baseTableName) {
                         baseSchemaName = schemaName;
@@ -1691,7 +1691,7 @@ namespace System.Data.OleDb {
                     }
                     else if ((0 != ADP.SrcCompare(baseTableName, info.baseTableName))
                             || (0 != ADP.SrcCompare(baseCatalogName, catalogName))
-                            || (0 != ADP.SrcCompare(baseSchemaName, schemaName))) { // MDAC 71808
+                            || (0 != ADP.SrcCompare(baseSchemaName, schemaName))) {
 #if DEBUG
                         if (AdapterSwitches.DataSchema.TraceVerbose) {
                             Debug.WriteLine("Multiple BaseTableName detected:"
@@ -1710,7 +1710,7 @@ namespace System.Data.OleDb {
             baseCatalogName = ADP.IsEmpty(baseCatalogName) ? null : baseCatalogName;
             baseSchemaName = ADP.IsEmpty(baseSchemaName) ? null : baseSchemaName;
 
-            if (null != _connection) { // MDAC 67394
+            if (null != _connection) {
                 if (ODB.DBPROPVAL_IC_SENSITIVE == _connection.QuotedIdentifierCase()) {
                     string p = null, s = null;
                     _connection.GetLiteralQuotes(ADP.GetSchemaTable, out s, out p);
@@ -1724,7 +1724,7 @@ namespace System.Data.OleDb {
                 }
             }
 
-            Hashtable baseColumnNames = new Hashtable(_metadata.Length * 2); // MDAC 67385
+            Hashtable baseColumnNames = new Hashtable(_metadata.Length * 2);
 
             for (int i = _metadata.Length-1; 0 <= i; --i) {
                 string basecolumname = _metadata[i].baseColumnName;
@@ -1782,7 +1782,7 @@ namespace System.Data.OleDb {
                     foreach(DataRow dataRow in table.Rows) {
                         string name = (string) dataRow[nameColumn, DataRowVersion.Default];
 
-                        int metaindex = IndexOf(baseColumnNames, name); // MDAC 67385
+                        int metaindex = IndexOf(baseColumnNames, name);
                         if (0 <= metaindex) {
                             MetaData info = _metadata[metaindex];
                             info.isKeyColumn = true;
@@ -1813,7 +1813,7 @@ namespace System.Data.OleDb {
         private void AppendSchemaUniqueIndexAsKey(Hashtable baseColumnNames, object[] restrictions) {
             bool partialPrimaryKey = false;
             DataTable table = null;
-            try { // MDAC 66209
+            try {
                 table = _connection.GetSchemaRowset(OleDbSchemaGuid.Indexes, restrictions);
             }
             catch(Exception e) {
@@ -1855,7 +1855,7 @@ namespace System.Data.OleDb {
                         if (isPKey || isUniq) {
                             string name = (string) dataRow[nameColumn, DataRowVersion.Default];
 
-                            int metaindex = IndexOf(baseColumnNames, name); // MDAC 67385
+                            int metaindex = IndexOf(baseColumnNames, name);
                             if (0 <= metaindex) {
                                 if (isPKey) {
                                     keys[metaindex] = true;
@@ -1934,7 +1934,7 @@ namespace System.Data.OleDb {
                 dataReader.InitializeIRowset(rowset, ChapterHandle.DB_NULL_HCHAPTER, IntPtr.Zero);
                 dataReader.BuildSchemaTableInfo(rowset, true, false);
 
-                hiddenColumns = GetPropertyValue(ODB.DBPROP_HIDDENCOLUMNS); // MDAC 55611, 72106
+                hiddenColumns = GetPropertyValue(ODB.DBPROP_HIDDENCOLUMNS);
                 if (0 == dataReader.FieldCount) {
                     return;
                 }
@@ -1975,7 +1975,7 @@ namespace System.Data.OleDb {
 
                     MetaData info = new MetaData();
 
-                    binding = columnidname.columnBinding; // MDAC 72627
+                    binding = columnidname.columnBinding;
                     if (!binding.IsValueNull()) {
                         info.idname = (string)binding.Value();
                         info.kind = ODB.DBKIND_NAME;
@@ -2099,7 +2099,7 @@ namespace System.Data.OleDb {
                 if (disallowKeyColumns) {
                     info.isKeyColumn = false;
                 }
-                else if (info.guid.Equals(ODB.DBCOL_SPECIALCOL)) { // MDAC 90827
+                else if (info.guid.Equals(ODB.DBCOL_SPECIALCOL)) {
                     info.isKeyColumn = false;
 
                     // This is the first key column to be invalidated, scan back through the 
@@ -2118,7 +2118,7 @@ namespace System.Data.OleDb {
                     info.isKeyColumn = false;
                 }
 
-                if (info.guid.Equals(ODB.DBCOL_SPECIALCOL)) { // MDAC 72390
+                if (info.guid.Equals(ODB.DBCOL_SPECIALCOL)) {
 #if DEBUG
                     if (AdapterSwitches.DataSchema.TraceVerbose) {
                         Debug.WriteLine("Filtered Column: DBCOLUMN_GUID=DBCOL_SPECIALCOL DBCOLUMN_NAME=" + info.columnName + " DBCOLUMN_KEYCOLUMN=" + info.isKeyColumn);
@@ -2152,7 +2152,7 @@ namespace System.Data.OleDb {
             }
 
             // CONSIDER: perf tracking to see if we need to sort or not
-            metainfo.Sort(); // MDAC 68319
+            metainfo.Sort();
             _visibleFieldCount = visibleCount;
             _metadata = metainfo.ToArray();
         }
@@ -2201,7 +2201,7 @@ namespace System.Data.OleDb {
 
         internal string columnName;
 
-        internal Guid guid; // MDAC 72627
+        internal Guid guid;
         internal int kind;
         internal IntPtr propid;
         internal string idname;
@@ -2226,7 +2226,7 @@ namespace System.Data.OleDb {
         internal string baseTableName;
         internal string baseColumnName;
 
-        int IComparable.CompareTo(object obj) { // MDAC 68319
+        int IComparable.CompareTo(object obj) {
             if (isHidden == (obj as MetaData).isHidden) {
 #if WIN32
                 return ((int)ordinal - (int)(obj as MetaData).ordinal);

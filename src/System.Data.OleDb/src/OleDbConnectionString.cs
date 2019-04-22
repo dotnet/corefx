@@ -97,7 +97,7 @@ namespace System.Data.OleDb {
                     _expandedConnectionString = ExpandDataDirectories(ref udlFileName, ref position);
 
                     if (!ADP.IsEmpty(udlFileName)) { // fail via new FileStream vs. GetFullPath
-                        udlFileName = ADP.GetFullPath(udlFileName); // MDAC 82833
+                        udlFileName = ADP.GetFullPath(udlFileName);
                     }
                     if (null != udlFileName) {
                         udlConnectionString = LoadStringFromStorage(udlFileName);
@@ -191,7 +191,7 @@ namespace System.Data.OleDb {
             return supportMultipleResults;
         }
 
-        static private int UdlPoolSize { // MDAC 69925
+        static private int UdlPoolSize {
             // SxS: UdpPoolSize reads registry value to get the pool size
             [ResourceExposure(ResourceScope.None)]
             [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
@@ -222,7 +222,7 @@ namespace System.Data.OleDb {
                     Debug.Assert(!ADP.IsEmpty(udlfilename), "empty filename didn't fail");
 
                     if (0 < UdlPoolSize) {
-                        Debug.Assert(udlfilename == ADP.GetFullPath(udlfilename), "only cache full path filenames"); // MDAC 82833
+                        Debug.Assert(udlfilename == ADP.GetFullPath(udlfilename), "only cache full path filenames");
 
                         if (null == udlcache) {
                             udlcache = new Dictionary<string,string>();
@@ -309,14 +309,14 @@ namespace System.Data.OleDb {
                 throw ADP.InvalidConnectTimeoutValue();
             }
 
-            string progid = ConvertValueToString(KEY.Data_Provider, null); // MDAC 71923
+            string progid = ConvertValueToString(KEY.Data_Provider, null);
             if (null != progid) {
                 progid = progid.Trim();
                 if (0 < progid.Length) { // don't fail on empty 'Data Provider' value
                     ValidateProvider(progid);
                 }
             }
-            progid = ConvertValueToString(KEY.RemoteProvider, null); // MDAC 71923
+            progid = ConvertValueToString(KEY.RemoteProvider, null);
             if (null != progid) {
                 progid = progid.Trim();
                 if (0 < progid.Length) { // don't fail on empty 'Data Provider' value
@@ -381,7 +381,7 @@ namespace System.Data.OleDb {
             if (ADP.IsEmpty(progid)) {
                 throw ODB.NoProviderSpecified();
             }
-            if (ODB.MaxProgIdLength <= progid.Length) { // MDAC 63151
+            if (ODB.MaxProgIdLength <= progid.Length) {
                 throw ODB.InvalidProviderSpecified();
             }
             progid = progid.ToLower(CultureInfo.InvariantCulture);

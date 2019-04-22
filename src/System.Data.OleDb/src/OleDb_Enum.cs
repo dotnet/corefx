@@ -154,16 +154,16 @@ namespace System.Data.OleDb {
         static private readonly NativeDBType D_DBDate           = new NativeDBType(0xff,  6,                 true,  false, OleDbType.DBDate,           NativeDBType.DBDATE,      S_DBDATE,        typeof(System.DateTime), NativeDBType.DBDATE,      DbType.Date      ); //  6 - (tagDBDate)
         static private readonly NativeDBType D_DBTime           = new NativeDBType(0xff,  6,                 true,  false, OleDbType.DBTime,           NativeDBType.DBTIME,      S_DBTIME,        typeof(System.TimeSpan), NativeDBType.DBTIME,      DbType.Time      ); //  7 - (tagDBTime)
         static private readonly NativeDBType D_DBTimeStamp      = new NativeDBType(0xff, 16,                 true,  false, OleDbType.DBTimeStamp,      NativeDBType.DBTIMESTAMP, S_DBTIMESTAMP,   typeof(System.DateTime), NativeDBType.DBTIMESTAMP, DbType.DateTime  ); //  8 - (tagDBTIMESTAMP)
-        static private readonly NativeDBType D_Decimal          = new NativeDBType(  28, 16,                 true,  false, OleDbType.Decimal,          NativeDBType.DECIMAL,     S_DECIMAL,       typeof(System.Decimal),  NativeDBType.DECIMAL,     DbType.Decimal   ); //  9 - (tagDec) // MDAC 68447
+        static private readonly NativeDBType D_Decimal          = new NativeDBType(  28, 16,                 true,  false, OleDbType.Decimal,          NativeDBType.DECIMAL,     S_DECIMAL,       typeof(System.Decimal),  NativeDBType.DECIMAL,     DbType.Decimal   ); //  9 - (tagDec)
         static private readonly NativeDBType D_Error            = new NativeDBType(0xff,  4,                 true,  false, OleDbType.Error,            NativeDBType.ERROR,       S_ERROR,         typeof(System.Int32),    NativeDBType.ERROR,       DbType.Int32     ); // 10 - integer4
-        static private readonly NativeDBType D_Filetime         = new NativeDBType(0xff,  8,                 true,  false, OleDbType.Filetime,         NativeDBType.FILETIME,    S_FILETIME,      typeof(System.DateTime), NativeDBType.FILETIME,    DbType.DateTime  ); // 11 - integer8 // MDAC 59504
+        static private readonly NativeDBType D_Filetime         = new NativeDBType(0xff,  8,                 true,  false, OleDbType.Filetime,         NativeDBType.FILETIME,    S_FILETIME,      typeof(System.DateTime), NativeDBType.FILETIME,    DbType.DateTime  ); // 11 - integer8
         static private readonly NativeDBType D_Guid             = new NativeDBType(0xff, 16,                 true,  false, OleDbType.Guid,             NativeDBType.GUID,        S_GUID,          typeof(System.Guid),     NativeDBType.GUID,        DbType.Guid      ); // 12 - ubyte[16]
-        static private readonly NativeDBType D_TinyInt          = new NativeDBType(   3,  1,                 true,  false, OleDbType.TinyInt,          NativeDBType.I1,          S_I1,            typeof(System.Int16),    NativeDBType.I1,          DbType.SByte     ); // 13 - integer1 // MDAC 59492
+        static private readonly NativeDBType D_TinyInt          = new NativeDBType(   3,  1,                 true,  false, OleDbType.TinyInt,          NativeDBType.I1,          S_I1,            typeof(System.Int16),    NativeDBType.I1,          DbType.SByte     ); // 13 - integer1
         static private readonly NativeDBType D_SmallInt         = new NativeDBType(   5,  2,                 true,  false, OleDbType.SmallInt,         NativeDBType.I2,          S_I2,            typeof(System.Int16),    NativeDBType.I2,          DbType.Int16     ); // 14 - integer2
         static private readonly NativeDBType D_Integer          = new NativeDBType(  10,  4,                 true,  false, OleDbType.Integer,          NativeDBType.I4,          S_I4,            typeof(System.Int32),    NativeDBType.I4,          DbType.Int32     ); // 15 - integer4
         static private readonly NativeDBType D_BigInt           = new NativeDBType(  19,  8,                 true,  false, OleDbType.BigInt,           NativeDBType.I8,          S_I8,            typeof(System.Int64),    NativeDBType.I8,          DbType.Int64     ); // 16 - integer8
         static private readonly NativeDBType D_IDispatch        = new NativeDBType(0xff, ADP.PtrSize,        true,  false, OleDbType.IDispatch,        NativeDBType.IDISPATCH,   S_IDISPATCH,     typeof(System.Object),   NativeDBType.IDISPATCH,   DbType.Object    ); // 17 - integer4 (pointer)
-        static private readonly NativeDBType D_IUnknown         = new NativeDBType(0xff, ADP.PtrSize,        true,  false, OleDbType.IUnknown,         NativeDBType.IUNKNOWN,    S_IUNKNOWN,      typeof(System.Object),   NativeDBType.IUNKNOWN,    DbType.Object    ); // 18 - integer4 (pointer) // MDAC 64040
+        static private readonly NativeDBType D_IUnknown         = new NativeDBType(0xff, ADP.PtrSize,        true,  false, OleDbType.IUnknown,         NativeDBType.IUNKNOWN,    S_IUNKNOWN,      typeof(System.Object),   NativeDBType.IUNKNOWN,    DbType.Object    ); // 18 - integer4 (pointer)
         static private readonly NativeDBType D_LongVarBinary    = new NativeDBType(0xff, -1,                 false, true,  OleDbType.LongVarBinary,    NativeDBType.BYTES,       S_LONGVARBINARY, typeof(System.Byte[]),   NativeDBType.BYTES,       DbType.Binary    ); // 19
         static private readonly NativeDBType D_LongVarChar      = new NativeDBType(0xff, -1,                 false, true,  OleDbType.LongVarChar,      NativeDBType.STR,         S_LONGVARCHAR,   typeof(System.String),   NativeDBType.WSTR/*STR*/, DbType.AnsiString); // 20 - (ansi pointer)
         static private readonly NativeDBType D_Numeric          = new NativeDBType(  28, 19,                 true,  false, OleDbType.Numeric,          NativeDBType.NUMERIC,     S_NUMERIC,       typeof(System.Decimal),  NativeDBType.NUMERIC,     DbType.Decimal   ); // 21 - (tagDB_Numeric)
@@ -187,7 +187,7 @@ namespace System.Data.OleDb {
         static private readonly NativeDBType D_Xml              = new NativeDBType(0xff, -1,                 false, false, OleDbType.VarWChar,         NativeDBType.XML,         S_XML,           typeof(System.String),   NativeDBType.WSTR,        DbType.String    ); // 38 - (unicode pointer)
         static private readonly NativeDBType D_Udt              = new NativeDBType(0xff, -1,                 false, false, OleDbType.VarBinary,        NativeDBType.UDT,         S_BINARY,        typeof(System.Byte[]),   NativeDBType.BYTES,       DbType.Binary    ); // 39 - (unicode pointer)
 
-        static internal readonly NativeDBType Default = D_VarWChar; // MDAC 65324
+        static internal readonly NativeDBType Default = D_VarWChar;
         static internal readonly Byte MaximumDecimalPrecision = D_Decimal.maxpre;
 
         private const int FixedDbPart = /*DBPART_VALUE*/0x1 | /*DBPART_STATUS*/0x4;
@@ -270,7 +270,7 @@ namespace System.Data.OleDb {
             case OleDbType.VarNumeric:       return D_VarNumeric;       // 139
             case OleDbType.VarChar:          return D_VarChar;          // 200
             case OleDbType.LongVarChar:      return D_LongVarChar;      // 201
-            case OleDbType.VarWChar:         return D_VarWChar;         // 202 // MDAC 64983: ORA-12704: character set mismatch
+            case OleDbType.VarWChar:         return D_VarWChar;         // 202: ORA-12704: character set mismatch
             case OleDbType.LongVarWChar:     return D_LongVarWChar;     // 203
             case OleDbType.VarBinary:        return D_VarBinary;        // 204
             case OleDbType.LongVarBinary:    return D_LongVarBinary;    // 205
@@ -347,7 +347,7 @@ namespace System.Data.OleDb {
             case DbType.VarNumeric: return D_VarNumeric;
             case DbType.Xml:        return D_Xml;
             default:
-                throw ADP.DbTypeNotSupported(dbType, typeof(OleDbType)); // MDAC 66009
+                throw ADP.DbTypeNotSupported(dbType, typeof(OleDbType));
             }
         }
 
@@ -397,7 +397,7 @@ namespace System.Data.OleDb {
                 if (0 != (NativeDBType.VECTOR & dbType)) {
                     throw ODB.DBBindingGetVector();
                 }
-                return D_Variant; // MDAC 72067
+                return D_Variant;
             }
         }
     }

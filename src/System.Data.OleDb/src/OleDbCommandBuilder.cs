@@ -82,7 +82,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        static public void DeriveParameters(OleDbCommand command) { // MDAC 65927
+        static public void DeriveParameters(OleDbCommand command) {
 
             if (null == command) {
                 throw ADP.ArgumentNull("command");
@@ -129,7 +129,7 @@ namespace System.Data.OleDb {
                 string quotePrefix, quoteSuffix;
                 connection.GetLiteralQuotes(ADP.DeriveParameters, out quotePrefix, out quoteSuffix);
 
-                Object[] parsed = MultipartIdentifier.ParseMultipartIdentifier(command.CommandText, quotePrefix, quoteSuffix, '.', 4, true, SR.OLEDB_OLEDBCommandText, false); // MDAC 70930
+                Object[] parsed = MultipartIdentifier.ParseMultipartIdentifier(command.CommandText, quotePrefix, quoteSuffix, '.', 4, true, SR.OLEDB_OLEDBCommandText, false);
                 if (null == parsed[3]) {
                     throw ADP.NoStoredProcedureExists(command.CommandText);             
                 }
@@ -186,10 +186,10 @@ namespace System.Data.OleDb {
                     index = columns.IndexOf(ODB.NUMERIC_SCALE);
                     if (-1 != index) numericScale = columns[index];
 
-                    index = columns.IndexOf(ODB.TYPE_NAME); // MDAC 72315
+                    index = columns.IndexOf(ODB.TYPE_NAME);
                     if (-1 != index) backendtype = columns[index];
 
-                    DataRow[] dataRows = table.Select(null, ODB.ORDINAL_POSITION_ASC, DataViewRowState.CurrentRows); // MDAC 70928
+                    DataRow[] dataRows = table.Select(null, ODB.ORDINAL_POSITION_ASC, DataViewRowState.CurrentRows);
                     plist = new OleDbParameter[dataRows.Length];
                     for(index = 0; index < dataRows.Length; ++index) {
                         DataRow dataRow = dataRows[index];
@@ -225,7 +225,7 @@ namespace System.Data.OleDb {
                                     parameter.ScaleInternal = (Byte) Convert.ToInt16(dataRow[numericScale], CultureInfo.InvariantCulture);
                                 }
                                 break;
-                            case OleDbType.VarBinary: // MDAC 72315
+                            case OleDbType.VarBinary:
                             case OleDbType.VarChar:
                             case OleDbType.VarWChar:
                                 value = dataRow[backendtype, DataRowVersion.Default];
@@ -284,10 +284,10 @@ namespace System.Data.OleDb {
                     throw ADP.NoStoredProcedureExists(command.CommandText);
                 }
                 // we don't ever expect a procedure with 0 parameters, they should have at least a return value
-                throw ODB.NoProviderSupportForSProcResetParameters(connection.Provider); // MDAC 71968
+                throw ODB.NoProviderSupportForSProcResetParameters(connection.Provider);
             }
             else {
-                throw ODB.NoProviderSupportForSProcResetParameters(connection.Provider); // MDAC 70918
+                throw ODB.NoProviderSupportForSProcResetParameters(connection.Provider);
             }
             return plist;
         }

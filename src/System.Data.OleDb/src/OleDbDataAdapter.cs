@@ -98,7 +98,6 @@ namespace System.Data.OleDb {
             add {
                 OleDbRowUpdatingEventHandler handler = (OleDbRowUpdatingEventHandler) Events[EventRowUpdating];
 
-                // MDAC 58177, 64513
                 // prevent someone from registering two different command builders on the adapter by
                 // silently removing the old one
                 if ((null != handler) && (value.Target is DbCommandBuilder)) {
@@ -136,7 +135,7 @@ namespace System.Data.OleDb {
             if (null == ADODBRecordSet) {
                 throw ADP.ArgumentNull("adodb");
             }
-            return FillFromADODB((object)dataTable, ADODBRecordSet, null, false); // MDAC 59249
+            return FillFromADODB((object)dataTable, ADODBRecordSet, null, false);
         }
 
         public int Fill(DataSet dataSet, object ADODBRecordSet, string srcTable) {
@@ -171,11 +170,11 @@ namespace System.Data.OleDb {
             }
             */
 
-            bool closeRecordset = multipleResults; // MDAC 60332, 66668
+            bool closeRecordset = multipleResults;
             UnsafeNativeMethods.ADORecordsetConstruction recordset = (adodb as UnsafeNativeMethods.ADORecordsetConstruction);
             UnsafeNativeMethods.ADORecordConstruction record = null;
 
-            if (null != recordset) { // MDAC 78415
+            if (null != recordset) {
                 if (multipleResults) {
                     // The NextRecordset method is not available on a disconnected Recordset object, where ActiveConnection has been set to NULL
                     object activeConnection;
@@ -189,7 +188,7 @@ namespace System.Data.OleDb {
             else {
                 record = (adodb as UnsafeNativeMethods.ADORecordConstruction);
                 
-                if (null != record) { // MDAC 78415
+                if (null != record) {
                     multipleResults = false; // IRow implies CommandBehavior.SingleRow which implies CommandBehavior.SingleResult
                 }
             }
@@ -198,7 +197,7 @@ namespace System.Data.OleDb {
             int results = 0;
             if (null != recordset) {
                 int resultCount = 0;
-                bool incrementResultCount; // MDAC 59632
+                bool incrementResultCount;
                 object[] value = new object[1];
 
                 do {
@@ -213,7 +212,7 @@ namespace System.Data.OleDb {
 
                         object recordsAffected;
                         object nextresult;
-                        OleDbHResult hr = ((UnsafeNativeMethods.Recordset15)adodb).NextRecordset(out recordsAffected, out nextresult); // MDAC 78415
+                        OleDbHResult hr = ((UnsafeNativeMethods.Recordset15)adodb).NextRecordset(out recordsAffected, out nextresult);
 
                         if (0 > hr) {
                             // Current provider does not support returning multiple recordsets from a single execution.
@@ -242,14 +241,14 @@ namespace System.Data.OleDb {
                     break;
                 } while(null != recordset);
 
-                if ((null != recordset) && (closeRecordset || (null == adodb))) { // MDAC 59746, 60902
+                if ((null != recordset) && (closeRecordset || (null == adodb))) {
                     FillClose(true, recordset);
                 }
             }
             else if (null != record) {
                 results = FillFromRecord(data, record, srcTable);
-                if (closeRecordset) { // MDAC 66668
-                    FillClose(false, record); // MDAC 60848
+                if (closeRecordset) {
+                    FillClose(false, record);
                 }
             }
             else {
@@ -258,7 +257,7 @@ namespace System.Data.OleDb {
             return results;
         }
 
-        //override protected int Fill(DataTable dataTable, IDataReader dataReader) { // MDAC 65506
+        //override protected int Fill(DataTable dataTable, IDataReader dataReader) {
         //    return base.Fill(dataTable, dataReader);
         //}
 
@@ -268,8 +267,8 @@ namespace System.Data.OleDb {
             IntPtr chapter; /*ODB.DB_NULL_HCHAPTER*/
             object result = null;
             try {
-                result = recordset.get_Rowset(); // MDAC 83342
-                chapter = recordset.get_Chapter(); // MDAC 83342
+                result = recordset.get_Rowset();
+                chapter = recordset.get_Chapter();
             }
             catch (Exception e) {
                 // UNDONE - should not be catching all exceptions!!!
@@ -293,10 +292,10 @@ namespace System.Data.OleDb {
                     dataReader.InitializeIRowset(result, chapterHandle, ADP.RecordsUnaffected);
                     dataReader.BuildMetaInfo();
 
-                    incrementResultCount = (0 < dataReader.FieldCount); // MDAC 59632
+                    incrementResultCount = (0 < dataReader.FieldCount);
                     if (incrementResultCount) {
                         if (data is DataTable) {
-                            return base.Fill((DataTable) data, dataReader); // MDAC 65506
+                            return base.Fill((DataTable) data, dataReader);
                         }
                         else {
                             return base.Fill((DataSet) data, srcTable, dataReader, 0, 0);
@@ -315,7 +314,7 @@ namespace System.Data.OleDb {
         private int FillFromRecord(Object data, UnsafeNativeMethods.ADORecordConstruction record, string srcTable) {
             object result = null;
             try {
-                result = record.get_Row(); // MDAC 83342
+                result = record.get_Row();
             }
             catch(Exception e) {
                 // UNDONE - should not be catching all exceptions!!!
@@ -337,7 +336,7 @@ namespace System.Data.OleDb {
                     dataReader.BuildMetaInfo();
 
                     if (data is DataTable) {
-                        return base.Fill((DataTable) data, dataReader); // MDAC 65506
+                        return base.Fill((DataTable) data, dataReader);
                     }
                     else {
                         return base.Fill((DataSet) data, srcTable, dataReader, 0, 0);
@@ -355,10 +354,10 @@ namespace System.Data.OleDb {
         private void FillClose(bool isrecordset, object value) {
             OleDbHResult hr;
             if (isrecordset) {
-                hr = ((UnsafeNativeMethods.Recordset15)value).Close(); // MDAC 78415
+                hr = ((UnsafeNativeMethods.Recordset15)value).Close();
             }
             else {
-                hr = ((UnsafeNativeMethods._ADORecord)value).Close(); // MDAC 78415
+                hr = ((UnsafeNativeMethods._ADORecord)value).Close();
             }
             if ((0 < (int)hr) && (ODB.ADODB_AlreadyClosedError != (int)hr)) {
                 UnsafeNativeMethods.IErrorInfo errorInfo = null;

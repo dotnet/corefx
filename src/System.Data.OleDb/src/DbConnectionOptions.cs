@@ -171,7 +171,7 @@ namespace System.Data.Common {
                         return ADP.IsEmpty((string)_parsetable[KEY.Password]);
                     } else
                     if (_parsetable.ContainsKey(SYNONYM.Pwd)) {
-                        return ADP.IsEmpty((string)_parsetable[SYNONYM.Pwd]); // MDAC 83097
+                        return ADP.IsEmpty((string)_parsetable[SYNONYM.Pwd]);
                     } else {
                         return ((_parsetable.ContainsKey(KEY.User_ID) && !ADP.IsEmpty((string)_parsetable[KEY.User_ID])) || (_parsetable.ContainsKey(SYNONYM.UID) && !ADP.IsEmpty((string)_parsetable[SYNONYM.UID])));
                     }
@@ -588,10 +588,10 @@ namespace System.Data.Common {
                     if ((';' == currentChar) || Char.IsWhiteSpace(currentChar)) {
                         continue;
                     }
-                    if ('\0' == currentChar)            { parserState = ParserState.NullTermination; continue; } // MDAC 83540
+                    if ('\0' == currentChar)            { parserState = ParserState.NullTermination; continue; }
                     if (Char.IsControl(currentChar))    { throw ADP.ConnectionStringSyntax(startposition); }
                     startposition = currentPosition;
-                    if ('=' != currentChar) { // MDAC 86902
+                    if ('=' != currentChar) {
                         parserState = ParserState.Key;
                         break;
                     }
@@ -670,12 +670,12 @@ namespace System.Data.Common {
                 case ParserState.QuotedValueEnd:
                     if (Char.IsWhiteSpace(currentChar)) { continue; }
                     if (';' == currentChar)             { goto ParserExit; }
-                    if ('\0' == currentChar)            { parserState = ParserState.NullTermination; continue; } // MDAC 83540
+                    if ('\0' == currentChar)            { parserState = ParserState.NullTermination; continue; }
                     throw ADP.ConnectionStringSyntax(startposition);  // unbalanced single quote
 
                 case ParserState.NullTermination: // [\\s;\u0000]*
                     if ('\0' == currentChar) { continue; }
-                    if (Char.IsWhiteSpace(currentChar)) { continue; } // MDAC 83540
+                    if (Char.IsWhiteSpace(currentChar)) { continue; }
                     throw ADP.ConnectionStringSyntax(currentPosition);
 
                 default:

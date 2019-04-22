@@ -35,7 +35,7 @@ namespace System.Data.OleDb {
         static internal readonly Guid ViewAll           = new Guid(0xc8b522fc,0x5cf3,0x11ce,0xad,0xe5,0x00,0xaa,0x00,0x44,0x77,0x3d);
   
         /*
-        static internal string GetTextFromValue(Guid guid) { // MDAC 74085
+        static internal string GetTextFromValue(Guid guid) {
             string value = ConvertToString(guid);
             if (null == value) {
                 value = "{" + guid.ToString("D", CultureInfo.InvariantCulture) + "}";
@@ -43,7 +43,7 @@ namespace System.Data.OleDb {
             return value;
         }
 
-        static internal string ConvertToString(Guid guid) { // MDAC 74085
+        static internal string ConvertToString(Guid guid) {
             if (guid == OleDbPropertySetGuid.DBInit) { return "DBInit"; }
             if (guid == OleDbPropertySetGuid.Rowset) { return "Rowset"; }
             if (guid == OleDbPropertySetGuid.DataSource) { return "DataSource"; }

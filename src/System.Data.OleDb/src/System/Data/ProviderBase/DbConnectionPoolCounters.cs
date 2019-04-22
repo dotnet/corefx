@@ -212,7 +212,7 @@ namespace System.Data.ProviderBase {
             if (null != assembly) {
                 AssemblyName name = assembly.GetName();
                 if (name != null) {
-                    result = name.Name; // MDAC 73469
+                    result = name.Name;
                 }
             }
             return result;

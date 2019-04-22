@@ -31,7 +31,7 @@ namespace System.Data.OleDb
             source.CloneHelper(this);
 
             ICloneable cloneable = (_value as ICloneable);
-            if (null != cloneable) { // MDAC 49322
+            if (null != cloneable) {
                 _value = cloneable.Clone();
             }
         }

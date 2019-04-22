@@ -33,7 +33,7 @@ namespace System.Data.OleDb {
             source.CloneHelper(this);
 
             ICloneable cloneable = (_value as ICloneable);
-            if (null != cloneable) { // MDAC 49322
+            if (null != cloneable) {
                 _value = cloneable.Clone();
             }
         }
@@ -86,7 +86,7 @@ namespace System.Data.OleDb {
 #if USEOFFSET
         [
         Browsable(false),
-        EditorBrowsableAttribute(EditorBrowsableState.Advanced), // MDAC 69508
+        EditorBrowsableAttribute(EditorBrowsableState.Advanced),
         // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Data),
         // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_Offset),
         ]

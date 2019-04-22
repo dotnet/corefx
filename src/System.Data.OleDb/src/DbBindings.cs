@@ -245,7 +245,7 @@ namespace System.Data.OleDb {
             RowBinding().StartDataBlock();
             for(int i = 0; i < parameters.Length; ++i) {
                 if (ADP.IsDirection(parameters[i], ParameterDirection.Input)) {
-                    columnBindings[i].SetOffset(parameters[i].Offset); // MDAC 80657
+                    columnBindings[i].SetOffset(parameters[i].Offset);
                     columnBindings[i].Value(parameters[i].GetCoercedValue());
                 }
                 else {

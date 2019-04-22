@@ -5,7 +5,7 @@
 using System.Globalization;
 
 namespace System.Data.OleDb {
-    public sealed class OleDbSchemaGuid { // MDAC 61846
+    public sealed class OleDbSchemaGuid {
 
         // V1 shipped with default ctor which is public
         // so we can NOT remove the now explict public ctor
@@ -91,7 +91,7 @@ namespace System.Data.OleDb {
 
         static public readonly Guid DbInfoLiterals              = new Guid(0xf3264c9d,0x1860,0x4dfe,0xb7,0x1b,0x29,0x61,0xb2,0xea,0x91,0xbd);
 
-        static internal string GetTextFromValue(Guid guid) { // MDAC 74085
+        static internal string GetTextFromValue(Guid guid) {
             // it is correct that SchemaGuids, DbInfoKeywords, DbInfoLiterals don't appear below
             // those are manufactured guids for calling methods other than IDBSchemaRowset.GetRowset
             // when the user calls OleDbConnection.GetOleDbSchemaTable

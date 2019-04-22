@@ -149,7 +149,7 @@ namespace System.Data.OleDb {
             get { return ConnectionString.Provider; }
         }
 
-        override public string ServerVersion { // MDAC 55481
+        override public string ServerVersion {
             // consider making a method, not a property
             get {
                 object value = GetDataSourceValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_DBMSVER);
@@ -203,7 +203,7 @@ namespace System.Data.OleDb {
 
             Debug.Assert((0 <= hr) || (null == icommandText), "CreateICommandText: error with ICommandText");
             if (hr < 0) {
-                if (OleDbHResult.E_NOINTERFACE != hr) { // MDAC 57856
+                if (OleDbHResult.E_NOINTERFACE != hr) {
                     ProcessResults(hr);
                 }
                 else {
@@ -266,7 +266,7 @@ namespace System.Data.OleDb {
             }
         }
 
-        public override void Dispose() { // MDAC 65459
+        public override void Dispose() {
             Debug.Assert(null == LocalTransaction, "why was Deactivate not called first");
             if (null != _sessionwrp) {
                 _sessionwrp.Dispose();
@@ -277,7 +277,7 @@ namespace System.Data.OleDb {
             base.Dispose();
         }
 
-        override public void EnlistTransaction(SysTx.Transaction transaction) { // MDAC 78997
+        override public void EnlistTransaction(SysTx.Transaction transaction) {
             OleDbConnection.VerifyExecutePermission();
 
             OleDbConnection outerConnection = Connection;
@@ -529,7 +529,7 @@ namespace System.Data.OleDb {
         }
 
         internal DataTable GetSchemaRowset(Guid schema, object[] restrictions) {
-            if (null == restrictions) { // MDAC 62243
+            if (null == restrictions) {
                 restrictions = new object[0];
             }
             DataTable dataTable = null;
@@ -582,7 +582,7 @@ namespace System.Data.OleDb {
 
         internal bool SupportSchemaRowset(Guid schema) {
             SchemaSupport[] schemaSupport = GetSchemaRowsetInformation();
-            if (null != schemaSupport) { // MDAC 68385
+            if (null != schemaSupport) {
                 for (int i = 0; i < schemaSupport.Length; ++i) {
                     if (schema == schemaSupport[i]._schemaRowset) {
                         return true;
@@ -689,12 +689,12 @@ namespace System.Data.OleDb {
                     this.weakTransaction = null;
                 }
             }
-            else if ((null != transaction) && (null != transaction.Connection)) { // MDAC 72706
+            else if ((null != transaction) && (null != transaction.Connection)) {
                 throw ADP.TransactionConnectionMismatch();
             }
             // else no transaction and cmd is correct
 
-            // MDAC 61649
+           
             // if transactionObject is from this connection but zombied
             // and no transactions currently exists - then ignore the bogus object
             return null;
