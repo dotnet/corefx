@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
@@ -80,13 +81,13 @@ namespace System.Text.Json.Serialization
         }
 
         // todo: have the caller check if current.Enumerator != null and call WriteEnumerable of the underlying property directly to avoid an extra virtual call.
-        internal override void Write(JsonSerializerOptions options, ref WriteStackFrame current, ref Utf8JsonWriter writer)
+        internal override void Write(JsonSerializerOptions options, ref WriteStackFrame current, Utf8JsonWriter writer)
         {
             if (current.Enumerator != null)
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
                 JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                propertyInfo.WriteEnumerable(options, ref current, ref writer);
+                propertyInfo.WriteEnumerable(options, ref current, writer);
             }
             else if (ShouldSerialize)
             {
@@ -115,17 +116,22 @@ namespace System.Text.Json.Serialization
                 {
                     if (_escapedName != null)
                     {
-                        ValueConverter.Write(_escapedName, value.GetValueOrDefault(), ref writer);
+                        ValueConverter.Write(_escapedName, value.GetValueOrDefault(), writer);
                     }
                     else
                     {
-                        ValueConverter.Write(value.GetValueOrDefault(), ref writer);
+                        ValueConverter.Write(value.GetValueOrDefault(), writer);
                     }
                 }
             }
         }
 
-        internal override void WriteEnumerable(JsonSerializerOptions options, ref WriteStackFrame current, ref Utf8JsonWriter writer)
+        internal override void WriteDictionary(JsonSerializerOptions options, ref WriteStackFrame current, Utf8JsonWriter writer)
+        {
+            JsonSerializer.WriteDictionary(ValueConverter, options, ref current, writer);
+        }
+
+        internal override void WriteEnumerable(JsonSerializerOptions options, ref WriteStackFrame current, Utf8JsonWriter writer)
         {
             if (ValueConverter != null)
             {
@@ -148,7 +154,7 @@ namespace System.Text.Json.Serialization
                 }
                 else
                 {
-                    ValueConverter.Write(value.GetValueOrDefault(), ref writer);
+                    ValueConverter.Write(value.GetValueOrDefault(), writer);
                 }
             }
         }
