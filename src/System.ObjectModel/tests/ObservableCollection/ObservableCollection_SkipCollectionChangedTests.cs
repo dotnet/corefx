@@ -104,15 +104,6 @@ namespace System.ObjectModel.Tests.ObservableCollection
 
                 base.InsertItem(index, item);
             }
-
-            protected override void SetItem(int index, T item)
-            {
-                if (item == null)
-                {
-                }
-
-                base.SetItem(index, item);
-            }
         }
     }
 }
