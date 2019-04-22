@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net.Security;
 using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -1263,6 +1265,31 @@ namespace System.Net.Http.Functional.Tests
                 cts.Cancel();
 
                 await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await clientTask);
+            }
+        }
+
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Http2_ProtocolMismatch_Throws()
+        {
+            HttpClientHandler handler = CreateHttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+            TestHelper.EnsureHttp2Feature(handler);
+
+            using (HttpClient client = new HttpClient(handler))
+            {
+                // Create HTTP/1.1 loopback server and advertise HTTP2 via ALPN.
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
+                {
+                    _output.WriteLine($"Connecting to {uri}");
+                    Task<string> requestTask = client.GetStringAsync(uri);
+
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        await connection.SendResponseAsync(HttpStatusCode.OK);
+                    });
+                    await Assert.ThrowsAnyAsync<HttpRequestException>(async () => await requestTask);
+                }
+                , new LoopbackServer.Options { UseSsl = true, ApplicationProtocols = new List<SslApplicationProtocol>(){SslApplicationProtocol.Http2}});
             }
         }
     }

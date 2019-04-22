@@ -8,7 +8,9 @@ using System.Linq;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -97,11 +99,15 @@ namespace System.Net.Test.Common
                     { return true; });
                     using (var cert = Configuration.Certificates.GetServerCertificate())
                     {
-                        await sslStream.AuthenticateAsServerAsync(
-                            cert,
-                            clientCertificateRequired: true, // allowed but not required
-                            enabledSslProtocols: _options.SslProtocols,
-                            checkCertificateRevocation: false).ConfigureAwait(false);
+                        SslServerAuthenticationOptions options = new SslServerAuthenticationOptions();
+
+                        options.EnabledSslProtocols = _options.SslProtocols;
+                        options.ServerCertificate = cert;
+                        options.ApplicationProtocols = _options.ApplicationProtocols;
+                        options.ClientCertificateRequired = true; // allowed but not required
+                        options.CertificateRevocationCheckMode = X509RevocationMode.NoCheck;
+
+                        await sslStream.AuthenticateAsServerAsync(options, CancellationToken.None).ConfigureAwait(false);
                     }
                     stream = sslStream;
                 }
@@ -355,6 +361,7 @@ namespace System.Net.Test.Common
                 SslProtocols.Tls13 |
 #endif
                 SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12;
+            public List<SslApplicationProtocol> ApplicationProtocols;
             public bool WebSocketEndpoint { get; set; } = false;
             public Func<Stream, Stream> StreamWrapper { get; set; }
             public string Username { get; set; }
