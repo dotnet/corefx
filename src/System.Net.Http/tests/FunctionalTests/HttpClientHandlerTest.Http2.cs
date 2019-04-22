@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net.Security;
 using System.Net.Test.Common;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -1280,16 +1281,25 @@ namespace System.Net.Http.Functional.Tests
                 // Create HTTP/1.1 loopback server and advertise HTTP2 via ALPN.
                 await LoopbackServer.CreateServerAsync(async (server, uri) =>
                 {
-                    _output.WriteLine($"Connecting to {uri}");
-                    Task<string> requestTask = client.GetStringAsync(uri);
+                    // Convert http to https as we are going to negotiate TLS.
+                    Task<string> requestTask = client.GetStringAsync(uri.ToString().Replace("http://", "https://"));
 
                     await server.AcceptConnectionAsync(async connection =>
                     {
-                        await connection.SendResponseAsync(HttpStatusCode.OK);
+                        // negotiate TLS with ALPN H/2
+                        var sslStream = new SslStream(connection.Stream, false, delegate { return true; });
+                        SslServerAuthenticationOptions options = new SslServerAuthenticationOptions();
+                        options.ServerCertificate = Net.Test.Common.Configuration.Certificates.GetServerCertificate();
+                        options.ApplicationProtocols = new List<SslApplicationProtocol>() { SslApplicationProtocol.Http2 };
+                        options.ApplicationProtocols.Add(SslApplicationProtocol.Http2);
+                        // Negotiate TLS.
+                        await sslStream.AuthenticateAsServerAsync(options, CancellationToken.None).ConfigureAwait(false);
+                        // Send back HTTP/1.1 response
+                        await sslStream.WriteAsync(Encoding.ASCII.GetBytes("HTTP/1.1 400 Unrecognized request\r\n\r\n"), CancellationToken.None);
                     });
+
                     await Assert.ThrowsAnyAsync<HttpRequestException>(async () => await requestTask);
-                }
-                , new LoopbackServer.Options { UseSsl = true, ApplicationProtocols = new List<SslApplicationProtocol>(){SslApplicationProtocol.Http2}});
+                });
             }
         }
     }
