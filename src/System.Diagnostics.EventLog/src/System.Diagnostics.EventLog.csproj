@@ -58,9 +58,6 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs">
       <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.CloseHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
-      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.ClearEventLog.cs">
       <Link>Common\Interop\Windows\Advapi32\Interop.ClearEventLog.cs</Link>
     </Compile>
@@ -100,12 +97,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FormatMessage_SafeLibraryHandle.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.FormatMessage_SafeLibraryHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.WaitForSingleObject.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.WaitForSingleObject.cs</Link>
     </Compile>
@@ -117,6 +108,17 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Diagnostics\NetFrameworkUtils.cs">
       <Link>Common\System\Diagnostics\NetFrameworkUtils.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND ('$(TargetGroup)' == 'netcoreapp2.0' OR '$(TargetGroup)' == 'netfx') ">
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
+      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">

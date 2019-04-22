@@ -92,9 +92,6 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.DuplicateHandle_SafeProcessHandle.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.DuplicateHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetComputerName.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.GetComputerName.cs</Link>
     </Compile>
@@ -109,9 +106,6 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.HandleOptions.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.HandleOptions.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibrary.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibrary.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LocalAlloc.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.LocalAlloc.cs</Link>
@@ -172,6 +166,14 @@
     </Compile>
     <Compile Include="$(CommonPath)\System\Diagnostics\NetFrameworkUtils.cs">
       <Link>Common\System\Diagnostics\NetFrameworkUtils.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' == 'netcoreapp2.0' ">
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibrary.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibrary.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">

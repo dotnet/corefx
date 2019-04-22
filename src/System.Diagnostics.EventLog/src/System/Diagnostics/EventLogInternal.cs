@@ -536,8 +536,13 @@ namespace System.Diagnostics
 
             if (messageLibraries != null)
             {
+#if netcoreapp20 || netfx
                 foreach (SafeLibraryHandle handle in messageLibraries.Values)
                     handle.Close();
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                foreach (IntPtr handle in messageLibraries.Values)
+                    NativeLibrary.Free(handle);
+#endif
 
                 messageLibraries = null;
             }
@@ -686,8 +691,8 @@ namespace System.Diagnostics
                 if (dllName == null || dllName.Length == 0)
                     continue;
 
+#if netcoreapp20 || netfx
                 SafeLibraryHandle hModule = null;
-
                 if (IsOpen)
                 {
                     hModule = MessageLibraries[dllName] as SafeLibraryHandle;
@@ -718,6 +723,38 @@ namespace System.Diagnostics
                         hModule.Close();
                     }
                 }
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                IntPtr hModule = IntPtr.Zero;
+                if (IsOpen)
+                {
+                    hModule = (IntPtr)MessageLibraries[dllName];
+                    if (hModule == IntPtr.Zero)
+                    {
+                        NativeLibrary.TryLoad(dllName, out hModule);
+                        MessageLibraries[dllName] = hModule;
+                    }
+                }
+                else
+                {
+                    NativeLibrary.TryLoad(dllName, out hModule);
+                }
+
+                if (hModule == IntPtr.Zero)
+                    continue;
+
+                string msg = null;
+                try
+                {
+                    msg = EventLog.TryFormatMessage(hModule, messageNum, insertionStrings);
+                }
+                finally
+                {
+                    if (!IsOpen)
+                    {
+                        NativeLibrary.Free(hModule);
+                    }
+                }
+#endif
 
                 if (msg != null)
                 {

@@ -17,13 +17,21 @@ namespace System.Drawing
         {
             private const string LibraryName = "gdiplus.dll";
 
+#if netcoreapp20
             private static SafeLibraryHandle s_gdipHandle;
-
             private static IntPtr LoadNativeLibrary()
             {
                 s_gdipHandle = Interop.Kernel32.LoadLibraryExW(LibraryName, IntPtr.Zero, 0);
                 return s_gdipHandle.DangerousGetHandle();
             }
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            private static IntPtr s_gdipHandle;
+            private static IntPtr LoadNativeLibrary() =>
+                NativeLibrary.TryLoad(LibraryName, out s_gdipHandle) ?
+                    s_gdipHandle : IntPtr.Zero;
+
+            ~Gdip() => NativeLibrary.Free(s_gdipHandle);
+#endif
 
             private static void PlatformInitialize()
             {

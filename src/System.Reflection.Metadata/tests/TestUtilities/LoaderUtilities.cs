@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Microsoft.Win32.SafeHandles;
 using System.IO;
-using System.Reflection.PortableExecutable;
-using Xunit;
 using System.Reflection.Internal;
+using System.Reflection.PortableExecutable;
+using System.Runtime.InteropServices;
+using Microsoft.Win32.SafeHandles;
+using Xunit;
 
 namespace System.Reflection.Metadata.Tests
 {
@@ -17,8 +18,14 @@ namespace System.Reflection.Metadata.Tests
             using (var tempFile = new TempFile(Path.GetTempFileName()))
             {
                 File.WriteAllBytes(tempFile.Path, peImage);
+#if netcoreapp20
+                SafeLibraryHandle libHandle = global::Interop.Kernel32.LoadLibraryExW(tempFile.Path, IntPtr.Zero, 0);
+                Assert.False(libHandle.IsInvalid);
+#else
+                Assert.True(NativeLibrary.TryLoad(tempFile.Path, out IntPtr libHandle));
+#endif
 
-                using (SafeLibraryHandle libHandle = global::Interop.Kernel32.LoadLibraryExW(tempFile.Path, IntPtr.Zero, 0))
+                try
                 {
                     byte* peImagePtr = (byte*)global::Interop.Kernel32.GetModuleHandle(Path.GetFileName(tempFile.Path));
 
@@ -32,6 +39,14 @@ namespace System.Reflection.Metadata.Tests
                     {
                         validator(peReader);
                     }
+                }
+                finally
+                {
+#if netcoreapp20
+                    libHandle.Dispose();
+#else
+                    NativeLibrary.Free(libHandle);
+#endif
                 }
             }
         }

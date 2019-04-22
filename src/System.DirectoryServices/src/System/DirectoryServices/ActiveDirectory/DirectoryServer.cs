@@ -298,14 +298,19 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal DirectoryContext Context => context;
 
-        internal void CheckConsistencyHelper(IntPtr dsHandle, LoadLibrarySafeHandle libHandle)
+        internal void CheckConsistencyHelper(IntPtr dsHandle, IntPtr libHandle)
         {
             // call DsReplicaConsistencyCheck
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsReplicaConsistencyCheck");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(libHandle, "DsReplicaConsistencyCheck", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
+
             UnsafeNativeMethods.DsReplicaConsistencyCheck replicaConsistencyCheck = (UnsafeNativeMethods.DsReplicaConsistencyCheck)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(UnsafeNativeMethods.DsReplicaConsistencyCheck));
 
             int result = replicaConsistencyCheck(dsHandle, 0, 0);
@@ -314,47 +319,60 @@ namespace System.DirectoryServices.ActiveDirectory
                 throw ExceptionHelper.GetExceptionFromErrorCode(result, Name);
         }
 
-        internal IntPtr GetReplicationInfoHelper(IntPtr dsHandle, int type, int secondaryType, string partition, ref bool advanced, int context, LoadLibrarySafeHandle libHandle)
+        internal IntPtr GetReplicationInfoHelper(IntPtr dsHandle, int type, int secondaryType, string partition, ref bool advanced, int context, IntPtr libHandle)
         {
-            IntPtr info = (IntPtr)0;
+            IntPtr info = IntPtr.Zero;
             int result = 0;
             bool needToTryAgain = true;
             IntPtr functionPtr;
 
             // first try to use the DsReplicaGetInfo2W API which does not exist on win2k machine
             // call DsReplicaGetInfo2W
+#if netcoreapp20
             functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsReplicaGetInfo2W");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
             {
                 // a win2k machine which does not have it.
                 functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsReplicaGetInfoW");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(libHandle, "DsReplicaGetInfo2W", out functionPtr))
+            {
+                // a win2k machine which does not have it.
+                if (!NativeLibrary.TryGetExport(libHandle, "DsReplicaGetInfoW", out functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
+
                 UnsafeNativeMethods.DsReplicaGetInfoW dsReplicaGetInfoW = (UnsafeNativeMethods.DsReplicaGetInfoW)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(UnsafeNativeMethods.DsReplicaGetInfoW));
-                result = dsReplicaGetInfoW(dsHandle, secondaryType, partition, (IntPtr)0, ref info);
+                result = dsReplicaGetInfoW(dsHandle, secondaryType, partition, IntPtr.Zero, ref info);
                 advanced = false;
                 needToTryAgain = false;
             }
             else
             {
                 UnsafeNativeMethods.DsReplicaGetInfo2W dsReplicaGetInfo2W = (UnsafeNativeMethods.DsReplicaGetInfo2W)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(UnsafeNativeMethods.DsReplicaGetInfo2W));
-                result = dsReplicaGetInfo2W(dsHandle, type, partition, (IntPtr)0, null, null, 0, context, ref info);
+                result = dsReplicaGetInfo2W(dsHandle, type, partition, IntPtr.Zero, null, null, 0, context, ref info);
             }
 
             // check the result
             if (needToTryAgain && result == DS_REPL_NOTSUPPORTED)
             {
                 // this is the case that client is xp/win2k3, dc is win2k
+#if netcoreapp20
                 functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsReplicaGetInfoW");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (!NativeLibrary.TryGetExport(libHandle, "DsReplicaGetInfoW", out functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
+
                 UnsafeNativeMethods.DsReplicaGetInfoW dsReplicaGetInfoW = (UnsafeNativeMethods.DsReplicaGetInfoW)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(UnsafeNativeMethods.DsReplicaGetInfoW));
 
-                result = dsReplicaGetInfoW(dsHandle, secondaryType, partition, (IntPtr)0, ref info);
+                result = dsReplicaGetInfoW(dsHandle, secondaryType, partition, IntPtr.Zero, ref info);
                 advanced = false;
             }
 
@@ -396,7 +414,7 @@ namespace System.DirectoryServices.ActiveDirectory
             return info;
         }
 
-        internal ReplicationCursorCollection ConstructReplicationCursors(IntPtr dsHandle, bool advanced, IntPtr info, string partition, DirectoryServer server, LoadLibrarySafeHandle libHandle)
+        internal ReplicationCursorCollection ConstructReplicationCursors(IntPtr dsHandle, bool advanced, IntPtr info, string partition, DirectoryServer server, IntPtr libHandle)
         {
             int context = 0;
             int count = 0;
@@ -410,7 +428,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 {
                     try
                     {
-                        if (info != (IntPtr)0)
+                        if (info != IntPtr.Zero)
                         {
                             DS_REPL_CURSORS_3 cursors = new DS_REPL_CURSORS_3();
                             Marshal.PtrToStructure(info, cursors);
@@ -443,7 +461,7 @@ namespace System.DirectoryServices.ActiveDirectory
             {
                 try
                 {
-                    if (info != (IntPtr)0)
+                    if (info != IntPtr.Zero)
                     {
                         // structure of DS_REPL_CURSORS_3 and DS_REPL_CURSORS actually are the same
                         DS_REPL_CURSORS cursors = new DS_REPL_CURSORS();
@@ -461,7 +479,7 @@ namespace System.DirectoryServices.ActiveDirectory
             return collection;
         }
 
-        internal ReplicationOperationInformation ConstructPendingOperations(IntPtr info, DirectoryServer server, LoadLibrarySafeHandle libHandle)
+        internal ReplicationOperationInformation ConstructPendingOperations(IntPtr info, DirectoryServer server, IntPtr libHandle)
         {
             ReplicationOperationInformation replicationInfo = new ReplicationOperationInformation();
             ReplicationOperationCollection collection = new ReplicationOperationCollection(server);
@@ -470,7 +488,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
             try
             {
-                if (info != (IntPtr)0)
+                if (info != IntPtr.Zero)
                 {
                     DS_REPL_PENDING_OPS operations = new DS_REPL_PENDING_OPS();
                     Marshal.PtrToStructure(info, operations);
@@ -490,14 +508,14 @@ namespace System.DirectoryServices.ActiveDirectory
             return replicationInfo;
         }
 
-        internal ReplicationNeighborCollection ConstructNeighbors(IntPtr info, DirectoryServer server, LoadLibrarySafeHandle libHandle)
+        internal ReplicationNeighborCollection ConstructNeighbors(IntPtr info, DirectoryServer server, IntPtr libHandle)
         {
             ReplicationNeighborCollection collection = new ReplicationNeighborCollection(server);
             int count = 0;
 
             try
             {
-                if (info != (IntPtr)0)
+                if (info != IntPtr.Zero)
                 {
                     DS_REPL_NEIGHBORS neighbors = new DS_REPL_NEIGHBORS();
                     Marshal.PtrToStructure(info, neighbors);
@@ -514,14 +532,14 @@ namespace System.DirectoryServices.ActiveDirectory
             return collection;
         }
 
-        internal ReplicationFailureCollection ConstructFailures(IntPtr info, DirectoryServer server, LoadLibrarySafeHandle libHandle)
+        internal ReplicationFailureCollection ConstructFailures(IntPtr info, DirectoryServer server, IntPtr libHandle)
         {
             ReplicationFailureCollection collection = new ReplicationFailureCollection(server);
             int count = 0;
 
             try
             {
-                if (info != (IntPtr)0)
+                if (info != IntPtr.Zero)
                 {
                     DS_REPL_KCC_DSA_FAILURES failures = new DS_REPL_KCC_DSA_FAILURES();
                     Marshal.PtrToStructure(info, failures);
@@ -537,7 +555,7 @@ namespace System.DirectoryServices.ActiveDirectory
             return collection;
         }
 
-        internal ActiveDirectoryReplicationMetadata ConstructMetaData(bool advanced, IntPtr info, DirectoryServer server, LoadLibrarySafeHandle libHandle)
+        internal ActiveDirectoryReplicationMetadata ConstructMetaData(bool advanced, IntPtr info, DirectoryServer server, IntPtr libHandle)
         {
             ActiveDirectoryReplicationMetadata collection = new ActiveDirectoryReplicationMetadata(server);
             int count = 0;
@@ -546,7 +564,7 @@ namespace System.DirectoryServices.ActiveDirectory
             {
                 try
                 {
-                    if (info != (IntPtr)0)
+                    if (info != IntPtr.Zero)
                     {
                         DS_REPL_OBJ_META_DATA_2 objMetaData = new DS_REPL_OBJ_META_DATA_2();
                         Marshal.PtrToStructure(info, objMetaData);
@@ -596,7 +614,7 @@ namespace System.DirectoryServices.ActiveDirectory
             {
                 // user specifies callback
                 // our callback is invoked, update should not be NULL, do assertion here
-                Debug.Assert(update != (IntPtr)0);
+                Debug.Assert(update != IntPtr.Zero);
 
                 DS_REPSYNCALL_UPDATE syncAllUpdate = new DS_REPSYNCALL_UPDATE();
                 Marshal.PtrToStructure(update, syncAllUpdate);
@@ -608,7 +626,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 IntPtr temp = syncAllUpdate.pErrInfo;
                 SyncFromAllServersOperationException exception = null;
 
-                if (temp != (IntPtr)0)
+                if (temp != IntPtr.Zero)
                 {
                     // error information is available		            
                     exception = ExceptionHelper.CreateSyncAllException(temp, true);
@@ -623,7 +641,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 string sourceName = null;
 
                 temp = syncAllUpdate.pSync;
-                if (temp != (IntPtr)0)
+                if (temp != IntPtr.Zero)
                 {
                     DS_REPSYNCALL_SYNC sync = new DS_REPSYNCALL_SYNC();
                     Marshal.PtrToStructure(temp, sync);
@@ -639,28 +657,33 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        internal void SyncReplicaAllHelper(IntPtr handle, SyncReplicaFromAllServersCallback syncAllFunctionPointer, string partition, SyncFromAllServersOptions option, SyncUpdateCallback callback, LoadLibrarySafeHandle libHandle)
+        internal void SyncReplicaAllHelper(IntPtr handle, SyncReplicaFromAllServersCallback syncAllFunctionPointer, string partition, SyncFromAllServersOptions option, SyncUpdateCallback callback, IntPtr libHandle)
         {
-            IntPtr errorInfo = (IntPtr)0;
+            IntPtr errorInfo = IntPtr.Zero;
 
             if (!Partitions.Contains(partition))
                 throw new ArgumentException(SR.ServerNotAReplica, nameof(partition));
 
             // we want to return the dn instead of DNS guid
             // call DsReplicaSyncAllW
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsReplicaSyncAllW");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(libHandle, "DsReplicaSyncAllW", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
+
             UnsafeNativeMethods.DsReplicaSyncAllW dsReplicaSyncAllW = (UnsafeNativeMethods.DsReplicaSyncAllW)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(UnsafeNativeMethods.DsReplicaSyncAllW));
 
-            int result = dsReplicaSyncAllW(handle, partition, (int)option | DS_REPSYNCALL_ID_SERVERS_BY_DN, syncAllFunctionPointer, (IntPtr)0, ref errorInfo);
+            int result = dsReplicaSyncAllW(handle, partition, (int)option | DS_REPSYNCALL_ID_SERVERS_BY_DN, syncAllFunctionPointer, IntPtr.Zero, ref errorInfo);
 
             try
             {
                 // error happens during the synchronization
-                if (errorInfo != (IntPtr)0)
+                if (errorInfo != IntPtr.Zero)
                 {
                     SyncFromAllServersOperationException e = ExceptionHelper.CreateSyncAllException(errorInfo, false);
                     if (e == null)
@@ -678,31 +701,36 @@ namespace System.DirectoryServices.ActiveDirectory
             finally
             {
                 // release the memory
-                if (errorInfo != (IntPtr)0)
+                if (errorInfo != IntPtr.Zero)
                     UnsafeNativeMethods.LocalFree(errorInfo);
             }
         }
 
-        private void FreeReplicaInfo(DS_REPL_INFO_TYPE type, IntPtr value, LoadLibrarySafeHandle libHandle)
+        private void FreeReplicaInfo(DS_REPL_INFO_TYPE type, IntPtr value, IntPtr libHandle)
         {
-            if (value != (IntPtr)0)
+            if (value != IntPtr.Zero)
             {
                 // call DsReplicaFreeInfo
+#if netcoreapp20
                 IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsReplicaFreeInfo");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (!NativeLibrary.TryGetExport(libHandle, "DsReplicaFreeInfo", out IntPtr functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
+
                 UnsafeNativeMethods.DsReplicaFreeInfo dsReplicaFreeInfo = (UnsafeNativeMethods.DsReplicaFreeInfo)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(UnsafeNativeMethods.DsReplicaFreeInfo));
 
                 dsReplicaFreeInfo((int)type, value);
             }
         }
 
-        internal void SyncReplicaHelper(IntPtr dsHandle, bool isADAM, string partition, string sourceServer, int option, LoadLibrarySafeHandle libHandle)
+        internal void SyncReplicaHelper(IntPtr dsHandle, bool isADAM, string partition, string sourceServer, int option, IntPtr libHandle)
         {
             int structSize = Marshal.SizeOf(typeof(Guid));
-            IntPtr unmanagedGuid = (IntPtr)0;
+            IntPtr unmanagedGuid = IntPtr.Zero;
             Guid guid = Guid.Empty;
             AdamInstance adamServer = null;
             DomainController dcServer = null;
@@ -728,11 +756,16 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
 
                 // call DsReplicaSyncW
+#if netcoreapp20
                 IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsReplicaSyncW");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (!NativeLibrary.TryGetExport(libHandle, "DsReplicaSyncW", out IntPtr functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
+
                 UnsafeNativeMethods.DsReplicaSyncW dsReplicaSyncW = (UnsafeNativeMethods.DsReplicaSyncW)Marshal.GetDelegateForFunctionPointer(functionPtr, typeof(UnsafeNativeMethods.DsReplicaSyncW));
 
                 int result = dsReplicaSyncW(dsHandle, partition, unmanagedGuid, (int)option);
@@ -756,7 +789,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             finally
             {
-                if (unmanagedGuid != (IntPtr)0)
+                if (unmanagedGuid != IntPtr.Zero)
                     Marshal.FreeHGlobal(unmanagedGuid);
 
                 if (adamServer != null)

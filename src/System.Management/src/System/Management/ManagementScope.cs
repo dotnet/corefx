@@ -311,8 +311,12 @@ namespace System.Management
                 CompatSwitches.DotNetVersion, // The same value is hard coded on Environment.Version and quirks for WMI
                 "wminet_utils.dll");
 
+#if netcoreapp20
             IntPtr hModule =  Interop.Kernel32.LoadLibrary(wminet_utilsPath);
             if (hModule == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryLoad(wminet_utilsPath, out IntPtr hModule))
+#endif
             {
                 // This is unlikely, so having the TypeInitializationException wrapping it is fine.
                 throw new Win32Exception(Marshal.GetLastWin32Error(), SR.Format(SR.LoadLibraryFailed, wminet_utilsPath));
@@ -380,8 +384,12 @@ namespace System.Management
         }
         static bool LoadDelegate<TDelegate>(ref TDelegate delegate_f, IntPtr hModule, string procName) where TDelegate : class
         {
+#if netcoreapp20
             IntPtr procAddr = Interop.Kernel32.GetProcAddress(hModule, procName);
             return procAddr != IntPtr.Zero &&
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            return NativeLibrary.TryGetExport(hModule, procName, out IntPtr procAddr) &&
+#endif
                 (delegate_f = Marshal.GetDelegateForFunctionPointer<TDelegate>(procAddr)) != null;
         }
 

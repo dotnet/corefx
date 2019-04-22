@@ -887,8 +887,12 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 // Get the sites within the forest
                 // call DsListSites
+#if netcoreapp20
                 IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsListSitesW");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsListSitesW", out IntPtr functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
@@ -924,8 +928,12 @@ namespace System.DirectoryServices.ActiveDirectory
                         if (sitesPtr != IntPtr.Zero)
                         {
                             // call DsFreeNameResultW
-                            functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsFreeNameResultW");
-                            if (functionPtr == (IntPtr)0)
+#if netcoreapp20
+                            functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsCrackNamesW");
+                            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                            if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsCrackNamesW", out functionPtr))
+#endif
                             {
                                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                             }
@@ -942,13 +950,13 @@ namespace System.DirectoryServices.ActiveDirectory
             finally
             {
                 // DsUnbind
-                if (dsHandle != (IntPtr)0)
+                if (dsHandle != IntPtr.Zero)
                 {
                     Utils.FreeDSHandle(dsHandle, DirectoryContext.ADHandle);
                 }
 
                 // free the credentials object
-                if (authIdentity != (IntPtr)0)
+                if (authIdentity != IntPtr.Zero)
                 {
                     Utils.FreeAuthIdentity(authIdentity, DirectoryContext.ADHandle);
                 }
@@ -1111,7 +1119,7 @@ namespace System.DirectoryServices.ActiveDirectory
         private TrustRelationshipInformationCollection GetTrustsHelper(string targetForestName)
         {
             string serverName = null;
-            IntPtr domains = (IntPtr)0;
+            IntPtr domains = IntPtr.Zero;
             int count = 0;
             TrustRelationshipInformationCollection collection = new TrustRelationshipInformationCollection();
             bool impersonated = false;
@@ -1145,9 +1153,9 @@ namespace System.DirectoryServices.ActiveDirectory
             try
             {
                 // now enumerate through the collection
-                if (domains != (IntPtr)0 && count != 0)
+                if (domains != IntPtr.Zero && count != 0)
                 {
-                    IntPtr addr = (IntPtr)0;
+                    IntPtr addr = IntPtr.Zero;
                     for (int i = 0; i < count; i++)
                     {
                         addr = IntPtr.Add(domains, i * Marshal.SizeOf(typeof(DS_DOMAIN_TRUSTS)));
@@ -1161,9 +1169,9 @@ namespace System.DirectoryServices.ActiveDirectory
                             string tmpDNSName = null;
                             string tmpNetBIOSName = null;
 
-                            if (unmanagedTrust.DnsDomainName != (IntPtr)0)
+                            if (unmanagedTrust.DnsDomainName != IntPtr.Zero)
                                 tmpDNSName = Marshal.PtrToStringUni(unmanagedTrust.DnsDomainName);
-                            if (unmanagedTrust.NetbiosDomainName != (IntPtr)0)
+                            if (unmanagedTrust.NetbiosDomainName != IntPtr.Zero)
                                 tmpNetBIOSName = Marshal.PtrToStringUni(unmanagedTrust.NetbiosDomainName);
 
                             // check whether it is the same target
@@ -1192,7 +1200,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             finally
             {
-                if (domains != (IntPtr)0)
+                if (domains != IntPtr.Zero)
                     UnsafeNativeMethods.NetApiBufferFree(domains);
             }
         }

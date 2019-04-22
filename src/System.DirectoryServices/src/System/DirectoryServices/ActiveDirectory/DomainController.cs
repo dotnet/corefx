@@ -461,7 +461,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public override ReplicationCursorCollection GetReplicationCursors(string partition)
         {
-            IntPtr info = (IntPtr)0;
+            IntPtr info = IntPtr.Zero;
             int context = 0;
             bool advanced = true;
 
@@ -482,7 +482,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public override ReplicationOperationInformation GetReplicationOperationInformation()
         {
-            IntPtr info = (IntPtr)0;
+            IntPtr info = IntPtr.Zero;
             bool advanced = true;
 
             if (_disposed)
@@ -496,7 +496,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public override ReplicationNeighborCollection GetReplicationNeighbors(string partition)
         {
-            IntPtr info = (IntPtr)0;
+            IntPtr info = IntPtr.Zero;
             bool advanced = true;
 
             if (_disposed)
@@ -516,7 +516,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public override ReplicationNeighborCollection GetAllReplicationNeighbors()
         {
-            IntPtr info = (IntPtr)0;
+            IntPtr info = IntPtr.Zero;
             bool advanced = true;
 
             if (_disposed)
@@ -535,7 +535,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         public override ActiveDirectoryReplicationMetadata GetReplicationMetadata(string objectPath)
         {
-            IntPtr info = (IntPtr)0;
+            IntPtr info = IntPtr.Zero;
             bool advanced = true;
 
             if (_disposed)
@@ -1088,8 +1088,12 @@ namespace System.DirectoryServices.ActiveDirectory
             GetDSHandle();
 
             // call DsGetDomainControllerInfo
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsGetDomainControllerInfoW");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsGetDomainControllerInfoW", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
@@ -1165,8 +1169,12 @@ namespace System.DirectoryServices.ActiveDirectory
                     if (dcInfoPtr != IntPtr.Zero)
                     {
                         // call DsFreeDomainControllerInfo
+#if netcoreapp20
                         functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsFreeDomainControllerInfoW");
-                        if (functionPtr == (IntPtr)0)
+                        if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                        if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsFreeDomainControllerInfoW", out functionPtr))
+#endif
                         {
                             throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                         }
@@ -1229,7 +1237,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal ReplicationFailureCollection GetReplicationFailures(DS_REPL_INFO_TYPE type)
         {
-            IntPtr info = (IntPtr)0;
+            IntPtr info = IntPtr.Zero;
             bool advanced = true;
 
             if (_disposed)
@@ -1250,8 +1258,12 @@ namespace System.DirectoryServices.ActiveDirectory
             GetDSHandle();
             // Get the roles
             // call DsListRoles
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsListRolesW");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsListRolesW", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
@@ -1290,8 +1302,12 @@ namespace System.DirectoryServices.ActiveDirectory
                     if (rolesPtr != IntPtr.Zero)
                     {
                         // call DsFreeNameResult
+#if netcoreapp20
                         functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsFreeNameResultW");
-                        if (functionPtr == (IntPtr)0)
+                        if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                        if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsFreeNameResultW", out functionPtr))
+#endif
                         {
                             throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                         }

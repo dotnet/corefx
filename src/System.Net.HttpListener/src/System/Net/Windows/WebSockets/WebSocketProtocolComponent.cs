@@ -13,26 +13,31 @@ namespace System.Net.WebSockets
     internal static class WebSocketProtocolComponent
     {
         private static readonly string s_dummyWebsocketKeyBase64 = Convert.ToBase64String(new byte[16]);
-        private static readonly SafeLibraryHandle s_webSocketDllHandle;
         private static readonly string s_supportedVersion;
 
+#if netcoreapp20
+       private static readonly SafeLibraryHandle s_webSocketDllHandle;
+#else
+       private static readonly IntPtr s_webSocketDllHandle;
+#endif
+
         private static readonly Interop.WebSocket.HttpHeader[] s_initialClientRequestHeaders = new Interop.WebSocket.HttpHeader[]
+        {
+            new Interop.WebSocket.HttpHeader
             {
-                new Interop.WebSocket.HttpHeader()
-                {
-                    Name = HttpKnownHeaderNames.Connection,
-                    NameLength = (uint)HttpKnownHeaderNames.Connection.Length,
-                    Value = HttpKnownHeaderNames.Upgrade,
-                    ValueLength = (uint)HttpKnownHeaderNames.Upgrade.Length
-                },
-                new Interop.WebSocket.HttpHeader()
-                {
-                    Name = HttpKnownHeaderNames.Upgrade,
-                    NameLength = (uint)HttpKnownHeaderNames.Upgrade.Length,
-                    Value = HttpWebSocket.WebSocketUpgradeToken,
-                    ValueLength = (uint)HttpWebSocket.WebSocketUpgradeToken.Length
-                }
-            };
+                Name = HttpKnownHeaderNames.Connection,
+                NameLength = (uint)HttpKnownHeaderNames.Connection.Length,
+                Value = HttpKnownHeaderNames.Upgrade,
+                ValueLength = (uint)HttpKnownHeaderNames.Upgrade.Length
+            },
+            new Interop.WebSocket.HttpHeader
+            {
+                Name = HttpKnownHeaderNames.Upgrade,
+                NameLength = (uint)HttpKnownHeaderNames.Upgrade.Length,
+                Value = HttpWebSocket.WebSocketUpgradeToken,
+                ValueLength = (uint)HttpWebSocket.WebSocketUpgradeToken.Length
+            }
+        };
 
         private static readonly Interop.WebSocket.HttpHeader[] s_ServerFakeRequestHeaders;
 
@@ -74,9 +79,12 @@ namespace System.Net.WebSockets
 
         static WebSocketProtocolComponent()
         {
+#if netcoreapp20
             s_webSocketDllHandle = Interop.Kernel32.LoadLibraryExW(Interop.Libraries.WebSocket, IntPtr.Zero, 0);
-
             if (!s_webSocketDllHandle.IsInvalid)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryLoad(Interop.Libraries.WebSocket, out s_webSocketDllHandle))
+#endif
             {
                 s_supportedVersion = GetSupportedVersion();
 
@@ -125,7 +133,11 @@ namespace System.Net.WebSockets
         {
             get
             {
+#if netcoreapp20
                 if (s_webSocketDllHandle.IsInvalid)
+#else
+                if (s_webSocketDllHandle == IntPtr.Zero)
+#endif
                 {
                     HttpWebSocket.ThrowPlatformNotSupportedException_WSPC();
                 }
@@ -134,17 +146,20 @@ namespace System.Net.WebSockets
             }
         }
 
-        internal static bool IsSupported
-        {
-            get
-            {
-                return !s_webSocketDllHandle.IsInvalid;
-            }
-        }
+        internal static bool IsSupported =>
+#if netcoreapp20
+            !s_webSocketDllHandle.IsInvalid;
+#else
+            s_webSocketDllHandle != IntPtr.Zero;
+#endif
 
         internal static string GetSupportedVersion()
         {
+#if netcoreapp20
             if (s_webSocketDllHandle.IsInvalid)
+#else
+            if (s_webSocketDllHandle == IntPtr.Zero)
+#endif
             {
                 HttpWebSocket.ThrowPlatformNotSupportedException_WSPC();
             }
@@ -210,7 +225,11 @@ namespace System.Net.WebSockets
                 (properties != null && propertyCount == properties.Length),
                 "'propertyCount' MUST MATCH 'properties.Length'.");
 
+#if netcoreapp20
             if (s_webSocketDllHandle.IsInvalid)
+#else
+            if (s_webSocketDllHandle == IntPtr.Zero)
+#endif
             {
                 HttpWebSocket.ThrowPlatformNotSupportedException_WSPC();
             }

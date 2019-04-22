@@ -123,6 +123,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\WinSock\Interop.GetAddrInfoExW.cs">
       <Link>Interop\Windows\WinSock\Interop.GetAddrInfoExW.cs</Link>
     </Compile>
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetsWindows)' == 'true' AND '$(TargetGroup)' == 'netcoreapp2.0' ">
     <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
       <Link>Common\CoreLi\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>

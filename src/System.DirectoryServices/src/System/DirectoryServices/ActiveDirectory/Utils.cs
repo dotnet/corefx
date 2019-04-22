@@ -108,8 +108,12 @@ namespace System.DirectoryServices.ActiveDirectory
             Debug.Assert(distinguishedName != null);
 
             // call DsCrackNamesW
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsCrackNamesW");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsCrackNamesW", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
@@ -154,18 +158,22 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 finally
                 {
-                    if (ptr != (IntPtr)0)
+                    if (ptr != IntPtr.Zero)
                         Marshal.FreeHGlobal(ptr);
 
-                    if (name != (IntPtr)0)
+                    if (name != IntPtr.Zero)
                         Marshal.FreeHGlobal(name);
 
                     // free the results
                     if (results != IntPtr.Zero)
                     {
                         // call DsFreeNameResultW
+#if netcoreapp20
                         functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsFreeNameResultW");
-                        if (functionPtr == (IntPtr)0)
+                        if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                        if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsFreeNameResultW", out functionPtr))
+#endif
                         {
                             throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                         }
@@ -196,8 +204,12 @@ namespace System.DirectoryServices.ActiveDirectory
             Debug.Assert(dnsName != null);
 
             // call DsCrackNamesW
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsCrackNamesW");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsCrackNamesW", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
@@ -223,17 +235,21 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 finally
                 {
-                    if (ptr != (IntPtr)0)
+                    if (ptr != IntPtr.Zero)
                         Marshal.FreeHGlobal(ptr);
 
-                    if (name != (IntPtr)0)
+                    if (name != IntPtr.Zero)
                         Marshal.FreeHGlobal(name);
                     // free the results
                     if (results != IntPtr.Zero)
                     {
                         // call DsFreeNameResultW
+#if netcoreapp20
                         functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsFreeNameResultW");
-                        if (functionPtr == (IntPtr)0)
+                        if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                        if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsFreeNameResultW", out functionPtr))
+#endif
                         {
                             throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                         }
@@ -607,7 +623,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        internal static IntPtr GetAuthIdentity(DirectoryContext context, LoadLibrarySafeHandle libHandle)
+        internal static IntPtr GetAuthIdentity(DirectoryContext context, IntPtr libHandle)
         {
             IntPtr authIdentity;
             int result = 0;
@@ -620,8 +636,12 @@ namespace System.DirectoryServices.ActiveDirectory
 
             // create the credentials 
             // call DsMakePasswordCredentialsW
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsMakePasswordCredentialsW");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(libHandle, "DsMakePasswordCredentialsW", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
@@ -639,14 +659,18 @@ namespace System.DirectoryServices.ActiveDirectory
             return authIdentity;
         }
 
-        internal static void FreeAuthIdentity(IntPtr authIdentity, LoadLibrarySafeHandle libHandle)
+        internal static void FreeAuthIdentity(IntPtr authIdentity, IntPtr libHandle)
         {
             // free the credentials object
             if (authIdentity != IntPtr.Zero)
             {
                 // call DsMakePasswordCredentialsW
+#if netcoreapp20
                 IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsFreePasswordCredentials");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (!NativeLibrary.TryGetExport(libHandle, "DsFreePasswordCredentials", out IntPtr functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
@@ -655,15 +679,19 @@ namespace System.DirectoryServices.ActiveDirectory
             }
         }
 
-        internal static IntPtr GetDSHandle(string domainControllerName, string domainName, IntPtr authIdentity, LoadLibrarySafeHandle libHandle)
+        internal static IntPtr GetDSHandle(string domainControllerName, string domainName, IntPtr authIdentity, IntPtr libHandle)
         {
             int result = 0;
             IntPtr handle;
 
             // call DsBindWithCred
             Debug.Assert((domainControllerName != null && domainName == null) || (domainName != null && domainControllerName == null));
+#if netcoreapp20
             IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsBindWithCredW");
-            if (functionPtr == (IntPtr)0)
+            if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryGetExport(libHandle, "DsBindWithCredW", out IntPtr functionPtr))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
@@ -677,14 +705,18 @@ namespace System.DirectoryServices.ActiveDirectory
             return handle;
         }
 
-        internal static void FreeDSHandle(IntPtr dsHandle, LoadLibrarySafeHandle libHandle)
+        internal static void FreeDSHandle(IntPtr dsHandle, IntPtr libHandle)
         {
             // DsUnbind
             if (dsHandle != IntPtr.Zero)
             {
                 // call DsUnbind
+#if netcoreapp20
                 IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(libHandle, "DsUnBindW");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (!NativeLibrary.TryGetExport(libHandle, "DsUnBindW", out IntPtr functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
@@ -835,7 +867,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
                 // get the string representation of the invocationID
                 byte[] byteGuid = invocationID.ToByteArray();
-                IntPtr ptr = (IntPtr)0;
+                IntPtr ptr = IntPtr.Zero;
                 string stringGuid = null;
 
                 // encode the byte arry into binary string representation
@@ -849,7 +881,7 @@ namespace System.DirectoryServices.ActiveDirectory
                     }
                     finally
                     {
-                        if (ptr != (IntPtr)0)
+                        if (ptr != IntPtr.Zero)
                             UnsafeNativeMethods.FreeADsMem(ptr);
                     }
                 }
@@ -918,7 +950,7 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static bool Impersonate(DirectoryContext context)
         {
-            IntPtr hToken = (IntPtr)0;
+            IntPtr hToken = IntPtr.Zero;
 
             // default credential is specified, no need to do impersonation
             if ((context.UserName == null) && (context.Password == null))
@@ -945,7 +977,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             finally
             {
-                if (hToken != (IntPtr)0)
+                if (hToken != IntPtr.Zero)
                     UnsafeNativeMethods.CloseHandle(hToken);
             }
 
@@ -954,9 +986,9 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static void ImpersonateAnonymous()
         {
-            IntPtr hThread = (IntPtr)0;
+            IntPtr hThread = IntPtr.Zero;
             hThread = UnsafeNativeMethods.OpenThread(s_THREAD_ALL_ACCESS, false, UnsafeNativeMethods.GetCurrentThreadId());
-            if (hThread == (IntPtr)0)
+            if (hThread == IntPtr.Zero)
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
 
             try
@@ -967,7 +999,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             finally
             {
-                if (hThread != (IntPtr)0)
+                if (hThread != IntPtr.Zero)
                     UnsafeNativeMethods.CloseHandle(hThread);
             }
         }
@@ -1041,10 +1073,10 @@ namespace System.DirectoryServices.ActiveDirectory
 
         internal static IntPtr GetPolicyHandle(string serverName)
         {
-            IntPtr handle = (IntPtr)0;
+            IntPtr handle = IntPtr.Zero;
             LSA_UNICODE_STRING systemName;
             LSA_OBJECT_ATTRIBUTES objectAttribute = new LSA_OBJECT_ATTRIBUTES();
-            IntPtr target = (IntPtr)0;
+            IntPtr target = IntPtr.Zero;
 
             int mask = s_POLICY_VIEW_LOCAL_INFORMATION;
 
@@ -1064,7 +1096,7 @@ namespace System.DirectoryServices.ActiveDirectory
             }
             finally
             {
-                if (target != (IntPtr)0)
+                if (target != IntPtr.Zero)
                     Marshal.FreeHGlobal(target);
             }
         }

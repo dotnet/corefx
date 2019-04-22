@@ -251,26 +251,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetProcAddress.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.GetProcAddress.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.GetSysColor.cs">
       <Link>Common\Interop\Windows\User32\Interop.GetSysColor.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.Win32SystemColors.cs">
       <Link>Common\Interop\Windows\User32\Interop.Win32SystemColors.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
-      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
-    </Compile>
-    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\FunctionWrapper.Windows.cs">
-      <Link>Common\System\Runtime\InteropServices\FunctionWrapper.Windows.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Ole32\Interop.IStream.cs">
       <Link>Common\Interop\Windows\Ole32\Interop.IStream.cs</Link>
@@ -289,6 +274,23 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.HRESULT.cs">
       <Link>Common\Interop\Windows\Interop.HRESULT.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true' AND '$(TargetGroup)' == 'netcoreapp2.0'">
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.FreeLibrary.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetProcAddress.cs">
+      <Link>Common\Interop\Windows\Kernel32\Interop.GetProcAddress.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Runtime\InteropServices\FunctionWrapper.Windows.cs">
+      <Link>Common\System\Runtime\InteropServices\FunctionWrapper.Windows.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
+      <Link>Common\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="$(TargetGroup.StartsWith('netcoreapp')) AND '$(TargetsUnix)' == 'true'">

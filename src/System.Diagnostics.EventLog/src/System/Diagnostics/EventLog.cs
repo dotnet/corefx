@@ -11,7 +11,10 @@ using System.Security;
 using System.Text;
 using System.Threading;
 using Microsoft.Win32;
+
+#if netcoreapp20 || netfx
 using Microsoft.Win32.SafeHandles;
+#endif
 
 namespace System.Diagnostics
 {
@@ -785,7 +788,11 @@ namespace System.Diagnostics
                 return Path.GetFullPath(path);
         }
 
+#if netcoreapp20 || netfx
         internal static string TryFormatMessage(SafeLibraryHandle hModule, uint messageNum, string[] insertionStrings)
+#else
+        internal static string TryFormatMessage(IntPtr hModule, uint messageNum, string[] insertionStrings)
+#endif
         {
             if (insertionStrings.Length == 0)
             {
@@ -845,7 +852,11 @@ namespace System.Diagnostics
         }
         // FormatMessageW will AV if you don't pass in enough format strings.  If you call TryFormatMessage we ensure insertionStrings
         // is long enough.  You don't want to call this directly unless you're sure insertionStrings is long enough!
+#if netcoreapp20 || netfx
         internal static string UnsafeTryFormatMessage(SafeLibraryHandle hModule, uint messageNum, string[] insertionStrings)
+#else
+        internal static string UnsafeTryFormatMessage(IntPtr hModule, uint messageNum, string[] insertionStrings)
+#endif
         {
             string msg = null;
 
@@ -874,7 +885,11 @@ namespace System.Diagnostics
                 {
                     msgLen = Interop.Kernel32.FormatMessage(
                         flags,
+#if netcoreapp20 || netfx
+                        hModule.DangerousGetHandle(),
+#else
                         hModule,
+#endif
                         messageNum,
                         0,
                         buf,

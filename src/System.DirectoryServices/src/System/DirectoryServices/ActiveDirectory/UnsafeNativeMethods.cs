@@ -473,11 +473,11 @@ namespace System.DirectoryServices.ActiveDirectory
         public LSA_OBJECT_ATTRIBUTES()
         {
             Length = 0;
-            _rootDirectory = (IntPtr)0;
-            _objectName = (IntPtr)0;
+            _rootDirectory = IntPtr.Zero;
+            _objectName = IntPtr.Zero;
             Attributes = 0;
-            _securityDescriptor = (IntPtr)0;
-            _securityQualityOfService = (IntPtr)0;
+            _securityDescriptor = IntPtr.Zero;
+            _securityQualityOfService = IntPtr.Zero;
         }
     }
 
@@ -734,6 +734,7 @@ namespace System.DirectoryServices.ActiveDirectory
         [DllImport("ntdll.dll", EntryPoint = "RtlInitUnicodeString")]
         public static extern int RtlInitUnicodeString(LSA_UNICODE_STRING result, IntPtr s);
 
+#if netcoreapp20
         [DllImport("Kernel32.dll", EntryPoint = "LoadLibraryW", CharSet = CharSet.Unicode, SetLastError = true)]
         public static extern IntPtr LoadLibrary(string name);
 
@@ -741,7 +742,8 @@ namespace System.DirectoryServices.ActiveDirectory
         public extern static uint FreeLibrary(IntPtr libName);
 
         [DllImport("kernel32.dll", EntryPoint = "GetProcAddress", SetLastError = true, BestFitMapping = false)]
-        public extern static IntPtr GetProcAddress(LoadLibrarySafeHandle hModule, string entryPoint);
+        public extern static IntPtr GetProcAddress(IntPtr hModule, string entryPoint);
+#endif
 
         /*
         DWORD DsRoleGetPrimaryDomainInformation(

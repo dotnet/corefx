@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Globalization;
@@ -13,7 +12,13 @@ namespace System.Data
 {
     internal static partial class LocalDBAPI
     {
-        private static IntPtr LoadProcAddress() => SafeNativeMethods.GetProcAddress(UserInstanceDLLHandle, "LocalDBFormatMessage");
+        private static IntPtr LoadProcAddress() =>
+#if netcoreapp20 || netcoreapp21 || netstandard || netfx
+            SafeNativeMethods.GetProcAddress(UserInstanceDLLHandle, "LocalDBFormatMessage");
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            NativeLibrary.TryGetExport(UserInstanceDLLHandle, "LocalDBFormatMessage", out var functionPtr)
+                ? functionPtr : IntPtr.Zero;
+#endif
 
         private static IntPtr UserInstanceDLLHandle
         {

@@ -35,15 +35,24 @@ namespace System.Data.SqlClient.SNI
 
         private LocalDBStartInstance localDBStartInstanceFunc = null;
 
-        private volatile SafeLibraryHandle _sqlUserInstanceLibraryHandle;
-
         private LocalDB() { }
 
         internal static string GetLocalDBConnectionString(string localDbInstance) =>
             Instance.LoadUserInstanceDll() ? Instance.GetConnectionString(localDbInstance) : null;
 
         internal static IntPtr GetProcAddress(string functionName) =>
+#if netcoreapp20 || netstandard || netfx
             Instance.LoadUserInstanceDll() ? Interop.Kernel32.GetProcAddress(LocalDB.Instance._sqlUserInstanceLibraryHandle, functionName) : IntPtr.Zero;
+
+        private volatile SafeLibraryHandle _sqlUserInstanceLibraryHandle;
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            Instance.LoadUserInstanceDll() && NativeLibrary.TryGetExport(LocalDB.Instance._sqlUserInstanceLibraryHandle, functionName, out var handle)
+                    ? handle : IntPtr.Zero;
+
+        private volatile IntPtr _sqlUserInstanceLibraryHandle;
+
+        ~LocalDB() => NativeLibrary.Free(_sqlUserInstanceLibraryHandle);
+#endif
 
         private string GetConnectionString(string localDbInstance)
         {
@@ -83,14 +92,22 @@ namespace System.Data.SqlClient.SNI
         private bool LoadUserInstanceDll()
         {
             // Check in a non thread-safe way if the handle is already set for performance.
+#if netcoreapp20 || netstandard || netfx
             if (_sqlUserInstanceLibraryHandle != null)
+#else
+            if (_sqlUserInstanceLibraryHandle != IntPtr.Zero)
+#endif
             {
                 return true;
             }
 
             lock (this)
             {
-                if(_sqlUserInstanceLibraryHandle !=null)
+#if netcoreapp20 || netstandard || netfx
+                if (_sqlUserInstanceLibraryHandle != null)
+#else
+                if (_sqlUserInstanceLibraryHandle != IntPtr.Zero)
+#endif
                 {
                     return true;
                 }
@@ -115,8 +132,8 @@ namespace System.Data.SqlClient.SNI
                 }
 
                 // Load the dll
+#if netcoreapp20 || netstandard || netfx
                 SafeLibraryHandle libraryHandle = Interop.Kernel32.LoadLibraryExW(dllPath.Trim(), IntPtr.Zero, 0);
-
                 if (libraryHandle.IsInvalid)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBFailedToLoadDll, string.Empty);
@@ -126,7 +143,6 @@ namespace System.Data.SqlClient.SNI
 
                 // Load the procs from the DLLs
                 _startInstanceHandle = Interop.Kernel32.GetProcAddress(libraryHandle, ProcLocalDBStartInstance);
-
                 if (_startInstanceHandle == IntPtr.Zero)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBBadRuntime, string.Empty);
@@ -136,7 +152,6 @@ namespace System.Data.SqlClient.SNI
 
                 // Set the delegate the invoke.
                 localDBStartInstanceFunc = (LocalDBStartInstance)Marshal.GetDelegateForFunctionPointer(_startInstanceHandle, typeof(LocalDBStartInstance));
-                
                 if (localDBStartInstanceFunc == null)
                 {
                     SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBBadRuntime, string.Empty);
@@ -144,7 +159,31 @@ namespace System.Data.SqlClient.SNI
                     _startInstanceHandle = IntPtr.Zero;
                     return false;
                 }
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (!NativeLibrary.TryLoad(dllPath.Trim(), out var libraryHandle))
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBFailedToLoadDll, string.Empty);
+                    return false;
+                }
 
+                // Load the procs from the DLLs
+                if (!NativeLibrary.TryGetExport(libraryHandle, ProcLocalDBStartInstance, out _startInstanceHandle))
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBBadRuntime, string.Empty);
+                    NativeLibrary.Free(libraryHandle);
+                    return false;
+                }
+
+                // Set the delegate the invoke.
+                localDBStartInstanceFunc = (LocalDBStartInstance)Marshal.GetDelegateForFunctionPointer(_startInstanceHandle, typeof(LocalDBStartInstance));
+                if (localDBStartInstanceFunc == null)
+                {
+                    SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.INVALID_PROV, 0, SNICommon.LocalDBBadRuntime, string.Empty);
+                    NativeLibrary.Free(libraryHandle);
+                    _startInstanceHandle = IntPtr.Zero;
+                    return false;
+                }
+#endif
                 _sqlUserInstanceLibraryHandle = libraryHandle;
 
                 return true;

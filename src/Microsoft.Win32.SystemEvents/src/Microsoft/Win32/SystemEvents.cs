@@ -439,7 +439,15 @@ namespace Microsoft.Win32
             {
                 if (s_defWindowProc == IntPtr.Zero)
                 {
+#if netcoreapp20 || netfx
                     s_defWindowProc = Interop.Kernel32.GetProcAddress(Interop.Kernel32.GetModuleHandle("user32.dll"), "DefWindowProcW");
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                    // avoid passing s_defWindowProc directory which produces CS0420 warning (a reference to a volatile field will not be treated as volatile)
+                    if (NativeLibrary.TryGetExport(Interop.Kernel32.GetModuleHandle("user32.dll"), "DefWindowProcW", out var handle))
+                    {
+                        s_defWindowProc = handle;
+                    }
+#endif
                 }
                 return s_defWindowProc;
             }
@@ -651,14 +659,22 @@ namespace Microsoft.Win32
         {
             if (!s_registeredSessionNotification)
             {
+#if netcoreapp20 || netfx
                 IntPtr retval = Interop.Kernel32.LoadLibrary(Interop.Libraries.Wtsapi32);
-
                 if (retval != IntPtr.Zero)
                 {
                     Interop.Wtsapi32.WTSRegisterSessionNotification(new HandleRef(s_systemEvents, s_systemEvents._windowHandle), Interop.Wtsapi32.NOTIFY_FOR_THIS_SESSION);
                     s_registeredSessionNotification = true;
                     Interop.Kernel32.FreeLibrary(retval);
                 }
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                if (NativeLibrary.TryLoad(Interop.Libraries.Wtsapi32, out IntPtr retval))
+                {
+                    Interop.Wtsapi32.WTSRegisterSessionNotification(new HandleRef(s_systemEvents, s_systemEvents._windowHandle), Interop.Wtsapi32.NOTIFY_FOR_THIS_SESSION);
+                    s_registeredSessionNotification = true;
+                    NativeLibrary.Free(retval);
+                }
+#endif
             }
         }
 

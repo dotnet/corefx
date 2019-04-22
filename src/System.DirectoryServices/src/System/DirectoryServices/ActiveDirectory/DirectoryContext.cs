@@ -31,8 +31,21 @@ namespace System.DirectoryServices.ActiveDirectory
         private bool _validated = false;
         private bool _contextIsValid = false;
 
-        internal static LoadLibrarySafeHandle ADHandle;
-        internal static LoadLibrarySafeHandle ADAMHandle;
+#if netcoreapp20
+        private static LoadLibrarySafeHandle _adHandle;
+        private static LoadLibrarySafeHandle _adamHandle;
+        internal static IntPtr ADHandle => _adHandle?.DangerousGetHandle() ?? IntPtr.Zero;
+        internal static IntPtr ADAMHandle => _adamHandle?.DangerousGetHandle() ?? IntPtr.Zero;
+#else
+        internal static IntPtr ADHandle { get; private set; }
+        internal static IntPtr ADAMHandle { get; private set; }
+
+        ~DirectoryContext()
+        {
+            NativeLibrary.Free(ADHandle);
+            NativeLibrary.Free(ADAMHandle);
+        }
+#endif
 
         #region constructors
 
@@ -685,28 +698,41 @@ namespace System.DirectoryServices.ActiveDirectory
         {
             // first get AD handle
             string systemPath = Environment.SystemDirectory;
+#if netcoreapp20
             IntPtr tempHandle = UnsafeNativeMethods.LoadLibrary(systemPath + "\\ntdsapi.dll");
             if (tempHandle == (IntPtr)0)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryLoad(systemPath + "\\ntdsapi.dll", out var ADHandle))
+#endif
             {
                 throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
             }
+#if netcoreapp20
             else
             {
-                ADHandle = new LoadLibrarySafeHandle(tempHandle);
+                _adHandle = new LoadLibrarySafeHandle(tempHandle);
             }
+#endif
 
             // not get the ADAM handle
             // got to the windows\adam directory
             DirectoryInfo windowsDirectory = Directory.GetParent(systemPath);
+#if netcoreapp20
             tempHandle = UnsafeNativeMethods.LoadLibrary(windowsDirectory.FullName + "\\ADAM\\ntdsapi.dll");
             if (tempHandle == (IntPtr)0)
             {
-                ADAMHandle = ADHandle;
+                _adamHandle = _adHandle;
             }
             else
             {
-                ADAMHandle = new LoadLibrarySafeHandle(tempHandle);
+                _adamHandle = new LoadLibrarySafeHandle(tempHandle);
             }
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryLoad(windowsDirectory.FullName + "\\ADAM\\ntdsapi.dll", out var ADAMHandle))
+            {
+                ADAMHandle = ADHandle;
+            }
+#endif
         }
 
         #endregion private methods

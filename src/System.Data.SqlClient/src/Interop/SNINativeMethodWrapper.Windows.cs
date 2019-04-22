@@ -400,6 +400,7 @@ namespace System.Data.SqlClient
     }
 }
 
+#if netcoreapp20 || netstandard || netfx
 namespace System.Data
 {
     internal static partial class SafeNativeMethods
@@ -408,6 +409,7 @@ namespace System.Data
         internal static extern IntPtr GetProcAddress(IntPtr HModule, [MarshalAs(UnmanagedType.LPStr), In] string funcName);
     }
 }
+#endif
 
 namespace System.Data
 {

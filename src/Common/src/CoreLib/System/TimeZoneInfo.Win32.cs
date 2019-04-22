@@ -828,6 +828,7 @@ namespace System
         /// </summary>
         private static unsafe string TryGetLocalizedNameByNativeResource(string filePath, int resource)
         {
+#if netcoreapp20 || netfx
             using (SafeLibraryHandle handle = Interop.Kernel32.LoadLibraryEx(filePath, IntPtr.Zero, Interop.Kernel32.LOAD_LIBRARY_AS_DATAFILE))
             {
                 if (!handle.IsInvalid)
@@ -835,13 +836,35 @@ namespace System
                     const int LoadStringMaxLength = 500;
                     char* localizedResource = stackalloc char[LoadStringMaxLength];
 
-                    int charsWritten = Interop.User32.LoadString(handle, (uint)resource, localizedResource, LoadStringMaxLength);
+                    int charsWritten = Interop.User32.LoadString(handle.DangerousGetHandle(), (uint)resource, localizedResource, LoadStringMaxLength);
                     if (charsWritten != 0)
                     {
                         return new string(localizedResource, 0, charsWritten);
                     }
                 }
             }
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            IntPtr handle;
+            try
+            {
+                if (NativeLibrary.TryLoad(filePath, out handle))
+                {
+                    const int LoadStringMaxLength = 500;
+                    char* localizedResource = stackalloc char[LoadStringMaxLength];
+
+                    int charsWritten = Interop.User32.LoadString(handle, (uint)resource, localizedResource, LoadStringMaxLength);
+                    if (charsWritten != 0)
+                    {
+                        var localizedName = new string(localizedResource, 0, charsWritten);
+                        return localizedName;
+                    }
+                }
+            }
+            finally
+            {
+                NativeLibrary.Free(handle);
+            }
+#endif
 
             return string.Empty;
         }

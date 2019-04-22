@@ -196,7 +196,7 @@ namespace System.DirectoryServices.ActiveDirectory
             // make sure that this is the platform that we support
             new DirectoryContext(DirectoryContextType.Forest);
 
-            IntPtr ptr = (IntPtr)0;
+            IntPtr ptr = IntPtr.Zero;
 
             int result = UnsafeNativeMethods.DsGetSiteName(null, ref ptr);
             if (result != 0)
@@ -224,7 +224,7 @@ namespace System.DirectoryServices.ActiveDirectory
                 }
                 finally
                 {
-                    if (ptr != (IntPtr)0)
+                    if (ptr != IntPtr.Zero)
                         Marshal.FreeHGlobal(ptr);
                 }
             }
@@ -1305,12 +1305,16 @@ namespace System.DirectoryServices.ActiveDirectory
                 DomainController dc = DomainController.GetDomainController(Utils.GetNewDirectoryContext(serverName, DirectoryContextType.DirectoryServer, context));
                 IntPtr handle = dc.Handle;
 
-                Debug.Assert(handle != (IntPtr)0);
+                Debug.Assert(handle != IntPtr.Zero);
 
-                IntPtr info = (IntPtr)0;
+                IntPtr info = IntPtr.Zero;
                 // call DsReplicaSyncAllW
+#if netcoreapp20
                 IntPtr functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsListDomainsInSiteW");
-                if (functionPtr == (IntPtr)0)
+                if (functionPtr == IntPtr.Zero)
+#else
+                if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsListDomainsInSiteW", out IntPtr functionPtr))
+#endif
                 {
                     throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                 }
@@ -1328,9 +1332,9 @@ namespace System.DirectoryServices.ActiveDirectory
                     IntPtr val = names.rItems;
                     if (count > 0)
                     {
-                        Debug.Assert(val != (IntPtr)0);
+                        Debug.Assert(val != IntPtr.Zero);
                         int status = Marshal.ReadInt32(val);
-                        IntPtr tmpPtr = (IntPtr)0;
+                        IntPtr tmpPtr = IntPtr.Zero;
                         for (int i = 0; i < count; i++)
                         {
                             tmpPtr = IntPtr.Add(val, Marshal.SizeOf(typeof(DS_NAME_RESULT_ITEM)) * i);
@@ -1352,8 +1356,12 @@ namespace System.DirectoryServices.ActiveDirectory
                 finally
                 {
                     // call DsFreeNameResultW
+#if netcoreapp20
                     functionPtr = UnsafeNativeMethods.GetProcAddress(DirectoryContext.ADHandle, "DsFreeNameResultW");
-                    if (functionPtr == (IntPtr)0)
+                    if (functionPtr == IntPtr.Zero)
+#else
+                    if (!NativeLibrary.TryGetExport(DirectoryContext.ADHandle, "DsFreeNameResultW", out functionPtr))
+#endif
                     {
                         throw ExceptionHelper.GetExceptionFromErrorCode(Marshal.GetLastWin32Error());
                     }

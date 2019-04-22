@@ -29,6 +29,7 @@ namespace System.DirectoryServices.ActiveDirectory
         override protected bool ReleaseHandle() => NativeMethods.LsaDeregisterLogonProcess(handle) == 0;
     }
 
+#if netcoreapp20
     internal sealed class LoadLibrarySafeHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
         private LoadLibrarySafeHandle() : base(true) { }
@@ -40,4 +41,5 @@ namespace System.DirectoryServices.ActiveDirectory
 
         override protected bool ReleaseHandle() => UnsafeNativeMethods.FreeLibrary(handle) != 0;
     }
+#endif
 }

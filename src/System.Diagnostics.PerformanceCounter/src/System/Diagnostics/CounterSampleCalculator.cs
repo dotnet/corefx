@@ -237,7 +237,11 @@ namespace System.Diagnostics
             string installPath = NetFrameworkUtils.GetLatestBuildDllDirectory(".");
 
             string perfcounterPath = Path.Combine(installPath, "perfcounter.dll");
+#if netcoreapp20
             if (Interop.Kernel32.LoadLibrary(perfcounterPath) == IntPtr.Zero)
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+            if (!NativeLibrary.TryLoad(perfcounterPath, out _))
+#endif
             {
                 throw new Win32Exception(Marshal.GetLastWin32Error());
             }
