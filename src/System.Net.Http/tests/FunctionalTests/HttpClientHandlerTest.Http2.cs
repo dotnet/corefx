@@ -1268,7 +1268,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         // rfc7540 8.1.2.3.
         public async Task Http2GetAsync_MultipleStatusHeaders_Throws()
         {
@@ -1285,7 +1285,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         // rfc7540 8.1.2.3.
         public async Task Http2GetAsync_StatusHeaderNotFirst_Throws()
         {
@@ -1303,7 +1303,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsAlpn))]
         // rfc7540 8.1.2.3.
         public async Task Http2GetAsync_TrailigPseudo_Throw()
         {

@@ -147,7 +147,7 @@ namespace System.Net.Http
 
                             if (value.Length != 3)
                             {
-                                if (NetEventSource.IsEnabled) _connection.Trace($"Received status headers '{System.Text.Encoding.ASCII.GetString(name)}'.");
+                                if (NetEventSource.IsEnabled) _connection.Trace($"Received status headers '{System.Text.Encoding.ASCII.GetString(value)}'.");
                                 throw new HttpRequestException(SR.net_http_invalid_response);
                             }
 
@@ -155,14 +155,15 @@ namespace System.Net.Http
                             byte status1 = value[0], status2 = value[1], status3 = value[2];
                             if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
                             {
-                                if (NetEventSource.IsEnabled) _connection.Trace($"Received status headers '{System.Text.Encoding.ASCII.GetString(name)}'.");
+                                if (NetEventSource.IsEnabled) _connection.Trace($"Invalid status header '{System.Text.Encoding.ASCII.GetString(value)}'.");
                                 throw new HttpRequestException(SR.net_http_invalid_response);
                             }
 
                             int statusValue = (100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0'));
                             if (statusValue == 0)
                             {
-                                throw new Exception("Invalid status code zero.");
+                                if (NetEventSource.IsEnabled) _connection.Trace($"Invalid status header '{System.Text.Encoding.ASCII.GetString(value)}'.");
+                                throw new HttpRequestException(SR.net_http_invalid_response);
                             }
 
                             _response.SetStatusCodeWithoutValidation((HttpStatusCode)statusValue);
@@ -177,7 +178,8 @@ namespace System.Net.Http
                     {
                         if (_response.StatusCode == 0)
                         {
-                            throw new Exception("Received eaders before status pseudo-header.");
+                            if (NetEventSource.IsEnabled) _connection.Trace($"Received header before status pseudo-header.");
+                            throw new HttpRequestException(SR.net_http_invalid_response);
                         }
 
                         if (!HeaderDescriptor.TryGet(name, out HeaderDescriptor descriptor))
