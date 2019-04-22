@@ -89,7 +89,7 @@ namespace System.Data.ProviderBase
                 SysTx.Transaction currentEnlistedTransaction = _enlistedTransaction;
                 if (((null == currentEnlistedTransaction) && (null != value))
                     || ((null != currentEnlistedTransaction) && !currentEnlistedTransaction.Equals(value)))
-                {  // WebData 20000024
+                {
 
                     // Pay attention to the order here:
                     // 1) defect from any notifications
@@ -437,7 +437,7 @@ namespace System.Data.ProviderBase
                 // If we're not already doomed, check the connection's lifetime and
                 // doom it if it's lifetime has elapsed.
 
-                DateTime now = DateTime.UtcNow;  // WebData 111116
+                DateTime now = DateTime.UtcNow;
                 if ((now.Ticks - _createTime.Ticks) > Pool.LoadBalanceTimeout.Ticks)
                 {
                     DoNotPoolThisConnection();
@@ -544,7 +544,7 @@ namespace System.Data.ProviderBase
             // a connection pool.
 
             // TODO: consider using ADP.TimerCurrent() for this.
-            _createTime = DateTime.UtcNow; // WebData 111116
+            _createTime = DateTime.UtcNow;
 
             _connectionPool = connectionPool;
             _performanceCounters = connectionPool.PerformanceCounters;

@@ -38,7 +38,7 @@ namespace System.Data.OleDb {
         // an open OleDbConnection.
 
         // We don't do extra work at this time to allow the DataReader to be used in a different context
-        // from which the command was executed in.  See WebData 64320, IRowset.GetNextRows will throw InvalidCastException
+        // from which the command was executed in. IRowset.GetNextRows will throw InvalidCastException
 
         // In V1.0, we worked around the performance impact of creating a DataSource/Session using
         // WrapIUnknownWithComObject which creates a new RCW without searching for existing RCW
@@ -472,7 +472,7 @@ namespace System.Data.OleDb {
                 using(DualCoTaskMem handle = new DualCoTaskMem(dbInfo, new int[1] { literal }, out literalCount, out literalInfo, out hr)) {
                     // All literals were either invalid or unsupported. The provider allocates memory for *prgLiteralInfo and sets the value of the fSupported element in all of the structures to FALSE. The consumer frees this memory when it no longer needs the information.
                     if (OleDbHResult.DB_E_ERRORSOCCURRED != hr) {
-                        if ((1 == literalCount) && Marshal.ReadInt32(literalInfo, ODB.OffsetOf_tagDBLITERALINFO_it) == literal) { // WebData 98612
+                        if ((1 == literalCount) && Marshal.ReadInt32(literalInfo, ODB.OffsetOf_tagDBLITERALINFO_it) == literal) {
                             literalValue = Marshal.PtrToStringUni(Marshal.ReadIntPtr(literalInfo, 0));
                         }
                         if (hr < 0) { // ignore infomsg

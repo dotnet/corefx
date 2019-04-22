@@ -210,7 +210,7 @@ namespace System.Data.OleDb
 
         private byte ValuePrecisionCore(object value) { // V1.2.3300
             if (value is Decimal) {
-                return ((System.Data.SqlTypes.SqlDecimal)(Decimal) value).Precision; // WebData 102913
+                return ((System.Data.SqlTypes.SqlDecimal)(Decimal) value).Precision;
             }
             return 0;
         }

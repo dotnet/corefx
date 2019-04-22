@@ -53,7 +53,7 @@ namespace System.Data.OleDb {
         }
 
         [ EditorBrowsable(EditorBrowsableState.Never) ]
-        [ Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  https://go.microsoft.com/fwlink/?linkid=14202", false) ] // 79027
+        [ Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  https://go.microsoft.com/fwlink/?linkid=14202", false) ]
         public OleDbParameter Add(string parameterName, object value) {
             return Add(new OleDbParameter(parameterName, value));
         }
@@ -78,7 +78,7 @@ namespace System.Data.OleDb {
             AddRange((Array)values);
         }
 
-        public override bool Contains(string value) { // WebData 97349
+        public override bool Contains(string value) {
             return (-1 != IndexOf(value));
         }
 

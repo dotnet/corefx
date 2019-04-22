@@ -9,7 +9,7 @@ using System.Data.Common;
 namespace System.Data.OleDb {
     [Serializable, ListBindable(false)]
     public sealed class OleDbErrorCollection : System.Collections.ICollection {
-        readonly private ArrayList items; // WebData 106655
+        readonly private ArrayList items;
 
         internal OleDbErrorCollection(UnsafeNativeMethods.IErrorInfo errorInfo) {
             ArrayList items = new ArrayList();

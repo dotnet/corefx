@@ -13,7 +13,7 @@ namespace System.Data.OleDb {
 
         public DataTable GetElements() {
              
-            DataTable dataTable = new DataTable("MSDAENUM"); // WebData 112482
+            DataTable dataTable = new DataTable("MSDAENUM");
             dataTable.Locale = CultureInfo.InvariantCulture;
             OleDbDataReader dataReader = GetRootEnumerator();
             OleDbDataAdapter.FillDataTable(dataReader, dataTable);
@@ -25,7 +25,7 @@ namespace System.Data.OleDb {
             return GetEnumeratorFromType(type);
         }
         
-        static internal OleDbDataReader GetEnumeratorFromType(Type type) { // WebData 99005
+        static internal OleDbDataReader GetEnumeratorFromType(Type type) {
             object value = Activator.CreateInstance(type, System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Instance, null, null, CultureInfo.InvariantCulture, null);
             return GetEnumeratorReader(value);
         }

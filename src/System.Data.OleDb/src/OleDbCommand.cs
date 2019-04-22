@@ -878,7 +878,7 @@ namespace System.Data.OleDb {
             else {
                 builder.Append("{ CALL ");
             }
-            builder.Append(sproctext); // WebData 95634
+            builder.Append(sproctext);
 
             switch(parameterCount) {
             case 0:

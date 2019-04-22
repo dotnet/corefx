@@ -168,7 +168,7 @@ namespace System.Data.OleDb {
             return ADP.Argument(SR.Format(SR.OleDb_MSDASQLNotSupported));
         }
         static internal InvalidOperationException CommandTextNotSupported(string provider, Exception inner) {
-            return ADP.DataAdapter(SR.Format(SR.OleDb_CommandTextNotSupported, provider), inner); // 72632
+            return ADP.DataAdapter(SR.Format(SR.OleDb_CommandTextNotSupported, provider), inner);
         }
         static internal InvalidOperationException PossiblePromptNotUserInteractive() {
             return ADP.DataAdapter(SR.Format(SR.OleDb_PossiblePromptNotUserInteractive));
@@ -178,7 +178,7 @@ namespace System.Data.OleDb {
             return ADP.DataAdapter(SR.Format(SR.OleDb_ProviderUnavailable, provider), inner);
         }
         static internal InvalidOperationException TransactionsNotSupported(string provider, Exception inner) {
-            return ADP.DataAdapter(SR.Format(SR.OleDb_TransactionsNotSupported, provider), inner); // 72632
+            return ADP.DataAdapter(SR.Format(SR.OleDb_TransactionsNotSupported, provider), inner);
         }
         static internal ArgumentException AsynchronousNotSupported() {
             return ADP.Argument(SR.Format(SR.OleDb_AsynchronousNotSupported));

@@ -161,7 +161,7 @@ namespace System.Data.OleDb {
             if (_ifIRowsetElseIRow) {
                 length = RowBinding.ReadIntPtr(_offsetLength).ToInt32();
             }
-            else { // WebData 94427
+            else {
                 length = Bindings.DBColumnAccess[IndexWithinAccessor].cbDataLen.ToInt32();
             }
             return Math.Max(length, 0);
@@ -195,7 +195,7 @@ namespace System.Data.OleDb {
             if (_ifIRowsetElseIRow) {
                 return (DBStatus) RowBinding.ReadInt32(_offsetStatus);
             }
-            else { // WebData 94427
+            else {
                 return (DBStatus) Bindings.DBColumnAccess[IndexWithinAccessor].dwStatus;
             }
         }
@@ -702,7 +702,7 @@ namespace System.Data.OleDb {
         private void Value_BYTES(Byte[] value) {
             Debug.Assert(null != value, "Value_BYTES null");
             // we silently truncate when the user has specified a given Size
-            int bytecount = ((ValueBindingOffset < value.Length) ? Math.Min(value.Length - ValueBindingOffset, ColumnBindingMaxLen) : 0); // 70232
+            int bytecount = ((ValueBindingOffset < value.Length) ? Math.Min(value.Length - ValueBindingOffset, ColumnBindingMaxLen) : 0);
             LengthValue(bytecount);
             StatusValue(DBStatus.S_OK);
             if (0 < bytecount) {
@@ -786,7 +786,7 @@ namespace System.Data.OleDb {
             Debug.Assert(NativeDBType.DECIMAL == DbType, "Value_DECIMAL");
 
             /* pending breaking change approval
-            if (_precision < ((System.Data.SqlTypes.SqlDecimal) value).Precision) { // WebData 87236
+            if (_precision < ((System.Data.SqlTypes.SqlDecimal) value).Precision) {
                 throw ADP.ParameterValueOutOfRange(value);
             }
             */
@@ -975,7 +975,7 @@ namespace System.Data.OleDb {
             Debug.Assert(NativeDBType.NUMERIC == DbType, "Value_NUMERIC");
 
             /* pending breaking change approval
-            if (_precision < ((System.Data.SqlTypes.SqlDecimal) value).Precision) { // WebData 87236
+            if (_precision < ((System.Data.SqlTypes.SqlDecimal) value).Precision) {
                 throw ADP.ParameterValueOutOfRange(value);
             }
             */
@@ -1070,7 +1070,7 @@ namespace System.Data.OleDb {
             Debug.Assert(null != value, "Value_BYTES null");
             Debug.Assert(NativeDBType.WSTR == DbType, "Value_WSTR");
             // we silently truncate when the user has specified a given Size
-            int charCount = ((ValueBindingOffset < value.Length) ? Math.Min(value.Length - ValueBindingOffset, (ColumnBindingMaxLen-2)/2) : 0); // 70232
+            int charCount = ((ValueBindingOffset < value.Length) ? Math.Min(value.Length - ValueBindingOffset, (ColumnBindingMaxLen-2)/2) : 0);
 
             LengthValue(charCount*2);
             StatusValue(DBStatus.S_OK);
@@ -1083,7 +1083,7 @@ namespace System.Data.OleDb {
             Debug.Assert(null != value, "Value_BYTES null");
             Debug.Assert(NativeDBType.WSTR == DbType, "Value_WSTR");
             // we silently truncate when the user has specified a given Size
-            int charCount = ((ValueBindingOffset < value.Length) ? Math.Min(value.Length - ValueBindingOffset, (ColumnBindingMaxLen-2)/2) : 0); // 70232
+            int charCount = ((ValueBindingOffset < value.Length) ? Math.Min(value.Length - ValueBindingOffset, (ColumnBindingMaxLen-2)/2) : 0);
 
             LengthValue(charCount*2);
             StatusValue(DBStatus.S_OK);

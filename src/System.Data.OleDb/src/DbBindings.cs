@@ -222,7 +222,7 @@ namespace System.Data.OleDb {
 
             if (!_ifIRowsetElseIRow) {
                 Debug.Assert(columnBindings.Length == _dbcolumns.Length, "length mismatch");
-                for(int i = 0; i < columnBindings.Length; ++i) { // WebData 94427
+                for(int i = 0; i < columnBindings.Length; ++i) {
                     _dbcolumns[i].pData = rowBinding.DangerousGetDataPtr(columnBindings[i].ValueOffset); // We are simply pointing at a location later in the buffer, so we're OK to not addref the buffer.
                 }
             }
@@ -252,7 +252,7 @@ namespace System.Data.OleDb {
                     // always set ouput only and return value parameter values to null when executing
                     parameters[i].Value = null;
 
-                    //columnBindings[i].SetValueEmpty(); // webdata 115079
+                    //columnBindings[i].SetValueEmpty();
                 }
             }
         }

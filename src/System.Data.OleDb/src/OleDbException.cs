@@ -87,7 +87,7 @@ namespace System.Data.OleDb {
             if (0 < errors.Count) {
                 StringBuilder builder = new StringBuilder();
 
-                if ((null != message) && (message != errors[0].Message)) { // WebData 103032
+                if ((null != message) && (message != errors[0].Message)) {
                     builder.Append(message.TrimEnd(ODB.ErrorTrimCharacters));
                     if (1 < count) {
                         builder.Append(Environment.NewLine);

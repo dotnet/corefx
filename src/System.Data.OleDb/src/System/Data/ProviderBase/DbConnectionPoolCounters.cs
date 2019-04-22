@@ -286,7 +286,7 @@ namespace System.Data.ProviderBase {
         }
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        private void SafeDispose(Counter counter) { // WebData 103603
+        private void SafeDispose(Counter counter) {
             if (null != counter) {
                 counter.Dispose();
             }

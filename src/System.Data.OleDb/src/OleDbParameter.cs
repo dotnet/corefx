@@ -191,7 +191,7 @@ namespace System.Data.OleDb {
         internal byte ScaleInternal {
             get {
                 byte scale = _scale;
-                if (!ShouldSerializeScale(scale)) { // WebData 94688
+                if (!ShouldSerializeScale(scale)) {
                     scale = ValueScale(Value);
                 }
                 return scale;
@@ -279,7 +279,7 @@ namespace System.Data.OleDb {
                 }
                 else {
                     if (NativeDBType.STR == dbtype.dbType) {
-                        size = Int32.MaxValue; // WebData 98940
+                        size = Int32.MaxValue;
                     }
                     else if (NativeDBType.WSTR == dbtype.dbType) {
                         size = Int32.MaxValue/2;
@@ -315,7 +315,7 @@ namespace System.Data.OleDb {
                     }
 
                     if (computedSize) {
-                        if (NativeDBType.STR == dbtype.dbType) { // WebData 98140
+                        if (NativeDBType.STR == dbtype.dbType) {
                             // maximum 0x7ffffffe characters, computed this way to avoid overflow exception
                             size = Math.Min(size, 0x3FFFFFFE) * 2;
                         }
@@ -390,7 +390,7 @@ namespace System.Data.OleDb {
                         if ((typeof(string) == destinationType.dataType) && (typeof(char[]) == currentType)) {
                         }
                         else if ((NativeDBType.CY == destinationType.dbType) && (typeof(string) == currentType)) {
-                            value = Decimal.Parse((string)value, NumberStyles.Currency, (IFormatProvider)null); // WebData 99376
+                            value = Decimal.Parse((string)value, NumberStyles.Currency, (IFormatProvider)null);
                         }
                         else {
                             value = Convert.ChangeType(value, destinationType.dataType, (IFormatProvider)null);
@@ -402,7 +402,7 @@ namespace System.Data.OleDb {
                             throw;
                         }
 
-                        throw ADP.ParameterConversionFailed(value, destinationType.dataType, e); // WebData 75433
+                        throw ADP.ParameterConversionFailed(value, destinationType.dataType, e);
                     }
                 }
             }

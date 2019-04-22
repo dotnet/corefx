@@ -450,7 +450,7 @@ namespace System.Data.ProviderBase {
             _state= State.Initializing;
 
             lock(_random) { // Random.Next is not thread-safe
-                _cleanupWait = _random.Next(12, 24)*10*1000; // 2-4 minutes in 10 sec intervals, WebData 103603
+                _cleanupWait = _random.Next(12, 24)*10*1000; // 2-4 minutes in 10 sec intervals
             }
 
             _connectionFactory = connectionFactory;

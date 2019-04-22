@@ -1061,7 +1061,7 @@ namespace System.Data.OleDb {
 
         static internal OleDbException NextResults(UnsafeNativeMethods.IMultipleResults imultipleResults, OleDbConnection connection, OleDbCommand command, out IntPtr recordsAffected) {
             recordsAffected = ADP.RecordsUnaffected;
-            List<OleDbException> exceptions = null; // WebData 104564
+            List<OleDbException> exceptions = null;
             if (null != imultipleResults) {
                 object result;
                 IntPtr affected;
@@ -1403,7 +1403,7 @@ namespace System.Data.OleDb {
                             maxLen = ADP.PtrSize;
                             getType = (short)((ushort) getType | (ushort)NativeDBType.BYREF);
                         }
-                        else if ((NativeDBType.WSTR == getType) && (-1 != info.size)) { // WebData 99298
+                        else if ((NativeDBType.WSTR == getType) && (-1 != info.size)) {
                             maxLen = info.size * 2 + 2;
                         }
                         else {
@@ -2010,7 +2010,7 @@ namespace System.Data.OleDb {
                     short wType = unchecked((short) dbtype.columnBinding.Value_UI2());
 
                     if (4 == ADP.PtrSize) {
-                        info.size = unchecked((int) columnsize.columnBinding.Value_UI4()); // WebData 99298
+                        info.size = unchecked((int) columnsize.columnBinding.Value_UI4());
                     }
                     else {
                         info.size = ADP.IntPtrToInt32((IntPtr)unchecked((long)columnsize.columnBinding.Value_UI8()));

@@ -4,7 +4,7 @@
 
 namespace System.Data.OleDb {
 
-    internal enum OleDbPropertyStatus { // WebData 99005
+    internal enum OleDbPropertyStatus {
         Ok = 0,
         NotSupported = 1,
         BadValue = 2,
