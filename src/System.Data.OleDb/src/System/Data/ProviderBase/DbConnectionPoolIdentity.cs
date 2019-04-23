@@ -12,12 +12,10 @@ namespace System.Data.ProviderBase {
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
     using System.Security;
-    using System.Security.Permissions;
     using System.Security.Principal;
     using System.Threading;
     using System.Runtime.Versioning;
 
-    [Serializable] // Serializable so SqlDependencyProcessDispatcher can marshall cross domain to SqlDependency.
     sealed internal class DbConnectionPoolIdentity {
         private const int E_NotImpersonationToken      = unchecked((int)0x8007051D);
         private const int Win32_CheckTokenMembership   = 1;
@@ -77,12 +75,10 @@ namespace System.Data.ProviderBase {
             return result;
         }
 
-        [SecurityPermission(SecurityAction.Assert, Flags=SecurityPermissionFlag.ControlPrincipal)]
         static internal WindowsIdentity GetCurrentWindowsIdentity() {
             return WindowsIdentity.GetCurrent();
         }
 
-        [SecurityPermission(SecurityAction.Assert, Flags=SecurityPermissionFlag.UnmanagedCode)]
         static private IntPtr GetWindowsIdentityToken(WindowsIdentity identity) {
             return identity.Token;
         }

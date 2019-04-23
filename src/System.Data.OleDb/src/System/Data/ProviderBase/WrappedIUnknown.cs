@@ -21,7 +21,7 @@ namespace System.Data.ProviderBase {
             if (null != unknown) {
                 RuntimeHelpers.PrepareConstrainedRegions();
                 try {} finally {
-                    base.handle = Marshal.GetIUnknownForObject(unknown);    // TODO: this method should be marked with a reliability contract.
+                    base.handle = Marshal.GetIUnknownForObject(unknown);
                 }
             }
         }

@@ -54,54 +54,31 @@ namespace System.Data.ProviderBase
         }
 
         public void ClearAllPools() {
-            // IntPtr hscp;
-            // Bid.ScopeEnter(out hscp, "<prov.DbConnectionFactory.ClearAllPools|API> ");
-            try {
-                Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> connectionPoolGroups = _connectionPoolGroups;
-                foreach (KeyValuePair<DbConnectionPoolKey, DbConnectionPoolGroup> entry in connectionPoolGroups) {
-                    DbConnectionPoolGroup poolGroup = entry.Value;
-                    if (null != poolGroup) {
-                        poolGroup.Clear();
-                    }
+            Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> connectionPoolGroups = _connectionPoolGroups;
+            foreach (KeyValuePair<DbConnectionPoolKey, DbConnectionPoolGroup> entry in connectionPoolGroups) {
+                DbConnectionPoolGroup poolGroup = entry.Value;
+                if (null != poolGroup) {
+                    poolGroup.Clear();
                 }
-            }
-            finally {
-                // Bid.ScopeLeave(ref hscp);
             }
         }
 
         public void ClearPool(DbConnection connection) {
             ADP.CheckArgumentNull(connection, "connection");
-
-            // IntPtr hscp;
-            // Bid.ScopeEnter(out hscp, "<prov.DbConnectionFactory.ClearPool|API> %d#" , GetObjectId(connection));
-            try {
                 DbConnectionPoolGroup poolGroup = GetConnectionPoolGroup(connection);
                 if (null != poolGroup) {
                     poolGroup.Clear();
                 }
-            }
-            finally {
-                // Bid.ScopeLeave(ref hscp);
-            }
         }
 
         public void ClearPool(DbConnectionPoolKey key) {
             Debug.Assert(key != null, "key cannot be null");
             ADP.CheckArgumentNull(key.ConnectionString, "key.ConnectionString");
-
-            // IntPtr hscp;
-            // Bid.ScopeEnter(out hscp, "<prov.DbConnectionFactory.ClearPool|API> connectionString");
-            try {
                 DbConnectionPoolGroup poolGroup;
                 Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> connectionPoolGroups = _connectionPoolGroups;
                 if (connectionPoolGroups.TryGetValue(key, out poolGroup)) {
                     poolGroup.Clear();
                 }
-            }
-            finally {
-                // Bid.ScopeLeave(ref hscp);
-            }
         }
 
         internal virtual DbConnectionPoolProviderInfo CreateConnectionPoolProviderInfo(DbConnectionOptions connectionOptions){
@@ -128,7 +105,6 @@ namespace System.Data.ProviderBase
                 PerformanceCounters.HardConnectsPerSecond.Increment();
                 newConnection.MakeNonPooledObject(owningConnection, PerformanceCounters);
             }
-            // Bid.Trace("<prov.DbConnectionFactory.CreateNonPooledConnection|RES|CPOOL> %d#, Non-pooled database connection created.\n", ObjectID);
             return newConnection;
         }
 
@@ -141,7 +117,6 @@ namespace System.Data.ProviderBase
                 PerformanceCounters.HardConnectsPerSecond.Increment();
                 newConnection.MakePooledConnection(pool);
             }
-            // Bid.Trace("<prov.DbConnectionFactory.CreatePooledConnection|RES|CPOOL> %d#, Pooled database connection created.\n", ObjectID);
             return newConnection;
         }
 
@@ -303,7 +278,6 @@ namespace System.Data.ProviderBase
                         // connection creation failed on semaphore waiting or if max pool reached
                         if (connectionPool.IsRunning) {
                             // If GetConnection failed while the pool is running, the pool timeout occurred.
-                            // Bid.Trace("<prov.DbConnectionFactory.GetConnection|RES|CPOOL> %d#, GetConnection failed because a pool timeout occurred.\n", ObjectID);
                             throw ADP.PooledOpenTimeout();
                         }
                         else {
@@ -319,7 +293,6 @@ namespace System.Data.ProviderBase
 
             if (connection == null) {
                 // exhausted all retries or timed out - give up
-                // Bid.Trace("<prov.DbConnectionFactory.GetConnection|RES|CPOOL> %d#, GetConnection failed because a pool timeout occurred and all retries were exhausted.\n", ObjectID);
                 throw ADP.PooledOpenTimeout();
             }
 
@@ -342,8 +315,6 @@ namespace System.Data.ProviderBase
 
             // however, don't rebuild connectionOptions if no pooling is involved - let new connections do that work
             if (connectionPoolGroup.IsDisabled && (null != connectionPoolGroup.PoolGroupOptions)) {
-                // Bid.Trace("<prov.DbConnectionFactory.GetConnectionPool|RES|INFO|CPOOL> %d#, DisabledPoolGroup=%d#\n", ObjectID, connectionPoolGroup.ObjectID);
-
                 // reusing existing pool option in case user originally used SetConnectionPoolOptions
                 DbConnectionPoolGroupOptions poolOptions = connectionPoolGroup.PoolGroupOptions;
 
@@ -455,10 +426,6 @@ namespace System.Data.ProviderBase
 
         private void PruneConnectionPoolGroups(object state) {
             // when debugging this method, expect multiple threads at the same time
-            // if (Bid.AdvancedOn) {
-                // Bid.Trace("<prov.DbConnectionFactory.PruneConnectionPoolGroups|RES|INFO|CPOOL> %d#\n", ObjectID);
-            // }
-
             // First, walk the pool release list and attempt to clear each
             // pool, when the pool is finally empty, we dispose of it.  If the
             // pool isn't empty, it's because there are active connections or
@@ -472,9 +439,6 @@ namespace System.Data.ProviderBase
 
                             if (0 == pool.Count) {
                                 _poolsToRelease.Remove(pool);
-                                // if (Bid.AdvancedOn) {
-                                    // Bid.Trace("<prov.DbConnectionFactory.PruneConnectionPoolGroups|RES|INFO|CPOOL> %d#, ReleasePool=%d#\n", ObjectID, pool.ObjectID);
-                                // }
                                 PerformanceCounters.NumberOfInactiveConnectionPools.Decrement();
                             }
                         }
@@ -494,9 +458,6 @@ namespace System.Data.ProviderBase
 
                             if (0 == poolsLeft) {
                                 _poolGroupsToRelease.Remove(poolGroup);
-                                // if (Bid.AdvancedOn) {
-                                    // Bid.Trace("<prov.DbConnectionFactory.PruneConnectionPoolGroups|RES|INFO|CPOOL> %d#, ReleasePoolGroup=%d#\n", ObjectID, poolGroup.ObjectID);
-                                // }
                                 PerformanceCounters.NumberOfInactiveConnectionPoolGroups.Decrement();
                             }
                         }
@@ -553,8 +514,6 @@ namespace System.Data.ProviderBase
 
         internal void QueuePoolGroupForRelease(DbConnectionPoolGroup poolGroup) {
             Debug.Assert (null != poolGroup, "null poolGroup?");
-            // Bid.Trace("<prov.DbConnectionFactory.QueuePoolGroupForRelease|RES|INFO|CPOOL> %d#, poolGroup=%d#\n", ObjectID, poolGroup.ObjectID);
-
             lock (_poolGroupsToRelease) {
                 _poolGroupsToRelease.Add(poolGroup);
             }

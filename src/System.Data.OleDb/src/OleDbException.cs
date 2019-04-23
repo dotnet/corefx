@@ -8,11 +8,9 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 using System.Text;
 
 namespace System.Data.OleDb {
-    [Serializable] 
     public sealed class OleDbException : System.Data.Common.DbException {
         private OleDbErrorCollection oledbErrors;
 
@@ -38,7 +36,6 @@ namespace System.Data.OleDb {
             oledbErrors = (OleDbErrorCollection) si.GetValue("oledbErrors", typeof(OleDbErrorCollection));
         }
 
-        [SecurityPermission(System.Security.Permissions.SecurityAction.LinkDemand, Flags=System.Security.Permissions.SecurityPermissionFlag.SerializationFormatter)]
         override public void GetObjectData(SerializationInfo si, StreamingContext context) {
             if (null == si) {
                 throw new ArgumentNullException("si");
@@ -47,18 +44,14 @@ namespace System.Data.OleDb {
             base.GetObjectData(si, context);
         }
 
-        [
-        TypeConverter(typeof(ErrorCodeConverter))
-        ]
+        [TypeConverter(typeof(ErrorCodeConverter))]
         override public int ErrorCode {
             get {
                 return base.ErrorCode;
             }
         }
 
-        [
-        DesignerSerializationVisibility(DesignerSerializationVisibility.Content)
-        ]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         public OleDbErrorCollection Errors {
             get {
                 OleDbErrorCollection errors = this.oledbErrors;

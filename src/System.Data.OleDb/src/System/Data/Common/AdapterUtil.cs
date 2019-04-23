@@ -9,7 +9,6 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.Versioning;
 using System.Security;
 using System.Text;
@@ -42,8 +41,7 @@ namespace System.Data.Common
             }
         }
 
-        // NOTE: Initializing a Task in SQL CLR requires the "UNSAFE" permission set (http://msdn.microsoft.com/en-us/library/ms172338.aspx)
-        // Therefore we are lazily initializing these Tasks to avoid forcing customers to use the "UNSAFE" set when they are actually using no Async features (See Dev11 Bug #193253)
+        // We are lazily initializing these Tasks to avoid forcing customers to use the "UNSAFE" set when they are actually using no Async features
         static private Task<bool> _trueTask = null;
         static internal Task<bool> TrueTask {
             get {
@@ -1061,9 +1059,6 @@ namespace System.Data.Common
         internal const float FailoverTimeoutStepForTnir = 0.125F; // Fraction of timeout to use in case of Transparent Network IP resolution.
         internal const int MinimumTimeoutForTnirMs = 500; // The first login attempt in  Transparent network IP Resolution 
 
-        // security issue, don't rely upon static public readonly values - AS/URT 109635
-        static internal readonly String StrEmpty = ""; // String.Empty
-
         static internal readonly IntPtr PtrZero = new IntPtr(0); // IntPtr.Zero
         static internal readonly int PtrSize = IntPtr.Size;
         static internal readonly IntPtr InvalidPtr = new IntPtr(-1); // use for INVALID_HANDLE
@@ -1182,40 +1177,19 @@ namespace System.Data.Common
             return;
         }
 
-        // [FileIOPermission(SecurityAction.Assert, AllFiles=FileIOPermissionAccess.PathDiscovery)]
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static internal string GetFullPath(string filename) {
             return Path.GetFullPath(filename);
         }
 
         // SxS: the file is opened in FileShare.Read mode allowing several threads/apps to read it simultaneously
-        // [ResourceExposure(ResourceScope.Machine)]
-        // [ResourceConsumption(ResourceScope.Machine)]
         static internal Stream GetFileStream(string filename) {
-            // (new FileIOPermission(FileIOPermissionAccess.Read, filename)).Assert();
-            try {
-                return new FileStream(filename,FileMode.Open,FileAccess.Read,FileShare.Read);
-            }
-            finally {
-                // FileIOPermission.RevertAssert();
-            }
+            return new FileStream(filename,FileMode.Open,FileAccess.Read,FileShare.Read);
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static internal FileVersionInfo GetVersionInfo(string filename) {
-            // (new FileIOPermission(FileIOPermissionAccess.Read, filename)).Assert();
-            try {
-                return FileVersionInfo.GetVersionInfo(filename);
-            }
-            finally {
-                // FileIOPermission.RevertAssert();
-            }
+            return FileVersionInfo.GetVersionInfo(filename);
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static internal Stream GetXmlStreamFromValues(String[] values, String errorString) {
             if (values.Length != 1){
                 throw ADP.ConfigWrongNumberOfValues(errorString);
@@ -1223,12 +1197,9 @@ namespace System.Data.Common
             return ADP.GetXmlStream(values[0],errorString);
         }
 
-        // SxS (VSDD 545786): metadata files are opened from <.NetRuntimeFolder>\CONFIG\<metadatafilename.xml>
+        // metadata files are opened from <.NetRuntimeFolder>\CONFIG\<metadatafilename.xml>
         // this operation is safe in SxS because the file is opened in read-only mode and each NDP runtime accesses its own copy of the metadata
         // under the runtime folder.
-        // This method returns stream to open file, so its ResourceExposure value is ResourceScope.Machine.
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static internal Stream GetXmlStream(String value, String errorString) {
             Stream XmlStream;
             const string config = "config\\";
@@ -1263,8 +1234,6 @@ namespace System.Data.Common
 
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static internal object ClassesRootRegistryValue(string subkey, string queryvalue) {
             //(new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_CLASSES_ROOT\\" + subkey)).Assert();
             try {
@@ -1283,8 +1252,6 @@ namespace System.Data.Common
             }
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static internal object LocalMachineRegistryValue(string subkey, string queryvalue) {
             // (new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_LOCAL_MACHINE\\" + subkey)).Assert();
             try {
@@ -1304,8 +1271,6 @@ namespace System.Data.Common
         }
 
         // SxS: although this method uses registry, it does not expose anything out
-        [ResourceExposure(ResourceScope.None)]
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         static internal void CheckVersionMDAC(bool ifodbcelseoledb) {
             int major, minor, build;
             string version;
@@ -1313,7 +1278,7 @@ namespace System.Data.Common
             try {
                 version = (string)ADP.LocalMachineRegistryValue("Software\\Microsoft\\DataAccess", "FullInstallVer");
                 if (ADP.IsEmpty(version)) {
-                    string filename = (string)ADP.ClassesRootRegistryValue(System.Data.OleDb.ODB.DataLinks_CLSID, ADP.StrEmpty);
+                    string filename = (string)ADP.ClassesRootRegistryValue(System.Data.OleDb.ODB.DataLinks_CLSID, string.Empty);
                     FileVersionInfo versionInfo = ADP.GetVersionInfo(filename);
                     major = versionInfo.FileMajorPart;
                     minor = versionInfo.FileMinorPart;
@@ -1428,7 +1393,7 @@ namespace System.Data.Common
                     hash[columnName] = i;
                 }
                 else {
-                    columnNameArray[i] = ADP.StrEmpty;
+                    columnNameArray[i] = string.Empty;
                     startIndex = i;
                 }
             }
@@ -1462,7 +1427,6 @@ namespace System.Data.Common
             return uniqueIndex;
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         static internal IntPtr IntPtrOffset(IntPtr pbase, Int32 offset) {
             if (4 == ADP.PtrSize) {
                 return (IntPtr) checked(pbase.ToInt32() + offset);

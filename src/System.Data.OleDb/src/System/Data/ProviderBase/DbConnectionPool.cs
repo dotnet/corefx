@@ -8,7 +8,6 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Threading;
@@ -298,8 +297,6 @@ namespace System.Data.ProviderBase {
 
             private readonly int _releaseFlags;
 
-            [ResourceExposure(ResourceScope.None)] // SxS: this method does not create named objects
-            [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
             internal PoolWaitHandles() : base(3*IntPtr.Size) {
                 bool mustRelease1 = false, mustRelease2 = false, mustRelease3 = false;
                 
@@ -340,7 +337,6 @@ namespace System.Data.ProviderBase {
             }
             
             internal SafeHandle CreationHandle {
-                [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
                 get { return _creationHandle; }
             }
 
@@ -1116,8 +1112,6 @@ namespace System.Data.ProviderBase {
         }
 
         [SuppressMessage("Microsoft.Reliability", "CA2001:AvoidCallingProblematicMethods")] // copied from Triaged.cs
-        [ResourceExposure(ResourceScope.None)] // SxS: this method does not expose resources
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         private bool TryGetConnection(DbConnection owningObject, uint waitForMultipleObjectsTimeout, bool allowCreate, bool onlyOneCheckConnection, DbConnectionOptions userOptions, out DbConnectionInternal connection) {
             DbConnectionInternal obj = null;
             SysTx.Transaction transaction = null;
@@ -1383,8 +1377,6 @@ namespace System.Data.ProviderBase {
             return obj;
         }
 
-        [ResourceExposure(ResourceScope.None)] // SxS: this method does not expose resources
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         private void PoolCreateRequest(object state) {
             // called by pooler to ensure pool requests are currently being satisfied -
             // creation mutex has not been obtained

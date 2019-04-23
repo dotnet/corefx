@@ -31,7 +31,7 @@ namespace System.Data.OleDb {
 
         internal PropertyInfoSet(UnsafeNativeMethods.IDBProperties idbProperties, PropertyIDSet propIDSet) : base(IntPtr.Zero, true) {
             OleDbHResult hr;
-            int propIDSetCount = propIDSet.Count; // avoid need for ReliabilityContract on get_Count
+            int propIDSetCount = propIDSet.Count;
             RuntimeHelpers.PrepareConstrainedRegions();
             try {} finally {
                 hr = idbProperties.GetPropertyInfo(propIDSetCount, propIDSet, out this.setCount, out base.handle, out this.descBuffer);

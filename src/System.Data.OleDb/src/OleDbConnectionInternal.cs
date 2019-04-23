@@ -8,11 +8,9 @@ using System.Data.ProviderBase;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
-using System.Security.Permissions;
 using System.Threading;
 
 namespace System.Data.OleDb {
-    //    using SysES = System.EnterpriseServices;
     using SysTx = Transactions;
 
     sealed internal class OleDbConnectionInternal : DbConnectionInternal, IDisposable {
@@ -592,7 +590,6 @@ namespace System.Data.OleDb {
             return false;
         }
 
-        [SecurityPermission(SecurityAction.Assert, Flags=SecurityPermissionFlag.UnmanagedCode)]
         static private object CreateInstanceDataLinks() {
             Type datalink = Type.GetTypeFromCLSID(ODB.CLSID_DataLinks, true);
             return Activator.CreateInstance(datalink, System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Instance, null, null, CultureInfo.InvariantCulture, null);

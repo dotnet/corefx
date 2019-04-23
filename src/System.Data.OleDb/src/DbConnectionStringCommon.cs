@@ -46,7 +46,6 @@ namespace System.Data.Common {
     }
 */
 
-    [Serializable()]
     internal sealed class ReadOnlyCollection<T> : System.Collections.ICollection, ICollection<T> {
         private T[] _items;
 
@@ -108,7 +107,6 @@ namespace System.Data.Common {
             get { return _items.Length; }
         }
 
-        [Serializable()]
         internal struct Enumerator<K> : IEnumerator<K>, System.Collections.IEnumerator { // based on List<T>.Enumerator
             private K[] _items;
             private int _index;

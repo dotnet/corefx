@@ -49,8 +49,6 @@ namespace System.Data.OleDb {
 
         [
         RefreshProperties(RefreshProperties.All),
-        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Data),
-        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_Direction),
         ]
         override public ParameterDirection Direction { // V1.2.3300, XXXParameter V1.0.3300
             get {
@@ -87,8 +85,6 @@ namespace System.Data.OleDb {
         [
         Browsable(false),
         EditorBrowsableAttribute(EditorBrowsableState.Advanced),
-        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Data),
-        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_Offset),
         ]
         public int Offset {
             get {
@@ -109,10 +105,6 @@ namespace System.Data.OleDb {
         }
 #endif
 
-        // [
-        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Data),
-        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_Size),
-        // ]
         override public int Size { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 int size = _size;
@@ -143,10 +135,6 @@ namespace System.Data.OleDb {
             return (0 != _size);
         }
 
-        // [
-        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Update),
-        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_SourceColumn),
-        // ]
         override public string SourceColumn { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 string sourceColumn = _sourceColumn;
@@ -166,10 +154,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        // [
-        // RESNAMESPACE.ResCategoryAttribute(SR.DataCategory_Update),
-        // RESNAMESPACE.ResDescriptionAttribute(SR.DbParameter_SourceVersion),
-        // ]
         override public DataRowVersion SourceVersion { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 DataRowVersion sourceVersion = _sourceVersion;

@@ -230,7 +230,6 @@ namespace System.Data.ProviderBase
 
             if (PoolGroupStateIdle == _state) {
                 _state = PoolGroupStateActive;
-                // Bid.Trace("<prov.DbConnectionPoolGroup.ClearInternal|RES|INFO|CPOOL> %d#, Active\n", ObjectID);
             }
             return (PoolGroupStateActive == _state);
         }
@@ -282,11 +281,9 @@ namespace System.Data.ProviderBase
                 if (0 == _poolCollection.Count) {
                     if (PoolGroupStateActive == _state) {
                         _state = PoolGroupStateIdle;
-                        // Bid.Trace("<prov.DbConnectionPoolGroup.ClearInternal|RES|INFO|CPOOL> %d#, Idle\n", ObjectID);
                     }
                     else if (PoolGroupStateIdle == _state) {
                         _state = PoolGroupStateDisabled;
-                        // Bid.Trace("<prov.DbConnectionPoolGroup.ReadyToRemove|RES|INFO|CPOOL> %d#, Disabled\n", ObjectID);
                     }
                 }
                 return (PoolGroupStateDisabled == _state);

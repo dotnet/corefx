@@ -10,9 +10,7 @@ namespace System.Data.ProviderBase {
     using System.Diagnostics;
     using System.Globalization;
     using System.Reflection;
-    using System.Runtime.ConstrainedExecution;
     using System.Security;
-    using System.Security.Permissions;
     using System.Security.Principal;
     using System.Runtime.Versioning;
 
@@ -122,7 +120,6 @@ namespace System.Data.ProviderBase {
                 }
             }
 
-            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
             internal void Dispose () { // TODO: race condition, Dispose at the same time as Increment/Decrement
                 PerformanceCounter instance = _instance;
                 _instance = null;
@@ -219,9 +216,7 @@ namespace System.Data.ProviderBase {
         }
 
         // SxS: this method uses GetCurrentProcessId to construct the instance name.
-        // TODO: VSDD 534795 - remove the Resource* attributes if you do not use GetCurrentProcessId after the fix
-        [ResourceExposure(ResourceScope.None)]
-        [ResourceConsumption(ResourceScope.Process, ResourceScope.Process)]
+        // TODO: remove the Resource* attributes if you do not use GetCurrentProcessId after the fix
         private string GetInstanceName() {
             string result = null;
 
@@ -266,7 +261,6 @@ namespace System.Data.ProviderBase {
             return result;
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         public void Dispose() {
             // ExceptionEventHandler with IsTerminiating may be called before
             // the Connection Close is called or the variables are initialized
@@ -285,26 +279,22 @@ namespace System.Data.ProviderBase {
             SafeDispose(NumberOfReclaimedConnections);
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         private void SafeDispose(Counter counter) {
             if (null != counter) {
                 counter.Dispose();
             }
         }
 
-        [PrePrepareMethod]
         void ExceptionEventHandler (object sender, UnhandledExceptionEventArgs e) {
             if ((null != e) && e.IsTerminating) {
                 Dispose();
             }
         }
 
-        [PrePrepareMethod]
         void ExitEventHandler (object sender, EventArgs e) {
             Dispose();
         }
 
-        [PrePrepareMethod]
         void UnloadEventHandler (object sender, EventArgs e) {
             Dispose();
         }

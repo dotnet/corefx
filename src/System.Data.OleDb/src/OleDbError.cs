@@ -6,7 +6,6 @@ using System.Data.Common;
 using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb {
-    [Serializable]
     public sealed class OleDbError {
         readonly private string message;
         readonly private string source;

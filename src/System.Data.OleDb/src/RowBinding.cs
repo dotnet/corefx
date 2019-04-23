@@ -5,7 +5,6 @@
 using System.Data.Common;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb {
@@ -332,8 +331,6 @@ namespace System.Data.OleDb {
 #endif
         }
 
-        // requires ReliabilityContract to be called by ReleaseHandle
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         private unsafe void ResetValues(IntPtr buffer, object iaccessor) {
             Debug.Assert(ADP.PtrZero != buffer && _needToReset && _haveData, "shouldn't be calling ResetValues");
             for (int i = 0; i < _bindingCount; ++i) {
@@ -406,7 +403,6 @@ namespace System.Data.OleDb {
             _haveData = false;
         }
 
-        // this correctly does not have a ReliabilityContract, will not be called via ReleaseHandle
         static private void FreeChapter(IntPtr buffer, int valueOffset, object iaccessor) {
             Debug.Assert (0 == valueOffset % 8, "unexpected unaligned ptr offset");
 
@@ -418,7 +414,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         static private void FreeBstr(IntPtr buffer, int valueOffset) {
             Debug.Assert (0 == valueOffset % 8, "unexpected unaligned ptr offset");
 
@@ -442,7 +437,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         static private void FreeCoTaskMem(IntPtr buffer, int valueOffset) {
             Debug.Assert (0 == valueOffset % 8, "unexpected unaligned ptr offset");
 
@@ -464,7 +458,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         static private void FreeVariant(IntPtr buffer, int valueOffset) {
             // two contigous VARIANT structures that need to be freed
             // the second should only be freed if different from the first
@@ -491,7 +484,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         static unsafe private void FreePropVariant(IntPtr buffer, int valueOffset) {
             // two contigous PROPVARIANT structures that need to be freed
             // the second should only be freed if different from the first
@@ -517,7 +509,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         internal IntPtr InterlockedExchangePointer(int offset) {
             ValidateCheck(offset, IntPtr.Size);
             Debug.Assert(0 == offset%ADP.PtrSize, "invalid alignment");

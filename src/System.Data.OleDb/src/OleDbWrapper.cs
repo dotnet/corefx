@@ -234,7 +234,7 @@ namespace System.Data.OleDb {
                     IntPtr method = Marshal.ReadIntPtr(vtable, 0);
                     UnsafeNativeMethods.IUnknownQueryInterface QueryInterface = (UnsafeNativeMethods.IUnknownQueryInterface)Marshal.GetDelegateForFunctionPointer(method, typeof(UnsafeNativeMethods.IUnknownQueryInterface));
 
-                    int hresult = QueryInterface(base.handle, ref ODB.IID_IDBCreateCommand, ref idbCreateCommand);  // TODO: this method should be marked with a reliability contract.
+                    int hresult = QueryInterface(base.handle, ref ODB.IID_IDBCreateCommand, ref idbCreateCommand);
                     if ((0 <= hresult) && (IntPtr.Zero != idbCreateCommand)) {
                         vtable = Marshal.ReadIntPtr(idbCreateCommand, 0);
                         method = Marshal.ReadIntPtr(vtable, 3 * IntPtr.Size);

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -245,7 +244,7 @@ namespace System.Data.Common {
                 [in] HCHAPTER hChapter,
                 [out] DBREFCOUNT * pcRefCount
             );*/
-            [PreserveSig, ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)] System.Data.OleDb.OleDbHResult ReleaseChapter(
+            [PreserveSig] System.Data.OleDb.OleDbHResult ReleaseChapter(
                 [In] IntPtr hChapter,
                 [Out] out int pcRefCount);
         }
@@ -716,7 +715,6 @@ namespace System.Data.Common {
 
             [ Obsolete("not used", true)] void GetOptionsObject(/*deleted parameter signature*/);
 
-            [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
             [PreserveSig] System.Data.OleDb.OleDbHResult StartTransaction(
                 [In] int isoLevel,
                 [In] int isoFlags,

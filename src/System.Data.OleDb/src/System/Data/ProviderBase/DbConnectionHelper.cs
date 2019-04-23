@@ -5,7 +5,6 @@
 using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Diagnostics;
-using System.Runtime.ConstrainedExecution;
 using System.Threading;
 
 namespace System.Data.OleDb {
@@ -134,20 +133,11 @@ namespace System.Data.OleDb {
         }
 
         // Open->ClosedPreviouslyOpened, and doom the internal connection too...
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         internal void Abort(Exception e) {
             DbConnectionInternal innerConnection = _innerConnection;  // Should not cause memory allocation...
             if (ConnectionState.Open == innerConnection.State) {
                 Interlocked.CompareExchange(ref _innerConnection, DbConnectionClosedPreviouslyOpened.SingletonInstance, innerConnection);
                 innerConnection.DoomThisConnection();
-            }
-
-            // NOTE: we put the tracing last, because the ToString() calls (and
-            // the Bid.Trace, for that matter) have no reliability contract and
-            // will end the reliable try...
-            if (e is OutOfMemoryException) {
-            }
-            else {
             }
         }
 

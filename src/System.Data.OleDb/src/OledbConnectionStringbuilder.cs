@@ -134,7 +134,6 @@ namespace System.Data.OleDb {
         [DisplayName(DbConnectionStringKeywords.FileName)]
         [RefreshProperties(RefreshProperties.All)]
         // TODO: hand off to VS, they derive from FileNameEditor and set the OpenDialogFilter to *.UDL
-        //[Editor("System.Windows.Forms.Design.FileNameEditor, " + AssemblyRef.SystemDesign, "System.Drawing.Design.UITypeEditor, " + AssemblyRef.SystemDrawing)]
         public string FileName {
             get { return _fileName; }
             set {
@@ -143,19 +142,6 @@ namespace System.Data.OleDb {
             }
         }
 
-/*
-        [DisplayName(DbConnectionStringKeywords.NamedConnection)]
-        //[ResCategoryAttribute(SR.DataCategory_NamedConnectionString)]
-        [RefreshPropertiesAttribute(RefreshProperties.All)]
-        [TypeConverter(typeof(NamedConnectionStringConverter))]
-        public string NamedConnection {
-            get { return _namedConnection; }
-            set {
-                SetValue(DbConnectionStringKeywords.NamedConnection, value);
-                _namedConnection = value;
-            }
-        }
-*/
         [DisplayName(DbConnectionStringKeywords.OleDbServices)]
         [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbServicesConverter))]

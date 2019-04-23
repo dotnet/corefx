@@ -4,7 +4,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Runtime.ConstrainedExecution;
 using System.Threading;
 
 namespace System.Data.ProviderBase
@@ -95,7 +94,6 @@ namespace System.Data.ProviderBase
         /// <summary>
         /// Release the lock which was obtained through LockToUpdate.
         /// </summary>
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         internal void ReleaseLockToUpdate() {
             int oldValue = Interlocked.CompareExchange(ref _isUpdateInProgress, STATUS_UNLOCKED, STATUS_LOCKED);
             Debug.Assert(oldValue == STATUS_LOCKED);

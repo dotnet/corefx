@@ -6,7 +6,6 @@ using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -705,8 +704,6 @@ namespace System.Data.OleDb {
 
     internal class NativeOledbWrapper
     {
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [ResourceExposure(ResourceScope.None)]
         internal unsafe static OleDbHResult IChapteredRowsetReleaseChapter(System.IntPtr ptr, System.IntPtr chapter)
         {
             OleDbHResult hr = OleDbHResult.E_UNEXPECTED;
@@ -728,8 +725,6 @@ namespace System.Data.OleDb {
             return hr;
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [ResourceExposure(ResourceScope.None)]
         internal unsafe static OleDbHResult ITransactionAbort(System.IntPtr ptr)
         {
             OleDbHResult hr = OleDbHResult.E_UNEXPECTED;
@@ -750,8 +745,6 @@ namespace System.Data.OleDb {
             return hr;
         }
 
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
-        [ResourceExposure(ResourceScope.None)]
         internal unsafe static OleDbHResult ITransactionCommit(System.IntPtr ptr)
         {
             OleDbHResult hr = OleDbHResult.E_UNEXPECTED;
@@ -772,7 +765,6 @@ namespace System.Data.OleDb {
             return hr;
         }
 
-        [ResourceExposure(ResourceScope.None)]
         internal static bool MemoryCompare(System.IntPtr buf1, System.IntPtr buf2, System.Int32 count)
         {
 
@@ -790,7 +782,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        [ResourceExposure(ResourceScope.None)]
         internal static void MemoryCopy(System.IntPtr dst, System.IntPtr src, System.Int32 count)
         {
             Debug.Assert (dst != src, "dst and src are the same");

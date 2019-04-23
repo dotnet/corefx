@@ -1530,14 +1530,6 @@ namespace System.Data.OleDb {
                 }
             }
 
-            //if (AdapterSwitches.DataError.TraceWarning) {
-            //    DBBindings binding = _dbBindings[i];
-            //    for (int k = 0; k < binding.Count; ++k) {
-            //        binding.CurrentIndex = k;
-            //        Debug.WriteLine("Status[" + k.ToString(CultureInfo.InvariantCulture) + "] = " + binding.StatusValue.ToString("G", CultureInfo.InvariantCulture));
-            //    }
-            //}
-
             _nextAccessorForRetrieval++;
             if (hr < 0) {
                 ProcessResults(hr);

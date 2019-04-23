@@ -4,8 +4,6 @@
 
 using System.Data.Common;
 using System.Diagnostics;
-using System.Runtime.ConstrainedExecution;
-using System.Security.Permissions;
 using System.Threading;
 using System.Threading.Tasks;
 using SysTx = System.Transactions;
@@ -503,7 +501,6 @@ namespace System.Data.ProviderBase
         }
 
         /// <devdoc>Ensure that this connection cannot be put back into the pool.</devdoc>
-        [ReliabilityContract(Consistency.WillNotCorruptState, Cer.Success)]
         protected internal void DoomThisConnection()
         {
             _connectionIsDoomed = true;
@@ -766,9 +763,6 @@ namespace System.Data.ProviderBase
             CleanupConnectionOnTransactionCompletion(transaction);
         }
 
-
-        // TODO: Review whether we need the unmanaged code permission when we have the new object model available.
-        [SecurityPermission(SecurityAction.Assert, Flags = SecurityPermissionFlag.UnmanagedCode)]
         private void TransactionOutcomeEnlist(SysTx.Transaction transaction)
         {
             transaction.TransactionCompleted += new SysTx.TransactionCompletedEventHandler(TransactionCompletedEvent);

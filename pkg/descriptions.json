@@ -542,7 +542,7 @@
   },
   {
     "Name": "System.Data.OleDb",
-    "Description": "Provides a collection of classes for OLE DB.",
+    "Description": "Provides a collection of classes for OLEDB.",
     "CommonTypes": [
         "System.Data.OleDb.OleDbCommand",
         "System.Data.OleDb.OleDbCommandBuilder",

@@ -82,8 +82,6 @@ namespace System.Data.OleDb {
 
         // SxS: if user specifies a value for "File Name=" (UDL) in connection string, OleDbConnectionString will load the connection string
         // from the UDL file. The UDL file is opened as FileMode.Open, FileAccess.Read, FileShare.Read, allowing concurrent access to it.
-        [ResourceExposure(ResourceScope.None)]
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         internal OleDbConnectionString(string connectionString, bool validate) : base(connectionString) {
             string prompt = this[KEY.Prompt];
             PossiblePrompt = ((!ADP.IsEmpty(prompt) && (0 != String.Compare(prompt, VALUES.NoPrompt, StringComparison.OrdinalIgnoreCase)))
@@ -193,8 +191,6 @@ namespace System.Data.OleDb {
 
         static private int UdlPoolSize {
             // SxS: UdpPoolSize reads registry value to get the pool size
-            [ResourceExposure(ResourceScope.None)]
-            [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
             get {
                 int poolsize = UDL._PoolSize;
                 if (!UDL._PoolSizeInit) {
@@ -210,8 +206,6 @@ namespace System.Data.OleDb {
             }
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static private string LoadStringFromStorage(string udlfilename) {
             string udlConnectionString = null;
             Dictionary<string,string> udlcache = UDL._Pool;
@@ -249,8 +243,6 @@ namespace System.Data.OleDb {
             return udlConnectionString;
         }
 
-        [ResourceExposure(ResourceScope.Machine)]
-        [ResourceConsumption(ResourceScope.Machine)]
         static private string LoadStringFromFileStorage(string udlfilename) {
             // Microsoft Data Link File Format
             // The first two lines of a .udl file must have exactly the following contents in order to work properly:
@@ -297,8 +289,6 @@ namespace System.Data.OleDb {
             return connectionString.Trim();
         }
 
-        [ResourceExposure(ResourceScope.None)] // reads OleDbServices value for the provider
-        [ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)]
         private string ValidateConnectionString(string connectionString) {
             if (ConvertValueToBoolean(KEY.Asynchronous_Processing, false)) {
                 throw ODB.AsynchronousNotSupported();
