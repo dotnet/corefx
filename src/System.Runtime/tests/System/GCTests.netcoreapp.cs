@@ -31,51 +31,37 @@ namespace System.Tests
         {
             RemoteExecutor.Invoke(() =>
             {
+                // Allows to update the value returned by GC.GetGCMemoryInfo
+                GC.Collect();
+
+                GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
+
+                Assert.True(memoryInfo1.HighMemoryLoadThresholdBytes > 0);
+                Assert.True(memoryInfo1.MemoryLoadBytes > 0);
+                Assert.True(memoryInfo1.TotalAvailableMemoryBytes > 0);
+                Assert.True(memoryInfo1.HeapSizeBytes > 0);
+                Assert.True(memoryInfo1.FragmentedBytes >= 0);
+
                 GCHandle[] gch = new GCHandle[64 * 1024];
-
-                try
+                for (int i = 0; i < gch.Length * 2; ++i)
                 {
-                    // Allows to update the value returned by GC.GetGCMemoryInfo
-                    GC.Collect();
-
-                    GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
-
-                    Assert.True(memoryInfo1.HighMemoryLoadThresholdBytes > 0);
-                    Assert.True(memoryInfo1.MemoryLoadBytes > 0);
-                    Assert.True(memoryInfo1.TotalAvailableMemoryBytes > 0);
-                    Assert.True(memoryInfo1.HeapSizeBytes > 0);
-                    Assert.True(memoryInfo1.FragmentedBytes >= 0);
-
-                    for (int i = 0; i < gch.Length * 2; ++i)
+                    byte[] arr = new byte[64];
+                    if (i % 2 == 0)
                     {
-                        byte[] arr = new byte[64];
-                        if (i % 2 == 0)
-                        {
-                            gch[i / 2] = GCHandle.Alloc(arr, GCHandleType.Pinned);
-                        }
-                    }
-
-                    // Allows to update the value returned by GC.GetGCMemoryInfo
-                    GC.Collect();
-
-                    GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
-
-                    Assert.True(memoryInfo2.HighMemoryLoadThresholdBytes == memoryInfo1.HighMemoryLoadThresholdBytes);
-                    Assert.True(memoryInfo2.MemoryLoadBytes >= memoryInfo1.MemoryLoadBytes);
-                    Assert.True(memoryInfo2.TotalAvailableMemoryBytes == memoryInfo1.TotalAvailableMemoryBytes);
-                    Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
-                    Assert.True(memoryInfo2.FragmentedBytes > memoryInfo1.FragmentedBytes);
-                }
-                finally
-                {
-                    for (int i = 0; i < gch.Length; ++i)
-                    {
-                        if (gch[i].IsAllocated)
-                        {
-                            gch[i].Free();
-                        }
+                        gch[i / 2] = GCHandle.Alloc(arr, GCHandleType.Pinned);
                     }
                 }
+
+                // Allows to update the value returned by GC.GetGCMemoryInfo
+                GC.Collect();
+
+                GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
+
+                Assert.True(memoryInfo2.HighMemoryLoadThresholdBytes == memoryInfo1.HighMemoryLoadThresholdBytes);
+                Assert.True(memoryInfo2.MemoryLoadBytes >= memoryInfo1.MemoryLoadBytes);
+                Assert.True(memoryInfo2.TotalAvailableMemoryBytes == memoryInfo1.TotalAvailableMemoryBytes);
+                Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
+                Assert.True(memoryInfo2.FragmentedBytes > memoryInfo1.FragmentedBytes);
             }).Dispose();
         }
     }
