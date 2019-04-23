@@ -119,10 +119,11 @@ namespace System.Text.Json.Serialization
             }
             else
             {
-                // temporary behavior until the reader can accept escaped string.
+#if true
+                // temporary behavior until the writer can accept escaped string.
                 byte[] utf8Key = Encoding.UTF8.GetBytes(key);
                 converter.Write(utf8Key, value, writer);
-#if false
+#else
                 byte[] pooledKey = null;
                 byte[] utf8Key = Encoding.UTF8.GetBytes(key);
                 int length = JsonWriterHelper.GetMaxEscapedLength(utf8Key.Length, 0);

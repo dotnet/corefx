@@ -42,14 +42,6 @@ namespace System.Text.Json.Serialization
                         Debug.Assert(state.Current.ReturnValue != default);
                         Debug.Assert(state.Current.JsonClassInfo != default);
 
-                        ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-                        if (reader._stringHasEscaping)
-                        {
-                            int idx = propertyName.IndexOf(JsonConstants.BackSlash);
-                            Debug.Assert(idx != -1);
-                            propertyName = GetUnescapedString(propertyName, idx);
-                        }
-
                         if (state.Current.IsDictionary())
                         {
                             string keyName = reader.GetString();
@@ -63,6 +55,14 @@ namespace System.Text.Json.Serialization
                         }
                         else
                         {
+                            ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+                            if (reader._stringHasEscaping)
+                            {
+                                int idx = propertyName.IndexOf(JsonConstants.BackSlash);
+                                Debug.Assert(idx != -1);
+                                propertyName = GetUnescapedString(propertyName, idx);
+                            }
+
                             state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(options, propertyName, ref state.Current);
                             if (state.Current.JsonPropertyInfo == null)
                             {

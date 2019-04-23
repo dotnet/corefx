@@ -136,8 +136,11 @@ namespace System.Text.Json.Serialization
                 }
 
                 // Cache the escaped name.
-                _escapedName = _name; // temporary behavior until the reader can accept escaped string.
-#if false
+#if true
+                // temporary behavior until the writer can accept escaped string.
+                _escapedName = _name;
+#else
+                
                 int valueIdx = JsonWriterHelper.NeedsEscaping(_name);
                 if (valueIdx == -1)
                 {

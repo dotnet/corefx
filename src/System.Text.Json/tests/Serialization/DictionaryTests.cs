@@ -69,8 +69,8 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             {
-                // Max property length in C# is 511; we want to go over StackallocThreshold=256 to force a pooled allocation. This property is 400 chars and 401 bytes.
-                const int charsInProperty = 350;
+                // We want to go over StackallocThreshold=256 to force a pooled allocation, so this property is 200 chars and 400 bytes.
+                const int charsInProperty = 200;
 
                 string longPropertyName = new string('ѧ', charsInProperty);
 
@@ -79,7 +79,10 @@ namespace System.Text.Json.Serialization.Tests
 
                 // Verify the name is escaped after serialize.
                 string json = JsonSerializer.ToString(obj);
+
+                // Duplicate the unicode character 'charsInProperty' times.
                 string longPropertyNameEscaped = new StringBuilder().Insert(0, @"\u0467", charsInProperty).ToString();
+
                 string expectedJson = $"{{\"{longPropertyNameEscaped}\":1}}";
                 Assert.Equal(expectedJson, json);
 
