@@ -4,6 +4,7 @@
 
 using System;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
@@ -40,55 +41,72 @@ namespace System.Tests
         [Fact]
         public static void GetGCMemoryInfoFragmentation()
         {
-            GCHandle[] gch = null;
-
-            try
+            RemoteExecutor.Invoke(() =>
             {
-                gch = new GCHandle[100];
+                GCHandle[] gch = new GCHandle[100];
 
-                for (int i = 0; i < gch.Length * 2; ++i)
+                try
                 {
-                    byte[] arr = new byte[128];
-                    if (i % 2 == 0)
+                    // Allows to update the value returned by GC.GetGCMemoryInfo
+                    GC.Collect();
+
+                    GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
+
+                    for (int i = 0; i < gch.Length * 2; ++i)
                     {
-                        gch[i / 2] = GCHandle.Alloc(arr, GCHandleType.Pinned);
+                        byte[] arr = new byte[128];
+                        if (i % 2 == 0)
+                        {
+                            gch[i / 2] = GCHandle.Alloc(arr, GCHandleType.Pinned);
+                        }
+                    }
+
+                    // Allows to update the value returned by GC.GetGCMemoryInfo
+                    GC.Collect();
+
+                    GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
+
+                    Assert.True(memoryInfo1.FragmentedBytes < memoryInfo2.FragmentedBytes);
+                    Assert.InRange(memoryInfo2.FragmentedBytes, 128 * (gch.Length - 1), long.MaxValue);
+                }
+                finally
+                {
+                    for (int i = 0; i < gch.Length; ++i)
+                    {
+                        if (gch[i].IsAllocated)
+                        {
+                            gch[i].Free();
+                        }
                     }
                 }
-
-                GC.Collect();
-
-                GCMemoryInfo memoryInfo = GC.GetGCMemoryInfo();
-
-                Assert.True(memoryInfo.FragmentedBytes >= 128 * (gch.Length - 1), $"FragmentedBytes = {memoryInfo.FragmentedBytes}");
-            }
-            finally
-            {
-                for (int i = 0; i < gch.Length; ++i)
-                {
-                    if (gch[i].IsAllocated)
-                    {
-                        gch[i].Free();
-                    }
-                }
-            }
+            }).Dispose();
         }
 
         [Fact]
         public static void GetGCMemoryInfoHeapSize()
         {
-            GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
-
-            byte[][] arr = new byte[64 * 1024][];
-            for (int i = 0; i < arr.Length; ++i)
+            RemoteExecutor.Invoke(() =>
             {
-                arr[i] = new byte[i + 1];
-            }
+                // Allows to update the value returned by GC.GetGCMemoryInfo
+                GC.Collect();
 
-            GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
+                GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
 
-            GC.KeepAlive(arr);
+                byte[][] arr = new byte[64 * 1024][];
+                for (int i = 0; i < arr.Length; ++i)
+                {
+                    arr[i] = new byte[i + 1];
+                }
 
-            Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
+                // Allows to update the value returned by GC.GetGCMemoryInfo
+                GC.Collect();
+
+                GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
+
+                GC.KeepAlive(arr);
+
+                Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
+            }).Dispose();
         }
     }
 }
