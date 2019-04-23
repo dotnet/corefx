@@ -143,11 +143,6 @@ namespace System.Data.Common
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        static internal DataException Data(string message) {
-            DataException e = new DataException(message);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         static internal IndexOutOfRangeException IndexOutOfRange(int value) {
             IndexOutOfRangeException e = new IndexOutOfRangeException(value.ToString(CultureInfo.InvariantCulture));
             TraceExceptionAsReturnValue(e);
@@ -187,28 +182,13 @@ namespace System.Data.Common
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        static internal NotImplementedException NotImplemented(string error) {
-            NotImplementedException e = new NotImplementedException(error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         static internal NotSupportedException NotSupported() {
             NotSupportedException e = new NotSupportedException();
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        static internal NotSupportedException NotSupported(string error) {
-            NotSupportedException e = new NotSupportedException(error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         static internal InvalidCastException InvalidCast() {
             InvalidCastException e = new InvalidCastException();
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        static internal IOException IO(string error, Exception inner) {
-            IOException e = new IOException(error, inner);
             TraceExceptionAsReturnValue(e);
             return e;
         }
@@ -220,17 +200,6 @@ namespace System.Data.Common
         }
         static private InvalidOperationException Provider(string error) {
             return InvalidOperation(error);
-        }
-        static internal ObjectDisposedException ObjectDisposed(object instance) {
-            ObjectDisposedException e = new ObjectDisposedException(instance.GetType().Name);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-
-        static internal ArgumentException InvalidPrefixSuffix() {
-            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_InvalidPrefixSuffix));
-            TraceExceptionAsReturnValue(e);
-            return e;
         }
 
         static internal ArgumentException InvalidMultipartName(string property, string value) {
@@ -247,18 +216,6 @@ namespace System.Data.Common
 
         static internal ArgumentException InvalidMultipartNameToManyParts(string property, string value, int limit) {
             ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_InvalidMultipartNameToManyParts, SR.GetString(property), value, limit));
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-
-        static internal ArgumentException BadParameterName(string parameterName) {
-            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_BadParameterName, parameterName));
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-
-        static internal ArgumentException MultipleReturnValue() {
-            ArgumentException e = new ArgumentException(SR.GetString(SR.ADP_MultipleReturnValue));
             TraceExceptionAsReturnValue(e);
             return e;
         }
@@ -323,38 +280,6 @@ namespace System.Data.Common
         static internal ArgumentOutOfRangeException InvalidEnumerationValue(Type type, int value) {
             return ADP.ArgumentOutOfRange(SR.GetString(SR.ADP_InvalidEnumerationValue, type.Name, value.ToString(System.Globalization.CultureInfo.InvariantCulture)), type.Name);
         }
-
-        static internal ArgumentOutOfRangeException NotSupportedEnumerationValue(Type type, string value, string method) {
-            return ADP.ArgumentOutOfRange(SR.GetString(SR.ADP_NotSupportedEnumerationValue, type.Name, value, method), type.Name);
-        }
-
-        static internal ArgumentOutOfRangeException InvalidAcceptRejectRule(AcceptRejectRule value) {
-#if DEBUG
-            switch(value) {
-            case AcceptRejectRule.None:
-            case AcceptRejectRule.Cascade:
-                Debug.Assert(false, "valid AcceptRejectRule " + value.ToString());
-                break;
-            }
-#endif
-            return InvalidEnumerationValue(typeof(AcceptRejectRule), (int) value);
-        }
-
-        static internal ArgumentOutOfRangeException InvalidCommandBehavior(CommandBehavior value) {
-#if DEBUG
-            if ((0 <= (int)value) && ((int)value <= 0x3F)) {
-                Debug.Assert(false, "valid CommandType " + value.ToString());
-            }
-#endif
-            return InvalidEnumerationValue(typeof(CommandBehavior), (int) value);
-        }
-        static internal ArgumentException InvalidArgumentLength(string argumentName, int limit) {
-            return Argument(SR.GetString(SR.ADP_InvalidArgumentLength, argumentName, limit));
-        }
-
-        static internal ArgumentException MustBeReadOnly(string argumentName) {
-            return Argument(SR.GetString(SR.ADP_MustBeReadOnly, argumentName));
-        }
         
         // IDbCommand.CommandType
         static internal ArgumentOutOfRangeException InvalidCommandType(CommandType value) {
@@ -403,20 +328,6 @@ namespace System.Data.Common
             return InvalidEnumerationValue(typeof(IsolationLevel), (int) value);
         }
 
-        // IDataAdapter.FillLoadOption
-        static internal ArgumentOutOfRangeException InvalidLoadOption(LoadOption value) {
-#if DEBUG
-            switch(value) {
-            case LoadOption.OverwriteChanges:
-            case LoadOption.PreserveChanges:
-            case LoadOption.Upsert:
-                Debug.Assert(false, "valid LoadOption " + value.ToString());
-                break;
-            }
-#endif
-            return InvalidEnumerationValue(typeof(LoadOption), (int) value);
-        }
-
         // IDataParameter.Direction
         static internal ArgumentOutOfRangeException InvalidParameterDirection(ParameterDirection value) {
 #if DEBUG
@@ -430,35 +341,6 @@ namespace System.Data.Common
             }
 #endif
             return InvalidEnumerationValue(typeof(ParameterDirection), (int) value);
-        }
-
-        // IDataAdapter.FillSchema
-        static internal ArgumentOutOfRangeException InvalidSchemaType(SchemaType value) {
-#if DEBUG
-            switch(value) {
-            case SchemaType.Source:
-            case SchemaType.Mapped:
-                Debug.Assert(false, "valid SchemaType " + value.ToString());
-                break;
-            }
-#endif
-            return InvalidEnumerationValue(typeof(SchemaType), (int) value);
-        }
-
-        // RowUpdatingEventArgs.StatementType
-        static internal ArgumentOutOfRangeException InvalidStatementType(StatementType value) {
-#if DEBUG
-            switch(value) {
-            case StatementType.Select:
-            case StatementType.Insert:
-            case StatementType.Update:
-            case StatementType.Delete:
-            case StatementType.Batch:
-                 Debug.Assert(false, "valid StatementType " + value.ToString());
-                break;
-            }
-#endif
-            return InvalidEnumerationValue(typeof(StatementType), (int) value);
         }
 
         // IDbCommand.UpdateRowSource
@@ -485,11 +367,6 @@ namespace System.Data.Common
         static internal ArgumentException KeywordNotSupported(string keyword) {
             return Argument(SR.GetString(SR.ADP_KeywordNotSupported, keyword));
         }
-        /*
-        static internal ArgumentException EmptyKeyValue(string keyword) {
-            return Argument(SR.GetString(SR.ADP_EmptyKeyValue, keyword));
-        }
-        */
         static internal ArgumentException UdlFileError(Exception inner) {
             return Argument(SR.GetString(SR.ADP_UdlFileError), inner);
         }
@@ -505,40 +382,9 @@ namespace System.Data.Common
         static internal ArgumentException InvalidValue(string parameterName) {
             return Argument(SR.GetString(SR.ADP_InvalidValue), parameterName);
         }
-        static internal ArgumentException InvalidMinMaxPoolSizeValues() {
-            return ADP.Argument(SR.GetString(SR.ADP_InvalidMinMaxPoolSizeValues));
-        }
         static internal ArgumentException ConvertFailed(Type fromType, Type toType, Exception innerException) {
             return ADP.Argument(SR.GetString(SR.SqlConvert_ConvertFailed, fromType.FullName, toType.FullName), innerException);
         }
-
-        static internal InvalidOperationException InvalidMixedUsageOfSecureAndClearCredential() {
-            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfSecureAndClearCredential));
-        }
-        
-        static internal ArgumentException InvalidMixedArgumentOfSecureAndClearCredential() {
-            return ADP.Argument(SR.GetString(SR.ADP_InvalidMixedUsageOfSecureAndClearCredential));
-        }
-
-        static internal InvalidOperationException InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity() {
-            return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity));
-        }
-
-       static internal ArgumentException InvalidMixedArgumentOfSecureCredentialAndIntegratedSecurity() {
-           return ADP.Argument(SR.GetString(SR.ADP_InvalidMixedUsageOfSecureCredentialAndIntegratedSecurity));
-        }
-
-       static internal InvalidOperationException InvalidMixedUsageOfAccessTokenAndIntegratedSecurity() {
-           return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndIntegratedSecurity));
-       }
-
-       static internal InvalidOperationException InvalidMixedUsageOfAccessTokenAndUserIDPassword() {
-           return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword));
-       }
-
-       static internal Exception InvalidMixedUsageOfCredentialAndAccessToken() {
-           return ADP.InvalidOperation(SR.GetString(SR.ADP_InvalidMixedUsageOfCredentialAndAccessToken));
-       }
 
        //
         // DbConnection
@@ -617,9 +463,6 @@ namespace System.Data.Common
         static internal InvalidCastException CollectionInvalidType(Type collection, Type itemType, object invalidValue) {
             return InvalidCast(SR.GetString(SR.ADP_CollectionInvalidType, collection.Name, itemType.Name, invalidValue.GetType().Name));
         }
-        static internal Exception CollectionUniqueValue(Type itemType, string propertyName, string propertyValue) {
-            return Argument(SR.GetString(SR.ADP_CollectionUniqueValue, itemType.Name, propertyName, propertyValue));
-        }
         static internal ArgumentException ParametersIsNotParent(Type parameterType, ICollection collection) {
             return Argument(SR.GetString(SR.ADP_CollectionIsNotParent, parameterType.Name, collection.GetType().Name));
         }
@@ -635,17 +478,6 @@ namespace System.Data.Common
         }
         static internal InvalidOperationException TransactionRequired(string method) {
             return Provider(SR.GetString(SR.ADP_TransactionRequired, method));
-        }
-
-        //
-        // AdapterMappingException
-        //
-        static private InvalidOperationException DataMapping(string error) {
-            return InvalidOperation(error);
-        }
-        // DbDataAdapter.Update
-        static internal InvalidOperationException MissingTableMappingDestination(string dstTable) {
-            return DataMapping(SR.GetString(SR.ADP_MissingTableMappingDestination, dstTable));
         }
 
         static internal Exception CommandTextRequired(string method) {
@@ -689,15 +521,6 @@ namespace System.Data.Common
         }
         static internal Exception FillRequiresSourceTableName(string parameter) {
             return Argument(SR.GetString(SR.ADP_FillRequiresSourceTableName), parameter);
-        }
-        static internal Exception FillChapterAutoIncrement() {
-            return InvalidOperation(SR.GetString(SR.ADP_FillChapterAutoIncrement));
-        }
-        static internal InvalidOperationException MissingDataReaderFieldType(int index) {
-            return DataAdapter(SR.GetString(SR.ADP_MissingDataReaderFieldType, index));
-        }
-        static internal InvalidOperationException OnlyOneTableForStartRecordOrMaxRecords() {
-            return DataAdapter(SR.GetString(SR.ADP_OnlyOneTableForStartRecordOrMaxRecords));
         }
 
         //
@@ -975,93 +798,39 @@ namespace System.Data.Common
         //
         // : CommandBuilder
         //
-
-        static internal InvalidOperationException InvalidDateTimeDigits(string dataTypeName) {
-            return InvalidOperation(SR.GetString(SR.ADP_InvalidDateTimeDigits, dataTypeName));
-        }
-
         static internal InvalidOperationException QuotePrefixNotSet(string method) {
             return InvalidOperation(SR.GetString(SR.ADP_QuotePrefixNotSet, method));
         }
 
         // global constant strings
-        internal const string Append = "Append";
-        internal const string BeginExecuteNonQuery = "BeginExecuteNonQuery";
-        internal const string BeginExecuteReader = "BeginExecuteReader";
         internal const string BeginTransaction = "BeginTransaction";
-        internal const string BeginExecuteXmlReader = "BeginExecuteXmlReader";
         internal const string ChangeDatabase = "ChangeDatabase";
-        internal const string Cancel = "Cancel";
-        internal const string Clone = "Clone";
-        internal const string ColumnEncryptionSystemProviderNamePrefix = "MSSQL_";
-        internal const string CommitTransaction = "CommitTransaction";
         internal const string CommandTimeout = "CommandTimeout";
         internal const string ConnectionString = "ConnectionString";
-        internal const string DataSetColumn = "DataSetColumn";
-        internal const string DataSetTable = "DataSetTable";
-        internal const string Delete = "Delete";
-        internal const string DeleteCommand = "DeleteCommand";
         internal const string DeriveParameters = "DeriveParameters";
-        internal const string EndExecuteNonQuery = "EndExecuteNonQuery";
-        internal const string EndExecuteReader = "EndExecuteReader";
-        internal const string EndExecuteXmlReader = "EndExecuteXmlReader";
         internal const string ExecuteReader = "ExecuteReader";
-        internal const string ExecuteRow = "ExecuteRow";
         internal const string ExecuteNonQuery = "ExecuteNonQuery";
         internal const string ExecuteScalar = "ExecuteScalar";
-        internal const string ExecuteSqlScalar = "ExecuteSqlScalar";
-        internal const string ExecuteXmlReader = "ExecuteXmlReader";
-        internal const string Fill = "Fill";
-        internal const string FillPage = "FillPage";
-        internal const string FillSchema = "FillSchema";
         internal const string GetBytes = "GetBytes";
         internal const string GetChars = "GetChars";
         internal const string GetOleDbSchemaTable = "GetOleDbSchemaTable";
-        internal const string GetProperties = "GetProperties";
         internal const string GetSchema = "GetSchema";
         internal const string GetSchemaTable = "GetSchemaTable";
-        internal const string GetServerTransactionLevel = "GetServerTransactionLevel";
-        internal const string Insert = "Insert";
-        internal const string Open = "Open";
         internal const string Parameter = "Parameter";
-        internal const string ParameterBuffer = "buffer";
-        internal const string ParameterCount = "count";
-        internal const string ParameterDestinationType = "destinationType";
-        internal const string ParameterIndex = "index";
         internal const string ParameterName = "ParameterName";
-        internal const string ParameterOffset = "offset";
-        internal const string ParameterSetPosition = "set_Position";
-        internal const string ParameterService = "Service";
-        internal const string ParameterTimeout = "Timeout";
-        internal const string ParameterUserData = "UserData";
         internal const string Prepare = "Prepare";
         internal const string QuoteIdentifier = "QuoteIdentifier";
-        internal const string Read = "Read";
-        internal const string ReadAsync = "ReadAsync";
-        internal const string Remove = "Remove";
-        internal const string RollbackTransaction = "RollbackTransaction";
-        internal const string SaveTransaction = "SaveTransaction";
         internal const string SetProperties = "SetProperties";
-        internal const string SourceColumn = "SourceColumn";
-        internal const string SourceVersion = "SourceVersion";
-        internal const string SourceTable = "SourceTable";
         internal const string UnquoteIdentifier = "UnquoteIdentifier";
-        internal const string Update = "Update";
-        internal const string UpdateCommand = "UpdateCommand";
-        internal const string UpdateRows = "UpdateRows";
 
         internal const CompareOptions compareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
         internal const int DecimalMaxPrecision = 29;
         internal const int DecimalMaxPrecision28 = 28;  // there are some cases in Odbc where we need that ...
         internal const int DefaultCommandTimeout = 30;
         internal const int DefaultConnectionTimeout = DbConnectionStringDefaults.ConnectTimeout;
-        internal const float FailoverTimeoutStep = 0.08F;    // fraction of timeout to use for fast failover connections
-        internal const float FailoverTimeoutStepForTnir = 0.125F; // Fraction of timeout to use in case of Transparent Network IP resolution.
-        internal const int MinimumTimeoutForTnirMs = 500; // The first login attempt in  Transparent network IP Resolution 
 
         static internal readonly IntPtr PtrZero = new IntPtr(0); // IntPtr.Zero
         static internal readonly int PtrSize = IntPtr.Size;
-        static internal readonly IntPtr InvalidPtr = new IntPtr(-1); // use for INVALID_HANDLE
         static internal readonly IntPtr RecordsUnaffected = new IntPtr(-1);
 
         internal const int CharSize = System.Text.UnicodeEncoding.CharSize;
@@ -1109,10 +878,6 @@ namespace System.Data.Common
             return false;
         }
 
-        static internal void TimerCurrent(out long ticks) {
-            ticks = DateTime.UtcNow.ToFileTimeUtc();
-        }
-
         static internal long TimerCurrent() {
             return DateTime.UtcNow.ToFileTimeUtc();
         }
@@ -1135,11 +900,6 @@ namespace System.Data.Common
 
         static internal long TimerToMilliseconds(long timerValue) {
             long result = timerValue / TimeSpan.TicksPerMillisecond;
-            return result;
-        }
-
-        static private long TimerToSeconds(long timerValue) {
-            long result = timerValue / TimeSpan.TicksPerSecond;
             return result;
         }
 
