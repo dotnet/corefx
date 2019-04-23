@@ -29,21 +29,9 @@ namespace System.Tests
         [Fact]
         public static void GetGCMemoryInfo()
         {
-            GCMemoryInfo memoryInfo = GC.GetGCMemoryInfo();
-
-            Assert.True(memoryInfo.HighMemoryLoadThresholdBytes > 0);
-            Assert.True(memoryInfo.MemoryLoadBytes > 0);
-            Assert.True(memoryInfo.TotalAvailableMemoryBytes > 0);
-            Assert.True(memoryInfo.HeapSizeBytes > 0);
-            Assert.True(memoryInfo.FragmentedBytes >= 0);
-        }
-
-        [Fact]
-        public static void GetGCMemoryInfoFragmentation()
-        {
             RemoteExecutor.Invoke(() =>
             {
-                GCHandle[] gch = new GCHandle[100];
+                GCHandle[] gch = new GCHandle[64 * 1024];
 
                 try
                 {
@@ -52,9 +40,15 @@ namespace System.Tests
 
                     GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
 
+                    Assert.True(memoryInfo1.HighMemoryLoadThresholdBytes > 0);
+                    Assert.True(memoryInfo1.MemoryLoadBytes > 0);
+                    Assert.True(memoryInfo1.TotalAvailableMemoryBytes > 0);
+                    Assert.True(memoryInfo1.HeapSizeBytes > 0);
+                    Assert.True(memoryInfo1.FragmentedBytes >= 0);
+
                     for (int i = 0; i < gch.Length * 2; ++i)
                     {
-                        byte[] arr = new byte[128];
+                        byte[] arr = new byte[64];
                         if (i % 2 == 0)
                         {
                             gch[i / 2] = GCHandle.Alloc(arr, GCHandleType.Pinned);
@@ -66,8 +60,11 @@ namespace System.Tests
 
                     GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
 
-                    Assert.True(memoryInfo1.FragmentedBytes < memoryInfo2.FragmentedBytes);
-                    Assert.InRange(memoryInfo2.FragmentedBytes, 128 * (gch.Length - 1), long.MaxValue);
+                    Assert.True(memoryInfo2.HighMemoryLoadThresholdBytes == memoryInfo1.HighMemoryLoadThresholdBytes);
+                    Assert.True(memoryInfo2.MemoryLoadBytes >= memoryInfo1.MemoryLoadBytes);
+                    Assert.True(memoryInfo2.TotalAvailableMemoryBytes == memoryInfo1.TotalAvailableMemoryBytes);
+                    Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
+                    Assert.True(memoryInfo2.FragmentedBytes > memoryInfo1.FragmentedBytes);
                 }
                 finally
                 {
@@ -79,33 +76,6 @@ namespace System.Tests
                         }
                     }
                 }
-            }).Dispose();
-        }
-
-        [Fact]
-        public static void GetGCMemoryInfoHeapSize()
-        {
-            RemoteExecutor.Invoke(() =>
-            {
-                // Allows to update the value returned by GC.GetGCMemoryInfo
-                GC.Collect();
-
-                GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
-
-                byte[][] arr = new byte[64 * 1024][];
-                for (int i = 0; i < arr.Length; ++i)
-                {
-                    arr[i] = new byte[i + 1];
-                }
-
-                // Allows to update the value returned by GC.GetGCMemoryInfo
-                GC.Collect();
-
-                GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
-
-                GC.KeepAlive(arr);
-
-                Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
             }).Dispose();
         }
     }
