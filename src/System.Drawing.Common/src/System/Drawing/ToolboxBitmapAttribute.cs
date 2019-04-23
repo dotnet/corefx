@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Drawing.Imaging;
 using System.IO;
 using DpiHelper = System.Windows.Forms.DpiHelper;
 using Gdip = System.Drawing.SafeNativeMethods.Gdip;
@@ -329,6 +330,10 @@ namespace System.Drawing
 
         private static void MakeBackgroundAlphaZero(Bitmap img)
         {
+            // Bitmap derived from Icon is already transparent.
+            if (img.RawFormat.Guid == ImageFormat.Icon.Guid)
+                return;
+
             Color bottomLeft = img.GetPixel(0, img.Height - 1);
             img.MakeTransparent();
 
