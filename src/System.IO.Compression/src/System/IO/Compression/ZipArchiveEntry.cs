@@ -804,6 +804,7 @@ namespace System.IO.Compression
                 CompressionMethod = CompressionMethodValues.Stored;
                 compressedSizeTruncated = 0;
                 uncompressedSizeTruncated = 0;
+                Debug.Assert(_compressedSize == 0);
                 Debug.Assert(_uncompressedSize == 0);
                 Debug.Assert(_crc32 == 0);
             }
@@ -909,6 +910,12 @@ namespace System.IO.Compression
                 }
                 else
                 {
+                    if (_uncompressedSize == 0)
+                    {
+                        // reset size to ensure proper central directory size header
+                        _compressedSize = 0;
+                    }
+
                     WriteLocalFileHeader(isEmptyFile: _uncompressedSize == 0);
 
                     // according to ZIP specs, zero-byte files MUST NOT include file data
@@ -918,11 +925,6 @@ namespace System.IO.Compression
                         {
                             _archive.ArchiveStream.Write(compressedBytes, 0, compressedBytes.Length);
                         }
-                    }
-                    else
-                    {
-                        // reset size to ensure proper central directory size header
-                        _compressedSize = 0;
                     }
                 }
             }
