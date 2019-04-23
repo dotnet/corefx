@@ -44,7 +44,7 @@ namespace System.Data.ProviderBase
         private SysTx.Transaction _enlistedTransactionOriginal;
 
 #if DEBUG
-        private int                      _activateCount;            // debug only counter to verify activate/deactivates are in sync.
+        private int _activateCount;            // debug only counter to verify activate/deactivates are in sync.
 #endif //DEBUG
 
         protected DbConnectionInternal() : this(ConnectionState.Open, true, false)

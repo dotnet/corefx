@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information
 
-namespace System.Data.ProviderBase {
+namespace System.Data.ProviderBase
+{
 
     using System;
     using System.Collections;
@@ -14,8 +15,10 @@ namespace System.Data.ProviderBase {
     using System.Security.Principal;
     using System.Runtime.Versioning;
 
-    internal abstract class DbConnectionPoolCounters {
-        private static class CreationData {
+    internal abstract class DbConnectionPoolCounters
+    {
+        private static class CreationData
+        {
 
             static internal readonly CounterCreationData HardConnectsPerSecond = new CounterCreationData(
                                                                         "HardConnectsPerSecond",
@@ -88,13 +91,18 @@ namespace System.Data.ProviderBase {
                                                                         PerformanceCounterType.NumberOfItems32);
         };
 
-        sealed internal class Counter {
+        sealed internal class Counter
+        {
             private PerformanceCounter _instance;
-            
-            internal Counter (string categoryName, string instanceName, string counterName, PerformanceCounterType counterType) {
-                if (ADP.IsPlatformNT5) {
-                    try {
-                        if (!ADP.IsEmpty(categoryName) && !ADP.IsEmpty(instanceName)) {
+
+            internal Counter(string categoryName, string instanceName, string counterName, PerformanceCounterType counterType)
+            {
+                if (ADP.IsPlatformNT5)
+                {
+                    try
+                    {
+                        if (!ADP.IsEmpty(categoryName) && !ADP.IsEmpty(instanceName))
+                        {
                             PerformanceCounter instance = new PerformanceCounter();
                             instance.CategoryName = categoryName;
                             instance.CounterName = counterName;
@@ -105,7 +113,8 @@ namespace System.Data.ProviderBase {
                             _instance = instance;
                         }
                     }
-                    catch (InvalidOperationException e) {
+                    catch (InvalidOperationException e)
+                    {
                         ADP.TraceExceptionWithoutRethrow(e);
                         // TODO: generate Application EventLog entry about inability to find perf counter
                     }
@@ -113,17 +122,21 @@ namespace System.Data.ProviderBase {
             }
 
 
-            internal void Decrement() {
+            internal void Decrement()
+            {
                 PerformanceCounter instance = _instance;
-                if (null != instance) {
+                if (null != instance)
+                {
                     instance.Decrement();
                 }
             }
 
-            internal void Dispose () { // TODO: race condition, Dispose at the same time as Increment/Decrement
+            internal void Dispose()
+            { // TODO: race condition, Dispose at the same time as Increment/Decrement
                 PerformanceCounter instance = _instance;
                 _instance = null;
-                if (null != instance) {
+                if (null != instance)
+                {
                     instance.RemoveInstance();
                     // should we be calling instance.Close?
                     // if we do will it exacerbate the Dispose vs. Decrement race condition
@@ -131,9 +144,11 @@ namespace System.Data.ProviderBase {
                 }
             }
 
-            internal void Increment() {
+            internal void Increment()
+            {
                 PerformanceCounter instance = _instance;
-                if (null != instance) {
+                if (null != instance)
+                {
                     instance.Increment();
                 }
             }
@@ -155,25 +170,29 @@ namespace System.Data.ProviderBase {
         internal readonly Counter NumberOfFreeConnections;
         internal readonly Counter NumberOfStasisConnections;
         internal readonly Counter NumberOfReclaimedConnections;
-        
-        protected DbConnectionPoolCounters() : this(null, null) {
+
+        protected DbConnectionPoolCounters() : this(null, null)
+        {
         }
 
-        protected DbConnectionPoolCounters(string categoryName, string categoryHelp) {
+        protected DbConnectionPoolCounters(string categoryName, string categoryHelp)
+        {
             AppDomain.CurrentDomain.DomainUnload += new EventHandler(this.UnloadEventHandler);
             AppDomain.CurrentDomain.ProcessExit += new EventHandler(this.ExitEventHandler);
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(this.ExceptionEventHandler);
-            
+
             string instanceName = null;
 
-            if (!ADP.IsEmpty(categoryName)) {
-                if (ADP.IsPlatformNT5) {
+            if (!ADP.IsEmpty(categoryName))
+            {
+                if (ADP.IsPlatformNT5)
+                {
                     instanceName = GetInstanceName();
                 }
             }
-            
+
             // level 0-3: hard connects/disconnects, plus basic pool/pool entry statistics
-            string basicCategoryName = categoryName;            
+            string basicCategoryName = categoryName;
             HardConnectsPerSecond = new Counter(basicCategoryName, instanceName, CreationData.HardConnectsPerSecond.CounterName, CreationData.HardConnectsPerSecond.CounterType);
             HardDisconnectsPerSecond = new Counter(basicCategoryName, instanceName, CreationData.HardDisconnectsPerSecond.CounterName, CreationData.HardDisconnectsPerSecond.CounterType);
             NumberOfNonPooledConnections = new Counter(basicCategoryName, instanceName, CreationData.NumberOfNonPooledConnections.CounterName, CreationData.NumberOfNonPooledConnections.CounterType);
@@ -184,14 +203,16 @@ namespace System.Data.ProviderBase {
             NumberOfInactiveConnectionPools = new Counter(basicCategoryName, instanceName, CreationData.NumberOfInactiveConnectionPools.CounterName, CreationData.NumberOfInactiveConnectionPools.CounterType);
             NumberOfStasisConnections = new Counter(basicCategoryName, instanceName, CreationData.NumberOfStasisConnections.CounterName, CreationData.NumberOfStasisConnections.CounterType);
             NumberOfReclaimedConnections = new Counter(basicCategoryName, instanceName, CreationData.NumberOfReclaimedConnections.CounterName, CreationData.NumberOfReclaimedConnections.CounterType);
-            
+
             // level 4: expensive stuff
             string verboseCategoryName = null;
-            if (!ADP.IsEmpty(categoryName)) {
+            if (!ADP.IsEmpty(categoryName))
+            {
                 // don't load TraceSwitch if no categoryName so that Odbc/OleDb have a chance of not loading TraceSwitch
                 // which are also used by System.Diagnostics.PerformanceCounter.ctor & System.Transactions.get_Current
                 TraceSwitch perfCtrSwitch = new TraceSwitch("ConnectionPoolPerformanceCounterDetail", "level of detail to track with connection pool performance counters");
-                if (TraceLevel.Verbose == perfCtrSwitch.Level) {
+                if (TraceLevel.Verbose == perfCtrSwitch.Level)
+                {
                     verboseCategoryName = categoryName;
                 }
             }
@@ -200,15 +221,18 @@ namespace System.Data.ProviderBase {
             NumberOfActiveConnections = new Counter(verboseCategoryName, instanceName, CreationData.NumberOfActiveConnections.CounterName, CreationData.NumberOfActiveConnections.CounterType);
             NumberOfFreeConnections = new Counter(verboseCategoryName, instanceName, CreationData.NumberOfFreeConnections.CounterName, CreationData.NumberOfFreeConnections.CounterType);
         }
-        private string GetAssemblyName() {
+        private string GetAssemblyName()
+        {
             string result = null;
 
             // First try GetEntryAssembly name, then AppDomain.FriendlyName.
             Assembly assembly = Assembly.GetEntryAssembly();
 
-            if (null != assembly) {
+            if (null != assembly)
+            {
                 AssemblyName name = assembly.GetName();
-                if (name != null) {
+                if (name != null)
+                {
                     result = name.Name;
                 }
             }
@@ -217,14 +241,17 @@ namespace System.Data.ProviderBase {
 
         // SxS: this method uses GetCurrentProcessId to construct the instance name.
         // TODO: remove the Resource* attributes if you do not use GetCurrentProcessId after the fix
-        private string GetInstanceName() {
+        private string GetInstanceName()
+        {
             string result = null;
 
             string instanceName = GetAssemblyName(); // instance perfcounter name
 
-            if (ADP.IsEmpty(instanceName)) {
+            if (ADP.IsEmpty(instanceName))
+            {
                 AppDomain appDomain = AppDomain.CurrentDomain;
-                if (null != appDomain) {
+                if (null != appDomain)
+                {
                     instanceName = appDomain.FriendlyName;
                 }
             }
@@ -238,10 +265,11 @@ namespace System.Data.ProviderBase {
             // prevent problems.
 
             result = String.Format((IFormatProvider)null, "{0}[{1}]", instanceName, pid);
-            result = result.Replace('(','[').Replace(')',']').Replace('#','_').Replace('/','_').Replace('\\','_'); 
+            result = result.Replace('(', '[').Replace(')', ']').Replace('#', '_').Replace('/', '_').Replace('\\', '_');
 
             // counter instance name cannot be greater than 127
-            if (result.Length > CounterInstanceNameMaxLength) {
+            if (result.Length > CounterInstanceNameMaxLength)
+            {
                 // Replacing the middle part with "[...]"
                 // For example: if path is c:\long_path\very_(Ax200)_long__path\perftest.exe and process ID is 1234 than the resulted instance name will be: 
                 // c:\long_path\very_(AxM)[...](AxN)_long__path\perftest.exe[1234]
@@ -254,14 +282,15 @@ namespace System.Data.ProviderBase {
                     insertString,
                     result.Substring(result.Length - lastPartLength, lastPartLength));
 
-                Debug.Assert(result.Length == CounterInstanceNameMaxLength, 
+                Debug.Assert(result.Length == CounterInstanceNameMaxLength,
                     string.Format((IFormatProvider)null, "wrong calculation of the instance name: expected {0}, actual: {1}", CounterInstanceNameMaxLength, result.Length));
             }
 
             return result;
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             // ExceptionEventHandler with IsTerminiating may be called before
             // the Connection Close is called or the variables are initialized
             SafeDispose(HardConnectsPerSecond);
@@ -279,32 +308,40 @@ namespace System.Data.ProviderBase {
             SafeDispose(NumberOfReclaimedConnections);
         }
 
-        private void SafeDispose(Counter counter) {
-            if (null != counter) {
+        private void SafeDispose(Counter counter)
+        {
+            if (null != counter)
+            {
                 counter.Dispose();
             }
         }
 
-        void ExceptionEventHandler (object sender, UnhandledExceptionEventArgs e) {
-            if ((null != e) && e.IsTerminating) {
+        void ExceptionEventHandler(object sender, UnhandledExceptionEventArgs e)
+        {
+            if ((null != e) && e.IsTerminating)
+            {
                 Dispose();
             }
         }
 
-        void ExitEventHandler (object sender, EventArgs e) {
+        void ExitEventHandler(object sender, EventArgs e)
+        {
             Dispose();
         }
 
-        void UnloadEventHandler (object sender, EventArgs e) {
+        void UnloadEventHandler(object sender, EventArgs e)
+        {
             Dispose();
         }
     }
-    
-    sealed internal class DbConnectionPoolCountersNoCounters : DbConnectionPoolCounters {
+
+    sealed internal class DbConnectionPoolCountersNoCounters : DbConnectionPoolCounters
+    {
 
         public static readonly DbConnectionPoolCountersNoCounters SingletonInstance = new DbConnectionPoolCountersNoCounters();
 
-        private DbConnectionPoolCountersNoCounters() : base () {
+        private DbConnectionPoolCountersNoCounters() : base()
+        {
         }
     }
 }

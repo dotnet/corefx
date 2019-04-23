@@ -58,7 +58,8 @@ namespace System.Data
 #endif
         void Trace<T0>(string format, T0 arg0)
         {
-            if (!Log.IsEnabled()) return;
+            if (!Log.IsEnabled())
+                return;
             Trace(string.Format(format, arg0));
         }
 
@@ -70,7 +71,8 @@ namespace System.Data
 #endif
         void Trace<T0, T1>(string format, T0 arg0, T1 arg1)
         {
-            if (!Log.IsEnabled()) return;
+            if (!Log.IsEnabled())
+                return;
             Trace(string.Format(format, arg0, arg1));
         }
 
@@ -82,7 +84,8 @@ namespace System.Data
 #endif
         void Trace<T0, T1, T2>(string format, T0 arg0, T1 arg1, T2 arg2)
         {
-            if (!Log.IsEnabled()) return;
+            if (!Log.IsEnabled())
+                return;
             Trace(string.Format(format, arg0, arg1, arg2));
         }
 
@@ -94,7 +97,8 @@ namespace System.Data
 #endif
         void Trace<T0, T1, T2, T3>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3)
         {
-            if (!Log.IsEnabled()) return;
+            if (!Log.IsEnabled())
+                return;
             Trace(string.Format(format, arg0, arg1, arg2, arg3));
         }
 
@@ -106,7 +110,8 @@ namespace System.Data
 #endif
         void Trace<T0, T1, T2, T3, T4>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4)
         {
-            if (!Log.IsEnabled()) return;
+            if (!Log.IsEnabled())
+                return;
             Trace(string.Format(format, arg0, arg1, arg2, arg3, arg4));
         }
 
@@ -118,7 +123,8 @@ namespace System.Data
 #endif
         void Trace<T0, T1, T2, T3, T4, T5, T6>(string format, T0 arg0, T1 arg1, T2 arg2, T3 arg3, T4 arg4, T5 arg5, T6 arg6)
         {
-            if (!Log.IsEnabled()) return;
+            if (!Log.IsEnabled())
+                return;
             Trace(string.Format(format, arg0, arg1, arg2, arg3, arg4, arg5, arg6));
         }
 

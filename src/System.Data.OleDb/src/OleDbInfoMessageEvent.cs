@@ -4,45 +4,58 @@
 
 using System.Diagnostics;
 
-namespace System.Data.OleDb {
-    public sealed class OleDbInfoMessageEventArgs : System.EventArgs {
+namespace System.Data.OleDb
+{
+    public sealed class OleDbInfoMessageEventArgs : System.EventArgs
+    {
         readonly private OleDbException exception;
 
-        internal OleDbInfoMessageEventArgs(OleDbException exception) {
-            Debug.Assert(null != exception, "OleDbInfoMessageEventArgs without OleDbException"); 
+        internal OleDbInfoMessageEventArgs(OleDbException exception)
+        {
+            Debug.Assert(null != exception, "OleDbInfoMessageEventArgs without OleDbException");
             this.exception = exception;
         }
 
-        public int ErrorCode {
-            get {
+        public int ErrorCode
+        {
+            get
+            {
                 return this.exception.ErrorCode;
             }
         }
 
-        public OleDbErrorCollection Errors {
-            get {
+        public OleDbErrorCollection Errors
+        {
+            get
+            {
                 return this.exception.Errors;
             }
         }
 
-        internal bool ShouldSerializeErrors() {
+        internal bool ShouldSerializeErrors()
+        {
             return this.exception.ShouldSerializeErrors();
         }
 
 
-        public string Message {
-            get {
+        public string Message
+        {
+            get
+            {
                 return this.exception.Message;
             }
         }
 
-        public string Source {
-            get {
+        public string Source
+        {
+            get
+            {
                 return this.exception.Source;
             }
         }
 
-        override public string ToString() {
+        override public string ToString()
+        {
             return Message;
         }
     }

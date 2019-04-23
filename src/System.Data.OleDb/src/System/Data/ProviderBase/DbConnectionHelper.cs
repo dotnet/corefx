@@ -7,31 +7,35 @@ using System.Data.ProviderBase;
 using System.Diagnostics;
 using System.Threading;
 
-namespace System.Data.OleDb {
+namespace System.Data.OleDb
+{
     using SysTx = Transactions;
 
-    public sealed partial class OleDbConnection : DbConnection {
-        private static readonly DbConnectionFactory     _connectionFactory = OleDbConnectionFactory.SingletonInstance;
+    public sealed partial class OleDbConnection : DbConnection
+    {
+        private static readonly DbConnectionFactory _connectionFactory = OleDbConnectionFactory.SingletonInstance;
 
-        private DbConnectionOptions     _userConnectionOptions;
-        private DbConnectionPoolGroup   _poolGroup;
-        private DbConnectionInternal    _innerConnection;
-        private int                     _closeCount;          // used to distinguish between different uses of this object, so we don't have to maintain a list of it's children
+        private DbConnectionOptions _userConnectionOptions;
+        private DbConnectionPoolGroup _poolGroup;
+        private DbConnectionInternal _innerConnection;
+        private int _closeCount;          // used to distinguish between different uses of this object, so we don't have to maintain a list of it's children
 
         private static int _objectTypeCount; // Bid counter
         internal readonly int ObjectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
 
-        public OleDbConnection() : base() {
+        public OleDbConnection() : base()
+        {
             GC.SuppressFinalize(this);
             _innerConnection = DbConnectionClosedNeverOpened.SingletonInstance;
         }
 
         // Copy Constructor
-        private void CopyFrom(OleDbConnection connection) { // V1.2.3300
+        private void CopyFrom(OleDbConnection connection)
+        { // V1.2.3300
             ADP.CheckArgumentNull(connection, "connection");
             _userConnectionOptions = connection.UserConnectionOptions;
             _poolGroup = connection.PoolGroup;
-            
+
             //  Match the original connection's behavior for whether the connection was never opened,
             //  but ensure Clone is in the closed state.
             if (DbConnectionClosedNeverOpened.SingletonInstance == connection._innerConnection)
@@ -49,53 +53,64 @@ namespace System.Data.OleDb {
         ///  would be affected by a close, we simply increment the _closeCount
         ///  and have each of our children check to see if they're "orphaned"
         ///  </devdoc>
-        internal int CloseCount {
-            get {
+        internal int CloseCount
+        {
+            get
+            {
                 return _closeCount;
             }
         }
 
-        internal DbConnectionFactory ConnectionFactory {
-            get {
+        internal DbConnectionFactory ConnectionFactory
+        {
+            get
+            {
                 return _connectionFactory;
             }
         }
 
-        internal DbConnectionOptions ConnectionOptions {
-            get {
+        internal DbConnectionOptions ConnectionOptions
+        {
+            get
+            {
                 System.Data.ProviderBase.DbConnectionPoolGroup poolGroup = PoolGroup;
                 return ((null != poolGroup) ? poolGroup.ConnectionOptions : null);
             }
         }
 
-        private string ConnectionString_Get() {
+        private string ConnectionString_Get()
+        {
             bool hidePassword = InnerConnection.ShouldHidePassword;
             DbConnectionOptions connectionOptions = UserConnectionOptions;
             return ((null != connectionOptions) ? connectionOptions.UsersConnectionString(hidePassword) : "");
         }
 
-        private void ConnectionString_Set(string value) {
+        private void ConnectionString_Set(string value)
+        {
             DbConnectionPoolKey key = new DbConnectionPoolKey(value);
 
             ConnectionString_Set(key);
         }
 
-        private void ConnectionString_Set(DbConnectionPoolKey key) {
+        private void ConnectionString_Set(DbConnectionPoolKey key)
+        {
             DbConnectionOptions connectionOptions = null;
             System.Data.ProviderBase.DbConnectionPoolGroup poolGroup = ConnectionFactory.GetConnectionPoolGroup(key, null, ref connectionOptions);
             DbConnectionInternal connectionInternal = InnerConnection;
             bool flag = connectionInternal.AllowSetConnectionString;
-            if (flag) {
+            if (flag)
+            {
                 //try {
-                    // NOTE: There's a race condition with multiple threads changing
-                    //       ConnectionString and any thread throws an exception
-                    // Closed->Busy: prevent Open during set_ConnectionString
-                    flag = SetInnerConnectionFrom(DbConnectionClosedBusy.SingletonInstance, connectionInternal);
-                    if (flag) {
-                        _userConnectionOptions = connectionOptions;
-                        _poolGroup = poolGroup;
-                        _innerConnection = DbConnectionClosedNeverOpened.SingletonInstance;
-                    }
+                // NOTE: There's a race condition with multiple threads changing
+                //       ConnectionString and any thread throws an exception
+                // Closed->Busy: prevent Open during set_ConnectionString
+                flag = SetInnerConnectionFrom(DbConnectionClosedBusy.SingletonInstance, connectionInternal);
+                if (flag)
+                {
+                    _userConnectionOptions = connectionOptions;
+                    _poolGroup = poolGroup;
+                    _innerConnection = DbConnectionClosedNeverOpened.SingletonInstance;
+                }
                 //}
                 //catch {
                 //    // recover from exceptions to avoid sticking in busy state
@@ -103,50 +118,62 @@ namespace System.Data.OleDb {
                 //    throw;
                 //}
             }
-            if (!flag) {
+            if (!flag)
+            {
                 throw ADP.OpenConnectionPropertySet(ADP.ConnectionString, connectionInternal.State);
             }
         }
 
-        internal DbConnectionInternal InnerConnection {
-            get {
+        internal DbConnectionInternal InnerConnection
+        {
+            get
+            {
                 return _innerConnection;
             }
         }
 
-        internal System.Data.ProviderBase.DbConnectionPoolGroup PoolGroup {
-            get {
+        internal System.Data.ProviderBase.DbConnectionPoolGroup PoolGroup
+        {
+            get
+            {
                 return _poolGroup;
             }
-            set {
+            set
+            {
                 // when a poolgroup expires and the connection eventually activates, the pool entry will be replaced
                 Debug.Assert(null != value, "null poolGroup");
                 _poolGroup = value;
             }
         }
 
-       
-        internal DbConnectionOptions UserConnectionOptions {
-            get {
+
+        internal DbConnectionOptions UserConnectionOptions
+        {
+            get
+            {
                 return _userConnectionOptions;
             }
         }
 
         // Open->ClosedPreviouslyOpened, and doom the internal connection too...
-        internal void Abort(Exception e) {
+        internal void Abort(Exception e)
+        {
             DbConnectionInternal innerConnection = _innerConnection;  // Should not cause memory allocation...
-            if (ConnectionState.Open == innerConnection.State) {
+            if (ConnectionState.Open == innerConnection.State)
+            {
                 Interlocked.CompareExchange(ref _innerConnection, DbConnectionClosedPreviouslyOpened.SingletonInstance, innerConnection);
                 innerConnection.DoomThisConnection();
             }
         }
 
-        internal void AddWeakReference(object value, int tag) {
+        internal void AddWeakReference(object value, int tag)
+        {
             InnerConnection.AddWeakReference(value, tag);
         }
 
 
-        override protected DbCommand CreateDbCommand() {
+        override protected DbCommand CreateDbCommand()
+        {
             DbCommand command = null;
 
             DbProviderFactory providerFactory = ConnectionFactory.ProviderFactory;
@@ -156,10 +183,12 @@ namespace System.Data.OleDb {
         }
 
 
-        override protected void Dispose(bool disposing) {
-            if (disposing) {
+        override protected void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
                 _userConnectionOptions = null;
-                _poolGroup= null;
+                _poolGroup = null;
                 Close();
             }
             DisposeMe(disposing);
@@ -191,7 +220,8 @@ namespace System.Data.OleDb {
         //    GC.KeepAlive(this);
         //}
 
-        override public void EnlistTransaction(SysTx.Transaction transaction) {
+        override public void EnlistTransaction(SysTx.Transaction transaction)
+        {
 
             // If we're currently enlisted in a transaction and we were called
             // on the EnlistTransaction method (Whidbey) we're not allowed to
@@ -203,9 +233,11 @@ namespace System.Data.OleDb {
             // server, we don't want to lock here, we'll handle the race conditions
             // elsewhere.
             SysTx.Transaction enlistedTransaction = innerConnection.EnlistedTransaction;
-            if (enlistedTransaction != null) {
+            if (enlistedTransaction != null)
+            {
                 // Allow calling enlist if already enlisted (no-op)
-                if (enlistedTransaction.Equals(transaction)) {
+                if (enlistedTransaction.Equals(transaction))
+                {
                     return;
                 }
 
@@ -225,38 +257,46 @@ namespace System.Data.OleDb {
             GC.KeepAlive(this);
         }
 
-        private DbMetaDataFactory GetMetaDataFactory(DbConnectionInternal internalConnection) {
+        private DbMetaDataFactory GetMetaDataFactory(DbConnectionInternal internalConnection)
+        {
             return ConnectionFactory.GetMetaDataFactory(_poolGroup, internalConnection);
         }
 
-        internal DbMetaDataFactory GetMetaDataFactoryInternal(DbConnectionInternal internalConnection) {
+        internal DbMetaDataFactory GetMetaDataFactoryInternal(DbConnectionInternal internalConnection)
+        {
             return GetMetaDataFactory(internalConnection);
         }
 
-        override public  DataTable GetSchema() {
+        override public DataTable GetSchema()
+        {
             return this.GetSchema(DbMetaDataCollectionNames.MetaDataCollections, null);
         }
 
-        override public DataTable GetSchema(string collectionName) {
+        override public DataTable GetSchema(string collectionName)
+        {
             return this.GetSchema(collectionName, null);
         }
 
-        override public DataTable GetSchema(string collectionName, string[] restrictionValues) {
+        override public DataTable GetSchema(string collectionName, string[] restrictionValues)
+        {
             // NOTE: This is virtual because not all providers may choose to support
             //       returning schema data
             return InnerConnection.GetSchema(ConnectionFactory, PoolGroup, this, collectionName, restrictionValues);
         }
 
-        internal void NotifyWeakReference(int message) {
+        internal void NotifyWeakReference(int message)
+        {
             InnerConnection.NotifyWeakReference(message);
         }
 
-        internal void PermissionDemand() {
+        internal void PermissionDemand()
+        {
             Debug.Assert(DbConnectionClosedConnecting.SingletonInstance == _innerConnection, "not connecting");
 
             System.Data.ProviderBase.DbConnectionPoolGroup poolGroup = PoolGroup;
             DbConnectionOptions connectionOptions = ((null != poolGroup) ? poolGroup.ConnectionOptions : null);
-            if ((null == connectionOptions) || connectionOptions.IsEmpty) {
+            if ((null == connectionOptions) || connectionOptions.IsEmpty)
+            {
                 throw ADP.NoConnectionString();
             }
 
@@ -264,13 +304,15 @@ namespace System.Data.OleDb {
             Debug.Assert(null != userConnectionOptions, "null UserConnectionOptions");
         }
 
-        internal void RemoveWeakReference(object value) {
+        internal void RemoveWeakReference(object value)
+        {
             InnerConnection.RemoveWeakReference(value);
         }
 
         // OpenBusy->Closed (previously opened)
         // Connecting->Open
-        internal void SetInnerConnectionEvent(DbConnectionInternal to) {
+        internal void SetInnerConnectionEvent(DbConnectionInternal to)
+        {
             // Set's the internal connection without verifying that it's a specific value
             Debug.Assert(null != _innerConnection, "null InnerConnection");
             Debug.Assert(null != to, "to null InnerConnection");
@@ -278,22 +320,28 @@ namespace System.Data.OleDb {
             ConnectionState originalState = _innerConnection.State & ConnectionState.Open;
             ConnectionState currentState = to.State & ConnectionState.Open;
 
-            if ((originalState != currentState) && (ConnectionState.Closed == currentState)) {
+            if ((originalState != currentState) && (ConnectionState.Closed == currentState))
+            {
                 // Increment the close count whenever we switch to Closed
-                unchecked { _closeCount++; }
+                unchecked
+                { _closeCount++; }
             }
 
             _innerConnection = to;
 
-            if (ConnectionState.Closed == originalState && ConnectionState.Open == currentState) {
+            if (ConnectionState.Closed == originalState && ConnectionState.Open == currentState)
+            {
                 OnStateChange(DbConnectionInternal.StateChangeOpen);
             }
-            else if (ConnectionState.Open == originalState && ConnectionState.Closed == currentState) {
+            else if (ConnectionState.Open == originalState && ConnectionState.Closed == currentState)
+            {
                 OnStateChange(DbConnectionInternal.StateChangeClosed);
             }
-            else {
+            else
+            {
                 Debug.Assert(false, "unexpected state switch");
-                if (originalState != currentState) {
+                if (originalState != currentState)
+                {
                     OnStateChange(new StateChangeEventArgs(originalState, currentState));
                 }
             }
@@ -302,7 +350,8 @@ namespace System.Data.OleDb {
         // Closed->Connecting: prevent set_ConnectionString during Open
         // Open->OpenBusy: guarantee internal connection is returned to correct pool
         // Closed->ClosedBusy: prevent Open during set_ConnectionString
-        internal bool SetInnerConnectionFrom(DbConnectionInternal to, DbConnectionInternal from) {
+        internal bool SetInnerConnectionFrom(DbConnectionInternal to, DbConnectionInternal from)
+        {
             // Set's the internal connection, verifying that it's a specific value before doing so.
             Debug.Assert(null != _innerConnection, "null InnerConnection");
             Debug.Assert(null != from, "from null InnerConnection");
@@ -314,7 +363,8 @@ namespace System.Data.OleDb {
 
         // ClosedBusy->Closed (never opened)
         // Connecting->Closed (exception during open, return to previous closed state)
-        internal void SetInnerConnectionTo(DbConnectionInternal to) {
+        internal void SetInnerConnectionTo(DbConnectionInternal to)
+        {
             // Set's the internal connection without verifying that it's a specific value
             Debug.Assert(null != _innerConnection, "null InnerConnection");
             Debug.Assert(null != to, "to null InnerConnection");
@@ -322,12 +372,15 @@ namespace System.Data.OleDb {
         }
 
         [ConditionalAttribute("DEBUG")]
-        internal static void VerifyExecutePermission() {
-            try {
+        internal static void VerifyExecutePermission()
+        {
+            try
+            {
                 // use this to help validate this code path is only used after the following permission has been previously demanded in the current codepath
                 // CONNECTIONOBJECTNAME.ExecutePermission.Demand();
             }
-            catch(System.Security.SecurityException) {
+            catch (System.Security.SecurityException)
+            {
                 System.Diagnostics.Debug.Assert(false, "unexpected SecurityException for current codepath");
                 throw;
             }

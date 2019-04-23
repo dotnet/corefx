@@ -46,7 +46,8 @@ namespace System.Data.ProviderBase
         /// </summary>
         /// <param name="accessToken">Access Token that will be used to connect to SQL Server. Carries identity information about a user.</param>
         /// <param name="expirationTime">The expiration time in UTC for the above accessToken.</param>
-        internal DbConnectionPoolAuthenticationContext(byte[] accessToken, DateTime expirationTime) {
+        internal DbConnectionPoolAuthenticationContext(byte[] accessToken, DateTime expirationTime)
+        {
 
             Debug.Assert(accessToken != null && accessToken.Length > 0);
             Debug.Assert(expirationTime > DateTime.MinValue && expirationTime < DateTime.MaxValue);
@@ -62,7 +63,8 @@ namespace System.Data.ProviderBase
         /// </summary>
         /// <param name="context1">Context1</param>
         /// <param name="context2">Context2</param>
-        internal static DbConnectionPoolAuthenticationContext ChooseAuthenticationContextToUpdate(DbConnectionPoolAuthenticationContext context1, DbConnectionPoolAuthenticationContext context2) {
+        internal static DbConnectionPoolAuthenticationContext ChooseAuthenticationContextToUpdate(DbConnectionPoolAuthenticationContext context1, DbConnectionPoolAuthenticationContext context2)
+        {
 
             Debug.Assert(context1 != null, "context1 should not be null.");
             Debug.Assert(context2 != null, "context2 should not be null.");
@@ -70,14 +72,18 @@ namespace System.Data.ProviderBase
             return context1.ExpirationTime > context2.ExpirationTime ? context1 : context2;
         }
 
-        internal byte[] AccessToken {
-            get {
+        internal byte[] AccessToken
+        {
+            get
+            {
                 return _accessToken;
             }
         }
 
-        internal DateTime ExpirationTime {
-            get {
+        internal DateTime ExpirationTime
+        {
+            get
+            {
                 return _expirationTime;
             }
         }
@@ -86,7 +92,8 @@ namespace System.Data.ProviderBase
         /// Try locking the variable _isUpdateInProgressCounter and return if this thread got the lock to update.
         /// Whichever thread got the chance to update this variable to 1 wins the lock.
         /// </summary>
-        internal bool LockToUpdate() {
+        internal bool LockToUpdate()
+        {
             int oldValue = Interlocked.CompareExchange(ref _isUpdateInProgress, STATUS_LOCKED, STATUS_UNLOCKED);
             return (oldValue == STATUS_UNLOCKED);
         }
@@ -94,7 +101,8 @@ namespace System.Data.ProviderBase
         /// <summary>
         /// Release the lock which was obtained through LockToUpdate.
         /// </summary>
-        internal void ReleaseLockToUpdate() {
+        internal void ReleaseLockToUpdate()
+        {
             int oldValue = Interlocked.CompareExchange(ref _isUpdateInProgress, STATUS_UNLOCKED, STATUS_LOCKED);
             Debug.Assert(oldValue == STATUS_LOCKED);
         }

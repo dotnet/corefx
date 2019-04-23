@@ -5,14 +5,18 @@
 using System.Data.Common;
 using System.Globalization;
 
-namespace System.Data.OleDb {
-    public sealed class OleDbEnumerator  {
+namespace System.Data.OleDb
+{
+    public sealed class OleDbEnumerator
+    {
 
-        public OleDbEnumerator() {
+        public OleDbEnumerator()
+        {
         }
 
-        public DataTable GetElements() {
-             
+        public DataTable GetElements()
+        {
+
             DataTable dataTable = new DataTable("MSDAENUM");
             dataTable.Locale = CultureInfo.InvariantCulture;
             OleDbDataReader dataReader = GetRootEnumerator();
@@ -20,26 +24,32 @@ namespace System.Data.OleDb {
             return dataTable;
         }
 
-        static public OleDbDataReader GetEnumerator(Type type) {
+        static public OleDbDataReader GetEnumerator(Type type)
+        {
 
             return GetEnumeratorFromType(type);
         }
-        
-        static internal OleDbDataReader GetEnumeratorFromType(Type type) {
-            object value = Activator.CreateInstance(type, System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Instance, null, null, CultureInfo.InvariantCulture, null);
+
+        static internal OleDbDataReader GetEnumeratorFromType(Type type)
+        {
+            object value = Activator.CreateInstance(type, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, null, CultureInfo.InvariantCulture, null);
             return GetEnumeratorReader(value);
         }
-        
-        static private OleDbDataReader GetEnumeratorReader(object value) {
+
+        static private OleDbDataReader GetEnumeratorReader(object value)
+        {
             NativeMethods.ISourcesRowset srcrowset = null;
 
-            try {
-                srcrowset = (NativeMethods.ISourcesRowset) value;
+            try
+            {
+                srcrowset = (NativeMethods.ISourcesRowset)value;
             }
-            catch(InvalidCastException) {
+            catch (InvalidCastException)
+            {
                 throw ODB.ISourcesRowsetNotSupported();
             }
-            if (null == srcrowset) {
+            if (null == srcrowset)
+            {
                 throw ODB.ISourcesRowsetNotSupported();
             }
             value = null; // still held by ISourcesRowset, reused for IRowset
@@ -49,7 +59,8 @@ namespace System.Data.OleDb {
             OleDbHResult hr = srcrowset.GetSourcesRowset(ADP.PtrZero, ODB.IID_IRowset, propCount, propSets, out value);
 
             Exception f = OleDbConnection.ProcessResults(hr, null, null);
-            if (null != f) {
+            if (null != f)
+            {
                 throw f;
             }
 
@@ -59,8 +70,9 @@ namespace System.Data.OleDb {
             dataReader.HasRowsRead();
             return dataReader;
         }
-        
-        static public OleDbDataReader GetRootEnumerator() {
+
+        static public OleDbDataReader GetRootEnumerator()
+        {
             //readonly Guid CLSID_MSDAENUM = new Guid(0xc8b522d0,0x5cf3,0x11ce,0xad,0xe5,0x00,0xaa,0x00,0x44,0x77,0x3d);
             //Type msdaenum = Type.GetTypeFromCLSID(CLSID_MSDAENUM, true);
             const string PROGID_MSDAENUM = "MSDAENUM";

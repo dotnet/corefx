@@ -4,36 +4,45 @@
 
 using System.Data.Common;
 
-namespace System.Data.OleDb {
+namespace System.Data.OleDb
+{
 
-    public sealed class OleDbFactory : DbProviderFactory {
+    public sealed class OleDbFactory : DbProviderFactory
+    {
 
         public static readonly OleDbFactory Instance = new OleDbFactory();
 
-        private OleDbFactory() {
+        private OleDbFactory()
+        {
         }
 
-        public override DbCommand CreateCommand() {
+        public override DbCommand CreateCommand()
+        {
             return new OleDbCommand();
         }
 
-        public override DbCommandBuilder CreateCommandBuilder() {
+        public override DbCommandBuilder CreateCommandBuilder()
+        {
             return new OleDbCommandBuilder();
         }
 
-        public override DbConnection CreateConnection() {
+        public override DbConnection CreateConnection()
+        {
             return new OleDbConnection();
         }
 
-        public override DbConnectionStringBuilder CreateConnectionStringBuilder() {
+        public override DbConnectionStringBuilder CreateConnectionStringBuilder()
+        {
             return new OleDbConnectionStringBuilder();
         }
 
-        public override DbDataAdapter CreateDataAdapter() {
+        public override DbDataAdapter CreateDataAdapter()
+        {
             return new OleDbDataAdapter();
         }
 
-        public override DbParameter CreateParameter() {
+        public override DbParameter CreateParameter()
+        {
             return new OleDbParameter();
         }
 

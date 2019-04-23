@@ -25,27 +25,29 @@ namespace System.Data.ProviderBase
     // and once no pools remain, change state from Active->Idle->Disabled
     // Once Disabled, factory can remove its reference to the pool entry
 
-    sealed internal class DbConnectionPoolGroup {
-        private readonly DbConnectionOptions               _connectionOptions;
-        private readonly DbConnectionPoolKey               _poolKey;
-        private readonly DbConnectionPoolGroupOptions      _poolGroupOptions;
+    sealed internal class DbConnectionPoolGroup
+    {
+        private readonly DbConnectionOptions _connectionOptions;
+        private readonly DbConnectionPoolKey _poolKey;
+        private readonly DbConnectionPoolGroupOptions _poolGroupOptions;
         private ConcurrentDictionary<DbConnectionPoolIdentity, DbConnectionPool> _poolCollection;
 
-        private          int                               _state;          // see PoolGroupState* below
+        private int _state;          // see PoolGroupState* below
 
-        private          DbConnectionPoolGroupProviderInfo _providerInfo;
-        private          DbMetaDataFactory                 _metaDataFactory;
+        private DbConnectionPoolGroupProviderInfo _providerInfo;
+        private DbMetaDataFactory _metaDataFactory;
 
         private static int _objectTypeCount; // Bid counter
         internal readonly int _objectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
 
         // always lock this before changing _state, we don't want to move out of the 'Disabled' state
         // PoolGroupStateUninitialized = 0;
-        private const int PoolGroupStateActive   = 1; // initial state, GetPoolGroup from cache, connection Open
-        private const int PoolGroupStateIdle     = 2; // all pools are pruned via Clear
+        private const int PoolGroupStateActive = 1; // initial state, GetPoolGroup from cache, connection Open
+        private const int PoolGroupStateIdle = 2; // all pools are pruned via Clear
         private const int PoolGroupStateDisabled = 4; // factory pool entry prunning method
 
-        internal DbConnectionPoolGroup (DbConnectionOptions connectionOptions, DbConnectionPoolKey key, DbConnectionPoolGroupOptions poolGroupOptions) {
+        internal DbConnectionPoolGroup(DbConnectionOptions connectionOptions, DbConnectionPoolKey key, DbConnectionPoolGroupOptions poolGroupOptions)
+        {
             Debug.Assert(null != connectionOptions, "null connection options");
             Debug.Assert(null == poolGroupOptions || ADP.IsWindowsNT, "should not have pooling options on Win9x");
 
@@ -61,76 +63,99 @@ namespace System.Data.ProviderBase
             _state = PoolGroupStateActive;
         }
 
-        internal DbConnectionOptions ConnectionOptions {
-            get {
+        internal DbConnectionOptions ConnectionOptions
+        {
+            get
+            {
                 return _connectionOptions;
             }
         }
 
-        internal DbConnectionPoolKey PoolKey {
-            get {
+        internal DbConnectionPoolKey PoolKey
+        {
+            get
+            {
                 return _poolKey;
             }
         }
 
-        internal DbConnectionPoolGroupProviderInfo ProviderInfo {
-            get {
+        internal DbConnectionPoolGroupProviderInfo ProviderInfo
+        {
+            get
+            {
                 return _providerInfo;
             }
-            set {
+            set
+            {
                 _providerInfo = value;
-                if(null!=value) {
+                if (null != value)
+                {
                     _providerInfo.PoolGroup = this;
                 }
             }
         }
 
-        internal bool IsDisabled {
-            get {
+        internal bool IsDisabled
+        {
+            get
+            {
                 return (PoolGroupStateDisabled == _state);
             }
         }
 
-        internal int ObjectID {
-            get {
+        internal int ObjectID
+        {
+            get
+            {
                 return _objectID;
             }
         }
 
-        internal DbConnectionPoolGroupOptions PoolGroupOptions {
-            get {
+        internal DbConnectionPoolGroupOptions PoolGroupOptions
+        {
+            get
+            {
                 return _poolGroupOptions;
             }
         }
 
-        internal DbMetaDataFactory MetaDataFactory{
-            get {
-                return  _metaDataFactory;
-                }
+        internal DbMetaDataFactory MetaDataFactory
+        {
+            get
+            {
+                return _metaDataFactory;
+            }
 
-            set {
+            set
+            {
                 _metaDataFactory = value;
             }
         }
 
-        internal int Clear() {
+        internal int Clear()
+        {
             // must be multi-thread safe with competing calls by Clear and Prune via background thread
             // will return the number of connections in the group after clearing has finished
 
             // First, note the old collection and create a new collection to be used
             ConcurrentDictionary<DbConnectionPoolIdentity, DbConnectionPool> oldPoolCollection = null;
-            lock (this) {
-                if (_poolCollection.Count > 0) {
+            lock (this)
+            {
+                if (_poolCollection.Count > 0)
+                {
                     oldPoolCollection = _poolCollection;
                     _poolCollection = new ConcurrentDictionary<DbConnectionPoolIdentity, DbConnectionPool>();
                 }
             }
 
             // Then, if a new collection was created, release the pools from the old collection
-            if (oldPoolCollection != null) {
-                foreach (var entry in oldPoolCollection) {
+            if (oldPoolCollection != null)
+            {
+                foreach (var entry in oldPoolCollection)
+                {
                     DbConnectionPool pool = entry.Value;
-                    if (pool != null) {
+                    if (pool != null)
+                    {
                         //  Pruning a pool while a connection is currently attempting to connect
                         //  will cause the pool to be prematurely abandoned. The only known effect so
                         //  far is that the errorWait throttling will be reset when this occurs.
@@ -149,7 +174,8 @@ namespace System.Data.ProviderBase
             return _poolCollection.Count;
         }
 
-        internal DbConnectionPool GetConnectionPool(DbConnectionFactory connectionFactory) {
+        internal DbConnectionPool GetConnectionPool(DbConnectionFactory connectionFactory)
+        {
             // When this method returns null it indicates that the connection
             // factory should not use pooling.
 
@@ -158,11 +184,13 @@ namespace System.Data.ProviderBase
             // PoolGroupOptions will only be null when we're not supposed to pool
             // connections.
             DbConnectionPool pool = null;
-            if (null != _poolGroupOptions) {
+            if (null != _poolGroupOptions)
+            {
                 Debug.Assert(ADP.IsWindowsNT, "should not be pooling on Win9x");
 
                 DbConnectionPoolIdentity currentIdentity = DbConnectionPoolIdentity.NoIdentity;
-                if (_poolGroupOptions.PoolByIdentity) {
+                if (_poolGroupOptions.PoolByIdentity)
+                {
                     // if we're pooling by identity (because integrated security is
                     // being used for these connections) then we need to go out and
                     // search for the connectionPool that matches the current identity.
@@ -171,22 +199,28 @@ namespace System.Data.ProviderBase
 
                     // If the current token is restricted in some way, then we must
                     // not attempt to pool these connections.
-                    if (currentIdentity.IsRestricted) {
+                    if (currentIdentity.IsRestricted)
+                    {
                         currentIdentity = null;
                     }
                 }
 
-                if (null != currentIdentity) {
-                    if (!_poolCollection.TryGetValue(currentIdentity, out pool)) { // find the pool
-                        
+                if (null != currentIdentity)
+                {
+                    if (!_poolCollection.TryGetValue(currentIdentity, out pool))
+                    { // find the pool
 
-                        lock (this) {
+
+                        lock (this)
+                        {
                             // Did someone already add it to the list?
-                            if (!_poolCollection.TryGetValue(currentIdentity, out pool)) {
+                            if (!_poolCollection.TryGetValue(currentIdentity, out pool))
+                            {
                                 DbConnectionPoolProviderInfo connectionPoolProviderInfo = connectionFactory.CreateConnectionPoolProviderInfo(this.ConnectionOptions);
                                 DbConnectionPool newPool = new DbConnectionPool(connectionFactory, this, currentIdentity, connectionPoolProviderInfo);
 
-                                if (MarkPoolGroupAsActive()) {
+                                if (MarkPoolGroupAsActive())
+                                {
                                     // If we get here, we know for certain that we there isn't
                                     // a pool that matches the current identity, so we have to
                                     // add the optimistically created one
@@ -196,7 +230,8 @@ namespace System.Data.ProviderBase
                                     connectionFactory.PerformanceCounters.NumberOfActiveConnectionPools.Increment();
                                     pool = newPool;
                                 }
-                                else {
+                                else
+                                {
                                     // else pool entry has been disabled so don't create new pools
                                     Debug.Assert(PoolGroupStateDisabled == _state, "state should be disabled");
 
@@ -205,7 +240,8 @@ namespace System.Data.ProviderBase
                                     newPool.Shutdown();
                                 }
                             }
-                            else {
+                            else
+                            {
                                 // else found an existing pool to use instead
                                 Debug.Assert(PoolGroupStateActive == _state, "state should be active since a pool exists and lock holds");
                             }
@@ -215,8 +251,10 @@ namespace System.Data.ProviderBase
                 }
             }
 
-            if (null == pool) {
-                lock(this) {
+            if (null == pool)
+            {
+                lock (this)
+                {
                     // keep the pool entry state active when not pooling
                     MarkPoolGroupAsActive();
                 }
@@ -224,27 +262,34 @@ namespace System.Data.ProviderBase
             return pool;
         }
 
-        private bool MarkPoolGroupAsActive() {
+        private bool MarkPoolGroupAsActive()
+        {
             // when getting a connection, make the entry active if it was idle (but not disabled)
             // must always lock this before calling
 
-            if (PoolGroupStateIdle == _state) {
+            if (PoolGroupStateIdle == _state)
+            {
                 _state = PoolGroupStateActive;
             }
             return (PoolGroupStateActive == _state);
         }
 
-        internal bool Prune() {
+        internal bool Prune()
+        {
             // must only call from DbConnectionFactory.PruneConnectionPoolGroups on background timer thread
             // must lock(DbConnectionFactory._connectionPoolGroups.SyncRoot) before calling ReadyToRemove
             //     to avoid conflict with DbConnectionFactory.CreateConnectionPoolGroup replacing pool entry
-            lock (this) {
-                if (_poolCollection.Count > 0) {
+            lock (this)
+            {
+                if (_poolCollection.Count > 0)
+                {
                     var newPoolCollection = new ConcurrentDictionary<DbConnectionPoolIdentity, DbConnectionPool>();
 
-                    foreach (var entry in _poolCollection) {
+                    foreach (var entry in _poolCollection)
+                    {
                         DbConnectionPool pool = entry.Value;
-                        if (pool != null) {
+                        if (pool != null)
+                        {
                             //  Pruning a pool while a connection is currently attempting to connect
                             //  will cause the pool to be prematurely abandoned. The only known effect so
                             //  far is that the errorWait throttling will be reset when this occurs.
@@ -256,7 +301,8 @@ namespace System.Data.ProviderBase
                             // Empty pool during pruning indicates zero or low activity, but
                             //  an error state indicates the pool needs to stay around to
                             //  throttle new connection attempts.
-                            if ((!pool.ErrorOccurred) && (0 == pool.Count)) {
+                            if ((!pool.ErrorOccurred) && (0 == pool.Count))
+                            {
 
                                 // Order is important here.  First we remove the pool
                                 // from the collection of pools so no one will try
@@ -268,7 +314,8 @@ namespace System.Data.ProviderBase
                                 connectionFactory.PerformanceCounters.NumberOfActiveConnectionPools.Decrement();
                                 connectionFactory.QueuePoolForRelease(pool, false);
                             }
-                            else {
+                            else
+                            {
                                 newPoolCollection.TryAdd(entry.Key, entry.Value);
                             }
                         }
@@ -278,11 +325,14 @@ namespace System.Data.ProviderBase
 
                 // must be pruning thread to change state and no connections
                 // otherwise pruning thread risks making entry disabled soon after user calls ClearPool
-                if (0 == _poolCollection.Count) {
-                    if (PoolGroupStateActive == _state) {
+                if (0 == _poolCollection.Count)
+                {
+                    if (PoolGroupStateActive == _state)
+                    {
                         _state = PoolGroupStateIdle;
                     }
-                    else if (PoolGroupStateIdle == _state) {
+                    else if (PoolGroupStateIdle == _state)
+                    {
                         _state = PoolGroupStateDisabled;
                     }
                 }

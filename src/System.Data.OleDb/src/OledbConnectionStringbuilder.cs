@@ -10,15 +10,18 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 
-namespace System.Data.OleDb {
+namespace System.Data.OleDb
+{
 
     [DefaultProperty("Provider")]
     [RefreshProperties(RefreshProperties.All)]
     [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbConnectionStringBuilderConverter))]
-    public sealed class OleDbConnectionStringBuilder : DbConnectionStringBuilder {
+    public sealed class OleDbConnectionStringBuilder : DbConnectionStringBuilder
+    {
 
-        private enum Keywords { // specific ordering for ConnectionString output construction
-//          NamedConnection,
+        private enum Keywords
+        { // specific ordering for ConnectionString output construction
+          //          NamedConnection,
             FileName,
 
             Provider,
@@ -29,92 +32,116 @@ namespace System.Data.OleDb {
         }
 
         private static readonly string[] _validKeywords;
-        private static readonly Dictionary<string,Keywords> _keywords;
+        private static readonly Dictionary<string, Keywords> _keywords;
 
         private string[] _knownKeywords;
-        private Dictionary<string,OleDbPropertyInfo> _propertyInfo;
+        private Dictionary<string, OleDbPropertyInfo> _propertyInfo;
 
-//      private string _namedConnection   = DbConnectionStringDefaults.NamedConnection;
-        private string _fileName          = DbConnectionStringDefaults.FileName;
+        //      private string _namedConnection   = DbConnectionStringDefaults.NamedConnection;
+        private string _fileName = DbConnectionStringDefaults.FileName;
 
-        private string _dataSource        = DbConnectionStringDefaults.DataSource;
-        private string _provider          = DbConnectionStringDefaults.Provider;
+        private string _dataSource = DbConnectionStringDefaults.DataSource;
+        private string _provider = DbConnectionStringDefaults.Provider;
 
-        private int _oleDbServices        = DbConnectionStringDefaults.OleDbServices;
+        private int _oleDbServices = DbConnectionStringDefaults.OleDbServices;
 
         private bool _persistSecurityInfo = DbConnectionStringDefaults.PersistSecurityInfo;
 
-        static OleDbConnectionStringBuilder() {
+        static OleDbConnectionStringBuilder()
+        {
             string[] validKeywords = new string[5];
-            validKeywords[(int)Keywords.DataSource]          = DbConnectionStringKeywords.DataSource;
-            validKeywords[(int)Keywords.FileName]            = DbConnectionStringKeywords.FileName;
-//          validKeywords[(int)Keywords.NamedConnection]     = DbConnectionStringKeywords.NamedConnection;
-            validKeywords[(int)Keywords.OleDbServices]       = DbConnectionStringKeywords.OleDbServices;
+            validKeywords[(int)Keywords.DataSource] = DbConnectionStringKeywords.DataSource;
+            validKeywords[(int)Keywords.FileName] = DbConnectionStringKeywords.FileName;
+            //          validKeywords[(int)Keywords.NamedConnection]     = DbConnectionStringKeywords.NamedConnection;
+            validKeywords[(int)Keywords.OleDbServices] = DbConnectionStringKeywords.OleDbServices;
             validKeywords[(int)Keywords.PersistSecurityInfo] = DbConnectionStringKeywords.PersistSecurityInfo;
-            validKeywords[(int)Keywords.Provider]            = DbConnectionStringKeywords.Provider;
+            validKeywords[(int)Keywords.Provider] = DbConnectionStringKeywords.Provider;
             _validKeywords = validKeywords;
 
-            Dictionary<string,Keywords> hash = new Dictionary<string,Keywords>(9, StringComparer.OrdinalIgnoreCase);
-            hash.Add(DbConnectionStringKeywords.DataSource,                Keywords.DataSource);
-            hash.Add(DbConnectionStringKeywords.FileName,                  Keywords.FileName);
-//          hash.Add(DbConnectionStringKeywords.NamedConnection,           Keywords.NamedConnection);
-            hash.Add(DbConnectionStringKeywords.OleDbServices,             Keywords.OleDbServices);
-            hash.Add(DbConnectionStringKeywords.PersistSecurityInfo,       Keywords.PersistSecurityInfo);
-            hash.Add(DbConnectionStringKeywords.Provider,                  Keywords.Provider);
+            Dictionary<string, Keywords> hash = new Dictionary<string, Keywords>(9, StringComparer.OrdinalIgnoreCase);
+            hash.Add(DbConnectionStringKeywords.DataSource, Keywords.DataSource);
+            hash.Add(DbConnectionStringKeywords.FileName, Keywords.FileName);
+            //          hash.Add(DbConnectionStringKeywords.NamedConnection,           Keywords.NamedConnection);
+            hash.Add(DbConnectionStringKeywords.OleDbServices, Keywords.OleDbServices);
+            hash.Add(DbConnectionStringKeywords.PersistSecurityInfo, Keywords.PersistSecurityInfo);
+            hash.Add(DbConnectionStringKeywords.Provider, Keywords.Provider);
             Debug.Assert(5 == hash.Count, "initial expected size is incorrect");
             _keywords = hash;
         }
 
-        public OleDbConnectionStringBuilder() : this(null) {
+        public OleDbConnectionStringBuilder() : this(null)
+        {
             _knownKeywords = _validKeywords;
         }
 
-        public OleDbConnectionStringBuilder(string connectionString) : base() {
-            if (!ADP.IsEmpty(connectionString)) {
+        public OleDbConnectionStringBuilder(string connectionString) : base()
+        {
+            if (!ADP.IsEmpty(connectionString))
+            {
                 ConnectionString = connectionString;
             }
         }
 
-        public override object this[string keyword] {
-            get {
+        public override object this[string keyword]
+        {
+            get
+            {
                 ADP.CheckArgumentNull(keyword, "keyword");
                 object value;
                 Keywords index;
-                if (_keywords.TryGetValue(keyword, out index)) {
+                if (_keywords.TryGetValue(keyword, out index))
+                {
                     value = GetAt(index);
                 }
-                else if (!base.TryGetValue(keyword, out value)) {
-                    Dictionary<string,OleDbPropertyInfo> dynamic = GetProviderInfo(Provider);
+                else if (!base.TryGetValue(keyword, out value))
+                {
+                    Dictionary<string, OleDbPropertyInfo> dynamic = GetProviderInfo(Provider);
                     OleDbPropertyInfo info = dynamic[keyword];
                     value = info._defaultValue;
                 }
                 return value;
             }
-            set {
-                if (null != value) {
+            set
+            {
+                if (null != value)
+                {
                     ADP.CheckArgumentNull(keyword, "keyword");
                     Keywords index;
-                    if (_keywords.TryGetValue(keyword, out index)) {
-                        switch(index) {
-                        case Keywords.DataSource:          DataSource = ConvertToString(value); break;
-                        case Keywords.FileName:            FileName = ConvertToString(value); break;
-//                      case Keywords.NamedConnection:     NamedConnection = ConvertToString(value); break;
-                        case Keywords.Provider:            Provider = ConvertToString(value); break;
+                    if (_keywords.TryGetValue(keyword, out index))
+                    {
+                        switch (index)
+                        {
+                            case Keywords.DataSource:
+                                DataSource = ConvertToString(value);
+                                break;
+                            case Keywords.FileName:
+                                FileName = ConvertToString(value);
+                                break;
+                            //                      case Keywords.NamedConnection:     NamedConnection = ConvertToString(value); break;
+                            case Keywords.Provider:
+                                Provider = ConvertToString(value);
+                                break;
 
-                        case Keywords.OleDbServices:       OleDbServices = ConvertToInt32(value); break;
+                            case Keywords.OleDbServices:
+                                OleDbServices = ConvertToInt32(value);
+                                break;
 
-                        case Keywords.PersistSecurityInfo: PersistSecurityInfo = ConvertToBoolean(value); break;
-                        default:
-                            Debug.Assert(false, "unexpected keyword");
-                            throw ADP.KeywordNotSupported(keyword);
+                            case Keywords.PersistSecurityInfo:
+                                PersistSecurityInfo = ConvertToBoolean(value);
+                                break;
+                            default:
+                                Debug.Assert(false, "unexpected keyword");
+                                throw ADP.KeywordNotSupported(keyword);
                         }
                     }
-                    else {
+                    else
+                    {
                         base[keyword] = value;
                         ClearPropertyDescriptors();
                     }
                 }
-                else {
+                else
+                {
                     Remove(keyword);
                 }
             }
@@ -123,9 +150,11 @@ namespace System.Data.OleDb {
         [DisplayName(DbConnectionStringKeywords.DataSource)]
         [RefreshProperties(RefreshProperties.All)]
         // TODO: hand off to editor VS, if SQL - do database names, if Jet do file picker
-        public string DataSource {
+        public string DataSource
+        {
             get { return _dataSource; }
-            set {
+            set
+            {
                 SetValue(DbConnectionStringKeywords.DataSource, value);
                 _dataSource = value;
             }
@@ -134,9 +163,11 @@ namespace System.Data.OleDb {
         [DisplayName(DbConnectionStringKeywords.FileName)]
         [RefreshProperties(RefreshProperties.All)]
         // TODO: hand off to VS, they derive from FileNameEditor and set the OpenDialogFilter to *.UDL
-        public string FileName {
+        public string FileName
+        {
             get { return _fileName; }
-            set {
+            set
+            {
                 SetValue(DbConnectionStringKeywords.FileName, value);
                 _fileName = value;
             }
@@ -145,9 +176,11 @@ namespace System.Data.OleDb {
         [DisplayName(DbConnectionStringKeywords.OleDbServices)]
         [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbServicesConverter))]
-        public int OleDbServices {
+        public int OleDbServices
+        {
             get { return _oleDbServices; }
-            set {
+            set
+            {
                 SetValue(DbConnectionStringKeywords.OleDbServices, value);
                 _oleDbServices = value;
             }
@@ -155,9 +188,11 @@ namespace System.Data.OleDb {
 
         [DisplayName(DbConnectionStringKeywords.PersistSecurityInfo)]
         [RefreshProperties(RefreshProperties.All)]
-        public bool PersistSecurityInfo {
+        public bool PersistSecurityInfo
+        {
             get { return _persistSecurityInfo; }
-            set {
+            set
+            {
                 SetValue(DbConnectionStringKeywords.PersistSecurityInfo, value);
                 _persistSecurityInfo = value;
             }
@@ -166,57 +201,73 @@ namespace System.Data.OleDb {
         [DisplayName(DbConnectionStringKeywords.Provider)]
         [RefreshProperties(RefreshProperties.All)]
         [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbProviderConverter))]
-        public string Provider {
+        public string Provider
+        {
             get { return _provider; }
-            set {
+            set
+            {
                 SetValue(DbConnectionStringKeywords.Provider, value);
                 _provider = value;
                 RestartProvider();
             }
         }
 
-        public override ICollection Keys {
-            get {
+        public override ICollection Keys
+        {
+            get
+            {
                 string[] knownKeywords = _knownKeywords;
-                if (null == knownKeywords) {
+                if (null == knownKeywords)
+                {
 
-                    Dictionary<string,OleDbPropertyInfo> dynamic = GetProviderInfo(Provider);
-                    if (0 < dynamic.Count) {
+                    Dictionary<string, OleDbPropertyInfo> dynamic = GetProviderInfo(Provider);
+                    if (0 < dynamic.Count)
+                    {
                         knownKeywords = new string[_validKeywords.Length + dynamic.Count];
                         _validKeywords.CopyTo(knownKeywords, 0);
                         dynamic.Keys.CopyTo(knownKeywords, _validKeywords.Length);
                     }
-                    else {
+                    else
+                    {
                         knownKeywords = _validKeywords;
                     }
 
                     int count = 0;
-                    foreach(string keyword in base.Keys) {
+                    foreach (string keyword in base.Keys)
+                    {
                         bool flag = true;
-                        foreach(string s in knownKeywords) {
-                            if (StringComparer.OrdinalIgnoreCase.Equals(s, keyword)) {
+                        foreach (string s in knownKeywords)
+                        {
+                            if (StringComparer.OrdinalIgnoreCase.Equals(s, keyword))
+                            {
                                 flag = false;
                                 break;
                             }
                         }
-                        if (flag) {
+                        if (flag)
+                        {
                             count++;
                         }
                     }
-                    if (0 < count) {
+                    if (0 < count)
+                    {
                         string[] tmp = new string[knownKeywords.Length + count];
                         knownKeywords.CopyTo(tmp, 0);
 
                         int index = knownKeywords.Length;
-                        foreach(string keyword in base.Keys) {
+                        foreach (string keyword in base.Keys)
+                        {
                             bool flag = true;
-                            foreach(string s in knownKeywords) {
-                                if (StringComparer.OrdinalIgnoreCase.Equals(s, keyword)) {
+                            foreach (string s in knownKeywords)
+                            {
+                                if (StringComparer.OrdinalIgnoreCase.Equals(s, keyword))
+                                {
                                     flag = false;
                                     break;
                                 }
                             }
-                            if (flag) {
+                            if (flag)
+                            {
                                 tmp[index++] = keyword;
                             }
                         }
@@ -228,118 +279,145 @@ namespace System.Data.OleDb {
             }
         }
 
-        public override bool ContainsKey(string keyword) {
+        public override bool ContainsKey(string keyword)
+        {
             ADP.CheckArgumentNull(keyword, "keyword");
             return _keywords.ContainsKey(keyword) || base.ContainsKey(keyword);
         }
 
-        private static bool ConvertToBoolean(object value) {
+        private static bool ConvertToBoolean(object value)
+        {
             return DbConnectionStringBuilderUtil.ConvertToBoolean(value);
         }
-        private static int ConvertToInt32(object value) {
+        private static int ConvertToInt32(object value)
+        {
             return DbConnectionStringBuilderUtil.ConvertToInt32(value);
         }
-        private static string ConvertToString(object value) {
+        private static string ConvertToString(object value)
+        {
             return DbConnectionStringBuilderUtil.ConvertToString(value);
         }
 
-        public override void Clear() {
+        public override void Clear()
+        {
             base.Clear();
-            for(int i = 0; i < _validKeywords.Length; ++i) {
+            for (int i = 0; i < _validKeywords.Length; ++i)
+            {
                 Reset((Keywords)i);
             }
             base.ClearPropertyDescriptors();
             _knownKeywords = _validKeywords;
         }
 
-        private object GetAt(Keywords index) {
-            switch(index) {
-            case Keywords.DataSource:          return DataSource;
-            case Keywords.FileName:            return FileName;
-//          case Keywords.NamedConnection:     return NamedConnection;
-            case Keywords.OleDbServices:       return OleDbServices;
-            case Keywords.PersistSecurityInfo: return PersistSecurityInfo;
-            case Keywords.Provider:            return Provider;
-            default:
-                Debug.Assert(false, "unexpected keyword");
-                throw ADP.KeywordNotSupported(_validKeywords[(int)index]);
+        private object GetAt(Keywords index)
+        {
+            switch (index)
+            {
+                case Keywords.DataSource:
+                    return DataSource;
+                case Keywords.FileName:
+                    return FileName;
+                //          case Keywords.NamedConnection:     return NamedConnection;
+                case Keywords.OleDbServices:
+                    return OleDbServices;
+                case Keywords.PersistSecurityInfo:
+                    return PersistSecurityInfo;
+                case Keywords.Provider:
+                    return Provider;
+                default:
+                    Debug.Assert(false, "unexpected keyword");
+                    throw ADP.KeywordNotSupported(_validKeywords[(int)index]);
             }
         }
 
-        public override bool Remove(string keyword) {
+        public override bool Remove(string keyword)
+        {
             ADP.CheckArgumentNull(keyword, "keyword");
             bool value = base.Remove(keyword);
 
             Keywords index;
-            if (_keywords.TryGetValue(keyword, out index)) {
+            if (_keywords.TryGetValue(keyword, out index))
+            {
                 Reset(index);
             }
-            else if (value) {
+            else if (value)
+            {
                 ClearPropertyDescriptors();
             }
             return value;
         }
 
-        private void Reset(Keywords index) {
-            switch(index) {
-            case Keywords.DataSource:
-                _dataSource = DbConnectionStringDefaults.DataSource;
-                break;
-            case Keywords.FileName:
-                _fileName = DbConnectionStringDefaults.FileName;
-                RestartProvider();
-                break;
-//          case Keywords.NamedConnection:
-//             _namedConnection = DbConnectionStringDefaults.NamedConnection;
-//              break;
-            case Keywords.OleDbServices:
-                _oleDbServices = DbConnectionStringDefaults.OleDbServices;
-                break;
-            case Keywords.PersistSecurityInfo:
-                _persistSecurityInfo = DbConnectionStringDefaults.PersistSecurityInfo;
-                break;
-            case Keywords.Provider:
-                _provider = DbConnectionStringDefaults.Provider;
-                RestartProvider();
-                break;
-             default:
-                Debug.Assert(false, "unexpected keyword");
-                throw ADP.KeywordNotSupported(_validKeywords[(int)index]);
+        private void Reset(Keywords index)
+        {
+            switch (index)
+            {
+                case Keywords.DataSource:
+                    _dataSource = DbConnectionStringDefaults.DataSource;
+                    break;
+                case Keywords.FileName:
+                    _fileName = DbConnectionStringDefaults.FileName;
+                    RestartProvider();
+                    break;
+                //          case Keywords.NamedConnection:
+                //             _namedConnection = DbConnectionStringDefaults.NamedConnection;
+                //              break;
+                case Keywords.OleDbServices:
+                    _oleDbServices = DbConnectionStringDefaults.OleDbServices;
+                    break;
+                case Keywords.PersistSecurityInfo:
+                    _persistSecurityInfo = DbConnectionStringDefaults.PersistSecurityInfo;
+                    break;
+                case Keywords.Provider:
+                    _provider = DbConnectionStringDefaults.Provider;
+                    RestartProvider();
+                    break;
+                default:
+                    Debug.Assert(false, "unexpected keyword");
+                    throw ADP.KeywordNotSupported(_validKeywords[(int)index]);
             }
         }
 
-        private new void ClearPropertyDescriptors() {
+        private new void ClearPropertyDescriptors()
+        {
             base.ClearPropertyDescriptors();
             _knownKeywords = null;
         }
 
-        private void RestartProvider() {
+        private void RestartProvider()
+        {
             ClearPropertyDescriptors();
             _propertyInfo = null;
         }
 
-        private void SetValue(string keyword, bool value) {
+        private void SetValue(string keyword, bool value)
+        {
             base[keyword] = value.ToString((System.IFormatProvider)null);
         }
-        private void SetValue(string keyword, int value) {
+        private void SetValue(string keyword, int value)
+        {
             base[keyword] = value.ToString((System.IFormatProvider)null);
         }
-        private void SetValue(string keyword, string value) {
+        private void SetValue(string keyword, string value)
+        {
             ADP.CheckArgumentNull(value, keyword);
             base[keyword] = value;
         }
 
-        public override bool TryGetValue(string keyword, out object value) {
+        public override bool TryGetValue(string keyword, out object value)
+        {
             ADP.CheckArgumentNull(keyword, "keyword");
             Keywords index;
-            if (_keywords.TryGetValue(keyword, out index)) {
+            if (_keywords.TryGetValue(keyword, out index))
+            {
                 value = GetAt(index);
                 return true;
             }
-            else if (!base.TryGetValue(keyword, out value)) {
-                Dictionary<string,OleDbPropertyInfo> dynamic = GetProviderInfo(Provider);
+            else if (!base.TryGetValue(keyword, out value))
+            {
+                Dictionary<string, OleDbPropertyInfo> dynamic = GetProviderInfo(Provider);
                 OleDbPropertyInfo info;
-                if (dynamic.TryGetValue(keyword, out info)) {
+                if (dynamic.TryGetValue(keyword, out info))
+                {
                     value = info._defaultValue;
                     return true;
                 }
@@ -348,30 +426,38 @@ namespace System.Data.OleDb {
             return true;
         }
 
-        private Dictionary<string,OleDbPropertyInfo> GetProviderInfo(string provider) {
-            Dictionary<string,OleDbPropertyInfo> providerInfo = _propertyInfo;
-            if (null == providerInfo) {
-                providerInfo = new Dictionary<string,OleDbPropertyInfo>(StringComparer.OrdinalIgnoreCase);
-                if (!ADP.IsEmpty(provider)) {
-                    Dictionary<string,OleDbPropertyInfo> hash = null;
-                    try {
+        private Dictionary<string, OleDbPropertyInfo> GetProviderInfo(string provider)
+        {
+            Dictionary<string, OleDbPropertyInfo> providerInfo = _propertyInfo;
+            if (null == providerInfo)
+            {
+                providerInfo = new Dictionary<string, OleDbPropertyInfo>(StringComparer.OrdinalIgnoreCase);
+                if (!ADP.IsEmpty(provider))
+                {
+                    Dictionary<string, OleDbPropertyInfo> hash = null;
+                    try
+                    {
                         StringBuilder builder = new StringBuilder();
                         AppendKeyValuePair(builder, DbConnectionStringKeywords.Provider, provider);
                         OleDbConnectionString constr = new OleDbConnectionString(builder.ToString(), true);
 
                         // load provider without calling Initialize or CreateDataSource
-                        using(OleDbConnectionInternal connection = new OleDbConnectionInternal(constr, (OleDbConnection)null)) {
+                        using (OleDbConnectionInternal connection = new OleDbConnectionInternal(constr, (OleDbConnection)null))
+                        {
 
                             // get all the init property information for the provider
                             hash = connection.GetPropertyInfo(new Guid[] { OleDbPropertySetGuid.DBInitAll });
-                            foreach(KeyValuePair<string,OleDbPropertyInfo> entry in hash) {
+                            foreach (KeyValuePair<string, OleDbPropertyInfo> entry in hash)
+                            {
                                 Keywords index;
                                 OleDbPropertyInfo info = entry.Value;
-                                if (!_keywords.TryGetValue(info._description, out index)) {
+                                if (!_keywords.TryGetValue(info._description, out index))
+                                {
                                     if ((OleDbPropertySetGuid.DBInit == info._propertySet) &&
                                             ((ODB.DBPROP_INIT_ASYNCH == info._propertyID) ||
                                              (ODB.DBPROP_INIT_HWND == info._propertyID) ||
-                                             (ODB.DBPROP_INIT_PROMPT == info._propertyID))) {
+                                             (ODB.DBPROP_INIT_PROMPT == info._propertyID)))
+                                    {
                                         continue; // skip this keyword
                                     }
                                     providerInfo[info._description] = info;
@@ -379,10 +465,12 @@ namespace System.Data.OleDb {
                             }
 
                             // what are the unique propertysets?
-                            List<Guid> listPropertySets= new List<Guid>();
-                            foreach(KeyValuePair<string,OleDbPropertyInfo> entry in hash) {
+                            List<Guid> listPropertySets = new List<Guid>();
+                            foreach (KeyValuePair<string, OleDbPropertyInfo> entry in hash)
+                            {
                                 OleDbPropertyInfo info = entry.Value;
-                                if (!listPropertySets.Contains(info._propertySet)) {
+                                if (!listPropertySets.Contains(info._propertySet))
+                                {
                                     listPropertySets.Add(info._propertySet);
                                 }
                             }
@@ -390,34 +478,46 @@ namespace System.Data.OleDb {
                             listPropertySets.CopyTo(arrayPropertySets, 0);
 
                             // get all the init property values for the provider
-                            using(PropertyIDSet propidset = new PropertyIDSet(arrayPropertySets)) {
-                                using(IDBPropertiesWrapper idbProperties = connection.IDBProperties()) {
+                            using (PropertyIDSet propidset = new PropertyIDSet(arrayPropertySets))
+                            {
+                                using (IDBPropertiesWrapper idbProperties = connection.IDBProperties())
+                                {
 
                                     OleDbHResult hr;
-                                    using(DBPropSet propset = new DBPropSet(idbProperties.Value, propidset, out hr)) {
+                                    using (DBPropSet propset = new DBPropSet(idbProperties.Value, propidset, out hr))
+                                    {
                                         // OleDbConnectionStringBuilder is ignoring/hiding potential errors of OLEDB provider when reading its properties information
-                                        if (0 <= (int)hr) {
+                                        if (0 <= (int)hr)
+                                        {
                                             int count = propset.PropertySetCount;
-                                            for(int i = 0; i < count; ++i) {
+                                            for (int i = 0; i < count; ++i)
+                                            {
                                                 Guid propertyset;
                                                 tagDBPROP[] props = propset.GetPropertySet(i, out propertyset);
 
                                                 // attach the default property value to the property info
-                                                foreach(tagDBPROP prop in props) {
+                                                foreach (tagDBPROP prop in props)
+                                                {
 
-                                                    foreach(KeyValuePair<string,OleDbPropertyInfo> entry in hash) {
+                                                    foreach (KeyValuePair<string, OleDbPropertyInfo> entry in hash)
+                                                    {
                                                         OleDbPropertyInfo info = entry.Value;
-                                                        if ((info._propertyID == prop.dwPropertyID) && (info._propertySet == propertyset)) {
+                                                        if ((info._propertyID == prop.dwPropertyID) && (info._propertySet == propertyset))
+                                                        {
                                                             info._defaultValue = prop.vValue;
 
-                                                            if (null == info._defaultValue) {
-                                                                if (typeof(string) == info._type) {
+                                                            if (null == info._defaultValue)
+                                                            {
+                                                                if (typeof(string) == info._type)
+                                                                {
                                                                     info._defaultValue = "";
                                                                 }
-                                                                else if (typeof(Int32) == info._type) {
+                                                                else if (typeof(Int32) == info._type)
+                                                                {
                                                                     info._defaultValue = 0;
                                                                 }
-                                                                else if (typeof(Boolean) == info._type) {
+                                                                else if (typeof(Boolean) == info._type)
+                                                                {
                                                                     info._defaultValue = false;
                                                                 }
                                                             }
@@ -431,13 +531,16 @@ namespace System.Data.OleDb {
                             }
                         }
                     }
-                    catch(System.InvalidOperationException e) {
+                    catch (System.InvalidOperationException e)
+                    {
                         ADP.TraceExceptionWithoutRethrow(e);
                     }
-                    catch(System.Data.OleDb.OleDbException e) {
+                    catch (System.Data.OleDb.OleDbException e)
+                    {
                         ADP.TraceExceptionWithoutRethrow(e);
                     }
-                    catch(System.Security.SecurityException e) {
+                    catch (System.Security.SecurityException e)
+                    {
                         ADP.TraceExceptionWithoutRethrow(e);
                     }
                 }
@@ -446,7 +549,8 @@ namespace System.Data.OleDb {
             return providerInfo;
         }
 
-        private sealed class OleDbProviderConverter : StringConverter {
+        private sealed class OleDbProviderConverter : StringConverter
+        {
 
             private const int DBSOURCETYPE_DATASOURCE_TDP = 1;
             private const int DBSOURCETYPE_DATASOURCE_MDP = 3;
@@ -454,20 +558,25 @@ namespace System.Data.OleDb {
             private StandardValuesCollection _standardValues;
 
             // converter classes should have public ctor
-            public OleDbProviderConverter() {
+            public OleDbProviderConverter()
+            {
             }
 
-            public override bool GetStandardValuesSupported(ITypeDescriptorContext context) {
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            {
                 return true;
             }
 
-            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) {
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
+            {
                 return false;
             }
 
-            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context) {
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            {
                 StandardValuesCollection dataSourceNames = _standardValues;
-                if (null == _standardValues) {
+                if (null == _standardValues)
+                {
                     // Get the sources rowset for the SQLOLEDB enumerator
                     DataTable table = (new OleDbEnumerator()).GetElements();
 
@@ -476,12 +585,16 @@ namespace System.Data.OleDb {
                     //DataColumn column4 = table.Columns["SOURCES_DESCRIPTION"];
 
                     System.Collections.Generic.List<string> providerNames = new System.Collections.Generic.List<string>(table.Rows.Count);
-                    foreach(DataRow row in table.Rows) {
+                    foreach (DataRow row in table.Rows)
+                    {
                         int sourceType = (int)row[column5];
-                        if (DBSOURCETYPE_DATASOURCE_TDP == sourceType || DBSOURCETYPE_DATASOURCE_MDP == sourceType) {
+                        if (DBSOURCETYPE_DATASOURCE_TDP == sourceType || DBSOURCETYPE_DATASOURCE_MDP == sourceType)
+                        {
                             string progid = (string)row[column2];
-                            if (!OleDbConnectionString.IsMSDASQL(progid.ToLower(CultureInfo.InvariantCulture))) {
-                                if (0 > providerNames.IndexOf(progid)) {
+                            if (!OleDbConnectionString.IsMSDASQL(progid.ToLower(CultureInfo.InvariantCulture)))
+                            {
+                                if (0 > providerNames.IndexOf(progid))
+                                {
                                     providerNames.Add(progid);
                                 }
                             }
@@ -496,46 +609,59 @@ namespace System.Data.OleDb {
             }
         }
 
-        [Flags()] internal enum OleDbServiceValues : int {
-            DisableAll              = unchecked((int)0x00000000),
-            ResourcePooling         = unchecked((int)0x00000001),
-            TransactionEnlistment   = unchecked((int)0x00000002),
-            ClientCursor            = unchecked((int)0x00000004),
+        [Flags()]
+        internal enum OleDbServiceValues : int
+        {
+            DisableAll = unchecked((int)0x00000000),
+            ResourcePooling = unchecked((int)0x00000001),
+            TransactionEnlistment = unchecked((int)0x00000002),
+            ClientCursor = unchecked((int)0x00000004),
             AggregationAfterSession = unchecked((int)0x00000008),
-            EnableAll               = unchecked((int)0xffffffff),
-            Default                 = ~(ClientCursor | AggregationAfterSession),
+            EnableAll = unchecked((int)0xffffffff),
+            Default = ~(ClientCursor | AggregationAfterSession),
         };
 
-        internal sealed class OleDbServicesConverter : TypeConverter {
+        internal sealed class OleDbServicesConverter : TypeConverter
+        {
 
             private StandardValuesCollection _standardValues;
 
             // converter classes should have public ctor
-            public OleDbServicesConverter() : base() {
+            public OleDbServicesConverter() : base()
+            {
             }
 
-            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType) {
+            public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
+            {
                 // Only know how to convert from a string
                 return ((typeof(string) == sourceType) || base.CanConvertFrom(context, sourceType));
             }
 
-            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value) {
+            public override object ConvertFrom(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value)
+            {
                 string svalue = (value as string);
-                if (null != svalue) {
+                if (null != svalue)
+                {
                     Int32 services;
-                    if(Int32.TryParse(svalue, out services)) {
+                    if (Int32.TryParse(svalue, out services))
+                    {
                         return services;
                     }
-                    else {
-                        if (svalue.IndexOf(',') != -1) {
+                    else
+                    {
+                        if (svalue.IndexOf(',') != -1)
+                        {
                             int convertedValue = 0;
-                            string[] values = svalue.Split(new char[] {','});
-                            foreach(string v in values) {
+                            string[] values = svalue.Split(new char[] { ',' });
+                            foreach (string v in values)
+                            {
                                 convertedValue |= (int)(OleDbServiceValues)Enum.Parse(typeof(OleDbServiceValues), v, true);
                             }
-                            return (int)convertedValue;;
+                            return (int)convertedValue;
+                            ;
                         }
-                        else {
+                        else
+                        {
                             return (int)(OleDbServiceValues)Enum.Parse(typeof(OleDbServiceValues), svalue, true);
                         }
                     }
@@ -543,29 +669,36 @@ namespace System.Data.OleDb {
                 return base.ConvertFrom(context, culture, value);
             }
 
-            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
+            public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
                 // Only know how to convert to the NetworkLibrary enumeration
                 return ((typeof(string) == destinationType) || base.CanConvertTo(context, destinationType));
             }
 
-            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType) {
-                if ((typeof(string) == destinationType) && (null != value) && (typeof(Int32) == value.GetType())) {
+            public override object ConvertTo(ITypeDescriptorContext context, System.Globalization.CultureInfo culture, object value, Type destinationType)
+            {
+                if ((typeof(string) == destinationType) && (null != value) && (typeof(Int32) == value.GetType()))
+                {
                     return Enum.Format(typeof(OleDbServiceValues), ((OleDbServiceValues)(int)value), "G");
                 }
                 return base.ConvertTo(context, culture, value, destinationType);
             }
 
-            public override bool GetStandardValuesSupported(ITypeDescriptorContext context) {
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
+            {
                 return true;
             }
 
-            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) {
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
+            {
                 return false;
             }
 
-            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context) {
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+            {
                 StandardValuesCollection standardValues = _standardValues;
-                if (null == standardValues) {
+                if (null == standardValues)
+                {
                     Array objValues = Enum.GetValues(typeof(OleDbServiceValues));
                     Array.Sort(objValues, 0, objValues.Length);
                     standardValues = new StandardValuesCollection(objValues);
@@ -574,39 +707,49 @@ namespace System.Data.OleDb {
                 return standardValues;
             }
 
-            public override bool IsValid(ITypeDescriptorContext context, object value) {
+            public override bool IsValid(ITypeDescriptorContext context, object value)
+            {
                 return true;
                 //return Enum.IsDefined(type, value);
             }
         }
 
-        sealed internal class OleDbConnectionStringBuilderConverter : ExpandableObjectConverter {
+        sealed internal class OleDbConnectionStringBuilderConverter : ExpandableObjectConverter
+        {
 
             // converter classes should have public ctor
-            public OleDbConnectionStringBuilderConverter() {
+            public OleDbConnectionStringBuilderConverter()
+            {
             }
 
-            override public bool CanConvertTo(ITypeDescriptorContext context, Type destinationType) {
-                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType) {
+            override public bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
+            {
+                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType)
+                {
                     return true;
                 }
                 return base.CanConvertTo(context, destinationType);
             }
 
-            override public object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType) {
-                if (destinationType == null) {
+            override public object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+            {
+                if (destinationType == null)
+                {
                     throw ADP.ArgumentNull("destinationType");
                 }
-                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType) {
+                if (typeof(System.ComponentModel.Design.Serialization.InstanceDescriptor) == destinationType)
+                {
                     OleDbConnectionStringBuilder obj = (value as OleDbConnectionStringBuilder);
-                    if (null != obj) {
+                    if (null != obj)
+                    {
                         return ConvertToInstanceDescriptor(obj);
                     }
                 }
                 return base.ConvertTo(context, culture, value, destinationType);
             }
 
-            private System.ComponentModel.Design.Serialization.InstanceDescriptor ConvertToInstanceDescriptor(OleDbConnectionStringBuilder options) {
+            private System.ComponentModel.Design.Serialization.InstanceDescriptor ConvertToInstanceDescriptor(OleDbConnectionStringBuilder options)
+            {
                 Type[] ctorParams = new Type[] { typeof(string) };
                 object[] ctorValues = new object[] { options.ConnectionString };
                 System.Reflection.ConstructorInfo ctor = typeof(OleDbConnectionStringBuilder).GetConstructor(ctorParams);

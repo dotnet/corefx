@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Data.OleDb {
-    public enum OleDbLiteral : int {
+namespace System.Data.OleDb
+{
+    public enum OleDbLiteral : int
+    {
         Invalid = 0,
         Binary_Literal = 1,
         Catalog_Name = 2,

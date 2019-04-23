@@ -8,134 +8,159 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Data.SqlClient;
 
-namespace System.Data.Common {
+namespace System.Data.Common
+{
 
-/*
-    internal sealed class NamedConnectionStringConverter : StringConverter {
+    /*
+        internal sealed class NamedConnectionStringConverter : StringConverter {
 
-        public NamedConnectionStringConverter() {
-        }
-
-        public override bool GetStandardValuesSupported(ITypeDescriptorContext context) {
-            return true;
-        }
-
-        public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) {
-            // Although theoretically this could be true, some people may want to just type in a name
-            return false;
-        }
-
-        public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context) {
-            StandardValuesCollection standardValues = null;
-            if (null != context) {
-                DbConnectionStringBuilder instance = (context.Instance as DbConnectionStringBuilder);
-                if (null != instance) {
-                    string myProviderName = instance.GetType().Namespace;
-
-                    List<string> myConnectionNames = new List<string>();
-                    foreach(System.Configuration.ConnectionStringSetting setting in System.Configuration.ConfigurationManager.ConnectionStrings) {
-                        if (myProviderName.EndsWith(setting.ProviderName)) {
-                            myConnectionNames.Add(setting.ConnectionName);
-                        }
-                    }
-                    standardValues = new StandardValuesCollection(myConnectionNames);
-                }
+            public NamedConnectionStringConverter() {
             }
-            return standardValues;
-        }
-    }
-*/
 
-    internal sealed class ReadOnlyCollection<T> : System.Collections.ICollection, ICollection<T> {
+            public override bool GetStandardValuesSupported(ITypeDescriptorContext context) {
+                return true;
+            }
+
+            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) {
+                // Although theoretically this could be true, some people may want to just type in a name
+                return false;
+            }
+
+            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context) {
+                StandardValuesCollection standardValues = null;
+                if (null != context) {
+                    DbConnectionStringBuilder instance = (context.Instance as DbConnectionStringBuilder);
+                    if (null != instance) {
+                        string myProviderName = instance.GetType().Namespace;
+
+                        List<string> myConnectionNames = new List<string>();
+                        foreach(System.Configuration.ConnectionStringSetting setting in System.Configuration.ConfigurationManager.ConnectionStrings) {
+                            if (myProviderName.EndsWith(setting.ProviderName)) {
+                                myConnectionNames.Add(setting.ConnectionName);
+                            }
+                        }
+                        standardValues = new StandardValuesCollection(myConnectionNames);
+                    }
+                }
+                return standardValues;
+            }
+        }
+    */
+
+    internal sealed class ReadOnlyCollection<T> : System.Collections.ICollection, ICollection<T>
+    {
         private T[] _items;
 
-        internal ReadOnlyCollection(T[] items) {
+        internal ReadOnlyCollection(T[] items)
+        {
             _items = items;
 #if DEBUG
-            for(int i = 0; i < items.Length; ++i) {
+            for (int i = 0; i < items.Length; ++i)
+            {
                 Debug.Assert(null != items[i], "null item");
             }
 #endif
         }
 
-        public void CopyTo(T[] array, int arrayIndex) {
+        public void CopyTo(T[] array, int arrayIndex)
+        {
             Array.Copy(_items, 0, array, arrayIndex, _items.Length);
         }
 
-        void System.Collections.ICollection.CopyTo(Array array, int arrayIndex) {
+        void System.Collections.ICollection.CopyTo(Array array, int arrayIndex)
+        {
             Array.Copy(_items, 0, array, arrayIndex, _items.Length);
         }
 
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator() {
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        {
             return new Enumerator<T>(_items);
         }
 
-        public System.Collections.IEnumerator GetEnumerator() {
+        public System.Collections.IEnumerator GetEnumerator()
+        {
             return new Enumerator<T>(_items);
         }
 
-        bool System.Collections.ICollection.IsSynchronized {
+        bool System.Collections.ICollection.IsSynchronized
+        {
             get { return false; }
         }
 
-        Object System.Collections.ICollection.SyncRoot {
+        Object System.Collections.ICollection.SyncRoot
+        {
             get { return _items; }
         }
 
-        bool ICollection<T>.IsReadOnly {
-            get { return true;}
+        bool ICollection<T>.IsReadOnly
+        {
+            get { return true; }
         }
 
-        void ICollection<T>.Add(T value) {
+        void ICollection<T>.Add(T value)
+        {
             throw new NotSupportedException();
         }
 
-        void ICollection<T>.Clear() {
+        void ICollection<T>.Clear()
+        {
             throw new NotSupportedException();
         }
 
-        bool ICollection<T>.Contains(T value) {
+        bool ICollection<T>.Contains(T value)
+        {
             return Array.IndexOf(_items, value) >= 0;
         }
 
-        bool ICollection<T>.Remove(T value) {
+        bool ICollection<T>.Remove(T value)
+        {
             throw new NotSupportedException();
         }
 
-        public int Count {
+        public int Count
+        {
             get { return _items.Length; }
         }
 
-        internal struct Enumerator<K> : IEnumerator<K>, System.Collections.IEnumerator { // based on List<T>.Enumerator
+        internal struct Enumerator<K> : IEnumerator<K>, System.Collections.IEnumerator
+        { // based on List<T>.Enumerator
             private K[] _items;
             private int _index;
 
-            internal Enumerator(K[] items) {
+            internal Enumerator(K[] items)
+            {
                 _items = items;
                 _index = -1;
             }
 
-            public void Dispose() {
+            public void Dispose()
+            {
             }
 
-            public bool MoveNext() {
+            public bool MoveNext()
+            {
                 return (++_index < _items.Length);
             }
 
-            public K Current {
-                get {
+            public K Current
+            {
+                get
+                {
                     return _items[_index];
                 }
             }
 
-            Object System.Collections.IEnumerator.Current {
-                get {
+            Object System.Collections.IEnumerator.Current
+            {
+                get
+                {
                     return _items[_index];
                 }
             }
 
-            void System.Collections.IEnumerator.Reset() {
+            void System.Collections.IEnumerator.Reset()
+            {
                 _index = -1;
             }
         }
@@ -229,19 +254,20 @@ namespace System.Data.Common {
         }
     }
 
-         internal static class DbConnectionStringDefaults {
+    internal static class DbConnectionStringDefaults
+    {
         // all
-//        internal const string NamedConnection           = "";
+        //        internal const string NamedConnection           = "";
 
         // Odbc
-        internal const string Driver                    = "";
-        internal const string Dsn                       = "";
+        internal const string Driver = "";
+        internal const string Dsn = "";
 
         // OleDb
-        internal const bool   AdoNetPooler              = false;
-        internal const string FileName                  = "";
-        internal const int    OleDbServices             = ~(/*DBPROPVAL_OS_AGR_AFTERSESSION*/0x00000008 | /*DBPROPVAL_OS_CLIENTCURSOR*/0x00000004); // -13
-        internal const string Provider                  = "";
+        internal const bool AdoNetPooler = false;
+        internal const string FileName = "";
+        internal const int OleDbServices = ~(/*DBPROPVAL_OS_AGR_AFTERSESSION*/0x00000008 | /*DBPROPVAL_OS_CLIENTCURSOR*/0x00000004); // -13
+        internal const string Provider = "";
 
         internal const int ConnectTimeout = 15;
         internal const bool PersistSecurityInfo = false;
@@ -251,38 +277,40 @@ namespace System.Data.Common {
         internal const bool MultiSubnetFailover = false;
     }
 
-    internal static class DbConnectionOptionKeywords {
+    internal static class DbConnectionOptionKeywords
+    {
         // Odbc
-        internal const string Driver                    = "driver";
-        internal const string Pwd                       = "pwd";
-        internal const string UID                       = "uid";
+        internal const string Driver = "driver";
+        internal const string Pwd = "pwd";
+        internal const string UID = "uid";
 
         // OleDb
-        internal const string DataProvider              = "data provider";
-        internal const string ExtendedProperties        = "extended properties";
-        internal const string FileName                  = "file name";
-        internal const string Provider                  = "provider";
-        internal const string RemoteProvider            = "remote provider";
+        internal const string DataProvider = "data provider";
+        internal const string ExtendedProperties = "extended properties";
+        internal const string FileName = "file name";
+        internal const string Provider = "provider";
+        internal const string RemoteProvider = "remote provider";
 
         // common keywords (OleDb, OracleClient, SqlClient)
-        internal const string Password                  = "password";
-        internal const string UserID                    = "user id";
+        internal const string Password = "password";
+        internal const string UserID = "user id";
     }
 
-    internal static class DbConnectionStringKeywords {
+    internal static class DbConnectionStringKeywords
+    {
         // all
-//        internal const string NamedConnection           = "Named Connection";
+        //        internal const string NamedConnection           = "Named Connection";
 
         // Odbc
-        internal const string Driver                    = "Driver";
-        internal const string Dsn                       = "Dsn";
-        internal const string FileDsn                   = "FileDsn";
-        internal const string SaveFile                  = "SaveFile";
+        internal const string Driver = "Driver";
+        internal const string Dsn = "Dsn";
+        internal const string FileDsn = "FileDsn";
+        internal const string SaveFile = "SaveFile";
 
         // OleDb
-        internal const string FileName                  = "File Name";
-        internal const string OleDbServices             = "OLE DB Services";
-        internal const string Provider                  = "Provider";
+        internal const string FileName = "File Name";
+        internal const string OleDbServices = "OLE DB Services";
+        internal const string Provider = "Provider";
 
         internal const string DataSource = "Data Source";
         internal const string PersistSecurityInfo = "Persist Security Info";

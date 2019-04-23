@@ -2,7 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information
 
-namespace System.Data.ProviderBase {
+namespace System.Data.ProviderBase
+{
 
     using System;
     using System.Collections;
@@ -16,21 +17,22 @@ namespace System.Data.ProviderBase {
     using System.Threading;
     using System.Runtime.Versioning;
 
-    sealed internal class DbConnectionPoolIdentity {
-        private const int E_NotImpersonationToken      = unchecked((int)0x8007051D);
-        private const int Win32_CheckTokenMembership   = 1;
-        private const int Win32_GetTokenInformation_1  = 2;
-        private const int Win32_GetTokenInformation_2  = 3;
+    sealed internal class DbConnectionPoolIdentity
+    {
+        private const int E_NotImpersonationToken = unchecked((int)0x8007051D);
+        private const int Win32_CheckTokenMembership = 1;
+        private const int Win32_GetTokenInformation_1 = 2;
+        private const int Win32_GetTokenInformation_2 = 3;
         private const int Win32_ConvertSidToStringSidW = 4;
-        private const int Win32_CreateWellKnownSid     = 5;
+        private const int Win32_CreateWellKnownSid = 5;
 
-        static public  readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(String.Empty, false, true);
-        static private readonly byte[]                   NetworkSid = (ADP.IsWindowsNT ? CreateWellKnownSid(WellKnownSidType.NetworkSid) : null);
+        static public readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(String.Empty, false, true);
+        static private readonly byte[] NetworkSid = (ADP.IsWindowsNT ? CreateWellKnownSid(WellKnownSidType.NetworkSid) : null);
 
         private readonly string _sidString;
-        private readonly bool   _isRestricted;
-        private readonly bool   _isNetwork;
-        private readonly int    _hashCode;
+        private readonly bool _isRestricted;
+        private readonly bool _isNetwork;
+        private readonly int _hashCode;
 
         private DbConnectionPoolIdentity(string sidString, bool isRestricted, bool isNetwork)
         {
@@ -45,20 +47,23 @@ namespace System.Data.ProviderBase {
             get { return _isRestricted; }
         }
 
-        internal bool IsNetwork {
+        internal bool IsNetwork
+        {
             get { return _isNetwork; }
         }
 
-        static private byte[] CreateWellKnownSid(WellKnownSidType sidType) {
+        static private byte[] CreateWellKnownSid(WellKnownSidType sidType)
+        {
             // Passing an array as big as it can ever be is a small price to pay for
             // not having to P/Invoke twice (once to get the buffer, once to get the data)
 
-            uint length = ( uint )SecurityIdentifier.MaxBinaryLength;
-            byte[] resultSid = new byte[ length ];
+            uint length = (uint)SecurityIdentifier.MaxBinaryLength;
+            byte[] resultSid = new byte[length];
 
             // NOTE - We copied this code from System.Security.Principal.Win32.CreateWellKnownSid...
 
-            if ( 0 == UnsafeNativeMethods.CreateWellKnownSid(( int )sidType, null, resultSid, ref length )) {
+            if (0 == UnsafeNativeMethods.CreateWellKnownSid((int)sidType, null, resultSid, ref length))
+            {
                 IntegratedSecurityError(Win32_CreateWellKnownSid);
             }
             return resultSid;
@@ -75,11 +80,13 @@ namespace System.Data.ProviderBase {
             return result;
         }
 
-        static internal WindowsIdentity GetCurrentWindowsIdentity() {
+        static internal WindowsIdentity GetCurrentWindowsIdentity()
+        {
             return WindowsIdentity.GetCurrent();
         }
 
-        static private IntPtr GetWindowsIdentityToken(WindowsIdentity identity) {
+        static private IntPtr GetWindowsIdentityToken(WindowsIdentity identity)
+        {
             return identity.Token;
         }
 
@@ -93,15 +100,17 @@ namespace System.Data.ProviderBase {
             return _hashCode;
         }
 
-        static private void IntegratedSecurityError(int caller) {
+        static private void IntegratedSecurityError(int caller)
+        {
             // passing 1,2,3,4,5 instead of true/false so that with a debugger
             // we could determine more easily which Win32 method call failed
             int lastError = Marshal.GetHRForLastWin32Error();
-            if ((Win32_CheckTokenMembership != caller) || (E_NotImpersonationToken != lastError)) {
+            if ((Win32_CheckTokenMembership != caller) || (E_NotImpersonationToken != lastError))
+            {
                 Marshal.ThrowExceptionForHR(lastError); // will only throw if (hresult < 0)
             }
         }
-        
+
     }
 }
 

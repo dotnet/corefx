@@ -4,20 +4,25 @@
 
 using System.Data.Common;
 
-namespace System.Data.OleDb {
-    public sealed class OleDbRowUpdatingEventArgs : RowUpdatingEventArgs {
+namespace System.Data.OleDb
+{
+    public sealed class OleDbRowUpdatingEventArgs : RowUpdatingEventArgs
+    {
 
         public OleDbRowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-        : base(dataRow, command, statementType, tableMapping) {
+        : base(dataRow, command, statementType, tableMapping)
+        {
         }
 
 
-        new public OleDbCommand Command {
+        new public OleDbCommand Command
+        {
             get { return (base.Command as OleDbCommand); }
             set { base.Command = value; }
         }
 
-        override protected IDbCommand BaseCommand {
+        override protected IDbCommand BaseCommand
+        {
             get { return base.BaseCommand; }
             set { base.BaseCommand = (value as OleDbCommand); }
         }

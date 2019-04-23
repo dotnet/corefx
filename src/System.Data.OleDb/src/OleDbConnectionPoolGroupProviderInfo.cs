@@ -6,24 +6,30 @@ using System.Data.ProviderBase;
 
 namespace System.Data.OleDb
 {
-    internal sealed class OleDbConnectionPoolGroupProviderInfo : DbConnectionPoolGroupProviderInfo {
+    internal sealed class OleDbConnectionPoolGroupProviderInfo : DbConnectionPoolGroupProviderInfo
+    {
         private bool _hasQuoteFix;
         private string _quotePrefix, _quoteSuffix;
 
-        internal OleDbConnectionPoolGroupProviderInfo() {
+        internal OleDbConnectionPoolGroupProviderInfo()
+        {
         }
-    
-        internal bool HasQuoteFix {
+
+        internal bool HasQuoteFix
+        {
             get { return _hasQuoteFix; }
         }
-        internal string QuotePrefix {
+        internal string QuotePrefix
+        {
             get { return _quotePrefix; }
         }
-        internal string QuoteSuffix {
+        internal string QuoteSuffix
+        {
             get { return _quoteSuffix; }
         }
 
-        internal void SetQuoteFix(string prefix, string suffix) {
+        internal void SetQuoteFix(string prefix, string suffix)
+        {
             _quotePrefix = prefix;
             _quoteSuffix = suffix;
             _hasQuoteFix = true;
