@@ -134,7 +134,7 @@ namespace System.Data.OleDb
         override public string SourceColumn { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 string sourceColumn = _sourceColumn;
-                return ((null != sourceColumn) ? sourceColumn : ADP.StrEmpty);
+                return ((null != sourceColumn) ? sourceColumn : string.Empty);
             }
             set {
                 _sourceColumn = value;

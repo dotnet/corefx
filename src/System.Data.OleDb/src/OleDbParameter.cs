@@ -141,7 +141,7 @@ namespace System.Data.OleDb {
         override public string ParameterName { // V1.2.3300, XXXParameter V1.0.3300
             get {
                 string parameterName = _parameterName;
-                return ((null != parameterName) ? parameterName : ADP.StrEmpty);
+                return ((null != parameterName) ? parameterName : string.Empty);
             }
             set {
                 if (_parameterName != value) {

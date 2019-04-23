@@ -63,7 +63,7 @@ namespace System.Data.OleDb {
         public string Message {
             get {
                 string message = this.message;
-                return ((null != message) ? message : ADP.StrEmpty);
+                return ((null != message) ? message : string.Empty);
             }
         }
 
@@ -76,14 +76,14 @@ namespace System.Data.OleDb {
         public string Source {
             get {
                 string source = this.source;
-                return ((null != source) ? source : ADP.StrEmpty);
+                return ((null != source) ? source : string.Empty);
             }
         }
 
         public string SQLState {
             get {
                 string sqlState = this.sqlState;
-                return ((null != sqlState) ? sqlState : ADP.StrEmpty);
+                return ((null != sqlState) ? sqlState : string.Empty);
             }
         }
 

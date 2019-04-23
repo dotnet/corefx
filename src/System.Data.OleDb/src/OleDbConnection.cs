@@ -80,7 +80,7 @@ namespace System.Data.OleDb {
         override public string Database {
             get {
                 OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
-                object value = (null != constr) ? constr.InitialCatalog : ADP.StrEmpty;
+                object value = (null != constr) ? constr.InitialCatalog : string.Empty;
                 if ((null != value) && !((string)value).StartsWith(DbConnectionOptions.DataDirectory, StringComparison.OrdinalIgnoreCase)) {
                     OleDbConnectionInternal connection = GetOpenConnection();
                     if (null != connection) {
@@ -93,7 +93,7 @@ namespace System.Data.OleDb {
                     }
                     else {
                         constr = this.OleDbConnectionStringValue;
-                        value = (null != constr) ? constr.InitialCatalog : ADP.StrEmpty;
+                        value = (null != constr) ? constr.InitialCatalog : string.Empty;
                     }
                 }
                 return Convert.ToString(value, CultureInfo.InvariantCulture);
@@ -106,7 +106,7 @@ namespace System.Data.OleDb {
         override public string DataSource {
             get {
                 OleDbConnectionString constr = (OleDbConnectionString)UserConnectionOptions;
-                object value = (null != constr) ? constr.DataSource : ADP.StrEmpty;
+                object value = (null != constr) ? constr.DataSource : string.Empty;
                 if ((null != value) && !((string)value).StartsWith(DbConnectionOptions.DataDirectory, StringComparison.OrdinalIgnoreCase)) {
                     if (IsOpen) {
                         value = GetDataSourceValue(OleDbPropertySetGuid.DBInit, ODB.DBPROP_INIT_DATASOURCE);
@@ -116,7 +116,7 @@ namespace System.Data.OleDb {
                     }
                     else {
                         constr = this.OleDbConnectionStringValue;
-                        value = (null != constr) ? constr.DataSource : ADP.StrEmpty;
+                        value = (null != constr) ? constr.DataSource : string.Empty;
                     }
                 }
                 return Convert.ToString(value, CultureInfo.InvariantCulture);
@@ -145,7 +145,7 @@ namespace System.Data.OleDb {
             get {
                 OleDbConnectionString constr = this.OleDbConnectionStringValue;
                 string value = ((null != constr) ? constr.ConvertValueToString(ODB.Provider, null) : null);
-                return ((null != value) ? value : ADP.StrEmpty);
+                return ((null != value) ? value : string.Empty);
             }
         }
         

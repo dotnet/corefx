@@ -3,7 +3,7 @@
     <PackageConfigurations>
       netstandard-Windows_NT;
       netstandard;
-      net461-Windows_NT;      
+      net461-Windows_NT;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);

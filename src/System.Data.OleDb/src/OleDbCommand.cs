@@ -98,7 +98,7 @@ namespace System.Data.OleDb {
         override public string CommandText {
             get {
                 string value = _commandText;
-                return ((null != value) ? value : ADP.StrEmpty);
+                return ((null != value) ? value : string.Empty);
             }
             set {
                 if (0 != ADP.SrcCompare(_commandText, value)) {
@@ -844,7 +844,7 @@ namespace System.Data.OleDb {
         private string ExpandCommandText() {
             string cmdtxt = CommandText;
             if (ADP.IsEmpty(cmdtxt)) {
-                return ADP.StrEmpty;
+                return string.Empty;
             }
             CommandType cmdtype = CommandType;
             switch(cmdtype) {

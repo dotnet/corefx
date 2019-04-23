@@ -118,11 +118,11 @@ namespace System.Data.OleDb {
         }
 
         internal string DataSource {
-            get { return base.ConvertValueToString(KEY.Data_Source, ADP.StrEmpty); }
+            get { return base.ConvertValueToString(KEY.Data_Source, string.Empty); }
         }
 
         internal string InitialCatalog {
-            get { return base.ConvertValueToString(KEY.Initial_Catalog, ADP.StrEmpty); }
+            get { return base.ConvertValueToString(KEY.Initial_Catalog, string.Empty); }
         }
 
         internal string Provider {
@@ -323,7 +323,7 @@ namespace System.Data.OleDb {
                     ValidateProvider(progid);
                 }
             }
-            progid = ConvertValueToString(KEY.Provider, ADP.StrEmpty).Trim();
+            progid = ConvertValueToString(KEY.Provider, string.Empty).Trim();
             ValidateProvider(progid); // will fail on empty 'Provider' value
 
             // initialize to default
