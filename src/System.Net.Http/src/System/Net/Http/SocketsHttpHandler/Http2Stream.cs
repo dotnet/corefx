@@ -119,6 +119,7 @@ namespace System.Net.Http
 
                 // By now, either we got response from server or timer expired.
                 bool sendRequestContent = await allowExpect100ToContinue.Task.ConfigureAwait(false);
+                expect100Timer.Dispose();
 
                 if (sendRequestContent)
                 {
