@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{A55A2B9A-830F-4330-A0E7-02A9FB30ABD2}</ProjectGuid>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-OSX-Debug;netstandard-OSX-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(TargetsUnix)' == 'true' ">
@@ -94,6 +95,7 @@
     <Compile Include="SslStreamDisposeTest.cs" />
     <Compile Include="SslStreamSniTest.cs" />
     <Compile Include="SslStreamEKUTest.cs" />
+    <Compile Include="SslStreamNegotiatedCipherSuiteTest.cs" />
     <Compile Include="SslStreamSchSendAuxRecordTest.cs" />
     <Compile Include="SslStreamCredentialCacheTest.cs" />
     <Compile Include="SslStreamSystemDefaultsTest.cs" />
@@ -106,9 +108,21 @@
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true' ">
     <Compile Include="IdentityValidator.Windows.cs" />
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.Windows.cs">
+      <Link>Common\System\Net\Capability.Security.Windows.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' ">
     <Compile Include="IdentityValidator.Unix.cs" />
+    <Compile Include="$(CommonTestPath)\System\Net\Capability.Security.Unix.cs">
+      <Link>Common\System\Net\Capability.Security.Unix.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs">
+      <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.NetSecurityNative.IsNtlmInstalled.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
+      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsLinux)' == 'true' ">
     <None Include="..\Scripts\Unix\setup-kdc.sh">
@@ -129,9 +143,6 @@
     <Compile Include="NegotiateStreamTest.Linux.cs" />
     <Compile Include="UnixGssFakeNegotiateStream.cs" />
     <Compile Include="UnixGssFakeStreamFramer.cs" />
-    <Compile Include="$(CommonPath)\Interop\Unix\Interop.Libraries.cs">
-      <Link>Common\Interop\Unix\Interop.Libraries.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs">
       <Link>Common\Interop\Unix\System.Net.Security.Native\Interop.GssApiException.cs</Link>
     </Compile>
@@ -146,12 +157,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.1-prerelease\content\**\*.*" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
+    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.2\content\**\*.*" DestinationDir="TestData" />
   </ItemGroup>
 </Project>

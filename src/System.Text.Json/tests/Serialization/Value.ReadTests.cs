@@ -18,6 +18,9 @@ namespace System.Text.Json.Serialization.Tests
             int i2 = JsonSerializer.Parse<int>("2");
             Assert.Equal(2, i2);
 
+            int? i3 = JsonSerializer.Parse<int?>("null");
+            Assert.Null(i3);
+
             long l = JsonSerializer.Parse<long>(Encoding.UTF8.GetBytes(long.MaxValue.ToString()));
             Assert.Equal(long.MaxValue, l);
 
@@ -36,6 +39,8 @@ namespace System.Text.Json.Serialization.Tests
         {
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(Encoding.UTF8.GetBytes(@"a")));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[1,a]")));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(@"null"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(@""""""));
         }
 
         [Fact]
@@ -52,6 +57,13 @@ namespace System.Text.Json.Serialization.Tests
             SampleEnum[] i = JsonSerializer.Parse<SampleEnum[]>(Encoding.UTF8.GetBytes(@"[1,2]"));
             Assert.Equal(SampleEnum.One, i[0]);
             Assert.Equal(SampleEnum.Two, i[1]);
+        }
+
+        [Fact]
+        public static void EmptyStringInput()
+        {
+            string obj = JsonSerializer.Parse<string>(@"""""");
+            Assert.Equal(string.Empty, obj);
         }
 
         [Fact]
@@ -137,61 +149,39 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void RangePass()
         {
-            Assert.Equal(byte.MinValue, JsonSerializer.Parse<byte>(byte.MinValue.ToString()));
             Assert.Equal(byte.MaxValue, JsonSerializer.Parse<byte>(byte.MaxValue.ToString()));
-            Assert.Equal(byte.MinValue, JsonSerializer.Parse<byte?>(byte.MinValue.ToString()));
             Assert.Equal(byte.MaxValue, JsonSerializer.Parse<byte?>(byte.MaxValue.ToString()));
 
-            Assert.Equal(sbyte.MinValue, JsonSerializer.Parse<sbyte>(sbyte.MinValue.ToString()));
             Assert.Equal(sbyte.MaxValue, JsonSerializer.Parse<sbyte>(sbyte.MaxValue.ToString()));
-            Assert.Equal(sbyte.MinValue, JsonSerializer.Parse<sbyte?>(sbyte.MinValue.ToString()));
             Assert.Equal(sbyte.MaxValue, JsonSerializer.Parse<sbyte?>(sbyte.MaxValue.ToString()));
 
-            Assert.Equal(short.MinValue, JsonSerializer.Parse<short>(short.MinValue.ToString()));
             Assert.Equal(short.MaxValue, JsonSerializer.Parse<short>(short.MaxValue.ToString()));
-            Assert.Equal(short.MinValue, JsonSerializer.Parse<short?>(short.MinValue.ToString()));
             Assert.Equal(short.MaxValue, JsonSerializer.Parse<short?>(short.MaxValue.ToString()));
 
-            Assert.Equal(ushort.MinValue, JsonSerializer.Parse<ushort>(ushort.MinValue.ToString()));
             Assert.Equal(ushort.MaxValue, JsonSerializer.Parse<ushort>(ushort.MaxValue.ToString()));
-            Assert.Equal(ushort.MinValue, JsonSerializer.Parse<ushort?>(ushort.MinValue.ToString()));
             Assert.Equal(ushort.MaxValue, JsonSerializer.Parse<ushort?>(ushort.MaxValue.ToString()));
 
             // todo: these fail due to double->float conversion
-            //Assert.Equal(float.MinValue, JsonSerializer.Parse<float>(float.MinValue.ToString()));
             //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float>(float.MaxValue.ToString()));
-            //Assert.Equal(float.MinValue, JsonSerializer.Parse<float?>(float.MinValue.ToString()));
             //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float?>(float.MaxValue.ToString()));
 
-            Assert.Equal(int.MinValue, JsonSerializer.Parse<int>(int.MinValue.ToString()));
             Assert.Equal(int.MaxValue, JsonSerializer.Parse<int>(int.MaxValue.ToString()));
-            Assert.Equal(int.MinValue, JsonSerializer.Parse<int?>(int.MinValue.ToString()));
             Assert.Equal(int.MaxValue, JsonSerializer.Parse<int?>(int.MaxValue.ToString()));
 
-            Assert.Equal(uint.MinValue, JsonSerializer.Parse<uint>(uint.MinValue.ToString()));
             Assert.Equal(uint.MaxValue, JsonSerializer.Parse<uint>(uint.MaxValue.ToString()));
-            Assert.Equal(uint.MinValue, JsonSerializer.Parse<uint?>(uint.MinValue.ToString()));
             Assert.Equal(uint.MaxValue, JsonSerializer.Parse<uint?>(uint.MaxValue.ToString()));
 
-            Assert.Equal(long.MinValue, JsonSerializer.Parse<long>(long.MinValue.ToString()));
             Assert.Equal(long.MaxValue, JsonSerializer.Parse<long>(long.MaxValue.ToString()));
-            Assert.Equal(long.MinValue, JsonSerializer.Parse<long?>(long.MinValue.ToString()));
             Assert.Equal(long.MaxValue, JsonSerializer.Parse<long?>(long.MaxValue.ToString()));
 
-            Assert.Equal(ulong.MinValue, JsonSerializer.Parse<ulong>(ulong.MinValue.ToString()));
             Assert.Equal(ulong.MaxValue, JsonSerializer.Parse<ulong>(ulong.MaxValue.ToString()));
-            Assert.Equal(ulong.MinValue, JsonSerializer.Parse<ulong?>(ulong.MinValue.ToString()));
             Assert.Equal(ulong.MaxValue, JsonSerializer.Parse<ulong?>(ulong.MaxValue.ToString()));
 
-            Assert.Equal(decimal.MinValue, JsonSerializer.Parse<decimal>(decimal.MinValue.ToString()));
             Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal>(decimal.MaxValue.ToString()));
-            Assert.Equal(decimal.MinValue, JsonSerializer.Parse<decimal?>(decimal.MinValue.ToString()));
             Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString()));
 
             // todo: these are failing; do we need round-trip format "R"?
-            //Assert.Equal(double.MinValue, JsonSerializer.Parse<double>(double.MinValue.ToString()));
             //Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString()));
-            //Assert.Equal(double.MinValue, JsonSerializer.Parse<double?>(double.MinValue.ToString()));
             //Assert.Equal(double.MaxValue, JsonSerializer.Parse<double?>(double.MaxValue.ToString()));
         }
 
@@ -201,74 +191,49 @@ namespace System.Text.Json.Serialization.Tests
             string unexpectedString = @"""unexpected string""";
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<byte?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<sbyte?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<short?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ushort?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<float?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<uint?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<long?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<ulong?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<decimal?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<double?>(unexpectedString));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime>(unexpectedString));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime?>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTime?>(unexpectedString));
 
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<string>("1"));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTimeOffset>(unexpectedString));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<DateTimeOffset?>(unexpectedString));
+
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<string>("1"));
 
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char>("1"));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char>("1"));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char?>("1"));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<char?>("1"));
 
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Enum>(unexpectedString));
             Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Enum>(unexpectedString));
         }
 
@@ -286,6 +251,14 @@ namespace System.Text.Json.Serialization.Tests
 
             i[0].Verify();
             i[1].Verify();
+        }
+
+        [Fact]
+        public static void ReadEmptyObjectArray()
+        {
+            SimpleTestClass[] data = JsonSerializer.Parse<SimpleTestClass[]>("[{}]");
+            Assert.Equal(1, data.Length);
+            Assert.NotNull(data[0]);
         }
 
         [Fact]
@@ -337,6 +310,291 @@ namespace System.Text.Json.Serialization.Tests
             List<int> i = JsonSerializer.Parse<List<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
             Assert.Equal(1, i[0]);
             Assert.Equal(2, i[1]);
+        }
+
+        [Fact]
+        public static void ReadIEnumerableTOfIEnumerableT()
+        {
+            IEnumerable<IEnumerable<int>> result = JsonSerializer.Parse<IEnumerable<IEnumerable<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IEnumerable<int> ie in result)
+            {
+                foreach (int i in ie)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadIEnumerableTOfArray()
+        {
+            IEnumerable<int[]> result = JsonSerializer.Parse<IEnumerable<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfIEnumerableT()
+        {
+            IEnumerable<int>[] result = JsonSerializer.Parse<IEnumerable<int>[]> (Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IEnumerable<int> arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveIEnumerableT()
+        {
+            IEnumerable<int> result = JsonSerializer.Parse<IEnumerable<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadIListTOfIListT()
+        {
+            IList<IList<int>> result = JsonSerializer.Parse<IList<IList<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IList<int> ie in result)
+            {
+                foreach (int i in ie)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadIListTOfArray()
+        {
+            IList<int[]> result = JsonSerializer.Parse<IList<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfIListT()
+        {
+            IList<int>[] result = JsonSerializer.Parse<IList<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IList<int> arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveIListT()
+        {
+            IList<int> result = JsonSerializer.Parse<IList<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadICollectionTOfICollectionT()
+        {
+            ICollection<ICollection<int>> result = JsonSerializer.Parse<ICollection<ICollection<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (ICollection<int> ie in result)
+            {
+                foreach (int i in ie)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadICollectionTOfArray()
+        {
+            ICollection<int[]> result = JsonSerializer.Parse<ICollection<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfICollectionT()
+        {
+            ICollection<int>[] result = JsonSerializer.Parse<ICollection<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (ICollection<int> arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveICollectionT()
+        {
+            ICollection<int> result = JsonSerializer.Parse<ICollection<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadIReadOnlyCollectionTOfIReadOnlyCollectionT()
+        {
+            IReadOnlyCollection<IReadOnlyCollection<int>> result = JsonSerializer.Parse<IReadOnlyCollection<IReadOnlyCollection<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IReadOnlyCollection<int> ie in result)
+            {
+                foreach (int i in ie)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadIReadOnlyCollectionTOfArray()
+        {
+            IReadOnlyCollection<int[]> result = JsonSerializer.Parse<IReadOnlyCollection<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfIReadOnlyCollectionT()
+        {
+            IReadOnlyCollection<int>[] result = JsonSerializer.Parse<IReadOnlyCollection<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IReadOnlyCollection<int> arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveIReadOnlyCollectionT()
+        {
+            IReadOnlyCollection<int> result = JsonSerializer.Parse<IReadOnlyCollection<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadIReadOnlyListTOfIReadOnlyListT()
+        {
+            IReadOnlyList<IReadOnlyList<int>> result = JsonSerializer.Parse<IReadOnlyList<IReadOnlyList<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IReadOnlyList<int> ie in result)
+            {
+                foreach (int i in ie)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadIReadOnlyListTOfArray()
+        {
+            IReadOnlyList<int[]> result = JsonSerializer.Parse<IReadOnlyList<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfIReadOnlyListT()
+        {
+            IReadOnlyList<int>[] result = JsonSerializer.Parse<IReadOnlyList<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (IReadOnlyList<int> arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveIReadOnlyListT()
+        {
+            IReadOnlyList<int> result = JsonSerializer.Parse<IReadOnlyList<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
         }
 
         public class TestClassWithBadData

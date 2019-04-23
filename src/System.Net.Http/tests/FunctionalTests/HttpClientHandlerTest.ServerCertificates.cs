@@ -10,7 +10,9 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication.ExtendedProtection;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -22,6 +24,8 @@ namespace System.Net.Http.Functional.Tests
         private static bool ClientSupportsDHECipherSuites => (!PlatformDetection.IsWindows || PlatformDetection.IsWindows10Version1607OrGreater);
         private bool BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites =>
             (BackendSupportsCustomCertificateHandling && ClientSupportsDHECipherSuites);
+
+        public HttpClientHandler_ServerCertificates_Test(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
@@ -406,14 +410,14 @@ namespace System.Net.Http.Functional.Tests
                     // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
                     // the same process as the other tests. Each test needs to be isolated to its own process.
                     // See dicussion: https://github.com/dotnet/corefx/issues/21945
-                    RemoteInvoke((remoteUrl, remoteExpectedErrors, useSocketsHttpHandlerString) =>
+                    RemoteExecutor.Invoke((remoteUrl, remoteExpectedErrors, useSocketsHttpHandlerString) =>
                     {
                         UseCallback_BadCertificate_ExpectedPolicyErrors_Helper(
                             remoteUrl,
                             bool.Parse(useSocketsHttpHandlerString),
                             (SslPolicyErrors)Enum.Parse(typeof(SslPolicyErrors), remoteExpectedErrors)).Wait();
 
-                        return SuccessExitCode;
+                        return RemoteExecutor.SuccessExitCode;
                     }, url, expectedErrors.ToString(), UseSocketsHttpHandler.ToString()).Dispose();
                 }
                 else

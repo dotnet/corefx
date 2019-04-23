@@ -318,6 +318,15 @@ namespace System.Reflection.Tests
             else
             {
                 Assert.NotEqual(currentAssembly, loadedAssembly1);
+
+#if netcoreapp
+                System.Runtime.Loader.AssemblyLoadContext alc = System.Runtime.Loader.AssemblyLoadContext.GetLoadContext(loadedAssembly1);
+                string expectedName = string.Format("Assembly.LoadFile({0})", fullRuntimeTestsPath);
+                Assert.Equal(expectedName, alc.Name);
+                Assert.Contains(fullRuntimeTestsPath, alc.Name);
+                Assert.Contains(expectedName, alc.ToString());
+                Assert.Contains("System.Runtime.Loader.IndividualAssemblyLoadContext", alc.ToString());
+#endif
             }
 
             string dir = Path.GetDirectoryName(fullRuntimeTestsPath);
@@ -456,6 +465,16 @@ namespace System.Reflection.Tests
             string simpleName = typeof(AssemblyTests).Assembly.GetName().Name;
             var assembly = Assembly.LoadWithPartialName(simpleName);
             Assert.Equal(typeof(AssemblyTests).Assembly, assembly);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Assembly.LoadFromWithPartialName() not supported on UapAot")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void LoadWithPartialName_Neg()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("partialName", () => Assembly.LoadWithPartialName(null));
+            AssertExtensions.Throws<ArgumentException>("partialName", () => Assembly.LoadWithPartialName(""));
+            Assert.Null(Assembly.LoadWithPartialName("no such assembly"));
         }        
 #pragma warning restore 618
 
@@ -671,6 +690,8 @@ namespace System.Reflection.Tests
         
             string emptyCName = new string('\0', 1);
             AssertExtensions.Throws<ArgumentException>(null, () => Assembly.Load(emptyCName));
+
+            Assert.Throws<FileNotFoundException>(() => Assembly.Load("no such assembly")); // No such assembly
         }
 
         [Fact]

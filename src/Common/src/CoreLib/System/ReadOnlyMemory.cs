@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -12,6 +13,14 @@ using EditorBrowsableState = System.ComponentModel.EditorBrowsableState;
 
 using Internal.Runtime.CompilerServices;
 
+#if BIT64
+using nint = System.Int64;
+using nuint = System.UInt64;
+#else // BIT64
+using nint = System.Int32;
+using nuint = System.UInt32;
+#endif // BIT64
+
 namespace System
 {
     /// <summary>
@@ -20,7 +29,7 @@ namespace System
     /// </summary>
     [DebuggerTypeProxy(typeof(MemoryDebugView<>))]
     [DebuggerDisplay("{ToString(),raw}")]
-    public readonly struct ReadOnlyMemory<T>
+    public readonly struct ReadOnlyMemory<T> : IEquatable<ReadOnlyMemory<T>>
     {
         // NOTE: With the current implementation, Memory<T> and ReadOnlyMemory<T> must have the same layout,
         // as code uses Unsafe.As to cast between them.
@@ -28,7 +37,7 @@ namespace System
         // The highest order bit of _index is used to discern whether _object is a pre-pinned array.
         // (_index < 0) => _object is a pre-pinned array, so Pin() will not allocate a new GCHandle
         //       (else) => Pin() needs to allocate a new GCHandle to pin the object.
-        private readonly object _object;
+        private readonly object? _object;
         private readonly int _index;
         private readonly int _length;
 
@@ -41,7 +50,7 @@ namespace System
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory(T[] array)
+        public ReadOnlyMemory(T[]? array)
         {
             if (array == null)
             {
@@ -67,7 +76,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory(T[] array, int start, int length)
+        public ReadOnlyMemory(T[]? array, int start, int length)
         {
             if (array == null)
             {
@@ -95,7 +104,7 @@ namespace System
         /// <param name="start">The index at which to begin the memory.</param>
         /// <param name="length">The number of items in the memory.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal ReadOnlyMemory(object obj, int start, int length)
+        internal ReadOnlyMemory(object? obj, int start, int length)
         {
             // No validation performed in release builds; caller must provide any necessary validation.
 
@@ -116,7 +125,7 @@ namespace System
         /// <summary>
         /// Defines an implicit conversion of an array to a <see cref="ReadOnlyMemory{T}"/>
         /// </summary>
-        public static implicit operator ReadOnlyMemory<T>(T[] array) => new ReadOnlyMemory<T>(array);
+        public static implicit operator ReadOnlyMemory<T>(T[]? array) => new ReadOnlyMemory<T>(array);
 
         /// <summary>
         /// Defines an implicit conversion of a <see cref="ArraySegment{T}"/> to a <see cref="ReadOnlyMemory{T}"/>
@@ -203,35 +212,6 @@ namespace System
         }
 
         /// <summary>
-        /// Forms a slice out of the given memory, beginning at 'startIndex'
-        /// </summary>
-        /// <param name="startIndex">The index at which to begin this slice.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory<T> Slice(Index startIndex)
-        {
-            int actualIndex = startIndex.GetOffset(_length);
-            return Slice(actualIndex);
-        }
-
-        /// <summary>
-        /// Forms a slice out of the given memory using the range start and end indexes.
-        /// </summary>
-        /// <param name="range">The range used to slice the memory using its start and end indexes.</param>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ReadOnlyMemory<T> Slice(Range range)
-        {
-            (int start, int length) = range.GetOffsetAndLength(_length);
-            // It is expected for _index + start to be negative if the memory is already pre-pinned.
-            return new ReadOnlyMemory<T>(_object, _index + start, length);
-        }
-
-        /// <summary>
-        /// Forms a slice out of the given memory using the range start and end indexes.
-        /// </summary>
-        /// <param name="range">The range used to slice the memory using its start and end indexes.</param>
-        public ReadOnlyMemory<T> this[Range range] => Slice(range);
-
-        /// <summary>
         /// Returns a span from the memory.
         /// </summary>
         public unsafe ReadOnlySpan<T> Span
@@ -244,7 +224,7 @@ namespace System
 
                 // Copy this field into a local so that it can't change out from under us mid-operation.
 
-                object tmpObject = _object;
+                object? tmpObject = _object;
                 if (tmpObject != null)
                 {
                     if (typeof(T) == typeof(char) && tmpObject.GetType() == typeof(string))
@@ -294,12 +274,12 @@ namespace System
                     // least to be in-bounds when compared with the original Memory<T> instance, so using the span won't
                     // AV the process.
 
-                    int desiredStartIndex = _index & RemoveFlagsBitMask;
+                    nuint desiredStartIndex = (uint)_index & (uint)RemoveFlagsBitMask;
                     int desiredLength = _length;
 
 #if BIT64
                     // See comment in Span<T>.Slice for how this works.
-                    if ((ulong)(uint)desiredStartIndex + (ulong)(uint)desiredLength > (ulong)(uint)lengthOfUnderlyingSpan)
+                    if ((ulong)desiredStartIndex + (ulong)(uint)desiredLength > (ulong)(uint)lengthOfUnderlyingSpan)
                     {
                         ThrowHelper.ThrowArgumentOutOfRangeException();
                     }
@@ -310,7 +290,7 @@ namespace System
                     }
 #endif
 
-                    refToReturn = ref Unsafe.Add(ref refToReturn, desiredStartIndex);
+                    refToReturn = ref Unsafe.Add(ref refToReturn, (IntPtr)(void*)desiredStartIndex);
                     lengthOfUnderlyingSpan = desiredLength;
                 }
 
@@ -355,7 +335,7 @@ namespace System
             // is torn. This is ok since the caller is expecting to use raw pointers,
             // and we're not required to keep this as safe as the other Span-based APIs.
 
-            object tmpObject = _object;
+            object? tmpObject = _object;
             if (tmpObject != null)
             {
                 if (typeof(T) == typeof(char) && tmpObject is string s)
@@ -409,7 +389,7 @@ namespace System
 
         /// <summary>Determines whether the specified object is equal to the current object.</summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is ReadOnlyMemory<T> readOnlyMemory)
             {
@@ -451,7 +431,7 @@ namespace System
         /// <param name="length">The count.</param>
         /// <returns>The object.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        internal object GetObjectStartLength(out int start, out int length)
+        internal object? GetObjectStartLength(out int start, out int length)
         {
             start = _index;
             length = _length;

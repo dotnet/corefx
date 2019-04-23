@@ -3,13 +3,18 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.IO;
 using System.Reflection;
 using System.Net.Test.Common;
 
+using Xunit.Abstractions;
+
 namespace System.Net.Http.Functional.Tests
 {
-    public abstract class HttpClientHandlerTestBase : RemoteExecutorTestBase
+    public abstract class HttpClientHandlerTestBase : FileCleanupTestBase
     {
+        public readonly ITestOutputHelper _output;
+
         protected virtual bool UseSocketsHttpHandler => true;
         protected virtual bool UseHttp2LoopbackServer => false;
 
@@ -17,6 +22,11 @@ namespace System.Net.Http.Functional.Tests
         protected bool IsCurlHandler => !UseSocketsHttpHandler && !PlatformDetection.IsWindows;
         protected bool IsNetfxHandler => PlatformDetection.IsWindows && PlatformDetection.IsFullFramework;
         protected bool IsUapHandler => PlatformDetection.IsWindows && PlatformDetection.IsUap;
+
+        public HttpClientHandlerTestBase(ITestOutputHelper output)
+        {
+            _output = output;
+        }
 
         protected HttpClient CreateHttpClient() => new HttpClient(CreateHttpClientHandler());
 
@@ -46,7 +56,7 @@ namespace System.Net.Http.Functional.Tests
                 Debug.Assert(useSocketsHttpHandler == IsSocketsHttpHandler(handler), "Unexpected handler.");
             }
 
-            TestHelper.EnsureHttp2Feature(handler);
+            TestHelper.EnsureHttp2Feature(handler, useHttp2LoopbackServer);
 
             if (useHttp2LoopbackServer)
             {

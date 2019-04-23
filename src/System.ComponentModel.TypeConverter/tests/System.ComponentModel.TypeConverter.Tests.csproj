@@ -2,9 +2,8 @@
   <PropertyGroup>
     <ProjectGuid>{3F0326A1-9E19-4A6C-95CE-63E65C9D2030}</ProjectGuid>
     <DefineConstants>$(DefineConstants);FUNCTIONAL_TESTS</DefineConstants>
-    <DebugEngines>{2E36F1D4-B23C-435D-AB41-18E608940038}</DebugEngines>
-    <RootNamespace>
-    </RootNamespace>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <RootNamespace />
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
@@ -46,6 +45,7 @@
     <Compile Include="ArrayConverterTests.cs" />
     <Compile Include="AttributeCollectionTests.cs" />
     <Compile Include="AttributeProviderAttributeTests.cs" />
+    <Compile Include="BaseNumberConverterTests.cs" />
     <Compile Include="BindingListTests.cs" />
     <Compile Include="BooleanConverterTests.cs" />
     <Compile Include="ByteConvertersTests.cs" />
@@ -118,6 +118,7 @@
     <Compile Include="TimeSpanConverterTests.cs" />
     <Compile Include="TypeConverterAttributeTests.cs" />
     <Compile Include="TypeConverterTests.cs" />
+    <Compile Include="TypeConverterTestBase.cs" />
     <Compile Include="TypeDescriptionProviderAttributeTests.cs" />
     <Compile Include="TypeDescriptorTests.cs" />
     <Compile Include="TypeDescriptorTests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
@@ -150,13 +151,7 @@
     <Compile Include="XTypeDescriptionProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.componentmodel.typeconverter.testdata\$(TestDataPackageVersion)\content\**\*.*">
+    <SupplementalTestData Include="$(PackagesDir)system.componentmodel.typeconverter.testdata\1.0.1\content\**\*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </SupplementalTestData>
   </ItemGroup>

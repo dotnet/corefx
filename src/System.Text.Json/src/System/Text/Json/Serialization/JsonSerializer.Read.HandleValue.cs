@@ -13,8 +13,15 @@ namespace System.Text.Json.Serialization
                 return false;
             }
 
-            bool lastCall = (!state.Current.IsEnumerable() && !state.Current.IsPropertyEnumerable() && state.Current.ReturnValue == null);
-            state.Current.JsonPropertyInfo.Read(tokenType, options, ref state, ref reader);
+            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+            if (jsonPropertyInfo == null || state.Current.JsonClassInfo.ClassType == ClassType.Unknown)
+            {
+                jsonPropertyInfo = state.Current.JsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, typeof(object), options);
+            }
+
+            bool lastCall = (!state.Current.IsProcessingEnumerableOrDictionary() && state.Current.ReturnValue == null);
+
+            jsonPropertyInfo.Read(tokenType, options, ref state, ref reader);
             return lastCall;
         }
     }

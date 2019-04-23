@@ -12,7 +12,9 @@ using System.Net.Test.Common;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -22,6 +24,8 @@ namespace System.Net.Http.Functional.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NetEventSource is only part of .NET Core.")]
     public abstract class DiagnosticsTest : HttpClientHandlerTestBase
     {
+        public DiagnosticsTest(ITestOutputHelper output) : base(output) { }
+
         [Fact]
         public static void EventSource_ExistsWithCorrectId()
         {
@@ -48,7 +52,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool requestLogged = false;
                 Guid requestGuid = Guid.Empty;
@@ -106,7 +110,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -118,7 +122,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceNoLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool requestLogged = false;
                 bool responseLogged = false;
@@ -167,7 +171,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.False(activityStopLogged, "HttpRequestOut.Stop was logged while logging disabled.");
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -178,7 +182,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(true)]
         public void SendAsync_HttpTracingEnabled_Succeeds(bool useSsl)
         {
-            RemoteInvoke(async (useSocketsHttpHandlerString, useSslString) =>
+            RemoteExecutor.Invoke(async (useSocketsHttpHandlerString, useSslString) =>
             {
                 using (var listener = new TestEventListener("Microsoft-System-Net-Http", EventLevel.Verbose))
                 {
@@ -218,7 +222,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.InRange(events.Count, 1, int.MaxValue);
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString(), useSsl.ToString()).Dispose();
         }
 
@@ -226,7 +230,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool exceptionLogged = false;
                 bool responseLogged = false;
@@ -266,7 +270,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -275,7 +279,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool cancelLogged = false;
                 var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
@@ -315,14 +319,14 @@ namespace System.Net.Http.Functional.Tests
                     "Cancellation was not logged within 1 second timeout.");
                 diagnosticListenerObserver.Disable();
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLoggingRequestId()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool requestLogged = false;
                 bool responseLogged = false;
@@ -401,14 +405,14 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLoggingW3C()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool requestLogged = false;
                 bool responseLogged = false;
@@ -486,7 +490,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -494,7 +498,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLogging_InvalidBaggage()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool activityStopLogged = false;
                 bool exceptionLogged = false;
@@ -546,7 +550,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -554,7 +558,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLoggingDoesNotOverwriteHeader()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool activityStartLogged = false;
                 bool activityStopLogged = false;
@@ -603,7 +607,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -611,7 +615,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceActivityLoggingDoesNotOverwriteW3CTraceParentHeader()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool activityStartLogged = false;
                 bool activityStopLogged = false;
@@ -660,7 +664,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -668,7 +672,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceUrlFilteredActivityLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool activityStartLogged = false;
                 bool activityStopLogged = false;
@@ -709,7 +713,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -717,7 +721,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionActivityLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool exceptionLogged = false;
                 bool activityStopLogged = false;
@@ -758,7 +762,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -775,7 +779,7 @@ namespace System.Net.Http.Functional.Tests
                 return;
             }
 
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool exceptionLogged = false;
                 bool activityStopLogged = false;
@@ -849,7 +853,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -857,7 +861,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticSourceNewAndDeprecatedEventsLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool requestLogged = false;
                 bool responseLogged = false;
@@ -901,7 +905,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -909,7 +913,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticExceptionOnlyActivityLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool exceptionLogged = false;
                 bool activityLogged = false;
@@ -944,7 +948,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -952,7 +956,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticStopOnlyActivityLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool activityStartLogged = false;
                 bool activityStopLogged = false;
@@ -986,7 +990,7 @@ namespace System.Net.Http.Functional.Tests
                     diagnosticListenerObserver.Disable();
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
@@ -995,7 +999,7 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledActivityLogging()
         {
-            RemoteInvoke(useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(useSocketsHttpHandlerString =>
             {
                 bool cancelLogged = false;
                 var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
@@ -1036,14 +1040,14 @@ namespace System.Net.Http.Functional.Tests
                     "Cancellation was not logged within 1 second timeout.");
                 diagnosticListenerObserver.Disable();
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [Fact]
         public void SendAsync_NullRequest_ThrowsArgumentNullException()
         {
-            RemoteInvoke(async () =>
+            RemoteExecutor.Invoke(async () =>
             {
                 var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(null);
                 using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
@@ -1067,7 +1071,7 @@ namespace System.Net.Http.Functional.Tests
                 }
 
                 diagnosticListenerObserver.Disable();
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 

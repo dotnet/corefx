@@ -3,6 +3,7 @@
     <ProjectGuid>{7C395A91-D955-444C-98BF-D3F809A56CE1}</ProjectGuid>
     <StringResourcesPath>../src/Resources/Strings.resx</StringResourcesPath>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release</Configurations>
+    <DefineConstants>$(DefineConstants);NETSTANDARD</DefineConstants>
   </PropertyGroup>
   <!-- Do not reference these assemblies from the TargetingPack since we are building part of the source code for tests. -->
   <ItemGroup>
@@ -26,6 +27,9 @@
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Configuration.WebSockets.cs">
       <Link>Common\System\Net\Configuration.WebSockets.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackProxyServer.cs">
+      <Link>Common\System\Net\Http\LoopbackProxyServer.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
       <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
@@ -57,6 +61,6 @@
     <Compile Include="WebSocketHelper.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.1-prerelease\content\**\*.*" />
+    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.2\content\**\*.*" DestinationDir="TestData" />
   </ItemGroup>
 </Project>

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -54,7 +55,7 @@ namespace System.Net.Sockets.Tests
             // TODO #5185: Harden against packet loss
             const int DatagramSize = 256;
             const int DatagramsToSend = 256;
-            const int AckTimeout = 5000;
+            const int AckTimeout = 10000;
             const int TestTimeout = 30000;
 
             var left = new Socket(leftAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
@@ -1238,7 +1239,7 @@ namespace System.Net.Sockets.Tests
             // TODO #5185: harden against packet loss
             const int DatagramSize = 256;
             const int DatagramsToSend = 256;
-            const int AckTimeout = 10000;
+            const int AckTimeout = 20000;
             const int TestTimeout = 60000;
 
             using (var left = new UdpClient(new IPEndPoint(leftAddress, 0)))
@@ -1389,7 +1390,7 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void BlockingRead_DoesntRequireAnotherThreadPoolThread()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 // Set the max number of worker threads to a low value.
                 ThreadPool.GetMaxThreads(out int workerThreads, out int completionPortThreads);

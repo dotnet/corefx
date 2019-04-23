@@ -6,8 +6,11 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection.Emit;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
@@ -279,24 +282,24 @@ namespace System.Tests
         public static void Contains_StringComparison_TurkishI()
         {
             string str = "\u0069\u0130";
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
                 Assert.True(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
                 Assert.True(source.AsSpan().Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, str).Dispose();
 
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
                 Assert.False(source.Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
                 Assert.False(source.AsSpan().Contains("\u0069\u0069", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, str).Dispose();
         }
 
@@ -665,7 +668,7 @@ namespace System.Tests
         {
             string src = "\u0069\u0130";
 
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
@@ -676,10 +679,10 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCulture));
                 Assert.Equal("aa", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, src).Dispose();
 
-            RemoteInvoke((source) =>
+            RemoteExecutor.Invoke((source) =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
@@ -690,7 +693,7 @@ namespace System.Tests
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCulture));
                 Assert.Equal("\u0069a", source.Replace("\u0130", "a", StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, src).Dispose();
         }
 
@@ -836,6 +839,84 @@ namespace System.Tests
         }
 
         [Theory]
+        [InlineData("")] // empty string
+        [InlineData("hello")] // non-empty string
+        public unsafe static void GetPinnableReference_ReturnsSameAsGCHandleAndLegacyFixed(string input)
+        {
+            Assert.NotNull(input); // test shouldn't have null input
+
+            // First, ensure the value pointed to by GetPinnableReference is correct.
+            // It should point to the first character (or the null terminator for empty inputs).
+
+            ref readonly char rChar = ref input.GetPinnableReference();
+            Assert.Equal((input.Length > 0) ? input[0] : '\0', rChar);
+
+            // Next, ensure that GetPinnableReference() and GCHandle.AddrOfPinnedObject agree
+            // on the address being returned.
+
+            GCHandle gcHandle = GCHandle.Alloc(input, GCHandleType.Pinned);
+            try
+            {
+                Assert.Equal((IntPtr)Unsafe.AsPointer(ref Unsafe.AsRef(in rChar)), gcHandle.AddrOfPinnedObject());
+            }
+            finally
+            {
+                gcHandle.Free();
+            }
+
+            // Next, ensure that GetPinnableReference matches the string projected as a ROS<char>.
+
+            Assert.True(Unsafe.AreSame(ref Unsafe.AsRef(in rChar), ref MemoryMarshal.GetReference((ReadOnlySpan<char>)input)));
+
+            // Finally, ensure that GetPinnableReference matches the legacy 'fixed' keyword.
+
+            DynamicMethod dynamicMethod = new DynamicMethod("tester", typeof(bool), new[] { typeof(string) });
+            ILGenerator ilGen = dynamicMethod.GetILGenerator();
+            LocalBuilder pinnedLocal = ilGen.DeclareLocal(typeof(object), pinned: true);
+
+            ilGen.Emit(OpCodes.Ldarg_0); // load 'input' and pin it
+            ilGen.Emit(OpCodes.Stloc, pinnedLocal);
+
+            ilGen.Emit(OpCodes.Ldloc, pinnedLocal); // get the address of field 0 from pinned 'input'
+            ilGen.Emit(OpCodes.Conv_I);
+
+            ilGen.Emit(OpCodes.Call, typeof(RuntimeHelpers).GetProperty("OffsetToStringData").GetMethod); // get pointer to start of string data
+            ilGen.Emit(OpCodes.Add);
+
+            ilGen.Emit(OpCodes.Ldarg_0); // get value of input.GetPinnableReference()
+            ilGen.Emit(OpCodes.Callvirt, typeof(string).GetMethod("GetPinnableReference"));
+
+            // At this point, the top of the evaluation stack is traditional (fixed char* = input) and input.GetPinnableReference().
+            // Compare for equality and return.
+
+            ilGen.Emit(OpCodes.Ceq);
+            ilGen.Emit(OpCodes.Ret);
+
+            Assert.True((bool)dynamicMethod.Invoke(null, new[] { input }));
+        }
+
+        [Fact]
+        public unsafe static void GetPinnableReference_WithNullInput_ThrowsNullRef()
+        {
+            // This test uses an explicit call instead of the normal callvirt that C# would emit.
+            // This allows us to make sure the NullReferenceException is coming from *within*
+            // the GetPinnableReference method rather than on the call site to that method.
+
+            DynamicMethod dynamicMethod = new DynamicMethod("tester", typeof(void), Type.EmptyTypes);
+            ILGenerator ilGen = dynamicMethod.GetILGenerator();
+
+            ilGen.Emit(OpCodes.Ldnull);
+            ilGen.Emit(OpCodes.Call, typeof(string).GetMethod("GetPinnableReference"));
+            ilGen.Emit(OpCodes.Pop);
+            ilGen.Emit(OpCodes.Ret);
+
+            Action del = (Action)dynamicMethod.CreateDelegate(typeof(Action));
+
+            Assert.NotNull(del);
+            Assert.Throws<NullReferenceException>(del);
+        }
+
+        [Theory]
         [InlineData("")]
         [InlineData("a")]
         [InlineData("\0")]
@@ -894,7 +975,7 @@ namespace System.Tests
         [Fact]
         public static void IndexOf_TurkishI_TurkishCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("tr-TR");
 
@@ -923,14 +1004,14 @@ namespace System.Tests
                 Assert.Equal(10, span.IndexOf(new char[] { value }, StringComparison.Ordinal));
                 Assert.Equal(10, span.IndexOf(new char[] { value }, StringComparison.OrdinalIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_TurkishI_InvariantCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -945,14 +1026,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_TurkishI_EnglishUSCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfo("en-US");
 
@@ -967,14 +1048,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_EquivalentDiacritics_EnglishUSCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Exhibit a\u0300\u00C0";
                 char value = '\u00C0';
@@ -986,14 +1067,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(10, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_EquivalentDiacritics_InvariantCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Exhibit a\u0300\u00C0";
                 char value = '\u00C0';
@@ -1003,14 +1084,14 @@ namespace System.Tests
                 Assert.Equal(10, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(8, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_CyrillicE_EnglishUSCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Foo\u0400Bar";
                 char value = '\u0400';
@@ -1022,14 +1103,14 @@ namespace System.Tests
                 Assert.Equal(3, s.IndexOf(value, StringComparison.Ordinal));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.OrdinalIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void IndexOf_CyrillicE_InvariantCulture_Char()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string s = "Foo\u0400Bar";
                 char value = '\u0400';
@@ -1039,7 +1120,7 @@ namespace System.Tests
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCulture));
                 Assert.Equal(3, s.IndexOf(value, StringComparison.CurrentCultureIgnoreCase));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -1070,51 +1151,51 @@ namespace System.Tests
             Assert.Equal(expected, result);
         }
 
-        // [Fact]
-        // public static void IndexerUsingIndexTest()
-        // {
-        //     Index index;
-        //     string s = "0123456789ABCDEF";
+        [Fact]
+        public static void IndexerUsingIndexTest()
+        {
+            Index index;
+            string s = "0123456789ABCDEF";
 
-        //     for (int i = 0; i < s.Length; i++)
-        //     {
-        //         index = Index.FromStart(i);
-        //         Assert.Equal(s[i], s[index]);
+            for (int i = 0; i < s.Length; i++)
+            {
+                index = Index.FromStart(i);
+                Assert.Equal(s[i], s[index]);
 
-        //         index = Index.FromEnd(i + 1);
-        //         Assert.Equal(s[s.Length - i - 1], s[index]);
-        //     }
+                index = Index.FromEnd(i + 1);
+                Assert.Equal(s[s.Length - i - 1], s[index]);
+            }
 
-        //     index = Index.FromStart(s.Length + 1);
-        //     char c;
-        //     Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
+            index = Index.FromStart(s.Length + 1);
+            char c;
+            Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
 
-        //     index = Index.FromEnd(s.Length + 1);
-        //     Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
-        // }
+            index = Index.FromEnd(s.Length + 1);
+            Assert.Throws<IndexOutOfRangeException>(() => c = s[index]);
+        }
 
-        // [Fact]
-        // public static void IndexerUsingRangeTest()
-        // {
-        //     Range range;
-        //     string s = "0123456789ABCDEF";
+        [Fact]
+        public static void IndexerUsingRangeTest()
+        {
+            Range range;
+            string s = "0123456789ABCDEF";
 
-        //     for (int i = 0; i < s.Length; i++)
-        //     {
-        //         range = new Range(Index.FromStart(0), Index.FromStart(i));
-        //         Assert.Equal(s.Substring(0, i), s[range]);
+            for (int i = 0; i < s.Length; i++)
+            {
+                range = new Range(Index.FromStart(0), Index.FromStart(i));
+                Assert.Equal(s.Substring(0, i), s[range]);
 
-        //         range = new Range(Index.FromEnd(s.Length), Index.FromEnd(i));
-        //         Assert.Equal(s.Substring(0, s.Length - i), s[range]);
-        //     }
+                range = new Range(Index.FromEnd(s.Length), Index.FromEnd(i));
+                Assert.Equal(s.Substring(0, s.Length - i), s[range]);
+            }
 
-        //     range = new Range(Index.FromStart(s.Length - 2), Index.FromStart(s.Length + 1));
-        //     string s1;
-        //     Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
+            range = new Range(Index.FromStart(s.Length - 2), Index.FromStart(s.Length + 1));
+            string s1;
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
 
-        //     range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
-        //     Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
-        // }
+            range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
+        }
 
         [Fact]
         public static void SubstringUsingIndexTest()
@@ -1123,15 +1204,15 @@ namespace System.Tests
 
             for (int i = 0; i < s.Length; i++)
             {
-                Assert.Equal(s.Substring(i), s.Substring(Index.FromStart(i)));
-                Assert.Equal(s.Substring(s.Length - i - 1), s.Substring(Index.FromEnd(i + 1)));
+                Assert.Equal(s.Substring(i), s[i..]);
+                Assert.Equal(s.Substring(s.Length - i - 1), s[^(i + 1)..]);
             }
 
             // String.Substring allows the string length as a valid input.
-            Assert.Equal(s.Substring(s.Length), s.Substring(Index.FromStart(s.Length)));
+            Assert.Equal(s.Substring(s.Length), s[s.Length..]);
 
-            Assert.Throws<ArgumentOutOfRangeException>(() => s.Substring(Index.FromStart(s.Length + 1)));
-            Assert.Throws<ArgumentOutOfRangeException>(() => s.Substring(Index.FromEnd(s.Length + 1)));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s[(s.Length + 1)..]);
+            Assert.Throws<ArgumentOutOfRangeException>(() => s[^(s.Length + 1)..]);
         }
 
         [Fact]
@@ -1143,18 +1224,18 @@ namespace System.Tests
             for (int i = 0; i < s.Length; i++)
             {
                 range = new Range(Index.FromStart(0), Index.FromStart(i));
-                Assert.Equal(s.Substring(0, i), s.Substring(range));
+                Assert.Equal(s.Substring(0, i), s[range]);
 
                 range = new Range(Index.FromEnd(s.Length), Index.FromEnd(i));
-                Assert.Equal(s.Substring(0, s.Length - i), s.Substring(range));
+                Assert.Equal(s.Substring(0, s.Length - i), s[range]);
             }
 
             range = new Range(Index.FromStart(s.Length - 2), Index.FromStart(s.Length + 1));
             string s1;
-            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
 
             range = new Range(Index.FromEnd(s.Length + 1), Index.FromEnd(0));
-            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s.Substring(range));
+            Assert.Throws<ArgumentOutOfRangeException>(() => s1 = s[range]);
         }
 
         /// <summary>
@@ -1177,6 +1258,392 @@ namespace System.Tests
                         Marshal.FreeHGlobal(pAnsiStr);
                     }
                 }
+            }
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", "Hello")]
+        [InlineData("      \t      ", "")]
+        [InlineData("", "")]
+        [InlineData("      ", "")]
+        public static void Trim_Memory(string s, string expected)
+        {
+            Assert.Equal(expected, s.AsSpan().Trim().ToString()); // ReadOnlySpan
+            Assert.Equal(expected, new Span<char>(s.ToCharArray()).Trim().ToString());
+            Assert.Equal(expected, new Memory<char>(s.ToCharArray()).Trim().ToString());
+            Assert.Equal(expected, s.AsMemory().Trim().ToString()); // ReadOnlyMemory
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", "  Hello")]
+        [InlineData("      \t      ", "")]
+        [InlineData("", "")]
+        [InlineData("      ", "")]
+        public static void TrimEnd_Memory(string s, string expected)
+        {
+            Assert.Equal(expected, s.AsSpan().TrimEnd().ToString()); // ReadOnlySpan
+            Assert.Equal(expected, new Span<char>(s.ToCharArray()).TrimEnd().ToString());
+            Assert.Equal(expected, new Memory<char>(s.ToCharArray()).TrimEnd().ToString());
+            Assert.Equal(expected, s.AsMemory().TrimEnd().ToString()); // ReadOnlyMemory
+        }
+
+        [Theory]
+        [InlineData("  Hello  ", "Hello  ")]
+        [InlineData("      \t      ", "")]
+        [InlineData("", "")]
+        [InlineData("      ", "")]
+        public static void TrimStart_Memory(string s, string expected)
+        {
+            Assert.Equal(expected, s.AsSpan().TrimStart().ToString()); // ReadOnlySpan
+            Assert.Equal(expected, new Span<char>(s.ToCharArray()).TrimStart().ToString());
+            Assert.Equal(expected, new Memory<char>(s.ToCharArray()).TrimStart().ToString());
+            Assert.Equal(expected, s.AsMemory().TrimStart().ToString()); // ReadOnlyMemory
+        }
+
+        [Fact]
+        public static void ZeroLengthTrim_Memory()
+        {
+            string s1 = string.Empty;
+
+            ReadOnlySpan<char> ros = s1.AsSpan();
+            Assert.True(ros.SequenceEqual(ros.Trim()));
+            Assert.True(ros.SequenceEqual(ros.TrimStart()));
+            Assert.True(ros.SequenceEqual(ros.TrimEnd()));
+
+            Span<char> span = new Span<char>(s1.ToCharArray());
+            Assert.True(span.SequenceEqual(span.Trim()));
+            Assert.True(span.SequenceEqual(span.TrimStart()));
+            Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+            Memory<char> mem = new Memory<char>(s1.ToCharArray());
+            Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+            Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+            Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+            ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(s1.ToCharArray());
+            Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+            Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+            Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+        }
+
+        [Fact]
+        public static void NoWhiteSpaceTrim_Memory()
+        {
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                string s1 = new string(a);
+
+                ReadOnlySpan<char> ros = s1.AsSpan();
+                Assert.True(ros.SequenceEqual(ros.Trim()));
+                Assert.True(ros.SequenceEqual(ros.TrimStart()));
+                Assert.True(ros.SequenceEqual(ros.TrimEnd()));
+
+                Span<char> span = new Span<char>(a);
+                Assert.True(span.SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void OnlyWhiteSpaceTrim_Memory()
+        {
+            for (int length = 0; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = ' ';
+                }
+                string s1 = new string(a);
+
+                ReadOnlySpan<char> ros = new ReadOnlySpan<char>(a);
+                Assert.True(ReadOnlySpan<char>.Empty.SequenceEqual(ros.Trim()));
+                Assert.True(ReadOnlySpan<char>.Empty.SequenceEqual(ros.TrimStart()));
+                Assert.True(ReadOnlySpan<char>.Empty.SequenceEqual(ros.TrimEnd()));
+
+                Span<char> span = new Span<char>(a);
+                Assert.True(Span<char>.Empty.SequenceEqual(span.Trim()));
+                Assert.True(Span<char>.Empty.SequenceEqual(span.TrimStart()));
+                Assert.True(Span<char>.Empty.SequenceEqual(span.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(Memory<char>.Empty.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(Memory<char>.Empty.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(Memory<char>.Empty.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(ReadOnlyMemory<char>.Empty.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(ReadOnlyMemory<char>.Empty.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(ReadOnlyMemory<char>.Empty.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceAtStartTrim_Memory()
+        {
+            for (int length = 2; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[0] = ' ';
+                string s1 = new string(a);
+
+                ReadOnlySpan<char> ros = s1.AsSpan();
+                Assert.True(ros.Slice(1).SequenceEqual(ros.Trim()));
+                Assert.True(ros.Slice(1).SequenceEqual(ros.TrimStart()));
+                Assert.True(ros.SequenceEqual(ros.TrimEnd()));
+
+                Span<char> span = new Span<char>(a);
+                Assert.True(span.Slice(1).SequenceEqual(span.Trim()));
+                Assert.True(span.Slice(1).SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceAtEndTrim_Memory()
+        {
+            for (int length = 2; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[length - 1] = ' ';
+                string s1 = new string(a);
+
+                ReadOnlySpan<char> ros = s1.AsSpan();
+                Assert.True(ros.Slice(0, length - 1).SequenceEqual(ros.Trim()));
+                Assert.True(ros.SequenceEqual(ros.TrimStart()));
+                Assert.True(ros.Slice(0, length - 1).SequenceEqual(ros.TrimEnd()));
+
+                Span<char> span = new Span<char>(a);
+                Assert.True(span.Slice(0, length - 1).SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.Slice(0, length - 1).SequenceEqual(span.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Slice(0, length - 1).Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Slice(0, length - 1).Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceAtStartAndEndTrim_Memory()
+        {
+            for (int length = 3; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[0] = ' ';
+                a[length - 1] = ' ';
+                string s1 = new string(a);
+
+                ReadOnlySpan<char> ros = s1.AsSpan();
+                Assert.True(ros.Slice(1, length - 2).SequenceEqual(ros.Trim()));
+                Assert.True(ros.Slice(1).SequenceEqual(ros.TrimStart()));
+                Assert.True(ros.Slice(0, length - 1).SequenceEqual(ros.TrimEnd()));
+
+                Span<char> span = new Span<char>(a);
+                Assert.True(span.Slice(1, length - 2).SequenceEqual(span.Trim()));
+                Assert.True(span.Slice(1).SequenceEqual(span.TrimStart()));
+                Assert.True(span.Slice(0, length - 1).SequenceEqual(span.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Slice(1, length - 2).Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Slice(1).Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Slice(1, length - 2).Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Slice(1).Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Slice(0, length - 1).Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void WhiteSpaceInMiddleTrim_Memory()
+        {
+            for (int length = 3; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[1] = ' ';
+                string s1 = new string(a);
+
+                ReadOnlySpan<char> ros = s1.AsSpan();
+                Assert.True(ros.SequenceEqual(ros.Trim()));
+                Assert.True(ros.SequenceEqual(ros.TrimStart()));
+                Assert.True(ros.SequenceEqual(ros.TrimEnd()));
+
+                Span<char> span = new Span<char>(a);
+                Assert.True(span.SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(a);
+                Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
+            }
+        }
+
+        [Fact]
+        public static void TrimWhiteSpaceMultipleTimes_Memory()
+        {
+            for (int length = 3; length < 32; length++)
+            {
+                char[] a = new char[length];
+                for (int i = 0; i < length; i++)
+                {
+                    a[i] = 'a';
+                }
+                a[0] = ' ';
+                a[length - 1] = ' ';
+                string s1 = new string(a);
+
+                // ReadOnlySpan
+                {
+                    ReadOnlySpan<char> ros = s1.AsSpan();
+                    ReadOnlySpan<char> trimResult = ros.Trim();
+                    ReadOnlySpan<char> trimStartResult = ros.TrimStart();
+                    ReadOnlySpan<char> trimEndResult = ros.TrimEnd();
+                    Assert.True(ros.Slice(1, length - 2).SequenceEqual(trimResult));
+                    Assert.True(ros.Slice(1).SequenceEqual(trimStartResult));
+                    Assert.True(ros.Slice(0, length - 1).SequenceEqual(trimEndResult));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.SequenceEqual(trimResult.Trim()));
+                    Assert.True(trimStartResult.SequenceEqual(trimStartResult.TrimStart()));
+                    Assert.True(trimEndResult.SequenceEqual(trimEndResult.TrimEnd()));
+                }
+
+                // Span
+                {
+                    Span<char> span = new Span<char>(a);
+                    Span<char> trimResult = span.Trim();
+                    Span<char> trimStartResult = span.TrimStart();
+                    Span<char> trimEndResult = span.TrimEnd();
+                    Assert.True(span.Slice(1, length - 2).SequenceEqual(trimResult));
+                    Assert.True(span.Slice(1).SequenceEqual(trimStartResult));
+                    Assert.True(span.Slice(0, length - 1).SequenceEqual(trimEndResult));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.SequenceEqual(trimResult.Trim()));
+                    Assert.True(trimStartResult.SequenceEqual(trimStartResult.TrimStart()));
+                    Assert.True(trimEndResult.SequenceEqual(trimEndResult.TrimEnd()));
+                }
+
+                // Memory
+                {
+                    Memory<char> mem = new Memory<char>(a);
+                    Memory<char> trimResult = mem.Trim();
+                    Memory<char> trimStartResult = mem.TrimStart();
+                    Memory<char> trimEndResult = mem.TrimEnd();
+                    Assert.True(mem.Slice(1, length - 2).Span.SequenceEqual(trimResult.Span));
+                    Assert.True(mem.Slice(1).Span.SequenceEqual(trimStartResult.Span));
+                    Assert.True(mem.Slice(0, length - 1).Span.SequenceEqual(trimEndResult.Span));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.Span.SequenceEqual(trimResult.Trim().Span));
+                    Assert.True(trimStartResult.Span.SequenceEqual(trimStartResult.TrimStart().Span));
+                    Assert.True(trimEndResult.Span.SequenceEqual(trimEndResult.TrimEnd().Span));
+                }
+
+                // ReadOnlyMemory
+                {
+                    ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(a);
+                    ReadOnlyMemory<char> trimResult = rom.Trim();
+                    ReadOnlyMemory<char> trimStartResult = rom.TrimStart();
+                    ReadOnlyMemory<char> trimEndResult = rom.TrimEnd();
+                    Assert.True(rom.Slice(1, length - 2).Span.SequenceEqual(trimResult.Span));
+                    Assert.True(rom.Slice(1).Span.SequenceEqual(trimStartResult.Span));
+                    Assert.True(rom.Slice(0, length - 1).Span.SequenceEqual(trimEndResult.Span));
+
+                    // 2nd attempt should do nothing
+                    Assert.True(trimResult.Span.SequenceEqual(trimResult.Trim().Span));
+                    Assert.True(trimStartResult.Span.SequenceEqual(trimStartResult.TrimStart().Span));
+                    Assert.True(trimEndResult.Span.SequenceEqual(trimEndResult.TrimEnd().Span));
+                }
+            }
+        }
+
+        [Fact]
+        public static void MakeSureNoTrimChecksGoOutOfRange_Memory()
+        {
+            for (int length = 3; length < 64; length++)
+            {
+                char[] first = new char[length];
+                first[0] = ' ';
+                first[length - 1] = ' ';
+                string s1 = new string(first, 1, length - 2);
+
+                ReadOnlySpan<char> ros = s1.AsSpan();
+                Assert.True(ros.SequenceEqual(ros.Trim()));
+                Assert.True(ros.SequenceEqual(ros.TrimStart()));
+                Assert.True(ros.SequenceEqual(ros.TrimEnd()));
+
+                Span<char> span = new Span<char>(s1.ToCharArray());
+                Assert.True(span.SequenceEqual(span.Trim()));
+                Assert.True(span.SequenceEqual(span.TrimStart()));
+                Assert.True(span.SequenceEqual(span.TrimEnd()));
+
+                Memory<char> mem = new Memory<char>(s1.ToCharArray());
+                Assert.True(mem.Span.SequenceEqual(mem.Trim().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimStart().Span));
+                Assert.True(mem.Span.SequenceEqual(mem.TrimEnd().Span));
+
+                ReadOnlyMemory<char> rom = new ReadOnlyMemory<char>(s1.ToCharArray());
+                Assert.True(rom.Span.SequenceEqual(rom.Trim().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimStart().Span));
+                Assert.True(rom.Span.SequenceEqual(rom.TrimEnd().Span));
             }
         }
     }

@@ -94,11 +94,75 @@ namespace Microsoft.VisualBasic
         public ControlChars() { }
     }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class Conversion
+    {
+        internal Conversion() { }
+        public static TargetType CTypeDynamic<TargetType>(object Expression) { throw null; }
+        public static object CTypeDynamic(object Expression, System.Type TargetType) { throw null; }
+        public static string ErrorToString() { throw null; }
+        public static string ErrorToString(int ErrorNumber) { throw null; }
+        public static int Fix(int Number) { throw null; }
+        public static long Fix(long Number) { throw null; }
+        public static double Fix(double Number) { throw null; }
+        public static float Fix(float Number) { throw null; }
+        public static decimal Fix(decimal Number) { throw null; }
+        public static object Fix(object Number) { throw null; }
+        public static short Fix(short Number) { throw null; }
+        public static string Hex(object Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(ulong Number) { throw null; }
+        public static string Hex(long Number) { throw null; }
+        public static string Hex(int Number) { throw null; }
+        public static string Hex(short Number) { throw null; }
+        public static string Hex(byte Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(uint Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(ushort Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(sbyte Number) { throw null; }
+        public static short Int(short Number) { throw null; }
+        public static int Int(int Number) { throw null; }
+        public static object Int(object Number) { throw null; }
+        public static double Int(double Number) { throw null; }
+        public static float Int(float Number) { throw null; }
+        public static long Int(long Number) { throw null; }
+        public static decimal Int(decimal Number) { throw null; }
+        public static string Oct(object Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(ulong Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(uint Number) { throw null; }
+        public static string Oct(long Number) { throw null; }
+        public static string Oct(short Number) { throw null; }
+        public static string Oct(byte Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(sbyte Number) { throw null; }
+        public static string Oct(int Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(ushort Number) { throw null; }
+        public static string Str(object Number) { throw null; }
+        public static double Val(string InputStr) { throw null; }
+        public static int Val(char Expression) { throw null; }
+        public static double Val(object Expression) { throw null; }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class DateAndTime
     {
         internal DateAndTime() { }
         public static System.DateTime Now { get { throw null; } }
         public static System.DateTime Today { get { throw null; } }
+    }
+    public sealed partial class ErrObject
+    {
+        internal ErrObject() { }
+        public void Clear() { }
+        public string Description { get { throw null; } set { } }
+        public int Erl { get { throw null; } }
+        public System.Exception GetException() { throw null; }
+        public int LastDllError { get { throw null; } }
+        public int Number { get { throw null; } set { } }
+        public void Raise(int Number, object Source = null, object Description = null, object HelpFile = null, object HelpContext = null) { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
@@ -110,6 +174,7 @@ namespace Microsoft.VisualBasic
     public sealed partial class Information
     {
         internal Information() { }
+        public static ErrObject Err() { throw null; }
         public static bool IsArray(object VarName) { throw null; }
         public static bool IsDate(object Expression) { throw null; }
         public static bool IsDBNull(object Expression) { throw null; }
@@ -121,9 +186,16 @@ namespace Microsoft.VisualBasic
         public static int QBColor(int Color) { throw null; }
         public static int RGB(int Red, int Green, int Blue) { throw null; }
         public static string SystemTypeName(string VbName) { throw null; }
+        public static string TypeName(object VarName) { throw null; }
         public static int UBound(System.Array Array, int Rank = 1) { throw null; }
         public static Microsoft.VisualBasic.VariantType VarType(object VarName) { throw null; }
         public static string VbTypeName(string UrtName) { throw null; }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class Interaction
+    {
+        internal Interaction() { }
+        public static object CallByName(object ObjectRef, string ProcName, CallType UseCallType, params object[] Args) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -176,6 +248,8 @@ namespace Microsoft.VisualBasic
         public static string Mid(string str, int Start, int Length) { throw null; }
         public static string Right(string str, int Length) { throw null; }
         public static string RTrim(string str) { throw null; }
+        public static int StrComp(string String1, string String2, CompareMethod Compare = CompareMethod.Binary) { throw null; }
+        public static string StrReverse(string Expression) { throw null; }
         public static string Trim(string str) { throw null; }
     }
     public enum VariantType
@@ -227,6 +301,15 @@ namespace Microsoft.VisualBasic
 }
 namespace Microsoft.VisualBasic.ApplicationServices
 {
+    public partial class ApplicationBase
+    {
+        public ApplicationBase() { }
+        public void ChangeCulture(string cultureName) { throw null; }
+        public void ChangeUICulture(string cultureName) { throw null; }
+        public System.Globalization.CultureInfo Culture { get { throw null; } }
+        public System.Globalization.CultureInfo UICulture { get { throw null; } }
+        public string GetEnvironmentVariable(string name) { throw null; }
+    }
     public partial class StartupEventArgs : System.ComponentModel.CancelEventArgs
     {
         public StartupEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args) { }
@@ -245,6 +328,16 @@ namespace Microsoft.VisualBasic.ApplicationServices
         public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base (default(System.Exception)) { }
         public bool ExitApplication { get { throw null; } set { } }
     }
+    public partial class User
+    {
+        public User() { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.Security.Principal.IPrincipal CurrentPrincipal { get { throw null; } set { } }
+        protected virtual System.Security.Principal.IPrincipal InternalPrincipal { get { throw null; } set { } }
+        public bool IsAuthenticated { get { throw null; } }
+        public bool IsInRole(string role) { throw null; }
+        public string Name { get { throw null; } }
+    }
 }
 namespace Microsoft.VisualBasic.CompilerServices
 {
@@ -254,6 +347,27 @@ namespace Microsoft.VisualBasic.CompilerServices
         internal BooleanType() { }
         public static bool FromObject(object Value) { throw null; }
         public static bool FromString(string Value) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class ByteType
+    {
+        internal ByteType() { }
+        public static byte FromObject(object Value) { throw null; }
+        public static byte FromString(string Value) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class CharArrayType
+    {
+        internal CharArrayType() { }
+        public static char[] FromObject(object Value) { throw null; }
+        public static char[] FromString(string Value) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class CharType
+    {
+        internal CharType() { }
+        public static char FromObject(object Value) { throw null; }
+        public static char FromString(string Value) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class Conversions
@@ -325,6 +439,14 @@ namespace Microsoft.VisualBasic.CompilerServices
         public static ushort ToUShort(string Value) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class DateType
+    {
+        internal DateType() { }
+        public static System.DateTime FromObject(object Value) { throw null; }
+        public static System.DateTime FromString(string Value) { throw null; }
+        public static System.DateTime FromString(string Value, System.Globalization.CultureInfo culture) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class DecimalType
     {
         internal DecimalType() { }
@@ -356,6 +478,53 @@ namespace Microsoft.VisualBasic.CompilerServices
     public sealed partial class IncompleteInitialization : System.Exception
     {
         public IncompleteInitialization() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class IntegerType
+    {
+        internal IntegerType() { }
+        public static int FromObject(object Value) { throw null; }
+        public static int FromString(string Value) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class LateBinding
+    {
+        internal LateBinding() { }
+        [System.Diagnostics.DebuggerHiddenAttribute]
+        [System.Diagnostics.DebuggerStepThroughAttribute]
+        public static void LateCall(object o, System.Type objType, string name, object[] args, string[] paramnames, bool[] CopyBack) { throw null; }
+        [System.Diagnostics.DebuggerHiddenAttribute]
+        [System.Diagnostics.DebuggerStepThroughAttribute]
+        public static object LateGet(object o, System.Type objType, string name, object[] args, string[] paramnames, bool[] CopyBack) { throw null; }
+        [System.Diagnostics.DebuggerHiddenAttribute]
+        [System.Diagnostics.DebuggerStepThroughAttribute]
+        public static object LateIndexGet(object o, object[] args, string[] paramnames) { throw null; }
+        [System.Diagnostics.DebuggerHiddenAttribute]
+        [System.Diagnostics.DebuggerStepThroughAttribute]
+        public static void LateIndexSet(object o, object[] args, string[] paramnames) { throw null; }
+        [System.Diagnostics.DebuggerHiddenAttribute]
+        [System.Diagnostics.DebuggerStepThroughAttribute]
+        public static void LateIndexSetComplex(object o, object[] args, string[] paramnames, bool OptimisticSet, bool RValueBase) { throw null; }
+        [System.Diagnostics.DebuggerHiddenAttribute]
+        [System.Diagnostics.DebuggerStepThroughAttribute]
+        public static void LateSet(object o, System.Type objType, string name, object[] args, string[] paramnames) { throw null; }
+        [System.Diagnostics.DebuggerHiddenAttribute]
+        [System.Diagnostics.DebuggerStepThroughAttribute]
+        public static void LateSetComplex(object o, System.Type objType, string name, object[] args, string[] paramnames, bool OptimisticSet, bool RValueBase) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class LikeOperator
+    {
+        internal LikeOperator() { }
+        public static object LikeObject(object Source, object Pattern, Microsoft.VisualBasic.CompareMethod CompareOption) { throw null; }
+        public static bool LikeString(string Source, string Pattern, Microsoft.VisualBasic.CompareMethod CompareOption) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class LongType
+    {
+        internal LongType() { }
+        public static long FromObject(object Value) { throw null; }
+        public static long FromString(string Value) { throw null; }
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class NewLateBinding
@@ -415,6 +584,31 @@ namespace Microsoft.VisualBasic.CompilerServices
         }
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class ObjectType
+    {
+        public ObjectType() { }
+        public static object AddObj(object o1, object o2) { throw null; }
+        public static object BitAndObj(object obj1, object obj2) { throw null; }
+        public static object BitOrObj(object obj1, object obj2) { throw null; }
+        public static object BitXorObj(object obj1, object obj2) { throw null; }
+        public static object DivObj(object o1, object o2) { throw null; }
+        public static object GetObjectValuePrimitive(object o) { throw null; }
+        public static object IDivObj(object o1, object o2) { throw null; }
+        public static bool LikeObj(object vLeft, object vRight, CompareMethod CompareOption) { throw null; }
+        public static object ModObj(object o1, object o2) { throw null; }
+        public static object MulObj(object o1, object o2) { throw null; }
+        public static object NegObj(object obj) { throw null; }
+        public static object NotObj(object obj) { throw null; }
+        public static int ObjTst(object o1, object o2, bool TextCompare) { throw null; }
+        public static object PlusObj(object obj) { throw null; }
+        public static object PowObj(object obj1, object obj2) { throw null; }
+        public static object ShiftLeftObj(object o1, int amount) { throw null; }
+        public static object ShiftRightObj(object o1, int amount) { throw null; }
+        public static object StrCatObj(object vLeft, object vRight) { throw null; }
+        public static object SubObj(object o1, object o2) { throw null; }
+        public static object XorObj(object obj1, object obj2) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class Operators
     {
         internal Operators() { }
@@ -467,8 +661,26 @@ namespace Microsoft.VisualBasic.CompilerServices
     {
         internal ProjectData() { }
         public static void ClearProjectError() { }
+        public static System.Exception CreateProjectError(int hr) { throw null; }
+        public static void EndApp() { }
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class ShortType
+    {
+        internal ShortType() { }
+        public static short FromObject(object Value) { throw null; }
+        public static short FromString(string Value) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class SingleType
+    {
+        internal SingleType() { }
+        public static float FromObject(object Value) { throw null; }
+        public static float FromObject(object Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static float FromString(string Value) { throw null; }
+        public static float FromString(string Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, Inherited=false, AllowMultiple=false)]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
@@ -483,6 +695,30 @@ namespace Microsoft.VisualBasic.CompilerServices
         public StaticLocalInitFlag() { }
     }
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public sealed partial class StringType
+    {
+        internal StringType() { }
+        public static string FromBoolean(bool Value) { throw null; }
+        public static string FromByte(byte Value) { throw null; }
+        public static string FromChar(char Value) { throw null; }
+        public static string FromDate(System.DateTime Value) { throw null; }
+        public static string FromDecimal(decimal Value) { throw null; }
+        public static string FromDecimal(decimal Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static string FromDouble(double Value) { throw null; }
+        public static string FromDouble(double Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static string FromInteger(int Value) { throw null; }
+        public static string FromLong(long Value) { throw null; }
+        public static string FromObject(object Value) { throw null; }
+        public static string FromShort(short Value) { throw null; }
+        public static string FromSingle(float Value) { throw null; }
+        public static string FromSingle(float Value, System.Globalization.NumberFormatInfo NumberFormat) { throw null; }
+        public static void MidStmtStr(ref string sDest, int StartPosition, int MaxInsertLength, string sInsert) { throw null; }
+        public static int StrCmp(string sLeft, string sRight, bool TextCompare) { throw null; }
+        public static bool StrLike(string Source, string Pattern, Microsoft.VisualBasic.CompareMethod CompareOption) { throw null; }
+        public static bool StrLikeBinary(string Source, string Pattern) { throw null; }
+        public static bool StrLikeText(string Source, string Pattern) { throw null; }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class Utils
     {
         internal Utils() { }
@@ -492,17 +728,72 @@ namespace Microsoft.VisualBasic.CompilerServices
     public sealed partial class Versioned
     {
         internal Versioned() { }
+        public static object CallByName(object Instance, string MethodName, CallType UseCallType, params object[] Arguments) { throw null; }
         public static bool IsNumeric(object Expression) { throw null; }
         public static string SystemTypeName(string VbName) { throw null; }
+        public static string TypeName(object Expression) { throw null; }
         public static string VbTypeName(string SystemName) { throw null; }
     }
 }
 namespace Microsoft.VisualBasic.Devices
 {
+    public partial class Audio
+    {
+        public Audio() { }
+    }
+    public partial class Clock
+    {
+        public Clock() { }
+        public System.DateTime GmtTime { get { throw null; } }
+        public System.DateTime LocalTime { get { throw null; } }
+        public int TickCount { get { throw null; } }
+    }
+    public partial class Computer : ServerComputer
+    {
+        public Computer() { }
+        public Audio Audio { get { throw null; } }
+        public Microsoft.VisualBasic.MyServices.ClipboardProxy Clipboard { get { throw null; } }
+        public Keyboard Keyboard { get { throw null; } }
+        public Mouse Mouse { get { throw null; } }
+        public Ports Ports { get { throw null; } }
+    }
+    public partial class ComputerInfo
+    {
+        public ComputerInfo() { }
+        public System.Globalization.CultureInfo InstalledUICulture { get { throw null; } }
+        public string OSPlatform { get { throw null; } }
+        public string OSVersion { get { throw null; } }
+    }
+    public partial class Keyboard
+    {
+        public Keyboard() { }
+    }
+    public partial class Mouse
+    {
+        public Mouse() { }
+    }
+    public partial class Network
+    {
+        public Network() { }
+    }
     public partial class NetworkAvailableEventArgs : System.EventArgs
     {
         public NetworkAvailableEventArgs(bool networkAvailable) { }
         public bool IsNetworkAvailable { get { throw null; } }
+    }
+    public partial class Ports
+    {
+        public Ports() { }
+    }
+    public partial class ServerComputer
+    {
+        public ServerComputer() { }
+        public Clock Clock { get { throw null; } }
+        public Microsoft.VisualBasic.MyServices.FileSystemProxy FileSystem { get { throw null; } }
+        public ComputerInfo Info { get { throw null; } }
+        public string Name { get { throw null; } }
+        public Network Network { get { throw null; } }
+        public Microsoft.VisualBasic.MyServices.RegistryProxy Registry { get { throw null; } }
     }
 }
 namespace Microsoft.VisualBasic.FileIO
@@ -659,5 +950,38 @@ namespace Microsoft.VisualBasic.FileIO
     {
         AllDialogs = 3,
         OnlyErrorDialogs = 2,
+    }
+}
+namespace Microsoft.VisualBasic.MyServices
+{
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class ClipboardProxy
+    {
+        internal ClipboardProxy() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class FileSystemProxy
+    {
+        internal FileSystemProxy() { }
+        public SpecialDirectoriesProxy SpecialDirectories { get { throw null; } }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class RegistryProxy
+    {
+        internal RegistryProxy() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class SpecialDirectoriesProxy
+    {
+        internal SpecialDirectoriesProxy() { }
+        public string AllUsersApplicationData { get { throw null; } }
+        public string CurrentUserApplicationData { get { throw null; } }
+        public string Desktop { get { throw null; } }
+        public string MyDocuments { get { throw null; } }
+        public string MyMusic { get { throw null; } }
+        public string MyPictures { get { throw null; } }
+        public string Programs { get { throw null; } }
+        public string ProgramFiles { get { throw null; } }
+        public string Temp { get { throw null; } }
     }
 }

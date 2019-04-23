@@ -4,6 +4,7 @@
     <DefineConstants Condition="'$(TargetsWindows)'=='true'">$(DefineConstants);TargetsWindows</DefineConstants>
     <DefineConstants>$(DefineConstants);SYSNETHTTP_NO_OPENSSL</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Unix-Debug;netstandard-Unix-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
@@ -64,6 +65,9 @@
     <Compile Include="$(CommonTestPath)\System\Net\VerboseTestLogging.cs">
       <Link>Common\System\Net\VerboseTestLogging.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackProxyServer.cs">
+      <Link>Common\System\Net\Http\LoopbackProxyServer.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Net\Http\LoopbackServer.cs">
       <Link>Common\System\Net\Http\LoopbackServer.cs</Link>
     </Compile>
@@ -113,12 +117,12 @@
     <Compile Include="HttpMessageInvokerTest.cs" />
     <Compile Include="HttpMethodTest.cs" />
     <Compile Include="HttpClientHandlerTest.Cookies.cs" />
+    <Compile Include="HttpClientHandlerTest.Headers.cs" />
     <Compile Include="HttpRetryProtocolTests.cs" />
     <Compile Include="IdnaProtocolTests.cs" />
     <Compile Include="HttpProtocolTests.cs" />
     <Compile Include="HttpRequestMessageTest.cs" />
     <Compile Include="HttpResponseMessageTest.cs" />
-    <Compile Include="LoopbackProxyServer.cs" />
     <Compile Include="MessageProcessingHandlerTest.cs" />
     <Compile Include="MultipartContentTest.cs" />
     <Compile Include="MultipartFormDataContentTest.cs" />
@@ -143,6 +147,7 @@
     <Compile Include="NtAuthTests.cs" />
     <Compile Include="ReadOnlyMemoryContentTest.cs" />
     <Compile Include="SocketsHttpHandlerTest.cs" />
+    <Compile Include="HttpClientHandlerTest.Http1.cs" />
     <Compile Include="HttpClientHandlerTest.Http2.cs" />
     <Compile Include="$(CommonTestPath)\System\Net\Http\Http2Frames.cs">
       <Link>Common\System\Net\Http\Http2Frames.cs</Link>
@@ -168,13 +173,7 @@
     <Compile Include="XUnitAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.1-prerelease\content\**\*.*" />
+    <SupplementalTestData Include="$(PackagesDir)system.net.testdata\1.0.2\content\**\*.*" DestinationDir="TestData" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsOSX)'=='true'">
     <TestCommandLines Include="ulimit -Sn 4096" />

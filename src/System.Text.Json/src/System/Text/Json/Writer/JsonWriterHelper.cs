@@ -9,40 +9,25 @@ namespace System.Text.Json
 {
     internal static partial class JsonWriterHelper
     {
-        public static bool TryWriteIndentation(Span<byte> buffer, int indent, out int bytesWritten)
+        public static void WriteIndentation(Span<byte> buffer, int indent)
         {
             Debug.Assert(indent % JsonConstants.SpacesPerIndent == 0);
+            Debug.Assert(buffer.Length >= indent);
 
-            if (buffer.Length >= indent)
+            // Based on perf tests, the break-even point where vectorized Fill is faster
+            // than explicitly writing the space in a loop is 8.
+            if (indent < 8)
             {
-                // Based on perf tests, the break-even point where vectorized Fill is faster
-                // than explicitly writing the space in a loop is 8.
-                if (indent < 8)
+                int i = 0;
+                while (i < indent)
                 {
-                    int i = 0;
-                    while (i < indent)
-                    {
-                        buffer[i++] = JsonConstants.Space;
-                        buffer[i++] = JsonConstants.Space;
-                    }
+                    buffer[i++] = JsonConstants.Space;
+                    buffer[i++] = JsonConstants.Space;
                 }
-                else
-                {
-                    buffer.Slice(0, indent).Fill(JsonConstants.Space);
-                }
-                bytesWritten = indent;
-                return true;
             }
             else
             {
-                int i = 0;
-                while (i < buffer.Length - 1)
-                {
-                    buffer[i++] = JsonConstants.Space;
-                    buffer[i++] = JsonConstants.Space;
-                }
-                bytesWritten = i;
-                return false;
+                buffer.Slice(0, indent).Fill(JsonConstants.Space);
             }
         }
 
@@ -126,6 +111,95 @@ namespace System.Text.Json
         {
             if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || value.Length > JsonConstants.MaxCharacterTokenSize)
                 ThrowHelper.ThrowArgumentException(propertyName, value);
+        }
+
+        internal static void ValidateNumber(ReadOnlySpan<byte> utf8FormattedNumber)
+        {
+            // This is a simplified version of the number reader from Utf8JsonReader.TryGetNumber,
+            // because it doesn't need to deal with "NeedsMoreData", or remembering the format.
+            if (utf8FormattedNumber.IsEmpty)
+            {
+                throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
+            }
+
+            int i = 0;
+
+            if (utf8FormattedNumber[i] == '-')
+            {
+                i++;
+
+                if (utf8FormattedNumber.Length <= i)
+                {
+                    throw new ArgumentException(SR.RequiredDigitNotFoundEndOfData, nameof(utf8FormattedNumber));
+                }
+            }
+
+            if (utf8FormattedNumber[i] == '0')
+            {
+                i++;
+            }
+            else
+            {
+                while (i < utf8FormattedNumber.Length && JsonHelpers.IsDigit(utf8FormattedNumber[i]))
+                {
+                    i++;
+                }
+            }
+
+            if (i == utf8FormattedNumber.Length)
+            {
+                return;
+            }
+
+            byte val = utf8FormattedNumber[i];
+
+            if (val == '.')
+            {
+                i++;
+            }
+            else if (val == 'e' || val == 'E')
+            {
+                i++;
+
+                if (i >= utf8FormattedNumber.Length)
+                {
+                    throw new ArgumentException(
+                        SR.RequiredDigitNotFoundEndOfData,
+                        nameof(utf8FormattedNumber));
+                }
+
+                val = utf8FormattedNumber[i];
+
+                if (val == '+' || val == '-')
+                {
+                    i++;
+                }
+            }
+            else
+            {
+                throw new ArgumentException(
+                    SR.Format(SR.ExpectedEndOfDigitNotFound, ThrowHelper.GetPrintableString(val)),
+                    nameof(utf8FormattedNumber));
+            }
+
+            if (i >= utf8FormattedNumber.Length)
+            {
+                throw new ArgumentException(
+                    SR.RequiredDigitNotFoundEndOfData,
+                    nameof(utf8FormattedNumber));
+            }
+
+            while (i < utf8FormattedNumber.Length && JsonHelpers.IsDigit(utf8FormattedNumber[i]))
+            {
+                i++;
+            }
+
+            if (i != utf8FormattedNumber.Length)
+            {
+                throw new ArgumentException(
+                    SR.Format(SR.ExpectedEndOfDigitNotFound, ThrowHelper.GetPrintableString(utf8FormattedNumber[i])),
+                    nameof(utf8FormattedNumber));
+            }
         }
     }
 }

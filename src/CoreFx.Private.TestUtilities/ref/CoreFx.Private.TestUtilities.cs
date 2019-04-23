@@ -48,6 +48,7 @@ namespace System
         public static bool IsArm64Process { get { throw null; } }
         public static bool IsArmOrArm64Process { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
+        public static bool Is32BitProcess { get { throw null; } }
         public static bool IsCentos6 { get { throw null; } }
         public static bool IsDebian { get { throw null; } }
         public static bool IsDebian8 { get { throw null; } }
@@ -110,6 +111,7 @@ namespace System
         public static bool IsWindows10Version1703OrGreater { get { throw null; } }
         public static bool IsWindows10Version1709OrGreater { get { throw null; } }
         public static bool IsWindows10Version1803OrGreater { get { throw null; } }
+        public static bool IsWindows10Version1903OrGreater { get { throw null; } }
         public static bool IsWindows7 { get { throw null; } }
         public static bool IsWindows8x { get { throw null; } }
         public static bool IsWindows8xOrLater { get { throw null; } }
@@ -140,54 +142,6 @@ namespace System
     {
         [System.CLSCompliantAttribute(false)]
         public static Xunit.TheoryData ToTheoryData<T>(this System.Collections.Generic.IEnumerable<T> data) { throw null; }
-    }
-}
-namespace System.Diagnostics
-{
-    public abstract partial class RemoteExecutorTestBase : System.IO.FileCleanupTestBase
-    {
-        public const int FailWaitTimeoutMilliseconds = 60000;
-        protected static readonly string HostRunner;
-        protected static readonly string HostRunnerName;
-        public const int SuccessExitCode = 42;
-        protected static readonly string TestConsoleApp;
-        protected RemoteExecutorTestBase() { }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string, string> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string, string> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string, string> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Action<string> method, string arg1, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<int> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, int> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, int> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, int> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, string, string, int> method, string arg1, string arg2, string arg3, string arg4, string arg5, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, string, System.Threading.Tasks.Task<int>> method, string arg1, string arg2, string arg3, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, string, System.Threading.Tasks.Task<int>> method, string arg1, string arg2, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<string, System.Threading.Tasks.Task<int>> method, string arg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvoke(System.Func<System.Threading.Tasks.Task<int>> method, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public static System.Diagnostics.RemoteExecutorTestBase.RemoteInvokeHandle RemoteInvokeRaw(System.Delegate method, string unparsedArg, System.Diagnostics.RemoteInvokeOptions options = null) { throw null; }
-        public sealed partial class RemoteInvokeHandle : System.IDisposable
-        {
-            public RemoteInvokeHandle(System.Diagnostics.Process process, System.Diagnostics.RemoteInvokeOptions options, string assemblyName, string className, string methodName) { }
-            public int ExitCode { get { throw null; } }
-            public System.Diagnostics.RemoteInvokeOptions Options { get { throw null; } }
-            public System.Diagnostics.Process Process { get { throw null; } set { } }
-            public void Dispose() { }
-        }
-    }
-    public sealed partial class RemoteInvokeOptions
-    {
-        public RemoteInvokeOptions() { }
-        public bool CheckExitCode { get { throw null; } set { } }
-        public bool EnableProfiling { get { throw null; } set { } }
-        public string ExceptionFile { get { throw null; } }
-        public int ExpectedExitCode { get { throw null; } set { } }
-        public bool RunAsSudo { get { throw null; } set { } }
-        public bool Start { get { throw null; } set { } }
-        public System.Diagnostics.ProcessStartInfo StartInfo { get { throw null; } set { } }
-        public int TimeOut { get { throw null; } set { } }
     }
 }
 namespace System.IO

@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace System.Net.Test.Common
 {
-    // Loopback server abstraction. 
+    // Loopback server abstraction.
     // Tests that want to run over both HTTP/1.1 and HTTP/2 should use this instead of the protocol-specific loopback servers.
 
     public abstract class LoopbackServerFactory
     {
-        public abstract Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync);
+        public abstract Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 30_000);
 
         public abstract bool IsHttp11 { get; }
         public abstract bool IsHttp2 { get; }
 
         // Common helper methods
 
-        public Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<GenericLoopbackServer, Task> serverFunc)
+        public Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<GenericLoopbackServer, Task> serverFunc, int millisecondsTimeout = 30_000)
         {
             return CreateServerAsync(async (server, uri) =>
             {
@@ -28,7 +28,7 @@ namespace System.Net.Test.Common
                 Task serverTask = serverFunc(server);
 
                 await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed();
-            });
+            }).TimeoutAfter(millisecondsTimeout);
         }
     }
 
@@ -54,6 +54,7 @@ namespace System.Net.Test.Common
 
     public class HttpRequestData
     {
+        public byte[] Body;
         public string Method;
         public string Path;
         public List<HttpHeaderData> Headers { get; }

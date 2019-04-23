@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
@@ -13,43 +14,56 @@ namespace System.Text.Json.Serialization
     {
         internal const int BufferSizeDefault = 16 * 1024;
 
-        private ClassMaterializer _classMaterializerStrategy;
-        private int _defaultBufferSize = BufferSizeDefault;
+        internal static readonly JsonSerializerOptions s_defaultOptions = new JsonSerializerOptions();
 
-        private static readonly ConcurrentDictionary<Type, JsonClassInfo> s_classes = new ConcurrentDictionary<Type, JsonClassInfo>();
+        private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
+        private ClassMaterializer _classMaterializerStrategy;
+        private JsonNamingPolicy _dictionayKeyPolicy;
+        private JsonNamingPolicy _jsonPropertyNamingPolicy;
+        private JsonCommentHandling _readCommentHandling;
+        private int _defaultBufferSize = BufferSizeDefault;
+        private int _maxDepth;
+        private bool _allowTrailingCommas;
+        private bool _haveTypesBeenCreated;
+        private bool _ignoreNullValues;
+        private bool _ignoreReadOnlyProperties;
+        private bool _propertyNameCaseInsensitive;
+        private bool _writeIndented;
 
         /// <summary>
         /// Constructs a new <see cref="JsonSerializerOptions"/> instance.
         /// </summary>
         public JsonSerializerOptions() { }
 
-        internal JsonClassInfo GetOrAddClass(Type classType)
+        /// <summary>
+        /// Defines whether an extra comma at the end of a list of JSON values in an object or array
+        /// is allowed (and ignored) within the JSON payload being deserialized.
+        /// By default, it's set to false, and <exception cref="JsonReaderException"/> is thrown if a trailing comma is encountered.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
+        public bool AllowTrailingCommas
         {
-            JsonClassInfo result;
-
-            if (!s_classes.TryGetValue(classType, out result))
+            get
             {
-                result = s_classes.GetOrAdd(classType, new JsonClassInfo(classType, this));
+                return _allowTrailingCommas;
             }
-
-            return result;
+            set
+            {
+                VerifyMutable();
+                _allowTrailingCommas = value;
+            }
         }
-
-        /// <summary>
-        /// Options to control the <see cref="Utf8JsonReader"/>.
-        /// </summary>
-        public JsonReaderOptions ReaderOptions { get; set; }
-
-        /// <summary>
-        /// Options to control the <see cref="Utf8JsonWriter"/>.
-        /// </summary>
-        public JsonWriterOptions WriterOptions { get; set; }
 
         /// <summary>
         /// The default buffer size in bytes used when creating temporary buffers.
         /// </summary>
         /// <remarks>The default size is 16K.</remarks>
         /// <exception cref="System.ArgumentException">Thrown when the buffer size is less than 1.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
         public int DefaultBufferSize
         {
             get
@@ -58,6 +72,8 @@ namespace System.Text.Json.Serialization
             }
             set
             {
+                VerifyMutable();
+
                 if (value < 1)
                 {
                     throw new ArgumentException(SR.SerializationInvalidBufferSize);
@@ -68,14 +84,165 @@ namespace System.Text.Json.Serialization
         }
 
         /// <summary>
-        /// Determines whether null values of properties are ignored or whether they are written to the JSON.
+        /// Specifies the policy used to convert a <see cref="System.Collections.IDictionary"/> key's name to another format, such as camel-casing.
         /// </summary>
-        public bool IgnoreNullPropertyValueOnWrite { get; set; }
+        /// <remarks>
+        /// This property can be set to <see cref="JsonNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// </remarks>
+        public JsonNamingPolicy DictionaryKeyPolicy
+        {
+            get
+            {
+                return _dictionayKeyPolicy;
+            }
+            set
+            {
+                VerifyMutable();
+                _dictionayKeyPolicy = value;
+            }
+        }
 
         /// <summary>
-        /// Determines whether null values in the JSON are ignored or whether they are set on properties.
+        /// Determines whether null values are ignored during serialization and deserialization.
+        /// The default value is false.
         /// </summary>
-        public bool IgnoreNullPropertyValueOnRead { get; set; }
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
+        public bool IgnoreNullValues
+        {
+            get
+            {
+                return _ignoreNullValues;
+            }
+            set
+            {
+                VerifyMutable();
+                _ignoreNullValues = value;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether read-only properties are ignored during serialization and deserialization.
+        /// A property is read-only if it contains a public getter but not a public setter.
+        /// The default value is false.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
+        public bool IgnoreReadOnlyProperties
+        {
+            get
+            {
+                return _ignoreReadOnlyProperties;
+            }
+            set
+            {
+                VerifyMutable();
+                _ignoreReadOnlyProperties = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the maximum depth allowed when serializing or deserializing JSON, with the default (i.e. 0) indicating a max depth of 64.
+        /// Going past this depth will throw a <exception cref="JsonReaderException"/>.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
+        public int MaxDepth
+        {
+            get
+            {
+                return _maxDepth;
+            }
+            set
+            {
+                VerifyMutable();
+                _maxDepth = value;
+            }
+        }
+
+        /// <summary>
+        /// Specifies the policy used to convert a property's name on an object to another format, such as camel-casing.
+        /// The resulting property name is expected to match the JSON payload during deserialization, and
+        /// will be used when writing the property name during serialization.
+        /// </summary>
+        /// <remarks>
+        /// The policy is not used for properties that have a <see cref="JsonPropertyNameAttribute"/> applied.
+        /// This property can be set to <see cref="JsonNamingPolicy.CamelCase"/> to specify a camel-casing policy.
+        /// </remarks>
+        public JsonNamingPolicy PropertyNamingPolicy
+        {
+            get
+            {
+                return _jsonPropertyNamingPolicy;
+            }
+            set
+            {
+                VerifyMutable();
+                _jsonPropertyNamingPolicy = value;
+            }
+        }
+
+        /// <summary>
+        /// Determines whether a property's name uses a case-insensitive comparison during deserialization.
+        /// The default value is false.
+        /// </summary>
+        /// <remarks>There is a performance cost associated when the value is true.</remarks>
+        public bool PropertyNameCaseInsensitive
+        {
+            get
+            {
+                return _propertyNameCaseInsensitive;
+            }
+            set
+            {
+                VerifyMutable();
+                _propertyNameCaseInsensitive = value;
+            }
+        }
+
+        /// <summary>
+        /// Defines how the comments are handled during deserialization.
+        /// By default <exception cref="JsonReaderException"/> is thrown if a comment is encountered.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
+        public JsonCommentHandling ReadCommentHandling
+        {
+            get
+            {
+                return _readCommentHandling;
+            }
+            set
+            {
+                VerifyMutable();
+                _readCommentHandling = value;
+            }
+        }
+
+        /// <summary>
+        /// Defines whether JSON should pretty print which includes:
+        /// indenting nested JSON tokens, adding new lines, and adding white space between property names and values.
+        /// By default, the JSON is serialized without any extra white space.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if this property is set after serialization or deserialization has occurred.
+        /// </exception>
+        public bool WriteIndented
+        {
+            get
+            {
+                return _writeIndented;
+            }
+            set
+            {
+                VerifyMutable();
+                _writeIndented = value;
+            }
+        }
 
         internal ClassMaterializer ClassMaterializerStrategy
         {
@@ -92,6 +259,48 @@ namespace System.Text.Json.Serialization
                 }
 
                 return _classMaterializerStrategy;
+            }
+        }
+
+        internal JsonClassInfo GetOrAddClass(Type classType)
+        {
+            _haveTypesBeenCreated = true;
+
+            // todo: for performance, consider obtaining the type from s_defaultOptions and then cloning.
+            if (!_classes.TryGetValue(classType, out JsonClassInfo result))
+            {
+                result = _classes.GetOrAdd(classType, new JsonClassInfo(classType, this));
+            }
+
+            return result;
+        }
+
+        internal JsonReaderOptions GetReaderOptions()
+        {
+            return new JsonReaderOptions
+            {
+                AllowTrailingCommas = AllowTrailingCommas,
+                CommentHandling = ReadCommentHandling,
+                MaxDepth = MaxDepth
+            };
+        }
+
+        internal JsonWriterOptions GetWriterOptions()
+        {
+            return new JsonWriterOptions
+            {
+                Indented = WriteIndented
+            };
+        }
+
+        private void VerifyMutable()
+        {
+            // The default options are hidden and thus should be immutable.
+            Debug.Assert(this != s_defaultOptions);
+
+            if (_haveTypesBeenCreated)
+            {
+                ThrowHelper.ThrowInvalidOperationException_SerializerOptionsImmutable();
             }
         }
     }

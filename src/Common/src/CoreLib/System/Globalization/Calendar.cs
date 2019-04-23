@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Runtime.Serialization;
 
@@ -147,8 +148,8 @@ namespace System.Globalization
         {
             // From ECMA CLI spec, Partition III, section 3.27:
             //
-            // If overflow occurs converting a floating-point type to an integer, or if the floating-point value 
-            // being converted to an integer is a NaN, the value returned is unspecified. 
+            // If overflow occurs converting a floating-point type to an integer, or if the floating-point value
+            // being converted to an integer is a NaN, the value returned is unspecified.
             //
             // Based upon this, this method should be performing the comparison against the double
             // before attempting a cast. Otherwise, the result is undefined.
@@ -417,7 +418,7 @@ namespace System.Globalization
             int day;
 
             int dayOfYear = GetDayOfYear(time) - 1; // Make the day of year to be 0-based, so that 1/1 is day 0.
-            
+
             // Calculate the number of days between the first day of year (1/1) and the first day of the week.
             // This value will be a positive value from 0 ~ 6.  We call this value as "offset".
             //
@@ -464,7 +465,7 @@ namespace System.Globalization
             // Otherwise, the specified time falls on the week of previous year.
             // Call this method again by passing the last day of previous year.
             // the last day of the previous year may "underflow" to no longer be a valid date time for
-            // this calendar if we just subtract so we need the subclass to provide us with 
+            // this calendar if we just subtract so we need the subclass to provide us with
             // that information
             if (time <= MinSupportedDateTime.AddDays(dayOfYear))
             {

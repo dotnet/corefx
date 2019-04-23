@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 namespace System.Buffers.Text
 {
     public static partial class Utf8Parser
@@ -80,12 +81,6 @@ namespace System.Buffers.Text
                 }
 
                 offsetMinutes = (int)(digit1 * 10 + digit2);
-            }
-
-            TimeSpan offset = new TimeSpan(hours: offsetHours, minutes: offsetMinutes, seconds: 0);
-            if (sign == Utf8Constants.Minus)
-            {
-                offset = -offset;
             }
 
             if (!TryCreateDateTimeOffset(dateTime: dateTime, offsetNegative: sign == Utf8Constants.Minus, offsetHours: offsetHours, offsetMinutes: offsetMinutes, out value))

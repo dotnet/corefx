@@ -170,6 +170,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Private Sub New()
         End Sub
 
+        Friend Const DISP_E_UNKNOWNNAME As Integer = &H80020006I
+        Friend Const DISP_E_NOTACOLLECTION As Integer = &H80020011I
+
         Friend Shared Function VbMakeIllegalForException() As System.Exception
             Return VbMakeExceptionEx(vbErrors.IllegalFor, GetResourceString(SR.ID92)) ' 92 - IllegaFor
         End Function
@@ -190,12 +193,11 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Function
 
         Friend Shared Function VbMakeException(ByVal ex As Exception, ByVal hr As Integer) As System.Exception
-            ' UNDONE - Err() requires port of Information.vb, ProjectData.vb
-            'Err().SetUnmappedError(hr)
+            Err().SetUnmappedError(hr)
             Return ex
         End Function
 
-        Private Shared Function VbMakeExceptionEx(ByVal number As Integer, ByVal sMsg As String) As System.Exception
+        Friend Shared Function VbMakeExceptionEx(ByVal number As Integer, ByVal sMsg As String) As System.Exception
             Dim vBDefinedError As Boolean
 
             VbMakeExceptionEx = BuildException(number, sMsg, vBDefinedError)

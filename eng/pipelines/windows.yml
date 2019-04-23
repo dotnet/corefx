@@ -96,12 +96,6 @@ jobs:
               _framework: uap
               _helixQueues: $(uapNetfxQueues)
 
-            UAP_arm_Release:
-              _BuildConfig: Release
-              _architecture: arm
-              _framework: uap
-              _helixQueues: $(windowsArmQueue)
-
             UAPAOT_x86_Release:
               _BuildConfig: Release
               _architecture: x86
@@ -116,7 +110,8 @@ jobs:
 
       pool:
         ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          name: dotnet-internal-temp
+          name: NetCoreInternal-Int-Pool
+          queue: buildpool.windows.10.amd64.vs2017
         ${{ if eq(parameters.isOfficialBuild, 'false') }}:
           name: Hosted VS2017
 
@@ -165,24 +160,26 @@ jobs:
 
         pool:
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            name: dotnet-internal-temp
+            name: NetCoreInternal-Int-Pool
+            queue: buildpool.windows.10.amd64.vs2017
           ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             name: Hosted VS2017
 
         submitToHelix: true
+        buildExtraArguments: /p:RuntimeOS=win10
         # azure pipelines reporter only supports xunit results based tests.
         enableAzurePipelinesReporter: false
 
         variables:
           - _outerloop: false
           - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            - allConfigurationsQueues: Windows.10.Amd64.ClientRS4.Open
+            - allConfigurationsQueues: Windows.10.Amd64.ClientRS5.Open
           - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            - allConfigurationsQueues: Windows.10.Amd64.ClientRS4
+            - allConfigurationsQueues: Windows.10.Amd64.ClientRS5
 
+        _jobFramework: -allConfigurations
         customBuildSteps:
           - script: build.cmd
-                    -restore
                     -build
                     -configuration $(_BuildConfig)
                     -ci
@@ -191,19 +188,8 @@ jobs:
                     -arch $(_architecture)
                     /p:RuntimeOS=win10
                     /p:ArchiveTests=Packages
-                    $(_windowsOfficialBuildArguments)
                     $(_msbuildCommonParameters)
             displayName: Build Packages and Tests
-          - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-            - script: build.cmd
-                      -restore
-                      -build
-                      -configuration $(_BuildConfig)
-                      -ci
-                      -buildtests
-                      -framework netstandard
-                      -arch $(_architecture)
-              displayName: Build Netstandard Test Suite
 
       # TODO: UAPAOT official builds should send to helix using continuation runner.
       # Legs without HELIX testing
@@ -223,6 +209,11 @@ jobs:
                 _architecture: arm
                 _framework: netcoreapp
 
+              UAP_arm_Release:
+                _BuildConfig: Release
+                _architecture: arm
+                _framework: uap
+
               UAPAOT_arm_Release:
                 _BuildConfig: Release
                 _architecture: arm
@@ -235,7 +226,8 @@ jobs:
 
         pool:
           ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-            name: dotnet-internal-temp
+            name: NetCoreInternal-Int-Pool
+            queue: buildpool.windows.10.amd64.vs2017
           ${{ if eq(parameters.isOfficialBuild, 'false') }}:
             name: Hosted VS2017
 

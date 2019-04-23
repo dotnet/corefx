@@ -205,6 +205,8 @@
     <Compile Include="System\Data\SqlClient\SNI\SNINpHandle.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNIPacket.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNIProxy.cs" />
+    <Compile Include="System\Data\SqlClient\SNI\SNIProxy.Windows.cs" Condition="'$(TargetsNetCoreApp)' != 'true' OR '$(TargetsUnix)' != 'true'" />
+    <Compile Include="System\Data\SqlClient\SNI\SNIProxy.Unix.cs" Condition="'$(TargetsNetCoreApp)' == 'true' AND '$(TargetsUnix)' == 'true'" />
     <Compile Include="System\Data\SqlClient\SNI\SNITcpHandle.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SslOverTdsStream.cs" />
     <Compile Include="System\Data\SqlClient\SNI\SNICommon.cs" />
@@ -240,6 +242,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.UNICODE_STRING.cs">
       <Link>Common\Interop\Windows\Interop.UNICODE_STRING.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.OBJECT_ATTRIBUTES.cs">
+      <Link>Common\Interop\Windows\Interop.OBJECT_ATTRIBUTES.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.IoControlCodeAccess.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.IoControlCodeAccess.cs</Link>
@@ -407,6 +412,9 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs">
       <Link>Common\Interop\Windows\SChannel\SecPkgContext_ConnectionInfo.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs">
+      <Link>Common\Interop\Windows\SChannel\SecPkgContext_CipherInfo.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\SspiCli\NegotiationInfoClass.cs">
       <Link>Common\Interop\Windows\SspiCli\NegotiationInfoClass.cs</Link>

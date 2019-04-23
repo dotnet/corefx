@@ -65,16 +65,16 @@ Areas are tracked by labels area-&#42; (e.g. area-System.Collections). Each area
 | [System.IO](https://github.com/dotnet/corefx/labels/area-System.IO)                           | [@JeremyKuhne](https://github.com/JeremyKuhne) |  |
 | [System.IO.Compression](https://github.com/dotnet/corefx/labels/area-System.IO.Compression)   | **[@buyaa-n](https://github.com/buyaa-n)**, [@ahsonkhan](https://github.com/ahsonkhan), [@ViktorHofer](https://github.com/ViktorHofer) |  |
 | [System.IO.Pipelines](https://github.com/dotnet/corefx/labels/area-System.IO.Pipelines)       | **[@pakrym](https://github.com/pakrym)**, [@davidfowl](https://github.com/davidfowl) |  |
-| [System.Linq](https://github.com/dotnet/corefx/labels/area-System.Linq)                       | [@cston](https://github.com/cston), [@333fred](https://github.com/333fred) |  |
+| [System.Linq](https://github.com/dotnet/corefx/labels/area-System.Linq)                       | [@maryamariyan](https://github.com/maryamariyan) |  |
 | [System.Linq.Expressions](https://github.com/dotnet/corefx/labels/area-System.Linq.Expressions) | [@cston](https://github.com/cston), [@333fred](https://github.com/333fred) | Archived component - limited churn/contributions (see [#33170](https://github.com/dotnet/corefx/issues/33170)) |
 | [System.Linq.Parallel](https://github.com/dotnet/corefx/labels/area-System.Linq.Parallel)     | **[@tarekgh](https://github.com/tarekgh)**, [@kouvel](https://github.com/kouvel) |  |
 | [System.Management](https://github.com/dotnet/corefx/labels/area-System.Management)           | [@Anipik](https://github.com/Anipik) | WMI |
 | [System.Memory](https://github.com/dotnet/corefx/labels/area-System.Memory)                   | [@ahsonkhan](https://github.com/ahsonkhan) |  |
-| [System.Net](https://github.com/dotnet/corefx/labels/area-System.Net)                         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@caesar1995](https://github.com/caesar1995), [@rmkerr](https://github.com/rmkerr), [@karelz](https://github.com/karelz) | Included:<ul><li>System.Uri</li></ul> |
-| [System.Net.Http](https://github.com/dotnet/corefx/labels/area-System.Net.Http)               | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@caesar1995](https://github.com/caesar1995), [@rmkerr](https://github.com/rmkerr), [@karelz](https://github.com/karelz) |  |
+| [System.Net](https://github.com/dotnet/corefx/labels/area-System.Net)                         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@karelz](https://github.com/karelz) | Included:<ul><li>System.Uri - [@wtgodbe](https://github.com/wtgodbe)</li></ul> |
+| [System.Net.Http](https://github.com/dotnet/corefx/labels/area-System.Net.Http)               | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@karelz](https://github.com/karelz) |  |
 | [System.Net.Http.SocketsHttpHandler](https://github.com/dotnet/corefx/labels/area-System.Net.Http.SocketsHttpHandler) | [@geoffkizer](https://github.com/geoffkizer), [@wfurt](https://github.com/wfurt), [@davidsh](https://github.com/davidsh), [@karelz](https://github.com/karelz) |  |
-| [System.Net.Security](https://github.com/dotnet/corefx/labels/area-System.Net.Security)       | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@caesar1995](https://github.com/caesar1995), [@rmkerr](https://github.com/rmkerr), [@karelz](https://github.com/karelz) |  |
-| [System.Net.Sockets](https://github.com/dotnet/corefx/labels/area-System.Net.Sockets)         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@caesar1995](https://github.com/caesar1995), [@rmkerr](https://github.com/rmkerr), [@karelz](https://github.com/karelz) |  |
+| [System.Net.Security](https://github.com/dotnet/corefx/labels/area-System.Net.Security)       | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@karelz](https://github.com/karelz) |  |
+| [System.Net.Sockets](https://github.com/dotnet/corefx/labels/area-System.Net.Sockets)         | [@davidsh](https://github.com/davidsh), [@wfurt](https://github.com/wfurt), [@karelz](https://github.com/karelz) |  |
 | [System.Numerics](https://github.com/dotnet/corefx/labels/area-System.Numerics)               | [@tannergooding](https://github.com/tannergooding), [@ViktorHofer](https://github.com/ViktorHofer) |  |
 | [System.Numerics.Tensors](https://github.com/dotnet/corefx/labels/area-System.Numerics.Tensors) | [@tannergooding](https://github.com/tannergooding) |  |
 | [System.Reflection](https://github.com/dotnet/corefx/labels/area-System.Reflection)           | [@steveharter](https://github.com/steveharter), [@GrabYourPitchforks](https://github.com/GrabYourPitchforks) |  |
@@ -129,7 +129,7 @@ Feel free to use other labels if it helps your triage efforts (e.g. **needs more
 #### Motivation for triage rules
 
 1. Each issue has exactly one **area-\*** label
-    * Motivation: Issues with multiple areas have loose responbility (everyone blames the other side) and issues are double counted in reports.
+    * Motivation: Issues with multiple areas have loose responsibility (everyone blames the other side) and issues are double counted in reports.
 1. Issue has no **Assignee**, unless someone is working on the issue at the moment
     * Motivation: Observation is that contributors are less likely to grab assigned issues, no matter what the repo rules say.
 1. Use **up-for-grabs** as much as possible, ideally with a quick note about next steps / complexity of the issue

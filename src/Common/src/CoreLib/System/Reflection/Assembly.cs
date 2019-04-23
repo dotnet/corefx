@@ -205,7 +205,17 @@ namespace System.Reflection
             if (partialName == null)
                 throw new ArgumentNullException(nameof(partialName));
 
-            return Load(partialName);
+            if ((partialName.Length == 0) || (partialName[0] == '\0'))
+                throw new ArgumentException(SR.Format_StringZeroLength, nameof(partialName));
+
+            try
+            {
+                return Load(partialName);
+            }
+            catch (FileNotFoundException)
+            {
+                return null;
+            }
         }
 
         // Loads the assembly with a COFF based IMAGE containing
@@ -227,7 +237,7 @@ namespace System.Reflection
             SerializationInfo.ThrowIfDeserializationInProgress("AllowAssembliesFromByteArrays",
                 ref s_cachedSerializationSwitch);
 
-            AssemblyLoadContext alc = new IndividualAssemblyLoadContext();
+            AssemblyLoadContext alc = new IndividualAssemblyLoadContext("Assembly.Load(byte[], ...)");
             return alc.InternalLoad(rawAssembly, rawSymbolStore);
         }
 
@@ -254,7 +264,7 @@ namespace System.Reflection
                 if (s_loadfile.TryGetValue(normalizedPath, out result))
                     return result;
 
-                AssemblyLoadContext alc = new IndividualAssemblyLoadContext();
+                AssemblyLoadContext alc = new IndividualAssemblyLoadContext(string.Format("Assembly.LoadFile({0})", normalizedPath));
                 result = alc.LoadFromAssemblyPath(normalizedPath);
                 s_loadfile.Add(normalizedPath, result);
             }

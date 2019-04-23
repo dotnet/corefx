@@ -45,17 +45,9 @@ namespace System.Text.Json
             throw GetArgumentException(SR.SpecialNumberValuesNotSupported);
         }
 
-        public static void ThrowArgumentException(ExceptionResource resource, int minimumSize = 0)
+        public static void ThrowInvalidOperationException_NeedLargerSpan()
         {
-            if (resource == ExceptionResource.FailedToGetLargerSpan)
-            {
-                throw GetArgumentException(SR.FailedToGetLargerSpan);
-            }
-            else
-            {
-                Debug.Assert(resource == ExceptionResource.FailedToGetMinimumSizeSpan);
-                throw GetArgumentException(SR.Format(SR.FailedToGetMinimumSizeSpan, minimumSize));
-            }
+            throw GetInvalidOperationException(SR.FailedToGetLargerSpan);
         }
 
         public static void ThrowArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
@@ -237,11 +229,17 @@ namespace System.Text.Json
 
         private static bool IsPrintable(byte value) => value >= 0x20 && value < 0x7F;
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static string GetPrintableString(byte value)
+        {
+            return IsPrintable(value) ? ((char)value).ToString() : $"0x{value:X2}";
+        }
+
         // This function will convert an ExceptionResource enum value to the resource string.
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static string GetResourceString(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte, string characters)
         {
-            string character = IsPrintable(nextByte) ? ((char)nextByte).ToString() : $"0x{nextByte:X2}";
+            string character = GetPrintableString(nextByte);
 
             string message = "";
             switch (resource)
@@ -251,6 +249,12 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.MismatchedObjectArray:
                     message = SR.Format(SR.MismatchedObjectArray, character);
+                    break;
+                case ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd:
+                    message = SR.TrailingCommaNotAllowedBeforeArrayEnd;
+                    break;
+                case ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd:
+                    message = SR.TrailingCommaNotAllowedBeforeObjectEnd;
                     break;
                 case ExceptionResource.EndOfStringNotFound:
                     message = SR.EndOfStringNotFound;
@@ -281,6 +285,9 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.ExpectedStartOfPropertyOrValueNotFound:
                     message = SR.ExpectedStartOfPropertyOrValueNotFound;
+                    break;
+                case ExceptionResource.ExpectedStartOfPropertyOrValueAfterComment:
+                    message = SR.Format(SR.ExpectedStartOfPropertyOrValueAfterComment, character);
                     break;
                 case ExceptionResource.ExpectedStartOfValueNotFound:
                     message = SR.Format(SR.ExpectedStartOfValueNotFound, character);
@@ -335,6 +342,11 @@ namespace System.Text.Json
         public static void ThrowInvalidOperationException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
         {
             throw GetInvalidOperationException(resource, currentDepth, token, tokenType);
+        }
+
+        public static void ThrowArgumentException_InvalidCommentValue()
+        {
+            throw new ArgumentException(SR.CannotWriteCommentWithEmbeddedDelimiter);
         }
 
         public static void ThrowArgumentException_InvalidUTF8(ReadOnlySpan<byte> value)
@@ -500,6 +512,7 @@ namespace System.Text.Json
         ExpectedSeparatorAfterPropertyNameNotFound,
         ExpectedStartOfPropertyNotFound,
         ExpectedStartOfPropertyOrValueNotFound,
+        ExpectedStartOfPropertyOrValueAfterComment,
         ExpectedStartOfValueNotFound,
         ExpectedTrue,
         ExpectedValueAfterPropertyNameNotFound,
@@ -516,10 +529,10 @@ namespace System.Text.Json
         CannotStartObjectArrayAfterPrimitiveOrClose,
         CannotWriteValueWithinObject,
         CannotWriteValueAfterPrimitive,
-        FailedToGetMinimumSizeSpan,
-        FailedToGetLargerSpan,
         CannotWritePropertyWithinArray,
-        ExpectedJsonTokens
+        ExpectedJsonTokens,
+        TrailingCommaNotAllowedBeforeArrayEnd,
+        TrailingCommaNotAllowedBeforeObjectEnd,
     }
 
     internal enum NumericType

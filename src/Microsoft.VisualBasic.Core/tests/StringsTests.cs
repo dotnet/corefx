@@ -7,11 +7,12 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text;
 using Microsoft.VisualBasic.CompilerServices.Tests;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace Microsoft.VisualBasic.Tests
 {
-    public class StringsTests : RemoteExecutorTestBase
+    public class StringsTests
     {
         static StringsTests()
         {
@@ -78,7 +79,7 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData(256)]
         public void Chr_CharCodeOutOfRange_ThrowsNotSupportedException(int charCode)
         {
-            RemoteInvoke(charCodeInner =>
+            RemoteExecutor.Invoke(charCodeInner =>
             {
                 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 CultureInfo.CurrentCulture = new CultureInfo("en-US"); // Strings.Chr doesn't fail on these inputs for all code pages, e.g. 949
@@ -443,6 +444,31 @@ namespace Microsoft.VisualBasic.Tests
         {
             // Trims only space and \u3000 specifically
             Assert.Equal(expected, Strings.Trim(str));
+        }
+
+        [Theory]
+        [InlineData("a", "a", 0, 0)]
+        [InlineData("a", "b", -1, -1)]
+        [InlineData("b", "a", 1, 1)]
+        [InlineData("a", "ABC", 1, -1)]
+        [InlineData("ABC", "a", -1, 1)]
+        [InlineData("abc", "ABC", 1, 0)]
+        public void StrComp(string left, string right, int expectedBinaryCompare, int expectedTextCompare)
+        {
+            Assert.Equal(expectedBinaryCompare, Strings.StrComp(left, right, CompareMethod.Binary));
+            Assert.Equal(expectedTextCompare, Strings.StrComp(left, right, CompareMethod.Text));
+        }
+
+        [Theory]
+        [InlineData(null, "")]
+        [InlineData("", "")]
+        [InlineData("\0", "\0")]
+        [InlineData("ABC", "CBA")]
+        [InlineData("\ud83c\udfc8", "\ud83c\udfc8")]
+        [InlineData("A\ud83c\udfc8", "\ud83c\udfc8A")]
+        public void StrReverse(string str, string expected)
+        {
+            Assert.Equal(expected, Strings.StrReverse(str));
         }
 
         public static TheoryData<string, string, int> InStr_TestData_NullsAndEmpties() => new TheoryData<string, string, int>

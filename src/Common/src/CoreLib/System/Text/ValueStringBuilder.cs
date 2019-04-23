@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -11,7 +12,7 @@ namespace System.Text
 {
     internal ref partial struct ValueStringBuilder
     {
-        private char[] _arrayToReturnToPool;
+        private char[]? _arrayToReturnToPool;
         private Span<char> _chars;
         private int _pos;
 
@@ -82,7 +83,9 @@ namespace System.Text
             }
         }
 
+#pragma warning disable CS8609 // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
         public override string ToString()
+#pragma warning restore CS8609
         {
             var s = _chars.Slice(0, _pos).ToString();
             Dispose();
@@ -277,7 +280,7 @@ namespace System.Text
 
             _chars.CopyTo(poolArray);
 
-            char[] toReturn = _arrayToReturnToPool;
+            char[]? toReturn = _arrayToReturnToPool;
             _chars = _arrayToReturnToPool = poolArray;
             if (toReturn != null)
             {
@@ -288,7 +291,7 @@ namespace System.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Dispose()
         {
-            char[] toReturn = _arrayToReturnToPool;
+            char[]? toReturn = _arrayToReturnToPool;
             this = default; // for safety, to avoid using pooled array if this instance is erroneously appended to again
             if (toReturn != null)
             {

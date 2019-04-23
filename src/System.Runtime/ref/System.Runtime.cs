@@ -1724,7 +1724,7 @@ namespace System
         public MemberAccessException(string message) { }
         public MemberAccessException(string message, System.Exception inner) { }
     }
-    public readonly partial struct Memory<T>
+    public readonly partial struct Memory<T> : IEquatable<Memory<T>>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
@@ -1732,7 +1732,6 @@ namespace System
         public Memory(T[] array, int start, int length) { throw null; }
         public static System.Memory<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
-        public System.Memory<T> this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public System.Span<T> Span { get { throw null; } }
         public void CopyTo(System.Memory<T> destination) { }
@@ -1745,10 +1744,8 @@ namespace System
         public static implicit operator System.ReadOnlyMemory<T> (System.Memory<T> memory) { throw null; }
         public static implicit operator System.Memory<T> (T[] array) { throw null; }
         public System.Buffers.MemoryHandle Pin() { throw null; }
-        public System.Memory<T> Slice(System.Index startIndex) { throw null; }
         public System.Memory<T> Slice(int start) { throw null; }
         public System.Memory<T> Slice(int start, int length) { throw null; }
-        public System.Memory<T> Slice(System.Range range) { throw null; }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
@@ -1984,17 +1981,9 @@ namespace System
         public override bool Equals(object value) { throw null; }
         public bool Equals(System.Range other) { throw null; }
         public override int GetHashCode() { throw null; }
-        public System.Range.OffsetAndLength GetOffsetAndLength(int length) { throw null; }
+        public (int Offset, int Length) GetOffsetAndLength(int length) { throw null; }
         public static System.Range StartAt(System.Index start) { throw null; }
         public override string ToString() { throw null; }
-        public readonly partial struct OffsetAndLength
-        {
-            private readonly int _dummyPrimitive;
-            public OffsetAndLength(int offset, int length) { throw null; }
-            public int Length { get { throw null; } }
-            public int Offset { get { throw null; } }
-            public void Deconstruct(out int offset, out int length) { throw null; }
-        }
     }
     public partial class RankException : System.SystemException
     {
@@ -2003,7 +1992,7 @@ namespace System
         public RankException(string message) { }
         public RankException(string message, System.Exception innerException) { }
     }
-    public readonly partial struct ReadOnlyMemory<T>
+    public readonly partial struct ReadOnlyMemory<T> : IEquatable<ReadOnlyMemory<T>>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
@@ -2011,7 +2000,6 @@ namespace System
         public ReadOnlyMemory(T[] array, int start, int length) { throw null; }
         public static System.ReadOnlyMemory<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
-        public System.ReadOnlyMemory<T> this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public System.ReadOnlySpan<T> Span { get { throw null; } }
         public void CopyTo(System.Memory<T> destination) { }
@@ -2023,10 +2011,8 @@ namespace System
         public static implicit operator System.ReadOnlyMemory<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlyMemory<T> (T[] array) { throw null; }
         public System.Buffers.MemoryHandle Pin() { throw null; }
-        public System.ReadOnlyMemory<T> Slice(System.Index startIndex) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start) { throw null; }
         public System.ReadOnlyMemory<T> Slice(int start, int length) { throw null; }
-        public System.ReadOnlyMemory<T> Slice(System.Range range) { throw null; }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Memory<T> destination) { throw null; }
@@ -2041,9 +2027,7 @@ namespace System
         public ReadOnlySpan(T[] array, int start, int length) { throw null; }
         public static System.ReadOnlySpan<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
-        public ref readonly T this[System.Index index] { get { throw null; } }
         public ref readonly T this[int index] { get { throw null; } }
-        public System.ReadOnlySpan<T> this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void CopyTo(System.Span<T> destination) { }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
@@ -2059,10 +2043,8 @@ namespace System
         public static implicit operator System.ReadOnlySpan<T> (System.ArraySegment<T> segment) { throw null; }
         public static implicit operator System.ReadOnlySpan<T> (T[] array) { throw null; }
         public static bool operator !=(System.ReadOnlySpan<T> left, System.ReadOnlySpan<T> right) { throw null; }
-        public System.ReadOnlySpan<T> Slice(System.Index startIndex) { throw null; }
         public System.ReadOnlySpan<T> Slice(int start) { throw null; }
         public System.ReadOnlySpan<T> Slice(int start, int length) { throw null; }
-        public System.ReadOnlySpan<T> Slice(System.Range range) { throw null; }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Span<T> destination) { throw null; }
@@ -2241,9 +2223,7 @@ namespace System
         public Span(T[] array, int start, int length) { throw null; }
         public static System.Span<T> Empty { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
-        public ref T this[System.Index index] { get { throw null; } }
         public ref T this[int index] { get { throw null; } }
-        public System.Span<T> this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public void Clear() { }
         public void CopyTo(System.Span<T> destination) { }
@@ -2262,10 +2242,8 @@ namespace System
         public static implicit operator System.ReadOnlySpan<T> (System.Span<T> span) { throw null; }
         public static implicit operator System.Span<T> (T[] array) { throw null; }
         public static bool operator !=(System.Span<T> left, System.Span<T> right) { throw null; }
-        public System.Span<T> Slice(System.Index startIndex) { throw null; }
         public System.Span<T> Slice(int start) { throw null; }
         public System.Span<T> Slice(int start, int length) { throw null; }
-        public System.Span<T> Slice(System.Range range) { throw null; }
         public T[] ToArray() { throw null; }
         public override string ToString() { throw null; }
         public bool TryCopyTo(System.Span<T> destination) { throw null; }
@@ -2306,11 +2284,7 @@ namespace System
         [System.CLSCompliantAttribute(false)]
         public unsafe String(sbyte* value, int startIndex, int length, System.Text.Encoding enc) { }
         [System.Runtime.CompilerServices.IndexerName("Chars")]
-        public char this[System.Index index] { get { throw null; } }
-        [System.Runtime.CompilerServices.IndexerName("Chars")]
         public char this[int index] { get { throw null; } }
-        [System.Runtime.CompilerServices.IndexerName("Chars")]
-        public string this[System.Range range] { get { throw null; } }
         public int Length { get { throw null; } }
         public object Clone() { throw null; }
         public static int Compare(System.String strA, int indexA, System.String strB, int indexB, int length) { throw null; }
@@ -2372,6 +2346,8 @@ namespace System
         public static int GetHashCode(System.ReadOnlySpan<char> value) { throw null; }
         public static int GetHashCode(System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public int GetHashCode(System.StringComparison comparisonType) { throw null; }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        public ref readonly char GetPinnableReference() { throw null; }
         public System.TypeCode GetTypeCode() { throw null; }
         public int IndexOf(char value) { throw null; }
         public int IndexOf(char value, int startIndex) { throw null; }
@@ -2443,10 +2419,8 @@ namespace System
         public bool StartsWith(System.String value) { throw null; }
         public bool StartsWith(System.String value, bool ignoreCase, System.Globalization.CultureInfo culture) { throw null; }
         public bool StartsWith(System.String value, System.StringComparison comparisonType) { throw null; }
-        public System.String Substring(System.Index startIndex) { throw null; }
         public System.String Substring(int startIndex) { throw null; }
         public System.String Substring(int startIndex, int length) { throw null; }
-        public System.String Substring(System.Range range) { throw null; }
         System.Collections.Generic.IEnumerator<char> System.Collections.Generic.IEnumerable<System.Char>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         bool System.IConvertible.ToBoolean(System.IFormatProvider provider) { throw null; }
@@ -6671,6 +6645,11 @@ namespace System.Runtime.CompilerServices
     {
         public DiscardableAttribute() { }
     }
+    [System.AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
+    public sealed class EnumeratorCancellationAttribute : Attribute
+    {
+        public EnumeratorCancellationAttribute() { }
+    }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Method)]
     public sealed partial class ExtensionAttribute : System.Attribute
     {
@@ -7111,6 +7090,12 @@ namespace System.Runtime.Remoting
 }
 namespace System.Runtime.Serialization
 {
+    public sealed partial class DeserializationBlockedException : System.Exception
+    {
+        public DeserializationBlockedException() { }
+        public DeserializationBlockedException(String message) { }
+        public DeserializationBlockedException(Exception innerException) { }
+    }
     public partial interface IDeserializationCallback
     {
         void OnDeserialization(object sender);
@@ -7689,10 +7674,12 @@ namespace System.Text
         public int Utf8SequenceLength { get { throw null; } }
         public int Value { get { throw null; } }
         public int CompareTo(System.Text.Rune other) { throw null; }
-        public static System.Buffers.OperationStatus DecodeUtf16(System.ReadOnlySpan<char> utf16Source, out System.Text.Rune result, out int charsConsumed) { throw null; }
-        public static System.Buffers.OperationStatus DecodeUtf16FromEnd(System.ReadOnlySpan<char> utf16Source, out System.Text.Rune result, out int charsConsumed) { throw null; }
-        public static System.Buffers.OperationStatus DecodeUtf8(System.ReadOnlySpan<byte> utf8Source, out System.Text.Rune result, out int bytesConsumed) { throw null; }
-        public static System.Buffers.OperationStatus DecodeUtf8FromEnd(System.ReadOnlySpan<byte> utf8Source, out System.Text.Rune result, out int bytesConsumed) { throw null; }
+        public static System.Buffers.OperationStatus DecodeFromUtf16(System.ReadOnlySpan<char> source, out System.Text.Rune result, out int charsConsumed) { throw null; }
+        public static System.Buffers.OperationStatus DecodeFromUtf8(System.ReadOnlySpan<byte> source, out System.Text.Rune result, out int bytesConsumed) { throw null; }
+        public static System.Buffers.OperationStatus DecodeLastFromUtf16(System.ReadOnlySpan<char> source, out System.Text.Rune result, out int charsConsumed) { throw null; }
+        public static System.Buffers.OperationStatus DecodeLastFromUtf8(System.ReadOnlySpan<byte> source, out System.Text.Rune value, out int bytesConsumed) { throw null; }
+        public int EncodeToUtf16(System.Span<char> destination) { throw null; }
+        public int EncodeToUtf8(System.Span<byte> destination) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Text.Rune other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -7733,8 +7720,8 @@ namespace System.Text
         public static bool TryCreate(int value, out System.Text.Rune result) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static bool TryCreate(uint value, out System.Text.Rune result) { throw null; }
-        public bool TryEncode(System.Span<char> destination, out int charsWritten) { throw null; }
-        public bool TryEncodeToUtf8Bytes(System.Span<byte> destination, out int bytesWritten) { throw null; }
+        public bool TryEncodeToUtf16(System.Span<char> destination, out int charsWritten) { throw null; }
+        public bool TryEncodeToUtf8(System.Span<byte> destination, out int bytesWritten) { throw null; }
         public static bool TryGetRuneAt(string input, int index, out System.Text.Rune value) { throw null; }
     }
     public sealed partial class StringBuilder : System.Runtime.Serialization.ISerializable

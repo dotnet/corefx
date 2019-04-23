@@ -17,12 +17,7 @@ namespace System.Net.Http.Functional.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
     public abstract class HttpClientHandler_Proxy_Test : HttpClientHandlerTestBase
     {
-        private readonly ITestOutputHelper _output;
-        
-        public HttpClientHandler_Proxy_Test(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public HttpClientHandler_Proxy_Test(ITestOutputHelper output) : base(output) { }
 
         [ActiveIssue(32809)]
         [OuterLoop("Uses external server")]
@@ -284,13 +279,13 @@ namespace System.Net.Http.Functional.Tests
 
         }
 
-        private static IEnumerable<object[]> BypassedProxies()
+        public static IEnumerable<object[]> BypassedProxies()
         {
             yield return new object[] { null };
             yield return new object[] { new UseSpecifiedUriWebProxy(new Uri($"http://{Guid.NewGuid().ToString().Substring(0, 15)}:12345"), bypass: true) };
         }
 
-        private static IEnumerable<object[]> CredentialsForProxy()
+        public static IEnumerable<object[]> CredentialsForProxy()
         {
             yield return new object[] { null, false };
             foreach (bool wrapCredsInCache in new[] { true, false })

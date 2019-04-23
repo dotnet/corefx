@@ -15,7 +15,11 @@ namespace System.Text.Json.Serialization
                 return;
             }
 
-            if (state.Current.IsEnumerable() || state.Current.IsPropertyEnumerable())
+            if (state.Current.IsDictionary())
+            {
+                // Fall through and treat as a return value.
+            }
+            else if (state.Current.IsEnumerable() || state.Current.IsPropertyEnumerable() || state.Current.IsPropertyADictionary())
             {
                 // An array of objects either on the current property or on a list
                 Type objType = state.Current.GetElementType();
@@ -25,7 +29,7 @@ namespace System.Text.Json.Serialization
             else if (state.Current.JsonPropertyInfo != null)
             {
                 // Nested object
-                Type objType = state.Current.JsonPropertyInfo.PropertyType;
+                Type objType = state.Current.JsonPropertyInfo.RuntimePropertyType;
                 state.Push();
                 state.Current.JsonClassInfo = options.GetOrAddClass(objType);
             }
@@ -43,6 +47,8 @@ namespace System.Text.Json.Serialization
                 return isLastFrame;
             }
 
+            state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
+
             object value = state.Current.ReturnValue;
 
             if (isLastFrame)
@@ -53,7 +59,7 @@ namespace System.Text.Json.Serialization
             }
 
             state.Pop();
-            ReadStackFrame.SetReturnValue(value, options, ref state.Current);
+            ApplyObjectToEnumerable(value, options, ref state.Current);
             return false;
         }
     }
