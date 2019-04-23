@@ -242,8 +242,8 @@ namespace System.IO.Compression.Tests
             }
         }
 
-        internal static readonly byte[] EmptyFileCompressed =
-           {
+        internal static readonly byte[] EmptyFileCompressedWithETX =
+        {
             0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00, 0x08, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x78, 0x6C,
             0x2F, 0x63, 0x75, 0x73, 0x74, 0x6F, 0x6D, 0x50, 0x72, 0x6F, 0x70, 0x65, 0x72, 0x74, 0x79, 0x32,
@@ -253,32 +253,59 @@ namespace System.IO.Compression.Tests
             0x00, 0x00, 0x00, 0x00, 0x78, 0x6C, 0x2F, 0x63, 0x75, 0x73, 0x74, 0x6F, 0x6D, 0x50, 0x72, 0x6F,
             0x70, 0x65, 0x72, 0x74, 0x79, 0x32, 0x2E, 0x62, 0x69, 0x6E, 0x50, 0x4B, 0x05, 0x06, 0x00, 0x00,
             0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x44, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00
-            };
+        };
+        internal static readonly byte[] EmptyFileCompressedWrongSize =
+        {
+            0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00, 0x08, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x78, 0x6C,
+            0x2F, 0x63, 0x75, 0x73, 0x74, 0x6F, 0x6D, 0x50, 0x72, 0x6F, 0x70, 0x65, 0x72, 0x74, 0x79, 0x32,
+            0x2E, 0x62, 0x69, 0x6E, 0xBA, 0xAD, 0x03, 0x00, 0x50, 0x4B, 0x01, 0x02, 0x14, 0x00, 0x14, 0x00,
+            0x06, 0x00, 0x08, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00, 0x00, 0x00, 0x04, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x78, 0x6C, 0x2F, 0x63, 0x75, 0x73, 0x74, 0x6F, 0x6D, 0x50,
+            0x72, 0x6F, 0x70, 0x65, 0x72, 0x74, 0x79, 0x32, 0x2E, 0x62, 0x69, 0x6E, 0x50, 0x4B, 0x05, 0x06,
+            0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x44, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00,
+            0x00, 0x00
+        };
+        internal static readonly Collections.Generic.List<byte[]> issue30317 = new Collections.Generic.List<byte[]>(){
+            EmptyFileCompressedWithETX, EmptyFileCompressedWrongSize
+        };
 
+        /// <summary>
+        /// This test checks behavior of ZipArchive with unexpected zip files:
+        /// 1. EmptyFileCompressedWithEOT has 
+        /// Deflate 0x08, _uncompressedSize 0, _compressedSize 2, compressed data: 0x0300 (\u0003 ETX)
+        /// 2. EmptyFileCompressedWrongSize has 
+        /// Deflate 0x08, _uncompressedSize 0, _compressedSize 4, compressed data: 0xBAAD0300 (just bad data)
+        /// ZipArchive is expected to change compression method to Stored (0x00) and ignore "bad" compressed size
+        /// </summary>
         [Fact]
         public static void ReadArchive_WithEmptyDeflatedFile()
         {
-            using (var testStream = new MemoryStream(EmptyFileCompressed))
+            foreach (var fileBytes in issue30317)
             {
-                var tmpfilename = "xl/customProperty2.bin";
-                var tmppathname = Path.GetTempPath();
-                var tmpfilepath = tmppathname + tmpfilename;
-                // open archive with zero-length file that is compressed (Deflate = 0x8)
-                using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update, true))
+                using (var testStream = new MemoryStream(fileBytes))
                 {
-                    // dispose without making any changes will rewrite the archive
-                }
+                    var tmpfilename = "xl/customProperty2.bin";
+                    var tmppathname = Path.GetTempPath();
+                    var tmpfilepath = tmppathname + tmpfilename;
+                    // open archive with zero-length file that is compressed (Deflate = 0x8)
+                    using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update, true))
+                    {
+                        // dispose without making any changes will rewrite the archive
+                    }
 
-                byte[] fileContent = testStream.ToArray();
+                    byte[] fileContent = testStream.ToArray();
 
-                // compression method should stay the same (Deflate = 0x8)
-                Assert.Equal(8, fileContent[8]);
+                    // compression method should change to "uncompressed" (Stored = 0x0)
+                    Assert.Equal(0, fileContent[8]);
 
-                // extract and check the file. should stay empty.
-                using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update))
-                {
-                    zip.ExtractToDirectory(tmppathname, overwriteFiles: true);
-                    Assert.Equal(0, new System.IO.FileInfo(tmpfilepath).Length);
+                    // extract and check the file. should stay empty.
+                    using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update))
+                    {
+                        zip.ExtractToDirectory(tmppathname, overwriteFiles: true);
+                        Assert.Equal(0, new System.IO.FileInfo(tmpfilepath).Length);
+                    }
                 }
             }
         }
