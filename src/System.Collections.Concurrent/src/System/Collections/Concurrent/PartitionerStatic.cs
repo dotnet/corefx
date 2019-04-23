@@ -19,7 +19,7 @@ namespace System.Collections.Concurrent
     /// <summary>
     /// Out-of-the-box partitioners are created with a set of default behaviors.  
     /// For example, by default, some form of buffering and chunking will be employed to achieve 
-    /// optimal performance in the common scenario where an IEnumerable<> implementation is fast and 
+    /// optimal performance in the common scenario where an <see cref="IEnumerable{T}"/> implementation is fast and 
     /// non-blocking.  These behaviors can be overridden via this enumeration.
     /// </summary>
     [Flags]
@@ -630,7 +630,6 @@ namespace System.Collections.Concurrent
                     return ((InternalPartitionEnumerable)this).GetEnumerator();
                 }
 
-#pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
                 ///////////////////
                 //
                 // Used by GrabChunk_Buffered()
@@ -939,8 +938,11 @@ namespace System.Collections.Concurrent
                     {
                         _localList = new KeyValuePair<long, TSource>[_maxChunkSize];
                     }
+
+#pragma warning disable 0420 // TODO: https://github.com/dotnet/corefx/issues/35022
                     // make the actual call to the enumerable that grabs a chunk
                     return _enumerable.GrabChunk(_localList, requestedChunkSize, ref _currentChunkSize.Value);
+#pragma warning restore 0420
                 }
 
                 /// <summary>
@@ -987,7 +989,6 @@ namespace System.Collections.Concurrent
                 }
             }
             #endregion
-#pragma warning restore 0420
         }
         #endregion
 
@@ -1622,7 +1623,6 @@ namespace System.Collections.Concurrent
         /// <summary>
         /// A very simple primitive that allows us to share a value across multiple threads.
         /// </summary>
-        /// <typeparam name="TSource"></typeparam>
         private class SharedInt
         {
             internal volatile int Value;

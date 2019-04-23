@@ -1,4 +1,3 @@
-<?xml version="1.0" encoding="utf-8"?>
 <root>
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
     <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
@@ -115,12 +114,6 @@
   </data>
   <data name="Formatter_ListSeparatorWithSpace" xml:space="preserve">
     <value>, </value>
-  </data>
-  <data name="Dependency_Not_In_Error_State" xml:space="preserve">
-    <value>Dependency is not in an error state.</value>
-  </data>
-  <data name="Sharing_Lock_Required" xml:space="preserve">
-    <value>Sharing lock is required</value>
   </data>
   <data name="Sharing_Lock_Taken" xml:space="preserve">
     <value>Sharing lock already taken in this operation.</value>

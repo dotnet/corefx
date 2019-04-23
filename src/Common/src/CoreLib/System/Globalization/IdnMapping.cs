@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 // This file contains the IDN functions and implementation.
 //
 // This allows encoding of non-ASCII domain names in a "punycode" form,
@@ -143,11 +144,10 @@ namespace System.Globalization
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            IdnMapping that = obj as IdnMapping;
             return
-                that != null &&
+                obj is IdnMapping that &&
                 _allowUnassigned == that._allowUnassigned &&
                 _useStd3AsciiRules == that._useStd3AsciiRules;
         }
@@ -205,15 +205,6 @@ namespace System.Globalization
             if (unicode[unicode.Length - 1] <= 0x1f)
             {
                 throw new ArgumentException(SR.Format(SR.Argument_InvalidCharSequence, unicode.Length - 1), nameof(unicode));
-            }
-
-            // Have to correctly IDNA normalize the string and Unassigned flags
-            bool bHasLastDot = (unicode.Length > 0) && IsDot(unicode[unicode.Length - 1]);
-
-            // Make sure we didn't normalize away something after a last dot
-            if ((!bHasLastDot) && unicode.Length > 0 && IsDot(unicode[unicode.Length - 1]))
-            {
-                throw new ArgumentException(SR.Argument_IdnBadLabelSize, nameof(unicode));
             }
 
             // May need to check Std3 rules again for non-ascii

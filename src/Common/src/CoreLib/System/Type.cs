@@ -102,8 +102,6 @@ namespace System
         public bool IsContextful => IsContextfulImpl();
         protected virtual bool IsContextfulImpl() => false;
 
-        public virtual bool IsCollectible => true;
-
         public virtual bool IsEnum => IsSubclassOf(typeof(Enum));
         public bool IsMarshalByRef => IsMarshalByRefImpl();
         protected virtual bool IsMarshalByRefImpl() => false;
@@ -283,8 +281,9 @@ namespace System
         }
         protected virtual TypeCode GetTypeCodeImpl()
         {
-            if (this != UnderlyingSystemType && UnderlyingSystemType != null)
-                return Type.GetTypeCode(UnderlyingSystemType);
+            Type systemType = UnderlyingSystemType;
+            if (this != systemType && systemType != null)
+                return Type.GetTypeCode(systemType);
 
             return TypeCode.Object;
         }

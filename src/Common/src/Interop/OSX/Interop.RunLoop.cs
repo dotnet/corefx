@@ -35,6 +35,12 @@ internal static partial class Interop
         internal extern static void CFRunLoopRun();
 
         /// <summary>
+        /// Runs the current thread’s CFRunLoop object in a particular mode.
+        /// </summary>
+        [DllImport(Interop.Libraries.CoreFoundationLibrary)]
+        internal extern static int CFRunLoopRunInMode(CFStringRef mode, double seconds, int returnAfterSourceHandled);
+
+        /// <summary>
         /// Notifies a RunLoop to stop and return control to the execution context that called CFRunLoopRun
         /// </summary>
         /// <param name="rl">The RunLoop to notify to stop</param>
@@ -53,8 +59,8 @@ internal static partial class Interop
         /// Adds a CFRunLoopSource object to a run loop mode.
         /// </summary>
         /// <param name="rl">The run loop to modify.</param>
-        /// <param name="rl">The run loop source to add. The source is retained by the run loop.</param>
-        /// <param name="rl">The run loop mode to which to add source.</param>
+        /// <param name="source">The run loop source to add. The source is retained by the run loop.</param>
+        /// <param name="mode">The run loop mode to which to add source.</param>
         [DllImport(Interop.Libraries.CoreFoundationLibrary)]
         internal static extern void CFRunLoopAddSource(CFRunLoopRef rl, CFRunLoopSourceRef source, CFStringRef mode);
 
@@ -62,11 +68,18 @@ internal static partial class Interop
         /// Removes a CFRunLoopSource object from a run loop mode.
         /// </summary>
         /// <param name="rl">The run loop to modify.</param>
-        /// <param name="rl">The run loop source to remove.</param>
-        /// <param name="rl">The run loop mode of rl from which to remove source.</param>
+        /// <param name="source">The run loop source to remove.</param>
+        /// <param name="mode">The run loop mode of rl from which to remove source.</param>
         [DllImport(Interop.Libraries.CoreFoundationLibrary)]
         internal static extern void CFRunLoopRemoveSource(CFRunLoopRef rl, CFRunLoopSourceRef source, CFStringRef mode);
-        
+
+        /// <summary>
+        /// Invalidates a CFRunLoopSource object, stopping it from ever firing again.
+        /// </summary>
+        /// <param name="source">The run loop source to invalidate.</param>
+        [DllImport(Interop.Libraries.CoreFoundationLibrary)]
+        internal static extern void CFRunLoopSourceInvalidate(CFRunLoopSourceRef source);
+
         /// <summary>
         /// Returns a bool that indicates whether the run loop is waiting for an event.
         /// </summary>

@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{DCBB8805-4658-44BF-B5E8-B6714EC8936B}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <ResourcesSourceOutputDirectory>../../src/Resources/</ResourcesSourceOutputDirectory>
+    <StringResourcesPath>../../src/Resources/Strings.resx</StringResourcesPath>
     <Configurations>netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
@@ -36,6 +36,7 @@
     <Compile Include="DnsParsingTests.cs" />
     <Compile Include="ExceptionHelper.cs" />
     <Compile Include="FileUtil.cs" />
+    <Compile Include="IPGlobalPropertiesTest.cs" />
     <Compile Include="IPInterfacePropertiesTest_Linux.cs" />
     <Compile Include="IPInterfacePropertiesTest_OSX.cs" />
     <Compile Include="IPInterfacePropertiesTest_Windows.cs" />

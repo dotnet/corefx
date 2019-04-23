@@ -1,4 +1,4 @@
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
 <!-- The versions can be updated by running UpdateToLatestStablePackages target in harvestPackages.depproj -->
 <ItemGroup>
 <PackageReference Include="Microsoft.CSharp">
@@ -105,6 +105,9 @@
 </PackageReference>
 <PackageReference Include="System.Net.WebSockets.WebSocketProtocol">
   <Version>4.5.1</Version>
+</PackageReference>
+<PackageReference Include="System.Numerics.Tensors">
+  <Version>0.1.0</Version>
 </PackageReference>
 <PackageReference Include="System.Numerics.Vectors">
   <Version>4.5.0</Version>

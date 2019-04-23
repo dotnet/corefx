@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -22,11 +21,13 @@ namespace System.Net.Http
             public sealed override bool CanRead => true;
             public sealed override bool CanWrite => false;
 
+            public sealed override void Write(ReadOnlySpan<byte> buffer) => throw new NotSupportedException(SR.net_http_content_readonly_stream);
+
             public sealed override ValueTask WriteAsync(ReadOnlyMemory<byte> destination, CancellationToken cancellationToken) => throw new NotSupportedException();
 
-            public override Task FlushAsync(CancellationToken cancellationToken) => throw new NotSupportedException();
-
             public virtual bool NeedsDrain => false;
+
+            protected bool IsDisposed => _disposed == 1;
 
             public virtual Task<bool> DrainAsync(int maxDrainBytes)
             {

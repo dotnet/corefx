@@ -15,7 +15,7 @@ namespace System.Net.Http.Functional.Tests
 
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP will send default credentials based on manifest settings")]
     [PlatformSpecific(TestPlatforms.Windows)]
-    public abstract class DefaultCredentialsTest : HttpClientTestBase
+    public abstract class DefaultCredentialsTest : HttpClientHandlerTestBase
     {
         private static bool DomainJoinedTestsEnabled => !string.IsNullOrEmpty(Configuration.Http.DomainJoinedHttpHost);
 
@@ -36,12 +36,7 @@ namespace System.Net.Http.Functional.Tests
         private static Uri s_authenticatedServer = DomainJoinedTestsEnabled ? 
             new Uri($"http://{Configuration.Http.DomainJoinedHttpHost}/test/auth/negotiate/showidentity.ashx") : null;
 
-        private readonly ITestOutputHelper _output;
-
-        public DefaultCredentialsTest(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public DefaultCredentialsTest(ITestOutputHelper output) : base(output) { }
 
         [OuterLoop("Uses external server")]
         [ConditionalTheory(nameof(ServerAuthenticationTestsEnabled))]

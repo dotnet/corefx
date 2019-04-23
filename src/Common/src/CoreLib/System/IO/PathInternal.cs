@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Text;
 
@@ -113,6 +114,7 @@ namespace System.IO
         /// <summary>
         /// Try to remove relative segments from the given path (without combining with a root).
         /// </summary>
+        /// <param name="path">Input path</param>
         /// <param name="rootLength">The length of the root of the given path</param>
         internal static string RemoveRelativeSegments(string path, int rootLength)
         {
@@ -131,7 +133,9 @@ namespace System.IO
         /// <summary>
         /// Try to remove relative segments from the given path (without combining with a root).
         /// </summary>
+        /// <param name="path">Input path</param>
         /// <param name="rootLength">The length of the root of the given path</param>
+        /// <param name="sb">String builder that will store the result</param>
         /// <returns>"true" if the path was modified</returns>
         internal static bool RemoveRelativeSegments(ReadOnlySpan<char> path, int rootLength, ref ValueStringBuilder sb)
         {

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -46,11 +47,11 @@ namespace System.IO
         private bool _isPipe;      // Whether to disable async buffering code.
         private long _appendStart; // When appending, prevent overwriting file.
 
-        private static unsafe IOCompletionCallback s_ioCallback = FileStreamCompletionSource.IOCallback;
+        private static readonly unsafe IOCompletionCallback s_ioCallback = FileStreamCompletionSource.IOCallback;
 
-        private Task _activeBufferOperation = null;                 // tracks in-progress async ops using the buffer
-        private PreAllocatedOverlapped _preallocatedOverlapped;     // optimization for async ops to avoid per-op allocations
-        private FileStreamCompletionSource _currentOverlappedOwner; // async op currently using the preallocated overlapped
+        private Task _activeBufferOperation = Task.CompletedTask;    // tracks in-progress async ops using the buffer
+        private PreAllocatedOverlapped? _preallocatedOverlapped;     // optimization for async ops to avoid per-op allocations
+        private FileStreamCompletionSource? _currentOverlappedOwner; // async op currently using the preallocated overlapped
 
         private void Init(FileMode mode, FileShare share, string originalPath)
         {
@@ -196,8 +197,7 @@ namespace System.IO
             return secAttrs;
         }
 
-        private bool HasActiveBufferOperation
-            => _activeBufferOperation != null && !_activeBufferOperation.IsCompleted;
+        private bool HasActiveBufferOperation => !_activeBufferOperation.IsCompleted;
 
         public override bool CanSeek => _canSeek;
 
@@ -226,24 +226,21 @@ namespace System.IO
             // finalized.
             try
             {
-                if (_fileHandle != null && !_fileHandle.IsClosed)
+                if (_fileHandle != null && !_fileHandle.IsClosed && _writePos > 0)
                 {
                     // Flush data to disk iff we were writing.  After 
                     // thinking about this, we also don't need to flush
                     // our read position, regardless of whether the handle
                     // was exposed to the user.  They probably would NOT 
                     // want us to do this.
-                    if (_writePos > 0)
+                    try
                     {
-                        try
-                        {
-                            FlushWriteBuffer(!disposing);
-                        }
-                        catch (Exception e) when (IsIoRelatedException(e) && !disposing)
-                        {
-                            // On finalization, ignore failures from trying to flush the write buffer,
-                            // e.g. if this stream is wrapping a pipe and the pipe is now broken.
-                        }
+                        FlushWriteBuffer(!disposing);
+                    }
+                    catch (Exception e) when (IsIoRelatedException(e) && !disposing)
+                    {
+                        // On finalization, ignore failures from trying to flush the write buffer,
+                        // e.g. if this stream is wrapping a pipe and the pipe is now broken.
                     }
                 }
             }
@@ -251,22 +248,46 @@ namespace System.IO
             {
                 if (_fileHandle != null && !_fileHandle.IsClosed)
                 {
-                    if (_fileHandle.ThreadPoolBinding != null)
-                        _fileHandle.ThreadPoolBinding.Dispose();
-
+                    _fileHandle.ThreadPoolBinding?.Dispose();
                     _fileHandle.Dispose();
                 }
 
-                if (_preallocatedOverlapped != null)
-                    _preallocatedOverlapped.Dispose();
-
+                _preallocatedOverlapped?.Dispose();
                 _canSeek = false;
 
                 // Don't set the buffer to null, to avoid a NullReferenceException
                 // when users have a race condition in their code (i.e. they call
                 // Close when calling another method on Stream like Read).
-                //_buffer = null;
-                base.Dispose(disposing);
+            }
+        }
+
+        public override ValueTask DisposeAsync() =>
+            GetType() == typeof(FileStream) ?
+                DisposeAsyncCore() :
+                base.DisposeAsync();
+
+        private async ValueTask DisposeAsyncCore()
+        {
+            // Same logic as in Dispose(), except with async counterparts.
+            // TODO: https://github.com/dotnet/corefx/issues/32837: FlushAsync does synchronous work.
+            try
+            {
+                if (_fileHandle != null && !_fileHandle.IsClosed && _writePos > 0)
+                {
+                    await FlushAsyncInternal(default).ConfigureAwait(false);
+                }
+            }
+            finally
+            {
+                if (_fileHandle != null && !_fileHandle.IsClosed)
+                {
+                    _fileHandle.ThreadPoolBinding?.Dispose();
+                    _fileHandle.Dispose();
+                }
+
+                _preallocatedOverlapped?.Dispose();
+                _canSeek = false;
+                GC.SuppressFinalize(this); // the handle is closed; nothing further for the finalizer to do
             }
         }
 
@@ -385,7 +406,8 @@ namespace System.IO
 
         // Instance method to help code external to this MarshalByRefObject avoid
         // accessing its fields by ref.  This avoids a compiler warning.
-        private FileStreamCompletionSource CompareExchangeCurrentOverlappedOwner(FileStreamCompletionSource newSource, FileStreamCompletionSource existingSource) => Interlocked.CompareExchange(ref _currentOverlappedOwner, newSource, existingSource);
+        private FileStreamCompletionSource? CompareExchangeCurrentOverlappedOwner(FileStreamCompletionSource? newSource, FileStreamCompletionSource? existingSource) =>
+            Interlocked.CompareExchange(ref _currentOverlappedOwner, newSource, existingSource);
 
         private int ReadSpan(Span<byte> destination)
         {
@@ -640,13 +662,13 @@ namespace System.IO
                 {
                     if (numBytes >= source.Length)
                     {
-                        source.CopyTo(new Span<byte>(GetBuffer()).Slice(_writePos));
+                        source.CopyTo(GetBuffer().AsSpan(_writePos));
                         _writePos += source.Length;
                         return;
                     }
                     else
                     {
-                        source.Slice(0, numBytes).CopyTo(new Span<byte>(GetBuffer()).Slice(_writePos));
+                        source.Slice(0, numBytes).CopyTo(GetBuffer().AsSpan(_writePos));
                         _writePos += numBytes;
                         source = source.Slice(numBytes);
                     }
@@ -671,7 +693,7 @@ namespace System.IO
             }
 
             // Copy remaining bytes into buffer, to write at a later date.
-            source.CopyTo(new Span<byte>(GetBuffer()).Slice(_writePos));
+            source.CopyTo(GetBuffer().AsSpan(_writePos));
             _writePos = source.Length;
             return;
         }
@@ -711,7 +733,7 @@ namespace System.IO
             return;
         }
 
-        private Task<int> ReadAsyncInternal(Memory<byte> destination, CancellationToken cancellationToken, out int synchronousResult)
+        private Task<int>? ReadAsyncInternal(Memory<byte> destination, CancellationToken cancellationToken, out int synchronousResult)
         {
             Debug.Assert(_useAsyncIO);
             if (!CanRead) throw Error.GetReadNotSupported();
@@ -1003,7 +1025,7 @@ namespace System.IO
             // We return a Task that represents one or both.
 
             // Flush the buffer asynchronously if there's anything to flush
-            Task flushTask = null;
+            Task? flushTask = null;
             if (_writePos > 0)
             {
                 flushTask = FlushWriteAsync(cancellationToken);
@@ -1320,6 +1342,7 @@ namespace System.IO
                 {
                     cancellationReg = cancellationToken.UnsafeRegister(s =>
                     {
+                        Debug.Assert(s is AsyncCopyToAwaitable);
                         var innerAwaitable = (AsyncCopyToAwaitable)s;
                         unsafe
                         {
@@ -1351,7 +1374,7 @@ namespace System.IO
                             // Allocate a native overlapped for our reusable overlapped, and set position to read based on the next
                             // desired address stored in the awaitable.  (This position may be 0, if either we're at the beginning or
                             // if the stream isn't seekable.)
-                            readAwaitable._nativeOverlapped = _fileHandle.ThreadPoolBinding.AllocateNativeOverlapped(awaitableOverlapped);
+                            readAwaitable._nativeOverlapped = _fileHandle.ThreadPoolBinding!.AllocateNativeOverlapped(awaitableOverlapped);
                             if (canSeek)
                             {
                                 readAwaitable._nativeOverlapped->OffsetLow = unchecked((int)readAwaitable._position);
@@ -1426,7 +1449,7 @@ namespace System.IO
                             }
                             if (overlapped != null)
                             {
-                                _fileHandle.ThreadPoolBinding.FreeNativeOverlapped(overlapped);
+                                _fileHandle.ThreadPoolBinding!.FreeNativeOverlapped(overlapped);
                             }
                         }
                     }
@@ -1471,7 +1494,7 @@ namespace System.IO
             /// s_sentinel if the I/O operation completed before the await,
             /// s_callback if it completed after the await yielded.
             /// </summary>
-            internal Action _continuation;
+            internal Action? _continuation;
             /// <summary>Last error code from completed operation.</summary>
             internal uint _errorCode;
             /// <summary>Last number of read bytes from completed operation.</summary>
@@ -1498,7 +1521,8 @@ namespace System.IO
             /// <summary>Overlapped callback: store the results, then invoke the continuation delegate.</summary>
             internal static unsafe void IOCallback(uint errorCode, uint numBytes, NativeOverlapped* pOVERLAP)
             {
-                var awaitable = (AsyncCopyToAwaitable)ThreadPoolBoundHandle.GetNativeOverlappedState(pOVERLAP);
+                var awaitable = (AsyncCopyToAwaitable?)ThreadPoolBoundHandle.GetNativeOverlappedState(pOVERLAP);
+                Debug.Assert(awaitable != null);
 
                 Debug.Assert(!ReferenceEquals(awaitable._continuation, s_sentinel), "Sentinel must not have already been set as the continuation");
                 awaitable._errorCode = errorCode;
@@ -1544,6 +1568,7 @@ namespace System.IO
             if (_fileHandle.IsClosed)
                 throw Error.GetFileNotOpen();
 
+            // TODO: https://github.com/dotnet/corefx/issues/32837 (stop doing this synchronous work).
             // The always synchronous data transfer between the OS and the internal buffer is intentional 
             // because this is needed to allow concurrent async IO requests. Concurrent data transfer
             // between the OS and the internal buffer will result in race conditions. Since FlushWrite and
@@ -1563,7 +1588,7 @@ namespace System.IO
             if (CanWrite)
             {
                 return Task.Factory.StartNew(
-                    state => ((FileStream)state).FlushOSBuffer(),
+                    state => ((FileStream)state!).FlushOSBuffer(), // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
                     this,
                     cancellationToken,
                     TaskCreationOptions.DenyChildAttach,
@@ -1612,7 +1637,7 @@ namespace System.IO
                 // probably be consistent w/ every other directory.
                 int errorCode = Marshal.GetLastWin32Error();
 
-                if (errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND && _path.Length == PathInternal.GetRootLength(_path))
+                if (errorCode == Interop.Errors.ERROR_PATH_NOT_FOUND && _path!.Length == PathInternal.GetRootLength(_path))
                     errorCode = Interop.Errors.ERROR_ACCESS_DENIED;
 
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode, _path);

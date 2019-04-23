@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{28AE24F8-BEF4-4358-B612-ADD9D587C8E1}</ProjectGuid>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
@@ -53,5 +54,6 @@
     <Compile Include="BigInteger\ToByteArray.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="BigInteger\TryWriteBytes.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
     <Compile Include="ComplexTests.cs" />
+    <Compile Include="ComplexTests.netcoreapp.cs" Condition="'$(TargetGroup)' == 'netcoreapp'" />
   </ItemGroup>
 </Project>

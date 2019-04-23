@@ -41,8 +41,10 @@ https://raw.githubusercontent.com/Cyan4973/xxHash/5c174cfa4e45a42f94082dc0d4539b
 
 */
 
+#nullable enable
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -253,10 +255,6 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static uint Rol(uint value, int count)
-            => (value << count) | (value >> (32 - count));
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static void Initialize(out uint v1, out uint v2, out uint v3, out uint v4)
         {
             v1 = s_seed + Prime1 + Prime2;
@@ -268,23 +266,19 @@ namespace System
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint Round(uint hash, uint input)
         {
-            hash += input * Prime2;
-            hash = Rol(hash, 13);
-            hash *= Prime1;
-            return hash;
+            return BitOperations.RotateLeft(hash + input * Prime2, 13) * Prime1;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint QueueRound(uint hash, uint queuedValue)
         {
-            hash += queuedValue * Prime3;
-            return Rol(hash, 17) * Prime4;
+            return BitOperations.RotateLeft(hash + queuedValue * Prime3, 17) * Prime4;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static uint MixState(uint v1, uint v2, uint v3, uint v4)
         {
-            return Rol(v1, 1) + Rol(v2, 7) + Rol(v3, 12) + Rol(v4, 18);
+            return BitOperations.RotateLeft(v1, 1) + BitOperations.RotateLeft(v2, 7) + BitOperations.RotateLeft(v3, 12) + BitOperations.RotateLeft(v4, 18);
         }
 
         private static uint MixEmptyState()
@@ -308,7 +302,7 @@ namespace System
             Add(value?.GetHashCode() ?? 0);
         }
 
-        public void Add<T>(T value, IEqualityComparer<T> comparer)
+        public void Add<T>(T value, IEqualityComparer<T>? comparer)
         {
             Add(comparer != null ? comparer.GetHashCode(value) : (value?.GetHashCode() ?? 0));
         }
@@ -424,7 +418,7 @@ namespace System
 
         [Obsolete("HashCode is a mutable struct and should not be compared with other HashCodes.", error: true)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public override bool Equals(object obj) => throw new NotSupportedException(SR.HashCode_EqualityNotSupported);
+        public override bool Equals(object? obj) => throw new NotSupportedException(SR.HashCode_EqualityNotSupported);
 #pragma warning restore 0809
     }
 }

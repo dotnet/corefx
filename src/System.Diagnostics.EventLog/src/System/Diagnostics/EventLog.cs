@@ -271,7 +271,7 @@ namespace System.Diagnostics
             RuntimeHelpers.PrepareConstrainedRegions();
             try
             {
-                SharedUtils.EnterMutex(eventLogMutexName, ref mutex);
+                NetFrameworkUtils.EnterMutex(eventLogMutexName, ref mutex);
                 Debug.WriteLineIf(CompModSwitches.EventLog.TraceVerbose, "CreateEventSource: Calling SourceExists");
                 if (SourceExists(source, machineName, true))
                 {
@@ -307,17 +307,13 @@ namespace System.Diagnostics
                     }
 
                     logKey = eventKey.OpenSubKey(logName, true);
-                    if (logKey == null && logName.Length >= 8)
+                    if (logKey == null)
                     {
-                        string logNameFirst8 = logName.Substring(0, 8);
-                        if (string.Equals(logNameFirst8, "AppEvent", StringComparison.OrdinalIgnoreCase) ||
-                             string.Equals(logNameFirst8, "SecEvent", StringComparison.OrdinalIgnoreCase) ||
-                             string.Equals(logNameFirst8, "SysEvent", StringComparison.OrdinalIgnoreCase))
+                        if (logName.Length == 8 && (
+                            string.Equals(logName, "AppEvent", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(logName, "SecEvent", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(logName, "SysEvent", StringComparison.OrdinalIgnoreCase)))
                             throw new ArgumentException(SR.Format(SR.InvalidCustomerLogName, logName));
-
-                        string sameLogName = FindSame8FirstCharsLog(eventKey, logName);
-                        if (sameLogName != null)
-                            throw new ArgumentException(SR.Format(SR.DuplicateLogName, logName, sameLogName));
                     }
 
                     bool createLogKey = (logKey == null);
@@ -386,7 +382,7 @@ namespace System.Diagnostics
             RuntimeHelpers.PrepareConstrainedRegions();
             try
             {
-                SharedUtils.EnterMutex(eventLogMutexName, ref mutex);
+                NetFrameworkUtils.EnterMutex(eventLogMutexName, ref mutex);
                 try
                 {
                     eventlogkey = GetEventLogRegKey(machineName, true);
@@ -457,7 +453,7 @@ namespace System.Diagnostics
             RuntimeHelpers.PrepareConstrainedRegions();
             try
             {
-                SharedUtils.EnterMutex(eventLogMutexName, ref mutex);
+                NetFrameworkUtils.EnterMutex(eventLogMutexName, ref mutex);
                 RegistryKey key = null;
                 // First open the key read only so we can do some checks.  This is important so we get the same 
                 // exceptions even if we don't have write access to the reg key. 
@@ -527,7 +523,7 @@ namespace System.Diagnostics
                 if (eventkey == null)
                     return false;
 
-                logKey = eventkey.OpenSubKey(logName, false);         // try to find log file key immediately.
+                logKey = eventkey.OpenSubKey(logName, false); // try to find log file key immediately.
                 return (logKey != null);
             }
             finally
@@ -535,23 +531,6 @@ namespace System.Diagnostics
                 eventkey?.Close();
                 logKey?.Close();
             }
-        }
-        // Try to find log file name with the same 8 first characters.
-        // Returns 'null' if no "same first 8 chars" log is found.   logName.Length must be > 7
-        private static string FindSame8FirstCharsLog(RegistryKey keyParent, string logName)
-        {
-            string logNameFirst8 = logName.Substring(0, 8);
-            string[] logNames = keyParent.GetSubKeyNames();
-
-            for (int i = 0; i < logNames.Length; i++)
-            {
-                string currentLogName = logNames[i];
-                if (currentLogName.Length >= 8 &&
-                    string.Equals(currentLogName.Substring(0, 8), logNameFirst8, StringComparison.OrdinalIgnoreCase))
-                    return currentLogName;
-            }
-
-            return null;   // not found
         }
 
         private static RegistryKey FindSourceRegistration(string source, string machineName, bool readOnly)
@@ -632,7 +611,7 @@ namespace System.Diagnostics
                     }
 
                     if (inaccessibleLogs != null)
-                        throw new SecurityException(SR.Format(wantToCreate ? SR.SomeLogsInaccessibleToCreate : SR.SomeLogsInaccessible, inaccessibleLogs.ToString()));
+                        throw new SecurityException(SR.Format(wantToCreate ? SR.SomeLogsInaccessibleToCreate : SR.SomeLogsInaccessible, inaccessibleLogs));
 
                 }
                 finally
@@ -712,7 +691,7 @@ namespace System.Diagnostics
 
         internal static string GetDllPath(string machineName)
         {
-            return Path.Combine(SharedUtils.GetLatestBuildDllDirectory(machineName), DllName);
+            return Path.Combine(NetFrameworkUtils.GetLatestBuildDllDirectory(machineName), DllName);
         }
 
         public static bool SourceExists(string source)
@@ -871,7 +850,7 @@ namespace System.Diagnostics
             string msg = null;
 
             int msgLen = 0;
-            StringBuilder buf = new StringBuilder(1024);
+            var buf = new char[1024];
             int flags = Interop.Kernel32.FORMAT_MESSAGE_FROM_HMODULE | Interop.Kernel32.FORMAT_MESSAGE_ARGUMENT_ARRAY;
 
             IntPtr[] addresses = new IntPtr[insertionStrings.Length];
@@ -890,8 +869,8 @@ namespace System.Diagnostics
                     handles[i] = GCHandle.Alloc(insertionStrings[i], GCHandleType.Pinned);
                     addresses[i] = handles[i].AddrOfPinnedObject();
                 }
-                int lastError = Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER;
-                while (msgLen == 0 && lastError == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER)
+                int lastError = Interop.Errors.ERROR_INSUFFICIENT_BUFFER;
+                while (msgLen == 0 && lastError == Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
                 {
                     msgLen = Interop.Kernel32.FormatMessage(
                         flags,
@@ -899,14 +878,14 @@ namespace System.Diagnostics
                         messageNum,
                         0,
                         buf,
-                        buf.Capacity,
+                        buf.Length,
                         addresses);
 
                     if (msgLen == 0)
                     {
                         lastError = Marshal.GetLastWin32Error();
-                        if (lastError == Interop.Kernel32.ERROR_INSUFFICIENT_BUFFER)
-                            buf.Capacity = buf.Capacity * 2;
+                        if (lastError == Interop.Errors.ERROR_INSUFFICIENT_BUFFER)
+                            buf = new char[buf.Length * 2];
                     }
                 }
             }
@@ -926,10 +905,9 @@ namespace System.Diagnostics
 
             if (msgLen > 0)
             {
-                msg = buf.ToString();
-                // chop off a single CR/LF pair from the end if there is one. FormatMessage always appends one extra.
-                if (msg.Length > 1 && msg[msg.Length - 1] == '\n')
-                    msg = msg.Substring(0, msg.Length - 2);
+                msg = msgLen > 1 && buf[msgLen - 1] == '\n' ?
+                    new string(buf, 0, msgLen - 2) : // chop off a single CR/LF pair from the end if there is one. FormatMessage always appends one extra.
+                    new string(buf, 0, msgLen);
             }
 
             return msg;

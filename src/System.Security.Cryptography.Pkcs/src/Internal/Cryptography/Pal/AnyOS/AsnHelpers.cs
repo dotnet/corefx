@@ -54,6 +54,7 @@ namespace Internal.Cryptography.Pal.AnyOS
         internal static AlgorithmIdentifier ToPresentationObject(this AlgorithmIdentifierAsn asn)
         {
             int keyLength;
+            byte[] parameters = Array.Empty<byte>();
 
             switch (asn.Algorithm.Value)
             {
@@ -103,7 +104,7 @@ namespace Internal.Cryptography.Pal.AnyOS
                         // there's no data after the [AnyValue] value.
                         if (reader.PeekTag() != Asn1Tag.Null)
                         {
-                            if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
+                            if (reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> contents))
                             {
                                 saltLen = contents.Length;
                             }
@@ -127,6 +128,10 @@ namespace Internal.Cryptography.Pal.AnyOS
                 case Oids.TripleDesCbc:
                     keyLength = KeyLengths.TripleDes_192Bit;
                     break;
+                case Oids.RsaOaep when !asn.HasNullEquivalentParameters():
+                    keyLength = 0;
+                    parameters = asn.Parameters.Value.ToArray();
+                    break;
                 default:
                     // .NET Framework doesn't set a keylength for AES, or any other algorithm than the ones
                     // listed here.
@@ -134,7 +139,9 @@ namespace Internal.Cryptography.Pal.AnyOS
                     break;
             }
 
-            return new AlgorithmIdentifier(new Oid(asn.Algorithm), keyLength);
+            return new AlgorithmIdentifier(new Oid(asn.Algorithm), keyLength) {
+                Parameters = parameters
+            };
         }
     }
 }

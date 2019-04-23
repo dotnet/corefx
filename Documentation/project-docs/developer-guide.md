@@ -3,11 +3,12 @@ Developer Guide
 
 The repo can be built for the following platforms, using the provided setup and the following instructions.
 
-| Chip  | Windows | Linux | OS X | FreeBSD |
-| :---- | :-----: | :---: | :--: | :--: |
-| x64   | &#x25CF;| &#x25D2;| &#x25D2;| &#x25D2;|
-| x86   | &#x25EF;| &#x25EF;| &#x25EF;| &#x25EF;|
-| ARM32 | &#x25EF;| &#x25EF;| &#x25EF;| &#x25EF;|
+| Chip  | Windows  | Linux    | macOS    | FreeBSD  |
+| :---- | :------: | :------: | :------: | :------: |
+| x64   | &#x2714; | &#x2714; | &#x2714; | &#x2714; |
+| x86   | &#x2714; |          |          |          |
+| ARM   | &#x2714; | &#x2714; |          |          |
+| ARM64 |          | &#x2714; |          |          |
 |       | [Instructions](../building/windows-instructions.md) | [Instructions](../building/unix-instructions.md) | [Instructions](../building/unix-instructions.md) | [Instructions](../building/unix-instructions.md) |
 
 
@@ -16,14 +17,11 @@ Building the repository
 
 The CoreFX repo can be built from a regular, non-admin command prompt. The build produces multiple binaries that make up the CoreFX libraries and the accompanying tests.
 
-Developer Workflow
-------------------
-The dev workflow describes the [development process](https://github.com/dotnet/buildtools/blob/master/Documentation/Dev-workflow.md) to follow. It is divided into specific tasks that are fast, transparent and easy to understand.
-
-For more information about the different options that each task has, use the argument `-?` when calling the script.  For example:
+For information about the different options that are available use the argument `-help|-h` when calling the build script:
 ```
-build -?
+build -h
 ```
+On Unix, arguments can be passed in with a single `-` or double hyphen `--`.
 
 ### Build
 The CoreFX build has two logical components, the native build which produces the "shims" (which provide a stable interface between the OS and managed code) and
@@ -33,37 +31,35 @@ Calling the script `build` attempts to build both the native and managed code.
 
 The build configurations are generally defaulted based on where you are building (i.e. which OS or which architecture) but we have a few shortcuts for the individual properties that can be passed to the build scripts:
 
-- `-framework` identifies the target framework for the build. It defaults to `netcoreapp` but possible values include `netcoreapp`, `netfx` or `uap`. (msbuild property `TargetGroup`)
+- `-framework|-f` identifies the target framework for the build. It defaults to `netcoreapp` but possible values include `netcoreapp`, `netfx` or `uap`. (msbuild property `TargetGroup`)
 - `-os` identifies the OS for the build. It defaults to the OS you are running on but possible values include `Windows_NT`, `Unix`, `Linux`, or `OSX`. (msbuild property `OSGroup`)
-- `-debug|-release` controls the optimization level the compilers use for the build. It defaults to `Debug`. (msbuild property `ConfigurationGroup`)
-- `/p:ArchGroup` identifies the architecture for the build. It defaults to `x64` but possible values include `x64`, `x86`, `arm`, or `arm64`. (msbuild property `ArchGroup`)
+- `-configuration|-c Debug|Release` controls the optimization level the compilers use for the build. It defaults to `Debug`. (msbuild property `ConfigurationGroup`)
+- `-arch` identifies the architecture for the build. It defaults to `x64` but possible values include `x64`, `x86`, `arm`, or `arm64`. (msbuild property `ArchGroup`)
 
 For more details on the build configurations see [project-guidelines](../coding-guidelines/project-guidelines.md#build-pivots).
 
-**Note**: Before working on individual projects or test projects you **must** run `build` from the root once before beginning that work. It is also a good idea to run `build` whenever you pull a large set of unknown changes into your branch.
+**Note**: Before working on individual projects or test projects you **must** run `build` from the root once before beginning that work. It is also a good idea to run `build` whenever you pull a large set of unknown changes into your branch. If you invoke the build script without any actions, the default action chain `-restore -build` is executed. This means that restore and build are not implicit when invoking other actions!
 
-The most common workflow for developers is to call `build` from the root once (preceeded by a `clean -all` if you have built previously) and then go and work on the individual library that you are trying to make changes for. On windows folks will usually open up the solution file in the root of that library directory and work in VS.
+**Note:** You can chain multiple actions together but the order of execution is fixed and does not relate to the position of the argument in the command.
 
-By default build only builds the product libraries and none of the tests if you want to build and run all the tests you can call `build -test` to build and run only the tests or `build -includetests` to build the project as well as the tests
+The most common workflow for developers is to call `build` from the root once and then go and work on the individual library that you are trying to make changes for.
+
+By default build only builds the product libraries and none of the tests. If you want to build the tests you can call `build -buildtests`. If you want to run the tests you can call `build -test`. To build and run the tests combine both arguments: `build -buildtests -test`. To build both the product libraries and the test libraries pass `build -build -buildtests` to the command line.
+
+If you invoke the build script without any argument the default arguments will be executed `-restore -build`. Note that -restore and -build are only implicit if no actions are passed in.
 
 **Examples**
-- Clean and build the product libraries
+- Building in release mode for platform x64 (restore and build are implicit here as no actions are passed in)
 ```
-clean -all
-build
-```
-
-- Building in debug mode for platform x64
-```
-build -debug /p:ArchGroup=x64
+build -c Release -arch x64
 ```
 
-- Building the src and then building and running the tests
+- Building the src assemblies and build and run tests (running all tests takes a considerable amount of time!)
 ```
-build -includetests
+build -restore -build -buildtests -test
 ```
 
-- Building for different target frameworks
+- Building for different target frameworks (restore and build are implicit again as no action is passed in)
 ```
 build -framework netcoreapp
 build -framework netfx
@@ -75,6 +71,10 @@ build -framework uap
 build /p:BuildNative=false
 ```
 
+- Clean the entire solution
+```
+build -clean
+```
 ### Build Native
 The native build produces shims over libc, openssl, gssapi, libcurl and libz.
 The build system uses CMake (2.8.12 or higher) to generate Makefiles using clang (3.5 or higher).
@@ -102,12 +102,12 @@ To build the tests and run them you can call the build script passing -tests opt
 **Examples**
 - The following shows how to build only the tests but not run them
 ```
-build -test -skiptests
+build -buildtests
 ```
 
 - The following builds and runs all tests for netcoreapp in release configuration.
 ```
-build -test -release -framework=netcoreapp
+build -buildtests -test -c Release -f netcoreapp
 ```
 
 - The following example shows how to pass extra msbuild properties to ignore tests ignored in CI.
@@ -145,7 +145,7 @@ build src\System.Collections\tests
 
 - All the options listed above like framework and configuration are also supported (note they must be after the directory)
 ```
-build System.Collections -framework:netfx -release
+build System.Collections -f netfx -c Release
 ```
 
 ### Building individual projects
@@ -165,7 +165,7 @@ You can build the tests for System.Diagnostics.DiagnosticSource.dll by going to
 
 Some libraries might also have a ref and/or a pkg directory and you can build them in a similar way by typing `dotnet msbuild` in that directory.
 
-For libraries that have multiple build configurations the configurations will be listed in the `<BuildConfigurations>` property group, commonly found in a configurations.props file next to the csproj. When building the csproj for a configuration the most compatible one in the list will be choosen and set for the build. For more information about `BuildConfigurations` see [project-guidelines](../coding-guidelines/project-guidelines.md).
+For libraries that have multiple build configurations the configurations will be listed in the `<BuildConfigurations>` property group, commonly found in a configurations.props file next to the csproj. When building the csproj for a configuration the most compatible one in the list will be chosen and set for the build. For more information about `BuildConfigurations` see [project-guidelines](../coding-guidelines/project-guidelines.md).
 
 **Examples**
 
@@ -193,26 +193,32 @@ dotnet msbuild System.Net.NetworkInformation.csproj /t:RebuildAll
 ### Building all for other OSes
 
 By default, building from the root will only build the libraries for the OS you are running on. One can
-build for another OS by specifying `build /p:OSGroup=[value]`.
+build for another OS by specifying `build -os [value]`.
 
 Note that you cannot generally build native components for another OS but you can for managed components so if you need to do that you can do it at the individual project level or build all via passing `/p:BuildNative=false`.
 
 ### Building in Release or Debug
 
 By default, building from the root or within a project will build the libraries in Debug mode.
-One can build in Debug or Release mode from the root by doing `build -release` or `build -debug` or when building a project by specifying `/p:ConfigurationGroup=[Debug|Release]` after the `dotnet msbuild` command.
+One can build in Debug or Release mode from the root by doing `build -c Release` or `build -c Debug` or when building a project by specifying `/p:ConfigurationGroup=[Debug|Release]` after the `dotnet msbuild` command.
 
 ### Building other Architectures
 
-One can build 32- or 64-bit binaries or for any architecture by specifying in the root `build /p:ArchGroup=[value]` or in a project `/p:ArchGroup=[value]` after the `dotnet msbuild` command.
+One can build 32- or 64-bit binaries or for any architecture by specifying in the root `build -arch [value]` or in a project `/p:ArchGroup=[value]` after the `dotnet msbuild` command.
+
+### Benchmarks
+
+All Benchmarks have been moved to the [dotnet/performance/](https://github.com/dotnet/performance/) repository.
+
+Please read the [Benchmarking workflow for CoreFX](https://github.com/dotnet/performance/blob/master/docs/benchmarking-workflow-corefx.md) document to find out how to build and run the Benchmarks.
 
 ### Tests
 
-We use the OSS testing framework [xunit](http://xunit.github.io/) with the [BuildTools test targets](https://github.com/dotnet/buildtools/blob/master/Documentation/test-targets-usage.md).
+We use the OSS testing framework [xunit](http://xunit.github.io/).
 
 #### Running tests on the command line
 
-Do build tests you need to pass `-test` flag (`build -test`) to build.cmd/sh or if you want to build both you pass `-includetests` flag (`build -includetests`).
+To build tests you need to pass the `-buildtests` flag to build.cmd/sh or if you want to build both src and tests you pass `-buildtests` flag (`build -restore -build -buildtests`). Note that you need to specify -restore and -build additionally as those are only implicit if no action is passed in.
 
 For more information about cross-platform testing, please take a look [here](https://github.com/dotnet/corefx/blob/master/Documentation/building/cross-platform-testing.md).
 
@@ -255,20 +261,16 @@ dotnet msbuild System.Runtime.Tests.csproj /p:TargetGroup=netfx
 
 The tests can also be filtered based on xunit trait attributes defined in [`Microsoft.DotNet.XUnitExtensions`](https://github.com/dotnet/arcade/tree/master/src/Microsoft.DotNet.XUnitExtensions). These attributes are specified above the test method's definition. The available attributes are:
 
-#### OuterloopAttribute
+#### OuterLoopAttribute
 
 ```cs
 [OuterLoop()]
 ```
-Tests marked as `Outerloop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `Outerloop` property e.g.
+Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `-outerloop` switch or `/p:OuterLoop=true` e.g.
 
 ```cmd
-build -test -Outerloop
-```
-
-To run <b>only</b> the Outerloop tests, use the following command:
-```cmd
-dotnet msbuild <csproj_file> /t:BuildAndTest /p:WithCategories=OuterLoop
+build -test -outerloop
+cd src/System.Text.RegularExpressions/tests && dotnet msbuild /t:RebuildAndTest /p:OuterLoop=true
 ```
 
 #### PlatformSpecificAttribute
@@ -281,7 +283,7 @@ Use this attribute on test methods to specify that this test may only be run on 
 - `nonlinuxtests` for tests that don't run on Linux
 - `nonosxtests` for tests that don't run on OS X
 
-**[Available Test Platforms](https://github.com/dotnet/buildtools/blob/master/src/Microsoft.DotNet.XUnitExtensions/TestPlatforms.cs#L10)**
+**[Available Test Platforms](https://github.com/dotnet/arcade/blob/master/src/Microsoft.DotNet.XUnitExtensions/src/TestPlatforms.cs)**
 
 When running tests by building a test project, tests that don't apply to the `OSGroup` are not run. For example, to run Linux-specific tests on a Linux box, use the following command line:
 ```sh
@@ -333,7 +335,7 @@ Use this attribute over test methods to skip tests only on the specific target f
 
 If it needs to be skipped in multiple frameworks and the reasons are different please use two attributes on the same test so that you can specify different reasons for each framework.
 
-**Currently this are the [Framework Monikers](https://github.com/dotnet/buildtools/blob/master/src/Microsoft.DotNet.XUnitExtensions/TargetFrameworkMonikers.cs#L23-L26) that we support through our test execution infrastructure**
+**Currently this are the [Framework Monikers](https://github.com/dotnet/arcade/blob/master/src/Microsoft.DotNet.XUnitExtensions/src/TargetFrameworkMonikers.cs#L23-L26) that we support through our test execution infrastructure**
 
 #### ConditionalFactAttribute
 Use this attribute to run the test only when a condition is `true`. This attribute is used when `ActiveIssueAttribute` or `SkipOnTargetFrameworkAttribute` are not flexible enough due to needing to run a custom logic at test time. This test behaves as a `[Fact]` test that has no test data passed in as a parameter.
@@ -412,24 +414,22 @@ dotnet msbuild <csproj_file> /t:BuildAndTest /p:OSGroup=Windows_NT
 dotnet msbuild <csproj_file> /t:BuildAndTest /p:OSGroup=OSX /p:WithCategories="OuterLoop;failing""
 ```
 
-Alternatively, you can directly invoke the XUnit executable by changing your working directory to the test execution directory at `bin\tests\{OSPlatformConfig)\{Project}.Tests\{TargetGroup}.{TestTFM}\` which is created when the test project is built.  For example, the following command runs all Linux-supported inner-loop tests:
-```sh
-./corerun xunit.console.dll <test_dll_file> -notrait category=nonlinuxtests -notrait category=OuterLoop
-```
-
 ### Code Coverage
 
 Code coverage is built into the corefx build system.  It utilizes OpenCover for generating coverage data and ReportGenerator for generating reports about that data.  To run:
 
 ```cmd
-:: Run full coverage
-build -test -Coverage
+:: Run full coverage (assuming sources and tests are already built)
+build -test -coverage
+
+If coverage succeeds, the full report can be found at `artifacts\coverage\index.htm`.
 
 :: To run a single project with code coverage enabled pass the /p:Coverage=true property
 cd src\System.Collections.Immutable\tests
 dotnet msbuild /t:BuildAndTest /p:Coverage=true
 ```
-If coverage succeeds, the code coverage report will be generated automatically and placed in the bin\tests\coverage directory.  You can view the full report by opening index.htm
+
+If coverage succeeds, the individual report can be found at `$(TestPath)\report\index.htm`.
 
 Code coverage reports from the continuous integration system are available from the links on the front page of the corefx repo.
 
@@ -462,7 +462,7 @@ Generally the CoreFx build system gets the CoreCLR from a NuGet package which ge
 1. Build CoreCLR and note your output directory. Ex: `\coreclr\bin\Product\Windows_NT.x64.Release\` Note this will vary based on your OS/Architecture/Flavor and it is generally a good idea to use Release builds for CoreCLR when running CoreFx tests and the OS and Architecture should match what you are building in CoreFx.
 2. Build CoreFx either passing in the `CoreCLROverridePath` property or setting it as an environment variable:
 ```
-build.cmd -- /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release\
+build.cmd /p:CoreCLROverridePath=d:\git\coreclr\bin\Product\Windows_NT.x64.Release\
 ```
 
 When we copy the files to override the CoreCLR we do a hard-link copy, so in general if you rebuild CoreCLR the new binaries should be reflected in CoreFx for subsequent builds of individual projects in corefx. However if you want to force refresh or if you want to just update the CoreCLR after you already ran `build.cmd` from CoreFx you can run the following command:
@@ -479,6 +479,4 @@ If you prefer, you can use a Debug build of System.Private.CoreLib, but if you d
 
 If the test project does not set the property `TestRuntime` to `true` and you want to collect code coverage that includes types in System.Private.CoreLib.dll, you'll need to follow the above steps, then
 
-`dotnet msbuild /t:rebuildandtest /p:Coverage=true /p:CodeCoverageAssemblies="System.Private.CoreLib"`
-
-In order to facilitate coverage tools that perform IL rewrite a dedicated shared framework directory is created by default for coverage runs. This shared runtime is copied from the default shared test runtime (the one with version 9.9.9, e.g.: `\corefx\bin\testhost\netcoreapp-Windows_NT-Debug-x64\shared\Microsoft.NETCore.App\9.9.9`). This behavior can be overridden by adding `/p:UseCoverageDedicatedRuntime=false` to the build command used to capture code coverage, which will cause the coverage run to use the same shared runtime as a test run using the native image of System.Private.CoreLib.dll, causing loss of source coverage information for it.
+`dotnet msbuild /t:rebuildandtest /p:Coverage=true /p:TestRuntime=true`

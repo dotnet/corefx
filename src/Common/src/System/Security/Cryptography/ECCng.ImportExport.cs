@@ -522,7 +522,7 @@ namespace System.Security.Cryptography
                 Exception e = errorCode.ToCryptographicException();
                 if (errorCode == ErrorCode.NTE_INVALID_PARAMETER)
                 {
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, curveName), e);
+                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, curveName), e);
                 }
                 throw e;
             }
@@ -565,14 +565,17 @@ namespace System.Security.Cryptography
             {
                 case "nistP256":
                 case "ECDH_P256":
+                case "ECDSA_P256":
                     return AlgorithmName.ECDHP256;
 
                 case "nistP384":
                 case "ECDH_P384":
+                case "ECDSA_P384":
                     return AlgorithmName.ECDHP384;
 
                 case "nistP521":
                 case "ECDH_P521":
+                case "ECDSA_P521":
                     return AlgorithmName.ECDHP521;
             }
 

@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Net.Http.HPack;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
@@ -26,6 +27,7 @@ namespace System.Net.Http
         private readonly string _host;
         private readonly int _port;
         private readonly Uri _proxyUri;
+        internal readonly byte[] _encodedAuthorityHostHeader;
 
         /// <summary>List of idle connections stored in the pool.</summary>
         private readonly List<CachedConnection> _idleConnections = new List<CachedConnection>();
@@ -38,7 +40,7 @@ namespace System.Net.Http
 
         /// <summary>For non-proxy connection pools, this is the host name in bytes; for proxies, null.</summary>
         private readonly byte[] _hostHeaderValueBytes;
-        /// <summary>Options specialized and cached for this pool and its <see cref="_key"/>.</summary>
+        /// <summary>Options specialized and cached for this pool and its key.</summary>
         private readonly SslClientAuthenticationOptions _sslOptionsHttp11;
         private readonly SslClientAuthenticationOptions _sslOptionsHttp2;
 
@@ -75,8 +77,7 @@ namespace System.Net.Http
                     Debug.Assert(port != 0);
                     Debug.Assert(sslHostName == null);
                     Debug.Assert(proxyUri == null);
-
-                    _http2Enabled = false;
+                    _http2Enabled = _poolManager.Settings._allowUnencryptedHttp2;
                     break;
 
                 case HttpConnectionKind.Https:
@@ -125,6 +126,25 @@ namespace System.Net.Http
                     break;
             }
 
+            string hostHeader = null;
+            if (_host != null)
+            {
+                // Precalculate ASCII bytes for Host header
+                // Note that if _host is null, this is a (non-tunneled) proxy connection, and we can't cache the hostname.
+                hostHeader =
+                    (_port != (sslHostName == null ? DefaultHttpPort : DefaultHttpsPort)) ?
+                    $"{_host}:{_port}" :
+                    _host;
+
+                // Note the IDN hostname should always be ASCII, since it's already been IDNA encoded.
+                _hostHeaderValueBytes = Encoding.ASCII.GetBytes(hostHeader);
+                Debug.Assert(Encoding.ASCII.GetString(_hostHeaderValueBytes) == hostHeader);
+                if (sslHostName == null)
+                {
+                    _encodedAuthorityHostHeader = HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingToAllocatedArray(StaticTable.Authority, hostHeader);
+                }
+            }
+
             if (sslHostName != null)
             {
                 _sslOptionsHttp11 = ConstructSslOptions(poolManager, sslHostName);
@@ -135,21 +155,10 @@ namespace System.Net.Http
                     _sslOptionsHttp2 = ConstructSslOptions(poolManager, sslHostName);
                     _sslOptionsHttp2.ApplicationProtocols = Http2ApplicationProtocols;
                     _sslOptionsHttp2.AllowRenegotiation = false;
+
+                    Debug.Assert(hostHeader != null);
+                    _encodedAuthorityHostHeader = HPackEncoder.EncodeLiteralHeaderFieldWithoutIndexingToAllocatedArray(StaticTable.Authority, hostHeader);
                 }
-            }
-
-            if (_host != null)
-            {
-                // Precalculate ASCII bytes for Host header
-                // Note that if _host is null, this is a (non-tunneled) proxy connection, and we can't cache the hostname.
-                string hostHeader =
-                    (_port != (sslHostName == null ? DefaultHttpPort : DefaultHttpsPort)) ?
-                    $"{_host}:{_port}" :
-                    _host;
-
-                // Note the IDN hostname should always be ASCII, since it's already been IDNA encoded.
-                _hostHeaderValueBytes = Encoding.ASCII.GetBytes(hostHeader);
-                Debug.Assert(Encoding.ASCII.GetString(_hostHeaderValueBytes) == hostHeader);
             }
             
             // Set up for PreAuthenticate.  Access to this cache is guarded by a lock on the cache itself.
@@ -210,22 +219,22 @@ namespace System.Net.Http
             return GetHttpConnectionAsync(request, cancellationToken);
         }
 
-        private ValueTask<(HttpConnectionBase connection, bool isNewConnection, HttpResponseMessage failureResponse)> 
-            GetHttpConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        private ValueTask<HttpConnection> GetOrReserveHttp11ConnectionAsync(CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
-                if (NetEventSource.IsEnabled) Trace("Unable to complete getting HTTP/1.x connection due to requested cancellation.");
-                return new ValueTask<(HttpConnectionBase, bool, HttpResponseMessage)>(Task.FromCanceled<(HttpConnectionBase, bool, HttpResponseMessage)>(cancellationToken));
+                return new ValueTask<HttpConnection>(Task.FromCanceled<HttpConnection>(cancellationToken));
             }
 
             TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
             TimeSpan pooledConnectionIdleTimeout = _poolManager.Settings._pooledConnectionIdleTimeout;
-            DateTimeOffset now = DateTimeOffset.UtcNow;
+            int nowTicks = Environment.TickCount;
             List<CachedConnection> list = _idleConnections;
 
-            // Try to get a cached connection.  If we can and if it's usable, return it.  If we can but it's not usable,
-            // try again.  And if we can't because there aren't any valid ones, create a new one and return it.
+            // Try to find a usable cached connection.
+            // If we can't find one, we will either wait for one to become available (if at the connection limit)
+            // or just increment the connection count and return null so the caller can create a new connection.
+            TaskCompletionSourceWithCancellation<HttpConnection> waiter;
             while (true)
             {
                 CachedConnection cachedConnection;
@@ -233,34 +242,29 @@ namespace System.Net.Http
                 {
                     if (list.Count > 0)
                     {
-                        // Pop off the next connection to try.  We'll test it outside of the lock
-                        // to avoid doing expensive validation while holding the lock.
+                        // We have a cached connection that we can attempt to use.
+                        // Test it below outside the lock, to avoid doing expensive validation while holding the lock.
                         cachedConnection = list[list.Count - 1];
                         list.RemoveAt(list.Count - 1);
                     }
                     else
                     {
-                        // No valid cached connections, so we need to create a new one.  If
-                        // there's no limit on the number of connections associated with this
-                        // pool, or if we haven't reached such a limit, simply create a new
-                        // connection.
+                        // No valid cached connections.
                         if (_associatedConnectionCount < _maxConnections)
                         {
-                            if (NetEventSource.IsEnabled) Trace("Creating new connection for pool.");
+                            // We are under the connection limit, so just increment the count and return null
+                            // to indicate to the caller that they should create a new connection.
                             IncrementConnectionCountNoLock();
-                            return WaitForCreatedConnectionAsync(CreateHttp11ConnectionAsync(request, cancellationToken));
+                            return new ValueTask<HttpConnection>((HttpConnection)null);
                         }
                         else
                         {
-                            // There is a limit, and we've reached it, which means we need to
-                            // wait for a connection to be returned to the pool or for a connection
-                            // associated with the pool to be dropped before we can create a
-                            // new one.  Create a waiter object and register it with the pool; it'll
-                            // be signaled with the created connection when one is returned or
-                            // space is available.
-                            if (NetEventSource.IsEnabled) Trace("Connection limit reached, enqueuing waiter.");
-                            TaskCompletionSourceWithCancellation<HttpConnection> waiter = EnqueueWaiter();
-                            return WaitForAvailableHttp11Connection(waiter, request, cancellationToken);
+                            // We've reached the connection limit and need to wait for an existing connection
+                            // to become available, or to be closed so that we can create a new connection.
+                            // Enqueue a waiter that will be signalled when this happens.
+                            // Break out of the loop and then do the actual wait below.
+                            waiter = EnqueueWaiter();
+                            break;
                         }
 
                         // Note that we don't check for _disposed.  We may end up disposing the
@@ -275,12 +279,12 @@ namespace System.Net.Http
                 }
 
                 HttpConnection conn = cachedConnection._connection;
-                if (cachedConnection.IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout) &&
+                if (!conn.LifetimeExpired(nowTicks, pooledConnectionLifetime) &&
                     !conn.EnsureReadAheadAndPollRead())
                 {
                     // We found a valid connection.  Return it.
                     if (NetEventSource.IsEnabled) conn.Trace("Found usable connection in pool.");
-                    return new ValueTask<(HttpConnectionBase, bool, HttpResponseMessage)>((conn, false, null));
+                    return new ValueTask<HttpConnection>(conn);
                 }
 
                 // We got a connection, but it was already closed by the server or the
@@ -289,34 +293,68 @@ namespace System.Net.Http
                 if (NetEventSource.IsEnabled) conn.Trace("Found invalid connection in pool.");
                 conn.Dispose();
             }
+
+            // We are at the connection limit. Wait for an available connection or connection count (indicated by null).
+            if (NetEventSource.IsEnabled) Trace("Connection limit reached, waiting for available connection.");
+            return new ValueTask<HttpConnection>(waiter.WaitWithCancellationAsync(cancellationToken));
         }
 
-        private async ValueTask<(HttpConnectionBase connection, bool isNewConnection, HttpResponseMessage failureResponse)>
-            WaitForAvailableHttp11Connection(TaskCompletionSourceWithCancellation<HttpConnection> waiter, HttpRequestMessage request, CancellationToken cancellationToken)
+        private async ValueTask<(HttpConnectionBase connection, bool isNewConnection, HttpResponseMessage failureResponse)> 
+            GetHttpConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            HttpConnection connection = await waiter.WaitWithCancellationAsync(cancellationToken).ConfigureAwait(false);
+            HttpConnection connection = await GetOrReserveHttp11ConnectionAsync(cancellationToken).ConfigureAwait(false);
             if (connection != null)
             {
                 return (connection, false, null);
             }
 
-            return await WaitForCreatedConnectionAsync(CreateHttp11ConnectionAsync(request, cancellationToken)).ConfigureAwait(false);
+            if (NetEventSource.IsEnabled) Trace("Creating new connection for pool.");
+
+            try
+            {
+                HttpResponseMessage failureResponse;
+                (connection, failureResponse) = await CreateHttp11ConnectionAsync(request, cancellationToken).ConfigureAwait(false);
+                if (connection == null)
+                {
+                    Debug.Assert(failureResponse != null);
+                    DecrementConnectionCount();
+                }
+                return (connection, true, failureResponse);
+            }
+            catch
+            {
+                DecrementConnectionCount();
+                throw;
+            }
         }
 
         private async ValueTask<(HttpConnectionBase connection, bool isNewConnection, HttpResponseMessage failureResponse)>
             GetHttp2ConnectionAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            Debug.Assert(_kind == HttpConnectionKind.Https || _kind == HttpConnectionKind.SslProxyTunnel);
+            Debug.Assert(_kind == HttpConnectionKind.Https || _kind == HttpConnectionKind.SslProxyTunnel || _kind == HttpConnectionKind.Http);
 
             // See if we have an HTTP2 connection
             Http2Connection http2Connection = _http2Connection;
+
             if (http2Connection != null)
             {
-                if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
-                return (http2Connection, false, null);
+                TimeSpan pooledConnectionLifetime = _poolManager.Settings._pooledConnectionLifetime;
+                if (http2Connection.LifetimeExpired(Environment.TickCount, pooledConnectionLifetime))
+                {
+                    // Connection expired.
+                    http2Connection.Dispose();
+                    InvalidateHttp2Connection(http2Connection);
+                }
+                else
+                {
+                    // Connection exist and it is still good to use.
+                    if (NetEventSource.IsEnabled) Trace("Using existing HTTP2 connection.");
+                    _usedSinceLastCleanup = true;
+                    return (http2Connection, false, null);
+                }
             }
 
-            // Ensure that the connection creation semaphore is created 
+            // Ensure that the connection creation semaphore is created
             if (_http2ConnectionCreateLock == null)
             {
                 lock (SyncObj)
@@ -364,6 +402,22 @@ namespace System.Net.Http
                     if (failureResponse != null)
                     {
                         return (null, true, failureResponse);
+                    }
+
+                    if (_kind == HttpConnectionKind.Http)
+                    {
+                        http2Connection = new Http2Connection(this, stream);
+                        await http2Connection.SetupAsync().ConfigureAwait(false);
+
+                        Debug.Assert(_http2Connection == null);
+                        _http2Connection = http2Connection;
+
+                        if (NetEventSource.IsEnabled)
+                        {
+                            Trace("New unencrypted HTTP2 connection established.");
+                        }
+
+                        return (_http2Connection, true, null);
                     }
 
                     sslStream = (SslStream)stream;
@@ -547,18 +601,17 @@ namespace System.Net.Http
 
             try
             {
-                Socket socket = null;
                 Stream stream = null;
                 switch (_kind)
                 {
                     case HttpConnectionKind.Http:
                     case HttpConnectionKind.Https:
                     case HttpConnectionKind.ProxyConnect:
-                        (socket, stream) = await ConnectHelper.ConnectAsync(_host, _port, cancellationToken).ConfigureAwait(false);
+                        stream = await ConnectHelper.ConnectAsync(_host, _port, cancellationToken).ConfigureAwait(false);
                         break;
 
                     case HttpConnectionKind.Proxy:
-                        (socket, stream) = await ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken).ConfigureAwait(false);
+                        stream = await ConnectHelper.ConnectAsync(_proxyUri.IdnHost, _proxyUri.Port, cancellationToken).ConfigureAwait(false);
                         break;
 
                     case HttpConnectionKind.ProxyTunnel:
@@ -573,6 +626,8 @@ namespace System.Net.Http
                         }
                         break;
                 }
+
+                Socket socket = (stream as ExposedSocketNetworkStream)?.Socket; // TODO: Use NetworkStream when https://github.com/dotnet/corefx/issues/35410 is available.
 
                 TransportContext transportContext = null;
                 if (_kind == HttpConnectionKind.Https || _kind == HttpConnectionKind.SslProxyTunnel)
@@ -628,7 +683,6 @@ namespace System.Net.Http
         }
 
         /// <summary>Enqueues a waiter to the waiters list.</summary>
-        /// <param name="waiter">The waiter to add.</param>
         private TaskCompletionSourceWithCancellation<HttpConnection> EnqueueWaiter()
         {
             Debug.Assert(Monitor.IsEntered(SyncObj));
@@ -661,25 +715,6 @@ namespace System.Net.Http
             Debug.Assert(_idleConnections.Count == 0, $"With {_idleConnections.Count} idle connections, we shouldn't have a waiter.");
 
             return _waiters.Dequeue();
-        }
-
-        /// <summary>Waits for and returns the created connection, decrementing the associated connection count if it fails.</summary>
-        private async ValueTask<(HttpConnectionBase connection, bool isNewConnection, HttpResponseMessage failureResponse)> WaitForCreatedConnectionAsync(ValueTask<(HttpConnection, HttpResponseMessage)> creationTask)
-        {
-            try
-            {
-                (HttpConnection connection, HttpResponseMessage response) = await creationTask.ConfigureAwait(false);
-                if (connection == null)
-                {
-                    DecrementConnectionCount();
-                }
-                return (connection, true, response);
-            }
-            catch
-            {
-                DecrementConnectionCount();
-                throw;
-            }
         }
 
         private void IncrementConnectionCountNoLock()
@@ -751,15 +786,12 @@ namespace System.Net.Http
                 _associatedConnectionCount--;
             }
         }
-        
+
         /// <summary>Returns the connection to the pool for subsequent reuse.</summary>
         /// <param name="connection">The connection to return.</param>
         public void ReturnConnection(HttpConnection connection)
         {
-            TimeSpan lifetime = _poolManager.Settings._pooledConnectionLifetime;
-            bool lifetimeExpired = 
-                lifetime != Timeout.InfiniteTimeSpan &&
-                (lifetime == TimeSpan.Zero || connection.CreationTime + lifetime <= DateTime.UtcNow);
+            bool lifetimeExpired = connection.LifetimeExpired(Environment.TickCount, _poolManager.Settings._pooledConnectionLifetime);
 
             if (!lifetimeExpired)
             {
@@ -819,8 +851,13 @@ namespace System.Net.Http
 
         public void InvalidateHttp2Connection(Http2Connection connection)
         {
-            Debug.Assert(_http2Connection == connection);
-            _http2Connection = null;
+            lock (SyncObj)
+            {
+                if (_http2Connection == connection)
+                {
+                    _http2Connection = null;
+                }
+            }
         }
 
         /// <summary>
@@ -864,6 +901,7 @@ namespace System.Net.Http
             List<CachedConnection> list = _idleConnections;
             List<HttpConnection> toDispose = null;
             bool tookLock = false;
+
             try
             {
                 if (NetEventSource.IsEnabled) Trace("Cleaning pool.");
@@ -871,11 +909,22 @@ namespace System.Net.Http
 
                 // Get the current time.  This is compared against each connection's last returned
                 // time to determine whether a connection is too old and should be closed.
-                DateTimeOffset now = DateTimeOffset.UtcNow;
+                int nowTicks = Environment.TickCount;
+                Http2Connection http2Connection = _http2Connection;
+
+                if (http2Connection != null)
+                {
+                    if (http2Connection.IsExpired(nowTicks, pooledConnectionLifetime, pooledConnectionIdleTimeout))
+                    {
+                        http2Connection.Dispose();
+                        // We can set _http2Connection directly while holding lock instead of calling InvalidateHttp2Connection().
+                        _http2Connection = null;
+                    }
+                }
 
                 // Find the first item which needs to be removed.
                 int freeIndex = 0;
-                while (freeIndex < list.Count && list[freeIndex].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
+                while (freeIndex < list.Count && list[freeIndex].IsUsable(nowTicks, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
                 {
                     freeIndex++;
                 }
@@ -893,7 +942,7 @@ namespace System.Net.Http
                     {
                         // Look for the first item to be kept.  Along the way, any
                         // that shouldn't be kept are disposed of.
-                        while (current < list.Count && !list[current].IsUsable(now, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
+                        while (current < list.Count && !list[current].IsUsable(nowTicks, pooledConnectionLifetime, pooledConnectionIdleTimeout, poll: true))
                         {
                             toDispose.Add(list[current]._connection);
                             current++;
@@ -918,7 +967,7 @@ namespace System.Net.Http
                     // if a pool was used since the last time we cleaned up, give it another chance. New pools
                     // start out saying they've recently been used, to give them a bit of breathing room and time
                     // for the initial collection to be added to it.
-                    if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup)
+                    if (_associatedConnectionCount == 0 && !_usedSinceLastCleanup && _http2Connection == null)
                     {
                         Debug.Assert(list.Count == 0, $"Expected {nameof(list)}.{nameof(list.Count)} == 0");
                         _disposed = true;
@@ -983,8 +1032,8 @@ namespace System.Net.Http
         {
             /// <summary>The cached connection.</summary>
             internal readonly HttpConnection _connection;
-            /// <summary>The last time the connection was used.</summary>
-            internal readonly DateTimeOffset _returnedTime;
+            /// <summary>The last tick count at which the connection was used.</summary>
+            internal readonly int _returnedTickCount;
 
             /// <summary>Initializes the cached connection and its associated metadata.</summary>
             /// <param name="connection">The connection.</param>
@@ -992,11 +1041,11 @@ namespace System.Net.Http
             {
                 Debug.Assert(connection != null);
                 _connection = connection;
-                _returnedTime = DateTimeOffset.UtcNow;
+                _returnedTickCount = Environment.TickCount;
             }
 
             /// <summary>Gets whether the connection is currently usable.</summary>
-            /// <param name="now">The current time.  Passed in to amortize the cost of calling DateTime.UtcNow.</param>
+            /// <param name="nowTicks">The current tick count.  Passed in to amortize the cost of calling Environment.TickCount.</param>
             /// <param name="pooledConnectionLifetime">How long a connection can be open to be considered reusable.</param>
             /// <param name="pooledConnectionIdleTimeout">How long a connection can have been idle in the pool to be considered reusable.</param>
             /// <returns>
@@ -1007,22 +1056,22 @@ namespace System.Net.Http
             /// the nature of connection pooling.
             /// </returns>
             public bool IsUsable(
-                DateTimeOffset now,
+                int nowTicks,
                 TimeSpan pooledConnectionLifetime,
                 TimeSpan pooledConnectionIdleTimeout,
                 bool poll = false)
             {
                 // Validate that the connection hasn't been idle in the pool for longer than is allowed.
-                if ((pooledConnectionIdleTimeout != Timeout.InfiniteTimeSpan) && (now - _returnedTime > pooledConnectionIdleTimeout))
+                if ((pooledConnectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
+                    ((uint)(nowTicks - _returnedTickCount) > pooledConnectionIdleTimeout.TotalMilliseconds))
                 {
-                    if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Idle {now - _returnedTime} > {pooledConnectionIdleTimeout}.");
+                    if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((uint)(nowTicks - _returnedTickCount))} > {pooledConnectionIdleTimeout}.");
                     return false;
                 }
 
                 // Validate that the connection hasn't been alive for longer than is allowed.
-                if ((pooledConnectionLifetime != Timeout.InfiniteTimeSpan) && (now - _connection.CreationTime > pooledConnectionLifetime))
+                if (_connection.LifetimeExpired(nowTicks, pooledConnectionLifetime))
                 {
-                    if (NetEventSource.IsEnabled) _connection.Trace($"Connection no longer usable. Alive {now - _connection.CreationTime} > {pooledConnectionLifetime}.");
                     return false;
                 }
 
@@ -1040,29 +1089,6 @@ namespace System.Net.Http
             public bool Equals(CachedConnection other) => ReferenceEquals(other._connection, _connection);
             public override bool Equals(object obj) => obj is CachedConnection && Equals((CachedConnection)obj);
             public override int GetHashCode() => _connection?.GetHashCode() ?? 0;
-        }
-
-        private sealed class TaskCompletionSourceWithCancellation<T> : TaskCompletionSource<T>
-        {
-            private CancellationToken _cancellationToken;
-
-            public TaskCompletionSourceWithCancellation() : base(TaskCreationOptions.RunContinuationsAsynchronously)
-            {
-            }
-
-            private void OnCancellation()
-            {
-                TrySetCanceled(_cancellationToken);
-            }
-
-            public async Task<T> WaitWithCancellationAsync(CancellationToken cancellationToken)
-            {
-                _cancellationToken = cancellationToken;
-                using (cancellationToken.Register(s => ((TaskCompletionSourceWithCancellation<HttpConnection>)s).OnCancellation(), this))
-                {
-                    return await Task.ConfigureAwait(false);
-                }
-            }
         }
     }
 }

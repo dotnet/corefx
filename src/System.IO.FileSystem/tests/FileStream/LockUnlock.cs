@@ -3,11 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.IO.Tests
 {
-    public class FileStream_LockUnlock : RemoteExecutorTestBase
+    public class FileStream_LockUnlock : FileCleanupTestBase
     {
         [Fact]
         public void InvalidArgs_Throws()
@@ -153,7 +154,7 @@ namespace System.IO.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/dotnet/corefx/issues/34397
         [InlineData(10, 0, 10, 1, 2)]
         [InlineData(10, 3, 5, 3, 5)]
         [InlineData(10, 3, 5, 3, 4)]
@@ -171,24 +172,24 @@ namespace System.IO.Tests
             {
                 fs1.Lock(firstPosition, firstLength);
 
-                RemoteInvoke((secondPath, secondPos, secondLen) =>
+                RemoteExecutor.Invoke((secondPath, secondPos, secondLen) =>
                 {
                     using (FileStream fs2 = File.Open(secondPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                     {
                         Assert.Throws<IOException>(() => fs2.Lock(long.Parse(secondPos), long.Parse(secondLen)));
                     }
-                    return SuccessExitCode;
+                    return RemoteExecutor.SuccessExitCode;
                 }, path, secondPosition.ToString(), secondLength.ToString()).Dispose();
 
                 fs1.Unlock(firstPosition, firstLength);
-                RemoteInvoke((secondPath, secondPos, secondLen) =>
+                RemoteExecutor.Invoke((secondPath, secondPos, secondLen) =>
                 {
                     using (FileStream fs2 = File.Open(secondPath, FileMode.Open, FileAccess.ReadWrite, FileShare.ReadWrite))
                     {
                         fs2.Lock(long.Parse(secondPos), long.Parse(secondLen));
                         fs2.Unlock(long.Parse(secondPos), long.Parse(secondLen));
                     }
-                    return SuccessExitCode;
+                    return RemoteExecutor.SuccessExitCode;
                 }, path, secondPosition.ToString(), secondLength.ToString()).Dispose();
             }
         }

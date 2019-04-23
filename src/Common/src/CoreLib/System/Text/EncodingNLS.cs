@@ -2,8 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System;
 using System.Collections;
+using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -27,6 +29,7 @@ namespace System.Text
     {
         protected EncodingNLS(int codePage) : base(codePage)
         {
+            Debug.Assert(GetType() == typeof(Latin1Encoding), "Should be no instantiations of this type except via Latin1Encoding.");
         }
 
         // Returns the number of bytes required to encode a range of characters in
@@ -64,7 +67,7 @@ namespace System.Text
         public override unsafe int GetByteCount(string s)
         {
             // Validate input
-            if (s==null)
+            if (s == null)
                 throw new ArgumentNullException(nameof(s));
 
             fixed (char* pChars = s)

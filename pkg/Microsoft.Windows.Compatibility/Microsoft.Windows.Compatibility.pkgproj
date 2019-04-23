@@ -1,11 +1,10 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
       <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built -->
     <_PreReleasePackageVersion>$(PackageVersion)</_PreReleasePackageVersion>
-    <PackageVersion>2.1.0</PackageVersion>
-    <ServiceModelVersion>4.4.1</ServiceModelVersion>
+    <PackageVersion>3.0.0</PackageVersion>
+    <ServiceModelVersion>4.5.3</ServiceModelVersion>
     <!-- We don't need to harvest the stable packages to build this -->
     <HarvestStablePackage>false</HarvestStablePackage>
   </PropertyGroup>
@@ -25,7 +24,6 @@
     <PrereleaseLibraryPackage Include="System.ComponentModel.Composition" />
     <PrereleaseLibraryPackage Include="System.Configuration.ConfigurationManager" />
     <PrereleaseLibraryPackage Include="System.Data.Odbc" />
-    <PrereleaseLibraryPackage Include="System.Data.DataSetExtensions" />
     <PrereleaseLibraryPackage Include="System.Data.SqlClient">
       <!-- SQL client defines its own version, higher than rest of master -->
       <Version>4.7.0</Version>
@@ -72,6 +70,9 @@
     <LibraryPackage Include="System.IO.Pipes.AccessControl">
       <Version>4.5.1</Version>
     </LibraryPackage>
+    <LibraryPackage Include="System.Data.DataSetExtensions">
+      <Version>4.5.0</Version>
+    </LibraryPackage>
   </ItemGroup>
   <ItemGroup>
     <!-- The shims included in the shims package are only needed for netcoreapp2.0 since in newer frameworks they are included inbox.
@@ -88,7 +89,7 @@
     </Dependency>
     <!-- Include dependency to shims package -->
     <Dependency Include="Microsoft.Windows.Compatibility.Shims">
-      <Version>$(CompatibilityShimsPackageVersion)</Version>
+      <Version>2.0.1</Version>
       <TargetFramework>netcoreapp2.0</TargetFramework>
     </Dependency>
   </ItemGroup>

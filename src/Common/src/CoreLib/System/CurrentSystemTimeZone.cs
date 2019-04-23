@@ -17,6 +17,7 @@
 **
 ============================================================*/
 
+#nullable enable
 using System.Collections;
 using System.Globalization;
 
@@ -148,7 +149,7 @@ namespace System
 
         private static DaylightTime CreateDaylightChanges(int year)
         {
-            DaylightTime currentDaylightChanges = null;
+            DaylightTime? currentDaylightChanges = null;
 
             if (TimeZoneInfo.Local.SupportsDaylightSavingTime)
             {
@@ -209,7 +210,7 @@ namespace System
             return (DaylightTime)m_CachedDaylightChanges[objYear];
         }
 
-        // The per-year information is cached in in this instance value. As a result it can
+        // The per-year information is cached in this instance value. As a result it can
         // be cleaned up by CultureInfo.ClearCachedData, which will clear the instance of this object
         private readonly Hashtable m_CachedDaylightChanges = new Hashtable();
 

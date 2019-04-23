@@ -3,8 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.ComponentModel.Composition.Primitives;
-using System.Diagnostics.Contracts;
 using Microsoft.Internal;
 using Microsoft.Internal.Collections;
 
@@ -61,7 +61,7 @@ namespace System.ComponentModel.Composition.Hosting
         {
             get
             {
-                Contract.Ensures(Contract.Result<IEnumerable<ComposablePartDefinition>>() != null);
+                Debug.Assert(_addedDefinitions != null);
 
                 return _addedDefinitions;
             }
@@ -72,14 +72,14 @@ namespace System.ComponentModel.Composition.Hosting
         /// </summary>
         /// <value>
         ///     An <see cref="IEnumerable{T}"/> of <see cref="ComposablePartDefinition"/> objects that 
-        ///     have been removed from from the <see cref="ComposablePartCatalog"/>.
+        ///     have been removed from the <see cref="ComposablePartCatalog"/>.
         /// </value>
         public IEnumerable<ComposablePartDefinition> RemovedDefinitions 
         {
             get
             {
-                Contract.Ensures(Contract.Result<IEnumerable<ComposablePartDefinition>>() != null);
-                
+                Debug.Assert(_removedDefinitions != null);
+
                 return _removedDefinitions;
             }
         }

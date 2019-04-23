@@ -7,7 +7,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Threading;
 using Microsoft.Internal;
 
@@ -61,7 +60,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Initializes a new instance of the <see cref="CompositionContainer"/> class 
         ///     with the specified export providers.
         /// </summary>
-        /// <param name="compositionOPtionss">
+        /// <param name="compositionOptions">
         ///     <see cref="CompositionOptions"/> enumeration with flags controlling the composition.
         /// </param>
         /// <param name="providers">
@@ -121,7 +120,7 @@ namespace System.ComponentModel.Composition.Hosting
         ///     Initializes a new instance of the <see cref="CompositionContainer"/> class 
         ///     with the specified catalog and export providers.
         /// </summary>
-        /// <param name="compositionSettings">
+        /// <param name="compositionOptions">
         ///     <see cref="CompositionOptions"/> enumeration with flags controlling the composition.
         /// </param>
         /// <param name="providers">
@@ -283,7 +282,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 ThrowIfDisposed();
-                Contract.Ensures(Contract.Result<ReadOnlyCollection<ExportProvider>>() != null);
+                Debug.Assert(_providers != null);
 
                 return _providers;
             }

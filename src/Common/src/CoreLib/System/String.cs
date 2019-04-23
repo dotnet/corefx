@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 using System.Text;
+using Internal.Runtime.CompilerServices;
 
 namespace System
 {
@@ -21,11 +23,15 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed partial class String : IComparable, IEnumerable, IConvertible, IEnumerable<char>, IComparable<string>, IEquatable<string>, ICloneable
+    public sealed partial class String : IComparable, IEnumerable, IConvertible, IEnumerable<char>, IComparable<string?>, IEquatable<string?>, ICloneable
     {
-        // String constructors
-        // These are special. The implementation methods for these have a different signature from the
-        // declared constructors.
+        /*
+         * CONSTRUCTORS
+         *
+         * Defining a new constructor for string-like types (like String) requires changes both
+         * to the managed code below and to the native VM code. See the comment at the top of
+         * src/vm/ecall.cpp for instructions on how to add new overloads.
+         */
 
         [MethodImplAttribute(MethodImplOptions.InternalCall)]
         public extern String(char[] value);
@@ -36,7 +42,7 @@ namespace System
 #if !CORECLR
         static
 #endif
-        private string Ctor(char[] value)
+        private string Ctor(char[]? value)
         {
             if (value == null || value.Length == 0)
                 return Empty;
@@ -162,11 +168,7 @@ namespace System
             if (pb == null)
                 return Empty;
 
-            int numBytes = new ReadOnlySpan<byte>((byte*)value, int.MaxValue).IndexOf<byte>(0);
-
-            // Check for overflow
-            if (numBytes < 0)
-                throw new ArgumentException(SR.Arg_MustBeNullTerminatedString);
+            int numBytes = strlen((byte*)value);
 
             return CreateStringForSByteConstructor(pb, numBytes);
         }
@@ -243,7 +245,7 @@ namespace System
 #if !CORECLR
         static
 #endif
-        private unsafe string Ctor(sbyte* value, int startIndex, int length, Encoding enc)
+        private unsafe string Ctor(sbyte* value, int startIndex, int length, Encoding? enc)
         {
             if (enc == null)
                 return new string(value, startIndex, length);
@@ -338,8 +340,7 @@ namespace System
                 return Empty;
 
             string result = FastAllocateString(value.Length);
-            fixed (char* dest = &result._firstChar, src = &MemoryMarshal.GetReference(value))
-                wstrcpy(dest, src, value.Length);
+            Buffer.Memmove(ref result._firstChar, ref MemoryMarshal.GetReference(value), (uint)value.Length);
             return result;
         }
 
@@ -361,7 +362,7 @@ namespace System
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static implicit operator ReadOnlySpan<char>(string value) =>
+        public static implicit operator ReadOnlySpan<char>(string? value) =>
             value != null ? new ReadOnlySpan<char>(ref value.GetRawStringData(), value.Length) : default;
 
         public object Clone()
@@ -436,7 +437,7 @@ namespace System
         }
 
         [NonVersionable]
-        public static bool IsNullOrEmpty(string value)
+        public static bool IsNullOrEmpty(string? value)
         {
             // Using 0u >= (uint)value.Length rather than
             // value.Length == 0 as it will elide the bounds check to
@@ -447,7 +448,7 @@ namespace System
             return (value == null || 0u >= (uint)value.Length) ? true : false;
         }
 
-        public static bool IsNullOrWhiteSpace(string value)
+        public static bool IsNullOrWhiteSpace(string? value)
         {
             if (value == null) return true;
 
@@ -458,6 +459,13 @@ namespace System
 
             return true;
         }
+
+        /// <summary>
+        /// Returns a reference to the first element of the String. If the string is null, an access will throw a NullReferenceException.
+        /// </summary>
+        [System.ComponentModel.EditorBrowsable(System.ComponentModel.EditorBrowsableState.Never)]
+        [NonVersionable]
+        public ref readonly char GetPinnableReference() => ref _firstChar;
 
         internal ref char GetRawStringData() => ref _firstChar;
 
@@ -470,7 +478,7 @@ namespace System
             Debug.Assert(byteLength >= 0);
 
             // Get our string length
-            int stringLength = encoding.GetCharCount(bytes, byteLength, null);
+            int stringLength = encoding.GetCharCount(bytes, byteLength);
             Debug.Assert(stringLength >= 0, "stringLength >= 0");
 
             // They gave us an empty string if they needed one
@@ -481,7 +489,7 @@ namespace System
             string s = FastAllocateString(stringLength);
             fixed (char* pTempChars = &s._firstChar)
             {
-                int doubleCheck = encoding.GetChars(bytes, byteLength, pTempChars, stringLength, null);
+                int doubleCheck = encoding.GetChars(bytes, byteLength, pTempChars, stringLength);
                 Debug.Assert(stringLength == doubleCheck,
                     "Expected encoding.GetChars to return same length as encoding.GetCharCount");
             }
@@ -499,6 +507,14 @@ namespace System
             return result;
         }
 
+        internal static string CreateFromChar(char c1, char c2)
+        {
+            string result = FastAllocateString(2);
+            result._firstChar = c1;
+            Unsafe.Add(ref result._firstChar, 1) = c2;
+            return result;
+        }
+
         internal static unsafe void wstrcpy(char* dmem, char* smem, int charCount)
         {
             Buffer.Memmove((byte*)dmem, (byte*)smem, ((uint)charCount) * 2);
@@ -512,7 +528,7 @@ namespace System
         }
 
         // Returns this string.
-        public string ToString(IFormatProvider provider)
+        public string ToString(IFormatProvider? provider)
         {
             return this;
         }
@@ -530,6 +546,17 @@ namespace System
         IEnumerator IEnumerable.GetEnumerator()
         {
             return new CharEnumerator(this);
+        }
+
+        /// <summary>
+        /// Returns an enumeration of <see cref="Rune"/> from this string.
+        /// </summary>
+        /// <remarks>
+        /// Invalid sequences will be represented in the enumeration by <see cref="Rune.ReplacementChar"/>.
+        /// </remarks>
+        public StringRuneEnumerator EnumerateRunes()
+        {
+            return new StringRuneEnumerator(this);
         }
 
         internal static unsafe int wcslen(char* ptr)
@@ -635,86 +662,105 @@ namespace System
             return count;
         }
 
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        internal static unsafe int strlen(byte* ptr)
+        {
+            // IndexOf processes memory in aligned chunks, and thus it won't crash even if it accesses memory beyond the null terminator.
+            int length = SpanHelpers.IndexOf(ref *ptr, (byte)'\0', int.MaxValue);
+            if (length < 0)
+            {
+                ThrowMustBeNullTerminatedString();
+            }
+
+            return length;
+        }
+
+        private static void ThrowMustBeNullTerminatedString()
+        {
+            throw new ArgumentException(SR.Arg_MustBeNullTerminatedString);
+        }
+
         //
         // IConvertible implementation
-        // 
+        //
 
         public TypeCode GetTypeCode()
         {
             return TypeCode.String;
         }
 
-        bool IConvertible.ToBoolean(IFormatProvider provider)
+        bool IConvertible.ToBoolean(IFormatProvider? provider)
         {
             return Convert.ToBoolean(this, provider);
         }
 
-        char IConvertible.ToChar(IFormatProvider provider)
+        char IConvertible.ToChar(IFormatProvider? provider)
         {
             return Convert.ToChar(this, provider);
         }
 
-        sbyte IConvertible.ToSByte(IFormatProvider provider)
+        sbyte IConvertible.ToSByte(IFormatProvider? provider)
         {
             return Convert.ToSByte(this, provider);
         }
 
-        byte IConvertible.ToByte(IFormatProvider provider)
+        byte IConvertible.ToByte(IFormatProvider? provider)
         {
             return Convert.ToByte(this, provider);
         }
 
-        short IConvertible.ToInt16(IFormatProvider provider)
+        short IConvertible.ToInt16(IFormatProvider? provider)
         {
             return Convert.ToInt16(this, provider);
         }
 
-        ushort IConvertible.ToUInt16(IFormatProvider provider)
+        ushort IConvertible.ToUInt16(IFormatProvider? provider)
         {
             return Convert.ToUInt16(this, provider);
         }
 
-        int IConvertible.ToInt32(IFormatProvider provider)
+        int IConvertible.ToInt32(IFormatProvider? provider)
         {
             return Convert.ToInt32(this, provider);
         }
 
-        uint IConvertible.ToUInt32(IFormatProvider provider)
+        uint IConvertible.ToUInt32(IFormatProvider? provider)
         {
             return Convert.ToUInt32(this, provider);
         }
 
-        long IConvertible.ToInt64(IFormatProvider provider)
+        long IConvertible.ToInt64(IFormatProvider? provider)
         {
             return Convert.ToInt64(this, provider);
         }
 
-        ulong IConvertible.ToUInt64(IFormatProvider provider)
+        ulong IConvertible.ToUInt64(IFormatProvider? provider)
         {
             return Convert.ToUInt64(this, provider);
         }
 
-        float IConvertible.ToSingle(IFormatProvider provider)
+        float IConvertible.ToSingle(IFormatProvider? provider)
         {
             return Convert.ToSingle(this, provider);
         }
 
-        double IConvertible.ToDouble(IFormatProvider provider)
+        double IConvertible.ToDouble(IFormatProvider? provider)
         {
             return Convert.ToDouble(this, provider);
         }
 
-        decimal IConvertible.ToDecimal(IFormatProvider provider)
+        decimal IConvertible.ToDecimal(IFormatProvider? provider)
         {
             return Convert.ToDecimal(this, provider);
         }
 
-        DateTime IConvertible.ToDateTime(IFormatProvider provider)
+        DateTime IConvertible.ToDateTime(IFormatProvider? provider)
         {
             return Convert.ToDateTime(this, provider);
         }
 
-        object IConvertible.ToType(Type type, IFormatProvider provider)
+        object IConvertible.ToType(Type type, IFormatProvider? provider)
         {
             return Convert.DefaultToType((IConvertible)this, type, provider);
         }

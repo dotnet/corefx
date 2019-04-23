@@ -461,14 +461,13 @@ nameof(boundedCapacity), boundedCapacity,
                         while (_currentAdders != COMPLETE_ADDING_ON_MASK) spinner.SpinOnce();
                         throw new InvalidOperationException(SR.BlockingCollection_Completed);
                     }
-#pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
+
                     if (Interlocked.CompareExchange(ref _currentAdders, observedAdders + 1, observedAdders) == observedAdders)
-#pragma warning restore 0420
                     {
                         Debug.Assert((observedAdders + 1) <= (~COMPLETE_ADDING_ON_MASK), "The number of concurrent adders thread exceeded the maximum limit.");
                         break;
                     }
-                    spinner.SpinOnce();
+                    spinner.SpinOnce(sleep1Threshold: -1);
                 }
 
                 // This outer try/finally to workaround of repeating the decrement adders code 3 times, because we should decrement the adders if:
@@ -517,9 +516,7 @@ nameof(boundedCapacity), boundedCapacity,
                 {
                     // decrement the adders count
                     Debug.Assert((_currentAdders & ~COMPLETE_ADDING_ON_MASK) > 0);
-#pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
                     Interlocked.Decrement(ref _currentAdders);
-#pragma warning restore 0420
                 }
             }
             return waitForSemaphoreWasSuccessful;
@@ -1489,9 +1486,8 @@ nameof(boundedCapacity), boundedCapacity,
                     while (_currentAdders != COMPLETE_ADDING_ON_MASK) spinner.SpinOnce();
                     return;
                 }
-#pragma warning disable 0420 // No warning for Interlocked.xxx if compiled with new managed compiler (Roslyn)
+
                 if (Interlocked.CompareExchange(ref _currentAdders, observedAdders | COMPLETE_ADDING_ON_MASK, observedAdders) == observedAdders)
-#pragma warning restore 0420
                 {
                     spinner.Reset();
                     while (_currentAdders != COMPLETE_ADDING_ON_MASK) spinner.SpinOnce();
@@ -1506,7 +1502,7 @@ nameof(boundedCapacity), boundedCapacity,
                     CancelWaitingProducers();
                     return;
                 }
-                spinner.SpinOnce();
+                spinner.SpinOnce(sleep1Threshold: -1);
             }
         }
 
@@ -1697,7 +1693,7 @@ nameof(boundedCapacity), boundedCapacity,
         /// <summary>Centralizes the logic for validating the BlockingCollections array passed to TryAddToAny()
         /// and TryTakeFromAny().</summary>
         /// <param name="collections">The collections to/from which an item should be added/removed.</param>
-        /// <param name="operationMode">Indicates whether this method is called to Add or Take.</param>
+        /// <param name="isAddOperation">Indicates whether this method is called to Add or Take.</param>
         /// <exception cref="System.ArgumentNullException">If the collections argument is null.</exception>
         /// <exception cref="System.ArgumentException">If the collections argument is a 0-length array or contains a 
         /// null element. Also, if at least one of the collections has been marked complete for adds.</exception>
@@ -1760,7 +1756,7 @@ nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_DispElems);
             if ((totalMilliseconds < 0 || totalMilliseconds > int.MaxValue) && (totalMilliseconds != Timeout.Infinite))
             {
                 throw new ArgumentOutOfRangeException(nameof(timeout), timeout,
-                    string.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
+                    SR.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
             }
         }
 
@@ -1774,7 +1770,7 @@ nameof(collections), SR.BlockingCollection_ValidateCollectionsArray_DispElems);
             if ((millisecondsTimeout < 0) && (millisecondsTimeout != Timeout.Infinite))
             {
                 throw new ArgumentOutOfRangeException(nameof(millisecondsTimeout), millisecondsTimeout,
-                    string.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
+                    SR.Format(CultureInfo.InvariantCulture, SR.BlockingCollection_TimeoutInvalid, int.MaxValue));
             }
         }
 

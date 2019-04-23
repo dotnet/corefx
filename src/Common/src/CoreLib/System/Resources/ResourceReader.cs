@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 /*============================================================
 **
 ** 
@@ -29,6 +30,7 @@ namespace System.Resources
     using System.Runtime.Versioning;
     using System.Diagnostics;
     using System.Diagnostics.Contracts;
+    using System.Threading;
 
     // Provides the default implementation of IResourceReader, reading
     // .resources file from the system default binary format.  This class
@@ -40,10 +42,10 @@ namespace System.Resources
 
     internal struct ResourceLocator
     {
-        internal object _value;  // Can be null.  Consider WeakReference instead?
+        internal object? _value;  // Can be null.  Consider WeakReference instead?
         internal int _dataPos;
 
-        internal ResourceLocator(int dataPos, object value)
+        internal ResourceLocator(int dataPos, object? value)
         {
             _dataPos = dataPos;
             _value = value;
@@ -57,7 +59,7 @@ namespace System.Resources
 
         // Allows adding in profiling data in a future version, or a special
         // resource profiling build.  We could also use WeakReference.
-        internal object Value
+        internal object? Value
         {
             get { return _value; }
             set { _value = value; }
@@ -81,7 +83,7 @@ namespace System.Resources
         // Used by RuntimeResourceSet and this class's enumerator.  Maps
         // resource name to a value, a ResourceLocator, or a 
         // LooselyLinkedManifestResource.
-        internal Dictionary<string, ResourceLocator> _resCache;
+        internal Dictionary<string, ResourceLocator>? _resCache;
         private long _nameSectionOffset;  // Offset to name section of file.
         private long _dataSectionOffset;  // Offset to Data section of file.
 
@@ -90,17 +92,26 @@ namespace System.Resources
         // we're given an UnmanagedMemoryStream referring to the mmap'ed portion
         // of the assembly.  The pointers here are pointers into that block of
         // memory controlled by the OS's loader.
-        private int[] _nameHashes;    // hash values for all names.
+        private int[]? _nameHashes;    // hash values for all names.
         private unsafe int* _nameHashesPtr;  // In case we're using UnmanagedMemoryStream
-        private int[] _namePositions; // relative locations of names
+        private int[]? _namePositions; // relative locations of names
         private unsafe int* _namePositionsPtr;  // If we're using UnmanagedMemoryStream
-        private Type[] _typeTable;    // Lazy array of Types for resource values.
-        private int[] _typeNamePositions;  // To delay initialize type table
-        private int _numResources;    // Num of resources files, in case arrays aren't allocated.        
+        private Type?[] _typeTable = null!;    // Lazy array of Types for resource values.
+        private int[] _typeNamePositions = null!;  // To delay initialize type table
+        private int _numResources;    // Num of resources files, in case arrays aren't allocated.
+
+        private readonly bool _permitDeserialization;  // can deserialize BinaryFormatted resources
+        private object? _binaryFormatter; // binary formatter instance to use for deserializing
+
+        // statics used to dynamically call into BinaryFormatter
+        // When successfully located s_binaryFormatterType will point to the BinaryFormatter type
+        // and s_deserializeMethod will point to an unbound delegate to the deserialize method.
+        private static Type s_binaryFormatterType;
+        private static Func<object?, Stream, object> s_deserializeMethod;
 
         // We'll include a separate code path that uses UnmanagedMemoryStream to
         // avoid allocating String objects and the like.
-        private UnmanagedMemoryStream _ums;
+        private UnmanagedMemoryStream? _ums;
 
         // Version number of .resources file, for compatibility
         private int _version;
@@ -141,7 +152,7 @@ namespace System.Resources
         // passing in the stream to read from and the RuntimeResourceSet's 
         // internal hash table (hash table of names with file offsets
         // and values, coupled to this ResourceReader).
-        internal ResourceReader(Stream stream, Dictionary<string, ResourceLocator> resCache)
+        internal ResourceReader(Stream stream, Dictionary<string, ResourceLocator> resCache, bool permitDeserialization)
         {
             Debug.Assert(stream != null, "Need a stream!");
             Debug.Assert(stream.CanRead, "Stream should be readable!");
@@ -151,6 +162,8 @@ namespace System.Resources
             _store = new BinaryReader(stream, Encoding.UTF8);
 
             _ums = stream as UnmanagedMemoryStream;
+
+            _permitDeserialization = permitDeserialization;
 
             ReadResources();
         }
@@ -176,11 +189,11 @@ namespace System.Resources
                     // Close the stream in a thread-safe way.  This fix means 
                     // that we may call Close n times, but that's safe.
                     BinaryReader copyOfStore = _store;
-                    _store = null;
+                    _store = null!; // TODO-NULLABLE: dispose should not null this out
                     if (copyOfStore != null)
                         copyOfStore.Close();
                 }
-                _store = null;
+                _store = null!; // TODO-NULLABLE: dispose should not null this out
                 _namePositions = null;
                 _nameHashes = null;
                 _ums = null;
@@ -210,24 +223,34 @@ namespace System.Resources
         private unsafe int GetNameHash(int index)
         {
             Debug.Assert(index >= 0 && index < _numResources, "Bad index into hash array.  index: " + index);
-            Debug.Assert((_ums == null && _nameHashes != null && _nameHashesPtr == null) ||
-                            (_ums != null && _nameHashes == null && _nameHashesPtr != null), "Internal state mangled.");
+
             if (_ums == null)
+            {
+                Debug.Assert(_nameHashes != null && _nameHashesPtr == null, "Internal state mangled.");
                 return _nameHashes[index];
+            }
             else
+            {
+                Debug.Assert(_nameHashes == null && _nameHashesPtr != null, "Internal state mangled.");
                 return ReadUnalignedI4(&_nameHashesPtr[index]);
+            }
         }
 
         private unsafe int GetNamePosition(int index)
         {
             Debug.Assert(index >= 0 && index < _numResources, "Bad index into name position array.  index: " + index);
-            Debug.Assert((_ums == null && _namePositions != null && _namePositionsPtr == null) ||
-                            (_ums != null && _namePositions == null && _namePositionsPtr != null), "Internal state mangled.");
             int r;
             if (_ums == null)
+            {
+                Debug.Assert(_namePositions != null && _namePositionsPtr == null, "Internal state mangled.");
                 r = _namePositions[index];
+            }
             else
+            {
+                Debug.Assert(_namePositions == null && _namePositionsPtr != null, "Internal state mangled.");
                 r = ReadUnalignedI4(&_namePositionsPtr[index]);
+            }
+
             if (r < 0 || r > _dataSectionOffset - _nameSectionOffset)
             {
                 throw new FormatException(SR.Format(SR.BadImageFormat_ResourcesNameInvalidOffset, r));
@@ -400,7 +423,7 @@ namespace System.Resources
                     if (_ums.Position > _ums.Length - byteLen)
                         throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResourcesIndexTooLong, index));
 
-                    string s = null;
+                    string? s = null;
                     char* charPtr = (char*)_ums.PositionPointer;
 
                     s = new string(charPtr, 0, byteLen / 2);
@@ -438,7 +461,7 @@ namespace System.Resources
         // This is used in the enumerator.  The enumerator iterates from 0 to n
         // of our resources and this returns the resource value for a particular
         // index.  The parameter is NOT a virtual offset.
-        private object GetValueForNameIndex(int index)
+        private object? GetValueForNameIndex(int index)
         {
             Debug.Assert(_store != null, "ResourceReader is closed!");
             long nameVA = GetNamePosition(index);
@@ -464,11 +487,11 @@ namespace System.Resources
         // from that location.
         // Anyone who calls LoadObject should make sure they take a lock so 
         // no one can cause us to do a seek in here.
-        internal string LoadString(int pos)
+        internal string? LoadString(int pos)
         {
             Debug.Assert(_store != null, "ResourceReader is closed!");
             _store.BaseStream.Seek(_dataSectionOffset + pos, SeekOrigin.Begin);
-            string s = null;
+            string? s = null;
             int typeIndex = _store.Read7BitEncodedInt();
             if (_version == 1)
             {
@@ -497,7 +520,7 @@ namespace System.Resources
         }
 
         // Called from RuntimeResourceSet
-        internal object LoadObject(int pos)
+        internal object? LoadObject(int pos)
         {
             if (_version == 1)
                 return LoadObjectV1(pos);
@@ -505,11 +528,11 @@ namespace System.Resources
             return LoadObjectV2(pos, out typeCode);
         }
 
-        internal object LoadObject(int pos, out ResourceTypeCode typeCode)
+        internal object? LoadObject(int pos, out ResourceTypeCode typeCode)
         {
             if (_version == 1)
             {
-                object o = LoadObjectV1(pos);
+                object? o = LoadObjectV1(pos);
                 typeCode = (o is string) ? ResourceTypeCode.String : ResourceTypeCode.StartOfUserTypes;
                 return o;
             }
@@ -520,7 +543,7 @@ namespace System.Resources
         // from that location.
         // Anyone who calls LoadObject should make sure they take a lock so 
         // no one can cause us to do a seek in here.
-        internal object LoadObjectV1(int pos)
+        internal object? LoadObjectV1(int pos)
         {
             Debug.Assert(_store != null, "ResourceReader is closed!");
             Debug.Assert(_version == 1, ".resources file was not a V1 .resources file!");
@@ -541,7 +564,7 @@ namespace System.Resources
             }
         }
 
-        private object _LoadObjectV1(int pos)
+        private object? _LoadObjectV1(int pos)
         {
             _store.BaseStream.Seek(_dataSectionOffset + pos, SeekOrigin.Begin);
             int typeIndex = _store.Read7BitEncodedInt();
@@ -591,11 +614,11 @@ namespace System.Resources
             }
             else
             {
-                throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
+                return DeserializeObject(typeIndex);
             }
         }
 
-        internal object LoadObjectV2(int pos, out ResourceTypeCode typeCode)
+        internal object? LoadObjectV2(int pos, out ResourceTypeCode typeCode)
         {
             Debug.Assert(_store != null, "ResourceReader is closed!");
             Debug.Assert(_version >= 2, ".resources file was not a V2 (or higher) .resources file!");
@@ -616,7 +639,7 @@ namespace System.Resources
             }
         }
 
-        private object _LoadObjectV2(int pos, out ResourceTypeCode typeCode)
+        private object? _LoadObjectV2(int pos, out ResourceTypeCode typeCode)
         {
             _store.BaseStream.Seek(_dataSectionOffset + pos, SeekOrigin.Begin);
             typeCode = (ResourceTypeCode)_store.Read7BitEncodedInt();
@@ -743,7 +766,61 @@ namespace System.Resources
             }
 
             // Normal serialized objects
-            throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
+            int typeIndex = typeCode - ResourceTypeCode.StartOfUserTypes;
+            return DeserializeObject(typeIndex);
+        }
+
+        private object DeserializeObject(int typeIndex)
+        {
+            if (!_permitDeserialization)
+            {
+                throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
+            }
+
+            if (_binaryFormatter == null)
+            {
+                InitializeBinaryFormatter();
+            }
+
+            Type type = FindType(typeIndex);
+  
+            object graph = s_deserializeMethod(_binaryFormatter, _store.BaseStream);
+            
+            // guard against corrupted resources
+            if (graph.GetType() != type)
+                throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResType_SerBlobMismatch, type.FullName, graph.GetType().FullName));
+ 
+            return graph;
+        }
+
+        private void InitializeBinaryFormatter()
+        {
+            LazyInitializer.EnsureInitialized(ref s_binaryFormatterType, () =>
+                Type.GetType("System.Runtime.Serialization.Formatters.Binary.BinaryFormatter, System.Runtime.Serialization.Formatters, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a",
+                throwOnError: true));
+
+            LazyInitializer.EnsureInitialized(ref s_deserializeMethod, () =>
+               {
+                   MethodInfo binaryFormatterDeserialize = s_binaryFormatterType.GetMethod("Deserialize", new Type[] { typeof(Stream) });
+
+                    // create an unbound delegate that can accept a BinaryFormatter instance as object
+                    return (Func<object?, Stream, object>)typeof(ResourceReader)
+                            .GetMethod(nameof(CreateUntypedDelegate), BindingFlags.NonPublic | BindingFlags.Static)
+                            .MakeGenericMethod(s_binaryFormatterType)
+                            .Invoke(null, new object[] { binaryFormatterDeserialize });
+               });
+
+            _binaryFormatter = Activator.CreateInstance(s_binaryFormatterType);
+        }
+
+        // generic method that we specialize at runtime once we've loaded the BinaryFormatter type
+        // permits creating an unbound delegate so that we can avoid reflection after the initial
+        // lightup code completes.
+        private static Func<object, Stream, object> CreateUntypedDelegate<TInstance>(MethodInfo method)
+        {
+            Func<TInstance, Stream, object> typedDelegate = (Func<TInstance, Stream, object>)Delegate.CreateDelegate(typeof(Func<TInstance, Stream, object>), null, method);
+
+            return (obj, stream) => typedDelegate((TInstance)obj, stream);
         }
 
         // Reads in the header information for a .resources file.  Verifies some
@@ -797,10 +874,8 @@ namespace System.Resources
                 // Read in type name for a suitable ResourceReader
                 // Note ResourceWriter & InternalResGen use different Strings.
                 string readerType = _store.ReadString();
-                readerType = System.CoreLib.FixupCoreLibName(readerType);
-                AssemblyName mscorlib = new AssemblyName(ResourceManager.MscorlibName);
 
-                if (!ResourceManager.CompareNames(readerType, ResourceManager.ResReaderTypeName, mscorlib))
+                if (!ResourceManager.IsDefaultType(readerType, ResourceManager.ResReaderTypeName))
                     throw new NotSupportedException(SR.Format(SR.NotSupported_WrongResourceReader_Type, readerType));
 
                 // Skip over type name for a suitable ResourceSet
@@ -966,7 +1041,7 @@ namespace System.Resources
                 }
             }
             Debug.Assert(_typeTable[typeIndex] != null, "Should have found a type!");
-            return _typeTable[typeIndex];
+            return _typeTable[typeIndex]!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
         }
 
         public void GetResourceData(string resourceName, out string resourceType, out byte[] resourceData)
@@ -1102,7 +1177,7 @@ namespace System.Resources
                 }
             }
 
-            public object Current
+            public object? Current // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
             {
                 get
                 {
@@ -1128,7 +1203,7 @@ namespace System.Resources
                     if (_reader._resCache == null) throw new InvalidOperationException(SR.ResourceReaderIsClosed);
 
                     string key;
-                    object value = null;
+                    object? value = null;
                     lock (_reader)
                     { // locks should be taken in the same order as in RuntimeResourceSet.GetObject to avoid deadlock
                         lock (_reader._resCache)
@@ -1157,7 +1232,7 @@ namespace System.Resources
                 }
             }
 
-            public object Value
+            public object? Value
             {
                 get
                 {

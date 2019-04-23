@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Runtime.Serialization;
 
 namespace System.Runtime.CompilerServices
@@ -27,7 +28,7 @@ namespace System.Runtime.CompilerServices
         private RuntimeWrappedException(SerializationInfo info, StreamingContext context)
             : base(info, context)
         {
-            _wrappedException = info.GetValue("WrappedException", typeof(object));
+            _wrappedException = info.GetValue("WrappedException", typeof(object))!;
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)

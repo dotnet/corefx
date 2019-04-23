@@ -18,10 +18,12 @@ namespace System
         public static bool IsWindows => false;
         public static bool IsWindows7 => false;
         public static bool IsWindows8x => false;
+        public static bool IsWindows8xOrLater => false;
         public static bool IsWindows10Version1607OrGreater => false;
         public static bool IsWindows10Version1703OrGreater => false;
         public static bool IsWindows10Version1709OrGreater => false;
         public static bool IsWindows10Version1803OrGreater => false;
+        public static bool IsWindows10Version1903OrGreater => false;
         public static bool IsNotOneCoreUAP =>  true;
         public static bool IsInAppContainer => false;
         public static int WindowsVersion => -1;
@@ -38,6 +40,7 @@ namespace System
         public static bool IsUbuntu1710 => IsDistroAndVersion("ubuntu", 17, 10);
         public static bool IsUbuntu1710OrHigher => IsDistroAndVersionOrHigher("ubuntu", 17, 10);
         public static bool IsUbuntu1804 => IsDistroAndVersion("ubuntu", 18, 04);
+        public static bool IsUbuntu1810OrHigher => IsDistroAndVersionOrHigher("ubuntu", 18, 10);
         public static bool IsTizen => IsDistroAndVersion("tizen");
         public static bool IsFedora => IsDistroAndVersion("fedora");
         public static bool IsWindowsNanoServer => false;
@@ -58,9 +61,29 @@ namespace System
         public static bool IsNetfx471OrNewer => false;
         public static bool IsNetfx472OrNewer => false;
 
-        public static Version OSXVersion { get; } = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion);
+        public static bool SupportsSsl3 => (PlatformDetection.IsOSX || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && PlatformDetection.OpenSslVersion < new Version(1, 0, 2) && !PlatformDetection.IsDebian));
 
-        public static Version OpenSslVersion => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? Interop.OpenSsl.OpenSslVersion : throw new PlatformNotSupportedException();
+        public static bool IsDrawingSupported { get; } =
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+#if netcoreapp20
+                ? dlopen("libgdiplus.dylib", RTLD_LAZY) != IntPtr.Zero
+                : dlopen("libgdiplus.so", RTLD_LAZY) != IntPtr.Zero || dlopen("libgdiplus.so.0", RTLD_LAZY) != IntPtr.Zero;
+
+        [DllImport("libdl")]
+        private static extern IntPtr dlopen(string libName, int flags);
+        private const int RTLD_LAZY = 0x001;
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                ? NativeLibrary.TryLoad("libgdiplus.dylib", out _)
+                : NativeLibrary.TryLoad("libgdiplus.so", out _) || NativeLibrary.TryLoad("libgdiplus.so.0", out _);
+#endif
+
+        public static bool IsInContainer => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/.dockerenv");
+
+        public static bool IsSoundPlaySupported { get; } = false;
+
+        public static Version OSXVersion { get; } = ToVersion(PlatformApis.GetOSVersion());
+
+        public static Version OpenSslVersion => !RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? GetOpenSslVersion() : throw new PlatformNotSupportedException();
 
         public static string GetDistroVersionString()
         {
@@ -69,9 +92,9 @@ namespace System
                 return "OSX Version=" + s_osxProductVersion.ToString();
             }
 
-            DistroInfo v = GetDistroInfo();
+            var (name, version) = GetDistroInfo();
 
-            return "Distro=" + v.Id + " VersionId=" + v.VersionId;
+            return "Distro=" + name + " VersionId=" + version;
         }
 
         /// <summary>
@@ -117,6 +140,9 @@ namespace System
         public static bool IsMacOsHighSierraOrHigher { get; } =
             IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 13));
 
+        public static bool IsMacOsMojaveOrHigher { get; } =
+            IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 14));
+
         private static readonly Version s_icuVersion = GetICUVersion();
         public static Version ICUVersion => s_icuVersion;
 
@@ -139,11 +165,8 @@ namespace System
             return new Version(int.Parse(versionString), 0);
         }
 
-        private static DistroInfo GetDistroInfo() => new DistroInfo()
-        {
-            Id = Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystem,
-            VersionId = ToVersion(Microsoft.DotNet.PlatformAbstractions.RuntimeEnvironment.OperatingSystemVersion)
-        };
+        private static (string name, Version version) GetDistroInfo() =>
+            (PlatformApis.GetOSName(), ToVersion(PlatformApis.GetOSVersion()));
 
         private static bool IsRedHatFamilyAndVersion(int major = -1, int minor = -1, int build = -1, int revision = -1)
         {
@@ -154,7 +177,10 @@ namespace System
         /// Get whether the OS platform matches the given Linux distro and optional version.
         /// </summary>
         /// <param name="distroId">The distribution id.</param>
-        /// <param name="versionId">The distro version.  If omitted, compares the distro only.</param>
+        /// <param name="major">The distro major version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="minor">The distro minor version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="build">The distro build version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="revision">The distro revision version. If omitted, this portion of the version is not included in the comparison.</param>
         /// <returns>Whether the OS platform matches the given Linux distro and optional version.</returns>
         private static bool IsDistroAndVersion(string distroId, int major = -1, int minor = -1, int build = -1, int revision = -1)
         {
@@ -165,7 +191,10 @@ namespace System
         /// Get whether the OS platform matches the given Linux distro and optional version is same or higher.
         /// </summary>
         /// <param name="distroId">The distribution id.</param>
-        /// <param name="versionId">The distro version.  If omitted, compares the distro only.</param>
+        /// <param name="major">The distro major version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="minor">The distro minor version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="build">The distro build version. If omitted, this portion of the version is not included in the comparison.</param>
+        /// <param name="revision">The distro revision version.  If omitted, this portion of the version is not included in the comparison.</param>
         /// <returns>Whether the OS platform matches the given Linux distro and optional version is same or higher.</returns>
         private static bool IsDistroAndVersionOrHigher(string distroId, int major = -1, int minor = -1, int build = -1, int revision = -1)
         {
@@ -176,8 +205,8 @@ namespace System
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                DistroInfo v = GetDistroInfo();
-                if (distroPredicate(v.Id) && VersionEquivalentTo(major, minor, build, revision, v.VersionId))
+                var (name, version) = GetDistroInfo();
+                if (distroPredicate(name) && VersionEquivalentTo(major, minor, build, revision, version))
                 {
                     return true;
                 }
@@ -190,8 +219,8 @@ namespace System
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                DistroInfo v = GetDistroInfo();
-                if (distroPredicate(v.Id) && VersionEquivalentToOrHigher(major, minor, build, revision, v.VersionId))
+                var (name, version) = GetDistroInfo();
+                if (distroPredicate(name) && VersionEquivalentToOrHigher(major, minor, build, revision, version))
                 {
                     return true;
                 }
@@ -213,10 +242,10 @@ namespace System
             return
                 VersionEquivalentTo(major, minor, build, revision, actualVersionId) ||
                     (actualVersionId.Major > major ||
-                        (actualVersionId.Major == major && actualVersionId.Minor > minor ||
-                            (actualVersionId.Minor == minor && actualVersionId.Build > build ||
-                                (actualVersionId.Build == build && actualVersionId.Revision > revision ||
-                                    (actualVersionId.Revision == revision)))));
+                        (actualVersionId.Major == major && (actualVersionId.Minor > minor ||
+                            (actualVersionId.Minor == minor && (actualVersionId.Build > build ||
+                                (actualVersionId.Build == build && (actualVersionId.Revision > revision ||
+                                    (actualVersionId.Revision == revision))))))));
         }
 
         private static Version GetOSXProductVersion()
@@ -269,6 +298,30 @@ namespace System
             return new Version(0, 0, 0);
         }
 
+        private static Version s_opensslVersion;
+        private static Version GetOpenSslVersion()
+        {
+            if (s_opensslVersion == null)
+            {
+                // OpenSSL version numbers are encoded as
+                // 0xMNNFFPPS: major (one nybble), minor (one byte, unaligned),
+                // "fix" (one byte, unaligned), patch (one byte, unaligned), status (one nybble)
+                //
+                // e.g. 1.0.2a final is 0x1000201F
+                //
+                // Currently they don't exceed 29-bit values, but we use long here to account
+                // for the expanded range on their 64-bit C-long return value.
+                long versionNumber = Interop.OpenSsl.OpenSslVersionNumber();
+                int major = (int)((versionNumber >> 28) & 0xF);
+                int minor = (int)((versionNumber >> 20) & 0xFF);
+                int fix = (int)((versionNumber >> 12) & 0xFF);
+
+                s_opensslVersion = new Version(major, minor, fix);
+            }
+
+            return s_opensslVersion;
+        }
+
         [DllImport("libc", SetLastError = true)]
         private static extern int sysctlbyname(string ctlName, byte[] oldp, ref IntPtr oldpLen, byte[] newp, IntPtr newpLen);
 
@@ -285,11 +338,5 @@ namespace System
         private static extern int GlobalizationNative_GetICUVersion();
 
         public static bool IsSuperUser => geteuid() == 0;
-
-        private struct DistroInfo
-        {
-            public string Id { get; set; }
-            public Version VersionId { get; set; }
-        }
     }
 }

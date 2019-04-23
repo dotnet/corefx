@@ -188,8 +188,8 @@ namespace System.Management
         /// and writes it to the specified file.
         /// </summary>
         /// <param name="lang">The language to generate in.</param>
-        /// <param name="FilePath">The path to the file where the generated code should be stored.</param>
-        /// <param name="Namespace">The .NET namespace into which the class is generated.</param>
+        /// <param name="filePath">The path to the file where the generated code should be stored.</param>
+        /// <param name="netNamespace">The .NET namespace into which the class is generated.</param>
         public bool GenerateCode(CodeLanguage lang ,string filePath,string netNamespace)
         {
             // check for proper arguments
@@ -4919,7 +4919,7 @@ namespace System.Management
             }
             catch
             {
-                throw new ArgumentOutOfRangeException(string.Format(SR.UnableToCreateCodeGeneratorException , strProvider ));
+                throw new ArgumentOutOfRangeException(SR.Format(SR.UnableToCreateCodeGeneratorException , strProvider ));
             }
 
             if(bSucceeded == true)
@@ -4928,7 +4928,7 @@ namespace System.Management
             }
             else
             {
-                throw new ArgumentOutOfRangeException(string.Format(SR.UnableToCreateCodeGeneratorException , strProvider));
+                throw new ArgumentOutOfRangeException(SR.Format(SR.UnableToCreateCodeGeneratorException , strProvider));
             }
             return true;
         }

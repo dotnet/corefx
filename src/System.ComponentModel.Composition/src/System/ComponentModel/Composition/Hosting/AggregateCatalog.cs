@@ -5,7 +5,6 @@
 using System.Collections.Generic;
 using System.ComponentModel.Composition.Primitives;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Threading;
 using Microsoft.Internal;
@@ -134,7 +133,7 @@ namespace System.ComponentModel.Composition.Hosting
                 var catalogExports = catalog.GetExports(definition);
                 if (catalogExports != ComposablePartCatalog._EmptyExportsList)
                 {
-                    // ideally this is is the case we will always hit
+                    // ideally this is the case we will always hit
                     if (result == null)
                     {
                         result = catalogExports;
@@ -169,7 +168,7 @@ namespace System.ComponentModel.Composition.Hosting
             get
             {
                 ThrowIfDisposed();
-                Contract.Ensures(Contract.Result<ICollection<ComposablePartCatalog>>() != null);
+                Debug.Assert(_catalogs != null);
 
                 return _catalogs;
             }
@@ -181,10 +180,7 @@ namespace System.ComponentModel.Composition.Hosting
             {
                 if (disposing)
                 {
-                    // NOTE : According to https://docs.microsoft.com/en-us/dotnet/csharp/language-reference/compiler-messages/cs0420, the warning is bogus when used with Interlocked API.
-#pragma warning disable 420
                     if (Interlocked.CompareExchange(ref _isDisposed, 1, 0) == 0)
-#pragma warning restore 420
                     {
                         _catalogs.Dispose();
                     }

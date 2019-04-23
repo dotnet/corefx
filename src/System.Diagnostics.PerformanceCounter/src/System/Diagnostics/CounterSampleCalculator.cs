@@ -79,7 +79,7 @@ namespace System.Diagnostics
             }
             else if (oldSample.CounterType != newSample.CounterType)
             {
-                throw new InvalidOperationException(SR.Format(SR.MismatchedCounterTypes));
+                throw new InvalidOperationException(SR.MismatchedCounterTypes);
             }
 
             if (newCounterType == Interop.Kernel32.PerformanceCounterOptions.PERF_ELAPSED_TIME)
@@ -234,7 +234,7 @@ namespace System.Diagnostics
             if (s_perfCounterDllLoaded)
                 return;
 
-            string installPath = SharedUtils.GetLatestBuildDllDirectory(".");
+            string installPath = NetFrameworkUtils.GetLatestBuildDllDirectory(".");
 
             string perfcounterPath = Path.Combine(installPath, "perfcounter.dll");
             if (Interop.Kernel32.LoadLibrary(perfcounterPath) == IntPtr.Zero)

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{D2DB0D6F-F65E-4174-B31E-27DC03137118}</ProjectGuid>
     <NoWarn>$(NoWarn);0618</NoWarn>
@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Data.Common.cs" />
+    <Compile Include="System.Data.Common.Forwards.cs" />
     <Compile Include="System.Data.Common.manual.cs" />
   </ItemGroup>
   <ItemGroup>

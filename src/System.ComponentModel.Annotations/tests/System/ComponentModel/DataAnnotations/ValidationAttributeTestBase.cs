@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.ComponentModel.DataAnnotations.Tests
 {
-    public abstract class ValidationAttributeTestBase : RemoteExecutorTestBase
+    public abstract class ValidationAttributeTestBase
     {
         protected abstract IEnumerable<TestCase> ValidValues();
         protected abstract IEnumerable<TestCase> InvalidValues();
@@ -167,7 +167,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Equal("Error Message from ErrorMessageResources.InternalErrorMessageTestProperty", validationResult.ErrorMessage);
         }
 
-        protected class TestCase
+        public class TestCase
         {
             public ValidationAttribute Attribute { get; }
             public object Value { get; }

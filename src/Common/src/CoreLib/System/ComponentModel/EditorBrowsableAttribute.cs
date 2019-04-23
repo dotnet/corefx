@@ -2,47 +2,33 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 namespace System.ComponentModel
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Enum | AttributeTargets.Constructor | AttributeTargets.Method | AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Event | AttributeTargets.Delegate | AttributeTargets.Interface)]
     public sealed class EditorBrowsableAttribute : Attribute
     {
-        private EditorBrowsableState browsableState;
-
         public EditorBrowsableAttribute(EditorBrowsableState state)
         {
-            browsableState = state;
+            State = state;
         }
 
-        public EditorBrowsableAttribute() : this(EditorBrowsableState.Always) { }
-
-        public EditorBrowsableState State
+        public EditorBrowsableAttribute() : this(EditorBrowsableState.Always)
         {
-            get { return browsableState; }
         }
 
-        public override bool Equals(object obj)
+        public EditorBrowsableState State { get; }
+
+        public override bool Equals(object? obj)
         {
             if (obj == this)
             {
                 return true;
             }
 
-            EditorBrowsableAttribute other = obj as EditorBrowsableAttribute;
-
-            return (other != null) && other.browsableState == browsableState;
+            return (obj is EditorBrowsableAttribute other) && other.State == State;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-    }
-
-    public enum EditorBrowsableState
-    {
-        Always,
-        Never,
-        Advanced
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

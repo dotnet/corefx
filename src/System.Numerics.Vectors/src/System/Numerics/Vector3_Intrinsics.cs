@@ -40,6 +40,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value">The Vector to extract X and Y components from.</param>
         /// <param name="z">The Z component.</param>
+        [Intrinsic]
         public Vector3(Vector2 value, float z) : this(value.X, value.Y, z) { }
 
         /// <summary>
@@ -61,8 +62,9 @@ namespace System.Numerics
         /// <summary>
         /// Copies the contents of the vector into the given array.
         /// </summary>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(float[] array)
+        public readonly void CopyTo(float[] array)
         {
             CopyTo(array, 0);
         }
@@ -76,7 +78,7 @@ namespace System.Numerics
         /// <exception cref="ArgumentException">If number of elements in source vector is greater than those available in destination array.</exception>
         [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(float[] array, int index)
+        public readonly void CopyTo(float[] array, int index)
         {
             if (array == null)
             {
@@ -102,7 +104,7 @@ namespace System.Numerics
         /// <param name="other">The Vector3 to compare this instance to.</param>
         /// <returns>True if the other Vector3 is equal to this instance; False otherwise.</returns>
         [Intrinsic]
-        public bool Equals(Vector3 other)
+        public readonly bool Equals(Vector3 other)
         {
             return X == other.X &&
                    Y == other.Y &&
@@ -305,6 +307,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if the vectors are not equal; False if they are equal.</returns>
+        [Intrinsic]
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector3 left, Vector3 right)
         {

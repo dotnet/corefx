@@ -8,6 +8,7 @@ using System.IO;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -15,19 +16,14 @@ namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public abstract class PostScenarioUWPTest : HttpClientTestBase
+    public abstract class PostScenarioUWPTest : HttpClientHandlerTestBase
     {
-        private readonly ITestOutputHelper _output;
-
-        public PostScenarioUWPTest(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public PostScenarioUWPTest(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         public void Authentication_UseStreamContent_Throws()
         {
-            RemoteInvoke(async useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(async useSocketsHttpHandlerString =>
             {
                 // This test validates the current limitation of CoreFx's NetFxToWinRtStreamAdapter
                 // which throws exceptions when trying to rewind a .NET Stream when it needs to be
@@ -47,14 +43,14 @@ namespace System.Net.Http.Functional.Tests
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.PostAsync(uri, content));
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [Fact]
         public void Authentication_UseMultiInterfaceNonRewindableStreamContent_Throws()
         {
-            RemoteInvoke(async useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(async useSocketsHttpHandlerString =>
             {
                 string username = "testuser";
                 string password = "password";
@@ -71,14 +67,14 @@ namespace System.Net.Http.Functional.Tests
                     await Assert.ThrowsAsync<HttpRequestException>(() => client.PostAsync(uri, content));
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [Fact]
         public void Authentication_UseMultiInterfaceStreamContent_Success()
         {
-            RemoteInvoke(async useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(async useSocketsHttpHandlerString =>
             {
                 string username = "testuser";
                 string password = "password";
@@ -99,14 +95,14 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [Fact]
         public void Authentication_UseMemoryStreamVisibleBufferContent_Success()
         {
-            RemoteInvoke(async useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(async useSocketsHttpHandlerString =>
             {
                 string username = "testuser";
                 string password = "password";
@@ -127,14 +123,14 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [Fact]
         public void Authentication_UseMemoryStreamNotVisibleBufferContent_Success()
         {
-            RemoteInvoke(async useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(async useSocketsHttpHandlerString =>
             {
                 string username = "testuser";
                 string password = "password";
@@ -155,7 +151,7 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
     }

@@ -42,6 +42,7 @@ namespace System.Security.Cryptography
         internal const string CertificateTemplate = "1.3.6.1.4.1.311.21.7";
         internal const string ApplicationCertPolicies = "1.3.6.1.4.1.311.21.10";
         internal const string AuthorityInformationAccess = "1.3.6.1.5.5.7.1.1";
+        internal const string OcspEndpoint = "1.3.6.1.5.5.7.48.1";
         internal const string CertificateAuthorityIssuers = "1.3.6.1.5.5.7.48.2";
         internal const string Pkcs9ExtensionRequest = "1.2.840.113549.1.9.14";
 
@@ -78,6 +79,7 @@ namespace System.Security.Cryptography
         internal const string ECDsaWithSha512 = "1.2.840.10045.4.3.4";
 
         internal const string Mgf1 = "1.2.840.113549.1.1.8";
+        internal const string PSpecified = "1.2.840.113549.1.1.9";
 
         // PKCS#7
         internal const string NoSignature = "1.3.6.1.5.5.7.6.2";

@@ -1225,7 +1225,6 @@ namespace System.Data
                         view.SetIndex2("", DataViewRowState.CurrentRows, null, true);
                     }
 
-                    // avoid HostProtectionAttribute(Synchronization=true) by not calling virtual methods from inside a lock
                     view = Interlocked.CompareExchange<DataView>(ref _defaultView, view, null);
                     if (null == view)
                     {
@@ -5151,7 +5150,7 @@ namespace System.Data
                             }
                             break;
                         case DataRowState.Deleted:
-                            Debug.Assert(false, "LoadOption.Upsert with deleted row, should not be here");
+                            Debug.Fail("LoadOption.Upsert with deleted row, should not be here");
                             break;
                         default:
                             action = DataRowAction.Change;

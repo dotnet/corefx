@@ -328,17 +328,24 @@ namespace System.Net.WebSockets
         public override Task CloseOutputAsync(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken)
         {
             WebSocketValidate.ValidateCloseStatus(closeStatus, statusDescription);
+            return CloseOutputAsyncCore(closeStatus, statusDescription, cancellationToken);
+        }
 
-            try
-            {
-                WebSocketValidate.ThrowIfInvalidState(_state, _disposed, s_validCloseOutputStates);
-            }
-            catch (Exception exc)
-            {
-                return Task.FromException(exc);
-            }
+        private async Task CloseOutputAsyncCore(WebSocketCloseStatus closeStatus, string statusDescription, CancellationToken cancellationToken)
+        {
+            WebSocketValidate.ThrowIfInvalidState(_state, _disposed, s_validCloseOutputStates);
 
-            return SendCloseFrameAsync(closeStatus, statusDescription, cancellationToken);
+            await SendCloseFrameAsync(closeStatus, statusDescription, cancellationToken).ConfigureAwait(false);
+
+            // If we already received a close frame, since we've now also sent one, we're now closed.
+            lock (StateUpdateLock)
+            {
+                Debug.Assert(_sentCloseFrame);
+                if (_receivedCloseFrame)
+                {
+                    DisposeCore();
+                }
+            }
         }
 
         public override void Abort()
@@ -440,7 +447,7 @@ namespace System.Net.WebSockets
                 int sendBytes = WriteFrameToSendBuffer(opcode, endOfMessage, payloadBuffer.Span);
                 using (cancellationToken.Register(s => ((ManagedWebSocket)s).Abort(), this))
                 {
-                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_sendBuffer, 0, sendBytes), default).ConfigureAwait(false);
+                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_sendBuffer, 0, sendBytes), cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (Exception exc) when (!(exc is OperationCanceledException))
@@ -605,7 +612,7 @@ namespace System.Net.WebSockets
         /// </summary>
         /// <param name="payloadBuffer">The buffer into which payload data should be written.</param>
         /// <param name="cancellationToken">The CancellationToken used to cancel the websocket.</param>
-        /// <param name="resultGetter">Used to get the result.  Allows the same method to be used with both <see cref="WebSocketReceiveResult"/> and <see cref="ValueWebSocketReceiveResult"/>.</param>
+        /// <param name="resultGetter">Used to get the result.  Allows the same method to be used with both <see cref="WebSocketReceiveResult"/> and <see cref="T:System.Net.WebSockets.ValueWebSocketReceiveResult"/>.</param>
         /// <returns>Information about the received message.</returns>
         private async ValueTask<TWebSocketReceiveResult> ReceiveAsyncPrivate<TWebSocketReceiveResultGetter, TWebSocketReceiveResult>(
             Memory<byte> payloadBuffer,
@@ -639,7 +646,7 @@ namespace System.Net.WebSockets
                             // Make sure we have the first two bytes, which includes the start of the payload length.
                             if (_receiveBufferCount < 2)
                             {
-                                await EnsureBufferContainsAsync(2, throwOnPrematureClosure: true).ConfigureAwait(false);
+                                await EnsureBufferContainsAsync(2, cancellationToken, throwOnPrematureClosure: true).ConfigureAwait(false);
                             }
 
                             // Then make sure we have the full header based on the payload length.
@@ -651,7 +658,7 @@ namespace System.Net.WebSockets
                                     2 +
                                     (_isServer ? MaskLength : 0) +
                                     (payloadLength <= 125 ? 0 : payloadLength == 126 ? sizeof(ushort) : sizeof(ulong)); // additional 2 or 8 bytes for 16-bit or 64-bit length
-                                await EnsureBufferContainsAsync(minNeeded).ConfigureAwait(false);
+                                await EnsureBufferContainsAsync(minNeeded, cancellationToken).ConfigureAwait(false);
                             }
                         }
 
@@ -667,12 +674,12 @@ namespace System.Net.WebSockets
                     // Alternatively, if it's a close message, handle it and exit.
                     if (header.Opcode == MessageOpcode.Ping || header.Opcode == MessageOpcode.Pong)
                     {
-                        await HandleReceivedPingPongAsync(header).ConfigureAwait(false);
+                        await HandleReceivedPingPongAsync(header, cancellationToken).ConfigureAwait(false);
                         continue;
                     }
                     else if (header.Opcode == MessageOpcode.Close)
                     {
-                        await HandleReceivedCloseAsync(header).ConfigureAwait(false);
+                        await HandleReceivedCloseAsync(header, cancellationToken).ConfigureAwait(false);
                         return resultGetter.GetResult(0, WebSocketMessageType.Close, true, _closeStatus, _closeStatusDescription);
                     }
 
@@ -722,7 +729,7 @@ namespace System.Net.WebSockets
                     {
                         int numBytesRead = await _stream.ReadAsync(payloadBuffer.Slice(
                             totalBytesReceived,
-                            (int)Math.Min(payloadBuffer.Length, header.PayloadLength) - totalBytesReceived)).ConfigureAwait(false);
+                            (int)Math.Min(payloadBuffer.Length, header.PayloadLength) - totalBytesReceived), cancellationToken).ConfigureAwait(false);
                         if (numBytesRead <= 0)
                         {
                             ThrowIfEOFUnexpected(throwOnPrematureClosure: true);
@@ -770,12 +777,16 @@ namespace System.Net.WebSockets
         /// <summary>Processes a received close message.</summary>
         /// <param name="header">The message header.</param>
         /// <returns>The received result message.</returns>
-        private async Task HandleReceivedCloseAsync(MessageHeader header)
+        private async Task HandleReceivedCloseAsync(MessageHeader header, CancellationToken cancellationToken)
         {
             lock (StateUpdateLock)
             {
                 _receivedCloseFrame = true;
-                if (_state < WebSocketState.CloseReceived)
+                if (_sentCloseFrame && _state < WebSocketState.Closed)
+                {
+                    _state = WebSocketState.Closed;
+                }
+                else if (_state < WebSocketState.CloseReceived)
                 {
                     _state = WebSocketState.CloseReceived;
                 }
@@ -794,7 +805,7 @@ namespace System.Net.WebSockets
             {
                 if (_receiveBufferCount < header.PayloadLength)
                 {
-                    await EnsureBufferContainsAsync((int)header.PayloadLength).ConfigureAwait(false);
+                    await EnsureBufferContainsAsync((int)header.PayloadLength, cancellationToken).ConfigureAwait(false);
                 }
 
                 if (_isServer)
@@ -828,18 +839,18 @@ namespace System.Net.WebSockets
 
             if (!_isServer && _sentCloseFrame)
             {
-                await WaitForServerToCloseConnectionAsync().ConfigureAwait(false);
+                await WaitForServerToCloseConnectionAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
         /// <summary>Issues a read on the stream to wait for EOF.</summary>
-        private async Task WaitForServerToCloseConnectionAsync()
+        private async Task WaitForServerToCloseConnectionAsync(CancellationToken cancellationToken)
         {
             // Per RFC 6455 7.1.1, try to let the server close the connection.  We give it up to a second.
             // We simply issue a read and don't care what we get back; we could validate that we don't get
             // additional data, but at this point we're about to close the connection and we're just stalling
             // to try to get the server to close first.
-            ValueTask<int> finalReadTask = _stream.ReadAsync(_receiveBuffer, default);
+            ValueTask<int> finalReadTask = _stream.ReadAsync(_receiveBuffer, cancellationToken);
             if (!finalReadTask.IsCompletedSuccessfully)
             {
                 const int WaitForCloseTimeoutMs = 1_000; // arbitrary amount of time to give the server (same as netfx)
@@ -861,12 +872,12 @@ namespace System.Net.WebSockets
 
         /// <summary>Processes a received ping or pong message.</summary>
         /// <param name="header">The message header.</param>
-        private async Task HandleReceivedPingPongAsync(MessageHeader header)
+        private async Task HandleReceivedPingPongAsync(MessageHeader header, CancellationToken cancellationToken)
         {
             // Consume any (optional) payload associated with the ping/pong.
             if (header.PayloadLength > 0 && _receiveBufferCount < header.PayloadLength)
             {
-                await EnsureBufferContainsAsync((int)header.PayloadLength).ConfigureAwait(false);
+                await EnsureBufferContainsAsync((int)header.PayloadLength, cancellationToken).ConfigureAwait(false);
             }
 
             // If this was a ping, send back a pong response.
@@ -1052,60 +1063,62 @@ namespace System.Net.WebSockets
                 await SendCloseFrameAsync(closeStatus, statusDescription, cancellationToken).ConfigureAwait(false);
             }
 
-            // We should now either be in a CloseSent case (because we just sent one), or in a CloseReceived state, in case
+            // We should now either be in a CloseSent case (because we just sent one), or in a Closed state, in case
             // there was a concurrent receive that ended up handling an immediate close frame response from the server.
             // Of course it could also be Aborted if something happened concurrently to cause things to blow up.
             Debug.Assert(
                 State == WebSocketState.CloseSent ||
-                State == WebSocketState.CloseReceived ||
+                State == WebSocketState.Closed ||
                 State == WebSocketState.Aborted,
                 $"Unexpected state {State}.");
 
-            // Wait until we've received a close response
-            byte[] closeBuffer = ArrayPool<byte>.Shared.Rent(MaxMessageHeaderLength + MaxControlPayloadLength);
-            try
+            // We only need to wait for a received close frame if we are in the CloseSent State. If we are in the Closed
+            // State then it means we already received a close frame. If we are in the Aborted State, then we should not
+            // wait for a close frame as per RFC 6455 Section 7.1.7 "Fail the WebSocket Connection".
+            if (State == WebSocketState.CloseSent)
             {
-                while (!_receivedCloseFrame)
+                // Wait until we've received a close response
+                byte[] closeBuffer = ArrayPool<byte>.Shared.Rent(MaxMessageHeaderLength + MaxControlPayloadLength);
+                try
                 {
-                    Debug.Assert(!Monitor.IsEntered(StateUpdateLock), $"{nameof(StateUpdateLock)} must never be held when acquiring {nameof(ReceiveAsyncLock)}");
-                    Task receiveTask;
-                    lock (ReceiveAsyncLock)
+                    while (!_receivedCloseFrame)
                     {
-                        // Now that we're holding the ReceiveAsyncLock, double-check that we've not yet received the close frame.
-                        // It could have been received between our check above and now due to a concurrent receive completing.
-                        if (_receivedCloseFrame)
+                        Debug.Assert(!Monitor.IsEntered(StateUpdateLock), $"{nameof(StateUpdateLock)} must never be held when acquiring {nameof(ReceiveAsyncLock)}");
+                        Task receiveTask;
+                        lock (ReceiveAsyncLock)
                         {
-                            break;
+                            // Now that we're holding the ReceiveAsyncLock, double-check that we've not yet received the close frame.
+                            // It could have been received between our check above and now due to a concurrent receive completing.
+                            if (_receivedCloseFrame)
+                            {
+                                break;
+                            }
+
+                            // We've not yet processed a received close frame, which means we need to wait for a received close to complete.
+                            // There may already be one in flight, in which case we want to just wait for that one rather than kicking off
+                            // another (we don't support concurrent receive operations).  We need to kick off a new receive if either we've
+                            // never issued a receive or if the last issued receive completed for reasons other than a close frame.  There is
+                            // a race condition here, e.g. if there's a in-flight receive that completes after we check, but that's fine: worst
+                            // case is we then await it, find that it's not what we need, and try again.
+                            receiveTask = _lastReceiveAsync;
+                            _lastReceiveAsync = receiveTask = ValidateAndReceiveAsync(receiveTask, closeBuffer, cancellationToken);
                         }
 
-                        // We've not yet processed a received close frame, which means we need to wait for a received close to complete.
-                        // There may already be one in flight, in which case we want to just wait for that one rather than kicking off
-                        // another (we don't support concurrent receive operations).  We need to kick off a new receive if either we've
-                        // never issued a receive or if the last issued receive completed for reasons other than a close frame.  There is
-                        // a race condition here, e.g. if there's a in-flight receive that completes after we check, but that's fine: worst
-                        // case is we then await it, find that it's not what we need, and try again.
-                        receiveTask = _lastReceiveAsync;
-                        _lastReceiveAsync = receiveTask = ValidateAndReceiveAsync(receiveTask, closeBuffer, cancellationToken);
+                        // Wait for whatever receive task we have.  We'll then loop around again to re-check our state.
+                        Debug.Assert(receiveTask != null);
+                        await receiveTask.ConfigureAwait(false);
                     }
-
-                    // Wait for whatever receive task we have.  We'll then loop around again to re-check our state.
-                    Debug.Assert(receiveTask != null);
-                    await receiveTask.ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(closeBuffer);
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(closeBuffer);
+                }
             }
 
             // We're closed.  Close the connection and update the status.
             lock (StateUpdateLock)
             {
                 DisposeCore();
-                if (_state < WebSocketState.Closed)
-                {
-                    _state = WebSocketState.Closed;
-                }
             }
         }
 
@@ -1150,7 +1163,11 @@ namespace System.Net.WebSockets
             lock (StateUpdateLock)
             {
                 _sentCloseFrame = true;
-                if (_state <= WebSocketState.CloseReceived)
+                if (_receivedCloseFrame && _state < WebSocketState.Closed)
+                {
+                    _state = WebSocketState.Closed;
+                }
+                else if (_state < WebSocketState.CloseSent)
                 {
                     _state = WebSocketState.CloseSent;
                 }
@@ -1158,7 +1175,7 @@ namespace System.Net.WebSockets
 
             if (!_isServer && _receivedCloseFrame)
             {
-                await WaitForServerToCloseConnectionAsync().ConfigureAwait(false);
+                await WaitForServerToCloseConnectionAsync(cancellationToken).ConfigureAwait(false);
             }
         }
 
@@ -1170,7 +1187,7 @@ namespace System.Net.WebSockets
             _receiveBufferOffset += count;
         }
 
-        private async Task EnsureBufferContainsAsync(int minimumRequiredBytes, bool throwOnPrematureClosure = true)
+        private async Task EnsureBufferContainsAsync(int minimumRequiredBytes, CancellationToken cancellationToken, bool throwOnPrematureClosure = true)
         {
             Debug.Assert(minimumRequiredBytes <= _receiveBuffer.Length, $"Requested number of bytes {minimumRequiredBytes} must not exceed {_receiveBuffer.Length}");
 
@@ -1187,7 +1204,7 @@ namespace System.Net.WebSockets
                 // While we don't have enough data, read more.
                 while (_receiveBufferCount < minimumRequiredBytes)
                 {
-                    int numRead = await _stream.ReadAsync(_receiveBuffer.Slice(_receiveBufferCount, _receiveBuffer.Length - _receiveBufferCount), default).ConfigureAwait(false);
+                    int numRead = await _stream.ReadAsync(_receiveBuffer.Slice(_receiveBufferCount, _receiveBuffer.Length - _receiveBufferCount), cancellationToken).ConfigureAwait(false);
                     Debug.Assert(numRead >= 0, $"Expected non-negative bytes read, got {numRead}");
                     if (numRead <= 0)
                     {

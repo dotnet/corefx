@@ -211,9 +211,11 @@ namespace System.Diagnostics
                     // This is the same thing that NextSample does, except that it doesn't try to get the actual counter
                     // value.  If we wanted the counter value, we would need to have an instance name. 
                     Initialize();
-                    CategorySample categorySample = PerformanceCounterLib.GetCategorySample(currentMachineName, currentCategoryName);
-                    CounterDefinitionSample counterSample = categorySample.GetCounterDefinitionSample(_counterName);
-                    _counterType = counterSample._counterType;
+                    using (CategorySample categorySample = PerformanceCounterLib.GetCategorySample(currentMachineName, currentCategoryName))
+                    {
+                        CounterDefinitionSample counterSample = categorySample.GetCounterDefinitionSample(_counterName);
+                        _counterType = counterSample._counterType;
+                    }
                 }
 
                 return (PerformanceCounterType)_counterType;
@@ -229,7 +231,7 @@ namespace System.Diagnostics
                     throw new ArgumentOutOfRangeException(nameof(value));
 
                 if (_initialized)
-                    throw new InvalidOperationException(SR.Format(SR.CantSetLifetimeAfterInitialized));
+                    throw new InvalidOperationException(SR.CantSetLifetimeAfterInitialized);
 
                 _instanceLifetime = value;
             }
@@ -433,14 +435,14 @@ namespace System.Diagnostics
 
         private void ThrowReadOnly()
         {
-            throw new InvalidOperationException(SR.Format(SR.ReadOnlyCounter));
+            throw new InvalidOperationException(SR.ReadOnlyCounter);
         }
 
         private static void VerifyWriteableCounterAllowed()
         {
             if (EnvironmentHelpers.IsAppContainerProcess)
             {
-                throw new NotSupportedException(SR.Format(SR.PCNotSupportedUnderAppContainer));
+                throw new NotSupportedException(SR.PCNotSupportedUnderAppContainer);
             }
         }
 
@@ -469,9 +471,9 @@ namespace System.Diagnostics
                     string currentMachineName = _machineName;
 
                     if (currentCategoryName == string.Empty)
-                        throw new InvalidOperationException(SR.Format(SR.CategoryNameMissing));
+                        throw new InvalidOperationException(SR.CategoryNameMissing);
                     if (_counterName == string.Empty)
-                        throw new InvalidOperationException(SR.Format(SR.CounterNameMissing));
+                        throw new InvalidOperationException(SR.CounterNameMissing);
 
                     if (ReadOnly)
                     {
@@ -491,17 +493,17 @@ namespace System.Diagnostics
                         }
 
                         if (_instanceLifetime != PerformanceCounterInstanceLifetime.Global)
-                            throw new InvalidOperationException(SR.Format(SR.InstanceLifetimeProcessonReadOnly));
+                            throw new InvalidOperationException(SR.InstanceLifetimeProcessonReadOnly);
 
                         _initialized = true;
                     }
                     else
                     {
                         if (currentMachineName != "." && !string.Equals(currentMachineName, PerformanceCounterLib.ComputerName, StringComparison.OrdinalIgnoreCase))
-                            throw new InvalidOperationException(SR.Format(SR.RemoteWriting));
+                            throw new InvalidOperationException(SR.RemoteWriting);
 
                         if (!PerformanceCounterLib.IsCustomCategory(currentMachineName, currentCategoryName))
-                            throw new InvalidOperationException(SR.Format(SR.NotCustomCounter));
+                            throw new InvalidOperationException(SR.NotCustomCounter);
 
                         // check category type
                         PerformanceCounterCategoryType categoryType = PerformanceCounterLib.GetCategoryType(currentMachineName, currentCategoryName);
@@ -517,7 +519,7 @@ namespace System.Diagnostics
                         }
 
                         if (string.IsNullOrEmpty(_instanceName) && InstanceLifetime == PerformanceCounterInstanceLifetime.Process)
-                            throw new InvalidOperationException(SR.Format(SR.InstanceLifetimeProcessforSingleInstance));
+                            throw new InvalidOperationException(SR.InstanceLifetimeProcessforSingleInstance);
 
                         _sharedCounter = new SharedPerformanceCounter(currentCategoryName.ToLower(CultureInfo.InvariantCulture), _counterName.ToLower(CultureInfo.InvariantCulture), _instanceName.ToLower(CultureInfo.InvariantCulture), _instanceLifetime);
                         _initialized = true;
@@ -542,22 +544,26 @@ namespace System.Diagnostics
             string currentMachineName = _machineName;
 
             Initialize();
-            CategorySample categorySample = PerformanceCounterLib.GetCategorySample(currentMachineName, currentCategoryName);
-            CounterDefinitionSample counterSample = categorySample.GetCounterDefinitionSample(_counterName);
-            _counterType = counterSample._counterType;
-            if (!categorySample._isMultiInstance)
-            {
-                if (_instanceName != null && _instanceName.Length != 0)
-                    throw new InvalidOperationException(SR.Format(SR.InstanceNameProhibited, _instanceName));
 
-                return counterSample.GetSingleValue();
-            }
-            else
-            {
-                if (_instanceName == null || _instanceName.Length == 0)
-                    throw new InvalidOperationException(SR.Format(SR.InstanceNameRequired));
 
-                return counterSample.GetInstanceValue(_instanceName);
+            using (CategorySample categorySample = PerformanceCounterLib.GetCategorySample(currentMachineName, currentCategoryName))
+            {
+                CounterDefinitionSample counterSample = categorySample.GetCounterDefinitionSample(_counterName);
+                _counterType = counterSample._counterType;
+                if (!categorySample._isMultiInstance)
+                {
+                    if (_instanceName != null && _instanceName.Length != 0)
+                        throw new InvalidOperationException(SR.Format(SR.InstanceNameProhibited, _instanceName));
+
+                    return counterSample.GetSingleValue();
+                }
+                else
+                {
+                    if (_instanceName == null || _instanceName.Length == 0)
+                        throw new InvalidOperationException(SR.InstanceNameRequired);
+
+                    return counterSample.GetInstanceValue(_instanceName);
+                }
             }
         }
 
@@ -584,7 +590,7 @@ namespace System.Diagnostics
         public void RemoveInstance()
         {
             if (_isReadOnly)
-                throw new InvalidOperationException(SR.Format(SR.ReadOnlyRemoveInstance));
+                throw new InvalidOperationException(SR.ReadOnlyRemoveInstance);
 
             Initialize();
             _sharedCounter.RemoveInstance(_instanceName.ToLower(CultureInfo.InvariantCulture), _instanceLifetime);

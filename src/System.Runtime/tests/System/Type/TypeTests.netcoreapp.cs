@@ -153,9 +153,9 @@ namespace System.Tests
         // works. It's likely that such a type will live in the core assembly so to improve our chances of catching this situation, test IsTypeDefinition
         // on every type exposed out of that assembly.
         //
-        // Skipping this on .Net Native because:
+        // Skipping this on .NET Native because:
         //  - We really don't want to opt in all the metadata in System.Private.CoreLib
-        //  - The .Net Native implementation of IsTypeDefinition is not the one that works by enumerating selected values off CorElementType.
+        //  - The .NET Native implementation of IsTypeDefinition is not the one that works by enumerating selected values off CorElementType.
         //    It has much less need of a test like this.
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot)]
@@ -177,7 +177,7 @@ namespace System.Tests
                 yield return new object[] { typeof(Outside.Inside) };
                 yield return new object[] { typeof(Outside<>) };
                 yield return new object[] { typeof(IEnumerable<>) };
-                yield return new object[] { 3.GetType().GetType() };  // This yields a reflection-blocked type on .Net Native - which is implemented separately
+                yield return new object[] { 3.GetType().GetType() };  // This yields a reflection-blocked type on .NET Native - which is implemented separately
 
                 if (PlatformDetection.IsWindows)
                     yield return new object[] { Type.GetTypeFromCLSID(default(Guid)) };
@@ -191,7 +191,7 @@ namespace System.Tests
                 Type theT = typeof(Outside<>).GetTypeInfo().GenericTypeParameters[0];
 
                 yield return new object[] { typeof(int[]) };
-                yield return new object[] { theT.MakeArrayType(1) }; // Using an open type as element type gets around .Net Native nonsupport of rank-1 multidim arrays 
+                yield return new object[] { theT.MakeArrayType(1) }; // Using an open type as element type gets around .NET Native nonsupport of rank-1 multidim arrays 
                 yield return new object[] { typeof(int[,]) };
 
                 yield return new object[] { typeof(int).MakeByRefType() };
@@ -218,19 +218,20 @@ namespace System.Tests
             {
                 Type theT = typeof(Outside<>).GetTypeInfo().GenericTypeParameters[0];
 
-                yield return new object[] { typeof(TypedReference), true };
-                yield return new object[] { typeof(RuntimeArgumentHandle), true };
-                yield return new object[] { typeof(Span<>), true };
-                yield return new object[] { typeof(Span<int>), true };
-                yield return new object[] { typeof(Span<>).MakeGenericType(theT), true };
+                yield return new object[] { typeof(ArgIterator), true };
                 yield return new object[] { typeof(ByRefLikeStruct), true };
                 yield return new object[] { typeof(RegularStruct), false };
-                yield return new object[] { typeof(object), false };
+                yield return new object[] { typeof(RuntimeArgumentHandle), true };
+                yield return new object[] { typeof(Span<>), true };
+                yield return new object[] { typeof(Span<>).MakeGenericType(theT), true };
+                yield return new object[] { typeof(Span<int>), true };
                 yield return new object[] { typeof(Span<int>).MakeByRefType(), false };
                 yield return new object[] { typeof(Span<int>).MakePointerType(), false };
+                yield return new object[] { typeof(TypedReference), true };
                 yield return new object[] { theT, false };
                 yield return new object[] { typeof(int[]), false };
                 yield return new object[] { typeof(int[,]), false };
+                yield return new object[] { typeof(object), false };
                 if (PlatformDetection.IsWindows) // GetTypeFromCLSID is Windows only
                 {
                     yield return new object[] { Type.GetTypeFromCLSID(default(Guid)), false };
@@ -272,8 +273,8 @@ namespace System.Tests
                 yield return new object[] { typeof(int[,]), false, false, false };
                 yield return new object[] { typeof(int).MakeByRefType(), false, false, false };
                 yield return new object[] { typeof(int).MakePointerType(), false, false, false };
-                yield return new object[] { typeof(G<>), false, false, false };
-                yield return new object[] { typeof(G<int>), false, false, false };
+                yield return new object[] { typeof(DummyGenericClassForTypeTestsNetcore<>), false, false, false };
+                yield return new object[] { typeof(DummyGenericClassForTypeTestsNetcore<int>), false, false, false };
                 if (PlatformDetection.IsWindows) // GetTypeFromCLSID is Windows only
                 {
                     yield return new object[] { Type.GetTypeFromCLSID(default(Guid)), false, false, false };
@@ -290,3 +291,5 @@ namespace System.Tests
         private static void GenericMethod<M>() { }
     }
 }
+
+internal class DummyGenericClassForTypeTestsNetcore<T> { }

@@ -7,7 +7,6 @@ namespace Microsoft.Win32
     using System;
     using System.Diagnostics;
     using System.Security;
-    using System.Security.Permissions;
     using System.Collections;
     using System.Collections.Generic;
     using System.ComponentModel;
@@ -412,13 +411,12 @@ namespace Microsoft.Win32
             {
                 if (s_staticwndclass == null)
                 {
-                    const string classNameFormat = ".NET-BroadcastEventWindow.{0}.{1}";
-
                     IntPtr hInstance = Interop.Kernel32.GetModuleHandle(null);
 
-                    s_className = string.Format(System.Globalization.CultureInfo.InvariantCulture,
-                        classNameFormat,
-                        Convert.ToString(AppDomain.CurrentDomain.GetHashCode(), 16),
+                    s_className = string.Format(
+                        System.Globalization.CultureInfo.InvariantCulture,
+                        ".NET-BroadcastEventWindow.{0:x}.{1}",
+                        AppDomain.CurrentDomain.GetHashCode(),
                         s_domainQualifier);
 
                     Interop.User32.WNDCLASS tempwndclass = new Interop.User32.WNDCLASS();
@@ -454,10 +452,9 @@ namespace Microsoft.Win32
             s_domainQualifier++;
         }
 
-        /// <include file='doc\SystemEvents.uex' path='docs/doc[@for="SystemEvents.CreateBroadcastWindow"]/*' />
-        /// <devdoc>
-        ///      Goes through the work to register and create a window.
-        /// </devdoc>
+        /// <summary>
+        /// Goes through the work to register and create a window.
+        /// </summary>
         private IntPtr CreateBroadcastWindow()
         {
             // Register the window class.
@@ -511,7 +508,7 @@ namespace Microsoft.Win32
 
         /// <internalonly/>
         /// <devdoc>
-        ///    <para>Creates a new window timer asociated with the
+        ///    <para>Creates a new window timer associated with the
         ///       system events window.</para>
         /// </devdoc>
         public static IntPtr CreateTimer(int interval)
@@ -814,7 +811,7 @@ namespace Microsoft.Win32
 
         /// <devdoc>
         ///     Called on the control's owning thread to perform the actual callback.
-        ///     This empties this control's callback queue, propagating any excpetions
+        ///     This empties this control's callback queue, propagating any exceptions
         ///     back as needed.
         /// </devdoc>
         [SuppressMessage("Microsoft.Security", "CA2102:CatchNonClsCompliantExceptionsInGeneralHandlers")]
@@ -1287,7 +1284,7 @@ namespace Microsoft.Win32
                         }
                         catch (Exception e)
                         {
-                            Debug.Assert(false, "Exception occurred while freeing memory: " + e.ToString());
+                            Debug.Fail("Exception occurred while freeing memory: " + e.ToString());
                         }
                     }
                     break;

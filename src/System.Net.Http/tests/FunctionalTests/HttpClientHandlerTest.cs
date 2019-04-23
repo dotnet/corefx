@@ -16,7 +16,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.DotNet.XUnitExtensions;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -26,9 +27,8 @@ namespace System.Net.Http.Functional.Tests
 
     // Note:  Disposing the HttpClient object automatically disposes the handler within. So, it is not necessary
     // to separately Dispose (or have a 'using' statement) for the handler.
-    public abstract class HttpClientHandlerTest : HttpClientTestBase
+    public abstract class HttpClientHandlerTest : HttpClientHandlerTestBase
     {
-        readonly ITestOutputHelper _output;
         private const string ExpectedContent = "Test content";
         private const string Username = "testuser";
         private const string Password = "password";
@@ -38,44 +38,8 @@ namespace System.Net.Http.Functional.Tests
 
         public static readonly object[][] EchoServers = Configuration.Http.EchoServers;
         public static readonly object[][] VerifyUploadServers = Configuration.Http.VerifyUploadServers;
-        public static readonly object[][] CompressedServers = Configuration.Http.CompressedServers;
         public static readonly object[][] Http2Servers = Configuration.Http.Http2Servers;
         public static readonly object[][] Http2NoPushServers = Configuration.Http.Http2NoPushServers;
-
-        public static readonly object[][] RedirectStatusCodes = {
-            new object[] { 300 },
-            new object[] { 301 },
-            new object[] { 302 },
-            new object[] { 303 },
-            new object[] { 307 },
-            new object[] { 308 }
-        };
-
-        public static readonly object[][] RedirectStatusCodesOldMethodsNewMethods = {
-            new object[] { 300, "GET", "GET" },
-            new object[] { 300, "POST", "GET" },
-            new object[] { 300, "HEAD", "HEAD" },
-
-            new object[] { 301, "GET", "GET" },
-            new object[] { 301, "POST", "GET" },
-            new object[] { 301, "HEAD", "HEAD" },
-
-            new object[] { 302, "GET", "GET" },
-            new object[] { 302, "POST", "GET" },
-            new object[] { 302, "HEAD", "HEAD" },
-
-            new object[] { 303, "GET", "GET" },
-            new object[] { 303, "POST", "GET" },
-            new object[] { 303, "HEAD", "HEAD" },
-
-            new object[] { 307, "GET", "GET" },
-            new object[] { 307, "POST", "POST" },
-            new object[] { 307, "HEAD", "HEAD" },
-
-            new object[] { 308, "GET", "GET" },
-            new object[] { 308, "POST", "POST" },
-            new object[] { 308, "HEAD", "HEAD" },
-        };
 
         // Standard HTTP methods defined in RFC7231: http://tools.ietf.org/html/rfc7231#section-4.3
         //     "GET", "HEAD", "POST", "PUT", "DELETE", "OPTIONS", "TRACE"
@@ -99,12 +63,11 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        public HttpClientHandlerTest(ITestOutputHelper output)
+        public HttpClientHandlerTest(ITestOutputHelper output) : base(output)
         {
-            _output = output;
             if (PlatformDetection.IsFullFramework)
             {
-                // On .NET Framework, the default limit for connections/server is very low (2). 
+                // On .NET Framework, the default limit for connections/server is very low (2).
                 // On .NET Core, the default limit is higher. Since these tests run in parallel,
                 // the limit needs to be increased to avoid timeouts when running the tests.
                 System.Net.ServicePointManager.DefaultConnectionLimit = int.MaxValue;
@@ -240,37 +203,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ActiveIssue(29802, TargetFrameworkMonikers.Uap)]
-        [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(RedirectStatusCodes))]
-        public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
-        {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
-            {
-                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            using (var client = new HttpClient(handler))
-            {
-                string credentialString = _credential.UserName + ":" + _credential.Password;
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentialString);
-                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: statusCode,
-                    destinationUri: Configuration.Http.RemoteEchoServer,
-                    hops: 1);
-                _output.WriteLine("Uri: {0}", uri);
-                using (HttpResponseMessage response = await client.GetAsync(uri))
-                {
-                    string responseText = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseText);
-                    Assert.False(TestHelper.JsonMessageContainsKey(responseText, "Authorization"));
-                }
-            }
-        }
-
         [Fact]
         public void Properties_Get_CountIsZero()
         {
@@ -315,54 +247,18 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses external server")]
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task SendAsync_GetWithValidHostHeader_Success(bool withPort)
-        {
-            var m = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
-            m.Headers.Host = withPort ? Configuration.Http.SecureHost + ":123" : Configuration.Http.SecureHost;
-
-            using (HttpClient client = CreateHttpClient())
-            using (HttpResponseMessage response = await client.SendAsync(m))
-            {
-                string responseContent = await response.Content.ReadAsStringAsync();
-                _output.WriteLine(responseContent);
-                TestHelper.VerifyResponseBody(
-                    responseContent,
-                    response.Content.Headers.ContentMD5,
-                    false,
-                    null);
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task SendAsync_GetWithInvalidHostHeader_ThrowsException()
-        {
-            if (PlatformDetection.IsNetCore && !UseSocketsHttpHandler)
-            {
-                // Only .NET Framework and SocketsHttpHandler use the Host header to influence the SSL auth.
-                return;
-            }
-
-            var m = new HttpRequestMessage(HttpMethod.Get, Configuration.Http.SecureRemoteEchoServer);
-            m.Headers.Host = "hostheaderthatdoesnotmatch";
-
-            using (HttpClient client = CreateHttpClient())
-            {
-                await Assert.ThrowsAsync<HttpRequestException>(() => client.SendAsync(m));
-            }
-        }
-
         [ActiveIssue(22158, TargetFrameworkMonikers.Uap)]
-        [Fact]
+        [ConditionalFact]
         public async Task GetAsync_IPv6LinkLocalAddressUri_Success()
         {
             using (HttpClient client = CreateHttpClient())
             {
                 var options = new LoopbackServer.Options { Address = TestHelper.GetIPv6LinkLocalAddress() };
+                if (options.Address == null)
+                {
+                    throw new SkipTestException("Unable to find valid IPv6 LL address.");
+                }
+
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     _output.WriteLine(url.ToString());
@@ -429,57 +325,6 @@ namespace System.Net.Http.Functional.Tests
                 string responseContent = await response.Content.ReadAsStringAsync();
                 _output.WriteLine(responseContent);
                 TestHelper.VerifyResponseBody(responseContent, response.Content.Headers.ContentMD5, false, null);
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task SendAsync_Cancel_CancellationTokenPropagates()
-        {
-            var cts = new CancellationTokenSource();
-            cts.Cancel();
-            using (HttpClient client = CreateHttpClient())
-            {
-                var request = new HttpRequestMessage(HttpMethod.Post, Configuration.Http.RemoteEchoServer);
-                Task t = client.SendAsync(request, cts.Token);
-                OperationCanceledException ex;
-                if (PlatformDetection.IsUap)
-                {
-                    ex = await Assert.ThrowsAsync<OperationCanceledException>(() => t);
-                }
-                else
-                {
-                    ex = await Assert.ThrowsAsync<TaskCanceledException>(() => t);
-                }
-
-                Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
-                if (!PlatformDetection.IsFullFramework)
-                {
-                    // .NET Framework has bug where it doesn't propagate token information.
-                    Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
-                }
-            }
-        }
-
-        [OuterLoop("Uses external servers")]
-        [Theory, MemberData(nameof(CompressedServers))]
-        public async Task GetAsync_SetAutomaticDecompression_ContentDecompressed(Uri server)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            using (var client = new HttpClient(handler))
-            {
-                using (HttpResponseMessage response = await client.GetAsync(server))
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    string responseContent = await response.Content.ReadAsStringAsync();
-                    _output.WriteLine(responseContent);
-                    TestHelper.VerifyResponseBody(
-                        responseContent,
-                        response.Content.Headers.ContentMD5,
-                        false,
-                        null);
-                }
             }
         }
 
@@ -639,92 +484,6 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
-        [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(CompressedServers))]
-        public async Task GetAsync_SetAutomaticDecompression_HeadersRemoved(Uri server)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            using (var client = new HttpClient(handler))
-            using (HttpResponseMessage response = await client.GetAsync(server, HttpCompletionOption.ResponseHeadersRead))
-            {
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-
-                Assert.False(response.Content.Headers.Contains("Content-Encoding"), "Content-Encoding unexpectedly found");
-                Assert.False(response.Content.Headers.Contains("Content-Length"), "Content-Length unexpectedly found");
-            }
-        }
-
-        [Theory]
-#if netcoreapp
-        [InlineData(DecompressionMethods.Brotli, "br", "")]
-        [InlineData(DecompressionMethods.Brotli, "br", "br")]
-        [InlineData(DecompressionMethods.Brotli, "br", "gzip")]
-        [InlineData(DecompressionMethods.Brotli, "br", "gzip, deflate")]
-#endif
-        [InlineData(DecompressionMethods.GZip, "gzip", "")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "")]
-        [InlineData(DecompressionMethods.GZip | DecompressionMethods.Deflate, "gzip, deflate", "")]
-        [InlineData(DecompressionMethods.GZip, "gzip", "gzip")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "deflate")]
-        [InlineData(DecompressionMethods.GZip, "gzip", "deflate")]
-        [InlineData(DecompressionMethods.GZip, "gzip", "br")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "gzip")]
-        [InlineData(DecompressionMethods.Deflate, "deflate", "br")]
-        [InlineData(DecompressionMethods.GZip | DecompressionMethods.Deflate, "gzip, deflate", "gzip, deflate")]
-        public async Task GetAsync_SetAutomaticDecompression_AcceptEncodingHeaderSentWithNoDuplicates(
-            DecompressionMethods methods,
-            string encodings,
-            string manualAcceptEncodingHeaderValues)
-        {
-            if (IsCurlHandler)
-            {
-                // Skip these tests on CurlHandler, dotnet/corefx #29905.
-                return;
-            }
-
-            if (!UseSocketsHttpHandler &&
-                (encodings.Contains("br") || manualAcceptEncodingHeaderValues.Contains("br")))
-            {
-                // Brotli encoding only supported on SocketsHttpHandler.
-                return;
-            }
-
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                HttpClientHandler handler = CreateHttpClientHandler();
-                handler.AutomaticDecompression = methods;
-
-                using (var client = new HttpClient(handler))
-                {
-                    if (!string.IsNullOrEmpty(manualAcceptEncodingHeaderValues))
-                    {
-                        client.DefaultRequestHeaders.Add("Accept-Encoding", manualAcceptEncodingHeaderValues);
-                    }
-
-                    Task<HttpResponseMessage> clientTask = client.GetAsync(url);
-                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
-                    await TaskTimeoutExtensions.WhenAllOrAnyFailed(new Task[] { clientTask, serverTask }); 
-
-                    List<string> requestLines = await serverTask;
-                    string requestLinesString = string.Join("\r\n", requestLines);
-                    _output.WriteLine(requestLinesString);
-
-                    Assert.InRange(Regex.Matches(requestLinesString, "Accept-Encoding").Count, 1, 1);
-                    Assert.InRange(Regex.Matches(requestLinesString, encodings).Count, 1, 1);
-                    if (!string.IsNullOrEmpty(manualAcceptEncodingHeaderValues))
-                    {
-                        Assert.InRange(Regex.Matches(requestLinesString, manualAcceptEncodingHeaderValues).Count, 1, 1);
-                    }
-
-                    using (HttpResponseMessage response = await clientTask)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    }                    
-                }
-            });
-        }
-
         [ActiveIssue(32647, TargetFrameworkMonikers.Uap)]
         [OuterLoop("Uses external server")]
         [Fact]
@@ -765,7 +524,7 @@ namespace System.Net.Http.Functional.Tests
             // UAP HTTP stack caches connections per-process. This causes interference when these tests run in
             // the same process as the other tests. Each test needs to be isolated to its own process.
             // See dicussion: https://github.com/dotnet/corefx/issues/21945
-            RemoteInvoke(async useSocketsHttpHandlerString =>
+            RemoteExecutor.Invoke(async useSocketsHttpHandlerString =>
             {
                 using (var client = CreateHttpClient(useSocketsHttpHandlerString))
                 {
@@ -775,7 +534,7 @@ namespace System.Net.Http.Functional.Tests
                         Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
                     }
 
-                    return SuccessExitCode;
+                    return RemoteExecutor.SuccessExitCode;
                 }
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
@@ -801,566 +560,6 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
             });
-        }
-
-        [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(RedirectStatusCodes))]
-        public async Task GetAsync_AllowAutoRedirectFalse_RedirectFromHttpToHttp_StatusCodeRedirect(int statusCode)
-        {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
-            {
-                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = false;
-            using (var client = new HttpClient(handler))
-            {
-                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: statusCode,
-                    destinationUri: Configuration.Http.RemoteEchoServer,
-                    hops: 1);
-                _output.WriteLine("Uri: {0}", uri);
-                using (HttpResponseMessage response = await client.GetAsync(uri))
-                {
-                    Assert.Equal(statusCode, (int)response.StatusCode);
-                    Assert.Equal(uri, response.RequestMessage.RequestUri);
-                }
-            }
-        }
-
-        [Theory, MemberData(nameof(RedirectStatusCodesOldMethodsNewMethods))]
-        public async Task AllowAutoRedirect_True_ValidateNewMethodUsedOnRedirection(
-            int statusCode, string oldMethod, string newMethod)
-        {
-            if (IsCurlHandler && statusCode == 300 && oldMethod == "POST")
-            {
-                // Known behavior: curl does not change method to "GET"
-                // https://github.com/dotnet/corefx/issues/26434
-                newMethod = "POST";
-            }
-
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
-            {
-                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            using (var client = new HttpClient(handler))
-            {
-                await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
-                {
-                    var request = new HttpRequestMessage(new HttpMethod(oldMethod), origUrl);
-
-                    Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
-
-                    await LoopbackServer.CreateServerAsync(async (redirServer, redirUrl) =>
-                    {
-                        // Original URL will redirect to a different URL
-                        Task<List<string>> serverTask = origServer.AcceptConnectionSendResponseAndCloseAsync((HttpStatusCode)statusCode, $"Location: {redirUrl}\r\n");
-
-                        await Task.WhenAny(getResponseTask, serverTask);
-                        Assert.False(getResponseTask.IsCompleted, $"{getResponseTask.Status}: {getResponseTask.Exception}");
-                        await serverTask;
-
-                        // Redirected URL answers with success
-                        serverTask = redirServer.AcceptConnectionSendResponseAndCloseAsync();
-                        await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
-
-                        List<string> receivedRequest = await serverTask;
-
-                        string[] statusLineParts = receivedRequest[0].Split(' ');
-
-                        using (HttpResponseMessage response = await getResponseTask)
-                        {
-                            Assert.Equal(200, (int)response.StatusCode);
-                            Assert.Equal(newMethod, statusLineParts[0]);
-                        }
-                    });
-                });
-            }
-        }
-
-        [ActiveIssue(30063, TargetFrameworkMonikers.Uap)] // fails due to TE header
-        [Theory]
-        [InlineData(300)]
-        [InlineData(301)]
-        [InlineData(302)]
-        [InlineData(303)]
-        public async Task AllowAutoRedirect_True_PostToGetDoesNotSendTE(int statusCode)
-        {
-            if (IsCurlHandler && statusCode == 300)
-            {
-                // ISSUE #26434:
-                // CurlHandler doesn't change POST to GET for 300 response (see above test).
-                return;
-            }
-
-            if (IsWinHttpHandler)
-            {
-                // ISSUE #27440:
-                // This test occasionally fails on WinHttpHandler.
-                // Likely this is due to the way the loopback server is sending the response before reading the entire request.
-                // We should change the server behavior here.
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            using (var client = new HttpClient(handler))
-            {
-                await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
-                {
-                    var request = new HttpRequestMessage(HttpMethod.Post, origUrl);
-                    request.Content = new StringContent(ExpectedContent);
-                    request.Headers.TransferEncodingChunked = true;
-
-                    Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
-
-                    await LoopbackServer.CreateServerAsync(async (redirServer, redirUrl) =>
-                    {
-                        // Original URL will redirect to a different URL
-                        Task serverTask = origServer.AcceptConnectionAsync(async connection =>
-                        {
-                            // Send Connection: close so the client will close connection after request is sent,
-                            // meaning we can just read to the end to get the content
-                            await connection.ReadRequestHeaderAndSendResponseAsync((HttpStatusCode)statusCode, $"Location: {redirUrl}\r\nConnection: close\r\n");
-                            connection.Socket.Shutdown(SocketShutdown.Send);
-                            await connection.Reader.ReadToEndAsync();
-                        });
-
-                        await Task.WhenAny(getResponseTask, serverTask);
-                        Assert.False(getResponseTask.IsCompleted, $"{getResponseTask.Status}: {getResponseTask.Exception}");
-                        await serverTask;
-
-                        // Redirected URL answers with success
-                        List<string> receivedRequest = null;
-                        string receivedContent = null;
-                        Task serverTask2 = redirServer.AcceptConnectionAsync(async connection =>
-                        {
-                            // Send Connection: close so the client will close connection after request is sent,
-                            // meaning we can just read to the end to get the content
-                            receivedRequest = await connection.ReadRequestHeaderAndSendResponseAsync(additionalHeaders: "Connection: close\r\n");
-                            connection.Socket.Shutdown(SocketShutdown.Send);
-                            receivedContent = await connection.Reader.ReadToEndAsync();
-                        });
-
-                        await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask2);
-
-                        string[] statusLineParts = receivedRequest[0].Split(' ');
-                        Assert.Equal("GET", statusLineParts[0]);
-                        Assert.DoesNotContain(receivedRequest, line => line.StartsWith("Transfer-Encoding"));
-                        Assert.DoesNotContain(receivedRequest, line => line.StartsWith("Content-Length"));
-
-                        using (HttpResponseMessage response = await getResponseTask)
-                        {
-                            Assert.Equal(200, (int)response.StatusCode);
-                        }
-                    });
-                });
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(RedirectStatusCodes))]
-        public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttp_StatusCodeOK(int statusCode)
-        {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
-            {
-                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
-            {
-                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: statusCode,
-                    destinationUri: Configuration.Http.RemoteEchoServer,
-                    hops: 1);
-                _output.WriteLine("Uri: {0}", uri);
-                using (HttpResponseMessage response = await client.GetAsync(uri))
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    Assert.Equal(Configuration.Http.RemoteEchoServer, response.RequestMessage.RequestUri);
-                }
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttps_StatusCodeOK()
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
-            {
-                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: 302,
-                    destinationUri: Configuration.Http.SecureRemoteEchoServer,
-                    hops: 1);
-                _output.WriteLine("Uri: {0}", uri);
-                using (HttpResponseMessage response = await client.GetAsync(uri))
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    Assert.Equal(Configuration.Http.SecureRemoteEchoServer, response.RequestMessage.RequestUri);
-                }
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework allows HTTPS to HTTP redirection")]
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpsToHttp_StatusCodeRedirect()
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
-            {
-                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                    secure: true,
-                    statusCode: 302,
-                    destinationUri: Configuration.Http.RemoteEchoServer,
-                    hops: 1);
-                _output.WriteLine("Uri: {0}", uri);
-
-                using (HttpResponseMessage response = await client.GetAsync(uri))
-                {
-                    Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-                    Assert.Equal(uri, response.RequestMessage.RequestUri);
-                }
-            }
-        }
-
-        [Fact]
-        public async Task GetAsync_AllowAutoRedirectTrue_RedirectWithoutLocation_ReturnsOriginalResponse()
-        {
-            // [ActiveIssue(24819, TestPlatforms.Windows)]
-            if (PlatformDetection.IsWindows && PlatformDetection.IsNetCore && !UseSocketsHttpHandler)
-            {
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
-            {
-                await LoopbackServer.CreateServerAsync(async (server, url) =>
-                {
-                    Task<HttpResponseMessage> getTask = client.GetAsync(url);
-                    Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.Found);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(getTask, serverTask);
-
-                    using (HttpResponseMessage response = await getTask)
-                    {
-                        Assert.Equal(302, (int)response.StatusCode);
-                    }
-                });
-            }
-        }
-
-        [ActiveIssue(32647, TargetFrameworkMonikers.Uap)]
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task GetAsync_AllowAutoRedirectTrue_RedirectToUriWithParams_RequestMsgUriSet()
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            Uri targetUri = Configuration.Http.BasicAuthUriForCreds(secure: false, userName: Username, password: Password);
-            using (var client = new HttpClient(handler))
-            {
-                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: 302,
-                    destinationUri: targetUri,
-                    hops: 1);
-                _output.WriteLine("Uri: {0}", uri);
-                using (HttpResponseMessage response = await client.GetAsync(uri))
-                {
-                    Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
-                    Assert.Equal(targetUri, response.RequestMessage.RequestUri);
-                }
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not currently supported on UAP")]
-        [OuterLoop("Uses external server")]
-        [Theory]
-        [InlineData(3, 2)]
-        [InlineData(3, 3)]
-        [InlineData(3, 4)]
-        public async Task GetAsync_MaxAutomaticRedirectionsNServerHops_ThrowsIfTooMany(int maxHops, int hops)
-        {
-            if (IsWinHttpHandler && !PlatformDetection.IsWindows10Version1703OrGreater)
-            {
-                // Skip this test if using WinHttpHandler but on a release prior to Windows 10 Creators Update.
-                _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
-                return;
-            }
-            else if (PlatformDetection.IsFullFramework)
-            {
-                // Skip this test if running on .NET Framework. Exceeding max redirections will not throw
-                // exception. Instead, it simply returns the 3xx response.
-                _output.WriteLine("Skipping test on .NET Framework due to behavior difference.");
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.MaxAutomaticRedirections = maxHops;
-            using (var client = new HttpClient(handler))
-            {
-                Task<HttpResponseMessage> t = client.GetAsync(Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: 302,
-                    destinationUri: Configuration.Http.RemoteEchoServer,
-                    hops: hops));
-
-                if (hops <= maxHops)
-                {
-                    using (HttpResponseMessage response = await t)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Equal(Configuration.Http.RemoteEchoServer, response.RequestMessage.RequestUri);
-                    }
-                }
-                else
-                {
-                    if (UseSocketsHttpHandler)
-                    {
-                        using (HttpResponseMessage response = await t)
-                        {
-                            Assert.Equal(HttpStatusCode.Redirect, response.StatusCode);
-                        }
-                    }
-                    else
-                    {
-                        await Assert.ThrowsAsync<HttpRequestException>(() => t);
-                    }
-                }
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public async Task GetAsync_AllowAutoRedirectTrue_RedirectWithRelativeLocation()
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
-            {
-                Uri uri = Configuration.Http.RedirectUriForDestinationUri(
-                    secure: false,
-                    statusCode: 302,
-                    destinationUri: Configuration.Http.RemoteEchoServer,
-                    hops: 1,
-                    relative: true);
-                _output.WriteLine("Uri: {0}", uri);
-
-                using (HttpResponseMessage response = await client.GetAsync(uri))
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                    Assert.Equal(Configuration.Http.RemoteEchoServer, response.RequestMessage.RequestUri);
-                }
-            }
-        }
-
-        [Theory]
-        [InlineData(200)]
-        [InlineData(201)]
-        [InlineData(400)]
-        public async Task GetAsync_AllowAutoRedirectTrue_NonRedirectStatusCode_LocationHeader_NoRedirect(int statusCode)
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
-            {
-                await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
-                {
-                    await LoopbackServer.CreateServerAsync(async (redirectServer, redirectUrl) =>
-                    {
-                        Task<HttpResponseMessage> getResponseTask = client.GetAsync(origUrl);
-
-                        Task redirectTask = redirectServer.AcceptConnectionSendResponseAndCloseAsync();
-
-                        await TestHelper.WhenAllCompletedOrAnyFailed(
-                            getResponseTask,
-                            origServer.AcceptConnectionSendResponseAndCloseAsync((HttpStatusCode)statusCode, $"Location: {redirectUrl}\r\n"));
-
-                        using (HttpResponseMessage response = await getResponseTask)
-                        {
-                            Assert.Equal(statusCode, (int)response.StatusCode);
-                            Assert.Equal(origUrl, response.RequestMessage.RequestUri);
-                            Assert.False(redirectTask.IsCompleted, "Should not have redirected to Location");
-                        }
-                    });
-                });
-            }
-        }
-
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't handle fragments according to https://tools.ietf.org/html/rfc7231#section-7.1.2")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Doesn't handle fragments according to https://tools.ietf.org/html/rfc7231#section-7.1.2")]
-        [Theory]
-        [InlineData("#origFragment", "", "#origFragment", false)]
-        [InlineData("#origFragment", "", "#origFragment", true)]
-        [InlineData("", "#redirFragment", "#redirFragment", false)]
-        [InlineData("", "#redirFragment", "#redirFragment", true)]
-        [InlineData("#origFragment", "#redirFragment", "#redirFragment", false)]
-        [InlineData("#origFragment", "#redirFragment", "#redirFragment", true)]
-        public async Task GetAsync_AllowAutoRedirectTrue_RetainsOriginalFragmentIfAppropriate(
-            string origFragment, string redirFragment, string expectedFragment, bool useRelativeRedirect)
-        {
-            if (IsCurlHandler)
-            {
-                // libcurl doesn't append fragment component to CURLINFO_EFFECTIVE_URL after redirect
-                return;
-            }
-
-            if (IsWinHttpHandler)
-            {
-                // According to https://tools.ietf.org/html/rfc7231#section-7.1.2,
-                // "If the Location value provided in a 3xx (Redirection) response does
-                //  not have a fragment component, a user agent MUST process the
-                //  redirection as if the value inherits the fragment component of the
-                //  URI reference used to generate the request target(i.e., the
-                //  redirection inherits the original reference's fragment, if any)."
-                // WINHTTP is not doing this, and thus neither is WinHttpHandler.
-                // It also sometimes doesn't include the fragments for redirects
-                // even in other cases.
-                return;
-            }
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
-            {
-                await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
-                {
-                    origUrl = new UriBuilder(origUrl) { Fragment = origFragment }.Uri;
-                    Uri redirectUrl = new UriBuilder(origUrl) { Fragment = redirFragment }.Uri;
-                    if (useRelativeRedirect)
-                    {
-                        redirectUrl = new Uri(redirectUrl.GetComponents(UriComponents.PathAndQuery | UriComponents.Fragment, UriFormat.SafeUnescaped), UriKind.Relative);
-                    }
-                    Uri expectedUrl = new UriBuilder(origUrl) { Fragment = expectedFragment }.Uri;
-
-                    // Make and receive the first request that'll be redirected.
-                    Task<HttpResponseMessage> getResponse = client.GetAsync(origUrl);
-                    Task firstRequest = origServer.AcceptConnectionSendResponseAndCloseAsync(HttpStatusCode.Found, $"Location: {redirectUrl}\r\n");
-                    Assert.Equal(firstRequest, await Task.WhenAny(firstRequest, getResponse));
-
-                    // Receive the second request.
-                    Task<List<string>> secondRequest = origServer.AcceptConnectionSendResponseAndCloseAsync();
-                    await TestHelper.WhenAllCompletedOrAnyFailed(secondRequest, getResponse);
-
-                    // Make sure the server received the second request for the right Uri.
-                    Assert.NotEmpty(secondRequest.Result);
-                    string[] statusLineParts = secondRequest.Result[0].Split(' ');
-                    Assert.Equal(3, statusLineParts.Length);
-                    Assert.Equal(expectedUrl.GetComponents(UriComponents.PathAndQuery, UriFormat.SafeUnescaped), statusLineParts[1]);
-
-                    // Make sure the request message was updated with the correct redirected location.
-                    using (HttpResponseMessage response = await getResponse)
-                    {
-                        Assert.Equal(200, (int)response.StatusCode);
-                        Assert.Equal(expectedUrl.ToString(), response.RequestMessage.RequestUri.ToString());
-                    }
-                });
-            }
-        }
-
-        [ActiveIssue(32647, TargetFrameworkMonikers.Uap)]
-        [Fact]
-        [OuterLoop("Uses external server")]
-        public async Task GetAsync_CredentialIsNetworkCredentialUriRedirect_StatusCodeUnauthorized()
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.Credentials = _credential;
-            using (var client = new HttpClient(handler))
-            {
-                Uri redirectUri = Configuration.Http.RedirectUriForCreds(
-                    secure: false,
-                    statusCode: 302,
-                    userName: Username,
-                    password: Password);
-                using (HttpResponseMessage unAuthResponse = await client.GetAsync(redirectUri))
-                {
-                    Assert.Equal(HttpStatusCode.Unauthorized, unAuthResponse.StatusCode);
-                }
-            }
-        }
-
-        [ActiveIssue(32647, TargetFrameworkMonikers.Uap)]
-        [Fact]
-        [OuterLoop("Uses external server")]
-        public async Task HttpClientHandler_CredentialIsNotCredentialCacheAfterRedirect_StatusCodeOK()
-        {
-            HttpClientHandler handler = CreateHttpClientHandler();
-            handler.Credentials = _credential;
-            using (var client = new HttpClient(handler))
-            {
-                Uri redirectUri = Configuration.Http.RedirectUriForCreds(
-                    secure: false,
-                    statusCode: 302,
-                    userName: Username,
-                    password: Password);
-                using (HttpResponseMessage unAuthResponse = await client.GetAsync(redirectUri))
-                {
-                    Assert.Equal(HttpStatusCode.Unauthorized, unAuthResponse.StatusCode);
-                }
-
-                // Use the same handler to perform get request, authentication should succeed after redirect.
-                Uri uri = Configuration.Http.BasicAuthUriForCreds(secure: true, userName: Username, password: Password);
-                using (HttpResponseMessage authResponse = await client.GetAsync(uri))
-                {
-                    Assert.Equal(HttpStatusCode.OK, authResponse.StatusCode);
-                }
-            }
-        }
-
-        [OuterLoop("Uses external server")]
-        [Theory, MemberData(nameof(RedirectStatusCodes))]
-        public async Task GetAsync_CredentialIsCredentialCacheUriRedirect_StatusCodeOK(int statusCode)
-        {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
-            {
-                // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
-                return;
-            }
-
-            Uri uri = Configuration.Http.BasicAuthUriForCreds(secure: false, userName: Username, password: Password);
-            Uri redirectUri = Configuration.Http.RedirectUriForCreds(
-                secure: false,
-                statusCode: statusCode,
-                userName: Username,
-                password: Password);
-            _output.WriteLine(uri.AbsoluteUri);
-            _output.WriteLine(redirectUri.AbsoluteUri);
-            var credentialCache = new CredentialCache();
-            credentialCache.Add(uri, "Basic", _credential);
-
-            HttpClientHandler handler = CreateHttpClientHandler();
-            if (PlatformDetection.IsUap)
-            {
-                // UAP does not support CredentialCache for Credentials.
-                Assert.Throws<PlatformNotSupportedException>(() => handler.Credentials = credentialCache);
-            }
-            else
-            {
-                handler.Credentials = credentialCache;
-                using (var client = new HttpClient(handler))
-                {
-                    using (HttpResponseMessage response = await client.GetAsync(redirectUri))
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        Assert.Equal(uri, response.RequestMessage.RequestUri);
-                    }
-                }
-            }
         }
 
         [OuterLoop("Uses external server")]
@@ -1511,17 +710,19 @@ namespace System.Net.Http.Functional.Tests
                 // System.InvalidCastException: "Unable to cast object of type 'System.Object[]' to type 'System.Net.Http.WinHttpRequestState'"
                 // This appears to be due to adding the Expect: 100-continue header, which causes winhttp
                 // to fail with a "The parameter is incorrect" error, which in turn causes the request to
-                // be torn down, and in doing so, we this this during disposal of the SafeWinHttpHandle.
+                // be torn down, and in doing so, we handle this during disposal of the SafeWinHttpHandle.
                 return;
             }
 
+            const string content = "hello world";
+
             // Using examples from https://en.wikipedia.org/wiki/List_of_HTTP_header_fields#Request_fields
             // Exercises all exposed request.Headers and request.Content.Headers strongly-typed properties
-            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
                 using (var client = CreateHttpClient())
                 {
-                    byte[] contentArray = Encoding.ASCII.GetBytes("hello world");
+                    byte[] contentArray = Encoding.ASCII.GetBytes(content);
                     var request = new HttpRequestMessage(HttpMethod.Post, uri) { Content = new ByteArrayContent(contentArray) };
 
                     request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/plain"));
@@ -1584,77 +785,94 @@ namespace System.Net.Http.Functional.Tests
                     request.Headers.Add("X-Csrf-Token", "i8XNjC4b8KVok4uw5RftR38Wgp2BFwql");
                     request.Headers.Add("X-Request-ID", "f058ebd6-02f7-4d3f-942e-904344e8cde5");
                     request.Headers.Add("X-Request-ID", "f058ebd6-02f7-4d3f-942e-904344e8cde5");
+                    request.Headers.Add("X-Empty", "");
+                    request.Headers.Add("X-Null", (string)null);
+                    request.Headers.Add("X-Underscore_Name", "X-Underscore_Name");
+                    request.Headers.Add("X-End", "End");
 
                     (await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead)).Dispose();
                 }
             }, async server =>
             {
-                await server.AcceptConnectionAsync(async connection =>
                 {
-                    var headersSet = new HashSet<string>();
-                    string line;
-                    while (!string.IsNullOrEmpty(line = await connection.Reader.ReadLineAsync()))
-                    {
-                        Assert.True(headersSet.Add(line));
-                    }
+                    HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK);
 
-                    await connection.Writer.WriteAsync($"HTTP/1.1 200 OK\r\nDate: {DateTimeOffset.UtcNow:R}\r\nConnection: close\r\nContent-Length: 0\r\n\r\n");
-                    while (await connection.Socket.ReceiveAsync(new ArraySegment<byte>(new byte[1000]), SocketFlags.None) > 0);
+                    var headersSet = requestData.Headers;
 
-                    Assert.Contains("Accept-Charset: utf-8", headersSet);
-                    Assert.Contains("Accept-Encoding: gzip, deflate", headersSet);
-                    Assert.Contains("Accept-Language: en-US", headersSet);
-                    Assert.Contains("Accept-Datetime: Thu, 31 May 2007 20:35:00 GMT", headersSet);
-                    Assert.Contains("Access-Control-Request-Method: GET", headersSet);
-                    Assert.Contains("Access-Control-Request-Headers: GET", headersSet);
-                    Assert.Contains("Age: 12", headersSet);
-                    Assert.Contains("Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", headersSet);
-                    Assert.Contains("Cache-Control: no-cache", headersSet);
-                    Assert.Contains("Connection: close", headersSet, StringComparer.OrdinalIgnoreCase); // NetFxHandler uses "Close" vs "close"
+                    Assert.Equal(content, Encoding.ASCII.GetString(requestData.Body));
+
+                    Assert.Equal("utf-8", requestData.GetSingleHeaderValue("Accept-Charset"));
+                    Assert.Equal("gzip, deflate", requestData.GetSingleHeaderValue("Accept-Encoding"));
+                    Assert.Equal("en-US", requestData.GetSingleHeaderValue("Accept-Language"));
+                    Assert.Equal("Thu, 31 May 2007 20:35:00 GMT", requestData.GetSingleHeaderValue("Accept-Datetime"));
+                    Assert.Equal("GET", requestData.GetSingleHeaderValue("Access-Control-Request-Method"));
+                    Assert.Equal("GET", requestData.GetSingleHeaderValue("Access-Control-Request-Headers"));
+                    Assert.Equal("12", requestData.GetSingleHeaderValue("Age"));
+                    Assert.Equal("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", requestData.GetSingleHeaderValue("Authorization"));
+                    Assert.Equal("no-cache", requestData.GetSingleHeaderValue("Cache-Control"));
                     if (!IsNetfxHandler)
                     {
-                        Assert.Contains("Cookie: $Version=1; Skin=new", headersSet);
+                        Assert.Equal("$Version=1; Skin=new", requestData.GetSingleHeaderValue("Cookie"));
                     }
-                    Assert.Contains("Date: Tue, 15 Nov 1994 08:12:31 GMT", headersSet);
-                    Assert.Contains("Expect: 100-continue", headersSet);
-                    Assert.Contains("Forwarded: for=192.0.2.60;proto=http;by=203.0.113.43", headersSet);
-                    Assert.Contains("From: User Name <user@example.com>", headersSet);
-                    Assert.Contains("Host: en.wikipedia.org:8080", headersSet);
-                    Assert.Contains("If-Match: \"37060cd8c284d8af7ad3082f209582d\"", headersSet);
-                    Assert.Contains("If-Modified-Since: Sat, 29 Oct 1994 19:43:31 GMT", headersSet);
-                    Assert.Contains("If-None-Match: \"737060cd8c284d8af7ad3082f209582d\"", headersSet);
-                    Assert.Contains("If-Range: Wed, 21 Oct 2015 07:28:00 GMT", headersSet);
-                    Assert.Contains("If-Unmodified-Since: Sat, 29 Oct 1994 19:43:31 GMT", headersSet);
-                    Assert.Contains("Max-Forwards: 10", headersSet);
-                    Assert.Contains("Origin: http://www.example-social-network.com", headersSet);
-                    Assert.Contains("Pragma: no-cache", headersSet);
-                    Assert.Contains("Proxy-Authorization: Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", headersSet);
-                    Assert.Contains("Range: bytes=500-999", headersSet);
-                    Assert.Contains("Referer: http://en.wikipedia.org/wiki/Main_Page", headersSet);
-                    Assert.Contains("TE: trailers, deflate", headersSet);
-                    Assert.Contains("Trailer: MyTrailer", headersSet);
-                    Assert.Contains("Transfer-Encoding: chunked", headersSet);
-                    Assert.Contains("User-Agent: Mozilla/5.0", headersSet);
-                    Assert.Contains("Upgrade: HTTPS/1.3, IRC/6.9, RTA/x11, websocket", headersSet);
-                    Assert.Contains("Via: 1.0 fred, 1.1 example.com (Apache/1.1)", headersSet);
-                    Assert.Contains("Warning: 199 - \"Miscellaneous warning\"", headersSet);
-                    Assert.Contains("X-Requested-With: XMLHttpRequest", headersSet);
-                    Assert.Contains("DNT: 1 (Do Not Track Enabled)", headersSet);
-                    Assert.Contains("X-Forwarded-For: client1, proxy1, proxy2", headersSet);
-                    Assert.Contains("X-Forwarded-Host: en.wikipedia.org:8080", headersSet);
-                    Assert.Contains("X-Forwarded-Proto: https", headersSet);
-                    Assert.Contains("Front-End-Https: https", headersSet);
-                    Assert.Contains("X-Http-Method-Override: DELETE", headersSet);
-                    Assert.Contains("X-ATT-DeviceId: GT-P7320/P7320XXLPG", headersSet);
-                    Assert.Contains("X-Wap-Profile: http://wap.samsungmobile.com/uaprof/SGH-I777.xml", headersSet);
-                    if (!IsNetfxHandler && !PlatformDetection.IsUap)
+                    Assert.Equal("Tue, 15 Nov 1994 08:12:31 GMT", requestData.GetSingleHeaderValue("Date"));
+                    Assert.Equal("100-continue", requestData.GetSingleHeaderValue("Expect"));
+                    Assert.Equal("for=192.0.2.60;proto=http;by=203.0.113.43", requestData.GetSingleHeaderValue("Forwarded"));
+                    Assert.Equal("User Name <user@example.com>", requestData.GetSingleHeaderValue("From"));
+                    Assert.Equal("\"37060cd8c284d8af7ad3082f209582d\"", requestData.GetSingleHeaderValue("If-Match"));
+                    Assert.Equal("Sat, 29 Oct 1994 19:43:31 GMT", requestData.GetSingleHeaderValue("If-Modified-Since"));
+                    Assert.Equal("\"737060cd8c284d8af7ad3082f209582d\"", requestData.GetSingleHeaderValue("If-None-Match"));
+                    Assert.Equal("Wed, 21 Oct 2015 07:28:00 GMT", requestData.GetSingleHeaderValue("If-Range"));
+                    Assert.Equal("Sat, 29 Oct 1994 19:43:31 GMT", requestData.GetSingleHeaderValue("If-Unmodified-Since"));
+                    Assert.Equal("10", requestData.GetSingleHeaderValue("Max-Forwards"));
+                    Assert.Equal("http://www.example-social-network.com", requestData.GetSingleHeaderValue("Origin"));
+                    Assert.Equal("no-cache", requestData.GetSingleHeaderValue("Pragma"));
+                    Assert.Equal("Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ==", requestData.GetSingleHeaderValue("Proxy-Authorization"));
+                    Assert.Equal("bytes=500-999", requestData.GetSingleHeaderValue("Range"));
+                    Assert.Equal("http://en.wikipedia.org/wiki/Main_Page", requestData.GetSingleHeaderValue("Referer"));
+                    Assert.Equal("MyTrailer", requestData.GetSingleHeaderValue("Trailer"));
+                    Assert.Equal("Mozilla/5.0", requestData.GetSingleHeaderValue("User-Agent"));
+                    Assert.Equal("1.0 fred, 1.1 example.com (Apache/1.1)", requestData.GetSingleHeaderValue("Via"));
+                    Assert.Equal("199 - \"Miscellaneous warning\"", requestData.GetSingleHeaderValue("Warning"));
+                    Assert.Equal("XMLHttpRequest", requestData.GetSingleHeaderValue("X-Requested-With"));
+                    Assert.Equal("1 (Do Not Track Enabled)", requestData.GetSingleHeaderValue("DNT"));
+                    Assert.Equal("client1, proxy1, proxy2", requestData.GetSingleHeaderValue("X-Forwarded-For"));
+                    Assert.Equal("en.wikipedia.org:8080", requestData.GetSingleHeaderValue("X-Forwarded-Host"));
+                    Assert.Equal("https", requestData.GetSingleHeaderValue("X-Forwarded-Proto"));
+                    Assert.Equal("https", requestData.GetSingleHeaderValue("Front-End-Https"));
+                    Assert.Equal("DELETE", requestData.GetSingleHeaderValue("X-Http-Method-Override"));
+                    Assert.Equal("GT-P7320/P7320XXLPG", requestData.GetSingleHeaderValue("X-ATT-DeviceId"));
+                    Assert.Equal("http://wap.samsungmobile.com/uaprof/SGH-I777.xml", requestData.GetSingleHeaderValue("X-Wap-Profile"));
+                    Assert.Equal("...", requestData.GetSingleHeaderValue("X-UIDH"));
+                    Assert.Equal("i8XNjC4b8KVok4uw5RftR38Wgp2BFwql", requestData.GetSingleHeaderValue("X-Csrf-Token"));
+                    Assert.Equal("f058ebd6-02f7-4d3f-942e-904344e8cde5, f058ebd6-02f7-4d3f-942e-904344e8cde5", requestData.GetSingleHeaderValue("X-Request-ID"));
+                    Assert.Equal("", requestData.GetSingleHeaderValue("X-Null"));
+                    Assert.Equal("", requestData.GetSingleHeaderValue("X-Empty"));
+                    Assert.Equal("X-Underscore_Name", requestData.GetSingleHeaderValue("X-Underscore_Name"));
+                    Assert.Equal("End", requestData.GetSingleHeaderValue("X-End"));
+
+                    if (LoopbackServerFactory.IsHttp2)
                     {
-                        Assert.Contains("Proxy-Connection: keep-alive", headersSet);
+                        // HTTP/2 forbids  certain headers or values.
+                        Assert.Equal("trailers", requestData.GetSingleHeaderValue("TE"));
+                        Assert.Equal(0, requestData.GetHeaderValueCount("Upgrade"));
+                        Assert.Equal(0, requestData.GetHeaderValueCount("Proxy-Connection"));
+                        Assert.Equal(0, requestData.GetHeaderValueCount("Host"));
+                        Assert.Equal(0, requestData.GetHeaderValueCount("Connection"));
+                        Assert.Equal(0, requestData.GetHeaderValueCount("Transfer-Encoding"));
                     }
-                    Assert.Contains("X-UIDH: ...", headersSet);
-                    Assert.Contains("X-Csrf-Token: i8XNjC4b8KVok4uw5RftR38Wgp2BFwql", headersSet);
-                    Assert.Contains("X-Request-ID: f058ebd6-02f7-4d3f-942e-904344e8cde5, f058ebd6-02f7-4d3f-942e-904344e8cde5", headersSet);
-                });
+                    else
+                    {
+                        // Verify HTTP/1.x headers
+                        Assert.Equal("close", requestData.GetSingleHeaderValue("Connection"), StringComparer.OrdinalIgnoreCase); // NetFxHandler uses "Close" vs "close"
+                        Assert.Equal("en.wikipedia.org:8080", requestData.GetSingleHeaderValue("Host"));
+                        Assert.Equal("trailers, deflate", requestData.GetSingleHeaderValue("TE"));
+                        Assert.Equal("HTTPS/1.3, IRC/6.9, RTA/x11, websocket", requestData.GetSingleHeaderValue("Upgrade"));
+                        if (!IsNetfxHandler && !PlatformDetection.IsUap)
+                        {
+                            Assert.Equal("keep-alive", requestData.GetSingleHeaderValue("Proxy-Connection"));
+                        }
+                    }
+                }
             });
         }
 
@@ -1802,56 +1020,6 @@ namespace System.Net.Http.Functional.Tests
                 $"X-XSS-Protection:{fold} 1; mode=block{newline}" +
                 $"{newline}"),
                 dribble ? new LoopbackServer.Options { StreamWrapper = s => new DribbleStream(s) } : null);
-        }
-
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task GetAsync_TrailingHeaders_Ignored(bool includeTrailerHeader)
-        {
-            if (IsCurlHandler)
-            {
-                // ActiveIssue #17174: CurlHandler has a problem here
-                // https://github.com/curl/curl/issues/1354
-                return;
-            }
-
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
-                {
-                    Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        getResponseTask,
-                        server.AcceptConnectionSendCustomResponseAndCloseAsync(
-                            "HTTP/1.1 200 OK\r\n" +
-                            "Connection: close\r\n" +
-                            "Transfer-Encoding: chunked\r\n" +
-                            (includeTrailerHeader ? "Trailer: MyCoolTrailerHeader\r\n" : "") +
-                            "\r\n" +
-                            "4\r\n" +
-                            "data\r\n" +
-                            "0\r\n" +
-                            "MyCoolTrailerHeader: amazingtrailer\r\n" +
-                            "\r\n"));
-
-                    using (HttpResponseMessage response = await getResponseTask)
-                    {
-                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                        if (includeTrailerHeader)
-                        {
-                            Assert.Contains("MyCoolTrailerHeader", response.Headers.GetValues("Trailer"));
-                        }
-                        Assert.False(response.Headers.Contains("MyCoolTrailerHeader"), "Trailer should have been ignored");
-
-                        string data = await response.Content.ReadAsStringAsync();
-                        Assert.Contains("data", data);
-                        Assert.DoesNotContain("MyCoolTrailerHeader", data);
-                        Assert.DoesNotContain("amazingtrailer", data);
-                    }
-                }
-            });
         }
 
         [Fact]
@@ -2730,6 +1898,236 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
+        public static IEnumerable<object[]> Interim1xxStatusCode()
+        {
+            yield return new object[] { (HttpStatusCode) 100 }; // 100 Continue.
+            // 101 SwitchingProtocols will be treated as a final status code.
+            yield return new object[] { (HttpStatusCode) 102 }; // 102 Processing.
+            yield return new object[] { (HttpStatusCode) 103 }; // 103 EarlyHints.
+            yield return new object[] { (HttpStatusCode) 150 };
+            yield return new object[] { (HttpStatusCode) 180 };
+            yield return new object[] { (HttpStatusCode) 199 };
+        }
+
+        [Theory]
+        [MemberData(nameof(Interim1xxStatusCode))]
+        public async Task SendAsync_1xxResponsesWithHeaders_InterimResponsesHeadersIgnored(HttpStatusCode responseStatusCode)
+        {
+            // Skip test on .NET Framework since it doesn't have the fix.
+            if (PlatformDetection.IsFullFramework && (int)responseStatusCode >= 102) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+            const string CookieHeaderExpected = "yummy_cookie=choco";
+            const string SetCookieExpected = "theme=light";
+            const string ContentTypeHeaderExpected = "text/html";
+
+            const string SetCookieIgnored1 = "hello=world";
+            const string SetCookieIgnored2 = "net=core";
+
+            // Set-Cookie header will not be ignored with CurlHandler.
+            int containerCookiesCount = IsCurlHandler ? 3 : 1;
+            string containerCookiesExpected = IsCurlHandler ?
+                SetCookieIgnored1 + "; " + SetCookieIgnored2 + "; " + SetCookieExpected : SetCookieExpected;
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    initialMessage.Headers.ExpectContinue = true;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    // Verify status code.
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    // Verify Cookie header.
+                    Assert.Equal(1, response.Headers.GetValues("Cookie").Count());
+                    Assert.Equal(CookieHeaderExpected, response.Headers.GetValues("Cookie").First().ToString());
+                    // Verify Set-Cookie header.
+                    Assert.Equal(containerCookiesCount, handler.CookieContainer.Count);
+                    Assert.Equal(containerCookiesExpected, handler.CookieContainer.GetCookieHeader(uri));
+                    // Verify Content-type header.
+                    Assert.Equal(ContentTypeHeaderExpected, response.Content.Headers.ContentType.ToString());
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send 100-Continue responses with additional headers.
+                    await connection.ReadRequestHeaderAndSendResponseAsync(responseStatusCode, additionalHeaders:
+                        "Cookie: ignore_cookie=choco1\r\n" + "Content-type: text/xml\r\n" + $"Set-Cookie: {SetCookieIgnored1}\r\n");
+                    await connection.SendResponseAsync(responseStatusCode, additionalHeaders:
+                        "Cookie: ignore_cookie=choco2\r\n" + "Content-type: text/plain\r\n" + $"Set-Cookie: {SetCookieIgnored2}\r\n");
+
+                    var result = new char[TestString.Length];
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    // Send final status code.
+                    await connection.SendResponseAsync(HttpStatusCode.OK, additionalHeaders:
+                        $"Cookie: {CookieHeaderExpected}\r\n" + $"Content-type: {ContentTypeHeaderExpected}\r\n" + $"Set-Cookie: {SetCookieExpected}\r\n");
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Theory]
+        [MemberData(nameof(Interim1xxStatusCode))]
+        public async Task SendAsync_Unexpected1xxResponses_DropAllInterimResponses(HttpStatusCode responseStatusCode)
+        {
+            // Skip test on .NET Framework since it doesn't have the fix.
+            if (PlatformDetection.IsFullFramework && (int)responseStatusCode >= 102) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    // No ExpectContinue header.
+                    initialMessage.Headers.ExpectContinue = false;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send unexpected 1xx responses.
+                    await connection.ReadRequestHeaderAndSendResponseAsync(responseStatusCode);
+                    await connection.SendResponseAsync(responseStatusCode);
+                    await connection.SendResponseAsync(responseStatusCode);
+
+                    var result = new char[TestString.Length];
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    // Send final status code.
+                    await connection.SendResponseAsync(HttpStatusCode.OK);
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Fact]
+        public async Task SendAsync_MultipleExpected100Responses_ReceivesCorrectResponse()
+        {
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+            const string Valid100ContinueResponse = "HTTP/1.1 100 Continue\r\n\r\n";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    initialMessage.Headers.ExpectContinue = true;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send multiple 100-Continue responses.
+                    await connection.ReadRequestHeaderAndSendCustomResponseAsync(
+                        string.Concat(Enumerable.Repeat(Valid100ContinueResponse, 3)));
+
+                    var result = new char[TestString.Length];
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    // Send final status code.
+                    await connection.SendResponseAsync(HttpStatusCode.OK);
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Fact]
+        public async Task SendAsync_No100ContinueReceived_RequestBodySentEventually()
+        {
+            // CurlHandler will not send request body if it doesn't see 100-Continue.
+            // This is not correct. Per RFC 7231: A client that sends a 100-continue expectation is not required
+            // to wait for any specific length of time; such a client MAY proceed to send the message body even
+            // if it has not yet received a response.
+            if (IsCurlHandler) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+            const string TestString = "test";
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpRequestMessage initialMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+                    initialMessage.Content = new StringContent(TestString);
+                    initialMessage.Headers.ExpectContinue = true;
+                    HttpResponseMessage response = await client.SendAsync(initialMessage);
+
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send final status code 200.
+                    await connection.ReadRequestHeaderAndSendResponseAsync();
+
+                    var result = new char[TestString.Length];
+                    await connection.ReadBlockAsync(result, 0, TestString.Length);
+                    Assert.Equal(TestString, new string(result));
+
+                    await clientFinished.Task;
+                });
+            });
+        }
+
+        [Fact]
+        public async Task SendAsync_101SwitchingProtocolsResponse_Success()
+        {
+            // WinHttpHandler and CurlHandler will hang, waiting for additional response.
+            // Other handlers will accept 101 as a final response.
+            if (IsWinHttpHandler || IsCurlHandler) return;
+
+            var clientFinished = new TaskCompletionSource<bool>();
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
+            {
+                using (var handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    HttpResponseMessage response = await client.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead);
+                    Assert.Equal(HttpStatusCode.SwitchingProtocols, response.StatusCode);
+                    clientFinished.SetResult(true);
+                }
+            }, async server =>
+            {
+                await server.AcceptConnectionAsync(async connection =>
+                {
+                    // Send a valid 101 Switching Protocols response.
+                    await connection.ReadRequestHeaderAndSendCustomResponseAsync(
+                        "HTTP/1.1 101 Switching Protocols\r\n" + "Upgrade: websocket\r\n" + "Connection: Upgrade\r\n\r\n");
+                    await clientFinished.Task;
+                });
+            });
+        }
+
         [ActiveIssue(30061, TargetFrameworkMonikers.Uap)]
         [Theory]
         [InlineData(false)]
@@ -2809,7 +2207,13 @@ namespace System.Net.Http.Functional.Tests
 
         public async Task PostAsync_Redirect_LargePayload_Helper(int statusCode, bool expectRedirectToPost)
         {
-            using (var fs = new FileStream(Path.Combine(Path.GetTempPath(), Path.GetTempFileName()), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x1000, FileOptions.DeleteOnClose))
+            using (var fs = new FileStream(
+                Path.Combine(Path.GetTempPath(), Path.GetTempFileName()),
+                FileMode.Create,
+                FileAccess.ReadWrite,
+                FileShare.None,
+                0x1000,
+                FileOptions.DeleteOnClose))
             {
                 string contentString = string.Join("", Enumerable.Repeat("Content", 100000));
                 byte[] contentBytes = Encoding.UTF32.GetBytes(contentString);
@@ -2817,15 +2221,33 @@ namespace System.Net.Http.Functional.Tests
                 fs.Flush(flushToDisk: true);
                 fs.Position = 0;
 
-                Uri redirectUri = Configuration.Http.RedirectUriForDestinationUri(false, statusCode, Configuration.Http.SecureRemoteEchoServer, 1);
+                Uri redirectUri = Configuration.Http.RedirectUriForDestinationUri(
+                    secure: false,
+                    statusCode: statusCode,
+                    destinationUri: Configuration.Http.SecureRemoteVerifyUploadServer,
+                    hops: 1);
+                var content = new StreamContent(fs);
+
+                // Compute MD5 of request body data. This will be verified by the server when it receives the request.
+                content.Headers.ContentMD5 = TestHelper.ComputeMD5Hash(contentBytes);
 
                 using (HttpClient client = CreateHttpClient())
-                using (HttpResponseMessage response = await client.PostAsync(redirectUri, new StreamContent(fs)))
+                using (HttpResponseMessage response = await client.PostAsync(redirectUri, content))
                 {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    try
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                    }
+                    catch
+                    {
+                        _output.WriteLine($"{(int)response.StatusCode} {response.ReasonPhrase}");
+                        throw;
+                    }
+
                     if (expectRedirectToPost)
                     {
-                        Assert.InRange(response.Content.Headers.ContentLength.GetValueOrDefault(), contentBytes.Length, int.MaxValue);
+                        IEnumerable<string> headerValue = response.Headers.GetValues("X-HttpRequest-Method");
+                        Assert.Equal("POST", headerValue.First());
                     }
                 }
             }
@@ -2852,23 +2274,21 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(HttpStatusCode.MethodNotAllowed, "Custom description")]
         [InlineData(HttpStatusCode.MethodNotAllowed, "")]
         public async Task GetAsync_CallMethod_ExpectedStatusLine(HttpStatusCode statusCode, string reasonPhrase)
         {
-            using (HttpClient client = CreateHttpClient())
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.StatusCodeUri(
-                    false,
-                    (int)statusCode,
-                    reasonPhrase)))
+                using (HttpClient client = CreateHttpClient())
+                using (HttpResponseMessage response = await client.GetAsync(uri))
                 {
                     Assert.Equal(statusCode, response.StatusCode);
                     Assert.Equal(reasonPhrase, response.ReasonPhrase);
                 }
-            }
+            }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(
+                $"HTTP/1.1 {(int)statusCode} {reasonPhrase}\r\nContent-Length: 0\r\n\r\n"));
         }
 
 #endregion
@@ -3060,23 +2480,16 @@ namespace System.Net.Http.Functional.Tests
             Assert.Equal(new Version(1, 1), receivedRequestVersion);
         }
 
-        [ActiveIssue(23037, TestPlatforms.AnyUnix)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Specifying Version(2,0) throws exception on netfx")]
         [OuterLoop("Uses external server")]
-        [Theory]
+        [ConditionalTheory]
         [MemberData(nameof(Http2Servers))]
         public async Task SendAsync_RequestVersion20_ResponseVersion20IfHttp2Supported(Uri server)
         {
-            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1703OrGreater)
+            if (IsWinHttpHandler && !PlatformDetection.IsWindows10Version1703OrGreater)
             {
                 // Skip this test if running on Windows but on a release prior to Windows 10 Creators Update.
-                _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
-                return;
-            }
-            if (UseSocketsHttpHandler)
-            {
-                // TODO #23134: SocketsHttpHandler doesn't yet support HTTP/2.
-                return;
+                throw new SkipTestException("Skipping test due to Windows 10 version prior to Version 1703.");
             }
 
             // We don't currently have a good way to test whether HTTP/2 is supported without
@@ -3089,25 +2502,6 @@ namespace System.Net.Http.Functional.Tests
             {
                 // It is generally expected that the test hosts will be trusted, so we don't register a validation
                 // callback in the usual case.
-                // 
-                // However, on our Debian 8 test machines, a combination of a server side TLS chain,
-                // the client chain processor, and the distribution's CA bundle results in an incomplete/untrusted
-                // certificate chain. See https://github.com/dotnet/corefx/issues/9244 for more details.
-                if (PlatformDetection.IsDebian8)
-                {
-                    // Func<HttpRequestMessage, X509Certificate2, X509Chain, SslPolicyErrors, bool>
-                    handler.ServerCertificateCustomValidationCallback = (msg, cert, chain, errors) =>
-                    {
-                        Assert.InRange(chain.ChainStatus.Length, 0, 1);
-
-                        if (chain.ChainStatus.Length > 0)
-                        {
-                            Assert.Equal(X509ChainStatusFlags.PartialChain, chain.ChainStatus[0].Status);
-                        }
-
-                        return true;
-                    };
-                }
 
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
@@ -3149,7 +2543,6 @@ namespace System.Net.Http.Functional.Tests
             HttpClientHandler handler = CreateHttpClientHandler();
             using (var client = new HttpClient(handler))
             {
-                TestHelper.EnsureHttp2Feature(handler);
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -3226,6 +2619,18 @@ namespace System.Net.Http.Functional.Tests
                 }
             });
         }
-#endregion
+        #endregion
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
+        public async Task GetAsync_InvalidUrl_ExpectedExceptionThrown()
+        {
+            string invalidUri = $"http://_{Guid.NewGuid().ToString("N")}";
+            _output.WriteLine($"{DateTime.Now} connecting to {invalidUri}");
+            using (HttpClient client = CreateHttpClient())
+            {
+                await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(invalidUri));
+                await Assert.ThrowsAsync<HttpRequestException>(() => client.GetStringAsync(invalidUri));
+            }
+        }
     }
 }
