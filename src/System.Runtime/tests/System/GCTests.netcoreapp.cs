@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Tests
@@ -34,6 +35,60 @@ namespace System.Tests
             Assert.True(memoryInfo.TotalAvailableMemoryBytes > 0);
             Assert.True(memoryInfo.HeapSizeBytes > 0);
             Assert.True(memoryInfo.FragmentedBytes >= 0);
+        }
+
+        [Fact]
+        public static void GetGCMemoryInfoFragmentation()
+        {
+            GCHandle[] gch = null;
+
+            try
+            {
+                gch = new GCHandle[100];
+
+                for (int i = 0; i < gch.Length * 2; ++i)
+                {
+                    byte[] arr = new byte[128];
+                    if (i % 2 == 0)
+                    {
+                        gch[i / 2] = GCHandle.Alloc(arr, GCHandleType.Pinned);
+                    }
+                }
+
+                GC.Collect();
+
+                GCMemoryInfo memoryInfo = GC.GetGCMemoryInfo();
+
+                Assert.True(memoryInfo.FragmentedBytes >= 128 * (gch.Length - 1), $"FragmentedBytes = {memoryInfo.FragmentedBytes}");
+            }
+            finally
+            {
+                for (int i = 0; i < gch.Length; ++i)
+                {
+                    if (gch[i].IsAllocated)
+                    {
+                        gch[i].Free();
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public static void GetGCMemoryInfoHeapSize()
+        {
+            GCMemoryInfo memoryInfo1 = GC.GetGCMemoryInfo();
+
+            byte[][] arr = new byte[64 * 1024][];
+            for (int i = 0; i < arr.Length; ++i)
+            {
+                arr[i] = new byte[i + 1];
+            }
+
+            GCMemoryInfo memoryInfo2 = GC.GetGCMemoryInfo();
+
+            GC.KeepAlive(arr);
+
+            Assert.True(memoryInfo2.HeapSizeBytes > memoryInfo1.HeapSizeBytes);
         }
     }
 }
