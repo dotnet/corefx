@@ -3563,13 +3563,7 @@
         "4.1.4.0": "4.6.0"
       }
     },
-    "System.Resources.Binary.Reader": {
-      "InboxOn": {},
-      "AssemblyVersionInPackageVersion": {
-        "4.0.0.0": "4.6.0"
-      }
-    },
-    "System.Resources.Binary.Writer": {
+    "System.Resources.Extensions": {
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
         "4.0.0.0": "4.6.0"

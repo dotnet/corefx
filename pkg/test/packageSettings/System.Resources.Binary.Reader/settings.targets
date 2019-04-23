@@ -1,5 +1,0 @@
-<Project>
-  <ItemGroup>
-    <IgnoredTypes Include="System.Resources.ResourceReader" />
-  </ItemGroup>
-</Project>
