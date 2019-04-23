@@ -16,17 +16,17 @@ using Xunit;
 
 namespace System.Resources.Extensions.Tests
 {
-    public class BinaryResourceWriterTests
+    public class PreserializedResourceWriterTests
     {
         [Fact]
         public static void ExceptionforNullStream()
         {
-            Assert.Throws<ArgumentNullException>("stream", () => new BinaryResourceWriter((Stream)null));
+            Assert.Throws<ArgumentNullException>("stream", () => new PreserializedResourceWriter((Stream)null));
         }
         [Fact]
         public static void ExceptionforNullFile()
         {
-            Assert.Throws<ArgumentNullException>("fileName", () => new BinaryResourceWriter((string)null));
+            Assert.Throws<ArgumentNullException>("fileName", () => new PreserializedResourceWriter((string)null));
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace System.Resources.Extensions.Tests
             {
                 using (var readOnlyStream = new MemoryStream(new byte[1], false))
                 {
-                    new BinaryResourceWriter(readOnlyStream);
+                    new PreserializedResourceWriter(readOnlyStream);
                 }
             });
         }
@@ -44,7 +44,7 @@ namespace System.Resources.Extensions.Tests
         [Fact]
         public static void ExceptionforNullResourceId()
         {
-            using (var writer = new BinaryResourceWriter(new MemoryStream()))
+            using (var writer = new PreserializedResourceWriter(new MemoryStream()))
             {
                 Assert.Throws<ArgumentNullException>("name", () => writer.AddResource(null, "value"));
                 Assert.Throws<ArgumentNullException>("name", () => writer.AddResource(null, new object()));
@@ -68,7 +68,7 @@ namespace System.Resources.Extensions.Tests
         [Fact]
         public static void ExceptionforDuplicateKey()
         {
-            using (var writer = new BinaryResourceWriter(new MemoryStream()))
+            using (var writer = new PreserializedResourceWriter(new MemoryStream()))
             {
                 writer.AddResource("duplicate", "value");
 
@@ -112,7 +112,7 @@ namespace System.Resources.Extensions.Tests
         [Fact]
         public static void ExceptionForAddAfterGenerate()
         {
-            using (var writer = new BinaryResourceWriter(new MemoryStream()))
+            using (var writer = new PreserializedResourceWriter(new MemoryStream()))
             {
                 writer.AddResource("duplicate", "value");
 
@@ -149,7 +149,7 @@ namespace System.Resources.Extensions.Tests
             }
 
             using (MemoryStream ms = new MemoryStream())
-            using (BinaryResourceWriter writer = new BinaryResourceWriter(ms))
+            using (PreserializedResourceWriter writer = new PreserializedResourceWriter(ms))
             {
                 writer.Generate();
                 binaryWriterBuffer = ms.ToArray();
@@ -181,7 +181,7 @@ namespace System.Resources.Extensions.Tests
             }
 
             using (MemoryStream ms = new MemoryStream())
-            using (BinaryResourceWriter writer = new BinaryResourceWriter(ms))
+            using (PreserializedResourceWriter writer = new PreserializedResourceWriter(ms))
             {
                 addData(writer);
                 writer.Generate();
@@ -201,7 +201,7 @@ namespace System.Resources.Extensions.Tests
                 }
             }
 
-            Assert.Throws<NotSupportedException>(() => new BinaryResourceReader(new MemoryStream(binaryWriterBuffer, false)));
+            Assert.Throws<NotSupportedException>(() => new DeserializingResourceReader(new MemoryStream(binaryWriterBuffer, false)));
         }
 
         [Fact]
@@ -227,7 +227,7 @@ namespace System.Resources.Extensions.Tests
             }
 
             using (MemoryStream ms = new MemoryStream())
-            using (BinaryResourceWriter writer = new BinaryResourceWriter(ms))
+            using (PreserializedResourceWriter writer = new PreserializedResourceWriter(ms))
             {
                 BinaryFormatter binaryFormatter = new BinaryFormatter();
 
@@ -258,7 +258,7 @@ namespace System.Resources.Extensions.Tests
                 }
             }
 
-            Assert.Throws<NotSupportedException>(() => new BinaryResourceReader(new MemoryStream(binaryWriterBuffer, false)));
+            Assert.Throws<NotSupportedException>(() => new DeserializingResourceReader(new MemoryStream(binaryWriterBuffer, false)));
         }
 
 
@@ -271,7 +271,7 @@ namespace System.Resources.Extensions.Tests
             byte[] binaryWriterBuffer;
 
             using (MemoryStream ms = new MemoryStream())
-            using (BinaryResourceWriter writer = new BinaryResourceWriter(ms))
+            using (PreserializedResourceWriter writer = new PreserializedResourceWriter(ms))
             {
                 foreach (var pair in values)
                 {
@@ -284,7 +284,7 @@ namespace System.Resources.Extensions.Tests
             }
 
             using (MemoryStream ms = new MemoryStream(binaryWriterBuffer, false))
-            using (BinaryResourceReader reader = new BinaryResourceReader(ms))
+            using (DeserializingResourceReader reader = new DeserializingResourceReader(ms))
             {
                 IDictionaryEnumerator dictEnum = reader.GetEnumerator();
 
@@ -303,7 +303,7 @@ namespace System.Resources.Extensions.Tests
             byte[] binaryWriterBuffer;
 
             using (MemoryStream ms = new MemoryStream())
-            using (BinaryResourceWriter writer = new BinaryResourceWriter(ms))
+            using (PreserializedResourceWriter writer = new PreserializedResourceWriter(ms))
             {
                 foreach (var pair in values)
                 {
@@ -316,7 +316,7 @@ namespace System.Resources.Extensions.Tests
             }
 
             using (MemoryStream ms = new MemoryStream(binaryWriterBuffer, false))
-            using (BinaryResourceReader reader = new BinaryResourceReader(ms))
+            using (DeserializingResourceReader reader = new DeserializingResourceReader(ms))
             {
                 IDictionaryEnumerator dictEnum = reader.GetEnumerator();
 
@@ -335,7 +335,7 @@ namespace System.Resources.Extensions.Tests
             byte[] binaryWriterBuffer;
 
             using (MemoryStream ms = new MemoryStream())
-            using (BinaryResourceWriter writer = new BinaryResourceWriter(ms))
+            using (PreserializedResourceWriter writer = new PreserializedResourceWriter(ms))
             {
                 foreach (var pair in values)
                 {
@@ -347,7 +347,7 @@ namespace System.Resources.Extensions.Tests
             }
 
             using (MemoryStream ms = new MemoryStream(binaryWriterBuffer, false))
-            using (BinaryResourceReader reader = new BinaryResourceReader(ms))
+            using (DeserializingResourceReader reader = new DeserializingResourceReader(ms))
             {
                 IDictionaryEnumerator dictEnum = reader.GetEnumerator();
 
@@ -393,8 +393,8 @@ namespace System.Resources.Extensions.Tests
         {
             ResourceManager resourceManager = new ResourceManager(typeof(TestData));
             ResourceSet resSet = resourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
-            IResourceReader reader = (IResourceReader)typeof(RuntimeResourceSet).GetField("Reader", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(resSet);
-            Assert.IsType<BinaryResourceReader>(reader);
+            IResourceReader reader = (IResourceReader)resSet.GetType().GetField("Reader", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(resSet);
+            Assert.IsType<DeserializingResourceReader>(reader);
         }
 
         private static void ResourceValueEquals(object expected, object actual)

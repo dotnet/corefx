@@ -7,10 +7,10 @@
 
 namespace System.Resources.Extensions
 {
-    public partial class BinaryResourceReader : System.Resources.IResourceReader
+    public partial class DeserializingResourceReader : System.Resources.IResourceReader
     {
-        public BinaryResourceReader(System.IO.Stream stream) { }
-        public BinaryResourceReader(string fileName) { }
+        public DeserializingResourceReader(System.IO.Stream stream) { }
+        public DeserializingResourceReader(string fileName) { }
         protected virtual int Version { get { throw null; } }
         public void Close() { }
         protected virtual object DeserializeObject(System.IO.BinaryReader reader, Type type) { throw null; }
@@ -19,14 +19,11 @@ namespace System.Resources.Extensions
         public void GetResourceData(string resourceName, out string resourceType, out byte[] resourceData) { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
     }
-    public sealed partial class RuntimeResourceSet : ResourceSet
+
+    public partial class PreserializedResourceWriter : System.Resources.IResourceWriter
     {
-        internal RuntimeResourceSet() { }
-    }
-    public partial class BinaryResourceWriter : System.Resources.IResourceWriter
-    {
-        public BinaryResourceWriter(System.IO.Stream stream) { }
-        public BinaryResourceWriter(string fileName) { }
+        public PreserializedResourceWriter(System.IO.Stream stream) { }
+        public PreserializedResourceWriter(string fileName) { }
         protected virtual string ResourceReaderTypeName { get { throw null; } }
         protected virtual string ResourceSetTypeName { get { throw null; } }
         public System.Func<System.Type, string> TypeNameConverter { get { throw null; } set { } }

@@ -1,6 +1,6 @@
 ﻿namespace System.IO
 {
-    static class BinaryReaderExtensions
+    internal static class BinaryReaderExtensions
     {
         public static int Read7BitEncodedInt(this BinaryReader reader)
         {
@@ -24,6 +24,22 @@
                 shift += 7;
             } while ((b & 0x80) != 0);
             return count;
+        }
+    }
+
+    internal static class BinaryWriterExtensions
+    {
+        public static void Write7BitEncodedInt(this BinaryWriter writer, int value)
+        {
+            // Write out an int 7 bits at a time.  The high bit of the byte,
+            // when on, tells reader to continue reading more bytes.
+            uint v = (uint)value;   // support negative numbers
+            while (v >= 0x80)
+            {
+                writer.Write((byte)(v | 0x80));
+                v >>= 7;
+            }
+            writer.Write((byte)v);
         }
     }
 }

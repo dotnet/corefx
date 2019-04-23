@@ -140,7 +140,7 @@ namespace System.Resources.Extensions.Tests
         
         public static void WriteResources(string file)
         {
-            using (var writer = new BinaryResourceWriter(file))
+            using (var writer = new PreserializedResourceWriter(file))
             {
                 foreach(var pair in Primitive)
                 {

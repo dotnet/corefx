@@ -164,7 +164,7 @@ namespace System.Resources
     // into smaller chunks, each of size sqrt(n), would be substantially better for
     // resource files containing thousands of resources.
     // 
-#if CORERT || RESOURCES_STANDALONE
+#if CORERT
     public  // On CoreRT, this must be public because of need to whitelist past the ReflectionBlock.
 #else
     internal
@@ -208,8 +208,28 @@ namespace System.Resources
             _defaultReader = new ResourceReader(stream, _resCache, permitDeserialization);
             Reader = _defaultReader;
         }
+#else
+        private readonly IResourceReader Reader;
 #endif
 
+        internal RuntimeResourceSet(IResourceReader reader) :
+            // explicitly do not call IResourceReader constructor since it caches all resources
+            // the purpose of RuntimeResourceSet is to lazily load and cache.
+            base()
+        {
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+
+            _defaultReader = reader as DeserializingResourceReader ?? throw new ArgumentException(SR.Format(SR.NotSupported_WrongResourceReader_Type, reader.GetType()), nameof(reader));
+            _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
+            Reader = reader;
+
+            // in the CoreLib version RuntimeResourceSet creates ResourceReader and passes this in, 
+            // in the custom case ManifestBasedResourceReader creates the ResourceReader and passes it in
+            // so we must initialize the cache here.
+            _defaultReader._resCache = _resCache;
+        }
+        
         protected override void Dispose(bool disposing)
         {
             if (Reader == null)

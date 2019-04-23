@@ -5,22 +5,22 @@ using System.Text;
 
 namespace System.Resources.Extensions
 {
-    public class BinaryResourceWriter : ResourceWriter
+    public class PreserializedResourceWriter : ResourceWriter
     {
 
-        bool _requiresBinaryResourceReader = false;
+        bool _requiresDeserializingResourceReader = false;
 
-        public BinaryResourceWriter(string fileName) : base(fileName)
+        public PreserializedResourceWriter(string fileName) : base(fileName)
         { }
 
-        public BinaryResourceWriter(Stream stream) : base(stream)
+        public PreserializedResourceWriter(Stream stream) : base(stream)
         { }
 
-        protected override string ResourceReaderTypeName => _requiresBinaryResourceReader ? 
-            typeof(BinaryResourceReader).AssemblyQualifiedName : 
+        protected override string ResourceReaderTypeName => _requiresDeserializingResourceReader ? 
+            typeof(DeserializingResourceReader).AssemblyQualifiedName : 
             base.ResourceReaderTypeName;
 
-        protected override string ResourceSetTypeName => _requiresBinaryResourceReader ?
+        protected override string ResourceSetTypeName => _requiresDeserializingResourceReader ?
             typeof(RuntimeResourceSet).AssemblyQualifiedName :
             base.ResourceSetTypeName;
 
@@ -35,7 +35,7 @@ namespace System.Resources.Extensions
 
             AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.TypeConverterString, value));
 
-            _requiresBinaryResourceReader = true;
+            _requiresDeserializingResourceReader = true;
         }
 
         public void AddTypeConverterResource(string name, string typeName, byte[] value)
@@ -49,7 +49,7 @@ namespace System.Resources.Extensions
 
             AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.TypeConverterByteArray, value));
 
-            _requiresBinaryResourceReader = true;
+            _requiresDeserializingResourceReader = true;
         }
 
         public void AddBinaryFormattedResource(string name, string typeName, byte[] value)
@@ -76,7 +76,7 @@ namespace System.Resources.Extensions
 
             AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.Stream, value));
 
-            _requiresBinaryResourceReader = true;
+            _requiresDeserializingResourceReader = true;
         }
 
         public void AddStreamResource(string name, string typeName, Stream value, bool closeAfterWrite)
@@ -93,7 +93,7 @@ namespace System.Resources.Extensions
 
             AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.Stream, value, closeAfterWrite));
 
-            _requiresBinaryResourceReader = true;
+            _requiresDeserializingResourceReader = true;
         }
 
         private class ResourceDataRecord
@@ -124,7 +124,7 @@ namespace System.Resources.Extensions
                 throw new InvalidOperationException(SR.Format(SR.InvalidOperation_CannotWriteType, GetType(), dataContext.GetType(), nameof(WriteData)));
             }
 
-            if (_requiresBinaryResourceReader)
+            if (_requiresDeserializingResourceReader)
             {
                 writer.Write((byte)record.Format);
             }
@@ -137,7 +137,7 @@ namespace System.Resources.Extensions
                         {
                             byte[] data = (byte[])record.Data;
 
-                            if (_requiresBinaryResourceReader)
+                            if (_requiresDeserializingResourceReader)
                             {
                                 writer.Write7BitEncodedInt(data.Length);
                             }

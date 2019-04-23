@@ -7,13 +7,13 @@ using System.Text;
 
 namespace System.Resources.Extensions
 {
-    public class BinaryResourceReader : ResourceReader
+    public class DeserializingResourceReader : ResourceReader
     {
-        public BinaryResourceReader(Stream stream) : base(stream)
+        public DeserializingResourceReader(Stream stream) : base(stream)
         {
         }
 
-        public BinaryResourceReader(string fileName) : base(fileName)
+        public DeserializingResourceReader(string fileName) : base(fileName)
         {
         }
 

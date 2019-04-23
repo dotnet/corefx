@@ -8,7 +8,6 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(TargetsNETStandard)' == 'true'">
     <Compile Include="$(ResourceWriterPath)System\Resources\ResourceWriter.cs" Link="System\Resources\ResourceWriter.cs" />
-    <Compile Include="$(ResourceWriterPath)System\Resources\__FastResourceComparer.cs" Link="System\Resources\__FastResourceComparer.cs" />
     <Compile Include="$(ResourceWriterPath)System\Runtime\Versioning\MultitargetingHelpers.cs" Link="System\Runtime\Versioning\MultitargetingHelpers.cs" />
   </ItemGroup>
   <!-- ItemGroup Condition="'$(TargetsNETStandard)' == 'true'" -->
@@ -19,13 +18,11 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceTypeCode.cs" Link="System\Resources\ResourceTypeCode.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BinaryWriterExtensions.cs" />
-    <Compile Include="BinaryReaderExtensions.cs" />
-    <Compile Include="System\Resources\Extensions\BinaryResourceReader.cs" />
-    <Compile Include="System\Resources\Extensions\BinaryResourceWriter.cs" />
-    <Compile Include="System\Resources\Extensions\RuntimeResourceSet.public.cs" />
+    <Compile Include="7BitExtensions.cs" />
+    <Compile Include="System\Resources\Extensions\DeserializingResourceReader.cs" />
+    <Compile Include="System\Resources\Extensions\PreserializedResourceWriter.cs" />
     <Compile Include="System\Resources\Extensions\SerializationFormat.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Resources\RuntimeResourceSet.cs" Link="System\Resources\Binary\RuntimeResourceSet.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\RuntimeResourceSet.cs" Link="System\Resources\Extensions\RuntimeResourceSet.cs" />
   </ItemGroup>
   <ItemGroup> 
     <Reference Include="System.Collections" />
