@@ -74,8 +74,6 @@ namespace System.Data.OleDb
         // ctor for an ADODB.Recordset, ADODB.Record or Hierarchial resultset
         internal OleDbDataReader(OleDbConnection connection, OleDbCommand command, int depth, CommandBehavior commandBehavior)
         {
-            OleDbConnection.VerifyExecutePermission();
-
             _connection = connection;
             _command = command;
             _commandBehavior = commandBehavior;

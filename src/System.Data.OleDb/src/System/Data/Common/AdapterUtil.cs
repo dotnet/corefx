@@ -1173,7 +1173,6 @@ namespace System.Data.Common
 
         static internal object ClassesRootRegistryValue(string subkey, string queryvalue)
         {
-            //(new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_CLASSES_ROOT\\" + subkey)).Assert();
             try
             {
                 using (RegistryKey key = Registry.ClassesRoot.OpenSubKey(subkey, false))
@@ -1183,20 +1182,15 @@ namespace System.Data.Common
             }
             catch (SecurityException e)
             {
-                // Even though we assert permission - it's possible there are
+                // it's possible there are
                 // ACL's on registry that cause SecurityException to be thrown.
                 ADP.TraceExceptionWithoutRethrow(e);
                 return null;
-            }
-            finally
-            {
-                // RegistryPermission.RevertAssert();
             }
         }
 
         static internal object LocalMachineRegistryValue(string subkey, string queryvalue)
         {
-            // (new RegistryPermission(RegistryPermissionAccess.Read, "HKEY_LOCAL_MACHINE\\" + subkey)).Assert();
             try
             {
                 using (RegistryKey key = Registry.LocalMachine.OpenSubKey(subkey, false))
@@ -1206,14 +1200,10 @@ namespace System.Data.Common
             }
             catch (SecurityException e)
             {
-                // Even though we assert permission - it's possible there are
+                // it's possible there are
                 // ACL's on registry that cause SecurityException to be thrown.
                 ADP.TraceExceptionWithoutRethrow(e);
                 return null;
-            }
-            finally
-            {
-                // RegistryPermission.RevertAssert();
             }
         }
 

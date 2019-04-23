@@ -15,9 +15,6 @@ namespace System.Data.OleDb
 
         private ParameterDirection _direction;
         private int _size;
-#if USEOFFSET   // USEOFFSET is set in makefile.inc for SqlParameter class only
-        private int _offset;
-#endif
         private string _sourceColumn;
         private DataRowVersion _sourceVersion;
         private bool _sourceColumnNullMapping;
@@ -91,23 +88,6 @@ namespace System.Data.OleDb
             }
         }
 
-#if USEOFFSET
-        [
-        Browsable(false),
-        EditorBrowsableAttribute(EditorBrowsableState.Advanced)
-        ]
-        public int Offset {
-            get {
-                return _offset;
-            }
-            set {
-                if (value < 0) {
-                    throw ADP.InvalidOffsetValue(value);
-                }
-                _offset = value;
-            }
-        }
-#else
         internal int Offset
         {
             get
@@ -115,7 +95,6 @@ namespace System.Data.OleDb
                 return 0;
             }
         }
-#endif
 
         override public int Size
         { // V1.2.3300, XXXParameter V1.0.3300
@@ -210,9 +189,6 @@ namespace System.Data.OleDb
             // NOTE: _parent is not cloned
             destination._direction = _direction;
             destination._size = _size;
-#if USEOFFSET
-            destination._offset                    = _offset;
-#endif
             destination._sourceColumn = _sourceColumn;
             destination._sourceVersion = _sourceVersion;
             destination._sourceColumnNullMapping = _sourceColumnNullMapping;

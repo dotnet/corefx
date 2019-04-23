@@ -321,8 +321,6 @@ namespace System.Data.OleDb
 
         override public void EnlistTransaction(SysTx.Transaction transaction)
         {
-            OleDbConnection.VerifyExecutePermission();
-
             OleDbConnection outerConnection = Connection;
             if (null != LocalTransaction)
             {
@@ -333,8 +331,6 @@ namespace System.Data.OleDb
 
         internal void EnlistTransactionInternal(SysTx.Transaction transaction)
         {
-            OleDbConnection.VerifyExecutePermission();
-
             SysTx.IDtcTransaction oleTxTransaction = ADP.GetOletxTransaction(transaction);
 
             using (ITransactionJoinWrapper transactionJoin = ITransactionJoin())

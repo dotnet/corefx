@@ -5,18 +5,22 @@
 using System.ComponentModel;
 using System.Data.Common;
 
-namespace System.Data.OleDb {
+namespace System.Data.OleDb
+{
     public sealed partial class OleDbParameterCollection : DbParameterCollection
     {
         private int _changeID;
 
         private static Type s_itemType = typeof(OleDbParameter);
 
-        internal OleDbParameterCollection() : base() {
+        internal OleDbParameterCollection() : base()
+        {
         }
 
-        internal int ChangeID {
-            get {
+        internal int ChangeID
+        {
+            get
+            {
                 return _changeID;
             }
         }
@@ -25,11 +29,14 @@ namespace System.Data.OleDb {
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)
         ]
-        public new OleDbParameter this[int index] {
-            get {
+        public new OleDbParameter this[int index]
+        {
+            get
+            {
                 return (OleDbParameter)GetParameter(index);
             }
-            set {
+            set
+            {
                 SetParameter(index, value);
             }
         }
@@ -38,73 +45,91 @@ namespace System.Data.OleDb {
         Browsable(false),
         DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)
         ]
-        public new OleDbParameter this[string parameterName] {
-            get {
+        public new OleDbParameter this[string parameterName]
+        {
+            get
+            {
                 return (OleDbParameter)GetParameter(parameterName);
             }
-            set {
+            set
+            {
                 SetParameter(parameterName, value);
             }
         }
 
-        public OleDbParameter Add(OleDbParameter value) {
+        public OleDbParameter Add(OleDbParameter value)
+        {
             Add((object)value);
             return value;
         }
 
-        [ EditorBrowsable(EditorBrowsableState.Never) ]
-        [ Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  https://go.microsoft.com/fwlink/?linkid=14202", false) ]
-        public OleDbParameter Add(string parameterName, object value) {
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Obsolete("Add(String parameterName, Object value) has been deprecated.  Use AddWithValue(String parameterName, Object value).  https://go.microsoft.com/fwlink/?linkid=14202", false)]
+        public OleDbParameter Add(string parameterName, object value)
+        {
             return Add(new OleDbParameter(parameterName, value));
         }
 
-        public OleDbParameter AddWithValue(string parameterName, object value) {
+        public OleDbParameter AddWithValue(string parameterName, object value)
+        {
             return Add(new OleDbParameter(parameterName, value));
         }
 
-        public OleDbParameter Add(string parameterName, OleDbType oleDbType) {
+        public OleDbParameter Add(string parameterName, OleDbType oleDbType)
+        {
             return Add(new OleDbParameter(parameterName, oleDbType));
         }
 
-        public OleDbParameter Add(string parameterName, OleDbType oleDbType, int size) {
+        public OleDbParameter Add(string parameterName, OleDbType oleDbType, int size)
+        {
             return Add(new OleDbParameter(parameterName, oleDbType, size));
         }
 
-        public OleDbParameter Add(string parameterName, OleDbType oleDbType, int size, string sourceColumn) {
+        public OleDbParameter Add(string parameterName, OleDbType oleDbType, int size, string sourceColumn)
+        {
             return Add(new OleDbParameter(parameterName, oleDbType, size, sourceColumn));
         }
 
-        public void AddRange(OleDbParameter[] values) { // V1.2.3300
+        public void AddRange(OleDbParameter[] values)
+        { // V1.2.3300
             AddRange((Array)values);
         }
 
-        public override bool Contains(string value) {
+        public override bool Contains(string value)
+        {
             return (-1 != IndexOf(value));
         }
 
-        public bool Contains(OleDbParameter value) {
+        public bool Contains(OleDbParameter value)
+        {
             return (-1 != IndexOf(value));
         }
 
-        public void CopyTo(OleDbParameter[] array, int index) {
+        public void CopyTo(OleDbParameter[] array, int index)
+        {
             CopyTo((Array)array, index);
         }
 
-        public int IndexOf(OleDbParameter value) {
+        public int IndexOf(OleDbParameter value)
+        {
             return IndexOf((object)value);
         }
 
-        public void Insert(int index, OleDbParameter value) {
+        public void Insert(int index, OleDbParameter value)
+        {
             Insert(index, (object)value);
         }
-        
-        private void OnChange() {
-            unchecked { _changeID++; }
+
+        private void OnChange()
+        {
+            unchecked
+            { _changeID++; }
         }
-        
-        public void Remove(OleDbParameter value) {
+
+        public void Remove(OleDbParameter value)
+        {
             Remove((object)value);
-        }    
+        }
 
     }
 }

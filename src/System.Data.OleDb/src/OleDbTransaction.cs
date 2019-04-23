@@ -120,8 +120,6 @@ namespace System.Data.OleDb
 
         internal OleDbTransaction(OleDbConnection connection, OleDbTransaction transaction, IsolationLevel isolevel)
         {
-            OleDbConnection.VerifyExecutePermission();
-
             _parentConnection = connection;
             _parentTransaction = transaction;
 
