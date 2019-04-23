@@ -65,11 +65,12 @@ namespace System.Net.Http
                 _state = StreamState.ExpectingHeaders;
 
                 _request = request;
-                _response = new HttpResponseMessage(0)
+                _response = new HttpResponseMessage()
                 {
                     Version = HttpVersion.Version20,
                     RequestMessage = request,
-                    Content = new HttpConnectionResponseContent()
+                    Content = new HttpConnectionResponseContent(),
+                    StatusCode = 0	// Set StatusCode to invalid value so we can track :status header.
                 };
 
                 _disposed = false;
@@ -152,7 +153,9 @@ namespace System.Net.Http
                             }
 
                             // Copied from HttpConnection
-                            byte status1 = value[0], status2 = value[1], status3 = value[2];
+                            byte status1 = value[0];
+                            byte status2 = value[1];
+                            byte status3 = value[2];
                             if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
                             {
                                 if (NetEventSource.IsEnabled) _connection.Trace($"Invalid status header '{System.Text.Encoding.ASCII.GetString(value)}'.");

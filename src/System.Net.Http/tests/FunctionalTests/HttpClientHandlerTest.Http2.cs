@@ -1268,8 +1268,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
         // rfc7540 8.1.2.3.
+        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2GetAsync_MultipleStatusHeaders_Throws()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -1285,8 +1285,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
         // rfc7540 8.1.2.3.
+        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2GetAsync_StatusHeaderNotFirst_Throws()
         {
             using (var server = Http2LoopbackServer.CreateServer())
@@ -1303,8 +1303,8 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [ConditionalFact(nameof(SupportsAlpn))]
         // rfc7540 8.1.2.3.
+        [ConditionalFact(nameof(SupportsAlpn))]
         public async Task Http2GetAsync_TrailigPseudo_Throw()
         {
             using (var server = Http2LoopbackServer.CreateServer())
