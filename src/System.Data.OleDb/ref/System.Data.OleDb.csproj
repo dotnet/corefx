@@ -6,7 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System.Data.OleDb.cs" />
-    <Compile Include="System.Data.OleDb.Manual.cs" />
+    <Compile Condition="'$(TargetsNetFx)' != 'true'" Include="System.Data.OleDb.Manual.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Reference Include="mscorlib" />
@@ -19,6 +19,5 @@
     <ProjectReference Include="..\..\System.Security.AccessControl\ref\System.Security.AccessControl.csproj" />
     <ProjectReference Include="..\..\System.Security.Permissions\ref\System.Security.Permissions.csproj" />
     <ProjectReference Include="..\..\System.Security.Principal.Windows\ref\System.Security.Principal.Windows.csproj" />
-   <!-- <ProjectReference Include="..\..\System.Transactions.Local\ref\System.Transactions.Local.csproj" />-->
   </ItemGroup>
 </Project>
