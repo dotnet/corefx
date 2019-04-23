@@ -125,7 +125,7 @@ namespace System.Net.Test.Common
             }
             catch (IOException)
             {
-                // eat errors when client aborts connection and rerutn null.
+                // eat errors when client aborts connection and return null.
                 return null;
             }
 
