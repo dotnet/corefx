@@ -270,7 +270,6 @@ namespace Microsoft.VisualBasic.Tests
                 yield return new object[] { 0.123, 4, TriState.UseDefault, TriState.UseDefault, TriState.UseDefault, "$0.1230" };
                 yield return new object[] { 0.123, 2, TriState.False, TriState.UseDefault, TriState.UseDefault, "$.12" };
                 yield return new object[] { 0.123, 2, TriState.True, TriState.UseDefault, TriState.UseDefault, "$0.12" };
-                yield return new object[] { -0.123, 2, TriState.UseDefault, TriState.UseDefault, TriState.UseDefault, "($0.12)" };
                 yield return new object[] { -0.123, 2, TriState.UseDefault, TriState.False, TriState.UseDefault, "-$0.12" };
                 yield return new object[] { -0.123, 2, TriState.UseDefault, TriState.True, TriState.UseDefault, "($0.12)" };
                 yield return new object[] { 1234.5, 2, TriState.UseDefault, TriState.UseDefault, TriState.UseDefault, "$1,234.50" };
