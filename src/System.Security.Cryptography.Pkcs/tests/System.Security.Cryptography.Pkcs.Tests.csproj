@@ -20,6 +20,7 @@
     <Compile Include="EnvelopedCms\EdgeCasesTests.cs" />
     <Compile Include="EnvelopedCms\GeneralTests.cs" />
     <Compile Include="EnvelopedCms\KeyAgreeRecipientInfoTests.cs" />
+    <Compile Include="EnvelopedCms\KeyTransRecipientInfoRsaOaepCertTests.cs" />
     <Compile Include="EnvelopedCms\KeyTransRecipientInfoTests.cs" />
     <Compile Include="EnvelopedCms\StateTests.cs" />
     <Compile Include="EnvelopedCms\UnprotectedAttributeTests.cs" />
