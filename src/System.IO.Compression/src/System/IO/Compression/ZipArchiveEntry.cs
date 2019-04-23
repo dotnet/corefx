@@ -804,7 +804,6 @@ namespace System.IO.Compression
                 CompressionMethod = CompressionMethodValues.Stored;
                 compressedSizeTruncated = 0;
                 uncompressedSizeTruncated = 0;
-                Debug.Assert(_compressedSize == 0 || _compressedSize == 2); // may have ETX 0x0003
                 Debug.Assert(_uncompressedSize == 0);
                 Debug.Assert(_crc32 == 0);
             }

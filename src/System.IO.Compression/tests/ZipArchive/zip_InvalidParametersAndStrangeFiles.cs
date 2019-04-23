@@ -290,7 +290,6 @@ namespace System.IO.Compression.Tests
             using (var testStream = new MemoryStream(fileBytes))
             {
                 string tmpfilename = "xl/customProperty2.bin";
-                string tmpfilepath = Path.Combine(TestDirectory, tmpfilename);
                 // open archive with zero-length file that is compressed (Deflate = 0x8)
                 using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update, leaveOpen: true))
                 {
@@ -305,11 +304,10 @@ namespace System.IO.Compression.Tests
                 // extract and check the file. should stay empty.
                 using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update))
                 {
-                    zip.ExtractToDirectory(TestDirectory, overwriteFiles: true);
-                    Assert.Equal(0, new System.IO.FileInfo(tmpfilepath).Length);
+                    ZipArchiveEntry entry = zip.GetEntry(tmpfilename);
+                    Assert.Equal(0, entry.Open().Length);
                 }
             }
-
         }
     }
 }
