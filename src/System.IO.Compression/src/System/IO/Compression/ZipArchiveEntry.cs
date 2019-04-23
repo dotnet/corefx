@@ -804,7 +804,7 @@ namespace System.IO.Compression
                 CompressionMethod = CompressionMethodValues.Stored;
                 compressedSizeTruncated = 0;
                 uncompressedSizeTruncated = 0;
-                Debug.Assert(_compressedSize == 0);
+                Debug.Assert(_compressedSize == 0 || _compressedSize == 2); // may have ETX 0x0003
                 Debug.Assert(_uncompressedSize == 0);
                 Debug.Assert(_crc32 == 0);
             }
@@ -910,18 +910,20 @@ namespace System.IO.Compression
                 }
                 else
                 {
-                    // we know the sizes at this point, so just go ahead and write the headers
-                    if (_uncompressedSize == 0)
+                    WriteLocalFileHeader(isEmptyFile: _uncompressedSize == 0);
+
+                    // according to ZIP specs, zero-byte files MUST NOT include file data
+                    if (_uncompressedSize != 0)
                     {
-                        // according to ZIP specs, zero-byte files MUST NOT include file data
-                        _compressedSize = 0;
-                        CompressionMethod = CompressionMethodValues.Stored;
+                        foreach (byte[] compressedBytes in _compressedBytes)
+                        {
+                            _archive.ArchiveStream.Write(compressedBytes, 0, compressedBytes.Length);
+                        }
                     }
-                        
-                    WriteLocalFileHeader(isEmptyFile: false);
-                    foreach (byte[] compressedBytes in _compressedBytes)
+                    else
                     {
-                        _archive.ArchiveStream.Write(compressedBytes, 0, compressedBytes.Length);
+                        // reset size to ensure proper central directory size header
+                        _compressedSize = 0;
                     }
                 }
             }

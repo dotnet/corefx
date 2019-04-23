@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Xunit;
@@ -16,7 +17,8 @@ namespace System.IO.Compression.Tests
             {
                 Assert.Throws<TException>(() =>
                 {
-                    using (ZipArchive archive = constructor()) { }
+                    using (ZipArchive archive = constructor())
+                    { }
                 });
             }
             catch (Exception e)
@@ -267,8 +269,10 @@ namespace System.IO.Compression.Tests
             0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x44, 0x00, 0x00, 0x00, 0x38, 0x00, 0x00, 0x00,
             0x00, 0x00
         };
-        internal static readonly Collections.Generic.List<byte[]> issue30317 = new Collections.Generic.List<byte[]>(){
-            EmptyFileCompressedWithETX, EmptyFileCompressedWrongSize
+        public static IEnumerable<object[]> EmptyFiles = new List<object[]>()
+        {
+            new object[] { EmptyFileCompressedWithETX },
+            new object[] { EmptyFileCompressedWrongSize }
         };
 
         /// <summary>
@@ -279,35 +283,33 @@ namespace System.IO.Compression.Tests
         /// Deflate 0x08, _uncompressedSize 0, _compressedSize 4, compressed data: 0xBAAD0300 (just bad data)
         /// ZipArchive is expected to change compression method to Stored (0x00) and ignore "bad" compressed size
         /// </summary>
-        [Fact]
-        public static void ReadArchive_WithEmptyDeflatedFile()
+        [Theory]
+        [MemberData(nameof(EmptyFiles))]
+        public void ReadArchive_WithEmptyDeflatedFile(byte[] fileBytes)
         {
-            foreach (var fileBytes in issue30317)
+            using (var testStream = new MemoryStream(fileBytes))
             {
-                using (var testStream = new MemoryStream(fileBytes))
+                string tmpfilename = "xl/customProperty2.bin";
+                string tmpfilepath = Path.Combine(TestDirectory, tmpfilename);
+                // open archive with zero-length file that is compressed (Deflate = 0x8)
+                using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update, leaveOpen: true))
                 {
-                    var tmpfilename = "xl/customProperty2.bin";
-                    var tmppathname = Path.GetTempPath();
-                    var tmpfilepath = tmppathname + tmpfilename;
-                    // open archive with zero-length file that is compressed (Deflate = 0x8)
-                    using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update, true))
-                    {
-                        // dispose without making any changes will rewrite the archive
-                    }
+                    // dispose without making any changes will rewrite the archive
+                }
 
-                    byte[] fileContent = testStream.ToArray();
+                byte[] fileContent = testStream.ToArray();
 
-                    // compression method should change to "uncompressed" (Stored = 0x0)
-                    Assert.Equal(0, fileContent[8]);
+                // compression method should change to "uncompressed" (Stored = 0x0)
+                Assert.Equal(0, fileContent[8]);
 
-                    // extract and check the file. should stay empty.
-                    using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update))
-                    {
-                        zip.ExtractToDirectory(tmppathname, overwriteFiles: true);
-                        Assert.Equal(0, new System.IO.FileInfo(tmpfilepath).Length);
-                    }
+                // extract and check the file. should stay empty.
+                using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update))
+                {
+                    zip.ExtractToDirectory(TestDirectory, overwriteFiles: true);
+                    Assert.Equal(0, new System.IO.FileInfo(tmpfilepath).Length);
                 }
             }
+
         }
     }
 }
