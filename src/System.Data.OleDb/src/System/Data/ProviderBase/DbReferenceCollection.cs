@@ -9,7 +9,6 @@ namespace System.Data.ProviderBase
 {
     internal abstract class DbReferenceCollection
     {
-
         private struct CollectionEntry
         {
             private int _tag;              // information about the reference

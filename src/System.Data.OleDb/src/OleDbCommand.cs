@@ -14,7 +14,6 @@ namespace System.Data.OleDb
 {
     public sealed class OleDbCommand : DbCommand, ICloneable, IDbCommand
     {
-
         // command data
         private string _commandText;
         private CommandType _commandType;
@@ -579,7 +578,6 @@ namespace System.Data.OleDb
             base.Dispose(disposing); // notify base classes
         }
 
-
         new public OleDbDataReader ExecuteReader()
         {
             return ExecuteReader(CommandBehavior.Default);
@@ -971,7 +969,6 @@ namespace System.Data.OleDb
                         {
                             if (null != propSet)
                             {
-
                                 bool mustRelease = false;
                                 RuntimeHelpers.PrepareConstrainedRegions();
                                 try
@@ -1242,7 +1239,6 @@ namespace System.Data.OleDb
 
                 using (PropertyIDSet propidset = new PropertyIDSet(propertySet, propertyID))
                 {
-
                     using (DBPropSet propset = new DBPropSet(icommandProperties, propidset, out hr))
                     {
                         if (hr < 0)

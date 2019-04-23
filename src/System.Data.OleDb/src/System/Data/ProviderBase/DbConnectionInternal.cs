@@ -67,7 +67,6 @@ namespace System.Data.ProviderBase
             Debug.Assert(null != owningObject, "null owningObject");
             Debug.Assert(null != connectionFactory, "null connectionFactory");
 
-
             // if an exception occurs after the state change but before the try block
             // the connection will be stuck in OpenBusy state.  The commented out try-catch
             // block doesn't really help because a ThreadAbort during the finally block

@@ -9,14 +9,12 @@ namespace System.Data.OleDb
 {
     public sealed class OleDbEnumerator
     {
-
         public OleDbEnumerator()
         {
         }
 
         public DataTable GetElements()
         {
-
             DataTable dataTable = new DataTable("MSDAENUM");
             dataTable.Locale = CultureInfo.InvariantCulture;
             OleDbDataReader dataReader = GetRootEnumerator();
@@ -26,7 +24,6 @@ namespace System.Data.OleDb
 
         static public OleDbDataReader GetEnumerator(Type type)
         {
-
             return GetEnumeratorFromType(type);
         }
 

@@ -6,7 +6,6 @@ namespace System.Data.OleDb
 {
     sealed internal class OleDbPropertySetGuid
     {
-
         private OleDbPropertySetGuid()
         {
         }

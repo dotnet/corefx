@@ -401,7 +401,6 @@ namespace System.Data.OleDb
                     object tmp = ADP.ClassesRootRegistryValue("CLSID\\{" + classidProvider.ToString("D", CultureInfo.InvariantCulture) + "}", ODB.OLEDB_SERVICES);
                     if (null != tmp)
                     {
-
                         // @devnote: some providers like MSDataShape don't have the OLEDB_SERVICES value
                         // the MSDataShape provider doesn't support the 'Ole Db Services' keyword
                         // hence, if the value doesn't exist - don't prepend to string

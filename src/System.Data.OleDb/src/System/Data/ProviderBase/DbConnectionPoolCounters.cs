@@ -4,7 +4,6 @@
 
 namespace System.Data.ProviderBase
 {
-
     using System;
     using System.Collections;
     using System.Data.Common;
@@ -19,7 +18,6 @@ namespace System.Data.ProviderBase
     {
         private static class CreationData
         {
-
             static internal readonly CounterCreationData HardConnectsPerSecond = new CounterCreationData(
                                                                         "HardConnectsPerSecond",
                                                                         "The number of actual connections per second that are being made to servers",
@@ -120,7 +118,6 @@ namespace System.Data.ProviderBase
                     }
                 }
             }
-
 
             internal void Decrement()
             {
@@ -259,7 +256,6 @@ namespace System.Data.ProviderBase
             // TODO: If you do not use GetCurrentProcessId after fixing VSDD 534795, please remove Resource* attributes from this method
             int pid = SafeNativeMethods.GetCurrentProcessId();
 
-
             // there are several characters which have special meaning
             // to PERFMON.  They recommend that we translate them as shown below, to 
             // prevent problems.
@@ -337,7 +333,6 @@ namespace System.Data.ProviderBase
 
     sealed internal class DbConnectionPoolCountersNoCounters : DbConnectionPoolCounters
     {
-
         public static readonly DbConnectionPoolCountersNoCounters SingletonInstance = new DbConnectionPoolCountersNoCounters();
 
         private DbConnectionPoolCountersNoCounters() : base()

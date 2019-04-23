@@ -10,11 +10,9 @@ using System.Threading;
 
 namespace System.Data.Common
 {
-
     [SuppressUnmanagedCodeSecurity()]
     internal static class SafeNativeMethods
     {
-
         [DllImport(Interop.Libraries.Ole32, SetLastError = false)]
         static internal extern IntPtr CoTaskMemAlloc(IntPtr cb);
 
@@ -96,7 +94,6 @@ namespace System.Data.Common
 
         sealed internal class Wrapper
         {
-
             private Wrapper() { }
 
             // SxS: clearing error information is considered safe

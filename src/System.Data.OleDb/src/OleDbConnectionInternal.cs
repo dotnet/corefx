@@ -16,7 +16,6 @@ namespace System.Data.OleDb
 
     sealed internal class OleDbConnectionInternal : DbConnectionInternal, IDisposable
     {
-
         static private volatile OleDbServicesWrapper idataInitialize;
         static private object dataInitializeLock = new object();
 
@@ -250,7 +249,6 @@ namespace System.Data.OleDb
 
         override public DbTransaction BeginTransaction(IsolationLevel isolationLevel)
         {
-
             OleDbConnection outerConnection = Connection;
             if (null != LocalTransaction)
             {
@@ -369,7 +367,6 @@ namespace System.Data.OleDb
             {
                 using (PropertyIDSet propidset = new PropertyIDSet(propertySet, propertyID))
                 {
-
                     using (DBPropSet propset = new DBPropSet(idbProperties.Value, propidset, out hr))
                     {
                         if (hr < 0)
@@ -454,10 +451,8 @@ namespace System.Data.OleDb
             }
         }
 
-
         internal DataTable BuildInfoKeywords()
         {
-
             DataTable table = new DataTable(ODB.DbInfoKeywords);
             table.Locale = CultureInfo.InvariantCulture;
             DataColumn keyword = new DataColumn(ODB.Keyword, typeof(String));
@@ -707,7 +702,6 @@ namespace System.Data.OleDb
             return Activator.CreateInstance(datalink, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance, null, null, CultureInfo.InvariantCulture, null);
         }
 
-
         // @devnote: should be multithread safe access to OleDbConnection.idataInitialize,
         // though last one wins for setting variable.  It may be different objects, but
         // OLE DB will ensure I'll work with just the single pool
@@ -780,7 +774,6 @@ namespace System.Data.OleDb
         {
             if (null != this.weakTransaction)
             {
-
                 OleDbTransaction head = (OleDbTransaction)this.weakTransaction.Target;
                 if ((null != head) && this.weakTransaction.IsAlive)
                 {
@@ -824,7 +817,6 @@ namespace System.Data.OleDb
                 throw ADP.TransactionConnectionMismatch();
             }
             // else no transaction and cmd is correct
-
 
             // if transactionObject is from this connection but zombied
             // and no transactions currently exists - then ignore the bogus object

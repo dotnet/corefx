@@ -8,12 +8,10 @@ namespace System.Data.OleDb
 {
     public sealed class OleDbRowUpdatingEventArgs : RowUpdatingEventArgs
     {
-
         public OleDbRowUpdatingEventArgs(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
         : base(dataRow, command, statementType, tableMapping)
         {
         }
-
 
         new public OleDbCommand Command
         {

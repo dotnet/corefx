@@ -12,7 +12,6 @@ namespace System.Data.OleDb
 {
     public sealed class OleDbTransaction : DbTransaction
     {
-
         private readonly OleDbTransaction _parentTransaction; // strong reference to keep parent alive
         private readonly System.Data.IsolationLevel _isolationLevel;
 
@@ -26,7 +25,6 @@ namespace System.Data.OleDb
 
         private sealed class WrappedTransaction : WrappedIUnknown
         {
-
             private bool _mustComplete;
 
             internal WrappedTransaction(UnsafeNativeMethods.ITransactionLocal transaction, int isolevel, out OleDbHResult hr) : base(transaction)
@@ -191,7 +189,6 @@ namespace System.Data.OleDb
 
         public OleDbTransaction Begin(IsolationLevel isolevel)
         {
-
             if (null == _transaction)
             {
                 throw ADP.TransactionZombied(this);
@@ -240,7 +237,6 @@ namespace System.Data.OleDb
 
         override public void Commit()
         {
-
             if (null == _transaction)
             {
                 throw ADP.TransactionZombied(this);

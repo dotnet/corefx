@@ -9,11 +9,8 @@ using System.Security;
 
 namespace System.Data.Common
 {
-
-
     internal static class UnsafeNativeMethods
     {
-
         //
         // Oleaut32
         //
@@ -26,7 +23,6 @@ namespace System.Data.Common
         [Guid("00000567-0000-0010-8000-00AA006D2EA4"), InterfaceType(ComInterfaceType.InterfaceIsDual), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ADORecordConstruction
         {
-
             [return: MarshalAs(UnmanagedType.Interface)] object get_Row();
 
             //void put_Row(
@@ -39,7 +35,6 @@ namespace System.Data.Common
         [Guid("00000283-0000-0010-8000-00AA006D2EA4"), InterfaceType(ComInterfaceType.InterfaceIsDual), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ADORecordsetConstruction
         {
-
             [return: MarshalAs(UnmanagedType.Interface)] object get_Rowset();
 
             [Obsolete("not used", true)] void put_Rowset(/*deleted parameters signature*/);
@@ -213,7 +208,6 @@ namespace System.Data.Common
         [ComImport, Guid("0C733A8C-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), SuppressUnmanagedCodeSecurity]
         internal interface IAccessor
         {
-
             [Obsolete("not used", true)] void AddRefAccessor(/*deleted parameters signature*/);
 
             /*[local]
@@ -250,7 +244,6 @@ namespace System.Data.Common
         [Guid("0C733A93-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IChapteredRowset
         {
-
             [Obsolete("not used", true)] void AddRefChapter(/*deleted parameters signature*/);
 
             /*[local]
@@ -267,7 +260,6 @@ namespace System.Data.Common
         [Guid("0C733A11-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IColumnsInfo
         {
-
             /*[local]
         	HRESULT GetColumnInfo(
         		[in, out] DBORDINAL * pcColumns,
@@ -287,7 +279,6 @@ namespace System.Data.Common
         [Guid("0C733A10-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IColumnsRowset
         {
-
             /*[local]
             HRESULT GetAvailableColumns(
                 [in, out] DBORDINAL * pcOptColumns,
@@ -319,11 +310,9 @@ namespace System.Data.Common
                 [Out, MarshalAs(UnmanagedType.Interface)] out IRowset ppColRowset);
         }
 
-
         [Guid("0C733A26-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ICommandPrepare
         {
-
             /*[local]
             HRESULT Prepare(
                 [in] ULONG cExpectedRuns
@@ -339,7 +328,6 @@ namespace System.Data.Common
         [Guid("0C733A79-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ICommandProperties
         {
-
             /*[local]
         	HRESULT GetProperties(
         		[in] const ULONG cPropertyIDSets,
@@ -368,7 +356,6 @@ namespace System.Data.Common
         [Guid("0C733A27-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ICommandText
         {
-
             /*[local]
             HRESULT Cancel(
             );*/
@@ -408,7 +395,6 @@ namespace System.Data.Common
         [Guid("0C733A64-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ICommandWithParameters
         {
-
             [Obsolete("not used", true)] void GetParameterInfo(/*deleted parameters signature*/);
 
             [Obsolete("not used", true)] void MapParameterNames(/*deleted parameter signature*/);
@@ -427,15 +413,11 @@ namespace System.Data.Common
         }
 
         [Guid("2206CCB1-19C1-11D1-89E0-00C04FD7A829"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
-        internal interface IDataInitialize
-        {
-
-        }
+        internal interface IDataInitialize { }
 
         [Guid("0C733A89-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IDBInfo
         {
-
             /*[local]
         	HRESULT	GetKeywords(
         		[out] LPOLESTR * ppwszKeywords
@@ -464,7 +446,6 @@ namespace System.Data.Common
         [Guid("0C733A8A-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IDBProperties
         {
-
             /*[local]
             HRESULT GetProperties(
                 [in] const ULONG cPropertyIDSets,
@@ -496,7 +477,6 @@ namespace System.Data.Common
         [Guid("0C733A7B-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IDBSchemaRowset
         {
-
             /*[local]
             HRESULT GetRowset(
                 [in] IUnknown * pUnkOuter,
@@ -535,7 +515,6 @@ namespace System.Data.Common
         [Guid("1CF2B120-547D-101B-8E65-08002B2BD119"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IErrorInfo
         {
-
             [Obsolete("not used", true)] void GetGUID(/*deleted parameter signature*/);
 
             [PreserveSig]
@@ -568,7 +547,6 @@ namespace System.Data.Common
         [Guid("0C733A67-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IErrorRecords
         {
-
             [Obsolete("not used", true)] void AddErrorRecord(/*deleted parameter signature*/);
 
             [Obsolete("not used", true)] void GetBasicErrorInfo(/*deleted parameter signature*/);
@@ -618,7 +596,6 @@ namespace System.Data.Common
         [Guid("0C733A90-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IMultipleResults
         {
-
             /*[local]
             HRESULT GetResult(
                 [in] IUnknown * pUnkOuter,
@@ -654,7 +631,6 @@ namespace System.Data.Common
         [Guid("0C733A69-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IOpenRowset
         {
-
             [PreserveSig]
             System.Data.OleDb.OleDbHResult OpenRowset(
                 [In] IntPtr pUnkOuter,
@@ -669,7 +645,6 @@ namespace System.Data.Common
         [Guid("0C733AB4-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IRow
         {
-
             [PreserveSig]
             System.Data.OleDb.OleDbHResult GetColumns(
                 [In] IntPtr cColumns,
@@ -682,7 +657,6 @@ namespace System.Data.Common
         [Guid("0C733A7C-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IRowset
         {
-
             [Obsolete("not used", true)] void AddRefRows(/*deleted parameter signature*/);
 
             /*HRESULT GetData(
@@ -732,7 +706,6 @@ namespace System.Data.Common
         [Guid("0C733A55-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface IRowsetInfo
         {
-
             /*[local]
             HRESULT GetProperties(
                 [in] const ULONG cPropertyIDSets,
@@ -760,7 +733,6 @@ namespace System.Data.Common
         [Guid("0C733A74-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ISQLErrorInfo
         {
-
             [return: MarshalAs(UnmanagedType.I4)]
             Int32 GetSQLInfo(
                 [Out, MarshalAs(UnmanagedType.BStr)] out String pbstrSQLState);
@@ -769,7 +741,6 @@ namespace System.Data.Common
         [Guid("0C733A5F-2A1C-11CE-ADE5-00AA0044773D"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport, SuppressUnmanagedCodeSecurity]
         internal interface ITransactionLocal
         {
-
             [Obsolete("not used", true)] void Commit(/*deleted parameter signature*/);
 
             [Obsolete("not used", true)] void Abort(/*deleted parameter signature*/);
@@ -792,7 +763,6 @@ namespace System.Data.Common
         // we do not expect native to change its vtable entry at run-time (especially since these are free-threaded objects)
         // however to be extra safe double check the function pointer is the same as the cached delegate
         // whenever we encounter a new instance of the data
-
 
         // dangerous delegate around IUnknown::QueryInterface (0th vtable entry)
         [SuppressUnmanagedCodeSecurity()]

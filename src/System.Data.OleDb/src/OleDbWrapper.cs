@@ -14,7 +14,6 @@ namespace System.Data.OleDb
     // expect 1 per app-domain
     sealed internal class OleDbServicesWrapper : WrappedIUnknown
     {
-
         // we expect to store IDataInitialize instance pointer in base.handle
 
         // since we only have one DataLinks object, caching the delegate here is valid as long we
@@ -91,7 +90,6 @@ namespace System.Data.OleDb
     // expect 1 per OleDbConnectionInternal
     sealed internal class DataSourceWrapper : WrappedIUnknown
     {
-
         // we expect to store IDBInitialize instance pointer in base.handle
 
         // construct a DataSourceWrapper and used as a ref parameter to GetDataSource
@@ -149,12 +147,10 @@ namespace System.Data.OleDb
                 // we don't ever expect DB_E_ALREADYINITIALIZED, but since we checked in V1.0 - its propagated along
                 if ((0 <= hr) || (OleDbHResult.DB_E_ALREADYINITIALIZED == hr))
                 {
-
                     // call IUnknown::QueryInterface via the delegate
                     hr = (OleDbHResult)QueryInterface(base.handle, ref ODB.IID_IDBCreateSession, ref idbCreateSession);
                     if ((0 <= hr) && (IntPtr.Zero != idbCreateSession))
                     {
-
                         // native COM rules are the QI result is the 'this' pointer
                         // the pointer stored at that location is the vtable
                         // since IDBCreateSession is a public,shipped COM interface, its layout will not change (ever)
@@ -221,12 +217,10 @@ namespace System.Data.OleDb
         }
     }
 
-
     // SafeHandle wrapper around 'Session' object which represents the session on the connection
     // expect 1 per OleDbConnectionInternal
     sealed internal class SessionWrapper : WrappedIUnknown
     {
-
         // base.handle will either reference the IUnknown interface or IDBCreateCommand interface
         // if OleDbConnectionString.DangerousIDBCreateCommandCreateCommand exists
         // the CreateSession call will ask directly for the optional IDBCreateCommand

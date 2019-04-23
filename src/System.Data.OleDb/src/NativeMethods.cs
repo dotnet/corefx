@@ -6,14 +6,11 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.Common
 {
-
     internal static class NativeMethods
     {
-
         [Guid("0c733a1e-2a1c-11ce-ade5-00aa0044773d"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown), ComImport]
         internal interface ISourcesRowset
         {
-
             [PreserveSig]
             System.Data.OleDb.OleDbHResult GetSourcesRowset(
                 [In] IntPtr pUnkOuter,
@@ -75,10 +72,9 @@ namespace System.Data.Common
             int dwSubAuthority7,                          // subauthority 7
             ref IntPtr pSid);                                   // SID
 
-
         [DllImport(Interop.Libraries.Advapi32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto, SetLastError = true)]
         static internal extern int GetLengthSid(
-            IntPtr pSid);   // SID to query
+                    IntPtr pSid);   // SID to query
 
         [DllImport(Interop.Libraries.Advapi32, ExactSpelling = true, CharSet = System.Runtime.InteropServices.CharSet.Auto, SetLastError = true)]
         static internal extern bool InitializeAcl(

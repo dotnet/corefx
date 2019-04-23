@@ -9,10 +9,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb
 {
-
     public sealed class OleDbDataAdapter : DbDataAdapter, IDbDataAdapter, ICloneable
     {
-
         static private readonly object EventRowUpdated = new object();
         static private readonly object EventRowUpdating = new object();
 

@@ -34,10 +34,8 @@ namespace System.Data.ProviderBase
         private const string _sqlCommand = "SQLCommand";
         private const string _prepareCollection = "PrepareCollection";
 
-
         public DbMetaDataFactory(Stream xmlStream, string serverVersion, string normalizedServerVersion)
         {
-
             ADP.CheckArgumentNull(xmlStream, "xmlStream");
             ADP.CheckArgumentNull(serverVersion, "serverVersion");
             ADP.CheckArgumentNull(normalizedServerVersion, "normalizedServerVersion");
@@ -64,7 +62,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-
         protected string ServerVersionNormalized
         {
             get
@@ -75,7 +72,6 @@ namespace System.Data.ProviderBase
 
         protected DataTable CloneAndFilterCollection(string collectionName, string[] hiddenColumnNames)
         {
-
             DataTable sourceTable;
             DataTable destinationTable;
             DataColumn[] filteredSourceColumns;
@@ -129,7 +125,6 @@ namespace System.Data.ProviderBase
 
         private DataTable ExecuteCommand(DataRow requestedCollectionRow, String[] restrictions, DbConnection connection)
         {
-
             DataTable metaDataCollectionsTable = _metaDataCollectionsDataSet.Tables[DbMetaDataCollectionNames.MetaDataCollections];
             DataColumn populationStringColumn = metaDataCollectionsTable.Columns[_populationString];
             DataColumn numberOfRestrictionsColumn = metaDataCollectionsTable.Columns[_numberOfRestrictions];
@@ -156,18 +151,14 @@ namespace System.Data.ProviderBase
 
             for (int i = 0; i < numberOfRestrictions; i++)
             {
-
                 DbParameter restrictionParameter = command.CreateParameter();
-
 
                 if ((restrictions != null) && (restrictions.Length > i) && (restrictions[i] != null))
                 {
-
                     restrictionParameter.Value = restrictions[i];
                 }
                 else
                 {
-
                     // This is where we have to assign null to the value of the parameter.
                     restrictionParameter.Value = DBNull.Value;
 
@@ -181,7 +172,6 @@ namespace System.Data.ProviderBase
             DbDataReader reader = null;
             try
             {
-
                 try
                 {
                     reader = command.ExecuteReader();
@@ -226,7 +216,6 @@ namespace System.Data.ProviderBase
 
         private DataColumn[] FilterColumns(DataTable sourceTable, string[] hiddenColumnNames, DataColumnCollection destinationColumns)
         {
-
             DataColumn newDestinationColumn;
             int currentColumn;
             DataColumn[] filteredSourceColumns = null;
@@ -263,7 +252,6 @@ namespace System.Data.ProviderBase
 
         internal DataRow FindMetaDataCollectionRow(string collectionName)
         {
-
             bool versionFailure;
             bool haveExactMatch;
             bool haveMultipleInexactMatches;
@@ -292,7 +280,6 @@ namespace System.Data.ProviderBase
 
             foreach (DataRow row in metaDataCollectionsTable.Rows)
             {
-
                 candidateCollectionName = row[collectionNameColumn, DataRowVersion.Current] as string;
                 if (ADP.IsEmpty(candidateCollectionName))
                 {
@@ -376,10 +363,8 @@ namespace System.Data.ProviderBase
             dataSourceInfoRow.AcceptChanges();
         }
 
-
         private string GetParameterName(string neededCollectionName, int neededRestrictionNumber)
         {
-
             DataTable restrictionsTable = null;
             DataColumnCollection restrictionColumns = null;
             DataColumn collectionName = null;
@@ -409,12 +394,10 @@ namespace System.Data.ProviderBase
 
             foreach (DataRow restriction in restrictionsTable.Rows)
             {
-
                 if (((string)restriction[collectionName] == neededCollectionName) &&
                     ((int)restriction[restrictionNumber] == neededRestrictionNumber) &&
                     (SupportedByCurrentVersion(restriction)))
                 {
-
                     result = (string)restriction[parameterName];
                     break;
                 }
@@ -447,7 +430,6 @@ namespace System.Data.ProviderBase
 
             if (ADP.IsEmptyArray(restrictions) == false)
             {
-
                 for (int i = 0; i < restrictions.Length; i++)
                 {
                     if ((restrictions[i] != null) && (restrictions[i].Length > 4096))
@@ -462,7 +444,6 @@ namespace System.Data.ProviderBase
             string populationMechanism = requestedCollectionRow[populationMechanismColumn, DataRowVersion.Current] as string;
             switch (populationMechanism)
             {
-
                 case _dataTable:
                     if (exactCollectionName == DbMetaDataCollectionNames.MetaDataCollections)
                     {
@@ -479,7 +460,6 @@ namespace System.Data.ProviderBase
                     {
                         throw ADP.TooManyRestrictions(exactCollectionName);
                     }
-
 
                     requestedSchema = CloneAndFilterCollection(exactCollectionName, hiddenColumns);
 
@@ -510,13 +490,11 @@ namespace System.Data.ProviderBase
 
         private bool IncludeThisColumn(DataColumn sourceColumn, string[] hiddenColumnNames)
         {
-
             bool result = true;
             string sourceColumnName = sourceColumn.ColumnName;
 
             switch (sourceColumnName)
             {
-
                 case _minimumVersion:
                 case _maximumVersion:
                     result = false;
@@ -555,7 +533,6 @@ namespace System.Data.ProviderBase
 
         private bool SupportedByCurrentVersion(DataRow requestedCollectionRow)
         {
-
             bool result = true;
             DataColumnCollection tableColumns = requestedCollectionRow.Table.Columns;
             DataColumn versionColumn;
@@ -602,6 +579,3 @@ namespace System.Data.ProviderBase
         }
     }
 }
-
-
-

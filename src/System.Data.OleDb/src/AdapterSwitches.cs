@@ -8,10 +8,8 @@ using System.Diagnostics;
 
 namespace System.Data.Common
 {
-
     internal static class AdapterSwitches
     {
-
         static private TraceSwitch _dataSchema;
 
         static internal TraceSwitch DataSchema

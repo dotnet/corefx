@@ -14,7 +14,6 @@ namespace System.Data.OleDb
 {
     sealed internal class ColumnBinding
     {
-
         // shared with other ColumnBindings
         private readonly OleDbDataReader _dataReader; // HCHAPTER
         private readonly RowBinding _rowbinding; // for native buffer interaction
@@ -55,7 +54,6 @@ namespace System.Data.OleDb
                                 OleDbParameter parameter, RowBinding rowbinding, Bindings bindings, tagDBBINDING binding, int offset,
                                 bool ifIRowsetElseIRow)
         {
-
             Debug.Assert(null != rowbinding, "null rowbinding");
             Debug.Assert(null != bindings, "null bindings");
             Debug.Assert(ODB.SizeOf_tagDBBINDING <= offset, "invalid offset" + offset);

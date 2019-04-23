@@ -4,7 +4,6 @@
 
 namespace System.Data.OleDb
 {
-
     internal enum OleDbPropertyStatus
     {
         Ok = 0,

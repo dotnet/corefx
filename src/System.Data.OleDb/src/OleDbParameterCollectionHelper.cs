@@ -40,7 +40,6 @@ namespace System.Data.OleDb
             }
         }
 
-
         override public object SyncRoot
         {
             get

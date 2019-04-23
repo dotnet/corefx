@@ -10,43 +10,6 @@ using System.Data.SqlClient;
 
 namespace System.Data.Common
 {
-
-    /*
-        internal sealed class NamedConnectionStringConverter : StringConverter {
-
-            public NamedConnectionStringConverter() {
-            }
-
-            public override bool GetStandardValuesSupported(ITypeDescriptorContext context) {
-                return true;
-            }
-
-            public override bool GetStandardValuesExclusive(ITypeDescriptorContext context) {
-                // Although theoretically this could be true, some people may want to just type in a name
-                return false;
-            }
-
-            public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context) {
-                StandardValuesCollection standardValues = null;
-                if (null != context) {
-                    DbConnectionStringBuilder instance = (context.Instance as DbConnectionStringBuilder);
-                    if (null != instance) {
-                        string myProviderName = instance.GetType().Namespace;
-
-                        List<string> myConnectionNames = new List<string>();
-                        foreach(System.Configuration.ConnectionStringSetting setting in System.Configuration.ConfigurationManager.ConnectionStrings) {
-                            if (myProviderName.EndsWith(setting.ProviderName)) {
-                                myConnectionNames.Add(setting.ConnectionName);
-                            }
-                        }
-                        standardValues = new StandardValuesCollection(myConnectionNames);
-                    }
-                }
-                return standardValues;
-            }
-        }
-    */
-
     internal sealed class ReadOnlyCollection<T> : System.Collections.ICollection, ICollection<T>
     {
         private T[] _items;
@@ -71,7 +34,6 @@ namespace System.Data.Common
         {
             Array.Copy(_items, 0, array, arrayIndex, _items.Length);
         }
-
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
@@ -168,7 +130,6 @@ namespace System.Data.Common
 
     internal static class DbConnectionStringBuilderUtil
     {
-
         internal static bool ConvertToBoolean(object value)
         {
             Debug.Assert(null != value, "ConvertToBoolean(null)");

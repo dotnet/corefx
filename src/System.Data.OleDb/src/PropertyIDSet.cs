@@ -6,10 +6,10 @@ using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Runtime.InteropServices;
 
-namespace System.Data.OleDb {
-
-    internal sealed class PropertyIDSet : DbBuffer {
-    
+namespace System.Data.OleDb
+{
+    internal sealed class PropertyIDSet : DbBuffer
+    {
         static private readonly int PropertyIDSetAndValueSize = ODB.SizeOf_tagDBPROPIDSET + ADP.PtrSize; // sizeof(tagDBPROPIDSET) + sizeof(int)
         static private readonly int PropertyIDSetSize = ODB.SizeOf_tagDBPROPIDSET;
 
@@ -17,7 +17,8 @@ namespace System.Data.OleDb {
 
         // the PropertyID is stored at the end of the tagDBPROPIDSET structure
         // this way only a single memory allocation is required instead of two
-        internal PropertyIDSet(Guid propertySet, int propertyID) : base(PropertyIDSetAndValueSize) {
+        internal PropertyIDSet(Guid propertySet, int propertyID) : base(PropertyIDSetAndValueSize)
+        {
             _count = 1;
 
             // rgPropertyIDs references where that PropertyID is stored
@@ -35,16 +36,20 @@ namespace System.Data.OleDb {
         }
 
         // no propertyIDs, just the propertyset guids
-        internal PropertyIDSet(Guid[] propertySets) : base(PropertyIDSetSize * propertySets.Length) {
+        internal PropertyIDSet(Guid[] propertySets) : base(PropertyIDSetSize * propertySets.Length)
+        {
             _count = propertySets.Length;
-            for(int i = 0; i < propertySets.Length; ++i) {
+            for (int i = 0; i < propertySets.Length; ++i)
+            {
                 IntPtr ptr = ADP.IntPtrOffset(base.handle, (i * PropertyIDSetSize) + ODB.OffsetOf_tagDBPROPIDSET_PropertySet);
                 Marshal.StructureToPtr(propertySets[i], ptr, false/*deleteold*/);
             }
         }
 
-        internal int Count {
-            get {
+        internal int Count
+        {
+            get
+            {
                 return _count;
             }
         }

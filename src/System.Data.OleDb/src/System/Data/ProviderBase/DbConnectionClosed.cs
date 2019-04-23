@@ -11,7 +11,6 @@ namespace System.Data.ProviderBase
 {
     abstract internal class DbConnectionClosed : DbConnectionInternal
     {
-
         // Construct an "empty" connection
         protected DbConnectionClosed(ConnectionState state, bool hidePassword, bool allowSetConnectionString) : base(state, hidePassword, allowSetConnectionString)
         {
@@ -73,7 +72,6 @@ namespace System.Data.ProviderBase
 
     abstract internal class DbConnectionBusy : DbConnectionClosed
     {
-
         protected DbConnectionBusy(ConnectionState state) : base(state, true, false)
         {
         }
@@ -126,7 +124,6 @@ namespace System.Data.ProviderBase
 
         internal override bool TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
         {
-
             if (retry == null || !retry.Task.IsCompleted)
             {
                 // retry is null if this is a synchronous call

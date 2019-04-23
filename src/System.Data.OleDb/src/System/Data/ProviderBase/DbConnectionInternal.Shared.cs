@@ -88,7 +88,6 @@ namespace System.Data.ProviderBase
                 if (((null == currentEnlistedTransaction) && (null != value))
                     || ((null != currentEnlistedTransaction) && !currentEnlistedTransaction.Equals(value)))
                 {
-
                     // Pay attention to the order here:
                     // 1) defect from any notifications
                     // 2) replace the transaction
@@ -730,7 +729,6 @@ namespace System.Data.ProviderBase
                     SysTx.Transaction currentEnlistedTransaction = _enlistedTransaction;
                     if (currentEnlistedTransaction != null && transaction.Equals(currentEnlistedTransaction))
                     {
-
                         EnlistedTransaction = null;
 
                         if (IsTxRootWaitingForTxEnd)

@@ -92,7 +92,6 @@ namespace System.Data.OleDb
 #endif
     internal sealed class tagDBBINDING
     {
-
         internal IntPtr iOrdinal;
         internal IntPtr obValue;
         internal IntPtr obLength;
@@ -156,7 +155,6 @@ namespace System.Data.OleDb
 #endif
     internal struct tagDBCOLUMNACCESS
     {
-
         internal IntPtr pData;
         internal tagDBIDX columnid;
         internal IntPtr cbDataLen;
@@ -225,7 +223,6 @@ namespace System.Data.OleDb
 #endif
     sealed internal class tagDBLITERALINFO
     {
-
         [MarshalAs(UnmanagedType.LPWStr)]
         internal String pwszLiteralValue = null;
 
@@ -355,7 +352,6 @@ namespace System.Data.OleDb
 #endif
     sealed internal class tagDBCOLUMNINFO
     {
-
         [MarshalAs(UnmanagedType.LPWStr)]
         internal String pwszName = null;
 
@@ -410,7 +406,6 @@ namespace System.Data.OleDb
 #endif
     sealed internal class tagDBPROPINFOSET
     {
-
         internal IntPtr rgPropertyInfos;
         internal Int32 cPropertyInfos;
         internal Guid guidPropertySet;
@@ -436,7 +431,6 @@ namespace System.Data.OleDb
 #endif
     sealed internal class tagDBPROPINFO
     {
-
         [MarshalAs(UnmanagedType.LPWStr)] internal string pwszDescription;
 
         internal Int32 dwPropertyID;

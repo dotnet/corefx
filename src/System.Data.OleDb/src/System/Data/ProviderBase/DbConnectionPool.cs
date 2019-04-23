@@ -62,7 +62,6 @@ namespace System.Data.ProviderBase
 
         sealed private class TransactedConnectionPool
         {
-
             Dictionary<SysTx.Transaction, TransactedConnectionList> _transactedCxns;
 
             DbConnectionPool _pool;
@@ -197,7 +196,6 @@ namespace System.Data.ProviderBase
                             }
                             else
                             {
-
                                 // add the connection/transacted object to the list
                                 newConnections.Add(transactedObject);
 
@@ -232,7 +230,6 @@ namespace System.Data.ProviderBase
 
             internal void TransactionEnded(SysTx.Transaction transaction, DbConnectionInternal transactedObject)
             {
-
                 TransactedConnectionList connections;
                 int entry = -1;
 
@@ -298,7 +295,6 @@ namespace System.Data.ProviderBase
 
         private sealed class PoolWaitHandles : DbBuffer
         {
-
             private readonly Semaphore _poolSemaphore;
             private readonly ManualResetEvent _errorEvent;
 
@@ -740,7 +736,6 @@ namespace System.Data.ProviderBase
 
         internal void Clear()
         {
-
             DbConnectionInternal obj;
 
             // First, quickly doom everything.
@@ -887,7 +882,6 @@ namespace System.Data.ProviderBase
 
         private void DeactivateObject(DbConnectionInternal obj)
         {
-
             obj.DeactivateConnection(); // we presume this operation is safe outside of a lock...
 
             bool returnToGeneralPool = false;
@@ -1030,7 +1024,6 @@ namespace System.Data.ProviderBase
             }
             else
             {
-
                 bool removed = false;
                 lock (_objectList)
                 {
@@ -1050,7 +1043,6 @@ namespace System.Data.ProviderBase
 
         private void ErrorCallback(Object state)
         {
-
             _errorOccurred = false;
             _waitHandles.ErrorEvent.Reset();
 
@@ -1063,7 +1055,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-
         // TODO: move this to src/Common and integrate with SqlClient
         // Note: OleDb connections are not passing through this code
         private Exception TryCloneCachedException()
@@ -1073,7 +1064,6 @@ namespace System.Data.ProviderBase
 
         void WaitForPendingOpen()
         {
-
             Debug.Assert(!Thread.CurrentThread.IsThreadPoolThread, "This thread may block for a long time.  Threadpool threads should not be used.");
 
             PendingGetConnection next;
@@ -1085,7 +1075,6 @@ namespace System.Data.ProviderBase
                 RuntimeHelpers.PrepareConstrainedRegions();
                 try
                 {
-
                     RuntimeHelpers.PrepareConstrainedRegions();
                     try
                     { }
@@ -1101,7 +1090,6 @@ namespace System.Data.ProviderBase
 
                     while (_pendingOpens.TryDequeue(out next))
                     {
-
                         if (next.Completion.Task.IsCompleted)
                         {
                             continue;
@@ -1184,7 +1172,6 @@ namespace System.Data.ProviderBase
 
         internal bool TryGetConnection(DbConnection owningObject, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions, out DbConnectionInternal connection)
         {
-
             uint waitForMultipleObjectsTimeout = 0;
             bool allowCreate = false;
 
@@ -1553,7 +1540,6 @@ namespace System.Data.ProviderBase
 
             if (State.Running == _state)
             {
-
                 // in case WaitForPendingOpen ever failed with no subsequent OpenAsync calls,
                 // start it back up again
                 if (!_pendingOpens.IsEmpty && _pendingOpensWaiting == 0)
@@ -1809,7 +1795,6 @@ namespace System.Data.ProviderBase
 
         internal void Startup()
         {
-
             _cleanupTimer = CreateCleanupTimer();
             if (NeedToReplenish)
             {
@@ -1819,7 +1804,6 @@ namespace System.Data.ProviderBase
 
         internal void Shutdown()
         {
-
             _state = State.ShuttingDown;
 
             // deactivate timer callbacks
@@ -1852,7 +1836,6 @@ namespace System.Data.ProviderBase
                 transactedConnectionPool.TransactionEnded(transaction, transactedObject);
             }
         }
-
 
         private DbConnectionInternal UserCreateRequest(DbConnection owningObject, DbConnectionOptions userOptions, DbConnectionInternal oldConnection = null)
         {

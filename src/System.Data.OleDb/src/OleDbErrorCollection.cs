@@ -19,7 +19,6 @@ namespace System.Data.OleDb
             UnsafeNativeMethods.IErrorRecords errorRecords = (errorInfo as UnsafeNativeMethods.IErrorRecords);
             if (null != errorRecords)
             {
-
                 int recordCount = errorRecords.GetRecordCount();
 
                 for (int i = 0; i < recordCount; ++i)

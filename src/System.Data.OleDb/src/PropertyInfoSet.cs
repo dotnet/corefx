@@ -10,7 +10,6 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb
 {
-
     sealed internal class OleDbPropertyInfo
     {
         public Guid _propertySet;
@@ -28,7 +27,6 @@ namespace System.Data.OleDb
 
     internal sealed class PropertyInfoSet : SafeHandle
     {
-
         private int setCount;
         private IntPtr descBuffer;
 

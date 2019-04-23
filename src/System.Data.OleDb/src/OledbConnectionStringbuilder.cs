@@ -12,13 +12,11 @@ using System.Text;
 
 namespace System.Data.OleDb
 {
-
     [DefaultProperty("Provider")]
     [RefreshProperties(RefreshProperties.All)]
     [TypeConverter(typeof(OleDbConnectionStringBuilder.OleDbConnectionStringBuilderConverter))]
     public sealed class OleDbConnectionStringBuilder : DbConnectionStringBuilder
     {
-
         private enum Keywords
         { // specific ordering for ConnectionString output construction
           //          NamedConnection,
@@ -219,7 +217,6 @@ namespace System.Data.OleDb
                 string[] knownKeywords = _knownKeywords;
                 if (null == knownKeywords)
                 {
-
                     Dictionary<string, OleDbPropertyInfo> dynamic = GetProviderInfo(Provider);
                     if (0 < dynamic.Count)
                     {
@@ -444,7 +441,6 @@ namespace System.Data.OleDb
                         // load provider without calling Initialize or CreateDataSource
                         using (OleDbConnectionInternal connection = new OleDbConnectionInternal(constr, (OleDbConnection)null))
                         {
-
                             // get all the init property information for the provider
                             hash = connection.GetPropertyInfo(new Guid[] { OleDbPropertySetGuid.DBInitAll });
                             foreach (KeyValuePair<string, OleDbPropertyInfo> entry in hash)
@@ -482,7 +478,6 @@ namespace System.Data.OleDb
                             {
                                 using (IDBPropertiesWrapper idbProperties = connection.IDBProperties())
                                 {
-
                                     OleDbHResult hr;
                                     using (DBPropSet propset = new DBPropSet(idbProperties.Value, propidset, out hr))
                                     {
@@ -498,7 +493,6 @@ namespace System.Data.OleDb
                                                 // attach the default property value to the property info
                                                 foreach (tagDBPROP prop in props)
                                                 {
-
                                                     foreach (KeyValuePair<string, OleDbPropertyInfo> entry in hash)
                                                     {
                                                         OleDbPropertyInfo info = entry.Value;
@@ -551,7 +545,6 @@ namespace System.Data.OleDb
 
         private sealed class OleDbProviderConverter : StringConverter
         {
-
             private const int DBSOURCETYPE_DATASOURCE_TDP = 1;
             private const int DBSOURCETYPE_DATASOURCE_MDP = 3;
 
@@ -623,7 +616,6 @@ namespace System.Data.OleDb
 
         internal sealed class OleDbServicesConverter : TypeConverter
         {
-
             private StandardValuesCollection _standardValues;
 
             // converter classes should have public ctor
@@ -716,7 +708,6 @@ namespace System.Data.OleDb
 
         sealed internal class OleDbConnectionStringBuilderConverter : ExpandableObjectConverter
         {
-
             // converter classes should have public ctor
             public OleDbConnectionStringBuilderConverter()
             {

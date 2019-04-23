@@ -48,7 +48,6 @@ namespace System.Data.ProviderBase
         /// <param name="expirationTime">The expiration time in UTC for the above accessToken.</param>
         internal DbConnectionPoolAuthenticationContext(byte[] accessToken, DateTime expirationTime)
         {
-
             Debug.Assert(accessToken != null && accessToken.Length > 0);
             Debug.Assert(expirationTime > DateTime.MinValue && expirationTime < DateTime.MaxValue);
 
@@ -65,7 +64,6 @@ namespace System.Data.ProviderBase
         /// <param name="context2">Context2</param>
         internal static DbConnectionPoolAuthenticationContext ChooseAuthenticationContextToUpdate(DbConnectionPoolAuthenticationContext context1, DbConnectionPoolAuthenticationContext context2)
         {
-
             Debug.Assert(context1 != null, "context1 should not be null.");
             Debug.Assert(context2 != null, "context2 should not be null.");
 

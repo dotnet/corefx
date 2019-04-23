@@ -13,7 +13,6 @@ namespace System.Data.OleDb
 {
     internal sealed class DualCoTaskMem : SafeHandle
     {
-
         private IntPtr handle2;   // this must be protected so derived classes can use out params.
 
         private DualCoTaskMem() : base(IntPtr.Zero, true)
@@ -49,7 +48,6 @@ namespace System.Data.OleDb
             hr = icolumnsRowset.GetAvailableColumns(out cOptColumns, out base.handle);
         }
 
-
         public override bool IsInvalid
         {
             get
@@ -81,7 +79,6 @@ namespace System.Data.OleDb
 
     internal sealed class RowHandleBuffer : DbBuffer
     {
-
         internal RowHandleBuffer(IntPtr rowHandleFetchCount) : base((int)rowHandleFetchCount * ADP.PtrSize)
         {
         }
@@ -96,7 +93,6 @@ namespace System.Data.OleDb
 
     internal sealed class StringMemHandle : DbBuffer
     {
-
         internal StringMemHandle(string value) : base((null != value) ? checked(2 + 2 * value.Length) : 0)
         {
             if (null != value)
@@ -109,7 +105,6 @@ namespace System.Data.OleDb
 
     internal sealed class ChapterHandle : WrappedIUnknown
     {
-
         internal static readonly ChapterHandle DB_NULL_HCHAPTER = new ChapterHandle(IntPtr.Zero);
         private IntPtr _chapterHandle;
 
@@ -469,7 +464,6 @@ namespace System.Data.OleDb
         [FieldOffset(0)]
         internal System.Runtime.InteropServices.ComTypes.FILETIME filetime;
 
-
         /// <summary>
         /// CLSID*   
         /// </summary>
@@ -802,7 +796,6 @@ namespace System.Data.OleDb
 
         internal static bool MemoryCompare(System.IntPtr buf1, System.IntPtr buf2, System.Int32 count)
         {
-
             Debug.Assert(buf1 != buf2, "buf1 and buf2 are the same");
             Debug.Assert(buf1.ToInt64() < buf2.ToInt64() || buf2.ToInt64() + count <= buf1.ToInt64(), "overlapping region buf1");
             Debug.Assert(buf2.ToInt64() < buf1.ToInt64() || buf1.ToInt64() + count <= buf2.ToInt64(), "overlapping region buf2");

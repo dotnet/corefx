@@ -6,10 +6,8 @@ using System.Data.Common;
 
 namespace System.Data.OleDb
 {
-
     public sealed class OleDbFactory : DbProviderFactory
     {
-
         public static readonly OleDbFactory Instance = new OleDbFactory();
 
         private OleDbFactory()

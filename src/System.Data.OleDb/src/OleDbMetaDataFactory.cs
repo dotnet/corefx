@@ -37,10 +37,8 @@ namespace System.Data.OleDb
                                     SchemaSupport[] schemaSupport) :
             base(XMLStream, serverVersion, serverVersionNormalized)
         {
-
             // set up the colletion mane schema rowset guid mapping
             _schemaMapping = new SchemaRowsetName[] {
-
                  new SchemaRowsetName(DbMetaDataCollectionNames.DataTypes,OleDbSchemaGuid.Provider_Types),
                  new SchemaRowsetName(OleDbMetaDataCollectionNames.Catalogs,OleDbSchemaGuid.Catalogs),
                  new SchemaRowsetName(OleDbMetaDataCollectionNames.Collations,OleDbSchemaGuid.Collations),
@@ -97,7 +95,6 @@ namespace System.Data.OleDb
 
             foreach (DataRow collection in metaDataCollectionsTable.Rows)
             {
-
                 string populationMechanismValue = collection[populationMechanism] as string;
                 if (ADP.IsEmpty(populationMechanismValue))
                 {
@@ -181,7 +178,6 @@ namespace System.Data.OleDb
 
         private String BuildRegularExpression(string invalidChars, string invalidStartingChars)
         {
-
             StringBuilder regularExpression = new StringBuilder("[^");
             ADP.EscapeSpecialCharacters(invalidStartingChars, regularExpression);
             regularExpression.Append("][^");
@@ -193,7 +189,6 @@ namespace System.Data.OleDb
 
         private DataTable GetDataSourceInformationTable(OleDbConnection connection, OleDbConnectionInternal internalConnection)
         {
-
             // verify that the data source information table is in the data set
             DataTable dataSourceInformationTable = CollectionDataSet.Tables[DbMetaDataCollectionNames.DataSourceInformation];
             if (dataSourceInformationTable == null)
@@ -250,12 +245,10 @@ namespace System.Data.OleDb
             dataSourceInformation[DbMetaDataColumnNames.DataSourceProductVersion] = ServerVersion;
             dataSourceInformation[DbMetaDataColumnNames.DataSourceProductVersionNormalized] = ServerVersionNormalized;
 
-
             // values that are the same for all OLE DB Providers.
             dataSourceInformation[DbMetaDataColumnNames.ParameterMarkerFormat] = "?";
             dataSourceInformation[DbMetaDataColumnNames.ParameterMarkerPattern] = "\\?";
             dataSourceInformation[DbMetaDataColumnNames.ParameterNameMaxLength] = 0;
-
 
             property = connection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_GROUPBY);
             GroupByBehavior groupByBehavior = GroupByBehavior.Unknown;
@@ -263,7 +256,6 @@ namespace System.Data.OleDb
             {
                 switch ((int)property)
                 {
-
                     case ODB.DBPROPVAL_GB_CONTAINS_SELECT:
                         groupByBehavior = GroupByBehavior.MustContainAll;
                         break;
@@ -326,7 +318,6 @@ namespace System.Data.OleDb
 
             if (quotePrefix != null)
             {
-
                 // if the quote suffix is null assume that it is the same as the prefix (See OLEDB spec
                 // IDBInfo::GetLiteralInfo DBLITERAL_QUOTE_SUFFIX.)
                 if (quoteSuffix == null)
@@ -362,7 +353,6 @@ namespace System.Data.OleDb
 
         private DataTable GetDataTypesTable(OleDbConnection connection)
         {
-
             // verify the existance of the table in the data set
             DataTable dataTypesTable = CollectionDataSet.Tables[DbMetaDataCollectionNames.DataTypes];
             if (dataTypesTable == null)
@@ -374,7 +364,6 @@ namespace System.Data.OleDb
             dataTypesTable = CloneAndFilterCollection(DbMetaDataCollectionNames.DataTypes, null);
 
             DataTable providerTypesTable = connection.GetOleDbSchemaTable(OleDbSchemaGuid.Provider_Types, null);
-
 
             DataColumn[] targetColumns = new DataColumn[] {
                 dataTypesTable.Columns[DbMetaDataColumnNames.TypeName],
@@ -422,7 +411,6 @@ namespace System.Data.OleDb
 
             DataColumn searchable = providerTypesTable.Columns["SEARCHABLE"];
 
-
             foreach (DataRow sourceRow in providerTypesTable.Rows)
             {
                 DataRow newRow = dataTypesTable.NewRow();
@@ -434,7 +422,6 @@ namespace System.Data.OleDb
                     }
                 }
 
-
                 short nativeDataType = (short)Convert.ChangeType(sourceRow[sourceOleDbType], typeof(short), CultureInfo.InvariantCulture);
                 NativeDBType nativeType = NativeDBType.FromDBType(nativeDataType, (bool)newRow[isLong], (bool)newRow[isFixed]);
 
@@ -444,16 +431,13 @@ namespace System.Data.OleDb
                 // searchable has to be special cased becasue it is not an eaxct mapping
                 if ((isSearchable != null) && (isSearchableWithLike != null) && (searchable != null))
                 {
-
                     newRow[isSearchable] = DBNull.Value;
                     newRow[isSearchableWithLike] = DBNull.Value;
                     if (DBNull.Value != sourceRow[searchable])
                     {
-
                         Int64 searchableValue = (Int64)(sourceRow[searchable]);
                         switch (searchableValue)
                         {
-
                             case ODB.DB_UNSEARCHABLE:
                                 newRow[isSearchable] = false;
                                 newRow[isSearchableWithLike] = false;
@@ -480,17 +464,14 @@ namespace System.Data.OleDb
                 dataTypesTable.Rows.Add(newRow);
             }
 
-
             dataTypesTable.AcceptChanges();
 
             return dataTypesTable;
 
         }
 
-
         private DataTable GetReservedWordsTable(OleDbConnectionInternal internalConnection)
         {
-
             // verify the existance of the table in the data set
             DataTable reservedWordsTable = CollectionDataSet.Tables[DbMetaDataCollectionNames.ReservedWords];
             if (null == reservedWordsTable)
@@ -517,7 +498,6 @@ namespace System.Data.OleDb
 
         protected override DataTable PrepareCollection(String collectionName, String[] restrictions, DbConnection connection)
         {
-
             OleDbConnection oleDbConnection = (OleDbConnection)connection;
             OleDbConnectionInternal oleDbInternalConnection = (OleDbConnectionInternal)(oleDbConnection.InnerConnection);
             DataTable resultTable = null;
@@ -551,7 +531,6 @@ namespace System.Data.OleDb
                 {
                     if (_schemaMapping[i]._schemaName == collectionName)
                     {
-
                         // need to special case the oledb schema rowset restrictions on columns that are not
                         // string tpyes
                         object[] mungedRestrictions = restrictions;
@@ -587,7 +566,6 @@ namespace System.Data.OleDb
                                 (restrictions.Length >= indexRestrictionTypeSlot + 1) &&
                                 (restrictions[indexRestrictionTypeSlot] != null))
                             {
-
                                 mungedRestrictions = new object[restrictions.Length];
                                 for (int j = 0; j < restrictions.Length; j++)
                                 {
@@ -632,7 +610,6 @@ namespace System.Data.OleDb
                                 (restrictions.Length >= procedureRestrictionTypeSlot + 1) &&
                                 (restrictions[procedureRestrictionTypeSlot] != null))
                             {
-
                                 mungedRestrictions = new object[restrictions.Length];
                                 for (int j = 0; j < restrictions.Length; j++)
                                 {
@@ -682,7 +659,6 @@ namespace System.Data.OleDb
 
         private void SetIdentifierCase(string columnName, int propertyID, DataRow row, OleDbConnection connection)
         {
-
             object property = connection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, propertyID);
             IdentifierCase identifierCase = IdentifierCase.Unknown;
             if (property != null)

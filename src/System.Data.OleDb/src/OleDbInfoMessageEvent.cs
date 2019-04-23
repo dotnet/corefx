@@ -37,7 +37,6 @@ namespace System.Data.OleDb
             return this.exception.ShouldSerializeErrors();
         }
 
-
         public string Message
         {
             get

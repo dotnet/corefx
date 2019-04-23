@@ -155,7 +155,6 @@ namespace System.Data.Common
             KeyChain = connectionOptions.KeyChain;
         }
 
-
         public string UsersConnectionString(bool hidePassword)
         {
             return UsersConnectionString(hidePassword, false);
@@ -422,7 +421,6 @@ namespace System.Data.Common
             string fullPath = null;
             if ((null != value) && value.StartsWith(DataDirectory, StringComparison.OrdinalIgnoreCase))
             {
-
                 string rootFolderPath = datadir;
                 if (null == rootFolderPath)
                 {

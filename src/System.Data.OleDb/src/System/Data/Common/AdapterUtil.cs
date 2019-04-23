@@ -1087,7 +1087,6 @@ namespace System.Data.Common
 
         static internal void EscapeSpecialCharacters(string unescapedString, StringBuilder escapedString)
         {
-
             // note special characters list is from character escapes
             // in the MSDN regular expression language elements documentation
             // added ] since escaping it seems necessary
@@ -1275,7 +1274,6 @@ namespace System.Data.Common
         // this allows the caller to determine if it is an error or not for the quotedString to not be quoted
         static internal Boolean RemoveStringQuotes(string quotePrefix, string quoteSuffix, string quotedString, out string unquotedString)
         {
-
             int prefixLength;
             if (quotePrefix == null)
             {
@@ -1400,7 +1398,6 @@ namespace System.Data.Common
                 string lowerName = uniqueName.ToLower(CultureInfo.InvariantCulture);
                 if (!hash.ContainsKey(lowerName))
                 {
-
                     columnName = uniqueName;
                     hash.Add(lowerName, index);
                     break;

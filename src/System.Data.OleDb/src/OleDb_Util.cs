@@ -13,7 +13,6 @@ namespace System.Data.OleDb
 {
     internal static class ODB
     {
-
         // OleDbCommand
         static internal void CommandParameterStatus(StringBuilder builder, int index, DBStatus status)
         {

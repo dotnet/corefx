@@ -24,7 +24,6 @@ namespace System.Data.OleDb
     [DefaultEvent("InfoMessage")]
     public sealed partial class OleDbConnection : DbConnection, ICloneable, IDbConnection
     {
-
         static private readonly object EventInfoMessage = new object();
 
         public OleDbConnection(string connectionString) : this()
@@ -366,12 +365,10 @@ namespace System.Data.OleDb
             }
         }
 
-
         // suppress this message - we cannot use SafeHandle here.
         [SuppressMessage("Microsoft.Reliability", "CA2004:RemoveCallsToGCKeepAlive")]
         override protected DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
         {
-
             DbTransaction transaction = InnerConnection.BeginTransaction(isolationLevel);
 
             // InnerConnection doesn't maintain a ref on the outer connection (this) and 
@@ -554,7 +551,6 @@ namespace System.Data.OleDb
                         Exception e = OleDbConnection.ProcessResults(hr, null, this);
                         if (OleDbHResult.DB_E_ERRORSOCCURRED == hr)
                         {
-
                             StringBuilder builder = new StringBuilder();
                             Debug.Assert(1 == propSet.PropertySetCount, "too many PropertySets");
 

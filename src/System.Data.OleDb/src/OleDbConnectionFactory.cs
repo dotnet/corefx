@@ -59,10 +59,8 @@ namespace System.Data.OleDb
 
         override protected DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
         {
-
             Debug.Assert(internalConnection != null, "internalConnection may not be null.");
             cacheMetaDataFactory = false;
-
 
             OleDbConnectionInternal oleDbInternalConnection = (OleDbConnectionInternal)internalConnection;
             OleDbConnection oleDbOuterConnection = oleDbInternalConnection.Connection;
@@ -74,7 +72,6 @@ namespace System.Data.OleDb
 
             if (settings != null)
             {
-
                 string[] values = null;
                 string metaDataXML = null;
                 // first try to get the provider specific xml

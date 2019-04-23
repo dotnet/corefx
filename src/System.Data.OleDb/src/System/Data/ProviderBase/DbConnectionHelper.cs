@@ -146,7 +146,6 @@ namespace System.Data.OleDb
             }
         }
 
-
         internal DbConnectionOptions UserConnectionOptions
         {
             get
@@ -171,7 +170,6 @@ namespace System.Data.OleDb
             InnerConnection.AddWeakReference(value, tag);
         }
 
-
         override protected DbCommand CreateDbCommand()
         {
             DbCommand command = null;
@@ -181,7 +179,6 @@ namespace System.Data.OleDb
             command.Connection = this;
             return command;
         }
-
 
         override protected void Dispose(bool disposing)
         {
@@ -222,7 +219,6 @@ namespace System.Data.OleDb
 
         override public void EnlistTransaction(SysTx.Transaction transaction)
         {
-
             // If we're currently enlisted in a transaction and we were called
             // on the EnlistTransaction method (Whidbey) we're not allowed to
             // enlist in a different transaction.

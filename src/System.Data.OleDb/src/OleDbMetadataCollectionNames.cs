@@ -4,10 +4,8 @@
 
 namespace System.Data.OleDb
 {
-
     public static class OleDbMetaDataCollectionNames
     {
-
         public static readonly string Catalogs = "Catalogs";
         public static readonly string Collations = "Collations";
         public static readonly string Columns = "Columns";

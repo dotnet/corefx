@@ -215,7 +215,6 @@ namespace System.Data.ProviderBase
                         CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                         lock (s_pendingOpenNonPooled)
                         {
-
                             // look for an available task slot (completed or empty)
                             int idx;
                             for (idx = 0; idx < s_pendingOpenNonPooled.Length; idx++)

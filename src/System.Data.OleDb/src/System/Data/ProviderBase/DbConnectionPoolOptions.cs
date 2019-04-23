@@ -4,10 +4,8 @@
 
 namespace System.Data.ProviderBase
 {
-
     internal sealed class DbConnectionPoolGroupOptions
     {
-
         private readonly bool _poolByIdentity;
         private readonly int _minPoolSize;
         private readonly int _maxPoolSize;
@@ -68,5 +66,3 @@ namespace System.Data.ProviderBase
         }
     }
 }
-
-

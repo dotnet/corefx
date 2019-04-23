@@ -16,7 +16,6 @@ namespace System.Data.OleDb
 {
     public sealed class OleDbDataReader : DbDataReader
     {
-
         private CommandBehavior _commandBehavior;
 
         private static int _objectTypeCount; // Bid counter
@@ -1208,7 +1207,6 @@ namespace System.Data.OleDb
             { throw e; }
         }
 
-
         static private IntPtr AddRecordsAffected(IntPtr recordsAffected, IntPtr affected)
         {
 #if WIN32
@@ -1258,7 +1256,6 @@ namespace System.Data.OleDb
                 object result;
                 IntPtr affected;
                 OleDbHResult hr;
-
 
                 // MSOLAP provider doesn't move onto the next result when calling GetResult with IID_NULL, but does return S_OK with 0 affected records.
                 // we want to break out of that infinite loop for ExecuteNonQuery and the multiple result Close scenarios
@@ -1325,7 +1322,6 @@ namespace System.Data.OleDb
 
         static private void NextResultsInfinite()
         {
-
             // edtriou's suggestion is that we debug assert so that users will learn of MSOLAP's misbehavior and not call ExecuteNonQuery
             Debug.Assert(false, "<oledb.OleDbDataReader.NextResultsInfinite|INFO> System.Data.OleDb.OleDbDataReader: 2000 IMultipleResult.GetResult(NULL, DBRESULTFLAG_DEFAULT, IID_NULL, NULL, NULL) iterations with 0 records affected. Stopping suspect infinite loop. To work-around try using ExecuteReader() and iterating through results with NextResult().\n");
         }
@@ -1478,7 +1474,6 @@ namespace System.Data.OleDb
 
             if (0 < (int)_rowFetchedCount)
             {
-
                 // release the data in the current row
                 Bindings[] bindings = _bindings;
                 Debug.Assert(null != bindings, "ReleaseCurrentRow: null dbBindings");
@@ -1849,7 +1844,6 @@ namespace System.Data.OleDb
 
             using (PropertyIDSet propidset = new PropertyIDSet(propertySet, propertyID))
             {
-
                 using (DBPropSet propset = new DBPropSet(irowsetinfo, propidset, out hr))
                 {
                     if (hr < 0)
@@ -2160,7 +2154,6 @@ namespace System.Data.OleDb
 
                 if ((-1 != indxIndex) && (-1 != pkeyIndex) && (-1 != uniqIndex) && (-1 != nameIndex))
                 {
-
                     DataColumn indxColumn = dataColumns[indxIndex];
                     DataColumn pkeyColumn = dataColumns[pkeyIndex];
                     DataColumn uniqCOlumn = dataColumns[uniqIndex];
@@ -2174,7 +2167,6 @@ namespace System.Data.OleDb
                     // match pkey name BaseColumnName
                     foreach (DataRow dataRow in table.Rows)
                     {
-
                         bool isPKey = (!dataRow.IsNull(pkeyColumn, DataRowVersion.Default) && (bool)dataRow[pkeyColumn, DataRowVersion.Default]);
                         bool isUniq = (!dataRow.IsNull(uniqCOlumn, DataRowVersion.Default) && (bool)dataRow[uniqCOlumn, DataRowVersion.Default]);
                         bool nullsVal = (null != nulls) && (dataRow.IsNull(nulls, DataRowVersion.Default) || (ODB.DBPROPVAL_IN_ALLOWNULL == Convert.ToInt32(dataRow[nulls, DataRowVersion.Default], CultureInfo.InvariantCulture)));
@@ -2593,7 +2585,6 @@ namespace System.Data.OleDb
 
     sealed internal class MetaData : IComparable
     {
-
         internal Bindings bindings;
         internal ColumnBinding columnBinding;
 

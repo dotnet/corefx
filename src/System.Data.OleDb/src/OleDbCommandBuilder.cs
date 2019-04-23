@@ -11,7 +11,6 @@ namespace System.Data.OleDb
 {
     public sealed class OleDbCommandBuilder : DbCommandBuilder
     {
-
         public OleDbCommandBuilder() : base()
         {
             GC.SuppressFinalize(this);
@@ -104,7 +103,6 @@ namespace System.Data.OleDb
 
         static public void DeriveParameters(OleDbCommand command)
         {
-
             if (null == command)
             {
                 throw ADP.ArgumentNull("command");
@@ -418,9 +416,7 @@ namespace System.Data.OleDb
 
         public string UnquoteIdentifier(string quotedIdentifier, OleDbConnection connection)
         {
-
             ADP.CheckArgumentNull(quotedIdentifier, "quotedIdentifier");
-
 
             // if the user has specificed a prefix use the user specified  prefix and suffix
             // otherwise get them from the provider

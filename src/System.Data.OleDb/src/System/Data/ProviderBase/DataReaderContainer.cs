@@ -9,7 +9,6 @@ namespace System.Data.ProviderBase
 {
     internal abstract class DataReaderContainer
     {
-
         protected readonly IDataReader _dataReader;
         protected int _fieldCount;
 
@@ -118,7 +117,6 @@ namespace System.Data.ProviderBase
 
         private sealed class CommonLanguageSubsetDataReader : DataReaderContainer
         {
-
             internal CommonLanguageSubsetDataReader(IDataReader dataReader) : base(dataReader)
             {
                 _fieldCount = VisibleFieldCount;

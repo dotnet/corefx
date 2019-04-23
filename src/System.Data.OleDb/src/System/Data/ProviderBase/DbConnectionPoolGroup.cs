@@ -209,8 +209,6 @@ namespace System.Data.ProviderBase
                 {
                     if (!_poolCollection.TryGetValue(currentIdentity, out pool))
                     { // find the pool
-
-
                         lock (this)
                         {
                             // Did someone already add it to the list?
@@ -303,7 +301,6 @@ namespace System.Data.ProviderBase
                             //  throttle new connection attempts.
                             if ((!pool.ErrorOccurred) && (0 == pool.Count))
                             {
-
                                 // Order is important here.  First we remove the pool
                                 // from the collection of pools so no one will try
                                 // to use it while we're processing and finally we put the

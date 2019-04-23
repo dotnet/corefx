@@ -10,10 +10,8 @@ using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb
 {
-
     sealed internal class DBPropSet : SafeHandle
     {
-
         private readonly Int32 propertySetCount;
 
         // stores the exception with last error.HRESULT from IDBProperties.GetProperties
@@ -129,11 +127,9 @@ namespace System.Data.OleDb
             base.handle = IntPtr.Zero;
             if (ADP.PtrZero != ptr)
             {
-
                 int count = this.propertySetCount;
                 for (int i = 0, offset = 0; i < count; ++i, offset += ODB.SizeOf_tagDBPROPSET)
                 {
-
                     IntPtr rgProperties = Marshal.ReadIntPtr(ptr, offset);
                     if (ADP.PtrZero != rgProperties)
                     {

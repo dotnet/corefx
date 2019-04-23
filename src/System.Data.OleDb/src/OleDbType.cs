@@ -4,10 +4,8 @@
 
 namespace System.Data.OleDb
 {
-
     public enum OleDbType
     {
-
         BigInt = 20,
         Binary = 128,
         Boolean = 11,

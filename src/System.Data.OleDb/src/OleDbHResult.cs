@@ -366,7 +366,6 @@ namespace System.Data.OleDb
         //  Form of bookmark is valid, but no row was found to match it.
         DB_E_BOOKMARKSKIPPED = unchecked((int)0x80040E43),
 
-
         // MessageId: DB_E_BADPROPERTYVALUE
         // MessageText:
         //  Property value is invalid.

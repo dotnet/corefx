@@ -10,7 +10,6 @@ namespace System.Data.OleDb
 {
     sealed internal class Bindings
     {
-
         private readonly tagDBPARAMBINDINFO[] _bindInfo;
         private readonly tagDBBINDING[] _dbbindings;
         private readonly tagDBCOLUMNACCESS[] _dbcolumns;
@@ -279,7 +278,6 @@ namespace System.Data.OleDb
 #endif
             return (indexStart + columnBindings.Length);
         }
-
 
         internal void ApplyInputParameters()
         {
