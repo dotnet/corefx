@@ -126,7 +126,7 @@ namespace System.IO.Pipelines.Tests
                     Assert.Equal(reads[index], buffer.ToArray());
                     reader.AdvanceTo(buffer.End);
                     index++;
-                    waitForRead?.TrySetResult(null);
+                    waitForRead.TrySetResult(null);
                 }
 
                 reader.Complete();
