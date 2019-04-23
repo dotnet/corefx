@@ -119,6 +119,10 @@ namespace System.Text.Json.Serialization
             }
             else
             {
+                // temporary behavior until the reader can accept escaped string.
+                byte[] utf8Key = Encoding.UTF8.GetBytes(key);
+                converter.Write(utf8Key, value, writer);
+#if false
                 byte[] pooledKey = null;
                 byte[] utf8Key = Encoding.UTF8.GetBytes(key);
                 int length = JsonWriterHelper.GetMaxEscapedLength(utf8Key.Length, 0);
@@ -133,8 +137,11 @@ namespace System.Text.Json.Serialization
 
                 if (pooledKey != null)
                 {
+                    // We clear the array because it is "user data" (although a property name).
+                    new Span<byte>(pooledKey, 0, written).Clear();
                     ArrayPool<byte>.Shared.Return(pooledKey);
                 }
+#endif
             }
         }
     }

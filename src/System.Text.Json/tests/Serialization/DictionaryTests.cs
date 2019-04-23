@@ -55,5 +55,38 @@ namespace System.Text.Json.Serialization.Tests
             // todo: this should throw a JsonReaderException
             Assert.Throws<ArgumentException>(() => JsonSerializer.Parse<Dictionary<string, string>>(@"{""Hello"":""World"", ""Hello"":""World""}"));
         }
+
+        [Fact]
+        public static void UnicodePropertyNames()
+        {
+            {
+                Dictionary<string, int> obj = JsonSerializer.Parse<Dictionary<string, int>>(@"{""Aѧ"":1}");
+                Assert.Equal(1, obj["Aѧ"]);
+
+                // Verify the name is escaped after serialize.
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(@"{""A\u0467"":1}", json);
+            }
+
+            {
+                // Max property length in C# is 511; we want to go over StackallocThreshold=256 to force a pooled allocation. This property is 400 chars and 401 bytes.
+                const int charsInProperty = 350;
+
+                string longPropertyName = new string('ѧ', charsInProperty);
+
+                Dictionary<string, int> obj = JsonSerializer.Parse<Dictionary<string, int>>($"{{\"{longPropertyName}\":1}}");
+                Assert.Equal(1, obj[longPropertyName]);
+
+                // Verify the name is escaped after serialize.
+                string json = JsonSerializer.ToString(obj);
+                string longPropertyNameEscaped = new StringBuilder().Insert(0, @"\u0467", charsInProperty).ToString();
+                string expectedJson = $"{{\"{longPropertyNameEscaped}\":1}}";
+                Assert.Equal(expectedJson, json);
+
+                // Verify the name is unescaped after deserialize.
+                obj = JsonSerializer.Parse<Dictionary<string, int>>(json);
+                Assert.Equal(1, obj[longPropertyName]);
+            }
+        }
     }
 }
