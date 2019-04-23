@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using System.Text;
 using Microsoft.VisualBasic.CompilerServices.Tests;
 using Microsoft.DotNet.RemoteExecutor;
@@ -232,6 +233,7 @@ namespace Microsoft.VisualBasic.Tests
                 yield return new object[] { true, "true/false",  "True" };
                 yield return new object[] { 0, "yes/no", "No" };
                 yield return new object[] { "ABC", "yes/no", "ABC" };
+                yield return new object[] { 123.4, "scientific", "1.23E+02" };
             }
             DateTime d = DateTime.Now;
             yield return new object[] { d, "long time", d.ToString("T") };
@@ -241,7 +243,6 @@ namespace Microsoft.VisualBasic.Tests
             yield return new object[] { d, "medium date", d.ToString("D") };
             yield return new object[] { d, "short date", d.ToString("d") };
             yield return new object[] { d, "general date", d.ToString("G") };
-            yield return new object[] { 123.4, "scientific", "1.23E+02" };
             yield return new object[] { 123.4, "general number", 123.4.ToString("G", null) };
         }
 
@@ -829,7 +830,14 @@ namespace Microsoft.VisualBasic.Tests
         [InlineData("Abc123", VbStrConv.Uppercase, 0, "ABC123")]
         public void StrConv(string str, Microsoft.VisualBasic.VbStrConv conversion, int localeID, string expected)
         {
-            Assert.Equal(expected, Strings.StrConv(str, conversion, localeID));
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                Assert.Equal(expected, Strings.StrConv(str, conversion, localeID));
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => Strings.StrConv(str, conversion, localeID));
+            }
         }
 
         [Theory]
