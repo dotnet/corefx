@@ -506,7 +506,7 @@ namespace System.Data.ProviderBase {
 
         private bool NeedToReplenish {
             get {
-                if (State.Running != _state) // SQL BU DT 364595 - don't allow connection create when not running.
+                if (State.Running != _state) // don't allow connection create when not running.
                     return false;
 
                 int totalObjects = Count;
@@ -770,7 +770,7 @@ namespace System.Data.ProviderBase {
                 // Failed to create instance
                 _resError = e;
 
-                // VSTFDEVDIV 479561: Make sure the timer starts even if ThreadAbort occurs after setting the ErrorEvent.
+                // Make sure the timer starts even if ThreadAbort occurs after setting the ErrorEvent.
 
                 // timer allocation has to be done out of CER block
                 Timer t = new Timer(new TimerCallback(this.ErrorCallback), null, Timeout.Infinite, Timeout.Infinite);
@@ -832,7 +832,7 @@ namespace System.Data.ProviderBase {
                     {
                         if ( obj.IsTransactionRoot )
                         {
-                            // SQLHotfix# 50003503 - connections that are affiliated with a 
+                            // connections that are affiliated with a 
                             //   root transaction and that also happen to be in a connection 
                             //   pool that is being shutdown need to be put in stasis so that 
                             //   the root transaction isn't effectively orphaned with no 
@@ -884,7 +884,7 @@ namespace System.Data.ProviderBase {
                         {
                             if ( obj.IsTransactionRoot && !obj.IsConnectionDoomed )
                             {
-                                // SQLHotfix# 50003503 - if the object cannot be pooled but is a transaction
+                                // if the object cannot be pooled but is a transaction
                                 //   root, then we must have hit one of two race conditions:
                                 //       1) PruneConnectionPoolGroups shutdown the pool and marked this connection 
                                 //          as non-poolable while we were processing within this lock
@@ -917,7 +917,7 @@ namespace System.Data.ProviderBase {
             }
             else if ( destroyObject )
             {
-                // VSTFDEVDIV# 479556 - connections that have been marked as no longer 
+                // connections that have been marked as no longer 
                 //   poolable (e.g. exceeded their connection lifetime) are not, in fact,
                 //   returned to the general pool
                 DestroyObject(obj);
@@ -1075,7 +1075,7 @@ namespace System.Data.ProviderBase {
             if (retry == null) {
                 waitForMultipleObjectsTimeout = (uint)CreationTimeout;
 
-                // VSTFDEVDIV 445531: set the wait timeout to INFINITE (-1) if the SQL connection timeout is 0 (== infinite)
+                // set the wait timeout to INFINITE (-1) if the SQL connection timeout is 0 (== infinite)
                 if (waitForMultipleObjectsTimeout == 0)
                     waitForMultipleObjectsTimeout = unchecked((uint)Timeout.Infinite);
 
@@ -1153,7 +1153,7 @@ namespace System.Data.ProviderBase {
                         finally {
                             waitResult = SafeNativeMethods.WaitForMultipleObjectsEx(waitHandleCount, _waitHandles.DangerousGetHandle(), false, waitForMultipleObjectsTimeout, false);
 
-                            // VSTFDEVDIV 479551 - call GetHRForLastWin32Error immediately after after the native call
+                            // call GetHRForLastWin32Error immediately after after the native call
                             if (waitResult == WAIT_FAILED) {
                                 waitForMultipleObjectsExHR = Marshal.GetHRForLastWin32Error();
                             }
@@ -1188,7 +1188,7 @@ namespace System.Data.ProviderBase {
                                 throw;
                             }
                             finally {
-                                // SQLBUDT #386664 - ensure that we release this waiter, regardless
+                                // ensure that we release this waiter, regardless
                                 // of any exceptions that may be thrown.
                                 if (null != obj) {
                                     Interlocked.Decrement(ref _waitCount);
@@ -1343,7 +1343,7 @@ namespace System.Data.ProviderBase {
                 Debug.Assert(obj != null, "null connection is not expected");
             }
 
-            // SQLBUDT #356870 -- When another thread is clearing this pool,  
+            // When another thread is clearing this pool,  
             // it will remove all connections in this pool which causes the 
             // following assert to fire, which really mucks up stress against
             //  checked bits.  The assert is benign, so we're commenting it out.  
@@ -1484,7 +1484,7 @@ namespace System.Data.ProviderBase {
         internal void PutNewObject(DbConnectionInternal obj) {
             Debug.Assert(null != obj,        "why are we adding a null object to the pool?");
 
-            // VSTFDEVDIV 742887 - When another thread is clearing this pool, it
+            // When another thread is clearing this pool, it
             // will set _cannotBePooled for all connections in this pool without prejudice which
             // causes the following assert to fire, which really mucks up stress
             // against checked bits.

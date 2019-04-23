@@ -409,7 +409,7 @@ namespace System.Data.OleDb {
 
                                     OleDbHResult hr;
                                     using(DBPropSet propset = new DBPropSet(idbProperties.Value, propidset, out hr)) {
-                                        // VSDD 671375: OleDbConnectionStringBuilder is ignoring/hiding potential errors of OLEDB provider when reading its properties information
+                                        // OleDbConnectionStringBuilder is ignoring/hiding potential errors of OLEDB provider when reading its properties information
                                         if (0 <= (int)hr) {
                                             int count = propset.PropertySetCount;
                                             for(int i = 0; i < count; ++i) {

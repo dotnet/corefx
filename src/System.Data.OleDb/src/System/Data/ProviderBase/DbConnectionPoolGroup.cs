@@ -58,7 +58,7 @@ namespace System.Data.ProviderBase
             // so it is safe to use for non-pooled connection as long as
             // we check _poolGroupOptions first
             _poolCollection = new ConcurrentDictionary<DbConnectionPoolIdentity, DbConnectionPool>();
-            _state = PoolGroupStateActive; // VSWhidbey 112102
+            _state = PoolGroupStateActive;
         }
 
         internal DbConnectionOptions ConnectionOptions {
@@ -131,7 +131,6 @@ namespace System.Data.ProviderBase
                 foreach (var entry in oldPoolCollection) {
                     DbConnectionPool pool = entry.Value;
                     if (pool != null) {
-                        // TODO: SQLBU 422890
                         //  Pruning a pool while a connection is currently attempting to connect
                         //  will cause the pool to be prematurely abandoned. The only known effect so
                         //  far is that the errorWait throttling will be reset when this occurs.
@@ -247,7 +246,6 @@ namespace System.Data.ProviderBase
                     foreach (var entry in _poolCollection) {
                         DbConnectionPool pool = entry.Value;
                         if (pool != null) {
-                            // TODO: SQLBU 422890
                             //  Pruning a pool while a connection is currently attempting to connect
                             //  will cause the pool to be prematurely abandoned. The only known effect so
                             //  far is that the errorWait throttling will be reset when this occurs.

@@ -215,7 +215,7 @@ namespace System.Data.OleDb{
             dataSourceInformation[DbMetaDataColumnNames.DataSourceProductVersionNormalized] = ServerVersionNormalized;
 
 
-                // values that are the same for all OLE DB Providers. See SQLBU 308529
+                // values that are the same for all OLE DB Providers.
                 dataSourceInformation[DbMetaDataColumnNames.ParameterMarkerFormat] =  "?";
                 dataSourceInformation[DbMetaDataColumnNames.ParameterMarkerPattern] =  "\\?";
                 dataSourceInformation[DbMetaDataColumnNames.ParameterNameMaxLength] = 0;

@@ -33,7 +33,6 @@ namespace System.Data.OleDb {
             _userConnectionOptions = connection.UserConnectionOptions;
             _poolGroup = connection.PoolGroup;
             
-            // SQLBU 432115
             //  Match the original connection's behavior for whether the connection was never opened,
             //  but ensure Clone is in the closed state.
             if (DbConnectionClosedNeverOpened.SingletonInstance == connection._innerConnection)

@@ -780,7 +780,7 @@ namespace System.Data.OleDb {
                 buffer[3],  // mid
                 buffer[1],  // high
                 (0 != (buffer[0] & unchecked((int)0x80000000))), // sign
-                unchecked((byte)((buffer[0] & unchecked((int)0x00FF0000)) >> 16))); // scale, MDAC 95080
+                unchecked((byte)((buffer[0] & unchecked((int)0x00FF0000)) >> 16))); // scale
         }
         private void Value_DECIMAL(Decimal value) {
             Debug.Assert(NativeDBType.DECIMAL == DbType, "Value_DECIMAL");

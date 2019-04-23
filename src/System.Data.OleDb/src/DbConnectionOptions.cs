@@ -58,7 +58,7 @@ namespace System.Data.Common {
             +  "((?![\\{\\s])"                                          // unquoted value must not start with { or space, would also like = but too late to change
             +   "([^;\\s\\p{Cc}]|\\s+[^;\\s\\p{Cc}])*"                  // control characters must be quoted
 
-            +  ")" // VSTFDEVDIV 94761: although the spec does not allow {}
+            +  ")" // although the spec does not allow {}
                    // embedded within a value, the retail code does.
             // +  "(?<![\\}]))"                                            // unquoted value must not stop with }
 
@@ -826,7 +826,7 @@ namespace System.Data.Common {
                     bool isEquivalent = (msg1 == msg2);
                     if (!isEquivalent)
                     {
-                        // VSTFDEVDIV 479587: we also accept cases were Regex parser (debug only) reports "wrong format" and 
+                        // we also accept cases were Regex parser (debug only) reports "wrong format" and 
                         // retail parsing code reports format exception in different location or "keyword not supported"
                         if (msg2.StartsWith(WrongFormatMessagePrefix, StringComparison.Ordinal)) {
                             if (msg1.StartsWith(KeywordNotSupportedMessagePrefix, StringComparison.Ordinal) || msg1.StartsWith(WrongFormatMessagePrefix, StringComparison.Ordinal)) {

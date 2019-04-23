@@ -228,7 +228,7 @@ namespace System.Data.OleDb {
             }
             set {
                 _designTimeInvisible = !value;
-                TypeDescriptor.Refresh(this); // VS7 208845
+                TypeDescriptor.Refresh(this);
             }
         }
 
@@ -250,7 +250,7 @@ namespace System.Data.OleDb {
 
         private bool HasParameters() {
             OleDbParameterCollection value = _parameters;
-            return (null != value) && (0 < value.Count); // VS 300569
+            return (null != value) && (0 < value.Count);
         }
 
         [
@@ -1035,7 +1035,7 @@ namespace System.Data.OleDb {
 
                     using(DBPropSet propset = new DBPropSet(icommandProperties, propidset, out hr)) {
                         if (hr < 0) {
-                            // VSDD 621427: OLEDB Data Reader masks provider specific errors by raising "Internal .Net Framework Data Provider error 30."
+                            // OLEDB Data Reader masks provider specific errors by raising "Internal Data Provider error 30."
                             // DBPropSet c-tor will register the exception and it will be raised at GetPropertySet call in case of failure
                             SafeNativeMethods.Wrapper.ClearErrorInfo();
                         }

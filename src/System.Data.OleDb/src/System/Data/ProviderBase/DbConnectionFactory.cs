@@ -184,14 +184,13 @@ namespace System.Data.ProviderBase
             DbConnectionPool connectionPool;
             connection = null;
 
-            // SQLBU 431251: 
             //  Work around race condition with clearing the pool between GetConnectionPool obtaining pool 
             //  and GetConnection on the pool checking the pool state.  Clearing the pool in this window
             //  will switch the pool into the ShuttingDown state, and GetConnection will return null.
             //  There is probably a better solution involving locking the pool/group, but that entails a major
             //  re-design of the connection pooling synchronization, so is post-poned for now.
 
-            // VSDD 674236: use retriesLeft to prevent CPU spikes with incremental sleep
+            // use retriesLeft to prevent CPU spikes with incremental sleep
             // start with one msec, double the time every retry
             // max time is: 1 + 2 + 4 + ... + 2^(retries-1) == 2^retries -1 == 1023ms (for 10 retries)
             int retriesLeft = 10;

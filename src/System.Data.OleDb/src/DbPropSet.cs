@@ -14,7 +14,7 @@ namespace System.Data.OleDb {
 
         private readonly Int32 propertySetCount;
 
-        // VSDD 621427: stores the exception with last error.HRESULT from IDBProperties.GetProperties
+        // stores the exception with last error.HRESULT from IDBProperties.GetProperties
         private Exception lastErrorFromProvider;
 
         private DBPropSet() : base(IntPtr.Zero, true) {
@@ -46,7 +46,7 @@ namespace System.Data.OleDb {
             hr = properties.GetProperties(propidsetcount, propidset, out this.propertySetCount, out base.handle);
 
             if (hr < 0) {
-                // VSDD 621427: remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
+                // remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
                 SetLastErrorInfo(hr);
             }
         }
@@ -61,7 +61,7 @@ namespace System.Data.OleDb {
             hr = properties.GetProperties(propidsetcount, propidset, out this.propertySetCount, out base.handle);
 
             if (hr < 0) {
-                // VSDD 621427: remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
+                // remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
                 SetLastErrorInfo(hr);
             }
         }
@@ -76,7 +76,7 @@ namespace System.Data.OleDb {
             hr = properties.GetProperties(propidsetcount, propidset, out this.propertySetCount, out base.handle);
 
             if (hr < 0) {
-                // VSDD 621427: remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
+                // remember the last HRESULT. Note we do not want to raise exception now to avoid breaking change from Orcas RTM/SP1
                 SetLastErrorInfo(hr);
             }
         }
@@ -135,7 +135,7 @@ namespace System.Data.OleDb {
             if ((index < 0) || (PropertySetCount <= index)) {
                 if (lastErrorFromProvider != null)
                 {
-                    // VSDD 621427: add extra error information for CSS/stress troubleshooting.
+                    // add extra error information for CSS/stress troubleshooting.
                     // We need to keep same exception type to avoid breaking change with Orcas RTM/SP1.
                     throw ADP.InternalError(ADP.InternalErrorCode.InvalidBuffer, lastErrorFromProvider);
                 }
@@ -173,7 +173,7 @@ namespace System.Data.OleDb {
         internal void SetPropertySet(int index, Guid propertySet, tagDBPROP[] properties) {
             if ((index < 0) || (PropertySetCount <= index)) {
                 if (lastErrorFromProvider != null) {
-                    // VSDD 621427: add extra error information for CSS/stress troubleshooting.
+                    // add extra error information for CSS/stress troubleshooting.
                     // We need to keep same exception type to avoid breaking change with Orcas RTM/SP1.
                     throw ADP.InternalError(ADP.InternalErrorCode.InvalidBuffer, lastErrorFromProvider);
                 }

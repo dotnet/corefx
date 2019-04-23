@@ -550,7 +550,7 @@ namespace System.Data.OleDb {
                 }
                 DumpToSchemaTable(rowset);
 
-                // VSTFDEVDIV 479576: release the rowset to avoid race condition between the GC and the user code causing
+                // release the rowset to avoid race condition between the GC and the user code causing
                 // "Connection is busy with results for another command" exception
                 if (null != rowset) {
                     Marshal.ReleaseComObject(rowset);
@@ -911,7 +911,7 @@ namespace System.Data.OleDb {
 
         override public String GetName(int index) {
             if (null != _metadata) {
-                Debug.Assert(null != _metadata[index].columnName, "MDAC 66681");
+                Debug.Assert(null != _metadata[index].columnName);
                 return _metadata[index].columnName;
             }
             throw ADP.DataReaderNoData();
@@ -1580,7 +1580,7 @@ namespace System.Data.OleDb {
 
                 using(DBPropSet propset = new DBPropSet(irowsetinfo, propidset, out hr)) {
                     if (hr < 0) {
-                        // VSDD 621427: OLEDB Data Reader masks provider specific errors by raising "Internal .Net Framework Data Provider error 30."
+                        // OLEDB Data Reader masks provider specific errors by raising "Internal Data Provider error 30."
                         // DBPropSet c-tor will register the exception and it will be raised at GetPropertySet call in case of failure
                         SafeNativeMethods.Wrapper.ClearErrorInfo();
                     }
@@ -2085,7 +2085,6 @@ namespace System.Data.OleDb {
                 visibleCount -= (int)hiddenColumns;
             }
 
-            // VSTFDevDiv 479578: 
             //  if one key column is invalidated, they all need to be invalidated. The SET is the key,
             //  and subsets likely are not accurate keys. Note the assumption that the two loops below
             //  will traverse the entire set of columns.

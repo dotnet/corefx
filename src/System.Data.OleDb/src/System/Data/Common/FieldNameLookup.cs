@@ -9,7 +9,7 @@ using System.Globalization;
 
 namespace System.Data.ProviderBase
 {
-    internal sealed class FieldNameLookup { // V1.2.3300, MDAC 69015, 71470
+    internal sealed class FieldNameLookup { // V1.2.3300
 
         // hashtable stores the index into the _fieldNames, match via case-sensitive
         private Hashtable _fieldNameLookup;
@@ -36,7 +36,7 @@ namespace System.Data.ProviderBase
             string[] fieldNames = new string[length];
             for (int i = 0; i < length; ++i) {
                 fieldNames[i] = columnNames[i];
-                Debug.Assert(null != fieldNames[i], "MDAC 66681");
+                Debug.Assert(null != fieldNames[i]);
             }
             _fieldNames = fieldNames;
             _defaultLocaleID = defaultLocaleID;
@@ -49,7 +49,7 @@ namespace System.Data.ProviderBase
             string[] fieldNames = new string[length];
             for (int i = 0; i < length; ++i) {
                 fieldNames[i] = reader.GetName(i);
-                Debug.Assert(null != fieldNames[i], "MDAC 66681");
+                Debug.Assert(null != fieldNames[i]);
             }
             _fieldNames = fieldNames;
             _defaultLocaleID = defaultLocaleID;

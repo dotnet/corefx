@@ -34,15 +34,6 @@ namespace System.Data.Common {
             Marshal.Copy(zeroes, 0, ptr, length);
         }
 
-        // <WARNING>
-        // Using the int versions of the Increment() and Decrement() methods is correct.
-        // Please check \fx\src\Data\System\Data\Odbc\OdbcHandle.cs for the memory layout.
-        // </WARNING>
-
-        // <NDPWHIDBEY 18133>
-        // The following casting operations require these three methods to be unsafe.  This is
-        // a workaround for this issue to meet the M1 exit criteria.  We need to revisit this in M2.
-
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         static internal unsafe IntPtr InterlockedExchangePointer(
                 IntPtr lpAddress,

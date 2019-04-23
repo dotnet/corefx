@@ -455,9 +455,6 @@ namespace System.Data.OleDb {
             else if (!ShouldSerializePrecision() && !ShouldSerializeScale() && ((NativeDBType.DECIMAL == _metaType.wType) || (NativeDBType.NUMERIC == _metaType.wType))) {
                 throw ADP.PrepareParameterScale(cmd, _metaType.wType.ToString("G", CultureInfo.InvariantCulture));
             }
-
-            // Disabling the assert, see Dev11 775862 for details: http://vstfdevdiv.redmond.corp.microsoft.com:8080/WorkItemTracking/WorkItem.aspx?artifactMoniker=775862
-            // Debug.Assert(false, "OleDbParameter.Prepare didn't throw");
         }
 
         [

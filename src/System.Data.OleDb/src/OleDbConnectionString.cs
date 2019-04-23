@@ -326,7 +326,7 @@ namespace System.Data.OleDb {
             progid = ConvertValueToString(KEY.Provider, ADP.StrEmpty).Trim();
             ValidateProvider(progid); // will fail on empty 'Provider' value
 
-            // SQLBU VSTS 59322: initialize to default
+            // initialize to default
             // If the value is not provided in connection string and OleDbServices registry key has not been set by the provider,
             // the default for the provider is -1 (all services are ON).
             // our default is -13, we turn off ODB.DBPROPVAL_OS_AGR_AFTERSESSION and ODB.DBPROPVAL_OS_CLIENTCURSOR flags
@@ -353,7 +353,7 @@ namespace System.Data.OleDb {
                         catch(InvalidCastException e) {
                             ADP.TraceExceptionWithoutRethrow(e);
                         }
-                        _oledbServices &= ~(ODB.DBPROPVAL_OS_AGR_AFTERSESSION | ODB.DBPROPVAL_OS_CLIENTCURSOR); // NT 347436, MDAC 58606
+                        _oledbServices &= ~(ODB.DBPROPVAL_OS_AGR_AFTERSESSION | ODB.DBPROPVAL_OS_CLIENTCURSOR);
 
                         StringBuilder builder = new StringBuilder();
                         builder.Append(KEY.Ole_DB_Services);
@@ -366,7 +366,7 @@ namespace System.Data.OleDb {
                 }
             }
             else {
-                // SQLBU VSTS 59322: parse the Ole Db Services value from connection string
+                // parse the Ole Db Services value from connection string
                 _oledbServices = ConvertValueToInt32(KEY.Ole_DB_Services, DbConnectionStringDefaults.OleDbServices);
             }
 

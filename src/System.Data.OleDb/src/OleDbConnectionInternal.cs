@@ -318,7 +318,7 @@ namespace System.Data.OleDb {
 
                     using(DBPropSet propset = new DBPropSet(idbProperties.Value, propidset, out hr)) {
                         if (hr < 0) {
-                            // VSDD 621427: OLEDB Data Reader masks provider specific errors by raising "Internal .Net Framework Data Provider error 30."
+                            // OLEDB Data Reader masks provider specific errors by raising "Internal Data Provider error 30."
                             // DBPropSet c-tor will register the exception and it will be raised at GetPropertySet call in case of failure
                             SafeNativeMethods.Wrapper.ClearErrorInfo();
                         }

@@ -96,7 +96,7 @@ namespace System.Data.ProviderBase
                     // 2) replace the transaction
                     // 3) re-enlist in notifications for the new transaction
 
-                    // SQLBUDT #230558 we need to use a clone of the transaction
+                    // we need to use a clone of the transaction
                     // when we store it, or we'll end up keeping it past the
                     // duration of the using block of the TransactionScope
                     SysTx.Transaction valueClone = null;
@@ -137,7 +137,7 @@ namespace System.Data.ProviderBase
                     {
                         // we really need to dispose our clones; they may have
                         // native resources and GC may not happen soon enough.
-                        // VSDevDiv 479564: don't dispose if still holding reference in _enlistedTransaction
+                        // don't dispose if still holding reference in _enlistedTransaction
                         if (null != previousTransactionClone &&
                                 !Object.ReferenceEquals(previousTransactionClone, _enlistedTransaction))
                         {
@@ -649,7 +649,7 @@ namespace System.Data.ProviderBase
 
             Debug.Assert(!IsEmancipated, "pooled object not in pool");
 
-            // SQLBUDT #356871 -- When another thread is clearing this pool, it 
+            // When another thread is clearing this pool, it 
             // will doom all connections in this pool without prejudice which 
             // causes the following assert to fire, which really mucks up stress 
             // against checked bits.  The assert is benign, so we're commenting 

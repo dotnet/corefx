@@ -25,7 +25,7 @@ namespace System.Data.OleDb {
                 RuntimeHelpers.PrepareConstrainedRegions();
                 try { } finally {
                     // store the QI result for IID_IDataInitialize
-                    base.handle = Marshal.GetComInterfaceForObject(unknown, typeof(UnsafeNativeMethods.IDataInitialize)); // TODO: this method should be marked with a reliability contract.
+                    base.handle = Marshal.GetComInterfaceForObject(unknown, typeof(UnsafeNativeMethods.IDataInitialize));
                 }
                 // native COM rules are the QI result is the 'this' pointer
                 // the pointer stored at that location is the vtable
@@ -215,7 +215,7 @@ namespace System.Data.OleDb {
 
             // caching the fact if we have queried for IDBCreateCommand or not
             // the command object is not supported by all providers, they would use IOpenRowset
-            // SQLBU:446413, SQLHotfix:1138 -- added extra if condition
+            // added extra if condition
             // If constr.HaveQueriedForCreateCommand is false, this is the first time through this method and we need to set up the cache for sure.
             // If two threads try to set the cache at the same time, everything should be okay. There can be multiple delegates that point to the same unmanaged function.
             // If constr.HaveQueriedForCreateCommand is true, we have already tried to query for IDBCreateCommand on a previous call to this method, but based on that alone,
