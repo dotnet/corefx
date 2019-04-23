@@ -209,7 +209,6 @@ namespace System.Collections.ObjectModel
             OnCollectionChanged(NotifyCollectionChangedAction.Replace, itemsToReplace, newItems, index);
         }
 
-
         /// <summary>
         /// Called by base class Collection&lt;T&gt; when an item is added to list;
         /// raises a CollectionChanged event to any listeners.
