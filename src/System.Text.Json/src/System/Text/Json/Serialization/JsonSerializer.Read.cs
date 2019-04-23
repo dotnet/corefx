@@ -75,7 +75,7 @@ namespace System.Text.Json.Serialization
                 }
                 else if (tokenType == JsonTokenType.StartObject)
                 {
-                    HandleStartObject(options, ref state);
+                    HandleStartObject(options, ref reader, ref state);
                 }
                 else if (tokenType == JsonTokenType.EndObject)
                 {

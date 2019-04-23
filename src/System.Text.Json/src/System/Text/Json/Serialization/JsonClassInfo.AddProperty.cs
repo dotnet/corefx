@@ -9,6 +9,11 @@ namespace System.Text.Json.Serialization
 {
     internal partial class JsonClassInfo
     {
+        private JsonPropertyInfo AddPolicyProperty(Type propertyType, JsonSerializerOptions options)
+        {
+            return AddProperty(propertyType, propertyInfo : null, classType : propertyType, options);
+
+        }
         private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
         {
             JsonPropertyInfo jsonInfo = CreateProperty(propertyType, propertyType, propertyInfo, classType, options);

@@ -40,42 +40,40 @@ namespace System.Text.Json.Serialization
                 ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(arrayType, reader, state);
             }
 
-            Debug.Assert(state.Current.IsPropertyEnumerable());
-            if (state.Current.IsPropertyEnumerable())
+            Debug.Assert(state.Current.IsPropertyEnumerable() || state.Current.IsDictionary());
+
+            if (state.Current.EnumerableCreated)
             {
-                if (state.Current.EnumerableCreated)
+                // A nested json array so push a new stack frame.
+                Type elementType = state.Current.JsonClassInfo.ElementClassInfo.GetPolicyProperty().RuntimePropertyType;
+
+                state.Push();
+
+                state.Current.Initialize(elementType, options);
+                state.Current.PopStackOnEnd = true;
+            }
+            else
+            {
+                state.Current.EnumerableCreated = true;
+            }
+
+            jsonPropertyInfo = state.Current.JsonPropertyInfo;
+
+            // If current property is already set (from a constructor, for example) leave as-is.
+            if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
+            {
+                // Create the enumerable.
+                object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
+                if (value != null)
                 {
-                    // A nested json array so push a new stack frame.
-                    Type elementType = state.Current.JsonClassInfo.ElementClassInfo.GetPolicyProperty().RuntimePropertyType;
-
-                    state.Push();
-
-                    state.Current.Initialize(elementType, options);
-                    state.Current.PopStackOnEndArray = true;
-                }
-                else
-                {
-                    state.Current.EnumerableCreated = true;
-                }
-
-                jsonPropertyInfo = state.Current.JsonPropertyInfo;
-
-                // If current property is already set (from a constructor, for example) leave as-is
-                if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue, options) == null)
-                {
-                    // Create the enumerable.
-                    object value = ReadStackFrame.CreateEnumerableValue(ref reader, ref state, options);
-                    if (value != null)
+                    if (state.Current.ReturnValue != null)
                     {
-                        if (state.Current.ReturnValue != null)
-                        {
-                            state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value, options);
-                        }
-                        else
-                        {
-                            // Primitive arrays being returned without object
-                            state.Current.SetReturnValue(value, options);
-                        }
+                        state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
+                    }
+                    else
+                    {
+                        // Primitive arrays being returned without object
+                        state.Current.SetReturnValue(value);
                     }
                 }
             }
@@ -117,8 +115,8 @@ namespace System.Text.Json.Serialization
                 setPropertyDirectly = false;
             }
 
-            bool valueReturning = state.Current.PopStackOnEndArray;
-            if (state.Current.PopStackOnEndArray)
+            bool valueReturning = state.Current.PopStackOnEnd;
+            if (state.Current.PopStackOnEnd)
             {
                 state.Pop();
             }
@@ -132,7 +130,7 @@ namespace System.Text.Json.Serialization
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsEnumerable())
+                else if (state.Current.IsEnumerable() || state.Current.IsDictionary())
                 {
                     // Returning a non-converted list.
                     return true;
@@ -174,23 +172,18 @@ namespace System.Text.Json.Serialization
                 }
                 else
                 {
-                    ((IList)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
+                    ((IList)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(value);
                 }
             }
             else if (frame.IsDictionary())
             {
-                ((IDictionary)frame.ReturnValue).Add(frame.KeyName, value);
-            }
-            else if (frame.IsPropertyADictionary())
-            {
-                Debug.Assert(frame.JsonPropertyInfo != null);
                 Debug.Assert(frame.ReturnValue != null);
-                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
+                ((IDictionary)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(frame.KeyName, value);
             }
             else
             {
                 Debug.Assert(frame.JsonPropertyInfo != null);
-                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
+                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value);
             }
         }
 
@@ -221,24 +214,18 @@ namespace System.Text.Json.Serialization
                 }
                 else
                 {
-                    ((IList<TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(value);
+                    ((IList<TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(value);
                 }
             }
             else if (frame.IsDictionary())
             {
-                // todo: use TryAdd and throw JsonReaderException
-                ((IDictionary<string, TProperty>)frame.ReturnValue).Add(frame.KeyName, value);
-            }
-            else if (frame.IsPropertyADictionary())
-            {
-                Debug.Assert(frame.JsonPropertyInfo != null);
                 Debug.Assert(frame.ReturnValue != null);
-                ((IDictionary<string, TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue, options)).Add(frame.KeyName, value);
+                ((IDictionary<string, TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(frame.KeyName, value);
             }
             else
             {
                 Debug.Assert(frame.JsonPropertyInfo != null);
-                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value, options);
+                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value);
             }
         }
     }
