@@ -369,6 +369,9 @@
   <data name="SQL_InvalidDataLength" xml:space="preserve">
     <value>Data length '{0}' is less than 0.</value>
   </data>
+  <data name="PlatformNotSupported_OleDb" xml:space="preserve">
+    <value>System.Data.OleDb is not supported on this platform.</value>
+  </data>
   <data name="PlatformNotSupported_GetIDispatchForObject" xml:space="preserve">
     <value>Marshal.GetIDispatchForObject API not available on this plaTform</value>
   </data>

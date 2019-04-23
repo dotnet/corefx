@@ -78,9 +78,6 @@ namespace System.Data.OleDb
         public OleDbConnection() { }
         public OleDbConnection(string connectionString) { }
         [System.ComponentModel.DefaultValueAttribute("")]
-#pragma warning disable 618
-        [System.ComponentModel.RecommendedAsConfigurableAttribute(true)]
-#pragma warning restore 618
         [System.ComponentModel.RefreshPropertiesAttribute(System.ComponentModel.RefreshProperties.All)]
         [System.ComponentModel.SettingsBindableAttribute(true)]
         public override string ConnectionString { get { throw null; } set { } }
