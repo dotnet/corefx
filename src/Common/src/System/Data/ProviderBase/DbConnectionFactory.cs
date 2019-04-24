@@ -246,7 +246,7 @@ namespace System.Data.ProviderBase
                         try
                         {
                             connectionPoolGroup = newConnectionPoolGroup;
-                            _connectionPoolGroups = newConnectionPoolGroups;
+                            Interlocked.Exchange(ref _connectionPoolGroups, newConnectionPoolGroups);
                         }
                         finally
                         {
@@ -351,7 +351,7 @@ namespace System.Data.ProviderBase
                         }
                     }
                 }
-                _connectionPoolGroups = newConnectionPoolGroups;
+                Interlocked.Exchange(ref _connectionPoolGroups, newConnectionPoolGroups);
             }
             finally
             {
