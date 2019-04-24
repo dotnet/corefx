@@ -9,9 +9,9 @@ namespace Microsoft.VisualBasic
 {
     public enum CallType
     {
+        Method = 1,
         Get = 2,
         Let = 4,
-        Method = 1,
         Set = 8,
     }
     public sealed partial class Collection : System.Collections.ICollection, System.Collections.IEnumerable, System.Collections.IList
@@ -69,6 +69,7 @@ namespace Microsoft.VisualBasic
         public const Microsoft.VisualBasic.CompareMethod vbBinaryCompare = Microsoft.VisualBasic.CompareMethod.Binary;
         public const string vbCr = "\r";
         public const string vbCrLf = "\r\n";
+        public const TriState vbFalse = TriState.False;
         public const string vbFormFeed = "\f";
         public const string vbLf = "\n";
         [System.ObsoleteAttribute("For a carriage return and line feed, use vbCrLf.  For the current platform's newline, use System.Environment.NewLine.")]
@@ -77,6 +78,8 @@ namespace Microsoft.VisualBasic
         public const string vbNullString = null;
         public const string vbTab = "\t";
         public const Microsoft.VisualBasic.CompareMethod vbTextCompare = Microsoft.VisualBasic.CompareMethod.Text;
+        public const TriState vbTrue = TriState.True;
+        public const TriState vbUseDefault = TriState.UseDefault;
         public const string vbVerticalTab = "\v";
     }
     public sealed partial class ControlChars
@@ -94,11 +97,72 @@ namespace Microsoft.VisualBasic
         public ControlChars() { }
     }
     [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class Conversion
+    {
+        internal Conversion() { }
+        public static TargetType CTypeDynamic<TargetType>(object Expression) { throw null; }
+        public static object CTypeDynamic(object Expression, System.Type TargetType) { throw null; }
+        public static string ErrorToString() { throw null; }
+        public static string ErrorToString(int ErrorNumber) { throw null; }
+        public static int Fix(int Number) { throw null; }
+        public static long Fix(long Number) { throw null; }
+        public static double Fix(double Number) { throw null; }
+        public static float Fix(float Number) { throw null; }
+        public static decimal Fix(decimal Number) { throw null; }
+        public static object Fix(object Number) { throw null; }
+        public static short Fix(short Number) { throw null; }
+        public static string Hex(object Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(ulong Number) { throw null; }
+        public static string Hex(long Number) { throw null; }
+        public static string Hex(int Number) { throw null; }
+        public static string Hex(short Number) { throw null; }
+        public static string Hex(byte Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(uint Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(ushort Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Hex(sbyte Number) { throw null; }
+        public static short Int(short Number) { throw null; }
+        public static int Int(int Number) { throw null; }
+        public static object Int(object Number) { throw null; }
+        public static double Int(double Number) { throw null; }
+        public static float Int(float Number) { throw null; }
+        public static long Int(long Number) { throw null; }
+        public static decimal Int(decimal Number) { throw null; }
+        public static string Oct(object Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(ulong Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(uint Number) { throw null; }
+        public static string Oct(long Number) { throw null; }
+        public static string Oct(short Number) { throw null; }
+        public static string Oct(byte Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(sbyte Number) { throw null; }
+        public static string Oct(int Number) { throw null; }
+        [System.CLSCompliant(false)]
+        public static string Oct(ushort Number) { throw null; }
+        public static string Str(object Number) { throw null; }
+        public static double Val(string InputStr) { throw null; }
+        public static int Val(char Expression) { throw null; }
+        public static double Val(object Expression) { throw null; }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
     public sealed partial class DateAndTime
     {
         internal DateAndTime() { }
         public static System.DateTime Now { get { throw null; } }
         public static System.DateTime Today { get { throw null; } }
+    }
+    public enum DateFormat
+    {
+        GeneralDate = 0,
+        LongDate = 1,
+        LongTime = 3,
+        ShortDate = 2,
+        ShortTime = 4,
     }
     public sealed partial class ErrObject
     {
@@ -133,9 +197,16 @@ namespace Microsoft.VisualBasic
         public static int QBColor(int Color) { throw null; }
         public static int RGB(int Red, int Green, int Blue) { throw null; }
         public static string SystemTypeName(string VbName) { throw null; }
+        public static string TypeName(object VarName) { throw null; }
         public static int UBound(System.Array Array, int Rank = 1) { throw null; }
         public static Microsoft.VisualBasic.VariantType VarType(object VarName) { throw null; }
         public static string VbTypeName(string UrtName) { throw null; }
+    }
+    [Microsoft.VisualBasic.CompilerServices.StandardModuleAttribute]
+    public sealed partial class Interaction
+    {
+        internal Interaction() { }
+        public static object CallByName(object ObjectRef, string ProcName, CallType UseCallType, params object[] Args) { throw null; }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, AllowMultiple=false, Inherited=false)]
     [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
@@ -159,9 +230,19 @@ namespace Microsoft.VisualBasic
         public static char ChrW(int CharCode) { throw null; }
         public static string[] Filter(object[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute]Microsoft.VisualBasic.CompareMethod Compare = Microsoft.VisualBasic.CompareMethod.Binary) { throw null; }
         public static string[] Filter(string[] Source, string Match, bool Include = true, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute]Microsoft.VisualBasic.CompareMethod Compare = Microsoft.VisualBasic.CompareMethod.Binary) { throw null; }
+        public static string Format(object Expression, string Style = "") { throw null; }
+        public static string FormatCurrency(object Expression, int NumDigitsAfterDecimal = -1, TriState IncludeLeadingDigit = TriState.UseDefault, TriState UseParensForNegativeNumbers = TriState.UseDefault, TriState GroupDigits = TriState.UseDefault) { throw null; }
+        public static string FormatDateTime(System.DateTime Expression, DateFormat NamedFormat = DateFormat.GeneralDate) { throw null; }
+        public static string FormatNumber(object Expression, int NumDigitsAfterDecimal = -1, TriState IncludeLeadingDigit = TriState.UseDefault, TriState UseParensForNegativeNumbers = TriState.UseDefault, TriState GroupDigits = TriState.UseDefault) { throw null; }
+        public static string FormatPercent(object Expression, int NumDigitsAfterDecimal = -1, TriState IncludeLeadingDigit = TriState.UseDefault, TriState UseParensForNegativeNumbers = TriState.UseDefault, TriState GroupDigits = TriState.UseDefault) { throw null; }
+        public static char GetChar(string str, int Index) { throw null; }
         public static int InStr(int StartPos, string String1, string String2, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute]Microsoft.VisualBasic.CompareMethod Compare = Microsoft.VisualBasic.CompareMethod.Binary) { throw null; }
         public static int InStr(string String1, string String2, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute]Microsoft.VisualBasic.CompareMethod Compare = Microsoft.VisualBasic.CompareMethod.Binary) { throw null; }
         public static int InStrRev(string StringCheck, string StringMatch, int Start = -1, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute]Microsoft.VisualBasic.CompareMethod Compare = Microsoft.VisualBasic.CompareMethod.Binary) { throw null; }
+        public static string Join(object[] SourceArray, string Delimiter = " ") { throw null; }
+        public static string Join(string[] SourceArray, string Delimiter = " ") { throw null; }
+        public static char LCase(char Value) { throw null; }
+        public static string LCase(string Value) { throw null; }
         public static string Left(string str, int Length) { throw null; }
         public static int Len(bool Expression) { throw null; }
         public static int Len(byte Expression) { throw null; }
@@ -183,36 +264,54 @@ namespace Microsoft.VisualBasic
         public static int Len(uint Expression) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static int Len(ulong Expression) { throw null; }
+        public static string LSet(string Source, int Length) { throw null; }
         public static string LTrim(string str) { throw null; }
         public static string Mid(string str, int Start) { throw null; }
         public static string Mid(string str, int Start, int Length) { throw null; }
+        public static string Replace(string Expression, string Find, string Replacement, int Start = 1, int Count = -1, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute] CompareMethod Compare = CompareMethod.Binary) { throw null; }
         public static string Right(string str, int Length) { throw null; }
+        public static string RSet(string Source, int Length) { throw null; }
         public static string RTrim(string str) { throw null; }
+        public static string Space(int Number) { throw null; }
+        public static string[] Split(string Expression, string Delimiter = " ", int Limit = -1, [Microsoft.VisualBasic.CompilerServices.OptionCompareAttribute] CompareMethod Compare = CompareMethod.Binary) { throw null; }
         public static int StrComp(string String1, string String2, CompareMethod Compare = CompareMethod.Binary) { throw null; }
+        public static string StrConv(string str, Microsoft.VisualBasic.VbStrConv Conversion, int LocaleID = 0) { throw null; }
+        public static string StrDup(int Number, char Character) { throw null; }
+        public static object StrDup(int Number, object Character) { throw null; }
+        public static string StrDup(int Number, string Character) { throw null; }
+        public static string StrReverse(string Expression) { throw null; }
         public static string Trim(string str) { throw null; }
+        public static char UCase(char Value) { throw null; }
+        public static string UCase(string Value) { throw null; }
+    }
+    public enum TriState
+    {
+        False = 0,
+        True = -1,
+        UseDefault = -2,
     }
     public enum VariantType
     {
-        Array = 8192,
+        Empty = 0,
+        Null = 1,
+        Short = 2,
+        Integer = 3,
+        Single = 4,
+        Double = 5,
+        Currency = 6,
+        Date = 7,
+        String = 8,
+        Object = 9,
+        Error = 10,
         Boolean = 11,
+        Variant = 12,
+        DataObject = 13,
+        Decimal = 14,
         Byte = 17,
         Char = 18,
-        Currency = 6,
-        DataObject = 13,
-        Date = 7,
-        Decimal = 14,
-        Double = 5,
-        Empty = 0,
-        Error = 10,
-        Integer = 3,
         Long = 20,
-        Null = 1,
-        Object = 9,
-        Short = 2,
-        Single = 4,
-        String = 8,
         UserDefinedType = 36,
-        Variant = 12,
+        Array = 8192,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Field, Inherited=false, AllowMultiple=false)]
     public sealed partial class VBFixedArrayAttribute : System.Attribute
@@ -237,9 +336,33 @@ namespace Microsoft.VisualBasic
         public static float Rnd() { throw null; }
         public static float Rnd(float Number) { throw null; }
     }
+    [System.FlagsAttribute]
+    public enum VbStrConv
+    {
+        Hiragana = 32,
+        Katakana = 16,
+        LinguisticCasing = 1024,
+        Lowercase = 2,
+        Narrow = 8,
+        None = 0,
+        ProperCase = 3,
+        SimplifiedChinese = 256,
+        TraditionalChinese = 512,
+        Uppercase = 1,
+        Wide = 4,
+    }
 }
 namespace Microsoft.VisualBasic.ApplicationServices
 {
+    public partial class ApplicationBase
+    {
+        public ApplicationBase() { }
+        public void ChangeCulture(string cultureName) { throw null; }
+        public void ChangeUICulture(string cultureName) { throw null; }
+        public System.Globalization.CultureInfo Culture { get { throw null; } }
+        public System.Globalization.CultureInfo UICulture { get { throw null; } }
+        public string GetEnvironmentVariable(string name) { throw null; }
+    }
     public partial class StartupEventArgs : System.ComponentModel.CancelEventArgs
     {
         public StartupEventArgs(System.Collections.ObjectModel.ReadOnlyCollection<string> args) { }
@@ -257,6 +380,16 @@ namespace Microsoft.VisualBasic.ApplicationServices
     {
         public UnhandledExceptionEventArgs(bool exitApplication, System.Exception exception) : base (default(System.Exception)) { }
         public bool ExitApplication { get { throw null; } set { } }
+    }
+    public partial class User
+    {
+        public User() { }
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Advanced)]
+        public System.Security.Principal.IPrincipal CurrentPrincipal { get { throw null; } set { } }
+        protected virtual System.Security.Principal.IPrincipal InternalPrincipal { get { throw null; } set { } }
+        public bool IsAuthenticated { get { throw null; } }
+        public bool IsInRole(string role) { throw null; }
+        public string Name { get { throw null; } }
     }
 }
 namespace Microsoft.VisualBasic.CompilerServices
@@ -582,6 +715,7 @@ namespace Microsoft.VisualBasic.CompilerServices
         internal ProjectData() { }
         public static void ClearProjectError() { }
         public static System.Exception CreateProjectError(int hr) { throw null; }
+        public static void EndApp() { }
         public static void SetProjectError(System.Exception ex) { }
         public static void SetProjectError(System.Exception ex, int lErl) { }
     }
@@ -647,25 +781,80 @@ namespace Microsoft.VisualBasic.CompilerServices
     public sealed partial class Versioned
     {
         internal Versioned() { }
+        public static object CallByName(object Instance, string MethodName, CallType UseCallType, params object[] Arguments) { throw null; }
         public static bool IsNumeric(object Expression) { throw null; }
         public static string SystemTypeName(string VbName) { throw null; }
+        public static string TypeName(object Expression) { throw null; }
         public static string VbTypeName(string SystemName) { throw null; }
     }
 }
 namespace Microsoft.VisualBasic.Devices
 {
+    public partial class Audio
+    {
+        public Audio() { }
+    }
+    public partial class Clock
+    {
+        public Clock() { }
+        public System.DateTime GmtTime { get { throw null; } }
+        public System.DateTime LocalTime { get { throw null; } }
+        public int TickCount { get { throw null; } }
+    }
+    public partial class Computer : ServerComputer
+    {
+        public Computer() { }
+        public Audio Audio { get { throw null; } }
+        public Microsoft.VisualBasic.MyServices.ClipboardProxy Clipboard { get { throw null; } }
+        public Keyboard Keyboard { get { throw null; } }
+        public Mouse Mouse { get { throw null; } }
+        public Ports Ports { get { throw null; } }
+    }
+    public partial class ComputerInfo
+    {
+        public ComputerInfo() { }
+        public System.Globalization.CultureInfo InstalledUICulture { get { throw null; } }
+        public string OSPlatform { get { throw null; } }
+        public string OSVersion { get { throw null; } }
+    }
+    public partial class Keyboard
+    {
+        public Keyboard() { }
+    }
+    public partial class Mouse
+    {
+        public Mouse() { }
+    }
+    public partial class Network
+    {
+        public Network() { }
+    }
     public partial class NetworkAvailableEventArgs : System.EventArgs
     {
         public NetworkAvailableEventArgs(bool networkAvailable) { }
         public bool IsNetworkAvailable { get { throw null; } }
+    }
+    public partial class Ports
+    {
+        public Ports() { }
+    }
+    public partial class ServerComputer
+    {
+        public ServerComputer() { }
+        public Clock Clock { get { throw null; } }
+        public Microsoft.VisualBasic.MyServices.FileSystemProxy FileSystem { get { throw null; } }
+        public ComputerInfo Info { get { throw null; } }
+        public string Name { get { throw null; } }
+        public Network Network { get { throw null; } }
+        public Microsoft.VisualBasic.MyServices.RegistryProxy Registry { get { throw null; } }
     }
 }
 namespace Microsoft.VisualBasic.FileIO
 {
     public enum DeleteDirectoryOption
     {
-        DeleteAllContents = 5,
         ThrowIfDirectoryNonEmpty = 4,
+        DeleteAllContents = 5,
     }
     public enum FieldType
     {
@@ -753,8 +942,8 @@ namespace Microsoft.VisualBasic.FileIO
     }
     public enum SearchOption
     {
-        SearchAllSubDirectories = 3,
         SearchTopLevelOnly = 2,
+        SearchAllSubDirectories = 3,
     }
     public partial class SpecialDirectories
     {
@@ -812,7 +1001,40 @@ namespace Microsoft.VisualBasic.FileIO
     }
     public enum UIOption
     {
-        AllDialogs = 3,
         OnlyErrorDialogs = 2,
+        AllDialogs = 3,
+    }
+}
+namespace Microsoft.VisualBasic.MyServices
+{
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class ClipboardProxy
+    {
+        internal ClipboardProxy() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class FileSystemProxy
+    {
+        internal FileSystemProxy() { }
+        public SpecialDirectoriesProxy SpecialDirectories { get { throw null; } }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class RegistryProxy
+    {
+        internal RegistryProxy() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+    public partial class SpecialDirectoriesProxy
+    {
+        internal SpecialDirectoriesProxy() { }
+        public string AllUsersApplicationData { get { throw null; } }
+        public string CurrentUserApplicationData { get { throw null; } }
+        public string Desktop { get { throw null; } }
+        public string MyDocuments { get { throw null; } }
+        public string MyMusic { get { throw null; } }
+        public string MyPictures { get { throw null; } }
+        public string Programs { get { throw null; } }
+        public string ProgramFiles { get { throw null; } }
+        public string Temp { get { throw null; } }
     }
 }

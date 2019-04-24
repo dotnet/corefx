@@ -411,7 +411,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             ElseIf obj2 Is Nothing Then
                 Return type1
             Else
-                ' An ugly hack. If we do x + y and one of them is DBNull and one of them is String,
+                ' If we do x + y and one of them is DBNull and one of them is String,
                 ' then we convert DBNull to "" and do concatenation. We communicate this by passing
                 ' back TypeCode.DBNull
                 If IsAdd AndAlso
@@ -3541,8 +3541,6 @@ DecimalExit:
 
             fromType = obj.GetType()
 
-            'REVIEW:  - Should we handle ByRef in this manner?
-            ' what happens when it's returned as non-byref?
             If toType.IsByRef Then
                 toType = toType.GetElementType()
                 IsToByRef = True
@@ -3561,7 +3559,6 @@ DecimalExit:
                     Return obj
                 End If
             End If
-            'END REVIEW
 
             Dim toTypeCode As TypeCode = Type.GetTypeCode(toType)
 
