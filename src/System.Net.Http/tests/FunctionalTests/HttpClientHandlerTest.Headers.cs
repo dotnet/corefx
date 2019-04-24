@@ -107,7 +107,8 @@ namespace System.Net.Http.Functional.Tests
                     var message = new HttpRequestMessage(HttpMethod.Get, uri);
                     var response = await  client.SendAsync(message).ConfigureAwait(false);
 
-                    Assert.Equal(3, response.Headers.Count());
+                    // HTTP/1.1 adds Connection: close and Date
+                    Assert.Equal(UseHttp2LoopbackServer ? 3 : 5, response.Headers.Count());
                     Assert.NotNull(response.Headers.GetValues("x-empty"));
                 }
             },
