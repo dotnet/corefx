@@ -19,7 +19,7 @@ internal partial class Interop
             internal fixed byte LeadByte[12];
             internal char UnicodeDefaultChar;
             internal uint CodePage;
-            internal fixed char CodePageName[260];
+            internal fixed char CodePageName[MAX_PATH];
         }
 
         internal static unsafe int GetLeadByteRanges(int codePage, byte[] leadByteRanges)
