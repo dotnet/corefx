@@ -151,10 +151,10 @@ namespace System.Net.Http
                 // Process the initial SETTINGS frame. This will send an ACK.
                 ProcessSettingsFrame(frameHeader);
             }
-            catch
+            catch (Exception e) when (e is IOException || e is Http2ProtocolException)
             {
                 // ISSUE 31315: Determine if/how to expose HTTP2 error codes
-                throw new HttpRequestException(SR.net_http_invalid_response);
+                throw new HttpRequestException(SR.net_http_invalid_response, e);
             }
 
             ProcessIncomingFrames();
