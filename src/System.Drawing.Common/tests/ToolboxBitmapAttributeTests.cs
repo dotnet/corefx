@@ -11,6 +11,8 @@ namespace System.Drawing.Tests
 {
     public class bitmap_173x183_indexed_8bit { }
 
+    public class Icon_toolboxBitmapAttributeTest { }
+
     public class ToolboxBitmapAttributeTests
     {
         private static Size DefaultSize = new Size(16, 16);
@@ -67,6 +69,7 @@ namespace System.Drawing.Tests
         [InlineData(typeof(ClassWithNoNamespace), -1, -1)]
         [InlineData(typeof(bitmap_173x183_indexed_8bit), 173, 183)]
         [InlineData(typeof(ToolboxBitmapAttributeTests), -1, -1)]
+        [InlineData(typeof(Icon_toolboxBitmapAttributeTest), 256, 256)]
         public void Ctor_Type(Type type, int width, int height)
         {
             var attribute = new ToolboxBitmapAttribute(type);
