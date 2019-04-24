@@ -172,13 +172,6 @@ namespace System.Diagnostics
             }
             finally
             {
-                // If we have a hard timeout, we cannot wait for the streams
-                if (_output != null && milliseconds == Timeout.Infinite)
-                    _output.WaitUtilEOF();
-
-                if (_error != null && milliseconds == Timeout.Infinite)
-                    _error.WaitUtilEOF();
-
                 handle?.Dispose();
             }
         }
