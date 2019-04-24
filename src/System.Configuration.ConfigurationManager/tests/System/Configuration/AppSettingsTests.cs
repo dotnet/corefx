@@ -118,24 +118,24 @@ namespace System.ConfigurationTests
         {
             using (var tempConfig = new TempConfig(TestData.EmptyConfig))
             {
-                var tempConfigDirectory = Path.Combine(Path.GetDirectoryName(tempConfig.ConfigPath), "Config");
+                const string SubDirectory = "Config";
+                const string AppConfigFileName = "tempAppConfig.config";
+                string tempConfigDirectory = Path.Combine(Path.GetDirectoryName(tempConfig.ConfigPath), SubDirectory);
                 using (var tempDirectory = new TempDirectory(tempConfigDirectory))
                 {
                     // set configSource and save the config
                     var config = ConfigurationManager.OpenExeConfiguration(tempConfig.ExePath);
-                    config.AppSettings.SectionInformation.ConfigSource = @"Config\tempAppConfig.config";
+                    config.AppSettings.SectionInformation.ConfigSource = Path.Combine(SubDirectory, AppConfigFileName);
                     config.Save();
 
                     // write temporary appConfig
-                    var tempAppConfigPath = Path.Combine(tempConfigDirectory, "tempAppConfig.config");
+                    var tempAppConfigPath = Path.Combine(tempConfigDirectory, AppConfigFileName);
                     File.WriteAllText(tempAppConfigPath, AppSettingsConfig);
 
                     // load config and test the appSettings
                     config = ConfigurationManager.OpenExeConfiguration(tempConfig.ExePath);
                     Assert.NotEmpty(config.AppSettings.Settings);
                     Assert.Equal("AppSettingsValue", config.AppSettings.Settings["AppSettingsKey"].Value);
-
-                    Console.WriteLine("test");
                 }
             }
         }
