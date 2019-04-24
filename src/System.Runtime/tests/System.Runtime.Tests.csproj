@@ -72,6 +72,7 @@
     <Compile Include="System\ByteTests.cs" />
     <Compile Include="System\CharTests.cs" />
     <Compile Include="System\CLSCompliantAttributeTests.cs" />
+    <Compile Include="System\Collections\ObjectModel\CollectionTests.cs" />
     <Compile Include="System\DateTimeTests.cs" />
     <Compile Include="System\DateTimeOffsetTests.cs" />
     <Compile Include="System\DBNullTests.cs" />
