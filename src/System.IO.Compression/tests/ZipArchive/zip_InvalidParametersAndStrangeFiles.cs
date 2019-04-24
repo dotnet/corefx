@@ -17,8 +17,7 @@ namespace System.IO.Compression.Tests
             {
                 Assert.Throws<TException>(() =>
                 {
-                    using (ZipArchive archive = constructor())
-                    { }
+                    using (ZipArchive archive = constructor()) { }
                 });
             }
             catch (Exception e)
@@ -244,7 +243,7 @@ namespace System.IO.Compression.Tests
             }
         }
 
-        internal static readonly byte[] EmptyFileCompressedWithETX =
+        private static readonly byte[] s_emptyFileCompressedWithEtx =
         {
             0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00, 0x08, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x78, 0x6C,
@@ -256,7 +255,7 @@ namespace System.IO.Compression.Tests
             0x70, 0x65, 0x72, 0x74, 0x79, 0x32, 0x2E, 0x62, 0x69, 0x6E, 0x50, 0x4B, 0x05, 0x06, 0x00, 0x00,
             0x00, 0x00, 0x01, 0x00, 0x01, 0x00, 0x44, 0x00, 0x00, 0x00, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00
         };
-        internal static readonly byte[] EmptyFileCompressedWrongSize =
+        private static readonly byte[] s_emptyFileCompressedWrongSize =
         {
             0x50, 0x4B, 0x03, 0x04, 0x14, 0x00, 0x06, 0x00, 0x08, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00, 0x00,
             0x00, 0x00, 0x04, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x16, 0x00, 0x00, 0x00, 0x78, 0x6C,
@@ -271,8 +270,8 @@ namespace System.IO.Compression.Tests
         };
         public static IEnumerable<object[]> EmptyFiles = new List<object[]>()
         {
-            new object[] { EmptyFileCompressedWithETX },
-            new object[] { EmptyFileCompressedWrongSize }
+            new object[] { s_emptyFileCompressedWithEtx },
+            new object[] { s_emptyFileCompressedWrongSize }
         };
 
         /// <summary>
@@ -289,7 +288,7 @@ namespace System.IO.Compression.Tests
         {
             using (var testStream = new MemoryStream(fileBytes))
             {
-                string tmpfilename = "xl/customProperty2.bin";
+                const string ExpectedFileName = "xl/customProperty2.bin";
                 // open archive with zero-length file that is compressed (Deflate = 0x8)
                 using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update, leaveOpen: true))
                 {
@@ -304,7 +303,7 @@ namespace System.IO.Compression.Tests
                 // extract and check the file. should stay empty.
                 using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update))
                 {
-                    ZipArchiveEntry entry = zip.GetEntry(tmpfilename);
+                    ZipArchiveEntry entry = zip.GetEntry(ExpectedFileName);
                     Assert.Equal(0, entry.Length);
                     Assert.Equal(0, entry.CompressedLength);
                     using (Stream entryStream = entry.Open())
