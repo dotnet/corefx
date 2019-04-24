@@ -6,11 +6,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.ComponentModel.Tests
 {
-    public partial class DefaultValueAttributeTests : RemoteExecutorTestBase
+    public partial class DefaultValueAttributeTests
     {
         [Fact]
         public static void Ctor()
@@ -38,12 +39,12 @@ namespace System.ComponentModel.Tests
             Assert.Null(new DefaultValueAttribute(typeof(int), "caughtException").Value);
         }
 
-        class CustomType
+        public class CustomType
         {
             public int Value { get; set; }
         }
 
-        class CustomConverter : TypeConverter
+        public class CustomConverter : TypeConverter
         {
             public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
             {
@@ -51,7 +52,7 @@ namespace System.ComponentModel.Tests
             }
         }
 
-        class CustomType2
+        public class CustomType2
         {
             public int Value { get; set; }
         }
@@ -71,7 +72,7 @@ namespace System.ComponentModel.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void Ctor_TypeDescriptorNotFound_ExceptionFallback(Type type, bool returnNull, string stringToConvert, int expectedValue)
         {
-            RemoteInvoke((innerType, innerReturnNull, innerStringToConvert, innerExpectedValue) =>
+            RemoteExecutor.Invoke((innerType, innerReturnNull, innerStringToConvert, innerExpectedValue) =>
             {
                 FieldInfo s_convertFromInvariantString = typeof(DefaultValueAttribute).GetField("s_convertFromInvariantString", BindingFlags.GetField | Reflection.BindingFlags.NonPublic | Reflection.BindingFlags.Static);
                 Assert.NotNull(s_convertFromInvariantString);

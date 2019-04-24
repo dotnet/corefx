@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -99,7 +100,7 @@ namespace System.IO.Pipelines.Tests
         }
 
         [Fact]
-        public void CanWriteOverTheBlockLength()
+        public async Task CanWriteOverTheBlockLength()
         {
             Memory<byte> memory = Pipe.Writer.GetMemory();
             PipeWriter writer = Pipe.Writer;
@@ -107,7 +108,7 @@ namespace System.IO.Pipelines.Tests
             IEnumerable<byte> source = Enumerable.Range(0, memory.Length).Select(i => (byte)i);
             byte[] expectedBytes = source.Concat(source).Concat(source).ToArray();
 
-            writer.Write(expectedBytes);
+            await writer.WriteAsync(expectedBytes);
 
             Assert.Equal(expectedBytes, Read());
         }
@@ -149,8 +150,7 @@ namespace System.IO.Pipelines.Tests
             var data = new byte[length];
             new Random(length).NextBytes(data);
             PipeWriter output = Pipe.Writer;
-            output.Write(data);
-            await output.FlushAsync();
+            await output.WriteAsync(data);
 
             ReadResult result = await Pipe.Reader.ReadAsync();
             ReadOnlySequence<byte> input = result.Buffer;
@@ -177,24 +177,88 @@ namespace System.IO.Pipelines.Tests
         public void ThrowsOnAdvanceOverMemorySize()
         {
             Memory<byte> buffer = Pipe.Writer.GetMemory(1);
-            var exception = Assert.Throws<InvalidOperationException>(() => Pipe.Writer.Advance(buffer.Length + 1));
-            Assert.Equal("Can't advance past buffer size.", exception.Message);
+            Assert.Throws<ArgumentOutOfRangeException>(() => Pipe.Writer.Advance(buffer.Length + 1));
         }
 
         [Fact]
         public void ThrowsOnAdvanceWithNoMemory()
         {
             PipeWriter buffer = Pipe.Writer;
-            var exception = Assert.Throws<InvalidOperationException>(() => buffer.Advance(1));
-            Assert.Equal("No writing operation. Make sure GetMemory() was called.", exception.Message);
+            Assert.Throws<ArgumentOutOfRangeException>(() => buffer.Advance(1));
         }
 
         [Fact]
-        public void GetMemory_AdjustsToPoolMaxBufferSize()
+        public async Task WritesUsingGetSpanWorks()
         {
-            PipeWriter buffer = Pipe.Writer;
-            var memory = buffer.GetMemory(int.MaxValue);
-            Assert.True(memory.Length >= 4096);
+            var bytes = Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwzyz");
+            var pipe = new Pipe(new PipeOptions(pool: new HeapBufferPool(), minimumSegmentSize: 1));
+            PipeWriter writer = pipe.Writer;
+
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                writer.GetSpan()[0] = bytes[i];
+                writer.Advance(1);
+            }
+
+            await writer.FlushAsync();
+            writer.Complete();
+
+            ReadResult readResult = await pipe.Reader.ReadAsync();
+            Assert.Equal(bytes, readResult.Buffer.ToArray());
+            pipe.Reader.AdvanceTo(readResult.Buffer.End);
+
+            pipe.Reader.Complete();
+        }
+
+        [Fact]
+        public async Task WritesUsingGetMemoryWorks()
+        {
+            var bytes = Encoding.ASCII.GetBytes("abcdefghijklmnopqrstuvwzyz");
+            var pipe = new Pipe(new PipeOptions(pool: new HeapBufferPool(), minimumSegmentSize: 1));
+            PipeWriter writer = pipe.Writer;
+
+            for (int i = 0; i < bytes.Length; i++)
+            {
+                writer.GetMemory().Span[0] = bytes[i];
+                writer.Advance(1);
+            }
+
+            await writer.FlushAsync();
+            writer.Complete();
+
+            ReadResult readResult = await pipe.Reader.ReadAsync();
+            Assert.Equal(bytes, readResult.Buffer.ToArray());
+            pipe.Reader.AdvanceTo(readResult.Buffer.End);
+
+            pipe.Reader.Complete();
+        }
+
+        [Fact]
+        public async Task CompleteWithLargeWriteThrows()
+        {
+            var pipe = new Pipe();
+            pipe.Reader.Complete();
+
+            var task = Task.Run(async () =>
+            {
+                await Task.Delay(10);
+                pipe.Writer.Complete();
+            });
+
+            try
+            {
+                for (int i = 0; i < 1000; i++)
+                {
+                    var buffer = new byte[10000000];
+                    await pipe.Writer.WriteAsync(buffer);
+                }
+            }
+            catch (InvalidOperationException)
+            {
+                // Complete while writing
+            }
+
+            await task;
         }
     }
 }

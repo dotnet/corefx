@@ -3,14 +3,50 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Globalization;
+using System.Security.Principal;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
+using Microsoft.Win32.SafeHandles;
 using Xunit;
 
 namespace System.IO.Pipes.Tests
 {
     [ActiveIssue(22271, TargetFrameworkMonikers.UapNotUapAot)]
-    public sealed class NamedPipeTest_CrossProcess : RemoteExecutorTestBase
+    public sealed class NamedPipeTest_CrossProcess
     {
+        [Fact]
+        public void InheritHandles_AvailableInChildProcess()
+        {
+            string pipeName = GetUniquePipeName();
+
+            using (var server = new NamedPipeServerStream(pipeName, PipeDirection.In))
+            using (var client = new NamedPipeClientStream(".", pipeName, PipeDirection.Out, PipeOptions.None, TokenImpersonationLevel.None, HandleInheritability.Inheritable))
+            {
+                Task.WaitAll(server.WaitForConnectionAsync(), client.ConnectAsync());
+                using (RemoteExecutor.Invoke(new Func<string, int>(ChildFunc), client.SafePipeHandle.DangerousGetHandle().ToString()))
+                {
+                    client.Dispose();
+                    for (int i = 0; i < 5; i++)
+                    {
+                        Assert.Equal(i, server.ReadByte());
+                    }
+                }
+            }
+
+            int ChildFunc(string handle)
+            {
+                using (var childClient = new NamedPipeClientStream(PipeDirection.Out, isAsync: false, isConnected: true, new SafePipeHandle((IntPtr)long.Parse(handle, CultureInfo.InvariantCulture), ownsHandle: true)))
+                {
+                    for (int i = 0; i < 5; i++)
+                    {
+                        childClient.WriteByte((byte)i);
+                    }
+                }
+                return RemoteExecutor.SuccessExitCode;
+            }
+        }
+
         [Fact]
         public void PingPong_Sync()
         {
@@ -22,7 +58,7 @@ namespace System.IO.Pipes.Tests
             // another process with which to communicate
             using (var outbound = new NamedPipeServerStream(outName, PipeDirection.Out))
             using (var inbound = new NamedPipeClientStream(".", inName, PipeDirection.In))
-            using (RemoteInvoke(new Func<string, string, int>(PingPong_OtherProcess), outName, inName))
+            using (RemoteExecutor.Invoke(new Func<string, string, int>(PingPong_OtherProcess), outName, inName))
             {
                 // Wait for both pipes to be connected
                 Task.WaitAll(outbound.WaitForConnectionAsync(), inbound.ConnectAsync());
@@ -48,7 +84,7 @@ namespace System.IO.Pipes.Tests
             // another process with which to communicate
             using (var outbound = new NamedPipeServerStream(outName, PipeDirection.Out))
             using (var inbound = new NamedPipeClientStream(".", inName, PipeDirection.In))
-            using (RemoteInvoke(new Func<string, string, int>(PingPong_OtherProcess), outName, inName))
+            using (RemoteExecutor.Invoke(new Func<string, string, int>(PingPong_OtherProcess), outName, inName))
             {
                 // Wait for both pipes to be connected
                 await Task.WhenAll(outbound.WaitForConnectionAsync(), inbound.ConnectAsync());
@@ -83,7 +119,7 @@ namespace System.IO.Pipes.Tests
                     outbound.WriteByte((byte)b);
                 }
             }
-            return SuccessExitCode;
+            return RemoteExecutor.SuccessExitCode;
         }
 
         private static string GetUniquePipeName()

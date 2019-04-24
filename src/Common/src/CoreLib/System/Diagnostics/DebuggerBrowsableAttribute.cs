@@ -2,10 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
+
 namespace System.Diagnostics
 {
     //  DebuggerBrowsableState states are defined as follows:
-    //      Never       never show this element
+    //      Never       element should never show
     //      Expanded    expansion of the class is done, so that all visible internal members are shown
     //      Collapsed   expansion of the class is not performed. Internal visible members are hidden
     //      RootHidden  The target element itself should not be shown, but should instead be 

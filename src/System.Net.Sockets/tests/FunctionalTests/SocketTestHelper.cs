@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Sockets.Tests
 {
@@ -240,10 +242,12 @@ namespace System.Net.Sockets.Tests
         where T : SocketHelperBase, new()
     {
         private readonly T _socketHelper;
+        public readonly ITestOutputHelper _output;
 
-        public SocketTestHelperBase()
+        public SocketTestHelperBase(ITestOutputHelper output)
         {
             _socketHelper = new T();
+            _output = output;
         }
 
         //
@@ -275,7 +279,7 @@ namespace System.Net.Sockets.Tests
     // MemberDatas that are generally useful
     //
 
-    public abstract class MemberDatas : RemoteExecutorTestBase
+    public abstract class MemberDatas
     {
         public static readonly object[][] Loopbacks = new[]
         {

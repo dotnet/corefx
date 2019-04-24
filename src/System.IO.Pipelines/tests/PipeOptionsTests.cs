@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using Xunit;
 
 namespace System.IO.Pipelines.Tests
@@ -11,13 +12,19 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void DefaultPauseWriterThresholdIsSet()
         {
-            Assert.Equal(32768, PipeOptions.Default.PauseWriterThreshold);
+            Assert.Equal(65536, PipeOptions.Default.PauseWriterThreshold);
         }
 
         [Fact]
         public void DefaultResumeWriterThresholdIsSet()
         {
-            Assert.Equal(16384, PipeOptions.Default.ResumeWriterThreshold);
+            Assert.Equal(32768, PipeOptions.Default.ResumeWriterThreshold);
+        }
+
+        [Fact]
+        public void DefaultPoolIsSetToShared()
+        {
+            Assert.Equal(MemoryPool<byte>.Shared, PipeOptions.Default.Pool);
         }
     }
 }

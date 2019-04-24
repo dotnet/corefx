@@ -70,9 +70,7 @@ namespace System.ComponentModel
         private MethodInfo _shouldSerializeMethod;      // the should serialize method
         private MethodInfo _resetMethod;                // the reset property method
         private EventDescriptor _realChangedEvent;           // <propertyname>Changed event handler on object
-#if FEATURE_INOTIFYPROPERTYCHANGED
         private EventDescriptor _realIPropChangedEvent;      // INotifyPropertyChanged.PropertyChanged event handler on object
-#endif
         private readonly Type _receiverType;               // Only set if we are an extender
 
         /// <summary>
@@ -88,12 +86,12 @@ namespace System.ComponentModel
                 if (type == null)
                 {
                     Debug.WriteLine($"type == null, name == {name}");
-                    throw new ArgumentException(string.Format(SR.ErrorInvalidPropertyType, name));
+                    throw new ArgumentException(SR.Format(SR.ErrorInvalidPropertyType, name));
                 }
                 if (componentClass == null)
                 {
                     Debug.WriteLine($"componentClass == null, name == {name}");
-                    throw new ArgumentException(string.Format(SR.InvalidNullArgument, nameof(componentClass)));
+                    throw new ArgumentException(SR.Format(SR.InvalidNullArgument, nameof(componentClass)));
                 }
                 _type = type;
                 _componentClass = componentClass;
@@ -143,7 +141,7 @@ namespace System.ComponentModel
 
             if (componentClass == null)
             {
-                throw new ArgumentException(string.Format(SR.InvalidNullArgument, nameof(componentClass)));
+                throw new ArgumentException(SR.Format(SR.InvalidNullArgument, nameof(componentClass)));
             }
 
             // If the classes are the same, we can potentially optimize the method fetch because
@@ -224,7 +222,7 @@ namespace System.ComponentModel
             {
                 if (!_state[s_bitChangedQueried])
                 {
-                    _realChangedEvent = TypeDescriptor.GetEvents(ComponentType)[string.Format(CultureInfo.InvariantCulture, "{0}Changed", Name)];
+                    _realChangedEvent = TypeDescriptor.GetEvents(ComponentType)[Name + "Changed"];
                     _state[s_bitChangedQueried] = true;
                 }
 
@@ -239,7 +237,6 @@ namespace System.ComponentModel
         {
             get
             {
-#if FEATURE_INOTIFYPROPERTYCHANGED
                 if (!_state[s_bitIPropChangedQueried])
                 {
                     if (typeof(INotifyPropertyChanged).IsAssignableFrom(ComponentType))
@@ -251,9 +248,6 @@ namespace System.ComponentModel
                 }
 
                 return _realIPropChangedEvent;
-#else
-                return null;
-#endif
             }
         }
 
@@ -313,11 +307,11 @@ namespace System.ComponentModel
                         }
                         if (_propInfo != null)
                         {
-                            _getMethod = _propInfo.GetMethod;
+                            _getMethod = _propInfo.GetGetMethod(nonPublic: true);
                         }
                         if (_getMethod == null)
                         {
-                            throw new InvalidOperationException(string.Format(SR.ErrorMissingPropertyAccessors, _componentClass.FullName + "." + Name));
+                            throw new InvalidOperationException(SR.Format(SR.ErrorMissingPropertyAccessors, _componentClass.FullName + "." + Name));
                         }
                     }
                     else
@@ -325,7 +319,7 @@ namespace System.ComponentModel
                         _getMethod = FindMethod(_componentClass, "Get" + Name, new Type[] { _receiverType }, _type);
                         if (_getMethod == null)
                         {
-                            throw new ArgumentException(string.Format(SR.ErrorMissingPropertyAccessors, Name));
+                            throw new ArgumentException(SR.Format(SR.ErrorMissingPropertyAccessors, Name));
                         }
                     }
                     _state[s_bitGetQueried] = true;
@@ -399,7 +393,7 @@ namespace System.ComponentModel
                             PropertyInfo p = t.GetProperty(name, PropertyType, Array.Empty<Type>(), null);
                             if (p != null)
                             {
-                                _setMethod = p.SetMethod;
+                                _setMethod = p.GetSetMethod(nonPublic: false);
                                 if (_setMethod != null)
                                 {
                                     break;
@@ -425,7 +419,7 @@ namespace System.ComponentModel
                         }
                         if (_propInfo != null)
                         {
-                            _setMethod = _propInfo.SetMethod;
+                            _setMethod = _propInfo.GetSetMethod(nonPublic: true);
                         }
                     }
                     else
@@ -925,7 +919,7 @@ namespace System.ComponentModel
 
                     string message = t.Message ?? t.GetType().Name;
 
-                    throw new TargetInvocationException(string.Format(SR.ErrorPropertyAccessorException, Name, name, message), t);
+                    throw new TargetInvocationException(SR.Format(SR.ErrorPropertyAccessorException, Name, name, message), t);
                 }
             }
             Debug.WriteLine("[" + Name + "]:   ---> returning: null");

@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/**
+/*
 * Routines used to manipulate IEEE 754 double-precision numbers, taken from JScript codebase.
 *
 * Define NOPARSE if you do not need FloatingDecimal -> double conversions
@@ -2160,7 +2160,7 @@ namespace System.Xml.Xsl
 
             LNegative:
                 // bi was bigger than this.
-                Debug.Assert(false, "Who's subtracting to negative?");
+                Debug.Fail("Who's subtracting to negative?");
                 _length = 0;
                 AssertValid();
             }

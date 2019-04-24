@@ -79,7 +79,7 @@ NetSecurityNative_ImportUserName(uint32_t* minorStatus, char* inputName, uint32_
 /*
 Shims the gss_import_name method with nametype = GSS_C_NT_USER_NAME.
 */
-DLLEXPORT uint32_t NetSecurityNative_ImportPrincipalName(uint32_t* minorStatus,
+DLLEXPORT uint32_t NetSecurityNative_ImportTargetName(uint32_t* minorStatus,
                                                          char* inputName,
                                                          uint32_t inputNameLen,
                                                          GssName** outputName);
@@ -107,6 +107,8 @@ DLLEXPORT uint32_t NetSecurityNative_InitSecContext(uint32_t* minorStatus,
                                                     GssCredId* claimantCredHandle,
                                                     GssCtxId** contextHandle,
                                                     uint32_t isNtlm,
+                                                    void* cbt,
+                                                    int32_t cbtSize,
                                                     GssName* targetName,
                                                     uint32_t reqFlags,
                                                     uint8_t* inputBytes,
@@ -122,7 +124,8 @@ DLLEXPORT uint32_t NetSecurityNative_AcceptSecContext(uint32_t* minorStatus,
                                                       GssCtxId** contextHandle,
                                                       uint8_t* inputBytes,
                                                       uint32_t inputLength,
-                                                      PAL_GssBuffer* outBuffer);
+                                                      PAL_GssBuffer* outBuffer,
+                                                      uint32_t* retFlags);
 
 /*
 
@@ -160,3 +163,15 @@ DLLEXPORT uint32_t NetSecurityNative_InitiateCredWithPassword(uint32_t* minorSta
                                                               char* password,
                                                               uint32_t passwdLen,
                                                               GssCredId** outputCredHandle);
+
+/*
+Shims the gss_indicate_mechs method to detect if NTLM mech is installed.
+*/
+DLLEXPORT uint32_t NetSecurityNative_IsNtlmInstalled(void);
+
+/*
+Shims gss_inquire_context and gss_display_name to get the remote user principal name.
+*/
+DLLEXPORT uint32_t NetSecurityNative_GetUser(uint32_t* minorStatus,
+                                             GssCtxId* contextHandle,
+                                             PAL_GssBuffer* outBuffer);

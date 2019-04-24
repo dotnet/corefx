@@ -83,7 +83,7 @@ namespace System.Management
     
     /// <summary>
     ///    <para>Describes the possible effects of saving an object to WMI when 
-    ///       using <see cref='System.Management.ManagementObject.Put'/>.</para>
+    ///       using <see cref='System.Management.ManagementObject.Put()'/>.</para>
     /// </summary>
     public enum PutType 
     { 
@@ -519,7 +519,7 @@ namespace System.Management
         /// <param name=' useAmendedQualifiers'><see langword='true'/> to specify whether the returned objects should contain amended (locale-aware) qualifiers; otherwise, <see langword='false'/> .</param>
         /// <param name=' ensureLocatable'><see langword='true'/> to specify to WMI that it should ensure all returned objects have valid paths; otherwise, <see langword='false'/> .</param>
         /// <param name=' prototypeOnly'><see langword='true'/> to return a prototype of the result set instead of the actual results; otherwise, <see langword='false'/> .</param>
-        /// <param name=' directRead'><see langword='true'/> to to retrieve objects of only the specified class only or from derived classes as well; otherwise, <see langword='false'/> .</param>
+        /// <param name=' directRead'><see langword='true'/> to retrieve objects of only the specified class only or from derived classes as well; otherwise, <see langword='false'/> .</param>
         /// <param name=' enumerateDeep'><see langword='true'/> to specify recursive enumeration in subclasses; otherwise, <see langword='false'/> .</param>
         public EnumerationOptions(
             ManagementNamedValueCollection context, 
@@ -1153,7 +1153,7 @@ namespace System.Management
         /// <para>Initializes a new instance of the <see cref='System.Management.InvokeMethodOptions'/> class.</para>
         /// </overload>
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.Management.InvokeMethodOptions'/> class for the <see cref='System.Management.ManagementObject.InvokeMethod'/> operation, using default values.
+        /// <para>Initializes a new instance of the <see cref='System.Management.InvokeMethodOptions'/> class for the <see cref='System.Management.ManagementObject.InvokeMethod(String, ManagementBaseObject, InvokeMethodOptions) '/> operation, using default values.
         ///    This is the default constructor.</para>
         /// </summary>
         public InvokeMethodOptions() : base () {}
@@ -1582,14 +1582,14 @@ namespace System.Management
         ///    connection, using the specified values.</para>
         /// </summary>
         /// <param name='locale'>The locale to be used for the connection.</param>
-        /// <param name=' username'>The user name to be used for the connection. If null, the credentials of the currently logged-on user are used.</param>
-        /// <param name=' securepassword'>The secure password for the given user name. If the user name is also null, the credentials used will be those of the currently logged-on user.</param>
-        /// <param name=' authority'><para>The authority to be used to authenticate the specified user.</para></param>
-        /// <param name=' impersonation'>The COM impersonation level to be used for the connection.</param>
-        /// <param name=' authentication'>The COM authentication level to be used for the connection.</param>
-        /// <param name=' enablePrivileges'><see langword='true'/>to enable special user privileges; otherwise, <see langword='false'/> . This parameter should only be used when performing an operation that requires special Windows NT user privileges.</param>
-        /// <param name=' context'>A provider-specific, named value pairs object to be passed through to the provider.</param>
-        /// <param name=' timeout'>Reserved for future use.</param>
+        /// <param name='username'>The user name to be used for the connection. If null, the credentials of the currently logged-on user are used.</param>
+        /// <param name='password'>The secure password for the given user name. If the user name is also null, the credentials used will be those of the currently logged-on user.</param>
+        /// <param name='authority'><para>The authority to be used to authenticate the specified user.</para></param>
+        /// <param name='impersonation'>The COM impersonation level to be used for the connection.</param>
+        /// <param name='authentication'>The COM authentication level to be used for the connection.</param>
+        /// <param name='enablePrivileges'><see langword='true'/>to enable special user privileges; otherwise, <see langword='false'/> . This parameter should only be used when performing an operation that requires special Windows NT user privileges.</param>
+        /// <param name='context'>A provider-specific, named value pairs object to be passed through to the provider.</param>
+        /// <param name='timeout'>Reserved for future use.</param>
         public ConnectionOptions (string locale,
                 string username, SecureString password, string authority,
                 ImpersonationLevel impersonation, AuthenticationLevel authentication,

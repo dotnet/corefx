@@ -231,21 +231,15 @@ namespace System.Security.Cryptography.Xml
             string keyName = null;
             if (cspKey != null && cspKey.CspKeyContainerInfo.KeyContainerName != null)
             {
-                keyName = string.Format(CultureInfo.InvariantCulture,
-                                        "\"{0}\"",
-                                        cspKey.CspKeyContainerInfo.KeyContainerName);
+                keyName = "\"" + cspKey.CspKeyContainerInfo.KeyContainerName + "\"";
             }
             else if (certificate2 != null)
             {
-                keyName = string.Format(CultureInfo.InvariantCulture,
-                                        "\"{0}\"",
-                                        certificate2.GetNameInfo(X509NameType.SimpleName, false));
+                keyName = "\"" + certificate2.GetNameInfo(X509NameType.SimpleName, false) + "\"";
             }
             else if (certificate != null)
             {
-                keyName = string.Format(CultureInfo.InvariantCulture,
-                                        "\"{0}\"",
-                                        certificate.Subject);
+                keyName = "\"" + certificate.Subject + "\"";
             }
             else
             {
@@ -293,7 +287,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_BeginCanonicalization,
                                                   canonicalizationTransform.Algorithm,
                                                   canonicalizationTransform.GetType().Name);
@@ -305,7 +299,7 @@ namespace System.Security.Cryptography.Xml
 
             if (VerboseLoggingEnabled)
             {
-                string canonicalizationSettings = string.Format(CultureInfo.InvariantCulture,
+                string canonicalizationSettings = SR.Format(CultureInfo.InvariantCulture,
                                                                 SR.Log_CanonicalizationSettings,
                                                                 canonicalizationTransform.Resolver.GetType(),
                                                                 canonicalizationTransform.BaseURI);
@@ -330,7 +324,7 @@ namespace System.Security.Cryptography.Xml
             {
                 MethodInfo validationMethod = formatValidator.Method;
 
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_CheckSignatureFormat,
                                                   validationMethod.Module.Assembly.FullName,
                                                   validationMethod.DeclaringType.FullName,
@@ -351,7 +345,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_CheckSignedInfo,
                                                   signedInfo.Id != null ? signedInfo.Id : NullString);
                 WriteLine(signedXml, TraceEventType.Information, SignedXmlDebugEvent.BeginCheckSignedInfo, logMessage);
@@ -377,7 +371,7 @@ namespace System.Security.Cryptography.Xml
 
             if (VerboseLoggingEnabled)
             {
-                string contextData = string.Format(CultureInfo.InvariantCulture,
+                string contextData = SR.Format(CultureInfo.InvariantCulture,
                                                    SR.Log_XmlContext,
                                                    context != null ? context.OuterXml : NullString);
 
@@ -407,7 +401,7 @@ namespace System.Security.Cryptography.Xml
 
             if (VerboseLoggingEnabled)
             {
-                string contextData = string.Format(CultureInfo.InvariantCulture,
+                string contextData = SR.Format(CultureInfo.InvariantCulture,
                                                    SR.Log_XmlContext,
                                                    context != null ? context.OuterXml : NullString);
 
@@ -432,7 +426,7 @@ namespace System.Security.Cryptography.Xml
             {
                 using (StreamReader reader = new StreamReader(canonicalizationTransform.GetOutput(typeof(Stream)) as Stream))
                 {
-                    string logMessage = string.Format(CultureInfo.InvariantCulture,
+                    string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                       SR.Log_CanonicalizedOutput,
                                                       reader.ReadToEnd());
                     WriteLine(signedXml,
@@ -465,7 +459,8 @@ namespace System.Security.Cryptography.Xml
         ///     algorithm not being on the valid list.
         /// </summary>
         /// <param name="signedXml">SignedXml object doing the signature verification</param>
-        /// <param name="result">result of the signature format verification</param>
+        /// <param name="algorithm">Canonicalization algorithm</param>
+        /// <param name="validAlgorithms">List of valid canonicalization algorithms</param>
         internal static void LogUnsafeCanonicalizationMethod(SignedXml signedXml, string algorithm, IEnumerable<string> validAlgorithms)
         {
             Debug.Assert(signedXml != null, "signedXml != null");
@@ -484,7 +479,7 @@ namespace System.Security.Cryptography.Xml
                     validAlgorithmBuilder.AppendFormat("\"{0}\"", validAlgorithm);
                 }
 
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_UnsafeCanonicalizationMethod,
                                                   algorithm,
                                                   validAlgorithmBuilder.ToString());
@@ -534,7 +529,7 @@ namespace System.Security.Cryptography.Xml
                     validAlgorithmBuilder.AppendFormat("\"{0}\"", validAlgorithm);
                 }
 
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_UnsafeTransformMethod,
                                                   algorithm,
                                                   validAlgorithmBuilder.ToString());
@@ -558,7 +553,7 @@ namespace System.Security.Cryptography.Xml
                 {
                     foreach (XmlAttribute propagatedNamespace in namespaces)
                     {
-                        string propagationMessage = string.Format(CultureInfo.InvariantCulture,
+                        string propagationMessage = SR.Format(CultureInfo.InvariantCulture,
                                                                   SR.Log_PropagatingNamespace,
                                                                   propagatedNamespace.Name,
                                                                   propagatedNamespace.Value);
@@ -608,7 +603,7 @@ namespace System.Security.Cryptography.Xml
                 } while (readBytes == buffer.Length);
 
                 // Log out information about it
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_TransformedReferenceContents,
                                                   Encoding.UTF8.GetString(ms.ToArray()));
                 WriteLine(reference,
@@ -647,7 +642,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_SigningAsymmetric,
                                                   GetKeyName(key),
                                                   signatureDescription.GetType().Name,
@@ -666,8 +661,6 @@ namespace System.Security.Cryptography.Xml
         /// </summary>
         /// <param name="signedXml">SignedXml object calculating the signature</param>
         /// <param name="key">key the signature is created with</param>
-        /// <param name="hash">hash algorithm used to digest the output</param>
-        /// <param name="asymmetricSignatureFormatter">signature formatter used to do the signing</param>
         internal static void LogSigning(SignedXml signedXml, KeyedHashAlgorithm key)
         {
             Debug.Assert(signedXml != null, "signedXml != null");
@@ -675,7 +668,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_SigningHmac,
                                                   key.GetType().Name);
 
@@ -700,7 +693,7 @@ namespace System.Security.Cryptography.Xml
             {
                 HashAlgorithm hashAlgorithm = CryptoHelpers.CreateFromName<HashAlgorithm>(reference.DigestMethod);
                 string hashAlgorithmName = hashAlgorithm == null ? "null" : hashAlgorithm.GetType().Name;
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_SigningReference,
                                                   GetObjectId(reference),
                                                   reference.Uri,
@@ -725,7 +718,7 @@ namespace System.Security.Cryptography.Xml
         {
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_VerificationFailed,
                                                   failureLocation);
 
@@ -775,7 +768,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_KeyUsages,
                                                   keyUsages.KeyUsages,
                                                   GetOidName(keyUsages.Oid),
@@ -800,7 +793,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_VerifyReference,
                                                   GetObjectId(reference),
                                                   reference.Uri,
@@ -835,7 +828,7 @@ namespace System.Security.Cryptography.Xml
             {
                 HashAlgorithm hashAlgorithm = CryptoHelpers.CreateFromName<HashAlgorithm>(reference.DigestMethod);
                 string hashAlgorithmName = hashAlgorithm == null ? "null" : hashAlgorithm.GetType().Name;
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_ReferenceHash,
                                                   GetObjectId(reference),
                                                   reference.DigestMethod,
@@ -876,7 +869,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_VerifySignedInfoAsymmetric,
                                                   GetKeyName(key),
                                                   signatureDescription.GetType().Name,
@@ -890,12 +883,12 @@ namespace System.Security.Cryptography.Xml
 
             if (VerboseLoggingEnabled)
             {
-                string hashLog = string.Format(CultureInfo.InvariantCulture,
+                string hashLog = SR.Format(CultureInfo.InvariantCulture,
                                                SR.Log_ActualHashValue,
                                                FormatBytes(actualHashValue));
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.VerifySignedInfo, hashLog);
 
-                string signatureLog = string.Format(CultureInfo.InvariantCulture,
+                string signatureLog = SR.Format(CultureInfo.InvariantCulture,
                                                     SR.Log_RawSignatureValue,
                                                     FormatBytes(signatureValue));
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.VerifySignedInfo, signatureLog);
@@ -920,7 +913,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_VerifySignedInfoHmac,
                                                   mac.GetType().Name);
                 WriteLine(signedXml,
@@ -931,12 +924,12 @@ namespace System.Security.Cryptography.Xml
 
             if (VerboseLoggingEnabled)
             {
-                string hashLog = string.Format(CultureInfo.InvariantCulture,
+                string hashLog = SR.Format(CultureInfo.InvariantCulture,
                                                SR.Log_ActualHashValue,
                                                FormatBytes(actualHashValue));
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.VerifySignedInfo, hashLog);
 
-                string signatureLog = string.Format(CultureInfo.InvariantCulture,
+                string signatureLog = SR.Format(CultureInfo.InvariantCulture,
                                                     SR.Log_RawSignatureValue,
                                                     FormatBytes(signatureValue));
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.VerifySignedInfo, signatureLog);
@@ -957,7 +950,7 @@ namespace System.Security.Cryptography.Xml
 
             if (InformationLoggingEnabled)
             {
-                string buildMessage = string.Format(CultureInfo.InvariantCulture,
+                string buildMessage = SR.Format(CultureInfo.InvariantCulture,
                                                     SR.Log_BuildX509Chain,
                                                     GetKeyName(certificate));
                 WriteLine(signedXml,
@@ -969,27 +962,27 @@ namespace System.Security.Cryptography.Xml
             if (VerboseLoggingEnabled)
             {
                 // Dump out the flags and other miscelanious information used for building
-                string revocationMode = string.Format(CultureInfo.InvariantCulture,
+                string revocationMode = SR.Format(CultureInfo.InvariantCulture,
                                                       SR.Log_RevocationMode,
                                                       chain.ChainPolicy.RevocationFlag);
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.X509Verification, revocationMode);
 
-                string revocationFlag = string.Format(CultureInfo.InvariantCulture,
+                string revocationFlag = SR.Format(CultureInfo.InvariantCulture,
                                                       SR.Log_RevocationFlag,
                                                       chain.ChainPolicy.RevocationFlag);
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.X509Verification, revocationFlag);
 
-                string verificationFlags = string.Format(CultureInfo.InvariantCulture,
+                string verificationFlags = SR.Format(CultureInfo.InvariantCulture,
                                                          SR.Log_VerificationFlag,
                                                          chain.ChainPolicy.VerificationFlags);
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.X509Verification, verificationFlags);
 
-                string verificationTime = string.Format(CultureInfo.InvariantCulture,
+                string verificationTime = SR.Format(CultureInfo.InvariantCulture,
                                                         SR.Log_VerificationTime,
                                                         chain.ChainPolicy.VerificationTime);
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.X509Verification, verificationTime);
 
-                string urlTimeout = string.Format(CultureInfo.InvariantCulture,
+                string urlTimeout = SR.Format(CultureInfo.InvariantCulture,
                                                   SR.Log_UrlTimeout,
                                                   chain.ChainPolicy.UrlRetrievalTimeout);
                 WriteLine(signedXml, TraceEventType.Verbose, SignedXmlDebugEvent.X509Verification, urlTimeout);
@@ -1002,7 +995,7 @@ namespace System.Security.Cryptography.Xml
                 {
                     if (status.Status != X509ChainStatusFlags.NoError)
                     {
-                        string logMessage = string.Format(CultureInfo.InvariantCulture,
+                        string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                           SR.Log_X509ChainError,
                                                           status.Status,
                                                           status.StatusInformation);
@@ -1049,7 +1042,7 @@ namespace System.Security.Cryptography.Xml
             {
                 HashAlgorithm hashAlgorithm = CryptoHelpers.CreateFromName<HashAlgorithm>(reference.DigestMethod);
                 string hashAlgorithmName = hashAlgorithm == null ? "null" : hashAlgorithm.GetType().Name;
-                string logMessage = string.Format(CultureInfo.InvariantCulture,
+                string logMessage = SR.Format(CultureInfo.InvariantCulture,
                                                     SR.Log_SignedXmlRecursionLimit,
                                                     GetObjectId(reference),
                                                     reference.DigestMethod,

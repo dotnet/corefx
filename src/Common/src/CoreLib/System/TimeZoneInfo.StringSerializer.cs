@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Collections.Generic;
 using System.Globalization;
 using System.Runtime.Serialization;
@@ -49,7 +50,7 @@ namespace System
                 //
                 SerializeSubstitute(zone.Id, serializedText);
                 serializedText.Append(Sep);
-                serializedText.Append(zone.BaseUtcOffset.TotalMinutes.ToString(CultureInfo.InvariantCulture));
+                serializedText.AppendSpanFormattable(zone.BaseUtcOffset.TotalMinutes, format: default, CultureInfo.InvariantCulture);
                 serializedText.Append(Sep);
                 SerializeSubstitute(zone.DisplayName, serializedText);
                 serializedText.Append(Sep);
@@ -62,11 +63,11 @@ namespace System
                 foreach (AdjustmentRule rule in rules)
                 {
                     serializedText.Append(Lhs);
-                    serializedText.Append(rule.DateStart.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+                    serializedText.AppendSpanFormattable(rule.DateStart, DateTimeFormat, DateTimeFormatInfo.InvariantInfo);
                     serializedText.Append(Sep);
-                    serializedText.Append(rule.DateEnd.ToString(DateTimeFormat, DateTimeFormatInfo.InvariantInfo));
+                    serializedText.AppendSpanFormattable(rule.DateEnd, DateTimeFormat, DateTimeFormatInfo.InvariantInfo);
                     serializedText.Append(Sep);
-                    serializedText.Append(rule.DaylightDelta.TotalMinutes.ToString(CultureInfo.InvariantCulture));
+                    serializedText.AppendSpanFormattable(rule.DaylightDelta.TotalMinutes, format: default, CultureInfo.InvariantCulture);
                     serializedText.Append(Sep);
                     // serialize the TransitionTime's
                     SerializeTransitionTime(rule.DaylightTransitionStart, serializedText);
@@ -76,7 +77,7 @@ namespace System
                     if (rule.BaseUtcOffsetDelta != TimeSpan.Zero)
                     {
                         // Serialize it only when BaseUtcOffsetDelta has a value to reduce the impact of adding rule.BaseUtcOffsetDelta
-                        serializedText.Append(rule.BaseUtcOffsetDelta.TotalMinutes.ToString(CultureInfo.InvariantCulture));
+                        serializedText.AppendSpanFormattable(rule.BaseUtcOffsetDelta.TotalMinutes, format: default, CultureInfo.InvariantCulture);
                         serializedText.Append(Sep);
                     }
                     if (rule.NoDaylightTransitions)
@@ -104,7 +105,7 @@ namespace System
                 string displayName = s.GetNextStringValue();
                 string standardName = s.GetNextStringValue();
                 string daylightName = s.GetNextStringValue();
-                AdjustmentRule[] rules = s.GetNextAdjustmentRuleArrayValue();
+                AdjustmentRule[]? rules = s.GetNextAdjustmentRuleArrayValue();
 
                 try
                 {
@@ -155,20 +156,20 @@ namespace System
                 serializedText.Append(Lhs);
                 serializedText.Append(time.IsFixedDateRule ? '1' : '0');
                 serializedText.Append(Sep);
-                serializedText.Append(time.TimeOfDay.ToString(TimeOfDayFormat, DateTimeFormatInfo.InvariantInfo));
+                serializedText.AppendSpanFormattable(time.TimeOfDay, TimeOfDayFormat, DateTimeFormatInfo.InvariantInfo);
                 serializedText.Append(Sep);
-                serializedText.Append(time.Month.ToString(CultureInfo.InvariantCulture));
+                serializedText.AppendSpanFormattable(time.Month, format: default, CultureInfo.InvariantCulture);
                 serializedText.Append(Sep);
                 if (time.IsFixedDateRule)
                 {
-                    serializedText.Append(time.Day.ToString(CultureInfo.InvariantCulture));
+                    serializedText.AppendSpanFormattable(time.Day, format: default, CultureInfo.InvariantCulture);
                     serializedText.Append(Sep);
                 }
                 else
                 {
-                    serializedText.Append(time.Week.ToString(CultureInfo.InvariantCulture));
+                    serializedText.AppendSpanFormattable(time.Week, format: default, CultureInfo.InvariantCulture);
                     serializedText.Append(Sep);
-                    serializedText.Append(((int)time.DayOfWeek).ToString(CultureInfo.InvariantCulture));
+                    serializedText.AppendSpanFormattable((int)time.DayOfWeek, format: default, CultureInfo.InvariantCulture);
                     serializedText.Append(Sep);
                 }
                 serializedText.Append(Rhs);
@@ -373,13 +374,13 @@ namespace System
             /// <summary>
             /// Helper function to read an AdjustmentRule[] token.
             /// </summary>
-            private AdjustmentRule[] GetNextAdjustmentRuleArrayValue()
+            private AdjustmentRule[]? GetNextAdjustmentRuleArrayValue()
             {
                 List<AdjustmentRule> rules = new List<AdjustmentRule>(1);
                 int count = 0;
 
                 // individual AdjustmentRule array elements do not require semicolons
-                AdjustmentRule rule = GetNextAdjustmentRuleValue();
+                AdjustmentRule? rule = GetNextAdjustmentRuleValue();
                 while (rule != null)
                 {
                     rules.Add(rule);
@@ -404,7 +405,7 @@ namespace System
             /// <summary>
             /// Helper function to read an AdjustmentRule token.
             /// </summary>
-            private AdjustmentRule GetNextAdjustmentRuleValue()
+            private AdjustmentRule? GetNextAdjustmentRuleValue()
             {
                 // first verify the internal state of the object
                 if (_state == State.EndOfLine)

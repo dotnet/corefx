@@ -16,6 +16,8 @@ namespace System
     {
         public static Version OSXVersion => throw new PlatformNotSupportedException();
         public static Version OpenSslVersion => throw new PlatformNotSupportedException();
+        public static bool IsDrawingSupported => IsNotWindowsNanoServer && IsNotWindowsServerCore;
+        public static bool IsSoundPlaySupported => IsNotWindowsNanoServer;
         public static bool IsSuperUser => throw new PlatformNotSupportedException();
         public static bool IsCentos6 => false;
         public static bool IsOpenSUSE => false;
@@ -29,28 +31,44 @@ namespace System
         public static bool IsUbuntu1710 => false;
         public static bool IsUbuntu1710OrHigher => false;
         public static bool IsUbuntu1804 => false;
+        public static bool IsUbuntu1810OrHigher => false;
         public static bool IsTizen => false;
         public static bool IsNotFedoraOrRedHatFamily => true;
         public static bool IsFedora => false;
         public static bool IsWindowsNanoServer => (IsNotWindowsIoTCore && GetInstallationType().Equals("Nano Server", StringComparison.OrdinalIgnoreCase));
         public static bool IsWindowsServerCore => GetInstallationType().Equals("Server Core", StringComparison.OrdinalIgnoreCase);
-        public static int WindowsVersion => GetWindowsVersion();
+        public static int WindowsVersion => (int)GetWindowsVersion();
         public static bool IsMacOsHighSierraOrHigher { get; } = false;
+        public static bool IsMacOsMojaveOrHigher { get; } = false;
         public static Version ICUVersion => new Version(0, 0, 0, 0);
         public static bool IsRedHatFamily => false;
         public static bool IsNotRedHatFamily => true;
         public static bool IsRedHatFamily6 => false;
         public static bool IsRedHatFamily7 => false;
         public static bool IsNotRedHatFamily6 => true;
+        public static bool IsInContainer => !String.IsNullOrEmpty(GetContainerType());
 
+        public static bool SupportsSsl3 => GetSsl3Support();
+
+        // >= Windows 10 Anniversary Update
         public static bool IsWindows10Version1607OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 14393;
+        
+         // >= Windows 10 Creators Update
         public static bool IsWindows10Version1703OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 15063;
+        
+        // >= Windows 10 Fall Creators Update
         public static bool IsWindows10Version1709OrGreater => 
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 16299;
+        
+        // >= Windows 10 April 2018 Update
         public static bool IsWindows10Version1803OrGreater =>
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 17134;
+
+        // >= Windows 10 May 2019 Update (19H1)
+        public static bool IsWindows10Version1903OrGreater =>
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 18362;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP =>  
@@ -95,6 +113,7 @@ namespace System
         public static bool IsWindows => true;
         public static bool IsWindows7 => GetWindowsVersion() == 6 && GetWindowsMinorVersion() == 1;
         public static bool IsWindows8x => GetWindowsVersion() == 6 && (GetWindowsMinorVersion() == 2 || GetWindowsMinorVersion() == 3);
+        public static bool IsWindows8xOrLater => new Version((int)GetWindowsVersion(), (int)GetWindowsMinorVersion()) >= new Version(6, 2);
 
         public static string LibcRelease => "glibc_not_found";
         public static string LibcVersion => "glibc_not_found";
@@ -176,22 +195,7 @@ namespace System
                     return false;
                 }
 
-                IntPtr processToken;
-                Assert.True(OpenProcessToken(GetCurrentProcess(), TOKEN_READ, out processToken));
-
-                try
-                {
-                    uint tokenInfo;
-                    uint returnLength;
-                    Assert.True(GetTokenInformation(
-                        processToken, TokenElevation, out tokenInfo, sizeof(uint), out returnLength));
-
-                    s_isWindowsElevated = tokenInfo == 0 ? 0 : 1;
-                }
-                finally
-                {
-                    CloseHandle(processToken);
-                }
+                s_isWindowsElevated = AdminHelpers.IsProcessElevated() ? 1 : 0;
 
                 return s_isWindowsElevated == 1;
             }
@@ -213,40 +217,48 @@ namespace System
             return value;
         }
 
+        private static bool GetSsl3Support()
+        {
+            string clientKey = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Client";
+            string serverKey = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\SecurityProviders\SCHANNEL\Protocols\SSL 3.0\Server";
+            bool enabled = true;
+
+            // This may change in future but for now, missing key means protocol is enabled.
+            try
+            {
+                if ((int)Registry.GetValue(clientKey, "Enabled", 1) == 0 || (int)Registry.GetValue(serverKey, "Enabled", 1) == 0)
+                {
+                    enabled = false;
+                }
+            }
+            catch (Exception e) when (e is SecurityException || e is InvalidCastException || e is NullReferenceException)
+            {
+            }
+
+            return enabled;
+        }
+
         private static int GetWindowsProductType()
         {
             Assert.True(GetProductInfo(Environment.OSVersion.Version.Major, Environment.OSVersion.Version.Minor, 0, 0, out int productType));
             return productType;
         }
 
-        private static unsafe int GetWindowsMinorVersion()
+        private static string GetContainerType()
         {
-            var osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)sizeof(RTL_OSVERSIONINFOEX);
-            Assert.Equal(0, RtlGetVersion(ref osvi));
-            return (int)osvi.dwMinorVersion;
+            string key = @"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control";
+            string value = "";
+
+            try
+            {
+                value = (string)Registry.GetValue(key, "ContainerType", defaultValue: "");
+            }
+            catch
+            {
+            }
+
+            return value;
         }
-
-        private static unsafe int GetWindowsBuildNumber()
-        {
-            var osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)sizeof(RTL_OSVERSIONINFOEX);
-            Assert.Equal(0, RtlGetVersion(ref osvi));
-            return (int)osvi.dwBuildNumber;
-        }
-
-        private const uint TokenElevation = 20;
-        private const uint STANDARD_RIGHTS_READ = 0x00020000;
-        private const uint TOKEN_QUERY = 0x0008;
-        private const uint TOKEN_READ = STANDARD_RIGHTS_READ | TOKEN_QUERY;
-
-        [DllImport("advapi32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool GetTokenInformation(
-            IntPtr TokenHandle,
-            uint TokenInformationClass,
-            out uint TokenInformation,
-            uint TokenInformationLength,
-            out uint ReturnLength);
 
         private const int PRODUCT_IOTUAP = 0x0000007B;
         private const int PRODUCT_IOTUAPCOMMERCIAL = 0x00000083;
@@ -268,39 +280,24 @@ namespace System
             out int pdwReturnedProductType
         );
 
-        [DllImport("ntdll.dll", ExactSpelling=true)]
-        private static extern int RtlGetVersion(ref RTL_OSVERSIONINFOEX lpVersionInformation);
-
-        [StructLayout(LayoutKind.Sequential, CharSet=CharSet.Unicode)]
-        private unsafe struct RTL_OSVERSIONINFOEX
-        {
-            internal uint dwOSVersionInfoSize;
-            internal uint dwMajorVersion;
-            internal uint dwMinorVersion;
-            internal uint dwBuildNumber;
-            internal uint dwPlatformId;
-            internal fixed char szCSDVersion[128];
-        }
-
-        private static unsafe int GetWindowsVersion()
-        {
-            var osvi = new RTL_OSVERSIONINFOEX();
-            osvi.dwOSVersionInfoSize = (uint)sizeof(RTL_OSVERSIONINFOEX);
-            Assert.Equal(0, RtlGetVersion(ref osvi));
-            return (int)osvi.dwMajorVersion;
-        }
 
         [DllImport("kernel32.dll", ExactSpelling = true)]
         private static extern int GetCurrentApplicationUserModelId(ref uint applicationUserModelIdLength, byte[] applicationUserModelId);
-            
-        [DllImport("kernel32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool CloseHandle(IntPtr handle);
 
-        [DllImport("advapi32.dll", SetLastError = true, ExactSpelling = true)]
-        private static extern bool OpenProcessToken(IntPtr ProcessHandle, uint DesiredAccess, out IntPtr TokenHandle);
-
-        // The process handle does NOT need closing
-        [DllImport("kernel32.dll", ExactSpelling = true)]
-        private static extern IntPtr GetCurrentProcess();
+        internal static uint GetWindowsVersion()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwMajorVersion;
+        }
+        internal static uint GetWindowsMinorVersion()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwMinorVersion;
+        }
+        internal static uint GetWindowsBuildNumber()
+        {
+            Assert.Equal(0, Interop.NtDll.RtlGetVersionEx(out Interop.NtDll.RTL_OSVERSIONINFOEX osvi));
+            return osvi.dwBuildNumber;
+        }
     }
 }

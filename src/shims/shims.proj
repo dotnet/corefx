@@ -1,16 +1,5 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project DefaultTargets="Build">
   <Import Project="Directory.Build.props" />
-
-  <PropertyGroup>
-    <PackageConfigurations>
-      netcoreapp2.0;
-    </PackageConfigurations>
-    <BuildConfigurations>
-      $(BuildConfigurations);
-      $(PackageConfigurations);
-    </BuildConfigurations>
-  </PropertyGroup>
 
   <Target Name="GetGenFacadesInputs">
     <ItemGroup>
@@ -18,7 +7,9 @@
         <StrongNameSig Condition="'%(NetfxReference.StrongNameSig)' == ''">StrongName</StrongNameSig>
         <StrongNameSig Condition="'%(NetfxReference.StrongNameSig)' != ''">%(NetfxReference.StrongNameSig)</StrongNameSig>
       </NetFxContracts>
-      <NETStandardContracts Include="$(NetStandardRefPath)netstandard.dll" />
+      <!-- TODO - once we retarget everything to netstandard2.1, remove netcoreapp2.0 reference to netstandard2.0 netstandard.dll -->
+      <NETStandardContracts Condition="'$(TargetGroup)' == 'netcoreapp2.0'" Include="$(NetStandardRefPath)netstandard.dll" />
+      <NETStandardContracts Condition="'$(TargetGroup)' != 'netcoreapp2.0'" Include="$(NetStandard21RefPath)netstandard.dll" />
       <GenFacadesContracts Include="@(NetFxContracts);@(NETStandardContracts)" />
       <GenFacadesSeeds Include="$(RefPath)*.dll" />
     </ItemGroup>
@@ -49,7 +40,6 @@
       FacadePath="$(GenFacadesOutputPath)"
       ProducePdb="$(ProducePdb)"
       IgnoreMissingTypes="$(GenFacadesIgnoreMissingTypes)"
-      IgnoreBuildAndRevisionMismatch="$(GenFacadesIgnoreBuildAndRevisionMismatch)"
       ForceZeroVersionSeeds="$(GenFacadesForceZeroVersionSeeds)"
       BuildPartialReferenceFacade="$(GenFacadesBuildPartialReferenceFacade)"
     />
@@ -65,18 +55,6 @@
       ForceZeroVersionSeeds="$(GenFacadesForceZeroVersionSeeds)"
       BuildPartialReferenceFacade="$(GenFacadesBuildPartialReferenceFacade)"
     />
-
-    <WriteSigningRequired
-        Condition="'@(NetFxContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
-        StrongNameSig="%(NetFxContracts.StrongNameSig)"
-        MarkerFile="$(GenFacadesOutputPath)%(NetFxContracts.Filename)%(NetFxContracts.Extension).requires_signing" />
-
-    <WriteSigningRequired
-        Condition="'@(NETStandardContracts)' != '' and '$(SkipSigning)' != 'true' and '$(SignType)' != 'public'"
-        AuthenticodeSig="Microsoft"
-        StrongNameSig="Open"
-        MarkerFile="$(GenFacadesOutputPath)%(NETStandardContracts.Filename)%(NETStandardContracts.Extension).requires_signing" />
 
     <MakeDir Directories="$(IntermediateOutputPath)" />
     <Touch Files="$(GenFacadesSemaphoreFile)" AlwaysCreate="true" />
@@ -109,26 +87,5 @@
       <RuntimeBinplaceItem Include="@(BinPlaceItemNames->'$(GenFacadesOutputPath)%(Identity).dll')" />
       <FileWrites Include="@(BinPlaceItem)" />
     </ItemGroup>
-  </Target>
-
-  <Target Name="GetCompatibilityShimsToPackage"
-          BeforeTargets="GetFilesToPackage">
-    <ItemGroup>
-      <!-- All the shims defined in netfxreference.props produced by this project need to be included in the ref path. -->
-      <FilesToPackage Include="@(NetFxReference->'$(GenFacadesOutputPath)%(Identity).dll')">
-        <TargetFramework>netcoreapp2.0</TargetFramework>
-        <TargetPath>/ref/netcoreapp2.0</TargetPath>
-      </FilesToPackage>
-
-      <!-- For the implementation path in the package we only want to include the non-manual shims produced by this project
-      and the manual shims that we produce against the 2.0.0 implementation will be included to the shims package through
-      a project reference, therefore we need to exclude them here.     -->
-      <_manualShimProjects Include="manual\*.csproj" />
-      <_manualShims Include="@(_manualShimProjects->'%(FileName)')" />
-      <_libShims Include="@(NetFxReference)" Exclude="@(_manualShims)" />
-    </ItemGroup>
-    <PropertyGroup>
-      <TargetPath>@(_libShims->'$(GenFacadesOutputPath)%(Identity).dll')</TargetPath>
-    </PropertyGroup>
   </Target>
 </Project>

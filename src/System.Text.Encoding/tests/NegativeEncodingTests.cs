@@ -16,13 +16,18 @@ namespace System.Text.Tests
             yield return new object[] { new UnicodeEncoding(true, false) };
             yield return new object[] { new UnicodeEncoding(true, true) };
             yield return new object[] { new UnicodeEncoding(true, true) };
+            yield return new object[] { Encoding.BigEndianUnicode };
+            yield return new object[] { Encoding.Unicode };
             yield return new object[] { new UTF7Encoding(true) };
             yield return new object[] { new UTF7Encoding(false) };
+            yield return new object[] { Encoding.UTF7 };
             yield return new object[] { new UTF8Encoding(true, true) };
             yield return new object[] { new UTF8Encoding(false, true) };
             yield return new object[] { new UTF8Encoding(true, false) };
             yield return new object[] { new UTF8Encoding(false, false) };
+            yield return new object[] { Encoding.UTF8 };
             yield return new object[] { new ASCIIEncoding() };
+            yield return new object[] { Encoding.ASCII };
             yield return new object[] { new UTF32Encoding(true, true, true) };
             yield return new object[] { new UTF32Encoding(true, true, false) };
             yield return new object[] { new UTF32Encoding(true, false, false) };
@@ -31,6 +36,7 @@ namespace System.Text.Tests
             yield return new object[] { new UTF32Encoding(false, true, false) };
             yield return new object[] { new UTF32Encoding(false, false, false) };
             yield return new object[] { new UTF32Encoding(false, false, true) };
+            yield return new object[] { Encoding.UTF32 };
             yield return new object[] { Encoding.GetEncoding("latin1") };
         }
 
@@ -39,7 +45,14 @@ namespace System.Text.Tests
         public static unsafe void GetByteCount_Invalid(Encoding encoding)
         {
             // Chars is null
-            AssertExtensions.Throws<ArgumentNullException>(encoding is ASCIIEncoding ? "chars" : "s", () => encoding.GetByteCount((string)null));
+            if (PlatformDetection.IsNetCore)
+            {
+                AssertExtensions.Throws<ArgumentNullException>((encoding is ASCIIEncoding || encoding is UTF8Encoding) ? "chars" : "s", () => encoding.GetByteCount((string)null));
+            }
+            else
+            {
+                AssertExtensions.Throws<ArgumentNullException>((encoding is ASCIIEncoding) ? "chars" : "s", () => encoding.GetByteCount((string)null));
+            }
             AssertExtensions.Throws<ArgumentNullException>("chars", () => encoding.GetByteCount((char[])null));
             AssertExtensions.Throws<ArgumentNullException>("chars", () => encoding.GetByteCount((char[])null, 0, 0));
 

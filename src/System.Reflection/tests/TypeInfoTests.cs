@@ -151,7 +151,7 @@ namespace System.Reflection.Tests
         [InlineData(typeof(MultipleNestedClass), nameof(MultipleNestedClass.Nest1), true)]
         [InlineData(typeof(MultipleNestedClass.Nest1), nameof(MultipleNestedClass.Nest1.Nest2), true)]
         [InlineData(typeof(MultipleNestedClass.Nest1.Nest2), nameof(MultipleNestedClass.Nest1.Nest2.Nest3), true)]
-        private void DeclaredNestedTypes(Type type, string name, bool exists)
+        public void DeclaredNestedTypes(Type type, string name, bool exists)
         {
             IEnumerable<string> nestedTypes = type.GetTypeInfo().DeclaredNestedTypes.Select(nestedType => nestedType.Name);
 
@@ -812,20 +812,6 @@ namespace System.Reflection.Tests
         }
 
         [Theory]
-        [InlineData(nameof(TI_NonGenericInterface1), false, true)]
-        [InlineData(nameof(TI_NonGenericInterface2), false, true)]
-        [InlineData(nameof(TI_NonGenericInterface2), true, true)]
-        public void GetInterface(string name, bool ignoreCase, bool exists)
-        {
-            TypeInfo typeInfo = typeof(MembersClass).GetTypeInfo();
-            if (!ignoreCase)
-            {
-                Assert.Equal(exists, typeInfo.GetInterface(name) != null);
-            }
-            Assert.Equal(exists, typeInfo.GetInterface(name, exists) != null);
-        }
-
-        [Theory]
         [InlineData(typeof(MembersClass), new Type[] { typeof(TI_NonGenericInterface1), typeof(TI_NonGenericInterface2) })]
         [InlineData(typeof(TI_NonGenericInterface2), new Type[0])]
         public void GetInterfaces(Type type, Type[] expected)
@@ -998,8 +984,8 @@ namespace System.Reflection.Tests
             Assert.Equal(expected, type.GetTypeInfo().GetElementType());
         }
 
-        [Theory]
-        public void GenericParameterConstraints(Type type)
+        [Fact]
+        public void GenericParameterConstraints()
         {
             Type[] genericTypeParameters = typeof(MethodClassWithConstraints<,>).GetTypeInfo().GenericTypeParameters;
             Assert.Equal(2, genericTypeParameters.Length);

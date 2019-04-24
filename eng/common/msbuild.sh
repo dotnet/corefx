@@ -13,7 +13,10 @@ done
 scriptroot="$( cd -P "$( dirname "$source" )" && pwd )"
 
 verbosity='minimal'
-extraargs=''
+warn_as_error=true
+node_reuse=true
+prepare_machine=false
+extra_args=''
 
 while (($# > 0)); do
   lowerI="$(echo $1 | awk '{print tolower($0)}')"
@@ -23,11 +26,11 @@ while (($# > 0)); do
       shift 2
       ;;
     --warnaserror)
-      warnaserror=$2
+      warn_as_error=$2
       shift 2
       ;;
     --nodereuse)
-      nodereuse=$2
+      node_reuse=$2
       shift 2
       ;;
     --ci)
@@ -39,13 +42,17 @@ while (($# > 0)); do
       shift 1
       ;;
       *)
-      extraargs="$extraargs $1"
+      extra_args="$extra_args $1"
       shift 1
       ;;
   esac
 done
 
-. $scriptroot/init-tools.sh
+. "$scriptroot/tools.sh"
 
-MSBuild $extraargs
-ExitWithExitCode $?
+if [[ "$ci" == true ]]; then
+  node_reuse=false
+fi
+
+MSBuild $extra_args
+ExitWithExitCode 0

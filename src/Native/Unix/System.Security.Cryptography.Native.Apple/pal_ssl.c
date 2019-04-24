@@ -5,6 +5,9 @@
 #include "pal_ssl.h"
 #include <dlfcn.h>
 
+// TLS 1.3 is only defined with 10.13 headers, but we build on 10.12
+#define kTLSProtocol13_ForwardDef 10
+
 // 10.13.4 introduced public API but linking would fail on all prior versions.
 // For that reason we use function pointers instead of direct call.
 // This can be revisited after we drop support for 10.12.
@@ -31,6 +34,8 @@ static SSLProtocol PalSslProtocolToSslProtocol(PAL_SslProtocol palProtocolId)
 {
     switch (palProtocolId)
     {
+        case PAL_SslProtocol_Tls13:
+            return kTLSProtocol13_ForwardDef;
         case PAL_SslProtocol_Tls12:
             return kTLSProtocol12;
         case PAL_SslProtocol_Tls11:
@@ -419,7 +424,9 @@ int32_t AppleCryptoNative_SslGetProtocolVersion(SSLContextRef sslContext, PAL_Ss
     {
         PAL_SslProtocol matchedProtocol = PAL_SslProtocol_None;
 
-        if (protocol == kTLSProtocol12)
+        if (protocol == kTLSProtocol13_ForwardDef)
+            matchedProtocol = PAL_SslProtocol_Tls13;
+        else if (protocol == kTLSProtocol12)
             matchedProtocol = PAL_SslProtocol_Tls12;
         else if (protocol == kTLSProtocol11)
             matchedProtocol = PAL_SslProtocol_Tls11;
@@ -436,12 +443,50 @@ int32_t AppleCryptoNative_SslGetProtocolVersion(SSLContextRef sslContext, PAL_Ss
     return osStatus;
 }
 
-int32_t AppleCryptoNative_SslGetCipherSuite(SSLContextRef sslContext, uint32_t* pCipherSuiteOut)
+int32_t AppleCryptoNative_SslGetCipherSuite(SSLContextRef sslContext, uint16_t* pCipherSuiteOut)
 {
     if (pCipherSuiteOut == NULL)
-        *pCipherSuiteOut = 0;
+    {
+        return errSecParam;
+    }
 
-    return SSLGetNegotiatedCipher(sslContext, pCipherSuiteOut);
+    SSLCipherSuite cipherSuite;
+    OSStatus status = SSLGetNegotiatedCipher(sslContext, &cipherSuite);
+    *pCipherSuiteOut = (uint16_t)cipherSuite;
+
+    return status;
+}
+
+int32_t AppleCryptoNative_SslSetEnabledCipherSuites(SSLContextRef sslContext, const uint32_t* cipherSuites, int32_t numCipherSuites)
+{
+    // Max numCipherSuites is 2^16 (all possible cipher suites)
+    assert(numCipherSuites < (1 << 16));
+
+    if (sizeof(SSLCipherSuite) == sizeof(uint32_t))
+    {
+        // macOS
+        return SSLSetEnabledCiphers(sslContext, cipherSuites, (size_t)numCipherSuites);
+    }
+    else
+    {
+        // iOS, tvOS, watchOS
+        SSLCipherSuite* cipherSuites16 = (SSLCipherSuite*)calloc((size_t)numCipherSuites, sizeof(SSLCipherSuite));
+
+        if (cipherSuites16 == NULL)
+        {
+            return errSSLInternal;
+        }
+
+        for (int i = 0; i < numCipherSuites; i++)
+        {
+            cipherSuites16[i] = (SSLCipherSuite)cipherSuites[i];
+        }
+
+        OSStatus status = SSLSetEnabledCiphers(sslContext, cipherSuites16, (size_t)numCipherSuites);
+
+        free(cipherSuites16);
+        return status;
+    }
 }
 
 __attribute__((constructor)) static void InitializeAppleCryptoSslShim()

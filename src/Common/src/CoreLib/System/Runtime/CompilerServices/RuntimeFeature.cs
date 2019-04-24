@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 namespace System.Runtime.CompilerServices
 {
-    public static class RuntimeFeature
+    public static partial class RuntimeFeature
     {
         /// <summary>
         /// Name of the Portable PDB feature.
@@ -30,6 +31,10 @@ namespace System.Runtime.CompilerServices
                 case DefaultImplementationsOfInterfaces:
 #endif
                     return true;
+                case nameof(IsDynamicCodeSupported):
+                    return IsDynamicCodeSupported;
+                case nameof(IsDynamicCodeCompiled):
+                    return IsDynamicCodeCompiled;
             }
 
             return false;

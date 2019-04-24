@@ -129,7 +129,7 @@ namespace System.ComponentModel
                 // the enum isn't a flags style.
                 if (!EnumType.IsDefined(typeof(FlagsAttribute), false) && !Enum.IsDefined(EnumType, value))
                 {
-                    throw new ArgumentException(SR.Format(SR.EnumConverterInvalidValue, value.ToString(), EnumType.Name));
+                    throw new ArgumentException(SR.Format(SR.EnumConverterInvalidValue, value, EnumType.Name));
                 }
 
                 return Enum.Format(EnumType, value, "G");
@@ -289,7 +289,7 @@ namespace System.ComponentModel
 
         /// <summary>
         /// Gets a value indicating whether the list of standard values returned from
-        /// <see cref='System.ComponentModel.TypeConverter.GetStandardValues'/> 
+        /// <see cref='System.ComponentModel.TypeConverter.GetStandardValues()'/> 
         /// is an exclusive list using the specified context.
         /// </summary>
         public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)

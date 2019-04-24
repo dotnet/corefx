@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Text;
-using System;
-using System.IO;
 using System.Reflection;
 
 namespace System.Diagnostics
@@ -17,7 +16,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Reflection information for the method if available, null otherwise.
         /// </summary>
-        private MethodBase _method;
+        private MethodBase? _method;
 
         /// <summary>
         /// Native offset of the current instruction within the current method if available,
@@ -34,7 +33,7 @@ namespace System.Diagnostics
         /// <summary>
         /// Source file name representing the current code location if available, null otherwise.
         /// </summary>
-        private string _fileName;
+        private string? _fileName;
 
         /// <summary>
         /// Line number representing the current code location if available, 0 otherwise.
@@ -53,13 +52,8 @@ namespace System.Diagnostics
 
         private void InitMembers()
         {
-            _method = null;
             _nativeOffset = OFFSET_UNKNOWN;
             _ilOffset = OFFSET_UNKNOWN;
-            _fileName = null;
-            _lineNumber = 0;
-            _columnNumber = 0;
-            _isLastFrameFromForeignExceptionStackTrace = false;
         }
 
         /// <summary>
@@ -68,7 +62,7 @@ namespace System.Diagnostics
         public StackFrame()
         {
             InitMembers();
-            BuildStackFrame(0 + StackTrace.METHODS_TO_SKIP, false);
+            BuildStackFrame(StackTrace.METHODS_TO_SKIP, false);
         }
 
         /// <summary>
@@ -77,7 +71,7 @@ namespace System.Diagnostics
         public StackFrame(bool needFileInfo)
         {
             InitMembers();
-            BuildStackFrame(0 + StackTrace.METHODS_TO_SKIP, needFileInfo);
+            BuildStackFrame(StackTrace.METHODS_TO_SKIP, needFileInfo);
         }
 
         /// <summary>
@@ -103,13 +97,13 @@ namespace System.Diagnostics
         /// name and line number.  Use when you don't want to use the
         /// debugger's line mapping logic.
         /// </summary>
-        public StackFrame(string fileName, int lineNumber)
+        public StackFrame(string? fileName, int lineNumber)
         {
             InitMembers();
+
             BuildStackFrame(StackTrace.METHODS_TO_SKIP, false);
             _fileName = fileName;
             _lineNumber = lineNumber;
-            _columnNumber = 0;
         }
 
         /// <summary>
@@ -117,12 +111,9 @@ namespace System.Diagnostics
         /// name, line number and column number.  Use when you don't want to
         /// use the debugger's line mapping logic.
         /// </summary>
-        public StackFrame(string fileName, int lineNumber, int colNumber)
+        public StackFrame(string? fileName, int lineNumber, int colNumber)
+            : this (fileName, lineNumber)
         {
-            InitMembers();
-            BuildStackFrame(StackTrace.METHODS_TO_SKIP, false);
-            _fileName = fileName;
-            _lineNumber = lineNumber;
             _columnNumber = colNumber;
         }
 
@@ -131,50 +122,12 @@ namespace System.Diagnostics
         /// </summary>
         public const int OFFSET_UNKNOWN = -1;
 
-        internal virtual void SetMethodBase(MethodBase mb)
-        {
-            _method = mb;
-        }
-
-        internal virtual void SetOffset(int iOffset)
-        {
-            _nativeOffset = iOffset;
-        }
-
-        internal virtual void SetILOffset(int iOffset)
-        {
-            _ilOffset = iOffset;
-        }
-
-        internal virtual void SetFileName(string strFName)
-        {
-            _fileName = strFName;
-        }
-
-        internal virtual void SetLineNumber(int iLine)
-        {
-            _lineNumber = iLine;
-        }
-
-        internal virtual void SetColumnNumber(int iCol)
-        {
-            _columnNumber = iCol;
-        }
-
-        internal virtual void SetIsLastFrameFromForeignExceptionStackTrace(bool fIsLastFrame)
-        {
-            _isLastFrameFromForeignExceptionStackTrace = fIsLastFrame;
-        }
-
-        internal virtual bool GetIsLastFrameFromForeignExceptionStackTrace()
-        {
-            return _isLastFrameFromForeignExceptionStackTrace;
-        }
+        internal bool IsLastFrameFromForeignExceptionStackTrace => _isLastFrameFromForeignExceptionStackTrace;
 
         /// <summary>
         /// Returns the method the frame is executing
         /// </summary>
-        public virtual MethodBase GetMethod()
+        public virtual MethodBase? GetMethod()
         {
             return _method;
         }
@@ -204,7 +157,7 @@ namespace System.Diagnostics
         /// information is normally extracted from the debugging symbols
         /// for the executable.
         /// </summary>
-        public virtual string GetFileName()
+        public virtual string? GetFileName()
         {
             return _fileName;
         }
@@ -278,13 +231,7 @@ namespace System.Diagnostics
                     sb.Append(_nativeOffset);
 
                 sb.Append(" in file:line:column ");
-
-                bool useFileName = (_fileName != null);
-
-                if (!useFileName)
-                    sb.Append("<filename unknown>");
-                else
-                    sb.Append(_fileName);
+                sb.Append(_fileName ?? "<filename unknown>");
                 sb.Append(':');
                 sb.Append(_lineNumber);
                 sb.Append(':');

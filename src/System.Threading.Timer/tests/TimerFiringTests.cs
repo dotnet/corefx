@@ -10,7 +10,9 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Threading.Tests;
 using Xunit;
+using Xunit.Sdk;
 
 public partial class TimerFiringTests
 {
@@ -254,51 +256,66 @@ public partial class TimerFiringTests
         const int MillisecondsPadding = 100; // for each timer, out of range == Math.Abs(actualTime - dueTime) > MillisecondsPadding
         const int MaxAllowedOutOfRangePercentage = 20; // max % allowed out of range to pass test
 
-        var outOfRange = new ConcurrentQueue<KeyValuePair<int, long>>();
-
-        long totalTimers = 0;
-        await Task.WhenAll(from p in Enumerable.Range(0, Environment.ProcessorCount)
-                           select Task.Run(async () =>
-                           {
-                               await Task.WhenAll(from dueTimeTemplate in dueTimes
-                                                  from dueTime in Enumerable.Repeat(dueTimeTemplate, 10)
-                                                  select Task.Run(async () =>
-                                                  {
-                                                      var sw = new Stopwatch();
-                                                      for (int i = 1; i <= 1_000 / dueTime; i++)
-                                                      {
-                                                          sw.Restart();
-                                                          await DueTimeAsync(dueTime);
-                                                          sw.Stop();
-
-                                                          Interlocked.Increment(ref totalTimers);
-                                                          if (Math.Abs(sw.ElapsedMilliseconds - dueTime) > MillisecondsPadding)
-                                                          {
-                                                              outOfRange.Enqueue(new KeyValuePair<int, long>(dueTime, sw.ElapsedMilliseconds));
-                                                          }
-                                                      }
-                                                  }));
-                           }));
-
-        double percOutOfRange = (double)outOfRange.Count / totalTimers * 100;
-        if (percOutOfRange > MaxAllowedOutOfRangePercentage)
+        for (int tries = 0; ; tries++)
         {
-            IOrderedEnumerable<IGrouping<int, KeyValuePair<int, long>>> results =
-                from sample in outOfRange
-                group sample by sample.Key into groupedByDueTime
-                orderby groupedByDueTime.Key
-                select groupedByDueTime;
-
-            var sb = new StringBuilder();
-            sb.AppendFormat("{0}% out of {1} timer firings were off by more than {2}ms",
-                percOutOfRange, totalTimers, MillisecondsPadding);
-            foreach (IGrouping<int, KeyValuePair<int, long>> result in results)
+            try
             {
-                sb.AppendLine();
-                sb.AppendFormat("Expected: {0}, Actuals: {1}", result.Key, string.Join(", ", result.Select(k => k.Value)));
+                var outOfRange = new ConcurrentQueue<KeyValuePair<int, long>>();
+
+                long totalTimers = 0;
+                await Task.WhenAll(from p in Enumerable.Range(0, Environment.ProcessorCount)
+                                   select Task.Run(async () =>
+                                   {
+                                       await Task.WhenAll(from dueTimeTemplate in dueTimes
+                                                          from dueTime in Enumerable.Repeat(dueTimeTemplate, 10)
+                                                          select Task.Run(async () =>
+                                                          {
+                                                              var sw = new Stopwatch();
+                                                              for (int i = 1; i <= 1_000 / dueTime; i++)
+                                                              {
+                                                                  sw.Restart();
+                                                                  await DueTimeAsync(dueTime);
+                                                                  sw.Stop();
+
+                                                                  Interlocked.Increment(ref totalTimers);
+                                                                  if (Math.Abs(sw.ElapsedMilliseconds - dueTime) > MillisecondsPadding)
+                                                                  {
+                                                                      outOfRange.Enqueue(new KeyValuePair<int, long>(dueTime, sw.ElapsedMilliseconds));
+                                                                  }
+                                                              }
+                                                          }));
+                                   }));
+
+                double percOutOfRange = (double)outOfRange.Count / totalTimers * 100;
+                if (percOutOfRange > MaxAllowedOutOfRangePercentage)
+                {
+                    IOrderedEnumerable<IGrouping<int, KeyValuePair<int, long>>> results =
+                        from sample in outOfRange
+                        group sample by sample.Key into groupedByDueTime
+                        orderby groupedByDueTime.Key
+                        select groupedByDueTime;
+
+                    var sb = new StringBuilder();
+                    sb.AppendFormat("{0}% out of {1} timer firings were off by more than {2}ms",
+                        percOutOfRange, totalTimers, MillisecondsPadding);
+                    foreach (IGrouping<int, KeyValuePair<int, long>> result in results)
+                    {
+                        sb.AppendLine();
+                        sb.AppendFormat("Expected: {0}, Actuals: {1}", result.Key, string.Join(", ", result.Select(k => k.Value)));
+                    }
+
+                    Assert.True(false, sb.ToString());
+                }
+            }
+            catch (XunitException) when (tries < 3)
+            {
+                // This test will occasionally fail apparently because it was switched out
+                // for a short period. Eat and go around again
+                await Task.Delay(TimeSpan.FromSeconds(10)); // Should be very rare: wait for machine to settle
+                continue;
             }
 
-            Assert.True(false, sb.ToString());
+            return;
         }
     }
 
@@ -319,6 +336,59 @@ public partial class TimerFiringTests
         {
             t.Change(period, period);
             await tcs.Task.ConfigureAwait(false);
+        }
+    }
+
+    [Fact]
+    public void TimersCreatedConcurrentlyOnDifferentThreadsAllFire()
+    {
+        int processorCount = Environment.ProcessorCount;
+
+        int timerTickCount = 0;
+        TimerCallback timerCallback = _ => Interlocked.Increment(ref timerTickCount);
+
+        var threadStarted = new AutoResetEvent(false);
+        var createTimers = new ManualResetEvent(false);
+        var timers = new Timer[processorCount];
+        Action<object> createTimerThreadStart = data =>
+        {
+            int i = (int)data;
+            var sw = new Stopwatch();
+            threadStarted.Set();
+            createTimers.WaitOne();
+
+            // Use the CPU a bit around creating the timer to try to have some of these threads run concurrently
+            sw.Restart();
+            do
+            {
+                Thread.SpinWait(1000);
+            } while (sw.ElapsedMilliseconds < 10);
+
+            timers[i] = new Timer(timerCallback, null, 1, Timeout.Infinite);
+
+            // Use the CPU a bit around creating the timer to try to have some of these threads run concurrently
+            sw.Restart();
+            do
+            {
+                Thread.SpinWait(1000);
+            } while (sw.ElapsedMilliseconds < 10);
+        };
+
+        var waitsForThread = new Action[timers.Length];
+        for (int i = 0; i < timers.Length; ++i)
+        {
+            var t = ThreadTestHelpers.CreateGuardedThread(out waitsForThread[i], createTimerThreadStart);
+            t.IsBackground = true;
+            t.Start(i);
+            threadStarted.CheckedWait();
+        }
+
+        createTimers.Set();
+        ThreadTestHelpers.WaitForCondition(() => timerTickCount == timers.Length);
+
+        foreach (var waitForThread in waitsForThread)
+        {
+            waitForThread();
         }
     }
 }

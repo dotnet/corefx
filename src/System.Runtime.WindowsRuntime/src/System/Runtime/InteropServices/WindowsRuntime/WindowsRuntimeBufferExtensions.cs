@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics.Contracts;
 using System.Diagnostics;
 using System.IO;
 using Windows.Foundation;
@@ -22,11 +21,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
 
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == unchecked((uint)source.Length));
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == unchecked((uint)source.Length));
-            Contract.EndContractBlock();
-
             return AsBuffer(source, 0, source.Length, source.Length);
         }
 
@@ -38,11 +32,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (offset < 0) throw new ArgumentOutOfRangeException(nameof(offset));
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
             if (source.Length - offset < length) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
-
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == unchecked((uint)length));
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == unchecked((uint)length));
-            Contract.EndContractBlock();
 
             return AsBuffer(source, offset, length, length);
         }
@@ -58,11 +47,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Length - offset < length) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (source.Length - offset < capacity) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (capacity < length) throw new ArgumentException(SR.Argument_InsufficientBufferCapacity);
-
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == unchecked((uint)length));
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == unchecked((uint)capacity));
-            Contract.EndContractBlock();
 
             return new WindowsRuntimeBuffer(source, offset, length, capacity);
         }
@@ -83,7 +67,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
-            Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, source.Length);
         }
@@ -109,7 +92,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Length <= sourceIndex) throw new ArgumentException(SR.Argument_IndexOutOfArrayBounds, nameof(sourceIndex));
             if (source.Length - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
             if (destination.Capacity - destinationIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInTargetBuffer);
-            Contract.EndContractBlock();
 
             // If destination is backed by a managed array, use the array instead of the pointer as it does not require pinning:
             byte[] destDataArr;
@@ -133,7 +115,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         public static byte[] ToArray(this IBuffer source)
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
-            Contract.EndContractBlock();
 
             return ToArray(source, 0, checked((int)source.Length));
         }
@@ -146,7 +127,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (count < 0) throw new ArgumentOutOfRangeException(nameof(count));
             if (source.Capacity <= sourceIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
-            Contract.EndContractBlock();
 
             if (count == 0)
                 return Array.Empty<Byte>();
@@ -166,7 +146,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
-            Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, checked((int)source.Length));
         }
@@ -183,7 +162,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
             if (destination.Length <= destinationIndex) throw new ArgumentException(SR.Argument_IndexOutOfArrayBounds);
             if (destination.Length - destinationIndex < count) throw new ArgumentException(SR.Argument_InsufficientArrayElementsAfterOffset);
-            Contract.EndContractBlock();
 
             // If source is backed by a managed array, use the array instead of the pointer as it does not require pinning:
             byte[] srcDataArr;
@@ -208,7 +186,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (destination == null) throw new ArgumentNullException(nameof(destination));
-            Contract.EndContractBlock();
 
             CopyTo(source, 0, destination, 0, source.Length);
         }
@@ -223,7 +200,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (source.Capacity - sourceIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInSourceBuffer);
             if (destination.Capacity <= destinationIndex) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity);
             if (destination.Capacity - destinationIndex < count) throw new ArgumentException(SR.Argument_InsufficientSpaceInTargetBuffer);
-            Contract.EndContractBlock();
 
             // If source are destination are backed by managed arrays, use the arrays instead of the pointers as it does not require pinning:
             byte[] srcDataArr, destDataArr;
@@ -292,8 +268,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
 
-            Contract.EndContractBlock();
-
             WindowsRuntimeBuffer winRtBuffer = buffer as WindowsRuntimeBuffer;
             if (winRtBuffer == null)
             {
@@ -322,8 +296,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (buffer == null)
                 throw new ArgumentNullException(nameof(buffer));
-
-            Contract.EndContractBlock();
 
             if (otherBuffer == null)
                 return false;
@@ -357,14 +329,14 @@ namespace System.Runtime.InteropServices.WindowsRuntime
 
         #region Extensions for co-operation with memory streams (share mem stream data; expose data as managed/unmanaged mem stream)
         /// <summary>
-        /// Creates a new <code>IBuffer<code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
+        /// Creates a new <code>IBuffer</code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
         /// The <code>MemoryStream</code> may re-sized in future, as a result the stream will be backed by a different memory region.
         /// In such case, the buffer created by this method will remain backed by the memory behind the stream at the time the buffer was created.<br />
         /// This method can throw an <code>ObjectDisposedException</code> if the specified stream is closed.<br />
         /// This method can throw an <code>UnauthorizedAccessException</code> if the specified stream cannot expose its underlying memory buffer.
         /// </summary>
         /// <param name="underlyingStream">A memory stream to share the data memory with the buffer being created.</param>
-        /// <returns>A new <code>IBuffer<code> backed by the same memory as this specified stream.</returns>
+        /// <returns>A new <code>IBuffer</code> backed by the same memory as this specified stream.</returns>
         // The naming inconsistency with (Byte []).AsBuffer is intentional: as this extension method will appear on
         // MemoryStream, consistency with method names on MemoryStream is more important. There we already have an API
         // called GetBuffer which returns the underlying array.
@@ -374,11 +346,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (underlyingStream == null)
                 throw new ArgumentNullException(nameof(underlyingStream));
 
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == underlyingStream.Length);
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == underlyingStream.Capacity);
-
-            Contract.EndContractBlock();
             ArraySegment<byte> streamData;
             if (!underlyingStream.TryGetBuffer(out streamData))
             {
@@ -389,7 +356,7 @@ namespace System.Runtime.InteropServices.WindowsRuntime
 
 
         /// <summary>
-        /// Creates a new <code>IBuffer<code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
+        /// Creates a new <code>IBuffer</code> instance backed by the same memory as is backing the specified <code>MemoryStream</code>.
         /// The <code>MemoryStream</code> may re-sized in future, as a result the stream will be backed by a different memory region.
         /// In such case buffer created by this method will remain backed by the memory behind the stream at the time the buffer was created.<br />
         /// This method can throw an <code>ObjectDisposedException</code> if the specified stream is closed.<br />
@@ -402,13 +369,14 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         /// length end, or zero if <code>positionInStream</code> is beyond stream length end, but not more than <code>length</code>.
         /// </summary>
         /// <param name="underlyingStream">A memory stream to share the data memory with the buffer being created.</param>
-        /// <returns>A new <code>IBuffer<code> backed by the same memory as this specified stream.</returns>
-        // The naming inconsistency with (Byte []).AsBuffer is intentional: as this extension method will appear on
-        // MemoryStream, consistency with method names on MemoryStream is more important. There we already have an API
-        // called GetBuffer which returns the underlying array.
+        /// <returns>A new <code>IBuffer</code> backed by the same memory as this specified stream.</returns>
         [CLSCompliant(false)]
         public static IBuffer GetWindowsRuntimeBuffer(this MemoryStream underlyingStream, int positionInStream, int length)
         {
+            // The naming inconsistency with (Byte []).AsBuffer is intentional: as this extension method will appear on
+            // MemoryStream, consistency with method names on MemoryStream is more important. There we already have an API
+            // called GetBuffer which returns the underlying array.
+
             if (underlyingStream == null)
                 throw new ArgumentNullException(nameof(underlyingStream));
 
@@ -421,11 +389,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
             if (underlyingStream.Capacity <= positionInStream)
                 throw new ArgumentException(SR.Argument_StreamPositionBeyondEOS);
 
-            Contract.Ensures(Contract.Result<IBuffer>() != null);
-            Contract.Ensures(Contract.Result<IBuffer>().Length == length);
-            Contract.Ensures(Contract.Result<IBuffer>().Capacity == length);
-
-            Contract.EndContractBlock();
             ArraySegment<byte> streamData;
 
             if (!underlyingStream.TryGetBuffer(out streamData))
@@ -445,11 +408,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-
-            Contract.Ensures(Contract.Result<Stream>() != null);
-            Contract.Ensures(Contract.Result<Stream>().Length == (uint)source.Capacity);
-
-            Contract.EndContractBlock();
 
             byte[] dataArr;
             int dataOffs;
@@ -476,8 +434,6 @@ namespace System.Runtime.InteropServices.WindowsRuntime
         {
             if (source == null) throw new ArgumentNullException(nameof(source));
             if (source.Capacity <= byteOffset) throw new ArgumentException(SR.Argument_BufferIndexExceedsCapacity, nameof(byteOffset));
-
-            Contract.EndContractBlock();
 
             byte[] srcDataArr;
             int srcDataOffs;

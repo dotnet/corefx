@@ -224,21 +224,6 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
-        public void StaticReadonlyField(bool useInterpreter)
-        {
-            MemberInfo member = typeof(PropertyAndFields).GetMember(nameof(PropertyAndFields.StaticReadonlyStringField))[0];
-            Expression<Func<PropertyAndFields>> assignToReadonly = Expression.Lambda<Func<PropertyAndFields>>(
-                Expression.MemberInit(
-                    Expression.New(typeof(PropertyAndFields)),
-                    Expression.Bind(member, Expression.Constant("ABC" + useInterpreter))
-                    )
-                );
-            Func<PropertyAndFields> func = assignToReadonly.Compile(useInterpreter);
-            func();
-            Assert.Equal("ABC" + useInterpreter, PropertyAndFields.StaticReadonlyStringField);
-        }
-
-        [Theory, ClassData(typeof(CompilationTypes))]
         public void StaticProperty(bool useInterpreter)
         {
             MemberInfo member = typeof(PropertyAndFields).GetMember(nameof(PropertyAndFields.StaticStringProperty))[0];
@@ -284,7 +269,7 @@ namespace System.Linq.Expressions.Tests
             public override string ToString() => ""; // Called internal to test framework and default would throw.
         }
 
-        private static IEnumerable<object[]> BogusBindings()
+        public static IEnumerable<object[]> BogusBindings()
         {
             MemberInfo member = typeof(PropertyAndFields).GetMember(nameof(PropertyAndFields.StaticReadonlyStringField))[0];
             foreach (MemberBindingType type in new[] {MemberBindingType.Assignment, MemberBindingType.ListBinding, MemberBindingType.MemberBinding, (MemberBindingType)(-1)})

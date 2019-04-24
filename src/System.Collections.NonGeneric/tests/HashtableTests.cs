@@ -6,13 +6,14 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 #pragma warning disable 618 // obsolete types
 
 namespace System.Collections.Tests
 {
-    public class HashtableTests : RemoteExecutorTestBase
+    public class HashtableTests
     {
         [Fact]
         public void Ctor_Empty()
@@ -90,7 +91,7 @@ namespace System.Collections.Tests
         [Fact]
         public void Ctor_IEqualityComparer()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 // Null comparer
                 var hash = new ComparableHashtable((IEqualityComparer)null);
@@ -101,7 +102,7 @@ namespace System.Collections.Tests
                 hash = new ComparableHashtable(comparer);
                 VerifyHashtable(hash, null, comparer);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -181,7 +182,7 @@ namespace System.Collections.Tests
         [Fact]
         public void Ctor_IDictionary_IEqualityComparer()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 // No exception
                 var hash1 = new ComparableHashtable(new Hashtable(), null);
@@ -201,7 +202,7 @@ namespace System.Collections.Tests
                 hash1 = new ComparableHashtable(hash2, comparer);
                 VerifyHashtable(hash1, hash2, comparer);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -274,7 +275,7 @@ namespace System.Collections.Tests
         [InlineData(1000)]
         public void Ctor_Int_IEqualityComparer(int capacity)
         {
-            RemoteInvoke((rcapacity) =>
+            RemoteExecutor.Invoke((rcapacity) =>
             {
                 int.TryParse(rcapacity, out int capacityint);
 
@@ -286,7 +287,7 @@ namespace System.Collections.Tests
                 IEqualityComparer comparer = StringComparer.CurrentCulture;
                 hash = new ComparableHashtable(capacityint, comparer);
                 VerifyHashtable(hash, null, comparer);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, capacity.ToString()).Dispose();
         }
 
@@ -300,7 +301,7 @@ namespace System.Collections.Tests
         [Fact]
         public void Ctor_IDictionary_Int_IEqualityComparer()
         {
-            RemoteInvoke(() => {
+            RemoteExecutor.Invoke(() => {
                 // No exception
                 var hash1 = new ComparableHashtable(new Hashtable(), 1f, null);
                 Assert.Equal(0, hash1.Count);
@@ -319,7 +320,7 @@ namespace System.Collections.Tests
                 IEqualityComparer comparer = StringComparer.CurrentCulture;
                 hash1 = new ComparableHashtable(hash2, 1f, comparer);
                 VerifyHashtable(hash1, hash2, comparer);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -343,7 +344,7 @@ namespace System.Collections.Tests
         [InlineData(1000, 1)]
         public void Ctor_Int_Int_IEqualityComparer(int capacity, float loadFactor)
         {
-            RemoteInvoke((rcapacity, rloadFactor) =>
+            RemoteExecutor.Invoke((rcapacity, rloadFactor) =>
             {
                 int.TryParse(rcapacity, out int capacityint);
                 float.TryParse(rloadFactor, out float loadFactorFloat);
@@ -358,7 +359,7 @@ namespace System.Collections.Tests
                 hash = new ComparableHashtable(capacityint, loadFactorFloat, comparer);
                 VerifyHashtable(hash, null, comparer);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, capacity.ToString(), loadFactor.ToString()).Dispose();
         }
 
@@ -1194,6 +1195,7 @@ namespace System.Collections.Tests
         }
     }
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // Changed behavior
     public class Hashtable_SyncRootTests
     {
         private Hashtable _hashDaughter;
@@ -1207,16 +1209,16 @@ namespace System.Collections.Tests
             var hash1 = new Hashtable();
             var hash2 = new Hashtable();
 
-            Assert.NotEqual(hash1.SyncRoot, hash2.SyncRoot);
-            Assert.Equal(hash1.SyncRoot.GetType(), typeof(object));
+            Assert.NotSame(hash1.SyncRoot, hash2.SyncRoot);
+            Assert.Equal(hash1.SyncRoot.GetType(), typeof(Hashtable));
 
             // Cloned hashtables have different SyncRoots
             hash1 = new Hashtable();
             hash2 = Hashtable.Synchronized(hash1);
             Hashtable hash3 = (Hashtable)hash2.Clone();
 
-            Assert.NotEqual(hash2.SyncRoot, hash3.SyncRoot);
-            Assert.NotEqual(hash1.SyncRoot, hash3.SyncRoot);
+            Assert.NotSame(hash2.SyncRoot, hash3.SyncRoot);
+            Assert.NotSame(hash1.SyncRoot, hash3.SyncRoot);
 
             // Testing SyncRoot is not as simple as its implementation looks like. This is the working
             // scenario we have in mind.
@@ -1236,11 +1238,11 @@ namespace System.Collections.Tests
             _hashGrandDaughter = Hashtable.Synchronized(hashSon);
             _hashDaughter = Hashtable.Synchronized(hashMother);
 
+            Assert.Same(hashSon.SyncRoot, hashMother.SyncRoot);
             Assert.Equal(hashSon.SyncRoot, hashMother.SyncRoot);
-            Assert.Equal(hashSon.SyncRoot, hashMother.SyncRoot);
-            Assert.Equal(_hashGrandDaughter.SyncRoot, hashMother.SyncRoot);
-            Assert.Equal(_hashDaughter.SyncRoot, hashMother.SyncRoot);
-            Assert.Equal(hashSon.SyncRoot, hashMother.SyncRoot);
+            Assert.Same(_hashGrandDaughter.SyncRoot, hashMother.SyncRoot);
+            Assert.Same(_hashDaughter.SyncRoot, hashMother.SyncRoot);
+            Assert.Same(hashSon.SyncRoot, hashMother.SyncRoot);
 
             // We are going to rumble with the Hashtables with some threads
             int iNumberOfWorkers = 30;

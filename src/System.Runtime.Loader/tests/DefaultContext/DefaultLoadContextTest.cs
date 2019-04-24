@@ -44,7 +44,7 @@ namespace System.Runtime.Loader.Tests
         }
     }
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyLoadContext not supported on .Net Native")]
+    [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "AssemblyLoadContext not supported on .NET Native")]
     public class DefaultLoadContextTests
     {
         private const string TestAssemblyName = "System.Runtime.Loader.Noop.Assembly";
@@ -96,12 +96,15 @@ namespace System.Runtime.Loader.Tests
             // Create a secondary load context and wireup its resolving event
             SecondaryLoadContext slc = new SecondaryLoadContext();
             slc.Resolving += ResolveAssembly;
-            
+
+            Assert.Contains(slc, AssemblyLoadContext.All);
+
             // Attempt to load the assembly in secondary load context
             var slcLoadedAssembly = slc.LoadFromAssemblyName(assemblyName);
-            
+
             // We should have successfully loaded the assembly in secondary load context.
             Assert.NotNull(slcLoadedAssembly);
+            Assert.Contains(slcLoadedAssembly, slc.Assemblies);
 
             // And make sure the simple name matches
             Assert.Equal(TestAssemblyName, slcLoadedAssembly.GetName().Name);
@@ -118,12 +121,13 @@ namespace System.Runtime.Loader.Tests
             AssemblyLoadContext.Default.Resolving += ResolveNullAssembly;
             AssemblyLoadContext.Default.Resolving += ResolveAssembly;
             AssemblyLoadContext.Default.Resolving += ResolveAssemblyAgain;
-            
+
             // This will invoke the resolution via VM requiring to bind using the TPA binder
             var assemblyExpectedFromLoad = Assembly.Load(assemblyName);
 
             // We should have successfully loaded the assembly in default context.
             Assert.NotNull(assemblyExpectedFromLoad);
+            Assert.Contains(assemblyExpectedFromLoad, AssemblyLoadContext.Default.Assemblies);
 
             // We should have only invoked non-Null returning handler once
             Assert.Equal(1, _numNonNullResolutions);
@@ -244,6 +248,8 @@ namespace System.Runtime.Loader.Tests
             var asmTargetAsm = olc.LoadFromAssemblyPath(_assemblyPath);
             var loadedContext = AssemblyLoadContext.GetLoadContext(asmTargetAsm);
 
+            olc.LoadedFromContext = false;
+
             // LoadContext of the assembly should be the custom context and not DefaultContext
             Assert.NotEqual(lcDefault, olc);
             Assert.Equal(olc, loadedContext);
@@ -256,7 +262,6 @@ namespace System.Runtime.Loader.Tests
             // Load System.Runtime - since this is on TPA, it should get resolved from our custom load context
             // since the Load method has been implemented to override TPA assemblies.
             var assemblyName = "System.Runtime, Version=4.0.0.0";
-            olc.LoadedFromContext = false;
             Assembly asmLoaded = (Assembly)method.Invoke(null, new object[] {assemblyName});
             loadedContext = AssemblyLoadContext.GetLoadContext(asmLoaded);
 

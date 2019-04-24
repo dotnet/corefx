@@ -10,7 +10,6 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Net;
 using System.Security.Principal;
-using System.Security.Permissions;
 using System.Collections.Specialized;
 using System.DirectoryServices;
 using System.Text;
@@ -2146,9 +2145,7 @@ namespace System.DirectoryServices.AccountManagement
                                                 serverName);
 
                         throw new PrincipalOperationException(
-                                string.Format(CultureInfo.CurrentCulture,
-                                                  SR.ADStoreCtxCantResolveSidForCrossStore,
-                                                  err));
+                                SR.Format(SR.ADStoreCtxCantResolveSidForCrossStore, err));
                     }
 
                     GlobalDebug.WriteLineIf(GlobalDebug.Info,

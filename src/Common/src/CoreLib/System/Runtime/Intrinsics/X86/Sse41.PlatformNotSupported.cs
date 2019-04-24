@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System;
+using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
 
 namespace System.Runtime.Intrinsics.X86
@@ -15,7 +17,40 @@ namespace System.Runtime.Intrinsics.X86
     {
         internal Sse41() { }
 
-        public new static bool IsSupported { get { return false; } }
+        public new static bool IsSupported { [Intrinsic] get { return false; } }
+
+        public new abstract class X64 : Sse2.X64
+        {
+            internal X64() { }
+
+            public new static bool IsSupported { [Intrinsic] get { return false; } }
+
+            /// <summary>
+            /// __int64 _mm_extract_epi64 (__m128i a, const int imm8)
+            ///   PEXTRQ reg/m64, xmm, imm8
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static long Extract(Vector128<long> value, byte index) { throw new PlatformNotSupportedException(); }
+            /// <summary>
+            /// __int64 _mm_extract_epi64 (__m128i a, const int imm8)
+            ///   PEXTRQ reg/m64, xmm, imm8
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static ulong Extract(Vector128<ulong> value, byte index) { throw new PlatformNotSupportedException(); }
+
+            /// <summary>
+            /// __m128i _mm_insert_epi64 (__m128i a, __int64 i, const int imm8)
+            ///   PINSRQ xmm, reg/m64, imm8
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static Vector128<long> Insert(Vector128<long> value, long data, byte index) { throw new PlatformNotSupportedException(); }
+            /// <summary>
+            /// __m128i _mm_insert_epi64 (__m128i a, __int64 i, const int imm8)
+            ///   PINSRQ xmm, reg/m64, imm8
+            /// This intrinisc is only available on 64-bit processes
+            /// </summary>
+            public static Vector128<ulong> Insert(Vector128<ulong> value, ulong data, byte index) { throw new PlatformNotSupportedException(); }
+        }
 
         /// <summary>
         /// __m128i _mm_blend_epi16 (__m128i a, __m128i b, const int imm8)
@@ -146,64 +181,125 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// __m128i _mm_cvtepi8_epi16 (__m128i a)
-        ///   PMOVSXBW xmm, xmm/m64
+        ///   PMOVSXBW xmm, xmm
         /// </summary>
         public static Vector128<short> ConvertToVector128Int16(Vector128<sbyte> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepu8_epi16 (__m128i a)
-        ///   PMOVZXBW xmm, xmm/m64
+        ///   PMOVZXBW xmm, xmm
         /// </summary>
         public static Vector128<short> ConvertToVector128Int16(Vector128<byte> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepi8_epi32 (__m128i a)
-        ///   PMOVSXBD xmm, xmm/m32
+        ///   PMOVSXBD xmm, xmm
         /// </summary>
         public static Vector128<int> ConvertToVector128Int32(Vector128<sbyte> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepu8_epi32 (__m128i a)
-        ///   PMOVZXBD xmm, xmm/m32
+        ///   PMOVZXBD xmm, xmm
         /// </summary>
         public static Vector128<int> ConvertToVector128Int32(Vector128<byte> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepi16_epi32 (__m128i a)
-        ///   PMOVSXWD xmm, xmm/m64
+        ///   PMOVSXWD xmm, xmm
         /// </summary>
         public static Vector128<int> ConvertToVector128Int32(Vector128<short> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepu16_epi32 (__m128i a)
-        ///   PMOVZXWD xmm, xmm/m64
+        ///   PMOVZXWD xmm, xmm
         /// </summary>
         public static Vector128<int> ConvertToVector128Int32(Vector128<ushort> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepi8_epi64 (__m128i a)
-        ///   PMOVSXBQ xmm, xmm/m16
+        ///   PMOVSXBQ xmm, xmm
         /// </summary>
         public static Vector128<long> ConvertToVector128Int64(Vector128<sbyte> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepu8_epi64 (__m128i a)
-        ///   PMOVZXBQ xmm, xmm/m16
+        ///   PMOVZXBQ xmm, xmm
         /// </summary>
         public static Vector128<long> ConvertToVector128Int64(Vector128<byte> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepi16_epi64 (__m128i a)
-        ///   PMOVSXWQ xmm, xmm/m32
+        ///   PMOVSXWQ xmm, xmm
         /// </summary>
         public static Vector128<long> ConvertToVector128Int64(Vector128<short> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepu16_epi64 (__m128i a)
-        ///   PMOVZXWQ xmm, xmm/m32
+        ///   PMOVZXWQ xmm, xmm
         /// </summary>
         public static Vector128<long> ConvertToVector128Int64(Vector128<ushort> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepi32_epi64 (__m128i a)
-        ///   PMOVSXDQ xmm, xmm/m64
+        ///   PMOVSXDQ xmm, xmm
         /// </summary>
         public static Vector128<long> ConvertToVector128Int64(Vector128<int> value) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128i _mm_cvtepu32_epi64 (__m128i a)
-        ///   PMOVZXDQ xmm, xmm/m64
+        ///   PMOVZXDQ xmm, xmm
         /// </summary>
         public static Vector128<long> ConvertToVector128Int64(Vector128<uint> value) { throw new PlatformNotSupportedException(); }
+
+        /// <summary>
+        ///   PMOVSXBW xmm, m64
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<short> ConvertToVector128Int16(sbyte* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVZXBW xmm, m64
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<short> ConvertToVector128Int16(byte* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVSXBD xmm, m32
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<int> ConvertToVector128Int32(sbyte* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVZXBD xmm, m32
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<int> ConvertToVector128Int32(byte* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVSXWD xmm, m64
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<int> ConvertToVector128Int32(short* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVZXWD xmm, m64
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<int> ConvertToVector128Int32(ushort* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVSXBQ xmm, m16
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<long> ConvertToVector128Int64(sbyte* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVZXBQ xmm, m16
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<long> ConvertToVector128Int64(byte* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVSXWQ xmm, m32
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<long> ConvertToVector128Int64(short* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVZXWQ xmm, m32
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<long> ConvertToVector128Int64(ushort* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVSXDQ xmm, m64
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<long> ConvertToVector128Int64(int* address) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        ///   PMOVZXDQ xmm, m64
+        /// The native signature does not exist. We provide this additional overload for completeness.
+        /// </summary>
+        public static unsafe Vector128<long> ConvertToVector128Int64(uint* address) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// __m128 _mm_dp_ps (__m128 a, __m128 b, const int imm8)
@@ -231,16 +327,6 @@ namespace System.Runtime.Intrinsics.X86
         ///   PEXTRD reg/m32, xmm, imm8
         /// </summary>
         public static uint Extract(Vector128<uint> value, byte index) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __int64 _mm_extract_epi64 (__m128i a, const int imm8)
-        ///   PEXTRQ reg/m64, xmm, imm8
-        /// </summary>
-        public static long Extract(Vector128<long> value, byte index) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __int64 _mm_extract_epi64 (__m128i a, const int imm8)
-        ///   PEXTRQ reg/m64, xmm, imm8
-        /// </summary>
-        public static ulong Extract(Vector128<ulong> value, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// int _mm_extract_ps (__m128 a, const int imm8)
         ///   EXTRACTPS xmm, xmm/m32, imm8
@@ -302,16 +388,6 @@ namespace System.Runtime.Intrinsics.X86
         ///   PINSRD xmm, reg/m32, imm8
         /// </summary>
         public static Vector128<uint> Insert(Vector128<uint> value, uint data, byte index) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_insert_epi64 (__m128i a, __int64 i, const int imm8)
-        ///   PINSRQ xmm, reg/m64, imm8
-        /// </summary>
-        public static Vector128<long> Insert(Vector128<long> value, long data, byte index) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// __m128i _mm_insert_epi64 (__m128i a, __int64 i, const int imm8)
-        ///   PINSRQ xmm, reg/m64, imm8
-        /// </summary>
-        public static Vector128<ulong> Insert(Vector128<ulong> value, ulong data, byte index) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// __m128 _mm_insert_ps (__m128 a, __m128 b, const int imm8)
         ///   INSERTPS xmm, xmm/m32, imm8
@@ -598,7 +674,8 @@ namespace System.Runtime.Intrinsics.X86
 
         /// <summary>
         /// int _mm_test_all_ones (__m128i a)
-        ///   HELPER
+        ///   PCMPEQD xmm, xmm/m128
+        ///   PTEST xmm, xmm/m128
         /// </summary>
         public static bool TestAllOnes(Vector128<sbyte> value) { throw new PlatformNotSupportedException(); }
         public static bool TestAllOnes(Vector128<byte> value) { throw new PlatformNotSupportedException(); }

@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project>
   <PropertyGroup>
     <PackageConfigurations>
       net461;
@@ -11,8 +10,6 @@
       $(PackageConfigurations);
       netfx;
       netcoreapp-Windows_NT;
-      netcoreappaot-Windows_NT;
-      netcoreappaot-WebAssembly;
       netcoreapp-Unix;
       uap-Windows_NT;
       uapaot-Windows_NT;

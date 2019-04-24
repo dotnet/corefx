@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,11 +28,11 @@ namespace System.IO
         private const int DefaultFileStreamBufferSize = 4096;
         private const int MinBufferSize = 128;
 
-        private Stream _stream;
-        private Encoding _encoding;
-        private Decoder _decoder;
-        private byte[] _byteBuffer;
-        private char[] _charBuffer;
+        private readonly Stream _stream;
+        private Encoding _encoding = null!; // only null in NullStreamReader where this is never used
+        private Decoder _decoder = null!; // only null in NullStreamReader where this is never used
+        private readonly byte[] _byteBuffer = null!; // only null in NullStreamReader where this is never used
+        private char[] _charBuffer = null!; // only null in NullStreamReader where this is never used
         private int _charPos;
         private int _charLen;
         // Record the number of valid bytes in the byteBuffer, for a few checks.
@@ -44,6 +44,9 @@ namespace System.IO
         // ReadBuffer.  Used so ReadBuffer can tell when to copy data into
         // a user's char[] directly, instead of our internal char[].
         private int _maxCharsPerBuffer;
+
+        /// <summary>True if the writer has been disposed; otherwise, false.</summary>
+        private bool _disposed;
 
         // We will support looking for byte order marks in the stream and trying
         // to decide what the encoding might be from the byte order marks, IF they
@@ -90,8 +93,11 @@ namespace System.IO
         // The high level goal is to be tolerant of encoding errors when we read and very strict 
         // when we write. Hence, default StreamWriter encoding will throw on error.   
 
-        internal StreamReader()
+        private StreamReader()
         {
+            Debug.Assert(this is NullStreamReader);
+            _stream = Stream.Null;
+            _closable = true;
         }
 
         public StreamReader(Stream stream)
@@ -144,7 +150,23 @@ namespace System.IO
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
             }
 
-            Init(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen);
+            _stream = stream;
+            _encoding = encoding;
+            _decoder = encoding.GetDecoder();
+            if (bufferSize < MinBufferSize)
+            {
+                bufferSize = MinBufferSize;
+            }
+
+            _byteBuffer = new byte[bufferSize];
+            _maxCharsPerBuffer = encoding.GetMaxCharCount(bufferSize);
+            _charBuffer = new char[_maxCharsPerBuffer];
+            _byteLen = 0;
+            _bytePos = 0;
+            _detectEncoding = detectEncodingFromByteOrderMarks;
+            _checkPreamble = encoding.Preamble.Length > 0;
+            _isBlocked = false;
+            _closable = !leaveOpen;
         }
 
         public StreamReader(string path)
@@ -167,7 +189,12 @@ namespace System.IO
         {
         }
 
-        public StreamReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize)
+        public StreamReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize) :
+            this(ValidateArgsAndOpenPath(path, encoding, bufferSize), encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen: false)
+        {
+        }
+
+        private static Stream ValidateArgsAndOpenPath(string path, Encoding encoding, int bufferSize)
         {
             if (path == null)
                 throw new ArgumentNullException(nameof(path));
@@ -178,37 +205,7 @@ namespace System.IO
             if (bufferSize <= 0)
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
 
-            Stream stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, 
-                DefaultFileStreamBufferSize, FileOptions.SequentialScan);
-            Init(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen: false);
-        }
-
-        private void Init(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize, bool leaveOpen)
-        {
-            _stream = stream;
-            _encoding = encoding;
-            _decoder = encoding.GetDecoder();
-            if (bufferSize < MinBufferSize)
-            {
-                bufferSize = MinBufferSize;
-            }
-
-            _byteBuffer = new byte[bufferSize];
-            _maxCharsPerBuffer = encoding.GetMaxCharCount(bufferSize);
-            _charBuffer = new char[_maxCharsPerBuffer];
-            _byteLen = 0;
-            _bytePos = 0;
-            _detectEncoding = detectEncodingFromByteOrderMarks;
-            _checkPreamble = encoding.Preamble.Length > 0;
-            _isBlocked = false;
-            _closable = !leaveOpen;
-        }
-
-        // Init used by NullStreamReader, to delay load encoding
-        internal void Init(Stream stream)
-        {
-            _stream = stream;
-            _closable = true;
+            return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.SequentialScan);
         }
 
         public override void Close()
@@ -218,26 +215,26 @@ namespace System.IO
 
         protected override void Dispose(bool disposing)
         {
-            // Dispose of our resources if this StreamReader is closable.
-            // Note that Console.In should be left open.
-            try
+            if (_disposed)
             {
-                // Note that Stream.Close() can potentially throw here. So we need to 
-                // ensure cleaning up internal resources, inside the finally block.  
-                if (!LeaveOpen && disposing && (_stream != null))
-                {
-                    _stream.Close();
-                }
+                return;
             }
-            finally
+            _disposed = true;
+
+            // Dispose of our resources if this StreamReader is closable.
+            if (!LeaveOpen)
             {
-                if (!LeaveOpen && (_stream != null))
+                try
                 {
-                    _stream = null;
-                    _encoding = null;
-                    _decoder = null;
-                    _byteBuffer = null;
-                    _charBuffer = null;
+                    // Note that Stream.Close() can potentially throw here. So we need to 
+                    // ensure cleaning up internal resources, inside the finally block.  
+                    if (disposing)
+                    {
+                        _stream.Close();
+                    }
+                }
+                finally
+                {
                     _charPos = 0;
                     _charLen = 0;
                     base.Dispose(disposing);
@@ -287,11 +284,7 @@ namespace System.IO
         {
             get
             {
-                if (_stream == null)
-                {
-                    throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-                }
-
+                ThrowIfDisposed();
                 CheckAsyncTaskInProgress();
 
                 if (_charPos < _charLen)
@@ -307,11 +300,7 @@ namespace System.IO
 
         public override int Peek()
         {
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             if (_charPos == _charLen)
@@ -326,11 +315,7 @@ namespace System.IO
 
         public override int Read()
         {
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             if (_charPos == _charLen)
@@ -369,11 +354,7 @@ namespace System.IO
         
         private int ReadSpan(Span<char> buffer)
         {
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             int charsRead = 0;
@@ -418,11 +399,7 @@ namespace System.IO
 
         public override string ReadToEnd()
         {
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             // Call ReadBuffer, then pull data out of charBuffer.
@@ -450,11 +427,7 @@ namespace System.IO
             {
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
             }
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             return base.ReadBlock(buffer, index, count);
@@ -798,13 +771,9 @@ namespace System.IO
         // contain the terminating carriage return and/or line feed. The returned
         // value is null if the end of the input stream has been reached.
         //
-        public override string ReadLine()
+        public override string? ReadLine()
         {
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             if (_charPos == _charLen)
@@ -815,7 +784,7 @@ namespace System.IO
                 }
             }
 
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
             do
             {
                 int i = _charPos;
@@ -858,8 +827,7 @@ namespace System.IO
             return sb.ToString();
         }
 
-        #region Task based Async APIs
-        public override Task<string> ReadLineAsync()
+        public override Task<string?> ReadLineAsync()
         {
             // If we have been inherited into a subclass, the following implementation could be incorrect
             // since it does not call through to Read() which a subclass might have overridden.  
@@ -870,27 +838,23 @@ namespace System.IO
                 return base.ReadLineAsync();
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
-            Task<string> task = ReadLineAsyncInternal();
+            Task<string?> task = ReadLineAsyncInternal();
             _asyncReadTask = task;
 
             return task;
         }
 
-        private async Task<string> ReadLineAsyncInternal()
+        private async Task<string?> ReadLineAsyncInternal()
         {
             if (_charPos == _charLen && (await ReadBufferAsync().ConfigureAwait(false)) == 0)
             {
                 return null;
             }
 
-            StringBuilder sb = null;
+            StringBuilder? sb = null;
 
             do
             {
@@ -958,11 +922,7 @@ namespace System.IO
                 return base.ReadToEndAsync();
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task<string> task = ReadToEndAsyncInternal();
@@ -1010,11 +970,7 @@ namespace System.IO
                 return base.ReadAsync(buffer, index, count);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task<int> task = ReadAsyncInternal(new Memory<char>(buffer, index, count), default).AsTask();
@@ -1031,11 +987,7 @@ namespace System.IO
                 return base.ReadAsync(buffer, cancellationToken);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             if (cancellationToken.IsCancellationRequested)
@@ -1241,11 +1193,7 @@ namespace System.IO
                 return base.ReadBlockAsync(buffer, index, count);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             Task<int> task = base.ReadBlockAsync(buffer, index, count);
@@ -1263,11 +1211,7 @@ namespace System.IO
                 return base.ReadBlockAsync(buffer, cancellationToken);
             }
 
-            if (_stream == null)
-            {
-                throw new ObjectDisposedException(null, SR.ObjectDisposed_ReaderClosed);
-            }
-
+            ThrowIfDisposed();
             CheckAsyncTaskInProgress();
 
             if (cancellationToken.IsCancellationRequested)
@@ -1359,24 +1303,21 @@ namespace System.IO
 
             return _charLen;
         }
-#endregion
 
+        private void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                ThrowObjectDisposedException();
+            }
+
+            void ThrowObjectDisposedException() => throw new ObjectDisposedException(GetType().Name, SR.ObjectDisposed_ReaderClosed);
+        }
 
         // No data, class doesn't need to be serializable.
         // Note this class is threadsafe.
-        private class NullStreamReader : StreamReader
+        private sealed class NullStreamReader : StreamReader
         {
-            // Instantiating Encoding causes unnecessary perf hit. 
-            internal NullStreamReader()
-            {
-                Init(Stream.Null);
-            }
-
-            public override Stream BaseStream
-            {
-                get { return Stream.Null; }
-            }
-
             public override Encoding CurrentEncoding
             {
                 get { return Encoding.Unicode; }
@@ -1403,7 +1344,7 @@ namespace System.IO
                 return 0;
             }
 
-            public override string ReadLine()
+            public override string? ReadLine()
             {
                 return null;
             }

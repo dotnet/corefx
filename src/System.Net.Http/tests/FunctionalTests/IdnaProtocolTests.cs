@@ -6,12 +6,15 @@ using System.Collections.Generic;
 using System.Net.Test.Common;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
-    public abstract class IdnaProtocolTests : HttpClientTestBase
+    public abstract class IdnaProtocolTests : HttpClientHandlerTestBase
     {
         protected abstract bool SupportsIdna { get; }
+
+        public IdnaProtocolTests(ITestOutputHelper output) : base(output) { }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP does not support custom proxies.")]
         [Theory]
@@ -113,7 +116,7 @@ namespace System.Net.Http.Functional.Tests
             });
         }
 
-        private static IEnumerable<object[]> InternationalHostNames()
+        public static IEnumerable<object[]> InternationalHostNames()
         {
             // Latin-1 supplement
             yield return new object[] { "\u00E1.com" };

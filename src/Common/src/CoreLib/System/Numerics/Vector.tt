@@ -7,6 +7,7 @@
 <#@ import namespace="System.Runtime.InteropServices" #>
 <#@ include file="GenerationConfig.ttinclude" #><# GenerateCopyrightHeader(); #>
 
+#nullable enable
 #if netcoreapp
 using Internal.Runtime.CompilerServices;
 #endif
@@ -94,7 +95,14 @@ namespace System.Numerics
         }
         private static readonly Vector<T> s_one = new Vector<T>(GetOneValue());
 
-        internal static Vector<T> AllOnes { get { return s_allOnes; } }
+        internal static Vector<T> AllOnes
+        {
+            [Intrinsic]
+            get
+            {
+                return s_allOnes;
+            }
+        }
         private static readonly Vector<T> s_allOnes = new Vector<T>(GetAllBitsSetValue());
         #endregion Static Members
 
@@ -195,6 +203,7 @@ namespace System.Numerics
         /// Constructs a vector from the given array, starting from the given index.
         /// The array must contain at least Vector'T.Count from the given index.
         /// </summary>
+        [Intrinsic]
         public unsafe Vector(T[] values, int index)
             : this()
         {
@@ -442,7 +451,7 @@ namespace System.Numerics
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this vector; False otherwise.</returns>
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is Vector<T>))
             {
@@ -583,7 +592,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="format">The format of individual elements.</param>
         /// <returns>The string representation.</returns>
-        public string ToString(string format)
+        public string ToString(string? format)
         {
             return ToString(format, CultureInfo.CurrentCulture);
         }
@@ -595,7 +604,7 @@ namespace System.Numerics
         /// <param name="format">The format of individual elements.</param>
         /// <param name="formatProvider">The format provider to use when formatting elements.</param>
         /// <returns>The string representation.</returns>
-        public string ToString(string format, IFormatProvider formatProvider)
+        public string ToString(string? format, IFormatProvider? formatProvider)
         {
             StringBuilder sb = new StringBuilder();
             string separator = NumberFormatInfo.GetInstance(formatProvider).NumberGroupSeparator;
@@ -620,6 +629,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The summed vector.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator +(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -679,6 +689,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The difference vector.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator -(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -739,6 +750,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The product vector.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator *(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -792,86 +804,28 @@ namespace System.Numerics
             }
         }
 
-        // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
         /// <summary>
         /// Multiplies a vector by the given scalar.
         /// </summary>
         /// <param name="value">The source vector.</param>
         /// <param name="factor">The scalar value.</param>
         /// <returns>The scaled vector.</returns>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static Vector<T> operator *(Vector<T> value, T factor)
         {
-            unchecked
-            {
-                if (Vector.IsHardwareAccelerated)
-                {
-                    return new Vector<T>(factor) * value;
-                }
-                else
-                {
-                    Vector<T> product = new Vector<T>();
-<#
-    foreach (Type type in supportedTypes)
-    {
-#>
-                    <#=GenerateIfStatementHeader(type)#>
-                    {
-<#
-        for (int g = 0; g < GetNumFields(type, totalSize); g++)
-        {
-#>
-                        product.<#= GetRegisterFieldName(type, g) #> = (<#=typeAliases[type]#>)(value.<#= GetRegisterFieldName(type, g) #> * (<#=typeAliases[type]#>)(object)factor);
-<#
-        }
-#>
-                    }
-<#
-    }
-#>
-                    return product;
-                }
-            }
+            return new Vector<T>(factor) * value;
         }
 
-        // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
         /// <summary>
         /// Multiplies a vector by the given scalar.
         /// </summary>
         /// <param name="factor">The scalar value.</param>
         /// <param name="value">The source vector.</param>
         /// <returns>The scaled vector.</returns>
+        [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static Vector<T> operator *(T factor, Vector<T> value)
         {
-            unchecked
-            {
-                if (Vector.IsHardwareAccelerated)
-                {
-                    return new Vector<T>(factor) * value;
-                }
-                else
-                {
-                    Vector<T> product = new Vector<T>();
-<#
-    foreach (Type type in supportedTypes)
-    {
-#>
-                    <#=GenerateIfStatementHeader(type)#>
-                    {
-<#
-        for (int g = 0; g < GetNumFields(type, totalSize); g++)
-        {
-#>
-                        product.<#= GetRegisterFieldName(type, g) #> = (<#=typeAliases[type]#>)(value.<#= GetRegisterFieldName(type, g) #> * (<#=typeAliases[type]#>)(object)factor);
-<#
-        }
-#>
-                    }
-<#
-    }
-#>
-                    return product;
-                }
-            }
+            return new Vector<T>(factor) * value;
         }
 
         // This method is intrinsic only for certain types. It cannot access fields directly unless we are sure the context is unaccelerated.
@@ -881,6 +835,7 @@ namespace System.Numerics
         /// <param name="left">The first source vector.</param>
         /// <param name="right">The second source vector.</param>
         /// <returns>The vector resulting from the division.</returns>
+        [Intrinsic]
         public static unsafe Vector<T> operator /(Vector<T> left, Vector<T> right)
         {
             unchecked
@@ -1058,6 +1013,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The first vector to compare.</param>
         /// <returns>True if all elements are equal; False otherwise.</returns>
+        [Intrinsic]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static bool operator ==(Vector<T> left, Vector<T> right)
         {
@@ -1070,6 +1026,7 @@ namespace System.Numerics
         /// <param name="left">The first vector to compare.</param>
         /// <param name="right">The second vector to compare.</param>
         /// <returns>True if left and right are not equal; False otherwise.</returns>
+        [Intrinsic]
         [MethodImplAttribute(MethodImplOptions.AggressiveInlining)]
         public static bool operator !=(Vector<T> left, Vector<T> right)
         {
@@ -1474,7 +1431,7 @@ namespace System.Numerics
         }
 
         [Intrinsic]
-        internal static T DotProduct(Vector<T> left, Vector<T> right)
+        internal static T Dot(Vector<T> left, Vector<T> right)
         {
             if (Vector.IsHardwareAccelerated)
             {

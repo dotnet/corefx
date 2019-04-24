@@ -15,17 +15,13 @@ namespace System.Net.Http.Functional.Tests
     using Configuration = System.Net.Test.Common.Configuration;
 
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
-    public abstract class HttpClientHandler_Proxy_Test : HttpClientTestBase
+    public abstract class HttpClientHandler_Proxy_Test : HttpClientHandlerTestBase
     {
-        private readonly ITestOutputHelper _output;
-        
-        public HttpClientHandler_Proxy_Test(ITestOutputHelper output)
-        {
-            _output = output;
-        }
-        
+        public HttpClientHandler_Proxy_Test(ITestOutputHelper output) : base(output) { }
+
+        [ActiveIssue(32809)]
         [OuterLoop("Uses external server")]
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(AuthenticationSchemes.Ntlm, true, false)]
         [InlineData(AuthenticationSchemes.Negotiate, true, false)]
         [InlineData(AuthenticationSchemes.Basic, false, false)]
@@ -105,6 +101,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(32809)]
         [OuterLoop("Uses external server")]
         [Theory]
         [MemberData(nameof(CredentialsForProxy))]
@@ -196,7 +193,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public async Task Proxy_SslProxyUnsupported_Throws()
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -282,13 +279,13 @@ namespace System.Net.Http.Functional.Tests
 
         }
 
-        private static IEnumerable<object[]> BypassedProxies()
+        public static IEnumerable<object[]> BypassedProxies()
         {
             yield return new object[] { null };
             yield return new object[] { new UseSpecifiedUriWebProxy(new Uri($"http://{Guid.NewGuid().ToString().Substring(0, 15)}:12345"), bypass: true) };
         }
 
-        private static IEnumerable<object[]> CredentialsForProxy()
+        public static IEnumerable<object[]> CredentialsForProxy()
         {
             yield return new object[] { null, false };
             foreach (bool wrapCredsInCache in new[] { true, false })

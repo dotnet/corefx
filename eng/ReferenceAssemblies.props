@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <IsReferenceAssembly Condition="'$(IsReferenceAssembly)'=='' AND ($(MSBuildProjectFullPath.Contains('\ref\')) OR $(MSBuildProjectFullPath.Contains('/ref/')))">true</IsReferenceAssembly>
+
+    <!-- Create a common root output directory for all reference assemblies -->
+    <ReferenceAssemblyOutputPath Condition="'$(ReferenceAssemblyOutputPath)' == ''">$(ArtifactsBinDir)ref/</ReferenceAssemblyOutputPath>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(IsReferenceAssembly)'=='true'">
+    <OutputPath>$(ReferenceAssemblyOutputPath)$(MSBuildProjectName)/$(Configuration)</OutputPath>
+    <IntermediateOutputPath>$(ArtifactsObjDir)ref/$(MSBuildProjectName)/$(Configuration)</IntermediateOutputPath>
+
+    <!-- disable warnings about unused fields -->
+    <NoWarn>$(NoWarn);0169;0649</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsReferenceAssembly)'=='true'">
+    <!-- All reference assemblies should have the 0x70 flag which prevents them from loading
+         and the ReferenceAssemblyAttribute. -->
+    <AssemblyInfoLines Include="[assembly:System.Runtime.CompilerServices.ReferenceAssembly]" />
+    <AssemblyInfoLines Include="[assembly:System.Reflection.AssemblyFlags((System.Reflection.AssemblyNameFlags)0x70)]" />
+  </ItemGroup>
+</Project>

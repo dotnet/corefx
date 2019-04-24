@@ -71,15 +71,12 @@ namespace System.Security.Cryptography
         {
             get
             {
-                // OpenSSL seems to accept answers of all sizes.
-                // Choosing a non-multiple of 8 would make some calculations misalign
-                // (like assertions of (output.Length * 8) == KeySize).
-                // Choosing a number too small is insecure.
-                // Choosing a number too large will cause GenerateKey to take much
-                // longer than anyone would be willing to wait.
+                // While OpenSSL 1.0.x and 1.1.0 will generate RSA-384 keys,
+                // OpenSSL 1.1.1 has lifted the minimum to RSA-512.
                 //
-                // So, copying the values from RSACryptoServiceProvider
-                return new[] { new KeySizes(384, 16384, 8) };
+                // Rather than make the matrix even more complicated,
+                // the low limit now is 512 on all OpenSSL-based RSA.
+                return new[] { new KeySizes(512, 16384, 8) };
             }
         }
 
@@ -132,6 +129,54 @@ namespace System.Security.Cryptography
             Interop.Crypto.RsaPadding rsaPadding = GetInteropPadding(padding, out RsaPaddingProcessor oaepProcessor);
             SafeRsaHandle key = _key.Value;
             CheckInvalidKey(key);
+
+            int keySizeBytes = Interop.Crypto.RsaSize(key);
+
+            // OpenSSL does not take a length value for the destination, so it can write out of bounds.
+            // To prevent the OOB write, decrypt into a temporary buffer.
+            if (destination.Length < keySizeBytes)
+            {
+                Span<byte> tmp = stackalloc byte[0];
+                byte[] rent = null;
+
+                // RSA up through 4096 stackalloc
+                if (keySizeBytes <= 512)
+                {
+                    tmp = stackalloc byte[keySizeBytes];
+                }
+                else
+                {
+                    rent = ArrayPool<byte>.Shared.Rent(keySizeBytes);
+                    tmp = rent;
+                }
+
+                bool ret = TryDecrypt(key, data, tmp, rsaPadding, oaepProcessor, out bytesWritten);
+
+                if (ret)
+                {
+                    tmp = tmp.Slice(0, bytesWritten);
+
+                    if (bytesWritten > destination.Length)
+                    {
+                        ret = false;
+                        bytesWritten = 0;
+                    }
+                    else
+                    {
+                        tmp.CopyTo(destination);
+                    }
+
+                    CryptographicOperations.ZeroMemory(tmp);
+                }
+
+                if (rent != null)
+                {
+                    // Already cleared
+                    ArrayPool<byte>.Shared.Return(rent);
+                }
+
+                return ret;
+            }
 
             return TryDecrypt(key, data, destination, rsaPadding, oaepProcessor, out bytesWritten);
         }

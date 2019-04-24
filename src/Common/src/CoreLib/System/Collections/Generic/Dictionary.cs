@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
-using System.Threading;
 
 namespace System.Collections.Generic
 {
@@ -38,8 +37,11 @@ namespace System.Collections.Generic
     {
         private struct Entry
         {
-            public int hashCode;    // Lower 31 bits of hash code, -1 if unused
-            public int next;        // Index of next entry, -1 if last
+            // 0-based index of next entry in chain: -1 means end of chain
+            // also encodes whether this entry _itself_ is part of the free list by changing sign and subtracting 3,
+            // so -2 means end of free list, -3 means index 0 but on free list, -4 means index 1 but on free list, etc.
+            public int next;
+            public uint hashCode;
             public TKey key;           // Key of entry
             public TValue value;         // Value of entry
         }
@@ -53,7 +55,7 @@ namespace System.Collections.Generic
         private IEqualityComparer<TKey> _comparer;
         private KeyCollection _keys;
         private ValueCollection _values;
-        private object _syncRoot;
+        private const int StartOfFreeList = -3;
 
         // constants for serialization
         private const string VersionName = "Version"; // Do not rename (binary serialization)
@@ -104,7 +106,7 @@ namespace System.Collections.Generic
                 Entry[] entries = d._entries;
                 for (int i = 0; i < count; i++)
                 {
-                    if (entries[i].hashCode >= 0)
+                    if (entries[i].next >= -1)
                     {
                         Add(entries[i].key, entries[i].value);
                     }
@@ -279,7 +281,7 @@ namespace System.Collections.Generic
             {
                 for (int i = 0; i < _count; i++)
                 {
-                    if (entries[i].hashCode >= 0 && entries[i].value == null) return true;
+                    if (entries[i].next >= -1 && entries[i].value == null) return true;
                 }
             }
             else
@@ -289,7 +291,7 @@ namespace System.Collections.Generic
                     // ValueType: Devirtualize with EqualityComparer<TValue>.Default intrinsic
                     for (int i = 0; i < _count; i++)
                     {
-                        if (entries[i].hashCode >= 0 && EqualityComparer<TValue>.Default.Equals(entries[i].value, value)) return true;
+                        if (entries[i].next >= -1 && EqualityComparer<TValue>.Default.Equals(entries[i].value, value)) return true;
                     }
                 }
                 else
@@ -300,7 +302,7 @@ namespace System.Collections.Generic
                     EqualityComparer<TValue> defaultComparer = EqualityComparer<TValue>.Default;
                     for (int i = 0; i < _count; i++)
                     {
-                        if (entries[i].hashCode >= 0 && defaultComparer.Equals(entries[i].value, value)) return true;
+                        if (entries[i].next >= -1 && defaultComparer.Equals(entries[i].value, value)) return true;
                     }
                 }
             }
@@ -328,7 +330,7 @@ namespace System.Collections.Generic
             Entry[] entries = _entries;
             for (int i = 0; i < count; i++)
             {
-                if (entries[i].hashCode >= 0)
+                if (entries[i].next >= -1)
                 {
                     array[index++] = new KeyValuePair<TKey, TValue>(entries[i].key, entries[i].value);
                 }
@@ -376,9 +378,9 @@ namespace System.Collections.Generic
                 IEqualityComparer<TKey> comparer = _comparer;
                 if (comparer == null)
                 {
-                    int hashCode = key.GetHashCode() & 0x7FFFFFFF;
+                    uint hashCode = (uint)key.GetHashCode();
                     // Value in _buckets is 1-based
-                    i = buckets[hashCode % buckets.Length] - 1;
+                    i = buckets[hashCode % (uint)buckets.Length] - 1;
                     if (default(TKey) != null)
                     {
                         // ValueType: Devirtualize with EqualityComparer<TValue>.Default intrinsic
@@ -429,9 +431,9 @@ namespace System.Collections.Generic
                 }
                 else
                 {
-                    int hashCode = comparer.GetHashCode(key) & 0x7FFFFFFF;
+                    uint hashCode = (uint)comparer.GetHashCode(key);
                     // Value in _buckets is 1-based
-                    i = buckets[hashCode % buckets.Length] - 1;
+                    i = buckets[hashCode % (uint)buckets.Length] - 1;
                     do
                     {
                         // Should be a while loop https://github.com/dotnet/coreclr/issues/15476
@@ -483,10 +485,10 @@ namespace System.Collections.Generic
             Entry[] entries = _entries;
             IEqualityComparer<TKey> comparer = _comparer;
 
-            int hashCode = ((comparer == null) ? key.GetHashCode() : comparer.GetHashCode(key)) & 0x7FFFFFFF;
+            uint hashCode = (uint)((comparer == null) ? key.GetHashCode() : comparer.GetHashCode(key));
 
             int collisionCount = 0;
-            ref int bucket = ref _buckets[hashCode % _buckets.Length];
+            ref int bucket = ref _buckets[hashCode % (uint)_buckets.Length];
             // Value in _buckets is 1-based
             int i = bucket - 1;
 
@@ -628,7 +630,7 @@ namespace System.Collections.Generic
                 if (count == entries.Length)
                 {
                     Resize();
-                    bucket = ref _buckets[hashCode % _buckets.Length];
+                    bucket = ref _buckets[hashCode % (uint)_buckets.Length];
                 }
                 index = count;
                 _count = count + 1;
@@ -639,7 +641,9 @@ namespace System.Collections.Generic
 
             if (updateFreeList)
             {
-                _freeList = entry.next;
+                Debug.Assert((StartOfFreeList - entries[_freeList].next) >= -1, "shouldn't overflow because `next` cannot underflow");
+
+                _freeList = StartOfFreeList - entries[_freeList].next;
             }
             entry.hashCode = hashCode;
             // Value in _buckets is 1-based
@@ -726,19 +730,19 @@ namespace System.Collections.Generic
             {
                 for (int i = 0; i < count; i++)
                 {
-                    if (entries[i].hashCode >= 0)
+                    if (entries[i].next >= -1)
                     {
                         Debug.Assert(_comparer == null);
-                        entries[i].hashCode = (entries[i].key.GetHashCode() & 0x7FFFFFFF);
+                        entries[i].hashCode = (uint)entries[i].key.GetHashCode();
                     }
                 }
             }
 
             for (int i = 0; i < count; i++)
             {
-                if (entries[i].hashCode >= 0)
+                if (entries[i].next >= -1)
                 {
-                    int bucket = entries[i].hashCode % newSize;
+                    uint bucket = entries[i].hashCode % (uint)newSize;
                     // Value in _buckets is 1-based
                     entries[i].next = buckets[bucket] - 1;
                     // Value in _buckets is 1-based
@@ -765,8 +769,8 @@ namespace System.Collections.Generic
             int collisionCount = 0;
             if (buckets != null)
             {
-                int hashCode = (_comparer?.GetHashCode(key) ?? key.GetHashCode()) & 0x7FFFFFFF;
-                int bucket = hashCode % buckets.Length;
+                uint hashCode = (uint)(_comparer?.GetHashCode(key) ?? key.GetHashCode());
+                uint bucket = hashCode % (uint)buckets.Length;
                 int last = -1;
                 // Value in buckets is 1-based
                 int i = buckets[bucket] - 1;
@@ -785,8 +789,10 @@ namespace System.Collections.Generic
                         {
                             entries[last].next = entry.next;
                         }
-                        entry.hashCode = -1;
-                        entry.next = _freeList;
+
+                        Debug.Assert((StartOfFreeList - _freeList) < 0, "shouldn't underflow because max hashtable length is MaxPrimeArrayLength = 0x7FEFFFFD(2146435069) _freelist underflow threshold 2147483646");
+
+                        entry.next = StartOfFreeList - _freeList;
 
                         if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>())
                         {
@@ -830,8 +836,8 @@ namespace System.Collections.Generic
             int collisionCount = 0;
             if (buckets != null)
             {
-                int hashCode = (_comparer?.GetHashCode(key) ?? key.GetHashCode()) & 0x7FFFFFFF;
-                int bucket = hashCode % buckets.Length;
+                uint hashCode = (uint)(_comparer?.GetHashCode(key) ?? key.GetHashCode());
+                uint bucket = hashCode % (uint)buckets.Length;
                 int last = -1;
                 // Value in buckets is 1-based
                 int i = buckets[bucket] - 1;
@@ -853,8 +859,9 @@ namespace System.Collections.Generic
 
                         value = entry.value;
 
-                        entry.hashCode = -1;
-                        entry.next = _freeList;
+                        Debug.Assert((StartOfFreeList - _freeList) < 0, "shouldn't underflow because max hashtable length is MaxPrimeArrayLength = 0x7FEFFFFD(2146435069) _freelist underflow threshold 2147483646");
+
+                        entry.next = StartOfFreeList - _freeList;
 
                         if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>())
                         {
@@ -926,7 +933,7 @@ namespace System.Collections.Generic
                 Entry[] entries = _entries;
                 for (int i = 0; i < _count; i++)
                 {
-                    if (entries[i].hashCode >= 0)
+                    if (entries[i].next >= -1)
                     {
                         dictEntryArray[index++] = new DictionaryEntry(entries[i].key, entries[i].value);
                     }
@@ -946,7 +953,7 @@ namespace System.Collections.Generic
                     Entry[] entries = _entries;
                     for (int i = 0; i < count; i++)
                     {
-                        if (entries[i].hashCode >= 0)
+                        if (entries[i].next >= -1)
                         {
                             objects[index++] = new KeyValuePair<TKey, TValue>(entries[i].key, entries[i].value);
                         }
@@ -1019,12 +1026,12 @@ namespace System.Collections.Generic
             int count = 0;
             for (int i = 0; i < oldCount; i++)
             {
-                int hashCode = oldEntries[i].hashCode;
-                if (hashCode >= 0)
+                uint hashCode = oldEntries[i].hashCode;
+                if (oldEntries[i].next >= -1)
                 {
                     ref Entry entry = ref entries[count];
                     entry = oldEntries[i];
-                    int bucket = hashCode % newSize;
+                    uint bucket = hashCode % (uint)newSize;
                     // Value in _buckets is 1-based
                     entry.next = buckets[bucket] - 1;
                     // Value in _buckets is 1-based
@@ -1038,17 +1045,7 @@ namespace System.Collections.Generic
 
         bool ICollection.IsSynchronized => false;
 
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-                }
-                return _syncRoot;
-            }
-        }
+        object ICollection.SyncRoot => this;
 
         bool IDictionary.IsFixedSize => false;
 
@@ -1190,7 +1187,7 @@ namespace System.Collections.Generic
                 {
                     ref Entry entry = ref _dictionary._entries[_index++];
 
-                    if (entry.hashCode >= 0)
+                    if (entry.next >= -1)
                     {
                         _current = new KeyValuePair<TKey, TValue>(entry.key, entry.value);
                         return true;
@@ -1318,7 +1315,7 @@ namespace System.Collections.Generic
                 Entry[] entries = _dictionary._entries;
                 for (int i = 0; i < count; i++)
                 {
-                    if (entries[i].hashCode >= 0) array[index++] = entries[i].key;
+                    if (entries[i].next >= -1) array[index++] = entries[i].key;
                 }
             }
 
@@ -1378,7 +1375,7 @@ namespace System.Collections.Generic
                     {
                         for (int i = 0; i < count; i++)
                         {
-                            if (entries[i].hashCode >= 0) objects[index++] = entries[i].key;
+                            if (entries[i].next >= -1) objects[index++] = entries[i].key;
                         }
                     }
                     catch (ArrayTypeMismatchException)
@@ -1422,7 +1419,7 @@ namespace System.Collections.Generic
                     {
                         ref Entry entry = ref _dictionary._entries[_index++];
 
-                        if (entry.hashCode >= 0)
+                        if (entry.next >= -1)
                         {
                             _currentKey = entry.key;
                             return true;
@@ -1501,7 +1498,7 @@ namespace System.Collections.Generic
                 Entry[] entries = _dictionary._entries;
                 for (int i = 0; i < count; i++)
                 {
-                    if (entries[i].hashCode >= 0) array[index++] = entries[i].value;
+                    if (entries[i].next >= -1) array[index++] = entries[i].value;
                 }
             }
 
@@ -1561,7 +1558,7 @@ namespace System.Collections.Generic
                     {
                         for (int i = 0; i < count; i++)
                         {
-                            if (entries[i].hashCode >= 0) objects[index++] = entries[i].value;
+                            if (entries[i].next >= -1) objects[index++] = entries[i].value;
                         }
                     }
                     catch (ArrayTypeMismatchException)
@@ -1605,7 +1602,7 @@ namespace System.Collections.Generic
                     {
                         ref Entry entry = ref _dictionary._entries[_index++];
 
-                        if (entry.hashCode >= 0)
+                        if (entry.next >= -1)
                         {
                             _currentValue = entry.value;
                             return true;

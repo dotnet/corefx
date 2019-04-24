@@ -6,6 +6,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 add_compile_options(-Wno-cast-align)
 add_compile_options(-Wno-reserved-id-macro)
 add_compile_options(-Wno-documentation)
+add_compile_options(-Wno-used-but-marked-unused)
 
 add_definitions(-DPIC=1 -DOPENSSL_API_COMPAT=0x10100000L)
 
@@ -13,7 +14,11 @@ if(CMAKE_STATIC_LIB_LINK)
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 endif(CMAKE_STATIC_LIB_LINK)
 
-find_package(OpenSSL REQUIRED)
+find_package(OpenSSL)
+if(NOT OPENSSL_FOUND)
+    message(FATAL_ERROR "!!! Cannot find libssl and System.Security.Cryptography.Native cannot build without it. Try installing libssl-dev (or the appropriate package for your platform) !!!")
+endif(NOT OPENSSL_FOUND)
+
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 set(NATIVECRYPTO_SOURCES
@@ -35,6 +40,7 @@ set(NATIVECRYPTO_SOURCES
     pal_evp_pkey_rsa.c
     pal_evp_cipher.c
     pal_hmac.c
+    pal_ocsp.c
     pal_pkcs12.c
     pal_pkcs7.c
     pal_rsa.c

@@ -15,7 +15,7 @@ namespace System.Net.Security
         private SafeGssNameHandle _targetName;
         private SafeGssContextHandle _context;
         private bool _isNtlmUsed;
-
+        
         public SafeGssNameHandle TargetName
         {
             get { return _targetName; }
@@ -32,13 +32,21 @@ namespace System.Net.Security
             get { return _context; }
         }
 
-        public SafeDeleteNegoContext(SafeFreeNegoCredentials credential, string targetName)
+        public SafeDeleteNegoContext(SafeFreeNegoCredentials credential)
             : base(credential)
         {
             Debug.Assert((null != credential), "Null credential in SafeDeleteNegoContext");
+        }
+
+        public SafeDeleteNegoContext(SafeFreeNegoCredentials credential, string targetName)
+            : this(credential)
+        {
             try
             {
-                _targetName = SafeGssNameHandle.CreatePrincipal(targetName);
+                // Convert any "SERVICE/HOST" style of targetName to use "SERVICE@HOST" style.
+                // This is because the System.Net.Security.Native GSS-API layer uses
+                // GSS_C_NT_HOSTBASED_SERVICE format for targetName.
+                _targetName = SafeGssNameHandle.CreateTarget(targetName.Replace('/', '@'));
             }
             catch
             {

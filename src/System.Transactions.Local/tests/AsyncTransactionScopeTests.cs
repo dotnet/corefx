@@ -5,17 +5,18 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace System.Transactions.Tests
 {
-    public class AsyncTransactionScopeTests : IDisposable
+    public class AsyncTransactionScopeTests
     {
-        private readonly ITestOutputHelper output;
-
         // Number of threads to create
         private const int iterations = 5;
 
@@ -25,14 +26,13 @@ namespace System.Transactions.Tests
         private static bool s_throwExceptionDefaultOrBeforeAwait;
         private static bool s_throwExceptionAfterAwait;
 
-        public AsyncTransactionScopeTests(ITestOutputHelper output)
+        public AsyncTransactionScopeTests()
         {
-            this.output = output;
             // Make sure we start with Transaction.Current = null.
             Transaction.Current = null;
         }
 
-        public void Dispose()
+        protected void Dispose(bool disposing)
         {
             Transaction.Current = null;
         }
@@ -97,20 +97,18 @@ namespace System.Transactions.Tests
         [InlineData(53)]
         [InlineData(54)]
         [ActiveIssue(31913, TargetFrameworkMonikers.Uap)]
-        public async Task AsyncTSTest(int variation)
+        public void AsyncTSTest(int variation)
         {
-            await Task.Run(delegate
+            RemoteExecutor.Invoke(variationString =>
             {
                 using (var listener = new TestEventListener(new Guid("8ac2d80a-1f1a-431b-ace4-bff8824aef0b"), System.Diagnostics.Tracing.EventLevel.Verbose))
                 {
                     var events = new ConcurrentQueue<EventWrittenEventArgs>();
-
-                    bool success = false;
                     try
                     {
                         listener.RunWithCallback(events.Enqueue, () =>
                         {
-                            switch (variation)
+                            switch (int.Parse(variationString))
                             {
                                 // Running exception test first to make sure any unintentional leak in ambient transaction during exception will be detected when subsequent test are run.
                                 case 0:
@@ -423,17 +421,19 @@ namespace System.Transactions.Tests
                                     }
                             }
                         });
-                        success = true;
                     }
-                    finally
+                    catch (Exception exc)
                     {
-                        if (!success)
+                        var sb = new StringBuilder();
+                        sb.AppendLine("Test failed with events:");
+                        foreach (EventWrittenEventArgs actualevent in events)
                         {
-                            HelperFunctions.DisplaySysTxTracing(output, events);
+                            sb.AppendLine($"{actualevent.Opcode} : {string.Format(actualevent.Message, actualevent.Payload.ToArray())}");
                         }
+                        throw new Exception(sb.ToString(), exc);
                     }
                 }
-            });
+            }, variation.ToString()).Dispose();
         }
 
         [Theory]
@@ -460,7 +460,7 @@ namespace System.Transactions.Tests
                 {
                     try
                     {
-                        // Since we use BlockCommitUntilComplete dependent transaction to syncronize the root TransactionScope, the ambient Tx may not be available and will be be disposed and block on Commit.
+                        // Since we use BlockCommitUntilComplete dependent transaction to syncronize the root TransactionScope, the ambient Tx may not be available and will be disposed and block on Commit.
                         // The flag will ensure we explicitly syncronize before disposing the root TransactionScope and the ambient transaction will still be available in the Task.
                         if (syncronizeScope)
                         {

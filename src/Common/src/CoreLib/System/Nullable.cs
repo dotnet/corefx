@@ -2,19 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Collections.Generic;
 using System.Runtime.Versioning;
 
 namespace System
 {
-    // Because we have special type system support that says a a boxed Nullable<T>
+    // Because we have special type system support that says a boxed Nullable<T>
     // can be used where a boxed<T> is use, Nullable<T> can not implement any intefaces
     // at all (since T may not).   Do NOT add any interfaces to Nullable!
     //
     [Serializable]
     [NonVersionable] // This only applies to field layout
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public struct Nullable<T> where T : struct
+    public partial struct Nullable<T> where T : struct
     {
         private readonly bool hasValue; // Do not rename (binary serialization)
         internal T value; // Do not rename (binary serialization) or make readonly (can be mutated in ToString, etc.)
@@ -59,7 +60,7 @@ namespace System
             return hasValue ? value : defaultValue;
         }
 
-        public override bool Equals(object other)
+        public override bool Equals(object? other)
         {
             if (!hasValue) return other == null;
             if (other == null) return false;
@@ -71,7 +72,7 @@ namespace System
             return hasValue ? value.GetHashCode() : 0;
         }
 
-        public override string ToString()
+        public override string? ToString()
         {
             return hasValue ? value.ToString() : "";
         }
@@ -85,7 +86,7 @@ namespace System
         [NonVersionable]
         public static explicit operator T(Nullable<T> value)
         {
-            return value.Value;
+            return value!.Value;
         }
     }
 
@@ -115,7 +116,7 @@ namespace System
 
         // If the type provided is not a Nullable Type, return null.
         // Otherwise, returns the underlying type of the Nullable type
-        public static Type GetUnderlyingType(Type nullableType)
+        public static Type? GetUnderlyingType(Type nullableType)
         {
             if ((object)nullableType == null)
             {

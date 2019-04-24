@@ -60,6 +60,7 @@ try {
   }
   $Env:CommonLibrary_NativeInstallDir = $NativeBaseDir
   $InstallBin = Join-Path $NativeBaseDir "bin"
+  $InstallerPath = Join-Path $EngCommonBaseDir "install-tool.ps1"
 
   # Process tools list
   Write-Host "Processing $GlobalJsonFile"
@@ -74,8 +75,8 @@ try {
     $NativeTools.PSObject.Properties | ForEach-Object {
       $ToolName = $_.Name
       $ToolVersion = $_.Value
-      $InstallerFilename = "install-$ToolName.ps1"
-      $LocalInstallerCommand = Join-Path $EngCommonBaseDir $InstallerFilename
+      $LocalInstallerCommand = $InstallerPath
+      $LocalInstallerCommand += " -ToolName $ToolName"
       $LocalInstallerCommand += " -InstallPath $InstallBin"
       $LocalInstallerCommand += " -BaseUri $BaseUri"
       $LocalInstallerCommand += " -CommonLibraryDirectory $EngCommonBaseDir"
@@ -97,9 +98,19 @@ try {
       Write-Verbose "Executing '$LocalInstallerCommand'"
       Invoke-Expression "$LocalInstallerCommand"
       if ($LASTEXITCODE -Ne "0") {
-        Write-Error "Execution failed"
-        exit 1
+        $errMsg = "$ToolName installation failed"
+        if ((Get-Variable 'DoNotAbortNativeToolsInstallationOnFailure' -ErrorAction 'SilentlyContinue') -and $DoNotAbortNativeToolsInstallationOnFailure) {
+            Write-Warning $errMsg
+            $toolInstallationFailure = $true
+        } else {
+            Write-Error $errMsg
+            exit 1
+        }
       }
+    }
+
+    if ((Get-Variable 'toolInstallationFailure' -ErrorAction 'SilentlyContinue') -and $toolInstallationFailure) {
+        exit 1
     }
   }
   else {
@@ -112,9 +123,7 @@ try {
   }
   if (Test-Path $InstallBin) {
     Write-Host "Native tools are available from" (Convert-Path -Path $InstallBin)
-    if ($env:BUILD_BUILDNUMBER) {
-        Write-Host "##vso[task.prependpath]" (Convert-Path -Path $InstallBin)
-    }
+    Write-Host "##vso[task.prependpath]$(Convert-Path -Path $InstallBin)"
   }
   else {
     Write-Error "Native tools install directory does not exist, installation failed"

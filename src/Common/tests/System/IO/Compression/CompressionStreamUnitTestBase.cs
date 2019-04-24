@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,6 +13,8 @@ namespace System.IO.Compression
 {
     public abstract class CompressionStreamUnitTestBase : CompressionStreamTestBase
     {
+        private const int TaskTimeout = 30 * 1000; // Generous timeout for official test runs
+
         [Fact]
         public virtual void FlushAsync_DuringWriteAsync()
         {
@@ -41,7 +44,7 @@ namespace System.IO.Compression
                     // Unblock Async operations
                     writeStream.manualResetEvent.Set();
                     // The original WriteAsync should be able to complete
-                    Assert.True(task.Wait(10 * 500), "Original WriteAsync Task did not complete in time");
+                    Assert.True(task.Wait(TaskTimeout), "Original WriteAsync Task did not complete in time");
                     Assert.True(writeStream.WriteHit, "BaseStream Write function was not called");
                 }
             }
@@ -71,7 +74,7 @@ namespace System.IO.Compression
                     // Unblock Async operations
                     readStream.manualResetEvent.Set();
                     // The original ReadAsync should be able to complete
-                    Assert.True(task.Wait(10 * 500), "Original ReadAsync Task did not complete in time");
+                    Assert.True(task.Wait(TaskTimeout), "Original ReadAsync Task did not complete in time");
                 }
             }
         }
@@ -112,7 +115,7 @@ namespace System.IO.Compression
                     // Unblock Async operations
                     writeStream.manualResetEvent.Set();
                     // The original WriteAsync should be able to complete
-                    Assert.True(task.Wait(5000), "Original write Task did not complete in time");
+                    Assert.True(task.Wait(TaskTimeout), "Original write Task did not complete in time");
                     Assert.True(writeStream.WriteHit, "Underlying Writesync function was not called.");
 
                 }
@@ -146,7 +149,7 @@ namespace System.IO.Compression
                     // Unblock Async operations
                     writeStream.manualResetEvent.Set();
                     // The original WriteAsync should be able to complete
-                    Assert.True(task.Wait(10 * 500), "Original WriteAsync Task did not complete in time");
+                    Assert.True(task.Wait(TaskTimeout), "Original WriteAsync Task did not complete in time");
                     Assert.True(writeStream.WriteHit, "BaseStream Write function was not called");
                 }
             }
@@ -171,7 +174,7 @@ namespace System.IO.Compression
                     // Unblock Async operations
                     readStream.manualResetEvent.Set();
                     // The original ReadAsync should be able to complete
-                    Assert.True(task.Wait(10 * 500), "The original ReadAsync should be able to complete");
+                    Assert.True(task.Wait(TaskTimeout), "The original ReadAsync should be able to complete");
                     Assert.True(readStream.ReadHit, "BaseStream ReadAsync should have been called");
                 }
             }
@@ -190,7 +193,7 @@ namespace System.IO.Compression
                 Task task = decompressor.ReadAsync(uncompressedBytes, 0, uncompressedBytes.Length);
                 decompressor.Dispose();
                 readStream.manualResetEvent.Set();
-                Assert.Throws<AggregateException>(() => task.Wait(1000));
+                Assert.Throws<AggregateException>(() => task.Wait(TaskTimeout));
             }
         }
 
@@ -1222,6 +1225,35 @@ namespace System.IO.Compression
                 baseStream.Write(bytes, 0, size);
             else
                 baseStream.Read(bytes, 0, size);
+        }
+
+        [Fact]
+        public async Task Parallel_CompressDecompressMultipleStreamsConcurrently()
+        {
+            const int ParallelOperations = 20;
+            const int DataSize = 10 * 1024;
+
+            var sourceData = new byte[DataSize];
+            new Random().NextBytes(sourceData);
+
+            await Task.WhenAll(Enumerable.Range(0, ParallelOperations).Select(_ => Task.Run(async () =>
+            {
+                var compressedStream = new MemoryStream();
+                using (Stream ds = CreateStream(compressedStream, CompressionMode.Compress, leaveOpen: true))
+                {
+                    await ds.WriteAsync(sourceData, 0, sourceData.Length);
+                }
+
+                compressedStream.Position = 0;
+
+                var decompressedStream = new MemoryStream();
+                using (Stream ds = CreateStream(compressedStream, CompressionMode.Decompress, leaveOpen: true))
+                {
+                    await ds.CopyToAsync(decompressedStream);
+                }
+
+                Assert.Equal(sourceData, decompressedStream.ToArray());
+            })));
         }
     }
 

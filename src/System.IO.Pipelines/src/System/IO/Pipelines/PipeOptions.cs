@@ -8,18 +8,18 @@ using System.Threading;
 namespace System.IO.Pipelines
 {
     /// <summary>
-    /// Represents a set of <see cref="Pipe"/> options
+    /// Represents a set of <see cref="Pipe"/> options.
     /// </summary>
     public class PipeOptions
     {
-        private const int DefaultMinimumSegmentSize = 2048;
+        private const int DefaultMinimumSegmentSize = 4096;
 
-        private const int DefaultResumeWriterThreshold = DefaultMinimumSegmentSize * Pipe.SegmentPoolSize / 2;
+        private const int DefaultResumeWriterThreshold = DefaultMinimumSegmentSize * Pipe.InitialSegmentPoolSize / 2;
 
-        private const int DefaultPauseWriterThreshold = DefaultMinimumSegmentSize * Pipe.SegmentPoolSize;
+        private const int DefaultPauseWriterThreshold = DefaultMinimumSegmentSize * Pipe.InitialSegmentPoolSize;
 
         /// <summary>
-        /// Default instance of <see cref="PipeOptions"/>
+        /// Default instance of <see cref="PipeOptions"/>.
         /// </summary>
         public static PipeOptions Default { get; } = new PipeOptions();
 

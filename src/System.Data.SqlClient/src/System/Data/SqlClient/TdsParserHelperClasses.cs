@@ -6,6 +6,7 @@
 
 //------------------------------------------------------------------------------
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data.Common;
@@ -13,6 +14,7 @@ using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Security;
 using System.Text;
+using System.Threading;
 using Microsoft.SqlServer.Server;
 
 namespace System.Data.SqlClient
@@ -77,7 +79,7 @@ namespace System.Data.SqlClient
         internal byte[] accessToken;
     }
 
-    sealed internal class SqlCollation
+    internal sealed class SqlCollation
     {
         // First 20 bits of info field represent the lcid, bits 21-25 are compare options
         private const uint IgnoreCase = 1 << 20; // bit 21 - IgnoreCase
@@ -232,7 +234,7 @@ namespace System.Data.SqlClient
         }
     }
 
-    sealed internal class SqlEnvChange
+    internal sealed class SqlEnvChange
     {
         internal byte type;
         internal byte oldLength;
@@ -240,16 +242,63 @@ namespace System.Data.SqlClient
         internal int length;
         internal string newValue;
         internal string oldValue;
+        /// <summary>
+        /// contains binary data, before using this field check newBinRented to see if you can take the field array or whether you should allocate and copy
+        /// </summary>
         internal byte[] newBinValue;
+        /// <summary>
+        /// contains binary data, before using this field check newBinRented to see if you can take the field array or whether you should allocate and copy
+        /// </summary>
         internal byte[] oldBinValue;
         internal long newLongValue;
         internal long oldLongValue;
         internal SqlCollation newCollation;
         internal SqlCollation oldCollation;
         internal RoutingInfo newRoutingInfo;
+        internal bool newBinRented;
+        internal bool oldBinRented;
+
+        internal SqlEnvChange Next;
+
+        internal void Clear()
+        {
+            type = 0;
+            oldLength = 0;
+            newLength = 0;
+            length = 0;
+            newValue = null;
+            oldValue = null;
+            if (newBinValue != null)
+            {
+                Array.Clear(newBinValue, 0, newBinValue.Length);
+                if (newBinRented)
+                {
+                    ArrayPool<byte>.Shared.Return(newBinValue);
+                }
+
+                newBinValue = null;
+            }
+            if (oldBinValue != null)
+            {
+                Array.Clear(oldBinValue, 0, oldBinValue.Length);
+                if (oldBinRented)
+                {
+                    ArrayPool<byte>.Shared.Return(oldBinValue);
+                }
+                oldBinValue = null;
+            }
+            newBinRented = false;
+            oldBinRented = false;
+            newLongValue = 0;
+            oldLongValue = 0;
+            newCollation = null;
+            oldCollation = null;
+            newRoutingInfo = null;
+            Next = null;
+        }
     }
 
-    sealed internal class SqlLogin
+    internal sealed class SqlLogin
     {
         internal int timeout;                                                       // login timeout
         internal bool userInstance = false;                                   // user instance
@@ -270,7 +319,7 @@ namespace System.Data.SqlClient
         internal SecureString newSecurePassword;
     }
 
-    sealed internal class SqlLoginAck
+    internal sealed class SqlLoginAck
     {
         internal byte majorVersion;
         internal byte minorVersion;
@@ -278,22 +327,34 @@ namespace System.Data.SqlClient
         internal uint tdsVersion;
     }
 
-    sealed internal class _SqlMetaData : SqlMetaDataPriv
+    internal sealed class _SqlMetaData : SqlMetaDataPriv
     {
+        [Flags]
+        private enum _SqlMetadataFlags : int
+        {
+            None = 0,
+
+            Updatable = 1 << 0,
+            UpdateableUnknown = 1 << 1,
+            IsDifferentName = 1 << 2,
+            IsKey = 1 << 3,
+            IsHidden = 1 << 4,
+            IsExpression = 1 << 5,
+            IsIdentity = 1 << 6,
+            IsColumnSet = 1 << 7,
+
+            IsReadOnlyMask = (Updatable | UpdateableUnknown) // two bit field (0 is read only, 1 is updatable, 2 is updatability unknown)
+        }
+
         internal string column;
         internal string baseColumn;
         internal MultiPartTableName multiPartTableName;
         internal readonly int ordinal;
-        internal byte updatability;     // two bit field (0 is read only, 1 is updatable, 2 is updatability unknown)
         internal byte tableNum;
-        internal bool isDifferentName;
-        internal bool isKey;
-        internal bool isHidden;
-        internal bool isExpression;
-        internal bool isIdentity;
-        internal bool isColumnSet;
         internal byte op;        // for altrow-columns only
         internal ushort operand; // for altrow-columns only
+        private _SqlMetadataFlags flags;
+
 
         internal _SqlMetaData(int ordinal) : base()
         {
@@ -329,6 +390,59 @@ namespace System.Data.SqlClient
             }
         }
 
+
+        public byte Updatability
+        {
+            get => (byte)(flags & _SqlMetadataFlags.IsReadOnlyMask);
+            set => flags = (_SqlMetadataFlags)((value & 0x3) | ((int)flags & ~0x03));
+        }
+
+        public bool IsReadOnly
+        {
+            get => flags.HasFlag(_SqlMetadataFlags.IsReadOnlyMask);
+        }
+
+        public bool IsDifferentName
+        {
+            get => flags.HasFlag(_SqlMetadataFlags.IsDifferentName);
+            set => Set(_SqlMetadataFlags.IsDifferentName, value);
+        }
+
+        public bool IsKey
+        {
+            get => flags.HasFlag(_SqlMetadataFlags.IsKey);
+            set => Set(_SqlMetadataFlags.IsKey, value);
+        }
+
+        public bool IsHidden
+        {
+            get => flags.HasFlag(_SqlMetadataFlags.IsHidden);
+            set => Set(_SqlMetadataFlags.IsHidden, value);
+        }
+
+        public bool IsExpression
+        {
+            get => flags.HasFlag(_SqlMetadataFlags.IsExpression);
+            set => Set(_SqlMetadataFlags.IsExpression, value);
+        }
+
+        public bool IsIdentity
+        {
+            get => flags.HasFlag(_SqlMetadataFlags.IsIdentity);
+            set => Set(_SqlMetadataFlags.IsIdentity, value);
+        }
+
+        public bool IsColumnSet
+        {
+            get => flags.HasFlag(_SqlMetadataFlags.IsColumnSet);
+            set => Set(_SqlMetadataFlags.IsColumnSet, value);
+        }
+
+        private void Set(_SqlMetadataFlags flag, bool value)
+        {
+            flags = value ? flags | flag : flags & ~flag;
+        }
+
         internal bool IsNewKatmaiDateTimeType
         {
             get
@@ -352,21 +466,15 @@ namespace System.Data.SqlClient
             result.column = column;
             result.baseColumn = baseColumn;
             result.multiPartTableName = multiPartTableName;
-            result.updatability = updatability;
             result.tableNum = tableNum;
-            result.isDifferentName = isDifferentName;
-            result.isKey = isKey;
-            result.isHidden = isHidden;
-            result.isExpression = isExpression;
-            result.isIdentity = isIdentity;
-            result.isColumnSet = isColumnSet;
+            result.flags = flags;
             result.op = op;
             result.operand = operand;
             return result;
         }
     }
 
-    sealed internal class _SqlMetaDataSet
+    internal sealed class _SqlMetaDataSet
     {
         internal ushort id;             // for altrow-columns only
         internal int[] indexMap;
@@ -432,7 +540,7 @@ namespace System.Data.SqlClient
         }
     }
 
-    sealed internal class _SqlMetaDataSetCollection
+    internal sealed class _SqlMetaDataSetCollection
     {
         private readonly List<_SqlMetaDataSet> _altMetaDataSetArray;
         internal _SqlMetaDataSet metaDataSet;
@@ -469,7 +577,7 @@ namespace System.Data.SqlClient
                     return altMetaDataSet;
                 }
             }
-            Debug.Assert(false, "Can't match up altMetaDataSet with given id");
+            Debug.Fail("Can't match up altMetaDataSet with given id");
             return null;
         }
 
@@ -487,42 +595,46 @@ namespace System.Data.SqlClient
 
     internal class SqlMetaDataPriv
     {
+        [Flags]
+        private enum SqlMetaDataPrivFlags : byte
+        {
+            None = 0,
+            IsNullable = 1 << 1,
+            IsMultiValued = 1 << 2
+        }
+
         internal SqlDbType type;    // SqlDbType enum value
         internal byte tdsType; // underlying tds type
         internal byte precision = TdsEnums.UNKNOWN_PRECISION_SCALE; // give default of unknown (-1)
         internal byte scale = TdsEnums.UNKNOWN_PRECISION_SCALE; // give default of unknown (-1)
+        private SqlMetaDataPrivFlags flags;
         internal int length;
         internal SqlCollation collation;
         internal int codePage;
         internal Encoding encoding;
-        internal bool isNullable;
-        internal bool isMultiValued = false;
-
-        // UDT specific metadata
-        // server metadata info
-        // additional temporary UDT meta data
-        internal string udtDatabaseName;
-        internal string udtSchemaName;
-        internal string udtTypeName;
-        internal string udtAssemblyQualifiedName;
-
-        // on demand
-        internal Type udtType;
-
-        // Xml specific metadata
-        internal string xmlSchemaCollectionDatabase;
-        internal string xmlSchemaCollectionOwningSchema;
-        internal string xmlSchemaCollectionName;
         internal MetaType metaType; // cached metaType
-
-        // Structured type-specific metadata
-        internal string structuredTypeDatabaseName;
-        internal string structuredTypeSchemaName;
-        internal string structuredTypeName;
-        internal IList<SmiMetaData> structuredFields;
+        public SqlMetaDataUdt udt;
+        public SqlMetaDataXmlSchemaCollection xmlSchemaCollection;
 
         internal SqlMetaDataPriv()
         {
+        }
+
+        public bool IsNullable
+        {
+            get => flags.HasFlag(SqlMetaDataPrivFlags.IsNullable);
+            set => Set(SqlMetaDataPrivFlags.IsNullable, value);
+        }
+
+        public bool IsMultiValued
+        {
+            get => flags.HasFlag(SqlMetaDataPrivFlags.IsMultiValued);
+            set => Set(SqlMetaDataPrivFlags.IsMultiValued, value);
+        }
+
+        private void Set(SqlMetaDataPrivFlags flag, bool value)
+        {
+            flags = value ? flags | flag : flags & ~flag;
         }
 
         internal virtual void CopyFrom(SqlMetaDataPriv original)
@@ -535,32 +647,74 @@ namespace System.Data.SqlClient
             this.collation = original.collation;
             this.codePage = original.codePage;
             this.encoding = original.encoding;
-            this.isNullable = original.isNullable;
-            this.isMultiValued = original.isMultiValued;
-            this.udtDatabaseName = original.udtDatabaseName;
-            this.udtSchemaName = original.udtSchemaName;
-            this.udtTypeName = original.udtTypeName;
-            this.udtAssemblyQualifiedName = original.udtAssemblyQualifiedName;
-            this.udtType = original.udtType;
-            this.xmlSchemaCollectionDatabase = original.xmlSchemaCollectionDatabase;
-            this.xmlSchemaCollectionOwningSchema = original.xmlSchemaCollectionOwningSchema;
-            this.xmlSchemaCollectionName = original.xmlSchemaCollectionName;
             this.metaType = original.metaType;
+            this.flags = original.flags;
 
-            this.structuredTypeDatabaseName = original.structuredTypeDatabaseName;
-            this.structuredTypeSchemaName = original.structuredTypeSchemaName;
-            this.structuredTypeName = original.structuredTypeName;
-            this.structuredFields = original.structuredFields;
+            if (original.udt != null)
+            {
+                udt = new SqlMetaDataUdt();
+                udt.CopyFrom(original.udt);
+            }
+
+            if (original.xmlSchemaCollection != null)
+            {
+                xmlSchemaCollection = new SqlMetaDataXmlSchemaCollection();
+                xmlSchemaCollection.CopyFrom(original.xmlSchemaCollection);
+            }
         }
     }
 
-    sealed internal class _SqlRPC
+    internal sealed class SqlMetaDataXmlSchemaCollection
+    {
+        internal string Database;
+        internal string OwningSchema;
+        internal string Name;
+
+        public void CopyFrom(SqlMetaDataXmlSchemaCollection original)
+        {
+            if (original != null)
+            {
+                Database = original.Database;
+                OwningSchema = original.OwningSchema;
+                Name = original.Name;
+            }
+        }
+    }
+
+    internal sealed class SqlMetaDataUdt
+    {
+        internal Type Type;
+        internal string DatabaseName;
+        internal string SchemaName;
+        internal string TypeName;
+        internal string AssemblyQualifiedName;
+
+        public void CopyFrom(SqlMetaDataUdt original)
+        {
+            if (original != null)
+            {
+                Type = original.Type;
+                DatabaseName = original.DatabaseName;
+                SchemaName = original.SchemaName;
+                TypeName = original.TypeName;
+                AssemblyQualifiedName = original.AssemblyQualifiedName;
+            }
+        }
+    }
+
+    internal sealed class _SqlRPC
     {
         internal string rpcName;
         internal ushort ProcID;       // Used instead of name
         internal ushort options;
-        internal SqlParameter[] parameters;
-        internal byte[] paramoptions;
+
+        internal SqlParameter[] systemParams;
+        internal byte[] systemParamOptions;
+        internal int systemParamCount;
+
+        internal SqlParameterCollection userParams;
+        internal long[] userParamMap;
+        internal int userParamCount;
 
         internal int? recordsAffected;
         internal int cumulativeRecordsAffected;
@@ -573,21 +727,27 @@ namespace System.Data.SqlClient
         internal int warningsIndexEnd;
         internal SqlErrorCollection warnings;
 
-        internal string GetCommandTextOrRpcName()
+        internal SqlParameter GetParameterByIndex(int index, out byte options)
         {
-            if (TdsEnums.RPC_PROCID_EXECUTESQL == ProcID)
+            options = 0;
+            SqlParameter retval = null;
+            if (index < systemParamCount)
             {
-                // Param 0 is the actual sql executing
-                return (string)parameters[0].Value;
+                retval = systemParams[index];
+                options = systemParamOptions[index];
             }
             else
             {
-                return rpcName;
+                long data = userParamMap[index - systemParamCount];
+                int paramIndex = (int)(data & int.MaxValue);
+                options = (byte)((data >> 32) & 0xFF);
+                retval = userParams[paramIndex];
             }
+            return retval;
         }
     }
 
-    sealed internal class SqlReturnValue : SqlMetaDataPriv
+    internal sealed class SqlReturnValue : SqlMetaDataPriv
     {
         internal string parameter;
         internal readonly SqlBuffer value;

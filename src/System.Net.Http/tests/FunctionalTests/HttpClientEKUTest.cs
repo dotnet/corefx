@@ -10,12 +10,13 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public abstract class HttpClientEKUTest : HttpClientTestBase
+    public abstract class HttpClientEKUTest : HttpClientHandlerTestBase
     {
         // Curl + OSX SecureTransport doesn't support the custom certificate callback.
         private static bool BackendSupportsCustomCertificateHandling =>
@@ -43,6 +44,8 @@ namespace System.Net.Http.Functional.Tests
         public static X509Certificate2 clientCertificateClientEku = Configuration.Certificates.GetClientCertificate();
 
         private VerboseTestLogging _log = VerboseTestLogging.GetInstance();
+
+        public HttpClientEKUTest(ITestOutputHelper output) : base(output) { }
 
         [ConditionalFact(nameof(CanTestCertificates))]
         public async Task HttpClient_NoEKUServerAuth_Ok()

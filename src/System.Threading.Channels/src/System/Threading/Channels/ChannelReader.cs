@@ -10,7 +10,7 @@ namespace System.Threading.Channels
     /// Provides a base class for reading from a channel.
     /// </summary>
     /// <typeparam name="T">Specifies the type of data that may be read from the channel.</typeparam>
-    public abstract class ChannelReader<T>
+    public abstract partial class ChannelReader<T>
     {
         /// <summary>
         /// Gets a <see cref="Task"/> that completes when no more data will ever
@@ -23,10 +23,10 @@ namespace System.Threading.Channels
         /// <returns>true if an item was read; otherwise, false if no item was read.</returns>
         public abstract bool TryRead(out T item);
 
-        /// <summary>Returns a <see cref="Task{Boolean}"/> that will complete when data is available to read.</summary>
+        /// <summary>Returns a <see cref="ValueTask{Boolean}"/> that will complete when data is available to read.</summary>
         /// <param name="cancellationToken">A <see cref="CancellationToken"/> used to cancel the wait operation.</param>
         /// <returns>
-        /// A <see cref="Task{Boolean}"/> that will complete with a <c>true</c> result when data is available to read
+        /// A <see cref="ValueTask{Boolean}"/> that will complete with a <c>true</c> result when data is available to read
         /// or with a <c>false</c> result when no further data will ever be available to be read.
         /// </returns>
         public abstract ValueTask<bool> WaitToReadAsync(CancellationToken cancellationToken = default);

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System;
 using System.Runtime.InteropServices;
 
@@ -42,7 +43,7 @@ internal partial class Interop
 
             // First try to format the message into the stack based buffer.  Most error messages willl fit.
             Span<char> stackBuffer = stackalloc char[256]; // arbitrary stack limit
-            fixed (char* bufferPtr = &MemoryMarshal.GetReference(stackBuffer))
+            fixed (char* bufferPtr = stackBuffer)
             {
                 int length = FormatMessage(flags, moduleHandle, unchecked((uint)errorCode), 0, bufferPtr, stackBuffer.Length, IntPtr.Zero);
                 if (length > 0)

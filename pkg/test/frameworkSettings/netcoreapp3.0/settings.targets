@@ -1,9 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <PropertyGroup>
     <!-- Enable targeting netcoreapp3.0 even in an older CLI -->
     <NETCoreAppMaximumVersion>3.0</NETCoreAppMaximumVersion>
     <!-- use the most recent MS.NETCore.App we have from upstack -->
     <RuntimeFrameworkVersion>$(MicrosoftNETCoreAppPackageVersion)</RuntimeFrameworkVersion>
+    <DisableImplicitNETCorePlatformsReference>true</DisableImplicitNETCorePlatformsReference>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- SDK doesn't honor RuntimeFrameworkVersion for targeting pack-->
+    <KnownFrameworkReference Update="Microsoft.NETCore.App" TargetingPackVersion="$(RuntimeFrameworkVersion)" />
+
+    <!-- Temporary till SDK supports transitive framework references. -->
+    <KnownFrameworkReference Remove="Microsoft.AspNetCore.App" />
+    <KnownFrameworkReference Remove="Microsoft.WindowsDesktop.App" />
+  </ItemGroup>
+
+  <!-- Unix CoreLib contains EventRegistrationToken but no other
+       types from System.Runtime.InteropServices.WindowsRuntime.
+       https://github.com/dotnet/corefx/issues/35792 -->
+  <ItemGroup Condition="'$(RuntimeIdentifier)' != '' AND !$(RuntimeIdentifier.StartsWith('win'))">
+    <IgnoredTypes Include="System.Runtime.InteropServices.WindowsRuntime.EventRegistrationToken" />
+  </ItemGroup>
 </Project>
