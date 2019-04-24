@@ -19,6 +19,8 @@ namespace System.Data.ProviderBase
         private const int PruningDueTime = 4 * 60 * 1000;           // 4 minutes
         private const int PruningPeriod = 30 * 1000;           // thirty seconds
 
+        private ReaderWriterLockSlim _poolLock;
+
 
         // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to 
         // a maximum of Environment.ProcessorCount at a time.
@@ -28,6 +30,7 @@ namespace System.Data.ProviderBase
 
         protected DbConnectionFactory()
         {
+            _poolLock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
             _connectionPoolGroups = new Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup>();
             _poolsToRelease = new List<DbConnectionPool>();
             _poolGroupsToRelease = new List<DbConnectionPoolGroup>();
@@ -221,7 +224,8 @@ namespace System.Data.ProviderBase
                     }
                 }
 
-                lock (this)
+                _poolLock.EnterUpgradeableReadLock();
+                try
                 {
                     connectionPoolGroups = _connectionPoolGroups;
                     if (!connectionPoolGroups.TryGetValue(key, out connectionPoolGroup))
@@ -238,14 +242,27 @@ namespace System.Data.ProviderBase
 
                         // lock prevents race condition with PruneConnectionPoolGroups
                         newConnectionPoolGroups.Add(key, newConnectionPoolGroup);
-                        connectionPoolGroup = newConnectionPoolGroup;
-                        _connectionPoolGroups = newConnectionPoolGroups;
+                        _poolLock.EnterWriteLock();
+                        try
+                        {
+                            connectionPoolGroup = newConnectionPoolGroup;
+                            _connectionPoolGroups = newConnectionPoolGroups;
+                        }
+                        finally
+                        {
+                            _poolLock.ExitWriteLock();
+                        }
                     }
                     else
                     {
                         Debug.Assert(!connectionPoolGroup.IsDisabled, "Disabled pool entry discovered");
                     }
                 }
+                finally
+                {
+                    _poolLock.ExitUpgradeableReadLock();
+                }
+                
                 Debug.Assert(null != connectionPoolGroup, "how did we not create a pool entry?");
                 Debug.Assert(null != userConnectionOptions, "how did we not have user connection options?");
             }
@@ -309,7 +326,8 @@ namespace System.Data.ProviderBase
             // Finally, we walk through the collection of connection pool entries
             // and prune each one.  This will cause any empty pools to be put
             // into the release list.
-            lock (this)
+            _poolLock.EnterWriteLock();
+            try
             {
                 Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> connectionPoolGroups = _connectionPoolGroups;
                 Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> newConnectionPoolGroups = new Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup>(connectionPoolGroups.Count);
@@ -334,6 +352,10 @@ namespace System.Data.ProviderBase
                     }
                 }
                 _connectionPoolGroups = newConnectionPoolGroups;
+            }
+            finally
+            {
+                _poolLock.ExitWriteLock();
             }
         }
 
