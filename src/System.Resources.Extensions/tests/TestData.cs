@@ -100,21 +100,21 @@ namespace System.Resources.Extensions.Tests
             };
         }
 
-        public static IReadOnlyDictionary<string, (Type type, Stream stream)> Stream
+        public static IReadOnlyDictionary<string, (Type type, Stream stream)> Activator
         {
             get => PlatformDetection.IsDrawingSupported ?
-                StreamDrawing : StreamWithoutDrawing;
+                ActivatorDrawing : ActivatorWithoutDrawing;
         }
 
-        public static Dictionary<string, (Type type, Stream stream)> StreamWithoutDrawing { get; } =
+        public static Dictionary<string, (Type type, Stream stream)> ActivatorWithoutDrawing { get; } =
             new Dictionary<string, (Type type, Stream stream)>()
             {
                 ["myResourceType_stream"] = (typeof(MyResourceType), new MemoryStream(new byte[] { 0xAB, 0xCD, 0xEF, 0x01, 0x23, 0x45, 0x67, 0x89 }))
             };
 
-        public static IReadOnlyDictionary<string, (Type type, Stream stream)> StreamDrawing
+        public static IReadOnlyDictionary<string, (Type type, Stream stream)> ActivatorDrawing
         {
-            get => new Dictionary<string, (Type type, Stream stream)>(StreamWithoutDrawing)
+            get => new Dictionary<string, (Type type, Stream stream)>(ActivatorWithoutDrawing)
             {
                 ["icon_stream"] = (typeof(Icon), File.OpenRead(Path.Combine("bitmaps", "32x32_one_entry_4bit.ico"))),
                 ["bitmap_stream"] = (typeof(Bitmap), File.OpenRead(Path.Combine("bitmaps", "almogaver24bits.bmp")))
@@ -171,9 +171,9 @@ namespace System.Resources.Extensions.Tests
                     writer.AddTypeConverterResource(pair.Key, GetSerializationTypeName(pair.Value.GetType()), value);
                 }
 
-                foreach(var pair in StreamWithoutDrawing)
+                foreach(var pair in ActivatorWithoutDrawing)
                 {
-                    writer.AddStreamResource(pair.Key, GetSerializationTypeName(pair.Value.type), pair.Value.stream, false);
+                    writer.AddActivatorResource(pair.Key, GetSerializationTypeName(pair.Value.type), pair.Value.stream, false);
                 }
 
                 writer.Generate();

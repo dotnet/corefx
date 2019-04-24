@@ -14,13 +14,8 @@
 ** 
 ===========================================================*/
 
-using System;
-using System.IO;
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
-using System.Runtime.Versioning;
 using System.Diagnostics;
 
 namespace System.Resources
@@ -28,6 +23,9 @@ namespace System.Resources
     .Extensions
 #endif
 {
+#if RESOURCES_STANDALONE
+    using ResourceReader = DeserializingResourceReader;
+#endif
     // A RuntimeResourceSet stores all the resources defined in one 
     // particular CultureInfo, with some loading optimizations.
     //
@@ -210,7 +208,6 @@ namespace System.Resources
         }
 #else
         private readonly IResourceReader Reader;
-#endif
 
         internal RuntimeResourceSet(IResourceReader reader) :
             // explicitly do not call IResourceReader constructor since it caches all resources
@@ -229,7 +226,8 @@ namespace System.Resources
             // so we must initialize the cache here.
             _defaultReader._resCache = _resCache;
         }
-        
+#endif
+
         protected override void Dispose(bool disposing)
         {
             if (Reader == null)

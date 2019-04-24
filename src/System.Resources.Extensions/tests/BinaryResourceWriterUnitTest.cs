@@ -54,14 +54,12 @@ namespace System.Resources.Extensions.Tests
                 {
                     Assert.Throws<ArgumentNullException>("name", () => writer.AddResource(null, stream));
                     Assert.Throws<ArgumentNullException>("name", () => writer.AddResource(null, stream, true));
-                    Assert.Throws<ArgumentNullException>("name", () => writer.AddStreamResource(null, "System.DayOfWeek", stream, false));
+                    Assert.Throws<ArgumentNullException>("name", () => writer.AddActivatorResource(null, "System.DayOfWeek", stream, false));
                 }
                 
                 Assert.Throws<ArgumentNullException>("name", () => writer.AddBinaryFormattedResource(null, "System.DayOfWeek", new byte[1]));
                 Assert.Throws<ArgumentNullException>("name", () => writer.AddTypeConverterResource(null, "System.DayOfWeek", new byte[1]));
                 Assert.Throws<ArgumentNullException>("name", () => writer.AddTypeConverterResource(null, "System.DayOfWeek", "Monday"));
-                Assert.Throws<ArgumentNullException>("name", () => writer.AddStreamResource(null, "System.DayOfWeek", new byte[1]));
-                Assert.Throws<ArgumentNullException>("name", () => writer.AddResourceData(null, "System.DayOfWeek", new byte[1]));
             }
         }
 
@@ -80,14 +78,12 @@ namespace System.Resources.Extensions.Tests
                 {
                     Assert.Throws<ArgumentException>(null, () => writer.AddResource("duplicate", stream));
                     Assert.Throws<ArgumentException>(null, () => writer.AddResource("duplicate", stream, true));
-                    Assert.Throws<ArgumentException>(null, () => writer.AddStreamResource("duplicate", "System.DayOfWeek", stream, false));
+                    Assert.Throws<ArgumentException>(null, () => writer.AddActivatorResource("duplicate", "System.DayOfWeek", stream, false));
                 }
 
                 Assert.Throws<ArgumentException>(null, () => writer.AddBinaryFormattedResource("duplicate", "System.DayOfWeek", new byte[1]));
                 Assert.Throws<ArgumentException>(null, () => writer.AddTypeConverterResource("duplicate", "System.DayOfWeek", new byte[1]));
                 Assert.Throws<ArgumentException>(null, () => writer.AddTypeConverterResource("duplicate", "System.DayOfWeek", "Monday"));
-                Assert.Throws<ArgumentException>(null, () => writer.AddStreamResource("duplicate", "System.DayOfWeek", new byte[1]));
-                Assert.Throws<ArgumentException>(null, () => writer.AddResourceData("duplicate", "System.DayOfWeek", new byte[1]));
 
 
                 Assert.Throws<ArgumentException>(null, () => writer.AddResource("Duplicate", "value"));
@@ -98,14 +94,12 @@ namespace System.Resources.Extensions.Tests
                 {
                     Assert.Throws<ArgumentException>(null, () => writer.AddResource("dupLicate", stream));
                     Assert.Throws<ArgumentException>(null, () => writer.AddResource("duplIcate", stream, true));
-                    Assert.Throws<ArgumentException>(null, () => writer.AddStreamResource("dupliCate", "System.DayOfWeek", stream, false));
+                    Assert.Throws<ArgumentException>(null, () => writer.AddActivatorResource("dupliCate", "System.DayOfWeek", stream, false));
                 }
 
                 Assert.Throws<ArgumentException>(null, () => writer.AddBinaryFormattedResource("duplicAte", "System.DayOfWeek", new byte[1]));
                 Assert.Throws<ArgumentException>(null, () => writer.AddTypeConverterResource("duplicaTe", "System.DayOfWeek", new byte[1]));
                 Assert.Throws<ArgumentException>(null, () => writer.AddTypeConverterResource("duplicatE", "System.DayOfWeek", "Monday"));
-                Assert.Throws<ArgumentException>(null, () => writer.AddStreamResource("DUplicate", "System.DayOfWeek", new byte[1]));
-                Assert.Throws<ArgumentException>(null, () => writer.AddResourceData("dUPlicate", "System.DayOfWeek", new byte[1]));
             }
         }
 
@@ -126,14 +120,12 @@ namespace System.Resources.Extensions.Tests
                 {
                     Assert.Throws<InvalidOperationException>(() => writer.AddResource("duplicate", stream));
                     Assert.Throws<InvalidOperationException>(() => writer.AddResource("duplicate", stream, true));
-                    Assert.Throws<InvalidOperationException>(() => writer.AddStreamResource("duplicate", "System.DayOfWeek", stream, false));
+                    Assert.Throws<InvalidOperationException>(() => writer.AddActivatorResource("duplicate", "System.DayOfWeek", stream, false));
                 }
 
                 Assert.Throws<InvalidOperationException>(() => writer.AddBinaryFormattedResource("duplicate", "System.DayOfWeek", new byte[1]));
                 Assert.Throws<InvalidOperationException>(() => writer.AddTypeConverterResource("duplicate", "System.DayOfWeek", new byte[1]));
                 Assert.Throws<InvalidOperationException>(() => writer.AddTypeConverterResource("duplicate", "System.DayOfWeek", "Monday"));
-                Assert.Throws<InvalidOperationException>(() => writer.AddStreamResource("duplicate", "System.DayOfWeek", new byte[1]));
-                Assert.Throws<InvalidOperationException>(() => writer.AddResourceData("duplicate", "System.DayOfWeek", new byte[1]));
             }
         }
 
@@ -195,13 +187,22 @@ namespace System.Resources.Extensions.Tests
             {
                 IDictionaryEnumerator dictEnum = reader.GetEnumerator();
 
-                while(dictEnum.MoveNext())
+                while (dictEnum.MoveNext())
                 {
                     Assert.Equal(values[(string)dictEnum.Key], dictEnum.Value);
                 }
             }
 
-            Assert.Throws<NotSupportedException>(() => new DeserializingResourceReader(new MemoryStream(binaryWriterBuffer, false)));
+            using (MemoryStream ms = new MemoryStream(binaryWriterBuffer, false))
+            using (DeserializingResourceReader reader = new DeserializingResourceReader(ms))
+            {
+                IDictionaryEnumerator dictEnum = reader.GetEnumerator();
+
+                while (dictEnum.MoveNext())
+                {
+                    Assert.Equal(values[(string)dictEnum.Key], dictEnum.Value);
+                }
+            }
         }
 
         [Fact]
@@ -258,7 +259,16 @@ namespace System.Resources.Extensions.Tests
                 }
             }
 
-            Assert.Throws<NotSupportedException>(() => new DeserializingResourceReader(new MemoryStream(binaryWriterBuffer, false)));
+            using (MemoryStream ms = new MemoryStream(writerBuffer, false))
+            using (DeserializingResourceReader reader = new DeserializingResourceReader(ms))
+            {
+                IDictionaryEnumerator dictEnum = reader.GetEnumerator();
+
+                while (dictEnum.MoveNext())
+                {
+                    ResourceValueEquals(values[(string)dictEnum.Key], dictEnum.Value);
+                }
+            }
         }
 
 
@@ -330,7 +340,7 @@ namespace System.Resources.Extensions.Tests
         [Fact]
         public static void StreamResources()
         {
-            var values = TestData.Stream;
+            var values = TestData.Activator;
 
             byte[] binaryWriterBuffer;
 
@@ -340,7 +350,7 @@ namespace System.Resources.Extensions.Tests
                 foreach (var pair in values)
                 {
                     pair.Value.stream.Seek(0, SeekOrigin.Begin);
-                    writer.AddStreamResource(pair.Key, TestData.GetSerializationTypeName(pair.Value.type), pair.Value.stream, false);
+                    writer.AddActivatorResource(pair.Key, TestData.GetSerializationTypeName(pair.Value.type), pair.Value.stream, false);
                 }
                 writer.Generate();
                 binaryWriterBuffer = ms.ToArray();
@@ -378,7 +388,7 @@ namespace System.Resources.Extensions.Tests
                 Assert.Equal(pair.Value, actualValue);
             }
 
-            foreach(KeyValuePair<string, (Type type, Stream stream)> pair in TestData.StreamWithoutDrawing)
+            foreach(KeyValuePair<string, (Type type, Stream stream)> pair in TestData.ActivatorWithoutDrawing)
             {
                 pair.Value.stream.Seek(0, SeekOrigin.Begin);
                 var expectedValue = Activator.CreateInstance(pair.Value.type, pair.Value.stream);

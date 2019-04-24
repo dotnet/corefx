@@ -1,28 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.IO;
-using System.Text;
 
 namespace System.Resources.Extensions
 {
-    public class PreserializedResourceWriter : ResourceWriter
+    partial class PreserializedResourceWriter
     {
-
         bool _requiresDeserializingResourceReader = false;
 
-        public PreserializedResourceWriter(string fileName) : base(fileName)
-        { }
+        private string ResourceReaderTypeName => _requiresDeserializingResourceReader ? 
+            typeof(DeserializingResourceReader).AssemblyQualifiedName :
+            ResourceReaderFullyQualifiedName;
 
-        public PreserializedResourceWriter(Stream stream) : base(stream)
-        { }
-
-        protected override string ResourceReaderTypeName => _requiresDeserializingResourceReader ? 
-            typeof(DeserializingResourceReader).AssemblyQualifiedName : 
-            base.ResourceReaderTypeName;
-
-        protected override string ResourceSetTypeName => _requiresDeserializingResourceReader ?
+        private string ResourceSetTypeName => _requiresDeserializingResourceReader ?
             typeof(RuntimeResourceSet).AssemblyQualifiedName :
-            base.ResourceSetTypeName;
+            ResSetTypeName;
 
         public void AddTypeConverterResource(string name, string typeName, string value)
         {
@@ -65,21 +59,7 @@ namespace System.Resources.Extensions
             AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.BinaryFormatter, value));
         }
 
-        public void AddStreamResource(string name, string typeName, byte[] value)
-        {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            if (typeName == null)
-                throw new ArgumentNullException(nameof(typeName));
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-
-            AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.Stream, value));
-
-            _requiresDeserializingResourceReader = true;
-        }
-
-        public void AddStreamResource(string name, string typeName, Stream value, bool closeAfterWrite)
+        public void AddActivatorResource(string name, string typeName, Stream value, bool closeAfterWrite)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -91,7 +71,7 @@ namespace System.Resources.Extensions
             if (!value.CanSeek)
                 throw new ArgumentException(SR.NotSupported_UnseekableStream);
 
-            AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.Stream, value, closeAfterWrite));
+            AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.ActivatorStream, value, closeAfterWrite));
 
             _requiresDeserializingResourceReader = true;
         }
@@ -110,7 +90,7 @@ namespace System.Resources.Extensions
             }
         }
 
-        protected override void WriteData(BinaryWriter writer, object dataContext)
+        private void WriteData(BinaryWriter writer, object dataContext)
         {
             if (writer == null)
                 throw new ArgumentNullException(nameof(writer));
@@ -139,17 +119,17 @@ namespace System.Resources.Extensions
 
                             if (_requiresDeserializingResourceReader)
                             {
-                                writer.Write7BitEncodedInt(data.Length);
+                                Write7BitEncodedInt(writer, data.Length);
                             }
 
                             writer.Write(data);
                             break;
                         }
-                    case SerializationFormat.Stream:
+                    case SerializationFormat.ActivatorStream:
                         {
                             if (record.Data is byte[] data)
                             {
-                                writer.Write7BitEncodedInt(data.Length);
+                                Write7BitEncodedInt(writer, data.Length);
                                 writer.Write(data);
                             }
                             else
@@ -160,7 +140,7 @@ namespace System.Resources.Extensions
                                     throw new ArgumentException(SR.ArgumentOutOfRange_StreamLength);
 
                                 stream.Position = 0;
-                                writer.Write7BitEncodedInt((int)stream.Length);
+                                Write7BitEncodedInt(writer, (int)stream.Length);
                                 stream.CopyTo(writer.BaseStream);
                             }
                             break;
@@ -168,7 +148,7 @@ namespace System.Resources.Extensions
                     case SerializationFormat.TypeConverterByteArray:
                         {
                             byte[] data = (byte[])record.Data;
-                            writer.Write7BitEncodedInt(data.Length);
+                            Write7BitEncodedInt(writer, data.Length);
                             writer.Write(data);
                             break;
                         }
@@ -190,7 +170,6 @@ namespace System.Resources.Extensions
                     disposable.Dispose();
                 }
             }
-
         }
     }
 }

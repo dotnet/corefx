@@ -1,41 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <Configurations>netstandard-Debug;netstandard-Release;netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
-    <NoWarn>$(NoWarn);436</NoWarn>
-    <ResourceWriterPath>$([MSBuild]::NormalizeDirectory('$(SourceDir)', 'System.Resources.Writer', 'src'))</ResourceWriterPath>
+    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
     <DefineConstants>$(DefineConstants);RESOURCES_STANDALONE</DefineConstants>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetsNETStandard)' == 'true'">
-    <Compile Include="$(ResourceWriterPath)System\Resources\ResourceWriter.cs" Link="System\Resources\ResourceWriter.cs" />
-    <Compile Include="$(ResourceWriterPath)System\Runtime\Versioning\MultitargetingHelpers.cs" Link="System\Runtime\Versioning\MultitargetingHelpers.cs" />
-  </ItemGroup>
-  <!-- ItemGroup Condition="'$(TargetsNETStandard)' == 'true'" -->
   <ItemGroup>
+    <Compile Include="$(CommonPath)\System\Resources\ResourceWriter.cs" Link="System\Resources\Extensions\ResourceWriter.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\IO\PinnedBufferMemoryStream.cs" Link="System\IO\PinnedBufferMemoryStream.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Resources\FastResourceComparer.cs" Link="System\Resources\FastResourceComparer.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceReader.cs" Link="System\Resources\ResourceReader.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceReader.cs" Link="System\Resources\Extensions\ResourceReader.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceTypeCode.cs" Link="System\Resources\ResourceTypeCode.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="7BitExtensions.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Resources\RuntimeResourceSet.cs" Link="System\Resources\Extensions\RuntimeResourceSet.cs" />
+    <Compile Include="BinaryReaderExtensions.cs" />
     <Compile Include="System\Resources\Extensions\DeserializingResourceReader.cs" />
     <Compile Include="System\Resources\Extensions\PreserializedResourceWriter.cs" />
-    <Compile Include="System\Resources\Extensions\SerializationFormat.cs" />
-    <Compile Include="$(CommonPath)\CoreLib\System\Resources\RuntimeResourceSet.cs" Link="System\Resources\Extensions\RuntimeResourceSet.cs" />
+    <Compile Include="System\Resources\Extensions\SerializationFormat.cs" />    
   </ItemGroup>
-  <ItemGroup> 
-    <Reference Include="System.Collections" />
-    <Reference Include="System.ComponentModel.TypeConverter" />
-    <Reference Include="System.Diagnostics.Debug" />
-    <Reference Include="System.Diagnostics.Tools" />
+  <ItemGroup>
     <Reference Include="System.Memory" />
-    <Reference Include="System.Resources.ResourceManager" />
-    <Reference Include="System.Resources.Writer" />
-    <Reference Include="System.Runtime" />
-    <Reference Include="System.Runtime.Extensions" />
-    <Reference Include="System.Runtime.InteropServices" />
-    <Reference Include="System.Runtime.Serialization.Formatters" />
-    <Reference Include="System.Threading" />
   </ItemGroup>
 </Project>

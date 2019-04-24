@@ -14,17 +14,15 @@
 ** 
 ===========================================================*/
 
-using System;
 using System.IO;
 using System.Text;
-using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Runtime.Versioning;
-using System.Runtime.Serialization;
 using System.Diagnostics;
 
 namespace System.Resources
+#if RESOURCES_STANDALONE
+    .Extensions
+#endif
 {
     // Generates a binary .resources file in the system default format 
     // from name and value pairs.  Create one with a unique file name,
@@ -37,7 +35,13 @@ namespace System.Resources
     // See the RuntimeResourceSet overview for details on the system 
     // default file format.
     // 
-    public class ResourceWriter : IResourceWriter
+    public sealed partial class
+#if RESOURCES_STANDALONE
+        PreserializedResourceWriter
+#else
+        ResourceWriter
+#endif
+        : IResourceWriter
     {
         // An initial size for our internal sorted list, to avoid extra resizes.
         private const int AverageNameSize = 20 * 2;  // chars in little endian Unicode
@@ -51,10 +55,13 @@ namespace System.Resources
         private Dictionary<string, object> _caseInsensitiveDups;
         private Dictionary<string, PrecannedResource> _preserializedData;
 
-        // Set this delegate to allow multi-targeting for .resources files.
-        public Func<Type, string> TypeNameConverter { get; set; }
-
-        public ResourceWriter(string fileName)
+        public
+#if RESOURCES_STANDALONE
+        PreserializedResourceWriter
+#else
+        ResourceWriter
+#endif
+            (string fileName)
         {
             if (fileName == null)
                 throw new ArgumentNullException(nameof(fileName));
@@ -64,7 +71,13 @@ namespace System.Resources
             _caseInsensitiveDups = new Dictionary<string, object>(StringComparer.OrdinalIgnoreCase);
         }
 
-        public ResourceWriter(Stream stream)
+        public
+#if RESOURCES_STANDALONE
+        PreserializedResourceWriter
+#else
+        ResourceWriter
+#endif
+            (Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));
@@ -118,24 +131,9 @@ namespace System.Resources
 
         // Adds a resource of type Stream to the list of resources to be 
         // written to a file.  They aren't written until Generate() is called.
-        // Doesn't close the Stream when done.
-        //
-        public void AddResource(string name, Stream value)
-        {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-
-            if (_resourceList == null)
-                throw new InvalidOperationException(SR.InvalidOperation_ResourceWriterSaved);
- 
-            AddResourceInternal(name, value, false);
-        }
- 
-        // Adds a resource of type Stream to the list of resources to be 
-        // written to a file.  They aren't written until Generate() is called.
         // closeAfterWrite parameter indicates whether to close the stream when done.
         // 
-        public void AddResource(string name, Stream value, bool closeAfterWrite)
+        public void AddResource(string name, Stream value, bool closeAfterWrite = false)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -176,31 +174,14 @@ namespace System.Resources
 
             if (_resourceList == null)
                 throw new InvalidOperationException(SR.InvalidOperation_ResourceWriterSaved);
- 
+
             // Check for duplicate resources whose names vary only by case.
             _caseInsensitiveDups.Add(name, null);
             _resourceList.Add(name, value);
         }
-        
-        public void AddResourceData(string name, string typeName, byte[] serializedData)
-        {
-            AddSerializedData(name, typeName, serializedData, nameof(serializedData));
-        }
 
-        protected void AddResourceData(string name, string typeName, object dataContext)
+        private void AddResourceData(string name, string typeName, object data)
         {
-            AddSerializedData(name, typeName, dataContext, nameof(dataContext));
-        }
-
-        private void AddSerializedData(string name, string typeName, object data, string dataParameterName)
-        {
-            if (name == null)
-                throw new ArgumentNullException(nameof(name));
-            if (typeName == null)
-                throw new ArgumentNullException(nameof(typeName));
-            if (data == null)
-                throw new ArgumentNullException(dataParameterName);
-
             if (_resourceList == null)
                 throw new InvalidOperationException(SR.InvalidOperation_ResourceWriterSaved);
 
@@ -211,9 +192,6 @@ namespace System.Resources
 
             _preserializedData.Add(name, new PrecannedResource(typeName, data));
         }
-
-        protected virtual string ResourceReaderTypeName { get => ResourceReaderFullyQualifiedName; }
-        protected virtual string ResourceSetTypeName { get => ResSetTypeName; }
 
         // For cases where users can't create an instance of the deserialized 
         // type in memory, and need to pass us serialized blobs instead.
@@ -450,25 +428,6 @@ namespace System.Resources
             _resourceList = null;
         }
 
-        protected virtual void WriteData(BinaryWriter writer, object dataContext)
-        {
-            // this method should only ever be called by Generate, but guard against derived classes calling with bad data.
-            
-            if (writer == null)
-                throw new ArgumentNullException(nameof(writer));
-            if (dataContext == null)
-                throw new ArgumentNullException(nameof(dataContext));
-
-            byte[] data = dataContext as byte[];
-
-            if (data == null)
-            {
-                throw new InvalidOperationException(SR.Format(SR.InvalidOperation_CannotWriteType, GetType(), dataContext.GetType(), nameof(WriteData)));
-            }
-
-            writer.Write(data);
-        }
-
         private static void Write7BitEncodedInt(BinaryWriter store, int value)
         {
             Debug.Assert(store != null);
@@ -542,7 +501,8 @@ namespace System.Resources
             }
             else 
             {
-                typeName = MultitargetingHelpers.GetAssemblyQualifiedName(type, TypeNameConverter);
+                // not a preserialized resource
+                throw new PlatformNotSupportedException(SR.NotSupported_BinarySerializedResources);
             }
  
             int typeIndex = types.IndexOf(typeName);

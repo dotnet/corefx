@@ -9,9 +9,9 @@
   <ItemGroup>
     <Compile Include="System\Resources\__FastResourceComparer.cs" />
     <Compile Include="System\Resources\IResourceWriter.cs" />
-    <Compile Include="System\Resources\ResourceWriter.cs" />
+    <Compile Include="System\Resources\ResourceWriter.base.cs" />
+    <Compile Include="$(CommonPath)\System\Resources\ResourceWriter.cs" Link="System\Resources\ResourceWriter.cs" />
     <Compile Include="$(CommonPath)\CoreLib\System\Resources\ResourceTypeCode.cs" Link="System\Resources\ResourceTypeCode.cs" />
-    <Compile Include="System\Runtime\Versioning\MultitargetingHelpers.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../System.Resources.ResourceManager/ref/System.Resources.ResourceManager.csproj" />

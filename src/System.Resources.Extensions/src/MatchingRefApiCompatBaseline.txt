@@ -1,4 +1,0 @@
-TypesMustExist : Type 'System.Resources.ResourceReader' does not exist in the reference but it does exist in the implementation.
-CannotRemoveBaseTypeOrInterface : Type 'System.Resources.Extensions.DeserializingResourceReader' does not inherit from base type 'System.Resources.ResourceReader' in the reference but it does in the implementation.
-TypesMustExist : Type 'System.Resources.ResourceWriter' does not exist in the reference but it does exist in the implementation.
-CannotRemoveBaseTypeOrInterface : Type 'System.Resources.Extensions.PreserializedResourceWriter' does not inherit from base type 'System.Resources.ResourceWriter' in the reference but it does in the implementation.

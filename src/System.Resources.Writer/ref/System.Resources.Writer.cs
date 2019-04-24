@@ -15,12 +15,10 @@ namespace System.Resources
         void Close();
         void Generate();
     }
-    public partial class ResourceWriter : System.IDisposable, System.Resources.IResourceWriter
+    public sealed partial class ResourceWriter : System.IDisposable, System.Resources.IResourceWriter
     {
         public ResourceWriter(System.IO.Stream stream) { }
         public ResourceWriter(string fileName) { }
-        protected virtual string ResourceReaderTypeName { get { throw null; } }
-        protected virtual string ResourceSetTypeName { get { throw null; } }
         public System.Func<System.Type, string> TypeNameConverter { get { throw null; } set { } }
         public void AddResource(string name, byte[] value) { }
         public void AddResource(string name, System.IO.Stream value) { }
@@ -28,10 +26,8 @@ namespace System.Resources
         public void AddResource(string name, object value) { }
         public void AddResource(string name, string value) { }
         public void AddResourceData(string name, string typeName, byte[] serializedData) { }
-        protected void AddResourceData(string name, string typeName, object dataContext) { }
         public void Close() { }
         public void Dispose() { }
         public void Generate() { }
-        protected virtual void WriteData(System.IO.BinaryWriter writer, object dataContext) { }
     }
 }

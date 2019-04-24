@@ -1,6 +1,0 @@
-// Until we get a System.Private.CoreLib with these changes.
-Compat issues with assembly System.Resources.ResourceManager:
-CannotSealType : Type 'System.Resources.ResourceReader' is actually (has the sealed modifier) sealed in the implementation but not sealed in the contract.
-MembersMustExist : Member 'System.Resources.ResourceReader.DeserializeObject(System.IO.BinaryReader, System.Type)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Resources.ResourceReader.Version.get()' does not exist in the implementation but it does exist in the contract.
-Total Issues: 3

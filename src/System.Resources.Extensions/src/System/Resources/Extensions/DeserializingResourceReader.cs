@@ -1,32 +1,58 @@
-﻿using System;
-using System.Collections.Generic;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.ComponentModel;
 using System.IO;
+using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 
 namespace System.Resources.Extensions
 {
-    public class DeserializingResourceReader : ResourceReader
+    public partial class DeserializingResourceReader
     {
-        public DeserializingResourceReader(Stream stream) : base(stream)
+        private const int Version = 2; // File format version number
+
+        private bool _assumeBinaryFormatter = false;
+        private BinaryFormatter _formatter = null;
+
+        private bool ValidateReaderType(string readerType)
         {
+            if (CompareNames(readerType, typeof(DeserializingResourceReader).AssemblyQualifiedName))
+            {
+                return true;
+            }
+
+            if (CompareNames(readerType, typeof(ResourceReader).AssemblyQualifiedName))
+            {
+                _assumeBinaryFormatter = true;
+                return true;
+            }
+
+            return false;
         }
 
-        public DeserializingResourceReader(string fileName) : base(fileName)
+        private object ReadBinaryFormattedObject()
         {
+            if (_formatter == null)
+            {
+                _formatter = new BinaryFormatter();
+            }
+
+            return _formatter.Deserialize(_store.BaseStream);
         }
 
-        protected override object DeserializeObject(BinaryReader reader, Type type)
+        private object DeserializeObject(int typeIndex)
         {
-            if (reader == null)
-                throw new ArgumentNullException(nameof(reader));
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
+            Type type = FindType(typeIndex);
+
+            if (_assumeBinaryFormatter)
+            {
+                return ReadBinaryFormattedObject();
+            }
 
             // read type
-            SerializationFormat format = (SerializationFormat)reader.ReadByte();
-
+            SerializationFormat format = (SerializationFormat)_store.ReadByte();
 
             object value = null;
 
@@ -36,19 +62,17 @@ namespace System.Resources.Extensions
                 case SerializationFormat.BinaryFormatter:
                     {
                         // read length
-                        int length = reader.Read7BitEncodedInt();
+                        int length = _store.Read7BitEncodedInt();
                         if (length < 0)
                         {
                             throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResourceDataLengthInvalid, length));
                         }
+                        
+                        long originalPosition = _store.BaseStream.Position;
 
-                        BinaryFormatter bf = new BinaryFormatter();
+                        value = ReadBinaryFormattedObject();
 
-                        long originalPosition = reader.BaseStream.Position;
-
-                        value = bf.Deserialize(reader.BaseStream);
-
-                        long bytesRead = reader.BaseStream.Position - originalPosition;
+                        long bytesRead = _store.BaseStream.Position - originalPosition;
 
                         // Ensure BF read what we expected.
                         if (bytesRead != length)
@@ -60,13 +84,13 @@ namespace System.Resources.Extensions
                 case SerializationFormat.TypeConverterByteArray:
                     {
                         // read length
-                        int length = reader.Read7BitEncodedInt();
+                        int length = _store.Read7BitEncodedInt();
                         if (length < 0)
                         {
                             throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResourceDataLengthInvalid, length));
                         }
 
-                        byte[] data = reader.ReadBytes(length);
+                        byte[] data = _store.ReadBytes(length);
 
                         TypeConverter converter = TypeDescriptor.GetConverter(type);
 
@@ -80,7 +104,7 @@ namespace System.Resources.Extensions
                     }
                 case SerializationFormat.TypeConverterString:
                     {
-                        string stringData = reader.ReadString();
+                        string stringData = _store.ReadString();
 
                         TypeConverter converter = TypeDescriptor.GetConverter(type);
 
@@ -92,17 +116,17 @@ namespace System.Resources.Extensions
                         value = converter.ConvertFromInvariantString(stringData);
                         break;
                     }
-                case SerializationFormat.Stream:
+                case SerializationFormat.ActivatorStream:
                     {
                         // read length
-                        int length = reader.Read7BitEncodedInt();
+                        int length = _store.Read7BitEncodedInt();
                         if (length < 0)
                         {
                             throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResourceDataLengthInvalid, length));
                         }
                         Stream stream;
 
-                        if (reader.BaseStream is UnmanagedMemoryStream ums)
+                        if (_store.BaseStream is UnmanagedMemoryStream ums)
                         {
                             // For the case that we've memory mapped in the .resources
                             // file, just return a Stream pointing to that block of memory.
@@ -114,7 +138,7 @@ namespace System.Resources.Extensions
                         else
                         {
 
-                            byte[] bytes = reader.ReadBytes(length);
+                            byte[] bytes = _store.ReadBytes(length);
                             // Lifetime of memory == lifetime of this stream.
                             stream = new MemoryStream(bytes, false);
                         }
@@ -129,5 +153,48 @@ namespace System.Resources.Extensions
             return value;
         }
 
+
+        private static bool CompareNames(string typeName1, string typeName2)
+        {
+            // First, compare type names
+            int comma1 = typeName1.IndexOf(',');
+            int comma2 = typeName2.IndexOf(',');
+            if (comma1 != comma2)
+                return false;
+
+            // both are missing assembly name, compare entire string as type name
+            if (comma1 == -1)
+                return string.Equals(typeName1, typeName2, StringComparison.Ordinal);
+
+            // compare the type name portion
+            ReadOnlySpan<char> type1 = typeName1.AsSpan(0, comma1);
+            ReadOnlySpan<char> type2 = typeName2.AsSpan(0, comma2);
+            if (!type1.Equals(type2, StringComparison.Ordinal))
+                return false;
+
+            // Now, compare assembly display names (IGNORES VERSION AND PROCESSORARCHITECTURE)
+            // also, for  mscorlib ignores everything, since that's what the binder is going to do
+            while (Char.IsWhiteSpace(typeName1[++comma1]))
+                ;
+            while (Char.IsWhiteSpace(typeName2[++comma2]))
+                ;
+
+            // case insensitive
+            AssemblyName an1 = new AssemblyName(typeName1.Substring(comma1));
+            AssemblyName an2 = new AssemblyName(typeName1.Substring(comma2));
+            if (!string.Equals(an1.Name, an2.Name, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            // to match IsMscorlib() in VM
+            if (string.Equals(an1.Name, "mscorlib", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            if (an1.CultureInfo?.LCID != an2.CultureInfo?.LCID)
+                return false;
+
+            byte[] pkt1 = an1.GetPublicKeyToken();
+            byte[] pkt2 = an2.GetPublicKeyToken();
+            return pkt1.AsSpan().SequenceEqual(pkt2);
+        }
     }
 }
