@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Collections.ObjectModel.Tests
 {
-    public partial class CollectionTests
+    public partial class CollectionTests : CollectionTestBase
     {
         private static readonly Collection<int> s_empty = new Collection<int>();
 
