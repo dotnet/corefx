@@ -61,7 +61,8 @@ namespace System.Text.Json
                 int fractionEnd = 19 + numFractionDigits;
 
                 // Write fraction
-                for (int i = fractionEnd; i >= curIndex; i--)
+                // Leading zeros are written because the fraction becomes zero when it's their turn
+                for (int i = fractionEnd; i > curIndex; i--)
                 {
                     buffer[i] = (byte)((fraction % 10) + (uint)'0');
                     fraction /= 10;
@@ -89,11 +90,18 @@ namespace System.Text.Json
                     // Last index of the offset
                     int bufferEnd = curIndex + 5;
 
-                    buffer[bufferEnd] = buffer[32];
-                    buffer[bufferEnd - 1] = buffer[31];
-                    buffer[bufferEnd - 2] = buffer[30];
-                    buffer[bufferEnd - 3] = buffer[29];
-                    buffer[bufferEnd - 4] = buffer[28];
+                    // Temporary offset characters to prevent their values from being overwritten
+                    byte offsetMinDigit2 = buffer[32];
+                    byte offsetMinDigit1 = buffer[31];
+                    byte offsetHourDigit2 = buffer[29];
+                    byte offsetHourDigit1 = buffer[28];
+
+                    // Write offset characters
+                    buffer[bufferEnd] = offsetMinDigit2;
+                    buffer[bufferEnd - 1] = offsetMinDigit1;
+                    buffer[bufferEnd - 2] = JsonConstants.Colon;
+                    buffer[bufferEnd - 3] = offsetHourDigit2;
+                    buffer[bufferEnd - 4] = offsetHourDigit1;
 
                     // bytes written is the last index of the offset + 1
                     bytesWritten = bufferEnd + 1;

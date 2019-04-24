@@ -3340,6 +3340,50 @@ namespace System.Text.Json.Tests
             WriteTooLargeHelper(options, key.Slice(0, 10_000_000 / 3), value.Slice(0, 10_000_000 / 3), noThrow: true);
         }
 
+        [Theory]
+        [InlineData("2019-04-24T14:50:17.0000000", "\"2019-04-24T14:50:17\"")]
+        [InlineData("2019-04-24T14:50:17.1000000", "\"2019-04-24T14:50:17.1\"")]
+        [InlineData("2019-04-24T14:50:17.0001000", "\"2019-04-24T14:50:17.0001\"")]
+        [InlineData("2019-04-24T14:50:17.0001500", "\"2019-04-24T14:50:17.00015\"")]
+        [InlineData("2019-04-24T14:50:17.0996100", "\"2019-04-24T14:50:17.09961\"")]
+        [InlineData("2019-04-24T14:50:17.0996141", "\"2019-04-24T14:50:17.0996141\"")]
+        [InlineData("2019-04-24T14:50:17.0000000Z", "\"2019-04-24T14:50:17Z\"")]
+        [InlineData("2019-04-24T14:50:17.1000000Z", "\"2019-04-24T14:50:17.1Z\"")]
+        [InlineData("2019-04-24T14:50:17.0001000Z", "\"2019-04-24T14:50:17.0001Z\"")]
+        [InlineData("2019-04-24T14:50:17.0001500Z", "\"2019-04-24T14:50:17.00015Z\"")]
+        [InlineData("2019-04-24T14:50:17.0996100Z", "\"2019-04-24T14:50:17.09961Z\"")]
+        [InlineData("2019-04-24T14:50:17.0996141Z", "\"2019-04-24T14:50:17.0996141Z\"")]
+        public void WriteDateTime_TrimsFractionCorrectly(string testStr, string expectedStr)
+        {
+            var options = new JsonWriterOptions { Indented = false, SkipValidation = false };
+            var output = new ArrayBufferWriter<byte>(1024);
+            var jsonUtf8 = new Utf8JsonWriter(output, options);
+
+            jsonUtf8.WriteStringValue(DateTime.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+            jsonUtf8.Flush();
+
+            AssertContents(expectedStr, output);
+        }
+
+        [Theory]
+        [InlineData("2019-04-24T14:50:17.0000000+01:00", "\"2019-04-24T14:50:17+01:00\"")]
+        [InlineData("2019-04-24T14:50:17.1000000+01:00", "\"2019-04-24T14:50:17.1+01:00\"")]
+        [InlineData("2019-04-24T14:50:17.0001000+01:00", "\"2019-04-24T14:50:17.0001+01:00\"")]
+        [InlineData("2019-04-24T14:50:17.0001500+01:00", "\"2019-04-24T14:50:17.00015+01:00\"")]
+        [InlineData("2019-04-24T14:50:17.0996100+01:00", "\"2019-04-24T14:50:17.09961+01:00\"")]
+        [InlineData("2019-04-24T14:50:17.0996141+01:00", "\"2019-04-24T14:50:17.0996141+01:00\"")]
+        public void WriteDateTimeOffset_TrimsFractionCorrectly(string testStr, string expectedStr)
+        {
+            var options = new JsonWriterOptions { Indented = false, SkipValidation = false };
+            var output = new ArrayBufferWriter<byte>(1024);
+            var jsonUtf8 = new Utf8JsonWriter(output, options);
+
+            jsonUtf8.WriteStringValue(DateTimeOffset.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
+            jsonUtf8.Flush();
+
+            AssertContents(expectedStr, output);
+        }
+
         private static void WriteTooLargeHelper(JsonWriterOptions options, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, bool noThrow = false)
         {
             // Resizing is too slow, even for outerloop tests, so initialize to a large output size up front.
