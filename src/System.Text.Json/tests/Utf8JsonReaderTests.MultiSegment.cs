@@ -292,6 +292,8 @@ namespace System.Text.Json.Tests
                 byte[] resultSequence = JsonTestHelper.ReaderLoop(dataUtf8.Length, out int length, ref utf8JsonReader);
                 string actualStrSequence = Encoding.UTF8.GetString(resultSequence, 0, length);
 
+                Assert.Equal(0, utf8JsonReader.TokenStartIndex);
+
                 long consumed = utf8JsonReader.BytesConsumed;
                 Assert.Equal(consumed, utf8JsonReader.CurrentState.BytesConsumed);
                 utf8JsonReader = new Utf8JsonReader(sequence.Slice(consumed), isFinalBlock: true, utf8JsonReader.CurrentState);
@@ -301,6 +303,8 @@ namespace System.Text.Json.Tests
                 Assert.Equal(utf8JsonReader.BytesConsumed, utf8JsonReader.CurrentState.BytesConsumed);
                 Assert.True(dataUtf8.Length - consumed == utf8JsonReader.BytesConsumed, message);
                 Assert.Equal(expectedString, actualStrSequence);
+
+                Assert.Equal(0, utf8JsonReader.TokenStartIndex);
             }
         }
 
@@ -480,6 +484,7 @@ namespace System.Text.Json.Tests
                     {
                         Assert.True(json.ValueSequence.IsEmpty);
                     }
+                    Assert.Equal(2, json.TokenStartIndex);
                 }
 
                 Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);

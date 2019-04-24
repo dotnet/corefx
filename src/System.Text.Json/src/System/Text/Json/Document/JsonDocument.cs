@@ -903,15 +903,14 @@ namespace System.Text.Json
             int numberOfRowsForMembers = 0;
             int numberOfRowsForValues = 0;
 
-            ref byte jsonStart = ref MemoryMarshal.GetReference(utf8JsonSpan);
-
             while (reader.Read())
             {
                 JsonTokenType tokenType = reader.TokenType;
 
-                int tokenStart = Unsafe.ByteOffset(
-                    ref jsonStart,
-                    ref MemoryMarshal.GetReference(reader.ValueSpan)).ToInt32();
+                // Since the input payload is contained within a Span, 
+                // token start index can never be larger than int.MaxValue (i.e. utf8JsonSpan.Length).
+                Debug.Assert(reader.TokenStartIndex <= int.MaxValue);
+                int tokenStart = (int)reader.TokenStartIndex;
 
                 if (tokenType == JsonTokenType.StartObject)
                 {
@@ -988,22 +987,29 @@ namespace System.Text.Json
                     arrayItemsCount = row.SizeOrLength;
                     numberOfRowsForValues += row.NumberOfRows;
                 }
-                else if (tokenType == JsonTokenType.PropertyName)
+                else if (IsStringLike(tokenType)) // Equivalent to (tokenType == JsonTokenType.PropertyName || tokenType == JsonTokenType.String)
                 {
                     numberOfRowsForValues++;
                     numberOfRowsForMembers++;
-                    database.Append(tokenType, tokenStart, reader.ValueSpan.Length);
+                    Debug.Assert(reader.TokenStartIndex < int.MaxValue); // Adding 1 to skip the start quote will never overflow
+                    database.Append(tokenType, tokenStart + 1, reader.ValueSpan.Length);
+
+                    Debug.Assert((tokenType == JsonTokenType.PropertyName && !inArray) || tokenType == JsonTokenType.String);
+
+                    if (inArray)
+                    {
+                        Debug.Assert(tokenType == JsonTokenType.String);
+                        arrayItemsCount++;
+                    }
 
                     if (reader._stringHasEscaping)
                     {
                         database.SetHasComplexChildren(database.Length - DbRow.Size);
                     }
-
-                    Debug.Assert(!inArray);
                 }
                 else
                 {
-                    Debug.Assert(tokenType >= JsonTokenType.String && tokenType <= JsonTokenType.Null);
+                    Debug.Assert(tokenType >= JsonTokenType.Number && tokenType <= JsonTokenType.Null);
                     numberOfRowsForValues++;
                     numberOfRowsForMembers++;
                     database.Append(tokenType, tokenStart, reader.ValueSpan.Length);
@@ -1027,13 +1033,6 @@ namespace System.Text.Json
                                 break;
                         }
                     }
-                    else if (tokenType == JsonTokenType.String)
-                    {
-                        if (reader._stringHasEscaping)
-                        {
-                            database.SetHasComplexChildren(database.Length - DbRow.Size);
-                        }
-                    }
                 }
 
                 inArray = reader.IsInArray;
@@ -1042,6 +1041,9 @@ namespace System.Text.Json
             Debug.Assert(reader.BytesConsumed == utf8JsonSpan.Length);
             database.TrimExcess();
         }
+
+        private static bool IsStringLike(JsonTokenType tokenType) =>
+            (tokenType - JsonTokenType.PropertyName) <= (JsonTokenType.String - JsonTokenType.PropertyName);
 
         private void CheckNotDisposed()
         {

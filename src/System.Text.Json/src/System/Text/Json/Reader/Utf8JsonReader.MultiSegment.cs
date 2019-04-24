@@ -47,6 +47,7 @@ namespace System.Text.Json
             _bitStack = state._bitStack;
 
             _consumed = 0;
+            TokenStartIndex = 0;
             _totalConsumed = 0;
 
             ValueSpan = ReadOnlySpan<byte>.Empty;
@@ -116,6 +117,8 @@ namespace System.Text.Json
                 }
                 first = _buffer[_consumed];
             }
+
+            TokenStartIndex = BytesConsumed;
 
             if (_tokenType == JsonTokenType.None)
             {
@@ -461,6 +464,8 @@ namespace System.Text.Json
                                         }
                                         marker = _buffer[_consumed];
                                     }
+
+                                    TokenStartIndex = BytesConsumed;
 
                                     // Skip comments and consume the actual JSON value.
                                     continue;
@@ -1626,6 +1631,8 @@ namespace System.Text.Json
                     first = _buffer[_consumed];
                 }
 
+                TokenStartIndex = BytesConsumed;
+
                 if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && first == JsonConstants.Slash)
                 {
                     _trailingCommaBeforeComment = true;
@@ -1719,6 +1726,8 @@ namespace System.Text.Json
 
             Debug.Assert(first != JsonConstants.Slash);
 
+            TokenStartIndex = BytesConsumed;
+
             if (first == JsonConstants.ListSeparator)
             {
                 // A comma without some JSON value preceding it is invalid
@@ -1762,6 +1771,8 @@ namespace System.Text.Json
                     }
                     first = _buffer[_consumed];
                 }
+
+                TokenStartIndex = BytesConsumed;
 
                 if (first == JsonConstants.Slash)
                 {
@@ -1986,6 +1997,8 @@ namespace System.Text.Json
                 goto IncompleteNoRollback;
             }
 
+            TokenStartIndex = BytesConsumed;
+
             if (_tokenType == JsonTokenType.StartObject)
             {
                 if (marker == JsonConstants.CloseBrace)
@@ -2087,6 +2100,8 @@ namespace System.Text.Json
                 {
                     goto IncompleteRollback;
                 }
+
+                TokenStartIndex = BytesConsumed;
 
                 if (_inObject)
                 {

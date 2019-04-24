@@ -20,6 +20,7 @@ namespace System.Text.Json.Tests
             Utf8JsonReader json = default;
 
             Assert.Equal(0, json.BytesConsumed);
+            Assert.Equal(0, json.TokenStartIndex);
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(JsonTokenType.None, json.TokenType);
             Assert.Equal(default, json.Position);
@@ -286,6 +287,7 @@ namespace System.Text.Json.Tests
                 long consumed = json.BytesConsumed;
                 Assert.Equal(consumed, json.CurrentState.BytesConsumed);
                 Assert.Equal(default, json.Position);
+                Assert.Equal(0, json.TokenStartIndex);
 
                 for (long j = consumed; j < dataUtf8.Length - consumed; j++)
                 {
@@ -313,6 +315,7 @@ namespace System.Text.Json.Tests
                     Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
                     Assert.Equal(default, json.Position);
                     Assert.Equal(default, json.CurrentState.Position);
+                    Assert.Equal(0, json.TokenStartIndex);
 
                     Assert.Equal(outputSpan.Length, written);
                     string actualStr = Encoding.UTF8.GetString(outputArray);
@@ -847,6 +850,7 @@ namespace System.Text.Json.Tests
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
+                        Assert.Equal(2, json.TokenStartIndex);
                     }
 
                     long consumed = json.BytesConsumed;
@@ -858,6 +862,10 @@ namespace System.Text.Json.Tests
                         // Check if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
                         Assert.True(json.TokenType >= JsonTokenType.String && json.TokenType <= JsonTokenType.Null);
                         Assert.Equal(expectedString, Encoding.UTF8.GetString(json.ValueSpan.ToArray()));
+                        if (consumed <= 2)
+                        {
+                            Assert.Equal(2 - consumed, json.TokenStartIndex);
+                        }
                     }
                     Assert.Equal(dataUtf8.Length - consumed, json.BytesConsumed);
                     Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
@@ -1856,6 +1864,7 @@ namespace System.Text.Json.Tests
             {
                 Assert.True(json.Read());
                 Assert.True(json.TokenType == JsonTokenType.StartArray);
+                Assert.Equal(0, json.TokenStartIndex);
             }
 
             if (json.Read())
@@ -1891,12 +1900,14 @@ namespace System.Text.Json.Tests
                         Assert.Equal(expectedString, boolValue.ToString(CultureInfo.InvariantCulture));
                         break;
                 }
+                Assert.Equal(insideArray ? 1688894 : 1688894 - 1, json.TokenStartIndex);
             }
 
             if (insideArray)
             {
                 Assert.True(json.Read());
                 Assert.True(json.TokenType == JsonTokenType.EndArray);
+                Assert.Equal(dataUtf8.Length - 1, json.TokenStartIndex);
             }
 
             Assert.False(json.Read());
@@ -1973,9 +1984,19 @@ namespace System.Text.Json.Tests
                         foundPrimitiveValue = true;
                         break;
                 }
+                if (isTokenPrimitive)
+                {
+                    Assert.Equal(insideArray ? 1688894 : 1688894 - 1, json.TokenStartIndex);
+                }
             }
             Assert.True(foundPrimitiveValue);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+
+            if (insideArray)
+            {
+                Assert.True(json.TokenType == JsonTokenType.EndArray);
+                Assert.Equal(dataUtf8.Length - 1, json.TokenStartIndex);
+            }
         }
 
         private static void VerifyReadLoop(ref Utf8JsonReader json, string expected)
