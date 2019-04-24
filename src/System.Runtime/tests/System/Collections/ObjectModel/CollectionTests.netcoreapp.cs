@@ -3,9 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Xunit;
 
 namespace System.Collections.ObjectModel.Tests
@@ -420,34 +418,6 @@ namespace System.Collections.ObjectModel.Tests
             collection.Add(2);
 
             AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collection.ReplaceRange(4, 2, new int[] { 1, 2 }));
-        }
-
-        private class TestCollection<T> : Collection<T>
-        {
-            public TestCollection()
-            {
-            }
-
-            public TestCollection(IList<T> items) : base(items)
-            {
-            }
-
-            public IList<T> GetItems() => Items;
-        }
-
-        private class ModifiableCollection<T> : Collection<T>
-        {
-            public ModifiableCollection()
-            {
-            }
-
-            public ModifiableCollection(IList<T> items)
-            {
-                foreach (var item in items)
-                {
-                    Items.Add(item);
-                }
-            }
         }
     }
 }

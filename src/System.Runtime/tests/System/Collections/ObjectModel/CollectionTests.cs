@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using Xunit;
 
 namespace System.Collections.ObjectModel.Tests
@@ -317,6 +314,34 @@ namespace System.Collections.ObjectModel.Tests
             Assert.Throws<NotSupportedException>(() => collection.Insert(0, 0));
             Assert.Throws<NotSupportedException>(() => collection.Remove(0));
             Assert.Throws<NotSupportedException>(() => collection.RemoveAt(0));
+        }
+
+        private class TestCollection<T> : Collection<T>
+        {
+            public TestCollection()
+            {
+            }
+
+            public TestCollection(IList<T> items) : base(items)
+            {
+            }
+
+            public IList<T> GetItems() => Items;
+        }
+
+        private class ModifiableCollection<T> : Collection<T>
+        {
+            public ModifiableCollection()
+            {
+            }
+
+            public ModifiableCollection(IList<T> items)
+            {
+                foreach (var item in items)
+                {
+                    Items.Add(item);
+                }
+            }
         }
     }
 }
