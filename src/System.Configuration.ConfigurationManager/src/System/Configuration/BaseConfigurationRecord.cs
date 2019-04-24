@@ -3224,7 +3224,7 @@ namespace System.Configuration
             if (configSource.IndexOf('\\') != -1 || configSource.IndexOf('/') != -1) // string.Contains(char) is .NetCore2.1+ specific
             {
                 string newConfigSource = configSource.Replace('\\', '/');
-                if (ConfigPathUtility.IsValid(newConfigSource))
+                if (!ConfigPathUtility.IsValid(newConfigSource))
                     throw new ConfigurationErrorsException(SR.Config_source_invalid_format, errorInfo);
             }
 

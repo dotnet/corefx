@@ -142,22 +142,22 @@ namespace System.ConfigurationTests
 
         public static IEnumerable<object[]> ConfigPaths = new List<object[]>()
         {
-            new object[] { @"../Config/foo.config", typeof(ArgumentException) },
-            new object[] { @"..\Config\foo.config", typeof(ArgumentException) },
-            new object[] { @"\Config\foo.config", typeof(ConfigurationErrorsException) },
-            new object[] { @"/Config/foo.config", typeof(ConfigurationErrorsException) },
-            new object[] { @"\..\Config\foo.config", typeof(ConfigurationErrorsException) },
-            new object[] { @"/../Config/foo.config", typeof(ConfigurationErrorsException) },
+            new object[] { @"../Config/foo.config" },
+            new object[] { @"..\Config\foo.config" },
+            new object[] { @"\Config\foo.config" },
+            new object[] { @"/Config/foo.config" },
+            new object[] { @"\..\Config\foo.config" },
+            new object[] { @"/../Config/foo.config" },
         };
 
         [Theory]
         [MemberData(nameof(ConfigPaths))]
-        public void AppSettingsInvalidConfigSourcePath_Throws(string configPath, Type exception)
+        public void AppSettingsInvalidConfigSourcePath_Throws(string configPath)
         {
             using (var tempConfig = new TempConfig(TestData.EmptyConfig))
             {
                 var config = ConfigurationManager.OpenExeConfiguration(tempConfig.ExePath);
-                Assert.Throws(exception, () => config.AppSettings.SectionInformation.ConfigSource = configPath);
+                Assert.ThrowsAny<Exception>(() => config.AppSettings.SectionInformation.ConfigSource = configPath);
             }
         }
     }
