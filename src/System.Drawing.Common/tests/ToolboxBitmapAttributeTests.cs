@@ -69,7 +69,6 @@ namespace System.Drawing.Tests
         [InlineData(typeof(ClassWithNoNamespace), -1, -1)]
         [InlineData(typeof(bitmap_173x183_indexed_8bit), 173, 183)]
         [InlineData(typeof(ToolboxBitmapAttributeTests), -1, -1)]
-        [InlineData(typeof(Icon_toolboxBitmapAttributeTest), 256, 256)]
         public void Ctor_Type(Type type, int width, int height)
         {
             var attribute = new ToolboxBitmapAttribute(type);
@@ -172,6 +171,26 @@ namespace System.Drawing.Tests
             using (Image image = attribute.GetImage(typeof(ToolboxBitmapAttributeTests), "bitmap_173x183_indexed_8bit", large: false))
             {
                 Assert.Equal(new Size(173, 183), image.Size);
+            }
+        }
+
+        [ActiveIssue(20884, TestPlatforms.AnyUnix)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Logical name with no extension is not supported in desktop framework")]
+        [InlineData(typeof(Icon_toolboxBitmapAttributeTest), 256, 256)]
+        public void GetImage_NoExtension(Type type, int width, int height)
+        {
+            var attribute = new ToolboxBitmapAttribute(type);
+            using (Image image = attribute.GetImage(type))
+            {
+                if (width == -1 && height == -1)
+                {
+                    AssertDefaultSize(image);
+                }
+                else
+                {
+                    Assert.Equal(new Size(width, height), image.Size);
+                }
             }
         }
 
