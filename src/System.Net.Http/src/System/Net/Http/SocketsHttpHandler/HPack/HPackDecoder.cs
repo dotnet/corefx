@@ -260,7 +260,16 @@ namespace System.Net.Http.HPack
 
                         if (_integerDecoder.StartDecode((byte)(b & ~HuffmanMask), StringLengthPrefix))
                         {
-                            OnStringLength(_integerDecoder.Value, nextState: State.HeaderValue);
+                            if (_integerDecoder.Value > 0)
+                            {
+                                OnStringLength(_integerDecoder.Value, nextState: State.HeaderValue);
+                            }
+                            else
+                            {
+                                OnString(nextState: State.Ready);
+                                var headerNameSpan = new ReadOnlySpan<byte>(_headerName, 0, _headerNameLength);
+                                onHeader(onHeaderState, headerNameSpan, new ReadOnlySpan<byte>());
+                            }
                         }
                         else
                         {
