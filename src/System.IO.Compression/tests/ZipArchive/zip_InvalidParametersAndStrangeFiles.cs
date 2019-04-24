@@ -305,7 +305,12 @@ namespace System.IO.Compression.Tests
                 using (var zip = new ZipArchive(testStream, ZipArchiveMode.Update))
                 {
                     ZipArchiveEntry entry = zip.GetEntry(tmpfilename);
-                    Assert.Equal(0, entry.Open().Length);
+                    Assert.Equal(0, entry.Length);
+                    Assert.Equal(0, entry.CompressedLength);
+                    using (Stream entryStream = entry.Open())
+                    {
+                        Assert.Equal(0, entryStream.Length);
+                    }
                 }
             }
         }
