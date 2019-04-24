@@ -51,13 +51,6 @@ namespace System.Resources
 
         private void WriteData(BinaryWriter writer, object dataContext)
         {
-            // this method should only ever be called by Generate, but guard against derived classes calling with bad data.
-            
-            if (writer == null)
-                throw new ArgumentNullException(nameof(writer));
-            if (dataContext == null)
-                throw new ArgumentNullException(nameof(dataContext));
-
             byte[] data = dataContext as byte[];
 
             if (data == null)

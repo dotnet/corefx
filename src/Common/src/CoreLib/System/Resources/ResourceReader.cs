@@ -189,7 +189,6 @@ namespace System.Resources
             }
         }
 
-
         internal static unsafe int ReadUnalignedI4(int* p)
         {
             byte* buffer = (byte*)p;
@@ -809,7 +808,6 @@ namespace System.Resources
                 // Read in type name for a suitable ResourceReader
                 // Note ResourceWriter & InternalResGen use different Strings.
                 string readerType = _store.ReadString();
-                string thisType = GetType().AssemblyQualifiedName;
 
                 if (!ValidateReaderType(readerType))
                     throw new NotSupportedException(SR.Format(SR.NotSupported_WrongResourceReader_Type, readerType));
@@ -821,8 +819,8 @@ namespace System.Resources
             // Read RuntimeResourceSet header
             // Do file version check
             int version = _store.ReadInt32();
-            if (version != Version && version != 1)
-                throw new ArgumentException(SR.Format(SR.Arg_ResourceFileUnsupportedVersion, Version, version));
+            if (version != RuntimeResourceSet.Version && version != 1)
+                throw new ArgumentException(SR.Format(SR.Arg_ResourceFileUnsupportedVersion, RuntimeResourceSet.Version, version));
             _version = version;
 
             _numResources = _store.ReadInt32();

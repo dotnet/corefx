@@ -7,8 +7,6 @@ namespace System.Resources
 
     partial class ResourceReader
     {
-        private const int Version = 2; // File format version number
-
         private readonly bool _permitDeserialization;  // can deserialize BinaryFormatted resources
         private object? _binaryFormatter; // binary formatter instance to use for deserializing
 
@@ -23,7 +21,6 @@ namespace System.Resources
         // internal hash table (hash table of names with file offsets
         // and values, coupled to this ResourceReader).
         internal ResourceReader(Stream stream, Dictionary<string, ResourceLocator> resCache, bool permitDeserialization)
-
         {
             Debug.Assert(stream != null, "Need a stream!");
             Debug.Assert(stream.CanRead, "Stream should be readable!");

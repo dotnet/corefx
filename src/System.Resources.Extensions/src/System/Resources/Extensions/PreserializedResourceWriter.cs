@@ -48,7 +48,6 @@ namespace System.Resources.Extensions
 
         public void AddBinaryFormattedResource(string name, string typeName, byte[] value)
         {
-
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
             if (typeName == null)
@@ -92,11 +91,6 @@ namespace System.Resources.Extensions
 
         private void WriteData(BinaryWriter writer, object dataContext)
         {
-            if (writer == null)
-                throw new ArgumentNullException(nameof(writer));
-            if (dataContext == null)
-                throw new ArgumentNullException(nameof(dataContext));
-
             ResourceDataRecord record = dataContext as ResourceDataRecord;
 
             if (record == null)

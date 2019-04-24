@@ -11,20 +11,22 @@ namespace System.Resources.Extensions
 {
     public partial class DeserializingResourceReader
     {
-        private const int Version = 2; // File format version number
-
         private bool _assumeBinaryFormatter = false;
         private BinaryFormatter _formatter = null;
 
         private bool ValidateReaderType(string readerType)
         {
+            // our format?
             if (CompareNames(readerType, typeof(DeserializingResourceReader).AssemblyQualifiedName))
             {
                 return true;
             }
 
+            // default format?
             if (CompareNames(readerType, typeof(ResourceReader).AssemblyQualifiedName))
             {
+                // we can read the default format, we just assume BinaryFormatter and don't
+                // read the SerializationFormat
                 _assumeBinaryFormatter = true;
                 return true;
             }
