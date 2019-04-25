@@ -963,6 +963,7 @@ NextOctCharacter:
             Dim dwOutFlags As Int32
             Dim nBaseShift As Int32
 
+#If PLATFORM_WINDOWS Then
             Const INTEGER_SIZE As Integer = 4
             Const INFLAGS_OFFSET As Integer = 4
 
@@ -1070,6 +1071,9 @@ NextOctCharacter:
 
             UnsafeNativeMethods.VariantChangeType(Value, Value, 0, CType(vtInput, Int16))
             Return Value
+#Else
+            Throw New PlatformNotSupportedException()
+#End If
         End Function
 
         Private Function ShiftVTBits(ByVal vt As Integer) As Integer

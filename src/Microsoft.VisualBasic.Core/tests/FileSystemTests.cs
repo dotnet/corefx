@@ -373,9 +373,9 @@ namespace Microsoft.VisualBasic.Tests
             FileSystem.FileOpen(fileNumber, fileName, OpenMode.Output);
             FileSystem.Write(fileNumber, true);
             FileSystem.Write(fileNumber, (byte)1, (char)2, (decimal)3, 4.0, 5.0f);
-            FileSystem.Write(fileNumber, 6, 7L, (object)8);
+            FileSystem.Write(fileNumber, 6, 7L);
             Assert.Throws<ArgumentException>(() => FileSystem.Write(fileNumber, new object()));
-            FileSystem.Write(fileNumber, (short)9, "ABC", dateTime);
+            FileSystem.Write(fileNumber, (short)8, "ABC", dateTime);
             FileSystem.FileClose(fileNumber);
 
             bool _bool = default;
@@ -386,7 +386,6 @@ namespace Microsoft.VisualBasic.Tests
             float _float = default;
             int _int = default;
             long _long = default;
-            object _object = default;
             short _short = default;
             string _string = default;
             DateTime _dateTime = default;
@@ -399,7 +398,6 @@ namespace Microsoft.VisualBasic.Tests
             FileSystem.Input(fileNumber, ref _float);
             FileSystem.Input(fileNumber, ref _int);
             FileSystem.Input(fileNumber, ref _long);
-            FileSystem.Input(fileNumber, ref _object);
             FileSystem.Input(fileNumber, ref _short);
             FileSystem.Input(fileNumber, ref _string);
             FileSystem.Input(fileNumber, ref _dateTime);
@@ -414,8 +412,7 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal(5.0f, _float);
             Assert.Equal(6, _int);
             Assert.Equal(7L, _long);
-            Assert.Equal(8, (short)_object);
-            Assert.Equal((short)9, _short);
+            Assert.Equal((short)8, _short);
             Assert.Equal("ABC", _string);
             Assert.Equal(dateTime, _dateTime);
         }
