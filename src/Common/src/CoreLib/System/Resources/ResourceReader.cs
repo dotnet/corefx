@@ -115,11 +115,10 @@ namespace System.Resources
 
         public
 #if RESOURCES_EXTENSIONS
-        DeserializingResourceReader
+        DeserializingResourceReader(string fileName)
 #else
-        ResourceReader
+        ResourceReader(string fileName)
 #endif
-            (string fileName)
         {
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
             _store = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.RandomAccess), Encoding.UTF8);
@@ -137,11 +136,10 @@ namespace System.Resources
 
         public
 #if RESOURCES_EXTENSIONS
-        DeserializingResourceReader
+        DeserializingResourceReader(Stream stream)
 #else
-        ResourceReader
+        ResourceReader(Stream stream)
 #endif
-            (Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));

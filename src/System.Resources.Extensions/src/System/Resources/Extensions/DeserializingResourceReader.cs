@@ -54,7 +54,7 @@ namespace System.Resources.Extensions
             }
 
             // read type
-            SerializationFormat format = (SerializationFormat)_store.ReadByte();
+            SerializationFormat format = (SerializationFormat)_store.Read7BitEncodedInt();
 
             object value;
 
@@ -152,6 +152,8 @@ namespace System.Resources.Extensions
                     throw new BadImageFormatException(SR.BadImageFormat_TypeMismatch);
             }
 
+            // Make sure we deserialized the type that we expected.  
+            // This protects against bad typeconverters or bad binaryformatter payloads.
             if (value.GetType() != type)
                 throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResType_SerBlobMismatch, type.FullName, value.GetType().FullName));
 
@@ -185,7 +187,7 @@ namespace System.Resources.Extensions
 
             // case insensitive
             AssemblyName an1 = new AssemblyName(typeName1.Substring(comma1));
-            AssemblyName an2 = new AssemblyName(typeName1.Substring(comma2));
+            AssemblyName an2 = new AssemblyName(typeName2.Substring(comma2));
             if (!string.Equals(an1.Name, an2.Name, StringComparison.OrdinalIgnoreCase))
                 return false;
 

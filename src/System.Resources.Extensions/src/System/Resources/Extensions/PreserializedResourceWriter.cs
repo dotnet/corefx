@@ -130,7 +130,7 @@ namespace System.Resources.Extensions
             // Only write the format if we resources are in DeserializingResourceReader format
             if (_requiresDeserializingResourceReader)
             {
-                writer.Write((byte)record.Format);
+                Write7BitEncodedInt(writer, (int)record.Format);
             }
 
             try

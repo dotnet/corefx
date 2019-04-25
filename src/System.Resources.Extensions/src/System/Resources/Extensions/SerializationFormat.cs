@@ -6,11 +6,11 @@ namespace System.Resources.Extensions
 {
     // Internal Enum that's shared between reader and writer to indicate the 
     // deserialization method for a resource.
-    internal enum SerializationFormat : byte
+    internal enum SerializationFormat
     {
-        BinaryFormatter = 0x1,
-        TypeConverterByteArray = 0x2,
-        TypeConverterString = 0x3,
-        ActivatorStream = 0x4
+        BinaryFormatter = 1,
+        TypeConverterByteArray = 2,
+        TypeConverterString = 3,
+        ActivatorStream = 4
     }
 }

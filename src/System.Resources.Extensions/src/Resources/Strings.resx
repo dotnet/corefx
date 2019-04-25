@@ -69,9 +69,6 @@
   <data name="Arg_ResourceFileUnsupportedVersion" xml:space="preserve">
     <value>The ResourceReader class does not know how to read this version of .resources files. Expected version: {0}  This file: {1}</value>
   </data>
-  <data name="Arg_ResourceNameNotExist" xml:space="preserve">
-    <value>The specified resource name "{0}" does not exist in the resource file.</value>
-  </data>
   <data name="BadImageFormat_InvalidType" xml:space="preserve">
     <value>Corrupt .resources file.  The specified type doesn't exist.</value>
   </data>
