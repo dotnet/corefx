@@ -60,6 +60,12 @@
         "net45": "4.0.0.0"
       }
     },
+    "Microsoft.Compatibility.AsyncInterfaces": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
+      }
+    },
     "Microsoft.CSharp": {
       "StableVersions": [
         "4.0.1",
@@ -427,6 +433,7 @@
         "netcoreapp3.0": "2.1.0.0",
         "net461": "2.0.0.0",
         "netstandard2.0": "2.0.0.0",
+        "netstandard2.1": "2.1.0.0",
         "uap10.0.16299": "2.0.0.0",
         "uap10.0.16300": "2.1.0.0"
       }
@@ -1232,8 +1239,8 @@
       ],
       "BaselineVersion": "4.5.0",
       "InboxOn": {
-        "net45": "4.0.0.0",
         "netcoreapp3.0": "4.0.0.0",
+        "net45": "4.0.0.0",
         "uap10.0.16300": "4.0.0.0"
       },
       "AssemblyVersionInPackageVersion": {
@@ -3723,8 +3730,8 @@
       ],
       "BaselineVersion": "4.5.1",
       "InboxOn": {
-        "uap10.0.16300": "4.0.5.0",
-        "netcoreapp3.0": "4.0.5.0"
+        "netcoreapp3.0": "4.0.5.0",
+        "uap10.0.16300": "4.0.5.0"
       },
       "AssemblyVersionInPackageVersion": {
         "4.0.3.0": "4.4.0",
