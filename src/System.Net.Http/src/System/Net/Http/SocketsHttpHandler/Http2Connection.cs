@@ -30,6 +30,7 @@ namespace System.Net.Http
 
         private readonly Dictionary<int, Http2Stream> _httpStreams;
         private readonly SemaphoreSlim _writerLock;
+
         private readonly SemaphoreSlim _headerSerializationLock;
 
         private readonly CreditManager _connectionWindow;
