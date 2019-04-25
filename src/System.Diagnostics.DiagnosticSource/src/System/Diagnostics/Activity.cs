@@ -745,19 +745,6 @@ namespace System.Diagnostics
             string overflowSuffix = ((int)GetRandomNumber()).ToString("x8");
             return parentId.Substring(0, trimPosition) + overflowSuffix + '#';
         }
-
-        private static string GenerateRootId()
-        {
-            // It is important that the part that changes frequently be first, because
-            // some sampling functions don't sample from the high entropy part of their hash function.
-            // This makes sampling based on this produce poor samples.
-            Span<char> result = stackalloc char[1 + 16 + s_uniqSuffix.Length]; // max length needed
-            result[0] = '|';
-            bool formatted = Interlocked.Increment(ref s_currentRootId).TryFormat(result.Slice(1), out int charsWritten, "x");
-            Debug.Assert(formatted);
-            s_uniqSuffix.AsSpan().CopyTo(result.Slice(1 + charsWritten));
-            return new string(result.Slice(0, 1 + charsWritten + s_uniqSuffix.Length));
-        }
 #if ALLOW_PARTIALLY_TRUSTED_CALLERS
         [System.Security.SecuritySafeCriticalAttribute]
 #endif
