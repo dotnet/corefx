@@ -37,33 +37,34 @@ namespace System.Net.NetworkInformation
             return collection;
         }
 
-        internal static List<GatewayIPAddressInformation> ParseIPv6GatewayAddressesFromRouteFile(List<GatewayIPAddressInformation> collection, string filePath, string interfaceName, long scopeId)
+        internal static void ParseIPv6GatewayAddressesFromRouteFile(List<GatewayIPAddressInformation> collection, string filePath, string interfaceName, long scopeId)
         {
             // Columns are as follows (first-line header):
             // 00000000000000000000000000000000 00 00000000000000000000000000000000 00 00000000000000000000000000000000 ffffffff 00000001 00000001 00200200 lo
             // +------------------------------+ ++ +------------------------------+ ++ +------------------------------+ +------+ +------+ +------+ +------+ ++
             // |                                |  |                                |  |                                |        |        |        |        |
-            // 1                                2  3                                4  5                                6        7        8        9        10
-            // 1. IPv6 destination network displayed in 32 hexadecimal chars without colons as separator
-            // 2. IPv6 destination prefix length in hexadecimal
-            // 3. IPv6 source network displayed in 32 hexadecimal chars without colons as separator
-            // 4. IPv6 source prefix length in hexadecimal
-            // 5. IPv6 next hop displayed in 32 hexadecimal chars without colons as separator
-            // 6. Metric in hexadecimal
-            // 7. Reference counter
-            // 8. Use counter
-            // 9. Flags
-            // 10. Device name
+            // 0                                1  2                                3  4                                5        6        7        8        9
+            //
+            // 0. IPv6 destination network displayed in 32 hexadecimal chars without colons as separator
+            // 1. IPv6 destination prefix length in hexadecimal
+            // 2. IPv6 source network displayed in 32 hexadecimal chars without colons as separator
+            // 3. IPv6 source prefix length in hexadecimal
+            // 4. IPv6 next hop displayed in 32 hexadecimal chars without colons as separator
+            // 5. Metric in hexadecimal
+            // 6. Reference counter
+            // 7. Use counter
+            // 8. Flags
+            // 9. Interface name
             string[] fileLines = File.ReadAllLines(filePath);
             foreach (string line in fileLines)
             {
                 if (line.StartsWith("00000000000000000000000000000000"))
                 {
-                   String[] token = line.Split();
+                   String[] token = line.Split(null);
                    if (token.Length > 4 && token[4] != "00000000000000000000000000000000")
                    {
 
-                        IPAddress address = ParseIPv6HexString(token[4], isSequence: true);
+                        IPAddress address = ParseIPv6HexString(token[4], isNetworkOrder: true);
                         if (address.IsIPv6LinkLocal)
                         {
                             // For Link-Local addresses add ScopeId as that is not part of the route entry.
@@ -73,8 +74,6 @@ namespace System.Net.NetworkInformation
                     }
                 }
             }
-
-            return collection;
         }
 
         internal static List<IPAddress> ParseDhcpServerAddressesFromLeasesFile(string filePath, string name)

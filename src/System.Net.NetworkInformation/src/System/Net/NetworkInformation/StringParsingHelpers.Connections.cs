@@ -294,11 +294,11 @@ namespace System.Net.NetworkInformation
         //      It's represenation in /proc/net/tcp6: 00-00-80-FE  00-00-00-00  FF-5D-15-02  02-04-00-FE
         //                                             (dashes and spaces added above for readability)
         // Strings passed to this must be 32 characters in length.
-        private static IPAddress ParseIPv6HexString(string hexAddress, bool isSequence = false)
+        private static IPAddress ParseIPv6HexString(string hexAddress, bool isNetworkOrder = false)
         {
             Debug.Assert(hexAddress.Length == 32);
             byte[] addressBytes = new byte[16];
-            if (isSequence)
+            if (isNetworkOrder)
             {
                 for (int i = 0; i < 16; i++)
                 {

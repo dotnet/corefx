@@ -234,7 +234,9 @@ int32_t SystemNative_EnumerateGatewayAddressesForInterface(uint32_t interfaceInd
                 }
 
                 memcpy_s(iai.AddressBytes, sizeof_member(IpAddressInfo, AddressBytes), &sain6->sin6_addr, sizeof(sain6->sin6_addr));
-            } else {
+            }
+            else
+            {
                 // Ignore other address families.
                 continue;
             }
