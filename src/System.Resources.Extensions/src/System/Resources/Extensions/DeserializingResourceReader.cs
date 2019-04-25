@@ -17,13 +17,13 @@ namespace System.Resources.Extensions
         private bool ValidateReaderType(string readerType)
         {
             // our format?
-            if (CompareNames(readerType, typeof(DeserializingResourceReader).AssemblyQualifiedName))
+            if (CompareNames(readerType, PreserializedResourceWriter.DeserializingResourceReaderFullyQualifiedName))
             {
                 return true;
             }
 
             // default format?
-            if (CompareNames(readerType, typeof(ResourceReader).AssemblyQualifiedName))
+            if (CompareNames(readerType, PreserializedResourceWriter.ResourceReaderFullyQualifiedName))
             {
                 // we can read the default format, we just assume BinaryFormatter and don't
                 // read the SerializationFormat
@@ -160,6 +160,7 @@ namespace System.Resources.Extensions
             return value;
         }
 
+        // Compare two type names ignoring version
         private static bool CompareNames(string typeName1, string typeName2)
         {
             // First, compare type names

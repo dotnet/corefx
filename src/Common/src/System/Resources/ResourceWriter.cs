@@ -46,7 +46,7 @@ namespace System.Resources
         // An initial size for our internal sorted list, to avoid extra resizes.
         private const int AverageNameSize = 20 * 2;  // chars in little endian Unicode
         private const int AverageValueSize = 40;
-        private const string ResourceReaderFullyQualifiedName = "System.Resources.ResourceReader, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
+        internal const string ResourceReaderFullyQualifiedName = "System.Resources.ResourceReader, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089";
         private const string ResSetTypeName = "System.Resources.RuntimeResourceSet";
         private const int ResSetVersion = 2;
 
@@ -57,11 +57,10 @@ namespace System.Resources
 
         public
 #if RESOURCES_EXTENSIONS
-        PreserializedResourceWriter
+        PreserializedResourceWriter(string fileName)
 #else
-        ResourceWriter
+        ResourceWriter(string fileName)
 #endif
-            (string fileName)
         {
             if (fileName == null)
                 throw new ArgumentNullException(nameof(fileName));
@@ -73,11 +72,10 @@ namespace System.Resources
 
         public
 #if RESOURCES_EXTENSIONS
-        PreserializedResourceWriter
+        PreserializedResourceWriter(Stream stream)
 #else
-        ResourceWriter
+        ResourceWriter(Stream stream)
 #endif
-            (Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));

@@ -13,12 +13,16 @@ namespace System.Resources.Extensions
         // in order to read them.
         bool _requiresDeserializingResourceReader = false;
 
-        private string ResourceReaderTypeName => _requiresDeserializingResourceReader ? 
-            typeof(DeserializingResourceReader).AssemblyQualifiedName :
+        // use hard-coded strings rather than typeof so that the version doesn't leak into resources files 
+        internal const string DeserializingResourceReaderFullyQualifiedName = "System.Resources.Extensions.DeserializingResourceReader, System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51";
+        internal const string RuntimeResourceSetFullyQualifiedName = "System.Resources.Extensions.RuntimeResourceSet, System.Resources.Extensions, Version=4.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51";
+
+        private string ResourceReaderTypeName => _requiresDeserializingResourceReader ?
+            DeserializingResourceReaderFullyQualifiedName :
             ResourceReaderFullyQualifiedName;
 
         private string ResourceSetTypeName => _requiresDeserializingResourceReader ?
-            typeof(RuntimeResourceSet).AssemblyQualifiedName :
+            RuntimeResourceSetFullyQualifiedName :
             ResSetTypeName;
 
         /// <summary>

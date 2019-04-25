@@ -141,10 +141,15 @@ namespace System.Resources.Extensions.Tests
 
             return runtimeType.AssemblyQualifiedName;
         }
-        
+
         public static void WriteResources(string file)
         {
-            using (var writer = new PreserializedResourceWriter(file))
+            WriteResourcesStream(File.Create(file));
+        }
+
+        public static void WriteResourcesStream(Stream stream)
+        {
+            using (var writer = new PreserializedResourceWriter(stream))
             {
                 foreach(var pair in Primitive)
                 {
