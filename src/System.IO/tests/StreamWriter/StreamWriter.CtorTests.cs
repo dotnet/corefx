@@ -65,5 +65,13 @@ namespace System.IO.Tests
             str2 = sr2.ReadToEnd();
             Assert.Equal(testString, str2);
         }
+
+        [Fact]
+        public void StreamWriter_WithOptionalArguments_NoExceptions()
+        {
+            Assert.Null(Record.Exception(() => new StreamWriter(new MemoryStream(), leaveOpen: true)));
+            Assert.Null(Record.Exception(() => new StreamWriter(new MemoryStream(), encoding: null)));
+            Assert.Null(Record.Exception(() => new StreamWriter(new MemoryStream(), bufferSize: -1)));
+        }
     }
 }
