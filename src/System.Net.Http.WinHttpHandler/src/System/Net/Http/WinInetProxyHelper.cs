@@ -63,10 +63,9 @@ namespace System.Net.Http
 
         public bool AutoSettingsUsed => AutoDetect || !string.IsNullOrEmpty(AutoConfigUrl);
 
-        public bool ManualSettingsOnly =>
-            !AutoDetect && string.IsNullOrEmpty(AutoConfigUrl) && !string.IsNullOrEmpty(Proxy);
-
         public bool ManualSettingsUsed => !string.IsNullOrEmpty(Proxy);
+
+        public bool ManualSettingsOnly => !AutoSettingsUsed && ManualSettingsUsed;
 
         public string Proxy { get; private set; }
 
