@@ -48,14 +48,5 @@ namespace System.IO.Tests
             Assert.Equal("ABCD", sr2.ReadToEnd());
             sr2.Dispose();
         }
-
-        [Fact]
-        public void StreamReader_WithOptionalArguments_NoExceptions()
-        {
-            Assert.Null(Record.Exception(() => new StreamReader(new MemoryStream(), leaveOpen: true)));
-            Assert.Null(Record.Exception(() => new StreamReader(new MemoryStream(), encoding: null)));
-            Assert.Null(Record.Exception(() => new StreamReader(new MemoryStream(), bufferSize: -1)));
-            Assert.Null(Record.Exception(() => new StreamReader(new MemoryStream(), detectEncodingFromByteOrderMarks: true)));
-        }
     }
 }

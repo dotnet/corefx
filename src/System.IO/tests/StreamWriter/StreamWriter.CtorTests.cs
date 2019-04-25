@@ -32,6 +32,16 @@ namespace System.IO.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void NullEncodingThrows()
+        {
+            // [] Check for ArgumentNullException on null encoding
+            //-----------------------------------------------------------------
+
+            Assert.Throws<ArgumentNullException>(() => new StreamWriter(new MemoryStream(), null));
+        }
+
+        [Fact]
         public static void UTF8Encoding()
         {
             TestEnconding(System.Text.Encoding.UTF8, "This is UTF8\u00FF");
@@ -64,14 +74,6 @@ namespace System.IO.Tests
             sr2 = new StreamReader(ms2, encoding);
             str2 = sr2.ReadToEnd();
             Assert.Equal(testString, str2);
-        }
-
-        [Fact]
-        public void StreamWriter_WithOptionalArguments_NoExceptions()
-        {
-            Assert.Null(Record.Exception(() => new StreamWriter(new MemoryStream(), leaveOpen: true)));
-            Assert.Null(Record.Exception(() => new StreamWriter(new MemoryStream(), encoding: null)));
-            Assert.Null(Record.Exception(() => new StreamWriter(new MemoryStream(), bufferSize: -1)));
         }
     }
 }
