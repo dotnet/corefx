@@ -1347,20 +1347,20 @@ namespace System.Net.Http
                 // Send headers
                 bool hasExpectContinueHeader = request.Content != null && request.HasHeaders && request.Headers.ExpectContinue == true;
 
-                if (!hasExpectContinueHeader )
+                if (!hasExpectContinueHeader)
                 {
                     // Send request body, if any
                     http2Stream = await SendHeadersAsync(request, cancellationToken).ConfigureAwait(false);
                     await http2Stream.SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
                     // Wait for response headers to be read.
-                    await http2Stream.ReadResponseHeadersAsync(true).ConfigureAwait(false);
+                    await http2Stream.ReadResponseHeadersAsync().ConfigureAwait(false);
                 }
                 else
                 {
                     // Send header and wait a little bit to see if server sends 100, reject or nothing.
                     if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing 100-Continue.");
                     http2Stream = await SendHeadersAsync(request, cancellationToken, flush : true).ConfigureAwait(false);
-                    await http2Stream.SendRequestContentWithExpect100ContinueAsync(cancellationToken).ConfigureAwait(false);
+                    await http2Stream.SendRequestBodyWithExpect100ContinueAsync(cancellationToken).ConfigureAwait(false);
                 }
             }
             catch (Exception e)

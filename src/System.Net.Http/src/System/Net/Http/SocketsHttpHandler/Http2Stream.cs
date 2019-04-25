@@ -43,7 +43,6 @@ namespace System.Net.Http
 
             private StreamState _state;
             private bool _disposed;
-            private bool _abortRequestBody;
 
             /// <summary>The core logic for the IValueTaskSource implementation.</summary>
             private ManualResetValueTaskSourceCore<bool> _waitSource = new ManualResetValueTaskSourceCore<bool> { RunContinuationsAsynchronously = true }; // mutable struct, do not make this readonly
@@ -108,18 +107,21 @@ namespace System.Net.Http
                 }
             }
 
-            public async Task SendRequestContentWithExpect100ContinueAsync(CancellationToken cancellationToken)
+            public async Task SendRequestBodyWithExpect100ContinueAsync(CancellationToken cancellationToken)
             {
                 // Start timer and try to read response headers.
                 TaskCompletionSource<bool> allowExpect100ToContinue = new TaskCompletionSource<bool>();
-                var expect100Timer = new Timer(
-                            s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
-                            allowExpect100ToContinue, _connection._pool.Settings._expect100ContinueTimeout, Timeout.InfiniteTimeSpan);
-                Task response = ReadResponseHeadersAsync(true, allowExpect100ToContinue);
+                bool sendRequestContent;
 
-                // By now, either we got response from server or timer expired.
-                bool sendRequestContent = await allowExpect100ToContinue.Task.ConfigureAwait(false);
-                expect100Timer.Dispose();
+                Task response = response = ReadResponseHeadersAsync(allowExpect100ToContinue);
+
+                using (var expect100Timer = new Timer(
+                            s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
+                            allowExpect100ToContinue, _connection._pool.Settings._expect100ContinueTimeout, Timeout.InfiniteTimeSpan))
+                {
+                    // By now, either we got response from server or timer expired.
+                    sendRequestContent = await allowExpect100ToContinue.Task.ConfigureAwait(false);
+                }
 
                 if (sendRequestContent)
                 {
@@ -359,7 +361,7 @@ namespace System.Net.Http
                 }
             }
 
-            public async Task ReadResponseHeadersAsync(bool createStream, TaskCompletionSource<bool> tcs = null)
+            public async Task ReadResponseHeadersAsync(TaskCompletionSource<bool> tcs = null)
             {
                 // Wait for response headers to be read.
                 bool emptyResponse;
@@ -383,11 +385,10 @@ namespace System.Net.Http
                 }
                 while ((uint)Response.StatusCode < 200);
 
-                if (tcs != null && (int)Response.StatusCode >= 300)
+                if ((int)Response.StatusCode >= 300)
                 {
-                    // We tried 100-Continue and got rejected.
-                    tcs.TrySetResult(false);
-                    _abortRequestBody = true;
+                    // If we tried 100-Continue and got rejected.
+                    tcs?.TrySetResult(false);
                 }
 
                 // Start to process the response body.
@@ -665,7 +666,7 @@ namespace System.Net.Http
                         return new ValueTask();
                     }
 
-                    if (http2Stream._abortRequestBody)
+                    if ((int)_http2Stream._response.StatusCode >= 300)
                     {
                         // If asked to abort sending request body after we started, send RST and ignore rest of the stream.
                         Task ignored = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel);
