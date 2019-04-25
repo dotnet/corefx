@@ -1880,29 +1880,24 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void LongProcessNamesAreSupported()
         {
-            string commandName = "sleep";
+            string programPath = GetProgramPath("sleep");
 
-            if (!IsProgramInstalled(commandName))
+            if (programPath == null)
             {
                 return;
             }
 
-            string longProcessName = "123456789012345678901234567890";
-            string sleepCommandPathFileName = Path.Combine(TestDirectory, longProcessName);
-            File.Copy(GetProgramPath(commandName), sleepCommandPathFileName);
+            const string LongProcessName = "123456789012345678901234567890";
+            string sleepCommandPathFileName = Path.Combine(TestDirectory, LongProcessName);
+            File.Copy(programPath, sleepCommandPathFileName);
 
-            using (Process px = Process.Start(sleepCommandPathFileName, "30"))
+            using (Process px = Process.Start(sleepCommandPathFileName, "600"))
             {
-                var runningProcesses = Process.GetProcesses();
-                try
-                {
-                    Assert.Contains(runningProcesses, p => p.ProcessName == longProcessName);
-                }
-                finally
-                {
-                    px.Kill();
-                    px.WaitForExit();
-                }
+                Process[] runningProcesses = Process.GetProcesses();
+                Assert.Contains(runningProcesses, p => p.ProcessName == LongProcessName);
+
+                px.Kill();
+                px.WaitForExit();
             }
         }
 

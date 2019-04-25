@@ -280,11 +280,12 @@ namespace System.Diagnostics
 
                             byte[] tmp = ArrayPool<byte>.Shared.Rent((int)newLength);
                             buffer.CopyTo(tmp);
+                            byte[] toReturn = rentedArray;
+                            buffer = rentedArray = tmp;
                             if (rentedArray != null)
                             {
-                                ArrayPool<byte>.Shared.Return(rentedArray);
+                                ArrayPool<byte>.Shared.Return(toReturn);
                             }
-                            buffer = rentedArray = tmp;
                         }
 
                         Debug.Assert(bytesRead < buffer.Length);
