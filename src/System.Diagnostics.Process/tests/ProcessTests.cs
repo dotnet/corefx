@@ -1894,10 +1894,15 @@ namespace System.Diagnostics.Tests
             using (Process px = Process.Start(sleepCommandPathFileName, "600"))
             {
                 Process[] runningProcesses = Process.GetProcesses();
-                Assert.Contains(runningProcesses, p => p.ProcessName == LongProcessName);
-
-                px.Kill();
-                px.WaitForExit();
+                try
+                {
+                    Assert.Contains(runningProcesses, p => p.ProcessName == LongProcessName);
+                }
+                finally
+                {
+                    px.Kill();
+                    px.WaitForExit();
+                }
             }
         }
 
