@@ -69,7 +69,7 @@ namespace System.IO.Tests
         {
             var ms2 = new MemoryStream();
             var encodedBytesWithPreamble = expectedEncoding.GetPreamble().Concat(expectedEncoding.GetBytes("ABCD")).ToArray();
-            ms2.Write(encodedBytesWithPreamble, 0, encodedBytesWithPreamble.Length);
+            ms2.Write(encodedBytesWithPreamble);
             ms2.Position = 0;
             var sr2 = new StreamReader(ms2, true);
             var streamContent = sr2.ReadToEnd();
