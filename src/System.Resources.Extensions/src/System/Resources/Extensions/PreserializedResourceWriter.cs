@@ -2,12 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 
 namespace System.Resources.Extensions
 {
     partial class PreserializedResourceWriter
     {
+        // indicates if the types of resources saved will require the DeserializingResourceReader
+        // in order to read them.
         bool _requiresDeserializingResourceReader = false;
 
         private string ResourceReaderTypeName => _requiresDeserializingResourceReader ? 
@@ -18,6 +21,13 @@ namespace System.Resources.Extensions
             typeof(RuntimeResourceSet).AssemblyQualifiedName :
             ResSetTypeName;
 
+        /// <summary>
+        /// Adds a resource of specified type represented by a string value which will be 
+        /// passed to the type's TypeConverter when reading the resource.
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="typeName">Assembly qualified type name of the resource</param>
+        /// <param name="value">Value of the resource in string form understood by the type's TypeConverter</param>
         public void AddTypeConverterResource(string name, string typeName, string value)
         {
             if (name == null)
@@ -32,6 +42,13 @@ namespace System.Resources.Extensions
             _requiresDeserializingResourceReader = true;
         }
 
+        /// <summary>
+        /// Adds a resource of specified type represented by a byte[] value which will be 
+        /// passed to the type's TypeConverter when reading the resource.
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="typeName">Assembly qualified type name of the resource</param>
+        /// <param name="value">Value of the resource in byte[] form understood by the type's TypeConverter</param>
         public void AddTypeConverterResource(string name, string typeName, byte[] value)
         {
             if (name == null)
@@ -46,6 +63,13 @@ namespace System.Resources.Extensions
             _requiresDeserializingResourceReader = true;
         }
 
+        /// <summary>
+        /// Adds a resource of specified type represented by a byte[] value which will be 
+        /// passed to BinaryFormatter when reading the resource.
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="typeName">Assembly qualified type name of the resource</param>
+        /// <param name="value">Value of the resource in byte[] form understood by BinaryFormatter</param>
         public void AddBinaryFormattedResource(string name, string typeName, byte[] value)
         {
             if (name == null)
@@ -58,7 +82,15 @@ namespace System.Resources.Extensions
             AddResourceData(name, typeName, new ResourceDataRecord(SerializationFormat.BinaryFormatter, value));
         }
 
-        public void AddActivatorResource(string name, string typeName, Stream value, bool closeAfterWrite)
+        /// <summary>
+        /// Adds a resource of specified type represented by a Stream value which will be 
+        /// passed to the type's constructor when reading the resource.
+        /// </summary>
+        /// <param name="name">Resource name</param>
+        /// <param name="typeName">Assembly qualified type name of the resource</param>
+        /// <param name="value">Value of the resource in Stream form understood by the types constructor</param>
+        /// <param name="closeAfterWrite">Indicates that the stream should be closed after resources have been written</param>
+        public void AddActivatorResource(string name, string typeName, Stream value, bool closeAfterWrite = false)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -93,11 +125,9 @@ namespace System.Resources.Extensions
         {
             ResourceDataRecord record = dataContext as ResourceDataRecord;
 
-            if (record == null)
-            {
-                throw new InvalidOperationException(SR.Format(SR.InvalidOperation_CannotWriteType, GetType(), dataContext.GetType(), nameof(WriteData)));
-            }
+            Debug.Assert(record != null);
 
+            // Only write the format if we resources are in DeserializingResourceReader format
             if (_requiresDeserializingResourceReader)
             {
                 writer.Write((byte)record.Format);
@@ -111,6 +141,8 @@ namespace System.Resources.Extensions
                         {
                             byte[] data = (byte[])record.Data;
 
+                            // only write length if using DeserializingResourceReader, ResourceReader
+                            // doesn't constrain binaryFormatter
                             if (_requiresDeserializingResourceReader)
                             {
                                 Write7BitEncodedInt(writer, data.Length);
@@ -121,22 +153,17 @@ namespace System.Resources.Extensions
                         }
                     case SerializationFormat.ActivatorStream:
                         {
-                            if (record.Data is byte[] data)
-                            {
-                                Write7BitEncodedInt(writer, data.Length);
-                                writer.Write(data);
-                            }
-                            else
-                            {
-                                Stream stream = (Stream)record.Data;
+                            Stream stream = (Stream)record.Data;
 
-                                if (stream.Length > int.MaxValue)
-                                    throw new ArgumentException(SR.ArgumentOutOfRange_StreamLength);
+                            if (stream.Length > int.MaxValue)
+                                throw new ArgumentException(SR.ArgumentOutOfRange_StreamLength);
 
-                                stream.Position = 0;
-                                Write7BitEncodedInt(writer, (int)stream.Length);
-                                stream.CopyTo(writer.BaseStream);
-                            }
+                            stream.Position = 0;
+
+                            Write7BitEncodedInt(writer, (int)stream.Length);
+
+                            stream.CopyTo(writer.BaseStream);
+
                             break;
                         }
                     case SerializationFormat.TypeConverterByteArray:

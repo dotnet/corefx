@@ -56,7 +56,7 @@ namespace System.Resources.Extensions
             // read type
             SerializationFormat format = (SerializationFormat)_store.ReadByte();
 
-            object value = null;
+            object value;
 
             // read data
             switch (format)

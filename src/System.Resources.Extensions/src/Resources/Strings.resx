@@ -147,7 +147,4 @@
   <data name="TypeLoadException_CannotLoadConverter" xml:space="preserve">
     <value>Could not load a converter for type {0}.</value>
   </data>
-  <data name="InvalidOperation_CannotWriteType" xml:space="preserve">
-    <value>ResourceWriter type {0} provided dataContext type {1} but did not handle this type in its {2} method.</value>
-  </data>
 </root>
