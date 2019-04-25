@@ -19,11 +19,11 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Resources
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
     .Extensions
 #endif
 {
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
     using ResourceReader = DeserializingResourceReader;
 #endif
     // A RuntimeResourceSet stores all the resources defined in one 
@@ -167,9 +167,9 @@ namespace System.Resources
 #else
     internal
 #endif
-    sealed partial class RuntimeResourceSet : ResourceSet, IEnumerable
+    sealed class RuntimeResourceSet : ResourceSet, IEnumerable
     {
-        internal const int Version = 2;
+        internal const int Version = 2;            // File format version number
 
         // Cache for resources.  Key is the resource name, which can be cached
         // for arbitrarily long times, since the object is usually a string
@@ -193,7 +193,7 @@ namespace System.Resources
         // the resources once, adding them into the table.
         private bool _haveReadFromReader;
 
-#if !RESOURCES_STANDALONE
+#if !RESOURCES_EXTENSIONS
         internal RuntimeResourceSet(string fileName) : base(false)
         {
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
@@ -209,7 +209,7 @@ namespace System.Resources
             Reader = _defaultReader;
         }
 #else
-        private readonly IResourceReader Reader;
+        private IResourceReader Reader => _defaultReader!;
 
         internal RuntimeResourceSet(IResourceReader reader) :
             // explicitly do not call IResourceReader constructor since it caches all resources
@@ -221,8 +221,7 @@ namespace System.Resources
 
             _defaultReader = reader as DeserializingResourceReader ?? throw new ArgumentException(SR.Format(SR.NotSupported_WrongResourceReader_Type, reader.GetType()), nameof(reader));
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
-            Reader = reader;
-
+            
             // in the CoreLib version RuntimeResourceSet creates ResourceReader and passes this in, 
             // in the custom case ManifestBasedResourceReader creates the ResourceReader and passes it in
             // so we must initialize the cache here.

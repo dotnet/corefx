@@ -10,7 +10,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Resources.Extensions;
 using System.Runtime.Serialization.Formatters.Binary;
 using Xunit;
 
@@ -23,6 +22,7 @@ namespace System.Resources.Extensions.Tests
         {
             Assert.Throws<ArgumentNullException>("stream", () => new PreserializedResourceWriter((Stream)null));
         }
+
         [Fact]
         public static void ExceptionforNullFile()
         {
@@ -180,6 +180,7 @@ namespace System.Resources.Extensions.Tests
                 binaryWriterBuffer = ms.ToArray();
             }
 
+            // PreserializedResourceWriter should write ResourceWriter/ResourceReader format
             Assert.Equal(writerBuffer, binaryWriterBuffer);
 
             using (MemoryStream ms = new MemoryStream(binaryWriterBuffer, false))
@@ -193,6 +194,7 @@ namespace System.Resources.Extensions.Tests
                 }
             }
 
+            // DeserializingResourceReader can read ResourceReader format
             using (MemoryStream ms = new MemoryStream(binaryWriterBuffer, false))
             using (DeserializingResourceReader reader = new DeserializingResourceReader(ms))
             {
@@ -244,6 +246,7 @@ namespace System.Resources.Extensions.Tests
                 binaryWriterBuffer = ms.ToArray();
             }
 
+            // PreserializedResourceWriter should write ResourceWriter/ResourceReader format
             Assert.Equal(writerBuffer, binaryWriterBuffer);
 
             using (MemoryStream ms = new MemoryStream(writerBuffer, false))
@@ -259,6 +262,7 @@ namespace System.Resources.Extensions.Tests
                 }
             }
 
+            // DeserializingResourceReader can read ResourceReader format
             using (MemoryStream ms = new MemoryStream(writerBuffer, false))
             using (DeserializingResourceReader reader = new DeserializingResourceReader(ms))
             {
@@ -270,8 +274,6 @@ namespace System.Resources.Extensions.Tests
                 }
             }
         }
-
-
 
         [Fact]
         public static void TypeConverterByteArrayResources()
@@ -403,7 +405,7 @@ namespace System.Resources.Extensions.Tests
         {
             ResourceManager resourceManager = new ResourceManager(typeof(TestData));
             ResourceSet resSet = resourceManager.GetResourceSet(CultureInfo.InvariantCulture, true, true);
-            IResourceReader reader = (IResourceReader)resSet.GetType().GetField("Reader", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(resSet);
+            IResourceReader reader = (IResourceReader)resSet.GetType().GetProperty("Reader", BindingFlags.NonPublic | BindingFlags.Instance)?.GetValue(resSet);
             Assert.IsType<DeserializingResourceReader>(reader);
         }
 

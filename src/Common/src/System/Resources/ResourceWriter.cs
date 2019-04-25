@@ -20,7 +20,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Resources
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
     .Extensions
 #endif
 {
@@ -36,7 +36,7 @@ namespace System.Resources
     // default file format.
     // 
     public sealed partial class
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
         PreserializedResourceWriter
 #else
         ResourceWriter
@@ -56,7 +56,7 @@ namespace System.Resources
         private Dictionary<string, PrecannedResource> _preserializedData;
 
         public
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
         PreserializedResourceWriter
 #else
         ResourceWriter
@@ -72,7 +72,7 @@ namespace System.Resources
         }
 
         public
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
         PreserializedResourceWriter
 #else
         ResourceWriter

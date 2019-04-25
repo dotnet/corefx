@@ -33,6 +33,5 @@ namespace System.Resources.Extensions
         public void AddActivatorResource(string name, string typeName, System.IO.Stream value, bool closeAfterWrite = false) { }
         public void AddTypeConverterResource(string name, string typeName, byte[] value) { }
         public void AddTypeConverterResource(string name, string typeName, string value) { }
-        
     }
 }

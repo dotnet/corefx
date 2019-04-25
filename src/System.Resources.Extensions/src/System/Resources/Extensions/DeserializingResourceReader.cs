@@ -152,9 +152,11 @@ namespace System.Resources.Extensions
                     throw new BadImageFormatException(SR.BadImageFormat_TypeMismatch);
             }
 
+            if (value.GetType() != type)
+                throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResType_SerBlobMismatch, type.FullName, value.GetType().FullName));
+
             return value;
         }
-
 
         private static bool CompareNames(string typeName1, string typeName2)
         {

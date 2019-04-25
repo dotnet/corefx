@@ -17,7 +17,7 @@
 ===========================================================*/
 
 namespace System.Resources
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
     .Extensions
 #endif
 {
@@ -28,7 +28,7 @@ namespace System.Resources
     using System.Collections.Generic;
     using System.Diagnostics;
 
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
     using ResourceReader = DeserializingResourceReader;
 #endif
     // Provides the default implementation of IResourceReader, reading
@@ -72,7 +72,7 @@ namespace System.Resources
     }
 
     public sealed partial class
-#if RESOURCES_STANDALONE
+#if RESOURCES_EXTENSIONS
         DeserializingResourceReader
 #else
         ResourceReader
@@ -114,12 +114,12 @@ namespace System.Resources
 
 
         public
-
-#if RESOURCES_STANDALONE
-        DeserializingResourceReader(string fileName)
+#if RESOURCES_EXTENSIONS
+        DeserializingResourceReader
 #else
-        ResourceReader(string fileName)
+        ResourceReader
 #endif
+            (string fileName)
         {
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
             _store = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read, DefaultFileStreamBufferSize, FileOptions.RandomAccess), Encoding.UTF8);
@@ -136,12 +136,12 @@ namespace System.Resources
         }
 
         public
-#if RESOURCES_STANDALONE
-        DeserializingResourceReader(Stream stream)
+#if RESOURCES_EXTENSIONS
+        DeserializingResourceReader
 #else
-        ResourceReader(Stream stream)
+        ResourceReader
 #endif
-
+            (Stream stream)
         {
             if (stream == null)
                 throw new ArgumentNullException(nameof(stream));

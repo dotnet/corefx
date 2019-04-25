@@ -53,10 +53,7 @@ namespace System.Resources
         {
             byte[] data = dataContext as byte[];
 
-            if (data == null)
-            {
-                throw new InvalidOperationException(SR.Format(SR.InvalidOperation_CannotWriteType, GetType(), dataContext.GetType(), nameof(WriteData)));
-            }
+            Debug.Assert(data != null);
 
             writer.Write(data);
         }

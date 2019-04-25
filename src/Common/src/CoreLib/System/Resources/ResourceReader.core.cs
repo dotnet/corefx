@@ -4,7 +4,6 @@
 
 namespace System.Resources
 {
-
     partial class ResourceReader
     {
         private readonly bool _permitDeserialization;  // can deserialize BinaryFormatted resources
@@ -38,37 +37,25 @@ namespace System.Resources
 
         private object DeserializeObject(int typeIndex)
         {
-            if (!_permitDeserialization && GetType() == typeof(ResourceReader))
+            if (!_permitDeserialization)
             {
                 throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
             }
-
-            Type type = FindType(typeIndex);
-
-            object graph = DeserializeObject(_store, type);
-
-            // guard against corrupted resources
-            if (graph.GetType() != type)
-                throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResType_SerBlobMismatch, type.FullName, graph.GetType().FullName));
-
-            return graph;
-        }
-
-        protected virtual object DeserializeObject(BinaryReader reader, Type type)
-        {
-            if (!_permitDeserialization)
-                throw new NotSupportedException(SR.NotSupported_ResourceObjectSerialization);
-            if (reader == null)
-                throw new ArgumentNullException(nameof(reader));
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
 
             if (_binaryFormatter == null)
             {
                 InitializeBinaryFormatter();
             }
 
-            return s_deserializeMethod(_binaryFormatter, reader.BaseStream);
+            Type type = FindType(typeIndex);
+
+            object graph = s_deserializeMethod(_binaryFormatter, _store.BaseStream);
+
+            // guard against corrupted resources
+            if (graph.GetType() != type)
+                throw new BadImageFormatException(SR.Format(SR.BadImageFormat_ResType_SerBlobMismatch, type.FullName, graph.GetType().FullName));
+
+            return graph;
         }
 
         private void InitializeBinaryFormatter()
