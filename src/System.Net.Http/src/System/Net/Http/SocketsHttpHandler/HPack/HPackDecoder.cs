@@ -266,9 +266,8 @@ namespace System.Net.Http.HPack
                             }
                             else
                             {
-                                OnString(nextState: State.Ready);
-                                var headerNameSpan = new ReadOnlySpan<byte>(_headerName, 0, _headerNameLength);
-                                onHeader(onHeaderState, headerNameSpan, new ReadOnlySpan<byte>());
+                                OnStringLength(_integerDecoder.Value, nextState: State.Ready);
+                                OnHeaderComplete(onHeader, onHeaderState, new ReadOnlySpan<byte>(_headerName, 0, _headerNameLength), new ReadOnlySpan<byte>());
                             }
                         }
                         else
@@ -294,12 +293,7 @@ namespace System.Net.Http.HPack
                             var headerNameSpan = new ReadOnlySpan<byte>(_headerName, 0, _headerNameLength);
                             var headerValueSpan = new ReadOnlySpan<byte>(_headerValueOctets, 0, _headerValueLength);
 
-                            onHeader(onHeaderState, headerNameSpan, headerValueSpan);
-
-                            if (_index)
-                            {
-                                _dynamicTable.Insert(headerNameSpan, headerValueSpan);
-                            }
+                            OnHeaderComplete(onHeader, onHeaderState, headerNameSpan, headerValueSpan);
                         }
 
                         break;
@@ -396,6 +390,18 @@ namespace System.Net.Http.HPack
             }
 
             _state = nextState;
+        }
+
+        // Called when we have complete header with name and value.
+        private void OnHeaderComplete(HeaderCallback onHeader, object onHeaderState, ReadOnlySpan<byte> headerName, ReadOnlySpan<byte> headerValue)
+        {
+            // Call provided callback.
+            onHeader(onHeaderState, headerName, headerValue);
+
+            if (_index)
+            {
+                _dynamicTable.Insert(headerName, headerValue);
+            }
         }
 
         private HeaderField GetHeader(int index)
