@@ -412,7 +412,7 @@ namespace System
             get
             {
                 int left, top;
-                GetCursorPosition(out left, out top);
+                TryGetCursorPosition(out left, out top);
                 return left;
             }
         }
@@ -422,7 +422,7 @@ namespace System
             get
             {
                 int left, top;
-                GetCursorPosition(out left, out top);
+                TryGetCursorPosition(out left, out top);
                 return top;
             }
         }
@@ -442,7 +442,7 @@ namespace System
         private static bool s_firstCursorPositionRequest = true;
 
         /// <summary>Gets the current cursor position.  This involves both writing to stdout and reading stdin.</summary>
-        private static unsafe void GetCursorPosition(out int left, out int top)
+        internal static unsafe bool TryGetCursorPosition(out int left, out int top, bool reinitializeForRead = false)
         {
             left = top = 0;
 
@@ -450,7 +450,7 @@ namespace System
             // parsing a response string from the terminal.  So if anything is redirected, bail.
             if (Console.IsInputRedirected || Console.IsOutputRedirected)
             {
-                return;
+                return false;
             }
 
             int cursorVersion;
@@ -458,7 +458,7 @@ namespace System
             {
                 if (TryGetCachedCursorPosition(out left, out top))
                 {
-                    return;
+                    return true;
                 }
 
                 cursorVersion = s_cursorVersion;
@@ -525,7 +525,7 @@ namespace System
                         // back to the StdInReader's extra buffer, treating it all as user input,
                         // and exit having not computed a valid cursor position.
                         TransferBytes(readBytes.Slice(readBytesPos), r);
-                        return;
+                        return false;
                     }
 
                     // At this point, readBytes starts with \ESC and ends with 'R'.
@@ -561,10 +561,16 @@ namespace System
                 }
                 finally
                 {
-                    Interop.Sys.UninitializeConsoleAfterRead();
+                    if (reinitializeForRead)
+                    {
+                        Interop.Sys.InitializeConsoleBeforeRead();
+                    }
+                    else
+                    {
+                        Interop.Sys.UninitializeConsoleAfterRead();
+                    }
                     s_firstCursorPositionRequest = false;
                 }
-
 
                 bool BufferUntil(byte toFind, StdInReader src, ref Span<byte> dst, ref int dstPos, out int foundPos)
                 {
@@ -667,6 +673,7 @@ namespace System
             lock (Console.Out)
             {
                 SetCachedCursorPosition(left, top, cursorVersion);
+                return true;
             }
         }
 
@@ -1359,7 +1366,7 @@ namespace System
         /// <summary>Writes a terminfo-based ANSI escape string to stdout.</summary>
         /// <param name="value">The string to write.</param>
         /// <param name="mayChangeCursorPosition">Writing this value may change the cursor position.</param>
-        private static unsafe void WriteStdoutAnsiString(string value, bool mayChangeCursorPosition = true)
+        internal static unsafe void WriteStdoutAnsiString(string value, bool mayChangeCursorPosition = true)
         {
             if (string.IsNullOrEmpty(value))
                 return;

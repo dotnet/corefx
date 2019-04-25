@@ -141,7 +141,21 @@ namespace System.IO
                                     string moveLeft = ConsolePal.TerminalFormatStrings.Instance.CursorLeft;
                                     s_moveLeftString = !string.IsNullOrEmpty(moveLeft) ? moveLeft + " " + moveLeft : string.Empty;
                                 }
-                                Console.Write(s_moveLeftString);
+
+                                // The ReadLine input may wrap accross terminal rows and we need to handle that.
+                                // note: ConsolePal will cache the cursor position to avoid making many slow cursor position fetch operations.
+                                if (ConsolePal.TryGetCursorPosition(out int left, out int top, reinitializeForRead: true) &&
+                                    left == 0 && top > 0)
+                                {
+                                    // Move to end of previous line
+                                    ConsolePal.SetCursorPosition(ConsolePal.WindowWidth - 1, top - 1);
+                                    // Clear from cursor to end of the line
+                                    ConsolePal.WriteStdoutAnsiString("\x1B[K", mayChangeCursorPosition: false);
+                                }
+                                else
+                                {
+                                    Console.Write(s_moveLeftString);
+                                }
                             }
                         }
                     }
