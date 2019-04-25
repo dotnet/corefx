@@ -1044,7 +1044,7 @@
   },
   {
     "Name": "Microsoft.Compatibility.AsyncInterfaces",
-    "Description": "Provides compatibility classes for Async Interfaces",
+    "Description": "Provides interfaces and helper types for consuming and producing async enumearbles on .NET Standard 2.0. This package is not required when targeting .NET Standard 2.1 ore .NET CoreApp 3.0 as they already have support for these types inbox.",
     "CommonTypes": [
       "System.IAsyncDisposable",
       "System.Collections.Generic.IAsyncEnumerable",
