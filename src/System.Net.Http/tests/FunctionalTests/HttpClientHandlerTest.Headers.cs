@@ -98,27 +98,25 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [Fact]
-        public async Task SendAsync_EmptyResponseHeader_Success()
+        public async Task GetAsync_EmptyResponseHeader_Success()
         {
+            IList<HttpHeaderData> headers = new HttpHeaderData[] {
+                                                new HttpHeaderData("x-test", "SendAsync_EmptyHeader_Success"),
+                                                new HttpHeaderData("x-empty", ""),
+                                                new HttpHeaderData("x-last", "bye") };
+
             await LoopbackServerFactory.CreateClientAndServerAsync(async uri =>
             {
-                using (var client = CreateHttpClient())
+                using (HttpClient client = CreateHttpClient())
                 {
-                    var message = new HttpRequestMessage(HttpMethod.Get, uri);
-                    var response = await  client.SendAsync(message).ConfigureAwait(false);
-
-                    // HTTP/1.1 adds Connection: close and Date
-                    Assert.Equal(UseHttp2LoopbackServer ? 3 : 5, response.Headers.Count());
+                    HttpResponseMessage response = await  client.GetAsync(uri).ConfigureAwait(false);
+                    // HTTP/1.1 LoopbackServer adds Connection: close and Date to responses.
+                    Assert.Equal(UseHttp2LoopbackServer ?  headers.Count : headers.Count + 2, response.Headers.Count());
                     Assert.NotNull(response.Headers.GetValues("x-empty"));
                 }
             },
             async server =>
             {
-                IList<HttpHeaderData> headers = new HttpHeaderData[] {
-                                new HttpHeaderData("x-test", "SendAsync_EmptyHeader_Success"),
-                                new HttpHeaderData("x-empty", ""),
-                                new HttpHeaderData("x-last", "bye") };
-
                 HttpRequestData requestData = await server.HandleRequestAsync(HttpStatusCode.OK, headers);
             });
         }
