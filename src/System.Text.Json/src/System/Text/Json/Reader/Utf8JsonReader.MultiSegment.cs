@@ -657,10 +657,20 @@ namespace System.Text.Json
             {
                 Debug.Assert(IsLastSpan);
 
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
+                // If there is no more data, and the JSON is not a single value, throw.
+                if (_isNotPrimitive)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
+                }
             }
 
-            Debug.Assert(JsonConstants.Delimiters.IndexOf(_buffer[_consumed]) >= 0);
+            // If there is more data and the JSON is not a single value, assert that there is an end of number delimiter.
+            // Else, if either the JSON is a single value XOR if there is no more data, don't assert anything since there won't always be an end of number delimiter.
+            Debug.Assert(
+                ((_consumed < _buffer.Length) &&
+                !_isNotPrimitive &&
+                JsonConstants.Delimiters.IndexOf(_buffer[_consumed]) >= 0)
+                || (_isNotPrimitive ^ (_consumed >= (uint)_buffer.Length)));
 
             return true;
         }
