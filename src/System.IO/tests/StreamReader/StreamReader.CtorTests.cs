@@ -3,7 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace System.IO.Tests
@@ -15,6 +18,7 @@ namespace System.IO.Tests
         {
             Assert.Throws<ArgumentNullException>(() => new StreamReader((Stream)null, true));
         }
+
         [Fact]
         public static void InputStreamClosed()
         {
@@ -42,9 +46,36 @@ namespace System.IO.Tests
             var ms2 = new MemoryStream();
             ms2.Write(new byte[] { 65, 66, 67, 68 }, 0, 4);
             ms2.Position = 0;
-            var sr2 = new StreamReader(ms2, false);
+            var sr2 = new StreamReader(ms2, true);
 
             Assert.Equal("ABCD", sr2.ReadToEnd());
+            sr2.Dispose();
+        }
+
+        public static IEnumerable<object[]> EncodingsToTestDetection()
+        {
+            yield return new object[] { Encoding.BigEndianUnicode };
+            yield return new object[] { Encoding.Unicode };
+            yield return new object[] { Encoding.UTF32 };
+            yield return new object[] { Encoding.UTF8 };
+
+            var bigEndianUTF32 = new UTF32Encoding(bigEndian: true, byteOrderMark: true);
+            yield return new object[] { bigEndianUTF32 };
+        }
+
+        [Theory]
+        [MemberData(nameof(EncodingsToTestDetection))]
+        public static void CreationFromMemoryStreamWithEncodingTrueDetectsCorrectEncoding(Encoding expectedEncoding)
+        {
+            var ms2 = new MemoryStream();
+            var encodedBytesWithPreamble = expectedEncoding.GetPreamble().Concat(expectedEncoding.GetBytes("ABCD")).ToArray();
+            ms2.Write(encodedBytesWithPreamble, 0, encodedBytesWithPreamble.Length);
+            ms2.Position = 0;
+            var sr2 = new StreamReader(ms2, true);
+            var streamContent = sr2.ReadToEnd();
+
+            Assert.Equal("ABCD", streamContent);
+            Assert.Equal(expectedEncoding, sr2.CurrentEncoding);
             sr2.Dispose();
         }
     }
