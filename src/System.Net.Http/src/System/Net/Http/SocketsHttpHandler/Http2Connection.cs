@@ -29,7 +29,6 @@ namespace System.Net.Http
         private readonly HPackDecoder _hpackDecoder;
 
         private readonly Dictionary<int, Http2Stream> _httpStreams;
-
         private readonly SemaphoreSlim _writerLock;
         private readonly SemaphoreSlim _headerSerializationLock;
 
@@ -51,6 +50,8 @@ namespace System.Net.Http
         // the write completes. We avoid actually canceling the write, as we would
         // then have to close the whole connection.
         private Task _inProgressWrite = null;
+
+        private Exception _pendingException;
 
         private const int MaxStreamId = int.MaxValue;
 
@@ -138,25 +139,6 @@ namespace System.Net.Http
 
             _expectingSettingsAck = true;
 
-
-            // Receive the initial SETTINGS frame from the peer.
-            try
-            {
-                FrameHeader frameHeader = await ReadFrameAsync(initialFrame: true).ConfigureAwait(false);
-                if (frameHeader.Type != FrameType.Settings || frameHeader.AckFlag)
-                {
-                    throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
-                }
-
-                // Process the initial SETTINGS frame. This will send an ACK.
-                ProcessSettingsFrame(frameHeader);
-            }
-            catch (Exception e) when (e is IOException || e is Http2ProtocolException)
-            {
-                // ISSUE 31315: Determine if/how to expose HTTP2 error codes
-                throw new HttpRequestException(SR.net_http_invalid_response, e);
-            }
-
             ProcessIncomingFrames();
         }
 
@@ -207,7 +189,7 @@ namespace System.Net.Http
                 }
 
                 _incomingBuffer.Discard(FrameHeader.Size);
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.FrameSizeError);
+                throw new Http2ProtocolException(initialFrame ? Http2ProtocolErrorCode.ProtocolError : Http2ProtocolErrorCode.FrameSizeError);
             }
             _incomingBuffer.Discard(FrameHeader.Size);
 
@@ -221,7 +203,14 @@ namespace System.Net.Http
         {
             try
             {
-                FrameHeader frameHeader;
+                FrameHeader frameHeader = await ReadFrameAsync(initialFrame: true).ConfigureAwait(false);
+                if (frameHeader.Type != FrameType.Settings || frameHeader.AckFlag)
+                {
+                    throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                }
+
+                // Process the initial SETTINGS frame. This will send an ACK.
+                ProcessSettingsFrame(frameHeader);
 
                 // Keep processing frames as they arrive.
                 while (true)
@@ -269,8 +258,19 @@ namespace System.Net.Http
                     }
                 }
             }
-            catch (Exception)
+            catch (Http2ProtocolException e)
             {
+                _pendingException = new HttpRequestException(SR.net_http_invalid_response, e);
+                Abort();
+            }
+            catch (IOException e)
+            {
+                _pendingException = new HttpRequestException(SR.net_http_io_read, e);
+                Abort();
+            }
+            catch (Exception e)
+            {
+                _pendingException = new HttpRequestException(SR.net_http_client_execution_error, e);
                 Abort();
             }
         }
@@ -1371,6 +1371,12 @@ namespace System.Net.Http
             catch (Exception e)
             {
                 http2Stream?.Dispose();
+
+                if (_pendingException != null)
+                {
+                    // Propagate exception from background task.
+                    throw _pendingException;
+                }
 
                 if (e is IOException)
                 {
