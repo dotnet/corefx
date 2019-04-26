@@ -115,11 +115,11 @@ namespace System.IO
         /// Try to remove relative segments from the given path (without combining with a root).
         /// </summary>
         /// <param name="path">Input path</param>
-        /// <param name="rootLength">The length of the root of the given path</param>
-        internal static string RemoveRelativeSegments(string path, int rootLength)
+        internal static string RemoveRelativeSegments(string path)
         {
             Span<char> initialBuffer = stackalloc char[260 /* PathInternal.MaxShortPath */];
             ValueStringBuilder sb = new ValueStringBuilder(initialBuffer);
+            int rootLength = GetRootLength(path.AsSpan());
 
             if (RemoveRelativeSegments(path.AsSpan(), rootLength, ref sb))
             {
@@ -139,14 +139,13 @@ namespace System.IO
         /// <returns>"true" if the path was modified</returns>
         internal static bool RemoveRelativeSegments(ReadOnlySpan<char> path, int rootLength, ref ValueStringBuilder sb)
         {
-            Debug.Assert(rootLength > 0);
             bool flippedSeparator = false;
 
             int skip = rootLength;
             // We treat "\.." , "\." and "\\" as a relative segment. We want to collapse the first separator past the root presuming
             // the root actually ends in a separator. Otherwise the first segment for RemoveRelativeSegments
             // in cases like "\\?\C:\.\" and "\\?\C:\..\", the first segment after the root will be ".\" and "..\" which is not considered as a relative segment and hence not be removed.
-            if (PathInternal.IsDirectorySeparator(path[skip - 1]))
+            if (skip > 0 && PathInternal.IsDirectorySeparator(path[skip - 1]))
                 skip--;
 
             // Remove "//", "/./", and "/../" from the path by copying each character to the output, 
