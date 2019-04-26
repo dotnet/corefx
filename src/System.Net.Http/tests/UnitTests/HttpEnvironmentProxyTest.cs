@@ -255,6 +255,7 @@ namespace System.Net.Http.Tests
 
         [Theory]
         [MemberData(nameof(HttpProxyCgiEnvVarMemberData))]
+        [PlatformSpecific(~TestPlatforms.Windows)]
         public void HttpProxy_TryCreateAndPossibleCgi_HttpProxyUpperCaseDisabledInCgi(
             string proxyEnvVar, bool cgi, bool expectedProxyUse)
         {
