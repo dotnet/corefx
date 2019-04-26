@@ -1878,28 +1878,25 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [ActiveIssue(37054, TestPlatforms.OSX)]
         [Fact]
-        public void GetProcesses_LongProcessName()
+        public void LongProcessNamesAreSupported()
         {
-            string commandName = "sleep";
+            string programPath = GetProgramPath("sleep");
 
-            // sleep program doesn't exist on some flavor
-            // in flavors such as Alpine, sleep is a busybox command which cannot be renamed
-            if (!IsProgramInstalled(commandName) || IsProgramInstalled("busybox"))
+            if (programPath == null)
             {
                 return;
             }
 
-            string longProcessName = "123456789012345678901234567890";
-            string sleepCommandPathFileName = Path.Combine(TestDirectory, longProcessName);
-            File.Copy(GetProgramPath(commandName), sleepCommandPathFileName);
+            const string LongProcessName = "123456789012345678901234567890";
+            string sleepCommandPathFileName = Path.Combine(TestDirectory, LongProcessName);
+            File.Copy(programPath, sleepCommandPathFileName);
 
-            // start sleep program and wait for some seconds
-            using (Process px = Process.Start(new ProcessStartInfo { FileName = sleepCommandPathFileName , Arguments = "30", UseShellExecute = true}))
+            using (Process px = Process.Start(sleepCommandPathFileName, "600"))
             {
-                var runninProcesses = Process.GetProcesses();
+                Process[] runningProcesses = Process.GetProcesses();
                 try
                 {
-                    Assert.Contains(runninProcesses, p => p.ProcessName == longProcessName);
+                    Assert.Contains(runningProcesses, p => p.ProcessName == LongProcessName);
                 }
                 finally
                 {
