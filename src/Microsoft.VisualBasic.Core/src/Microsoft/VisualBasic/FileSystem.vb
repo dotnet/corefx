@@ -1256,7 +1256,7 @@ Namespace Microsoft.VisualBasic
                 Return OpenModeTypes.Any
             End If
 
-            ' This exception should never been hit.
+            ' This exception should never be hit.
             ' We will throw Arguments are not valid.
             Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue), "om")
         End Function

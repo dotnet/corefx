@@ -42,6 +42,47 @@ namespace Microsoft.VisualBasic.Tests
         //   public static void ChDrive(char Drive){ throw null; }
         //   public static void ChDrive(string Drive){ throw null; }
 
+        [Fact]
+        public void CloseAllFiles()
+        {
+            var fileName1 = GetTestFilePath();
+            var fileName2 = GetTestFilePath();
+
+            RemoteExecutor.Invoke(
+                (fileName1, fileName2) =>
+                {
+                    putStringNoClose(fileName1, "abc");
+                    putStringNoClose(fileName2, "123");
+
+                    // ProjectData.EndApp() should close all open files.
+                    Microsoft.VisualBasic.CompilerServices.ProjectData.EndApp();
+
+                    static void putStringNoClose(string fileName, string str)
+                    {
+                        int fileNumber = FileSystem.FreeFile();
+                        FileSystem.FileOpen(fileNumber, fileName, OpenMode.Random);
+                        FileSystem.FilePut(fileNumber, str);
+                    }
+                },
+                fileName1,
+                fileName2,
+                new RemoteInvokeOptions() { ExpectedExitCode = 0 }).Dispose();
+
+            // Verify all text was written to the files.
+            Assert.Equal("abc", getString(fileName1));
+            Assert.Equal("123", getString(fileName2));
+
+            static string getString(string fileName)
+            {
+                int fileNumber = FileSystem.FreeFile();
+                FileSystem.FileOpen(fileNumber, fileName, OpenMode.Random);
+                string str = null;
+                FileSystem.FileGet(fileNumber, ref str);
+                FileSystem.FileClose(fileNumber);
+                return str;
+            }
+        }
+
         // Can't get current directory on OSX before setting it.
         [ConditionalFact(nameof(IsNotOSX))]
         public void CurDir()
@@ -557,25 +598,26 @@ namespace Microsoft.VisualBasic.Tests
 
             static void remoteWrite(string fileName, string text)
             {
-                RemoteExecutor.Invoke((fileName, text) =>
-                {
-                    using (var stream = System.IO.File.Open(fileName, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite))
+                RemoteExecutor.Invoke(
+                    (fileName, text) =>
                     {
-                        try
+                        using (var stream = System.IO.File.Open(fileName, System.IO.FileMode.Append, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite))
                         {
-                            using (var writer = new System.IO.StreamWriter(stream))
+                            try
                             {
-                                writer.Write(text);
+                                using (var writer = new System.IO.StreamWriter(stream))
+                                {
+                                    writer.Write(text);
+                                }
+                            }
+                            catch (System.IO.IOException)
+                            {
                             }
                         }
-                        catch (System.IO.IOException)
-                        {
-                        }
-                    }
-                },
-                fileName,
-                text,
-                new RemoteInvokeOptions() { ExpectedExitCode = 0 }).Dispose();
+                    },
+                    fileName,
+                    text,
+                    new RemoteInvokeOptions() { ExpectedExitCode = 0 }).Dispose();
             }
         }
 
