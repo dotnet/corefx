@@ -83,7 +83,7 @@ namespace System.Net.Security.Tests
 
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.NoEncryption))
                 {
-                    if (SupportsNullEncryption)
+                    if (SupportsNullEncryption && !PlatformDetection.SupportsTls13)
                     {
                         await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
                         _log.WriteLine("Client authenticated to server({0}) with encryption cipher: {1} {2}-bit strength",
@@ -92,6 +92,12 @@ namespace System.Net.Security.Tests
                         CipherAlgorithmType expected = CipherAlgorithmType.Null;
                         Assert.Equal(expected, sslStream.CipherAlgorithm);
                         Assert.Equal(0, sslStream.CipherStrength);
+                    }
+                    else if (SupportsNullEncryption && PlatformDetection.SupportsTls13)
+                    {
+                        // Platform supports NullEncryption but TLS1.3 forbids it.
+                        var ae = await Assert.ThrowsAsync<AuthenticationException>(() => sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false));
+                        Assert.IsType<AuthenticationException>(ae);
                     }
                     else
                     {

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Security.Authentication;
@@ -94,6 +95,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        private static bool SupportsNullEncryption => TestConfiguration.SupportsNullEncryption;
+        private static bool SupportsNullEncryption => TestConfiguration.SupportsNullEncryption && !PlatformDetection.SupportsTls13;
     }
 }
