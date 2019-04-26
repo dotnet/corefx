@@ -14,6 +14,7 @@ namespace System.Diagnostics
             // It is important that the part that changes frequently be first, because
             // some sampling functions don't sample from the high entropy part of their hash function.
             // This makes sampling based on this produce poor samples.
+            Debug.Assert(s_uniqSuffix.Length < 50); // Ensure stackalloc not too large
             Span<char> result = stackalloc char[1 + 16 + s_uniqSuffix.Length]; // max length needed
             result[0] = '|';
             bool formatted = Interlocked.Increment(ref s_currentRootId).TryFormat(result.Slice(1), out int charsWritten, "x");
