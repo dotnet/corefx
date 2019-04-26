@@ -413,6 +413,17 @@ namespace System.Tests
         }
 
         [Fact]
+        public static void ConvertToTimeSpanPrecisionTest()
+        {
+            Assert.Equal(12345, TimeSpan.FromMilliseconds(1.23456).Ticks);
+            Assert.Equal(12345, TimeSpan.FromMilliseconds(1.234567).Ticks);
+
+            Assert.Equal(12345600, TimeSpan.FromSeconds(1.23456).Ticks);
+
+            Assert.Equal(1.23456 * 60 * 10_000_000, TimeSpan.FromMinutes(1.23456).Ticks);
+        }
+
+        [Fact]
         public static void FromSeconds_Invalid()
         {
             double maxSeconds = long.MaxValue / (TimeSpan.TicksPerMillisecond / 1000.0);
@@ -428,13 +439,13 @@ namespace System.Tests
 
         public static IEnumerable<object[]> FromMilliseconds_TestData()
         {
-            yield return new object[] { 1500.5, new TimeSpan(0, 0, 0, 1, 501) };
-            yield return new object[] { 2.5, new TimeSpan(0, 0, 0, 0, 3) };
-            yield return new object[] { 1.0, new TimeSpan(0, 0, 0, 0, 1) };
-            yield return new object[] { 0.0, new TimeSpan(0, 0, 0, 0, 0) };
-            yield return new object[] { -1.0, new TimeSpan(0, 0, 0, 0, -1) };
-            yield return new object[] { -2.5, new TimeSpan(0, 0, 0, 0, -3) };
-            yield return new object[] { -1500.5, new TimeSpan(0, 0, 0, -1, -501) };
+            yield return new object[] { 1500.5, new TimeSpan(15005000) };
+            yield return new object[] { 2.5, new TimeSpan(25000) };
+            yield return new object[] { 1.0, new TimeSpan(10000) };
+            yield return new object[] { 0.0, new TimeSpan(0) };
+            yield return new object[] { -1.0, new TimeSpan(-10000) };
+            yield return new object[] { -2.5, new TimeSpan(-25000) };
+            yield return new object[] { -1500.5, new TimeSpan(-15005000) };
         }
 
         [Theory]
@@ -447,7 +458,7 @@ namespace System.Tests
         [Fact]
         public static void FromMilliseconds_Invalid()
         {
-            double maxMilliseconds = long.MaxValue / TimeSpan.TicksPerMillisecond;
+            double maxMilliseconds = (double)TimeSpan.MaxValue.Ticks / (double)TimeSpan.TicksPerMillisecond + 1;
 
             Assert.Throws<OverflowException>(() => TimeSpan.FromMilliseconds(double.PositiveInfinity)); // Value is positive infinity
             Assert.Throws<OverflowException>(() => TimeSpan.FromMilliseconds(double.NegativeInfinity)); // Value is positive infinity
