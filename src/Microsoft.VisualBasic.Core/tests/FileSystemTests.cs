@@ -447,7 +447,7 @@ namespace Microsoft.VisualBasic.Tests
         //   public static string LineInput(int FileNumber) { throw null; }
         //   public static long Loc(int FileNumber) { throw null; }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsWindows))]
         public void Lock_Unlock()
         {
             int fileNumber = FileSystem.FreeFile();
