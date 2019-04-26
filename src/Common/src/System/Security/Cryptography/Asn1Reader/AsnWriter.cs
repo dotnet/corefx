@@ -193,6 +193,24 @@ namespace System.Security.Cryptography.Asn1
             return new ReadOnlySpan<byte>(_buffer, 0, _offset);
         }
 
+        /// <summary>
+        ///   Determines if <see cref="Encode"/> would produce an output identical to
+        ///   <paramref name="other"/>.
+        /// </summary>
+        /// <returns>
+        ///   <see langword="true"/> if the pending encoded data is identical to <paramref name="other"/>,
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   A <see cref="PushSequence()"/> or <see cref="PushSetOf()"/> has not been closed via
+        ///   <see cref="PopSequence()"/> or <see cref="PopSetOf()"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">The writer has been Disposed.</exception>
+        public bool ValueEquals(ReadOnlySpan<byte> other)
+        {
+            return EncodeAsSpan().SequenceEqual(other);
+        }
+
         private void CheckDisposed()
         {
             if (_offset < 0)
