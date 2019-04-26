@@ -3,10 +3,6 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports System
-Imports System.Text
-Imports System.IO
-Imports System.Security
-
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
 
@@ -51,7 +47,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_file.Lock(lStartByte, lLength)
         End Sub
 
-
         ' see Lock description
         Friend Overloads Overrides Sub Unlock(ByVal lStart As Long, ByVal lEnd As Long)
             If lStart > lEnd Then
@@ -74,20 +69,15 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_file.Unlock(lStartByte, lLength)
         End Sub
 
-
         Public Overrides Function GetMode() As OpenMode
             Return OpenMode.Binary
         End Function
-
-
 
         Friend Overloads Overrides Function Seek() As Long
             'm_file.position is the last read byte as a zero based offset
             'Seek returns the position of the next byte to read
             Return (m_position + 1)
         End Function
-
-
 
         Friend Overloads Overrides Sub Seek(ByVal BaseOnePosition As Long)
             If BaseOnePosition <= 0 Then
@@ -104,37 +94,25 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overrides Function LOC() As Long
             Return m_position
         End Function
-
-
 
         Friend Overrides Function CanInput() As Boolean
             Return True
         End Function
 
-
-
         Friend Overrides Function CanWrite() As Boolean
             Return True
         End Function
 
-
-        <SecurityCritical()>
         Friend Overloads Overrides Sub Input(ByRef Value As Object)
             Value = InputStr()
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As String)
             Value = InputStr()
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Char)
             Dim s As String = InputStr()
@@ -146,61 +124,41 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Boolean)
             Value = BooleanType.FromString(InputStr())
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Byte)
             Value = ByteType.FromObject(InputNum(VariantType.Byte))
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Short)
             Value = ShortType.FromObject(InputNum(VariantType.Short))
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Integer)
             Value = IntegerType.FromObject(InputNum(VariantType.Integer))
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Long)
             Value = LongType.FromObject(InputNum(VariantType.Long))
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Single)
             Value = SingleType.FromObject(InputNum(VariantType.Single))
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Double)
             Value = DoubleType.FromObject(InputNum(VariantType.Double))
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Decimal)
             Value = DecimalType.FromObject(InputNum(VariantType.Decimal))
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Date)
             Value = DateType.FromString(InputStr(), GetCultureInfo())
         End Sub
-
-
 
         Friend Overloads Overrides Sub Put(ByVal Value As String, Optional ByVal RecordNumber As Long = 0, Optional ByVal StringIsFixedLength As Boolean = False)
             ValidateWriteable()
@@ -220,8 +178,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
             Value = GetFixedLengthString(RecordNumber, ByteLength)
         End Sub
-
-
 
         Protected Overrides Function InputStr() As String
             Dim lChar As Integer

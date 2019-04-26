@@ -4,9 +4,7 @@
 
 Imports System
 Imports System.Security
-Imports System.Globalization
 Imports System.IO
-Imports System.Text
 
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
@@ -28,8 +26,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Sub New(ByVal FileName As String, ByVal share As OpenShare)
             MyBase.New(FileName, OpenAccess.Read, share, -1)
         End Sub
-
-
 
         '============================================================================
         ' Operations
@@ -60,8 +56,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_eof = (m_file.Length = 0)  'Don't do a Peek here or it will buffer data, causing side-effects with the Lock function.
         End Sub
 
-
-
         Public Function ReadLine() As String
             Dim s As String
             s = m_sr.ReadLine()
@@ -72,25 +66,17 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Return Nothing
         End Function
 
-
-
         Friend Overrides Function CanInput() As Boolean
             Return True
         End Function
-
-
 
         Friend Overrides Function EOF() As Boolean
             Return m_eof
         End Function
 
-
-
         Public Overrides Function GetMode() As OpenMode
             Return OpenMode.Input
         End Function
-
-
 
         Friend Function ParseInputString(ByRef sInput As String) As Object
             ParseInputString = sInput
@@ -139,12 +125,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Function
 
-
-
         '======================================
         ' Input
         '======================================
-        <SecurityCritical()>
         Friend Overloads Overrides Sub Input(ByRef obj As Object)
             Dim lChar As Integer
             Dim sField As String
@@ -166,37 +149,25 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Boolean)
             Value = BooleanType.FromObject(ParseInputString(InputStr()))
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Byte)
             Value = ByteType.FromObject(InputNum(VariantType.Byte))
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Short)
             Value = ShortType.FromObject(InputNum(VariantType.Short))
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Integer)
             Value = IntegerType.FromObject(InputNum(VariantType.Integer))
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Long)
             Value = LongType.FromObject(InputNum(VariantType.Long))
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Char)
             Dim s As String = InputStr()
@@ -208,37 +179,25 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Single)
             Value = SingleType.FromObject(InputNum(VariantType.Single), GetInvariantCultureInfo().NumberFormat)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As Double)
             Value = DoubleType.FromObject(InputNum(VariantType.Double), GetInvariantCultureInfo().NumberFormat)
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Decimal)
             Value = DecimalType.FromObject(InputNum(VariantType.Decimal), GetInvariantCultureInfo().NumberFormat)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Input(ByRef Value As String)
             Value = InputStr()
         End Sub
 
-
-
         Friend Overloads Overrides Sub Input(ByRef Value As Date)
             Value = DateType.FromObject(ParseInputString(InputStr()))
         End Sub
-
-
 
         Friend Overrides Function LOC() As Long
             'This calculation depends on the buffersize of the FileStream 

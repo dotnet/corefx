@@ -8,7 +8,6 @@ Imports System.Security
 Imports System.Globalization
 Imports System.IO
 Imports System.Text
-Imports System.Runtime.InteropServices
 
 Imports Microsoft.VisualBasic.CompilerServices.StructUtils
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
@@ -102,8 +101,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             MyBase.New()
             m_oFile = oFile
         End Sub
-
-
 
         Function Callback(ByVal field_info As Reflection.FieldInfo, ByRef vValue As Object) As Boolean Implements IRecordEnum.Callback
             Dim FieldType As System.Type = field_info.FieldType
@@ -214,8 +211,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Function
     End Class
 
-
-
     <System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)>
     Friend NotInheritable Class GetHandler
         Implements IRecordEnum
@@ -225,8 +220,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             MyBase.New()
             m_oFile = oFile
         End Sub
-
-
 
         Function Callback(ByVal field_info As Reflection.FieldInfo, ByRef vValue As Object) As Boolean Implements IRecordEnum.Callback
             Dim FieldType As System.Type
@@ -319,8 +312,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         End Function
     End Class
 
-
-
     '**********************************************
     '*
     '* VB6File
@@ -364,16 +355,12 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Protected Const FIN_STRING As Short = 2
         Protected Const FIN_NUMBER As Short = 3
 
-
-
         '============================================================================
         ' Construction functions.
         '============================================================================
         Protected Sub New()
             MyBase.New()
         End Sub
-
-
 
         Protected Sub New(ByVal sPath As String, ByVal access As OpenAccess, ByVal share As OpenShare, ByVal lRecordLen As Integer)
             MyBase.New()
@@ -398,16 +385,12 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_sFullPath = (New FileInfo(sPath)).FullName
         End Sub
 
-
-
         '============================================================================
         ' Open/Close/Information functions.
         '============================================================================
         Friend Function GetAbsolutePath() As String
             Return m_sFullPath
         End Function
-
-
 
         Friend Overridable Sub OpenFile()
             Try
@@ -423,13 +406,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End Try
         End Sub
 
-
-
         Friend Overridable Sub CloseFile()
             CloseTheFile()
         End Sub
-
-
 
         Protected Sub CloseTheFile()
             If m_sw Is Nothing Then
@@ -452,13 +431,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Function GetColumn() As Integer
             Return m_lCurrentColumn
         End Function
-
-
 
         Friend Sub SetColumn(ByVal lColumn As Integer)
             If m_lWidth <> 0 AndAlso m_lCurrentColumn <> 0 AndAlso
@@ -469,13 +444,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Function GetWidth() As Integer
             Return m_lWidth
         End Function
-
-
 
         Friend Sub SetWidth(ByVal RecordWidth As Integer)
             If RecordWidth < 0 OrElse RecordWidth > 255 Then
@@ -485,8 +456,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_lWidth = RecordWidth
         End Sub
 
-
-
         '============================================================================
         ' Output functions.
         '============================================================================
@@ -494,25 +463,17 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Sub WriteString(ByVal s As String)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Function EOF() As Boolean
             Return m_eof
         End Function
 
-
-
         Friend Function LOF() As Long
             Return m_file.Length
         End Function
-
-
 
         Friend Overridable Function LOC() As Long
             If (m_lRecordLen = -1) OrElse (GetMode() <> OpenMode.Random) Then
@@ -533,13 +494,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Function
 
-
-
         Friend Overridable Function GetStreamReader() As StreamReader
             Return m_sr
         End Function
-
-
 
         Friend Sub SetRecord(ByVal RecordNumber As Long)
             Dim lSeekPos As Long
@@ -590,8 +547,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_lRecordStart = lSeekPos
         End Sub
 
-
-
         Friend Overridable Overloads Sub Seek(ByVal BaseOnePosition As Long)
             If BaseOnePosition <= 0 Then
                 Throw VbMakeException(vbErrors.BadRecordNum)
@@ -614,8 +569,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
         End Sub
 
-
-
         'Function Seek
         '
         'RANDOM MODE - Returns number of next record
@@ -626,8 +579,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             'Seek returns the position of the next byte to read
             Return (m_position + 1)
         End Function
-
-
 
         Friend Sub SeekOffset(ByVal offset As Long)
             'Do not call m_file.SetLength here because that could extend the file length,
@@ -641,26 +592,18 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
         End Sub
 
-
-
         Friend Function GetPos() As Long
             Return m_position
         End Function
-
-
 
         Friend Overridable Overloads Sub Lock()
             'Lock the whole file, not just the current size of file, since file could change.
             m_file.Lock(0, Int32.MaxValue)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Unlock()
             m_file.Unlock(0, Int32.MaxValue)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Lock(ByVal Record As Long)
             If m_lRecordLen = -1 Then
@@ -670,8 +613,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overridable Overloads Sub Unlock(ByVal Record As Long)
             If m_lRecordLen = -1 Then
                 m_file.Unlock((Record - 1), 1)
@@ -679,8 +620,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 m_file.Unlock((Record - 1) * m_lRecordLen, m_lRecordLen)
             End If
         End Sub
-
-
 
         Friend Overridable Overloads Sub Lock(ByVal RecordStart As Long, ByVal RecordEnd As Long)
             If m_lRecordLen = -1 Then
@@ -690,8 +629,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overridable Overloads Sub Unlock(ByVal RecordStart As Long, ByVal RecordEnd As Long)
             If m_lRecordLen = -1 Then
                 m_file.Unlock((RecordStart - 1), (RecordEnd - RecordStart) + 1)
@@ -699,8 +636,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 m_file.Unlock((RecordStart - 1) * m_lRecordLen, ((RecordEnd - RecordStart) + 1) * m_lRecordLen)
             End If
         End Sub
-
-
 
         Friend Function LineInput() As String
             ValidateReadable()
@@ -715,25 +650,17 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Return Result
         End Function
 
-
-
         Friend Overridable Function CanInput() As Boolean
             Return False
         End Function
-
-
 
         Friend Overridable Function CanWrite() As Boolean
             Return False
         End Function
 
-
-
         Protected Overridable Sub InputObject(ByRef Value As Object)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Protected Overridable Function InputStr() As String
             Dim lChar As Integer
@@ -755,8 +682,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             SkipTrailingWhiteSpace()
         End Function
 
-
-
         Protected Overridable Function InputNum(ByVal vt As VariantType) As Object
             Dim sField As String
 
@@ -773,11 +698,7 @@ Namespace Microsoft.VisualBasic.CompilerServices
             SkipTrailingWhiteSpace()
         End Function
 
-
-
         Public MustOverride Function GetMode() As OpenMode
-
-
 
         Friend Function InputString(ByVal lLen As Integer) As String
             Dim sb As StringBuilder
@@ -824,8 +745,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Return sb.ToString()
         End Function
 
-
-
         Friend Sub SPC(ByVal iCount As Integer)
             Dim lCurPos As Integer
             Dim lWidth As Integer
@@ -870,8 +789,6 @@ NewLine:
             End If
         End Sub
 
-
-
         Friend Sub Tab(ByVal Column As Integer)
             Dim lCurPos As Integer
             Dim lWidth As Integer
@@ -908,8 +825,6 @@ NewLine:
             End If
         End Sub
 
-
-
         Friend Sub SetPrintMode()
             Dim mode As OpenMode
 
@@ -924,8 +839,6 @@ NewLine:
             m_bPrint = True
         End Sub
 
-
-
         Friend Shared Function VTType(ByVal VarName As Object) As VT
             If VarName Is Nothing Then
                 Return VT.Variant
@@ -933,8 +846,6 @@ NewLine:
 
             Return VTFromComType(VarName.GetType())
         End Function
-
-
 
         Friend Shared Function VTFromComType(ByVal typ As System.Type) As VT
             If typ Is Nothing Then
@@ -1005,8 +916,6 @@ NewLine:
             End If
         End Function
 
-
-
         Friend Sub PutFixedArray(ByVal RecordNumber As Long, ByVal arr As System.Array, ByVal ElementType As System.Type,
             Optional ByVal FixedStringLength As Integer = -1, Optional ByVal FirstBound As Integer = -1,
             Optional ByVal SecondBound As Integer = -1)
@@ -1017,8 +926,6 @@ NewLine:
             End If
             PutArrayData(arr, ElementType, FixedStringLength, FirstBound, SecondBound)
         End Sub
-
-
 
         Friend Sub PutDynamicArray(ByVal RecordNumber As Long, ByVal arr As System.Array,
             Optional ByVal ContainedInVariant As Boolean = True, Optional ByVal FixedStringLength As Integer = -1)
@@ -1062,8 +969,6 @@ NewLine:
             End If
         End Sub
 
-
-
         Friend Sub LengthCheck(ByVal Length As Integer)
             If m_lRecordLen = -1 Then
                 Exit Sub
@@ -1077,8 +982,6 @@ NewLine:
                 End If
             End If
         End Sub
-
-
 
         'Writes a fixed length string member of a structure to the file
         Friend Sub PutFixedLengthString(ByVal RecordNumber As Long, ByVal s As String, ByVal lengthToWrite As Integer)
@@ -1132,8 +1035,6 @@ NewLine:
             m_position += lengthToWrite
         End Sub
 
-
-
         Friend Sub PutVariantString(ByVal RecordNumber As Long, ByVal s As String)
             If s Is Nothing Then
                 s = ""
@@ -1154,8 +1055,6 @@ NewLine:
             m_position += ByteLength + 2 + 2
         End Sub
 
-
-
         Friend Sub PutString(ByVal RecordNumber As Long, ByVal s As String)
             If s Is Nothing Then
                 s = ""
@@ -1173,7 +1072,6 @@ NewLine:
 
             m_position += ByteLength
         End Sub
-
 
         Friend Sub PutStringWithLength(ByVal RecordNumber As Long, ByVal s As String)
             If s Is Nothing Then
@@ -1195,8 +1093,6 @@ NewLine:
             m_position += ByteLength + 2
         End Sub
 
-
-
         Friend Sub PutDate(ByVal RecordNumber As Long, ByVal dt As Date, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 8
             Dim dbl As Double
@@ -1217,7 +1113,6 @@ NewLine:
             m_position += RecLength
         End Sub
 
-
         Friend Sub PutShort(ByVal RecordNumber As Long, ByVal i As Short, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 2
 
@@ -1235,8 +1130,6 @@ NewLine:
             m_bw.Write(i)
             m_position += RecLength
         End Sub
-
-
 
         Friend Sub PutInteger(ByVal RecordNumber As Long, ByVal l As Integer, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 4
@@ -1256,8 +1149,6 @@ NewLine:
             m_position += RecLength
         End Sub
 
-
-
         Friend Sub PutLong(ByVal RecordNumber As Long, ByVal l As Long, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 8
 
@@ -1275,8 +1166,6 @@ NewLine:
             m_bw.Write(l)
             m_position += RecLength
         End Sub
-
-
 
         Friend Sub PutByte(ByVal RecordNumber As Long, ByVal byt As Byte, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 1
@@ -1296,8 +1185,6 @@ NewLine:
             m_position += RecLength
         End Sub
 
-
-
         Friend Sub PutChar(ByVal RecordNumber As Long, ByVal ch As Char, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 2
 
@@ -1315,8 +1202,6 @@ NewLine:
             m_bw.Write(ch)
             m_position += RecLength
         End Sub
-
-
 
         Friend Sub PutSingle(ByVal RecordNumber As Long, ByVal sng As Single, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 4
@@ -1336,8 +1221,6 @@ NewLine:
             m_position += RecLength
         End Sub
 
-
-
         Friend Sub PutDouble(ByVal RecordNumber As Long, ByVal dbl As Double, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 8
 
@@ -1356,8 +1239,6 @@ NewLine:
             m_position += RecLength
         End Sub
 
-
-
         Friend Sub PutEmpty(ByVal RecordNumber As Long)
             'This will always be a Variant
             SetRecord(RecordNumber)
@@ -1365,8 +1246,6 @@ NewLine:
             m_bw.Write(VT.Empty)
             m_position += 2
         End Sub
-
-
 
         Friend Sub PutBoolean(ByVal RecordNumber As Long, ByVal b As Boolean, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 2
@@ -1390,8 +1269,6 @@ NewLine:
 
             m_position += RecLength
         End Sub
-
-
 
         Friend Sub PutDecimal(ByVal RecordNumber As Long, ByVal dec As Decimal, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 16
@@ -1431,8 +1308,6 @@ NewLine:
             m_position += RecLength
         End Sub
 
-
-
         Friend Sub PutCurrency(ByVal RecordNumber As Long, ByVal dec As Decimal, Optional ByVal ContainedInVariant As Boolean = False)
             Dim RecLength As Integer = 16
 
@@ -1450,8 +1325,6 @@ NewLine:
             m_bw.Write(System.Decimal.ToOACurrency(dec))
             m_position += RecLength
         End Sub
-
-
 
         Friend Sub PutRecord(ByVal RecordNumber As Long, ByVal o As ValueType)
             If o Is Nothing Then
@@ -1472,8 +1345,6 @@ NewLine:
 
             EnumerateUDT(o, intf, False)
         End Sub
-
-
 
         Friend Function ComTypeFromVT(ByVal vtype As VT) As System.Type
             Select Case vtype
@@ -1514,8 +1385,6 @@ NewLine:
             End Select
         End Function
 
-
-
         Friend Sub GetFixedArray(ByVal RecordNumber As Long, ByRef arr As System.Array,
         ByVal FieldType As System.Type, Optional ByVal FirstBound As Integer = -1,
             Optional ByVal SecondBound As Integer = -1, Optional ByVal FixedStringLength As Integer = -1)
@@ -1529,8 +1398,6 @@ NewLine:
             SetRecord(RecordNumber)
             GetArrayData(arr, FieldType, FirstBound, SecondBound, FixedStringLength)
         End Sub
-
-
 
         Friend Sub GetDynamicArray(ByRef arr As System.Array, ByVal t As System.Type, Optional ByVal FixedStringLength As Integer = -1)
             arr = GetArrayDesc(t)
@@ -1547,8 +1414,6 @@ NewLine:
 
             GetArrayData(arr, t, FirstBound, SecondBound, FixedStringLength)
         End Sub
-
-
 
         Private Sub PutArrayDesc(ByVal arr As System.Array)
             Dim cDims As Short
@@ -1572,8 +1437,6 @@ NewLine:
                 m_position += 8
             Next i
         End Sub
-
-
 
         Friend Function GetArrayDesc(ByVal typ As System.Type) As System.Array
             Dim cDims As Integer
@@ -1601,8 +1464,6 @@ NewLine:
             Return System.Array.CreateInstance(typ, lElementCounts, lLowerBounds)
         End Function
 
-
-
         Friend Overridable Function GetLengthPrefixedString(ByVal RecordNumber As Long) As String
             SetRecord(RecordNumber)
 
@@ -1613,14 +1474,10 @@ NewLine:
             Return ReadString()
         End Function
 
-
-
         Friend Overridable Function GetFixedLengthString(ByVal RecordNumber As Long, ByVal ByteLength As Integer) As String
             SetRecord(RecordNumber)
             Return ReadString(ByteLength)
         End Function
-
-
 
         Protected Overloads Function ReadString(ByVal ByteLength As Integer) As String
             Dim byteArray As Byte()
@@ -1634,8 +1491,6 @@ NewLine:
 
             Return m_Encoding.GetString(byteArray)
         End Function
-
-
 
         Protected Overloads Function ReadString() As String
             Dim ByteLen As Integer
@@ -1652,8 +1507,6 @@ NewLine:
 
         End Function
 
-
-
         Friend Function GetDate(ByVal RecordNumber As Long) As Date
             Dim dbl As Double
 
@@ -1662,8 +1515,6 @@ NewLine:
             m_position += 8
             Return System.DateTime.FromOADate(dbl)
         End Function
-
-
 
         Friend Function GetShort(ByVal RecordNumber As Long) As Short
             Dim s As Short
@@ -1674,8 +1525,6 @@ NewLine:
             Return s
         End Function
 
-
-
         Friend Function GetInteger(ByVal RecordNumber As Long) As Integer
             Dim i As Integer
 
@@ -1684,8 +1533,6 @@ NewLine:
             m_position += 4
             Return i
         End Function
-
-
 
         Friend Function GetLong(ByVal RecordNumber As Long) As Long
             Dim l As Long
@@ -1696,8 +1543,6 @@ NewLine:
             Return l
         End Function
 
-
-
         Friend Function GetByte(ByVal RecordNumber As Long) As Byte
             Dim b As Byte
 
@@ -1706,8 +1551,6 @@ NewLine:
             m_position += 1
             Return b
         End Function
-
-
 
         Friend Function GetChar(ByVal RecordNumber As Long) As Char
             Dim c As Char
@@ -1718,8 +1561,6 @@ NewLine:
             Return c
         End Function
 
-
-
         Friend Function GetSingle(ByVal RecordNumber As Long) As Single
             Dim s As Single
 
@@ -1729,8 +1570,6 @@ NewLine:
             Return s
         End Function
 
-
-
         Friend Function GetDouble(ByVal RecordNumber As Long) As Double
             Dim d As Double
 
@@ -1739,8 +1578,6 @@ NewLine:
             m_position += 8
             Return d
         End Function
-
-
 
         Friend Function GetDecimal(ByVal RecordNumber As Long) As Decimal
             Dim vt As Integer
@@ -1765,8 +1602,6 @@ NewLine:
             Return New Decimal(lo, mid, hi, negative, flags)
         End Function
 
-
-
         Friend Function GetCurrency(ByVal RecordNumber As Long) As Decimal
             Dim i64 As Int64
 
@@ -1775,8 +1610,6 @@ NewLine:
             m_position += 8
             Return Decimal.FromOACurrency(i64)
         End Function
-
-
 
         Friend Function GetBoolean(ByVal RecordNumber As Long) As Boolean
             Dim i As Short
@@ -1791,8 +1624,6 @@ NewLine:
                 Return True
             End If
         End Function
-
-
 
         Friend Sub GetRecord(ByVal RecordNumber As Long, ByRef o As ValueType, Optional ByVal ContainedInVariant As Boolean = False)
             Dim intf As IRecordEnum
@@ -1812,8 +1643,6 @@ NewLine:
 
             EnumerateUDT(o, intf, True)
         End Sub
-
-
 
         Friend Sub PutArrayData(ByVal arr As System.Array, ByVal typ As System.Type, ByVal FixedStringLength As Integer,
             ByVal FirstBound As Integer, ByVal SecondBound As Integer)
@@ -2244,8 +2073,6 @@ NewLine:
             End If
         End Sub
 
-
-
         Private Function AddSpaces(ByVal s As String) As String
             Dim NegativeSign As String
 
@@ -2264,7 +2091,6 @@ NewLine:
             'Append both leading and trailing space
             Return System.String.Concat(" ", s, " ")
         End Function
-
 
         Friend Sub PrintLine(ByVal ParamArray Output() As Object)
             Print(Output)
@@ -2360,22 +2186,16 @@ NewLine:
             Next i
         End Sub
 
-
-        <SecurityCritical()>
         Friend Sub WriteLineHelper(ByVal ParamArray Output() As Object)
             InternalWriteHelper(Output)
             WriteLine(Nothing)
         End Sub
 
-
-        <SecurityCritical()>
         Friend Sub WriteHelper(ByVal ParamArray Output() As Object)
             InternalWriteHelper(Output)
             WriteString(",")
         End Sub
 
-
-        <SecurityCritical()>
         Private Sub InternalWriteHelper(ByVal ParamArray Output() As Object)
             Dim SpcInfoType As Type = GetType(SpcInfo)
             Dim CurrentType As Type = SpcInfoType
@@ -2450,31 +2270,20 @@ NewLine:
             Next
         End Sub
 
-
-
         Private Function IOStrFromSingle(ByVal Value As Single, ByVal NumberFormat As NumberFormatInfo) As String
             Return Value.ToString(Nothing, NumberFormat)
         End Function
-
-
 
         Private Function IOStrFromDouble(ByVal Value As Double, ByVal NumberFormat As NumberFormatInfo) As String
             Return Value.ToString(Nothing, NumberFormat)
         End Function
 
-
-
         Private Function IOStrFromDecimal(ByVal Value As Decimal, ByVal NumberFormat As NumberFormatInfo) As String
             Return Value.ToString("G29", NumberFormat)
         End Function
 
-
-        <SecurityCritical()>
         Friend Function FormatUniversalDate(ByVal dt As Date) As String
             Dim bHasDate As Boolean
-#If False Then
-            Dim sb As StringBuilder
-#End If
             Dim sFormat As String
 
             'sb = New StringBuilder("#", 24)
@@ -2484,14 +2293,6 @@ NewLine:
             '  only insert date If not at the "start of time" (1/1/0)
 
             If (dt.Year <> 0 OrElse dt.Month <> 1 OrElse dt.Day <> 1) Then
-#If False Then
-                '  output year, month, day as "yyyy-mm-dd"
-                sb.Append(Right(CStr(dt.Year + 10000), 4))
-                sb.Append("-")
-                sb.Append(Right(CStr(dt.Month + 100), 2))
-                sb.Append("-")
-                sb.Append(Right(CStr(dt.Day + 100), 2))
-#End If
                 bHasDate = True
                 sFormat = sDateFormat
             End If
@@ -2502,18 +2303,6 @@ NewLine:
                 If bHasDate Then
                     sFormat = sDateTimeFormat
                 End If
-#If False Then
-                If bHasDate Then
-                    sb.Append(" ")
-                End If
-                '  output hour, minute, and second as "hh:mm:ss"
-
-                sb.Append(Right(CStr(dt.Hour + 100), 2))
-                sb.Append(":")
-                sb.Append(Right(CStr(dt.Minute + 100), 2))
-                sb.Append(":")
-                sb.Append(Right(CStr(dt.Second + 100), 2))
-#End If
             End If
 
             Return dt.ToString(sFormat, m_WriteDateFormatInfo)
@@ -2522,14 +2311,10 @@ NewLine:
             '    FormatUniversalDate = sb.ToString()
         End Function
 
-
-
         Protected Function GetQuotedString(ByVal Value As String) As String
             'Wrap Value with quotes, but make sure to escape quotes contained in Value.
             Return """" & Value.Replace("""", """""") & """"
         End Function
-
-
 
         Protected Sub ValidateRec(ByVal RecordNumber As Long)
             If RecordNumber < 1 Then
@@ -2537,19 +2322,13 @@ NewLine:
             End If
         End Sub
 
-
-
         Friend Overridable Sub GetObject(ByRef Value As Object, Optional ByVal RecordNumber As Long = 0, Optional ByVal ContainedInVariant As Boolean = True)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub [Get](ByRef Value As ValueType, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub [Get](ByRef Value As System.Array, Optional ByVal RecordNumber As Long = 0,
             Optional ByVal ArrayIsDynamic As Boolean = False, Optional ByVal StringIsFixedLength As Boolean = False)
@@ -2557,91 +2336,61 @@ NewLine:
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub [Get](ByRef Value As Boolean, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub [Get](ByRef Value As Byte, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub [Get](ByRef Value As Short, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub [Get](ByRef Value As Integer, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub [Get](ByRef Value As Long, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub [Get](ByRef Value As Char, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub [Get](ByRef Value As Single, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub [Get](ByRef Value As Double, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub [Get](ByRef Value As Decimal, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub [Get](ByRef Value As String, Optional ByVal RecordNumber As Long = 0, Optional ByVal StringIsFixedLength As Boolean = False)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub [Get](ByRef Value As Date, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Sub PutObject(ByVal Value As Object, Optional ByVal RecordNumber As Long = 0, Optional ByVal ContainedInVariant As Boolean = True)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As Object, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As ValueType, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Put(ByVal Value As System.Array, Optional ByVal RecordNumber As Long = 0,
             Optional ByVal ArrayIsDynamic As Boolean = False, Optional ByVal StringIsFixedLength As Boolean = False)
@@ -2649,149 +2398,100 @@ NewLine:
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As Boolean, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Put(ByVal Value As Byte, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As Short, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Put(ByVal Value As Integer, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As Long, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Put(ByVal Value As Char, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As Single, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Put(ByVal Value As Double, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As Decimal, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Put(ByVal Value As String, Optional ByVal RecordNumber As Long = 0, Optional ByVal StringIsFixedLength As Boolean = False)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Put(ByVal Value As Date, Optional ByVal RecordNumber As Long = 0)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         '======================================
         ' Input
         '======================================
-        <SecurityCritical()>
         Friend Overridable Overloads Sub Input(ByRef obj As Object)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Input(ByRef Value As Boolean)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Input(ByRef Value As Byte)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Input(ByRef Value As Short)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Input(ByRef Value As Integer)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Input(ByRef Value As Long)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Input(ByRef Value As Char)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Input(ByRef Value As Single)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Input(ByRef Value As Double)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Friend Overridable Overloads Sub Input(ByRef Value As Decimal)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Input(ByRef Value As String)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
 
-
-
         Friend Overridable Overloads Sub Input(ByRef Value As Date)
             Throw VbMakeException(vbErrors.BadFileMode)
         End Sub
-
-
 
         Protected Function SkipWhiteSpace() As Integer
             Dim lChar As Integer = m_sr.Peek()
@@ -2816,8 +2516,6 @@ SkipWhiteSpaceExit:
             Return lChar
         End Function
 
-
-
         Private Function GetFileInTerm(ByVal iTermType As Short) As String
             Select Case iTermType
                 Case FIN_NUMTERMCHAR
@@ -2835,28 +2533,20 @@ SkipWhiteSpaceExit:
             End Select
         End Function
 
-
-
         Protected Function IntlIsSpace(ByVal lch As Integer) As Boolean
             ' consider testing for intl spaces
             Return (lch = lchSpace) Or (lch = lchIntlSpace)
         End Function
-
-
 
         Protected Function IntlIsDoubleQuote(ByVal lch As Integer) As Boolean
             ' consider testing for intl double quotes
             Return (lch = lchDoubleQuote)
         End Function
 
-
-
         Protected Function IntlIsComma(ByVal lch As Integer) As Boolean
             ' consider testing for intl commas
             Return (lch = lchComma)
         End Function
-
-
 
         Protected Function SkipWhiteSpaceEOF() As Integer
             Dim retValue As Integer = SkipWhiteSpace()
@@ -2866,8 +2556,6 @@ SkipWhiteSpaceExit:
             End If
             Return retValue
         End Function
-
-
 
         Protected Sub SkipTrailingWhiteSpace()
             Dim lChar As Integer
@@ -2931,8 +2619,6 @@ SkipWhiteSpaceExit:
                 Exit Sub
             End If
         End Sub
-
-
 
         Protected Function ReadInField(ByVal iTermType As Short) As String
             Dim sTermChars As String

@@ -101,8 +101,6 @@ Namespace Microsoft.VisualBasic
             IO.Directory.SetCurrentDirectory(Drive & Path.VolumeSeparatorChar)
         End Sub
 
-
-
         Public Sub ChDrive(ByVal Drive As String)
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
                 "Methods in Microsoft.VisualBasic should not call FileSystem public method.")
@@ -113,8 +111,6 @@ Namespace Microsoft.VisualBasic
 
             ChDrive(Drive.Chars(0))
         End Sub
-
-
 
         Public Function CurDir() As String
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
@@ -141,16 +137,12 @@ Namespace Microsoft.VisualBasic
             Return CurrentPath
         End Function
 
-
-
         Public Function Dir() As String
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
                 "Methods in Microsoft.VisualBasic should not call FileSystem public method.")
 
             Return FindNextFile(System.Reflection.Assembly.GetCallingAssembly())
         End Function
-
-
 
         <ResourceExposure(ResourceScope.None)>
         <ResourceConsumption(ResourceScope.Machine, ResourceScope.Machine)>
@@ -211,8 +203,6 @@ Namespace Microsoft.VisualBasic
             End If
         End Function
 
-
-
         Public Sub MkDir(ByVal Path As String)
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
                 "Methods in Microsoft.VisualBasic should not call FileSystem public method.")
@@ -227,8 +217,6 @@ Namespace Microsoft.VisualBasic
                 Directory.CreateDirectory(Path)
             End If
         End Sub
-
-
 
         Public Sub RmDir(ByVal Path As String)
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
@@ -254,8 +242,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         '============================================================================
         ' File functions.
         '============================================================================
@@ -275,8 +261,6 @@ Namespace Microsoft.VisualBasic
 
             Return False
         End Function
-
-
 
         Public Sub FileCopy(ByVal Source As String, ByVal Destination As String)
             If (Source Is Nothing) OrElse (Source.Length = 0) Then
@@ -322,8 +306,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Function FileDateTime(ByVal PathName As String) As DateTime
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
                 "Methods in Microsoft.VisualBasic should not call FileSystem public method.")
@@ -339,8 +321,6 @@ Namespace Microsoft.VisualBasic
             Throw New FileNotFoundException(GetResourceString(SR.FileSystem_FileNotFound1, PathName))
         End Function
 
-
-
         Public Function FileLen(ByVal PathName As String) As Long
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
                 "Methods in Microsoft.VisualBasic should not call FileSystem public method.")
@@ -351,8 +331,6 @@ Namespace Microsoft.VisualBasic
 
             Throw New FileNotFoundException(GetResourceString(SR.FileSystem_FileNotFound1, PathName))
         End Function
-
-
 
         Public Function GetAttr(ByVal PathName As String) As FileAttribute
             'VB's FileAttribute is different than System.IO.FileAttributes:
@@ -402,8 +380,6 @@ Namespace Microsoft.VisualBasic
             End If
 
         End Function
-
-
 
         Public Sub Kill(ByVal PathName As String)
             Debug.Assert(Not System.Reflection.Assembly.GetCallingAssembly() Is Utils.VBRuntimeAssembly,
@@ -465,8 +441,6 @@ Namespace Microsoft.VisualBasic
             End If
         End Sub
 
-
-
         Public Sub SetAttr(ByVal PathName As String, ByVal Attributes As FileAttribute)
             'VB's FileAttribute is different than System.IO.FileAttributes:
             '                   VB    URT
@@ -516,8 +490,6 @@ Namespace Microsoft.VisualBasic
 #End If
         End Function
 
-
-
         '*****************************************
         ' FileSystem APIs
         '*****************************************
@@ -530,8 +502,6 @@ Namespace Microsoft.VisualBasic
             End If
         End Sub
 
-
-
         Private Sub ValidateShare(ByVal Share As OpenShare)
             If Share <> OpenShare.Default AndAlso
                 Share <> OpenShare.Shared AndAlso
@@ -542,8 +512,6 @@ Namespace Microsoft.VisualBasic
             End If
         End Sub
 
-
-
         Private Sub ValidateMode(ByVal Mode As OpenMode)
             If Mode <> OpenMode.Input AndAlso
                 Mode <> OpenMode.Output AndAlso
@@ -553,8 +521,6 @@ Namespace Microsoft.VisualBasic
                 Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue1, "Mode"))
             End If
         End Sub
-
-
 
         '============================================================================
         ' Initialization functions.
@@ -585,8 +551,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileClose(ByVal ParamArray FileNumbers() As Integer)
             'If the paramarray is empty, then all files get closed
 
@@ -610,15 +574,11 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Private Sub ValidateGetPutRecordNumber(ByVal RecordNumber As Long)
             If RecordNumber < 1 AndAlso RecordNumber <> -1 Then
                 Throw VbMakeException(New ArgumentException(GetResourceString(SR.Argument_InvalidValue1, "RecordNumber")), vbErrors.BadRecordNum)
             End If
         End Sub
-
-
 
         Public Sub FileGetObject(ByVal FileNumber As Integer, ByRef Value As Object, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -630,8 +590,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As ValueType, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -641,8 +599,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As System.Array, Optional ByVal RecordNumber As Long = -1,
             Optional ByVal ArrayIsDynamic As Boolean = False, Optional ByVal StringIsFixedLength As Boolean = False)
@@ -655,8 +611,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Boolean, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -666,8 +620,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Byte, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -679,8 +631,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Short, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -690,8 +640,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Integer, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -703,8 +651,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Long, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -714,8 +660,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Char, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -727,8 +671,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Single, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -738,8 +680,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Double, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -751,8 +691,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Decimal, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -762,8 +700,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As String, Optional ByVal RecordNumber As Long = -1, Optional ByVal StringIsFixedLength As Boolean = False)
             Try
@@ -775,8 +711,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FileGet(ByVal FileNumber As Integer, ByRef Value As Date, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -786,8 +720,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FilePutObject(ByVal FileNumber As Integer, ByVal Value As Object, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -799,14 +731,10 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         <ObsoleteAttribute("This member has been deprecated. Please use FilePutObject to write Object types, or coerce FileNumber and RecordNumber to Integer for writing non-Object types. http://go.microsoft.com/fwlink/?linkid=14202")>
         Public Sub FilePut(ByVal FileNumber As Object, ByVal Value As Object, Optional ByVal RecordNumber As Object = -1)
             Throw New ArgumentException(GetResourceString(SR.UseFilePutObject))
         End Sub
-
-
 
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As ValueType, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -817,8 +745,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As System.Array, Optional ByVal RecordNumber As Long = -1,
             Optional ByVal ArrayIsDynamic As Boolean = False, Optional ByVal StringIsFixedLength As Boolean = False)
@@ -832,8 +758,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Boolean, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -843,8 +767,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Byte, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -856,8 +778,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Short, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -867,8 +787,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Integer, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -880,8 +798,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Long, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -891,8 +807,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Char, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -904,8 +818,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Single, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -915,8 +827,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Double, Optional ByVal RecordNumber As Long = -1)
             Try
@@ -928,8 +838,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Decimal, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -939,8 +847,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As String, Optional ByVal RecordNumber As Long = -1, Optional ByVal StringIsFixedLength As Boolean = False)
             Try
@@ -952,8 +858,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub FilePut(ByVal FileNumber As Integer, ByVal Value As Date, Optional ByVal RecordNumber As Long = -1)
             Try
                 ValidateGetPutRecordNumber(RecordNumber)
@@ -964,8 +868,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub Print(ByVal FileNumber As Integer, ByVal ParamArray Output() As Object)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -974,8 +876,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub PrintLine(ByVal FileNumber As Integer, ByVal ParamArray Output() As Object)
             Try
@@ -986,7 +886,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Object)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -995,8 +894,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Boolean)
             Try
@@ -1007,8 +904,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Byte)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -1017,8 +912,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Short)
             Try
@@ -1029,8 +922,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Integer)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -1039,8 +930,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Long)
             Try
@@ -1051,8 +940,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Char)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -1061,8 +948,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Single)
             Try
@@ -1073,8 +958,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Double)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -1083,8 +966,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Decimal)
             Try
@@ -1095,8 +976,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As String)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -1105,8 +984,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Sub Input(ByVal FileNumber As Integer, ByRef Value As Date)
             Try
@@ -1117,8 +994,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub [Write](ByVal FileNumber As Integer, ByVal ParamArray Output() As Object)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -1128,8 +1003,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Sub
 
-
-
         Public Sub WriteLine(ByVal FileNumber As Integer, ByVal ParamArray Output() As Object)
             Try
                 Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
@@ -1138,8 +1011,6 @@ Namespace Microsoft.VisualBasic
                 Throw ex
             End Try
         End Sub
-
-
 
         Public Function InputString(ByVal FileNumber As Integer, ByVal CharCount As Integer) As String
             Try
@@ -1164,8 +1035,6 @@ Namespace Microsoft.VisualBasic
             End Try
         End Function
 
-
-
         Public Function [LineInput](ByVal FileNumber As Integer) As String
             Dim oFile As VB6File
 
@@ -1180,56 +1049,40 @@ Namespace Microsoft.VisualBasic
             Return oFile.LineInput()
         End Function
 
-
-
         Public Sub Lock(ByVal FileNumber As Integer)
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).Lock()
         End Sub
-
-
 
         Public Sub Lock(ByVal FileNumber As Integer, ByVal Record As Long)
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).Lock(Record)
         End Sub
 
-
-
         Public Sub Lock(ByVal FileNumber As Integer, ByVal FromRecord As Long, ByVal ToRecord As Long)
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).Lock(FromRecord, ToRecord)
         End Sub
-
-
 
         Public Sub Unlock(ByVal FileNumber As Integer)
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).Unlock()
         End Sub
 
-
-
         Public Sub Unlock(ByVal FileNumber As Integer, ByVal Record As Long)
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).Unlock(Record)
         End Sub
-
-
 
         Public Sub Unlock(ByVal FileNumber As Integer, ByVal FromRecord As Long, ByVal ToRecord As Long)
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).Unlock(FromRecord, ToRecord)
         End Sub
 
-
-
         Public Sub FileWidth(ByVal FileNumber As Integer, ByVal RecordWidth As Integer)
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).SetWidth(RecordWidth)
         End Sub
-
-
 
         Public Function [FreeFile]() As Integer
             Dim indChannel As Integer
@@ -1251,8 +1104,6 @@ Namespace Microsoft.VisualBasic
             Throw VbMakeException(vbErrors.TooManyFiles)
         End Function
 
-
-
         'Function Seek
         '
         'RANDOM MODE - Sets the number of next record to read/write
@@ -1263,8 +1114,6 @@ Namespace Microsoft.VisualBasic
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             GetStream(assem, FileNumber).Seek(Position)
         End Sub
-
-
 
         'Function Seek
         '
@@ -1277,36 +1126,26 @@ Namespace Microsoft.VisualBasic
             Return GetStream(assem, FileNumber).Seek()
         End Function
 
-
-
         Public Function EOF(ByVal FileNumber As Integer) As Boolean
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             Return GetStream(assem, FileNumber).EOF()
         End Function
-
-
 
         Public Function Loc(ByVal FileNumber As Integer) As Long
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             Return GetStream(assem, FileNumber).LOC()
         End Function
 
-
-
         Public Function LOF(ByVal FileNumber As Integer) As Long
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             Return GetStream(assem, FileNumber).LOF()
         End Function
-
-
 
         Public Function TAB() As TabInfo
             Dim Result As TabInfo
             Result.Column = -1
             Return Result
         End Function
-
-
 
         Public Function TAB(ByVal Column As Short) As TabInfo
             Dim Result As TabInfo
@@ -1318,8 +1157,6 @@ Namespace Microsoft.VisualBasic
             Return Result
         End Function
 
-
-
         Public Function SPC(ByVal Count As Short) As SpcInfo
             Dim Result As SpcInfo
             If Count < 1 Then
@@ -1330,20 +1167,14 @@ Namespace Microsoft.VisualBasic
             Return Result
         End Function
 
-
-
         Public Function FileAttr(ByVal FileNumber As Integer) As OpenMode
             Dim assem As System.Reflection.Assembly = System.Reflection.Assembly.GetCallingAssembly()
             Return GetStream(assem, FileNumber).GetMode()
         End Function
 
-
-
         Public Sub Reset()
             CloseAllFiles(System.Reflection.Assembly.GetCallingAssembly())
         End Sub
-
-
 
         <ResourceExposure(ResourceScope.Machine)>
         <ResourceConsumption(ResourceScope.Machine)>
@@ -1383,8 +1214,6 @@ Namespace Microsoft.VisualBasic
 #End If
         End Sub
 
-
-
         '======================================
         'Private APIs
         '======================================
@@ -1395,8 +1224,6 @@ Namespace Microsoft.VisualBasic
                                             OpenModeTypes.Append Or
                                             OpenModeTypes.Binary, OpenModeTypes))
         End Function
-
-
 
         Private Function GetStream(ByVal assem As System.Reflection.Assembly, ByVal FileNumber As Integer, ByVal mode As OpenModeTypes) As VB6File
             Dim Result As VB6File
@@ -1414,8 +1241,6 @@ Namespace Microsoft.VisualBasic
             Return Result
         End Function
 
-
-
         Private Function OpenModeTypesFromOpenMode(ByVal om As OpenMode) As OpenModeTypes
             If (om = OpenMode.Input) Then
                 Return OpenModeTypes.Input
@@ -1431,11 +1256,10 @@ Namespace Microsoft.VisualBasic
                 Return OpenModeTypes.Any
             End If
 
-            ' Fix FxCop violation. This is security-in-depth mean. This exception should never been hit.
+            ' This exception should never been hit.
             ' We will throw Arguments are not valid.
             Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue), "om")
         End Function
-
 
         Friend Sub CloseAllFiles(ByVal assem As System.Reflection.Assembly)
             CloseAllFiles(ProjectData.GetProjectData().GetAssemblyData(assem))
@@ -1448,8 +1272,6 @@ Namespace Microsoft.VisualBasic
                 InternalCloseFile(oAssemblyData, FileNumber)
             Next
         End Sub
-
-
 
         Private Sub InternalCloseFile(ByVal oAssemblyData As AssemblyData, ByVal FileNumber As Integer)
             If FileNumber = 0 Then
@@ -1471,8 +1293,6 @@ Namespace Microsoft.VisualBasic
             End If
         End Sub
 
-
-
         Friend Function VB6CheckPathname(ByVal oAssemblyData As AssemblyData, ByVal sPath As String, ByVal mode As OpenMode) As String
             Dim Result As String
             '  Error if wildcard characters in pathname
@@ -1490,8 +1310,6 @@ Namespace Microsoft.VisualBasic
 
             Return Result
         End Function
-
-
 
         Friend Function CheckFileOpen(ByVal oAssemblyData As AssemblyData, ByVal sPath As String, ByVal NewFileMode As OpenModeTypes) As Boolean
             Dim lChannel As Integer
@@ -1531,8 +1349,6 @@ Namespace Microsoft.VisualBasic
 
             Return False
         End Function
-
-
 
         Private Sub vbIOOpenFile(ByVal assem As System.Reflection.Assembly,
                                     ByVal FileNumber As Integer,
@@ -1635,8 +1451,6 @@ Namespace Microsoft.VisualBasic
             AddFileToList(oAssemblyData, FileNumber, oFile)
         End Sub
 
-
-
         Private Sub AddFileToList(ByVal oAssemblyData As AssemblyData, ByVal FileNumber As Integer, ByVal oFile As VB6File)
             If oFile Is Nothing Then
                 Throw VbMakeException(vbErrors.InternalError)
@@ -1646,8 +1460,6 @@ Namespace Microsoft.VisualBasic
                 oAssemblyData.SetChannelObj(FileNumber, oFile)
             End If
         End Sub
-
-
 
         '======================================
         ' Static methods
@@ -1666,8 +1478,6 @@ Namespace Microsoft.VisualBasic
             Return oFile
         End Function
 
-
-
         '======================================
         ' Protected and Private methods
         '======================================
@@ -1677,15 +1487,11 @@ Namespace Microsoft.VisualBasic
             Return oAssemblyData.GetChannelObj(FileNumber)
         End Function
 
-
-
         Private Sub CheckInputCapable(ByVal oFile As VB6File)
             If Not oFile.CanInput() Then
                 Throw VbMakeException(vbErrors.BadFileMode)
             End If
         End Sub
-
-
 
     End Module
 End Namespace

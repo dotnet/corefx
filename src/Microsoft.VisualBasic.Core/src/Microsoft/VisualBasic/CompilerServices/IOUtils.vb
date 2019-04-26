@@ -4,9 +4,7 @@
 
 Imports System
 Imports System.Security
-Imports System.Security.Permissions
 Imports System.IO
-Imports System.Text
 
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
@@ -19,7 +17,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Private Sub New()
         End Sub
 
-        <SecurityCritical()> _
         Friend Shared Function FindFirstFile(ByVal assem As System.Reflection.Assembly, ByVal PathName As String, ByVal Attributes As IO.FileAttributes) As String
             Dim Dir As DirectoryInfo
             Dim DirName As String = Nothing
@@ -43,7 +40,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                     End If
                 End If
 
-
                 If (DirName Is Nothing) OrElse (DirName.Length = 0) Then
                     If Path.IsPathRooted(PathName) Then
                         DirName = Path.GetPathRoot(PathName)
@@ -64,7 +60,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                     FileName = "*.*"
                 End If
             End If
-
 
             Try
                 Dir = Directory.GetParent(DirName & FileName)
@@ -96,8 +91,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             Return FindFileFilter(oAssemblyData)
         End Function
 
-
-
         Friend Shared Function FindNextFile(ByVal assem As System.Reflection.Assembly) As String
             Dim oAssemblyData As AssemblyData
 
@@ -116,8 +109,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
             Return FindFileFilter(oAssemblyData)
         End Function
-
-
 
         Private Shared Function FindFileFilter(ByVal oAssemblyData As AssemblyData) As String
             Dim Index As Integer

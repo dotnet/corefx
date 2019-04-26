@@ -3,8 +3,6 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports System
-Imports System.Text
-Imports System.Globalization
 Imports System.IO
 Imports System.Security
 
@@ -21,8 +19,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         '============================================================================
         Inherits VB6File
 
-
-
         '============================================================================
         ' Constructor
         '============================================================================
@@ -30,14 +26,10 @@ Namespace Microsoft.VisualBasic.CompilerServices
             MyBase.New()
         End Sub
 
-
-
         Friend Sub New(ByVal FileName As String, ByVal share As OpenShare, ByVal fAppend As Boolean)
             MyBase.New(FileName, OpenAccess.Write, share, -1)
             m_fAppend = fAppend
         End Sub
-
-
 
         '============================================================================
         ' Operations
@@ -79,8 +71,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overrides Sub WriteLine(ByVal s As String)
             If s Is Nothing Then
                 m_sw.WriteLine()
@@ -100,8 +90,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
 
             m_lCurrentColumn = 0
         End Sub
-
-
 
         Friend Overrides Sub WriteString(ByVal s As String)
             If (s Is Nothing) OrElse (s.Length = 0) Then
@@ -124,13 +112,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_lCurrentColumn += s.Length
         End Sub
 
-
-
         Friend Overrides Function CanWrite() As Boolean
             CanWrite = True
         End Function
-
-
 
         Public Overrides Function GetMode() As OpenMode
             If m_fAppend Then
@@ -140,13 +124,9 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Function
 
-
-
         Friend Overrides Function EOF() As Boolean
             EOF = True
         End Function
-
-
 
         Friend Overrides Function LOC() As Long
             Return ((m_position + 127) \ 128)

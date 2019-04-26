@@ -3,9 +3,7 @@
 ' See the LICENSE file in the project root for more information.
 
 Imports System
-Imports System.Text
 Imports System.IO
-Imports System.Globalization
 
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
@@ -27,7 +25,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
         Public Sub New(ByVal FileName As String, ByVal access As OpenAccess, ByVal share As OpenShare, ByVal lRecordLen As Integer)
             MyBase.New(FileName, access, share, lRecordLen)
         End Sub
-
 
         '============================================================================
         ' Operations
@@ -57,8 +54,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
                 Throw VbMakeException(vbErrors.InternalError)
             End Try
         End Sub
-
-
 
         Friend Overrides Sub OpenFile()
             Dim fm As FileMode
@@ -125,16 +120,12 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overrides Sub CloseFile()
             If Not m_sw Is Nothing Then
                 m_sw.Flush()
             End If
             CloseTheFile()
         End Sub
-
-
 
         Friend Overloads Overrides Sub Lock(ByVal lStart As Long, ByVal lEnd As Long)
             If lStart > lEnd Then
@@ -150,8 +141,6 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_file.Lock(lStartByte, lLength)
         End Sub
 
-
-
         Friend Overloads Overrides Sub Unlock(ByVal lStart As Long, ByVal lEnd As Long)
             If lStart > lEnd Then
                 Throw New ArgumentException(GetResourceString(SR.Argument_InvalidValue1, "Start"))
@@ -165,26 +154,18 @@ Namespace Microsoft.VisualBasic.CompilerServices
             m_file.Unlock(lStartByte, lLength)
         End Sub
 
-
-
         Public Overrides Function GetMode() As OpenMode
             GetMode = OpenMode.Random
         End Function
-
-
 
         Friend Overrides Function GetStreamReader() As StreamReader
             GetStreamReader = New StreamReader(m_file, m_Encoding)
         End Function
 
-
-
         Friend Overrides Function EOF() As Boolean
             m_eof = (m_position >= m_file.Length)
             Return m_eof
         End Function
-
-
 
         Friend Overrides Function LOC() As Long
             If m_lRecordLen = 0 Then
@@ -196,19 +177,13 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Function
 
-
-
         Friend Overloads Overrides Sub Seek(ByVal Position As Long)
             SetRecord(Position)
         End Sub
 
-
-
         Friend Overloads Overrides Function Seek() As Long
             Return (LOC() + 1)
         End Function
-
-
 
         '======================================
         ' Get
@@ -311,14 +286,10 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub [Get](ByRef Value As ValueType, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             GetRecord(RecordNumber, Value, False)
         End Sub
-
-
 
         Friend Overloads Overrides Sub [Get](ByRef Value As System.Array, Optional ByVal RecordNumber As Long = 0,
             Optional ByVal ArrayIsDynamic As Boolean = False, Optional ByVal StringIsFixedLength As Boolean = False)
@@ -384,70 +355,50 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub [Get](ByRef Value As Boolean, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetBoolean(RecordNumber)
         End Sub
-
-
 
         Friend Overloads Overrides Sub [Get](ByRef Value As Byte, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetByte(RecordNumber)
         End Sub
 
-
-
         Friend Overloads Overrides Sub [Get](ByRef Value As Short, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetShort(RecordNumber)
         End Sub
-
-
 
         Friend Overloads Overrides Sub [Get](ByRef Value As Integer, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetInteger(RecordNumber)
         End Sub
 
-
-
         Friend Overloads Overrides Sub [Get](ByRef Value As Long, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetLong(RecordNumber)
         End Sub
-
-
 
         Friend Overloads Overrides Sub [Get](ByRef Value As Char, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetChar(RecordNumber)
         End Sub
 
-
-
         Friend Overloads Overrides Sub [Get](ByRef Value As Single, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetSingle(RecordNumber)
         End Sub
-
-
 
         Friend Overloads Overrides Sub [Get](ByRef Value As Double, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetDouble(RecordNumber)
         End Sub
 
-
-
         Friend Overloads Overrides Sub [Get](ByRef Value As Decimal, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetCurrency(RecordNumber)
         End Sub
-
-
 
         Friend Overloads Overrides Sub [Get](ByRef Value As String, Optional ByVal RecordNumber As Long = 0,
             Optional ByVal StringIsFixedLength As Boolean = False)
@@ -468,14 +419,10 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub [Get](ByRef Value As Date, Optional ByVal RecordNumber As Long = 0)
             ValidateReadable()
             Value = GetDate(RecordNumber)
         End Sub
-
-
 
         Friend Overrides Sub PutObject(ByVal Value As Object, Optional ByVal RecordNumber As Long = 0,
             Optional ByVal ContainedInVariant As Boolean = True)
@@ -555,14 +502,10 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub Put(ByVal Value As ValueType, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutRecord(RecordNumber, Value)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Put(ByVal Value As System.Array, Optional ByVal RecordNumber As Long = 0,
             Optional ByVal ArrayIsDynamic As Boolean = False, Optional ByVal StringIsFixedLength As Boolean = False)
@@ -595,70 +538,50 @@ Namespace Microsoft.VisualBasic.CompilerServices
             End If
         End Sub
 
-
-
         Friend Overloads Overrides Sub Put(ByVal Value As Boolean, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutBoolean(RecordNumber, Value)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Put(ByVal Value As Byte, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutByte(RecordNumber, Value)
         End Sub
 
-
-
         Friend Overloads Overrides Sub Put(ByVal Value As Short, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutShort(RecordNumber, Value)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Put(ByVal Value As Integer, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutInteger(RecordNumber, Value)
         End Sub
 
-
-
         Friend Overloads Overrides Sub Put(ByVal Value As Long, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutLong(RecordNumber, Value)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Put(ByVal Value As Char, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutChar(RecordNumber, Value)
         End Sub
 
-
-
         Friend Overloads Overrides Sub Put(ByVal Value As Single, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutSingle(RecordNumber, Value)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Put(ByVal Value As Double, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutDouble(RecordNumber, Value)
         End Sub
 
-
-
         Friend Overloads Overrides Sub Put(ByVal Value As Decimal, Optional ByVal RecordNumber As Long = 0)
             ValidateWriteable()
             PutCurrency(RecordNumber, Value)
         End Sub
-
-
 
         Friend Overloads Overrides Sub Put(ByVal Value As String, Optional ByVal RecordNumber As Long = 0, Optional ByVal StringIsFixedLength As Boolean = False)
             ValidateWriteable()

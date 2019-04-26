@@ -100,6 +100,19 @@ namespace Microsoft.VisualBasic.Tests
         }
 
         [Fact]
+        public void Dir_Volume()
+        {
+            if (PlatformDetection.IsWindows)
+            {
+                _ = FileSystem.Dir(TestDirectory, FileAttribute.Volume);
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Dir(TestDirectory, FileAttribute.Volume));
+            }
+        }
+
+        [Fact]
         public void EOF()
         {
             int fileNumber = FileSystem.FreeFile();
@@ -390,8 +403,6 @@ namespace Microsoft.VisualBasic.Tests
             FileSystem.Write(fileNumber, true);
             FileSystem.Write(fileNumber, (byte)1, (char)2, (decimal)3, 4.0, 5.0f);
             FileSystem.Write(fileNumber, 6, 7L);
-            // Investigate why this throws IOException in RELEASE rather than ArgumentException.
-            Assert.ThrowsAny<Exception>(() => FileSystem.Write(fileNumber, new object()));
             FileSystem.Write(fileNumber, (short)8, "ABC", dateTime);
             FileSystem.FileClose(fileNumber);
 
@@ -432,6 +443,73 @@ namespace Microsoft.VisualBasic.Tests
             Assert.Equal((short)8, _short);
             Assert.Equal("ABC", _string);
             Assert.Equal(dateTime, _dateTime);
+        }
+
+        [Fact]
+        public void Input_Object_Write()
+        {
+            int fileNumber = FileSystem.FreeFile();
+            var fileName = GetTestFilePath();
+            DateTime dateTime = new DateTime(2019, 1, 1);
+
+            FileSystem.FileOpen(fileNumber, fileName, OpenMode.Output);
+            FileSystem.Write(fileNumber, DBNull.Value);
+            FileSystem.Write(fileNumber, true);
+            FileSystem.Write(fileNumber, (byte)1, (char)2, (decimal)3, 4.0, 5.0f);
+            FileSystem.Write(fileNumber, 6, 7L);
+            FileSystem.Write(fileNumber, (short)8, "ABC", dateTime);
+            FileSystem.FileClose(fileNumber);
+
+            object _dbnull = null;
+            object _bool = null;
+            object _byte = null;
+            object _char = null;
+            object _decimal = null;
+            object _double = null;
+            object _float = null;
+            object _int = null;
+            object _long = null;
+            object _short = null;
+            object _string = null;
+            object _dateTime = null;
+            FileSystem.FileOpen(fileNumber, fileName, OpenMode.Input);
+            FileSystem.Input(fileNumber, ref _dbnull);
+            FileSystem.Input(fileNumber, ref _bool);
+            if (PlatformDetection.IsWindows)
+            {
+                FileSystem.Input(fileNumber, ref _byte);
+                FileSystem.Input(fileNumber, ref _char);
+                FileSystem.Input(fileNumber, ref _decimal);
+                FileSystem.Input(fileNumber, ref _double);
+                FileSystem.Input(fileNumber, ref _float);
+                FileSystem.Input(fileNumber, ref _int);
+                FileSystem.Input(fileNumber, ref _long);
+                FileSystem.Input(fileNumber, ref _short);
+                FileSystem.Input(fileNumber, ref _string);
+                FileSystem.Input(fileNumber, ref _dateTime);
+                Assert.True(FileSystem.EOF(fileNumber));
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Input(fileNumber, ref _byte));
+            }
+            FileSystem.FileClose(fileNumber);
+
+            Assert.Equal(DBNull.Value, _dbnull);
+            Assert.Equal(true, _bool);
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Equal((short)1, _byte);
+                Assert.Equal("\u0002", _char);
+                Assert.Equal((short)3, _decimal);
+                Assert.Equal((short)4, _double);
+                Assert.Equal((short)5, _float);
+                Assert.Equal((short)6, _int);
+                Assert.Equal((short)7, _long);
+                Assert.Equal((short)8, _short);
+                Assert.Equal("ABC", _string);
+                Assert.Equal(dateTime, _dateTime);
+            }
         }
 
         // Not tested:
@@ -530,7 +608,48 @@ namespace Microsoft.VisualBasic.Tests
         // Not tested:
         //   public static void Print(int FileNumber, params object[] Output) { }
         //   public static void PrintLine(int FileNumber, params object[] Output) { }
-        //   public static void Rename(string OldPath, string NewPath) { }
+
+        [Fact]
+        public void Rename()
+        {
+            // Rename to an unused name.
+            var sourceName = GetTestFilePath();
+            System.IO.File.WriteAllText(sourceName, "abc");
+            var destName = GetTestFilePath();
+            if (PlatformDetection.IsWindows)
+            {
+                FileSystem.Rename(sourceName, destName);
+                Assert.False(System.IO.File.Exists(sourceName));
+                Assert.True(System.IO.File.Exists(destName));
+                Assert.Equal("abc", System.IO.File.ReadAllText(destName));
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Rename(sourceName, destName));
+                Assert.True(System.IO.File.Exists(sourceName));
+                Assert.True(System.IO.File.Exists(destName));
+                Assert.Equal("123", System.IO.File.ReadAllText(destName));
+            }
+
+            // Rename to an existing name.
+            sourceName = GetTestFilePath();
+            System.IO.File.WriteAllText(sourceName, "def");
+            destName = GetTestFilePath();
+            System.IO.File.WriteAllText(destName, "123");
+            if (PlatformDetection.IsWindows)
+            {
+                Assert.Throws<System.IO.IOException>(() => FileSystem.Rename(sourceName, destName));
+            }
+            else
+            {
+                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Rename(sourceName, destName));
+            }
+            Assert.True(System.IO.File.Exists(sourceName));
+            Assert.True(System.IO.File.Exists(destName));
+            Assert.Equal("123", System.IO.File.ReadAllText(destName));
+        }
+
+        // Not tested:
         //   public static void Reset() { }
         //   public static void Seek(int FileNumber, long Position) { }
         //   public static long Seek(int FileNumber) { throw null; }
@@ -539,5 +658,16 @@ namespace Microsoft.VisualBasic.Tests
         //   public static TabInfo TAB() { throw null; }
         //   public static TabInfo TAB(short Column) { throw null; }
         //   public static void WriteLine(int FileNumber, params object[] Output) { }
+
+        [Fact]
+        public void Write_ArgumentException()
+        {
+            int fileNumber = FileSystem.FreeFile();
+            var fileName = GetTestFilePath();
+            FileSystem.FileOpen(fileNumber, fileName, OpenMode.Output);
+            // Investigate why this throws IOException in RELEASE rather than ArgumentException.
+            Assert.ThrowsAny<Exception>(() => FileSystem.Write(fileNumber, new object()));
+            FileSystem.FileClose(fileNumber);
+        }
     }
 }
