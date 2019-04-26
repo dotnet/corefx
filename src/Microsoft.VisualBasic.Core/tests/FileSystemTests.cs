@@ -149,7 +149,7 @@ namespace Microsoft.VisualBasic.Tests
             }
             else
             {
-                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Dir(TestDirectory, FileAttribute.Volume));
+                AssertThrows<PlatformNotSupportedException>(() => FileSystem.Dir(TestDirectory, FileAttribute.Volume));
             }
         }
 
@@ -390,7 +390,7 @@ namespace Microsoft.VisualBasic.Tests
             // OpenMode.Input:
             fileNumber = FileSystem.FreeFile();
             fileName = GetTestFilePath();
-            Assert.Throws<System.IO.FileNotFoundException>(() => FileSystem.FileOpen(fileNumber, fileName, OpenMode.Input));
+            AssertThrows<System.IO.FileNotFoundException>(() => FileSystem.FileOpen(fileNumber, fileName, OpenMode.Input));
             System.IO.File.WriteAllText(fileName, "abc123");
             FileSystem.FileOpen(fileNumber, fileName, OpenMode.Input);
             FileSystem.FileClose(fileNumber);
@@ -411,11 +411,11 @@ namespace Microsoft.VisualBasic.Tests
             fileNumber = FileSystem.FreeFile();
             fileName = GetTestFilePath();
             FileSystem.FileOpen(fileNumber, fileName, OpenMode.Append);
-            Assert.Throws<System.IO.IOException>(() => FileSystem.FileOpen(fileNumber, fileName, OpenMode.Append));
+            AssertThrows<System.IO.IOException>(() => FileSystem.FileOpen(fileNumber, fileName, OpenMode.Append));
             FileSystem.FileClose(fileNumber);
 
             // Open an invalid fileNumber.
-            Assert.Throws<System.IO.IOException>(() => FileSystem.FileOpen(256, GetTestFilePath(), OpenMode.Append));
+            AssertThrows<System.IO.IOException>(() => FileSystem.FileOpen(256, GetTestFilePath(), OpenMode.Append));
         }
 
         // Not tested:
@@ -532,7 +532,7 @@ namespace Microsoft.VisualBasic.Tests
             }
             else
             {
-                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Input(fileNumber, ref _byte));
+                AssertThrows<PlatformNotSupportedException>(() => FileSystem.Input(fileNumber, ref _byte));
             }
             FileSystem.FileClose(fileNumber);
 
@@ -567,7 +567,7 @@ namespace Microsoft.VisualBasic.Tests
 
             // Missing file.
             fileName = GetTestFilePath();
-            Assert.Throws<System.IO.FileNotFoundException>(() => FileSystem.Kill(fileName));
+            AssertThrows<System.IO.FileNotFoundException>(() => FileSystem.Kill(fileName));
             Assert.False(System.IO.File.Exists(fileName));
         }
 
@@ -638,13 +638,13 @@ namespace Microsoft.VisualBasic.Tests
             Assert.True(System.IO.Directory.Exists(dirName));
 
             // Create the directory a second time.
-            Assert.Throws<System.IO.IOException>(() => FileSystem.MkDir(dirName));
+            AssertThrows<System.IO.IOException>(() => FileSystem.MkDir(dirName));
 
             FileSystem.RmDir(dirName);
             Assert.False(System.IO.Directory.Exists(dirName));
 
             // Remove the directory a second time.
-            Assert.Throws<System.IO.DirectoryNotFoundException>(() => FileSystem.RmDir(dirName));
+            AssertThrows<System.IO.DirectoryNotFoundException>(() => FileSystem.RmDir(dirName));
         }
 
         // Not tested:
@@ -667,7 +667,7 @@ namespace Microsoft.VisualBasic.Tests
             }
             else
             {
-                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Rename(sourceName, destName));
+                AssertThrows<PlatformNotSupportedException>(() => FileSystem.Rename(sourceName, destName));
                 Assert.True(System.IO.File.Exists(sourceName));
                 Assert.False(System.IO.File.Exists(destName));
                 Assert.Equal("abc", System.IO.File.ReadAllText(sourceName));
@@ -680,11 +680,11 @@ namespace Microsoft.VisualBasic.Tests
             System.IO.File.WriteAllText(destName, "123");
             if (PlatformDetection.IsWindows)
             {
-                Assert.Throws<System.IO.IOException>(() => FileSystem.Rename(sourceName, destName));
+                AssertThrows<System.IO.IOException>(() => FileSystem.Rename(sourceName, destName));
             }
             else
             {
-                Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Rename(sourceName, destName));
+                AssertThrows<PlatformNotSupportedException>(() => FileSystem.Rename(sourceName, destName));
             }
             Assert.True(System.IO.File.Exists(sourceName));
             Assert.True(System.IO.File.Exists(destName));
@@ -708,9 +708,26 @@ namespace Microsoft.VisualBasic.Tests
             int fileNumber = FileSystem.FreeFile();
             var fileName = GetTestFilePath();
             FileSystem.FileOpen(fileNumber, fileName, OpenMode.Output);
-            // Investigate why this throws IOException in RELEASE rather than ArgumentException.
-            Assert.ThrowsAny<Exception>(() => FileSystem.Write(fileNumber, new object()));
+            AssertThrows<ArgumentException>(() => FileSystem.Write(fileNumber, new object()));
             FileSystem.FileClose(fileNumber);
+        }
+
+        // We cannot use XUnit.Assert.Throws<T>() for lambdas that rely on AssemblyData (such as
+        // file numbers) because AssemblyData instances are associated with the calling assembly, and
+        // in RELEASE builds, the calling assembly of a lambda invoked from XUnit.Assert.Throws<T>()
+        // is corelib rather than this assembly, so file numbers created outside the lambda will be invalid.
+        private static void AssertThrows<TException>(Action action) where TException : Exception
+        {
+            TException ex = null;
+            try
+            {
+                action();
+            }
+            catch (TException e)
+            {
+                ex = e;
+            }
+            Assert.NotNull(ex?.GetType() == typeof(TException));
         }
     }
 }
