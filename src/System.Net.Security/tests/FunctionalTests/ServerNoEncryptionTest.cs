@@ -83,21 +83,16 @@ namespace System.Net.Security.Tests
 
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.NoEncryption))
                 {
-                    if (SupportsNullEncryption && !PlatformDetection.SupportsTls13)
+                    if (SupportsNullEncryption)
                     {
-                        await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false);
+                        // null encryption is not permitted with Tls13
+                        await sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocols.Tls | SslProtocols.Tls11 |  SslProtocols.Tls12, false);
                         _log.WriteLine("Client authenticated to server({0}) with encryption cipher: {1} {2}-bit strength",
                             serverNoEncryption.RemoteEndPoint, sslStream.CipherAlgorithm, sslStream.CipherStrength);
 
                         CipherAlgorithmType expected = CipherAlgorithmType.Null;
                         Assert.Equal(expected, sslStream.CipherAlgorithm);
                         Assert.Equal(0, sslStream.CipherStrength);
-                    }
-                    else if (SupportsNullEncryption && PlatformDetection.SupportsTls13)
-                    {
-                        // Platform supports NullEncryption but TLS1.3 forbids it.
-                        var ae = await Assert.ThrowsAsync<AuthenticationException>(() => sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false));
-                        Assert.IsType<AuthenticationException>(ae);
                     }
                     else
                     {

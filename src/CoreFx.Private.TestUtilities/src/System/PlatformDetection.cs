@@ -59,7 +59,7 @@ namespace System
             (OpenSslVersion.Major >= 1 && (OpenSslVersion.Minor >= 1 || OpenSslVersion.Build >= 2)));
         public static bool SupportsClientAlpn => SupportsAlpn || (IsOSX && PlatformDetection.OSXVersion > new Version(10, 12));
         // OpenSSL 1.1.1 and above.
-        public static bool SupportsTls13 => !IsWindows && !IsOSX && (OpenSslVersion.Major >= 1 && OpenSslVersion.Minor >= 1 && OpenSslVersion.Build >= 1);
+        public static bool SupportsTls13 => !IsWindows && !IsOSX && (OpenSslVersion.CompareTo(new Version(1,1,1)) >= 0)
 
         // Officially, .NET Native only supports processes running in an AppContainer. However, the majority of tests still work fine
         // in a normal Win32 process and we often do so as running in an AppContainer imposes a substantial tax in debuggability

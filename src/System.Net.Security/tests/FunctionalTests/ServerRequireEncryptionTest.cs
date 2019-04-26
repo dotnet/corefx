@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Net.Test.Common;
@@ -83,16 +82,8 @@ namespace System.Net.Security.Tests
                 await client.ConnectAsync(serverRequireEncryption.RemoteEndPoint.Address, serverRequireEncryption.RemoteEndPoint.Port);
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.NoEncryption))
                 {
-                    if (PlatformDetection.SupportsTls13)
-                    {
-                        await Assert.ThrowsAsync<AuthenticationException>(() =>
-                        sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false));
-                    }
-                    else
-                    {
-                        await Assert.ThrowsAsync<IOException>(() =>
-                        sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false));
-                    }
+                    await Assert.ThrowsAsync<IOException>(() =>
+                        sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocols.Tls | SslProtocols.Tls11 |  SslProtocols.Tls12, false));
                 }
             }
         }
