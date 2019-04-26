@@ -42,7 +42,7 @@ namespace System.Text.Json.Serialization
                         Debug.Assert(state.Current.ReturnValue != default);
                         Debug.Assert(state.Current.JsonClassInfo != default);
 
-                        if (state.Current.IsDictionary())
+                        if (state.Current.IsDictionary)
                         {
                             string keyName = reader.GetString();
                             if (options.DictionaryKeyPolicy != null)

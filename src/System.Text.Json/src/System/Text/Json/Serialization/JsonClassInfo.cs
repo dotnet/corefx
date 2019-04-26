@@ -319,25 +319,22 @@ namespace System.Text.Json.Serialization
 
                     if (propertyType.IsGenericType)
                     {
-                        if (GetClassType(propertyType) == ClassType.Dictionary)
+                        if (GetClassType(propertyType) == ClassType.Dictionary &&
+                            args.Length >= 2) // It is >= 2 in case there is a Dictionary<TKey, TValue, TSomeExtension>.
                         {
-                            // IDictionary<TKey, TValue>
-                            Debug.Assert(args.Length >= 2);
-
+                            
                             elementType = args[1];
                         }
-                        else
+                        else if (args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
                         {
-                            // IEnumerable<T>
-                            Debug.Assert(args.Length >= 1);
-
+                            Debug.Assert(GetClassType(propertyType) == ClassType.Enumerable);
                             elementType = args[0];
                         }
                     }
                     else
                     {
                         // Unable to determine collection type; attempt to use object which will be used to create loosely-typed collection.
-                        return typeof(object);
+                        elementType = typeof(object);
                     }
                 }
             }

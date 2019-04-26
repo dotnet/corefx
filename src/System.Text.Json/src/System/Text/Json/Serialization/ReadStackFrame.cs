@@ -34,6 +34,12 @@ namespace System.Text.Json.Serialization
         // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
         public bool Drain;
 
+        public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
+        public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
+        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsDictionary;
+        public bool IsProcessingEnumerable => IsEnumerable || IsPropertyEnumerable;
+        public bool IsPropertyEnumerable => JsonPropertyInfo != null ? JsonPropertyInfo.ClassType == ClassType.Enumerable : false;
+
         public void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
@@ -70,61 +76,6 @@ namespace System.Text.Json.Serialization
         {
             PropertyIndex = 0;
             ResetProperty();
-        }
-
-        public bool IsProcessingEnumerableOrDictionary()
-        {
-            return IsProcessingEnumerable() || IsDictionary();
-        }
-
-        public bool IsProcessingEnumerable()
-        {
-            return IsEnumerable() || IsPropertyEnumerable();
-        }
-
-        public bool IsEnumerable()
-        {
-            return JsonClassInfo.ClassType == ClassType.Enumerable;
-        }
-
-        public bool IsDictionary()
-        {
-            return JsonClassInfo.ClassType == ClassType.Dictionary;
-        }
-
-        public bool Skip()
-        {
-            return Drain || ReferenceEquals(JsonPropertyInfo, JsonSerializer.s_missingProperty);
-        }
-
-        public bool IsPropertyEnumerable()
-        {
-            if (JsonPropertyInfo != null)
-            {
-                return JsonPropertyInfo.ClassType == ClassType.Enumerable;
-            }
-
-            return false;
-        }
-
-        public Type GetElementType()
-        {
-            if (IsPropertyEnumerable())
-            {
-                return JsonPropertyInfo.ElementClassInfo.Type;
-            }
-
-            if (IsEnumerable())
-            {
-                return JsonClassInfo.ElementClassInfo.Type;
-            }
-
-            if (IsDictionary())
-            {
-                return JsonClassInfo.ElementClassInfo.Type;
-            }
-
-            return JsonPropertyInfo.RuntimePropertyType;
         }
 
         public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
@@ -164,9 +115,29 @@ namespace System.Text.Json.Serialization
             }
         }
 
+        public Type GetElementType()
+        {
+            if (IsPropertyEnumerable)
+            {
+                return JsonPropertyInfo.ElementClassInfo.Type;
+            }
+
+            if (IsEnumerable)
+            {
+                return JsonClassInfo.ElementClassInfo.Type;
+            }
+
+            if (IsDictionary)
+            {
+                return JsonClassInfo.ElementClassInfo.Type;
+            }
+
+            return JsonPropertyInfo.RuntimePropertyType;
+        }
+
         public static IEnumerable GetEnumerableValue(in ReadStackFrame current)
         {
-            if (current.IsEnumerable())
+            if (current.IsEnumerable)
             {
                 if (current.ReturnValue != null)
                 {
@@ -182,6 +153,11 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(ReturnValue == null);
             ReturnValue = value;
+        }
+
+        public bool Skip()
+        {
+            return Drain || ReferenceEquals(JsonPropertyInfo, JsonSerializer.s_missingProperty);
         }
     }
 }

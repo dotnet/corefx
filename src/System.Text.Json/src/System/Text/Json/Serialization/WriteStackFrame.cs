@@ -88,7 +88,7 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        private void WriteObjectOrArrayStart(ClassType classType, Span<byte> propertyName, Utf8JsonWriter writer, bool writeNull)
+        private void WriteObjectOrArrayStart(ClassType classType, ReadOnlySpan<byte> propertyName, Utf8JsonWriter writer, bool writeNull)
         {
             if (writeNull)
             {

@@ -11,7 +11,14 @@ namespace System.Text.Json.Serialization
     {
         private JsonPropertyInfo AddPolicyProperty(Type propertyType, JsonSerializerOptions options)
         {
-            return AddProperty(propertyType, propertyInfo : null, classType : propertyType, options);
+            // A policy property is not a real property on a type; instead it leverages the existing converter
+            // logic and generic support to avoid boxing. It is used with values types and elements from collections and
+            // dictionaries. Typically it would represent a CLR type such as System.String.
+            return AddProperty(
+                propertyType,
+                propertyInfo : null,        // Not a real property so this is null.
+                classType : typeof(object), // A dummy type (not used).
+                options : options);
 
         }
         private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)

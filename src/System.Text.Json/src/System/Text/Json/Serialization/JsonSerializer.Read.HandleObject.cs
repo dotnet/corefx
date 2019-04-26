@@ -17,7 +17,7 @@ namespace System.Text.Json.Serialization
                 return;
             }
 
-            if (state.Current.IsProcessingEnumerable())
+            if (state.Current.IsProcessingEnumerable)
             {
                 Type objType = state.Current.GetElementType();
                 state.Push();
@@ -25,9 +25,10 @@ namespace System.Text.Json.Serialization
             }
             else if (state.Current.JsonPropertyInfo != null)
             {
-                if (state.Current.IsDictionary())
+                if (state.Current.IsDictionary)
                 {
-                    // Verify that the Dictionary can be deserialized.
+                    // Verify that the Dictionary can be deserialized by having <string> as first generic argument.
+                    Debug.Assert(state.Current.JsonClassInfo.Type.GetGenericArguments().Length >= 1);
                     if (state.Current.JsonClassInfo.Type.GetGenericArguments()[0].UnderlyingSystemType != typeof(string))
                     {
                         ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state);
@@ -41,20 +42,15 @@ namespace System.Text.Json.Serialization
                         // Ensure any nested array creates a new frame.
                         state.Current.EnumerableCreated = true;
                     }
-                    else if (classType == ClassType.Object || classType == ClassType.Dictionary)
+                    else
                     {
+                        Debug.Assert(classType == ClassType.Object || classType == ClassType.Dictionary);
+
                         // A nested object or dictionary.
                         JsonClassInfo classInfoTemp = state.Current.JsonClassInfo;
                         state.Push();
                         state.Current.JsonClassInfo = classInfoTemp.ElementClassInfo;
                         state.Current.InitializeJsonPropertyInfo();
-                    }
-                    else
-                    {
-                        // We shouldn't get here unless we add to the ClassType enum.
-                        Debug.Assert(false);
-                        ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(
-                            state.Current.JsonClassInfo.ElementClassInfo.Type, reader, state);
                     }
                 }
                 else

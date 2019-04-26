@@ -40,7 +40,7 @@ namespace System.Text.Json.Serialization
                 ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(arrayType, reader, state);
             }
 
-            Debug.Assert(state.Current.IsPropertyEnumerable() || state.Current.IsDictionary());
+            Debug.Assert(state.Current.IsPropertyEnumerable || state.Current.IsDictionary);
 
             if (state.Current.EnumerableCreated)
             {
@@ -130,7 +130,7 @@ namespace System.Text.Json.Serialization
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsEnumerable() || state.Current.IsDictionary())
+                else if (state.Current.IsEnumerable || state.Current.IsDictionary)
                 {
                     // Returning a non-converted list.
                     return true;
@@ -151,7 +151,7 @@ namespace System.Text.Json.Serialization
         // If this method is changed, also change ApplyValueToEnumerable.
         internal static void ApplyObjectToEnumerable(object value, JsonSerializerOptions options, ref ReadStackFrame frame, bool setPropertyDirectly = false)
         {
-            if (frame.IsEnumerable())
+            if (frame.IsEnumerable)
             {
                 if (frame.TempEnumerableValues != null)
                 {
@@ -162,7 +162,7 @@ namespace System.Text.Json.Serialization
                     ((IList)frame.ReturnValue).Add(value);
                 }
             }
-            else if (!setPropertyDirectly && frame.IsPropertyEnumerable())
+            else if (!setPropertyDirectly && frame.IsPropertyEnumerable)
             {
                 Debug.Assert(frame.JsonPropertyInfo != null);
                 Debug.Assert(frame.ReturnValue != null);
@@ -175,7 +175,7 @@ namespace System.Text.Json.Serialization
                     ((IList)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(value);
                 }
             }
-            else if (frame.IsDictionary())
+            else if (frame.IsDictionary)
             {
                 Debug.Assert(frame.ReturnValue != null);
                 ((IDictionary)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(frame.KeyName, value);
@@ -193,7 +193,7 @@ namespace System.Text.Json.Serialization
             JsonSerializerOptions options,
             ref ReadStackFrame frame)
         {
-            if (frame.IsEnumerable())
+            if (frame.IsEnumerable)
             {
                 if (frame.TempEnumerableValues != null)
                 {
@@ -204,7 +204,7 @@ namespace System.Text.Json.Serialization
                     ((IList<TProperty>)frame.ReturnValue).Add(value);
                 }
             }
-            else if (frame.IsPropertyEnumerable())
+            else if (frame.IsPropertyEnumerable)
             {
                 Debug.Assert(frame.JsonPropertyInfo != null);
                 Debug.Assert(frame.ReturnValue != null);
@@ -217,7 +217,7 @@ namespace System.Text.Json.Serialization
                     ((IList<TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(value);
                 }
             }
-            else if (frame.IsDictionary())
+            else if (frame.IsDictionary)
             {
                 Debug.Assert(frame.ReturnValue != null);
                 ((IDictionary<string, TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(frame.KeyName, value);

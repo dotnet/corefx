@@ -67,8 +67,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(ExpectedJson, json);
 
             var dictionary = new Dictionary<string, string> { { "City", "MyCity" } };
-            var array2 = new object[] { 1, true, dictionary, null, "foo" };
-            json = JsonSerializer.ToString(array2);
+            var arrayWithDictionary = new object[] { 1, true, dictionary, null, "foo" };
+            json = JsonSerializer.ToString(arrayWithDictionary);
             Assert.Equal(ExpectedJson, json);
 
             json = JsonSerializer.ToString<object>(array);

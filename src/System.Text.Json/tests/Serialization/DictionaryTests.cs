@@ -12,42 +12,42 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void DictionaryOfString()
         {
-            const string Json = @"{""Hello"":""World"",""Hello2"":""World2""}";
+            const string JsonString = @"{""Hello"":""World"",""Hello2"":""World2""}";
 
             {
-                Dictionary<string, string> obj = JsonSerializer.Parse<Dictionary<string, string>>(Json);
+                Dictionary<string, string> obj = JsonSerializer.Parse<Dictionary<string, string>>(JsonString);
                 Assert.Equal("World", obj["Hello"]);
                 Assert.Equal("World2", obj["Hello2"]);
 
                 string json = JsonSerializer.ToString(obj);
-                Assert.Equal(Json, json);
+                Assert.Equal(JsonString, json);
 
                 json = JsonSerializer.ToString<object>(obj);
-                Assert.Equal(Json, json);
+                Assert.Equal(JsonString, json);
             }
 
             {
-                IDictionary<string, string> obj = JsonSerializer.Parse<IDictionary<string, string>>(Json);
+                IDictionary<string, string> obj = JsonSerializer.Parse<IDictionary<string, string>>(JsonString);
                 Assert.Equal("World", obj["Hello"]);
                 Assert.Equal("World2", obj["Hello2"]);
 
                 string json = JsonSerializer.ToString(obj);
-                Assert.Equal(Json, json);
+                Assert.Equal(JsonString, json);
 
                 json = JsonSerializer.ToString<object>(obj);
-                Assert.Equal(Json, json);
+                Assert.Equal(JsonString, json);
             }
 
             {
-                IReadOnlyDictionary<string, string> obj = JsonSerializer.Parse<IReadOnlyDictionary<string, string>>(Json);
+                IReadOnlyDictionary<string, string> obj = JsonSerializer.Parse<IReadOnlyDictionary<string, string>>(JsonString);
                 Assert.Equal("World", obj["Hello"]);
                 Assert.Equal("World2", obj["Hello2"]);
 
                 string json = JsonSerializer.ToString(obj);
-                Assert.Equal(Json, json);
+                Assert.Equal(JsonString, json);
 
                 json = JsonSerializer.ToString<object>(obj);
-                Assert.Equal(Json, json);
+                Assert.Equal(JsonString, json);
             }
         }
 
@@ -74,86 +74,102 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void DictionaryOfList()
         {
-            const string Json = @"{""Key1"":[1,2],""Key2"":[3,4]}";
+            const string JsonString = @"{""Key1"":[1,2],""Key2"":[3,4]}";
 
-            IDictionary<string, List<int>> obj = JsonSerializer.Parse<IDictionary<string, List<int>>>(Json);
+            IDictionary<string, List<int>> obj = JsonSerializer.Parse<IDictionary<string, List<int>>>(JsonString);
 
+            Assert.Equal(2, obj.Count);
+            Assert.Equal(2, obj["Key1"].Count);
             Assert.Equal(1, obj["Key1"][0]);
             Assert.Equal(2, obj["Key1"][1]);
+            Assert.Equal(2, obj["Key2"].Count);
             Assert.Equal(3, obj["Key2"][0]);
             Assert.Equal(4, obj["Key2"][1]);
 
+
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
         }
 
         [Fact]
         public static void DictionaryOfArray()
         {
-            const string Json = @"{""Key1"":[1,2],""Key2"":[3,4]}";
-            Dictionary<string, int[]> obj = JsonSerializer.Parse<Dictionary<string, int[]>>(Json);
+            const string JsonString = @"{""Key1"":[1,2],""Key2"":[3,4]}";
+            Dictionary<string, int[]> obj = JsonSerializer.Parse<Dictionary<string, int[]>>(JsonString);
 
+            Assert.Equal(2, obj.Count);
+            Assert.Equal(2, obj["Key1"].Length);
             Assert.Equal(1, obj["Key1"][0]);
             Assert.Equal(2, obj["Key1"][1]);
+            Assert.Equal(2, obj["Key2"].Length);
             Assert.Equal(3, obj["Key2"][0]);
             Assert.Equal(4, obj["Key2"][1]);
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
         }
 
         [Fact]
         public static void ListOfDictionary()
         {
-            const string Json = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
-            List<Dictionary<string, int>> obj = JsonSerializer.Parse<List<Dictionary<string, int>>>(Json);
+            const string JsonString = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
+            List<Dictionary<string, int>> obj = JsonSerializer.Parse<List<Dictionary<string, int>>>(JsonString);
 
+            Assert.Equal(2, obj.Count);
+            Assert.Equal(2, obj[0].Count);
             Assert.Equal(1, obj[0]["Key1"]);
             Assert.Equal(2, obj[0]["Key2"]);
+            Assert.Equal(2, obj[1].Count);
             Assert.Equal(3, obj[1]["Key1"]);
             Assert.Equal(4, obj[1]["Key2"]);
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
 
             json = JsonSerializer.ToString<object>(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
         }
 
         [Fact]
         public static void ArrayOfDictionary()
         {
-            const string Json = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
-            Dictionary<string, int>[] obj = JsonSerializer.Parse<Dictionary<string, int>[]>(Json);
+            const string JsonString = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
+            Dictionary<string, int>[] obj = JsonSerializer.Parse<Dictionary<string, int>[]>(JsonString);
 
+            Assert.Equal(2, obj.Length);
+            Assert.Equal(2, obj[0].Count);
             Assert.Equal(1, obj[0]["Key1"]);
             Assert.Equal(2, obj[0]["Key2"]);
+            Assert.Equal(2, obj[1].Count);
             Assert.Equal(3, obj[1]["Key1"]);
             Assert.Equal(4, obj[1]["Key2"]);
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
 
             json = JsonSerializer.ToString<object>(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
         }
 
         [Fact]
         public static void DictionaryOfDictionary()
         {
-            const string Json = @"{""Key1"":{""Key1a"":1,""Key1b"":2},""Key2"":{""Key2a"":3,""Key2b"":4}}";
-            Dictionary<string, Dictionary<string, int>> obj = JsonSerializer.Parse<Dictionary<string, Dictionary<string, int>>>(Json);
+            const string JsonString = @"{""Key1"":{""Key1a"":1,""Key1b"":2},""Key2"":{""Key2a"":3,""Key2b"":4}}";
+            Dictionary<string, Dictionary<string, int>> obj = JsonSerializer.Parse<Dictionary<string, Dictionary<string, int>>>(JsonString);
 
+            Assert.Equal(2, obj.Count);
+            Assert.Equal(2, obj["Key1"].Count);
             Assert.Equal(1, obj["Key1"]["Key1a"]);
             Assert.Equal(2, obj["Key1"]["Key1b"]);
+            Assert.Equal(2, obj["Key2"].Count);
             Assert.Equal(3, obj["Key2"]["Key2a"]);
             Assert.Equal(4, obj["Key2"]["Key2b"]);
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
 
             json = JsonSerializer.ToString<object>(obj);
-            Assert.Equal(Json, json);
+            Assert.Equal(JsonString, json);
         }
 
         [Fact]
@@ -164,15 +180,17 @@ namespace System.Text.Json.Serialization.Tests
             {
                 string json = @"{""Key1"":" + SimpleTestClass.s_json + @",""Key2"":" + SimpleTestClass.s_json + "}";
                 obj = JsonSerializer.Parse<Dictionary<string, SimpleTestClass>>(json);
+                Assert.Equal(2, obj.Count);
                 obj["Key1"].Verify();
                 obj["Key2"].Verify();
             }
 
             {
-                // We can't compare against the json string above because object serialization is not deterministic (based on reflection order)
-                // So just round-trip the json and compare.
+                // We can't compare against the json string above because property ordering is not deterministic (based on reflection order)
+                // so just round-trip the json and compare.
                 string json = JsonSerializer.ToString(obj);
                 obj = JsonSerializer.Parse<Dictionary<string, SimpleTestClass>>(json);
+                Assert.Equal(2, obj.Count);
                 obj["Key1"].Verify();
                 obj["Key2"].Verify();
             }
@@ -180,6 +198,7 @@ namespace System.Text.Json.Serialization.Tests
             {
                 string json = JsonSerializer.ToString<object>(obj);
                 obj = JsonSerializer.Parse<Dictionary<string, SimpleTestClass>>(json);
+                Assert.Equal(2, obj.Count);
                 obj["Key1"].Verify();
                 obj["Key2"].Verify();
             }
@@ -191,9 +210,10 @@ namespace System.Text.Json.Serialization.Tests
             var options = new JsonSerializerOptions();
             options.DictionaryKeyPolicy = JsonNamingPolicy.CamelCase;
 
-            const string Json = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
-            Dictionary<string, int>[] obj = JsonSerializer.Parse<Dictionary<string, int>[]>(Json, options);
+            const string JsonString = @"[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}]";
+            Dictionary<string, int>[] obj = JsonSerializer.Parse<Dictionary<string, int>[]>(JsonString, options);
 
+            Assert.Equal(2, obj.Length);
             Assert.Equal(1, obj[0]["key1"]);
             Assert.Equal(2, obj[0]["key2"]);
             Assert.Equal(3, obj[1]["key1"]);
