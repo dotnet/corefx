@@ -237,6 +237,12 @@ namespace System.Drawing
             }
         }
 
+        public BitmapData LockBits()
+        {
+            var rect = new Rectangle(0, 0, this.Width, this.Height)
+            return LockBits(rect, ImageLockMode.ReadWrite, this.PixelFormat);
+        }
+        
         public BitmapData LockBits(Rectangle rect, ImageLockMode flags, PixelFormat format)
         {
             return LockBits(rect, flags, format, new BitmapData());
