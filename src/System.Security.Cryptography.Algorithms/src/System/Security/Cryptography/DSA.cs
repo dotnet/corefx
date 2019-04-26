@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Diagnostics;
 using System.IO;
 using System.Numerics;
 using System.Runtime.InteropServices;
@@ -200,22 +201,34 @@ namespace System.Security.Cryptography
                 throw HashAlgorithmNameNullOrEmpty();
             }
 
-            for (int i = 256; ; i = checked(i * 2))
+            // The biggest hash algorithm supported is SHA512, which is only 64 bytes (512 bits).
+            // So this should realistically never hit the fallback
+            // (it'd require a derived type to add support for a different hash algorithm, and that
+            // algorithm to have a large output.)
+            Span<byte> buf = stackalloc byte[128];
+            ReadOnlySpan<byte> hash = stackalloc byte[0];
+
+            if (TryHashData(data, buf, hashAlgorithm, out int hashLength))
             {
-                int hashLength = 0;
-                byte[] hash = CryptoPool.Rent(i);
+                hash = buf.Slice(0, hashLength);
+            }
+            else
+            {
+                // Use ArrayPool.Shared because the array is passed out.
+                byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
                 try
                 {
-                    if (TryHashData(data, hash, hashAlgorithm, out hashLength))
-                    {
-                        return VerifySignature(new ReadOnlySpan<byte>(hash, 0, hashLength), signature);
-                    }
+                    data.CopyTo(array);
+                    hash = HashData(array, 0, data.Length, hashAlgorithm);
                 }
                 finally
                 {
-                    CryptoPool.Return(hash, hashLength);
+                    Array.Clear(array, 0, data.Length);
+                    ArrayPool<byte>.Shared.Return(array);
                 }
             }
+
+            return VerifySignature(hash, signature);
         }
 
         public virtual bool VerifySignature(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature) =>
