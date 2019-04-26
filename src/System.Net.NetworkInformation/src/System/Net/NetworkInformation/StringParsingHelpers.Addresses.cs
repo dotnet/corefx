@@ -62,7 +62,7 @@ namespace System.Net.NetworkInformation
                 if (line.StartsWith("00000000000000000000000000000000"))
                 {
                    string[] token = line.Split(s_delimiter, StringSplitOptions.RemoveEmptyEntries);
-                   if (token.Length > 4 && token[4] != "00000000000000000000000000000000")
+                   if (token.Length > 9 && token[4] != "00000000000000000000000000000000")
                    {
                         if (!string.IsNullOrEmpty(interfaceName) && interfaceName != token[9])
                         {
