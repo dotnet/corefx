@@ -73,12 +73,20 @@ namespace Microsoft.VisualBasic.Tests
 
             // Get all files.
             string fileName = FileSystem.Dir(System.IO.Path.Combine(TestDirectory, "*"));
+            var foundNames = new string[n];
             for (int i = 0; i < n; i++)
             {
-                Assert.Equal(fileName, fileNames[i]);
+                foundNames[i] = fileName;
                 fileName = FileSystem.Dir();
             }
             Assert.Null(fileName);
+
+            Array.Sort(fileNames);
+            Array.Sort(foundNames);
+            for (int i = 0; i < n; i++)
+            {
+                Assert.Equal(fileNames[i], foundNames[i]);
+            }
 
             // Get single file.
             fileName = FileSystem.Dir(System.IO.Path.Combine(TestDirectory, fileNames[2]));
