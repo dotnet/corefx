@@ -20,9 +20,6 @@ namespace System.Data.OleDb
         private DbConnectionInternal _innerConnection;
         private int _closeCount;          // used to distinguish between different uses of this object, so we don't have to maintain a list of it's children
 
-        private static int _objectTypeCount; // Bid counter
-        internal readonly int ObjectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
         public OleDbConnection() : base()
         {
             GC.SuppressFinalize(this);
@@ -45,19 +42,6 @@ namespace System.Data.OleDb
             else
             {
                 _innerConnection = DbConnectionClosedPreviouslyOpened.SingletonInstance;
-            }
-        }
-
-        /// <devdoc>We use the _closeCount to avoid having to know about all our
-        ///  children; instead of keeping a collection of all the objects that
-        ///  would be affected by a close, we simply increment the _closeCount
-        ///  and have each of our children check to see if they're "orphaned"
-        ///  </devdoc>
-        internal int CloseCount
-        {
-            get
-            {
-                return _closeCount;
             }
         }
 
@@ -154,17 +138,6 @@ namespace System.Data.OleDb
             }
         }
 
-        // Open->ClosedPreviouslyOpened, and doom the internal connection too...
-        internal void Abort(Exception e)
-        {
-            DbConnectionInternal innerConnection = _innerConnection;  // Should not cause memory allocation...
-            if (ConnectionState.Open == innerConnection.State)
-            {
-                Interlocked.CompareExchange(ref _innerConnection, DbConnectionClosedPreviouslyOpened.SingletonInstance, innerConnection);
-                innerConnection.DoomThisConnection();
-            }
-        }
-
         internal void AddWeakReference(object value, int tag)
         {
             InnerConnection.AddWeakReference(value, tag);
@@ -251,16 +224,6 @@ namespace System.Data.OleDb
             // while we're attempting to enlist; not sure how likely that is but
             // we should consider a GC.KeepAlive(this) here.
             GC.KeepAlive(this);
-        }
-
-        private DbMetaDataFactory GetMetaDataFactory(DbConnectionInternal internalConnection)
-        {
-            return ConnectionFactory.GetMetaDataFactory(_poolGroup, internalConnection);
-        }
-
-        internal DbMetaDataFactory GetMetaDataFactoryInternal(DbConnectionInternal internalConnection)
-        {
-            return GetMetaDataFactory(internalConnection);
         }
 
         override public DataTable GetSchema()

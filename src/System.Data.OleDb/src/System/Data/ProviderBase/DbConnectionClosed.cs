@@ -34,11 +34,6 @@ namespace System.Data.ProviderBase
             throw ADP.ClosedConnectionError();
         }
 
-        override public void ChangeDatabase(string database)
-        {
-            throw ADP.ClosedConnectionError();
-        }
-
         internal override void CloseConnection(DbConnection owningObject, DbConnectionFactory connectionFactory)
         {
             // not much to do here...
@@ -117,11 +112,6 @@ namespace System.Data.ProviderBase
             connectionFactory.SetInnerConnectionTo(owningObject, DbConnectionClosedPreviouslyOpened.SingletonInstance);
         }
 
-        internal override bool TryReplaceConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
-        {
-            return TryOpenConnection(outerConnection, connectionFactory, retry, userOptions);
-        }
-
         internal override bool TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
         {
             if (retry == null || !retry.Task.IsCompleted)
@@ -167,11 +157,6 @@ namespace System.Data.ProviderBase
 
         private DbConnectionClosedPreviouslyOpened() : base(ConnectionState.Closed, true, true)
         {
-        }
-
-        internal override bool TryReplaceConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
-        {
-            return TryOpenConnection(outerConnection, connectionFactory, retry, userOptions);
         }
     }
 }

@@ -35,7 +35,6 @@ namespace System.Data.OleDb
         private string[] _knownKeywords;
         private Dictionary<string, OleDbPropertyInfo> _propertyInfo;
 
-        //      private string _namedConnection   = DbConnectionStringDefaults.NamedConnection;
         private string _fileName = DbConnectionStringDefaults.FileName;
 
         private string _dataSource = DbConnectionStringDefaults.DataSource;
@@ -50,7 +49,6 @@ namespace System.Data.OleDb
             string[] validKeywords = new string[5];
             validKeywords[(int)Keywords.DataSource] = DbConnectionStringKeywords.DataSource;
             validKeywords[(int)Keywords.FileName] = DbConnectionStringKeywords.FileName;
-            //          validKeywords[(int)Keywords.NamedConnection]     = DbConnectionStringKeywords.NamedConnection;
             validKeywords[(int)Keywords.OleDbServices] = DbConnectionStringKeywords.OleDbServices;
             validKeywords[(int)Keywords.PersistSecurityInfo] = DbConnectionStringKeywords.PersistSecurityInfo;
             validKeywords[(int)Keywords.Provider] = DbConnectionStringKeywords.Provider;
@@ -59,7 +57,6 @@ namespace System.Data.OleDb
             Dictionary<string, Keywords> hash = new Dictionary<string, Keywords>(9, StringComparer.OrdinalIgnoreCase);
             hash.Add(DbConnectionStringKeywords.DataSource, Keywords.DataSource);
             hash.Add(DbConnectionStringKeywords.FileName, Keywords.FileName);
-            //          hash.Add(DbConnectionStringKeywords.NamedConnection,           Keywords.NamedConnection);
             hash.Add(DbConnectionStringKeywords.OleDbServices, Keywords.OleDbServices);
             hash.Add(DbConnectionStringKeywords.PersistSecurityInfo, Keywords.PersistSecurityInfo);
             hash.Add(DbConnectionStringKeywords.Provider, Keywords.Provider);
@@ -355,9 +352,6 @@ namespace System.Data.OleDb
                     _fileName = DbConnectionStringDefaults.FileName;
                     RestartProvider();
                     break;
-                //          case Keywords.NamedConnection:
-                //             _namedConnection = DbConnectionStringDefaults.NamedConnection;
-                //              break;
                 case Keywords.OleDbServices:
                     _oleDbServices = DbConnectionStringDefaults.OleDbServices;
                     break;

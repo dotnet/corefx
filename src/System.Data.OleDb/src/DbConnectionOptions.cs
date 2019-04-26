@@ -87,7 +87,6 @@ namespace System.Data.Common
         // connection string common keywords
         private static class KEY
         {
-            internal const string Integrated_Security = "integrated security";
             internal const string Password = "password";
             internal const string Persist_Security_Info = "persist security info";
             internal const string User_ID = "user id";
@@ -145,16 +144,6 @@ namespace System.Data.Common
             }
         }
 
-        protected DbConnectionOptions(DbConnectionOptions connectionOptions)
-        { // Clone used by SqlConnectionString
-            _usersConnectionString = connectionOptions._usersConnectionString;
-            HasPasswordKeyword = connectionOptions.HasPasswordKeyword;
-            HasUserIdKeyword = connectionOptions.HasUserIdKeyword;
-            UseOdbcRules = connectionOptions.UseOdbcRules;
-            _parsetable = connectionOptions._parsetable;
-            KeyChain = connectionOptions.KeyChain;
-        }
-
         public string UsersConnectionString(bool hidePassword)
         {
             return UsersConnectionString(hidePassword, false);
@@ -168,35 +157,6 @@ namespace System.Data.Common
                 ReplacePasswordPwd(out connectionString, false);
             }
             return ((null != connectionString) ? connectionString : "");
-        }
-
-        internal string UsersConnectionStringForTrace()
-        {
-            return UsersConnectionString(true, true);
-        }
-
-        internal bool HasBlankPassword
-        {
-            get
-            {
-                if (!ConvertValueToIntegratedSecurity())
-                {
-                    if (_parsetable.ContainsKey(KEY.Password))
-                    {
-                        return ADP.IsEmpty((string)_parsetable[KEY.Password]);
-                    }
-                    else
-                    if (_parsetable.ContainsKey(SYNONYM.Pwd))
-                    {
-                        return ADP.IsEmpty((string)_parsetable[SYNONYM.Pwd]);
-                    }
-                    else
-                    {
-                        return ((_parsetable.ContainsKey(KEY.User_ID) && !ADP.IsEmpty((string)_parsetable[KEY.User_ID])) || (_parsetable.ContainsKey(SYNONYM.UID) && !ADP.IsEmpty((string)_parsetable[SYNONYM.UID])));
-                    }
-                }
-                return false;
-            }
         }
 
         internal bool HasPersistablePassword
@@ -214,16 +174,6 @@ namespace System.Data.Common
         public bool IsEmpty
         {
             get { return (null == KeyChain); }
-        }
-
-        internal Hashtable Parsetable
-        {
-            get { return _parsetable; }
-        }
-
-        public ICollection Keys
-        {
-            get { return _parsetable.Keys; }
         }
 
         public string this[string keyword]
@@ -330,37 +280,6 @@ namespace System.Data.Common
                 else
                 {
                     throw ADP.InvalidConnectionOptionValue(keyName);
-                }
-            }
-        }
-
-        // same as Boolean, but with SSPI thrown in as valid yes
-        public bool ConvertValueToIntegratedSecurity()
-        {
-            object value = _parsetable[KEY.Integrated_Security];
-            if (null == value)
-            {
-                return false;
-            }
-            return ConvertValueToIntegratedSecurityInternal((string)value);
-        }
-
-        internal bool ConvertValueToIntegratedSecurityInternal(string stringValue)
-        {
-            if (CompareInsensitiveInvariant(stringValue, "sspi") || CompareInsensitiveInvariant(stringValue, "true") || CompareInsensitiveInvariant(stringValue, "yes"))
-                return true;
-            else if (CompareInsensitiveInvariant(stringValue, "false") || CompareInsensitiveInvariant(stringValue, "no"))
-                return false;
-            else
-            {
-                string tmp = stringValue.Trim();  // Remove leading & trailing white space.
-                if (CompareInsensitiveInvariant(tmp, "sspi") || CompareInsensitiveInvariant(tmp, "true") || CompareInsensitiveInvariant(tmp, "yes"))
-                    return true;
-                else if (CompareInsensitiveInvariant(tmp, "false") || CompareInsensitiveInvariant(tmp, "no"))
-                    return false;
-                else
-                {
-                    throw ADP.InvalidConnectionOptionValue(KEY.Integrated_Security);
                 }
             }
         }
@@ -564,40 +483,6 @@ namespace System.Data.Common
                 value = null;
             }
             return value;
-        }
-
-        internal string ExpandKeyword(string keyword, string replacementValue)
-        {
-            // preserve duplicates, updated keyword value with replacement value
-            // if keyword not specified, append to end of the string
-            bool expanded = false;
-            int copyPosition = 0;
-
-            StringBuilder builder = new StringBuilder(_usersConnectionString.Length);
-            for (NameValuePair current = KeyChain; null != current; current = current.Next)
-            {
-                if ((current.Name == keyword) && (current.Value == this[keyword]))
-                {
-                    // only replace the parse end-result value instead of all values
-                    // so that when duplicate-keywords occur other original values remain in place
-                    AppendKeyValuePairBuilder(builder, current.Name, replacementValue, UseOdbcRules);
-                    builder.Append(';');
-                    expanded = true;
-                }
-                else
-                {
-                    builder.Append(_usersConnectionString, copyPosition, current.Length);
-                }
-                copyPosition += current.Length;
-            }
-
-            if (!expanded)
-            {
-                // TODO: technically for ODBC  it should be prepended but not using the method from ODBC
-                Debug.Assert(!UseOdbcRules, "ExpandKeyword not ready for Odbc");
-                AppendKeyValuePairBuilder(builder, keyword, replacementValue, UseOdbcRules);
-            }
-            return builder.ToString();
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
@@ -1107,18 +992,6 @@ namespace System.Data.Common
             Debug.Assert(expanded, "password/pwd was not removed");
             constr = builder.ToString();
             return head;
-        }
-
-        internal static void ValidateKeyValuePair(string keyword, string value)
-        {
-            if ((null == keyword) || !ConnectionStringValidKeyRegex.IsMatch(keyword))
-            {
-                throw ADP.InvalidKeyname(keyword);
-            }
-            if ((null != value) && !ConnectionStringValidValueRegex.IsMatch(value))
-            {
-                throw ADP.InvalidValue(keyword);
-            }
         }
     }
 }

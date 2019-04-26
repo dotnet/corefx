@@ -21,9 +21,6 @@ namespace System.Data.ProviderBase
         private const int PruningDueTime = 4 * 60 * 1000;           // 4 minutes
         private const int PruningPeriod = 30 * 1000;           // thirty seconds
 
-        private static int _objectTypeCount; // Bid counter
-        internal readonly int _objectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
         // s_pendingOpenNonPooled is an array of tasks used to throttle creation of non-pooled connections to 
         // a maximum of Environment.ProcessorCount at a time.
         static int s_pendingOpenNonPooledNext = 0;
@@ -51,14 +48,6 @@ namespace System.Data.ProviderBase
             get;
         }
 
-        internal int ObjectID
-        {
-            get
-            {
-                return _objectID;
-            }
-        }
-
         public void ClearAllPools()
         {
             Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> connectionPoolGroups = _connectionPoolGroups;
@@ -70,33 +59,6 @@ namespace System.Data.ProviderBase
                     poolGroup.Clear();
                 }
             }
-        }
-
-        public void ClearPool(DbConnection connection)
-        {
-            ADP.CheckArgumentNull(connection, "connection");
-            DbConnectionPoolGroup poolGroup = GetConnectionPoolGroup(connection);
-            if (null != poolGroup)
-            {
-                poolGroup.Clear();
-            }
-        }
-
-        public void ClearPool(DbConnectionPoolKey key)
-        {
-            Debug.Assert(key != null, "key cannot be null");
-            ADP.CheckArgumentNull(key.ConnectionString, "key.ConnectionString");
-            DbConnectionPoolGroup poolGroup;
-            Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> connectionPoolGroups = _connectionPoolGroups;
-            if (connectionPoolGroups.TryGetValue(key, out poolGroup))
-            {
-                poolGroup.Clear();
-            }
-        }
-
-        internal virtual DbConnectionPoolProviderInfo CreateConnectionPoolProviderInfo(DbConnectionOptions connectionOptions)
-        {
-            return null;
         }
 
         virtual protected DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
@@ -148,21 +110,6 @@ namespace System.Data.ProviderBase
         {
             TimerCallback callback = new TimerCallback(PruneConnectionPoolGroups);
             return new Timer(callback, null, PruningDueTime, PruningPeriod);
-        }
-
-        protected DbConnectionOptions FindConnectionOptions(DbConnectionPoolKey key)
-        {
-            Debug.Assert(key != null, "key cannot be null");
-            if (!ADP.IsEmpty(key.ConnectionString))
-            {
-                DbConnectionPoolGroup connectionPoolGroup;
-                Dictionary<DbConnectionPoolKey, DbConnectionPoolGroup> connectionPoolGroups = _connectionPoolGroups;
-                if (connectionPoolGroups.TryGetValue(key, out connectionPoolGroup))
-                {
-                    return connectionPoolGroup.ConnectionOptions;
-                }
-            }
-            return null;
         }
 
         // GetCompletedTask must be called from within s_pendingOpenPooled lock
@@ -625,11 +572,6 @@ namespace System.Data.ProviderBase
         abstract protected DbConnectionPoolGroupOptions CreateConnectionPoolGroupOptions(DbConnectionOptions options);
 
         abstract internal DbConnectionPoolGroup GetConnectionPoolGroup(DbConnection connection);
-
-        abstract internal DbConnectionInternal GetInnerConnection(DbConnection connection);
-
-        abstract protected int GetObjectId(DbConnection connection);
-
         abstract internal void PermissionDemand(DbConnection outerConnection);
 
         abstract internal void SetConnectionPoolGroup(DbConnection outerConnection, DbConnectionPoolGroup poolGroup);

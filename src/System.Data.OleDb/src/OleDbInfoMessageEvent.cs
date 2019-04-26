@@ -32,11 +32,6 @@ namespace System.Data.OleDb
             }
         }
 
-        internal bool ShouldSerializeErrors()
-        {
-            return this.exception.ShouldSerializeErrors();
-        }
-
         public string Message
         {
             get

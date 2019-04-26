@@ -43,35 +43,6 @@ namespace System.Data.Common
             }
         }
 
-        // We are lazily initializing these Tasks to avoid forcing customers to use the "UNSAFE" set when they are actually using no Async features
-        static private Task<bool> _trueTask = null;
-        static internal Task<bool> TrueTask
-        {
-            get
-            {
-                if (_trueTask == null)
-                {
-                    _trueTask = Task.FromResult<bool>(true);
-                }
-                return _trueTask;
-            }
-        }
-
-        static private Task<bool> _falseTask = null;
-        static internal Task<bool> FalseTask
-        {
-            get
-            {
-                if (_falseTask == null)
-                {
-                    _falseTask = Task.FromResult<bool>(false);
-                }
-                return _falseTask;
-            }
-        }
-
-        internal const CompareOptions DefaultCompareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
-
         static void TraceException(string trace, Exception e)
         {
             Debug.Assert(e != null, "TraceException: null Exception");
@@ -135,21 +106,9 @@ namespace System.Data.Common
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        static internal ArgumentOutOfRangeException ArgumentOutOfRange(string parameterName)
-        {
-            ArgumentOutOfRangeException e = new ArgumentOutOfRangeException(parameterName);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         static internal ArgumentOutOfRangeException ArgumentOutOfRange(string message, string parameterName)
         {
             ArgumentOutOfRangeException e = new ArgumentOutOfRangeException(parameterName, message);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        static internal ArgumentOutOfRangeException ArgumentOutOfRange(string message, string parameterName, object value)
-        {
-            ArgumentOutOfRangeException e = new ArgumentOutOfRangeException(parameterName, value, message);
             TraceExceptionAsReturnValue(e);
             return e;
         }
@@ -159,27 +118,9 @@ namespace System.Data.Common
             TraceExceptionAsReturnValue(e);
             return e;
         }
-        static internal ConfigurationException Configuration(string message, XmlNode node)
-        {
-            ConfigurationException e = new ConfigurationErrorsException(message, node);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        static internal IndexOutOfRangeException IndexOutOfRange(int value)
-        {
-            IndexOutOfRangeException e = new IndexOutOfRangeException(value.ToString(CultureInfo.InvariantCulture));
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         static internal IndexOutOfRangeException IndexOutOfRange(string error)
         {
             IndexOutOfRangeException e = new IndexOutOfRangeException(error);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
-        static internal IndexOutOfRangeException IndexOutOfRange()
-        {
-            IndexOutOfRangeException e = new IndexOutOfRangeException();
             TraceExceptionAsReturnValue(e);
             return e;
         }
@@ -451,12 +392,6 @@ namespace System.Data.Common
             return InvalidOperation(SR.GetString(SR.ADP_NoConnectionString));
         }
 
-        static internal NotImplementedException MethodNotImplemented(string methodName)
-        {
-            NotImplementedException e = new NotImplementedException(methodName);
-            TraceExceptionAsReturnValue(e);
-            return e;
-        }
         static private string ConnectionStateMsg(ConnectionState state)
         {
             switch (state)
@@ -641,10 +576,7 @@ namespace System.Data.Common
         //
         // : ConnectionUtil
         //
-        static internal Exception ConnectionIsDisabled(Exception InnerException)
-        {
-            return InvalidOperation(SR.GetString(SR.ADP_ConnectionIsDisabled), InnerException);
-        }
+
         static internal Exception ClosedConnectionError()
         {
             return InvalidOperation(SR.GetString(SR.ADP_ClosedConnectionError));
@@ -668,10 +600,6 @@ namespace System.Data.Common
         static internal Exception EmptyDatabaseName()
         {
             return Argument(SR.GetString(SR.ADP_EmptyDatabaseName));
-        }
-        static internal Exception DatabaseNameTooLong()
-        {
-            return Argument(SR.GetString(SR.ADP_DatabaseNameTooLong));
         }
 
         internal enum ConnectionError
@@ -951,29 +879,27 @@ namespace System.Data.Common
         }
 
         // global constant strings
-        internal const string BeginTransaction = "BeginTransaction";
-        internal const string ChangeDatabase = "ChangeDatabase";
-        internal const string CommandTimeout = "CommandTimeout";
-        internal const string ConnectionString = "ConnectionString";
-        internal const string DeriveParameters = "DeriveParameters";
-        internal const string ExecuteReader = "ExecuteReader";
-        internal const string ExecuteNonQuery = "ExecuteNonQuery";
-        internal const string ExecuteScalar = "ExecuteScalar";
-        internal const string GetBytes = "GetBytes";
-        internal const string GetChars = "GetChars";
-        internal const string GetOleDbSchemaTable = "GetOleDbSchemaTable";
-        internal const string GetSchema = "GetSchema";
-        internal const string GetSchemaTable = "GetSchemaTable";
-        internal const string Parameter = "Parameter";
-        internal const string ParameterName = "ParameterName";
-        internal const string Prepare = "Prepare";
-        internal const string QuoteIdentifier = "QuoteIdentifier";
-        internal const string SetProperties = "SetProperties";
-        internal const string UnquoteIdentifier = "UnquoteIdentifier";
+        internal const string BeginTransaction = nameof(BeginTransaction);
+        internal const string ChangeDatabase = nameof(ChangeDatabase);
+        internal const string CommandTimeout = nameof(CommandTimeout);
+        internal const string ConnectionString = nameof(ConnectionString);
+        internal const string DeriveParameters = nameof(DeriveParameters);
+        internal const string ExecuteReader = nameof(ExecuteReader);
+        internal const string ExecuteNonQuery = nameof(ExecuteNonQuery);
+        internal const string ExecuteScalar = nameof(ExecuteScalar);
+        internal const string GetBytes = nameof(GetBytes);
+        internal const string GetChars = nameof(GetChars);
+        internal const string GetOleDbSchemaTable = nameof(GetOleDbSchemaTable);
+        internal const string GetSchema = nameof(GetSchema);
+        internal const string GetSchemaTable = nameof(GetSchemaTable);
+        internal const string Parameter = nameof(Parameter);
+        internal const string ParameterName = nameof(ParameterName);
+        internal const string Prepare = nameof(Prepare);
+        internal const string QuoteIdentifier = nameof(QuoteIdentifier);
+        internal const string SetProperties = nameof(SetProperties);
+        internal const string UnquoteIdentifier = nameof(UnquoteIdentifier);
 
         internal const CompareOptions compareOptions = CompareOptions.IgnoreKanaType | CompareOptions.IgnoreWidth | CompareOptions.IgnoreCase;
-        internal const int DecimalMaxPrecision = 29;
-        internal const int DecimalMaxPrecision28 = 28;  // there are some cases in Odbc where we need that ...
         internal const int DefaultCommandTimeout = 30;
         internal const int DefaultConnectionTimeout = DbConnectionStringDefaults.ConnectTimeout;
 
@@ -1330,70 +1256,6 @@ namespace System.Data.Common
                 unquotedString = quotedString.Substring(prefixLength, quotedStringLength - prefixLength);
             }
             return true;
-        }
-
-        // { "a", "a", "a" } -> { "a", "a1", "a2" }
-        // { "a", "a", "a1" } -> { "a", "a2", "a1" }
-        // { "a", "A", "a" } -> { "a", "A1", "a2" }
-        // { "a", "A", "a1" } -> { "a", "A2", "a1" }
-        static internal void BuildSchemaTableInfoTableNames(string[] columnNameArray)
-        {
-            Dictionary<string, int> hash = new Dictionary<string, int>(columnNameArray.Length);
-
-            int startIndex = columnNameArray.Length; // lowest non-unique index
-            for (int i = columnNameArray.Length - 1; 0 <= i; --i)
-            {
-                string columnName = columnNameArray[i];
-                if ((null != columnName) && (0 < columnName.Length))
-                {
-                    columnName = columnName.ToLower(CultureInfo.InvariantCulture);
-                    int index;
-                    if (hash.TryGetValue(columnName, out index))
-                    {
-                        startIndex = Math.Min(startIndex, index);
-                    }
-                    hash[columnName] = i;
-                }
-                else
-                {
-                    columnNameArray[i] = string.Empty;
-                    startIndex = i;
-                }
-            }
-            int uniqueIndex = 1;
-            for (int i = startIndex; i < columnNameArray.Length; ++i)
-            {
-                string columnName = columnNameArray[i];
-                if (0 == columnName.Length)
-                { // generate a unique name
-                    columnNameArray[i] = "Column";
-                    uniqueIndex = GenerateUniqueName(hash, ref columnNameArray[i], i, uniqueIndex);
-                }
-                else
-                {
-                    columnName = columnName.ToLower(CultureInfo.InvariantCulture);
-                    if (i != hash[columnName])
-                    {
-                        GenerateUniqueName(hash, ref columnNameArray[i], i, 1);
-                    }
-                }
-            }
-        }
-
-        static private int GenerateUniqueName(Dictionary<string, int> hash, ref string columnName, int index, int uniqueIndex)
-        {
-            for (; ; ++uniqueIndex)
-            {
-                string uniqueName = columnName + uniqueIndex.ToString(CultureInfo.InvariantCulture);
-                string lowerName = uniqueName.ToLower(CultureInfo.InvariantCulture);
-                if (!hash.ContainsKey(lowerName))
-                {
-                    columnName = uniqueName;
-                    hash.Add(lowerName, index);
-                    break;
-                }
-            }
-            return uniqueIndex;
         }
 
         static internal IntPtr IntPtrOffset(IntPtr pbase, Int32 offset)

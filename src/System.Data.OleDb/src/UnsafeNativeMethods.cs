@@ -826,35 +826,11 @@ namespace System.Data.Common
             }
         }
 
-        [DllImport(Interop.Libraries.Advapi32, CharSet = CharSet.Unicode)]
-        static internal extern uint GetEffectiveRightsFromAclW(byte[] pAcl, ref Trustee pTrustee, out uint pAccessMask);
-
-        [DllImport(Interop.Libraries.Advapi32, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static internal extern bool CheckTokenMembership(IntPtr tokenHandle, byte[] sidToCheck, out bool isMember);
-
-        [DllImport(Interop.Libraries.Advapi32, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static internal extern bool ConvertSidToStringSidW(IntPtr sid, out IntPtr stringSid);
-
         [DllImport(Interop.Libraries.Advapi32, EntryPoint = "CreateWellKnownSid", SetLastError = true, CharSet = CharSet.Unicode)]
         static internal extern int CreateWellKnownSid(
             int sidType,
             byte[] domainSid,
             [Out] byte[] resultSid,
             ref uint resultSidLength);
-
-        [DllImport(Interop.Libraries.Advapi32, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static internal extern bool GetTokenInformation(IntPtr tokenHandle, uint token_class, IntPtr tokenStruct, uint tokenInformationLength, ref uint tokenString);
-
-        [DllImport(Interop.Libraries.Kernel32, CharSet = CharSet.Unicode)]
-        internal static extern int lstrlenW(IntPtr ptr);
-
-        /* For debugging purposes...
-        [DllImport(Interop.Libraries.Advapi32)]
-        [return:MarshalAs(UnmanagedType.I4)]
-        static internal extern int GetLengthSid(IntPtr sid1);
-        */
     }
 }

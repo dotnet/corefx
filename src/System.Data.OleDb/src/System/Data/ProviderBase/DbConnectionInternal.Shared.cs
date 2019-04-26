@@ -12,9 +12,6 @@ namespace System.Data.ProviderBase
 {
     internal abstract partial class DbConnectionInternal // V1.1.3300
     {
-        private static int _objectTypeCount;
-        internal readonly int _objectID = Interlocked.Increment(ref _objectTypeCount);
-
         internal static readonly StateChangeEventArgs StateChangeClosed = new StateChangeEventArgs(ConnectionState.Open, ConnectionState.Closed);
         internal static readonly StateChangeEventArgs StateChangeOpen = new StateChangeEventArgs(ConnectionState.Closed, ConnectionState.Open);
 
@@ -154,48 +151,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-        /// <summary>
-        /// Get boolean value that indicates whether the enlisted transaction has been disposed.
-        /// </summary>
-        /// <value>
-        /// True if there is an enlisted transaction, and it has been diposed.
-        /// False if there is an enlisted transaction that has not been disposed, or if the transaction reference is null.
-        /// </value>
-        /// <remarks>
-        /// This method must be called while holding a lock on the DbConnectionInternal instance.
-        /// </remarks>
-        protected bool EnlistedTransactionDisposed
-        {
-            get
-            {
-                // Until the Transaction.Disposed property is public it is necessary to access a member
-                // that throws if the object is disposed to determine if in fact the transaction is disposed.
-                try
-                {
-                    bool disposed;
-
-                    SysTx.Transaction currentEnlistedTransactionOriginal = _enlistedTransactionOriginal;
-                    if (currentEnlistedTransactionOriginal != null)
-                    {
-                        disposed = currentEnlistedTransactionOriginal.TransactionInformation == null;
-                    }
-                    else
-                    {
-                        // Don't expect to get here in the general case,
-                        // Since this getter is called by CheckEnlistedTransactionBinding
-                        // after checking for a non-null enlisted transaction (and it does so under lock).
-                        disposed = false;
-                    }
-
-                    return disposed;
-                }
-                catch (ObjectDisposedException)
-                {
-                    return true;
-                }
-            }
-        }
-
         // Is this connection in stasis, waiting for transaction to end before returning to pool?
         internal bool IsTxRootWaitingForTxEnd
         {
@@ -277,23 +232,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-        internal bool IsInPool
-        {
-            get
-            {
-                Debug.Assert(_pooledCount <= 1 && _pooledCount >= -1, "Pooled count for object is invalid");
-                return (_pooledCount == 1);
-            }
-        }
-
-        internal int ObjectID
-        {
-            get
-            {
-                return _objectID;
-            }
-        }
-
         protected internal object Owner
         {
             // We use a weak reference to the owning object so we can identify when
@@ -319,15 +257,6 @@ namespace System.Data.ProviderBase
                 return _performanceCounters;
             }
         }
-
-        virtual protected bool ReadyToPrepareTransaction
-        {
-            get
-            {
-                return true;
-            }
-        }
-
         protected internal DbReferenceCollection ReferenceCollection
         {
             get
@@ -339,15 +268,6 @@ namespace System.Data.ProviderBase
         abstract public string ServerVersion
         {
             get;
-        }
-
-        // this should be abstract but untill it is added to all the providers virtual will have to do RickFe
-        virtual public string ServerVersionNormalized
-        {
-            get
-            {
-                throw ADP.NotSupported();
-            }
         }
 
         public bool ShouldHidePassword
@@ -382,11 +302,6 @@ namespace System.Data.ProviderBase
         }
 
         abstract public DbTransaction BeginTransaction(IsolationLevel il);
-
-        virtual public void ChangeDatabase(string value)
-        {
-            throw ADP.MethodNotImplemented("ChangeDatabase");
-        }
 
         virtual internal void PrepareForReplaceConnection()
         {
@@ -505,12 +420,6 @@ namespace System.Data.ProviderBase
             _connectionIsDoomed = true;
         }
 
-        // Reset connection doomed status so it can be re-connected and pooled.
-        protected internal void UnDoomThisConnection()
-        {
-            _connectionIsDoomed = false;
-        }
-
         abstract public void EnlistTransaction(SysTx.Transaction transaction);
 
         virtual protected internal DataTable GetSchema(DbConnectionFactory factory, DbConnectionPoolGroup poolGroup, DbConnection outerConnection, string collectionName, string[] restrictions)
@@ -571,11 +480,6 @@ namespace System.Data.ProviderBase
         internal virtual bool TryOpenConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
         {
             throw ADP.ConnectionAlreadyOpen(State);
-        }
-
-        internal virtual bool TryReplaceConnection(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
-        {
-            throw ADP.MethodNotImplemented("TryReplaceConnection");
         }
 
         protected bool TryOpenConnectionInternal(DbConnection outerConnection, DbConnectionFactory connectionFactory, TaskCompletionSource<DbConnectionInternal> retry, DbConnectionOptions userOptions)
@@ -685,13 +589,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-        // Cleanup connection's transaction-specific structures (currently used by Delegated transaction).
-        //  This is a separate method because cleanup can be triggered in multiple ways for a delegated
-        //  transaction.
-        virtual protected void CleanupTransactionOnCompletion(SysTx.Transaction transaction)
-        {
-        }
-
         internal void DetachCurrentTransactionIfEnded()
         {
             SysTx.Transaction enlistedTransaction = EnlistedTransaction;
@@ -738,32 +635,6 @@ namespace System.Data.ProviderBase
                     }
                 }
             }
-        }
-
-        // Handle transaction detach, pool cleanup and other post-transaction cleanup tasks associated with
-        internal void CleanupConnectionOnTransactionCompletion(SysTx.Transaction transaction)
-        {
-            DetachTransaction(transaction, false);
-
-            DbConnectionPool pool = Pool;
-            if (null != pool)
-            {
-                pool.TransactionEnded(transaction, this);
-            }
-        }
-
-        void TransactionCompletedEvent(object sender, SysTx.TransactionEventArgs e)
-        {
-            SysTx.Transaction transaction = e.Transaction;
-
-            CleanupTransactionOnCompletion(transaction);
-
-            CleanupConnectionOnTransactionCompletion(transaction);
-        }
-
-        private void TransactionOutcomeEnlist(SysTx.Transaction transaction)
-        {
-            transaction.TransactionCompleted += new SysTx.TransactionCompletedEventHandler(TransactionCompletedEvent);
         }
 
         internal void SetInStasis()

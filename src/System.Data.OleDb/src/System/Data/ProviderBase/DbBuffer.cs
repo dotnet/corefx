@@ -66,35 +66,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-        internal string PtrToStringUni(int offset)
-        {
-            offset += BaseOffset;
-            Validate(offset, 2);
-            Debug.Assert(0 == offset % ADP.PtrSize, "invalid alignment");
-
-            string value = null;
-            bool mustRelease = false;
-            RuntimeHelpers.PrepareConstrainedRegions();
-            try
-            {
-                DangerousAddRef(ref mustRelease);
-
-                IntPtr ptr = ADP.IntPtrOffset(DangerousGetHandle(), offset);
-                int length = UnsafeNativeMethods.lstrlenW(ptr);
-                Validate(offset, (2 * (length + 1)));
-                value = Marshal.PtrToStringUni(ptr, length);
-            }
-            finally
-            {
-                if (mustRelease)
-                {
-                    DangerousRelease();
-                }
-            }
-
-            return value;
-        }
-
         internal String PtrToStringUni(int offset, int length)
         {
             offset += BaseOffset;
@@ -650,26 +621,6 @@ namespace System.Data.ProviderBase
         internal unsafe void WriteSingle(int offset, Single value)
         {
             WriteInt32(offset, *(Int32*)&value);
-        }
-
-        internal void ZeroMemory()
-        {
-            bool mustRelease = false;
-            RuntimeHelpers.PrepareConstrainedRegions();
-            try
-            {
-                DangerousAddRef(ref mustRelease);
-
-                IntPtr ptr = DangerousGetHandle();
-                SafeNativeMethods.ZeroMemory(ptr, Length);
-            }
-            finally
-            {
-                if (mustRelease)
-                {
-                    DangerousRelease();
-                }
-            }
         }
 
         internal Guid ReadGuid(int offset)

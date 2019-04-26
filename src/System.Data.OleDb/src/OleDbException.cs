@@ -36,12 +36,6 @@ namespace System.Data.OleDb
             this.oledbErrors = errors;
         }
 
-        // runtime will call even if private...
-        private OleDbException(SerializationInfo si, StreamingContext sc) : base(si, sc)
-        {
-            oledbErrors = (OleDbErrorCollection)si.GetValue("oledbErrors", typeof(OleDbErrorCollection));
-        }
-
         override public void GetObjectData(SerializationInfo si, StreamingContext context)
         {
             if (null == si)
@@ -69,12 +63,6 @@ namespace System.Data.OleDb
                 OleDbErrorCollection errors = this.oledbErrors;
                 return ((null != errors) ? errors : new OleDbErrorCollection(null));
             }
-        }
-
-        internal bool ShouldSerializeErrors()
-        {
-            OleDbErrorCollection errors = this.oledbErrors;
-            return ((null != errors) && (0 < errors.Count));
         }
 
         static internal OleDbException CreateException(UnsafeNativeMethods.IErrorInfo errorInfo, OleDbHResult errorCode, Exception inner)

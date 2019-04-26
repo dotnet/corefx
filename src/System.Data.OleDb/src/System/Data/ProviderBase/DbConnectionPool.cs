@@ -66,23 +66,12 @@ namespace System.Data.ProviderBase
 
             DbConnectionPool _pool;
 
-            private static int _objectTypeCount; // Bid counter
-            internal readonly int _objectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
             internal TransactedConnectionPool(DbConnectionPool pool)
             {
                 Debug.Assert(null != pool, "null pool?");
 
                 _pool = pool;
                 _transactedCxns = new Dictionary<SysTx.Transaction, TransactedConnectionList>();
-            }
-
-            internal int ObjectID
-            {
-                get
-                {
-                    return _objectID;
-                }
             }
 
             internal DbConnectionPool Pool
@@ -227,70 +216,6 @@ namespace System.Data.ProviderBase
                 Pool.PerformanceCounters.NumberOfFreeConnections.Increment();
 
             }
-
-            internal void TransactionEnded(SysTx.Transaction transaction, DbConnectionInternal transactedObject)
-            {
-                TransactedConnectionList connections;
-                int entry = -1;
-
-                // NOTE: because TransactionEnded is an asynchronous notification, there's no guarantee
-                //   around the order in which PutTransactionObject and TransactionEnded are called. As
-                //   such, it is possible that the transaction does not yet have a pool created.
-
-                // TODO: is this a plausible and/or likely scenario? Do we need to have a mechanism to ensure
-                // TODO:   that the pending creation of a transacted pool for this transaction is aborted when
-                // TODO:   PutTransactedObject finally gets some CPU time?
-
-                lock (_transactedCxns)
-                {
-                    if (_transactedCxns.TryGetValue(transaction, out connections))
-                    {
-                        Debug.Assert(connections != null);
-
-                        bool shouldDisposeConnections = false;
-
-                        // Lock connections to avoid conflict with GetTransactionObject
-                        lock (connections)
-                        {
-                            entry = connections.IndexOf(transactedObject);
-
-                            if (entry >= 0)
-                            {
-                                connections.RemoveAt(entry);
-                            }
-
-                            // Once we've completed all the ended notifications, we can
-                            // safely remove the list from the transacted pool.
-                            if (0 >= connections.Count)
-                            {
-                                _transactedCxns.Remove(transaction);
-
-                                // we really need to dispose our connection list; it may have 
-                                // native resources via the tx and GC may not happen soon enough.
-                                shouldDisposeConnections = true;
-                            }
-                        }
-
-                        if (shouldDisposeConnections)
-                        {
-                            connections.Dispose();
-                        }
-                    }
-                    else
-                    {
-                        //Debug.Assert ( false, "TransactionCompletedEvent fired before PutTransactedObject put the connection in the transacted pool." );
-                    }
-                }
-
-                // If (and only if) we found the connection in the list of
-                // connections, we'll put it back...
-                if (0 <= entry)
-                {
-                    Pool.PerformanceCounters.NumberOfFreeConnections.Decrement();
-                    Pool.PutObjectFromTransactedPool(transactedObject);
-                }
-            }
-
         }
 
         private sealed class PoolWaitHandles : DbBuffer
@@ -420,13 +345,6 @@ namespace System.Data.ProviderBase
         private readonly DbConnectionFactory _connectionFactory;
         private readonly DbConnectionPoolGroup _connectionPoolGroup;
         private readonly DbConnectionPoolGroupOptions _connectionPoolGroupOptions;
-        private DbConnectionPoolProviderInfo _connectionPoolProviderInfo;
-
-        /// <summary>
-        /// The private member which carries the set of authenticationcontexts for this pool (based on the user's identity).
-        /// </summary>
-        private readonly ConcurrentDictionary<DbConnectionPoolAuthenticationContextKey, DbConnectionPoolAuthenticationContext> _pooledDbAuthenticationContexts;
-
         private State _state;
 
         private readonly ConcurrentStack<DbConnectionInternal> _stackOld = new ConcurrentStack<DbConnectionInternal>();
@@ -453,15 +371,11 @@ namespace System.Data.ProviderBase
         private readonly List<DbConnectionInternal> _objectList;
         private int _totalObjects;
 
-        private static int _objectTypeCount; // Bid counter
-        internal readonly int _objectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
         // only created by DbConnectionPoolGroup.GetConnectionPool
         internal DbConnectionPool(
                             DbConnectionFactory connectionFactory,
                             DbConnectionPoolGroup connectionPoolGroup,
-                            DbConnectionPoolIdentity identity,
-                            DbConnectionPoolProviderInfo connectionPoolProviderInfo)
+                            DbConnectionPoolIdentity identity)
         {
             Debug.Assert(ADP.IsWindowsNT, "Attempting to construct a connection pool on Win9x?");
             Debug.Assert(null != connectionPoolGroup, "null connectionPoolGroup");
@@ -481,7 +395,6 @@ namespace System.Data.ProviderBase
             _connectionFactory = connectionFactory;
             _connectionPoolGroup = connectionPoolGroup;
             _connectionPoolGroupOptions = connectionPoolGroup.PoolGroupOptions;
-            _connectionPoolProviderInfo = connectionPoolProviderInfo;
             _identity = identity;
 
             _waitHandles = new PoolWaitHandles();
@@ -490,9 +403,6 @@ namespace System.Data.ProviderBase
             _errorTimer = null;  // No error yet.
 
             _objectList = new List<DbConnectionInternal>(MaxPoolSize);
-
-            _pooledDbAuthenticationContexts = new ConcurrentDictionary<DbConnectionPoolAuthenticationContextKey, DbConnectionPoolAuthenticationContext>(concurrencyLevel: 4 * Environment.ProcessorCount /* default value in ConcurrentDictionary*/,
-                                                                                                                                                        capacity: 2);
 
             if (ADP.IsPlatformNT5)
             {
@@ -559,11 +469,6 @@ namespace System.Data.ProviderBase
             }
         }
 
-        internal DbConnectionPoolIdentity Identity
-        {
-            get { return _identity; }
-        }
-
         internal bool IsRunning
         {
             get { return State.Running == _state; }
@@ -579,14 +484,6 @@ namespace System.Data.ProviderBase
             get { return PoolGroupOptions.MinPoolSize; }
         }
 
-        internal int ObjectID
-        {
-            get
-            {
-                return _objectID;
-            }
-        }
-
         internal DbConnectionPoolCounters PerformanceCounters
         {
             get { return _connectionFactory.PerformanceCounters; }
@@ -600,22 +497,6 @@ namespace System.Data.ProviderBase
         internal DbConnectionPoolGroupOptions PoolGroupOptions
         {
             get { return _connectionPoolGroupOptions; }
-        }
-
-        internal DbConnectionPoolProviderInfo ProviderInfo
-        {
-            get { return _connectionPoolProviderInfo; }
-        }
-
-        /// <summary>
-        /// Return the pooled authentication contexts.
-        /// </summary>
-        internal ConcurrentDictionary<DbConnectionPoolAuthenticationContextKey, DbConnectionPoolAuthenticationContext> AuthenticationContexts
-        {
-            get
-            {
-                return _pooledDbAuthenticationContexts;
-            }
         }
 
         internal bool UseLoadBalancing
@@ -1812,28 +1693,6 @@ namespace System.Data.ProviderBase
             if (null != t)
             {
                 t.Dispose();
-            }
-        }
-
-        // TransactionEnded merely provides the plumbing for DbConnectionInternal to access the transacted pool
-        //   that is implemented inside DbConnectionPool. This method's counterpart (PutTransactedObject) should
-        //   only be called from DbConnectionPool.DeactivateObject and thus the plumbing to provide access to 
-        //   other objects is unnecessary (hence the asymmetry of Ended but no Begin)
-        internal void TransactionEnded(SysTx.Transaction transaction, DbConnectionInternal transactedObject)
-        {
-            Debug.Assert(null != transaction, "null transaction?");
-            Debug.Assert(null != transactedObject, "null transactedObject?");
-            // Note: connection may still be associated with transaction due to Explicit Unbinding requirement.
-
-            // called by the internal connection when it get's told that the
-            // transaction is completed.  We tell the transacted pool to remove
-            // the connection from it's list, then we put the connection back in
-            // general circulation.
-
-            TransactedConnectionPool transactedConnectionPool = _transactedConnectionPool;
-            if (null != transactedConnectionPool)
-            {
-                transactedConnectionPool.TransactionEnded(transaction, transactedObject);
             }
         }
 

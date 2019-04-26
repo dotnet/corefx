@@ -393,9 +393,6 @@
   <data name="ADP_InvalidValue" xml:space="preserve">
     <value>The value contains embedded nulls (\\u0000).</value>
   </data>
-  <data name="ADP_InvalidMixedUsageOfAccessTokenAndUserIDPassword" xml:space="preserve">
-    <value>Cannot set the AccessToken property if 'UserID', 'UID', 'Password', or 'PWD' has been specified in connection string.</value>
-  </data>
   <data name="ADP_NoConnectionString" xml:space="preserve">
     <value>The ConnectionString property has not been initialized.</value>
   </data>
@@ -465,9 +462,6 @@
   <data name="ADP_PrepareParameterScale" xml:space="preserve">
     <value>{0}.Prepare method requires parameters of type '{1}' have an explicitly set Precision and Scale.</value>
   </data>
-  <data name="ADP_ConnectionIsDisabled" xml:space="preserve">
-    <value>The connection has been disabled.</value>
-  </data>
   <data name="ADP_ClosedConnectionError" xml:space="preserve">
     <value>Invalid operation. The connection is closed.</value>
   </data>
@@ -485,9 +479,6 @@
   </data>
   <data name="ADP_EmptyDatabaseName" xml:space="preserve">
     <value>Database cannot be null, the empty string, or string of only whitespace.</value>
-  </data>
-  <data name="ADP_DatabaseNameTooLong" xml:space="preserve">
-    <value>The argument is too long.</value>
   </data>
   <data name="ADP_InternalConnectionError" xml:space="preserve">
     <value>Internal DbConnection Error: {0}</value>

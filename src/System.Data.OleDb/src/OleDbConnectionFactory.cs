@@ -10,18 +10,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Runtime.Versioning;
 
-namespace System.Configuration
-{
-    internal static class PrivilegedConfigurationManager
-    {
-        internal static ConnectionStringSettingsCollection ConnectionStrings => ConfigurationManager.ConnectionStrings;
-
-        internal static object GetSection(string sectionName)
-        {
-            return ConfigurationManager.GetSection(sectionName);
-        }
-    }
-}
 namespace System.Data.OleDb
 {
     sealed internal class OleDbConnectionFactory : DbConnectionFactory
@@ -66,7 +54,7 @@ namespace System.Data.OleDb
             OleDbConnection oleDbOuterConnection = oleDbInternalConnection.Connection;
             Debug.Assert(oleDbOuterConnection != null, "outer connection may not be null.");
 
-            NameValueCollection settings = (NameValueCollection)PrivilegedConfigurationManager.GetSection("system.data.oledb");
+            NameValueCollection settings = (NameValueCollection)ConfigurationManager.GetSection("system.data.oledb");
             Stream XMLStream = null;
             String providerFileName = oleDbOuterConnection.GetDataSourcePropertyValue(OleDbPropertySetGuid.DataSourceInfo, ODB.DBPROP_PROVIDERFILENAME) as string;
 
@@ -134,26 +122,6 @@ namespace System.Data.OleDb
                 return c.PoolGroup;
             }
             return null;
-        }
-
-        override internal DbConnectionInternal GetInnerConnection(DbConnection connection)
-        {
-            OleDbConnection c = (connection as OleDbConnection);
-            if (null != c)
-            {
-                return c.InnerConnection;
-            }
-            return null;
-        }
-
-        override protected int GetObjectId(DbConnection connection)
-        {
-            OleDbConnection c = (connection as OleDbConnection);
-            if (null != c)
-            {
-                return c.ObjectID;
-            }
-            return 0;
         }
 
         override internal void PermissionDemand(DbConnection outerConnection)

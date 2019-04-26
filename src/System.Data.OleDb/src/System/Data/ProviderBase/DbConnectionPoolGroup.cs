@@ -37,9 +37,6 @@ namespace System.Data.ProviderBase
         private DbConnectionPoolGroupProviderInfo _providerInfo;
         private DbMetaDataFactory _metaDataFactory;
 
-        private static int _objectTypeCount; // Bid counter
-        internal readonly int _objectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
         // always lock this before changing _state, we don't want to move out of the 'Disabled' state
         // PoolGroupStateUninitialized = 0;
         private const int PoolGroupStateActive = 1; // initial state, GetPoolGroup from cache, connection Open
@@ -100,14 +97,6 @@ namespace System.Data.ProviderBase
             get
             {
                 return (PoolGroupStateDisabled == _state);
-            }
-        }
-
-        internal int ObjectID
-        {
-            get
-            {
-                return _objectID;
             }
         }
 
@@ -214,8 +203,7 @@ namespace System.Data.ProviderBase
                             // Did someone already add it to the list?
                             if (!_poolCollection.TryGetValue(currentIdentity, out pool))
                             {
-                                DbConnectionPoolProviderInfo connectionPoolProviderInfo = connectionFactory.CreateConnectionPoolProviderInfo(this.ConnectionOptions);
-                                DbConnectionPool newPool = new DbConnectionPool(connectionFactory, this, currentIdentity, connectionPoolProviderInfo);
+                                DbConnectionPool newPool = new DbConnectionPool(connectionFactory, this, currentIdentity);
 
                                 if (MarkPoolGroupAsActive())
                                 {

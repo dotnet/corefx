@@ -23,9 +23,6 @@ namespace System.Data.OleDb
         private OleDbConnection _connection;
         private OleDbTransaction _transaction;
 
-        private static int _objectTypeCount; // Bid counter
-        internal readonly int ObjectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
         private OleDbParameterCollection _parameters;
 
         // native information
@@ -150,11 +147,6 @@ namespace System.Data.OleDb
                 PropertyChanging();
                 _commandTimeout = ADP.DefaultCommandTimeout;
             }
-        }
-
-        private bool ShouldSerializeCommandTimeout()
-        { // V1.2.3300
-            return (ADP.DefaultCommandTimeout != _commandTimeout);
         }
 
         [DefaultValue(System.Data.CommandType.Text)]

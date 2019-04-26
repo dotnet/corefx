@@ -160,36 +160,6 @@ namespace System.Data.Common
             }
         }
 
-        internal static bool ConvertToIntegratedSecurity(object value)
-        {
-            Debug.Assert(null != value, "ConvertToIntegratedSecurity(null)");
-            string svalue = (value as string);
-            if (null != svalue)
-            {
-                if (StringComparer.OrdinalIgnoreCase.Equals(svalue, "sspi") || StringComparer.OrdinalIgnoreCase.Equals(svalue, "true") || StringComparer.OrdinalIgnoreCase.Equals(svalue, "yes"))
-                    return true;
-                else if (StringComparer.OrdinalIgnoreCase.Equals(svalue, "false") || StringComparer.OrdinalIgnoreCase.Equals(svalue, "no"))
-                    return false;
-                else
-                {
-                    string tmp = svalue.Trim();  // Remove leading & trailing white space.
-                    if (StringComparer.OrdinalIgnoreCase.Equals(tmp, "sspi") || StringComparer.OrdinalIgnoreCase.Equals(tmp, "true") || StringComparer.OrdinalIgnoreCase.Equals(tmp, "yes"))
-                        return true;
-                    else if (StringComparer.OrdinalIgnoreCase.Equals(tmp, "false") || StringComparer.OrdinalIgnoreCase.Equals(tmp, "no"))
-                        return false;
-                }
-                return Boolean.Parse(svalue);
-            }
-            try
-            {
-                return ((IConvertible)value).ToBoolean(CultureInfo.InvariantCulture);
-            }
-            catch (InvalidCastException e)
-            {
-                throw ADP.ConvertFailed(value.GetType(), typeof(Boolean), e);
-            }
-        }
-
         internal static int ConvertToInt32(object value)
         {
             try
@@ -217,15 +187,7 @@ namespace System.Data.Common
 
     internal static class DbConnectionStringDefaults
     {
-        // all
-        //        internal const string NamedConnection           = "";
-
-        // Odbc
-        internal const string Driver = "";
-        internal const string Dsn = "";
-
         // OleDb
-        internal const bool AdoNetPooler = false;
         internal const string FileName = "";
         internal const int OleDbServices = ~(/*DBPROPVAL_OS_AGR_AFTERSESSION*/0x00000008 | /*DBPROPVAL_OS_CLIENTCURSOR*/0x00000004); // -13
         internal const string Provider = "";
@@ -233,9 +195,6 @@ namespace System.Data.Common
         internal const int ConnectTimeout = 15;
         internal const bool PersistSecurityInfo = false;
         internal const string DataSource = "";
-        internal const string ApplicationName = "Core .Net SqlClient Data Provider";
-        internal const ApplicationIntent ApplicationIntent = System.Data.SqlClient.ApplicationIntent.ReadWrite;
-        internal const bool MultiSubnetFailover = false;
     }
 
     internal static class DbConnectionOptionKeywords
@@ -259,14 +218,8 @@ namespace System.Data.Common
 
     internal static class DbConnectionStringKeywords
     {
-        // all
-        //        internal const string NamedConnection           = "Named Connection";
-
         // Odbc
         internal const string Driver = "Driver";
-        internal const string Dsn = "Dsn";
-        internal const string FileDsn = "FileDsn";
-        internal const string SaveFile = "SaveFile";
 
         // OleDb
         internal const string FileName = "File Name";
@@ -275,6 +228,5 @@ namespace System.Data.Common
 
         internal const string DataSource = "Data Source";
         internal const string PersistSecurityInfo = "Persist Security Info";
-        internal const string IntegratedSecurity = "Integrated Security";
     }
 }

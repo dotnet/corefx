@@ -20,9 +20,6 @@ namespace System.Data.OleDb
 
         internal OleDbConnection _parentConnection;
 
-        private static int _objectTypeCount; // Bid counter
-        internal readonly int _objectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
         private sealed class WrappedTransaction : WrappedIUnknown
         {
             private bool _mustComplete;
@@ -166,14 +163,6 @@ namespace System.Data.OleDb
                     throw ADP.TransactionZombied(this);
                 }
                 return _isolationLevel;
-            }
-        }
-
-        internal int ObjectID
-        {
-            get
-            {
-                return _objectID;
             }
         }
 

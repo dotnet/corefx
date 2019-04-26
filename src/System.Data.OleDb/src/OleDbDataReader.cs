@@ -18,9 +18,6 @@ namespace System.Data.OleDb
     {
         private CommandBehavior _commandBehavior;
 
-        private static int _objectTypeCount; // Bid counter
-        internal readonly int ObjectID = System.Threading.Interlocked.Increment(ref _objectTypeCount);
-
         // object model interaction
         private OleDbConnection _connection;
         private OleDbCommand _command;

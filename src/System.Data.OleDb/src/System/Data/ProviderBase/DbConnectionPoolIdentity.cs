@@ -46,11 +46,6 @@ namespace System.Data.ProviderBase
             get { return _isRestricted; }
         }
 
-        internal bool IsNetwork
-        {
-            get { return _isNetwork; }
-        }
-
         static private byte[] CreateWellKnownSid(WellKnownSidType sidType)
         {
             // Passing an array as big as it can ever be is a small price to pay for
@@ -77,16 +72,6 @@ namespace System.Data.ProviderBase
                 result = ((_sidString == that._sidString) && (_isRestricted == that._isRestricted) && (_isNetwork == that._isNetwork));
             }
             return result;
-        }
-
-        static internal WindowsIdentity GetCurrentWindowsIdentity()
-        {
-            return WindowsIdentity.GetCurrent();
-        }
-
-        static private IntPtr GetWindowsIdentityToken(WindowsIdentity identity)
-        {
-            return identity.Token;
         }
 
         internal static DbConnectionPoolIdentity GetCurrent()
