@@ -2501,8 +2501,8 @@ namespace System.Text.Json
             }
             else
             {
-                // Exclude start-of-comment chars /*, if not already  skipped and 
-                // take characters until the first line  separator character
+                // Exclude start-of-comment chars //, if not already skipped and
+                // take characters until the first line separator character
                 ValueSpan = _buffer.Slice(previousConsumed + leftOver, toConsume);
             }
 
@@ -2514,6 +2514,7 @@ namespace System.Text.Json
             _consumed += leftOver + idx;
             return true;
         }
+
         private bool ConsumeMultiLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int leftOver, SequencePosition start, int previousConsumed)
         {
             SequencePosition end = start;

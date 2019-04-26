@@ -587,12 +587,12 @@ namespace System.Text.Json.Tests
         }
 
         // For first line in each case:
-        //     . represents continugous character in input.
+        //     . represents contiguous characters in input.
         //     | represents end of a segment in the sequence. Character below | is last character of particular segment.
         //     
         //     Note: \ for escape sequence has neither a . nor a |
         //
-        // Second line in each case represnts whether the resulting token after parsing has a value sequence or not.
+        // Second line in each case represents whether the resulting token after parsing has a value sequence or not.
         //     T(rue) indicates presence of value sequence and F(alse) indicates otherwise. T or F is written above first
         //       character of partiular token.
         //     - indicates that token that begins at character right below it has been skipped during parsing and hence there

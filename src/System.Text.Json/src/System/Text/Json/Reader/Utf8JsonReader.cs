@@ -2112,13 +2112,13 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWithinStartOfComment);
                 }
             }
 
             if (IsLastSpan)
             {
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWithinStartOfComment);
             }
             return false;
         }
@@ -2186,8 +2186,8 @@ namespace System.Text.Json
                 }
                 if (foundIdx != 0 && localBuffer[foundIdx + idx - 1] == JsonConstants.Asterisk)
                 {
-                    // foundIdx points to '*' in the end-of-comment delimiter. Hence increment idx by one position
-                    // less to make it point right before beginning of end-of-comment delimiter i.e. */
+                    // foundIdx points just after '*' in the end-of-comment delimiter. Hence increment idx by one
+                    // position less to make it point right before beginning of end-of-comment delimiter i.e. */
                     idx += foundIdx - 1;
                     break;
                 }
@@ -2195,8 +2195,8 @@ namespace System.Text.Json
             }
 
             // Consume the /* and */ characters that are part of the multi-line comment.
-            // idx points right before the final '*' (i.e. before the last '/'). Hence increment _consumed
-            // by 4 to exclude the start/end-of-comment delimiters.
+            // idx points right before the final '*'. Hence increment _consumed by 4 to exclude the
+            // start /end-of-comment delimiters.
             _consumed += 4 + idx;
 
             (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx));
@@ -2205,7 +2205,7 @@ namespace System.Text.Json
             {
                 // newLineIndex points at last newline character and byte positions in the new line start
                 // after that. Hence add 1 to skip the newline character.
-                _bytePositionInLine = 2 + idx - (newLineIndex + 1);
+                _bytePositionInLine = idx - newLineIndex + 1;
             }
             else
             {
@@ -2232,13 +2232,13 @@ namespace System.Text.Json
                 }
                 else
                 {
-                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWithinStartOfComment);
                 }
             }
 
             if (IsLastSpan)
             {
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWithinStartOfComment);
             }
             return false;
         }
