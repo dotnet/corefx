@@ -669,8 +669,8 @@ namespace Microsoft.VisualBasic.Tests
             {
                 Assert.Throws<PlatformNotSupportedException>(() => FileSystem.Rename(sourceName, destName));
                 Assert.True(System.IO.File.Exists(sourceName));
-                Assert.True(System.IO.File.Exists(destName));
-                Assert.Equal("123", System.IO.File.ReadAllText(destName));
+                Assert.False(System.IO.File.Exists(destName));
+                Assert.Equal("abc", System.IO.File.ReadAllText(sourceName));
             }
 
             // Rename to an existing name.
@@ -688,6 +688,7 @@ namespace Microsoft.VisualBasic.Tests
             }
             Assert.True(System.IO.File.Exists(sourceName));
             Assert.True(System.IO.File.Exists(destName));
+            Assert.Equal("def", System.IO.File.ReadAllText(sourceName));
             Assert.Equal("123", System.IO.File.ReadAllText(destName));
         }
 
