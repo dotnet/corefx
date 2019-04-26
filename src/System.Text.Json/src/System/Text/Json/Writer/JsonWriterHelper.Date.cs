@@ -29,6 +29,11 @@ namespace System.Text.Json
                 buffer.Length == (JsonConstants.MaximumFormatDateTimeLength + 1) ||
                 buffer.Length == JsonConstants.MaximumFormatDateTimeOffsetLength);
 
+            if (buffer.Length == JsonConstants.MaximumFormatDateTimeOffsetLength)
+            {
+                Debug.Assert(buffer[30] == JsonConstants.Colon);
+            }
+
             uint digit7 = buffer[26] - (uint)'0';
             uint digit6 = buffer[25] - (uint)'0';
             uint digit5 = buffer[24] - (uint)'0';
@@ -90,14 +95,14 @@ namespace System.Text.Json
                     // Last index of the offset
                     int bufferEnd = curIndex + 5;
 
-                    // Temporary offset characters to prevent their values from being overwritten
-                    byte offsetMinDigit2 = buffer[32];
+                    // Cache offset characters to prevent them from being overwritten
+                    // The second minute digit is never at risk
                     byte offsetMinDigit1 = buffer[31];
                     byte offsetHourDigit2 = buffer[29];
                     byte offsetHourDigit1 = buffer[28];
 
                     // Write offset characters
-                    buffer[bufferEnd] = offsetMinDigit2;
+                    buffer[bufferEnd] = buffer[32];
                     buffer[bufferEnd - 1] = offsetMinDigit1;
                     buffer[bufferEnd - 2] = JsonConstants.Colon;
                     buffer[bufferEnd - 3] = offsetHourDigit2;

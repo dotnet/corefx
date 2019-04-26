@@ -3341,47 +3341,37 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("2019-04-24T14:50:17.0000000", "\"2019-04-24T14:50:17\"")]
-        [InlineData("2019-04-24T14:50:17.1000000", "\"2019-04-24T14:50:17.1\"")]
-        [InlineData("2019-04-24T14:50:17.0001000", "\"2019-04-24T14:50:17.0001\"")]
-        [InlineData("2019-04-24T14:50:17.0001500", "\"2019-04-24T14:50:17.00015\"")]
-        [InlineData("2019-04-24T14:50:17.0996100", "\"2019-04-24T14:50:17.09961\"")]
-        [InlineData("2019-04-24T14:50:17.0996141", "\"2019-04-24T14:50:17.0996141\"")]
-        [InlineData("2019-04-24T14:50:17.0000000Z", "\"2019-04-24T14:50:17Z\"")]
-        [InlineData("2019-04-24T14:50:17.1000000Z", "\"2019-04-24T14:50:17.1Z\"")]
-        [InlineData("2019-04-24T14:50:17.0001000Z", "\"2019-04-24T14:50:17.0001Z\"")]
-        [InlineData("2019-04-24T14:50:17.0001500Z", "\"2019-04-24T14:50:17.00015Z\"")]
-        [InlineData("2019-04-24T14:50:17.0996100Z", "\"2019-04-24T14:50:17.09961Z\"")]
-        [InlineData("2019-04-24T14:50:17.0996141Z", "\"2019-04-24T14:50:17.0996141Z\"")]
+        [MemberData(nameof(JsonDateTimeTestData.DateTimeFractionTrimBaseTests), MemberType = typeof(JsonDateTimeTestData))]
+        [MemberData(nameof(JsonDateTimeTestData.DateTimeFractionTrimUtcOffsetTests), MemberType = typeof(JsonDateTimeTestData))]
         public void WriteDateTime_TrimsFractionCorrectly(string testStr, string expectedStr)
         {
-            var options = new JsonWriterOptions { Indented = false, SkipValidation = false };
             var output = new ArrayBufferWriter<byte>(1024);
-            var jsonUtf8 = new Utf8JsonWriter(output, options);
+            using var jsonUtf8 = new Utf8JsonWriter(output);
 
             jsonUtf8.WriteStringValue(DateTime.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
             jsonUtf8.Flush();
 
-            AssertContents(expectedStr, output);
+            AssertContents($"\"{expectedStr}\"", output);
         }
 
         [Theory]
-        [InlineData("2019-04-24T14:50:17.0000000+01:00", "\"2019-04-24T14:50:17+01:00\"")]
-        [InlineData("2019-04-24T14:50:17.1000000+01:00", "\"2019-04-24T14:50:17.1+01:00\"")]
-        [InlineData("2019-04-24T14:50:17.0001000+01:00", "\"2019-04-24T14:50:17.0001+01:00\"")]
-        [InlineData("2019-04-24T14:50:17.0001500+01:00", "\"2019-04-24T14:50:17.00015+01:00\"")]
-        [InlineData("2019-04-24T14:50:17.0996100+01:00", "\"2019-04-24T14:50:17.09961+01:00\"")]
-        [InlineData("2019-04-24T14:50:17.0996141+01:00", "\"2019-04-24T14:50:17.0996141+01:00\"")]
+        [MemberData(nameof(JsonDateTimeTestData.DateTimeOffsetFractionTrimTests), MemberType = typeof(JsonDateTimeTestData))]
         public void WriteDateTimeOffset_TrimsFractionCorrectly(string testStr, string expectedStr)
         {
-            var options = new JsonWriterOptions { Indented = false, SkipValidation = false };
             var output = new ArrayBufferWriter<byte>(1024);
-            var jsonUtf8 = new Utf8JsonWriter(output, options);
+            using var jsonUtf8 = new Utf8JsonWriter(output);
 
             jsonUtf8.WriteStringValue(DateTimeOffset.ParseExact(testStr, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind));
             jsonUtf8.Flush();
 
-            AssertContents(expectedStr, output);
+            AssertContents($"\"{expectedStr}\"", output);
+        }
+
+        [Fact]
+        public void WriteDateTime_TrimsFractionCorrectly_SerializerRoundtrip()
+        {
+            DateTime utcNow = DateTime.UtcNow;
+            Assert.Equal(utcNow, Serialization.JsonSerializer.Parse(Serialization.JsonSerializer.ToBytes(utcNow), typeof(DateTime)));
         }
 
         private static void WriteTooLargeHelper(JsonWriterOptions options, ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, bool noThrow = false)
