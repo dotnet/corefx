@@ -44,11 +44,25 @@ namespace System.Net.NetworkInformation.Tests
             string fileName = GetTestFilePath();
             FileUtil.NormalizeLineEndings("NetworkFiles/ipv6_route", fileName);
             List<GatewayIPAddressInformation> gatewayAddresses = new List<GatewayIPAddressInformation>();
-            StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "wlan0", 42);
+            StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "lo", 42);
+            Assert.Equal(0, gatewayAddresses.Count);
+
+            StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "foo", 42);
+            Assert.Equal(0, gatewayAddresses.Count);
+
+            StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "enp0s5", 42);
             Assert.Equal(2, gatewayAddresses.Count);
 
             Assert.Equal(IPAddress.Parse("2002:2c26:f4e4:0:21c:42ff:fe20:4636"), gatewayAddresses[0].Address);
             Assert.Equal(IPAddress.Parse("fe80::21c:42ff:fe00:18%42"), gatewayAddresses[1].Address);
+
+            gatewayAddresses = new List<GatewayIPAddressInformation>();
+            StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, "wlan0", 21);
+            Assert.Equal(IPAddress.Parse("fe80::21c:42ff:fe00:18%21"), gatewayAddresses[0].Address);
+
+            gatewayAddresses = new List<GatewayIPAddressInformation>();
+            StringParsingHelpers.ParseIPv6GatewayAddressesFromRouteFile(gatewayAddresses, fileName, null, 0);
+            Assert.Equal(3, gatewayAddresses.Count);
         }
 
         [Fact]
