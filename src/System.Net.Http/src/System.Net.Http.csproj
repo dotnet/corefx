@@ -709,9 +709,4 @@
     <Reference Include="System.Security.Cryptography.OpenSsl" />
     <Reference Include="System.Security.Cryptography.Primitives" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Update="D:\repos\corefx\src\System.Net.Http\src/Resources/Strings.resx">
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-  </ItemGroup>
 </Project>

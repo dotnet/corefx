@@ -23,7 +23,7 @@ namespace System.Net.Http.Functional.Tests
 
         public HttpClientHandlerTest_Http2(ITestOutputHelper output) : base(output) { }
 
-        private async Task AssertProtocolError(Task task, ProtocolErrors errorCode)
+        private async Task AssertProtocolErrorAsync(Task task, ProtocolErrors errorCode)
         {
             Exception e = await Assert.ThrowsAsync<HttpRequestException>(() => task);
             if (UseSocketsHttpHandler)
@@ -114,7 +114,7 @@ namespace System.Net.Http.Functional.Tests
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.Padded, 10, 1);
                 await server.WriteFrameAsync(invalidFrame);
 
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
             }
         }
 
@@ -214,7 +214,7 @@ namespace System.Net.Http.Functional.Tests
                 // Send invalid initial SETTINGS value
                 await server.EstablishConnectionAsync(new SettingsEntry { SettingId = settingId, Value = value });
 
-                await AssertProtocolError(sendTask, expectedError);
+                await AssertProtocolErrorAsync(sendTask, expectedError);
             }
         }
 
@@ -240,7 +240,7 @@ namespace System.Net.Http.Functional.Tests
                 RstStreamFrame resetStream = new RstStreamFrame(FrameFlags.None, (int)ProtocolErrors.INTERNAL_ERROR, streamId);
                 await server.WriteFrameAsync(resetStream);
 
-                await AssertProtocolError(sendTask, ProtocolErrors.INTERNAL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.INTERNAL_ERROR);
             }
         }
 
@@ -262,7 +262,7 @@ namespace System.Net.Http.Functional.Tests
                 RstStreamFrame resetStream = new RstStreamFrame(FrameFlags.None, (int)ProtocolErrors.INTERNAL_ERROR, streamId);
                 await server.WriteFrameAsync(resetStream);
 
-                await AssertProtocolError(sendTask, ProtocolErrors.INTERNAL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.INTERNAL_ERROR);
             }
         }
 
@@ -286,7 +286,7 @@ namespace System.Net.Http.Functional.Tests
                 RstStreamFrame resetStream = new RstStreamFrame(FrameFlags.None, (int)ProtocolErrors.INTERNAL_ERROR, streamId);
                 await server.WriteFrameAsync(resetStream);
 
-                await AssertProtocolError(sendTask, ProtocolErrors.INTERNAL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.INTERNAL_ERROR);
             }
         }
 
@@ -309,7 +309,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(invalidFrame);
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -341,7 +341,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(invalidFrame);
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -372,7 +372,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendDefaultResponseHeadersAsync(5);
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -407,7 +407,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(MakeSimpleContinuationFrame(streamId));
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -427,7 +427,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(MakeSimpleDataFrame(streamId));
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -448,7 +448,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(MakeSimpleHeadersFrame(streamId, endHeaders: false));
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -470,7 +470,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(MakeSimpleHeadersFrame(streamId, endHeaders: false));
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -491,7 +491,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(MakeSimpleDataFrame(streamId));
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -513,7 +513,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(MakeSimpleDataFrame(streamId));
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -539,7 +539,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(invalidFrame);
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.PROTOCOL_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.PROTOCOL_ERROR);
 
                 // The client should close the connection as this is a fatal connection level error.
                 Assert.Null(await server.ReadFrameAsync(TimeSpan.FromSeconds(30)));
@@ -562,7 +562,7 @@ namespace System.Net.Http.Functional.Tests
                 await server.WriteFrameAsync(invalidFrame);
 
                 // As this is a connection level error, the client should see the request fail.
-                await AssertProtocolError(sendTask, ProtocolErrors.FRAME_SIZE_ERROR);
+                await AssertProtocolErrorAsync(sendTask, ProtocolErrors.FRAME_SIZE_ERROR);
             }
         }
 
@@ -676,7 +676,7 @@ namespace System.Net.Http.Functional.Tests
                 RstStreamFrame resetStream = new RstStreamFrame(FrameFlags.None, (int)error, streamId);
                 await server.WriteFrameAsync(resetStream);
 
-                await AssertProtocolError(sendTask, error);
+                await AssertProtocolErrorAsync(sendTask, error);
 
                 // Send a frame on the now-closed stream.
                 DataFrame invalidFrame = new DataFrame(new byte[10], FrameFlags.None, 0, streamId);
@@ -794,8 +794,8 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalFact(nameof(SupportsAlpn))]
         public async Task GoAwayFrame_AbortAllPendingStreams_StreamFailWithExpectedException()
         {
-            using (var server = Http2LoopbackServer.CreateServer())
-            using (var client = CreateHttpClient())
+            using (Http2LoopbackServer server = Http2LoopbackServer.CreateServer())
+            using (HttpClient client = CreateHttpClient())
             {
                 await EstablishConnectionAndProcessOneRequestAsync(client, server);
 
@@ -830,9 +830,9 @@ namespace System.Net.Http.Functional.Tests
                 // We will not send any more frames, so send EOF now, and ensure the client handles this properly.
                 server.ShutdownSend();
 
-                await AssertProtocolError(sendTask1, ProtocolErrors.ENHANCE_YOUR_CALM);
-                await AssertProtocolError(sendTask2, ProtocolErrors.ENHANCE_YOUR_CALM);
-                await AssertProtocolError(sendTask3, ProtocolErrors.ENHANCE_YOUR_CALM);
+                await AssertProtocolErrorAsync(sendTask1, ProtocolErrors.ENHANCE_YOUR_CALM);
+                await AssertProtocolErrorAsync(sendTask2, ProtocolErrors.ENHANCE_YOUR_CALM);
+                await AssertProtocolErrorAsync(sendTask3, ProtocolErrors.ENHANCE_YOUR_CALM);
 
                 // Now that all pending responses have been sent, the client should close the connection.
                 await server.WaitForConnectionShutdownAsync();

@@ -260,8 +260,8 @@ namespace System.Net.Http.Functional.Tests
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.SupportsAlpn))]
         public async Task Http2GetAsync_TrailingHeaders_NoData_EmptyResponseObserved()
         {
-            using (var server = Http2LoopbackServer.CreateServer())
-            using (var client = new HttpClient(CreateHttpClientHandler(useSocketsHttpHandler: true, useHttp2LoopbackServer: true)))
+            using (Http2LoopbackServer server = Http2LoopbackServer.CreateServer())
+            using (HttpClient client = new HttpClient(CreateHttpClientHandler(useSocketsHttpHandler: true, useHttp2LoopbackServer: true)))
             {
                 Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
 
