@@ -2195,8 +2195,8 @@ namespace System.Text.Json
             }
 
             // Consume the /* and */ characters that are part of the multi-line comment.
-            // idx points right before the final '*'. Hence increment _consumed by 4 to exclude the
-            // start /end-of-comment delimiters.
+            // idx points right before the final '*' (which is right before the last '/'). Hence increment _consumed
+            // by 4 to exclude the start/end-of-comment delimiters.
             _consumed += 4 + idx;
 
             (int newLines, int newLineIndex) = JsonReaderHelper.CountNewLines(localBuffer.Slice(0, idx));
