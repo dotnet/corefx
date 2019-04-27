@@ -138,9 +138,10 @@ namespace System.Collections.Concurrent
                 // Get the head at which to try to dequeue.
                 int currentHead = Volatile.Read(ref _headAndTail.Head);
                 int slotsIndex = currentHead & _slotsMask;
+                ref Slot slot = ref slots[slotsIndex];
 
                 // Read the sequence number for the head position.
-                int sequenceNumber = Volatile.Read(ref slots[slotsIndex].SequenceNumber);
+                int sequenceNumber = Volatile.Read(ref slot.SequenceNumber);
 
                 // We can dequeue from this slot if it's been filled by an enqueuer, which
                 // would have left the sequence number at pos+1.
@@ -159,14 +160,14 @@ namespace System.Collections.Concurrent
                     {
                         // Successfully reserved the slot.  Note that after the above CompareExchange, other threads
                         // trying to dequeue from this slot will end up spinning until we do the subsequent Write.
-                        item = slots[slotsIndex].Item;
+                        item = slot.Item;
                         if (!Volatile.Read(ref _preservedForObservation))
                         {
                             // If we're preserving, though, we don't zero out the slot, as we need it for
                             // enumerations, peeking, ToArray, etc.  And we don't update the sequence number,
                             // so that an enqueuer will see it as full and be forced to move to a new segment.
-                            slots[slotsIndex].Item = default!; // TODO-NULLABLE-GENERIC
-                            Volatile.Write(ref slots[slotsIndex].SequenceNumber, currentHead + slots.Length);
+                            slot.Item = default!; // TODO-NULLABLE-GENERIC
+                            Volatile.Write(ref slot.SequenceNumber, currentHead + slots.Length);
                         }
                         return true;
                     }
@@ -220,16 +221,17 @@ namespace System.Collections.Concurrent
                 // Get the head at which to try to peek.
                 int currentHead = Volatile.Read(ref _headAndTail.Head);
                 int slotsIndex = currentHead & _slotsMask;
+                ref Slot slot = ref slots[slotsIndex];
 
                 // Read the sequence number for the head position.
-                int sequenceNumber = Volatile.Read(ref slots[slotsIndex].SequenceNumber);
+                int sequenceNumber = Volatile.Read(ref slot.SequenceNumber);
 
                 // We can peek from this slot if it's been filled by an enqueuer, which
                 // would have left the sequence number at pos+1.
                 int diff = sequenceNumber - (currentHead + 1);
                 if (diff == 0)
                 {
-                    result = resultUsed ? slots[slotsIndex].Item : default!; // TODO-NULLABLE-GENERIC
+                    result = resultUsed ? slot.Item : default!; // TODO-NULLABLE-GENERIC
                     return true;
                 }
                 else if (diff < 0)
@@ -275,9 +277,10 @@ namespace System.Collections.Concurrent
                 // Get the tail at which to try to return.
                 int currentTail = Volatile.Read(ref _headAndTail.Tail);
                 int slotsIndex = currentTail & _slotsMask;
+                ref Slot slot = ref slots[slotsIndex];
 
                 // Read the sequence number for the tail position.
-                int sequenceNumber = Volatile.Read(ref slots[slotsIndex].SequenceNumber);
+                int sequenceNumber = Volatile.Read(ref slot.SequenceNumber);
 
                 // The slot is empty and ready for us to enqueue into it if its sequence
                 // number matches the slot.
@@ -296,8 +299,8 @@ namespace System.Collections.Concurrent
                     {
                         // Successfully reserved the slot.  Note that after the above CompareExchange, other threads
                         // trying to return will end up spinning until we do the subsequent Write.
-                        slots[slotsIndex].Item = item;
-                        Volatile.Write(ref slots[slotsIndex].SequenceNumber, currentTail + 1);
+                        slot.Item = item;
+                        Volatile.Write(ref slot.SequenceNumber, currentTail + 1);
                         return true;
                     }
                 }
