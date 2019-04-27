@@ -69,51 +69,47 @@ namespace System.Text.Json.Serialization.Tests
             var dictionary = new Dictionary<string, string> { { "City", "MyCity" } };
             var arrayWithDictionary = new object[] { 1, true, dictionary, null, "foo" };
             json = JsonSerializer.ToString(arrayWithDictionary);
-            Assert.Equal(ExpectedJson, json);
-
-            json = JsonSerializer.ToString<object>(array);
-            Assert.Equal(ExpectedJson, json);
+            Assert.Equal(ExpectedJson, json);;
 
             List<object> list = new List<object> { 1, true, address, null, "foo" };
             json = JsonSerializer.ToString(list);
-            Assert.Equal(ExpectedJson, json);
-
-            json = JsonSerializer.ToString<object>(list);
             Assert.Equal(ExpectedJson, json);
 
             IEnumerable<object> ienumerable = new List<object> { 1, true, address, null, "foo" };
             json = JsonSerializer.ToString(ienumerable);
             Assert.Equal(ExpectedJson, json);
 
-            json = JsonSerializer.ToString<object>(ienumerable);
-            Assert.Equal(ExpectedJson, json);
-
             IList<object> ilist = new List<object> { 1, true, address, null, "foo" };
             json = JsonSerializer.ToString(ilist);
-            Assert.Equal(ExpectedJson, json);
-
-            json = JsonSerializer.ToString<object>(ilist);
             Assert.Equal(ExpectedJson, json);
 
             ICollection<object> icollection = new List<object> { 1, true, address, null, "foo" };
             json = JsonSerializer.ToString(icollection);
             Assert.Equal(ExpectedJson, json);
 
-            json = JsonSerializer.ToString<object>(icollection);
-            Assert.Equal(ExpectedJson, json);
-
             IReadOnlyCollection<object> ireadonlycollection = new List<object> { 1, true, address, null, "foo" };
             json = JsonSerializer.ToString(ireadonlycollection);
-            Assert.Equal(ExpectedJson, json);
-
-            json = JsonSerializer.ToString<object>(ireadonlycollection);
             Assert.Equal(ExpectedJson, json);
 
             IReadOnlyList<object> ireadonlylist = new List<object> { 1, true, address, null, "foo" };
             json = JsonSerializer.ToString(ireadonlylist);
             Assert.Equal(ExpectedJson, json);
 
-            json = JsonSerializer.ToString<object>(ireadonlylist);
+            Stack<object> stack = new Stack<object>(new List<object> { 1, true, address, null, "foo" });
+            const string reversedExpectedJson = @"[""foo"",null,{""City"":""MyCity""},true,1]";
+            json = JsonSerializer.ToString(stack);
+            Assert.Equal(reversedExpectedJson, json);
+
+            Queue<object> queue = new Queue<object>(new List<object> { 1, true, address, null, "foo" });
+            json = JsonSerializer.ToString(queue);
+            Assert.Equal(ExpectedJson, json);
+
+            HashSet<object> hashset = new HashSet<object>(new List<object> { 1, true, address, null, "foo" });
+            json = JsonSerializer.ToString(hashset);
+            Assert.Equal(ExpectedJson, json);
+
+            LinkedList<object> linkedlist = new LinkedList<object>(new List<object> { 1, true, address, null, "foo" });
+            json = JsonSerializer.ToString(linkedlist);
             Assert.Equal(ExpectedJson, json);
         }
 
@@ -154,6 +150,11 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Contains(@"""ICollectionT"":[""Hello"",""World""]", json);
                 Assert.Contains(@"""IReadOnlyCollectionT"":[""Hello"",""World""]", json);
                 Assert.Contains(@"""IReadOnlyListT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""StackT"":[""World"",""Hello""]", json);
+                Assert.Contains(@"""QueueT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""HashSetT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""LinkedListT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""SortedSetT"":[""Hello"",""World""]", json);
                 Assert.Contains(@"""NullableInt"":42", json);
                 Assert.Contains(@"""Object"":{}", json);
                 Assert.Contains(@"""NullableIntArray"":[null,42,null]", json);

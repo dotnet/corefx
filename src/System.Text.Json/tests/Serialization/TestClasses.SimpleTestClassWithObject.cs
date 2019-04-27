@@ -53,6 +53,11 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringToStringDict { get; set; }
         public object MyStringToStringIDict { get; set; }
         public object MyStringToStringIReadOnlyDict { get; set; }
+        public object MyStringStackT { get; set; }
+        public object MyStringQueueT { get; set; }
+        public object MyStringHashSetT { get; set; }
+        public object MyStringLinkedListT { get; set; }
+        public object MyStringSortedSetT { get; set; }
 
         public static readonly string s_json =
                 @"{" +
@@ -99,7 +104,11 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringToStringDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}" +
-                @"}";
+                @"""MyStringStackT"" : [""Hello"", ""World""]," +
+                @"""MyStringQueueT"" : [""Hello"", ""World""]," +
+                @"""MyStringHashSetT"" : [""Hello""]," +
+                @"""MyStringLinkedListT"" : [""Hello""]," +
+                @"""MyStringSortedSetT"" : [""Hello""]";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
@@ -151,6 +160,12 @@ namespace System.Text.Json.Serialization.Tests
             MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
             MyStringToStringIReadOnlyDict = new Dictionary<string, string> { { "key", "value" } };
+
+            MyStringStackT = new Stack<string>(new List<string>() { "Hello", "World" });
+            MyStringQueueT = new Queue<string>(new List<string>() { "Hello", "World" });
+            MyStringHashSetT = new HashSet<string>(new List<string>() { "Hello" });
+            MyStringLinkedListT = new LinkedList<string>(new List<string>() { "Hello" });
+            MyStringSortedSetT = new SortedSet<string>(new List<string>() { "Hello" });
         }
 
         public void Verify()
@@ -201,6 +216,22 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("value", ((Dictionary<string, string>)MyStringToStringDict)["key"]);
             Assert.Equal("value", ((IDictionary<string, string>)MyStringToStringIDict)["key"]);
             Assert.Equal("value", ((IReadOnlyDictionary<string, string>)MyStringToStringIReadOnlyDict)["key"]);
+
+            Assert.Equal(2, ((Stack<string>)MyStringStackT).Count);
+            Assert.True(((Stack<string>)MyStringStackT).Contains("Hello"));
+            Assert.True(((Stack<string>)MyStringStackT).Contains("World"));
+
+            string[] expectedQueue = new string[] { "Hello", "World" };
+            int i = 0;
+            foreach (string item in ((Queue<string>)MyStringQueueT))
+            {
+                Assert.Equal(expectedQueue[i], item);
+                i++;
+            }
+
+            Assert.Equal("Hello", ((HashSet<string>)MyStringHashSetT).First());
+            Assert.Equal("Hello", ((LinkedList<string>)MyStringLinkedListT).First());
+            Assert.Equal("Hello", ((SortedSet<string>)MyStringSortedSetT).First());
         }
     }
 }

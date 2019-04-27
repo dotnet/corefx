@@ -115,6 +115,21 @@ namespace System.Text.Json.Serialization.Tests
         public object /*ICollection<string>*/ ICollectionT { get; set; }
         public object /*IReadOnlyCollection<string>*/ IReadOnlyCollectionT { get; set; }
         public object /*IReadOnlyList<string>*/ IReadOnlyListT { get; set; }
+        public object /*Stack<string>*/ StackT { get; set; }
+        public object /*Queue<string>*/ QueueT { get; set; }
+        public object /*HashSet<string>*/ HashSetT { get; set; }
+        public object /*LinkedList<string>*/ LinkedListT { get; set; }
+        public object /*SortedSet<string>*/ SortedSetT { get; set; }
+        //IImmutableList<T>
+        //IImmutableStack<T>
+        //IImmutableQueue<T>
+        //IImmutableSet<T>
+        //ImmutableArray<T>
+        //ImmutableHashSet<T>
+        //ImmutableList<T>
+        //ImmutableStack<T>
+        //ImmutableQueue<T>
+        //ImmutableSortedSet<T>
         public object /*int?*/ NullableInt { get; set; }
         public object /*object*/ Object { get; set; }
         public object /*int?[]*/ NullableIntArray { get; set; }
@@ -158,6 +173,16 @@ namespace System.Text.Json.Serialization.Tests
             {
                 "Hello", "World"
             };
+
+            StackT = new Stack<string>(new List<string> { "Hello", "World" });
+
+            QueueT = new Queue<string>(new List<string> { "Hello", "World" });
+
+            HashSetT = new HashSet<string>(new List<string> { "Hello", "World" });
+
+            LinkedListT = new LinkedList<string>(new List<string> { "Hello", "World" });
+
+            SortedSetT = new SortedSet<string>(new List<string> { "Hello", "World" });
 
             NullableInt = new int?(42);
             Object = new object();

@@ -597,6 +597,266 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
+        [Fact]
+        public static void StackTOfStackT()
+        {
+            Stack<Stack<int>> result = JsonSerializer.Parse<Stack<Stack<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 4;
+
+            foreach (Stack<int> st in result)
+            {
+                foreach (int i in st)
+                {
+                    Assert.Equal(expected--, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadStackTOfArray()
+        {
+            Stack<int[]> result = JsonSerializer.Parse<Stack<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 3;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+
+                expected = 1;
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfStackT()
+        {
+            Stack<int>[] result = JsonSerializer.Parse<Stack<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 2;
+
+            foreach (Stack<int> st in result)
+            {
+                foreach (int i in st)
+                {
+                    Assert.Equal(expected--, i);
+                }
+
+                expected = 4;
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveStackT()
+        {
+            Stack<int> result = JsonSerializer.Parse<Stack<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 2;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected--, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadQueueTOfQueueT()
+        {
+            Queue<Queue<int>> result = JsonSerializer.Parse<Queue<Queue<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (Queue<int> q in result)
+            {
+                foreach (int i in q)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadQueueTOfArray()
+        {
+            Queue<int[]> result = JsonSerializer.Parse<Queue<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfIQueueT()
+        {
+            Queue<int>[] result = JsonSerializer.Parse<Queue<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (Queue<int> q in result)
+            {
+                foreach (int i in q)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveQueueT()
+        {
+            Queue<int> result = JsonSerializer.Parse<Queue<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadHashSetTOfHashSetT()
+        {
+            HashSet<HashSet<int>> result = JsonSerializer.Parse<HashSet<HashSet<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (HashSet<int> hs in result)
+            {
+                foreach (int i in hs)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadHashSetTOfArray()
+        {
+            HashSet<int[]> result = JsonSerializer.Parse<HashSet<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfIHashSetT()
+        {
+            HashSet<int>[] result = JsonSerializer.Parse<HashSet<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (HashSet<int> hs in result)
+            {
+                foreach (int i in hs)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveHashSetT()
+        {
+            HashSet<int> result = JsonSerializer.Parse<HashSet<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadLinkedListTOfLinkedListT()
+        {
+            LinkedList<LinkedList<int>> result = JsonSerializer.Parse<LinkedList<LinkedList<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (LinkedList<int> l in result)
+            {
+                foreach (int i in l)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadLinkedListTOfArray()
+        {
+            LinkedList<int[]> result = JsonSerializer.Parse<LinkedList<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (int[] arr in result)
+            {
+                foreach (int i in arr)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfILinkedListT()
+        {
+            LinkedList<int>[] result = JsonSerializer.Parse<LinkedList<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (LinkedList<int> l in result)
+            {
+                foreach (int i in l)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveLinkedListT()
+        {
+            LinkedList<int> result = JsonSerializer.Parse<LinkedList<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+        [Fact]
+        public static void ReadArrayOfISortedSetT()
+        {
+            SortedSet<int>[] result = JsonSerializer.Parse<SortedSet<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            int expected = 1;
+
+            foreach (SortedSet<int> s in result)
+            {
+                foreach (int i in s)
+                {
+                    Assert.Equal(expected++, i);
+                }
+            }
+        }
+
+        [Fact]
+        public static void ReadPrimitiveSortedSetT()
+        {
+            SortedSet<int> result = JsonSerializer.Parse<SortedSet<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            int expected = 1;
+
+            foreach (int i in result)
+            {
+                Assert.Equal(expected++, i);
+            }
+        }
+
+
         public class TestClassWithBadData
         {
             public TestChildClassWithBadData[] Children { get; set; }

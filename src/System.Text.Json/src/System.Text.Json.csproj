@@ -47,6 +47,8 @@
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultConverters.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultConvertersOfTValue.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultEnumerableConverter.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\DefaultIEnumerableConstructibleConveter.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\DefaultImmutableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterBoolean.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByte.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterChar.cs" />
@@ -154,6 +156,7 @@
     <Reference Include="System.Text.Encoding.Extensions" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Linq" />

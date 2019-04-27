@@ -318,5 +318,28 @@ namespace System.Text.Json.Serialization.Tests
                 obj.Verify();
             }
         }
+
+        [Fact]
+        public static void WriteClassWithObjectIEnumerableConstructibleTypes()
+        {
+            string json;
+
+            {
+                TestClassWithObjectIEnumerableConstructibleTypes obj = new TestClassWithObjectIEnumerableConstructibleTypes();
+                obj.Initialize();
+                obj.Verify();
+                json = JsonSerializer.ToString(obj);
+            }
+
+            {
+                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableConstructibleTypes>(json);
+                obj.Verify();
+            }
+
+            {
+                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableConstructibleTypes>(TestClassWithObjectIEnumerableConstructibleTypes.s_data);
+                obj.Verify();
+            }
+        }
     }
 }
