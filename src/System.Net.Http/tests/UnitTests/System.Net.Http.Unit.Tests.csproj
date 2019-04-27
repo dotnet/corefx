@@ -318,8 +318,8 @@
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.OSX.cs" Condition=" '$(TargetsOSX)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.OSX.cs</Link>
     </Compile>
-    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Linux.cs" Condition=" '$(TargetsUnix)' == 'true' And '$(TargetsOSX)' != 'true' And '$(TargetGroup)' == 'netcoreapp'">
-      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Linux.cs</Link>
+    <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Unix.cs" Condition=" '$(TargetsUnix)' == 'true' And '$(TargetsOSX)' != 'true' And '$(TargetGroup)' == 'netcoreapp'">
+      <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Unix.cs</Link>
     </Compile>
     <Compile Include="..\..\src\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Windows.cs" Condition=" '$(TargetsWindows)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
       <Link>ProductionCode\System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Windows.cs</Link>
