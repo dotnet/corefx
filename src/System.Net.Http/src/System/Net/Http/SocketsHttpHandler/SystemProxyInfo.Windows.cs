@@ -9,13 +9,11 @@ namespace System.Net.Http
         // On Windows we get default proxy configuration from either environment variables or the Windows system proxy.
         public static IWebProxy ConstructSystemProxy()
         {
-            if (HttpEnvironmentProxy.TryCreate(out IWebProxy proxy))
+            if (!HttpEnvironmentProxy.TryCreate(out IWebProxy proxy))
             {
-                return proxy;
+                HttpSystemProxy.TryCreate(out proxy);
             }
-            
-            HttpSystemProxy.TryCreate(out proxy);
-            
+
             return proxy;
         }
     }

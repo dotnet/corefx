@@ -258,7 +258,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' And '$(TargetsOSX)' != 'true' And '$(TargetGroup)' == 'netcoreapp'">
-    <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Unix.cs" />
+    <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.Linux.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true' And '$(TargetGroup)' == 'netcoreapp'">
     <Compile Include="System\Net\Http\SocketsHttpHandler\SystemProxyInfo.OSX.cs" />
