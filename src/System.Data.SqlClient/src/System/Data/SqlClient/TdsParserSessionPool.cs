@@ -167,7 +167,7 @@ namespace System.Data.SqlClient
                 else if ((okToReuse) && (_freeStateObjectCount < MaxInactiveCount))
                 {
                     // Session is good to re-use and our cache has space
-                    Debug.Assert(!session._pendingData, "pending data on a pooled session?");
+                    Debug.Assert(!session.HasPendingData, "pending data on a pooled session?");
 
                     _freeStateObjects[_freeStateObjectCount] = session;
                     _freeStateObjectCount++;

@@ -465,7 +465,7 @@ namespace System.Data.SqlClient
             {
                 session = _sessionPool.GetSession(owner);
 
-                Debug.Assert(!session._pendingData, "pending data on a pooled MARS session");
+                Debug.Assert(!session.HasPendingData, "pending data on a pooled MARS session");
             }
             else
             {
@@ -900,7 +900,7 @@ namespace System.Data.SqlClient
 
             if (!connectionIsDoomed && null != _physicalStateObj)
             {
-                if (_physicalStateObj._pendingData)
+                if (_physicalStateObj.HasPendingData)
                 {
                     DrainData(_physicalStateObj);
                 }
@@ -1647,7 +1647,7 @@ namespace System.Data.SqlClient
                         {
                             if (token == TdsEnums.SQLERROR)
                             {
-                                stateObj._errorTokenReceived = true; // Keep track of the fact error token was received - for Done processing.
+                                stateObj.HasReceivedError = true; // Keep track of the fact error token was received - for Done processing.
                             }
 
                             SqlError error;
@@ -2112,18 +2112,18 @@ namespace System.Data.SqlClient
                         break;
                 }
 
-                Debug.Assert(stateObj._pendingData || !dataReady, "dataReady is set, but there is no pending data");
+                Debug.Assert(stateObj.HasPendingData || !dataReady, "dataReady is set, but there is no pending data");
             }
 
             // Loop while data pending & runbehavior not return immediately, OR
             // if in attention case, loop while no more pending data & attention has not yet been
             // received.
-            while ((stateObj._pendingData &&
+            while ((stateObj.HasPendingData &&
                     (RunBehavior.ReturnImmediately != (RunBehavior.ReturnImmediately & runBehavior))) ||
-                (!stateObj._pendingData && stateObj._attentionSent && !stateObj._attentionReceived));
+                (!stateObj.HasPendingData && stateObj._attentionSent && !stateObj.HasReceivedAttention));
 
 #if DEBUG
-            if ((stateObj._pendingData) && (!dataReady))
+            if ((stateObj.HasPendingData) && (!dataReady))
             {
                 byte token;
                 if (!stateObj.TryPeekByte(out token))
@@ -2134,7 +2134,7 @@ namespace System.Data.SqlClient
             }
 #endif
 
-            if (!stateObj._pendingData)
+            if (!stateObj.HasPendingData)
             {
                 if (null != CurrentTransaction)
                 {
@@ -2144,7 +2144,7 @@ namespace System.Data.SqlClient
 
             // if we received an attention (but this thread didn't send it) then
             // we throw an Operation Cancelled error
-            if (stateObj._attentionReceived)
+            if (stateObj.HasReceivedAttention)
             {
                 // Dev11 #344723: SqlClient stress hang System_Data!Tcp::ReadSync via a call to SqlDataReader::Close
                 // Spin until SendAttention has cleared _attentionSending, this prevents a race condition between receiving the attention ACK and setting _attentionSent
@@ -2155,7 +2155,7 @@ namespace System.Data.SqlClient
                 {
                     // Reset attention state.
                     stateObj._attentionSent = false;
-                    stateObj._attentionReceived = false;
+                    stateObj.HasReceivedAttention = false;
 
                     if (RunBehavior.Clean != (RunBehavior.Clean & runBehavior) && !stateObj._internalTimeout)
                     {
@@ -2574,7 +2574,7 @@ namespace System.Data.SqlClient
             {
                 Debug.Assert(TdsEnums.DONE_MORE != (status & TdsEnums.DONE_MORE), "Not expecting DONE_MORE when receiving DONE_ATTN");
                 Debug.Assert(stateObj._attentionSent, "Received attention done without sending one!");
-                stateObj._attentionReceived = true;
+                stateObj.HasReceivedAttention = true;
                 Debug.Assert(stateObj._inBytesUsed == stateObj._inBytesRead && stateObj._inBytesPacket == 0, "DONE_ATTN received with more data left on wire");
             }
             if ((null != cmd) && (TdsEnums.DONE_COUNT == (status & TdsEnums.DONE_COUNT)))
@@ -2584,13 +2584,13 @@ namespace System.Data.SqlClient
                     cmd.InternalRecordsAffected = count;
                 }
                 // Skip the bogus DONE counts sent by the server
-                if (stateObj._receivedColMetaData || (curCmd != TdsEnums.SELECT))
+                if (stateObj.HasReceivedColumnMetadata || (curCmd != TdsEnums.SELECT))
                 {
                     cmd.OnStatementCompleted(count);
                 }
             }
 
-            stateObj._receivedColMetaData = false;
+            stateObj.HasReceivedColumnMetadata = false;
 
             // Surface exception for DONE_ERROR in the case we did not receive an error token
             // in the stream, but an error occurred.  In these cases, we throw a general server error.  The
@@ -2599,7 +2599,7 @@ namespace System.Data.SqlClient
             // the server has reached its max connection limit.  Bottom line, we need to throw general
             // error in the cases where we did not receive an error token along with the DONE_ERROR.
             if ((TdsEnums.DONE_ERROR == (TdsEnums.DONE_ERROR & status)) && stateObj.ErrorCount == 0 &&
-                  stateObj._errorTokenReceived == false && (RunBehavior.Clean != (RunBehavior.Clean & run)))
+                  stateObj.HasReceivedError == false && (RunBehavior.Clean != (RunBehavior.Clean & run)))
             {
                 stateObj.AddError(new SqlError(0, 0, TdsEnums.MIN_ERROR_CLASS, _server, SQLMessage.SevereError(), "", 0));
 
@@ -2633,17 +2633,17 @@ namespace System.Data.SqlClient
             // stop if the DONE_MORE bit isn't set (see above for attention handling)
             if (TdsEnums.DONE_MORE != (status & TdsEnums.DONE_MORE))
             {
-                stateObj._errorTokenReceived = false;
+                stateObj.HasReceivedError = false;
                 if (stateObj._inBytesUsed >= stateObj._inBytesRead)
                 {
-                    stateObj._pendingData = false;
+                    stateObj.HasPendingData = false;
                 }
             }
 
             // _pendingData set by e.g. 'TdsExecuteSQLBatch'
             // _hasOpenResult always set to true by 'WriteMarsHeader'
             //
-            if (!stateObj._pendingData && stateObj._hasOpenResult)
+            if (!stateObj.HasPendingData && stateObj.HasOpenResult)
             {
                 /*
                                 Debug.Assert(!((sqlTransaction != null               && _distributedTransaction != null) ||
@@ -3528,7 +3528,7 @@ namespace System.Data.SqlClient
             {
                 DrainData(stateObj);
 
-                stateObj._pendingData = false;
+                stateObj.HasPendingData = false;
             }
 
             ThrowExceptionAndWarning(stateObj);
@@ -3842,7 +3842,7 @@ namespace System.Data.SqlClient
 
             // We get too many DONE COUNTs from the server, causing too many StatementCompleted event firings.
             // We only need to fire this event when we actually have a meta data stream with 0 or more rows.
-            stateObj._receivedColMetaData = true;
+            stateObj.HasReceivedColumnMetadata = true;
             return true;
         }
 
@@ -6552,7 +6552,7 @@ namespace System.Data.SqlClient
 
             _physicalStateObj.WritePacket(TdsEnums.HARDFLUSH);
             _physicalStateObj.ResetSecurePasswordsInformation();
-            _physicalStateObj._pendingData = true;
+            _physicalStateObj.HasPendingData = true;
             _physicalStateObj._messageStatus = 0;
         }// tdsLogin
 
@@ -6845,7 +6845,7 @@ namespace System.Data.SqlClient
 
                 Task writeTask = stateObj.WritePacket(TdsEnums.HARDFLUSH);
                 Debug.Assert(writeTask == null, "Writes should not pend when writing sync");
-                stateObj._pendingData = true;
+                stateObj.HasPendingData = true;
                 stateObj._messageStatus = 0;
 
                 SqlDataReader dtcReader = null;
@@ -8185,7 +8185,7 @@ namespace System.Data.SqlClient
             WriteShort(0, stateObj);
             WriteInt(0, stateObj);
 
-            stateObj._pendingData = true;
+            stateObj.HasPendingData = true;
             stateObj._messageStatus = 0;
             return stateObj.WritePacket(TdsEnums.HARDFLUSH);
         }

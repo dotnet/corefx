@@ -22,6 +22,17 @@ namespace System.Data.SqlClient
 
     internal abstract class TdsParserStateObject
     {
+        [Flags]
+        internal enum SnapshottedStateFlags : byte
+        {
+            None = 0,
+            PendingData = 1 << 1,
+            OpenResult = 1 << 2,
+            ErrorTokenReceived = 1 << 3,  // Keep track of whether an error was received for the result. This is reset upon each done token
+            ColMetaDataReceived = 1 << 4, // Used to keep track of when to fire StatementCompleted  event.
+            AttentionReceived = 1 << 5    // NOTE: Received is not volatile as it is only ever accessed\modified by TryRun its callees (i.e. single threaded access)
+        }
+
         private const int AttentionTimeoutSeconds = 5;
 
         // Ticks to consider a connection "good" after a successful I/O (10,000 ticks = 1 ms)
@@ -55,25 +66,23 @@ namespace System.Data.SqlClient
                                                           // - initialize past header
                                                           // In buffer variables
         protected byte[] _inBuff;                         // internal read buffer - initialize on login
-        internal int _inBytesUsed = 0;                   // number of bytes used in internal read buffer
-        internal int _inBytesRead = 0;                   // number of bytes read into internal read buffer
+        internal int _inBytesUsed;                   // number of bytes used in internal read buffer
+        internal int _inBytesRead;                   // number of bytes read into internal read buffer
 
-        internal int _inBytesPacket = 0;                   // number of bytes left in packet
+        internal int _inBytesPacket;                   // number of bytes left in packet
 
         // Packet state variables
-        internal byte _outputMessageType = 0;                   // tds header type
+        internal byte _outputMessageType;                   // tds header type
         internal byte _messageStatus;                               // tds header status
         internal byte _outputPacketNumber = 1;                   // number of packets sent to server in message - start at 1 per ramas
         internal uint _outputPacketCount;
-        internal bool _pendingData = false;
-        internal volatile bool _fResetEventOwned = false;               // ResetEvent serializing call to sp_reset_connection
-        internal volatile bool _fResetConnectionSent = false;               // For multiple packet execute
+        internal volatile bool _fResetEventOwned;               // ResetEvent serializing call to sp_reset_connection
+        internal volatile bool _fResetConnectionSent;               // For multiple packet execute
 
-        internal bool _errorTokenReceived = false;               // Keep track of whether an error was received for the result.
-                                                                 // This is reset upon each done token - there can be
+        private SnapshottedStateFlags _snapshottedState;
 
-        internal bool _bulkCopyOpperationInProgress = false;        // Set to true during bulk copy and used to turn toggle write timeouts.
-        internal bool _bulkCopyWriteTimeout = false;                // Set to trun when _bulkCopyOpeperationInProgress is trun and write timeout happens
+        internal bool _bulkCopyOpperationInProgress;        // Set to true during bulk copy and used to turn toggle write timeouts.
+        internal bool _bulkCopyWriteTimeout;                // Set to trun when _bulkCopyOpeperationInProgress is trun and write timeout happens
 
         // SNI variables                                                     // multiple resultsets in one batch.
         
@@ -85,10 +94,9 @@ namespace System.Data.SqlClient
         // Timeout variables
         private long _timeoutMilliseconds;
         private long _timeoutTime;                                 // variable used for timeout computations, holds the value of the hi-res performance counter at which this request should expire
-        internal volatile bool _attentionSent = false;               // true if we sent an Attention to the server
-        internal bool _attentionReceived = false;               // NOTE: Received is not volatile as it is only ever accessed\modified by TryRun its callees (i.e. single threaded access)
-        internal volatile bool _attentionSending = false;
-        internal bool _internalTimeout = false;               // an internal timeout occurred
+        internal volatile bool _attentionSent;               // true if we sent an Attention to the server
+        internal volatile bool _attentionSending;
+        internal bool _internalTimeout;               // an internal timeout occurred
 
         private readonly LastIOTimer _lastSuccessfulIOTimer;
 
@@ -113,32 +121,28 @@ namespace System.Data.SqlClient
         private const int _waitForCancellationLockPollTimeout = 100;
         private WeakReference _cancellationOwner = new WeakReference(null);
 
-        internal bool _hasOpenResult = false;
         // Cache the transaction for which this command was executed so upon completion we can
         // decrement the appropriate result count.
-        internal SqlInternalTransaction _executedUnderTransaction = null;
+        internal SqlInternalTransaction _executedUnderTransaction;
 
         // TDS stream processing variables
         internal ulong _longlen;                                     // plp data length indicator
         internal ulong _longlenleft;                                 // Length of data left to read (64 bit lengths)
-        internal int[] _decimalBits = null;                // scratch buffer for decimal/numeric data
+        internal int[] _decimalBits;                // scratch buffer for decimal/numeric data
         internal byte[] _bTmp = new byte[TdsEnums.YUKON_HEADER_LEN];  // Scratch buffer for misc use
-        internal int _bTmpRead = 0;                   // Counter for number of temporary bytes read
-        internal Decoder _plpdecoder = null;             // Decoder object to process plp character data
-        internal bool _accumulateInfoEvents = false;               // TRUE - accumulate info messages during TdsParser.Run, FALSE - fire them
-        internal List<SqlError> _pendingInfoEvents = null;
+        internal int _bTmpRead;                   // Counter for number of temporary bytes read
+        internal Decoder _plpdecoder;             // Decoder object to process plp character data
+        internal bool _accumulateInfoEvents;               // TRUE - accumulate info messages during TdsParser.Run, FALSE - fire them
+        internal List<SqlError> _pendingInfoEvents;
 
         //
         // DO NOT USE THIS BUFFER FOR OTHER THINGS.
         // ProcessHeader can be called ANYTIME while doing network reads.
         private byte[] _partialHeaderBuffer = new byte[TdsEnums.HEADER_LEN];   // Scratch buffer for ProcessHeader
-        internal int _partialHeaderBytesRead = 0;
+        internal int _partialHeaderBytesRead;
 
-        internal _SqlMetaDataSet _cleanupMetaData = null;
-        internal _SqlMetaDataSetCollection _cleanupAltMetaDataSetArray = null;
-
-
-        internal bool _receivedColMetaData;      // Used to keep track of when to fire StatementCompleted  event.
+        internal _SqlMetaDataSet _cleanupMetaData;
+        internal _SqlMetaDataSetCollection _cleanupAltMetaDataSetArray;
 
         private SniContext _sniContext = SniContext.Undefined;
 #if DEBUG
@@ -154,33 +158,34 @@ namespace System.Data.SqlClient
         internal TaskCompletionSource<object> _networkPacketTaskSource;
         private Timer _networkPacketTimeout;
         internal bool _syncOverAsync = true;
-        private bool _snapshotReplay = false;
+        private bool _snapshotReplay;
         private StateSnapshot _snapshot;
+        private StateSnapshot _cachedSnapshot;
         internal ExecutionContext _executionContext;
-        internal bool _asyncReadWithoutSnapshot = false;
+        internal bool _asyncReadWithoutSnapshot;
 #if DEBUG
         // Used to override the assert than ensures that the stacktraces on subsequent replays are the same
         // This is useful is you are purposefully running the replay from a different thread (e.g. during SqlDataReader.Close)
-        internal bool _permitReplayStackTraceToDiffer = false;
+        internal bool _permitReplayStackTraceToDiffer;
 
         // Used to indicate that the higher level object believes that this stateObj has enough data to complete an operation
         // If this stateObj has to read, then it will raise an assert
-        internal bool _shouldHaveEnoughData = false;
+        internal bool _shouldHaveEnoughData;
 #endif
 
         // local exceptions to cache warnings and errors
         internal SqlErrorCollection _errors;
         internal SqlErrorCollection _warnings;
         internal object _errorAndWarningsLock = new object();
-        private bool _hasErrorOrWarning = false;
+        private bool _hasErrorOrWarning;
 
         // local exceptions to cache warnings and errors that occurred prior to sending attention
         internal SqlErrorCollection _preAttentionErrors;
         internal SqlErrorCollection _preAttentionWarnings;
 
-        private volatile TaskCompletionSource<object> _writeCompletionSource = null;
-        protected volatile int _asyncWriteCount = 0;
-        private volatile Exception _delayedWriteAsyncCallbackException = null; // set by write async callback if completion source is not yet created
+        private volatile TaskCompletionSource<object> _writeCompletionSource;
+        protected volatile int _asyncWriteCount;
+        private volatile Exception _delayedWriteAsyncCallbackException; // set by write async callback if completion source is not yet created
 
         // _readingcount is incremented when we are about to read.
         // We check the parser state afterwards.
@@ -219,13 +224,13 @@ namespace System.Data.SqlClient
 
         // Prevents any pending read from completing until the user signals it using
         // CompletePendingReadWithSuccess() or CompletePendingReadWithFailure(int errorCode) in SqlCommand\SqlDataReader
-        internal static bool _forcePendingReadsToWaitForUser;
-        internal TaskCompletionSource<object> _realNetworkPacketTaskSource = null;
+        internal static bool _forcePendingReadsToWaitForUser = false;
+        internal TaskCompletionSource<object> _realNetworkPacketTaskSource;
 
         // Field is never assigned to, and will always have its default value
 #pragma warning disable 0649
         // Set to true to enable checking the call stacks match when packet retry occurs.
-        internal static bool _checkNetworkPacketRetryStacks;
+        internal static bool _checkNetworkPacketRetryStacks = false;
 #pragma warning restore 0649
 #endif
 
@@ -306,17 +311,7 @@ namespace System.Data.SqlClient
                 return _debugOnlyCopyOfSniContext;
             }
         }
-#endif
 
-        internal bool HasOpenResult
-        {
-            get
-            {
-                return _hasOpenResult;
-            }
-        }
-
-#if DEBUG
         internal void InvalidateDebugOnlyCopyOfSniContext()
         {
             _debugOnlyCopyOfSniContext = SniContext.Undefined;
@@ -603,7 +598,7 @@ namespace System.Data.SqlClient
                         {
                             _cancelled = true;
 
-                            if (_pendingData && !_attentionSent)
+                            if (_snapshottedState.HasFlag(SnapshottedStateFlags.PendingData) && !_attentionSent)
                             {
                                 bool hasParserLock = false;
                                 // Keep looping until we have the parser lock (and so are allowed to write), or the connection closes\breaks
@@ -794,7 +789,7 @@ namespace System.Data.SqlClient
                 TdsParserState state = Parser.State;
                 if (state != TdsParserState.Broken && state != TdsParserState.Closed)
                 {
-                    if (_pendingData)
+                    if (_snapshottedState.HasFlag(SnapshottedStateFlags.PendingData))
                     {
                         Parser.DrainData(this); // This may throw - taking us to catch block.c
                     }
@@ -844,7 +839,7 @@ namespace System.Data.SqlClient
                 _executedUnderTransaction.DecrementAndObtainOpenResultCount();
                 _executedUnderTransaction = null;
             }
-            _hasOpenResult = false;
+            SetSnapshottedState(SnapshottedStateFlags.OpenResult, false);
         }
         
         internal int DecrementPendingCallbacks(bool release)
@@ -884,7 +879,7 @@ namespace System.Data.SqlClient
 
         internal int IncrementAndObtainOpenResultCount(SqlInternalTransaction transaction)
         {
-            _hasOpenResult = true;
+            HasOpenResult = true;
 
             if (transaction == null)
             {
@@ -957,13 +952,13 @@ namespace System.Data.SqlClient
                     Task writePacketTask = WritePacket(TdsEnums.HARDFLUSH);
                     if (writePacketTask == null)
                     {
-                        _pendingData = true;
+                        HasPendingData = true;
                         _messageStatus = 0;
                         return null;
                     }
                     else
                     {
-                        return AsyncHelper.CreateContinuationTask(writePacketTask, () => { _pendingData = true; _messageStatus = 0; });
+                        return AsyncHelper.CreateContinuationTask(writePacketTask, () => { HasPendingData = true; _messageStatus = 0; });
                     }
                 }
             }
@@ -1121,6 +1116,48 @@ namespace System.Data.SqlClient
         {
             _outputPacketNumber = 1;
             _outputPacketCount = 0;
+        }
+
+        private void SetSnapshottedState(SnapshottedStateFlags flag, bool value)
+        {
+            if (value)
+            {
+                _snapshottedState |= flag;
+            }
+            else
+            {
+                _snapshottedState &= ~flag;
+            }
+        }
+
+        internal bool HasOpenResult
+        {
+            get => _snapshottedState.HasFlag(SnapshottedStateFlags.OpenResult);
+            set => SetSnapshottedState(SnapshottedStateFlags.OpenResult, value);
+        }
+
+        internal bool HasPendingData
+        {
+            get => _snapshottedState.HasFlag(SnapshottedStateFlags.PendingData);
+            set => SetSnapshottedState(SnapshottedStateFlags.PendingData,value);
+        }
+
+        internal bool HasReceivedError
+        {
+            get => _snapshottedState.HasFlag(SnapshottedStateFlags.ErrorTokenReceived);
+            set => SetSnapshottedState(SnapshottedStateFlags.ErrorTokenReceived, value);
+        }
+
+        internal bool HasReceivedAttention
+        {
+            get => _snapshottedState.HasFlag(SnapshottedStateFlags.AttentionReceived);
+            set => SetSnapshottedState(SnapshottedStateFlags.AttentionReceived, value);
+        }
+
+        internal bool HasReceivedColumnMetadata
+        {
+            get => _snapshottedState.HasFlag(SnapshottedStateFlags.ColMetaDataReceived);
+            set => SetSnapshottedState(SnapshottedStateFlags.ColMetaDataReceived, value);
         }
 
         internal bool SetPacketSize(int size)
@@ -1980,14 +2017,29 @@ namespace System.Data.SqlClient
 
         internal void SetSnapshot()
         {
-            _snapshot = new StateSnapshot(this);
-            _snapshot.Snap();
+            StateSnapshot snapshot = _snapshot;
+            if (snapshot is null)
+            {
+                snapshot = Interlocked.Exchange(ref _cachedSnapshot, null) ?? new StateSnapshot();
+            }
+            else
+            {
+                snapshot.Clear();
+            }
+            _snapshot = snapshot;
+            _snapshot.Snap(this);
             _snapshotReplay = false;
         }
 
         internal void ResetSnapshot()
         {
-            _snapshot = null;
+            if (_snapshot != null)
+            {
+                StateSnapshot snapshot = _snapshot;
+                _snapshot = null;
+                snapshot.Clear();
+                Interlocked.CompareExchange(ref _cachedSnapshot, snapshot, null);
+            }
             _snapshotReplay = false;
         }
 
@@ -3728,7 +3780,7 @@ namespace System.Data.SqlClient
                 Debug.Assert(_asyncWriteCount == 0, "StateObj still has outstanding async writes");
                 Debug.Assert(_delayedWriteAsyncCallbackException == null, "StateObj has an unobserved exceptions from an async write");
                 // Attention\Cancellation\Timeouts
-                Debug.Assert(!_attentionReceived && !_attentionSent && !_attentionSending, $"StateObj is still dealing with attention: Sent: {_attentionSent}, Received: {_attentionReceived}, Sending: {_attentionSending}");
+                Debug.Assert(!HasReceivedAttention && !_attentionSent && !_attentionSending, $"StateObj is still dealing with attention: Sent: {_attentionSent}, Received: {HasReceivedAttention}, Sending: {_attentionSending}");
                 Debug.Assert(!_cancelled, "StateObj still has cancellation set");
                 Debug.Assert(!_internalTimeout, "StateObj still has internal timeout set");
                 // Errors and Warnings
@@ -3814,46 +3866,72 @@ namespace System.Data.SqlClient
             }
         }
 
-        private class PacketData
+
+        private sealed class StateSnapshot
         {
-            public byte[] Buffer;
-            public int Read;
-#if DEBUG
-            public string Stack;
-#endif
-        }
-
-        private class StateSnapshot
-        {
-            private List<PacketData> _snapshotInBuffs;
-            private int _snapshotInBuffCurrent = 0;
-            private int _snapshotInBytesUsed = 0;
-            private int _snapshotInBytesPacket = 0;
-            private bool _snapshotPendingData = false;
-            private bool _snapshotErrorTokenReceived = false;
-            private bool _snapshotHasOpenResult = false;
-            private bool _snapshotReceivedColumnMetadata = false;
-            private bool _snapshotAttentionReceived;
-            private byte _snapshotMessageStatus;
-
-            private NullBitmap _snapshotNullBitmapInfo;
-            private ulong _snapshotLongLen;
-            private ulong _snapshotLongLenLeft;
-            private _SqlMetaDataSet _snapshotCleanupMetaData;
-            private _SqlMetaDataSetCollection _snapshotCleanupAltMetaDataSetArray;
-
-            private readonly TdsParserStateObject _stateObj;
-
-            public StateSnapshot(TdsParserStateObject state)
+            private sealed class PLPData
             {
-                _snapshotInBuffs = new List<PacketData>();
-                _stateObj = state;
+                public readonly ulong SnapshotLongLen;
+                public readonly ulong SnapshotLongLenLeft;
+
+                public PLPData(ulong snapshotLongLen, ulong snapshotLongLenLeft)
+                {
+                    SnapshotLongLen = snapshotLongLen;
+                    SnapshotLongLenLeft = snapshotLongLenLeft;
+                }
+            }
+
+            private sealed partial class PacketData
+            {
+                public byte[] Buffer;
+                public int Read;
+                public PacketData Prev;
+
+                public void SetStack(string value)
+                {
+                    SetStackInternal(value);
+                }
+                partial void SetStackInternal(string value);
+
+                public void Clear()
+                {
+                    Buffer = null;
+                    Read = 0;
+                    Prev = null;
+                    SetStackInternal(null);
+                }
             }
 
 #if DEBUG
+            private sealed partial class PacketData
+            {
+                public string Stack;
+
+                partial void SetStackInternal(string value)
+                {
+                    Stack = value;
+                }
+            }
+
             private int _rollingPend = 0;
             private int _rollingPendCount = 0;
+#endif 
+            private PacketData _snapshotInBuffList;
+            private PacketData _sparePacket;
+            private NullBitmap _snapshotNullBitmapInfo;
+            private _SqlMetaDataSet _snapshotCleanupMetaData;
+            private _SqlMetaDataSetCollection _snapshotCleanupAltMetaDataSetArray;
+            private PLPData _plpData;
+            private TdsParserStateObject _stateObj;
 
+            private int _snapshotInBuffCount;
+            private int _snapshotInBuffCurrent;
+            private int _snapshotInBytesUsed;
+            private int _snapshotInBytesPacket;
+            private SnapshottedStateFlags _state;
+            private byte _snapshotMessageStatus;
+
+#if DEBUG
             internal bool DoPend()
             {
                 if (_failAsyncPends || !_forceAllPends)
@@ -3871,8 +3949,25 @@ namespace System.Data.SqlClient
                 _rollingPendCount++;
                 return false;
             }
-#endif
 
+            internal void AssertCurrent()
+            {
+                Debug.Assert(_snapshotInBuffCurrent == _snapshotInBuffCount, "Should not be reading new packets when not replaying last packet");
+            }
+
+            internal void CheckStack(string trace)
+            {
+                PacketData prev = _snapshotInBuffList?.Prev;
+                if (prev.Stack == null)
+                {
+                    prev.Stack = trace;
+                }
+                else
+                {
+                    Debug.Assert(_stateObj._permitReplayStackTraceToDiffer || prev.Stack.ToString() == trace.ToString(), "The stack trace on subsequent replays should be the same");
+                }
+            }
+#endif
             internal void CloneNullBitmapInfo()
             {
                 if (_stateObj._nullBitmapInfo.ReferenceEquals(_snapshotNullBitmapInfo))
@@ -3891,42 +3986,45 @@ namespace System.Data.SqlClient
 
             internal void PushBuffer(byte[] buffer, int read)
             {
-                Debug.Assert(!_snapshotInBuffs.Any(b => object.ReferenceEquals(b.Buffer, buffer)));
-
-                PacketData packetData = new PacketData();
-                packetData.Buffer = buffer;
-                packetData.Read = read;
 #if DEBUG
-                packetData.Stack = _stateObj._lastStack;
+                for (PacketData current = _snapshotInBuffList; current != null; current = current.Prev)
+                {
+                    Debug.Assert(!object.ReferenceEquals(current.Buffer,buffer));
+                }
 #endif
 
-                _snapshotInBuffs.Add(packetData);
-            }
-
-#if DEBUG
-            internal void AssertCurrent()
-            {
-                Debug.Assert(_snapshotInBuffCurrent == _snapshotInBuffs.Count, "Should not be reading new packets when not replaying last packet");
-            }
-            internal void CheckStack(string trace)
-            {
-                PacketData prev = _snapshotInBuffs[_snapshotInBuffCurrent - 1];
-                if (prev.Stack == null)
+                PacketData packetData = _sparePacket;
+                if (packetData is null)
                 {
-                    prev.Stack = trace;
+                    packetData = new PacketData();
                 }
                 else
                 {
-                    Debug.Assert(_stateObj._permitReplayStackTraceToDiffer || prev.Stack.ToString() == trace.ToString(), "The stack trace on subsequent replays should be the same");
+                    _sparePacket = null;
                 }
-            }
+                packetData.Buffer = buffer;
+                packetData.Read = read;
+                packetData.Prev = _snapshotInBuffList;
+#if DEBUG
+                packetData.SetStack(_stateObj._lastStack);
 #endif
+                _snapshotInBuffList = packetData;
+                _snapshotInBuffCount++;
+            }
 
             internal bool Replay()
             {
-                if (_snapshotInBuffCurrent < _snapshotInBuffs.Count)
+                if (_snapshotInBuffCurrent < _snapshotInBuffCount)
                 {
-                    PacketData next = _snapshotInBuffs[_snapshotInBuffCurrent];
+                    PacketData next = _snapshotInBuffList;
+                    for (
+                        int position = (_snapshotInBuffCount - 1);
+                        position != _snapshotInBuffCurrent;
+                        position -= 1
+                    )
+                    {
+                        next = next.Prev;
+                    }
                     _stateObj._inBuff = next.Buffer;
                     _stateObj._inBytesUsed = 0;
                     _stateObj._inBytesRead = next.Read;
@@ -3937,25 +4035,27 @@ namespace System.Data.SqlClient
                 return false;
             }
 
-            internal void Snap()
+            internal void Snap(TdsParserStateObject state)
             {
-                _snapshotInBuffs.Clear();
+                _stateObj = state;
+                _snapshotInBuffList = null;
+                _snapshotInBuffCount = 0;
                 _snapshotInBuffCurrent = 0;
                 _snapshotInBytesUsed = _stateObj._inBytesUsed;
                 _snapshotInBytesPacket = _stateObj._inBytesPacket;
-                _snapshotPendingData = _stateObj._pendingData;
-                _snapshotErrorTokenReceived = _stateObj._errorTokenReceived;
+
                 _snapshotMessageStatus = _stateObj._messageStatus;
                 // _nullBitmapInfo must be cloned before it is updated
                 _snapshotNullBitmapInfo = _stateObj._nullBitmapInfo;
-                _snapshotLongLen = _stateObj._longlen;
-                _snapshotLongLenLeft = _stateObj._longlenleft;
+                if (_stateObj._longlen != 0 || _stateObj._longlenleft != 0)
+                {
+                    _plpData = new PLPData(_stateObj._longlen, _stateObj._longlenleft);
+                }
                 _snapshotCleanupMetaData = _stateObj._cleanupMetaData;
                 // _cleanupAltMetaDataSetArray must be cloned before it is updated
                 _snapshotCleanupAltMetaDataSetArray = _stateObj._cleanupAltMetaDataSetArray;
-                _snapshotHasOpenResult = _stateObj._hasOpenResult;
-                _snapshotReceivedColumnMetadata = _stateObj._receivedColMetaData;
-                _snapshotAttentionReceived = _stateObj._attentionReceived;
+
+                _state = _stateObj._snapshottedState;
 #if DEBUG
                 _rollingPend = 0;
                 _rollingPendCount = 0;
@@ -3976,23 +4076,21 @@ namespace System.Data.SqlClient
 
                 _stateObj._inBytesUsed = _snapshotInBytesUsed;
                 _stateObj._inBytesPacket = _snapshotInBytesPacket;
-                _stateObj._pendingData = _snapshotPendingData;
-                _stateObj._errorTokenReceived = _snapshotErrorTokenReceived;
+
                 _stateObj._messageStatus = _snapshotMessageStatus;
                 _stateObj._nullBitmapInfo = _snapshotNullBitmapInfo;
                 _stateObj._cleanupMetaData = _snapshotCleanupMetaData;
                 _stateObj._cleanupAltMetaDataSetArray = _snapshotCleanupAltMetaDataSetArray;
-                _stateObj._hasOpenResult = _snapshotHasOpenResult;
-                _stateObj._receivedColMetaData = _snapshotReceivedColumnMetadata;
-                _stateObj._attentionReceived = _snapshotAttentionReceived;
+
+                _stateObj._snapshottedState = _state;
 
                 // Reset partially read state (these only need to be maintained if doing async without snapshot)
                 _stateObj._bTmpRead = 0;
                 _stateObj._partialHeaderBytesRead = 0;
 
-                // reset plp state
-                _stateObj._longlen = _snapshotLongLen;
-                _stateObj._longlenleft = _snapshotLongLenLeft;
+                // reset plp state                
+                _stateObj._longlen = _plpData?.SnapshotLongLen ?? 0;
+                _stateObj._longlenleft = _plpData?.SnapshotLongLenLeft ?? 0;
 
                 _stateObj._snapshotReplay = true;
 
@@ -4003,6 +4101,32 @@ namespace System.Data.SqlClient
             {
                 ResetSnapshotState();
             }
+
+            internal void Clear()
+            {
+                PacketData packet = _snapshotInBuffList;
+                _snapshotInBuffList = null;
+                _snapshotInBuffCount = 0;
+                _snapshotInBuffCurrent = 0;
+                _snapshotInBytesUsed = 0;
+                _snapshotInBytesPacket = 0;
+                _snapshotMessageStatus = 0;
+                _snapshotNullBitmapInfo = default;
+                _plpData = null;
+                _snapshotCleanupMetaData = null;
+                _snapshotCleanupAltMetaDataSetArray = null;
+                _state = SnapshottedStateFlags.None;
+#if DEBUG
+                _rollingPend = 0;
+                _rollingPendCount = 0;
+                _stateObj._lastStack = null;
+#endif
+                _stateObj = null;
+
+                packet.Clear();
+                _sparePacket = packet;
+            }
+
         }
 
         /*
