@@ -91,6 +91,8 @@ namespace System.Data.SqlClient
 
         private SqlSequentialStream _currentStream;
         private SqlSequentialTextReader _currentTextReader;
+        private IsDBNullAsyncResumable _cachedIsDBNullResumable;
+        private ReadAsyncResumable _cachedReadAsyncResumable;
 
         internal SqlDataReader(SqlCommand command, CommandBehavior behavior)
         {
@@ -4000,7 +4002,7 @@ namespace System.Data.SqlClient
                     source.SetCanceled();
                     return source.Task;
                 }
-                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
+                registration = cancellationToken.Register(SqlCommand.s_cancelIgnoreFailure, _command);
             }
 
             Task original = Interlocked.CompareExchange(ref _currentTask, source.Task, null);
@@ -4020,33 +4022,32 @@ namespace System.Data.SqlClient
 
             PrepareAsyncInvocation(useSnapshot: true);
 
-            Func<Task, Task<bool>> moreFunc = null;
+            return InvokeResumable(new HasNextResultAsyncResumable(this, source, registration));
+        }
 
-            moreFunc = (t) =>
+        private static Task<bool> NextResultAsyncWillResume(Task task, object state)
+        {
+            HasNextResultAsyncResumable context = (HasNextResultAsyncResumable)state;
+            if (task != null)
             {
-                if (t != null)
-                {
-                    PrepareForAsyncContinuation();
-                }
+                context.reader.PrepareForAsyncContinuation();
+            }
 
-                bool more;
-                if (TryNextResult(out more))
-                {
-                    // completed 
-                    return more ? ADP.TrueTask : ADP.FalseTask;
-                }
+            bool more;
+            if (context.reader.TryNextResult(out more))
+            {
+                // completed 
+                return more ? ADP.TrueTask : ADP.FalseTask;
+            }
 
-                return ContinueRetryable(moreFunc);
-            };
-
-            return InvokeRetryable(moreFunc, source, registration);
+            return context.reader.ContinueResumable(context);
         }
 
         // NOTE: This will return null if it completed sequentially
         // If this returns null, then you can use bytesRead to see how many bytes were read - otherwise bytesRead should be ignored
-        internal Task<int> GetBytesAsync(int i, byte[] buffer, int index, int length, int timeout, CancellationToken cancellationToken, out int bytesRead)
+        internal Task<int> GetBytesAsync(int columnIndex, byte[] buffer, int index, int length, int timeout, CancellationToken cancellationToken, out int bytesRead)
         {
-            AssertReaderState(requireData: true, permitAsync: true, columnIndex: i, enforceSequentialAccess: true);
+            AssertReaderState(requireData: true, permitAsync: true, columnIndex: columnIndex, enforceSequentialAccess: true);
             Debug.Assert(IsCommandBehavior(CommandBehavior.SequentialAccess));
 
             bytesRead = 0;
@@ -4068,6 +4069,16 @@ namespace System.Data.SqlClient
                 }
             }
 
+            var resumable = new GetBytesAsyncResumable(this)
+            {
+                columnIndex = columnIndex,
+                buffer = buffer,
+                index = index,
+                length = length,
+                timeout = timeout,
+                cancellationToken = cancellationToken,
+            };
+
             // Check if we need to skip columns
             Debug.Assert(_sharedState._nextColumnDataToRead <= _lastColumnWithDataChunkRead, "Non sequential access");
             if ((_sharedState._nextColumnHeaderToRead <= _lastColumnWithDataChunkRead) || (_sharedState._nextColumnDataToRead < _lastColumnWithDataChunkRead))
@@ -4082,8 +4093,6 @@ namespace System.Data.SqlClient
 
                 PrepareAsyncInvocation(useSnapshot: true);
 
-                Func<Task, Task<int>> moreFunc = null;
-
                 // Timeout
                 CancellationToken timeoutToken = CancellationToken.None;
                 CancellationTokenSource timeoutCancellationSource = null;
@@ -4094,54 +4103,11 @@ namespace System.Data.SqlClient
                     timeoutToken = timeoutCancellationSource.Token;
                 }
 
-                moreFunc = (t) =>
-                {
-                    if (t != null)
-                    {
-                        PrepareForAsyncContinuation();
-                    }
+                resumable.disposable = timeoutCancellationSource;
+                resumable.timeoutToken = timeoutToken;
+                resumable.source = source;
 
-                    // Prepare for stateObj timeout
-                    SetTimeout(_defaultTimeoutMilliseconds);
-
-                    if (TryReadColumnHeader(i))
-                    {
-                        // Only once we have read up to where we need to be can we check the cancellation tokens (otherwise we will be in an unknown state)
-
-                        if (cancellationToken.IsCancellationRequested)
-                        {
-                            // User requested cancellation
-                            return Task.FromCanceled<int>(cancellationToken);
-                        }
-                        else if (timeoutToken.IsCancellationRequested)
-                        {
-                            // Timeout
-                            return Task.FromException<int>(ADP.ExceptionWithStackTrace(ADP.IO(SQLMessage.Timeout())));
-                        }
-                        else
-                        {
-                            // Up to the correct column - continue to read
-                            SwitchToAsyncWithoutSnapshot();
-                            int totalBytesRead;
-                            var readTask = GetBytesAsyncReadDataStage(i, buffer, index, length, timeout, true, cancellationToken, timeoutToken, out totalBytesRead);
-                            if (readTask == null)
-                            {
-                                // Completed synchronously
-                                return Task.FromResult<int>(totalBytesRead);
-                            }
-                            else
-                            {
-                                return readTask;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        return ContinueRetryable(moreFunc);
-                    }
-                };
-
-                return InvokeRetryable(moreFunc, source, timeoutCancellationSource);
+                return InvokeResumable(resumable);
             }
             else
             {
@@ -4149,10 +4115,11 @@ namespace System.Data.SqlClient
 
                 // Switch to async
                 PrepareAsyncInvocation(useSnapshot: false);
+                resumable.mode = GetBytesAsyncResumable.OperationMode.Read;
 
                 try
                 {
-                    return GetBytesAsyncReadDataStage(i, buffer, index, length, timeout, false, cancellationToken, CancellationToken.None, out bytesRead);
+                    return GetBytesAsyncReadDataStage(resumable, false, out bytesRead);
                 }
                 catch
                 {
@@ -4162,25 +4129,123 @@ namespace System.Data.SqlClient
             }
         }
 
-        private Task<int> GetBytesAsyncReadDataStage(int i, byte[] buffer, int index, int length, int timeout, bool isContinuation, CancellationToken cancellationToken, CancellationToken timeoutToken, out int bytesRead)
+        private static Task<int> GetBytesAsyncSeekWillResume(Task task, object state)
         {
-            _lastColumnWithDataChunkRead = i;
+            GetBytesAsyncResumable resumable = (GetBytesAsyncResumable)state;
+            SqlDataReader reader = resumable.reader;
+
+            Debug.Assert(resumable.mode == GetBytesAsyncResumable.OperationMode.Seek, "resumable.mode must be Seek to check if seeking can resume");
+
+            if (task != null)
+            {
+                reader.PrepareForAsyncContinuation();
+            }
+
+            // Prepare for stateObj timeout
+            reader.SetTimeout(reader._defaultTimeoutMilliseconds);
+
+            if (reader.TryReadColumnHeader(resumable.columnIndex))
+            {
+                // Only once we have read up to where we need to be can we check the cancellation tokens (otherwise we will be in an unknown state)
+
+                if (resumable.cancellationToken.IsCancellationRequested)
+                {
+                    // User requested cancellation
+                    return Task.FromCanceled<int>(resumable.cancellationToken);
+                }
+                else if (resumable.timeoutToken.IsCancellationRequested)
+                {
+                    // Timeout
+                    return Task.FromException<int>(ADP.ExceptionWithStackTrace(ADP.IO(SQLMessage.Timeout())));
+                }
+                else
+                {
+                    // Up to the correct column - continue to read
+                    resumable.mode = GetBytesAsyncResumable.OperationMode.Read;
+                    reader.SwitchToAsyncWithoutSnapshot();
+                    int totalBytesRead;
+                    var readTask = reader.GetBytesAsyncReadDataStage(resumable, true, out totalBytesRead);
+                    if (readTask == null)
+                    {
+                        // Completed synchronously
+                        return Task.FromResult<int>(totalBytesRead);
+                    }
+                    else
+                    {
+                        return readTask;
+                    }
+                }
+            }
+            else
+            {
+                return reader.ContinueResumable(resumable);
+            }
+        }
+
+        private static Task<int> GetBytesAsyncReadWillResume(Task task, object state)
+        {
+            var resumable = (GetBytesAsyncResumable)state;
+            SqlDataReader reader = resumable.reader;
+
+            Debug.Assert(resumable.mode == GetBytesAsyncResumable.OperationMode.Read, "resumable.mode must be Read to check if read can resume");
+
+            reader.PrepareForAsyncContinuation();
+
+            if (resumable.cancellationToken.IsCancellationRequested)
+            {
+                // User requested cancellation
+                return Task.FromCanceled<int>(resumable.cancellationToken);
+            }
+            else if (resumable.timeoutToken.IsCancellationRequested)
+            {
+                // Timeout
+                return Task.FromException<int>(ADP.ExceptionWithStackTrace(ADP.IO(SQLMessage.Timeout())));
+            }
+            else
+            {
+                // Prepare for stateObj timeout
+                reader.SetTimeout(reader._defaultTimeoutMilliseconds);
+
+                int bytesReadThisIteration;
+                bool result = reader.TryGetBytesInternalSequential(
+                    resumable.columnIndex,
+                    resumable.buffer,
+                    resumable.index + resumable.totalBytesRead,
+                    resumable.length - resumable.totalBytesRead,
+                    out bytesReadThisIteration
+                );
+                resumable.totalBytesRead += bytesReadThisIteration;
+                Debug.Assert(resumable.totalBytesRead <= resumable.length, "Read more bytes than required");
+
+                if (result)
+                {
+                    return Task.FromResult<int>(resumable.totalBytesRead);
+                }
+                else
+                {
+                    return reader.ContinueResumable(resumable);
+                }
+            }
+        }
+
+        private Task<int> GetBytesAsyncReadDataStage(GetBytesAsyncResumable resumable, bool isContinuation, out int bytesRead)
+        {
+            Debug.Assert(resumable.mode == GetBytesAsyncResumable.OperationMode.Read, "resumable.Mode must be Read to read data");
+
+            _lastColumnWithDataChunkRead = resumable.columnIndex;
             TaskCompletionSource<int> source = null;
-            CancellationTokenSource timeoutCancellationSource = null;
 
             // Prepare for stateObj timeout
             SetTimeout(_defaultTimeoutMilliseconds);
 
             // Try to read without any continuations (all the data may already be in the stateObj's buffer)
-            if (!TryGetBytesInternalSequential(i, buffer, index, length, out bytesRead))
+            if (!TryGetBytesInternalSequential(resumable.columnIndex, resumable.buffer, resumable.index, resumable.length, out bytesRead))
             {
-                // This will be the 'state' for the callback
-                int totalBytesRead = bytesRead;
-
                 if (!isContinuation)
                 {
                     // This is the first async operation which is happening - setup the _currentTask and timeout
                     source = new TaskCompletionSource<int>();
+
                     Task original = Interlocked.CompareExchange(ref _currentTask, source.Task, null);
                     if (original != null)
                     {
@@ -4197,52 +4262,21 @@ namespace System.Data.SqlClient
                     }
 
                     // Timeout
-                    Debug.Assert(timeoutToken == CancellationToken.None, "TimeoutToken is set when GetBytesAsyncReadDataStage is not a continuation");
-                    if (timeout > 0)
+                    Debug.Assert(resumable.timeoutToken == CancellationToken.None, "TimeoutToken is set when GetBytesAsyncReadDataStage is not a continuation");
+                    if (resumable.timeout > 0)
                     {
-                        timeoutCancellationSource = new CancellationTokenSource();
-                        timeoutCancellationSource.CancelAfter(timeout);
-                        timeoutToken = timeoutCancellationSource.Token;
+                        CancellationTokenSource timeoutCancellationSource = new CancellationTokenSource();
+                        timeoutCancellationSource.CancelAfter(resumable.timeout);
+                        Debug.Assert(resumable.disposable is null, "setting resumable.disposable would lose the previous dispoable");
+                        resumable.disposable = timeoutCancellationSource;
+                        resumable.timeoutToken = timeoutCancellationSource.Token;
                     }
+                    Debug.Assert(resumable.source is null, "setting resumable.source would lose the previous source");
+                    resumable.source = source;
                 }
 
-                Func<Task, Task<int>> moreFunc = null;
-                moreFunc = (_ =>
-                {
-                    PrepareForAsyncContinuation();
 
-                    if (cancellationToken.IsCancellationRequested)
-                    {
-                        // User requested cancellation
-                        return Task.FromCanceled<int>(cancellationToken);
-                    }
-                    else if (timeoutToken.IsCancellationRequested)
-                    {
-                        // Timeout
-                        return Task.FromException<int>(ADP.ExceptionWithStackTrace(ADP.IO(SQLMessage.Timeout())));
-                    }
-                    else
-                    {
-                        // Prepare for stateObj timeout
-                        SetTimeout(_defaultTimeoutMilliseconds);
-
-                        int bytesReadThisIteration;
-                        bool result = TryGetBytesInternalSequential(i, buffer, index + totalBytesRead, length - totalBytesRead, out bytesReadThisIteration);
-                        totalBytesRead += bytesReadThisIteration;
-                        Debug.Assert(totalBytesRead <= length, "Read more bytes than required");
-
-                        if (result)
-                        {
-                            return Task.FromResult<int>(totalBytesRead);
-                        }
-                        else
-                        {
-                            return ContinueRetryable(moreFunc);
-                        }
-                    }
-                });
-
-                Task<int> retryTask = ContinueRetryable(moreFunc);
+                Task<int> retryTask = ContinueResumable(resumable);
                 if (isContinuation)
                 {
                     // Let the caller handle cleanup\completing
@@ -4250,8 +4284,13 @@ namespace System.Data.SqlClient
                 }
                 else
                 {
+                    Debug.Assert(resumable.source != null, "resumable.source shuld not be null when continuing");
                     // setup for cleanup\completing
-                    retryTask.ContinueWith((t) => CompleteRetryable(t, source, timeoutCancellationSource), TaskScheduler.Default);
+                    retryTask.ContinueWith(
+                        continuationAction: Resumable<int>.s_completeCallback.Value,
+                        state: resumable,
+                        TaskScheduler.Default
+                    );
                     return source.Task;
                 }
             }
@@ -4373,50 +4412,67 @@ namespace System.Data.SqlClient
             IDisposable registration = null;
             if (cancellationToken.CanBeCanceled)
             {
-                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
+                registration = cancellationToken.Register(SqlCommand.s_cancelIgnoreFailure, _command);
             }
+
+            var resumable = Interlocked.Exchange(ref _cachedReadAsyncResumable, null) ?? new ReadAsyncResumable();
+
+            Debug.Assert(resumable.reader == null && resumable.source == null && resumable.disposable == null, "cached ReadAsyncResumable resumable not properly disposed");
+
+            resumable.Set(this, source, registration);
+            resumable.hasMoreData = more;
+            resumable.hasReadRowToken = rowTokenRead;
 
             PrepareAsyncInvocation(useSnapshot: true);
 
-            Func<Task, Task<bool>> moreFunc = null;
-            moreFunc = (t) =>
-            {
-                if (t != null)
-                {
-                    PrepareForAsyncContinuation();
-                }
+            return InvokeResumable(resumable);
+        }
 
-                if (rowTokenRead || TryReadInternal(true, out more))
+        private static Task<bool> ReadAsyncWillResume(Task task, object state)
+        {
+            var context = (ReadAsyncResumable)state;
+            SqlDataReader reader = context.reader;
+            ref bool hasMoreData = ref context.hasMoreData;
+            ref bool hasReadRowToken = ref context.hasReadRowToken;
+
+            if (task != null)
+            {
+                reader.PrepareForAsyncContinuation();
+            }
+
+            if (hasReadRowToken || reader.TryReadInternal(true, out hasMoreData))
+            {
+                // If there are no more rows, or this is Sequential Access, then we are done
+                if (!hasMoreData || (reader._commandBehavior & CommandBehavior.SequentialAccess) == CommandBehavior.SequentialAccess)
                 {
-                    // If there are no more rows, or this is Sequential Access, then we are done
-                    if (!more || (_commandBehavior & CommandBehavior.SequentialAccess) == CommandBehavior.SequentialAccess)
+                    // completed 
+                    return hasMoreData ? ADP.TrueTask : ADP.FalseTask;
+                }
+                else
+                {
+                    // First time reading the row token - update the snapshot
+                    if (!hasReadRowToken)
+                    {
+                        hasReadRowToken = true;
+                        reader._snapshot = null;
+                        reader.PrepareAsyncInvocation(useSnapshot: true);
+                    }
+
+                    // if non-sequentialaccess then read entire row before returning
+                    if (reader.TryReadColumn(reader._metaData.Length - 1, true))
                     {
                         // completed 
-                        return more ? ADP.TrueTask : ADP.FalseTask;
-                    }
-                    else
-                    {
-                        // First time reading the row token - update the snapshot
-                        if (!rowTokenRead)
-                        {
-                            rowTokenRead = true;
-                            _snapshot = null;
-                            PrepareAsyncInvocation(useSnapshot: true);
-                        }
-
-                        // if non-sequentialaccess then read entire row before returning
-                        if (TryReadColumn(_metaData.Length - 1, true))
-                        {
-                            // completed 
-                            return ADP.TrueTask;
-                        }
+                        return ADP.TrueTask;
                     }
                 }
+            }
 
-                return ContinueRetryable(moreFunc);
-            };
+            return reader.ContinueResumable(context);
+        }
 
-            return InvokeRetryable(moreFunc, source, registration);
+        private void SetCachedReadAsyncResumable(ReadAsyncResumable instance)
+        {
+            Interlocked.CompareExchange(ref _cachedReadAsyncResumable, instance, null);
         }
 
         override public Task<bool> IsDBNullAsync(int i, CancellationToken cancellationToken)
@@ -4509,39 +4565,50 @@ namespace System.Data.SqlClient
                     return source.Task;
                 }
 
-                // Setup cancellations
                 IDisposable registration = null;
                 if (cancellationToken.CanBeCanceled)
                 {
-                    registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
+                    registration = cancellationToken.Register(SqlCommand.s_cancelIgnoreFailure, _command);
                 }
 
-                // Setup async
                 PrepareAsyncInvocation(useSnapshot: true);
 
-                // Setup the retryable function
-                Func<Task, Task<bool>> moreFunc = null;
-                moreFunc = (t) =>
-                {
-                    if (t != null)
-                    {
-                        PrepareForAsyncContinuation();
-                    }
+                IsDBNullAsyncResumable resumable = Interlocked.Exchange(ref _cachedIsDBNullResumable, null) ?? new IsDBNullAsyncResumable();
 
-                    if (TryReadColumnHeader(i))
-                    {
-                        return _data[i].IsNull ? ADP.TrueTask : ADP.FalseTask;
-                    }
-                    else
-                    {
-                        return ContinueRetryable(moreFunc);
-                    }
-                };
+                Debug.Assert(resumable.reader == null && resumable.source == null && resumable.disposable == null, "cached ISDBNullAsync resumable not properly disposed");
 
-                // Go!
-                return InvokeRetryable(moreFunc, source, registration);
+                resumable.Set(this, source, registration);
+                resumable.columnIndex = i;
+
+                return InvokeResumable(resumable);
             }
         }
+
+        private static Task<bool> IsDBNullAsyncWillResume(Task task, object state)
+        {
+            IsDBNullAsyncResumable context = (IsDBNullAsyncResumable)state;
+            SqlDataReader reader = context.reader;
+
+            if (task != null)
+            {
+                reader.PrepareForAsyncContinuation();
+            }
+
+            if (reader.TryReadColumnHeader(context.columnIndex))
+            {
+                return reader._data[context.columnIndex].IsNull ? ADP.TrueTask : ADP.FalseTask;
+            }
+            else
+            {
+                return reader.ContinueResumable(context);
+            }
+        }
+
+        private void SetCachedIDBNullAsyncResumable(IsDBNullAsyncResumable instance)
+        {
+            Interlocked.CompareExchange(ref _cachedIsDBNullResumable, instance, null);
+        }
+
 
         override public Task<T> GetFieldValueAsync<T>(int i, CancellationToken cancellationToken)
         {
@@ -4632,37 +4699,195 @@ namespace System.Data.SqlClient
                 return source.Task;
             }
 
-            // Setup cancellations
             IDisposable registration = null;
             if (cancellationToken.CanBeCanceled)
             {
-                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), _command);
+                registration = cancellationToken.Register(SqlCommand.s_cancelIgnoreFailure, _command);
             }
 
-            // Setup async
             PrepareAsyncInvocation(useSnapshot: true);
 
-            // Setup the retryable function
-            Func<Task, Task<T>> moreFunc = null;
-            moreFunc = (t) =>
+            return InvokeResumable(
+                new GetFieldValueAsyncResumable<T>(this, source, registration)
+                {
+                    columnIndex = i
+                }
+            );
+        }
+
+        private static Task<T> GetFieldValueAsyncWillResume<T>(Task task, object state)
+        {
+            GetFieldValueAsyncResumable<T> resumable = (GetFieldValueAsyncResumable<T>)state;
+            SqlDataReader reader = resumable.reader;
+            int columnIndex = resumable.columnIndex;
+
+            if (task != null)
             {
-                if (t != null)
-                {
-                    PrepareForAsyncContinuation();
-                }
+                reader.PrepareForAsyncContinuation();
+            }
 
-                if (TryReadColumn(i, setTimeout: false))
-                {
-                    return Task.FromResult<T>(GetFieldValueFromSqlBufferInternal<T>(_data[i], _metaData[i]));
-                }
-                else
-                {
-                    return ContinueRetryable(moreFunc);
-                }
-            };
+            if (reader.TryReadColumn(columnIndex, setTimeout: false))
+            {
+                return Task.FromResult<T>(reader.GetFieldValueFromSqlBufferInternal<T>(reader._data[columnIndex], reader._metaData[columnIndex]));
+            }
+            else
+            {
+                return reader.ContinueResumable(resumable);
+            }
+        }
 
-            // Go!
-            return InvokeRetryable(moreFunc, source, registration);
+
+        private abstract class Resumable<T> : IDisposable
+        {
+            internal static readonly Lazy<Action<Task<T>, object>> s_completeCallback = new Lazy<Action<Task<T>, object>>(
+                () => SqlDataReader.CompleteResumableCallback<T>
+            );
+
+            internal static readonly Lazy<Func<Task, object, Task<T>>> s_continueCallback = new Lazy<Func<Task, object, Task<T>>>(
+                () => SqlDataReader.ContinueResumableCallback<T>
+            );
+
+            internal SqlDataReader reader;
+            internal TaskCompletionSource<T> source;
+            internal IDisposable disposable;
+
+            protected Resumable()
+            {
+            }
+
+            protected Resumable(SqlDataReader reader, TaskCompletionSource<T> source, IDisposable disposable = null)
+            {
+                Set(reader, source, disposable);
+            }
+
+            internal void Set(SqlDataReader reader, TaskCompletionSource<T> source, IDisposable disposable = null)
+            {
+                this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
+                this.source = source ?? throw new ArgumentNullException(nameof(source));
+                this.disposable = disposable;
+            }
+
+            internal void Clear()
+            {
+                source = null;
+                reader = null;
+                IDisposable copyDisposable = disposable;
+                disposable = null;
+                copyDisposable?.Dispose();
+            }
+
+            internal abstract Func<Task, object, Task<T>> WillResume { get; }
+
+            public virtual void Dispose()
+            {
+                Clear();
+            }
+        }
+
+        private sealed class ReadAsyncResumable : Resumable<bool>
+        {
+            internal static readonly Func<Task, object, Task<bool>> s_willResume = SqlDataReader.ReadAsyncWillResume;
+
+            internal bool hasMoreData;
+            internal bool hasReadRowToken;
+
+            internal ReadAsyncResumable()
+            {
+            }
+
+            internal ReadAsyncResumable(SqlDataReader reader, TaskCompletionSource<bool> source, IDisposable disposable)
+                : base(reader, source, disposable)
+            {
+            }
+
+            internal override Func<Task, object, Task<bool>> WillResume => s_willResume;
+
+            public override void Dispose()
+            {
+                SqlDataReader reader = this.reader;
+                base.Dispose();
+                reader.SetCachedReadAsyncResumable(this);
+            }
+        }
+
+        private sealed class IsDBNullAsyncResumable : Resumable<bool>
+        {
+            internal static readonly Func<Task, object, Task<bool>> s_willResume = SqlDataReader.IsDBNullAsyncWillResume;
+
+            internal int columnIndex;
+
+            internal IsDBNullAsyncResumable() { }
+
+            internal override Func<Task, object, Task<bool>> WillResume => s_willResume;
+
+            public override void Dispose()
+            {
+                SqlDataReader reader = this.reader;
+                base.Dispose();
+                reader.SetCachedIDBNullAsyncResumable(this);
+            }
+        }
+
+        private sealed class HasNextResultAsyncResumable : Resumable<bool>
+        {
+            private static readonly Func<Task, object, Task<bool>> s_willResume = SqlDataReader.NextResultAsyncWillResume;
+
+            public HasNextResultAsyncResumable(SqlDataReader reader, TaskCompletionSource<bool> source, IDisposable disposable)
+                : base(reader, source, disposable)
+            {
+            }
+
+            internal override Func<Task, object, Task<bool>> WillResume => s_willResume;
+        }
+
+        private sealed class GetBytesAsyncResumable : Resumable<int>
+        {
+            internal enum OperationMode
+            {
+                Seek = 0,
+                Read = 1
+            }
+
+            private static readonly Func<Task, object, Task<int>> s_willSeekResume = SqlDataReader.GetBytesAsyncSeekWillResume;
+            private static readonly Func<Task, object, Task<int>> s_willReadResume = SqlDataReader.GetBytesAsyncReadWillResume;
+
+            internal int columnIndex;
+            internal byte[] buffer;
+            internal int index;
+            internal int length;
+            internal int timeout;
+            internal CancellationToken cancellationToken;
+            internal CancellationToken timeoutToken;
+            internal int totalBytesRead;
+
+            internal OperationMode mode;
+
+            internal GetBytesAsyncResumable(SqlDataReader reader)
+            {
+                this.reader = reader ?? throw new ArgumentNullException(nameof(reader));
+            }
+
+            internal override Func<Task, object, Task<int>> WillResume => mode == OperationMode.Seek ? s_willSeekResume : s_willReadResume;
+
+            public override void Dispose()
+            {
+                buffer = null;
+                cancellationToken = default;
+                timeoutToken = default;
+                base.Dispose();
+            }
+        }
+
+        private sealed class GetFieldValueAsyncResumable<T> : Resumable<T>
+        {
+            private static readonly Func<Task, object, Task<T>> s_willResume = SqlDataReader.GetFieldValueAsyncWillResume<T>;
+
+            internal int columnIndex;
+
+            internal GetFieldValueAsyncResumable(SqlDataReader reader, TaskCompletionSource<T> source, IDisposable disposable)
+                : base(reader, source, disposable) { }
+
+            internal override Func<Task, object, Task<T>> WillResume => s_willResume;
         }
 
 #if DEBUG
@@ -4687,28 +4912,9 @@ namespace System.Data.SqlClient
 
 #endif
 
-        private class Snapshot
-        {
-            public bool _dataReady;
-            public bool _haltRead;
-            public bool _metaDataConsumed;
-            public bool _browseModeInfoConsumed;
-            public bool _hasRows;
-            public ALTROWSTATUS _altRowStatus;
-            public int _nextColumnDataToRead;
-            public int _nextColumnHeaderToRead;
-            public long _columnDataBytesRead;
-            public long _columnDataBytesRemaining;
 
-            public _SqlMetaDataSet _metadata;
-            public _SqlMetaDataSetCollection _altMetaDataSetCollection;
-            public MultiPartTableName[] _tableNames;
 
-            public SqlSequentialStream _currentStream;
-            public SqlSequentialTextReader _currentTextReader;
-        }
-
-        private Task<T> ContinueRetryable<T>(Func<Task, Task<T>> moreFunc)
+        private Task<T> ContinueResumable<T>(Resumable<T> resumable)
         {
             // _networkPacketTaskSource could be null if the connection was closed
             // while an async invocation was outstanding.
@@ -4720,67 +4926,82 @@ namespace System.Data.SqlClient
             }
             else
             {
-                return completionSource.Task.ContinueWith((retryTask) =>
+                return completionSource.Task.ContinueWith(
+                    continuationFunction: Resumable<T>.s_continueCallback.Value,
+                    state: resumable,
+                    TaskScheduler.Default
+                ).Unwrap();
+            }
+        }
+
+        private static Task<T> ContinueResumableCallback<T>(Task task, object state)
+        {
+            Resumable<T> resumable = (Resumable<T>)state;
+            return resumable.reader.ContinueResumable(task, resumable);
+        }
+
+        // this function must be an instance function called from the static callback because otherwise a compiler error
+        // is caused by accessing the _cancelAsyncOnCloseToken field of a MarchalByRefObject derived class
+        private Task<T> ContinueResumable<T>(Task task, Resumable<T> resumable)
+        {
+            if (task.IsFaulted)
+            {
+                // Somehow the network task faulted - return the exception
+                return Task.FromException<T>(task.Exception.InnerException);
+            }
+            else if (!_cancelAsyncOnCloseToken.IsCancellationRequested)
+            {
+                TdsParserStateObject stateObj = _stateObj;
+                if (stateObj != null)
                 {
-                    if (retryTask.IsFaulted)
+                    // protect continuations against concurrent
+                    // close and cancel
+                    lock (stateObj)
                     {
-                        // Somehow the network task faulted - return the exception
-                        return Task.FromException<T>(retryTask.Exception.InnerException);
-                    }
-                    else if (!_cancelAsyncOnCloseToken.IsCancellationRequested)
-                    {
-                        TdsParserStateObject stateObj = _stateObj;
-                        if (stateObj != null)
-                        {
-                            // protect continuations against concurrent
-                            // close and cancel
-                            lock (stateObj)
+                        if (_stateObj != null)
+                        { // reader not closed while we waited for the lock
+                            if (task.IsCanceled)
                             {
-                                if (_stateObj != null)
-                                { // reader not closed while we waited for the lock
-                                    if (retryTask.IsCanceled)
+                                if (_parser != null)
+                                {
+                                    _parser.State = TdsParserState.Broken; // We failed to respond to attention, we have to quit!
+                                    _parser.Connection.BreakConnection();
+                                    _parser.ThrowExceptionAndWarning(_stateObj);
+                                }
+                            }
+                            else
+                            {
+                                if (!IsClosed)
+                                {
+                                    try
                                     {
-                                        if (_parser != null)
-                                        {
-                                            _parser.State = TdsParserState.Broken; // We failed to respond to attention, we have to quit!
-                                            _parser.Connection.BreakConnection();
-                                            _parser.ThrowExceptionAndWarning(_stateObj);
-                                        }
+                                        return resumable.WillResume(task, resumable);
                                     }
-                                    else
+                                    catch (Exception)
                                     {
-                                        if (!IsClosed)
-                                        {
-                                            try
-                                            {
-                                                return moreFunc(retryTask);
-                                            }
-                                            catch (Exception)
-                                            {
-                                                CleanupAfterAsyncInvocation();
-                                                throw;
-                                            }
-                                        }
+                                        CleanupAfterAsyncInvocation();
+                                        throw;
                                     }
                                 }
                             }
                         }
                     }
-                    // if stateObj is null, or we closed the connection or the connection was already closed,
-                    // then mark this operation as cancelled.
-                    return Task.FromException<T>(ADP.ExceptionWithStackTrace(ADP.ClosedConnectionError()));
-                }, TaskScheduler.Default).Unwrap();
+                }
             }
+            // if stateObj is null, or we closed the connection or the connection was already closed,
+            // then mark this operation as cancelled.
+            return Task.FromException<T>(ADP.ExceptionWithStackTrace(ADP.ClosedConnectionError()));
         }
 
-        private Task<T> InvokeRetryable<T>(Func<Task, Task<T>> moreFunc, TaskCompletionSource<T> source, IDisposable objectToDispose = null)
+        private Task<T> InvokeResumable<T>(Resumable<T> resumable)
         {
+            TaskCompletionSource<T> source = resumable.source;
             try
             {
                 Task<T> task;
                 try
                 {
-                    task = moreFunc(null);
+                    task = resumable.WillResume(null, resumable);
                 }
                 catch (Exception ex)
                 {
@@ -4789,11 +5010,15 @@ namespace System.Data.SqlClient
 
                 if (task.IsCompleted)
                 {
-                    CompleteRetryable(task, source, objectToDispose);
+                    CompleteResumable(task, resumable);
                 }
                 else
                 {
-                    task.ContinueWith((t) => CompleteRetryable(t, source, objectToDispose), TaskScheduler.Default);
+                    task.ContinueWith(
+                        continuationAction: Resumable<T>.s_completeCallback.Value,
+                        state: resumable,
+                        TaskScheduler.Default
+                    );
                 }
             }
             catch (AggregateException e)
@@ -4809,12 +5034,16 @@ namespace System.Data.SqlClient
             return source.Task;
         }
 
-        private void CompleteRetryable<T>(Task<T> task, TaskCompletionSource<T> source, IDisposable objectToDispose)
+        private static void CompleteResumableCallback<T>(Task<T> task, object state)
         {
-            if (objectToDispose != null)
-            {
-                objectToDispose.Dispose();
-            }
+            Resumable<T> resumable = (Resumable<T>)state;
+            resumable.reader.CompleteResumable<T>(task, resumable);
+        }
+
+        private void CompleteResumable<T>(Task<T> task, Resumable<T> resumable)
+        {
+            TaskCompletionSource<T> source = resumable.source;
+            resumable.Dispose();
 
             // If something has forced us to switch to SyncOverAsync mode while in an async task then we need to guarantee that we do the cleanup
             // This avoids us replaying non-replayable data (such as DONE or ENV_CHANGE tokens)
@@ -4838,6 +5067,28 @@ namespace System.Data.SqlClient
             {
                 source.TrySetResult(task.Result);
             }
+        }
+
+
+        private class Snapshot
+        {
+            public bool _dataReady;
+            public bool _haltRead;
+            public bool _metaDataConsumed;
+            public bool _browseModeInfoConsumed;
+            public bool _hasRows;
+            public ALTROWSTATUS _altRowStatus;
+            public int _nextColumnDataToRead;
+            public int _nextColumnHeaderToRead;
+            public long _columnDataBytesRead;
+            public long _columnDataBytesRemaining;
+
+            public _SqlMetaDataSet _metadata;
+            public _SqlMetaDataSetCollection _altMetaDataSetCollection;
+            public MultiPartTableName[] _tableNames;
+
+            public SqlSequentialStream _currentStream;
+            public SqlSequentialTextReader _currentTextReader;
         }
 
         private void PrepareAsyncInvocation(bool useSnapshot)
@@ -5004,7 +5255,7 @@ namespace System.Data.SqlClient
             {
                 _SqlMetaData col = md[i];
                 SqlDbColumn dbColumn = new SqlDbColumn(md[i]);
-                
+
                 if (_typeSystem <= SqlConnectionString.TypeSystem.SQLServer2005 && col.IsNewKatmaiDateTimeType)
                 {
                     dbColumn.SqlNumericScale = MetaType.MetaNVarChar.Scale;

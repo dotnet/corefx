@@ -31,6 +31,8 @@ namespace System.Data.SqlClient
         private static readonly DiagnosticListener _diagnosticListener = new DiagnosticListener(SqlClientDiagnosticListenerExtensions.DiagnosticListenerName);
         private bool _parentOperationStarted = false;
 
+        internal static readonly Action<object> s_cancelIgnoreFailure = CancelIgnoreFailureCallback;
+
         // Prepare
         // Against 7.0 Serve a prepare/unprepare requires an extra roundtrip to the server.
         //
@@ -1184,7 +1186,7 @@ namespace System.Data.SqlClient
                     if (task != null)
                     {
                         task = AsyncHelper.CreateContinuationTaskWithState(task,
-                            state: reader, 
+                            state: reader,
                             onSuccess: state => ((SqlDataReader)state).Close()
                         );
                     }
@@ -1644,7 +1646,7 @@ namespace System.Data.SqlClient
                     source.SetCanceled();
                     return source.Task;
                 }
-                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), this);
+                registration = cancellationToken.Register(s_cancelIgnoreFailure, this);
             }
 
             Task<int> returnedTask = source.Task;
@@ -1727,7 +1729,7 @@ namespace System.Data.SqlClient
                     source.SetCanceled();
                     return source.Task;
                 }
-                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), this);
+                registration = cancellationToken.Register(s_cancelIgnoreFailure, this);
             }
 
             Task<SqlDataReader> returnedTask = source.Task;
@@ -1872,7 +1874,7 @@ namespace System.Data.SqlClient
                     source.SetCanceled();
                     return source.Task;
                 }
-                registration = cancellationToken.Register(s => ((SqlCommand)s).CancelIgnoreFailure(), this);
+                registration = cancellationToken.Register(s_cancelIgnoreFailure, this);
             }
 
             Task<XmlReader> returnedTask = source.Task;
@@ -2458,7 +2460,7 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        AsyncHelper.ContinueTaskWithState(subTask, completion, 
+                        AsyncHelper.ContinueTaskWithState(subTask, completion,
                             state: completion,
                             onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
                         );
@@ -2713,7 +2715,7 @@ namespace System.Data.SqlClient
         // This is in its own method to avoid always allocating the lambda in RunExecuteReaderTds 
         private Task RunExecuteReaderTdsSetupContinuation(RunBehavior runBehavior, SqlDataReader ds, string optionSettings, Task writeTask)
         {
-            Task task = AsyncHelper.CreateContinuationTask(writeTask, 
+            Task task = AsyncHelper.CreateContinuationTask(writeTask,
                 onSuccess: () =>
                 {
                     _activeConnection.GetOpenTdsConnection(); // it will throw if connection is closed 
@@ -2749,7 +2751,7 @@ namespace System.Data.SqlClient
                     }
                     else
                     {
-                        AsyncHelper.ContinueTaskWithState(subTask, completion, 
+                        AsyncHelper.ContinueTaskWithState(subTask, completion,
                             state: completion,
                             onSuccess: (state) => ((TaskCompletionSource<object>)state).SetResult(null)
                         );
@@ -4018,6 +4020,12 @@ namespace System.Data.SqlClient
             }
         }
 #endif
+
+        internal static void CancelIgnoreFailureCallback(object state)
+        {
+            SqlCommand command = (SqlCommand)state;
+            command.CancelIgnoreFailure();
+        }
 
         internal void CancelIgnoreFailure()
         {
