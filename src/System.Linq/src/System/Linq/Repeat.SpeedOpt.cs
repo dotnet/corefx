@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 
 namespace System.Linq
@@ -16,7 +17,7 @@ namespace System.Linq
             public TResult[] ToArray()
             {
                 TResult[] array = new TResult[_count];
-                if (_current != null)
+                if (_current is object) // not null
                 {
                     Array.Fill(array, _current);
                 }
@@ -24,16 +25,7 @@ namespace System.Linq
                 return array;
             }
 
-            public List<TResult> ToList()
-            {
-                List<TResult> list = new List<TResult>(_count);
-                for (int i = 0; i != _count; ++i)
-                {
-                    list.Add(_current);
-                }
-
-                return list;
-            }
+            public List<TResult> ToList() => new List<TResult>(new ToListCollection(this));
 
             public int GetCount(bool onlyIfCheap) => _count;
 
@@ -80,6 +72,44 @@ namespace System.Linq
                 found = true;
                 return _current;
             }
+
+            private class ToListCollection : ICollection<TResult>
+            {
+                readonly TResult _current;
+                readonly int _count;
+
+                public ToListCollection(RepeatIterator<TResult> source)
+                {
+                    _current = source._current;
+                    _count = source._count;
+                }
+
+                public int Count => _count;
+
+                public bool IsReadOnly => true;
+
+                public void CopyTo(TResult[] array, int _)
+                {
+                    if (_current is object) // not null
+                    {
+                        unchecked
+                        {
+                            for(int index = 0; index < _count; index++)
+                            {
+                                array[index] = _current;
+                            }
+                        }
+                    }
+                }
+
+                IEnumerator IEnumerable.GetEnumerator() => throw new NotSupportedException();
+                IEnumerator<TResult> IEnumerable<TResult>.GetEnumerator() => throw new NotSupportedException();
+                void ICollection<TResult>.Add(TResult item) => throw new NotSupportedException();
+                bool ICollection<TResult>.Remove(TResult item) => throw new NotSupportedException();
+                void ICollection<TResult>.Clear() => throw new NotSupportedException();
+                bool ICollection<TResult>.Contains(TResult item) => throw new NotSupportedException();
+            }
+
         }
     }
 }

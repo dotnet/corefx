@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 
 namespace System.Linq
@@ -28,16 +29,7 @@ namespace System.Linq
                 return array;
             }
 
-            public List<int> ToList()
-            {
-                List<int> list = new List<int>(_end - _start);
-                for (int cur = _start; cur != _end; cur++)
-                {
-                    list.Add(cur);
-                }
-
-                return list;
-            }
+            public List<int> ToList() => new List<int>(new ToListCollection(this));
 
             public int GetCount(bool onlyIfCheap) => unchecked(_end - _start);
 
@@ -85,6 +77,41 @@ namespace System.Linq
                 found = true;
                 return _end - 1;
             }
+
+            private class ToListCollection : ICollection<int>
+            {
+                readonly int _start;
+                readonly int _count;
+
+                public ToListCollection(RangeIterator source)
+                {
+                    _start = source._start;
+                    _count = source._end - source._start;
+                }
+
+                public int Count => _count;
+
+                public bool IsReadOnly => true;
+
+                public void CopyTo(int[] array, int _)
+                {
+                    unchecked
+                    {
+                        for(int index = 0; index < _count; index++)
+                        {
+                            array[index] = _start + index;
+                        }
+                    }
+                }
+
+                IEnumerator IEnumerable.GetEnumerator() => throw new NotSupportedException();
+                IEnumerator<int> IEnumerable<int>.GetEnumerator() => throw new NotSupportedException();
+                void ICollection<int>.Add(int item) => throw new NotSupportedException();
+                bool ICollection<int>.Remove(int item) => throw new NotSupportedException();
+                void ICollection<int>.Clear() => throw new NotSupportedException();
+                bool ICollection<int>.Contains(int item) => throw new NotSupportedException();
+            }
+
         }
     }
 }
