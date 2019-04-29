@@ -18,15 +18,7 @@ namespace System.Text.Json.Serialization
             // Write the start.
             if (!state.Current.StartObjectWritten)
             {
-                if (state.Current.JsonPropertyInfo?._escapedName == null)
-                {
-                    writer.WriteStartObject();
-                }
-                else
-                {
-                    writer.WriteStartObject(state.Current.JsonPropertyInfo._escapedName);
-                }
-                state.Current.StartObjectWritten = true;
+                state.Current.WriteObjectOrArrayStart(ClassType.Object, writer);
             }
 
             // Determine if we are done enumerating properties.
@@ -67,7 +59,7 @@ namespace System.Text.Json.Serialization
             // Check for polymorphism.
             if (jsonPropertyInfo.ClassType == ClassType.Unknown)
             {
-                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
                 obtainedValue = true;
                 GetRuntimePropertyInfo(currentValue, state.Current.JsonClassInfo, ref jsonPropertyInfo, options);
             }
@@ -93,10 +85,22 @@ namespace System.Text.Json.Serialization
                 return endOfEnumerable;
             }
 
+            // A property that returns a dictionary keeps the same stack frame.
+            if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
+            {
+                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                if (endOfEnumerable)
+                {
+                    state.Current.NextProperty();
+                }
+
+                return endOfEnumerable;
+            }
+
             // A property that returns an object.
             if (!obtainedValue)
             {
-                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
             }
 
             if (currentValue != null)

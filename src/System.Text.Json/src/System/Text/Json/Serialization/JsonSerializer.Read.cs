@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Collections.Generic;
 using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
@@ -41,19 +42,40 @@ namespace System.Text.Json.Serialization
                         Debug.Assert(state.Current.ReturnValue != default);
                         Debug.Assert(state.Current.JsonClassInfo != default);
 
-                        ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
-                        state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(options, propertyName, ref state.Current);
-                        if (state.Current.JsonPropertyInfo == null)
+                        if (state.Current.IsDictionary)
                         {
-                            state.Current.JsonPropertyInfo = s_missingProperty;
-                        }
+                            string keyName = reader.GetString();
+                            if (options.DictionaryKeyPolicy != null)
+                            {
+                                keyName = options.DictionaryKeyPolicy.ConvertName(keyName);
+                            }
 
-                        state.Current.PropertyIndex++;
+                            state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetPolicyProperty();
+                            state.Current.KeyName = keyName;
+                        }
+                        else
+                        {
+                            ReadOnlySpan<byte> propertyName = reader.HasValueSequence ? reader.ValueSequence.ToArray() : reader.ValueSpan;
+                            if (reader._stringHasEscaping)
+                            {
+                                int idx = propertyName.IndexOf(JsonConstants.BackSlash);
+                                Debug.Assert(idx != -1);
+                                propertyName = GetUnescapedString(propertyName, idx);
+                            }
+
+                            state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(options, propertyName, ref state.Current);
+                            if (state.Current.JsonPropertyInfo == null)
+                            {
+                                state.Current.JsonPropertyInfo = s_missingProperty;
+                            }
+
+                            state.Current.PropertyIndex++;
+                        }
                     }
                 }
                 else if (tokenType == JsonTokenType.StartObject)
                 {
-                    HandleStartObject(options, ref state);
+                    HandleStartObject(options, ref reader, ref state);
                 }
                 else if (tokenType == JsonTokenType.EndObject)
                 {
@@ -83,6 +105,29 @@ namespace System.Text.Json.Serialization
             }
 
             return;
+        }
+
+        private static ReadOnlySpan<byte> GetUnescapedString(ReadOnlySpan<byte> utf8Source, int idx)
+        {
+            // The escaped name is always longer than the unescaped, so it is safe to use escaped name for the buffer length.
+            int length = utf8Source.Length;
+            byte[] pooledName = null;
+
+            Span<byte> unescapedName = length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[length] :
+                (pooledName = ArrayPool<byte>.Shared.Rent(length));
+
+            JsonReaderHelper.Unescape(utf8Source, unescapedName, idx, out int written);
+            ReadOnlySpan<byte> propertyName = unescapedName.Slice(0, written).ToArray();
+
+            if (pooledName != null)
+            {
+                // We clear the array because it is "user data" (although a property name).
+                new Span<byte>(pooledName, 0, written).Clear();
+                ArrayPool<byte>.Shared.Return(pooledName);
+            }
+
+            return propertyName;
         }
     }
 }

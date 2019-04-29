@@ -136,8 +136,9 @@ namespace System.Net.Http
                         {
                             // Pseudo-headers not allowed in trailers.
                             if (NetEventSource.IsEnabled) _connection.Trace("Pseudo-header in trailer headers.");
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new HttpRequestException(SR.net_http_invalid_response_pseudo_header_in_trailer);
                         }
+
                         if (name.SequenceEqual(s_statusHeaderName))
                         {
                             if (_response.StatusCode != 0)
@@ -152,14 +153,14 @@ namespace System.Net.Http
                                 throw new HttpRequestException(SR.net_http_invalid_response);
                             }
 
-                            // Copied from HttpConnection
-                            byte status1 = value[0];
-                            byte status2 = value[1];
-                            byte status3 = value[2];
-                            if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
+                            byte status1, status2, status3;
+                            if (value.Length != 3 ||
+                                !IsDigit(status1 = value[0]) ||
+                                !IsDigit(status2 = value[1]) ||
+                                !IsDigit(status3 = value[2]))
                             {
-                                if (NetEventSource.IsEnabled) _connection.Trace($"Invalid status header '{System.Text.Encoding.ASCII.GetString(value)}'.");
-                                throw new HttpRequestException(SR.net_http_invalid_response);
+                                throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_status_code, Encoding.ASCII.GetString(value)));
+                                // Copied from HttpConnection
                             }
 
                             int statusValue = (100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0'));
@@ -188,7 +189,7 @@ namespace System.Net.Http
                         if (!HeaderDescriptor.TryGet(name, out HeaderDescriptor descriptor))
                         {
                             // Invalid header name
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_header_name, Encoding.ASCII.GetString(name)));
                         }
 
                         string headerValue = descriptor.GetHeaderValue(value);
@@ -334,7 +335,7 @@ namespace System.Net.Http
 
                     if (_state == StreamState.Aborted)
                     {
-                        throw new IOException(SR.net_http_invalid_response);
+                        throw new IOException(SR.net_http_request_aborted);
                     }
                     else if (_state == StreamState.ExpectingHeaders)
                     {
@@ -427,7 +428,7 @@ namespace System.Net.Http
                     }
                     else if (_state == StreamState.Aborted)
                     {
-                        throw new IOException(SR.net_http_invalid_response);
+                        throw new IOException(SR.net_http_request_aborted);
                     }
 
                     Debug.Assert(_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders);

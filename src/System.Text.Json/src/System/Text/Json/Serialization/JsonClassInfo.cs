@@ -102,7 +102,7 @@ namespace System.Text.Json.Serialization
                         }
 
                         // If the JsonPropertyNameAttribute or naming policy results in collisions, throw an exception.
-                        if (!propertyNames.Add(jsonPropertyInfo.CompareNameAsString))
+                        if (!propertyNames.Add(jsonPropertyInfo.NameUsedToCompareAsString))
                         {
                             ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameConflict(this, jsonPropertyInfo);
                         }
@@ -111,19 +111,23 @@ namespace System.Text.Json.Serialization
                     }
                 }
             }
-            else if (ClassType == ClassType.Enumerable)
+            else if (ClassType == ClassType.Enumerable || ClassType == ClassType.Dictionary)
             {
                 // Add a single property that maps to the class type so we can have policies applied.
-                AddProperty(type, propertyInfo : null, type, options);
+                JsonPropertyInfo jsonPropertyInfo = AddPolicyProperty(type, options);
+
+                // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
+                CreateObject = options.ClassMaterializerStrategy.CreateConstructor(jsonPropertyInfo.RuntimePropertyType);
 
                 // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
                 Type elementType = GetElementType(type);
+
                 ElementClassInfo = options.GetOrAddClass(elementType);
             }
             else if (ClassType == ClassType.Value)
             {
                 // Add a single property that maps to the class type so we can have policies applied.
-                AddProperty(type, propertyInfo: null, type, options);
+                AddPolicyProperty(type, options);
             }
             else
             {
@@ -238,7 +242,7 @@ namespace System.Text.Json.Serialization
             {
                 if (propertyName.Length <= PropertyNameKeyLength ||
                     // We compare the whole name, although we could skip the first 6 bytes (but it's likely not any faster)
-                    propertyName.SequenceEqual((ReadOnlySpan<byte>)propertyRef.Info.CompareName))
+                    propertyName.SequenceEqual(propertyRef.Info.NameUsedToCompare))
                 {
                     info = propertyRef.Info;
                     return true;
@@ -311,14 +315,26 @@ namespace System.Text.Json.Serialization
                 elementType = propertyType.GetElementType();
                 if (elementType == null)
                 {
+                    Type[] args = propertyType.GetGenericArguments();
+
                     if (propertyType.IsGenericType)
                     {
-                        elementType = propertyType.GetGenericArguments()[0];
+                        if (GetClassType(propertyType) == ClassType.Dictionary &&
+                            args.Length >= 2) // It is >= 2 in case there is a Dictionary<TKey, TValue, TSomeExtension>.
+                        {
+                            
+                            elementType = args[1];
+                        }
+                        else if (args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
+                        {
+                            Debug.Assert(GetClassType(propertyType) == ClassType.Enumerable);
+                            elementType = args[0];
+                        }
                     }
                     else
                     {
                         // Unable to determine collection type; attempt to use object which will be used to create loosely-typed collection.
-                        return typeof(object);
+                        elementType = typeof(object);
                     }
                 }
             }
@@ -335,10 +351,17 @@ namespace System.Text.Json.Serialization
                 type = Nullable.GetUnderlyingType(type);
             }
 
-            // A Type is considered a value if it implements IConvertible.
+            // A Type is considered a value if it implements IConvertible or is a DateTimeOffset.
             if (typeof(IConvertible).IsAssignableFrom(type) || type == typeof(DateTimeOffset))
             {
                 return ClassType.Value;
+            }
+
+            if (typeof(IDictionary).IsAssignableFrom(type) || 
+                (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) 
+                || type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
+            {
+                return ClassType.Dictionary;
             }
 
             if (typeof(IEnumerable).IsAssignableFrom(type))
