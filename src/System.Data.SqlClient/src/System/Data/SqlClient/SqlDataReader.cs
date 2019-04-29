@@ -4287,7 +4287,7 @@ namespace System.Data.SqlClient
                     Debug.Assert(resumable.source != null, "resumable.source shuld not be null when continuing");
                     // setup for cleanup\completing
                     retryTask.ContinueWith(
-                        continuationAction: Resumable<int>.s_completeCallback.Value,
+                        continuationAction: Resumable<int>.s_completeCallback,
                         state: resumable,
                         TaskScheduler.Default
                     );
@@ -4739,13 +4739,9 @@ namespace System.Data.SqlClient
 
         private abstract class Resumable<T> : IDisposable
         {
-            internal static readonly Lazy<Action<Task<T>, object>> s_completeCallback = new Lazy<Action<Task<T>, object>>(
-                () => SqlDataReader.CompleteResumableCallback<T>
-            );
+            internal static readonly Action<Task<T>, object> s_completeCallback = SqlDataReader.CompleteResumableCallback<T>;
 
-            internal static readonly Lazy<Func<Task, object, Task<T>>> s_continueCallback = new Lazy<Func<Task, object, Task<T>>>(
-                () => SqlDataReader.ContinueResumableCallback<T>
-            );
+            internal static readonly Func<Task, object, Task<T>> s_continueCallback = SqlDataReader.ContinueResumableCallback<T>;
 
             internal SqlDataReader reader;
             internal TaskCompletionSource<T> source;
@@ -4927,7 +4923,7 @@ namespace System.Data.SqlClient
             else
             {
                 return completionSource.Task.ContinueWith(
-                    continuationFunction: Resumable<T>.s_continueCallback.Value,
+                    continuationFunction: Resumable<T>.s_continueCallback,
                     state: resumable,
                     TaskScheduler.Default
                 ).Unwrap();
@@ -5015,7 +5011,7 @@ namespace System.Data.SqlClient
                 else
                 {
                     task.ContinueWith(
-                        continuationAction: Resumable<T>.s_completeCallback.Value,
+                        continuationAction: Resumable<T>.s_completeCallback,
                         state: resumable,
                         TaskScheduler.Default
                     );
