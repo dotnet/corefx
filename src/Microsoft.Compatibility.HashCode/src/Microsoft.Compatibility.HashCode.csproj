@@ -12,7 +12,7 @@
     </Compile>
     <Compile Include="BitOperations.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true' AND '$(TargetGroup)' != 'netstandard2.1'">
     <Reference Include="System.Runtime" />
     <Reference Include="System.Resources.ResourceManager" />
   </ItemGroup>

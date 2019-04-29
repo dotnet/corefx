@@ -8,6 +8,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="Microsoft.Compatibility.HashCode.Forwards.cs" />
-    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Runtime\ref\System.Runtime.csproj" Condition="'$(TargetGroup)' != 'netcoreapp2.1' AND '$(TargetGroup)' != 'netstandard2.1'" />
+    <Reference Include="System.Runtime" Condition="'$(TargetGroup)' == 'netcoreapp2.1' OR '$(TargetGroup)' == 'netstandard2.1'" />
   </ItemGroup>
 </Project>

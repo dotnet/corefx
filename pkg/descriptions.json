@@ -32,7 +32,7 @@
   },
   {
     "Name": "Microsoft.Compatibility.HashCode",
-    "Description": "Provides the HashCode struct compatible with .NET Standard2.0. This package is not required when targetting .NET Standard2.1 or .NETCore App 3.0",
+    "Description": "Provides the HashCode type for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
     "CommonTypes": [
       "System.HashCode"
     ]
