@@ -36,7 +36,7 @@ namespace System.Net.Http
             private readonly int _streamId;
             private readonly CreditManager _streamWindow;
             private readonly HttpRequestMessage _request;
-            private readonly HttpResponseMessage _response;
+            private HttpResponseMessage _response;
 
             private ArrayBuffer _responseBuffer; // mutable struct, do not make this readonly
             private int _pendingWindowUpdate;
@@ -65,13 +65,6 @@ namespace System.Net.Http
                 _state = StreamState.ExpectingHeaders;
 
                 _request = request;
-                _response = new HttpResponseMessage()
-                {
-                    Version = HttpVersion.Version20,
-                    RequestMessage = request,
-                    Content = new HttpConnectionResponseContent(),
-                    StatusCode = 0	// Set StatusCode to invalid value so we can track :status header.
-                };
 
                 _disposed = false;
 
@@ -121,6 +114,7 @@ namespace System.Net.Http
 
             public void OnResponseHeader(ReadOnlySpan<byte> name, ReadOnlySpan<byte> value)
             {
+                Debug.Assert(name != null && name.Length > 0);
                 // TODO: ISSUE 31309: Optimize HPACK static table decoding
 
                 lock (SyncObject)
@@ -130,7 +124,7 @@ namespace System.Net.Http
                         throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                     }
 
-                    if (name[0] == 58) // ':'
+                    if (name[0] == (byte)':')
                     {
                         if (_state == StreamState.ExpectingTrailingHeaders)
                         {
@@ -141,15 +135,9 @@ namespace System.Net.Http
 
                         if (name.SequenceEqual(s_statusHeaderName))
                         {
-                            if (_response.StatusCode != 0)
+                            if (_response != null)
                             {
                                 if (NetEventSource.IsEnabled) _connection.Trace("Received duplicate status headers.");
-                                throw new HttpRequestException(SR.net_http_invalid_response);
-                            }
-
-                            if (value.Length != 3)
-                            {
-                                if (NetEventSource.IsEnabled) _connection.Trace($"Received status headers '{System.Text.Encoding.ASCII.GetString(value)}'.");
                                 throw new HttpRequestException(SR.net_http_invalid_response);
                             }
 
@@ -160,17 +148,16 @@ namespace System.Net.Http
                                 !IsDigit(status3 = value[2]))
                             {
                                 throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_status_code, Encoding.ASCII.GetString(value)));
-                                // Copied from HttpConnection
                             }
 
                             int statusValue = (100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0'));
-                            if (statusValue == 0)
+                            _response = new HttpResponseMessage()
                             {
-                                if (NetEventSource.IsEnabled) _connection.Trace($"Invalid status header '{System.Text.Encoding.ASCII.GetString(value)}'.");
-                                throw new HttpRequestException(SR.net_http_invalid_response);
-                            }
-
-                            _response.SetStatusCodeWithoutValidation((HttpStatusCode)statusValue);
+                                Version = HttpVersion.Version20,
+                                RequestMessage = _request,
+                                Content = new HttpConnectionResponseContent(),
+                                StatusCode = (HttpStatusCode)statusValue
+                            };
                         }
                         else
                         {
@@ -180,7 +167,7 @@ namespace System.Net.Http
                     }
                     else
                     {
-                        if (_response.StatusCode == 0)
+                        if (_response == null)
                         {
                             if (NetEventSource.IsEnabled) _connection.Trace($"Received header before status pseudo-header.");
                             throw new HttpRequestException(SR.net_http_invalid_response);
