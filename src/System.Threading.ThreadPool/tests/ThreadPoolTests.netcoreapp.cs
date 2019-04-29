@@ -298,8 +298,6 @@ namespace System.Threading.ThreadPools.Tests
             int minExpectedPendingLocalWorkCount = Math.Max(1, simultaneousLocalWorkCount - processorCount * 8);
             int minExpectedPendingGlobalWorkCount = Math.Max(1, simultaneousGlobalWorkCount - processorCount * 8);
             int minExpectedPendingWorkCount = minExpectedPendingLocalWorkCount + minExpectedPendingGlobalWorkCount;
-            Assert.True(ThreadPool.PendingLocalWorkItemCount >= minExpectedPendingLocalWorkCount);
-            Assert.True(ThreadPool.PendingGlobalWorkItemCount >= minExpectedPendingGlobalWorkCount);
             Assert.True(ThreadPool.PendingWorkItemCount >= minExpectedPendingWorkCount);
 
             // Complete the work and verify the completed work item count
