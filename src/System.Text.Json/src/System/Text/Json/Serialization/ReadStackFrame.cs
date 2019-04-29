@@ -127,7 +127,7 @@ namespace System.Text.Json.Serialization
             }
             else
             {
-                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(propType, reader, state);
+                ThrowHelper.ThrowJsonSerializationException_DeserializeUnableToConvertValue(propType, reader, state.PropertyPath);
                 return null;
             }
         }

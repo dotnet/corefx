@@ -15,6 +15,7 @@
     <Compile Include="System\Text\Json\JsonCommentHandling.cs" />
     <Compile Include="System\Text\Json\JsonConstants.cs" />
     <Compile Include="System\Text\Json\JsonEncodedText.cs" />
+    <Compile Include="System\Text\Json\JsonException.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.Date.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
@@ -79,6 +80,7 @@
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNotNullable.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyInfoNullable.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonPropertyNameAttribute.cs" />
+    <Compile Include="System\Text\Json\Serialization\JsonSerializationException.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.HandleArray.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.Helpers.cs" />
     <Compile Include="System\Text\Json\Serialization\JsonSerializer.Read.Stream.cs" />
