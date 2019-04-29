@@ -45,7 +45,7 @@
     <Compile Include="System\Diagnostics\Activity.DateTime.corefx.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetGroup)' == 'netcoreapp' OR '$(TargetGroup)' == 'uap' OR '$(TargetGroup)' == 'netstandard2.1'">
-    <Compile Include="System\Diagnostics\Activity.GenerateRootId.netstandard.cs" />
+    <Compile Include="System\Diagnostics\Activity.GenerateRootId.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetGroup)' != 'netcoreapp' AND '$(TargetGroup)' != 'uap' AND '$(TargetGroup)' != 'netstandard2.1' AND '$(TargetGroup)' != 'netstandard1.1'">
     <Compile Include="System\Diagnostics\Activity.GenerateRootId.netfx.cs" />
