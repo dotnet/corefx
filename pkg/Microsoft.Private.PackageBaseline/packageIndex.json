@@ -66,6 +66,12 @@
         "net45": "4.0.0.0"
       }
     },
+    "Microsoft.Compatibility.HashCode": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
+      }
+    },
     "Microsoft.CSharp": {
       "StableVersions": [
         "4.0.1",

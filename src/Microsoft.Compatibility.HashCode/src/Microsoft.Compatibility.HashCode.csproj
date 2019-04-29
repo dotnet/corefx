@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
+  <PropertyGroup>
+    <ProjectGuid>{B77D0212-D53C-4F7F-8CEC-2E067AC6FCAB}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netstandard'">true</IsPartialFacadeAssembly>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release</Configurations>
+    <DefineConstants>$(DefineConstants);BUILDINGNETSTANDARD20</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
+    <Compile Include="$(CommonPath)\CoreLib\System\HashCode.cs">
+      <Link>ProductionCode\Common\CoreLib\System\HashCode.cs</Link>
+    </Compile>
+    <Compile Include="BitOperations.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(IsPartialFacadeAssembly)' == 'true'">
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Resources.ResourceManager" />
+  </ItemGroup>
+</Project>
