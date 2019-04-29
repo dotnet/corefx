@@ -34,14 +34,7 @@ namespace System
             }
         }
 
-        public static string Concat(object? arg0)
-        {
-            if (arg0 == null)
-            {
-                return string.Empty;
-            }
-            return arg0.ToString();
-        }
+        public static string Concat(object? arg0) => arg0?.ToString() ?? string.Empty;
 
         public static string Concat(object? arg0, object? arg1)
         {
@@ -1685,20 +1678,6 @@ namespace System
             }
 
             return InternalSubString(startIndex, length);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string Substring(Index startIndex)
-        {
-            int actualIndex = startIndex.GetOffset(Length);
-            return Substring(actualIndex);
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public string Substring(Range range)
-        {
-            (int start, int length) = range.GetOffsetAndLength(Length);
-            return Substring(start, length);
         }
 
         private unsafe string InternalSubString(int startIndex, int length)

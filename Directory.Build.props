@@ -31,19 +31,25 @@
 
   <!-- Import configuration data model -->
   <Import Project="$(RepositoryEngineeringDir)configurations/properties.props" />
-  
+
   <PropertyGroup Condition="'$(BuildingInsideVisualStudio)' == 'true' and '$(Configuration)' != ''">
     <!-- When building in VS setup the ConfigurationGroup based on the given Configuration -->
     <ConfigurationGroup Condition="$(Configuration.EndsWith('Debug'))">Debug</ConfigurationGroup>
     <ConfigurationGroup Condition="$(Configuration.EndsWith('Release'))">Release</ConfigurationGroup>
   </PropertyGroup>
-  
+
   <!-- Platform detection -->
   <PropertyGroup>
-    <DefaultOSGroup Condition="'$(OS)'=='Unix' AND Exists('/Applications')">OSX</DefaultOSGroup>
-    <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND '$(OS)'=='Unix' AND $([MSBuild]::IsOSPlatform('FREEBSD'))">FreeBSD</DefaultOSGroup>
-    <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND '$(OS)'=='Unix' AND $([MSBuild]::IsOSPlatform('NETBSD'))">NetBSD</DefaultOSGroup>
-    <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND '$(OS)'=='Unix'">Linux</DefaultOSGroup>
+    <!--
+      Use MSBuild property functions for platform detection:
+      https://docs.microsoft.com/en-us/visualstudio/msbuild/property-functions?view=vs-2019#msbuild-property-functions
+      Note that some of these intrinsic functions are implemented using RuntimeInformation:
+      https://github.com/Microsoft/msbuild/blob/3a9d1d2ae23e41b32a612ea6b0dce531fcf86be7/src/Build/Evaluation/IntrinsicFunctions.cs#L431
+    -->
+    <DefaultOSGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">OSX</DefaultOSGroup>
+    <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND $([MSBuild]::IsOSPlatform('FREEBSD'))">FreeBSD</DefaultOSGroup>
+    <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND $([MSBuild]::IsOSPlatform('NETBSD'))">NetBSD</DefaultOSGroup>
+    <DefaultOSGroup Condition="'$(DefaultOSGroup)'=='' AND $([MSBuild]::IsOSUnixLike())">Linux</DefaultOSGroup>
     <DefaultOSGroup Condition="'$(DefaultOSGroup)'==''">$(OS)</DefaultOSGroup>
   </PropertyGroup>
 
@@ -70,7 +76,6 @@
     <BuildConfigurations Condition="'$(MSBuildProjectExtension)' == '.pkgproj' AND '$(BuildConfigurations)' == ''">package</BuildConfigurations>
   </PropertyGroup>
 
-
   <!-- Informs build tools to apply .NET Framework metadata if not a test project -->
   <PropertyGroup>
     <IsDotNetFrameworkProductAssembly>true</IsDotNetFrameworkProductAssembly>
@@ -96,14 +101,14 @@
   </PropertyGroup>
   <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.props" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.props')" />
   <PropertyGroup>
-    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == 'unused'"></ProjectAssetsFile>
+    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == 'unused'" />
     <ExcludeRestorePackageImports>$(_excludeRestorePackageImports)</ExcludeRestorePackageImports>
   </PropertyGroup>
 
   <!-- Common repo directories -->
   <PropertyGroup>
     <ArtifactsBinDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', 'artifacts', 'bin'))</ArtifactsBinDir>
-    
+
     <!-- Need to try and keep the same logic as the native builds as we need this for packaging -->
     <NativeBinDir>$([MSBuild]::NormalizePath('$(ArtifactsBinDir)', 'native', '$(BuildConfiguration)'))</NativeBinDir>
 
@@ -150,8 +155,6 @@
     <RestoreSources Condition="'$(DotNetBuildOffline)' != 'true'">
       https://dotnetfeed.blob.core.windows.net/dotnet-core/index.json;
       https://dotnetfeed.blob.core.windows.net/dotnet-coreclr/index.json;
-      https://dotnet.myget.org/F/dotnet-buildtools/api/v3/index.json;
-      https://dotnet.myget.org/F/dotnet-core/api/v3/index.json;
       https://api.nuget.org/v3/index.json;
       $(OverridePackageSource);
       $(RestoreSources)
@@ -164,7 +167,7 @@
     <OutputType>Library</OutputType>
     <!-- Default any assembly not specifying a key to use the Open Key -->
     <StrongNameKeyId>Open</StrongNameKeyId>
-    <RunApiCompat Condition="'$(TargetGroup)' != 'netcoreappaot'">true</RunApiCompat>
+    <RunApiCompat>true</RunApiCompat>
     <ApiCompatExcludeAttributeList>$(RepositoryEngineeringDir)DefaultGenApiDocIds.txt</ApiCompatExcludeAttributeList>
     <!-- Build as portable by default -->
     <PortableBuild Condition="'$(PortableBuild)' == ''">true</PortableBuild>
@@ -196,7 +199,7 @@
     <!-- support cross-targeting by choosing a RID to restore when running on a different machine that what we're build for -->
     <_portableOS Condition="'$(OSGroup)' == 'Unix' AND '$(_runtimeOSFamily)' != 'osx' AND '$(_runtimeOSFamily)' != 'FreeBSD' AND '$(_runtimeOS)' != 'linux-musl'">linux</_portableOS>
 
-    <_packageRID/>
+    <_packageRID />
     <_packageRID Condition="'$(PortableBuild)' == 'true'">$(_portableOS)-$(ArchGroup)</_packageRID>
     <_packageRID Condition="$(TargetGroup.StartsWith('uap'))">win10-$(ArchGroup)</_packageRID>
     <_packageRID Condition="$(TargetGroup.EndsWith('aot'))">$(_packageRID)-aot</_packageRID>
@@ -215,8 +218,7 @@
 
   <!-- set properties for each vertical -->
   <PropertyGroup>
-    <BuildingNETCoreAppVertical Condition="'$(BuildingNETCoreAppVertical)' == '' AND ('$(_bc_TargetGroup)'=='netcoreapp' OR '$(_bc_TargetGroup)'=='netcoreappaot' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETCoreAppVertical>
-    <BuildingNETStandardVertical Condition="'$(BuildingNETStandardVertical)' == '' AND ('$(_bc_TargetGroup)'=='netstandard' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETStandardVertical>
+    <BuildingNETCoreAppVertical Condition="'$(BuildingNETCoreAppVertical)' == '' AND ('$(_bc_TargetGroup)'=='netcoreapp' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETCoreAppVertical>
     <BuildingNETFxVertical Condition="'$(BuildingNETFxVertical)' == '' AND ('$(_bc_TargetGroup)'=='netfx' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingNETFxVertical>
     <BuildingUAPVertical Condition="'$(BuildingUAPVertical)' == '' AND ('$(_bc_TargetGroup)'=='uap' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPVertical>
     <BuildingUAPAOTVertical Condition="'$(BuildingUAPAOTVertical)' == '' AND ('$(_bc_TargetGroup)'=='uapaot' OR '$(BuildAllConfigurations)' == 'true')">true</BuildingUAPAOTVertical>
@@ -236,7 +238,7 @@
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Arcade.Sdk" />
-  
+
   <PropertyGroup Condition="'$(CopyrightNetFoundation)' != ''">
     <Copyright>$(CopyrightNetFoundation)</Copyright>
     <!-- Temporarily disable PackageLicenseExpression until we can workaround 
@@ -245,7 +247,7 @@
   </PropertyGroup>
 
   <!-- Import packaging props -->
-  <Import Project="$(RepositoryEngineeringDir)Packaging.props"/>
+  <Import Project="$(RepositoryEngineeringDir)Packaging.props" />
 
   <!-- Set the kind of PDB to Portable and turn on SourceLink (fetching source from GitHub) -->
   <PropertyGroup>
@@ -253,7 +255,7 @@
     <DebugType>portable</DebugType>
 
     <!-- Empty DebugType when building for netfx and in windows so that it is set to full or pdbonly later -->
-    <DebugType Condition="'$(TargetsNetFx)' == 'true' AND '$(OS)' == 'Windows_NT'"></DebugType>
+    <DebugType Condition="'$(TargetsNetFx)' == 'true' AND '$(OS)' == 'Windows_NT'" />
 
     <!-- Rhel 6 and FreeBSD doesn't support the source control git package so disable SourceLink -->
     <EnableSourceLink Condition="$(RuntimeOS.StartsWith('rhel.6')) OR '$(_runtimeOSFamily)' == 'FreeBSD'">false</EnableSourceLink>
@@ -262,10 +264,15 @@
     <!-- Disable source link on local builds. -->
     <EnableSourceLink Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuildId)' == ''">false</EnableSourceLink>
   </PropertyGroup>
-  
+
   <PropertyGroup>
-    <!-- Embed IBC data on Windows release builds, if IBCMerge isn't available this will just log the commandline -->
-    <EnablePartialNgenOptimization Condition="'$(EnablePartialNgenOptimization)' == '' and '$(OS)' == 'Windows_NT' and '$(ConfigurationGroup)' == 'Release'">true</EnablePartialNgenOptimization>
+    <!-- Embed IBC data on release builds, if IBCMerge isn't available this will just log the commandline -->
+    <EnableNgenOptimization Condition="'$(EnableNgenOptimization)' == '' and '$(ConfigurationGroup)' == 'Release'">true</EnableNgenOptimization>
+
+    <WindowsCoreFxOptimizationDataPackageId>optimization.windows_nt-x64.IBC.CoreFx</WindowsCoreFxOptimizationDataPackageId>
+    <WindowsCoreFxOptimizationDataVersion>$(optimizationwindows_ntx64IBCCoreFxPackageVersion)</WindowsCoreFxOptimizationDataVersion>
+    <LinuxCoreFxOptimizationDataPackageId>optimization.linux-x64.IBC.CoreFx</LinuxCoreFxOptimizationDataPackageId>
+    <LinuxCoreFxOptimizationDataVersion>$(optimizationwindows_ntx64IBCCoreFxPackageVersion)</LinuxCoreFxOptimizationDataVersion>
   </PropertyGroup>
 
   <!-- Set up Default symbol and optimization for Configuration -->
@@ -317,11 +324,11 @@
 
     <!-- Suppress preview message as we are usually using preview SDK versions. -->
     <SuppressNETCoreSdkPreviewMessage>true</SuppressNETCoreSdkPreviewMessage>
-    
+
     <CLSCompliant Condition="'$(CLSCompliant)'=='' and '$(IsTestProject)'=='true'">false</CLSCompliant>
     <CLSCompliant Condition="'$(CLSCompliant)'==''">true</CLSCompliant>
     <GenFacadesIgnoreBuildAndRevisionMismatch>true</GenFacadesIgnoreBuildAndRevisionMismatch>
-    
+
     <!-- Warnings -->
     <NoWarn>$(NoWarn);BCL0020</NoWarn> <!-- TODO: Remove BCL0020 once https://github.com/dotnet/arcade/pull/2158 is consumed. -->
   </PropertyGroup>
@@ -343,7 +350,6 @@
     <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
 
     <RuntimePath Condition="'$(RuntimePath)' == ''">$(ArtifactsBinDir)runtime/$(BuildConfiguration)/</RuntimePath>
-    <ShimsTargetRuntimeRoot>$(ArtifactsBinDir)shimsTargetRuntime/</ShimsTargetRuntimeRoot>
     <TestWorkingDir Condition="'$(TestWorkingDir)'==''">$([MSBuild]::NormalizeDirectory('$(ArtifactsBinDir)', 'tests'))</TestWorkingDir>
     <TestPath Condition="'$(TestPath)' == ''">$([MSBuild]::NormalizeDirectory('$(TestWorkingDir)', '$(MSBuildProjectName)', '$(BuildConfiguration)'))</TestPath>
     <RefRootPath>$(ArtifactsBinDir)ref/</RefRootPath>
@@ -354,7 +360,8 @@
     <NetStandardRefPath>$(RefRootPath)netstandard/</NetStandardRefPath>
     <NetStandard21RefPath>$(RefRootPath)netstandard2.1/</NetStandard21RefPath>
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
-    <GlobalToolsDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'tools'))</GlobalToolsDir>
+    <!-- Keep in sync with property in eng\Tools.props. -->
+    <GlobalToolsDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', '.tools', 'globaltools'))</GlobalToolsDir>
     <IbcOptimizationDataDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'ibc'))</IbcOptimizationDataDir>
     <ILAsmToolPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ilasm'))</ILAsmToolPath>
     <ILLinkDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ILLink'))</ILLinkDir>
@@ -374,13 +381,11 @@
     <!-- Paths to binplace package content -->
     <NETCoreAppPackageRefPath>$(ArtifactsBinDir)pkg\netcoreapp\ref</NETCoreAppPackageRefPath>
     <NETCoreAppPackageRuntimePath>$(ArtifactsBinDir)pkg\netcoreapp\lib</NETCoreAppPackageRuntimePath>
-    <NETCoreAppAotPackageRuntimePath>$(ArtifactsBinDir)pkg\netcoreappaot\lib</NETCoreAppAotPackageRuntimePath>
     <UAPPackageRefPath>$(ArtifactsBinDir)pkg\uap\ref</UAPPackageRefPath>
     <UAPPackageRuntimePath>$(ArtifactsBinDir)pkg\uap\lib</UAPPackageRuntimePath>
     <UAPAOTPackageRuntimePath>$(ArtifactsBinDir)pkg\uapaot\lib</UAPAOTPackageRuntimePath>
     <NetFxPackageRefPath>$(ArtifactsBinDir)pkg\netfx\ref</NetFxPackageRefPath>
     <NetFxPackageRuntimePath>$(ArtifactsBinDir)pkg\netfx\lib</NetFxPackageRuntimePath>
-    <NETStandardTestSuiteOutputPath>$(ArtifactsBinDir)NetStandardTestSuite\</NETStandardTestSuiteOutputPath>
 
     <!-- We add extra binplacing for the test shared framework until we can get hardlinking with the runtime directory working on all platforms -->
     <BinPlaceTestSharedFramework Condition="'$(_bc_TargetGroup)' == 'netcoreapp' AND '$(BuildTests)'!='false'">true</BinPlaceTestSharedFramework>
@@ -453,7 +458,7 @@
 
   <Import Condition="'$(IsTestProject)' == 'true' AND '$(IsTestSupportProject)' != 'true' AND '$(EnableVSTestReferences)' == 'true'" Project="$(RuntimePath)Microsoft.NET.Test.Sdk.props" />
 
-  <ItemDefinitionGroup Condition="'$(IsTestProject)' != 'true'"> 
+  <ItemDefinitionGroup Condition="'$(IsTestProject)' != 'true'">
     <!-- Project references for non-test assemblies should never be copied to the output. -->
     <ProjectReference>
       <Private>false</Private>

@@ -32,7 +32,7 @@ namespace System.Text.Json.Serialization.Tests
             json = JsonSerializer.ToString(null, typeof(object));
             Assert.Equal(@"null", json);
 
-            Decimal pi = 3.1415926535897932384626433833m;
+            decimal pi = 3.1415926535897932384626433833m;
             json = JsonSerializer.ToString<object>(pi);
             Assert.Equal(@"3.1415926535897932384626433833", json);
             json = JsonSerializer.ToString(pi, typeof(object));
@@ -40,15 +40,35 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadPrimitivesFail()
+        {
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@""));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@"a"));
+        }
+
+        [Fact]
+        public static void ParseUntyped()
+        {
+            // Not supported until we are able to deserialize into JsonElement.
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@"""hello"""));
+            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@"true"));
+        }
+
+        [Fact]
         public static void ArrayAsRootObject()
         {
             const string ExpectedJson = @"[1,true,{""City"":""MyCity""},null,""foo""]";
 
-            Address address = new Address();
+            var address = new Address();
             address.Initialize();
 
-            object[] array = new object[] { 1, true, address, null, "foo" };
+            var array = new object[] { 1, true, address, null, "foo" };
             string json = JsonSerializer.ToString(array);
+            Assert.Equal(ExpectedJson, json);
+
+            var dictionary = new Dictionary<string, string> { { "City", "MyCity" } };
+            var arrayWithDictionary = new object[] { 1, true, dictionary, null, "foo" };
+            json = JsonSerializer.ToString(arrayWithDictionary);
             Assert.Equal(ExpectedJson, json);
 
             json = JsonSerializer.ToString<object>(array);
@@ -59,6 +79,41 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(ExpectedJson, json);
 
             json = JsonSerializer.ToString<object>(list);
+            Assert.Equal(ExpectedJson, json);
+
+            IEnumerable<object> ienumerable = new List<object> { 1, true, address, null, "foo" };
+            json = JsonSerializer.ToString(ienumerable);
+            Assert.Equal(ExpectedJson, json);
+
+            json = JsonSerializer.ToString<object>(ienumerable);
+            Assert.Equal(ExpectedJson, json);
+
+            IList<object> ilist = new List<object> { 1, true, address, null, "foo" };
+            json = JsonSerializer.ToString(ilist);
+            Assert.Equal(ExpectedJson, json);
+
+            json = JsonSerializer.ToString<object>(ilist);
+            Assert.Equal(ExpectedJson, json);
+
+            ICollection<object> icollection = new List<object> { 1, true, address, null, "foo" };
+            json = JsonSerializer.ToString(icollection);
+            Assert.Equal(ExpectedJson, json);
+
+            json = JsonSerializer.ToString<object>(icollection);
+            Assert.Equal(ExpectedJson, json);
+
+            IReadOnlyCollection<object> ireadonlycollection = new List<object> { 1, true, address, null, "foo" };
+            json = JsonSerializer.ToString(ireadonlycollection);
+            Assert.Equal(ExpectedJson, json);
+
+            json = JsonSerializer.ToString<object>(ireadonlycollection);
+            Assert.Equal(ExpectedJson, json);
+
+            IReadOnlyList<object> ireadonlylist = new List<object> { 1, true, address, null, "foo" };
+            json = JsonSerializer.ToString(ireadonlylist);
+            Assert.Equal(ExpectedJson, json);
+
+            json = JsonSerializer.ToString<object>(ireadonlylist);
             Assert.Equal(ExpectedJson, json);
         }
 
@@ -89,6 +144,21 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void NestedObjectAsRootObject()
         {
+            static void Verify(string json)
+            {
+                Assert.Contains(@"""Address"":{""City"":""MyCity""}", json);
+                Assert.Contains(@"""List"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""Array"":[""Hello"",""Again""]", json);
+                Assert.Contains(@"""IEnumerableT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""IListT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""ICollectionT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""IReadOnlyCollectionT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""IReadOnlyListT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""NullableInt"":42", json);
+                Assert.Contains(@"""Object"":{}", json);
+                Assert.Contains(@"""NullableIntArray"":[null,42,null]", json);
+            }
+
             // Sanity checks on test type.
             Assert.Equal(typeof(object), typeof(ObjectWithObjectProperties).GetProperty("Address").PropertyType);
             Assert.Equal(typeof(object), typeof(ObjectWithObjectProperties).GetProperty("List").PropertyType);
@@ -99,10 +169,10 @@ namespace System.Text.Json.Serialization.Tests
             var obj = new ObjectWithObjectProperties();
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(ObjectWithObjectProperties.ExpectedJson, json);
+            Verify(json);
 
             json = JsonSerializer.ToString<object>(obj);
-            Assert.Equal(ObjectWithObjectProperties.ExpectedJson, json);
+            Verify(json);
         }
 
         [Fact]
@@ -113,12 +183,12 @@ namespace System.Text.Json.Serialization.Tests
             obj.NullableInt = null;
 
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(ObjectWithObjectProperties.ExpectedJsonNullInt, json);
+            Assert.Contains(@"""NullableInt"":null", json);
 
             JsonSerializerOptions options = new JsonSerializerOptions();
-            options.IgnoreNullPropertyValueOnWrite = true;
+            options.IgnoreNullValues = true;
             json = JsonSerializer.ToString(obj, options);
-            Assert.Equal(ObjectWithObjectProperties.ExpectedJsonNullIntIgnoreNulls, json);
+            Assert.DoesNotContain(@"""NullableInt"":null", json);
         }
 
         [Fact]

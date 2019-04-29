@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -120,7 +121,7 @@ namespace System.Text
         /// <summary>
         /// Entry point from <see cref="EncoderNLS.GetByteCount"/>.
         /// </summary>
-        internal virtual unsafe int GetByteCount(char* pChars, int charCount, EncoderNLS encoder)
+        internal virtual unsafe int GetByteCount(char* pChars, int charCount, EncoderNLS? encoder)
         {
             Debug.Assert(encoder != null, "This code path should only be called from EncoderNLS.");
             Debug.Assert(charCount >= 0, "Caller should've checked this condition.");
@@ -173,7 +174,7 @@ namespace System.Text
         /// The implementation should not attempt to perform any sort of fallback behavior.
         /// If custom fallback behavior is necessary, override <see cref="GetByteCountWithFallback"/>.
         /// </remarks>
-        private protected virtual unsafe int GetByteCountFast(char* pChars, int charsLength, EncoderFallback fallback, out int charsConsumed)
+        private protected virtual unsafe int GetByteCountFast(char* pChars, int charsLength, EncoderFallback? fallback, out int charsConsumed)
         {
             // Any production-quality type would override this method and provide a real
             // implementation, so we won't provide a base implementation. However, a
@@ -309,7 +310,7 @@ namespace System.Text
         /// If the resulting byte count is greater than <see cref="int.MaxValue"/>.
         /// (Implementation should call <see cref="ThrowConversionOverflow"/>.)
         /// </exception>
-        private protected virtual unsafe int GetByteCountWithFallback(ReadOnlySpan<char> chars, int originalCharsLength, EncoderNLS encoder)
+        private protected virtual unsafe int GetByteCountWithFallback(ReadOnlySpan<char> chars, int originalCharsLength, EncoderNLS? encoder)
         {
             Debug.Assert(!chars.IsEmpty, "Caller shouldn't invoke this method with an empty input buffer.");
             Debug.Assert(originalCharsLength >= 0, "Caller provided invalid parameter.");
@@ -397,7 +398,7 @@ namespace System.Text
         /// <summary>
         /// Entry point from <see cref="EncoderNLS.GetBytes"/> and <see cref="EncoderNLS.Convert"/>.
         /// </summary>
-        internal virtual unsafe int GetBytes(char* pChars, int charCount, byte* pBytes, int byteCount, EncoderNLS encoder)
+        internal virtual unsafe int GetBytes(char* pChars, int charCount, byte* pBytes, int byteCount, EncoderNLS? encoder)
         {
             Debug.Assert(encoder != null, "This code path should only be called from EncoderNLS.");
             Debug.Assert(charCount >= 0, "Caller should've checked this condition.");
@@ -584,7 +585,7 @@ namespace System.Text
         /// implementation, deferring to the base implementation if needed. This method calls <see cref="ThrowBytesOverflow"/>
         /// if necessary.
         /// </remarks>
-        private protected virtual unsafe int GetBytesWithFallback(ReadOnlySpan<char> chars, int originalCharsLength, Span<byte> bytes, int originalBytesLength, EncoderNLS encoder)
+        private protected virtual unsafe int GetBytesWithFallback(ReadOnlySpan<char> chars, int originalCharsLength, Span<byte> bytes, int originalBytesLength, EncoderNLS? encoder)
         {
             Debug.Assert(!chars.IsEmpty, "Caller shouldn't invoke this method with an empty input buffer.");
             Debug.Assert(originalCharsLength >= 0, "Caller provided invalid parameter.");
@@ -705,7 +706,7 @@ namespace System.Text
         /// <summary>
         /// Entry point from <see cref="DecoderNLS.GetCharCount"/>.
         /// </summary>
-        internal virtual unsafe int GetCharCount(byte* pBytes, int byteCount, DecoderNLS decoder)
+        internal virtual unsafe int GetCharCount(byte* pBytes, int byteCount, DecoderNLS? decoder)
         {
             Debug.Assert(decoder != null, "This code path should only be called from DecoderNLS.");
             Debug.Assert(byteCount >= 0, "Caller should've checked this condition.");
@@ -760,7 +761,7 @@ namespace System.Text
         /// The implementation should not attempt to perform any sort of fallback behavior.
         /// If custom fallback behavior is necessary, override <see cref="GetCharCountWithFallback"/>.
         /// </remarks>
-        private protected virtual unsafe int GetCharCountFast(byte* pBytes, int bytesLength, DecoderFallback fallback, out int bytesConsumed)
+        private protected virtual unsafe int GetCharCountFast(byte* pBytes, int bytesLength, DecoderFallback? fallback, out int bytesConsumed)
         {
             // Any production-quality type would override this method and provide a real
             // implementation, so we won't provide a base implementation. However, a
@@ -850,8 +851,14 @@ namespace System.Text
 
             ReadOnlySpan<byte> bytes = new ReadOnlySpan<byte>(pOriginalBytes, originalByteCount).Slice(bytesConsumedSoFar);
 
-            int totalCharCount = decoder.DrainLeftoverDataForGetCharCount(bytes, out int bytesConsumedJustNow);
-            bytes = bytes.Slice(bytesConsumedJustNow);
+            int bytesConsumedJustNow = 0;
+            int totalCharCount = 0;
+
+            if (decoder.HasLeftoverData)
+            {
+                totalCharCount = decoder.DrainLeftoverDataForGetCharCount(bytes, out bytesConsumedJustNow);
+                bytes = bytes.Slice(bytesConsumedJustNow);
+            }
 
             // Now try invoking the "fast path" (no fallback) implementation.
             // We can use Unsafe.AsPointer here since these spans are created from pinned data (raw pointers).
@@ -895,7 +902,7 @@ namespace System.Text
         /// If the resulting char count is greater than <see cref="int.MaxValue"/>.
         /// (Implementation should call <see cref="ThrowConversionOverflow"/>.)
         /// </exception>
-        private unsafe int GetCharCountWithFallback(ReadOnlySpan<byte> bytes, int originalBytesLength, DecoderNLS decoder)
+        private unsafe int GetCharCountWithFallback(ReadOnlySpan<byte> bytes, int originalBytesLength, DecoderNLS? decoder)
         {
             Debug.Assert(!bytes.IsEmpty, "Caller shouldn't invoke this method with an empty input buffer.");
             Debug.Assert(originalBytesLength >= 0, "Caller provided invalid parameter.");
@@ -979,7 +986,7 @@ namespace System.Text
         /// <summary>
         /// Entry point from <see cref="DecoderNLS.GetChars"/> and <see cref="DecoderNLS.Convert"/>.
         /// </summary>
-        internal virtual unsafe int GetChars(byte* pBytes, int byteCount, char* pChars, int charCount, DecoderNLS decoder)
+        internal virtual unsafe int GetChars(byte* pBytes, int byteCount, char* pChars, int charCount, DecoderNLS? decoder)
         {
             Debug.Assert(decoder != null, "This code path should only be called from DecoderNLS.");
             Debug.Assert(byteCount >= 0, "Caller should've checked this condition.");
@@ -1120,10 +1127,15 @@ namespace System.Text
             ReadOnlySpan<byte> bytes = new ReadOnlySpan<byte>(pOriginalBytes, originalByteCount).Slice(bytesConsumedSoFar);
             Span<char> chars = new Span<char>(pOriginalChars, originalCharCount).Slice(charsWrittenSoFar);
 
-            int charsWrittenJustNow = decoder.DrainLeftoverDataForGetChars(bytes, chars, out int bytesConsumedJustNow);
+            int bytesConsumedJustNow = 0;
+            int charsWrittenJustNow = 0;
 
-            bytes = bytes.Slice(bytesConsumedJustNow);
-            chars = chars.Slice(charsWrittenJustNow);
+            if (decoder.HasLeftoverData)
+            {
+                charsWrittenJustNow = decoder.DrainLeftoverDataForGetChars(bytes, chars, out bytesConsumedJustNow);
+                bytes = bytes.Slice(bytesConsumedJustNow);
+                chars = chars.Slice(charsWrittenJustNow);
+            }
 
             Debug.Assert(!decoder.InternalHasFallbackBuffer || decoder.FallbackBuffer.Remaining == 0, "Should be no remaining fallback data at this point.");
 
@@ -1166,7 +1178,7 @@ namespace System.Text
         /// implementation, deferring to the base implementation if needed. This method calls <see cref="ThrowCharsOverflow"/>
         /// if necessary.
         /// </remarks>
-        private protected virtual unsafe int GetCharsWithFallback(ReadOnlySpan<byte> bytes, int originalBytesLength, Span<char> chars, int originalCharsLength, DecoderNLS decoder)
+        private protected virtual unsafe int GetCharsWithFallback(ReadOnlySpan<byte> bytes, int originalBytesLength, Span<char> chars, int originalCharsLength, DecoderNLS? decoder)
         {
             Debug.Assert(!bytes.IsEmpty, "Caller shouldn't invoke this method with an empty input buffer.");
             Debug.Assert(originalBytesLength >= 0, "Caller provided invalid parameter.");

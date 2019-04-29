@@ -12,6 +12,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -23,6 +24,8 @@ namespace System.Net.Http.Functional.Tests
         private static bool ClientSupportsDHECipherSuites => (!PlatformDetection.IsWindows || PlatformDetection.IsWindows10Version1607OrGreater);
         private bool BackendSupportsCustomCertificateHandlingAndClientSupportsDHECipherSuites =>
             (BackendSupportsCustomCertificateHandling && ClientSupportsDHECipherSuites);
+
+        public HttpClientHandler_ServerCertificates_Test(ITestOutputHelper output) : base(output) { }
 
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap)]
@@ -132,6 +135,7 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [ActiveIssue(37250)]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP won't send requests through a custom proxy")]
         [OuterLoop("Uses external server")]
         [Fact]

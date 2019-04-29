@@ -9,6 +9,10 @@
   </PropertyGroup>
   <ItemGroup Condition="'$(IncludePartialFacadeTests)' == 'true'">
     <!-- Tests specific to netcoreapp and uap -->
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.Byte.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.Char.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.String.cs" />
+    <Compile Include="ArrayBufferWriter\ArrayBufferWriterTests.T.cs" />
     <Compile Include="MemoryMarshal\AsRef.cs" />
     <Compile Include="MemoryMarshal\AsReadOnlyRef.cs" />
     <Compile Include="MemoryMarshal\CreateSpan.cs" />
@@ -184,6 +188,7 @@
     <Compile Include="Memory\Strings.cs" />
     <Compile Include="Memory\ToArray.cs" />
     <Compile Include="Memory\ToString.cs" />
+    <Compile Include="Memory\Trim.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="MemoryMarshal\AsBytesReadOnlySpan.cs" />

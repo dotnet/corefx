@@ -63,17 +63,19 @@ namespace System.Text.Json.Serialization
         private static object ParseCore(string json, Type returnType, JsonSerializerOptions options = null)
         {
             if (options == null)
-                options = s_defaultSettings;
+            {
+                options = JsonSerializerOptions.s_defaultOptions;
+            }
 
             // todo: use an array pool here for smaller requests to avoid the alloc?
             byte[] jsonBytes = JsonReaderHelper.s_utf8Encoding.GetBytes(json);
-            var readerState = new JsonReaderState(options: options.ReaderOptions);
+            var readerState = new JsonReaderState(options.GetReaderOptions());
             var reader = new Utf8JsonReader(jsonBytes, isFinalBlock: true, readerState);
             object result = ReadCore(returnType, options, ref reader);
 
-            readerState = reader.CurrentState;
-            if (readerState.BytesConsumed != jsonBytes.Length)
+            if (reader.BytesConsumed != jsonBytes.Length)
             {
+                readerState = reader.CurrentState;
                 throw new JsonReaderException(SR.Format(SR.DeserializeDataRemaining,
                     jsonBytes.Length, jsonBytes.Length - readerState.BytesConsumed), readerState);
             }

@@ -10,11 +10,14 @@ using System.Net.Test.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientHandler_Cancellation_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_Cancellation_Test(ITestOutputHelper output) : base(output) { }
+
         [Theory]
         [InlineData(false, CancellationMode.Token)]
         [InlineData(true, CancellationMode.Token)]
@@ -341,6 +344,46 @@ namespace System.Net.Http.Functional.Tests
                     await new[] { get4, serverTask4 }.WhenAllOrAnyFailed();
                 });
             }
+        }
+
+        [Fact]
+        public async Task SendAsync_Cancel_CancellationTokenPropagates()
+        {
+            TaskCompletionSource<bool> clientCanceled = new TaskCompletionSource<bool>();
+            await LoopbackServerFactory.CreateClientAndServerAsync(
+                async uri =>
+                {
+                    var cts = new CancellationTokenSource();
+                    cts.Cancel();
+
+                    using (HttpClient client = CreateHttpClient())
+                    {
+                        OperationCanceledException ex = null;
+                        try
+                        {
+                            await client.GetAsync(uri, cts.Token);
+                        }
+                        catch(OperationCanceledException e)
+                        {
+                            ex = e;
+                        }
+                        Assert.True(ex != null, "Expected OperationCancelledException, but no exception was thrown.");
+
+                        Assert.True(cts.Token.IsCancellationRequested, "cts token IsCancellationRequested");
+
+                        if (!PlatformDetection.IsFullFramework)
+                        {
+                            // .NET Framework has bug where it doesn't propagate token information.
+                            Assert.True(ex.CancellationToken.IsCancellationRequested, "exception token IsCancellationRequested");
+                        }
+                        clientCanceled.SetResult(true);
+                    }
+                },
+                async server =>
+                {
+                    Task serverTask = server.HandleRequestAsync();
+                    await clientCanceled.Task;
+                });
         }
 
         private async Task ValidateClientCancellationAsync(Func<Task> clientBodyAsync)

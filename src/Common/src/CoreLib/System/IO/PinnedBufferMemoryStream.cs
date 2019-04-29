@@ -14,6 +14,7 @@
 **
 ===========================================================*/
 
+#nullable enable
 using System;
 using System.Runtime.InteropServices;
 using System.Diagnostics;
@@ -38,9 +39,11 @@ namespace System.IO
                 Initialize(ptr, len, len, FileAccess.Read);
         }
 
+#if !netstandard
         public override int Read(Span<byte> buffer) => ReadCore(buffer);
 
         public override void Write(ReadOnlySpan<byte> buffer) => WriteCore(buffer);
+#endif
 
         ~PinnedBufferMemoryStream()
         {

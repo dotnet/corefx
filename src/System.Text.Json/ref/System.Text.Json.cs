@@ -9,8 +9,8 @@ namespace System.Text.Json
 {
     public enum JsonCommentHandling : byte
     {
-        Allow = (byte)1,
         Disallow = (byte)0,
+        Allow = (byte)1,
         Skip = (byte)2,
     }
     public sealed partial class JsonDocument : System.IDisposable
@@ -33,6 +33,7 @@ namespace System.Text.Json
         private readonly int _dummyPrimitive;
         public System.Text.Json.JsonElement this[int index] { get { throw null; } }
         public System.Text.Json.JsonValueType Type { get { throw null; } }
+        public System.Text.Json.JsonElement Clone() { throw null; }
         public System.Text.Json.JsonElement.ArrayEnumerator EnumerateArray() { throw null; }
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
         public int GetArrayLength() { throw null; }
@@ -70,9 +71,9 @@ namespace System.Text.Json
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
-        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, ref Utf8JsonWriter writer) { }
-        public void WriteAsProperty(ReadOnlySpan<char> propertyName, ref Utf8JsonWriter writer) { }
-        public void WriteAsValue(ref System.Text.Json.Utf8JsonWriter writer) { }
+        public void WriteAsProperty(System.ReadOnlySpan<byte> utf8PropertyName, System.Text.Json.Utf8JsonWriter writer) { }
+        public void WriteAsProperty(System.ReadOnlySpan<char> propertyName, System.Text.Json.Utf8JsonWriter writer) { }
+        public void WriteAsValue(System.Text.Json.Utf8JsonWriter writer) { }
         public partial struct ArrayEnumerator : System.Collections.Generic.IEnumerable<System.Text.Json.JsonElement>, System.Collections.Generic.IEnumerator<System.Text.Json.JsonElement>, System.Collections.IEnumerable, System.Collections.IEnumerator, System.IDisposable
         {
             private object _dummy;
@@ -117,6 +118,7 @@ namespace System.Text.Json
     public partial struct JsonReaderOptions
     {
         private int _dummyPrimitive;
+        public bool AllowTrailingCommas { get { throw null; } set { } }
         public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
     }
@@ -131,44 +133,35 @@ namespace System.Text.Json
     }
     public enum JsonTokenType : byte
     {
-        Comment = (byte)11,
-        EndArray = (byte)4,
-        EndObject = (byte)2,
-        False = (byte)9,
         None = (byte)0,
-        Null = (byte)10,
-        Number = (byte)7,
-        PropertyName = (byte)5,
-        StartArray = (byte)3,
         StartObject = (byte)1,
+        EndObject = (byte)2,
+        StartArray = (byte)3,
+        EndArray = (byte)4,
+        PropertyName = (byte)5,
         String = (byte)6,
+        Number = (byte)7,
         True = (byte)8,
+        False = (byte)9,
+        Null = (byte)10,
+        Comment = (byte)11,
     }
     public enum JsonValueType : byte
     {
+        Undefined = (byte)0,
+        Object = (byte)1,
         Array = (byte)2,
+        String = (byte)3,
+        Number = (byte)4,
+        True = (byte)5,
         False = (byte)6,
         Null = (byte)7,
-        Number = (byte)4,
-        Object = (byte)1,
-        String = (byte)3,
-        True = (byte)5,
-        Undefined = (byte)0,
     }
     public partial struct JsonWriterOptions
     {
         private int _dummyPrimitive;
         public bool Indented { get { throw null; } set { } }
         public bool SkipValidation { get { throw null; } set { } }
-    }
-    public partial struct JsonWriterState
-    {
-        private object _dummy;
-        private int _dummyPrimitive;
-        public JsonWriterState(System.Text.Json.JsonWriterOptions options = default(System.Text.Json.JsonWriterOptions)) { throw null; }
-        public long BytesCommitted { get { throw null; } }
-        public long BytesWritten { get { throw null; } }
-        public System.Text.Json.JsonWriterOptions Options { get { throw null; } }
     }
     public ref partial struct Utf8JsonReader
     {
@@ -214,56 +207,60 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
     }
-    public ref partial struct Utf8JsonWriter
+    public sealed partial class Utf8JsonWriter : System.IDisposable
     {
-        private object _dummy;
-        private int _dummyPrimitive;
-        public Utf8JsonWriter(System.Buffers.IBufferWriter<byte> bufferWriter, System.Text.Json.JsonWriterState state = default(System.Text.Json.JsonWriterState)) { throw null; }
+        public Utf8JsonWriter(System.Buffers.IBufferWriter<byte> bufferWriter, System.Text.Json.JsonWriterOptions options = default(System.Text.Json.JsonWriterOptions)) { }
+        public Utf8JsonWriter(System.IO.Stream utf8Json, System.Text.Json.JsonWriterOptions options = default(System.Text.Json.JsonWriterOptions)) { }
         public long BytesCommitted { get { throw null; } }
-        public long BytesWritten { get { throw null; } }
+        public int BytesPending { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
-        public void Flush(bool isFinalBlock = true) { }
-        public System.Text.Json.JsonWriterState GetCurrentState() { throw null; }
-        public void WriteBoolean(System.ReadOnlySpan<byte> utf8PropertyName, bool value, bool escape = true) { }
-        public void WriteBoolean(System.ReadOnlySpan<char> propertyName, bool value, bool escape = true) { }
-        public void WriteBoolean(string propertyName, bool value, bool escape = true) { }
+        public System.Text.Json.JsonWriterOptions Options { get { throw null; } }
+        public void Dispose() { }
+        public void Flush() { }
+        public System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
+        public void Reset() { }
+        public void Reset(System.Buffers.IBufferWriter<byte> bufferWriter) { }
+        public void Reset(System.IO.Stream utf8Json) { }
+        public void WriteBoolean(System.ReadOnlySpan<byte> utf8PropertyName, bool value) { }
+        public void WriteBoolean(System.ReadOnlySpan<char> propertyName, bool value) { }
+        public void WriteBoolean(string propertyName, bool value) { }
         public void WriteBooleanValue(bool value) { }
-        public void WriteCommentValue(System.ReadOnlySpan<byte> utf8Value, bool escape = true) { }
-        public void WriteCommentValue(System.ReadOnlySpan<char> value, bool escape = true) { }
-        public void WriteCommentValue(string value, bool escape = true) { }
+        public void WriteCommentValue(System.ReadOnlySpan<byte> utf8Value) { }
+        public void WriteCommentValue(System.ReadOnlySpan<char> value) { }
+        public void WriteCommentValue(string value) { }
         public void WriteEndArray() { }
         public void WriteEndObject() { }
-        public void WriteNull(System.ReadOnlySpan<byte> utf8PropertyName, bool escape = true) { }
-        public void WriteNull(System.ReadOnlySpan<char> propertyName, bool escape = true) { }
-        public void WriteNull(string propertyName, bool escape = true) { }
+        public void WriteNull(System.ReadOnlySpan<byte> utf8PropertyName) { }
+        public void WriteNull(System.ReadOnlySpan<char> propertyName) { }
+        public void WriteNull(string propertyName) { }
         public void WriteNullValue() { }
-        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, decimal value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, double value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, int value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, long value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, float value, bool escape = true) { }
+        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, decimal value) { }
+        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, double value) { }
+        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, int value) { }
+        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, long value) { }
+        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, float value) { }
         [System.CLSCompliantAttribute(false)]
-        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, uint value, bool escape = true) { }
+        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, ulong value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<char> propertyName, decimal value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<char> propertyName, double value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<char> propertyName, int value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<char> propertyName, long value, bool escape = true) { }
-        public void WriteNumber(System.ReadOnlySpan<char> propertyName, float value, bool escape = true) { }
+        public void WriteNumber(System.ReadOnlySpan<byte> utf8PropertyName, ulong value) { }
+        public void WriteNumber(System.ReadOnlySpan<char> propertyName, decimal value) { }
+        public void WriteNumber(System.ReadOnlySpan<char> propertyName, double value) { }
+        public void WriteNumber(System.ReadOnlySpan<char> propertyName, int value) { }
+        public void WriteNumber(System.ReadOnlySpan<char> propertyName, long value) { }
+        public void WriteNumber(System.ReadOnlySpan<char> propertyName, float value) { }
         [System.CLSCompliantAttribute(false)]
-        public void WriteNumber(System.ReadOnlySpan<char> propertyName, uint value, bool escape = true) { }
+        public void WriteNumber(System.ReadOnlySpan<char> propertyName, uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public void WriteNumber(System.ReadOnlySpan<char> propertyName, ulong value, bool escape = true) { }
-        public void WriteNumber(string propertyName, decimal value, bool escape = true) { }
-        public void WriteNumber(string propertyName, double value, bool escape = true) { }
-        public void WriteNumber(string propertyName, int value, bool escape = true) { }
-        public void WriteNumber(string propertyName, long value, bool escape = true) { }
-        public void WriteNumber(string propertyName, float value, bool escape = true) { }
+        public void WriteNumber(System.ReadOnlySpan<char> propertyName, ulong value) { }
+        public void WriteNumber(string propertyName, decimal value) { }
+        public void WriteNumber(string propertyName, double value) { }
+        public void WriteNumber(string propertyName, int value) { }
+        public void WriteNumber(string propertyName, long value) { }
+        public void WriteNumber(string propertyName, float value) { }
         [System.CLSCompliantAttribute(false)]
-        public void WriteNumber(string propertyName, uint value, bool escape = true) { }
+        public void WriteNumber(string propertyName, uint value) { }
         [System.CLSCompliantAttribute(false)]
-        public void WriteNumber(string propertyName, ulong value, bool escape = true) { }
+        public void WriteNumber(string propertyName, ulong value) { }
         public void WriteNumberValue(decimal value) { }
         public void WriteNumberValue(double value) { }
         public void WriteNumberValue(int value) { }
@@ -274,41 +271,62 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public void WriteNumberValue(ulong value) { }
         public void WriteStartArray() { }
-        public void WriteStartArray(System.ReadOnlySpan<byte> utf8PropertyName, bool escape = true) { }
-        public void WriteStartArray(System.ReadOnlySpan<char> propertyName, bool escape = true) { }
-        public void WriteStartArray(string propertyName, bool escape = true) { }
+        public void WriteStartArray(System.ReadOnlySpan<byte> utf8PropertyName) { }
+        public void WriteStartArray(System.ReadOnlySpan<char> propertyName) { }
+        public void WriteStartArray(string propertyName) { }
         public void WriteStartObject() { }
-        public void WriteStartObject(System.ReadOnlySpan<byte> utf8PropertyName, bool escape = true) { }
-        public void WriteStartObject(System.ReadOnlySpan<char> propertyName, bool escape = true) { }
-        public void WriteStartObject(string propertyName, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.DateTime value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.DateTimeOffset value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.Guid value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.ReadOnlySpan<byte> utf8Value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.ReadOnlySpan<char> value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, string value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<char> propertyName, System.DateTime value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<char> propertyName, System.DateTimeOffset value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<char> propertyName, System.Guid value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<char> propertyName, System.ReadOnlySpan<byte> utf8Value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<char> propertyName, System.ReadOnlySpan<char> value, bool escape = true) { }
-        public void WriteString(System.ReadOnlySpan<char> propertyName, string value, bool escape = true) { }
-        public void WriteString(string propertyName, System.DateTime value, bool escape = true) { }
-        public void WriteString(string propertyName, System.DateTimeOffset value, bool escape = true) { }
-        public void WriteString(string propertyName, System.Guid value, bool escape = true) { }
-        public void WriteString(string propertyName, System.ReadOnlySpan<byte> utf8Value, bool escape = true) { }
-        public void WriteString(string propertyName, System.ReadOnlySpan<char> value, bool escape = true) { }
-        public void WriteString(string propertyName, string value, bool escape = true) { }
+        public void WriteStartObject(System.ReadOnlySpan<byte> utf8PropertyName) { }
+        public void WriteStartObject(System.ReadOnlySpan<char> propertyName) { }
+        public void WriteStartObject(string propertyName) { }
+        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.DateTime value) { }
+        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.DateTimeOffset value) { }
+        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.Guid value) { }
+        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.ReadOnlySpan<byte> utf8Value) { }
+        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, System.ReadOnlySpan<char> value) { }
+        public void WriteString(System.ReadOnlySpan<byte> utf8PropertyName, string value) { }
+        public void WriteString(System.ReadOnlySpan<char> propertyName, System.DateTime value) { }
+        public void WriteString(System.ReadOnlySpan<char> propertyName, System.DateTimeOffset value) { }
+        public void WriteString(System.ReadOnlySpan<char> propertyName, System.Guid value) { }
+        public void WriteString(System.ReadOnlySpan<char> propertyName, System.ReadOnlySpan<byte> utf8Value) { }
+        public void WriteString(System.ReadOnlySpan<char> propertyName, System.ReadOnlySpan<char> value) { }
+        public void WriteString(System.ReadOnlySpan<char> propertyName, string value) { }
+        public void WriteString(string propertyName, System.DateTime value) { }
+        public void WriteString(string propertyName, System.DateTimeOffset value) { }
+        public void WriteString(string propertyName, System.Guid value) { }
+        public void WriteString(string propertyName, System.ReadOnlySpan<byte> utf8Value) { }
+        public void WriteString(string propertyName, System.ReadOnlySpan<char> value) { }
+        public void WriteString(string propertyName, string value) { }
         public void WriteStringValue(System.DateTime value) { }
         public void WriteStringValue(System.DateTimeOffset value) { }
         public void WriteStringValue(System.Guid value) { }
-        public void WriteStringValue(System.ReadOnlySpan<byte> utf8Value, bool escape = true) { }
-        public void WriteStringValue(System.ReadOnlySpan<char> value, bool escape = true) { }
-        public void WriteStringValue(string value, bool escape = true) { }
+        public void WriteStringValue(System.ReadOnlySpan<byte> utf8Value) { }
+        public void WriteStringValue(System.ReadOnlySpan<char> value) { }
+        public void WriteStringValue(string value) { }
     }
 }
 namespace System.Text.Json.Serialization
 {
+    public abstract partial class JsonAttribute : System.Attribute
+    {
+        protected JsonAttribute() { }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
+    public sealed partial class JsonIgnoreAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonIgnoreAttribute() { }
+    }
+    public abstract partial class JsonNamingPolicy
+    {
+        protected JsonNamingPolicy() { }
+        public static System.Text.Json.Serialization.JsonNamingPolicy CamelCase { get { throw null; } }
+        public abstract string ConvertName(string name);
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
+    public sealed partial class JsonPropertyNameAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonPropertyNameAttribute(string propertyName) { }
+        public string Name { get { throw null; } set { } }
+    }
     public static partial class JsonSerializer
     {
         public static object Parse(System.ReadOnlySpan<byte> utf8Json, System.Type returnType, System.Text.Json.Serialization.JsonSerializerOptions options = null) { throw null; }
@@ -327,10 +345,15 @@ namespace System.Text.Json.Serialization
     public sealed partial class JsonSerializerOptions
     {
         public JsonSerializerOptions() { }
+        public bool AllowTrailingCommas { get { throw null; } set { } }
         public int DefaultBufferSize { get { throw null; } set { } }
-        public bool IgnoreNullPropertyValueOnRead { get { throw null; } set { } }
-        public bool IgnoreNullPropertyValueOnWrite { get { throw null; } set { } }
-        public System.Text.Json.JsonReaderOptions ReaderOptions { get { throw null; } set { } }
-        public System.Text.Json.JsonWriterOptions WriterOptions { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonNamingPolicy DictionaryKeyPolicy { get { throw null; } set { } }
+        public bool IgnoreNullValues { get { throw null; } set { } }
+        public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
+        public int MaxDepth { get { throw null; } set { } }
+        public bool PropertyNameCaseInsensitive { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonNamingPolicy PropertyNamingPolicy { get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling ReadCommentHandling { get { throw null; } set { } }
+        public bool WriteIndented { get { throw null; } set { } }
     }
 }

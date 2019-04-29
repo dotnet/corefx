@@ -237,14 +237,18 @@ namespace Internal.Cryptography.Pal
                         }
                     }
                 }
-
-                return null;
+            }
+            catch (CryptographicException)
+            {
+                // Treat any ASN errors as if the extension was missing.
             }
             finally
             {
                 // The data came from a certificate, so it's public.
                 CryptoPool.Return(crlDistributionPoints.Array, clearSize: 0);
             }
+
+            return null;
         }
     }
 }

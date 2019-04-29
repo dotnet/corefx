@@ -9,8 +9,10 @@ namespace System.Text.Json.Serialization
     /// </summary>
     internal enum ClassType
     {
-        Object = 0,
-        Value = 1,
-        Enumerable = 2,
+        Unknown = 0,        // typeof(object)
+        Object = 1,         // POCO or rich data type
+        Value = 2,          // Data type with single value
+        Enumerable = 3,     // IEnumerable
+        Dictionary = 4,     // IDictionary
     }
 }

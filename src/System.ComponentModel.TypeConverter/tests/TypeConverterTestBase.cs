@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -38,7 +39,7 @@ namespace System.ComponentModel.Tests
                     if (convertTest.CanConvert)
                     {
                         object actual = Converter.ConvertTo(convertTest.Context, convertTest.Culture, convertTest.Source, convertTest.DestinationType);
-                        Assert.Equal(convertTest.Expected, actual);
+                        AssertEqualInstanceDescriptor(convertTest.Expected, actual);
                     }
                     else
                     {
@@ -76,6 +77,13 @@ namespace System.ComponentModel.Tests
         public void ConvertTo_NullDestinationType_ThrowsArgumentNullException()
         {
             AssertExtensions.Throws<ArgumentNullException>("destinationType", () => Converter.ConvertTo(TypeConverterTests.s_context, null, "", null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core fixes some NullReferenceExceptions in CanConvertTo")]
+        public void CanConvertTo_NullDestinationType_ReturnsFalse()
+        {
+            Assert.False(Converter.CanConvertTo(null));
         }
 
         [Fact]
@@ -153,6 +161,20 @@ namespace System.ComponentModel.Tests
             Assert.Equal(StandardValuesExclusive, converter.GetStandardValuesExclusive());
         }
 
+        private static void AssertEqualInstanceDescriptor(object expected, object actual)
+        {
+            if (expected is InstanceDescriptor expectedDescriptor && actual is InstanceDescriptor actualDescriptor)
+            {
+                Assert.Equal(expectedDescriptor.MemberInfo, actualDescriptor.MemberInfo);
+                Assert.Equal(expectedDescriptor.Arguments, actualDescriptor.Arguments);
+                Assert.Equal(expectedDescriptor.IsComplete, actualDescriptor.IsComplete);
+            }
+            else
+            {
+                Assert.Equal(expected, actual);
+            }
+        }
+
         [Serializable]
         public class ConvertTest : ISerializable
         {
@@ -196,12 +218,24 @@ namespace System.ComponentModel.Tests
                 };
             }
 
-            public static ConvertTest CantConvert(object source, Type destinationType = null, CultureInfo culture = null)
+            public static ConvertTest CantConvertTo(object source, Type destinationType = null, CultureInfo culture = null)
             {
                 return new ConvertTest
                 {
                     Source = source,
                     DestinationType = destinationType,
+                    Culture = culture,
+                    NetCoreExceptionType = typeof(NotSupportedException),
+                    NetFrameworkExceptionType = typeof(NotSupportedException),
+                    CanConvert = false
+                };
+            }
+
+            public static ConvertTest CantConvertFrom(object source,  CultureInfo culture = null)
+            {
+                return new ConvertTest
+                {
+                    Source = source,
                     Culture = culture,
                     NetCoreExceptionType = typeof(NotSupportedException),
                     NetFrameworkExceptionType = typeof(NotSupportedException),

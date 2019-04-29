@@ -78,17 +78,15 @@ namespace System.Text.Json.Serialization
             JsonSerializerOptions options = null,
             CancellationToken cancellationToken = default)
         {
-            options ??= s_defaultSettings;
-
-            ReadStack state = default;
-            JsonClassInfo classInfo = options.GetOrAddClass(returnType);
-            state.Current.JsonClassInfo = classInfo;
-            if (classInfo.ClassType != ClassType.Object)
+            if (options == null)
             {
-                state.Current.JsonPropertyInfo = classInfo.GetPolicyProperty();
+                options = JsonSerializerOptions.s_defaultOptions;
             }
 
-            var readerState = new JsonReaderState(options.ReaderOptions);
+            ReadStack state = default;
+            state.Current.Initialize(returnType, options);
+
+            var readerState = new JsonReaderState(options.GetReaderOptions());
 
             // todo: switch to ArrayBuffer implementation to handle and simplify the allocs?
             byte[] buffer = ArrayPool<byte>.Shared.Rent(options.DefaultBufferSize);

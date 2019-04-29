@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -39,7 +40,7 @@ namespace System.IO
     /// </summary>
     public class UnmanagedMemoryStream : Stream
     {
-        private SafeBuffer _buffer;
+        private SafeBuffer? _buffer;
         private unsafe byte* _mem;
         private long _length;
         private long _capacity;
@@ -47,7 +48,7 @@ namespace System.IO
         private long _offset;
         private FileAccess _access;
         private bool _isOpen;
-        private Task<int> _lastReadTask; // The last successful task returned from ReadAsync 
+        private Task<int>? _lastReadTask; // The last successful task returned from ReadAsync 
 
         /// <summary>
         /// Creates a closed stream.
@@ -473,7 +474,7 @@ namespace System.IO
             try
             {
                 int n = Read(buffer, offset, count);
-                Task<int> t = _lastReadTask;
+                Task<int>? t = _lastReadTask;
                 return (t != null && t.Result == n) ? t : (_lastReadTask = Task.FromResult<Int32>(n));
             }
             catch (Exception ex)
@@ -511,7 +512,7 @@ namespace System.IO
                 // it then fall back to doing the ArrayPool/copy behavior.
                 return new ValueTask<int>(
                     MemoryMarshal.TryGetArray(buffer, out ArraySegment<byte> destinationArray) ?
-                        Read(destinationArray.Array, destinationArray.Offset, destinationArray.Count) :
+                        Read(destinationArray.Array!, destinationArray.Offset, destinationArray.Count) : // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
                         Read(buffer.Span));
             }
             catch (Exception ex)
@@ -796,7 +797,7 @@ namespace System.IO
                 // Unlike ReadAsync, we could delegate to WriteAsync(byte[], ...) here, but we don't for consistency.
                 if (MemoryMarshal.TryGetArray(buffer, out ArraySegment<byte> sourceArray))
                 {
-                    Write(sourceArray.Array, sourceArray.Offset, sourceArray.Count);
+                    Write(sourceArray.Array!, sourceArray.Offset, sourceArray.Count); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
                 }
                 else
                 {

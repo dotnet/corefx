@@ -261,8 +261,7 @@ namespace System.Tests
             RemoteExecutor.Invoke(() =>
             {
                 AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "TestLoadAssembly.dll"));
-                ObjectHandle oh = Activator.CreateInstance(",,,,", "PublicClassSample");
-                Assert.NotNull(oh.Unwrap());
+                Assert.Throws<FileLoadException>(() => Activator.CreateInstance(",,,,", "PublicClassSample"));
             }).Dispose();
         }
 

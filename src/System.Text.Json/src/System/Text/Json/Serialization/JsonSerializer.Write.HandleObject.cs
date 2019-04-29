@@ -10,7 +10,7 @@ namespace System.Text.Json.Serialization
     {
         private static bool WriteObject(
             JsonSerializerOptions options,
-            ref Utf8JsonWriter writer,
+            Utf8JsonWriter writer,
             ref WriteStack state)
         {
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
@@ -18,21 +18,13 @@ namespace System.Text.Json.Serialization
             // Write the start.
             if (!state.Current.StartObjectWritten)
             {
-                if (state.Current.JsonPropertyInfo?._escapedName == null)
-                {
-                    writer.WriteStartObject();
-                }
-                else
-                {
-                    writer.WriteStartObject(state.Current.JsonPropertyInfo._escapedName);
-                }
-                state.Current.StartObjectWritten = true;
+                state.Current.WriteObjectOrArrayStart(ClassType.Object, writer);
             }
 
             // Determine if we are done enumerating properties.
             if (state.Current.PropertyIndex != classInfo.PropertyCount)
             {
-                HandleObject(options, ref writer, ref state);
+                HandleObject(options, writer, ref state);
                 return false;
             }
 
@@ -52,51 +44,51 @@ namespace System.Text.Json.Serialization
 
         private static bool HandleObject(
                 JsonSerializerOptions options,
-                ref Utf8JsonWriter writer,
+                Utf8JsonWriter writer,
                 ref WriteStack state)
         {
-            Debug.Assert(state.Current.JsonClassInfo.ClassType == ClassType.Object);
+            Debug.Assert(
+                state.Current.JsonClassInfo.ClassType == ClassType.Object ||
+                state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(state.Current.PropertyIndex);
-            ClassType propertyClassType = jsonPropertyInfo.ClassType;
 
             bool obtainedValue = false;
             object currentValue = null;
 
             // Check for polymorphism.
-            if (jsonPropertyInfo.RuntimePropertyType == typeof(object))
+            if (jsonPropertyInfo.ClassType == ClassType.Unknown)
             {
-                Debug.Assert(propertyClassType == ClassType.Object);
-
-                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
                 obtainedValue = true;
-
-                if (currentValue != null)
-                {
-                    Type runtimeType = currentValue.GetType();
-
-                    // Ignore object() instances since they are handled as an empty object.
-                    if (runtimeType != typeof(object))
-                    {
-                        propertyClassType = JsonClassInfo.GetClassType(runtimeType);
-                        jsonPropertyInfo = state.Current.JsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, runtimeType, options);
-                    }
-                }
+                GetRuntimePropertyInfo(currentValue, state.Current.JsonClassInfo, ref jsonPropertyInfo, options);
             }
 
             state.Current.JsonPropertyInfo = jsonPropertyInfo;
 
-            if (propertyClassType == ClassType.Value)
+            if (jsonPropertyInfo.ClassType == ClassType.Value)
             {
-                jsonPropertyInfo.Write(options, ref state.Current, ref writer);
+                jsonPropertyInfo.Write(options, ref state.Current, writer);
                 state.Current.NextProperty();
                 return true;
             }
 
             // A property that returns an enumerator keeps the same stack frame.
-            if (propertyClassType == ClassType.Enumerable)
+            if (jsonPropertyInfo.ClassType == ClassType.Enumerable)
             {
-                bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, ref writer, ref state);
+                bool endOfEnumerable = HandleEnumerable(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                if (endOfEnumerable)
+                {
+                    state.Current.NextProperty();
+                }
+
+                return endOfEnumerable;
+            }
+
+            // A property that returns a dictionary keeps the same stack frame.
+            if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
+            {
+                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {
                     state.Current.NextProperty();
@@ -108,7 +100,7 @@ namespace System.Text.Json.Serialization
             // A property that returns an object.
             if (!obtainedValue)
             {
-                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
             }
 
             if (currentValue != null)
@@ -126,7 +118,7 @@ namespace System.Text.Json.Serialization
             }
             else
             {
-                if (!jsonPropertyInfo.IgnoreNullPropertyValueOnWrite(options))
+                if (!jsonPropertyInfo.IgnoreNullValues)
                 {
                     writer.WriteNull(jsonPropertyInfo._escapedName);
                 }

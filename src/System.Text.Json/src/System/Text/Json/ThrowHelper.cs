@@ -45,17 +45,9 @@ namespace System.Text.Json
             throw GetArgumentException(SR.SpecialNumberValuesNotSupported);
         }
 
-        public static void ThrowArgumentException(ExceptionResource resource, int minimumSize = 0)
+        public static void ThrowInvalidOperationException_NeedLargerSpan()
         {
-            if (resource == ExceptionResource.FailedToGetLargerSpan)
-            {
-                throw GetArgumentException(SR.FailedToGetLargerSpan);
-            }
-            else
-            {
-                Debug.Assert(resource == ExceptionResource.FailedToGetMinimumSizeSpan);
-                throw GetArgumentException(SR.Format(SR.FailedToGetMinimumSizeSpan, minimumSize));
-            }
+            throw GetInvalidOperationException(SR.FailedToGetLargerSpan);
         }
 
         public static void ThrowArgumentException(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> value)
@@ -258,6 +250,12 @@ namespace System.Text.Json
                 case ExceptionResource.MismatchedObjectArray:
                     message = SR.Format(SR.MismatchedObjectArray, character);
                     break;
+                case ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd:
+                    message = SR.TrailingCommaNotAllowedBeforeArrayEnd;
+                    break;
+                case ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd:
+                    message = SR.TrailingCommaNotAllowedBeforeObjectEnd;
+                    break;
                 case ExceptionResource.EndOfStringNotFound:
                     message = SR.EndOfStringNotFound;
                     break;
@@ -287,6 +285,9 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.ExpectedStartOfPropertyOrValueNotFound:
                     message = SR.ExpectedStartOfPropertyOrValueNotFound;
+                    break;
+                case ExceptionResource.ExpectedStartOfPropertyOrValueAfterComment:
+                    message = SR.Format(SR.ExpectedStartOfPropertyOrValueAfterComment, character);
                     break;
                 case ExceptionResource.ExpectedStartOfValueNotFound:
                     message = SR.Format(SR.ExpectedStartOfValueNotFound, character);
@@ -341,6 +342,11 @@ namespace System.Text.Json
         public static void ThrowInvalidOperationException(ExceptionResource resource, int currentDepth, byte token, JsonTokenType tokenType)
         {
             throw GetInvalidOperationException(resource, currentDepth, token, tokenType);
+        }
+
+        public static void ThrowArgumentException_InvalidCommentValue()
+        {
+            throw new ArgumentException(SR.CannotWriteCommentWithEmbeddedDelimiter);
         }
 
         public static void ThrowArgumentException_InvalidUTF8(ReadOnlySpan<byte> value)
@@ -506,6 +512,7 @@ namespace System.Text.Json
         ExpectedSeparatorAfterPropertyNameNotFound,
         ExpectedStartOfPropertyNotFound,
         ExpectedStartOfPropertyOrValueNotFound,
+        ExpectedStartOfPropertyOrValueAfterComment,
         ExpectedStartOfValueNotFound,
         ExpectedTrue,
         ExpectedValueAfterPropertyNameNotFound,
@@ -522,10 +529,10 @@ namespace System.Text.Json
         CannotStartObjectArrayAfterPrimitiveOrClose,
         CannotWriteValueWithinObject,
         CannotWriteValueAfterPrimitive,
-        FailedToGetMinimumSizeSpan,
-        FailedToGetLargerSpan,
         CannotWritePropertyWithinArray,
-        ExpectedJsonTokens
+        ExpectedJsonTokens,
+        TrailingCommaNotAllowedBeforeArrayEnd,
+        TrailingCommaNotAllowedBeforeObjectEnd,
     }
 
     internal enum NumericType

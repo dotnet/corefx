@@ -7,6 +7,9 @@ using System.Net.Test.Common;
 using System.Text;
 using System.Threading.Tasks;
 
+using Microsoft.DotNet.XUnitExtensions;
+using Microsoft.DotNet.RemoteExecutor;
+
 using Xunit;
 using Xunit.Abstractions;
 
@@ -17,12 +20,7 @@ namespace System.Net.Http.Functional.Tests
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
     public abstract class HttpClientHandler_Proxy_Test : HttpClientHandlerTestBase
     {
-        private readonly ITestOutputHelper _output;
-        
-        public HttpClientHandler_Proxy_Test(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public HttpClientHandler_Proxy_Test(ITestOutputHelper output) : base(output) { }
 
         [ActiveIssue(32809)]
         [OuterLoop("Uses external server")]
@@ -104,6 +102,35 @@ namespace System.Net.Http.Functional.Tests
                     }
                 }
             }
+        }
+
+        [OuterLoop("Uses external server")]
+        [ConditionalFact]
+        public void Proxy_UseEnvironmentVariableToSetSystemProxy_RequestGoesThruProxy()
+        {
+            if (!UseSocketsHttpHandler)
+            {
+                throw new SkipTestException("Test needs SocketsHttpHandler");
+            }
+
+            RemoteExecutor.Invoke(async useSocketsHttpHandlerString =>
+            {
+                var options = new LoopbackProxyServer.Options { AddViaRequestHeader = true };
+                using (LoopbackProxyServer proxyServer = LoopbackProxyServer.Create(options))
+                {
+                    Environment.SetEnvironmentVariable("http_proxy", proxyServer.Uri.AbsoluteUri.ToString());
+
+                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString))
+                    using (HttpResponseMessage response = await client.GetAsync(Configuration.Http.RemoteEchoServer))
+                    {
+                        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                        string body = await response.Content.ReadAsStringAsync();
+                        Assert.Contains(proxyServer.ViaHeader, body);
+                    }
+
+                    return RemoteExecutor.SuccessExitCode;
+                }
+            }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
         [ActiveIssue(32809)]

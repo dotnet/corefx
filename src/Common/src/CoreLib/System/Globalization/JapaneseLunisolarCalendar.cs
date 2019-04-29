@@ -27,7 +27,7 @@ namespace System.Globalization
         public override DateTime MinSupportedDateTime => s_minDate;
 
         public override DateTime MaxSupportedDateTime => s_maxDate;
-        
+
         protected override int DaysInYearBeforeMinSupportedYear
         {
             get
@@ -202,7 +202,7 @@ namespace System.Globalization
             // If we didn't copy any then something was wrong, just return base
             if (newIndex == 0) return baseEras;
 
-            Array.Resize(ref newEras, newIndex);
+            Array.Resize(ref newEras!, newIndex); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
             return newEras;
         }
 
@@ -217,6 +217,6 @@ namespace System.Globalization
 
         internal override CalendarId ID => CalendarId.JAPANESELUNISOLAR;
 
-        public override int[]? Eras => _helper.Eras;
+        public override int[] Eras => _helper.Eras;
     }
 }

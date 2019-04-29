@@ -68,18 +68,13 @@
       <!-- enable trimming for any runtime project that's part of the shared framework and hasn't already set ILLinkTrimAssembly -->
       <SetProperties Condition="'$(BinPlaceRuntime)' == 'true' AND '$(ILLinkTrimAssembly)' == ''">ILLinkTrimAssembly=true</SetProperties>
     </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(IsNETCoreApp)' == 'true' AND '$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreappaot-$(_bc_OSGroup)">
-      <PackageFileRuntimePath>$(NETCoreAppAotPackageRuntimePath)</PackageFileRuntimePath>
-      <!-- enable trimming for any runtime project that's part of the shared framework and hasn't already set ILLinkTrimAssembly -->
-      <SetProperties Condition="'$(BinPlaceRuntime)' == 'true' AND '$(ILLinkTrimAssembly)' == ''">ILLinkTrimAssembly=true</SetProperties>
-    </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(IsUAPRef)'=='true' AND ('$(BuildingUAPVertical)' == 'true' OR '$(BuildingUAPAOTVertical)' == 'true')" Include="uap-$(_bc_OSGroup)">
+    <BinPlaceConfiguration Condition="'$(IsUAPRef)'=='true' AND ('$(BuildingUAPVertical)' == 'true' OR '$(BuildingUAPAOTVertical)' == 'true')" Include="uap-Windows_NT">
       <PackageFileRefPath>$(UAPPackageRefPath)</PackageFileRefPath>
     </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPVertical)' == 'true'" Include="uap-$(_bc_OSGroup)">
+    <BinPlaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPVertical)' == 'true'" Include="uap-Windows_NT">
       <PackageFileRuntimePath>$(UAPPackageRuntimePath)</PackageFileRuntimePath>
     </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPAOTVertical)' == 'true'" Include="uapaot-$(_bc_OSGroup)">
+    <BinPlaceConfiguration Condition="'$(IsUAP)' == 'true' AND '$(BuildingUAPAOTVertical)' == 'true'" Include="uapaot-Windows_NT">
       <PackageFileRuntimePath>$(UAPAOTPackageRuntimePath)</PackageFileRuntimePath>
     </BinPlaceConfiguration>
 
@@ -88,23 +83,15 @@
       <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)</RuntimePath>
     </BinPlaceConfiguration>
     <!-- Setup the ILCInputFolder directory for testing aot -->
-    <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="uapaot-$(_bc_OSGroup)">
-      <RuntimePath>$(ILCFXInputFolder)</RuntimePath>
-    </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="netcoreappaot-$(_bc_OSGroup)">
+    <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="uapaot-Windows_NT">
       <RuntimePath>$(ILCFXInputFolder)</RuntimePath>
     </BinPlaceConfiguration>
     <!-- And the UAP folder for the F5 (CoreCLR UAP-debugging) scenario -->
-    <BinPlaceConfiguration Condition="'$(BinPlaceUAPFramework)' == 'true'" Include="uap-$(_bc_OSGroup)">
+    <BinPlaceConfiguration Condition="'$(BinPlaceUAPFramework)' == 'true'" Include="uap-Windows_NT">
       <RuntimePath>$(UAPTestSharedFrameworkPath)</RuntimePath>
     </BinPlaceConfiguration>
-    <BinPlaceConfiguration Condition="'$(BinPlaceNETFXRuntime)' == 'true'" Include="netfx-$(_bc_OSGroup)">
+    <BinPlaceConfiguration Condition="'$(BinPlaceNETFXRuntime)' == 'true'" Include="netfx-Windows_NT">
       <RuntimePath>$(TestHostRootPath)</RuntimePath>
-    </BinPlaceConfiguration>
-
-    <!-- binplace netstandard test suite -->
-    <BinPlaceConfiguration Condition="'$(BuildingNETStandardVertical)' == 'true' AND '$(IsTestProject)' == 'true'" Include="netstandard-$(_bc_OSGroup)">
-      <TestPath>$(NETStandardTestSuiteOutputPath)$(AssemblyName)/</TestPath>
     </BinPlaceConfiguration>
 
     <!-- binplace targeting packs which may be different from BuildConfiguration -->
@@ -114,9 +101,6 @@
     <!-- some libraries that produce packages will remain targeting netcoreapp2.0 -->
     <BinPlaceConfiguration Condition="'$(BuildingNETCoreAppVertical)' == 'true'" Include="netcoreapp2.0">
       <RefPath>$(RefRootPath)netcoreapp2.0/</RefPath>
-    </BinPlaceConfiguration>
-    <BinPlaceConfiguration Include="netcoreapp2.0-Windows_NT">
-      <RuntimePath>$(ShimsTargetRuntimeRoot)netcoreapp2.0/</RuntimePath>
     </BinPlaceConfiguration>
     <!-- some libraries that produce packages will remain targeting uap10.0.16299 -->
     <BinPlaceConfiguration Condition="'$(BuildingUAPVertical)' == 'true' OR '$(BuildingUAPAOTVertical)' == 'true'" Include="uap10.0.16299">
@@ -129,6 +113,10 @@
     <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'"
                            Include="@(_TargetGroupsWithIsAot->WithMetadataValue('IsAot', 'false'))">
       <RefPath>$(RefRootPath)%(Identity)/</RefPath>
+    </BinPlaceConfiguration>
+    <!-- for BuildAllConfigurations make sure runtimepaths are created for all vertical targetgroups. -->
+    <BinPlaceConfiguration Condition="'$(BuildAllConfigurations)' == 'true'" Include="netcoreapp-$(_bc_OSGroup);uap-Windows_NT;uapaot-Windows_NT">
+      <RuntimePath>$(ArtifactsBinDir)runtime/%(Identity)-$(ConfigurationGroup)-$(ArchGroup)</RuntimePath>
     </BinPlaceConfiguration>
 
     <BinPlaceConfiguration Include="@(AdditionalBinPlaceConfiguration)" />

@@ -104,9 +104,7 @@ namespace System.Runtime.Loader.Tests
 
             // We should have successfully loaded the assembly in secondary load context.
             Assert.NotNull(slcLoadedAssembly);
-#if CoreCLR_23583
             Assert.Contains(slcLoadedAssembly, slc.Assemblies);
-#endif
 
             // And make sure the simple name matches
             Assert.Equal(TestAssemblyName, slcLoadedAssembly.GetName().Name);
@@ -129,9 +127,7 @@ namespace System.Runtime.Loader.Tests
 
             // We should have successfully loaded the assembly in default context.
             Assert.NotNull(assemblyExpectedFromLoad);
-#if CoreCLR_23583
             Assert.Contains(assemblyExpectedFromLoad, AssemblyLoadContext.Default.Assemblies);
-#endif
 
             // We should have only invoked non-Null returning handler once
             Assert.Equal(1, _numNonNullResolutions);
@@ -252,6 +248,8 @@ namespace System.Runtime.Loader.Tests
             var asmTargetAsm = olc.LoadFromAssemblyPath(_assemblyPath);
             var loadedContext = AssemblyLoadContext.GetLoadContext(asmTargetAsm);
 
+            olc.LoadedFromContext = false;
+
             // LoadContext of the assembly should be the custom context and not DefaultContext
             Assert.NotEqual(lcDefault, olc);
             Assert.Equal(olc, loadedContext);
@@ -264,7 +262,6 @@ namespace System.Runtime.Loader.Tests
             // Load System.Runtime - since this is on TPA, it should get resolved from our custom load context
             // since the Load method has been implemented to override TPA assemblies.
             var assemblyName = "System.Runtime, Version=4.0.0.0";
-            olc.LoadedFromContext = false;
             Assembly asmLoaded = (Assembly)method.Invoke(null, new object[] {assemblyName});
             loadedContext = AssemblyLoadContext.GetLoadContext(asmLoaded);
 

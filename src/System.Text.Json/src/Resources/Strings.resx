@@ -204,9 +204,6 @@
   <data name="FailedToGetLargerSpan" xml:space="preserve">
     <value>The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing.</value>
   </data>
-  <data name="FailedToGetMinimumSizeSpan" xml:space="preserve">
-    <value>The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing. Need at least {0} bytes.</value>
-  </data>
   <data name="FoundInvalidCharacter" xml:space="preserve">
     <value>'{0}' is invalid after a value. Expected either ',', '}}', or ']'.</value>
   </data>
@@ -311,5 +308,29 @@
   </data>
   <data name="FormatGuid" xml:space="preserve">
     <value>The JSON value is not in a supported Guid format.</value>
+  </data>
+  <data name="ExpectedStartOfPropertyOrValueAfterComment" xml:space="preserve">
+    <value>'{0}' is an invalid start of a property name or value, after a comment.</value>
+  </data>
+  <data name="TrailingCommaNotAllowedBeforeArrayEnd" xml:space="preserve">
+    <value>The JSON array contains a trailing comma at the end which is not supported in this mode. Change the reader options.</value>
+  </data>
+  <data name="TrailingCommaNotAllowedBeforeObjectEnd" xml:space="preserve">
+    <value>The JSON object contains a trailing comma at the end which is not supported in this mode. Change the reader options.</value>
+  </data>
+  <data name="SerializerOptionsImmutable" xml:space="preserve">
+    <value>Serializer options cannot be changed once serialization or deserialization has occurred.</value>
+  </data>
+  <data name="StreamNotWritable" xml:space="preserve">
+    <value>Stream is not writable.</value>
+  </data>
+  <data name="CannotWriteCommentWithEmbeddedDelimiter" xml:space="preserve">
+    <value>Cannot write a comment value which contains the end of comment delimiter.</value>
+  </data>
+  <data name="SerializerPropertyNameConflict" xml:space="preserve">
+    <value>The JSON property name for '{0}.{1}' collides with another property.</value>
+  </data>
+  <data name="SerializerPropertyNameNull" xml:space="preserve">
+    <value>The JSON property name for '{0}.{1}' cannot be null.</value>
   </data>
 </root>

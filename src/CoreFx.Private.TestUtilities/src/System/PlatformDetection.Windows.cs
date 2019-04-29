@@ -16,7 +16,7 @@ namespace System
     {
         public static Version OSXVersion => throw new PlatformNotSupportedException();
         public static Version OpenSslVersion => throw new PlatformNotSupportedException();
-        public static bool IsDrawingSupported => IsNotWindowsNanoServer && IsNotWindowsServerCore;
+        public static bool IsDrawingSupported => IsNotWindowsNanoServer && IsNotWindowsServerCore && !IsUap;
         public static bool IsSoundPlaySupported => IsNotWindowsNanoServer;
         public static bool IsSuperUser => throw new PlatformNotSupportedException();
         public static bool IsCentos6 => false;
@@ -65,6 +65,10 @@ namespace System
         // >= Windows 10 April 2018 Update
         public static bool IsWindows10Version1803OrGreater =>
             GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 17134;
+
+        // >= Windows 10 May 2019 Update (19H1)
+        public static bool IsWindows10Version1903OrGreater =>
+            GetWindowsVersion() == 10 && GetWindowsMinorVersion() == 0 && GetWindowsBuildNumber() >= 18362;
 
         // Windows OneCoreUAP SKU doesn't have httpapi.dll
         public static bool IsNotOneCoreUAP =>  

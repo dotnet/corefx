@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Serialization.Converters;
@@ -14,16 +16,16 @@ namespace System.Text.Json.Serialization
     /// </summary>
     internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty> : JsonPropertyInfo
     {
-        internal bool _isPropertyPolicy;
-        internal Func<TClass, TDeclaredProperty> Get { get; private set; }
-        internal Action<TClass, TDeclaredProperty> Set { get; private set; }
+        public bool _isPropertyPolicy;
+        public Func<TClass, TDeclaredProperty> Get { get; private set; }
+        public Action<TClass, TDeclaredProperty> Set { get; private set; }
 
         public JsonValueConverter<TRuntimeProperty> ValueConverter { get; internal set; }
 
         // Constructor used for internal identifiers
-        internal JsonPropertyInfoCommon() { }
+        public JsonPropertyInfoCommon() { }
 
-        internal JsonPropertyInfoCommon(
+        public JsonPropertyInfoCommon(
             Type parentClassType,
             Type declaredPropertyType,
             Type runtimePropertyType,
@@ -51,18 +53,19 @@ namespace System.Text.Json.Serialization
                 _isPropertyPolicy = true;
                 HasGetter = true;
                 HasSetter = true;
+                ValueConverter = DefaultConverters<TRuntimeProperty>.s_converter;
             }
 
             GetPolicies(options);
         }
 
-        internal override void GetPolicies(JsonSerializerOptions options)
+        public override void GetPolicies(JsonSerializerOptions options)
         {
             ValueConverter = DefaultConverters<TRuntimeProperty>.s_converter;
             base.GetPolicies(options);
         }
 
-        internal override object GetValueAsObject(object obj, JsonSerializerOptions options)
+        public override object GetValueAsObject(object obj)
         {
             if (_isPropertyPolicy)
             {
@@ -73,15 +76,32 @@ namespace System.Text.Json.Serialization
             return Get((TClass)obj);
         }
 
-        internal override void SetValueAsObject(object obj, object value, JsonSerializerOptions options)
+        public override void SetValueAsObject(object obj, object value)
         {
             Debug.Assert(Set != null);
             TDeclaredProperty typedValue = (TDeclaredProperty)value;
 
-            if (typedValue != null || !IgnoreNullPropertyValueOnWrite(options))
+            if (typedValue != null || !IgnoreNullValues)
             {
                 Set((TClass)obj, (TDeclaredProperty)value);
             }
+        }
+
+        public override IList CreateConverterList()
+        {
+            return new List<TDeclaredProperty>();
+        }
+
+        // Map interfaces to a well-known implementation.
+        public override Type GetConcreteType(Type interfaceType)
+        {
+            if (interfaceType.IsAssignableFrom(typeof(IDictionary<string, TRuntimeProperty>)) ||
+                interfaceType.IsAssignableFrom(typeof(IReadOnlyDictionary<string, TRuntimeProperty>)))
+            {
+                return typeof(Dictionary<string, TRuntimeProperty>);
+            }
+
+            return interfaceType;
         }
     }
 }

@@ -9,64 +9,49 @@ namespace System.Text.Json.Serialization
 {
     public static partial class JsonSerializer
     {
-        private static bool WriteEnumerable(
-            JsonSerializerOptions options,
-            ref Utf8JsonWriter writer,
-            ref WriteStack state)
-        {
-            return HandleEnumerable(state.Current.JsonClassInfo.ElementClassInfo, options, ref writer, ref state);
-        }
-
         private static bool HandleEnumerable(
             JsonClassInfo elementClassInfo,
             JsonSerializerOptions options,
-            ref Utf8JsonWriter writer,
+            Utf8JsonWriter writer,
             ref WriteStack state)
         {
             Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
+            if (!jsonPropertyInfo.ShouldSerialize)
+            {
+                // Ignore writing this property.
+                return true;
+            }
 
             if (state.Current.Enumerator == null)
             {
-                if (jsonPropertyInfo._name == null)
+                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
+
+                if (enumerable == null)
                 {
-                    writer.WriteStartArray();
-                }
-                else
-                {
-                    writer.WriteStartArray(jsonPropertyInfo._name);
+                    // Write a null object or enumerable.
+                    state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer, writeNull: true);
+                    return true;
                 }
 
-                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                state.Current.Enumerator = enumerable.GetEnumerator();
 
-                if (enumerable != null)
-                {
-                    state.Current.Enumerator = enumerable.GetEnumerator();
-                }
+                state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer);
             }
 
-            if (state.Current.Enumerator != null && state.Current.Enumerator.MoveNext())
+            if (state.Current.Enumerator.MoveNext())
             {
-                // If the enumerator contains typeof(object), get the run-time type
-                if (elementClassInfo.ClassType == ClassType.Object && jsonPropertyInfo.ElementClassInfo.Type == typeof(object))
+                // Check for polymorphism.
+                if (elementClassInfo.ClassType == ClassType.Unknown)
                 {
                     object currentValue = state.Current.Enumerator.Current;
-                    if (currentValue != null)
-                    {
-                        Type runtimeType = currentValue.GetType();
-                        
-                        // Ignore object() instances since they are handled as an empty object.
-                        if (runtimeType != typeof(object))
-                        {
-                            elementClassInfo = options.GetOrAddClass(runtimeType);
-                        }
-                    }
+                    GetRuntimeClassInfo(currentValue, ref elementClassInfo, options);
                 }
 
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
-                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, ref writer);
+                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, writer);
                 }
                 else if (state.Current.Enumerator.Current == null)
                 {
@@ -86,7 +71,7 @@ namespace System.Text.Json.Serialization
             // We are done enumerating.
             writer.WriteEndArray();
 
-            if (state.Current.PopStackOnEndArray)
+            if (state.Current.PopStackOnEnd)
             {
                 state.Pop();
             }
