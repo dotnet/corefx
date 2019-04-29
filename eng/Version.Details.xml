@@ -14,25 +14,25 @@
     </Dependency>
   </ProductDependencies>
   <ToolsetDependencies>
-    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview6-27626-01">
+    <Dependency Name="Microsoft.NETCore.App" Version="3.0.0-preview6-27628-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>ae2b1b87767c013397f31e0489b654705764db2f</Sha>
+      <Sha>3cae3dfe319d7fe2b7ec5af161c0648bb1d6f4c4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.0.0-preview6-27626-01">
+    <Dependency Name="Microsoft.NETCore.DotNetHost" Version="3.0.0-preview6-27628-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>ae2b1b87767c013397f31e0489b654705764db2f</Sha>
+      <Sha>3cae3dfe319d7fe2b7ec5af161c0648bb1d6f4c4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.0.0-preview6-27626-01">
+    <Dependency Name="Microsoft.NETCore.DotNetHostPolicy" Version="3.0.0-preview6-27628-03">
       <Uri>https://github.com/dotnet/core-setup</Uri>
-      <Sha>ae2b1b87767c013397f31e0489b654705764db2f</Sha>
+      <Sha>3cae3dfe319d7fe2b7ec5af161c0648bb1d6f4c4</Sha>
     </Dependency>
-    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview6.19225.1">
+    <Dependency Name="Microsoft.NETCore.Platforms" Version="3.0.0-preview6.19227.7">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>8c7afe67ee2e9bd21a4412265b66f875cfafaede</Sha>
+      <Sha>4f27d0f84c17850ef02ea7b330908fddcdf73c86</Sha>
     </Dependency>
-    <Dependency Name="runtime.native.System.IO.Ports" Version="4.6.0-preview6.19225.1">
+    <Dependency Name="runtime.native.System.IO.Ports" Version="4.6.0-preview6.19227.7">
       <Uri>https://github.com/dotnet/corefx</Uri>
-      <Sha>18cd561127e35841db2775dc7a85adad70363e18</Sha>
+      <Sha>4f27d0f84c17850ef02ea7b330908fddcdf73c86</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.Arcade.Sdk" Version="1.0.0-beta.19225.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
@@ -47,10 +47,6 @@
       <Sha>d37270268a65592cae630f1b979b70f74d4614dd</Sha>
     </Dependency>
     <Dependency Name="Microsoft.DotNet.ApiCompat" Version="1.0.0-beta.19225.5">
-      <Uri>https://github.com/dotnet/arcade</Uri>
-      <Sha>d37270268a65592cae630f1b979b70f74d4614dd</Sha>
-    </Dependency>
-    <Dependency Name="Microsoft.DotNet.SourceRewriter" Version="1.0.0-beta.19225.5">
       <Uri>https://github.com/dotnet/arcade</Uri>
       <Sha>d37270268a65592cae630f1b979b70f74d4614dd</Sha>
     </Dependency>
