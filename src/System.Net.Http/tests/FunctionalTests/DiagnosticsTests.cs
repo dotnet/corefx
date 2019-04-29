@@ -175,7 +175,6 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [ActiveIssue(23771, TestPlatforms.AnyUnix)]
         [OuterLoop("Uses external server")]
         [Theory]
         [InlineData(false)]
@@ -274,7 +273,6 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [ActiveIssue(23209)]
         [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledLogging()
@@ -994,7 +992,6 @@ namespace System.Net.Http.Functional.Tests
             }, UseSocketsHttpHandler.ToString()).Dispose();
         }
 
-        [ActiveIssue(23209)]
         [OuterLoop("Uses external server")]
         [Fact]
         public void SendAsync_ExpectedDiagnosticCancelledActivityLogging()
