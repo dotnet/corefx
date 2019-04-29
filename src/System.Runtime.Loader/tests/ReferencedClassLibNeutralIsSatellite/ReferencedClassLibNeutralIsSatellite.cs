@@ -15,7 +15,7 @@ namespace ReferencedClassLibNeutralIsSatellite
         {
             try
             {
-                ResourceManager rm = new ResourceManager(typeof(ReferencedStrings));
+                ResourceManager rm = new ResourceManager("ReferencedClassLibNeutralIsSatellite.ReferencedStrings", typeof(Program).Assembly);
     
                 CultureInfo ci = CultureInfo.CreateSpecificCulture(lang);
         
@@ -26,9 +26,5 @@ namespace ReferencedClassLibNeutralIsSatellite
                 return e.ToString();
             }
         }
-    }
-    
-    class ReferencedStrings
-    {
     }
 }

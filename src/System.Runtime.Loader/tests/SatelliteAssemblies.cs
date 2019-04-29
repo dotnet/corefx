@@ -67,16 +67,12 @@ namespace System.Runtime.Loader.Tests
         [InlineData("fr-FR", "Neutral language Main description 1.0.0")]
         static public void mainResources(string lang, string expected)
         {
-            ResourceManager rm = new ResourceManager(typeof(MainStrings));
-
-            CultureInfo ci = CultureInfo.CreateSpecificCulture(lang);
-
             Assert.Equal(expected, Describe(lang));
         }
 
         public static string Describe(string lang)
         {
-            ResourceManager rm = new ResourceManager(typeof(MainStrings));
+            ResourceManager rm = new ResourceManager("System.Runtime.Loader.Tests.MainStrings", typeof(SatelliteAssembliesTests).Assembly);
 
             CultureInfo ci = CultureInfo.CreateSpecificCulture(lang);
 
@@ -236,10 +232,6 @@ namespace System.Runtime.Loader.Tests
         {
             SatelliteLoadsCorrectly(alc, assemblyName, culture);
         }
-    }
-
-    class MainStrings
-    {
     }
 }
 

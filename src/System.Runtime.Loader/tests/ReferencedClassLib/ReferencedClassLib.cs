@@ -13,7 +13,7 @@ namespace ReferencedClassLib
         {
             try
             {
-                ResourceManager rm = new ResourceManager(typeof(ReferencedStrings));
+                ResourceManager rm = new ResourceManager("ReferencedClassLib.ReferencedStrings", typeof(Program).Assembly);
     
                 CultureInfo ci = CultureInfo.CreateSpecificCulture(lang);
         
@@ -24,9 +24,5 @@ namespace ReferencedClassLib
                 return e.ToString();
             }
         }
-    }
-    
-    class ReferencedStrings
-    {
     }
 }
