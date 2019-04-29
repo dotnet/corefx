@@ -29,8 +29,8 @@ namespace System.Net.Http
         private readonly HPackDecoder _hpackDecoder;
 
         private readonly Dictionary<int, Http2Stream> _httpStreams;
-        private readonly SemaphoreSlim _writerLock;
 
+        private readonly SemaphoreSlim _writerLock;
         private readonly SemaphoreSlim _headerSerializationLock;
 
         private readonly CreditManager _connectionWindow;
@@ -45,6 +45,7 @@ namespace System.Net.Http
         private int _pendingWriters;
 
         private bool _disposed;
+        private Exception _abortException;
 
         // If an in-progress write is canceled we need to be able to immediately
         // report a cancellation to the user, but also block the connection until
@@ -1123,6 +1124,7 @@ namespace System.Net.Http
         {
             // The connection has failed, e.g. failed IO or a connection-level frame error.
             // Abort all streams and cause further processing to fail.
+            _abortException = abortException;
             AbortStreams(0, abortException);
         }
 
@@ -1364,7 +1366,7 @@ namespace System.Net.Http
                     e is ObjectDisposedException ||
                     e is Http2ProtocolException)
                 {
-                    replacementException = new HttpRequestException(SR.net_http_client_execution_error, e);
+                    replacementException = new HttpRequestException(SR.net_http_client_execution_error, _abortException ?? e);
                 }
                 else if (e is OperationCanceledException oce)
                 {

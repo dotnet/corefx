@@ -1345,7 +1345,16 @@ namespace System.Net.Http.Functional.Tests
                         await sslStream.WriteAsync(Encoding.ASCII.GetBytes("HTTP/1.1 400 Unrecognized request\r\n\r\n"), CancellationToken.None);
                     });
 
-                    await Assert.ThrowsAnyAsync<HttpRequestException>(async () => await requestTask);
+                    try {
+                        await requestTask;
+                        throw new Exception("Should not be here");
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        Assert.NotNull(e.InnerException);
+                        // TBD expect Http2ProtocolException wheni/if exposed
+                        Assert.False(e.InnerException is ObjectDisposedException);
+                    }
                 });
             }
         }
