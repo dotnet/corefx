@@ -13,6 +13,7 @@ using ReferencedClassLibNeutralIsSatellite;
 
 namespace System.Runtime.Loader.Tests
 {
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UWP does not use satellite assemblies in most cases")]
     public class SatelliteAssembliesTestsFixture
     {
         public Dictionary<string, AssemblyLoadContext> contexts = new Dictionary<string, AssemblyLoadContext>();
@@ -29,16 +30,15 @@ namespace System.Runtime.Loader.Tests
 
             new AssemblyLoadContext("Empty");
 
-            AssemblyLoadContext referencedClassLibEn = new AssemblyLoadContext("ReferencedClassLib.en");
-            string parentDir = Path.GetDirectoryName(typeof(ReferencedClassLib.Program).Assembly.Location);
-            string name = typeof(ReferencedClassLib.Program).Assembly.GetName().Name + ".resources.dll";
-            string path = Path.Combine(parentDir, "en", name);
-            Console.WriteLine(path);
-            // *** The following line is commented out due to #37246 or dotnet/sdk#3185
-            // referencedClassLibEn.LoadFromAssemblyPath(Path.Combine(parentDir, "en", name));
-
-            Assembly assembly = Assembly.LoadFile(typeof(SatelliteAssembliesTests).Assembly.Location);
-            contexts["LoadFrom"] = AssemblyLoadContext.GetLoadContext(assembly);
+            try
+            {
+                Assembly assembly = Assembly.LoadFile(typeof(SatelliteAssembliesTests).Assembly.Location);
+                contexts["LoadFile"] = AssemblyLoadContext.GetLoadContext(assembly);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
 
             foreach (var alc in AssemblyLoadContext.All)
             {
@@ -48,6 +48,7 @@ namespace System.Runtime.Loader.Tests
         }
     }
 
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UWP does not use satellite assemblies in most cases")]
     public class SatelliteAssembliesTests : IClassFixture<SatelliteAssembliesTestsFixture>
     {
         Dictionary<string, AssemblyLoadContext> contexts;
@@ -134,13 +135,13 @@ namespace System.Runtime.Loader.Tests
         [InlineData("SatelliteAssembliesTests", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "es-MX", "Spanish (Mexico) language Main description 1.0.0")]
         [InlineData("SatelliteAssembliesTests", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "fr",    "Neutral language Main description 1.0.0")]
         [InlineData("SatelliteAssembliesTests", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "fr-FR", "Neutral language Main description 1.0.0")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "",      "Neutral language Main description 1.0.0")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "en",    "English language Main description 1.0.0")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "en-US", "English language Main description 1.0.0")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "es",    "Neutral language Main description 1.0.0")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "es-MX", "Spanish (Mexico) language Main description 1.0.0")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "fr",    "Neutral language Main description 1.0.0")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "fr-FR", "Neutral language Main description 1.0.0")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "",      "Neutral language Main description 1.0.0")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "en",    "English language Main description 1.0.0")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "en-US", "English language Main description 1.0.0")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "es",    "Neutral language Main description 1.0.0")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "es-MX", "Spanish (Mexico) language Main description 1.0.0")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "fr",    "Neutral language Main description 1.0.0")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests.SatelliteAssembliesTests", "fr-FR", "Neutral language Main description 1.0.0")]
         public void describeLib24191(string alc, string type, string culture, string expected)
         {
             describeLib(alc, type, culture, expected);
@@ -194,8 +195,8 @@ namespace System.Runtime.Loader.Tests
         [ActiveIssue("dotnet/coreclr#24191")]
         [InlineData("SatelliteAssembliesTests", "System.Runtime.Loader.Tests", "en")]
         [InlineData("SatelliteAssembliesTests", "System.Runtime.Loader.Tests", "es-MX")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests", "en")]
-        [InlineData("LoadFrom", "System.Runtime.Loader.Tests", "es-MX")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests", "en")]
+        [InlineData("LoadFile", "System.Runtime.Loader.Tests", "es-MX")]
         public void SatelliteLoadsCorrectly24191(string alc, string assemblyName, string culture)
         {
             SatelliteLoadsCorrectly(alc, assemblyName, culture);
@@ -210,9 +211,9 @@ namespace System.Runtime.Loader.Tests
         [InlineData("Empty", "ReferencedClassLib", "en")]
         [InlineData("Empty", "ReferencedClassLibNeutralIsSatellite", "en")]
         [InlineData("Empty", "ReferencedClassLibNeutralIsSatellite", "es")]
-        [InlineData("LoadFrom", "ReferencedClassLib", "en")]
-        [InlineData("LoadFrom", "ReferencedClassLibNeutralIsSatellite", "en")]
-        [InlineData("LoadFrom", "ReferencedClassLibNeutralIsSatellite", "es")]
+        [InlineData("LoadFile", "ReferencedClassLib", "en")]
+        [InlineData("LoadFile", "ReferencedClassLibNeutralIsSatellite", "en")]
+        [InlineData("LoadFile", "ReferencedClassLibNeutralIsSatellite", "es")]
         [InlineData("ReferencedClassLibNeutralIsSatellite", "ReferencedClassLib", "en")]
         [InlineData("ReferencedClassLib", "ReferencedClassLibNeutralIsSatellite", "en")]
         [InlineData("ReferencedClassLib", "ReferencedClassLibNeutralIsSatellite", "es")]
