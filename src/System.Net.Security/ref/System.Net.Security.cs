@@ -27,6 +27,42 @@ namespace System.Net.Security
         NoEncryption = 2,
     }
     public delegate System.Security.Cryptography.X509Certificates.X509Certificate LocalCertificateSelectionCallback(object sender, string targetHost, System.Security.Cryptography.X509Certificates.X509CertificateCollection localCertificates, System.Security.Cryptography.X509Certificates.X509Certificate remoteCertificate, string[] acceptableIssuers);
+    [System.FlagsAttribute]
+    public enum NegotiateAuthFlags
+    {
+        None = 0,
+        Delegate = 1,
+        MutualAuth = 2,
+        ReplayDetect = 4,
+        SequenceDetect = 8,
+        Confidentiality = 16,
+        UseSessionKey = 32,
+        InitUseSuppliedCreds = 128,
+        AllocateMemory = 256,
+        Connection = 2048,
+        InitExtendedError = 16384,
+        AcceptExtendedError = 32768,
+        InitStream = 32768,
+        AcceptStream = 65536,
+        InitIntegrity = 65536,
+        AcceptIntegrity = 131072,
+        InitIdentify = 131072,
+        AcceptIdentify = 524288,
+        InitManualCredValidation = 524288,
+        ProxyBindings = 67108864,
+        AllowMissingBindings = 268435456,
+        UnverifiedTargetName = 536870912,
+    }
+    public partial class NegotiateAuthState : System.IDisposable
+    {
+        public NegotiateAuthState(bool isServer, string package, System.Net.NetworkCredential credential, string spn, System.Net.Security.NegotiateAuthFlags requestedContextFlags, System.Security.Authentication.ExtendedProtection.ChannelBinding channelBinding) { }
+        public string ClientSpecifiedSpn { get { throw null; } }
+        public bool IsCompleted { get { throw null; } }
+        public string Package { get { throw null; } }
+        public void Dispose() { }
+        public System.Security.Principal.IIdentity GetIdentity() { throw null; }
+        public string GetOutgoingBlob(string incomingBlob) { throw null; }
+    }
     public partial class NegotiateStream : System.Net.Security.AuthenticatedStream
     {
         public NegotiateStream(System.IO.Stream innerStream) : base (default(System.IO.Stream), default(bool)) { }

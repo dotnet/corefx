@@ -9,6 +9,7 @@ using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Security.Authentication.ExtendedProtection;
+using System.Net.Security;
 
 namespace System.Net.Http
 {
@@ -101,8 +102,7 @@ namespace System.Net.Http
                         }
 
                         ChannelBinding channelBinding = connection.TransportContext?.GetChannelBinding(ChannelBindingKind.Endpoint);
-                        NTAuthentication authContext = new NTAuthentication(isServer:false, challenge.SchemeName, challenge.Credential, spn, ContextFlagsPal.Connection, channelBinding);
-                        try
+                        using (NegotiateAuthState authContext = new NegotiateAuthState(isServer: false, challenge.SchemeName, challenge.Credential, spn, NegotiateAuthFlags.Connection, channelBinding))
                         {
                             while (true)
                             {
@@ -128,10 +128,6 @@ namespace System.Net.Http
 
                                 needDrain = true;
                             }
-                        }
-                        finally
-                        {
-                            authContext.CloseContext();
                         }
                     }
                     finally
