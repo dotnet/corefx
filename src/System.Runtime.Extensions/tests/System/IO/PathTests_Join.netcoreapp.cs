@@ -117,5 +117,77 @@ namespace System.IO.Tests
                 Assert.Equal(output, new char[output.Length]);
             }
         }
+
+        public static TheoryData<string, string, string, string, string> TestData_JoinFourPaths = new TheoryData<string, string, string, string, string>
+        {
+            { "", "", "", "", "" },
+            { Sep, Sep, Sep, Sep, $"{Sep}{Sep}{Sep}{Sep}" },
+            { AltSep, AltSep, AltSep, AltSep, $"{AltSep}{AltSep}{AltSep}{AltSep}" },
+            { "a", "", "", "", "a" },
+            { "", "a", "", "", "a" },
+            { "", "", "a", "", "a" },
+            { "", "", "", "a", "a" },
+            { "a", "b", "", "", $"a{Sep}b" },
+            { "a", "", "b", "", $"a{Sep}b" },
+            { "a", "", "", "b", $"a{Sep}b" },
+            { "a", "b", "c", "", $"a{Sep}b{Sep}c" },
+            { "a", "b", "", "c", $"a{Sep}b{Sep}c" },
+            { "a", "", "b", "c", $"a{Sep}b{Sep}c" },
+            { "", "a", "b", "c", $"a{Sep}b{Sep}c" },
+            { "a", "b", "c", "d", $"a{Sep}b{Sep}c{Sep}d" },
+            { "a", Sep, "b", "", $"a{Sep}b" },
+            { "a", Sep, "", "b", $"a{Sep}b" },
+            { "a", "", Sep, "b", $"a{Sep}b" },
+            { $"a{Sep}", "b", "", "", $"a{Sep}b" },
+            { $"a{Sep}", "", "b", "", $"a{Sep}b" },
+            { $"a{Sep}", "", "", "b", $"a{Sep}b" },
+            { "", $"a{Sep}", "b", "", $"a{Sep}b" },
+            { "", $"a{Sep}", "", "b", $"a{Sep}b" },
+            { "", "", $"a{Sep}", "b", $"a{Sep}b" },
+            { "a", $"{Sep}b", "", "", $"a{Sep}b" },
+            { "a", "", $"{Sep}b", "", $"a{Sep}b" },
+            { "a", "", "", $"{Sep}b", $"a{Sep}b" },
+            { $"a{AltSep}", "b", "", "", $"a{AltSep}b" },
+            { $"a{AltSep}", "", "b", "", $"a{AltSep}b" },
+            { $"a{AltSep}", "", "", "b", $"a{AltSep}b" },
+            { "", $"a{AltSep}", "b", "", $"a{AltSep}b" },
+            { "", $"a{AltSep}", "", "b", $"a{AltSep}b" },
+            { "", "", $"a{AltSep}", "b", $"a{AltSep}b" },
+            { "a", $"{AltSep}b", "", "", $"a{AltSep}b" },
+            { "a", "", $"{AltSep}b", "", $"a{AltSep}b" },
+            { "a", "", "", $"{AltSep}b", $"a{AltSep}b" },
+            { null, null, null, null, "" },
+            { "a", null, null, null, "a" },
+            { null, "a", null, null, "a" },
+            { null, null, "a", null, "a" },
+            { null, null, null, "a", "a" },
+            { "a", null, "b", null, $"a{Sep}b" },
+            { "a", null, null, "b", $"a{Sep}b" }
+        };
+
+        [Theory, MemberData(nameof(TestData_JoinFourPaths))]
+        public void JoinFourPaths(string path1, string path2, string path3, string path4, string expected)
+        {   
+            Assert.Equal(expected, Path.Join(path1.AsSpan(), path2.AsSpan(), path3.AsSpan(), path4.AsSpan()));
+            Assert.Equal(expected, Path.Join(path1, path2, path3, path4));
+        }
+
+        [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
+        public void JoinStringArray_2(string path1, string path2, string expected)
+        {
+            Assert.Equal(expected, Path.Join(new string[] { path1, path2 }));
+        }
+
+        [Theory, MemberData(nameof(TestData_JoinThreePaths))]
+        public void JoinStringArray_3(string path1, string path2, string path3, string expected)
+        {
+            Assert.Equal(expected, Path.Join(new string[] { path1, path2, path3 }));
+        }
+
+        [Theory, MemberData(nameof(TestData_JoinFourPaths))]
+        public void JoinStringArray_4(string path1, string path2, string path3, string path4, string expected)
+        {
+            Assert.Equal(expected, Path.Join(new string[] { path1, path2, path3, path4 }));
+        }
     }
 }
