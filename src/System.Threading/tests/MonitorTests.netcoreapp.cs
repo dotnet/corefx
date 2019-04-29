@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Threading.Tests
 {
-    public static class MonitorTests
+    public static partial class MonitorTests
     {
         [Fact]
         public static void Enter_HasToWait_LockContentionCountTest()
