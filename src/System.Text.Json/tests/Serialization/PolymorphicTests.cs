@@ -42,16 +42,16 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadPrimitivesFail()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@""));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@"a"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<object>(@""));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<object>(@"a"));
         }
 
         [Fact]
         public static void ParseUntyped()
         {
             // Not supported until we are able to deserialize into JsonElement.
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@"""hello"""));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>(@"true"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<object>(@"""hello"""));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<object>(@"true"));
         }
 
         [Fact]

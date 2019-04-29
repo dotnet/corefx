@@ -54,21 +54,20 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void DuplicateKeysFail()
         {
-            // todo: this should throw a JsonReaderException
-            Assert.Throws<ArgumentException>(() => JsonSerializer.Parse<Dictionary<string, string>>(
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<Dictionary<string, string>>(
                 @"{""Hello"":""World"", ""Hello"":""World""}"));
         }
 
         [Fact]
         public static void DictionaryOfObjectFail()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Dictionary<string, object>>(@"{""Key1"":1"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<Dictionary<string, object>>(@"{""Key1"":1"));
         }
 
         [Fact]
         public static void FirstGenericArgNotStringFail()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
         }
 
         [Fact]

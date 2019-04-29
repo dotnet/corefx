@@ -101,6 +101,13 @@ namespace System.Text.Json
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         }
     }
+    public abstract partial class JsonException : System.Exception
+    {
+        protected JsonException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public JsonException(string message) { }
+        public JsonException(string message, System.Exception innerException) { }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+    }
     public readonly partial struct JsonProperty
     {
         private readonly object _dummy;
@@ -108,9 +115,9 @@ namespace System.Text.Json
         public System.Text.Json.JsonElement Value { get { throw null; } }
         public override string ToString() { throw null; }
     }
-    public sealed partial class JsonReaderException : System.Exception
+    public sealed partial class JsonReaderException : System.Text.Json.JsonException
     {
-        public JsonReaderException(string message, long lineNumber, long bytePositionInLine) { }
+        public JsonReaderException(string message, long lineNumber, long bytePositionInLine) : base (default(string)) { }
         public long BytePositionInLine { get { throw null; } }
         public long LineNumber { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
@@ -326,6 +333,15 @@ namespace System.Text.Json.Serialization
     {
         public JsonPropertyNameAttribute(string propertyName) { }
         public string Name { get { throw null; } set { } }
+    }
+    public sealed partial class JsonSerializationException : System.Text.Json.JsonException
+    {
+        public JsonSerializationException(string message, long lineNumber, long bytePositionInLine, string path) : base (default(string)) { }
+        public JsonSerializationException(string message, long lineNumber, long bytePositionInLine, string path, System.Exception innerException) : base (default(string)) { }
+        public long BytePositionInLine { get { throw null; } }
+        public long LineNumber { get { throw null; } }
+        public string Path { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public static partial class JsonSerializer
     {

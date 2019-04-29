@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
@@ -17,15 +18,15 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonReaderException_DeserializeUnableToConvertValue(Type propertyType, in Utf8JsonReader reader, in ReadStack state)
+        public static void ThrowJsonSerializationException_DeserializeUnableToConvertValue(Type propertyType, in Utf8JsonReader reader, string path)
         {
-            throw new JsonReaderException(SR.Format(SR.DeserializeUnableToConvertValue, state.PropertyPath, propertyType.FullName), reader.CurrentState);
+            ThowJsonSerializationException(SR.Format(SR.DeserializeUnableToConvertValue, propertyType.FullName), in reader, path);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonReaderException_DeserializeCannotBeNull(in Utf8JsonReader reader, in ReadStack state)
+        public static void ThrowJsonSerializationException_DeserializeCannotBeNull(in Utf8JsonReader reader, string path)
         {
-            throw new JsonReaderException(SR.Format(SR.DeserializeCannotBeNull, state.PropertyPath), reader.CurrentState);
+            ThowJsonSerializationException(SR.DeserializeCannotBeNull, in reader, path);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -50,6 +51,44 @@ namespace System.Text.Json
         public static void ThrowInvalidOperationException_SerializerPropertyNameNull(JsonClassInfo jsonClassInfo, JsonPropertyInfo jsonPropertyInfo)
         {
             throw new InvalidOperationException(SR.Format(SR.SerializerPropertyNameNull, jsonClassInfo.Type.FullName, jsonPropertyInfo.PropertyInfo.Name));
+        }
+
+        public static void ThrowJsonSerializationException_DeserializeDataRemaining(long length, long bytesRemaining)
+        {
+            throw new JsonSerializationException(SR.Format(SR.DeserializeDataRemaining, length, bytesRemaining), 0, 0, "");
+        }
+
+        public static void ThrowJsonSerializationException_DeserializeDuplicateKey(string key, in Utf8JsonReader reader, string path)
+        {
+            ThowJsonSerializationException(SR.Format(SR.DeserializeDuplicateKey, key), in reader, path);
+        }
+
+        private static void ThowJsonSerializationException(string message, in Utf8JsonReader reader, string path)
+        {
+            long lineNumber = reader.CurrentState._lineNumber;
+            long bytePositionInLine = reader.CurrentState._bytePositionInLine;
+
+            message += $" Path: {path} | LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.";
+            throw new JsonSerializationException(message, lineNumber, bytePositionInLine, path);
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowSerializationException(JsonReaderException exception, string path)
+        {
+            string message = exception.Message;
+
+            // Insert the "Path" portion before "LineNumber" and "BytePositionInLine".
+            int iPos = message.LastIndexOf(" LineNumber: ", StringComparison.InvariantCulture);
+            if (iPos >= 0)
+            {
+                message = $"{message.Substring(0, iPos)} Path: {path} |{message.Substring(iPos)}";
+            }
+            else
+            {
+                message += $" Path: {path}.";
+            }
+
+            throw new JsonSerializationException(message, exception.LineNumber, exception.BytePositionInLine, path, exception);
         }
     }
 }

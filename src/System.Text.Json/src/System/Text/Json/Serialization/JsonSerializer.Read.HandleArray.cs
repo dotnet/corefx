@@ -37,7 +37,7 @@ namespace System.Text.Json.Serialization
             Type arrayType = jsonPropertyInfo.RuntimePropertyType;
             if (!typeof(IEnumerable).IsAssignableFrom(arrayType) || (arrayType.IsArray && arrayType.GetArrayRank() > 1))
             {
-                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(arrayType, reader, state);
+                ThrowHelper.ThrowJsonSerializationException_DeserializeUnableToConvertValue(arrayType, reader, state.PropertyPath);
             }
 
             Debug.Assert(state.Current.IsPropertyEnumerable || state.Current.IsDictionary);
@@ -191,41 +191,45 @@ namespace System.Text.Json.Serialization
         internal static void ApplyValueToEnumerable<TProperty>(
             ref TProperty value,
             JsonSerializerOptions options,
-            ref ReadStackFrame frame)
+            ref ReadStack state,
+            ref Utf8JsonReader reader)
         {
-            if (frame.IsEnumerable)
+            if (state.Current.IsEnumerable)
             {
-                if (frame.TempEnumerableValues != null)
+                if (state.Current.TempEnumerableValues != null)
                 {
-                    ((IList<TProperty>)frame.TempEnumerableValues).Add(value);
+                    ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
                 }
                 else
                 {
-                    ((IList<TProperty>)frame.ReturnValue).Add(value);
+                    ((IList<TProperty>)state.Current.ReturnValue).Add(value);
                 }
             }
-            else if (frame.IsPropertyEnumerable)
+            else if (state.Current.IsPropertyEnumerable)
             {
-                Debug.Assert(frame.JsonPropertyInfo != null);
-                Debug.Assert(frame.ReturnValue != null);
-                if (frame.TempEnumerableValues != null)
+                Debug.Assert(state.Current.JsonPropertyInfo != null);
+                Debug.Assert(state.Current.ReturnValue != null);
+                if (state.Current.TempEnumerableValues != null)
                 {
-                    ((IList<TProperty>)frame.TempEnumerableValues).Add(value);
+                    ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
                 }
                 else
                 {
-                    ((IList<TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(value);
+                    ((IList<TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue)).Add(value);
                 }
             }
-            else if (frame.IsDictionary)
+            else if (state.Current.IsDictionary)
             {
-                Debug.Assert(frame.ReturnValue != null);
-                ((IDictionary<string, TProperty>)frame.JsonPropertyInfo.GetValueAsObject(frame.ReturnValue)).Add(frame.KeyName, value);
+                Debug.Assert(state.Current.ReturnValue != null);
+                if (!((IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue)).TryAdd(state.Current.KeyName, value))
+                {
+                    ThrowHelper.ThrowJsonSerializationException_DeserializeDuplicateKey(state.Current.KeyName, reader, state.PropertyPath);
+                }
             }
             else
             {
-                Debug.Assert(frame.JsonPropertyInfo != null);
-                frame.JsonPropertyInfo.SetValueAsObject(frame.ReturnValue, value);
+                Debug.Assert(state.Current.JsonPropertyInfo != null);
+                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, value);
             }
         }
     }

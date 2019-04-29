@@ -31,7 +31,7 @@ namespace System.Text.Json.Serialization
                     Debug.Assert(state.Current.JsonClassInfo.Type.GetGenericArguments().Length >= 1);
                     if (state.Current.JsonClassInfo.Type.GetGenericArguments()[0].UnderlyingSystemType != typeof(string))
                     {
-                        ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state);
+                        ThrowHelper.ThrowJsonSerializationException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.PropertyPath);
                     }
 
                     ClassType classType = state.Current.JsonClassInfo.ElementClassInfo.ClassType;

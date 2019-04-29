@@ -33,21 +33,21 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadObjectFail()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<SimpleTestClass>("blah"));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>("blah"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<SimpleTestClass>("blah"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<object>("blah"));
 
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<SimpleTestClass>("true"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<SimpleTestClass>("true"));
 
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<SimpleTestClass>("null."));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>("null."));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<SimpleTestClass>("null."));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<object>("null."));
         }
 
         [Fact]
         public static void ParseUntyped()
         {
             // Not supported until we are able to deserialize into JsonElement.
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<SimpleTestClass>("[]"));
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>("[]"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<SimpleTestClass>("[]"));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse<object>("[]"));
         }
 
         [Fact]

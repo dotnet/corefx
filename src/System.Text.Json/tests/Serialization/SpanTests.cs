@@ -36,7 +36,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             // Not supported until we are able to deserialize into JsonElement.
             byte[] bytes = Encoding.UTF8.GetBytes("42");
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse(bytes, typeof(object)));
+            Assert.Throws<JsonSerializationException>(() => JsonSerializer.Parse(bytes, typeof(object)));
         }
 
         [Fact]
