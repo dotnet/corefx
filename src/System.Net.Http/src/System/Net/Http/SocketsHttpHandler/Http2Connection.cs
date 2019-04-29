@@ -52,8 +52,6 @@ namespace System.Net.Http
         // then have to close the whole connection.
         private Task _inProgressWrite = null;
 
-        private Exception _pendingException;
-
         private const int MaxStreamId = int.MaxValue;
 
         private static readonly byte[] s_http2ConnectionPreface = Encoding.ASCII.GetBytes("PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n");
@@ -1362,27 +1360,9 @@ namespace System.Net.Http
             {
                 Exception replacementException = null;
 
-<<<<<<< HEAD
-                if (_pendingException != null)
-                {
-                    // Propagate exception from background task.
-                    throw _pendingException;
-                }
-
-                if (e is IOException)
-                {
-                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
-                }
-                else if (e is ObjectDisposedException)
-                {
-                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
-                }
-                else if (e is Http2ProtocolException)
-=======
                 if (e is IOException ||
                     e is ObjectDisposedException ||
                     e is Http2ProtocolException)
->>>>>>> 7237da089c09531c36a2110a3bdd9ccaf7c05d77
                 {
                     replacementException = new HttpRequestException(SR.net_http_client_execution_error, e);
                 }
