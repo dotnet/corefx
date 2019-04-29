@@ -24,12 +24,14 @@ namespace Microsoft.VisualBasic.FileIO.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void AllUsersApplicationDataFolderTest()
         {
             Assert.Throws<PlatformNotSupportedException>(() => SpecialDirectories.AllUsersApplicationData);
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void CurrentUserApplicationDataFolderTest()
         {
             Assert.Throws<PlatformNotSupportedException>(() => SpecialDirectories.CurrentUserApplicationData);
