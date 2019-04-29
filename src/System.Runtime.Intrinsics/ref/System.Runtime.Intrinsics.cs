@@ -920,36 +920,36 @@ namespace System.Runtime.Intrinsics.X86
     public enum FloatComparisonMode : byte
     {
         OrderedEqualNonSignaling = (byte)0,
-        OrderedEqualSignaling = (byte)16,
-        OrderedFalseNonSignaling = (byte)11,
-        OrderedFalseSignaling = (byte)27,
-        OrderedGreaterThanNonSignaling = (byte)30,
-        OrderedGreaterThanOrEqualNonSignaling = (byte)29,
-        OrderedGreaterThanOrEqualSignaling = (byte)13,
-        OrderedGreaterThanSignaling = (byte)14,
-        OrderedLessThanNonSignaling = (byte)17,
-        OrderedLessThanOrEqualNonSignaling = (byte)18,
-        OrderedLessThanOrEqualSignaling = (byte)2,
         OrderedLessThanSignaling = (byte)1,
-        OrderedNonSignaling = (byte)7,
-        OrderedNotEqualNonSignaling = (byte)12,
-        OrderedNotEqualSignaling = (byte)28,
-        OrderedSignaling = (byte)23,
-        UnorderedEqualNonSignaling = (byte)8,
-        UnorderedEqualSignaling = (byte)24,
+        OrderedLessThanOrEqualSignaling = (byte)2,
         UnorderedNonSignaling = (byte)3,
         UnorderedNotEqualNonSignaling = (byte)4,
-        UnorderedNotEqualSignaling = (byte)20,
-        UnorderedNotGreaterThanNonSignaling = (byte)26,
-        UnorderedNotGreaterThanOrEqualNonSignaling = (byte)25,
+        UnorderedNotLessThanSignaling = (byte)5,
+        UnorderedNotLessThanOrEqualSignaling = (byte)6,
+        OrderedNonSignaling = (byte)7,
+        UnorderedEqualNonSignaling = (byte)8,
         UnorderedNotGreaterThanOrEqualSignaling = (byte)9,
         UnorderedNotGreaterThanSignaling = (byte)10,
+        OrderedFalseNonSignaling = (byte)11,
+        OrderedNotEqualNonSignaling = (byte)12,
+        OrderedGreaterThanOrEqualSignaling = (byte)13,
+        OrderedGreaterThanSignaling = (byte)14,
+        UnorderedTrueNonSignaling = (byte)15,
+        OrderedEqualSignaling = (byte)16,
+        OrderedLessThanNonSignaling = (byte)17,
+        OrderedLessThanOrEqualNonSignaling = (byte)18,
+        UnorderedSignaling = (byte)19,
+        UnorderedNotEqualSignaling = (byte)20,
         UnorderedNotLessThanNonSignaling = (byte)21,
         UnorderedNotLessThanOrEqualNonSignaling = (byte)22,
-        UnorderedNotLessThanOrEqualSignaling = (byte)6,
-        UnorderedNotLessThanSignaling = (byte)5,
-        UnorderedSignaling = (byte)19,
-        UnorderedTrueNonSignaling = (byte)15,
+        OrderedSignaling = (byte)23,
+        UnorderedEqualSignaling = (byte)24,
+        UnorderedNotGreaterThanOrEqualNonSignaling = (byte)25,
+        UnorderedNotGreaterThanNonSignaling = (byte)26,
+        OrderedFalseSignaling = (byte)27,
+        OrderedNotEqualSignaling = (byte)28,
+        OrderedGreaterThanOrEqualNonSignaling = (byte)29,
+        OrderedGreaterThanNonSignaling = (byte)30,
         UnorderedTrueSignaling = (byte)31,
     }
     public abstract partial class Fma : System.Runtime.Intrinsics.X86.Avx
@@ -1374,11 +1374,11 @@ namespace System.Runtime.Intrinsics.X86
         public unsafe static void StoreAlignedNonTemporal(ulong* address, System.Runtime.Intrinsics.Vector128<ulong> source) { }
         public unsafe static void StoreHigh(double* address, System.Runtime.Intrinsics.Vector128<double> source) { }
         public unsafe static void StoreLow(double* address, System.Runtime.Intrinsics.Vector128<double> source) { }
-        public unsafe static void StoreLow(long* address, System.Runtime.Intrinsics.Vector128<long> source) { }
-        public unsafe static void StoreLow(ulong* address, System.Runtime.Intrinsics.Vector128<ulong> source) { }
         public unsafe static void StoreNonTemporal(int* address, int value) { }
         public unsafe static void StoreNonTemporal(uint* address, uint value) { }
         public unsafe static void StoreScalar(double* address, System.Runtime.Intrinsics.Vector128<double> source) { }
+        public unsafe static void StoreScalar(long* address, System.Runtime.Intrinsics.Vector128<long> source) { }
+        public unsafe static void StoreScalar(ulong* address, System.Runtime.Intrinsics.Vector128<ulong> source) { }
         public static System.Runtime.Intrinsics.Vector128<byte> Subtract(System.Runtime.Intrinsics.Vector128<byte> left, System.Runtime.Intrinsics.Vector128<byte> right) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<double> Subtract(System.Runtime.Intrinsics.Vector128<double> left, System.Runtime.Intrinsics.Vector128<double> right) { throw null; }
         public static System.Runtime.Intrinsics.Vector128<short> Subtract(System.Runtime.Intrinsics.Vector128<short> left, System.Runtime.Intrinsics.Vector128<short> right) { throw null; }

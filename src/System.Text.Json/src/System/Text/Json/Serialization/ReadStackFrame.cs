@@ -11,87 +11,74 @@ namespace System.Text.Json.Serialization
     internal struct ReadStackFrame
     {
         // The object (POCO or IEnumerable) that is being populated
-        internal object ReturnValue;
-        internal JsonClassInfo JsonClassInfo;
+        public object ReturnValue;
+        public JsonClassInfo JsonClassInfo;
 
-        // Current property values
-        internal JsonPropertyInfo JsonPropertyInfo;
-        internal bool PopStackOnEndArray;
-        internal bool EnumerableCreated;
+        // Support Dictionary keys.
+        public string KeyName;
 
-        // Support System.Array and other types that don't implement IList
-        internal IList TempEnumerableValues;
+        // Current property values.
+        public JsonPropertyInfo JsonPropertyInfo;
+
+        // Pop the stack when the current array or dictionary is done.
+        public bool PopStackOnEnd;
+
+        // Support System.Array and other types that don't implement IList.
+        public IList TempEnumerableValues;
+        public bool EnumerableCreated;
 
         // For performance, we order the properties by the first deserialize and PropertyIndex helps find the right slot quicker.
-        internal int PropertyIndex;
-        internal List<PropertyRef> PropertyRefCache;
+        public int PropertyIndex;
+        public List<PropertyRef> PropertyRefCache;
 
-        // The current JSON data for a property does not match a given POCO, so ignore the property (recursively for enumerables or object).
-        internal bool Drain;
+        // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
+        public bool Drain;
 
-        internal void Initialize(Type type, JsonSerializerOptions options)
+        public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
+        public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
+        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsDictionary;
+        public bool IsProcessingEnumerable => IsEnumerable || IsPropertyEnumerable;
+        public bool IsPropertyEnumerable => JsonPropertyInfo != null ? JsonPropertyInfo.ClassType == ClassType.Enumerable : false;
+
+        public void Initialize(Type type, JsonSerializerOptions options)
         {
             JsonClassInfo = options.GetOrAddClass(type);
-            if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable)
+            InitializeJsonPropertyInfo();
+        }
+
+        public void InitializeJsonPropertyInfo()
+        {
+            if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
             }
         }
 
-        internal void Reset()
+        public void Reset()
         {
-            ReturnValue = null;
-            JsonClassInfo = null;
-            PropertyRefCache = null;
-            PropertyIndex = 0;
             Drain = false;
-            ResetProperty();
+            JsonClassInfo = null;
+            KeyName = null;
+            PropertyRefCache = null;
+            ReturnValue = null;
+            EndObject();
         }
 
-        internal void ResetProperty()
+        public void ResetProperty()
         {
-            JsonPropertyInfo = null;
-            PopStackOnEndArray = false;
             EnumerableCreated = false;
+            JsonPropertyInfo = null;
+            PopStackOnEnd = false;
             TempEnumerableValues = null;
         }
 
-        internal bool IsEnumerable()
+        public void EndObject()
         {
-            return JsonClassInfo.ClassType == ClassType.Enumerable;
+            PropertyIndex = 0;
+            ResetProperty();
         }
 
-        internal bool Skip()
-        {
-            return Drain || ReferenceEquals(JsonPropertyInfo, JsonSerializer.s_missingProperty);
-        }
-
-        internal bool IsPropertyEnumerable()
-        {
-            if (JsonPropertyInfo != null)
-            {
-                return JsonPropertyInfo.ClassType == ClassType.Enumerable;
-            }
-
-            return false;
-        }
-
-        public Type GetElementType()
-        {
-            if (IsPropertyEnumerable())
-            {
-                return JsonPropertyInfo.ElementClassInfo.Type;
-            }
-
-            if (IsEnumerable())
-            {
-                return JsonClassInfo.ElementClassInfo.Type;
-            }
-
-            return JsonPropertyInfo.RuntimePropertyType;
-        }
-
-        internal static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
+        public static object CreateEnumerableValue(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
         {
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
 
@@ -128,9 +115,29 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        internal static IEnumerable GetEnumerableValue(in ReadStackFrame current)
+        public Type GetElementType()
         {
-            if (current.IsEnumerable())
+            if (IsPropertyEnumerable)
+            {
+                return JsonPropertyInfo.ElementClassInfo.Type;
+            }
+
+            if (IsEnumerable)
+            {
+                return JsonClassInfo.ElementClassInfo.Type;
+            }
+
+            if (IsDictionary)
+            {
+                return JsonClassInfo.ElementClassInfo.Type;
+            }
+
+            return JsonPropertyInfo.RuntimePropertyType;
+        }
+
+        public static IEnumerable GetEnumerableValue(in ReadStackFrame current)
+        {
+            if (current.IsEnumerable)
             {
                 if (current.ReturnValue != null)
                 {
@@ -142,10 +149,15 @@ namespace System.Text.Json.Serialization
             return current.TempEnumerableValues;
         }
 
-        internal void SetReturnValue(object value, JsonSerializerOptions options)
+        public void SetReturnValue(object value)
         {
             Debug.Assert(ReturnValue == null);
             ReturnValue = value;
+        }
+
+        public bool Skip()
+        {
+            return Drain || ReferenceEquals(JsonPropertyInfo, JsonSerializer.s_missingProperty);
         }
     }
 }

@@ -1295,6 +1295,16 @@ namespace System.Runtime.Intrinsics.X86
         ///   MOVSD m64, xmm
         /// </summary>
         public static unsafe void StoreScalar(double* address, Vector128<double> source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
+        ///   MOVQ m64, xmm
+        /// </summary>
+        public static unsafe void StoreScalar(long* address, Vector128<long> source) { throw new PlatformNotSupportedException(); }
+        /// <summary>
+        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
+        ///   MOVQ m64, xmm
+        /// </summary>
+        public static unsafe void StoreScalar(ulong* address, Vector128<ulong> source) { throw new PlatformNotSupportedException(); }
 
         /// <summary>
         /// void _mm_store_si128 (__m128i* mem_addr, __m128i a)
@@ -1440,16 +1450,6 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static unsafe void StoreHigh(double* address, Vector128<double> source) { throw new PlatformNotSupportedException(); }
 
-        /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(long* address, Vector128<long> source) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(ulong* address, Vector128<ulong> source) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// void _mm_storel_pd (double* mem_addr, __m128d a)
         ///   MOVLPD m64, xmm
