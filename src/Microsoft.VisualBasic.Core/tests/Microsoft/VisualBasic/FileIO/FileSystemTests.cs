@@ -636,8 +636,8 @@ namespace Microsoft.VisualBasic.FileIO.Tests
 
         [Fact]
         public void MoveDirectory_SourceDirectoryName_DestinationDirectoryName()
-    {
-        var FullPathToSourceDirectory = System.IO.Path.Combine(TestDirectory, "SourceDirectory");
+        {
+            var FullPathToSourceDirectory = System.IO.Path.Combine(TestDirectory, "SourceDirectory");
             var FullPathToTargetDirectory = System.IO.Path.Combine(TestDirectory, "TargetDirectory");
             System.IO.Directory.CreateDirectory(FullPathToSourceDirectory);
             for (int i = 0; i < 6; i++)

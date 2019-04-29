@@ -160,19 +160,6 @@ ghi 789");
         }
 
         [Fact]
-        public void HasFieldsEnclosedInQuotes_MalformedLineException()
-        {
-            var path = GetTestFilePath();
-            File.WriteAllText(path, @""""", """);
-
-            using (var parser = new TextFieldParser(path))
-            {
-                parser.Delimiters = new[] { "," };
-                Assert.Throws<MalformedLineException>(() => parser.ReadFields());
-            }
-        }
-
-        [Fact]
         public void HasFieldsEnclosedInQuotes_TrimWhiteSpace()
         {
             var path = GetTestFilePath();
@@ -371,6 +358,19 @@ ghi,789");
                 Assert.Equal(null, parser.ReadToEnd());
                 Assert.Equal(-1, parser.LineNumber);
                 Assert.True(parser.EndOfData);
+            }
+        }
+
+        [Fact]
+        public void UnmatchedQuote_MalformedLineException()
+        {
+            var path = GetTestFilePath();
+            File.WriteAllText(path, @""""", """);
+
+            using (var parser = new TextFieldParser(path))
+            {
+                parser.Delimiters = new[] { "," };
+                Assert.Throws<MalformedLineException>(() => parser.ReadFields());
             }
         }
     }
