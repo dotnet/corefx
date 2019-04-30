@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{53134B0C-0D57-481B-B84E-D1991E8D54FF}</ProjectGuid>
     <RootNamespace>System.Numerics</RootNamespace>
@@ -42,6 +42,7 @@
     <Compile Include="$(CommonPath)\CoreLib\System\Numerics\Vector_Operations.cs">
       <Link>System\Numerics\Vector_Operations.cs</Link>
     </Compile>
+    <Compile Include="System\ThrowHelper.cs" />
   </ItemGroup>
   <!-- Carry a copy of MathF where not available -->
   <ItemGroup Condition="'$(TargetsNetFx)' == 'true' OR $(TargetGroup.StartsWith('netstandard'))">
@@ -97,6 +98,7 @@
     <Reference Include="System.Globalization" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe" />
     <Reference Include="System.Runtime.Extensions" />
   </ItemGroup>
   <ItemGroup>
