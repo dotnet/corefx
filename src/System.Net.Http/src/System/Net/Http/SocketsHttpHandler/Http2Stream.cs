@@ -151,7 +151,7 @@ namespace System.Net.Http
                 {
                     if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
                     {
-                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "header", _state));
                     }
 
                     if (name.SequenceEqual(s_statusHeaderName))
@@ -208,7 +208,7 @@ namespace System.Net.Http
                 {
                     if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingData)
                     {
-                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "headers", _state));
                     }
 
                     if (_state == StreamState.ExpectingData)
@@ -221,12 +221,12 @@ namespace System.Net.Http
             public void OnResponse100Continue()
             {
                 // This is called when we receive complete set of headers with status 100 Continue.
-                // We need to rest state and wait for another final response.
+                // We need to reset state and wait for another final response.
                 lock (SyncObject)
                 {
                     if (_state != StreamState.ExpectingData)
                     {
-                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "100Continue", _state));
                     }
 
                    _state = StreamState.ExpectingHeaders;
@@ -240,7 +240,7 @@ namespace System.Net.Http
                 {
                     if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
                     {
-                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "headers", _state));
                     }
 
                     if (_state == StreamState.ExpectingTrailingHeaders || endStream)
@@ -274,7 +274,7 @@ namespace System.Net.Http
 
                     if (_state != StreamState.ExpectingData)
                     {
-                        throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "data", _state));
                     }
 
                     if (_responseBuffer.ActiveSpan.Length + buffer.Length > StreamWindowSize)

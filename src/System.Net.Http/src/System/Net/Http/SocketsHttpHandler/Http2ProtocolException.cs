@@ -16,6 +16,12 @@ namespace System.Net.Http
             ProtocolError = protocolError;
         }
 
+        public Http2ProtocolException(string message)
+            : base(message)
+        {
+            ProtocolError = Http2ProtocolErrorCode.ProtocolError;
+        }
+
         private Http2ProtocolException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             ProtocolError = (Http2ProtocolErrorCode)info.GetInt32(nameof(ProtocolError));
