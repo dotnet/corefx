@@ -1124,7 +1124,7 @@ namespace System.Net.Http
         {
             // The connection has failed, e.g. failed IO or a connection-level frame error.
             // Abort all streams and cause further processing to fail.
-            if (!IsAborted)
+            if (!IsAborted())
             {
                 _abortException = abortException;
             }
