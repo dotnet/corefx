@@ -16,8 +16,7 @@ namespace System.Net.Http
             ProtocolError = protocolError;
         }
 
-        public Http2ProtocolException(string message)
-            : base(message)
+        public Http2ProtocolException(string message) : base(message)
         {
             ProtocolError = Http2ProtocolErrorCode.ProtocolError;
         }

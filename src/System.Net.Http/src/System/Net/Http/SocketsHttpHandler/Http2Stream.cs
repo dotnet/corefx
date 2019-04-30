@@ -226,7 +226,7 @@ namespace System.Net.Http
                 {
                     if (_state != StreamState.ExpectingData)
                     {
-                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "100Continue", _state));
+                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "100 Continue", _state));
                     }
 
                    _state = StreamState.ExpectingHeaders;
