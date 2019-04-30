@@ -101,14 +101,14 @@ namespace System.Text.Json
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         }
     }
-    public readonly partial struct JsonEncodedText : IEquatable<JsonEncodedText>
+    public readonly partial struct JsonEncodedText : System.IEquatable<System.Text.Json.JsonEncodedText>
     {
-        public static JsonEncodedText Encode(string value) { throw null; }
-        public static JsonEncodedText Encode(ReadOnlySpan<char> value) { throw null; }
-        public static JsonEncodedText Encode(ReadOnlySpan<byte> utf8Value) { throw null; }
-        public ReadOnlySpan<byte> EncodedUtf8Bytes { get { throw null; } }
-        public bool Equals(JsonEncodedText other) { throw null; }
+        public System.ReadOnlySpan<byte> EncodedUtf8Bytes { get { throw null; } }
+        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value) { throw null; }
+        public static System.Text.Json.JsonEncodedText Encode(string value) { throw null; }
         public override bool Equals(object obj) { throw null; }
+        public bool Equals(System.Text.Json.JsonEncodedText other) { throw null; }
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
     }
