@@ -198,7 +198,6 @@ jobs:
                 msbuildScript: $(_msbuildCommand)
                 framework: $(_framework)
                 outerloop: $(_outerloop)
-                enableAzurePipelinesReporter: false
 
                 ${{ if eq(parameters.isOfficialBuild, 'true') }}:
                   isExternal: false
