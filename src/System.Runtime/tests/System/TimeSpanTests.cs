@@ -413,17 +413,6 @@ namespace System.Tests
         }
 
         [Fact]
-        public static void ConvertToTimeSpanPrecisionTest()
-        {
-            Assert.Equal(12345, TimeSpan.FromMilliseconds(1.23456).Ticks);
-            Assert.Equal(12345, TimeSpan.FromMilliseconds(1.234567).Ticks);
-
-            Assert.Equal(12345600, TimeSpan.FromSeconds(1.23456).Ticks);
-
-            Assert.Equal(1.23456 * 60 * 10_000_000, TimeSpan.FromMinutes(1.23456).Ticks);
-        }
-
-        [Fact]
         public static void FromSeconds_Invalid()
         {
             double maxSeconds = long.MaxValue / (TimeSpan.TicksPerMillisecond / 1000.0);
@@ -437,7 +426,7 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => TimeSpan.FromSeconds(double.NaN)); // Value is NaN
         }
 
-        public static IEnumerable<object[]> FromMilliseconds_TestData()
+        public static IEnumerable<object[]> FromMilliseconds_TestData_NetCore()
         {
             yield return new object[] { 1500.5, new TimeSpan(15005000) };
             yield return new object[] { 2.5, new TimeSpan(25000) };
@@ -449,8 +438,28 @@ namespace System.Tests
         }
 
         [Theory]
-        [MemberData(nameof(FromMilliseconds_TestData))]
-        public static void FromMilliseconds(double value, TimeSpan expected)
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        [MemberData(nameof(FromMilliseconds_TestData_NetCore))]
+        public static void FromMilliseconds_Netcore(double value, TimeSpan expected)
+        {
+            Assert.Equal(expected, TimeSpan.FromMilliseconds(value));
+        }
+
+        public static IEnumerable<object[]> FromMilliseconds_TestData_Desktop()
+        {
+            yield return new object[] { 1500.5, new TimeSpan(15010000) };
+            yield return new object[] { 2.5, new TimeSpan(30000) };
+            yield return new object[] { 1.0, new TimeSpan(10000) };
+            yield return new object[] { 0.0, new TimeSpan(0) };
+            yield return new object[] { -1.0, new TimeSpan(-10000) };
+            yield return new object[] { -2.5, new TimeSpan(-30000) };
+            yield return new object[] { -1500.5, new TimeSpan(-15010000) };
+        }
+
+        [Theory]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        [MemberData(nameof(FromMilliseconds_TestData_Desktop))]
+        public static void FromMilliseconds_Desktop(double value, TimeSpan expected)
         {
             Assert.Equal(expected, TimeSpan.FromMilliseconds(value));
         }

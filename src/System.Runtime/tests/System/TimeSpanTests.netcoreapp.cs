@@ -313,5 +313,16 @@ namespace System.Tests
             char[] dst = new char[1];
             Assert.Throws<FormatException>(() => new TimeSpan().TryFormat(dst.AsSpan(), out int charsWritten, invalidFormat, null));
         }
+
+        [Fact]
+        public static void ConvertToTimeSpanPrecisionTest()
+        {
+            Assert.Equal(12345, TimeSpan.FromMilliseconds(1.23456).Ticks);
+            Assert.Equal(12345, TimeSpan.FromMilliseconds(1.234567).Ticks);
+
+            Assert.Equal(12345600, TimeSpan.FromSeconds(1.23456).Ticks);
+
+            Assert.Equal(1.23456 * 60 * 10_000_000, TimeSpan.FromMinutes(1.23456).Ticks);
+        }
     }
 }
