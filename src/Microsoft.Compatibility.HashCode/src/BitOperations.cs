@@ -6,7 +6,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Numerics
 {
-    // NOTE: This class is a copy from src\Common\src\CoreLib\System\Numerics\BitOperations.cs only for HashCode pourposes.
+    // NOTE: This class is a copy from src\Common\src\CoreLib\System\Numerics\BitOperations.cs only for HashCode purposes.
     // Any changes to the BitOperations class should be done in there instead.
     internal static class BitOperations
     {

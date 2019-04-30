@@ -69,12 +69,7 @@ namespace System
         private static unsafe uint GenerateGlobalSeed()
         {
             uint result;
-#if !BUILDINGNETSTANDARD20
             Interop.GetRandomBytes((byte*)&result, sizeof(uint));
-#else
-            byte[] bytes = Guid.NewGuid().ToByteArray();
-            result = BitConverter.ToUInt32(bytes, 0);
-#endif
             return result;
         }
 

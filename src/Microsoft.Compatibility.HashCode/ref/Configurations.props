@@ -1,10 +1,9 @@
 <Project>
   <PropertyGroup>
     <PackageConfigurations>
-      netstandard;
+      netstandard2.0;
       netstandard2.1;
       netcoreapp2.1;
-      uap;
     </PackageConfigurations>
     <BuildConfigurations>
       $(PackageConfigurations);
