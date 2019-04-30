@@ -157,6 +157,30 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        public void ProcessNameMatchesScriptName()
+        {
+            string scriptName = GetTestFileName();
+            string filename = Path.Combine(TestDirectory, scriptName);
+            File.WriteAllText(filename, $"#!/bin/sh\nsleep 600\n"); // sleep 10 min.
+            // set x-bit
+            int mode = Convert.ToInt32("744", 8);
+            Assert.Equal(0, chmod(filename, mode));
+
+            using (var process = Process.Start(new ProcessStartInfo { FileName = filename }))
+            {
+                try
+                {
+                    Assert.Equal(scriptName, process.ProcessName);
+                }
+                finally
+                {
+                    process.Kill();
+                    process.WaitForExit();
+                }
+            }
+        }
+
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)] // s_allowedProgramsToRun is Linux specific
         public void ProcessStart_UseShellExecute_OnUnix_FallsBackWhenNotRealExecutable()
         {
