@@ -16,6 +16,7 @@
     <!-- We need to enable xunit reporter so that it parses test results
          Package testing doesn't run on xunit. -->
     <EnableXunitReporter Condition="'$(TargetGroup)' != 'AllConfigurations'">true</EnableXunitReporter>
+    <EnableAzurePipelinesReporter Condition="'$(TargetGroup)' != 'AllConfigurations'">true</EnableAzurePipelinesReporter>
     
     <TestArchiveRuntimeFile>$(TestArchiveRuntimeRoot)test-runtime-$(BuildConfiguration).zip</TestArchiveRuntimeFile>
     <TestArchiveRuntimeFile Condition="'$(TargetGroup)' == 'AllConfigurations'">$(TestArchiveRuntimeRoot)packages-testPayload-$(ConfigurationGroup).zip</TestArchiveRuntimeFile>
