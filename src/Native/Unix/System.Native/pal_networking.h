@@ -56,10 +56,13 @@ typedef enum
  */
 typedef enum
 {
-    AddressFamily_AF_UNSPEC = 0, // System.Net.AddressFamily.Unspecified
-    AddressFamily_AF_UNIX = 1,   // System.Net.AddressFamily.Unix
-    AddressFamily_AF_INET = 2,   // System.Net.AddressFamily.InterNetwork
-    AddressFamily_AF_INET6 = 23, // System.Net.AddressFamily.InterNetworkV6
+    AddressFamily_AF_UNSPEC = 0,   // System.Net.AddressFamily.Unspecified
+    AddressFamily_AF_UNIX = 1,     // System.Net.AddressFamily.Unix
+    AddressFamily_AF_INET = 2,     // System.Net.AddressFamily.InterNetwork
+    AddressFamily_AF_INET6 = 23,   // System.Net.AddressFamily.InterNetworkV6
+    AddressFamily_AF_NETLINK = 30, // System.Net.AddressFamily.Netlink
+    AddressFamily_AF_PACKET = 31,  // System.Net.AddressFamily.Packet
+    AddressFamily_AF_CAN = 32,     // System.Net.AddressFamily.ControllerAreaNetwork
 } AddressFamily;
 
 /*

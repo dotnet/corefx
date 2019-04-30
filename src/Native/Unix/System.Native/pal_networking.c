@@ -490,7 +490,21 @@ static bool TryConvertAddressFamilyPlatformToPal(sa_family_t platformAddressFami
         case AF_INET6:
             *palAddressFamily = AddressFamily_AF_INET6;
             return true;
-
+#ifdef AF_NETLINK
+        case AF_NETLINK:
+            *palAddressFamily = AddressFamily_AF_NETLINK;
+            return true;
+#endif
+#ifdef AF_PACKET
+        case AF_PACKET:
+            *palAddressFamily = AddressFamily_AF_PACKET;
+            return true;
+#endif
+#ifdef AF_CAN
+        case AF_CAN:
+            *palAddressFamily = AddressFamily_AF_CAN;
+            return true;
+#endif
         default:
             *palAddressFamily = platformAddressFamily;
             return false;
@@ -518,7 +532,21 @@ static bool TryConvertAddressFamilyPalToPlatform(int32_t palAddressFamily, sa_fa
         case AddressFamily_AF_INET6:
             *platformAddressFamily = AF_INET6;
             return true;
-
+#ifdef AF_NETLINK
+        case AddressFamily_AF_NETLINK:
+            *platformAddressFamily = AF_NETLINK;
+            return true;
+#endif
+#ifdef AF_PACKET
+        case AddressFamily_AF_PACKET:
+            *platformAddressFamily = AF_PACKET;
+            return true;
+#endif
+#ifdef AF_CAN
+        case AddressFamily_AF_CAN:
+            *platformAddressFamily = AF_CAN;
+            return true;
+#endif
         default:
             *platformAddressFamily = (sa_family_t)palAddressFamily;
             return false;
@@ -1915,9 +1943,16 @@ static bool TryConvertSocketTypePalToPlatform(int32_t palSocketType, int* platfo
     }
 }
 
-static bool TryConvertProtocolTypePalToPlatform(int32_t palProtocolType, int* platformProtocolType)
+static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_t palProtocolType, int* platformProtocolType)
 {
     assert(platformProtocolType != NULL);
+
+    if (palAddressFamily == AddressFamily_AF_NETLINK || palAddressFamily == AddressFamily_AF_PACKET || palAddressFamily == AddressFamily_AF_CAN)
+    {
+        // Protocol type is specific to AddressFamily. For non-IP protocols just pass what ever caller give us and let OS to handle it.
+        *platformProtocolType = palProtocolType;
+        return true;
+    }
 
     switch (palProtocolType)
     {
@@ -1969,7 +2004,7 @@ int32_t SystemNative_Socket(int32_t addressFamily, int32_t socketType, int32_t p
         return Error_EPROTOTYPE;
     }
 
-    if (!TryConvertProtocolTypePalToPlatform(protocolType, &platformProtocolType))
+    if (!TryConvertProtocolTypePalToPlatform(addressFamily, protocolType, &platformProtocolType))
     {
         *createdSocket = -1;
         return Error_EPROTONOSUPPORT;
