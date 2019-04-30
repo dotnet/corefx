@@ -4877,10 +4877,9 @@ namespace System
                 }
 
                 char[] dest1 = new char[dest.Length];
-                //
+
                 // We use the left-shift operator (<<) to double the length of the input to copy, since Buffer.BlockCopy
                 // takes a count of how many bytes we want to copy, whereas 'dest' is an array of chars, which are 2 bytes wide.
-                //
                 Buffer.BlockCopy(dest, 0, dest1, 0, end << 1);
                 fixed (char* pdest = dest1)
                 {
@@ -5035,11 +5034,10 @@ namespace System
                                 //
                                 // just reusing a variable slot we perform //dest.Remove(i+1, dotCount + (lastSlash==0?0:1));
                                 lastSlash = (ushort)(i + 1 + dotCount + (lastSlash == 0 ? 0 : 1));
-                                //
-                                // We use the left-shift operator (<<) to double the indices we're copying to/from because
-                                // Buffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
+
+                                // We use the left-shift operator (<<) to double the indices we're copying to/from.
+                                // This is becauseBuffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
                                 // while 'dest' is an array of chars which are 2-bytes wide.
-                                //
                                 Buffer.BlockCopy(dest, lastSlash << 1, dest, (i + 1) << 1, (destLength - lastSlash) << 1);
                                 destLength -= (lastSlash - i - 1);
 
@@ -5075,11 +5073,10 @@ namespace System
 
                             // just reusing a variable slot we perform //dest.Remove(i+1, lastSlash - i);
                             lastSlash = (ushort)(lastSlash + 1);
-                            //
-                            // We use the left-shift operator (<<) to double the indices we're copying to/from because
-                            // Buffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
+
+                            // We use the left-shift operator (<<) to double the indices we're copying to/from.
+                            // This is becauseBuffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
                             // while 'dest' is an array of chars which are 2-bytes wide.
-                            //
                             Buffer.BlockCopy(dest, lastSlash << 1, dest, (i + 1) << 1, (destLength - lastSlash) << 1);
                             destLength -= (lastSlash - i - 1);
                         }
@@ -5098,11 +5095,10 @@ namespace System
                     {
                         //remove first not rooted segment
                         lastSlash = (ushort)(lastSlash + 1);
-                        //
-                        // We use the left-shift operator (<<) to double the indices we're copying to/from because
-                        // Buffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
+
+                        // We use the left-shift operator (<<) to double the indices we're copying to/from.
+                        // This is becauseBuffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
                         // while 'dest' is an array of chars which are 2-bytes wide.
-                        //
                         Buffer.BlockCopy(dest, lastSlash << 1, dest, start << 1, (destLength - lastSlash) << 1);
                         destLength -= lastSlash;
                     }
@@ -5113,11 +5109,10 @@ namespace System
                         if (lastSlash == dotCount + 1 || (lastSlash == 0 && dotCount + 1 == destLength))
                         {
                             dotCount = (ushort)(dotCount + (lastSlash == 0 ? 0 : 1));
-                            //
-                            // We use the left-shift operator (<<) to double the indices we're copying to/from because
-                            // Buffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
+
+                            // We use the left-shift operator (<<) to double the indices we're copying to/from.
+                            // This is becauseBuffer.BlockCopy() takes indices as byte-offsets from the beginning of the input/output buffers,
                             // while 'dest' is an array of chars which are 2-bytes wide.
-                            //
                             Buffer.BlockCopy(dest, dotCount << 1, dest, start << 1, (destLength - dotCount) << 1);
                             destLength -= dotCount;
                         }
