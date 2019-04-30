@@ -1880,6 +1880,13 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void LongProcessNamesAreSupported()
         {
+            // Alpine implements sleep as a symlink to the busybox executable.
+            // If we rename it, the program will no longer sleep.
+            if (PlatformDetection.IsAlpine)
+            {
+                return;
+            }
+
             string programPath = GetProgramPath("sleep");
 
             if (programPath == null)
