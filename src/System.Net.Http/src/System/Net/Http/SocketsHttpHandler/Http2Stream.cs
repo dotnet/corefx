@@ -43,6 +43,7 @@ namespace System.Net.Http
 
             private StreamState _state;
             private bool _disposed;
+            private Exception _abortException;
 
             /// <summary>The core logic for the IValueTaskSource implementation.</summary>
             private ManualResetValueTaskSourceCore<bool> _waitSource = new ManualResetValueTaskSourceCore<bool> { RunContinuationsAsynchronously = true }; // mutable struct, do not make this readonly
@@ -135,17 +136,16 @@ namespace System.Net.Http
                         {
                             // Pseudo-headers not allowed in trailers.
                             if (NetEventSource.IsEnabled) _connection.Trace("Pseudo-header in trailer headers.");
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new HttpRequestException(SR.net_http_invalid_response_pseudo_header_in_trailer);
                         }
 
-                        if (value.Length != 3)
-                            throw new Exception("Invalid status code");
-
-                        // Copied from HttpConnection
-                        byte status1 = value[0], status2 = value[1], status3 = value[2];
-                        if (!IsDigit(status1) || !IsDigit(status2) || !IsDigit(status3))
+                        byte status1, status2, status3;
+                        if (value.Length != 3 ||
+                            !IsDigit(status1 = value[0]) ||
+                            !IsDigit(status2 = value[1]) ||
+                            !IsDigit(status3 = value[2]))
                         {
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_status_code, Encoding.ASCII.GetString(value)));
                         }
 
                         _response.SetStatusCodeWithoutValidation((HttpStatusCode)(100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0')));
@@ -155,7 +155,7 @@ namespace System.Net.Http
                         if (!HeaderDescriptor.TryGet(name, out HeaderDescriptor descriptor))
                         {
                             // Invalid header name
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_header_name, Encoding.ASCII.GetString(name)));
                         }
 
                         string headerValue = descriptor.GetHeaderValue(value);
@@ -263,7 +263,7 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnResponseAbort()
+            public void OnResponseAbort(Exception abortException)
             {
                 bool signalWaiter;
                 lock (SyncObject)
@@ -278,6 +278,7 @@ namespace System.Net.Http
                         return;
                     }
 
+                    _abortException = abortException;
                     _state = StreamState.Aborted;
 
                     signalWaiter = _hasWaiter;
@@ -301,7 +302,7 @@ namespace System.Net.Http
 
                     if (_state == StreamState.Aborted)
                     {
-                        throw new IOException(SR.net_http_invalid_response);
+                        throw new IOException(SR.net_http_request_aborted, _abortException);
                     }
                     else if (_state == StreamState.ExpectingHeaders)
                     {
@@ -394,7 +395,7 @@ namespace System.Net.Http
                     }
                     else if (_state == StreamState.Aborted)
                     {
-                        throw new IOException(SR.net_http_invalid_response);
+                        throw new IOException(SR.net_http_request_aborted, _abortException);
                     }
 
                     Debug.Assert(_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders);
@@ -494,6 +495,7 @@ namespace System.Net.Http
                 lock (SyncObject)
                 {
                     Task ignored = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
+                    _abortException = new OperationCanceledException();
                     _state = StreamState.Aborted;
 
                     signalWaiter = _hasWaiter;
@@ -597,12 +599,10 @@ namespace System.Net.Http
                 public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
                 {
                     Http2Stream http2Stream = _http2Stream;
-                    if (http2Stream == null)
-                    {
-                        return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
-                    }
-
-                    return new ValueTask(http2Stream.SendDataAsync(buffer, cancellationToken));
+                    Task t = http2Stream != null ?
+                        http2Stream.SendDataAsync(buffer, cancellationToken) :
+                        Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream)));
+                    return new ValueTask(t);
                 }
             }
         }
