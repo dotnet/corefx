@@ -103,6 +103,7 @@ namespace System.Text.Json
     }
     public readonly partial struct JsonEncodedText : System.IEquatable<System.Text.Json.JsonEncodedText>
     {
+        private readonly object _dummy;
         public System.ReadOnlySpan<byte> EncodedUtf8Bytes { get { throw null; } }
         public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<byte> utf8Value) { throw null; }
         public static System.Text.Json.JsonEncodedText Encode(System.ReadOnlySpan<char> value) { throw null; }

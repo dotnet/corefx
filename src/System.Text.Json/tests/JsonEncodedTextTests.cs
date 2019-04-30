@@ -22,6 +22,17 @@ namespace System.Text.Json.Tests
             JsonEncodedText defaultText = default;
             object obj = defaultText;
             Assert.True(text.Equals(obj));
+
+            JsonEncodedText textByteEmpty = JsonEncodedText.Encode(Array.Empty<byte>());
+            Assert.True(textByteEmpty.EncodedUtf8Bytes.IsEmpty);
+            Assert.Equal("", textByteEmpty.ToString());
+
+            JsonEncodedText textCharEmpty = JsonEncodedText.Encode(Array.Empty<char>());
+            Assert.True(textCharEmpty.EncodedUtf8Bytes.IsEmpty);
+            Assert.Equal("", textCharEmpty.ToString());
+
+            Assert.True(textCharEmpty.Equals(textByteEmpty));
+            Assert.Equal(textByteEmpty.GetHashCode(), textCharEmpty.GetHashCode());
         }
 
         [Fact]
@@ -270,6 +281,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        [OuterLoop]
         public static void InvalidLargeEncode()
         {
             char[] largeValue = new char[400_000_000];
