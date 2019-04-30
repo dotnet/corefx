@@ -1015,23 +1015,7 @@ namespace System.Text.Json
                         arrayItemsCount++;
                     }
 
-                    if (tokenType == JsonTokenType.Number)
-                    {
-                        database.Append(tokenType, tokenStart, reader.ValueSpan.Length);
-
-                        switch (reader._numberFormat)
-                        {
-                            case JsonConstants.ScientificNotationFormat:
-                                database.SetHasComplexChildren(database.Length - DbRow.Size);
-                                break;
-                            default:
-                                Debug.Assert(
-                                    reader._numberFormat == default,
-                                    $"Unhandled numeric format {reader._numberFormat}");
-                                break;
-                        }
-                    }
-                    else if (tokenType == JsonTokenType.String)
+                    if (tokenType == JsonTokenType.String)
                     {
                         // Adding 1 to skip the start quote will never overflow
                         Debug.Assert(tokenStart < int.MaxValue);
@@ -1046,6 +1030,21 @@ namespace System.Text.Json
                     else
                     {
                         database.Append(tokenType, tokenStart, reader.ValueSpan.Length);
+
+                        if (tokenType == JsonTokenType.Number)
+                        {
+                            switch (reader._numberFormat)
+                            {
+                                case JsonConstants.ScientificNotationFormat:
+                                    database.SetHasComplexChildren(database.Length - DbRow.Size);
+                                    break;
+                                default:
+                                    Debug.Assert(
+                                        reader._numberFormat == default,
+                                        $"Unhandled numeric format {reader._numberFormat}");
+                                    break;
+                            }
+                        }
                     }
                 }
 
