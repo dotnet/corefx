@@ -32,18 +32,18 @@
     test run name will be displayed as $(BuildConfiguration)-$(HelixTargetQueue) -->
     <TestRunNamePrefix>$(BuildConfiguration)-</TestRunNamePrefix>
     <TestRunNamePrefix Condition="'$(IsPackageTesting)' == 'true'">PackageTests-$(ConfigurationGroup)-$(ArchGroup)</TestRunNamePrefix>
-
-    <MaxRetryCount Condition="'$(MaxRetryCount)' == ''">4</MaxRetryCount>
+    
+    <FailOnTestFailure Condition="'$(WaitForWorkItemCompletion)' != '' and '$(TargetGroup)' != 'AllConfigurations'">$(WaitForWorkItemCompletion)</FailOnTestFailure>
   </PropertyGroup>
 
   <!-- If mission control reports a test failure then fail the build whenever helix wait runs. -->
-  <PropertyGroup Condition="'$(FailOnMissionControlTestFailure)' == ''">
+  <PropertyGroup Condition="'$(FailOnMissionControlTestFailure)' == '' and '$(TargetGroup)' == 'AllConfigurations'">
     <FailOnMissionControlTestFailure>true</FailOnMissionControlTestFailure>
     <FailOnMissionControlTestFailure Condition="'$(OfficialBuildId)' != ''">false</FailOnMissionControlTestFailure>
   </PropertyGroup>
 
   <!-- If mission control reports a test crash (fireball) then fail the build on helix wait -->
-  <PropertyGroup Condition="'$(FailOnWorkItemFailure)' == ''">
+  <PropertyGroup Condition="'$(FailOnWorkItemFailure)' == '' and '$(TargetGroup)' == 'AllConfigurations'">
     <FailOnWorkItemFailure>true</FailOnWorkItemFailure>
     <FailOnWorkItemFailure Condition="'$(OfficialBuildId)' != ''">false</FailOnWorkItemFailure>
   </PropertyGroup>
