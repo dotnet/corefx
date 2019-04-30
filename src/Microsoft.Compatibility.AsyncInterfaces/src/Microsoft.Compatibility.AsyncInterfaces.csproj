@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="Current">
   <PropertyGroup>
     <ProjectGuid>{96A7CE75-B5E8-421B-BDF0-C4651D97D8CA}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;netstandard2.1-Debug;netstandard2.1-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netstandard-Debug;netstandard-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
     <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netstandard'">true</IsPartialFacadeAssembly>
   </PropertyGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">
@@ -24,9 +24,9 @@
       <Link>ProductionCode\Common\CoreLib\System\Runtime\CompilerServices\ConfiguredCancelableAsyncEnumerable.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Reference Include="System.Runtime" />
-    <Reference Condition="'$(TargetGroup)' == 'netstandard'" Include="System.Threading.Tasks.Extensions" />
+    <Reference Include="System.Threading.Tasks.Extensions" />
     <Reference Include="System.Threading.Tasks" />
   </ItemGroup>
 </Project>
