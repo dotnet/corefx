@@ -207,9 +207,8 @@ namespace System.IO.Tests
         }
 
         [Theory, MemberData(nameof(TestData_JoinFourPaths))]
-        public void JoinStringArray_8(string path1, string path2, string path3, string path4, string _)
-        {
-            string fourJoined = Path.Join(path1, path2, path3, path4);
+        public void JoinStringArray_8(string path1, string path2, string path3, string path4, string fourJoined)
+        {   
             Assert.Equal(Path.Join(fourJoined, fourJoined) , Path.Join(new string[] { path1, path2, path3, path4, path1, path2, path3, path4 }));
         }
     }
