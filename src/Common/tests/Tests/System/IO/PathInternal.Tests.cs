@@ -65,123 +65,133 @@ namespace Tests.System.IO
             Assert.Equal(expected, PathInternal.GetCommonPathLength(first, second, ignoreCase));
         }
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentsData => new TheoryData<string, int, string>
+        public static TheoryData<string, string> RemoveRelativeSegmentNewData => new TheoryData<string, string>
         {
-            { @"C:\git\corefx", 2, @"C:\git\corefx"},
-            { @"C:\\git\corefx", 2, @"C:\git\corefx"},
-            { @"C:\git\\corefx", 2, @"C:\git\corefx"},
-            { @"C:\git\.\corefx\.\\", 2, @"C:\git\corefx\"},
-            { @"C:\git\corefx", 2, @"C:\git\corefx"},
-            { @"C:\git\..\corefx", 2, @"C:\corefx"},
-            { @"C:\git\corefx\..\", 2, @"C:\git\"},
-            { @"C:\git\corefx\..\..\..\", 2, @"C:\"},
-            { @"C:\git\corefx\..\..\.\", 2, @"C:\"},
-            { @"C:\git\..\.\corefx\temp\..", 2, @"C:\corefx"},
-            { @"C:\git\..\\\.\..\corefx", 2, @"C:\corefx"},
-            { @"C:\git\corefx\", 2, @"C:\git\corefx\"},
-            { @"C:\git\temp\..\corefx\", 2, @"C:\git\corefx\"},
+            { @"C:\git\corefx", @"C:\git\corefx"},
+            { @"C:\\git\corefx", @"C:\git\corefx"},
+            { @"C:\git\\corefx", @"C:\git\corefx"},
+            { @"C:\.\.\.\.\.\git\\corefx", @"C:\git\corefx"},
+            { @"C:\..\git\\corefx", @"C:\git\corefx"},
+            { @"asd\asd\..\.\", @"asd\"},
+            { @"asd\asd\..\..\..\.\.\", @"\"},
 
-            { @"C:\.", 3, @"C:\"},
-            { @"C:\..", 3, @"C:\"},
-            { @"C:\..\..", 3, @"C:\"},
-            { @"C:\.", 2, @"C:"},
-            { @"C:\..", 2, @"C:"},
-            { @"C:\..\..", 2, @"C:"},
-            { @"C:A\.", 2, @"C:A"},
-            { @"C:A\..", 2, @"C:"},
-            { @"C:A\..\..", 2, @"C:"},
-            { @"C:A\..\..\..", 2, @"C:"},
-
-            { @"C:\tmp\home", 3, @"C:\tmp\home" },
-            { @"C:\tmp\..", 3, @"C:\" },
-            { @"C:\tmp\home\..\.\.\", 3, @"C:\tmp\" },
-            { @"C:\tmp\..\..\..\", 3, @"C:\" },
-            { @"C:\tmp\\home", 3, @"C:\tmp\home" },
-            { @"C:\.\tmp\\home", 3, @"C:\tmp\home" },
-            { @"C:\..\tmp\home", 3, @"C:\tmp\home" },
-            { @"C:\..\..\..\tmp\.\home", 3, @"C:\tmp\home" },
-            { @"C:\\tmp\\\home", 3, @"C:\tmp\home" },
-            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", 3, @"C:\tmp\home\git\" },
-            { @"C:\.\tmp\home", 3, @"C:\tmp\home" },
-
-            { @"C:\tmp\home", 6, @"C:\tmp\home" },
-            { @"C:\tmp\..", 6, @"C:\tmp" },
-            { @"C:\tmp\home\..\.\.\", 5, @"C:\tmp\" },
-            { @"C:\tmp\..\..\..\", 6, @"C:\tmp\" },
-            { @"C:\tmp\\home", 5, @"C:\tmp\home" },
-            { @"C:\.\tmp\\home", 4, @"C:\.\tmp\home" },
-            { @"C:\..\tmp\home", 5, @"C:\..\tmp\home" },
-            { @"C:\..\..\..\tmp\.\home", 6, @"C:\..\tmp\home" },
-            { @"C:\\tmp\\\home", 7, @"C:\\tmp\home" },
-            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", 7, @"C:\tmp\home\git\" },
-            { @"C:\.\tmp\home", 5, @"C:\.\tmp\home" },
-
-            { @"C:\tmp\..", 2, @"C:\" },
-            { @"C:\tmp\home\..\..\.\", 2, @"C:\" },
-            { @"C:\tmp\..\..\..\", 2, @"C:\" },
-            { @"C:\tmp\\home", 2, @"C:\tmp\home" },
-            { @"C:\.\tmp\\home", 2, @"C:\tmp\home" },
-            { @"C:\..\tmp\home", 2, @"C:\tmp\home" },
-            { @"C:\..\..\..\tmp\.\home", 2, @"C:\tmp\home" },
-            { @"C:\\tmp\\\home", 2, @"C:\tmp\home" },
-            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", 2, @"C:\tmp\home\git\" },
-            { @"C:\.\tmp\home", 2, @"C:\tmp\home" },
-
-            { @"C:\tmp\..\..\", 10, @"C:\tmp\..\" },
-            { @"C:\tmp\home\..\.\.\", 12, @"C:\tmp\home\" },
-            { @"C:\tmp\..\..\..\", 10, @"C:\tmp\..\" },
-            { @"C:\tmp\\home\..\.\\", 13, @"C:\tmp\\home\" },
-            { @"C:\.\tmp\\home\git\git", 9, @"C:\.\tmp\home\git\git" },
-            { @"C:\..\tmp\.\home", 10, @"C:\..\tmp\home" },
-            { @"C:\..\..\..\tmp\.\home", 10, @"C:\..\..\..\tmp\home" },
-            { @"C:\\tmp\\\home\..", 7, @"C:\\tmp\" },
-            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", 18, @"C:\tmp\home\git\.\git\" },
-            { @"C:\.\tmp\home\.\.\", 9, @"C:\.\tmp\home\" },
+            { @"C:A\.", @"C:A"},
+            { @"C:A\..", @"C:"},
+            { @"C:A\..\..", @"C:"},
+            { @"C:A\..\..\..", @"C:"},
         };
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentsFirstRelativeSegment => new TheoryData<string, int, string>
+
+        public static TheoryData<string, string> RemoveRelativeSegmentsData => new TheoryData<string, string>
         {
-            { @"C:\\git\corefx", 2, @"C:\git\corefx"},
-            { @"C:\.\git\corefx", 2, @"C:\git\corefx"},
-            { @"C:\\.\git\.\corefx", 2, @"C:\git\corefx"},
-            { @"C:\..\git\corefx", 2, @"C:\git\corefx"},
-            { @"C:\.\git\..\corefx", 2, @"C:\corefx"},
-            { @"C:\.\git\corefx\..\", 2, @"C:\git\"},
-            { @"C:\.\git\corefx\..\..\..\", 2, @"C:\"},
-            { @"C:\.\git\corefx\..\..\.\", 2, @"C:\"},
-            { @"C:\.\git\..\.\corefx\temp\..", 2, @"C:\corefx"},
-            { @"C:\.\git\..\\\.\..\corefx", 2, @"C:\corefx"},
-            { @"C:\.\git\corefx\", 2, @"C:\git\corefx\"},
-            { @"C:\.\git\temp\..\corefx\", 2, @"C:\git\corefx\"},
-            { @"C:\\..\..", 3, @"C:\"}
+            { @"C:\git\corefx", @"C:\git\corefx"},
+            { @"C:\\git\corefx", @"C:\git\corefx"},
+            { @"C:\git\\corefx", @"C:\git\corefx"},
+            { @"C:\git\.\corefx\.\\", @"C:\git\corefx\"},
+            { @"C:\git\corefx", @"C:\git\corefx"},
+            { @"C:\git\..\corefx", @"C:\corefx"},
+            { @"C:\git\corefx\..\", @"C:\git\"},
+            { @"C:\git\corefx\..\..\..\", @"C:\"},
+            { @"C:\git\corefx\..\..\.\", @"C:\"},
+            { @"C:\git\..\.\corefx\temp\..", @"C:\corefx"},
+            { @"C:\git\..\\\.\..\corefx", @"C:\corefx"},
+            { @"C:\git\corefx\", @"C:\git\corefx\"},
+            { @"C:\git\temp\..\corefx\", @"C:\git\corefx\"},
+
+            { @"C:\.", @"C:\"},
+            { @"C:\..", @"C:\"},
+            { @"C:\..\..", @"C:\"},
+            { @"C:\.", @"C:\"},
+            { @"C:\..", @"C:\"},
+            { @"C:\..\..", @"C:\"},
+
+            { @"C:\tmp\home", @"C:\tmp\home" },
+            { @"C:\tmp\..", @"C:\" },
+            { @"C:\tmp\home\..\.\.\", @"C:\tmp\" },
+            { @"C:\tmp\..\..\..\", @"C:\" },
+            { @"C:\tmp\\home", @"C:\tmp\home" },
+            { @"C:\.\tmp\\home", @"C:\tmp\home" },
+            { @"C:\..\tmp\home", @"C:\tmp\home" },
+            { @"C:\..\..\..\tmp\.\home", @"C:\tmp\home" },
+            { @"C:\\tmp\\\home", @"C:\tmp\home" },
+            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", @"C:\tmp\home\git\" },
+            { @"C:\.\tmp\home", @"C:\tmp\home" },
+
+            { @"C:\tmp\home", @"C:\tmp\home" },
+            { @"C:\tmp\..", @"C:\" },
+            { @"C:\tmp\home\..\.\.\", @"C:\tmp\" },
+            { @"C:\tmp\..\..\..\", @"C:\" },
+            { @"C:\tmp\\home", @"C:\tmp\home" },
+            { @"C:\.\tmp\\home", @"C:\tmp\home" },
+            { @"C:\..\tmp\home", @"C:\tmp\home" },
+            { @"C:\..\..\..\tmp\.\home", @"C:\tmp\home" },
+            { @"C:\\tmp\\\home", @"C:\tmp\home" },
+            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", @"C:\tmp\home\git\" },
+            { @"C:\.\tmp\home", @"C:\tmp\home" },
+
+            { @"C:\tmp\..", @"C:\" },
+            { @"C:\tmp\home\..\..\.\", @"C:\" },
+            { @"C:\tmp\..\..\..\", @"C:\" },
+            { @"C:\tmp\\home", @"C:\tmp\home" },
+            { @"C:\.\tmp\\home", @"C:\tmp\home" },
+            { @"C:\..\tmp\home", @"C:\tmp\home" },
+            { @"C:\..\..\..\tmp\.\home", @"C:\tmp\home" },
+            { @"C:\\tmp\\\home", @"C:\tmp\home" },
+            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", @"C:\tmp\home\git\" },
+            { @"C:\.\tmp\home", @"C:\tmp\home" },
+
+            { @"C:\tmp\..\..\", @"C:\" },
+            { @"C:\tmp\home\..\.\.\", @"C:\tmp\" },
+            { @"C:\tmp\..\..\..\", @"C:\" },
+            { @"C:\tmp\\home\..\.\\", @"C:\tmp\" },
+            { @"C:\.\tmp\\home\git\git", @"C:\tmp\home\git\git" },
+            { @"C:\..\tmp\.\home", @"C:\tmp\home" },
+            { @"C:\..\..\..\tmp\.\home", @"C:\tmp\home" },
+            { @"C:\\tmp\\\home\..", @"C:\tmp" },
+            { @"C:\tmp\home\git\.\..\.\git\corefx\..\", @"C:\tmp\home\git\" },
+            { @"C:\.\tmp\home\.\.\", @"C:\tmp\home\" },
         };
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentsSkipAboveRoot => new TheoryData<string, int, string>
+        public static TheoryData<string, string> RemoveRelativeSegmentsFirstRelativeSegment => new TheoryData<string, string>
         {
-            { @"C:\temp\..\" , 7, @"C:\temp\" },
-            { @"C:\temp\..\git" , 7, @"C:\temp\git" },
-            { @"C:\temp\..\git" , 8, @"C:\temp\git" },
-            { @"C:\temp\..\.\" , 8, @"C:\temp\" },
-            { @"C:\temp\..\" , 9, @"C:\temp\..\" },
-            { @"C:\temp\..\git" , 9, @"C:\temp\..\git" },
-            { @"C:\git\..\temp\..\" , 15, @"C:\git\..\temp\" },
-            { @"C:\\\.\..\..\temp\..\" , 17, @"C:\\\.\..\..\temp\" },
+            { @"C:\\git\corefx", @"C:\git\corefx"},
+            { @"C:\.\git\corefx", @"C:\git\corefx"},
+            { @"C:\\.\git\.\corefx", @"C:\git\corefx"},
+            { @"C:\..\git\corefx", @"C:\git\corefx"},
+            { @"C:\.\git\..\corefx", @"C:\corefx"},
+            { @"C:\.\git\corefx\..\", @"C:\git\"},
+            { @"C:\.\git\corefx\..\..\..\", @"C:\"},
+            { @"C:\.\git\corefx\..\..\.\", @"C:\"},
+            { @"C:\.\git\..\.\corefx\temp\..", @"C:\corefx"},
+            { @"C:\.\git\..\\\.\..\corefx", @"C:\corefx"},
+            { @"C:\.\git\corefx\", @"C:\git\corefx\"},
+            { @"C:\.\git\temp\..\corefx\", @"C:\git\corefx\"},
+            { @"C:\\..\..", @"C:\"}
         };
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentsFirstRelativeSegmentRoot => new TheoryData<string, int, string>
+        public static TheoryData<string, string> RemoveRelativeSegmentsSkipAboveRoot => new TheoryData<string, string>
         {
-            { @"C:\\git\corefx", 3, @"C:\git\corefx"},
-            { @"C:\.\git\corefx", 3, @"C:\git\corefx"},
-            { @"C:\\.\git\.\corefx", 3, @"C:\git\corefx"},
-            { @"C:\..\git\corefx", 3, @"C:\git\corefx"},
-            { @"C:\.\git\..\corefx", 3, @"C:\corefx"},
-            { @"C:\.\git\corefx\..\", 3, @"C:\git\"},
-            { @"C:\.\git\corefx\..\..\..\", 3, @"C:\"},
-            { @"C:\.\git\corefx\..\..\.\", 3, @"C:\"},
-            { @"C:\.\git\..\.\corefx\temp\..", 3, @"C:\corefx"},
-            { @"C:\.\git\..\\\.\..\corefx", 3, @"C:\corefx"},
-            { @"C:\.\git\corefx\", 3, @"C:\git\corefx\"},
-            { @"C:\.\git\temp\..\corefx\", 3, @"C:\git\corefx\"},
+            { @"C:\temp\..\" , @"C:\" },
+            { @"C:\temp\..\git" , @"C:\git" },
+            { @"C:\temp\..\.\" , @"C:\" },
+            { @"C:\git\..\temp\..\" , @"C:\" },
+            { @"C:\\\.\..\..\temp\..\" , @"C:\" },
+        };
+
+        public static TheoryData<string, string> RemoveRelativeSegmentsFirstRelativeSegmentRoot => new TheoryData<string, string>
+        {
+            { @"C:\\git\corefx", @"C:\git\corefx"},
+            { @"C:\.\git\corefx", @"C:\git\corefx"},
+            { @"C:\\.\git\.\corefx", @"C:\git\corefx"},
+            { @"C:\..\git\corefx", @"C:\git\corefx"},
+            { @"C:\.\git\..\corefx", @"C:\corefx"},
+            { @"C:\.\git\corefx\..\", @"C:\git\"},
+            { @"C:\.\git\corefx\..\..\..\", @"C:\"},
+            { @"C:\.\git\corefx\..\..\.\", @"C:\"},
+            { @"C:\.\git\..\.\corefx\temp\..", @"C:\corefx"},
+            { @"C:\.\git\..\\\.\..\corefx", @"C:\corefx"},
+            { @"C:\.\git\corefx\", @"C:\git\corefx\"},
+            { @"C:\.\git\temp\..\corefx\", @"C:\git\corefx\"},
         };
 
         [Theory,
@@ -190,165 +200,163 @@ namespace Tests.System.IO
             MemberData(nameof(RemoveRelativeSegmentsFirstRelativeSegmentRoot)),
             MemberData(nameof(RemoveRelativeSegmentsSkipAboveRoot))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void RemoveRelativeSegmentsTest(string path, int skip, string expected)
+        public void RemoveRelativeSegmentsTest(string path, string expected)
         {
-            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path, skip));
-            Assert.Equal(@"\\.\" + expected, PathInternal.RemoveRelativeSegments(@"\\.\" + path, skip + 4));
-            Assert.Equal(@"\\?\" + expected, PathInternal.RemoveRelativeSegments(@"\\?\" + path, skip + 4));
+            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path));
+            Assert.Equal(@"\\.\" + expected, PathInternal.RemoveRelativeSegments(@"\\.\" + path));
+            Assert.Equal(@"\\?\" + expected, PathInternal.RemoveRelativeSegments(@"\\?\" + path));
         }
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentsUncData => new TheoryData<string, int, string>
+        [Theory,
+            MemberData(nameof(RemoveRelativeSegmentNewData))]
+        public void RemoveRelativeSegmentsTest2(string path, string expected)
         {
-            { @"Server\Share\git\corefx", 12, @"Server\Share\git\corefx"},
-            { @"Server\Share\\git\corefx", 12, @"Server\Share\git\corefx"},
-            { @"Server\Share\git\\corefx", 12, @"Server\Share\git\corefx"},
-            { @"Server\Share\git\.\corefx\.\\", 12, @"Server\Share\git\corefx\"},
-            { @"Server\Share\git\corefx", 12, @"Server\Share\git\corefx"},
-            { @"Server\Share\git\..\corefx", 12, @"Server\Share\corefx"},
-            { @"Server\Share\git\corefx\..\", 12, @"Server\Share\git\"},
-            { @"Server\Share\git\corefx\..\..\..\", 12, @"Server\Share\"},
-            { @"Server\Share\git\corefx\..\..\.\", 12, @"Server\Share\"},
-            { @"Server\Share\git\..\.\corefx\temp\..", 12, @"Server\Share\corefx"},
-            { @"Server\Share\git\..\\\.\..\corefx", 12, @"Server\Share\corefx"},
-            { @"Server\Share\git\corefx\", 12, @"Server\Share\git\corefx\"},
-            { @"Server\Share\git\temp\..\corefx\", 12, @"Server\Share\git\corefx\"},
+            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path));
+        }
+
+        public static TheoryData<string, string> RemoveRelativeSegmentsUncData => new TheoryData<string, string>
+        {
+            { @"Server\Share\git\corefx", @"Server\Share\git\corefx"},
+            { @"Server\Share\\git\corefx", @"Server\Share\git\corefx"},
+            { @"Server\Share\git\\corefx", @"Server\Share\git\corefx"},
+            { @"Server\Share\git\.\corefx\.\\", @"Server\Share\git\corefx\"},
+            { @"Server\Share\git\corefx", @"Server\Share\git\corefx"},
+            { @"Server\Share\git\..\corefx", @"Server\Share\corefx"},
+            { @"Server\Share\git\corefx\..\", @"Server\Share\git\"},
+            { @"Server\Share\git\corefx\..\..\..\", @"Server\Share\"},
+            { @"Server\Share\git\corefx\..\..\.\", @"Server\Share\"},
+            { @"Server\Share\git\..\.\corefx\temp\..", @"Server\Share\corefx"},
+            { @"Server\Share\git\..\\\.\..\corefx", @"Server\Share\corefx"},
+            { @"Server\Share\git\corefx\", @"Server\Share\git\corefx\"},
+            { @"Server\Share\git\temp\..\corefx\", @"Server\Share\git\corefx\"},
         };
 
         [Theory,
             MemberData(nameof(RemoveRelativeSegmentsUncData))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void RemoveRelativeSegmentsUncTest(string path, int skip, string expected)
+        public void RemoveRelativeSegmentsUncTest(string path, string expected)
         {
-            Assert.Equal(@"\\" + expected, PathInternal.RemoveRelativeSegments(@"\\" + path, skip + 2));
-            Assert.Equal(@"\\.\UNC\" + expected, PathInternal.RemoveRelativeSegments(@"\\.\UNC\" + path, skip + 8));
-            Assert.Equal(@"\\?\UNC\" + expected, PathInternal.RemoveRelativeSegments(@"\\?\UNC\" + path, skip + 8));
+            Assert.Equal(@"\\" + expected, PathInternal.RemoveRelativeSegments(@"\\" + path));
+            Assert.Equal(@"\\.\UNC\" + expected, PathInternal.RemoveRelativeSegments(@"\\.\UNC\" + path));
+            Assert.Equal(@"\\?\UNC\" + expected, PathInternal.RemoveRelativeSegments(@"\\?\UNC\" + path));
         }
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentsDeviceData => new TheoryData<string, int, string>
+        public static TheoryData<string, string> RemoveRelativeSegmentsDeviceData => new TheoryData<string, string>
         {
-            { @"\\.\git\corefx", 7, @"\\.\git\corefx"},
-            { @"\\.\git\corefx", 7, @"\\.\git\corefx"},
-            { @"\\.\git\\corefx", 7, @"\\.\git\corefx"},
-            { @"\\.\git\.\corefx\.\\", 7, @"\\.\git\corefx\"},
-            { @"\\.\git\corefx", 7, @"\\.\git\corefx"},
-            { @"\\.\git\..\corefx", 7, @"\\.\git\corefx"},
-            { @"\\.\git\corefx\..\", 7, @"\\.\git\"},
-            { @"\\.\git\corefx\..\..\..\", 7, @"\\.\git\"},
-            { @"\\.\git\corefx\..\..\.\", 7, @"\\.\git\"},
-            { @"\\.\git\..\.\corefx\temp\..", 7, @"\\.\git\corefx"},
-            { @"\\.\git\..\\\.\..\corefx", 7, @"\\.\git\corefx"},
-            { @"\\.\git\corefx\", 7, @"\\.\git\corefx\"},
-            { @"\\.\git\temp\..\corefx\", 7, @"\\.\git\corefx\"},
+            { @"\\.\git\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\.\corefx\.\\", @"\\.\git\corefx\"},
+            { @"\\.\git\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\..\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\corefx\..\", @"\\.\git\"},
+            { @"\\.\git\corefx\..\..\..\", @"\\.\git\"},
+            { @"\\.\git\corefx\..\..\.\", @"\\.\git\"},
+            { @"\\.\git\..\.\corefx\temp\..", @"\\.\git\corefx"},
+            { @"\\.\git\..\\\.\..\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\corefx\", @"\\.\git\corefx\"},
+            { @"\\.\git\temp\..\corefx\", @"\\.\git\corefx\"},
 
-            { @"\\.\.\corefx", 5, @"\\.\.\corefx"},
-            { @"\\.\.\corefx", 5, @"\\.\.\corefx"},
-            { @"\\.\.\\corefx", 5, @"\\.\.\corefx"},
-            { @"\\.\.\.\corefx\.\\", 5, @"\\.\.\corefx\"},
-            { @"\\.\.\corefx", 5, @"\\.\.\corefx"},
-            { @"\\.\.\..\corefx", 5, @"\\.\.\corefx"},
-            { @"\\.\.\corefx\..\", 5, @"\\.\.\"},
-            { @"\\.\.\corefx\..\..\..\", 5, @"\\.\.\"},
-            { @"\\.\.\corefx\..\..\.\", 5, @"\\.\.\"},
-            { @"\\.\.\..\.\corefx\temp\..", 5, @"\\.\.\corefx"},
-            { @"\\.\.\..\\\.\..\corefx", 5, @"\\.\.\corefx"},
-            { @"\\.\.\corefx\", 5, @"\\.\.\corefx\"},
-            { @"\\.\.\temp\..\corefx\", 5, @"\\.\.\corefx\"},
+            { @"\\.\.\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\.\corefx\.\\", @"\\.\.\corefx\"},
+            { @"\\.\.\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\..\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\corefx\..\", @"\\.\.\"},
+            { @"\\.\.\corefx\..\..\..\", @"\\.\.\"},
+            { @"\\.\.\corefx\..\..\.\", @"\\.\.\"},
+            { @"\\.\.\..\.\corefx\temp\..", @"\\.\.\corefx"},
+            { @"\\.\.\..\\\.\..\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\corefx\", @"\\.\.\corefx\"},
+            { @"\\.\.\temp\..\corefx\", @"\\.\.\corefx\"},
 
-            { @"\\.\..\corefx", 6, @"\\.\..\corefx"},
-            { @"\\.\..\corefx", 6, @"\\.\..\corefx"},
-            { @"\\.\..\\corefx", 6, @"\\.\..\corefx"},
-            { @"\\.\..\.\corefx\.\\", 6, @"\\.\..\corefx\"},
-            { @"\\.\..\corefx", 6, @"\\.\..\corefx"},
-            { @"\\.\..\..\corefx", 6, @"\\.\..\corefx"},
-            { @"\\.\..\corefx\..\", 6, @"\\.\..\"},
-            { @"\\.\..\corefx\..\..\..\", 6, @"\\.\..\"},
-            { @"\\.\..\corefx\..\..\.\", 6, @"\\.\..\"},
-            { @"\\.\..\..\.\corefx\temp\..", 6, @"\\.\..\corefx"},
-            { @"\\.\..\..\\\.\..\corefx", 6, @"\\.\..\corefx"},
-            { @"\\.\..\corefx\", 6, @"\\.\..\corefx\"},
-            { @"\\.\..\temp\..\corefx\", 6, @"\\.\..\corefx\"},
+            { @"\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\.\corefx\.\\", @"\\.\..\corefx\"},
+            { @"\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\corefx\..\", @"\\.\..\"},
+            { @"\\.\..\corefx\..\..\..\", @"\\.\..\"},
+            { @"\\.\..\corefx\..\..\.\", @"\\.\..\"},
+            { @"\\.\..\..\.\corefx\temp\..", @"\\.\..\corefx"},
+            { @"\\.\..\..\\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\corefx\", @"\\.\..\corefx\"},
+            { @"\\.\..\temp\..\corefx\", @"\\.\..\corefx\"},
 
-            { @"\\.\\corefx", 4, @"\\.\corefx"},
-            { @"\\.\\corefx", 4, @"\\.\corefx"},
-            { @"\\.\\\corefx", 4, @"\\.\corefx"},
-            { @"\\.\\.\corefx\.\\", 4, @"\\.\corefx\"},
-            { @"\\.\\corefx", 4, @"\\.\corefx"},
-            { @"\\.\\..\corefx", 4, @"\\.\corefx"},
-            { @"\\.\\corefx\..\", 4, @"\\.\"},
-            { @"\\.\\corefx\..\..\..\", 4, @"\\.\"},
-            { @"\\.\\corefx\..\..\.\", 4, @"\\.\"},
-            { @"\\.\\..\.\corefx\temp\..", 4, @"\\.\corefx"},
-            { @"\\.\\..\\\.\..\corefx", 4, @"\\.\corefx"},
-            { @"\\.\\corefx\", 4, @"\\.\corefx\"},
-            { @"\\.\\temp\..\corefx\", 4, @"\\.\corefx\"},
+            { @"\\.\\corefx", @"\\.\corefx"},
+            { @"\\.\\corefx", @"\\.\corefx"},
+            { @"\\.\\\corefx", @"\\.\corefx"},
+            { @"\\.\\.\corefx\.\\", @"\\.\corefx\"},
+            { @"\\.\\corefx", @"\\.\corefx"},
+            { @"\\.\\..\corefx", @"\\.\corefx"},
+            { @"\\.\\corefx\..\", @"\\.\"},
+            { @"\\.\\corefx\..\..\..\", @"\\.\"},
+            { @"\\.\\corefx\..\..\.\", @"\\.\"},
+            { @"\\.\\..\.\corefx\temp\..", @"\\.\corefx"},
+            { @"\\.\\..\\\.\..\corefx", @"\\.\corefx"},
+            { @"\\.\\corefx\", @"\\.\corefx\"},
+            { @"\\.\\temp\..\corefx\", @"\\.\corefx\"},
+
+            { @"\\.\C:A\.", @"\\.\C:A\"},
+            { @"\\.\C:A\..", @"\\.\C:A\"},
+            { @"\\.\C:A\..\..", @"\\.\C:A\"},
+            { @"\\.\C:A\..\..\..", @"\\.\C:A\"},
         };
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentsDeviceRootData => new TheoryData<string, int, string>
+        public static TheoryData<string, string> RemoveRelativeSegmentsDeviceRootData => new TheoryData<string, string>
         {
-            { @"\\.\git\corefx", 8, @"\\.\git\corefx"},
-            { @"\\.\git\corefx", 8, @"\\.\git\corefx"},
-            { @"\\.\git\\corefx", 8, @"\\.\git\corefx"},
-            { @"\\.\git\.\corefx\.\\", 8, @"\\.\git\corefx\"},
-            { @"\\.\git\corefx", 8, @"\\.\git\corefx"},
-            { @"\\.\git\..\corefx", 8, @"\\.\git\corefx"},
-            { @"\\.\git\corefx\..\", 8, @"\\.\git\"},
-            { @"\\.\git\corefx\..\..\..\", 8, @"\\.\git\"},
-            { @"\\.\git\corefx\..\..\.\", 8, @"\\.\git\"},
-            { @"\\.\git\..\.\corefx\temp\..", 8, @"\\.\git\corefx"},
-            { @"\\.\git\..\\\.\..\corefx", 8, @"\\.\git\corefx"},
-            { @"\\.\git\corefx\", 8, @"\\.\git\corefx\"},
-            { @"\\.\git\temp\..\corefx\", 8, @"\\.\git\corefx\"},
+            { @"\\.\git\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\.\corefx\.\\", @"\\.\git\corefx\"},
+            { @"\\.\git\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\..\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\corefx\..\", @"\\.\git\"},
+            { @"\\.\git\corefx\..\..\..\", @"\\.\git\"},
+            { @"\\.\git\corefx\..\..\.\", @"\\.\git\"},
+            { @"\\.\git\..\.\corefx\temp\..", @"\\.\git\corefx"},
+            { @"\\.\git\..\\\.\..\corefx", @"\\.\git\corefx"},
+            { @"\\.\git\corefx\", @"\\.\git\corefx\"},
+            { @"\\.\git\temp\..\corefx\", @"\\.\git\corefx\"},
 
-            { @"\\.\.\corefx", 6, @"\\.\.\corefx"},
-            { @"\\.\.\corefx", 6, @"\\.\.\corefx"},
-            { @"\\.\.\\corefx", 6, @"\\.\.\corefx"},
-            { @"\\.\.\.\corefx\.\\", 6, @"\\.\.\corefx\"},
-            { @"\\.\.\corefx", 6, @"\\.\.\corefx"},
-            { @"\\.\.\..\corefx", 6, @"\\.\.\corefx"},
-            { @"\\.\.\corefx\..\", 6, @"\\.\.\"},
-            { @"\\.\.\corefx\..\..\..\", 6, @"\\.\.\"},
-            { @"\\.\.\corefx\..\..\.\", 6, @"\\.\.\"},
-            { @"\\.\.\..\.\corefx\temp\..", 6, @"\\.\.\corefx"},
-            { @"\\.\.\..\\\.\..\corefx", 6, @"\\.\.\corefx"},
-            { @"\\.\.\corefx\", 6, @"\\.\.\corefx\"},
-            { @"\\.\.\temp\..\corefx\", 6, @"\\.\.\corefx\"},
+            { @"\\.\.\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\.\corefx\.\\", @"\\.\.\corefx\"},
+            { @"\\.\.\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\..\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\corefx\..\", @"\\.\.\"},
+            { @"\\.\.\corefx\..\..\..\", @"\\.\.\"},
+            { @"\\.\.\corefx\..\..\.\", @"\\.\.\"},
+            { @"\\.\.\..\.\corefx\temp\..", @"\\.\.\corefx"},
+            { @"\\.\.\..\\\.\..\corefx", @"\\.\.\corefx"},
+            { @"\\.\.\corefx\", @"\\.\.\corefx\"},
+            { @"\\.\.\temp\..\corefx\", @"\\.\.\corefx\"},
 
-            { @"\\.\..\corefx", 7, @"\\.\..\corefx"},
-            { @"\\.\..\corefx", 7, @"\\.\..\corefx"},
-            { @"\\.\..\\corefx", 7, @"\\.\..\corefx"},
-            { @"\\.\..\.\corefx\.\\", 7, @"\\.\..\corefx\"},
-            { @"\\.\..\corefx", 7, @"\\.\..\corefx"},
-            { @"\\.\..\..\corefx", 7, @"\\.\..\corefx"},
-            { @"\\.\..\corefx\..\", 7, @"\\.\..\"},
-            { @"\\.\..\corefx\..\..\..\", 7, @"\\.\..\"},
-            { @"\\.\..\corefx\..\..\.\", 7, @"\\.\..\"},
-            { @"\\.\..\..\.\corefx\temp\..", 7, @"\\.\..\corefx"},
-            { @"\\.\..\..\\\.\..\corefx", 7, @"\\.\..\corefx"},
-            { @"\\.\..\corefx\", 7, @"\\.\..\corefx\"},
-            { @"\\.\..\temp\..\corefx\", 7, @"\\.\..\corefx\"},
-
-            { @"\\.\\corefx", 5, @"\\.\\corefx"},
-            { @"\\.\\corefx", 5, @"\\.\\corefx"},
-            { @"\\.\\\corefx", 5, @"\\.\\corefx"},
-            { @"\\.\\.\corefx\.\\", 5, @"\\.\\corefx\"},
-            { @"\\.\\corefx", 5, @"\\.\\corefx"},
-            { @"\\.\\..\corefx", 5, @"\\.\\corefx"},
-            { @"\\.\\corefx\..\", 5, @"\\.\\"},
-            { @"\\.\\corefx\..\..\..\", 5, @"\\.\\"},
-            { @"\\.\\corefx\..\..\.\", 5, @"\\.\\"},
-            { @"\\.\\..\.\corefx\temp\..", 5, @"\\.\\corefx"},
-            { @"\\.\\..\\\.\..\corefx", 5, @"\\.\\corefx"},
-            { @"\\.\\corefx\", 5, @"\\.\\corefx\"},
-            { @"\\.\\temp\..\corefx\", 5, @"\\.\\corefx\"},
+            { @"\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\.\corefx\.\\", @"\\.\..\corefx\"},
+            { @"\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\corefx\..\", @"\\.\..\"},
+            { @"\\.\..\corefx\..\..\..\", @"\\.\..\"},
+            { @"\\.\..\corefx\..\..\.\", @"\\.\..\"},
+            { @"\\.\..\..\.\corefx\temp\..", @"\\.\..\corefx"},
+            { @"\\.\..\..\\\.\..\corefx", @"\\.\..\corefx"},
+            { @"\\.\..\corefx\", @"\\.\..\corefx\"},
+            { @"\\.\..\temp\..\corefx\", @"\\.\..\corefx\"}
         };
 
         [Theory,
             MemberData(nameof(RemoveRelativeSegmentsDeviceData)),
             MemberData(nameof(RemoveRelativeSegmentsDeviceRootData))]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void RemoveRelativeSegmentsDeviceTest(string path, int skip, string expected)
+        public void RemoveRelativeSegmentsDeviceTest(string path, string expected)
         {
-            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path, skip));
+            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path));
             StringBuilder sb = new StringBuilder(expected);
             sb.Replace('.', '?', 0, 4);
             expected = sb.ToString();
@@ -356,53 +364,53 @@ namespace Tests.System.IO
             sb = new StringBuilder(path);
             sb.Replace('.', '?', 0, 4);
             path = sb.ToString();
-            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path, skip));
+            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path));
         }
 
-        public static TheoryData<string, int, string> RemoveRelativeSegmentUnixData => new TheoryData<string, int, string>
+        public static TheoryData<string, string> RemoveRelativeSegmentUnixData => new TheoryData<string, string>
         {
-            { "/tmp/home", 1, "/tmp/home" },
-            { "/tmp/..", 1, "/" },
-            { "/tmp/home/../././", 1, "/tmp/" },
-            { "/tmp/../../../", 1, "/" },
-            { "/tmp//home", 1, "/tmp/home" },
-            { "/./tmp//home", 1, "/tmp/home" },
-            { "/../tmp/home", 1, "/tmp/home" },
-            { "/../../../tmp/./home", 1, "/tmp/home" },
-            { "//tmp///home", 1, "/tmp/home" },
-            { "/tmp/home/git/./.././git/corefx/../", 1, "/tmp/home/git/" },
-            { "/./tmp/home", 1, "/tmp/home" },
+            { "/tmp/home", "/tmp/home" },
+            { "/tmp/..", "/" },
+            { "/tmp/home/../././", "/tmp/" },
+            { "/tmp/../../../", "/" },
+            { "/tmp//home", "/tmp/home" },
+            { "/./tmp//home", "/tmp/home" },
+            { "/../tmp/home", "/tmp/home" },
+            { "/../../../tmp/./home", "/tmp/home" },
+            { "//tmp///home", "/tmp/home" },
+            { "/tmp/home/git/./.././git/corefx/../", "/tmp/home/git/" },
+            { "/./tmp/home", "/tmp/home" },
 
-            { "/tmp/home", 4, "/tmp/home" },
-            { "/tmp/..", 4, "/tmp" },
-            { "/tmp/home/../././", 4, "/tmp/" },
-            { "/tmp/../../../", 4, "/tmp/" },
-            { "/tmp//home", 4, "/tmp/home" },
-            { "/./tmp//home", 2, "/./tmp/home" },
-            { "/../tmp/home", 3, "/../tmp/home" },
-            { "/../../../tmp/./home", 4, "/../tmp/home" },
-            { "//tmp///home", 5, "//tmp/home" },
-            { "/tmp/home/git/./.././git/corefx/../", 5, "/tmp/home/git/" },
-            { "/./tmp/home", 3, "/./tmp/home" },
+            { "/tmp/home", "/tmp/home" },
+            { "/tmp/..", "/tmp" },
+            { "/tmp/home/../././", "/tmp/" },
+            { "/tmp/../../../", "/tmp/" },
+            { "/tmp//home", "/tmp/home" },
+            { "/./tmp//home", "/./tmp/home" },
+            { "/../tmp/home", "/../tmp/home" },
+            { "/../../../tmp/./home", "/../tmp/home" },
+            { "//tmp///home", "//tmp/home" },
+            { "/tmp/home/git/./.././git/corefx/../", "/tmp/home/git/" },
+            { "/./tmp/home", "/./tmp/home" },
 
-            { "/tmp/../../", 8, "/tmp/../" },
-            { "/tmp/home/../././", 10, "/tmp/home/" },
-            { "/tmp/../../../", 8, "/tmp/../" },
-            { "/tmp//home/.././/", 11, "/tmp//home/" },
-            { "/./tmp//home/git/git", 7, "/./tmp/home/git/git" },
-            { "/../tmp/./home", 8, "/../tmp/home" },
-            { "/../../../tmp/./home", 8, "/../../../tmp/home" },
-            { "//tmp///home/..", 5, "//tmp/" },
-            { "/tmp/home/git/./.././git/corefx/../", 16, "/tmp/home/git/./git/" },
-            { "/./tmp/home/././", 7, "/./tmp/home/" },
+            { "/tmp/../../", "/tmp/../" },
+            { "/tmp/home/../././", "/tmp/home/" },
+            { "/tmp/../../../", "/tmp/../" },
+            { "/tmp//home/.././/", "/tmp//home/" },
+            { "/./tmp//home/git/git", "/./tmp/home/git/git" },
+            { "/../tmp/./home", "/../tmp/home" },
+            { "/../../../tmp/./home", "/../../../tmp/home" },
+            { "//tmp///home/..", "//tmp/" },
+            { "/tmp/home/git/./.././git/corefx/../", "/tmp/home/git/./git/" },
+            { "/./tmp/home/././", "/./tmp/home/" },
         };
 
         [Theory,
             MemberData(nameof(RemoveRelativeSegmentUnixData))]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void RemoveRelativeSegmentsUnix(string path, int skip, string expected)
+        public void RemoveRelativeSegmentsUnix(string path, string expected)
         {
-            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path, skip));
+            Assert.Equal(expected, PathInternal.RemoveRelativeSegments(path));
         }
     }
 }
