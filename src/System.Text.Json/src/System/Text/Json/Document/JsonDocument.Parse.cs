@@ -476,7 +476,7 @@ namespace System.Text.Json
                                 readerSpan[(int)reader.TokenStartIndex + payloadLength - 1] == (byte)'"',
                                 $"Calculated span ends with {readerSpan[(int)reader.TokenStartIndex + payloadLength - 1]}");
 
-                                valueSpan = readerSpan.Slice((int)reader.TokenStartIndex, payloadLength);
+                            valueSpan = readerSpan.Slice((int)reader.TokenStartIndex, payloadLength);
                         }
                         else
                         {
