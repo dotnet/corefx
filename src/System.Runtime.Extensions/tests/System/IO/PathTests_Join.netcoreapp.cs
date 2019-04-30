@@ -147,6 +147,16 @@ namespace System.IO.Tests
             { "a", $"{Sep}b", "", "", $"a{Sep}b" },
             { "a", "", $"{Sep}b", "", $"a{Sep}b" },
             { "a", "", "", $"{Sep}b", $"a{Sep}b" },
+            { $"{Sep}a", "", "", "", $"{Sep}a" },
+            { "", $"{Sep}a", "", "", $"{Sep}a" },
+            { "", "", $"{Sep}a", "", $"{Sep}a" },
+            { "", "", "", $"{Sep}a", $"{Sep}a" },
+            { $"{Sep}a", "b", "", "", $"{Sep}a{Sep}b" },
+            { "", $"{Sep}a", "b", "", $"{Sep}a{Sep}b" },
+            { "", "", $"{Sep}a", "b", $"{Sep}a{Sep}b" },
+            { $"a{Sep}", $"{Sep}b", "", "", $"a{Sep}{Sep}b" },
+            { $"a{Sep}", "", $"{Sep}b", "", $"a{Sep}{Sep}b" },
+            { $"a{Sep}", "", "", $"{Sep}b", $"a{Sep}{Sep}b" },
             { $"a{AltSep}", "b", "", "", $"a{AltSep}b" },
             { $"a{AltSep}", "", "b", "", $"a{AltSep}b" },
             { $"a{AltSep}", "", "", "b", $"a{AltSep}b" },
@@ -172,6 +182,12 @@ namespace System.IO.Tests
             Assert.Equal(expected, Path.Join(path1, path2, path3, path4));
         }
 
+        [Fact]
+        public void JoinStringArray_ThrowsArugmentNullException()
+        {
+            Assert.Throws<ArgumentNullException>(() => Path.Join(null));
+        }
+
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
         public void JoinStringArray_2(string path1, string path2, string expected)
         {
@@ -188,6 +204,13 @@ namespace System.IO.Tests
         public void JoinStringArray_4(string path1, string path2, string path3, string path4, string expected)
         {
             Assert.Equal(expected, Path.Join(new string[] { path1, path2, path3, path4 }));
+        }
+
+        [Theory, MemberData(nameof(TestData_JoinFourPaths))]
+        public void JoinStringArray_8(string path1, string path2, string path3, string path4, string _)
+        {
+            string fourJoined = Path.Join(path1, path2, path3, path4);
+            Assert.Equal(Path.Join(fourJoined, fourJoined) , Path.Join(new string[] { path1, path2, path3, path4, path1, path2, path3, path4 }));
         }
     }
 }
