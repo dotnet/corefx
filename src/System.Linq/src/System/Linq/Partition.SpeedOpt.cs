@@ -17,7 +17,7 @@ namespace System.Linq
     /// Returning an instance of this type is useful to quickly handle scenarios where it is known
     /// that an operation will result in zero elements.
     /// </remarks>
-    internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>
+    internal sealed class EmptyPartition<TElement> : IPartition<TElement>, IEnumerator<TElement>, IList<TElement>, IReadOnlyList<TElement>
     {
         /// <summary>
         /// A cached, immutable instance of an empty enumerable.
@@ -27,6 +27,31 @@ namespace System.Linq
         private EmptyPartition()
         {
         }
+
+        public int Count => 0;
+
+        public bool IsReadOnly => true;
+
+        public TElement this[int index]
+        { 
+            get => ThrowHelper.ThrowArgumentOutOfRangeException<TElement>(ExceptionArgument.index);
+            set => ThrowHelper.ThrowNotSupportedException();
+        }
+
+        public void CopyTo(TElement[] array, int arrayIndex)
+        {
+            // Do nothing.
+        }
+
+        public bool Contains(TElement item) => false;            
+
+        public int IndexOf(TElement item) => -1;
+
+        void ICollection<TElement>.Add(TElement item) => ThrowHelper.ThrowNotSupportedException();
+        bool ICollection<TElement>.Remove(TElement item) => ThrowHelper.ThrowNotSupportedException<bool>();
+        void ICollection<TElement>.Clear() => ThrowHelper.ThrowNotSupportedException();
+        void IList<TElement>.Insert(int index, TElement item) => ThrowHelper.ThrowNotSupportedException();
+        void IList<TElement>.RemoveAt(int index) => ThrowHelper.ThrowNotSupportedException();
 
         public IEnumerator<TElement> GetEnumerator() => this;
 

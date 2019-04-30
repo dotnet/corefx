@@ -13,6 +13,10 @@ namespace System.Linq
 
         internal static void ThrowArgumentOutOfRangeException(ExceptionArgument argument) => throw new ArgumentOutOfRangeException(GetArgumentString(argument));
 
+        internal static T ThrowArgumentOutOfRangeException<T>(ExceptionArgument argument) => throw new ArgumentOutOfRangeException(GetArgumentString(argument));
+
+        internal static void ThrowArgumentArrayPlusOffTooSmall() => throw new ArgumentException(SR.ArrayPlusOffTooSmall);
+
         internal static void ThrowMoreThanOneElementException() => throw new InvalidOperationException(SR.MoreThanOneElement);
 
         internal static void ThrowMoreThanOneMatchException() => throw new InvalidOperationException(SR.MoreThanOneMatch);
@@ -22,6 +26,8 @@ namespace System.Linq
         internal static void ThrowNoMatchException() => throw new InvalidOperationException(SR.NoMatch);
 
         internal static void ThrowNotSupportedException() => throw new NotSupportedException();
+
+        internal static T ThrowNotSupportedException<T>() => throw new NotSupportedException();
 
         private static string GetArgumentString(ExceptionArgument argument)
         {
@@ -44,6 +50,8 @@ namespace System.Linq
                 case ExceptionArgument.second: return nameof(ExceptionArgument.second);
                 case ExceptionArgument.selector: return nameof(ExceptionArgument.selector);
                 case ExceptionArgument.source: return nameof(ExceptionArgument.source);
+                case ExceptionArgument.array: return nameof(ExceptionArgument.array);
+                case ExceptionArgument.arrayIndex: return nameof(ExceptionArgument.arrayIndex);
                 default:
                     Debug.Fail("The ExceptionArgument value is not defined.");
                     return string.Empty;
@@ -70,5 +78,7 @@ namespace System.Linq
         second,
         selector,
         source,
+        array,
+        arrayIndex,
     }
 }

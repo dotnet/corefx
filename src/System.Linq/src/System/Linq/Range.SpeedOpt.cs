@@ -28,16 +28,7 @@ namespace System.Linq
                 return array;
             }
 
-            public List<int> ToList()
-            {
-                List<int> list = new List<int>(_end - _start);
-                for (int cur = _start; cur != _end; cur++)
-                {
-                    list.Add(cur);
-                }
-
-                return list;
-            }
+            public List<int> ToList() => new List<int>(this);
 
             public int GetCount(bool onlyIfCheap) => unchecked(_end - _start);
 

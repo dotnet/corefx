@@ -28,7 +28,7 @@ namespace System.Linq
         /// An iterator that yields the same item multiple times. 
         /// </summary>
         /// <typeparam name="TResult">The type of the item.</typeparam>
-        private sealed partial class RepeatIterator<TResult> : Iterator<TResult>
+        private sealed partial class RepeatIterator<TResult> : Iterator<TResult>, IList<TResult>, IReadOnlyList<TResult>
         {
             private readonly int _count;
 
@@ -38,6 +38,55 @@ namespace System.Linq
                 _current = element;
                 _count = count;
             }
+
+           public int Count => _count;
+
+            public bool IsReadOnly => true;
+
+            public TResult this[int index]
+            {
+                get
+                {
+                    if ((uint)index >= (uint)_count)
+                    {
+                        ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
+                    }
+                    return _current;
+                }
+                
+                set => ThrowHelper.ThrowNotSupportedException();
+            }
+
+            public void CopyTo(TResult[] array, int arrayIndex)
+            {
+                if (array is null)
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+
+                if ((uint)arrayIndex >= (uint)array.Length)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.arrayIndex);
+
+                unchecked
+                {
+                    if (array.Length - arrayIndex < Count)
+                        ThrowHelper.ThrowArgumentArrayPlusOffTooSmall();
+
+                    int end = arrayIndex + Count;
+                    for (int index = arrayIndex; index < end; index++)
+                    {
+                        array[index] = _current;
+                    }
+                }
+            }
+
+            public bool Contains(TResult item) => EqualityComparer<TResult>.Default.Equals(_current, item);            
+
+            public int IndexOf(TResult item) => EqualityComparer<TResult>.Default.Equals(_current, item) ? 0 : -1;      
+
+            void ICollection<TResult>.Add(TResult item) => ThrowHelper.ThrowNotSupportedException();
+            bool ICollection<TResult>.Remove(TResult item) => ThrowHelper.ThrowNotSupportedException<bool>();
+            void ICollection<TResult>.Clear() => ThrowHelper.ThrowNotSupportedException();
+            void IList<TResult>.Insert(int index, TResult item) => ThrowHelper.ThrowNotSupportedException();
+            void IList<TResult>.RemoveAt(int index) => ThrowHelper.ThrowNotSupportedException();
 
             public override Iterator<TResult> Clone()
             {

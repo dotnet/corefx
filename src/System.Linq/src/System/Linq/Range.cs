@@ -28,7 +28,7 @@ namespace System.Linq
         /// <summary>
         /// An iterator that yields a range of consecutive integers.
         /// </summary>
-        private sealed partial class RangeIterator : Iterator<int>
+        private sealed partial class RangeIterator : Iterator<int>, IList<int>, IReadOnlyList<int>
         {
             private readonly int _start;
             private readonly int _end;
@@ -39,6 +39,61 @@ namespace System.Linq
                 _start = start;
                 _end = unchecked(start + count);
             }
+
+            public int Count => unchecked(_end - _start);
+
+            public bool IsReadOnly => true;
+
+            public int this[int index]
+            {
+                get
+                {
+                    if ((uint)index >= (uint)Count)
+                    {
+                        ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
+                    }
+                    return unchecked(index + _start);
+                }
+                set => ThrowHelper.ThrowNotSupportedException();
+            }
+
+            public void CopyTo(int[] array, int arrayIndex)
+            {
+                if (array is null)
+                    ThrowHelper.ThrowArgumentNullException(ExceptionArgument.array);
+
+                if ((uint)arrayIndex >= (uint)array.Length)
+                    ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.arrayIndex);
+
+                unchecked
+                {
+                    if (array.Length - arrayIndex < Count)
+                        ThrowHelper.ThrowArgumentArrayPlusOffTooSmall();
+
+                    int end = arrayIndex + Count;
+                    for (int index = arrayIndex, value = _start; index < end; index++, value++)
+                    {
+                        array[index] = value;
+                    }
+                }
+            }
+
+            public bool Contains(int item) => item >= _start && item < _end;            
+
+            public int IndexOf(int item)
+            {
+                if (item < _start || item >= _end)
+                {
+                    return -1;
+                }
+                return unchecked(item - _start);
+            }            
+
+            void ICollection<int>.Add(int item) => ThrowHelper.ThrowNotSupportedException();
+            bool ICollection<int>.Remove(int item) => ThrowHelper.ThrowNotSupportedException<bool>(); 
+            void ICollection<int>.Clear() => ThrowHelper.ThrowNotSupportedException();
+            void IList<int>.Insert(int index, int item) => ThrowHelper.ThrowNotSupportedException();
+            void IList<int>.RemoveAt(int index) => ThrowHelper.ThrowNotSupportedException();
 
             public override Iterator<int> Clone() => new RangeIterator(_start, _end - _start);
 

@@ -24,16 +24,7 @@ namespace System.Linq
                 return array;
             }
 
-            public List<TResult> ToList()
-            {
-                List<TResult> list = new List<TResult>(_count);
-                for (int i = 0; i != _count; ++i)
-                {
-                    list.Add(_current);
-                }
-
-                return list;
-            }
+            public List<TResult> ToList() => new List<TResult>(this);
 
             public int GetCount(bool onlyIfCheap) => _count;
 

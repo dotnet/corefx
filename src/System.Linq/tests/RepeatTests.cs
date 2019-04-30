@@ -240,5 +240,132 @@ namespace System.Linq.Tests
         {
             Assert.Equal(42, Enumerable.Repeat("Test", 42).Count());
         }
+
+        [Fact]
+        public void ICollection_IsReadOnly()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as ICollection<string>;
+
+            Assert.Equal(true, repeatSequence.IsReadOnly);
+            Assert.Throws<NotSupportedException>(() => repeatSequence.Add(null));
+            Assert.Throws<NotSupportedException>(() => repeatSequence.Remove(null));
+            Assert.Throws<NotSupportedException>(() => repeatSequence.Clear());
+        }
+
+        [Fact]
+        public void ICollection_Count()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as ICollection<string>;
+
+            Assert.Equal(100, repeatSequence.Count);
+        }
+
+        [Fact]
+        public void ICollection_CopyTo_ProduceCorrectSequence()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as ICollection<string>;
+
+            var arrayIndex = 10;
+            var array = new string[repeatSequence.Count + arrayIndex];
+            repeatSequence.CopyTo(array, arrayIndex);
+            
+            int count = 0;
+            for (var index = arrayIndex; index < repeatSequence.Count + arrayIndex; index++)
+            {
+                count++;
+                Assert.Equal("Test", array[index]);
+            }
+
+            Assert.Equal(100, count);
+        }
+
+        [Fact]
+        public void ICollection_CopyTo_ThrowExceptionOnNullArray()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as ICollection<string>;
+
+            AssertExtensions.Throws<ArgumentNullException>("array", () => repeatSequence.CopyTo(null, 0));
+        }
+
+        [Fact]
+        public void ICollection_CopyTo_ThrowExceptionOnOutOfRangeArrayIndex()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as ICollection<string>;
+            var array = new string[100];
+
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => repeatSequence.CopyTo(array, int.MinValue));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => repeatSequence.CopyTo(array, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => repeatSequence.CopyTo(array, 100));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => repeatSequence.CopyTo(array, int.MaxValue));
+        }
+
+        [Fact]
+        public void ICollection_CopyTo_ThrowExceptionOnArrayOverflow()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as ICollection<string>;
+            var array = new string[100];
+
+            Assert.Throws<ArgumentException>(() => repeatSequence.CopyTo(array, 1));
+        }
+
+        [Fact]
+        public void ICollection_Contains()
+        {
+            var emptyRepeatSequence = Enumerable.Repeat("Test", 0) as IList<string>;
+
+            Assert.Equal(false, emptyRepeatSequence.Contains("Test"));
+
+            var repeatSequence = Enumerable.Repeat("Test", 100) as ICollection<string>;
+
+            Assert.Equal(false, repeatSequence.Contains("AnotherTest"));
+            Assert.Equal(true, repeatSequence.Contains("Test"));
+        }
+
+        [Fact]
+        public void IList_IsReadOnly()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as IList<string>;
+
+            Assert.Throws<NotSupportedException>(() => repeatSequence.Insert(0, null));
+            Assert.Throws<NotSupportedException>(() => repeatSequence.RemoveAt(0));
+        }
+
+        [Fact]
+        public void IList_Indexer_ProduceCorrectSequence()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as IList<string>;
+            int count = 0;
+            for (var index = 0; index < repeatSequence.Count; index++)
+            {
+                count++;
+                Assert.Equal("Test", repeatSequence[index]);
+            }
+
+            Assert.Equal(100, count);
+        }
+
+        [Fact]
+        public void IList_Indexer_ThrowExceptionOnOutOfRangeIndex()
+        {
+            var repeatSequence = Enumerable.Repeat("Test", 100) as IList<string>;
+
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => repeatSequence[int.MinValue]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => repeatSequence[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => repeatSequence[100]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => repeatSequence[int.MaxValue]);
+        }
+
+        [Fact]
+        public void IList_IndexOf()
+        {
+            var emptyRepeatSequence = Enumerable.Repeat("Test", 0) as IList<string>;
+
+            Assert.Equal(-1, emptyRepeatSequence.IndexOf("Test"));
+
+            var repeatSequence = Enumerable.Repeat("Test", 100) as IList<string>;
+
+            Assert.Equal(-1, repeatSequence.IndexOf("AnotherTest"));
+            Assert.Equal(0, repeatSequence.IndexOf("Test"));
+        }    
     }
 }
