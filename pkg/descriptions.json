@@ -1043,7 +1043,7 @@
     ]
   },
   {
-    "Name": "Microsoft.Compatibility.AsyncInterfaces",
+    "Name": "Microsoft.Bcl.AsyncInterfaces",
     "Description": "Provides interfaces and helper types for consuming and producing async enumerables on .NET Standard 2.0. This package is not required when targeting .NET Standard 2.1 or .NET CoreApp 3.0 as they already have support for these types inbox.",
     "CommonTypes": [
       "System.IAsyncDisposable",

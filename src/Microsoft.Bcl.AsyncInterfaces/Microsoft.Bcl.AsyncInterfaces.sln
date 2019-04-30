@@ -2,12 +2,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27213.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Compatibility.AsyncInterfaces", "src\Microsoft.Compatibility.AsyncInterfaces.csproj", "{96A7CE75-B5E8-421B-BDF0-C4651D97D8CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Bcl.AsyncInterfaces", "src\Microsoft.Bcl.AsyncInterfaces.csproj", "{96A7CE75-B5E8-421B-BDF0-C4651D97D8CA}"
 	ProjectSection(ProjectDependencies) = postProject
 		{6371299B-8F39-4A0A-A9CD-70F80FF205F6} = {6371299B-8F39-4A0A-A9CD-70F80FF205F6}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Compatibility.AsyncInterfaces", "ref\Microsoft.Compatibility.AsyncInterfaces.csproj", "{6371299B-8F39-4A0A-A9CD-70F80FF205F6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Bcl.AsyncInterfaces", "ref\Microsoft.Bcl.AsyncInterfaces.csproj", "{6371299B-8F39-4A0A-A9CD-70F80FF205F6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E893-4E87-987E-04EF0DCEAEFD}"
 EndProject
@@ -36,6 +36,6 @@ Global
 		{6371299B-8F39-4A0A-A9CD-70F80FF205F6} = {2E666815-2EDB-464B-9DF6-380BF4789AD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {FE82A0EE-2473-4F59-A141-4C7D92D46AE9}
+		SolutionGuid = {38217F72-3F9A-4B15-96C8-BFA23083AAD3}
 	EndGlobalSection
 EndGlobal

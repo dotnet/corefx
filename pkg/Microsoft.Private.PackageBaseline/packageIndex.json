@@ -27,6 +27,12 @@
         "net45": "4.0.0.0"
       }
     },
+    "Microsoft.Bcl.AsyncInterfaces": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
+      }
+    },
     "Microsoft.Bcl.Json.Sources": {
       "InboxOn": {}
     },
@@ -58,12 +64,6 @@
     "Microsoft.Build.Utilities.v4.0": {
       "InboxOn": {
         "net45": "4.0.0.0"
-      }
-    },
-    "Microsoft.Compatibility.AsyncInterfaces": {
-      "InboxOn": {},
-      "AssemblyVersionInPackageVersion": {
-        "4.0.0.0": "4.6.0"
       }
     },
     "Microsoft.CSharp": {
