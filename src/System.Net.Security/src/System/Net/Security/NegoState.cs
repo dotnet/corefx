@@ -764,17 +764,12 @@ namespace System.Net.Security
             }
         }
 
-        internal static bool IsError(SecurityStatusPal status)
-        {
-            return ((int)status.ErrorCode >= (int)SecurityStatusPalErrorCode.OutOfMemory);
-        }
-
         private unsafe byte[] GetOutgoingBlob(byte[] incomingBlob, ref Exception e)
         {
             SecurityStatusPal statusCode;
-            byte[] message = _context.GetOutgoingBlob(incomingBlob, false, out statusCode);
+            byte[] message = _context.GetOutgoingBlob(incomingBlob, out statusCode);
 
-            if (IsError(statusCode))
+            if (statusCode.IsError)
             {
                 e = NegotiateStreamPal.CreateExceptionFromError(statusCode);
                 uint error = (uint)e.HResult;

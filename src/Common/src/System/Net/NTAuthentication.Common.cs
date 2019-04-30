@@ -156,17 +156,37 @@ namespace System.Net
             }
         }
 
+        // SmtpNegotiate
         internal int VerifySignature(byte[] buffer, int offset, int count)
         {
             return NegotiateStreamPal.VerifySignature(_securityContext, buffer, offset, count);
         }
 
+        // SmtpNegotiate
         internal int MakeSignature(byte[] buffer, int offset, int count, ref byte[] output)
         {
             return NegotiateStreamPal.MakeSignature(_securityContext, buffer, offset, count, ref output);
         }
 
+        // SmtpNtlm, SmtpNegotiate, SocketHttpHandler
         internal string GetOutgoingBlob(string incomingBlob)
+        {
+            SecurityStatusPal statusCode;
+            string outgoingBlob = GetOutgoingBlob(incomingBlob, out statusCode);
+
+            if (statusCode.IsError)
+            {
+                Exception exception = NegotiateStreamPal.CreateExceptionFromError(statusCode);
+                if (NetEventSource.IsEnabled)
+                    NetEventSource.Exit(this, exception);
+                throw exception;
+            }
+
+            return outgoingBlob;
+        }
+
+        // upstack, Convert HttpListener?
+        internal string GetOutgoingBlob(string incomingBlob, out SecurityStatusPal statusCode)
         {
             byte[] decodedIncomingBlob = null;
             if (incomingBlob != null && incomingBlob.Length > 0)
@@ -180,11 +200,11 @@ namespace System.Net
                 // we tried auth previously, now we got a null blob, we're done. this happens
                 // with Kerberos & valid credentials on the domain but no ACLs on the resource
                 _isCompleted = true;
+                statusCode = default;
             }
             else
             {
-                SecurityStatusPal statusCode;
-                decodedOutgoingBlob = GetOutgoingBlob(decodedIncomingBlob, true, out statusCode);
+                decodedOutgoingBlob = GetOutgoingBlob(decodedIncomingBlob, out statusCode);
             }
 
             string outgoingBlob = null;
@@ -193,22 +213,12 @@ namespace System.Net
                 outgoingBlob = Convert.ToBase64String(decodedOutgoingBlob);
             }
 
-            if (IsCompleted)
-            {
-                CloseContext();
-            }
-
             return outgoingBlob;
         }
 
-        internal byte[] GetOutgoingBlob(byte[] incomingBlob, bool thrownOnError)
-        {
-            SecurityStatusPal statusCode;
-            return GetOutgoingBlob(incomingBlob, thrownOnError, out statusCode);
-        }
-
+        // HttpListener, NegotiateStream, upstack
         // Accepts an incoming binary security blob and returns an outgoing binary security blob.
-        internal byte[] GetOutgoingBlob(byte[] incomingBlob, bool throwOnError, out SecurityStatusPal statusCode)
+        internal byte[] GetOutgoingBlob(byte[] incomingBlob, out SecurityStatusPal statusCode)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Enter(this, incomingBlob);
 
@@ -271,16 +281,10 @@ namespace System.Net
             }
 
 
-            if (((int)statusCode.ErrorCode >= (int)SecurityStatusPalErrorCode.OutOfMemory))
+            if (statusCode.IsError)
             {
                 CloseContext();
                 _isCompleted = true;
-                if (throwOnError)
-                {
-                    Exception exception = NegotiateStreamPal.CreateExceptionFromError(statusCode);
-                    if (NetEventSource.IsEnabled) NetEventSource.Exit(this, exception);
-                    throw exception;
-                }
 
                 if (NetEventSource.IsEnabled) NetEventSource.Exit(this, $"null statusCode:0x{((int)statusCode.ErrorCode):x8} ({statusCode})");
                 return null;

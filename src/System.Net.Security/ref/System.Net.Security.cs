@@ -59,9 +59,12 @@ namespace System.Net.Security
         public string ClientSpecifiedSpn { get { throw null; } }
         public bool IsCompleted { get { throw null; } }
         public string Package { get { throw null; } }
+        public string ProtocolName { get { throw null; } }
         public void Dispose() { }
         public System.Security.Principal.IIdentity GetIdentity() { throw null; }
         public string GetOutgoingBlob(string incomingBlob) { throw null; }
+        public int MakeSignature(byte[] buffer, int offset, int count, ref byte[] output) { throw null; }
+        public int VerifySignature(byte[] buffer, int offset, int count) { throw null; }
     }
     public partial class NegotiateStream : System.Net.Security.AuthenticatedStream
     {
@@ -123,6 +126,16 @@ namespace System.Net.Security
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw null; }
         public override void SetLength(long value) { }
         public override void Write(byte[] buffer, int offset, int count) { }
+    }
+    public static partial class NegotiationPackages
+    {
+        public static readonly string Negotiate;
+        public static readonly string NTLM;
+    }
+    public static partial class NegotiationProtocols
+    {
+        public static readonly string Kerberos;
+        public static readonly string NTLM;
     }
     public enum ProtectionLevel
     {

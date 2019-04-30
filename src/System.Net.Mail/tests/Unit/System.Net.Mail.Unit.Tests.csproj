@@ -17,8 +17,6 @@
     <Compile Include="MessageTests\MessageEncodeHeadersTest.cs" />
     <Compile Include="MessageTests\MessageHeaderBehaviorTest.cs" />
     <Compile Include="MessageTests\ReplyToListTest.cs" />
-    <Compile Include="NTAuthenticationStub.cs" />
-    <Compile Include="NTAuthenticationStubTests.cs" />
     <Compile Include="QuotedPrintableStreamTest.cs" />
     <Compile Include="SmtpConnectionTests\EhloParseExtensionsTest.cs" />
     <Compile Include="SmtpDateTimeTest.cs" />

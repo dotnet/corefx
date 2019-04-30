@@ -15,6 +15,14 @@ namespace System.Net
             Exception = exception;
         }
 
+        public bool IsError
+        {
+            get
+            {
+                return ErrorCode >= SecurityStatusPalErrorCode.OutOfMemory;
+            }
+        }
+
         public override string ToString()
         {
             return Exception == null ?

@@ -4,13 +4,14 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Net.Security;
 using System.Security.Authentication.ExtendedProtection;
 
 namespace System.Net.Mail
 {
     internal sealed class SmtpNegotiateAuthenticationModule : ISmtpAuthenticationModule
     {
-        private readonly Dictionary<object, NTAuthentication> _sessions = new Dictionary<object, NTAuthentication>();
+        private readonly Dictionary<object, NegotiateAuthState> _sessions = new Dictionary<object, NegotiateAuthState>();
 
         internal SmtpNegotiateAuthenticationModule()
         {
@@ -23,7 +24,7 @@ namespace System.Net.Mail
             {
                 lock (_sessions)
                 {
-                    NTAuthentication clientContext;
+                    NegotiateAuthState clientContext;
                     if (!_sessions.TryGetValue(sessionCookie, out clientContext))
                     {
                         if (credential == null)
@@ -33,11 +34,10 @@ namespace System.Net.Mail
 
                         _sessions[sessionCookie] =
                             clientContext =
-                            new NTAuthentication(false, "Negotiate", credential, spn,
-                                                 ContextFlagsPal.Connection | ContextFlagsPal.InitIntegrity, channelBindingToken);
+                            new NegotiateAuthState(false, NegotiationPackages.Negotiate, credential, spn,
+                                                 NegotiateAuthFlags.Connection | NegotiateAuthFlags.InitIntegrity, channelBindingToken);
                     }
 
-                    byte[] byteResp;
                     string resp = null;
 
                     if (!clientContext.IsCompleted)
@@ -45,21 +45,10 @@ namespace System.Net.Mail
 
                         // If auth is not yet completed keep producing
                         // challenge responses with GetOutgoingBlob
-
-                        byte[] decodedChallenge = null;
-                        if (challenge != null)
-                        {
-                            decodedChallenge =
-                                Convert.FromBase64String(challenge);
-                        }
-                        byteResp = clientContext.GetOutgoingBlob(decodedChallenge, false);
-                        if (clientContext.IsCompleted && byteResp == null)
+                        resp = clientContext.GetOutgoingBlob(challenge);
+                        if (clientContext.IsCompleted && resp == null)
                         {
                             resp = "\r\n";
-                        }
-                        if (byteResp != null)
-                        {
-                            resp = Convert.ToBase64String(byteResp);
                         }
                     }
                     else
@@ -75,7 +64,7 @@ namespace System.Net.Mail
                     return new Authorization(resp, clientContext.IsCompleted);
                 }
             }
-            // From reflected type NTAuthentication in System.Net.Security.
+            // From reflected type NegotiateAuthState in System.Net.Security.
             catch (NullReferenceException)
             {
                 return null;
@@ -96,7 +85,7 @@ namespace System.Net.Mail
 
         public void CloseContext(object sessionCookie)
         {
-            NTAuthentication clientContext = null;
+            NegotiateAuthState clientContext = null;
             lock (_sessions)
             {
                 if (_sessions.TryGetValue(sessionCookie, out clientContext))
@@ -106,7 +95,7 @@ namespace System.Net.Mail
             }
             if (clientContext != null)
             {
-                clientContext.CloseContext();
+                clientContext.Dispose();
             }
         }
 
@@ -115,7 +104,7 @@ namespace System.Net.Mail
         //
         // Returns null for failure, Base64 encoded string on
         // success.
-        private string GetSecurityLayerOutgoingBlob(string challenge, NTAuthentication clientContext)
+        private string GetSecurityLayerOutgoingBlob(string challenge, NegotiateAuthState clientContext)
         {
             // must have a security layer challenge
 

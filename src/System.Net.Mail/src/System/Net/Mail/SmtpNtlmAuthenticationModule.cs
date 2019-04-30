@@ -3,13 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Net.Security;
 using System.Security.Authentication.ExtendedProtection;
 
 namespace System.Net.Mail
 {
     internal sealed class SmtpNtlmAuthenticationModule : ISmtpAuthenticationModule
     {
-        private readonly Dictionary<object, NTAuthentication> _sessions = new Dictionary<object, NTAuthentication>();
+        private readonly Dictionary<object, NegotiateAuthState> _sessions = new Dictionary<object, NegotiateAuthState>();
 
         internal SmtpNtlmAuthenticationModule()
         {
@@ -22,7 +23,7 @@ namespace System.Net.Mail
             {
                 lock (_sessions)
                 {
-                    NTAuthentication clientContext;
+                    NegotiateAuthState clientContext;
                     if (!_sessions.TryGetValue(sessionCookie, out clientContext))
                     {
                         if (credential == null)
@@ -32,7 +33,7 @@ namespace System.Net.Mail
 
                         _sessions[sessionCookie] =
                             clientContext =
-                            new NTAuthentication(false, "Ntlm", credential, spn, ContextFlagsPal.Connection, channelBindingToken);
+                            new NegotiateAuthState(false, NegotiationPackages.NTLM, credential, spn, NegotiateAuthFlags.Connection, channelBindingToken);
 
                     }
 
@@ -44,12 +45,13 @@ namespace System.Net.Mail
                     }
                     else
                     {
+                        clientContext.Dispose();
                         _sessions.Remove(sessionCookie);
                         return new Authorization(resp, true);
                     }
                 }
             }
-            // From reflected type NTAuthentication in System.Net.Security.
+            // From reflected type NegotiateAuthState in System.Net.Security.
             catch (NullReferenceException)
             {
                 return null;

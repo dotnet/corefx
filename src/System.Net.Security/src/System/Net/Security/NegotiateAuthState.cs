@@ -17,10 +17,22 @@ namespace System.Net.Security
         }
 
         public bool IsCompleted => _ntAuth.IsCompleted;
+        // The package used for negotiation (Negotiate, NTLM)
         public string Package => _ntAuth.Package;
+        // The negotiated protocol (Kerberos, NTLM)
+        public string ProtocolName => _ntAuth.ProtocolName;
         public string ClientSpecifiedSpn => _ntAuth.ClientSpecifiedSpn;
 
         public string GetOutgoingBlob(string incomingBlob) => _ntAuth.GetOutgoingBlob(incomingBlob);
+
+        // SmtpNegotiate only
+        public int MakeSignature(byte[] buffer, int offset, int count, ref byte[] output)
+            => _ntAuth.MakeSignature(buffer, offset, count, ref output);
+
+        // SmtpNegotiate only
+        public int VerifySignature(byte[] buffer, int offset, int count)
+            => _ntAuth.VerifySignature(buffer, offset, count);
+
 
         public IIdentity GetIdentity() => NegotiateStreamPal.GetIdentity(_ntAuth);
 
@@ -57,5 +69,17 @@ namespace System.Net.Security
         ProxyBindings = 0x04000000,
         AllowMissingBindings = 0x10000000,
         UnverifiedTargetName = 0x20000000,
+    }
+
+    public static class NegotiationPackages
+    {
+        public static readonly string NTLM = "NTLM";
+        public static readonly string Negotiate = "Negotiate";
+    }
+
+    public static class NegotiationProtocols
+    {
+        public static readonly string NTLM = "NTLM";
+        public static readonly string Kerberos = "Kerberos";
     }
 }
