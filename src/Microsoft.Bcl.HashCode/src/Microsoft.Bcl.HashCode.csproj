@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ProjectGuid>{B77D0212-D53C-4F7F-8CEC-2E067AC6FCAB}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netstandard'">true</IsPartialFacadeAssembly>
+    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' != 'netstandard2.0'">true</IsPartialFacadeAssembly>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;netcoreapp2.1-Debug;netcoreapp2.1-Release;netstandard2.0-Debug;netstandard2.0-Release;netstandard2.1-Debug;netstandard2.1-Release</Configurations>
   </PropertyGroup>
   <ItemGroup Condition="'$(IsPartialFacadeAssembly)' != 'true'">

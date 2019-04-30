@@ -33,6 +33,12 @@
         "1.0.0.0": "1.0.0"
       }
     },
+    "Microsoft.Bcl.HashCode": {
+      "InboxOn": {},
+      "AssemblyVersionInPackageVersion": {
+        "4.0.0.0": "4.6.0"
+      }
+    },
     "Microsoft.Bcl.Json.Sources": {
       "InboxOn": {}
     },
@@ -64,12 +70,6 @@
     "Microsoft.Build.Utilities.v4.0": {
       "InboxOn": {
         "net45": "4.0.0.0"
-      }
-    },
-    "Microsoft.Compatibility.HashCode": {
-      "InboxOn": {},
-      "AssemblyVersionInPackageVersion": {
-        "4.0.0.0": "4.6.0"
       }
     },
     "Microsoft.CSharp": {

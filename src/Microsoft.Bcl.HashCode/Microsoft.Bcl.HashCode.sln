@@ -2,12 +2,12 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27213.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Compatibility.HashCode", "src\Microsoft.Compatibility.HashCode.csproj", "{B77D0212-D53C-4F7F-8CEC-2E067AC6FCAB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Bcl.HashCode", "src\Microsoft.Bcl.HashCode.csproj", "{B77D0212-D53C-4F7F-8CEC-2E067AC6FCAB}"
 	ProjectSection(ProjectDependencies) = postProject
 		{96AA2060-C846-4E56-9509-E8CB9C114C8F} = {96AA2060-C846-4E56-9509-E8CB9C114C8F}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Compatibility.HashCode", "ref\Microsoft.Compatibility.HashCode.csproj", "{96AA2060-C846-4E56-9509-E8CB9C114C8F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Microsoft.Bcl.HashCode", "ref\Microsoft.Bcl.HashCode.csproj", "{96AA2060-C846-4E56-9509-E8CB9C114C8F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{E107E9C1-E893-4E87-987E-04EF0DCEAEFD}"
 EndProject
@@ -36,6 +36,6 @@ Global
 		{96AA2060-C846-4E56-9509-E8CB9C114C8F} = {2E666815-2EDB-464B-9DF6-380BF4789AD4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {BAF30C1F-FD05-40DC-AC91-82645C22463A}
+		SolutionGuid = {9B2C2F54-126A-4D67-8690-F9E19A1B901F}
 	EndGlobalSection
 EndGlobal
