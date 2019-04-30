@@ -30,7 +30,7 @@
     "Microsoft.Bcl.AsyncInterfaces": {
       "InboxOn": {},
       "AssemblyVersionInPackageVersion": {
-        "4.0.0.0": "4.6.0"
+        "1.0.0.0": "1.0.0"
       }
     },
     "Microsoft.Bcl.Json.Sources": {
