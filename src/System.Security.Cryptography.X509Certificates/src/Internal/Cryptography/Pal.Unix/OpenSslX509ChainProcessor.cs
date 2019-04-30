@@ -398,7 +398,7 @@ namespace Internal.Cryptography.Pal
 
             if (applicationPolicy?.Count > 0 || certificatePolicy?.Count > 0)
             {
-                ProcessPolicy(elements, overallStatus, applicationPolicy, certificatePolicy);
+                ProcessPolicy(elements, ref overallStatus, applicationPolicy, certificatePolicy);
             }
 
             ChainStatus = overallStatus?.ToArray() ?? Array.Empty<X509ChainStatus>();
@@ -618,7 +618,7 @@ namespace Internal.Cryptography.Pal
 
         private static void ProcessPolicy(
             X509ChainElement[] elements,
-            List<X509ChainStatus> overallStatus,
+            ref List<X509ChainStatus> overallStatus,
             OidCollection applicationPolicy,
             OidCollection certificatePolicy)
         {
@@ -651,7 +651,10 @@ namespace Internal.Cryptography.Pal
 
             if (failsPolicyChecks)
             {
-                X509ChainElement leafElement = elements[0];
+                if (overallStatus == null)
+                {
+                    overallStatus = new List<X509ChainStatus>();
+                }
 
                 X509ChainStatus chainStatus = new X509ChainStatus
                 {
@@ -659,16 +662,22 @@ namespace Internal.Cryptography.Pal
                     StatusInformation = SR.Chain_NoPolicyMatch,
                 };
 
-                var elementStatus = new List<X509ChainStatus>(leafElement.ChainElementStatus.Length + 1);
-                elementStatus.AddRange(leafElement.ChainElementStatus);
-
-                AddUniqueStatus(elementStatus, ref chainStatus);
                 AddUniqueStatus(overallStatus, ref chainStatus);
 
-                elements[0] = new X509ChainElement(
-                    leafElement.Certificate,
-                    elementStatus.ToArray(),
-                    leafElement.Information);
+                for (int i = 0; i < elements.Length; i++)
+                {
+                    X509ChainElement element = elements[i];
+
+                    var elementStatus = new List<X509ChainStatus>(element.ChainElementStatus.Length + 1);
+                    elementStatus.AddRange(element.ChainElementStatus);
+
+                    AddUniqueStatus(elementStatus, ref chainStatus);
+
+                    elements[i] = new X509ChainElement(
+                        element.Certificate,
+                        elementStatus.ToArray(),
+                        element.Information);
+                }
             }
         }
 
