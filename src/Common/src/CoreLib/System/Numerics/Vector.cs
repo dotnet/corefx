@@ -759,6 +759,7 @@ namespace System.Numerics
         #endregion Constructors
 
         #region Public Instance Methods
+#if netcoreapp
         /// <summary>
         /// Copies the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>.
         /// </summary>
@@ -788,6 +789,7 @@ namespace System.Numerics
 
             Unsafe.WriteUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destination)), this);
         }
+#endif
 
         /// <summary>
         /// Copies the vector to the given destination array. The destination array must be at least size Vector'T.Count.
@@ -1571,6 +1573,7 @@ namespace System.Numerics
             return sb.ToString();
         }
 
+#if netcoreapp
         /// <summary>
         /// Attempts to copy the vector to the given <see cref="Span{Byte}"/>. The destination span must be at least size <see cref="Vector{Byte}.Count"/>.
         /// </summary>
@@ -1605,6 +1608,7 @@ namespace System.Numerics
             Unsafe.WriteUnaligned<Vector<T>>(ref Unsafe.As<T, byte>(ref MemoryMarshal.GetReference(destination)), this);
             return true;
         }
+#endif
         #endregion Public Instance Methods
 
         #region Arithmetic Operators
