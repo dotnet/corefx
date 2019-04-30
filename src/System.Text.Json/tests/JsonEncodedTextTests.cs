@@ -1,0 +1,305 @@
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System.Collections.Generic;
+using Xunit;
+
+namespace System.Text.Json.Tests
+{
+    public static partial class JsonEncodedTextTests
+    {
+        [Fact]
+        public static void Default()
+        {
+            JsonEncodedText text = default;
+            Assert.True(text.EncodedUtf8Bytes.IsEmpty);
+
+            Assert.Equal(0, text.GetHashCode());
+            Assert.Equal("", text.ToString());
+            Assert.True(text.Equals(default));
+
+            JsonEncodedText defaultText = default;
+            object obj = defaultText;
+            Assert.True(text.Equals(obj));
+        }
+
+        [Fact]
+        public static void Equals()
+        {
+            string message = "message";
+
+            JsonEncodedText text = JsonEncodedText.Encode(message);
+            JsonEncodedText textCopy = text;
+            JsonEncodedText textDuplicate = JsonEncodedText.Encode(message);
+            JsonEncodedText textDuplicateDiffStringRef = JsonEncodedText.Encode("message");
+            JsonEncodedText differentText = JsonEncodedText.Encode("message1");
+
+            Assert.True(text.Equals(text));
+
+            Assert.True(text.Equals(textCopy));
+            Assert.True(textCopy.Equals(text));
+
+            Assert.True(text.Equals(textDuplicate));
+            Assert.True(textDuplicate.Equals(text));
+
+            Assert.True(text.Equals(textDuplicateDiffStringRef));
+            Assert.True(textDuplicateDiffStringRef.Equals(text));
+
+            Assert.False(text.Equals(differentText));
+            Assert.False(differentText.Equals(text));
+        }
+
+        [Fact]
+        public static void EqualsObject()
+        {
+            string message = "message";
+
+            JsonEncodedText text = JsonEncodedText.Encode(message);
+            object textCopy = text;
+            object textDuplicate = JsonEncodedText.Encode(message);
+            object textDuplicateDiffStringRef = JsonEncodedText.Encode("message");
+            object differentText = JsonEncodedText.Encode("message1");
+
+            Assert.True(text.Equals(text));
+
+            Assert.True(text.Equals(textCopy));
+            Assert.True(textCopy.Equals(text));
+
+            Assert.True(text.Equals(textDuplicate));
+            Assert.True(textDuplicate.Equals(text));
+
+            Assert.True(text.Equals(textDuplicateDiffStringRef));
+            Assert.True(textDuplicateDiffStringRef.Equals(text));
+
+            Assert.False(text.Equals(differentText));
+            Assert.False(differentText.Equals(text));
+
+            Assert.False(text.Equals(null));
+        }
+
+        [Fact]
+        public static void GetHashCodeTest()
+        {
+            string message = "message";
+
+            JsonEncodedText text = JsonEncodedText.Encode(message);
+            JsonEncodedText textCopy = text;
+            JsonEncodedText textDuplicate = JsonEncodedText.Encode(message);
+            JsonEncodedText textDuplicateDiffStringRef = JsonEncodedText.Encode("message");
+            JsonEncodedText differentText = JsonEncodedText.Encode("message1");
+
+            int expectedHashCode = text.GetHashCode();
+
+            Assert.NotEqual(0, expectedHashCode);
+            Assert.Equal(expectedHashCode, textCopy.GetHashCode());
+            Assert.Equal(expectedHashCode, textDuplicate.GetHashCode());
+            Assert.Equal(expectedHashCode, textDuplicateDiffStringRef.GetHashCode());
+            Assert.NotEqual(expectedHashCode, differentText.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData("", "")]
+        [InlineData("message", "message")]
+        [InlineData("mess\"age", "mess\\u0022age")]
+        [InlineData(">>>>>", "\\u003e\\u003e\\u003e\\u003e\\u003e")]
+        public static void ToStringTest(string message, string expectedMessage)
+        {
+            JsonEncodedText text = JsonEncodedText.Encode(message);
+            JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
+            JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
+
+            Assert.Equal(expectedMessage, text.ToString());
+            Assert.Equal(expectedMessage, textSpan.ToString());
+            Assert.Equal(expectedMessage, textUtf8Span.ToString());
+
+            Assert.True(text.Equals(textSpan));
+            Assert.True(text.Equals(textUtf8Span));
+            Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+            Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1_000)]
+        [InlineData(10_000)]
+        public static void ToStringLargeTest(int stringLength)
+        {
+            {
+                var message = new string('a', stringLength);
+                var expectedMessge = new string('a', stringLength);
+
+                JsonEncodedText text = JsonEncodedText.Encode(message);
+                JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
+                JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
+
+                Assert.Equal(expectedMessge, text.ToString());
+                Assert.Equal(expectedMessge, textSpan.ToString());
+                Assert.Equal(expectedMessge, textUtf8Span.ToString());
+
+                Assert.True(text.Equals(textSpan));
+                Assert.True(text.Equals(textUtf8Span));
+                Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+                Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+            }
+            {
+                var message = new string('>', stringLength);
+                var builder = new StringBuilder();
+                for (int i = 0; i < stringLength; i++)
+                {
+                    builder.Append("\\u003e");
+                }
+                string expectedMessge = builder.ToString();
+
+                JsonEncodedText text = JsonEncodedText.Encode(message);
+                JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
+                JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
+
+                Assert.Equal(expectedMessge, text.ToString());
+                Assert.Equal(expectedMessge, textSpan.ToString());
+                Assert.Equal(expectedMessge, textUtf8Span.ToString());
+
+                Assert.True(text.Equals(textSpan));
+                Assert.True(text.Equals(textUtf8Span));
+                Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+                Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+            }
+        }
+
+        [Theory]
+        [InlineData("", "")]
+        [InlineData("message", "message")]
+        [InlineData("mess\"age", "mess\\u0022age")]
+        [InlineData(">>>>>", "\\u003e\\u003e\\u003e\\u003e\\u003e")]
+        public static void GetUtf8BytesTest(string message, string expectedMessage)
+        {
+            byte[] expectedBytes = Encoding.UTF8.GetBytes(expectedMessage);
+
+            JsonEncodedText text = JsonEncodedText.Encode(message);
+            JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
+            JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
+
+            Assert.True(text.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+            Assert.True(textSpan.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+            Assert.True(textUtf8Span.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+
+            Assert.True(text.Equals(textSpan));
+            Assert.True(text.Equals(textUtf8Span));
+            Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+            Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+        }
+
+        [Theory]
+        [InlineData(10)]
+        [InlineData(100)]
+        [InlineData(1_000)]
+        [InlineData(10_000)]
+        public static void GetUtf8BytesLargeTest(int stringLength)
+        {
+            {
+                var message = new string('a', stringLength);
+                byte[] expectedBytes = Encoding.UTF8.GetBytes(message);
+
+                JsonEncodedText text = JsonEncodedText.Encode(message);
+                JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
+                JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
+
+                Assert.True(text.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+                Assert.True(textSpan.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+                Assert.True(textUtf8Span.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+
+                Assert.True(text.Equals(textSpan));
+                Assert.True(text.Equals(textUtf8Span));
+                Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+                Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+            }
+            {
+                var message = new string('>', stringLength);
+                var builder = new StringBuilder();
+                for (int i = 0; i < stringLength; i++)
+                {
+                    builder.Append("\\u003e");
+                }
+                byte[] expectedBytes = Encoding.UTF8.GetBytes(builder.ToString());
+
+                JsonEncodedText text = JsonEncodedText.Encode(message);
+                JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
+                JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
+
+                Assert.True(text.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+                Assert.True(textSpan.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+                Assert.True(textUtf8Span.EncodedUtf8Bytes.SequenceEqual(expectedBytes));
+
+                Assert.True(text.Equals(textSpan));
+                Assert.True(text.Equals(textUtf8Span));
+                Assert.Equal(text.GetHashCode(), textSpan.GetHashCode());
+                Assert.Equal(text.GetHashCode(), textUtf8Span.GetHashCode());
+            }
+        }
+
+        [Fact]
+        public static void InvalidUTF16()
+        {
+            var invalid = new char[5] { 'a', 'b', 'c', (char)0xDC00, 'a' };
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(invalid));
+
+            invalid = new char[5] { 'a', 'b', 'c', (char)0xD800, 'a' };
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(invalid));
+
+            invalid = new char[5] { 'a', 'b', 'c', (char)0xDC00, (char)0xD800 };
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(invalid));
+
+            var valid = new char[5] { 'a', 'b', 'c', (char)0xD800, (char)0xDC00 };
+            JsonEncodedText _ = JsonEncodedText.Encode(valid);
+
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(new string(valid).Substring(0, 4)));
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidUTF8Strings))]
+        public static void InvalidUTF8(byte[] dataUtf8)
+        {
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(dataUtf8));
+        }
+
+        [Fact]
+        public static void InvalidEncode()
+        {
+            Assert.Throws<ArgumentNullException>(() => JsonEncodedText.Encode((string)null));
+        }
+
+        [Fact]
+        public static void InvalidLargeEncode()
+        {
+            char[] largeValue = new char[400_000_000];
+
+            Span<char> largeValueSpan = largeValue.AsSpan();
+            largeValueSpan.Fill('a');
+
+            var largeValueString = new string(largeValue);
+            byte[] utf8Value = Encoding.UTF8.GetBytes(largeValue);
+
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(largeValueString));
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(largeValue));
+            Assert.Throws<ArgumentException>(() => JsonEncodedText.Encode(utf8Value));
+        }
+
+        public static IEnumerable<object[]> InvalidUTF8Strings
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] { new byte[] { 34, 97, 0xc3, 0x28, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xa0, 0xa1, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x28, 0xa1, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xe2, 0x82, 0x28, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0xbc, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x90, 0x28, 0xbc, 98, 34 } },
+                    new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0x28, 98, 34 } },
+                };
+            }
+        }
+    }
+}

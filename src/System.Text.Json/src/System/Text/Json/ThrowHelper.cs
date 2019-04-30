@@ -373,12 +373,12 @@ namespace System.Text.Json
                 builder.Append("...");
             }
 
-            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF8, builder));
+            throw new ArgumentException(SR.Format(SR.CannotEncodeInvalidUTF8, builder));
         }
 
         public static void ThrowArgumentException_InvalidUTF16(int charAsInt)
         {
-            throw new ArgumentException(SR.Format(SR.CannotWriteInvalidUTF16, $"0x{charAsInt:X2}"));
+            throw new ArgumentException(SR.Format(SR.CannotEncodeInvalidUTF16, $"0x{charAsInt:X2}"));
         }
 
         public static void ThrowInvalidOperationException_ReadInvalidUTF16(int charAsInt)
@@ -394,6 +394,11 @@ namespace System.Text.Json
         public static InvalidOperationException GetInvalidOperationException_ReadInvalidUTF8(DecoderFallbackException innerException)
         {
             return new InvalidOperationException(SR.CannotTranscodeInvalidUtf8, innerException);
+        }
+
+        public static ArgumentException GetArgumentException_ReadInvalidUTF16(EncoderFallbackException innerException)
+        {
+            return new ArgumentException(SR.CannotTranscodeInvalidUtf16, innerException);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
