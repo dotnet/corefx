@@ -17,6 +17,7 @@
     <Compile Include="DateTypeTests.cs" />
     <Compile Include="DateAndTimeTests.cs" />
     <Compile Include="ErrObjectTests.cs" />
+    <Compile Include="FileSystemTests.cs" />
     <Compile Include="IConvertibleWrapper.cs" />
     <Compile Include="InformationTests.cs" />
     <Compile Include="IntegerTypeTests.cs" />
@@ -40,6 +41,9 @@
     <Compile Include="Microsoft\VisualBasic\Devices\ComputerTests.cs" />
     <Compile Include="Microsoft\VisualBasic\Devices\NetworkAvailableEventArgsTests.cs" />
     <Compile Include="Microsoft\VisualBasic\Devices\ServerComputerTests.cs" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\FileSystemTests.cs" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\SpecialDirectoriesTests.cs" />
+    <Compile Include="Microsoft\VisualBasic\FileIO\TextFieldParserTests.cs" />
     <Compile Include="Microsoft\VisualBasic\HideModuleNameAttributeTests.cs" />
     <Compile Include="Microsoft\VisualBasic\MyGroupCollectionAttributeTests.cs" />
     <Compile Include="Microsoft\VisualBasic\MyServices\FileSystemProxyTests.cs" />

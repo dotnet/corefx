@@ -9,6 +9,18 @@ namespace System.Text.Json.Serialization
 {
     internal partial class JsonClassInfo
     {
+        private JsonPropertyInfo AddPolicyProperty(Type propertyType, JsonSerializerOptions options)
+        {
+            // A policy property is not a real property on a type; instead it leverages the existing converter
+            // logic and generic support to avoid boxing. It is used with values types and elements from collections and
+            // dictionaries. Typically it would represent a CLR type such as System.String.
+            return AddProperty(
+                propertyType,
+                propertyInfo : null,        // Not a real property so this is null.
+                classType : typeof(object), // A dummy type (not used).
+                options : options);
+
+        }
         private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
         {
             JsonPropertyInfo jsonInfo = CreateProperty(propertyType, propertyType, propertyInfo, classType, options);
@@ -25,7 +37,7 @@ namespace System.Text.Json.Serialization
 
             if (propertyInfo != null)
             {
-                _propertyRefs.Add(new PropertyRef(GetKey(jsonInfo.CompareName), jsonInfo));
+                _propertyRefs.Add(new PropertyRef(GetKey(jsonInfo.NameUsedToCompare), jsonInfo));
             }
             else
             {
@@ -60,7 +72,7 @@ namespace System.Text.Json.Serialization
 
             JsonPropertyInfo jsonInfo = (JsonPropertyInfo)Activator.CreateInstance(
                 propertyInfoClassType,
-                BindingFlags.Instance | BindingFlags.NonPublic,
+                BindingFlags.Instance | BindingFlags.Public,
                 binder: null,
                 new object[] { parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, collectionElementType, options },
                 culture: null);

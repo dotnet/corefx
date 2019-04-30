@@ -80,6 +80,7 @@ namespace System
         public static bool IsNotNetNative { get { throw null; } }
         public static bool IsNotNetNativeRunningAsConsoleApp { get { throw null; } }
         public static bool IsNotOneCoreUAP { get { throw null; } }
+        public static bool IsNotOSX { get { throw null; } }
         public static bool IsNotRedHatFamily { get { throw null; } }
         public static bool IsNotRedHatFamily6 { get { throw null; } }
         public static bool IsNotWindows8x { get { throw null; } }
@@ -130,6 +131,7 @@ namespace System
         public static bool SupportsAlpn { get { throw null; } }
         public static bool SupportsClientAlpn { get { throw null; } }
         public static bool SupportsSsl3 { get { throw null; } }
+        public static bool SupportsTls13 { get { throw null; } }
         public static bool TargetsNetFx452OrLower { get { throw null; } }
         public static int WindowsVersion { get { throw null; } }
         public static string GetDistroVersionString() { throw null; }
