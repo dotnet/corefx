@@ -10,7 +10,6 @@ parameters:
   targetOS: ''
   waitForCompletion: '' # true | false
   officialBuildId: ''
-  enableAzurePipelinesReporter: '' # true | false
   outerloop: '' # true | false
   condition: always()
 
@@ -30,7 +29,6 @@ steps:
             /p:IsExternal=${{ parameters.isExternal }}
             /p:Creator=${{ parameters.creator }}
             /p:OfficialBuildId=${{ parameters.officialBuildId }}
-            /p:EnableAzurePipelinesReporter=${{ parameters.enableAzurePipelinesReporter }}
             /bl:$(Build.SourcesDirectory)/artifacts/log/$(_BuildConfig)/SendToHelix.binlog
     displayName: Send to Helix
     condition: ${{ parameters.condition }}
