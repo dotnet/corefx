@@ -8,6 +8,15 @@ namespace System.IO.Tests
 {
     public class PathTests_Join : PathTestsBase
     {
+        public static TheoryData<string, string> TestData_JoinOnePath = new TheoryData<string, string>
+        {
+            { "", "" },
+            { Sep, Sep },
+            { AltSep, AltSep },
+            { "a", "a" },
+            { null, ""}
+        };
+
         public static TheoryData<string, string, string> TestData_JoinTwoPaths = new TheoryData<string, string, string>
         {
             { "", "", "" },
@@ -192,6 +201,12 @@ namespace System.IO.Tests
         public void JoinStringArray_ZeroLengthArray()
         {
             Assert.Equal(string.Empty, Path.Join(new string[0]));
+        }
+
+        [Theory, MemberData(nameof(TestData_JoinOnePath))]
+        public void JoinStringArray_1(string path1, string expected)
+        {
+            Assert.Equal(expected, Path.Join(new string[] { path1 }));
         }
 
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
