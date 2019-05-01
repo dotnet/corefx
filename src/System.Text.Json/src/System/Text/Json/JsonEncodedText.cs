@@ -53,16 +53,11 @@ namespace System.Text.Json
             finally
             {
                 // On the basis that this is user data, go ahead and clear it.
-                ClearAndReturn(utf8Bytes, expectedByteCount);
+                utf8Bytes.AsSpan(0, expectedByteCount).Clear();
+                ArrayPool<byte>.Shared.Return(utf8Bytes);
             }
 
             return encodedText;
-        }
-
-        private static void ClearAndReturn(byte[] utf8Bytes, int written)
-        {
-            utf8Bytes.AsSpan(0, written).Clear();
-            ArrayPool<byte>.Shared.Return(utf8Bytes);
         }
 
         public static JsonEncodedText Encode(ReadOnlySpan<byte> utf8Value)

@@ -9,6 +9,19 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        public void WriteStringValue(JsonEncodedText value)
+            => WriteStringValueHelper(value.EncodedUtf8Bytes);
+
+        private void WriteStringValueHelper(ReadOnlySpan<byte> utf8Value)
+        {
+            Debug.Assert(utf8Value.Length <= JsonConstants.MaxTokenSize);
+
+            WriteStringByOptions(utf8Value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
         /// <summary>
         /// Writes the string text value (as a JSON string) as an element of a JSON array.
         /// </summary>

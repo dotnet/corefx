@@ -10,6 +10,19 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        public void WriteNumber(JsonEncodedText propertyName, decimal value)
+            => WriteNumberHelper(propertyName.EncodedUtf8Bytes, value);
+
+        private void WriteNumberHelper(ReadOnlySpan<byte> utf8PropertyName, decimal value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            WriteNumberByOptions(utf8PropertyName, value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.Number;
+        }
+
         /// <summary>
         /// Writes the property name and <see cref="decimal"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>

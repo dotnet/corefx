@@ -116,6 +116,13 @@ namespace System.Text.Json
             }
         }
 
+        public static void ThrowInvalidOperationException(int currentDepth)
+        {
+            currentDepth &= JsonConstants.RemoveFlagsBitMask;
+            Debug.Assert(currentDepth >= JsonConstants.MaxWriterDepth);
+            ThrowInvalidOperationException(SR.Format(SR.DepthTooLarge, currentDepth, JsonConstants.MaxWriterDepth));
+        }
+
         public static void ThrowInvalidOperationException(string message)
         {
             throw GetInvalidOperationException(message);

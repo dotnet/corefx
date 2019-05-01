@@ -110,10 +110,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("", "")]
-        [InlineData("message", "message")]
-        [InlineData("mess\"age", "mess\\u0022age")]
-        [InlineData(">>>>>", "\\u003e\\u003e\\u003e\\u003e\\u003e")]
+        [MemberData(nameof(JsonEncodedTextStrings))]
         public static void ToStringTest(string message, string expectedMessage)
         {
             JsonEncodedText text = JsonEncodedText.Encode(message);
@@ -131,7 +128,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(10)]
         [InlineData(100)]
         [InlineData(1_000)]
         [InlineData(10_000)]
@@ -179,10 +175,7 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData("", "")]
-        [InlineData("message", "message")]
-        [InlineData("mess\"age", "mess\\u0022age")]
-        [InlineData(">>>>>", "\\u003e\\u003e\\u003e\\u003e\\u003e")]
+        [MemberData(nameof(JsonEncodedTextStrings))]
         public static void GetUtf8BytesTest(string message, string expectedMessage)
         {
             byte[] expectedBytes = Encoding.UTF8.GetBytes(expectedMessage);
@@ -202,7 +195,6 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
-        [InlineData(10)]
         [InlineData(100)]
         [InlineData(1_000)]
         [InlineData(10_000)]
@@ -310,6 +302,22 @@ namespace System.Text.Json.Tests
                     new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0xbc, 98, 34 } },
                     new object[] { new byte[] { 34, 97, 0xf0, 0x90, 0x28, 0xbc, 98, 34 } },
                     new object[] { new byte[] { 34, 97, 0xf0, 0x28, 0x8c, 0x28, 98, 34 } },
+                };
+            }
+        }
+
+        public static IEnumerable<object[]> JsonEncodedTextStrings
+        {
+            get
+            {
+                return new List<object[]>
+                {
+                    new object[] {"", "" },
+                    new object[] { "message", "message" },
+                    new object[] { "mess\"age", "mess\\u0022age" },
+                    new object[] { "mess\\u0022age", "mess\\\\u0022age" },
+                    new object[] { ">>>>>", "\\u003e\\u003e\\u003e\\u003e\\u003e" },
+                    new object[] { "\\u003e\\u003e\\u003e\\u003e\\u003e", "\\\\u003e\\\\u003e\\\\u003e\\\\u003e\\\\u003e" },
                 };
             }
         }

@@ -4,13 +4,27 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        public void WriteString(JsonEncodedText propertyName, JsonEncodedText value)
+            => WriteStringHelper(propertyName.EncodedUtf8Bytes, value.EncodedUtf8Bytes);
+
+        private void WriteStringHelper(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> utf8Value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize && utf8Value.Length <= JsonConstants.MaxTokenSize);
+
+            WriteStringByOptions(utf8PropertyName, utf8Value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
+        public void WriteString(string propertyName, JsonEncodedText value)
+            => WriteString(propertyName.AsSpan(), value);
+
         /// <summary>
         /// Writes the property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
@@ -76,6 +90,35 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
+        public void WriteString(JsonEncodedText propertyName, string value)
+            => WriteString(propertyName, value.AsSpan());
+
+        public void WriteString(JsonEncodedText propertyName, ReadOnlySpan<char> value)
+            => WriteStringHelperEscapeValue(propertyName.EncodedUtf8Bytes, value);
+
+        private void WriteStringHelperEscapeValue(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<char> value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            JsonWriterHelper.ValidateValue(value);
+
+            int valueIdx = JsonWriterHelper.NeedsEscaping(value);
+
+            Debug.Assert(valueIdx >= -1 && valueIdx < value.Length && valueIdx < int.MaxValue / 2);
+
+            if (valueIdx != -1)
+            {
+                WriteStringEscapeValueOnly(utf8PropertyName, value, valueIdx);
+            }
+            else
+            {
+                WriteStringByOptions(utf8PropertyName, value);
+            }
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
         /// <summary>
         /// Writes the property name and UTF-16 text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
@@ -112,6 +155,32 @@ namespace System.Text.Json
             JsonWriterHelper.ValidatePropertyAndValue(utf8PropertyName, value);
 
             WriteStringEscape(utf8PropertyName, value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
+        public void WriteString(JsonEncodedText propertyName, ReadOnlySpan<byte> utf8Value)
+            => WriteStringHelperEscapeValue(propertyName.EncodedUtf8Bytes, utf8Value);
+
+        private void WriteStringHelperEscapeValue(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> utf8Value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            JsonWriterHelper.ValidateValue(utf8Value);
+
+            int valueIdx = JsonWriterHelper.NeedsEscaping(utf8Value);
+
+            Debug.Assert(valueIdx >= -1 && valueIdx < utf8Value.Length && valueIdx < int.MaxValue / 2);
+
+            if (valueIdx != -1)
+            {
+                WriteStringEscapeValueOnly(utf8PropertyName, utf8Value, valueIdx);
+            }
+            else
+            {
+                WriteStringByOptions(utf8PropertyName, utf8Value);
+            }
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.String;
@@ -158,6 +227,32 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
+        public void WriteString(ReadOnlySpan<char> propertyName, JsonEncodedText value)
+            => WriteStringHelperEscapeProperty(propertyName, value.EncodedUtf8Bytes);
+
+        private void WriteStringHelperEscapeProperty(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> utf8Value)
+        {
+            Debug.Assert(utf8Value.Length <= JsonConstants.MaxTokenSize);
+
+            JsonWriterHelper.ValidateProperty(propertyName);
+
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
+
+            Debug.Assert(propertyIdx >= -1 && propertyIdx < propertyName.Length && propertyIdx < int.MaxValue / 2);
+
+            if (propertyIdx != -1)
+            {
+                WriteStringEscapePropertyOnly(propertyName, utf8Value, propertyIdx);
+            }
+            else
+            {
+                WriteStringByOptions(propertyName, utf8Value);
+            }
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
         /// <summary>
         /// Writes the UTF-16 property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
@@ -174,6 +269,32 @@ namespace System.Text.Json
         /// </exception>
         public void WriteString(ReadOnlySpan<char> propertyName, string value)
             => WriteString(propertyName, value.AsSpan());
+
+        public void WriteString(ReadOnlySpan<byte> utf8PropertyName, JsonEncodedText value)
+            => WriteStringHelperEscapeProperty(utf8PropertyName, value.EncodedUtf8Bytes);
+
+        private void WriteStringHelperEscapeProperty(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> utf8Value)
+        {
+            Debug.Assert(utf8Value.Length <= JsonConstants.MaxTokenSize);
+
+            JsonWriterHelper.ValidateProperty(utf8PropertyName);
+
+            int propertyIdx = JsonWriterHelper.NeedsEscaping(utf8PropertyName);
+
+            Debug.Assert(propertyIdx >= -1 && propertyIdx < utf8PropertyName.Length && propertyIdx < int.MaxValue / 2);
+
+            if (propertyIdx != -1)
+            {
+                WriteStringEscapePropertyOnly(utf8PropertyName, utf8Value, propertyIdx);
+            }
+            else
+            {
+                WriteStringByOptions(utf8PropertyName, utf8Value);
+            }
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
 
         /// <summary>
         /// Writes the UTF-8 property name and string text value (as a JSON string) as part of a name/value pair of a JSON object.
@@ -192,46 +313,27 @@ namespace System.Text.Json
         public void WriteString(ReadOnlySpan<byte> utf8PropertyName, string value)
             => WriteString(utf8PropertyName, value.AsSpan());
 
-        private void WriteStringEscapeValueOnly(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<char> value, int firstEscapeIndex)
-        {
-            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
-            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < value.Length);
-
-            char[] valueArray = ArrayPool<char>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndex));
-            Span<char> escapedValue = valueArray;
-            JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndex, out int written);
-
-            WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
-
-            ArrayPool<char>.Shared.Return(valueArray);
-        }
-
         private void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<byte> utf8Value, int firstEscapeIndex)
         {
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8Value.Length);
             Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < utf8Value.Length);
 
-            byte[] valueArray = ArrayPool<byte>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(utf8Value.Length, firstEscapeIndex));
-            Span<byte> escapedValue = valueArray;
+            byte[] valueArray = null;
+
+            int length = JsonWriterHelper.GetMaxEscapedLength(utf8Value.Length, firstEscapeIndex);
+
+            Span<byte> escapedValue = length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[length] :
+                (valueArray = ArrayPool<byte>.Shared.Rent(length));
+
             JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndex, out int written);
 
             WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
 
-            ArrayPool<byte>.Shared.Return(valueArray);
-        }
-
-        private void WriteStringEscapeValueOnly(ReadOnlySpan<char> escapedPropertyName, ReadOnlySpan<byte> utf8Value, int firstEscapeIndex)
-        {
-            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8Value.Length);
-            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < utf8Value.Length);
-
-            byte[] valueArray = ArrayPool<byte>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(utf8Value.Length, firstEscapeIndex));
-            Span<byte> escapedValue = valueArray;
-            JsonWriterHelper.EscapeString(utf8Value, escapedValue, firstEscapeIndex, out int written);
-
-            WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
-
-            ArrayPool<byte>.Shared.Return(valueArray);
+            if (valueArray != null)
+            {
+                ArrayPool<byte>.Shared.Return(valueArray);
+            }
         }
 
         private void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedPropertyName, ReadOnlySpan<char> value, int firstEscapeIndex)
@@ -239,13 +341,68 @@ namespace System.Text.Json
             Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= value.Length);
             Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < value.Length);
 
-            char[] valueArray = ArrayPool<char>.Shared.Rent(JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndex));
-            Span<char> escapedValue = valueArray;
+            char[] valueArray = null;
+
+            int length = JsonWriterHelper.GetMaxEscapedLength(value.Length, firstEscapeIndex);
+
+            Span<char> escapedValue = length <= JsonConstants.StackallocThreshold ?
+                stackalloc char[length] :
+                (valueArray = ArrayPool<char>.Shared.Rent(length));
+
             JsonWriterHelper.EscapeString(value, escapedValue, firstEscapeIndex, out int written);
 
             WriteStringByOptions(escapedPropertyName, escapedValue.Slice(0, written));
 
-            ArrayPool<char>.Shared.Return(valueArray);
+            if (valueArray != null)
+            {
+                ArrayPool<char>.Shared.Return(valueArray);
+            }
+        }
+
+        private void WriteStringEscapePropertyOnly(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> escapedValue, int firstEscapeIndex)
+        {
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= propertyName.Length);
+            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < propertyName.Length);
+
+            char[] propertyArray = null;
+
+            int length = JsonWriterHelper.GetMaxEscapedLength(propertyName.Length, firstEscapeIndex);
+
+            Span<char> escapedPropertyName = length <= JsonConstants.StackallocThreshold ?
+                stackalloc char[length] :
+                (propertyArray = ArrayPool<char>.Shared.Rent(length));
+
+            JsonWriterHelper.EscapeString(propertyName, escapedPropertyName, firstEscapeIndex, out int written);
+
+            WriteStringByOptions(escapedPropertyName.Slice(0, written), escapedValue);
+
+            if (propertyArray != null)
+            {
+                ArrayPool<char>.Shared.Return(propertyArray);
+            }
+        }
+
+        private void WriteStringEscapePropertyOnly(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> escapedValue, int firstEscapeIndex)
+        {
+            Debug.Assert(int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping >= utf8PropertyName.Length);
+            Debug.Assert(firstEscapeIndex >= 0 && firstEscapeIndex < utf8PropertyName.Length);
+
+            byte[] propertyArray = null;
+
+            int length = JsonWriterHelper.GetMaxEscapedLength(utf8PropertyName.Length, firstEscapeIndex);
+
+            Span<byte> escapedPropertyName = length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[length] :
+                (propertyArray = ArrayPool<byte>.Shared.Rent(length));
+
+            JsonWriterHelper.EscapeString(utf8PropertyName, escapedPropertyName, firstEscapeIndex, out int written);
+
+            WriteStringByOptions(escapedPropertyName.Slice(0, written), escapedValue);
+
+            if (propertyArray != null)
+            {
+                ArrayPool<byte>.Shared.Return(propertyArray);
+            }
         }
 
         private void WriteStringEscape(ReadOnlySpan<char> propertyName, ReadOnlySpan<char> value)

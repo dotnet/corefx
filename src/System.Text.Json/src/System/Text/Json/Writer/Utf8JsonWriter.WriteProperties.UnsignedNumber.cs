@@ -10,6 +10,20 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        [CLSCompliant(false)]
+        public void WriteNumber(JsonEncodedText propertyName, ulong value)
+            => WriteNumberHelper(propertyName.EncodedUtf8Bytes, value);
+
+        private void WriteNumberHelper(ReadOnlySpan<byte> utf8PropertyName, ulong value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            WriteNumberByOptions(utf8PropertyName, value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.Number;
+        }
+
         /// <summary>
         /// Writes the property name and <see cref="ulong"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
@@ -86,6 +100,10 @@ namespace System.Text.Json
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
         }
+
+        [CLSCompliant(false)]
+        public void WriteNumber(JsonEncodedText propertyName, uint value)
+            => WriteNumber(propertyName, (ulong)value);
 
         /// <summary>
         /// Writes the property name and <see cref="uint"/> value (as a JSON number) as part of a name/value pair of a JSON object.

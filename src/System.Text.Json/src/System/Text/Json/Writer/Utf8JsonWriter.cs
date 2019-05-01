@@ -548,6 +548,31 @@ namespace System.Text.Json
             output[BytesPending++] = token;
         }
 
+        public void WriteStartArray(JsonEncodedText propertyName)
+        {
+            WriteStartHelper(propertyName.EncodedUtf8Bytes, JsonConstants.OpenBracket);
+            _tokenType = JsonTokenType.StartArray;
+        }
+
+        public void WriteStartObject(JsonEncodedText propertyName)
+        {
+            WriteStartHelper(propertyName.EncodedUtf8Bytes, JsonConstants.OpenBrace);
+            _tokenType = JsonTokenType.StartObject;
+        }
+
+        private void WriteStartHelper(ReadOnlySpan<byte> utf8PropertyName, byte token)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            ValidateDepth();
+
+            WriteStartByOptions(utf8PropertyName, token);
+
+            _currentDepth &= JsonConstants.RemoveFlagsBitMask;
+            _currentDepth++;
+            _isNotPrimitive = true;
+        }
+
         /// <summary>
         /// Writes the beginning of a JSON array with a property name as the key.
         /// </summary>

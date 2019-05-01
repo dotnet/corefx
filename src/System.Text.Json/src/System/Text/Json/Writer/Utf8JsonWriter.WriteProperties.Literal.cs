@@ -9,6 +9,21 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        public void WriteNull(JsonEncodedText propertyName)
+        {
+            WriteLiteralHelper(propertyName.EncodedUtf8Bytes, JsonConstants.NullValue);
+            _tokenType = JsonTokenType.Null;
+        }
+
+        private void WriteLiteralHelper(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            WriteLiteralByOptions(utf8PropertyName, value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+        }
+
         /// <summary>
         /// Writes the property name and the JSON literal "null" as part of a name/value pair of a JSON object.
         /// </summary>
@@ -73,6 +88,20 @@ namespace System.Text.Json
 
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Null;
+        }
+
+        public void WriteBoolean(JsonEncodedText propertyName, bool value)
+        {
+            if (value)
+            {
+                WriteLiteralHelper(propertyName.EncodedUtf8Bytes, JsonConstants.TrueValue);
+                _tokenType = JsonTokenType.True;
+            }
+            else
+            {
+                WriteLiteralHelper(propertyName.EncodedUtf8Bytes, JsonConstants.FalseValue);
+                _tokenType = JsonTokenType.False;
+            }
         }
 
         /// <summary>

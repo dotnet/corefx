@@ -10,6 +10,19 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        public void WriteNumber(JsonEncodedText propertyName, long value)
+            => WriteNumberHelper(propertyName.EncodedUtf8Bytes, value);
+
+        private void WriteNumberHelper(ReadOnlySpan<byte> utf8PropertyName, long value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            WriteNumberByOptions(utf8PropertyName, value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.Number;
+        }
+
         /// <summary>
         /// Writes the property name and <see cref="long"/> value (as a JSON number) as part of a name/value pair of a JSON object.
         /// </summary>
@@ -83,6 +96,9 @@ namespace System.Text.Json
             SetFlagToAddListSeparatorBeforeNextItem();
             _tokenType = JsonTokenType.Number;
         }
+
+        public void WriteNumber(JsonEncodedText propertyName, int value)
+            => WriteNumber(propertyName, (long)value);
 
         /// <summary>
         /// Writes the property name and <see cref="int"/> value (as a JSON number) as part of a name/value pair of a JSON object.

@@ -10,6 +10,19 @@ namespace System.Text.Json
 {
     public sealed partial class Utf8JsonWriter
     {
+        public void WriteString(JsonEncodedText propertyName, DateTime value)
+            => WriteStringHelper(propertyName.EncodedUtf8Bytes, value);
+
+        private void WriteStringHelper(ReadOnlySpan<byte> utf8PropertyName, DateTime value)
+        {
+            Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
+
+            WriteStringByOptions(utf8PropertyName, value);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
         /// <summary>
         /// Writes the property name and <see cref="DateTime"/> value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
