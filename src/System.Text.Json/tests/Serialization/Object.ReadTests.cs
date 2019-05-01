@@ -17,6 +17,38 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadSimpleClassWithObject()
+        {
+            var obj = JsonSerializer.Parse<SimpleTestClassWithSimpleObject>(SimpleTestClassWithSimpleObject.s_json);
+            obj.Verify();
+            string reserialized = JsonSerializer.ToString(obj);
+
+            // Properties in the exported json will be in the order that they were reflected, doing a quick check to see that
+            // we end up with the same length (i.e. same amount of data) to start.
+            Assert.Equal(SimpleTestClassWithSimpleObject.s_json.Replace(" ", string.Empty).Length, reserialized.Length);
+
+            // Shoving it back through the parser should validate round tripping.
+            obj = JsonSerializer.Parse<SimpleTestClassWithSimpleObject>(reserialized);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadSimpleClassWithObjectArray()
+        {
+            var obj = JsonSerializer.Parse<SimpleTestClassWithObjectArrays>(SimpleTestClassWithObjectArrays.s_json);
+            obj.Verify();
+            string reserialized = JsonSerializer.ToString(obj);
+
+            // Properties in the exported json will be in the order that they were reflected, doing a quick check to see that
+            // we end up with the same length (i.e. same amount of data) to start.
+            Assert.Equal(SimpleTestClassWithObjectArrays.s_json.Replace(" ", string.Empty).Length, reserialized.Length);
+
+            // Shoving it back through the parser should validate round tripping.
+            obj = JsonSerializer.Parse<SimpleTestClassWithObjectArrays>(reserialized);
+            obj.Verify();
+        }
+
+        [Fact]
         public static void ReadEmpty()
         {
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>("{}");
