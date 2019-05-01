@@ -48,7 +48,7 @@ namespace System.Text.Json.Serialization
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (JsonPropertyInfo == null)
+                if (JsonPropertyInfo == null || Skip())
                     return false;
                 ClassType type = JsonPropertyInfo.ClassType;
                 return type == ClassType.Value || type == ClassType.Unknown;

@@ -55,8 +55,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.NotNull(obj);
         }
 
-        // Fix
-        [Fact(Skip = "Handling complex objects breaks this. Investigating...")]
+        [Fact]
         public static void EmptyClassWithRandomData()
         {
             JsonSerializer.Parse<EmptyClass>(SimpleTestClass.s_json);
