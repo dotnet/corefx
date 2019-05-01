@@ -220,7 +220,7 @@
     <value>The ITransactionLocal interface is not supported by the '{0}' provider.  Local transactions are unavailable with the current provider.</value>
   </data>
   <data name="OleDb_AsynchronousNotSupported" xml:space="preserve">
-    <value>'Asynchronous Processing' is not a supported feature of the Data OLEDB Provider(System.Data.OleDb).</value>
+    <value>'Asynchronous Processing' is not a supported feature of the Data OLEDB Provider (System.Data.OleDb).</value>
   </data>
   <data name="OleDb_NoProviderSpecified" xml:space="preserve">
     <value>An OLEDB Provider was not specified in the ConnectionString.  An example would be, 'Provider=SQLOLEDB;'.</value>

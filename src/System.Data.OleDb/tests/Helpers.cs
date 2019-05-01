@@ -10,17 +10,18 @@ namespace System.Data.OleDb.Tests
     public static class Helpers
     {
         public const string IsDriverAvailable = nameof(Helpers) + "." + nameof(GetIsDriverAvailable);
-        public static bool GetIsDriverAvailable() => Singleton.IsAvailable;
-        public static string ProviderName => Singleton.ProviderName;
+        public static bool GetIsDriverAvailable() => Nested.IsAvailable;
+        public static string ProviderName => Nested.ProviderName;
         public static string GetTableName(string memberName) => memberName + ".csv";
 
-        private class Singleton
+        private class Nested
         {
-            public static Singleton Instance { get { return lazy.Value; } }
-            public static bool IsAvailable => Instance._isAvailable;
-            public static string ProviderName => Instance._providerName;
-            private static readonly Lazy<Singleton> lazy = new Lazy<Singleton>(() => new Singleton());
-            private Singleton()
+            public static readonly bool IsAvailable;
+            public static readonly string ProviderName;
+            public static Nested Instance => s_instance;
+            private static readonly Nested s_instance = new Nested();
+            private Nested() { }
+            static Nested()
             {
                 // Get the sources rowset for the SQLOLEDB enumerator
                 DataTable table = (new OleDbEnumerator()).GetElements();
@@ -30,13 +31,12 @@ namespace System.Data.OleDb.Tests
                 {
                     providerNames.Add(row[providersRegistered]);
                 }
-                _isAvailable = providerNames.Contains(_providerName);
-            }
-            private readonly bool _isAvailable;
-            private readonly string _providerName = 
-                PlatformDetection.Is32BitProcess ? 
+                string providerName = PlatformDetection.Is32BitProcess ? 
                     @"Microsoft.Jet.OLEDB.4.0" : 
                     @"Microsoft.ACE.OLEDB.12.0";
+                IsAvailable = providerNames.Contains(providerName);
+                ProviderName = IsAvailable ? providerName : null;
+            }
         }
     }
 }

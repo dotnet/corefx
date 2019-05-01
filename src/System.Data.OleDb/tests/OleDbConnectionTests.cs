@@ -235,7 +235,7 @@ namespace System.Data.OleDb.Tests
             var oleDbConnection = new OleDbConnection(@"file name = " + udlFile);
             Assert.NotNull(oleDbConnection);
             oleDbConnection.Open();
-            Assert.NotEmpty(oleDbConnection.DataSource);
+            Assert.Equal(Helpers.ProviderName, oleDbConnection.Provider);
             oleDbConnection.Dispose();
         }
 
