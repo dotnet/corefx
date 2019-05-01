@@ -21,6 +21,7 @@ namespace System.Data.OleDb.Tests
             Assert.Throws<ArgumentNullException>(() => adapter.Fill(null, new object()));
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_NoSelectCommand_Throws()
         {
@@ -30,6 +31,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DefaultCommandValues()
         {
@@ -47,6 +49,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_Select_Success()
         {
@@ -66,6 +69,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_Select_NullDataTable_Throws()
         {
@@ -81,6 +85,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Update_Success()
         {
@@ -118,6 +123,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_OpenDataReader_Throws()
         {
@@ -151,7 +157,7 @@ namespace System.Data.OleDb.Tests
 
         private void RunTest(Action<OleDbCommand, string> testAction, [CallerMemberName] string memberName = null)
         {
-            var tableName = memberName + ".csv";
+            string tableName = Helpers.GetTableName(memberName);
             Assert.False(File.Exists(Path.Combine(TestDirectory, tableName)));
             command.CommandText =
                 @"CREATE TABLE " + tableName + @" (

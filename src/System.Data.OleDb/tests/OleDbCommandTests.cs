@@ -13,6 +13,7 @@ namespace System.Data.OleDb.Tests
 {
     public class OleDbCommandTests : OleDbTestBase
     {
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void CommandType_InvalidType_Throws()
         {
@@ -24,6 +25,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void ExecuteScalar_Select_ComputesSumAndCount()
         {
@@ -38,7 +40,7 @@ namespace System.Data.OleDb.Tests
 
         private void RunTest(Action<OleDbCommand, string> testAction, [CallerMemberName] string memberName = null)
         {
-            var tableName = memberName + ".csv";
+            string tableName = Helpers.GetTableName(memberName);
             Assert.False(File.Exists(Path.Combine(TestDirectory, tableName)));
             command.CommandText =
                 @"CREATE TABLE " + tableName + @" (

@@ -53,6 +53,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DeriveParameters_NullConnection_Throws()
         {
@@ -72,6 +73,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DeriveParameters_ClosedConnection_Throws()
         {
@@ -92,6 +94,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void UnquoteIdentifier_Null_Throws()
         {
@@ -108,6 +111,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_Defaults()
         {
@@ -130,7 +134,7 @@ namespace System.Data.OleDb.Tests
 
         private void RunTest(Action<OleDbCommand, string> testAction, [CallerMemberName] string memberName = null)
         {
-            var tableName = memberName + ".csv";
+            string tableName = Helpers.GetTableName(memberName);
             Assert.False(File.Exists(Path.Combine(TestDirectory, tableName)));
             command.CommandText =
                 @"CREATE TABLE " + tableName + @" (

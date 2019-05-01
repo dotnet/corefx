@@ -23,6 +23,7 @@ namespace System.Data.OleDb.Tests
             Assert.Throws<OleDbException>(() => command.ExecuteNonQuery());
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void InvalidRowIndex()
         {
@@ -40,6 +41,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void NonExistentColumn()
         {
@@ -55,6 +57,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetValues()
         {
@@ -69,6 +72,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void EmptyReader_SchemaOnly_EmptyReader()
         {
@@ -92,6 +96,7 @@ namespace System.Data.OleDb.Tests
             }, schemaOnly: true);
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_SchemaOnly_GetsColumnInfo()
         {
@@ -104,6 +109,7 @@ namespace System.Data.OleDb.Tests
             }, schemaOnly: true);
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_ColumnName_Success()
         {
@@ -117,6 +123,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_DataType_Success()
         {
@@ -130,6 +137,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetInt32_Success()
         {
@@ -142,6 +150,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetString_Success()
         {
@@ -152,6 +161,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetDouble_Success()
         {
@@ -163,6 +173,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetFloat_Success()
         {
@@ -174,6 +185,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalTheory(Helpers.IsDriverAvailable)]
         [InlineData(0)]
         [InlineData(1)]
@@ -184,6 +196,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetValues_Null_Throws()
         {
@@ -192,6 +205,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Depth_IsClosed_Throws()
         {
@@ -201,6 +215,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void FieldCount_IsClosed_Throws()
         {
@@ -210,6 +225,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void VisibleFieldCount_IsClosed_Throws()
         {
@@ -219,6 +235,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void HasRows_IsClosed_Throws()
         {
@@ -228,6 +245,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_IsClosed_Throws()
         {
@@ -245,7 +263,7 @@ namespace System.Data.OleDb.Tests
 
         private void RunTest(Action<OleDbDataReader> testAction, bool schemaOnly = false, [CallerMemberName] string memberName = null)
         {
-            string tableName = memberName + ".csv";
+            string tableName = Helpers.GetTableName(memberName);
             Assert.False(File.Exists(Path.Combine(TestDirectory, tableName)));
             command.CommandText =
                 @"CREATE TABLE " + tableName + @" (
