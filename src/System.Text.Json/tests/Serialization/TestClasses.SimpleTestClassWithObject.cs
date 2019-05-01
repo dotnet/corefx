@@ -265,8 +265,6 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    // TODO: Need to hook the JsonValueConverterJsonElement up so it gets utilized when
-    // serializing/deserializing arrays.
     public class SimpleTestClassWithObjectArrays : ITestClass
     {
         public object[] MyInt16 { get; set; }
