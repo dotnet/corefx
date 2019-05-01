@@ -13,6 +13,7 @@ namespace System.Text.Json.Serialization.Converters
             if (JsonDocument.TryParseValue(ref reader, out JsonDocument document))
             {
                 value = document.RootElement.Clone();
+                document.Dispose();
                 return true;
             }
             else

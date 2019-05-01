@@ -109,9 +109,9 @@ namespace System.Text.Json.Serialization.Tests
                         @"true, " +
                         @"false, " +
                         @"""Hello""" +
+                        // @"[2, false, true, ""Goodbye""], " +
+                        // @"{}" +
                     @"]" +
-                    // @"""Array"" : [2, false, true, ""Goodbye""]," +
-                    // @"""Object"" : {}" +
                 @"}";
 
             public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);

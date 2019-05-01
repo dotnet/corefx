@@ -49,7 +49,10 @@ namespace System.Text.Json.Serialization
             get
             {
                 if (JsonPropertyInfo == null || Skip())
+                {
                     return false;
+                }
+
                 ClassType type = JsonPropertyInfo.ClassType;
                 return type == ClassType.Value || type == ClassType.Unknown;
             }
