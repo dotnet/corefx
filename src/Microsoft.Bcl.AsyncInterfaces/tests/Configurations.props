@@ -1,8 +1,7 @@
-﻿<Project>
+﻿<Project DefaultTargets="Build">
   <PropertyGroup>
     <BuildConfigurations>
-      netcoreapp;
-      uap;
+      netstandard;
     </BuildConfigurations>
   </PropertyGroup>
 </Project>
