@@ -10,7 +10,8 @@ trigger:
     - release/3.0
   paths:
     exclude:
-    - *.md
+    - Documentation/*
+    - /*.md
 
 pr:
   branches:
@@ -19,7 +20,8 @@ pr:
     - release/3.0
   paths:
     exclude:
-    - *.md
+    - Documentation/*
+    - /*.md
 
 resources:
   containers:
