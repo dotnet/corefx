@@ -664,11 +664,14 @@ namespace Internal.Cryptography.Pal
 
                 AddUniqueStatus(overallStatus, ref chainStatus);
 
+                // No individual element can have seen more errors than the chain overall,
+                // so avoid regrowth of the list.
+                var elementStatus = new List<X509ChainStatus>(overallStatus.Count);
+
                 for (int i = 0; i < elements.Length; i++)
                 {
                     X509ChainElement element = elements[i];
-
-                    var elementStatus = new List<X509ChainStatus>(element.ChainElementStatus.Length + 1);
+                    elementStatus.Clear();
                     elementStatus.AddRange(element.ChainElementStatus);
 
                     AddUniqueStatus(elementStatus, ref chainStatus);
