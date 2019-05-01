@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -30,19 +31,17 @@ namespace System.Text.Json.Serialization.Tests
             public JsonElement True { get; set; }
             public JsonElement False { get; set; }
             public JsonElement String { get; set; }
-
-            // Currently does not work
-            // public JsonElement Array { get; set; }
-            // public JsonElement Object { get; set; }
+            public JsonElement Array { get; set; }
+            public JsonElement Object { get; set; }
 
             public static readonly string s_json =
                 @"{" +
                     @"""Number"" : 1," +
                     @"""True"" : true," +
                     @"""False"" : false," +
-                    @"""String"" : ""Hello""" +
-                    // @"""Array"" : [2, false, true, ""Goodbye""]," +
-                    // @"""Object"" : {}" +
+                    @"""String"" : ""Hello""," +
+                    @"""Array"" : [2, false, true, ""Goodbye""]," +
+                    @"""Object"" : {}" +
                 @"}";
 
             public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
@@ -53,8 +52,8 @@ namespace System.Text.Json.Serialization.Tests
                 True = JsonDocument.Parse(@"true").RootElement.Clone();
                 False = JsonDocument.Parse(@"false").RootElement.Clone();
                 String = JsonDocument.Parse(@"""Hello""").RootElement.Clone();
-                // Array = JsonDocument.Parse(@"[2, false, true, ""Goodbye""]").RootElement.Clone();
-                // Object = JsonDocument.Parse(@"{}").RootElement.Clone();
+                Array = JsonDocument.Parse(@"[2, false, true, ""Goodbye""]").RootElement.Clone();
+                Object = JsonDocument.Parse(@"{}").RootElement.Clone();
             }
 
             public void Verify()
@@ -67,6 +66,19 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal("False", False.ToString());
                 Assert.Equal(JsonValueType.String, String.Type);
                 Assert.Equal("Hello", String.ToString());
+                Assert.Equal(JsonValueType.Array, Array.Type);
+                JsonElement[] elements = Array.EnumerateArray().ToArray();
+                Assert.Equal(JsonValueType.Number, elements[0].Type);
+                Assert.Equal("2", elements[0].ToString());
+                Assert.Equal(JsonValueType.False, elements[1].Type);
+                Assert.Equal("False", elements[1].ToString());
+                Assert.Equal(JsonValueType.True, elements[2].Type);
+                Assert.Equal("True", elements[2].ToString());
+                Assert.Equal(JsonValueType.String, elements[3].Type);
+                Assert.Equal("Goodbye", elements[3].ToString());
+                Assert.Equal(JsonValueType.Array, Array.Type);
+                Assert.Equal(JsonValueType.Object, Object.Type);
+                Assert.Equal("{}", Object.ToString());
             }
         }
 
