@@ -13,7 +13,7 @@ namespace System.Data.OleDb.Tests
 {
     public class OleDbDataReaderTests : OleDbTestBase
     {
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void ExecuteNonQuery_TableNameWithoutCsvExtension_Throws()
         {
             command.CommandText =
@@ -23,7 +23,7 @@ namespace System.Data.OleDb.Tests
             Assert.Throws<OleDbException>(() => command.ExecuteNonQuery());
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void InvalidRowIndex()
         {
             RunTest((reader) => {
@@ -40,7 +40,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void NonExistentColumn()
         {
             RunTest((reader) => {
@@ -55,7 +55,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetValues()
         {
             RunTest((reader) => {
@@ -69,7 +69,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void EmptyReader_SchemaOnly_EmptyReader()
         {
             RunTest((reader) => {
@@ -92,7 +92,7 @@ namespace System.Data.OleDb.Tests
             }, schemaOnly: true);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_SchemaOnly_GetsColumnInfo()
         {
             RunTest((reader) => {
@@ -104,7 +104,7 @@ namespace System.Data.OleDb.Tests
             }, schemaOnly: true);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_ColumnName_Success()
         {
             RunTest((reader) => {
@@ -117,7 +117,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_DataType_Success()
         {
             RunTest((reader) => {
@@ -130,7 +130,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetInt32_Success()
         {
             RunTest((reader) => {
@@ -142,7 +142,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetString_Success()
         {
             RunTest((reader) => {
@@ -152,7 +152,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetDouble_Success()
         {
             RunTest((reader) => {
@@ -163,7 +163,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Read_GetFloat_Success()
         {
             RunTest((reader) => {
@@ -174,7 +174,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Theory]
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
         [InlineData(0)]
         [InlineData(1)]
         public void GetChar_MethodNotSupported_Throws(int ordinal)
@@ -184,7 +184,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetValues_Null_Throws()
         {
             RunTest((reader) => {
@@ -192,7 +192,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Depth_IsClosed_Throws()
         {
             RunTest((reader) => {
@@ -201,7 +201,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void FieldCount_IsClosed_Throws()
         {
             RunTest((reader) => {
@@ -210,7 +210,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void VisibleFieldCount_IsClosed_Throws()
         {
             RunTest((reader) => {
@@ -219,7 +219,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void HasRows_IsClosed_Throws()
         {
             RunTest((reader) => {
@@ -228,13 +228,19 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchemaTable_IsClosed_Throws()
         {
             RunTest((reader) => {
                 reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.GetSchemaTable());
             });
+        }
+
+        [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void GetEnumerator_BadType_Throws()
+        {
+            Assert.Throws<ArgumentException>(() => OleDbEnumerator.GetEnumerator(typeof(Exception)));
         }
 
         private void RunTest(Action<OleDbDataReader> testAction, bool schemaOnly = false, [CallerMemberName] string memberName = null)
@@ -255,7 +261,7 @@ namespace System.Data.OleDb.Tests
                 command.CommandText =
                     @"INSERT INTO " + tableName + @" ( 
                         CustomerID,
-                        CustomerName,
+                        CustomerName, 
                         SingleAmount, 
                         RealAmount)
                     VALUES ( 123, 'XYZ', @value, @realValue );";

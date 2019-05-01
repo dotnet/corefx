@@ -14,13 +14,13 @@ namespace System.Data.OleDb.Tests
 {
     public class OleDbCommandBuilderTests : OleDbTestBase
     {
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DeriveParameters_NullCommand_Throws()
         {
             Assert.Throws<ArgumentNullException>(() => OleDbCommandBuilder.DeriveParameters(null));
         }
 
-        [Theory]
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
         [InlineData(CommandType.Text)]
         [InlineData(CommandType.TableDirect)]
         public void DeriveParameters_NullCommand_Throws(CommandType commandType)
@@ -37,7 +37,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DeriveParameters_NulllCommandText_Throws()
         {
             using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
@@ -53,7 +53,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DeriveParameters_NullConnection_Throws()
         {
             RunTest((command, tableName) => {
@@ -72,7 +72,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DeriveParameters_ClosedConnection_Throws()
         {
             RunTest((command, tableName) => {
@@ -92,7 +92,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void UnquoteIdentifier_Null_Throws()
         {
             RunTest((command, tableName) => {
@@ -108,7 +108,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_Defaults()
         {
             RunTest((command, tableName) => {

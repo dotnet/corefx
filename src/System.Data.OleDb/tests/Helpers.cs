@@ -2,6 +2,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace System.Data.OleDb.Tests
 {
@@ -19,7 +20,10 @@ namespace System.Data.OleDb.Tests
             {
                 providerNames.Add(row[providersRegistered]);
             }
-            return true;//providerNames.Contains(@"Microsoft.ACE.OLEDB.12.0");
+            return providerNames.Contains(ProviderName);
         }
+
+        public static string ProviderName => PlatformDetection.Is32BitProcess ? 
+            @"Microsoft.Jet.OLEDB.4.0" : @"Microsoft.ACE.OLEDB.12.0";
     }
 }

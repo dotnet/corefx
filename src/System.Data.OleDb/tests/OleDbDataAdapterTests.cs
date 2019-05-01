@@ -14,14 +14,14 @@ namespace System.Data.OleDb.Tests
 {
     public class OleDbDataAdapterTests : OleDbTestBase
     {
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_NullDataTable_Throws()
         {
             var adapter = (OleDbDataAdapter)OleDbFactory.Instance.CreateDataAdapter();
             Assert.Throws<ArgumentNullException>(() => adapter.Fill(null, new object()));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_NoSelectCommand_Throws()
         {
             RunTest((command, tableName) => {
@@ -30,7 +30,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void DefaultCommandValues()
         {
             RunTest((command, tableName) => {
@@ -47,7 +47,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_Select_Success()
         {
             RunTest((command, tableName) => {
@@ -66,7 +66,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_Select_NullDataTable_Throws()
         {
             RunTest((command, tableName) => {
@@ -81,7 +81,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Update_Success()
         {
             RunTest((command, tableName) => {
@@ -118,7 +118,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Fill_OpenDataReader_Throws()
         {
             RunTest((command, tableName) => {

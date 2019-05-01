@@ -14,45 +14,45 @@ namespace System.Data.OleDb.Tests
 {
     public class OleDbConnectionTests : OleDbTestBase
     {
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_ConnectionStringMissingProvider_Throws()
         {
             Assert.Throws<ArgumentException>(() => new OleDbConnection("Reason=missingProvider"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_LongProvider_Throws()
         {
             Assert.Throws<ArgumentException>(() => new OleDbConnection("provider=" + new string('c', 256)));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_MSDASQLNotSupported_Throws()
         {
             Assert.Throws<ArgumentException>(() => new OleDbConnection("provider=MSDASQL"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_MissingUdlFile_Throws()
         {
             Assert.Throws<ArgumentException>(() => new OleDbConnection(@"file name = missing-file.udl"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_AsynchronousNotSupported_Throws()
         {
             Assert.Throws<ArgumentException>(() => 
                 new OleDbConnection(ConnectionString + ";asynchronous processing=true"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_InvalidConnectTimeout_Throws()
         {
             Assert.Throws<ArgumentException>(() => 
                 new OleDbConnection(ConnectionString + ";connect timeout=-2"));
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Open_NoConnectionString_Throws()
         {
             using (var innerConnection = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
@@ -62,7 +62,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void BeginTransaction_IsolationLevelIsUnspecified_SetsReadCommitted()
         {
             using (var oleDbConnection = new OleDbConnection(ConnectionString))
@@ -79,7 +79,7 @@ namespace System.Data.OleDb.Tests
             }
         }
         
-        [Theory]
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
         [MemberData(nameof(IsolationLevelsExceptUnspecified))]
         public void BeginTransaction_SpecificIsolationLevel_Success(IsolationLevel isolationLevel)
         {
@@ -93,7 +93,7 @@ namespace System.Data.OleDb.Tests
             }
         }
         
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void BeginTransaction_InvalidIsolationLevel_Throws()
         {
             using (var oleDbConnection = new OleDbConnection(ConnectionString))
@@ -103,17 +103,17 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Provider_SetProperlyFromCtor()
         {
             using (var oleDbConnection = new OleDbConnection(ConnectionString))
             {
                 oleDbConnection.Open();
-                Assert.Equal(ProviderName, oleDbConnection.Provider);
+                Assert.Equal(Helpers.ProviderName, oleDbConnection.Provider);
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetSchema()
         {
             using (var oleDbConnection = new OleDbConnection(ConnectionString))
@@ -137,7 +137,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void ChangeDatabase_EmptyDatabase_Throws()
         {
             using (var oleDbConnection = new OleDbConnection(ConnectionString))
@@ -147,7 +147,8 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ManufacturedOleDbSchemaGuids))]
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
+        [MemberData(nameof(ManufacturedOleDbSchemaGuids))]
         public void GetOleDbSchemaTable_NoRestrictions_Success(Guid oleDbSchemaGuid)
         {
             DataTable oleDbSchemaTable = null;
@@ -164,7 +165,8 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Theory, MemberData(nameof(ManufacturedOleDbSchemaGuids))]
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
+        [MemberData(nameof(ManufacturedOleDbSchemaGuids))]
         public void GetOleDbSchemaTable_SomeRestrictions_Throws(Guid oleDbSchemaGuid)
         {
             object[] restrictions = new object[] { null };
@@ -196,7 +198,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
         [InlineData(0, 0)]
         [InlineData(0, 1)]
         [InlineData(0, 2)]
@@ -221,7 +223,7 @@ namespace System.Data.OleDb.Tests
                 exception.Message);
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Ctor_ValidUdlFile_Success()
         {
             string udlFile = GetTestFilePath() + ".udl";
@@ -237,7 +239,7 @@ namespace System.Data.OleDb.Tests
             oleDbConnection.Dispose();
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void OleDbConnectionStringBuilder_Success()
         {
             var connectionStringBuilder = (OleDbConnectionStringBuilder)OleDbFactory.Instance.CreateConnectionStringBuilder();
@@ -253,7 +255,7 @@ namespace System.Data.OleDb.Tests
             Assert.False(connectionStringBuilder.PersistSecurityInfo);
 
             connectionStringBuilder = new OleDbConnectionStringBuilder(ConnectionString);
-            Assert.Equal(ProviderName, connectionStringBuilder.Provider);
+            Assert.Equal(Helpers.ProviderName, connectionStringBuilder.Provider);
             Assert.Equal(TestDirectory, connectionStringBuilder.DataSource);
 
             string udlFile = GetTestFilePath() + ".udl";

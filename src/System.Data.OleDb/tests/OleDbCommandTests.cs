@@ -13,7 +13,7 @@ namespace System.Data.OleDb.Tests
 {
     public class OleDbCommandTests : OleDbTestBase
     {
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void CommandType_InvalidType_Throws()
         {
             RunTest((command, tableName) => {
@@ -24,7 +24,7 @@ namespace System.Data.OleDb.Tests
             });
         }
 
-        [Fact]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void ExecuteScalar_Select_ComputesSumAndCount()
         {
             RunTest((command, tableName) => {

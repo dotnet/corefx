@@ -41,7 +41,6 @@ namespace System.Data.OleDb.Tests
             base.Dispose(disposing);
         }
 
-        protected string ProviderName => @"Microsoft.ACE.OLEDB.12.0";
-        protected string ConnectionString => @"Provider=" + ProviderName + @";Data source=" + TestDirectory + @";Extended Properties=""Text;HDR=No;FMT=Delimited""";
+        protected string ConnectionString => @"Provider=" + Helpers.ProviderName + @";Data source=" + TestDirectory + @";Extended Properties=""Text;HDR=No;FMT=Delimited""";
     }
 }
