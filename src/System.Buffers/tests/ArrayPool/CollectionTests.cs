@@ -149,6 +149,7 @@ namespace System.Buffers.ArrayPool.Tests
             InlineData(true),
             InlineData(false)]
         [ActiveIssue(29866, TargetFrameworkMonikers.UapNotUapAot)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void PollingEventFires(bool trim)
         {
             RemoteInvokeWithTrimming((trimString) =>

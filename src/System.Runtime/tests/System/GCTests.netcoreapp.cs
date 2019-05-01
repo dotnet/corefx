@@ -14,6 +14,7 @@ namespace System.Tests
         [Theory]
         [InlineData(1000)]
         [InlineData(100000)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void GetAllocatedBytesForCurrentThread(int size)
         {
             long start = GC.GetAllocatedBytesForCurrentThread();
@@ -27,6 +28,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void GetGCMemoryInfo()
         {
             RemoteExecutor.Invoke(() =>

@@ -75,6 +75,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void Collect_CallsFinalizer()
         {
             FinalizerTest.Run();
@@ -162,6 +163,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void KeepAlive_Null()
         {
             KeepAliveNullTest.Run();
@@ -340,6 +342,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void GetTotalMemoryTest_ForceCollection()
         {
             // We don't test GetTotalMemory(false) at all because a collection
@@ -381,6 +384,7 @@ namespace System.Tests
         [Theory]
         [InlineData(GCLargeObjectHeapCompactionMode.CompactOnce)]
         [InlineData(GCLargeObjectHeapCompactionMode.Default)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void LargeObjectHeapCompactionModeRoundTrips(GCLargeObjectHeapCompactionMode value)
         {
             GCLargeObjectHeapCompactionMode orig = GCSettings.LargeObjectHeapCompactionMode;
@@ -399,6 +403,7 @@ namespace System.Tests
         [Theory]
         [InlineData(GCLatencyMode.Batch)]
         [InlineData(GCLatencyMode.Interactive)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void LatencyRoundtrips(GCLatencyMode value)
         {
             GCLatencyMode orig = GCSettings.LatencyMode;

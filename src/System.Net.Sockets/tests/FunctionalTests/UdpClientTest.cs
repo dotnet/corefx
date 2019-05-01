@@ -195,6 +195,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void Finalize_NoExceptionsThrown()
         {
             WeakReference<UdpClient> udpClientWeakRef = CreateAndDiscardUdpClient();

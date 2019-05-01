@@ -86,6 +86,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void PointerFieldSetValue(int value)
         {
             var obj = new PointerHolder();
@@ -105,6 +106,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void IntPtrFieldSetValue(int value)
         {
             var obj = new PointerHolder();
@@ -127,6 +129,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void PointerFieldGetValue(int value)
         {
             var obj = new PointerHolder();
@@ -140,6 +143,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void PointerPropertySetValue(int value)
         {
             var obj = new PointerHolder();
@@ -172,6 +176,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void PointerPropertyGetValue(int value)
         {
             var obj = new PointerHolder();
@@ -185,6 +190,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void PointerMethodParameter(int value)
         {
             var obj = new PointerHolder();
@@ -235,6 +241,7 @@ namespace System.Reflection.Tests
 
         [Theory]
         [MemberData(nameof(Pointers))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public void PointerMethodDelegateParameter(int value)
         {
             var obj = new PointerHolder();
