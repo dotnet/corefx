@@ -191,7 +191,7 @@ namespace System.IO.Tests
         [Fact]
         public void JoinStringArray_ZeroLengthArray()
         {
-            Assert.Equal("", Path.Join(new string[0]));
+            Assert.Equal(string.Empty, Path.Join(new string[0]));
         }
 
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
