@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.DotNet.XUnitExtensions;
+using System.Linq;
 using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
@@ -60,12 +61,10 @@ namespace System.Net.NetworkInformation.Tests
             }
 
             Assert.Equal(IPStatus.Success, pingReply.Status);
-            foreach (IPAddress localIpAddress in localIpAddresses)
+            if (localIpAddresses.Any(addr => pingReply.Address.Equals(addr)))
             {
-                if (pingReply.Address.Equals(localIpAddress))
-                {
-                    return;
-                }
+                // response did come from expected address. Test will pass.
+                return;
             }
             // We did not find response address in given list.
             // Test is going to fail. Collect some more info.
