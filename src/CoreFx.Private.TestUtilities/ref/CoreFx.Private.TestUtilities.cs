@@ -138,8 +138,8 @@ namespace System
     }
     public static partial class RetryHelper
     {
-        public static void Execute(int maxAttempts, System.Action test, System.Func<int, int> backoffFunc = null) { }
-        public static System.Threading.Tasks.Task ExecuteAsync(int maxAttempts, System.Func<System.Threading.Tasks.Task> test, System.Func<int, int> backoffFunc = null) { throw null; }
+        public static void Execute(System.Action test, int maxAttempts = 5, System.Func<int, int> backoffFunc = null) { }
+        public static System.Threading.Tasks.Task ExecuteAsync(Func<System.Threading.Tasks.Task> test, int maxAttempts = 5, System.Func<int, int> backoffFunc = null) { throw null; }
     }
     public static partial class TestEnvironment
     {

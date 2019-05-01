@@ -1475,7 +1475,7 @@ namespace System.Diagnostics.Tests
         {
             RemoteExecutor.Invoke(() =>
             {
-                RetryHelper.Execute(maxAttempts: 10, () =>
+                RetryHelper.Execute(() =>
                 {
                     using (Process p = Process.GetCurrentProcess())
                     {
