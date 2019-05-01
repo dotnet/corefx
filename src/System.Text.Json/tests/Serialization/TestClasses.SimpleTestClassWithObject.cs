@@ -29,7 +29,7 @@ namespace System.Text.Json.Serialization.Tests
         public object MyEnum { get; set; }
 
         public static readonly string s_json =
-                @"{" +
+            @"{" +
                 @"""MyInt16"" : 1," +
                 @"""MyInt32"" : 2," +
                 @"""MyInt64"" : 3," +
