@@ -49,6 +49,7 @@
     <Compile Include="Serialization\Value.ReadTests.cs" />
     <Compile Include="Serialization\Value.WriteTests.cs" />
     <Compile Include="TestCaseType.cs" />
+    <Compile Include="TestClasses.ClassWithComplexObjects.cs" />
     <Compile Include="Utf8JsonReaderTests.cs" />
     <Compile Include="Utf8JsonReaderTests.MultiSegment.cs" />
     <Compile Include="Utf8JsonReaderTests.TextEquals.cs" />

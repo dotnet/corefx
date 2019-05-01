@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -51,8 +50,11 @@ namespace System.Text.Json.Serialization.Tests
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
+        private bool _initialized;
+
         public virtual void Initialize()
         {
+            _initialized = true;
             MyInt16 = (short)1;
             MyInt32 = (int)2;
             MyInt64 = (long)3;
@@ -74,6 +76,13 @@ namespace System.Text.Json.Serialization.Tests
 
         public virtual void Verify()
         {
+            // Shared test logic verifies state after calling Initialize. In the object
+            // case we don't care if the object is initialized with non JsonElement values,
+            // they'll still be serialized back in as JsonElement.
+
+            if (_initialized)
+                return;
+
             Assert.IsType<JsonElement>(MyInt16);
             Assert.Equal(JsonValueType.Number, ((JsonElement)MyInt16).Type);
             Assert.Equal(1, ((JsonElement)MyInt16).GetInt32());
@@ -308,8 +317,12 @@ namespace System.Text.Json.Serialization.Tests
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
+        private bool _initialized;
+
         public void Initialize()
         {
+            _initialized = true;
+
             MyInt16 = new object[] { (short)1 };
             MyInt32 = new object[] { (int)2 };
             MyInt64 = new object[] { (long)3 };
@@ -331,6 +344,13 @@ namespace System.Text.Json.Serialization.Tests
 
         public void Verify()
         {
+            // Shared test logic verifies state after calling Initialize. In the object
+            // case we don't care if the object is initialized with non JsonElement values,
+            // they'll still be serialized back in as JsonElement.
+
+            if (_initialized)
+                return;
+
             Assert.IsType<JsonElement>(MyInt16[0]);
             Assert.Equal(JsonValueType.Number, ((JsonElement)MyInt16[0]).Type);
             Assert.Equal(1, ((JsonElement)MyInt16[0]).GetInt32());

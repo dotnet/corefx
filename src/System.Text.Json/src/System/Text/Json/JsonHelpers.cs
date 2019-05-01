@@ -9,7 +9,7 @@ namespace System.Text.Json
     internal static partial class JsonHelpers
     {
         /// <summary>
-        /// Returns <see langword="true"/> iff <paramref name="value"/> is a valid Unicode scalar
+        /// Returns <see langword="true"/> if <paramref name="value"/> is a valid Unicode scalar
         /// value, i.e., is in [ U+0000..U+D7FF ], inclusive; or [ U+E000..U+10FFFF ], inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
