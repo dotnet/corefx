@@ -14,6 +14,14 @@ namespace System.Text.Json
 
         public ReadOnlySpan<byte> EncodedUtf8Bytes => _utf8Value;
 
+        private JsonEncodedText(byte[] utf8Value)
+        {
+            Debug.Assert(utf8Value != null);
+
+            _value = JsonReaderHelper.GetTextFromUtf8(utf8Value);
+            _utf8Value = utf8Value;
+        }
+
         public static JsonEncodedText Encode(string value)
         {
             if (value == null)
@@ -41,21 +49,16 @@ namespace System.Text.Json
 
             JsonEncodedText encodedText;
 
-            try
-            {
-                // Since GetUtf8ByteCount above already throws on invalid input, the transcoding
-                // to UTF-8 is guaranteed to succeed here. Therefore, there's no need for a catch block.
-                int actualByteCount = JsonReaderHelper.GetUtf8FromText(value, utf8Bytes);
-                Debug.Assert(expectedByteCount == actualByteCount);
+            // Since GetUtf8ByteCount above already throws on invalid input, the transcoding
+            // to UTF-8 is guaranteed to succeed here. Therefore, there's no need for a try-catch-finally block.
+            int actualByteCount = JsonReaderHelper.GetUtf8FromText(value, utf8Bytes);
+            Debug.Assert(expectedByteCount == actualByteCount);
 
-                encodedText = EncodeHelper(utf8Bytes.AsSpan(0, actualByteCount));
-            }
-            finally
-            {
-                // On the basis that this is user data, go ahead and clear it.
-                utf8Bytes.AsSpan(0, expectedByteCount).Clear();
-                ArrayPool<byte>.Shared.Return(utf8Bytes);
-            }
+            encodedText = EncodeHelper(utf8Bytes.AsSpan(0, actualByteCount));
+
+            // On the basis that this is user data, go ahead and clear it.
+            utf8Bytes.AsSpan(0, expectedByteCount).Clear();
+            ArrayPool<byte>.Shared.Return(utf8Bytes);
 
             return encodedText;
         }
@@ -83,14 +86,6 @@ namespace System.Text.Json
             {
                 return new JsonEncodedText(utf8Value.ToArray());
             }
-        }
-
-        private JsonEncodedText(byte[] utf8Value)
-        {
-            Debug.Assert(utf8Value != null);
-
-            _value = JsonReaderHelper.GetTextFromUtf8(utf8Value);
-            _utf8Value = utf8Value;
         }
 
         private static byte[] GetEscapedString(ReadOnlySpan<byte> utf8Value, int firstEscapeIndexVal)

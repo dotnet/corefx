@@ -43,7 +43,7 @@ namespace System.Text.Json.Tests
             JsonEncodedText text = JsonEncodedText.Encode(message);
             JsonEncodedText textCopy = text;
             JsonEncodedText textDuplicate = JsonEncodedText.Encode(message);
-            JsonEncodedText textDuplicateDiffStringRef = JsonEncodedText.Encode("message");
+            JsonEncodedText textDuplicateDiffStringRef = JsonEncodedText.Encode(string.Concat("mess", "age"));
             JsonEncodedText differentText = JsonEncodedText.Encode("message1");
 
             Assert.True(text.Equals(text));
@@ -69,7 +69,7 @@ namespace System.Text.Json.Tests
             JsonEncodedText text = JsonEncodedText.Encode(message);
             object textCopy = text;
             object textDuplicate = JsonEncodedText.Encode(message);
-            object textDuplicateDiffStringRef = JsonEncodedText.Encode("message");
+            object textDuplicateDiffStringRef = JsonEncodedText.Encode(string.Concat("mess", "age"));
             object differentText = JsonEncodedText.Encode("message1");
 
             Assert.True(text.Equals(text));
@@ -97,7 +97,7 @@ namespace System.Text.Json.Tests
             JsonEncodedText text = JsonEncodedText.Encode(message);
             JsonEncodedText textCopy = text;
             JsonEncodedText textDuplicate = JsonEncodedText.Encode(message);
-            JsonEncodedText textDuplicateDiffStringRef = JsonEncodedText.Encode("message");
+            JsonEncodedText textDuplicateDiffStringRef = JsonEncodedText.Encode(string.Concat("mess", "age"));
             JsonEncodedText differentText = JsonEncodedText.Encode("message1");
 
             int expectedHashCode = text.GetHashCode();
@@ -135,15 +135,15 @@ namespace System.Text.Json.Tests
         {
             {
                 var message = new string('a', stringLength);
-                var expectedMessge = new string('a', stringLength);
+                var expectedMessage = new string('a', stringLength);
 
                 JsonEncodedText text = JsonEncodedText.Encode(message);
                 JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
                 JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
 
-                Assert.Equal(expectedMessge, text.ToString());
-                Assert.Equal(expectedMessge, textSpan.ToString());
-                Assert.Equal(expectedMessge, textUtf8Span.ToString());
+                Assert.Equal(expectedMessage, text.ToString());
+                Assert.Equal(expectedMessage, textSpan.ToString());
+                Assert.Equal(expectedMessage, textUtf8Span.ToString());
 
                 Assert.True(text.Equals(textSpan));
                 Assert.True(text.Equals(textUtf8Span));
@@ -157,15 +157,15 @@ namespace System.Text.Json.Tests
                 {
                     builder.Append("\\u003e");
                 }
-                string expectedMessge = builder.ToString();
+                string expectedMessage = builder.ToString();
 
                 JsonEncodedText text = JsonEncodedText.Encode(message);
                 JsonEncodedText textSpan = JsonEncodedText.Encode(message.AsSpan());
                 JsonEncodedText textUtf8Span = JsonEncodedText.Encode(Encoding.UTF8.GetBytes(message));
 
-                Assert.Equal(expectedMessge, text.ToString());
-                Assert.Equal(expectedMessge, textSpan.ToString());
-                Assert.Equal(expectedMessge, textUtf8Span.ToString());
+                Assert.Equal(expectedMessage, text.ToString());
+                Assert.Equal(expectedMessage, textSpan.ToString());
+                Assert.Equal(expectedMessage, textUtf8Span.ToString());
 
                 Assert.True(text.Equals(textSpan));
                 Assert.True(text.Equals(textUtf8Span));
