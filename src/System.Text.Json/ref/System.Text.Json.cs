@@ -373,8 +373,9 @@ namespace System.Text.Json.Serialization
     }
     public sealed partial class JsonSerializationException : System.Text.Json.JsonException
     {
-        public JsonSerializationException(string message, long lineNumber, long bytePositionInLine, string path) : base (default(string)) { }
-        public JsonSerializationException(string message, long lineNumber, long bytePositionInLine, string path, System.Exception innerException) : base (default(string)) { }
+        public JsonSerializationException(string message, string path, long lineNumber, long bytePositionInLine, System.Exception innerException) : base (default(string)) { }
+        public JsonSerializationException(string message, string path) : base (default(string)) { }
+        public JsonSerializationException(string message, string path, long lineNumber, long bytePositionInLine) : base (default(string)) { }
         public long BytePositionInLine { get { throw null; } }
         public long LineNumber { get { throw null; } }
         public string Path { get { throw null; } }

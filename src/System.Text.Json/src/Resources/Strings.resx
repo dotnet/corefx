@@ -337,6 +337,6 @@
     <value>The JSON property name for '{0}.{1}' cannot be null.</value>
   </data>
   <data name="DeserializeDuplicateKey" xml:space="preserve">
-    <value>An item with the same key has already been added. Key: {0}.</value>
+    <value>An item with the same property name '{0}' has already been added to the dictionary.</value>
   </data>
 </root>

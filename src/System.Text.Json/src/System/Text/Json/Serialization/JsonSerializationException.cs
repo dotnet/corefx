@@ -18,14 +18,14 @@ namespace System.Text.Json.Serialization
         /// Creates a new exception object to relay error information to the user.
         /// </summary>
         /// <param name="message">The context specific error message.</param>
-        /// <param name="lineNumber">The line number at which the invalid JSON was encountered (starting at 0).</param>
-        /// <param name="bytePositionInLine">The byte count within the current line where the invalid JSON was encountered (starting at 0).</param>
+        /// <param name="lineNumber">The line number at which the invalid JSON was encountered (starting at 0) when deserializing.</param>
+        /// <param name="bytePositionInLine">The byte count within the current line where the invalid JSON was encountered (starting at 0) when deserializing.</param>
         /// <param name="path">The property path where the invalid JSON was encountered.</param>
         /// <param name="innerException">The exception that caused the current exception.</param>
         /// <remarks>
         /// Note that the <paramref name="bytePositionInLine"/> counts the number of bytes (i.e. UTF-8 code units) and not characters or scalars.
         /// </remarks>
-        public JsonSerializationException(string message, long lineNumber, long bytePositionInLine, string path, Exception innerException) : base(message, innerException)
+        public JsonSerializationException(string message, string path, long lineNumber, long bytePositionInLine, Exception innerException) : base(message, innerException)
         {
             LineNumber = lineNumber;
             BytePositionInLine = bytePositionInLine;
@@ -36,16 +36,26 @@ namespace System.Text.Json.Serialization
         /// Creates a new exception object to relay error information to the user.
         /// </summary>
         /// <param name="message">The context specific error message.</param>
-        /// <param name="lineNumber">The line number at which the invalid JSON was encountered (starting at 0).</param>
-        /// <param name="bytePositionInLine">The byte count within the current line where the invalid JSON was encountered (starting at 0).</param>
         /// <param name="path">The property path where the invalid JSON was encountered.</param>
+        /// <param name="lineNumber">The line number at which the invalid JSON was encountered (starting at 0) when deserializing.</param>
+        /// <param name="bytePositionInLine">The byte count within the current line where the invalid JSON was encountered (starting at 0) when deserializing.</param>
         /// <remarks>
         /// Note that the <paramref name="bytePositionInLine"/> counts the number of bytes (i.e. UTF-8 code units) and not characters or scalars.
         /// </remarks>
-        public JsonSerializationException(string message, long lineNumber, long bytePositionInLine, string path) : base(message)
+        public JsonSerializationException(string message, string path, long lineNumber, long bytePositionInLine) : base(message)
         {
             LineNumber = lineNumber;
             BytePositionInLine = bytePositionInLine;
+            Path = path;
+        }
+
+        /// <summary>
+        /// Creates a new exception object to relay error information to the user.
+        /// </summary>
+        /// <param name="message">The context specific error message.</param>
+        /// <param name="path">The property path where the invalid JSON was encountered.</param>
+        public JsonSerializationException(string message, string path) : base(message)
+        {
             Path = path;
         }
 
@@ -80,7 +90,7 @@ namespace System.Text.Json.Serialization
         public long BytePositionInLine { get; private set; }
 
         /// <summary>
-        /// The property path of the exception.
+        /// The property path within the JSON where the exception was encountered.
         /// </summary>
         public string Path { get; private set; }
     }

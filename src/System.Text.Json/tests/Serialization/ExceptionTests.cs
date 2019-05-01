@@ -11,27 +11,22 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void RootException()
         {
-            bool exceptionThrown = false;
             try
             {
                 int i2 = JsonSerializer.Parse<int>("12bad");
+                Assert.True(false, "Expected JsonSerializationException was not thrown.");
             }
             catch (JsonSerializationException e)
             {
-                exceptionThrown = true;
-
                 Assert.Equal(0, e.LineNumber);
                 Assert.Equal(2, e.BytePositionInLine);
                 Assert.Equal("[System.Int32]", e.Path);
             }
-
-            Assert.True(exceptionThrown);
         }
 
         [Fact]
         public static void RethrownJsonReaderException()
         {
-            bool exceptionThrown = false;
             string json = Encoding.UTF8.GetString(BasicCompany.s_data);
 
             json = json.Replace(@"""zip"" : 98052", @"""zip"" : bad");
@@ -39,11 +34,10 @@ namespace System.Text.Json.Serialization.Tests
             try
             {
                 JsonSerializer.Parse<BasicCompany>(json);
+                Assert.True(false, "Expected JsonSerializationException was not thrown.");
             }
             catch (JsonSerializationException e)
             {
-                exceptionThrown = true;
-
                 Assert.Equal(18, e.LineNumber);
                 Assert.Equal(8, e.BytePositionInLine);
                 Assert.Equal("[System.Text.Json.Serialization.Tests.BasicCompany].mainSite.zip", e.Path);
@@ -55,8 +49,6 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(18, inner.LineNumber);
                 Assert.Equal(8, inner.BytePositionInLine);
             }
-
-            Assert.True(exceptionThrown);
         }
     }
 }

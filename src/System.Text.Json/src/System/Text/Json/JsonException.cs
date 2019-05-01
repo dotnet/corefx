@@ -7,8 +7,7 @@ using System.Runtime.Serialization;
 namespace System.Text.Json
 {
     /// <summary>
-    /// Defines a custom exception object that is thrown when invalid JSON text is encountered, when the defined maximum depth is passed,
-    /// or the JSON text is not compatible with the type of a property on an object.
+    /// Defines the base class for exceptions thrown from the System.Text.Json namespace.
     /// </summary>
     [Serializable]
     public abstract class JsonException : Exception

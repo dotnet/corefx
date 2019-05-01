@@ -55,7 +55,7 @@ namespace System.Text.Json
 
         public static void ThrowJsonSerializationException_DeserializeDataRemaining(long length, long bytesRemaining)
         {
-            throw new JsonSerializationException(SR.Format(SR.DeserializeDataRemaining, length, bytesRemaining), 0, 0, "");
+            throw new JsonSerializationException(SR.Format(SR.DeserializeDataRemaining, length, bytesRemaining), "");
         }
 
         public static void ThrowJsonSerializationException_DeserializeDuplicateKey(string key, in Utf8JsonReader reader, string path)
@@ -69,7 +69,7 @@ namespace System.Text.Json
             long bytePositionInLine = reader.CurrentState._bytePositionInLine;
 
             message += $" Path: {path} | LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.";
-            throw new JsonSerializationException(message, lineNumber, bytePositionInLine, path);
+            throw new JsonSerializationException(message, path, lineNumber, bytePositionInLine);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -88,7 +88,7 @@ namespace System.Text.Json
                 message += $" Path: {path}.";
             }
 
-            throw new JsonSerializationException(message, exception.LineNumber, exception.BytePositionInLine, path, exception);
+            throw new JsonSerializationException(message, path, exception.LineNumber, exception.BytePositionInLine, exception);
         }
     }
 }
