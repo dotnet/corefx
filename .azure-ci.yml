@@ -10,14 +10,16 @@ trigger:
     - release/3.0
   paths:
     exclude:
-      - Documentation/*
-      - README.md
-      - CONTRIBUTING.md
-      - CODE_OF_CONDUCT.md
+    - *.md
 
 pr:
-- master
-- release/3.0
+  branches:
+    include:
+    - master
+    - release/3.0
+  paths:
+    exclude:
+    - *.md
 
 resources:
   containers:
