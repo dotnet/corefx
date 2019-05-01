@@ -426,6 +426,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 holder.Chain.ChainPolicy.ApplicationPolicy.Add(new Oid("0.1.2.3.4", null));
                 holder.Chain.ChainPolicy.VerificationTime = microsoftDotCom.NotBefore.AddDays(1);
+                holder.Chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
 
                 Assert.False(holder.Chain.Build(microsoftDotCom));
 
