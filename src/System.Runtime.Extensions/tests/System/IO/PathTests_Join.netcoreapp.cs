@@ -188,6 +188,12 @@ namespace System.IO.Tests
             Assert.Throws<ArgumentNullException>(() => Path.Join(null));
         }
 
+        [Fact]
+        public void JoinStringArray_ZeroLengthArray()
+        {
+            Assert.Equal("", Path.Join(new string[0]));
+        }
+
         [Theory, MemberData(nameof(TestData_JoinTwoPaths))]
         public void JoinStringArray_2(string path1, string path2, string expected)
         {
