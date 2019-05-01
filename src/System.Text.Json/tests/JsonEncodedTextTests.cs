@@ -18,10 +18,14 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, text.GetHashCode());
             Assert.Equal("", text.ToString());
             Assert.True(text.Equals(default));
+            Assert.True(text.Equals(text));
+            Assert.False(text.Equals(null));
 
             JsonEncodedText defaultText = default;
             object obj = defaultText;
             Assert.True(text.Equals(obj));
+            Assert.True(text.Equals(defaultText));
+            Assert.True(defaultText.Equals(text));
 
             JsonEncodedText textByteEmpty = JsonEncodedText.Encode(Array.Empty<byte>());
             Assert.True(textByteEmpty.EncodedUtf8Bytes.IsEmpty);
