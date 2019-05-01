@@ -35,23 +35,11 @@ namespace System.Net.Http
         #region Properties
         public static IWebProxy DefaultProxy
         {
-            get
-            {
-                if (s_defaultProxy == null)
-                {
-                    s_defaultProxy = SystemProxyInfo.Proxy;
-                }
+            get => LazyInitializer.EnsureInitialized(ref s_defaultProxy, () => SystemProxyInfo.Proxy);
 
-                return s_defaultProxy;
-            }
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                s_defaultProxy = value;
+                s_defaultProxy = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
