@@ -18,6 +18,7 @@
     <Compile Include="System\Buffers\BoundedMemory.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
     <Compile Include="System\Buffers\BoundedMemory.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
     <Compile Include="System\Buffers\PoisonPagePlacement.cs" />
+    <Compile Include="System\RetryHelper.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
     <Compile Include="System\AdminHelpers.cs" />
