@@ -89,7 +89,7 @@ namespace System.Data.OleDb
             }
         }
 
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         override public string Database
         {
             get

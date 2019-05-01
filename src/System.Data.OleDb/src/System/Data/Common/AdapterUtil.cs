@@ -22,15 +22,6 @@ namespace System.Data.Common
 {
     internal static class ADP
     {
-        // The class ADP defines the exceptions that are specific to the Adapters.f
-        // The class contains functions that take the proper informational variables and then construct
-        // the appropriate exception with an error string obtained from the resource Framework.txt.
-        // The exception is then returned to the caller, so that the caller may then throw from its
-        // location so that the catcher of the exception will have the appropriate call stack.
-        // This class is used so that there will be compile time checking of error messages.
-        // The resource Framework.txt will ensure proper string text based on the appropriate
-        // locale.
-
         static internal Exception ExceptionWithStackTrace(Exception e)
         {
             try

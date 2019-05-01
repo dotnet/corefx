@@ -172,7 +172,7 @@
     <value>Keyword not supported: '{0}'.</value>
   </data>
   <data name="ADP_InternalProviderError" xml:space="preserve">
-    <value>Internal .Net Framework Data Provider error {0}.</value>
+    <value>Internal data provider error {0}.</value>
   </data>
   <data name="ADP_InvalidMultipartName" xml:space="preserve">
     <value>{0} "{1}".</value>
@@ -202,13 +202,13 @@
     <value>No error message available, result code: {0}.</value>
   </data>
   <data name="OleDb_MDACNotAvailable" xml:space="preserve">
-    <value>The .Net Framework Data Providers require Microsoft Data Access Components(MDAC).  Please install Microsoft Data Access Components(MDAC) version 2.6 or later.</value>
+    <value>The data providers require Microsoft Data Access Components (MDAC).  Please install Microsoft Data Access Components (MDAC) version 2.6 or later.</value>
   </data>
   <data name="OleDb_MSDASQLNotSupported" xml:space="preserve">
-    <value>The .Net Framework Data Provider for OLEDB (System.Data.OleDb) does not support the Microsoft OLE DB Provider for ODBC Drivers (MSDASQL). Use the .Net Framework Data Provider for ODBC (System.Data.Odbc).</value>
+    <value>The data provider for OLEDB (System.Data.OleDb) does not support the Microsoft OLEDB Provider for ODBC Drivers (MSDASQL). Use the data provider for ODBC (System.Data.Odbc).</value>
   </data>
   <data name="OleDb_PossiblePromptNotUserInteractive" xml:space="preserve">
-    <value>The .Net Framework Data Provider for OLEDB will not allow the OLE DB Provider to prompt the user in a non-interactive environment.</value>
+    <value>The data provider for OLEDB will not allow the OLEDB Provider to prompt the user in a non-interactive environment.</value>
   </data>
   <data name="OleDb_ProviderUnavailable" xml:space="preserve">
     <value>The '{0}' provider is not registered on the local machine.</value>
@@ -220,13 +220,13 @@
     <value>The ITransactionLocal interface is not supported by the '{0}' provider.  Local transactions are unavailable with the current provider.</value>
   </data>
   <data name="OleDb_AsynchronousNotSupported" xml:space="preserve">
-    <value>'Asynchronous Processing' is not a supported feature of the .Net Framework Data OLE DB Provider(System.Data.OleDb).</value>
+    <value>'Asynchronous Processing' is not a supported feature of the Data OLEDB Provider(System.Data.OleDb).</value>
   </data>
   <data name="OleDb_NoProviderSpecified" xml:space="preserve">
-    <value>An OLE DB Provider was not specified in the ConnectionString.  An example would be, 'Provider=SQLOLEDB;'.</value>
+    <value>An OLEDB Provider was not specified in the ConnectionString.  An example would be, 'Provider=SQLOLEDB;'.</value>
   </data>
   <data name="OleDb_InvalidProviderSpecified" xml:space="preserve">
-    <value>The OLE DB Provider specified in the ConnectionString is too long.</value>
+    <value>The OLEDB Provider specified in the ConnectionString is too long.</value>
   </data>
   <data name="OleDb_InvalidRestrictionsDbInfoKeywords" xml:space="preserve">
     <value>No restrictions are expected for the DbInfoKeywords OleDbSchemaGuid.</value>
@@ -283,7 +283,7 @@
     <value>Unable to retrieve the IRow interface from the ADODB.Record object.</value>
   </data>
   <data name="OleDb_ISourcesRowsetNotSupported" xml:space="preserve">
-    <value>Type does not support the OLE DB interface ISourcesRowset</value>
+    <value>Type does not support the OLEDB interface ISourcesRowset</value>
   </data>
   <data name="OleDb_IDBInfoNotSupported" xml:space="preserve">
     <value>Cannot construct the ReservedWords schema collection because the provider does not support IDBInfo.</value>
@@ -295,7 +295,7 @@
     <value>Failed to initialize the '{0}' property for one of the following reasons:
   The value data type was not the data type of the property or was not null. For example, the property was DBPROP_MEMORYUSAGE, which has a data type of Int32, and the data type was Int64.
   The value was not a valid value. For example, the property was DBPROP_MEMORYUSAGE and the value was negative.
-  The value was a valid value for the property and the provider supports the property as a settable property, but the provider does not support the value specified. This includes the case where the value was added to the property in OLE DB after the provider was written.</value>
+  The value was a valid value for the property and the provider supports the property as a settable property, but the provider does not support the value specified. This includes the case where the value was added to the property in OLEDB after the provider was written.</value>
   </data>
   <data name="OleDb_PropertyBadOption" xml:space="preserve">
     <value>The value of Options was invalid.</value>
@@ -337,19 +337,19 @@
     <value>Conversion failed because the {0} data value overflowed the type specified for the {0} value part in the consumer's buffer.</value>
   </data>
   <data name="OleDb_GVtUnknown" xml:space="preserve">
-    <value>OleDbDataAdapter internal error: [get] Unknown OLE DB data type: 0x{0} ({1}).</value>
+    <value>OleDbDataAdapter internal error: [get] Unknown OLEDB data type: 0x{0} ({1}).</value>
   </data>
   <data name="OleDb_SignMismatch" xml:space="preserve">
     <value>Conversion failed because the {0} data value was signed and the type specified for the {0} value part in the consumer's buffer was unsigned.</value>
   </data>
   <data name="OleDb_SVtUnknown" xml:space="preserve">
-    <value>OleDbDataAdapter internal error: [set] Unknown OLE DB data type: 0x{0} ({1}).</value>
+    <value>OleDbDataAdapter internal error: [set] Unknown OLEDB data type: 0x{0} ({1}).</value>
   </data>
   <data name="OleDb_Unavailable" xml:space="preserve">
     <value>The provider could not determine the {0} value. For example, the row was just created, the default for the {0} column was not available, and the consumer had not yet set a new {0} value.</value>
   </data>
   <data name="OleDb_UnexpectedStatusValue" xml:space="preserve">
-    <value>OLE DB Provider returned an unexpected status value of {0}.</value>
+    <value>OLEDB Provider returned an unexpected status value of {0}.</value>
   </data>
   <data name="OleDb_ThreadApartmentState" xml:space="preserve">
     <value>The OleDbDataReader.Read must be used from the same thread on which is was created if that thread's ApartmentState was not ApartmentState.MTA.</value>
@@ -364,7 +364,7 @@
     <value>IErrorInfo.GetSource failed with {0}.</value>
   </data>
   <data name="OleDb_DBBindingGetVector" xml:space="preserve">
-    <value>DBTYPE_VECTOR data is not supported by the .Net Framework Data OLE DB Provider(System.Data.OleDb).</value>
+    <value>DBTYPE_VECTOR data is not supported by the Data OLEDB Provider (System.Data.OleDb).</value>
   </data>
   <data name="SQL_InvalidDataLength" xml:space="preserve">
     <value>Data length '{0}' is less than 0.</value>
@@ -571,9 +571,9 @@
     <value>{0} requires open connection when the quote prefix has not been set.</value>
   </data>
   <data name="Odbc_MDACWrongVersion" xml:space="preserve">
-    <value>The .Net Framework Odbc Data Provider requires Microsoft Data Access Components(MDAC) version 2.6 or later.  Version {0} was found currently installed.</value>
+    <value>The Odbc Data Provider requires Microsoft Data Access Components (MDAC) version 2.6 or later. Version {0} was found currently installed.</value>
   </data>
   <data name="OleDb_MDACWrongVersion" xml:space="preserve">
-    <value>The .Net Framework OleDb Data Provider requires Microsoft Data Access Components(MDAC) version 2.6 or later.  Version {0} was found currently installed.</value>
+    <value>The OLEDB Data Provider requires Microsoft Data Access Components (MDAC) version 2.6 or later. Version {0} was found currently installed.</value>
   </data>
 </root>
