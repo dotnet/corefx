@@ -1314,9 +1314,8 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
-            TestHelper.EnsureHttp2Feature(handler);
 
-            using (HttpClient client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient())
             {
                 // Create HTTP/1.1 loopback server and advertise HTTP2 via ALPN.
                 await LoopbackServer.CreateServerAsync(async (server, uri) =>
@@ -1345,9 +1344,10 @@ namespace System.Net.Http.Functional.Tests
                     catch (HttpRequestException e)
                     {
                         Assert.NotNull(e.InnerException);
-                        // TBD expect Http2ProtocolException wheni/if exposed
+                        // TBD expect Http2ProtocolException when/if exposed
                         Assert.False(e.InnerException is ObjectDisposedException);
                     }
+                    //});
                 });
             }
         }
