@@ -113,6 +113,7 @@ namespace System.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
         public static void KeepAlive()
         {
             KeepAliveTest.Run();
