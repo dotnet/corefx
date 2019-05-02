@@ -202,11 +202,17 @@ namespace System.Collections.ObjectModel
                 _skipRaisingEvents = false;
             }
 
-            IList newItems = collection is IList list ? list : new List<T>(collection);
+            if (!_skipRaisingEvents)
+            {
+                IList newItems = collection is IList list ? list : new List<T>(collection);
 
-            OnCountPropertyChanged();
-            OnIndexerPropertyChanged();
-            OnCollectionChanged(NotifyCollectionChangedAction.Replace, itemsToReplace, newItems, index);
+                if (newItems.Count > 0)
+                {
+                    OnCountPropertyChanged();
+                    OnIndexerPropertyChanged();
+                    OnCollectionChanged(NotifyCollectionChangedAction.Replace, itemsToReplace, newItems, index);
+                }
+            }
         }
 
         /// <summary>
