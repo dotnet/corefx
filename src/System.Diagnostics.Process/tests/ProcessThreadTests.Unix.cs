@@ -17,11 +17,19 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
+            ProcessThread thread = _process.Threads[0];
+            ThreadPriorityLevel level = ThreadPriorityLevel.Normal;
+
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
             {
-                Assert.Throws<PlatformNotSupportedException>(() => _process.Threads[0].PriorityLevel);
+                Assert.Throws<PlatformNotSupportedException>(() => thread.PriorityLevel);
             }
-            Assert.Throws<PlatformNotSupportedException>(() => _process.Threads[0].PriorityLevel = ThreadPriorityLevel.AboveNormal);
+            else
+            {
+                level = thread.PriorityLevel;
+            }
+
+            Assert.Throws<PlatformNotSupportedException>(() => thread.PriorityLevel = level);
         }
     }
 }
