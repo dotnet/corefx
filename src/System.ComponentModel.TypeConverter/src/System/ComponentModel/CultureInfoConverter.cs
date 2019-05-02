@@ -58,9 +58,9 @@ namespace System.ComponentModel
         /// </summary>
         public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
         {
-            // Hack, Only when GetCultureName returns culture.Name, we use CultureInfoMapper
+            // Only when GetCultureName returns culture.Name, we use CultureInfoMapper
             // (Since CultureInfoMapper will transfer Culture.DisplayName to Culture.Name).
-            // Otherwise, we just keep the value unchange.
+            // Otherwise, we just keep the value unchanged.
             if (value is string text)
             {
                 if (GetCultureName(CultureInfo.InvariantCulture).Equals(""))
