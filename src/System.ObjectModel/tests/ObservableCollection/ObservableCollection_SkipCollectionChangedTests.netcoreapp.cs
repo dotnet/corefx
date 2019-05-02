@@ -89,6 +89,23 @@ namespace System.ObjectModel.Tests.ObservableCollection
             Assert.Equal(1, collectionChangedCounter);
         }
 
+        [Fact]
+        public void SkipCollectionChanged_ReplaceRange_Empty_Test()
+        {
+            int collectionChangedCounter = 0;
+            NonNullObservableCollection<string> collection = new NonNullObservableCollection<string>();
+            collection.Add("1");
+            collection.Add("2");
+            collection.Add("3");
+            collection.CollectionChanged += (s, e) => collectionChangedCounter++;
+
+            Assert.Throws<ArgumentNullException>(() => collection.ReplaceRange(0, 0, new string[0]));
+            Assert.Equal(0, collectionChangedCounter);
+
+            collection.Add("1");
+            Assert.Equal(1, collectionChangedCounter);
+        }
+
         public class NonNullObservableCollection<T> : ObservableCollection<T>
         {
 
