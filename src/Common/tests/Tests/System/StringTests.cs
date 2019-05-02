@@ -7398,7 +7398,6 @@ namespace System.Tests
             Assert.True(s.IsNormalized(NormalizationForm.FormD));
             Assert.True(s.IsNormalized(NormalizationForm.FormKC));
             Assert.True(s.IsNormalized(NormalizationForm.FormKD));
-
             Assert.Same(s, s.Normalize());
             Assert.Same(s, s.Normalize(NormalizationForm.FormC));
             Assert.Same(s, s.Normalize(NormalizationForm.FormD));
