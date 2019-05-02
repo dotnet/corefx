@@ -328,6 +328,9 @@
     <CLSCompliant Condition="'$(CLSCompliant)'=='' and '$(IsTestProject)'=='true'">false</CLSCompliant>
     <CLSCompliant Condition="'$(CLSCompliant)'==''">true</CLSCompliant>
     <GenFacadesIgnoreBuildAndRevisionMismatch>true</GenFacadesIgnoreBuildAndRevisionMismatch>
+
+    <!-- Warnings -->
+    <NoWarn>$(NoWarn);CS8609</NoWarn> <!-- TODO: Remove CS8609 once https://github.com/dotnet/roslyn/issues/23268 is consumed. -->
   </PropertyGroup>
 
   <!-- Set up some common paths -->
