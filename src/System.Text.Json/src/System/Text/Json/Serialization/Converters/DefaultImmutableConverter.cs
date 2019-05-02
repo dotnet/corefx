@@ -11,6 +11,7 @@ using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization.Converters
 {
+    // This converter returns enumerables in the System.Collections.Immutable namespace.
     internal sealed class DefaultImmutableConverter : JsonEnumerableConverter
     {
         public const string ImmutableNamespace = "System.Collections.Immutable";

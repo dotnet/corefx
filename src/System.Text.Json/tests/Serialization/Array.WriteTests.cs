@@ -341,5 +341,28 @@ namespace System.Text.Json.Serialization.Tests
                 obj.Verify();
             }
         }
+
+        [Fact]
+        public static void WriteClassWithObjectImmutableTypes()
+        {
+            string json;
+
+            {
+                TestClassWithObjectImmutableTypes obj = new TestClassWithObjectImmutableTypes();
+                obj.Initialize();
+                obj.Verify();
+                json = JsonSerializer.ToString(obj);
+            }
+
+            {
+                TestClassWithObjectImmutableTypes obj = JsonSerializer.Parse<TestClassWithObjectImmutableTypes>(json);
+                obj.Verify();
+            }
+
+            {
+                TestClassWithObjectImmutableTypes obj = JsonSerializer.Parse<TestClassWithObjectImmutableTypes>(TestClassWithObjectImmutableTypes.s_data);
+                obj.Verify();
+            }
+        }
     }
 }

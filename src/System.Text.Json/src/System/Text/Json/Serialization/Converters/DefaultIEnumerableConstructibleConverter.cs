@@ -29,7 +29,9 @@ namespace System.Text.Json.Serialization.Converters
 
         public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
         {
-            MethodInfo mi = typeof(DefaultIEnumerableConstructibleConverter).GetMethod("CreateFromListInternal", BindingFlags.NonPublic | BindingFlags.Static);
+            MethodInfo mi = typeof(DefaultIEnumerableConstructibleConverter).GetMethod(
+                "CreateFromListInternal",
+                BindingFlags.NonPublic | BindingFlags.Static);
 
             if (mi == null)
             {
