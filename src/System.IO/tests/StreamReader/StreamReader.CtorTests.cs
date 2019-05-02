@@ -74,7 +74,7 @@ namespace System.IO.Tests
         public static void CreationFromMemoryStreamWithEncodingTrueDetectsCorrectEncodingWhenPreambleAvailable(Encoding expectedEncoding, byte[] encodedData, string expectedOutput)
         {
             var ms2 = new MemoryStream();
-            ms2.Write(encodedData);
+            ms2.Write(encodedData, 0, encodedData.Length);
             ms2.Position = 0;
             var sr2 = new StreamReader(ms2, true);
             var streamContent = sr2.ReadToEnd();
@@ -102,7 +102,7 @@ namespace System.IO.Tests
         public static void CreationFromMemoryStreamWithEncodingTrueDetectsCorrectEncodingWithOffPatterns(Encoding expectedEncoding, byte[] encodedData)
         {
             var ms2 = new MemoryStream();
-            ms2.Write(encodedData);
+            ms2.Write(encodedData, 0, encodedData.Length);
             ms2.Position = 0;
             var sr2 = new StreamReader(ms2, true);
             var streamContent = sr2.ReadToEnd();
@@ -130,7 +130,7 @@ namespace System.IO.Tests
         public static void CreationFromMemoryStreamWithEncodingTrueDoesNotFailOnSmallInputs(Encoding expectedEncoding, byte[] data)
         {
             var ms2 = new MemoryStream();
-            ms2.Write(data);
+            ms2.Write(data, 0, data.Length);
             ms2.Position = 0;
             var sr2 = new StreamReader(ms2, encoding: expectedEncoding, detectEncodingFromByteOrderMarks: true);
             var streamContent = sr2.ReadToEnd();
