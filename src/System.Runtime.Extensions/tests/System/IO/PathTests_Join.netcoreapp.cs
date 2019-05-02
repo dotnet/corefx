@@ -14,7 +14,7 @@ namespace System.IO.Tests
             { Sep, Sep },
             { AltSep, AltSep },
             { "a", "a" },
-            { null, ""}
+            { null, "" }
         };
 
         public static TheoryData<string, string, string> TestData_JoinTwoPaths = new TheoryData<string, string, string>
@@ -186,7 +186,7 @@ namespace System.IO.Tests
 
         [Theory, MemberData(nameof(TestData_JoinFourPaths))]
         public void JoinFourPaths(string path1, string path2, string path3, string path4, string expected)
-        {   
+        {
             Assert.Equal(expected, Path.Join(path1.AsSpan(), path2.AsSpan(), path3.AsSpan(), path4.AsSpan()));
             Assert.Equal(expected, Path.Join(path1, path2, path3, path4));
         }
@@ -229,8 +229,8 @@ namespace System.IO.Tests
 
         [Theory, MemberData(nameof(TestData_JoinFourPaths))]
         public void JoinStringArray_8(string path1, string path2, string path3, string path4, string fourJoined)
-        {   
-            Assert.Equal(Path.Join(fourJoined, fourJoined) , Path.Join(new string[] { path1, path2, path3, path4, path1, path2, path3, path4 }));
+        {
+            Assert.Equal(Path.Join(fourJoined, fourJoined), Path.Join(new string[] { path1, path2, path3, path4, path1, path2, path3, path4 }));
         }
     }
 }
