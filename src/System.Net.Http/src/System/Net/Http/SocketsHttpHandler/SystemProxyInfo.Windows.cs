@@ -4,17 +4,17 @@
 
 namespace System.Net.Http
 {
-    internal static class SystemProxyInfo
+    internal static partial class SystemProxyInfo
     {
         // On Windows we get default proxy configuration from either environment variables or the Windows system proxy.
         public static IWebProxy ConstructSystemProxy()
         {
             if (!HttpEnvironmentProxy.TryCreate(out IWebProxy proxy))
             {
-                HttpSystemProxy.TryCreate(out proxy);
+                HttpWindowsProxy.TryCreate(out proxy);
             }
 
-            return proxy;
+            return proxy ?? new HttpNoProxy();
         }
     }
 }
