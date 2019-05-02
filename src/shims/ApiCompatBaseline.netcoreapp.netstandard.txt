@@ -33,4 +33,7 @@ CannotMakeMemberNonVirtual : Member 'System.ComponentModel.BaseNumberConverter.C
 CannotMakeMemberNonVirtual : Member 'System.ComponentModel.BaseNumberConverter.CanConvertTo(System.ComponentModel.ITypeDescriptorContext, System.Type)' is non-virtual in the implementation but is virtual in the contract.
 CannotMakeMemberNonVirtual : Member 'System.ComponentModel.BaseNumberConverter.ConvertFrom(System.ComponentModel.ITypeDescriptorContext, System.Globalization.CultureInfo, System.Object)' is non-virtual in the implementation but is virtual in the contract.
 CannotMakeMemberNonVirtual : Member 'System.ComponentModel.BaseNumberConverter.ConvertTo(System.ComponentModel.ITypeDescriptorContext, System.Globalization.CultureInfo, System.Object, System.Type)' is non-virtual in the implementation but is virtual in the contract.
-Total Issues: 27
+MembersMustExist : Member 'System.Threading.Tasks.TaskExtensions.ConfigureAwait(System.IAsyncDisposable, System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Threading.Tasks.TaskExtensions.ConfigureAwait<T>(System.Collections.Generic.IAsyncEnumerable<T>, System.Boolean)' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.Threading.Tasks.TaskExtensions.WithCancellation<T>(System.Collections.Generic.IAsyncEnumerable<T>, System.Threading.CancellationToken)' does not exist in the implementation but it does exist in the contract.
+Total Issues: 30
