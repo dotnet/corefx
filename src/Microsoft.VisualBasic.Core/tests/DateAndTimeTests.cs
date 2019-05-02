@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Reflection;
 using Xunit;
 
 namespace Microsoft.VisualBasic.Tests
@@ -357,7 +358,22 @@ namespace Microsoft.VisualBasic.Tests
 
         // Not tested:
         //   public static DateTime DateSerial(int Year, int Month, int Day) { throw null; }
-        //   public static string DateString { get { throw null; } set { } }
+
+        [Fact]
+        public void DateString()
+        {
+            string str = DateAndTime.DateString;
+            // Should return a date with three non-empty parts.
+            string[] parts = str.Split('-');
+            Assert.Equal(3, parts.Length);
+            foreach (var part in parts)
+            {
+                Assert.False(string.IsNullOrEmpty(part));
+            }
+        }
+
+        // Not tested:
+        //   public static string DateString { set { } }
         //   public static DateTime DateValue(string StringDate) { throw null; }
 
         [Fact]
