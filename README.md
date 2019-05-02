@@ -7,7 +7,6 @@ The corresponding [.NET Core Runtime repo](https://github.com/dotnet/coreclr) (c
 Runtime-specific library code ([System.Private.CoreLib](https://github.com/dotnet/coreclr/tree/master/src/System.Private.CoreLib)) lives in the CoreCLR repo. It needs to be built and versioned in tandem with the runtime. The rest of CoreFX is agnostic of runtime-implementation and can be run on any compatible .NET runtime (e.g. [CoreRT](https://github.com/dotnet/corert)).
 
 
-
 ## .NET Core
 
 Official Starting Page: https://dotnet.github.io
