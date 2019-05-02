@@ -149,7 +149,7 @@ namespace System.Buffers.ArrayPool.Tests
             InlineData(true),
             InlineData(false)]
         [ActiveIssue(29866, TargetFrameworkMonikers.UapNotUapAot)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void PollingEventFires(bool trim)
         {
             RemoteInvokeWithTrimming((trimString) =>
