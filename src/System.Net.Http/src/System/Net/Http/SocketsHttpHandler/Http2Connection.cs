@@ -139,7 +139,7 @@ namespace System.Net.Http
 
             _expectingSettingsAck = true;
 
-            ProcessIncomingFrames();
+            _ = ProcessIncomingFrames();
         }
 
         private async Task EnsureIncomingBytesAsync(int minReadBytes)
@@ -199,7 +199,7 @@ namespace System.Net.Http
             return frameHeader;
         }
 
-        private async void ProcessIncomingFrames()
+        private async Task ProcessIncomingFrames()
         {
             try
             {
