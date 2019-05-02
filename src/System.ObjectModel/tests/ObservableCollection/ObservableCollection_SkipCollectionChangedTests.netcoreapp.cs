@@ -99,7 +99,7 @@ namespace System.ObjectModel.Tests.ObservableCollection
             collection.Add("3");
             collection.CollectionChanged += (s, e) => collectionChangedCounter++;
 
-            Assert.Throws<ArgumentNullException>(() => collection.ReplaceRange(0, 0, new string[0]));
+            collection.ReplaceRange(0, 0, new string[0]);
             Assert.Equal(0, collectionChangedCounter);
 
             collection.Add("1");
