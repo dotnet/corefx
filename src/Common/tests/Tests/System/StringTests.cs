@@ -7399,11 +7399,22 @@ namespace System.Tests
             Assert.True(s.IsNormalized(NormalizationForm.FormKC));
             Assert.True(s.IsNormalized(NormalizationForm.FormKD));
 
-            Assert.Equal(s, s.Normalize());
-            Assert.Equal(s, s.Normalize(NormalizationForm.FormC));
-            Assert.Equal(s, s.Normalize(NormalizationForm.FormD));
-            Assert.Equal(s, s.Normalize(NormalizationForm.FormKC));
-            Assert.Equal(s, s.Normalize(NormalizationForm.FormKD));
+            if (PlatformDetection.IsMonoRuntime)
+            {
+                Assert.Equal(s, s.Normalize());
+                Assert.Equal(s, s.Normalize(NormalizationForm.FormC));
+                Assert.Equal(s, s.Normalize(NormalizationForm.FormD));
+                Assert.Equal(s, s.Normalize(NormalizationForm.FormKC));
+                Assert.Equal(s, s.Normalize(NormalizationForm.FormKD));
+            }
+            else
+            {
+                Assert.Same(s, s.Normalize());
+                Assert.Same(s, s.Normalize(NormalizationForm.FormC));
+                Assert.Same(s, s.Normalize(NormalizationForm.FormD));
+                Assert.Same(s, s.Normalize(NormalizationForm.FormKC));
+                Assert.Same(s, s.Normalize(NormalizationForm.FormKD));
+            }
         }
 
         [Fact]
