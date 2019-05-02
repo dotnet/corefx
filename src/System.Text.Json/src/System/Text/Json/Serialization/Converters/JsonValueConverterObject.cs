@@ -25,14 +25,12 @@ namespace System.Text.Json.Serialization.Converters
 
         public override void Write(object value, Utf8JsonWriter writer)
         {
-            // Should only get here if the object is actually System.Object.
-            throw new NotSupportedException();
+            throw new InvalidOperationException();
         }
 
         public override void Write(Span<byte> escapedPropertyName, object value, Utf8JsonWriter writer)
         {
-            // Should only get here if the object is actually System.Object.
-            throw new NotSupportedException();
+            throw new InvalidOperationException();
         }
     }
 }

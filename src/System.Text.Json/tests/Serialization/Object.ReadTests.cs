@@ -18,7 +18,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadSimpleClassWithObject()
         {
-            var obj = JsonSerializer.Parse<SimpleTestClassWithSimpleObject>(SimpleTestClassWithSimpleObject.s_json);
+            SimpleTestClassWithSimpleObject obj = JsonSerializer.Parse<SimpleTestClassWithSimpleObject>(SimpleTestClassWithSimpleObject.s_json);
             obj.Verify();
             string reserialized = JsonSerializer.ToString(obj);
 
@@ -34,7 +34,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadSimpleClassWithObjectArray()
         {
-            var obj = JsonSerializer.Parse<SimpleTestClassWithObjectArrays>(SimpleTestClassWithObjectArrays.s_json);
+            SimpleTestClassWithObjectArrays obj = JsonSerializer.Parse<SimpleTestClassWithObjectArrays>(SimpleTestClassWithObjectArrays.s_json);
             obj.Verify();
             string reserialized = JsonSerializer.ToString(obj);
 
@@ -50,7 +50,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadClassWithComplexObjects()
         {
-            var obj = JsonSerializer.Parse<ClassWithComplexObjects>(ClassWithComplexObjects.s_json);
+            ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(ClassWithComplexObjects.s_json);
             obj.Verify();
             string reserialized = JsonSerializer.ToString(obj);
 

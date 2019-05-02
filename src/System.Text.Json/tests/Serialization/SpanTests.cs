@@ -34,7 +34,6 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ParseUntyped()
         {
-            // Not supported until we are able to deserialize into JsonElement.
             byte[] bytes = Encoding.UTF8.GetBytes("42");
             object obj = JsonSerializer.Parse(bytes, typeof(object));
             Assert.IsType<JsonElement>(obj);

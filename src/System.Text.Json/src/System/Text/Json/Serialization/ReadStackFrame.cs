@@ -10,7 +10,6 @@ using System.Runtime.CompilerServices;
 namespace System.Text.Json.Serialization
 {
     [DebuggerDisplay("ClassType.{JsonClassInfo.ClassType} {JsonClassInfo.Type.Name}")]
-
     internal struct ReadStackFrame
     {
         // The object (POCO or IEnumerable) that is being populated

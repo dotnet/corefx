@@ -78,12 +78,9 @@ namespace System.Text.Json.Serialization
                     {
                         HandleStartObject(options, ref reader, ref state);
                     }
-                    else
+                    else if (HandleValue(tokenType, options, ref reader, ref state))
                     {
-                        if (HandleValue(tokenType, options, ref reader, ref state))
-                        {
-                            return;
-                        }
+                        return;
                     }
                 }
                 else if (tokenType == JsonTokenType.EndObject)
@@ -99,12 +96,9 @@ namespace System.Text.Json.Serialization
                     {
                         HandleStartArray(options, ref reader, ref state);
                     }
-                    else
+                    else if (HandleValue(tokenType, options, ref reader, ref state))
                     {
-                        if (HandleValue(tokenType, options, ref reader, ref state))
-                        {
-                            return;
-                        }
+                        return;
                     }
                 }
                 else if (tokenType == JsonTokenType.EndArray)

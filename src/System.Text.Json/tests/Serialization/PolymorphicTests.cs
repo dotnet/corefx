@@ -59,6 +59,9 @@ namespace System.Text.Json.Serialization.Tests
             element = (JsonElement)obj;
             Assert.Equal(JsonValueType.True, element.Type);
             Assert.Equal(true, element.GetBoolean());
+
+            obj = JsonSerializer.Parse<object>(@"null");
+            Assert.Null(obj);
         }
 
         [Fact]

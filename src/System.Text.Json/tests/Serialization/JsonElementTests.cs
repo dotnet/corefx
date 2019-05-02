@@ -12,7 +12,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public void SerializeJsonElement()
         {
-            var obj = JsonSerializer.Parse<JsonElementClass>(JsonElementClass.s_json);
+            JsonElementClass obj = JsonSerializer.Parse<JsonElementClass>(JsonElementClass.s_json);
             obj.Verify();
             string reserialized = JsonSerializer.ToString(obj);
 
@@ -33,6 +33,7 @@ namespace System.Text.Json.Serialization.Tests
             public JsonElement String { get; set; }
             public JsonElement Array { get; set; }
             public JsonElement Object { get; set; }
+            // public JsonElement Null { get; set; }
 
             public static readonly string s_json =
                 @"{" +
@@ -42,6 +43,8 @@ namespace System.Text.Json.Serialization.Tests
                     @"""String"" : ""Hello""," +
                     @"""Array"" : [2, false, true, ""Goodbye""]," +
                     @"""Object"" : {}" +
+                    // TODO: Null doesn't work yet (but probably should? object gets null in this case)
+                    //@"""Null"" : null" +
                 @"}";
 
             public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
@@ -54,6 +57,7 @@ namespace System.Text.Json.Serialization.Tests
                 String = JsonDocument.Parse(@"""Hello""").RootElement.Clone();
                 Array = JsonDocument.Parse(@"[2, false, true, ""Goodbye""]").RootElement.Clone();
                 Object = JsonDocument.Parse(@"{}").RootElement.Clone();
+                // Null = JsonDocument.Parse(@"null").RootElement.Clone();
             }
 
             public void Verify()
@@ -76,16 +80,17 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal("True", elements[2].ToString());
                 Assert.Equal(JsonValueType.String, elements[3].Type);
                 Assert.Equal("Goodbye", elements[3].ToString());
-                Assert.Equal(JsonValueType.Array, Array.Type);
                 Assert.Equal(JsonValueType.Object, Object.Type);
                 Assert.Equal("{}", Object.ToString());
+                //Assert.Equal(JsonValueType.Null, Null.Type);
+                //Assert.Equal("Null", Null.ToString());
             }
         }
 
         [Fact]
         public void SerializeJsonElementArray()
         {
-            var obj = JsonSerializer.Parse<JsonElementArrayClass>(JsonElementArrayClass.s_json);
+            JsonElementArrayClass obj = JsonSerializer.Parse<JsonElementArrayClass>(JsonElementArrayClass.s_json);
             obj.Verify();
             string reserialized = JsonSerializer.ToString(obj);
 
@@ -109,6 +114,7 @@ namespace System.Text.Json.Serialization.Tests
                         @"true, " +
                         @"false, " +
                         @"""Hello""" +
+                        // TODO: Nested complex objects aren't handled by the collection code yet.
                         // @"[2, false, true, ""Goodbye""], " +
                         // @"{}" +
                     @"]" +
