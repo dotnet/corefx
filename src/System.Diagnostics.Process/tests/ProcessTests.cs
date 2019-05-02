@@ -1897,6 +1897,11 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void LongProcessNamesAreSupported()
         {
+            if (PlatformDetection.IsAlpine)
+            {
+                return; // https://github.com/dotnet/corefx/issues/37054
+            }
+
             string programPath = GetProgramPath("sleep");
 
             if (programPath == null)
