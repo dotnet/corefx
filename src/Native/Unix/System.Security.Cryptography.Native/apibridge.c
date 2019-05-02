@@ -607,6 +607,8 @@ int32_t local_X509_check_host(X509* x509, const char* name, size_t namelen, unsi
 {
     assert(peername == NULL);
     assert(flags == X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS);
+    (void)flags;
+    (void)peername;
 
     GENERAL_NAMES* san = (GENERAL_NAMES*)(X509_get_ext_d2i(x509, NID_subject_alt_name, NULL, NULL));
     int readSubject = 1;
