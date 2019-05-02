@@ -16,7 +16,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     public static partial class GeneralTests
     {
         public static bool SupportsDiffieHellman { get; } = KeyAgreeRecipientInfoTests.SupportsDiffieHellman;
-        public static bool SupportsRsaOaepCerts { get; } = KeyTransRecipientInfoRsaOaepCertTests.SupportsRsaOaepCerts;
+        public static bool SupportsRsaOaepCerts => PlatformDetection.IsWindows;
 
         [Fact]
         public static void DecodeVersion0_RoundTrip()

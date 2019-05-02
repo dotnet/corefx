@@ -220,7 +220,8 @@ namespace Internal.Cryptography.Pal.Windows
                             break;
 
                         case Oids.Esdh:
-                        case Oids.X942dh:
+                        case Oids.DiffieHellman:
+                        case Oids.DiffieHellmanPkcs3:
                             recipientEncodeInfo.dwRecipientChoice = CMsgCmsRecipientChoice.CMSG_KEY_AGREE_RECIPIENT;
                             recipientEncodeInfo.pCmsRecipientEncodeInfo = (IntPtr)EncodeKeyAgreeRecipientInfo(recipient, contentEncryptionAlgorithm, hb);
                             break;

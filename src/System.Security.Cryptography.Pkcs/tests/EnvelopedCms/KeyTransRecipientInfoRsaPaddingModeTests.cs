@@ -15,7 +15,6 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
     {
         public static bool SupportsRsaOaepCerts => PlatformDetection.IsWindows;
 
-
         [Theory]
         [MemberData(nameof(TestKeyTransEncryptedKey_RsaAlgorithmTypes))]
         public static void TestKeyTransEncryptedKey_RsaAlgorithms(RSAEncryptionPadding encryptionPadding, string expectedOid, byte[] expectedParameters)
