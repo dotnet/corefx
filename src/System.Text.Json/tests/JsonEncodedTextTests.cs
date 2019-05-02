@@ -276,7 +276,7 @@ namespace System.Text.Json.Tests
             Assert.Throws<ArgumentNullException>(() => JsonEncodedText.Encode((string)null));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(Environment), nameof(Environment.Is64BitProcess))]
         [OuterLoop]
         public static void InvalidLargeEncode()
         {
