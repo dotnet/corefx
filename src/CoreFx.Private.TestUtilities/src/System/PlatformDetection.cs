@@ -144,5 +144,8 @@ namespace System
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
         // heavily on Reflection.Emit
         public static bool IsXmlDsigXsltTransformSupported => !PlatformDetection.IsUap;
+
+        // See https://github.com/dotnet/corefx/pull/37358#discussion_r280442394
+        public static bool IsPreciseGcSupported => !IsMonoRuntime;
     }
 }

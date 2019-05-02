@@ -195,7 +195,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void Finalize_NoExceptionsThrown()
         {
             WeakReference<UdpClient> udpClientWeakRef = CreateAndDiscardUdpClient();

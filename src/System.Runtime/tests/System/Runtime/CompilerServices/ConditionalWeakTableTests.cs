@@ -30,7 +30,7 @@ namespace System.Runtime.CompilerServices.Tests
         [Theory]
         [InlineData(1)]
         [InlineData(100)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void Add(int numObjects)
         {
             // Isolated to ensure we drop all references even in debug builds where lifetime is extended by the JIT to the end of the method
@@ -233,7 +233,7 @@ namespace System.Runtime.CompilerServices.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetOrCreateValue()
         {
             WeakReference<object> wrValue;
@@ -265,7 +265,7 @@ namespace System.Runtime.CompilerServices.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetValue()
         {
             WeakReference<object> wrValue;
