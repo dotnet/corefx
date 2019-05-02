@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Reflection;
 using Xunit;
 
 namespace Microsoft.VisualBasic.Tests
