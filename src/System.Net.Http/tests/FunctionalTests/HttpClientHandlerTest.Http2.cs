@@ -1313,7 +1313,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task Http2GetAsync_MultipleStatusHeaders_Throws()
         {
             using (var server = Http2LoopbackServer.CreateServer())
-            using (var client = new HttpClient(CreateHttpClientHandler(useSocketsHttpHandler: true, useHttp2LoopbackServer: true)))
+            using (HttpClient client = CreateHttpClient())
             {
                 IList<HttpHeaderData> headers = new HttpHeaderData[] { new HttpHeaderData(":status", "300"), new HttpHeaderData("x-test", "Http2GetAsync_MultipleStatusHeaders_Throws") };
                 Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
@@ -1330,7 +1330,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task Http2GetAsync_StatusHeaderNotFirst_Throws()
         {
             using (var server = Http2LoopbackServer.CreateServer())
-            using (var client = new HttpClient(CreateHttpClientHandler(useSocketsHttpHandler: true, useHttp2LoopbackServer: true)))
+            using (HttpClient client = CreateHttpClient())
             {
                 IList<HttpHeaderData> headers = new HttpHeaderData[] { new HttpHeaderData("x-test", "Http2GetAsync_StatusHeaderNotFirst_Throws"), new HttpHeaderData(":status", "200") };
                 Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);
@@ -1348,7 +1348,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task Http2GetAsync_TrailigPseudo_Throw()
         {
             using (var server = Http2LoopbackServer.CreateServer())
-            using (var client = new HttpClient(CreateHttpClientHandler(useSocketsHttpHandler: true, useHttp2LoopbackServer: true)))
+            using (HttpClient client = CreateHttpClient())
             {
                 IList<HttpHeaderData> headers = new HttpHeaderData[] { new HttpHeaderData(":path", "http"), new HttpHeaderData("x-test", "Http2GetAsync_TrailigPseudo_Throw") };
                 Task<HttpResponseMessage> sendTask = client.GetAsync(server.Address);

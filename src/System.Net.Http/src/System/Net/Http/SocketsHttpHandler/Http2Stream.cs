@@ -139,7 +139,7 @@ namespace System.Net.Http
                             if (_response != null)
                             {
                                 if (NetEventSource.IsEnabled) _connection.Trace("Received duplicate status headers.");
-                                throw new HttpRequestException(SR.net_http_invalid_response);
+                                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                             }
 
                             byte status1, status2, status3;
