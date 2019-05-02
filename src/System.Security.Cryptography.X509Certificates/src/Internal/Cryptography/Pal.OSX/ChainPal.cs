@@ -36,11 +36,13 @@ namespace Internal.Cryptography.Pal
         internal void OpenTrustHandle(
             ICertificatePal leafCert,
             X509Certificate2Collection extraStore,
-            X509RevocationMode revocationMode)
+            X509RevocationMode revocationMode,
+            X509Certificate2Collection customTrustStore,
+            X509ChainTrustMode trustMode)
         {
             _revocationMode = revocationMode;
             SafeCreateHandle policiesArray = PreparePoliciesArray(revocationMode != X509RevocationMode.NoCheck);
-            SafeCreateHandle certsArray = PrepareCertsArray(leafCert, extraStore);
+            SafeCreateHandle certsArray = PrepareCertsArray(leafCert, extraStore, customTrustStore, trustMode);
 
             int osStatus;
 
@@ -50,6 +52,13 @@ namespace Internal.Cryptography.Pal
                 policiesArray,
                 out chain,
                 out osStatus);
+
+            if (trustMode == X509ChainTrustMode.CustomRootTrust)
+            {
+                SafeCreateHandle customCertsArray = null;
+                customCertsArray = PrepareCustomCertsArray(customTrustStore);
+                Interop.AppleCrypto.X509ChainSetTrustAnchorCertificates(chain, customCertsArray);
+            }
 
             if (ret == 1)
             {
@@ -120,25 +129,66 @@ namespace Internal.Cryptography.Pal
             return policiesArray;
         }
 
-        private SafeCreateHandle PrepareCertsArray(ICertificatePal cert, X509Certificate2Collection extraStore)
+        private SafeCreateHandle PrepareCertsArray(
+            ICertificatePal cert,
+            X509Certificate2Collection extraStore,
+            X509Certificate2Collection customTrustStore,
+            X509ChainTrustMode trustMode)
         {
-            IntPtr[] ptrs = new IntPtr[1 + (extraStore?.Count ?? 0)];
-            SafeHandle[] safeHandles = new SafeHandle[ptrs.Length];
-
+            int certificateCount = 1 + (extraStore?.Count ?? 0) + (trustMode == X509ChainTrustMode.CustomRootTrust ? customTrustStore?.Count ?? 0 : 0);
+            int certificatesAdded = 1;
+            SafeHandle[] safeHandles = new SafeHandle[certificateCount];
             AppleCertificatePal applePal = (AppleCertificatePal)cert;
-
             safeHandles[0] = applePal.CertificateHandle;
 
             if (extraStore != null)
             {
-                for (int i = 0; i < extraStore.Count; i++)
+                foreach (X509Certificate2 extraCert in extraStore)
                 {
-                    AppleCertificatePal extraCertPal = (AppleCertificatePal)extraStore[i].Pal;
-
-                    safeHandles[i + 1] = extraCertPal.CertificateHandle;
+                    AppleCertificatePal extraCertPal = (AppleCertificatePal)extraCert.Pal;
+                    safeHandles[certificatesAdded] = extraCertPal.CertificateHandle;
+                    certificatesAdded++;
                 }
             }
 
+            if (trustMode == X509ChainTrustMode.CustomRootTrust && customTrustStore != null)
+            {
+                for (int i = 0; i < customTrustStore.Count; i++)
+                {
+                    AppleCertificatePal extraCertPal = (AppleCertificatePal)customTrustStore[i].Pal;
+                    safeHandles[certificatesAdded + i] = extraCertPal.CertificateHandle;
+                }
+            }
+
+            return GetCertsArray(safeHandles);
+        }
+
+        private SafeCreateHandle PrepareCustomCertsArray(X509Certificate2Collection customTrustStore)
+        {
+            X509Certificate2Collection rootCertificates = new X509Certificate2Collection();
+            SafeHandle[] safeHandles;
+
+            foreach (X509Certificate2 cert in customTrustStore)
+            {
+                if (cert.SubjectName.RawData.ContentsEqual(cert.IssuerName.RawData))
+                {
+                    rootCertificates.Add(cert);
+                }
+            }
+
+            safeHandles = new SafeHandle[rootCertificates.Count];
+            for (int i = 0; i < rootCertificates.Count; i++)
+            {
+                AppleCertificatePal extraCertPal = (AppleCertificatePal)rootCertificates[i].Pal;
+                safeHandles[i] = extraCertPal.CertificateHandle;
+            }
+
+            return GetCertsArray(safeHandles);
+        }
+
+        private SafeCreateHandle GetCertsArray(SafeHandle[] safeHandles)
+        {
+            IntPtr[] ptrs = new IntPtr[safeHandles.Length];
             int idx = 0;
             bool addedRef = false;
 
@@ -550,6 +600,8 @@ namespace Internal.Cryptography.Pal
             OidCollection certificatePolicy,
             X509RevocationMode revocationMode,
             X509RevocationFlag revocationFlag,
+            X509Certificate2Collection customTrustStore,
+            X509ChainTrustMode trustMode,
             DateTime verificationTime,
             TimeSpan timeout)
         {
@@ -569,7 +621,12 @@ namespace Internal.Cryptography.Pal
 
             try
             {
-                chainPal.OpenTrustHandle(cert, extraStore, revocationMode);
+                chainPal.OpenTrustHandle(
+                    cert,
+                    extraStore,
+                    revocationMode,
+                    customTrustStore,
+                    trustMode);
 
                 chainPal.Execute(
                     verificationTime,

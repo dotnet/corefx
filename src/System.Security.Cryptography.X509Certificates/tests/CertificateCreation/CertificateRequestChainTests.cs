@@ -10,10 +10,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
 {
     public static class CertificateRequestChainTests
     {
+        const string RootDN = "CN=Experimental Root Certificate";
+        const string Intermed1DN = "CN=First Intermediate Certificate, O=Experimental";
+        const string Intermed2DN = "CN=Second Intermediate Certificate, O=Experimental";
+        const string LeafDN = "CN=End-Entity Certificate, O=Experimental";
+
         public static bool PlatformSupportsPss { get; } = DetectPssSupport();
 
-        [Fact]
-        public static void CreateChain_ECC()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void CreateChain_ECC(bool useExtraStore)
         {
             using (ECDsa rootKey = ECDsa.Create(ECCurve.NamedCurves.nistP521))
             using (ECDsa intermed1Key = ECDsa.Create(ECCurve.NamedCurves.nistP384))
@@ -21,16 +28,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             using (ECDsa leafKey = ECDsa.Create(ECCurve.NamedCurves.nistP256))
             using (ECDsa leafPubKey = ECDsa.Create(leafKey.ExportParameters(false)))
             {
-                CreateAndTestChain(
+                CreateCertificates(
                     rootKey,
                     intermed1Key,
                     intermed2Key,
-                    leafPubKey);
+                    leafPubKey,
+                    BuildAndTestChain,
+                    useExtraStore);
             }
         }
 
-        [Fact]
-        public static void CreateChain_RSA()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void CreateChain_RSA(bool useExtraStore)
         {
             using (RSA rootKey = RSA.Create(3072))
             using (RSA intermed1Key = RSA.Create(2048))
@@ -40,16 +51,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             {
                 leafPubKey.ImportParameters(leafKey.ExportParameters(false));
 
-                CreateAndTestChain(
+                CreateCertificates(
                     rootKey,
                     intermed1Key,
                     intermed2Key,
-                    leafPubKey);
+                    leafPubKey,
+                    BuildAndTestChain,
+                    useExtraStore);
             }
         }
 
-        [Fact]
-        public static void CreateChain_Hybrid()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public static void CreateChain_Hybrid(bool useExtraStore)
         {
             using (ECDsa rootKey = ECDsa.Create(ECCurve.NamedCurves.nistP521))
             using (RSA intermed1Key = RSA.Create(2048))
@@ -57,11 +72,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
             using (ECDsa leafKey = ECDsa.Create(ECCurve.NamedCurves.nistP256))
             using (ECDsa leafPubKey = ECDsa.Create(leafKey.ExportParameters(false)))
             {
-                CreateAndTestChain(
+                CreateCertificates(
                     rootKey,
                     intermed1Key,
                     intermed2Key,
-                    leafPubKey);
+                    leafPubKey,
+                    BuildAndTestChain,
+                    useExtraStore);
             }
         }
 
@@ -198,6 +215,85 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                 intermedKey?.Dispose();
                 rootCert?.Dispose();
                 rootKey?.Dispose();
+            }
+        }
+
+        [Fact]
+        public static void BuildChainUntrustedRoot()
+        {
+            using (RSA rootPrivKey = RSA.Create(3072))
+            using (RSA intermed1PrivKey = RSA.Create(2048))
+            using (RSA leafKey = RSA.Create(1536))
+            using (RSA leafPubKey = RSA.Create(leafKey.ExportParameters(false)))
+            {
+                leafPubKey.ImportParameters(leafKey.ExportParameters(false));
+                CreateCertificates(rootPrivKey, intermed1PrivKey, intermed1PrivKey, leafPubKey, BuildAndTestChainLocal, false);
+            }
+
+            void BuildAndTestChainLocal(
+                X509Certificate2 rootCert,
+                X509Certificate2 intermed1Cert,
+                X509Certificate2 intermed2Cert,
+                X509Certificate2 leafCert,
+                bool rootExtraStore)
+            {
+                using (X509Chain chain = new X509Chain())
+                {
+                    chain.ChainPolicy.ExtraStore.Add(rootCert);
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                    chain.ChainPolicy.VerificationTime = DateTimeOffset.UtcNow.ToLocalTime().DateTime;
+                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    chain.ChainPolicy.CustomTrustStore.Add(intermed2Cert);
+
+                    RunChain(chain, leafCert, false, "Initial chain build");
+
+                    try
+                    {
+                        Assert.Equal(LeafDN, chain.ChainElements[0].Certificate.Subject);
+                        Assert.Equal(Intermed2DN, chain.ChainElements[1].Certificate.Subject);
+                        Assert.Equal(3, chain.ChainElements.Count);
+                        Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.AllStatusFlags());
+                    }
+                    finally
+                    {
+                        DisposeChainCerts(chain);
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public static void CustomStoreWithPublicCertificate()
+        {
+            using (RSA rootPrivKey = RSA.Create(3072))
+            using (RSA intermed1PrivKey = RSA.Create(2048))
+            using (RSA leafKey = RSA.Create(1536))
+            using (RSA leafPubKey = RSA.Create(leafKey.ExportParameters(false)))
+            {
+                leafPubKey.ImportParameters(leafKey.ExportParameters(false));
+                CreateCertificates(rootPrivKey, intermed1PrivKey, intermed1PrivKey, leafPubKey, BuildAndTestChainLocal, false);
+            }
+
+            void BuildAndTestChainLocal(
+                X509Certificate2 rootCert,
+                X509Certificate2 intermed1Cert,
+                X509Certificate2 intermed2Cert,
+                X509Certificate2 leafCert,
+                bool useExtraStore)
+            {
+                DateTimeOffset now = DateTimeOffset.UtcNow;
+                using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
+                using (X509Chain chain = new X509Chain())
+                {
+                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                    chain.ChainPolicy.VerificationTime = new DateTime(2015, 10, 15, 12, 01, 01, DateTimeKind.Local);
+                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    chain.ChainPolicy.CustomTrustStore.Add(rootCert);
+                    chain.ChainPolicy.ExtraStore.Add(intermed2Cert);
+                    RunChain(chain, microsoftDotCom, false, "Initial chain build");
+                    Assert.Equal(3, chain.ChainElements.Count);
+                    Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.AllStatusFlags());
+                }
             }
         }
 
@@ -348,17 +444,66 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                 $"Had no handler for key of type {key?.GetType().FullName ?? "null"}");
         }
 
-        private static void CreateAndTestChain(
+        private static void BuildAndTestChain(
+            X509Certificate2 rootCert,
+            X509Certificate2 intermed1Cert,
+            X509Certificate2 intermed2Cert,
+            X509Certificate2 leafCert,
+            bool useExtraStore)
+        {
+            DateTimeOffset now = DateTimeOffset.UtcNow;
+            using (X509Chain chain = new X509Chain())
+            {
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                if (!useExtraStore)
+                {
+                    chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+                    chain.ChainPolicy.CustomTrustStore.Add(rootCert);
+                }
+                else
+                {
+                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
+                    chain.ChainPolicy.ExtraStore.Add(rootCert);
+                }
+                chain.ChainPolicy.ExtraStore.Add(intermed1Cert);
+                chain.ChainPolicy.ExtraStore.Add(intermed2Cert);
+                chain.ChainPolicy.VerificationTime = now.ToLocalTime().DateTime;
+
+                RunChain(chain, leafCert, true, "Initial chain build");
+
+                try
+                {
+                    // Intermediate 1 plays no part.
+                    Assert.Equal(3, chain.ChainElements.Count);
+                    Assert.Equal(LeafDN, chain.ChainElements[0].Certificate.Subject);
+                    Assert.Equal(Intermed2DN, chain.ChainElements[1].Certificate.Subject);
+                    Assert.Equal(RootDN, chain.ChainElements[2].Certificate.Subject);
+                }
+                finally
+                {
+                    DisposeChainCerts(chain);
+                }
+
+                // Server Auth EKU, expect true.
+                chain.ChainPolicy.ApplicationPolicy.Add(new Oid("1.3.6.1.5.5.7.3.1"));
+                RunChain(chain, leafCert, true, "Server auth EKU chain build");
+                DisposeChainCerts(chain);
+
+                // Client Auth EKU, expect false
+                chain.ChainPolicy.ApplicationPolicy.Add(new Oid("1.3.6.1.5.5.7.3.2"));
+                RunChain(chain, leafCert, false, "Server and Client auth EKU chain build");
+                DisposeChainCerts(chain);
+            }
+        }
+
+        private static void CreateCertificates(
             AsymmetricAlgorithm rootPrivKey,
             AsymmetricAlgorithm intermed1PrivKey,
             AsymmetricAlgorithm intermed2PrivKey,
-            AsymmetricAlgorithm leafPubKey)
+            AsymmetricAlgorithm leafPubKey,
+            Action<X509Certificate2, X509Certificate2, X509Certificate2, X509Certificate2, bool> buildAndTest,
+            bool useExtraStore)
         {
-            const string RootDN = "CN=Experimental Root Certificate";
-            const string Intermed1DN = "CN=First Intermediate Certificate, O=Experimental";
-            const string Intermed2DN = "CN=Second Intermediate Certificate, O=Experimental";
-            const string LeafDN = "CN=End-Entity Certificate, O=Experimental";
-
             CertificateRequest rootRequest =
                 CreateChainRequest(RootDN, rootPrivKey, HashAlgorithmName.SHA512, true, null);
 
@@ -418,40 +563,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests.CertificateCreatio
                 leafCert = leafRequest.Create(
                     intermed2CertWithKey.SubjectName, intermed2Generator, now, leafEnd, leafSerial);
 
-                using (X509Chain chain = new X509Chain())
-                {
-                    chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
-                    chain.ChainPolicy.VerificationFlags = X509VerificationFlags.AllowUnknownCertificateAuthority;
-                    chain.ChainPolicy.ExtraStore.Add(intermed1CertWithKey);
-                    chain.ChainPolicy.ExtraStore.Add(intermed2CertWithKey);
-                    chain.ChainPolicy.ExtraStore.Add(rootCertWithKey);
-                    chain.ChainPolicy.VerificationTime = now.ToLocalTime().DateTime;
-
-                    RunChain(chain, leafCert, true, "Initial chain build");
-
-                    try
-                    {
-                        // Intermediate 1 plays no part.
-                        Assert.Equal(3, chain.ChainElements.Count);
-                        Assert.Equal(LeafDN, chain.ChainElements[0].Certificate.Subject);
-                        Assert.Equal(Intermed2DN, chain.ChainElements[1].Certificate.Subject);
-                        Assert.Equal(RootDN, chain.ChainElements[2].Certificate.Subject);
-                    }
-                    finally
-                    {
-                        DisposeChainCerts(chain);
-                    }
-
-                    // Server Auth EKU, expect true.
-                    chain.ChainPolicy.ApplicationPolicy.Add(new Oid("1.3.6.1.5.5.7.3.1"));
-                    RunChain(chain, leafCert, true, "Server auth EKU chain build");
-                    DisposeChainCerts(chain);
-
-                    // Client Auth EKU, expect false
-                    chain.ChainPolicy.ApplicationPolicy.Add(new Oid("1.3.6.1.5.5.7.3.2"));
-                    RunChain(chain, leafCert, false, "Server and Client auth EKU chain build");
-                    DisposeChainCerts(chain);
-                }
+                buildAndTest(rootCertWithKey, intermed1CertWithKey, intermed2CertWithKey, leafCert, useExtraStore);
             }
             finally
             {

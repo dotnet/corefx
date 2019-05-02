@@ -267,3 +267,17 @@ int32_t AppleCryptoNative_GetOSStatusForChainStatus(PAL_X509ChainStatusFlags cha
             return errSecCoreFoundationUnknown;
     }
 }
+
+void AppleCryptoNative_X509ChainSetTrustAnchorCertificates(SecTrustRef chain, CFArrayRef anchorCertificates)
+{
+    if (chain == NULL)
+    {
+        return;
+    }
+    if (anchorCertificates == NULL)
+    {
+        return;
+    }
+
+    SecTrustSetAnchorCertificates(chain, anchorCertificates);
+}

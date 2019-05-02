@@ -226,6 +226,78 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
+        public static void BuildChainCustomTrustStorePinnedCertificate()
+        {
+            using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
+            using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
+            using (var chainHolder = new ChainHolder())
+            {
+                // Normal case
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationTime = new DateTime(2015, 9, 22, 12, 25, 0);
+
+                Assert.True(chain.Build(microsoftDotCom));
+                Assert.Equal(3, chain.ChainElements.Count);
+                X509Certificate2 rootCert = chain.ChainElements[2].Certificate;
+                X509Certificate2 intermediateCert = chain.ChainElements[1].Certificate;
+
+                //Trust mode set to custom, but no certificates added
+                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+                Assert.False(chain.Build(microsoftDotCom));
+                Assert.Equal(3, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.AllStatusFlags());
+
+                // Add random certificate to CustomTrustStore
+                chain.ChainPolicy.CustomTrustStore.Add(testCert);
+
+                Assert.False(chain.Build(microsoftDotCom));
+                Assert.Equal(3, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.AllStatusFlags());
+
+                // Add valid intermediate certificate to customTrustStore
+                chain.ChainPolicy.ExtraStore.Add(rootCert);
+                chain.ChainPolicy.CustomTrustStore.Add(intermediateCert);
+
+                Assert.False(chain.Build(microsoftDotCom));
+                Assert.Equal(3, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.UntrustedRoot, chain.AllStatusFlags());
+
+                // Add valid root certificate to CustomTrustStore
+                chain.ChainPolicy.CustomTrustStore.Add(rootCert);
+                chain.ChainPolicy.ExtraStore.Remove(rootCert);
+
+                Assert.True(chain.Build(microsoftDotCom));
+                Assert.Equal(3, chain.ChainElements.Count);
+                Assert.Equal(X509ChainStatusFlags.NoError, chain.AllStatusFlags());
+            }
+        }
+
+        [Fact]
+        public static void BuildChainCustomTrustStoreMultipleExceptions()
+        {
+            using (var testCert = new X509Certificate2(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword))
+            using (ImportedCollection ic = Cert.Import(Path.Combine("TestData", "test.pfx"), TestData.ChainPfxPassword, X509KeyStorageFlags.DefaultKeySet))
+            using (var chainHolder = new ChainHolder())
+            {
+                X509Certificate2Collection collection = ic.Collection;
+
+                X509Chain chain = chainHolder.Chain;
+                chain.ChainPolicy.CustomTrustStore.AddRange(collection);
+                chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+                chain.ChainPolicy.VerificationTime = new DateTime(2015, 9, 22, 12, 25, 0);
+
+                Assert.Throws<ArgumentException>("TrustMode", () => chain.Build(testCert));
+
+                chain.ChainPolicy.CustomTrustStore.Add(new X509Certificate2());
+                chain.ChainPolicy.TrustMode = X509ChainTrustMode.CustomRootTrust;
+
+                Assert.Throws<ArgumentException>("CustomTrustStore", () => chain.Build(testCert));
+            }
+        }
+
         public static IEnumerable<object[]> VerifyExpressionData()
         {
             // The test will be using the chain for TestData.MicrosoftDotComSslCertBytes

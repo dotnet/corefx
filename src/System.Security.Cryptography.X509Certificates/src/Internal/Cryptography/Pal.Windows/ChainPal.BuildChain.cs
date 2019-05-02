@@ -33,14 +33,18 @@ namespace Internal.Cryptography.Pal
             OidCollection certificatePolicy,
             X509RevocationMode revocationMode,
             X509RevocationFlag revocationFlag,
+            X509Certificate2Collection customTrustStore,
+            X509ChainTrustMode trustMode,
             DateTime verificationTime,
             TimeSpan timeout)
         {
             CertificatePal certificatePal = (CertificatePal)cert;
+            X509Certificate2Collection additionalStore = extraStore ?? new X509Certificate2Collection();
+            IntPtr chainEngine = GetChainEngine(trustMode, customTrustStore, additionalStore, useMachineContext);
 
             unsafe
             {
-                using (SafeCertStoreHandle extraStoreHandle = ConvertExtraStoreToSafeHandle(extraStore))
+                using (SafeCertStoreHandle extraStoreHandle = ConvertStoreToSafeHandle(additionalStore))
                 {
                     CERT_CHAIN_PARA chainPara = new CERT_CHAIN_PARA();
                     chainPara.cbSize = Marshal.SizeOf<CERT_CHAIN_PARA>();
@@ -69,11 +73,10 @@ namespace Internal.Cryptography.Pal
 
                             FILETIME ft = FILETIME.FromDateTime(verificationTime);
                             CertChainFlags flags = MapRevocationFlags(revocationMode, revocationFlag);
-                            ChainEngine chainEngine = useMachineContext ? ChainEngine.HCCE_LOCAL_MACHINE : ChainEngine.HCCE_CURRENT_USER;
-
                             SafeX509ChainHandle chain;
                             if (!Interop.crypt32.CertGetCertificateChain(chainEngine, certificatePal.CertContext, &ft, extraStoreHandle, ref chainPara, flags, IntPtr.Zero, out chain))
                                 return null;
+                            Interop.crypt32.CertFreeCertificateChainEngine(chainEngine);
                             return new ChainPal(chain);
                         }
                     }
@@ -81,9 +84,62 @@ namespace Internal.Cryptography.Pal
             }
         }
 
-        private static SafeCertStoreHandle ConvertExtraStoreToSafeHandle(X509Certificate2Collection extraStore)
+        private static IntPtr GetChainEngine(
+            X509ChainTrustMode trustMode,
+            X509Certificate2Collection customTrustStore,
+            X509Certificate2Collection extraStore,
+            bool useMachineContext
+            )
         {
-            if (extraStore == null || extraStore.Count == 0)
+            IntPtr chainEngine;
+            if (trustMode == X509ChainTrustMode.CustomRootTrust)
+            {
+                CERT_CHAIN_ENGINE_CONFIG customChainEngine = new CERT_CHAIN_ENGINE_CONFIG();
+                customChainEngine.cbSize = Marshal.SizeOf<CERT_CHAIN_ENGINE_CONFIG>();
+                using (SafeCertStoreHandle customTrustStoreHandle = ConvertStoreToSafeHandle(customTrustStore))
+                {
+                    if (!customTrustStoreHandle.IsInvalid)
+                    {
+                        customChainEngine.hExclusiveRoot = customTrustStoreHandle.DangerousGetHandle();
+                    }
+
+                    Interop.crypt32.CertCreateCertificateChainEngine(customChainEngine, out chainEngine);
+                    AddDefaultCertificatesToStore(extraStore, useMachineContext);
+                }
+            }
+            else
+            {
+                chainEngine = useMachineContext ? (IntPtr)ChainEngine.HCCE_LOCAL_MACHINE : (IntPtr)ChainEngine.HCCE_CURRENT_USER;
+            }
+
+            return chainEngine;
+        }
+
+        private static void AddDefaultCertificatesToStore(X509Certificate2Collection collectionStore, bool useMachineContext)
+        {
+            StoreLocation storeLocation = useMachineContext ? StoreLocation.LocalMachine: StoreLocation.CurrentUser;
+            foreach (StoreName storeName in (StoreName[]) Enum.GetValues(typeof(StoreName)))
+            {
+                if (storeName == StoreName.Disallowed)
+                {
+                    continue;
+                }
+
+                X509Store store = new X509Store(storeName, storeLocation);
+                store.Open(OpenFlags.ReadOnly);
+
+                foreach (X509Certificate2 certificate in store.Certificates)
+                {
+                    collectionStore.Add(certificate);
+                }
+
+                store.Close();
+            }
+        }
+
+        private static SafeCertStoreHandle ConvertStoreToSafeHandle(X509Certificate2Collection extraStore)
+        {
+            if (extraStore == null)
                 return SafeCertStoreHandle.InvalidHandle;
 
             return ((StorePal)StorePal.LinkFromCertificateCollection(extraStore)).SafeCertStoreHandle;
