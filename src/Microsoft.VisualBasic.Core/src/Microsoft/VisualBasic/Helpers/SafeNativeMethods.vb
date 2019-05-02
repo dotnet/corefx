@@ -2,16 +2,13 @@
 ' The .NET Foundation licenses this file to you under the MIT license.
 ' See the LICENSE file in the project root for more information.
 
-Imports System.Security
 Imports System.Runtime.InteropServices
 Imports System.Runtime.Versioning
 
 Namespace Microsoft.VisualBasic.CompilerServices
 
-    <System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)> _
-    <SecurityCritical()> _
-    <ComVisible(False)> _
-    <SuppressUnmanagedCodeSecurityAttribute()> _
+    <System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)>
+    <ComVisible(False)>
     Friend NotInheritable Class _
         SafeNativeMethods
 
