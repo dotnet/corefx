@@ -18,8 +18,8 @@ namespace Microsoft.VisualBasic.ApplicationServices.Tests
         }
 
         [Theory]
-        [MemberData(nameof(Properties_TestData))]
-        public void Properties(System.Reflection.Assembly assembly)
+        [MemberData(nameof(AssemblyProperties_TestData))]
+        public void AssemblyProperties(System.Reflection.Assembly assembly)
         {
             var assemblyInfo = new AssemblyInfo(assembly);
             var assemblyName = assembly.GetName();
@@ -34,16 +34,38 @@ namespace Microsoft.VisualBasic.ApplicationServices.Tests
             Assert.Equal(assemblyName.Version, assemblyInfo.Version);
         }
 
-        private static IEnumerable<object[]> Properties_TestData()
+        private static IEnumerable<object[]> AssemblyProperties_TestData()
         {
             yield return new object[] { typeof(object).Assembly };
             yield return new object[] { Assembly.GetExecutingAssembly() };
         }
 
-        // Not tested:
-        //   public System.Collections.ObjectModel.ReadOnlyCollection<System.Reflection.Assembly> LoadedAssemblies { get { throw null; } }
-        //   public string StackTrace { get { throw null; } }
-        //   public long WorkingSet { get { throw null; } }
+        [Fact]
+        public void LoadedAssemblies()
+        {
+            var executingAssembly = Assembly.GetExecutingAssembly();
+            var assemblyInfo = new AssemblyInfo(executingAssembly);
+            var loadedAssemblies = assemblyInfo.LoadedAssemblies;
+            Assert.True(loadedAssemblies.Contains(executingAssembly));
+        }
+
+        [Fact]
+        public void StackTrace()
+        {
+            // Property is independent of the actual assembly.
+            var assemblyInfo = new AssemblyInfo(Assembly.GetExecutingAssembly());
+            var stackTrace = assemblyInfo.StackTrace;
+            Assert.True(stackTrace.Contains(nameof(AssemblyInfoTests)));
+        }
+
+        [Fact]
+        public void WorkingSet()
+        {
+            // Property is independent of the actual assembly.
+            var assemblyInfo = new AssemblyInfo(Assembly.GetExecutingAssembly());
+            var workingSet = assemblyInfo.WorkingSet;
+            Assert.True(workingSet > 0);
+        }
 
         private static string GetAttributeValue<TAttribute>(System.Reflection.Assembly assembly, Func<TAttribute, string> getAttributeValue)
             where TAttribute : Attribute
