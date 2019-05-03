@@ -90,7 +90,7 @@ namespace System.Text.Json.Serialization
                 }
                 else if (tokenType == JsonTokenType.EndArray)
                 {
-                    if (HandleEndArray(options, ref state))
+                    if (HandleEndArray(options, ref reader, ref state))
                     {
                         return;
                     }

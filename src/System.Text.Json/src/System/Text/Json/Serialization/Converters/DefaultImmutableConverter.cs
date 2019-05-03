@@ -19,8 +19,6 @@ namespace System.Text.Json.Serialization.Converters
         private const string ImmutableListGenericTypeName = "System.Collections.Immutable.ImmutableList`1";
         private const string ImmutableListGenericInterfaceTypeName = "System.Collections.Immutable.IImmutableList`1";
 
-        private const string ImmutableArrayGenericTypeName = "System.Collections.Immutable.ImmutableArray`1";
-
         private const string ImmutableStackGenericTypeName = "System.Collections.Immutable.ImmutableStack`1";
         private const string ImmutableStackGenericInterfaceTypeName = "System.Collections.Immutable.IImmutableStack`1";
 
@@ -48,7 +46,12 @@ namespace System.Text.Json.Serialization.Converters
             return (IEnumerable)createImmutableMethod.Invoke(null, new object[] { list } );
         }
 
-        public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
+        public override IEnumerable CreateFromList(
+            Type enumerableType,
+            Type elementType,
+            IList sourceList,
+            ref Utf8JsonReader reader,
+            ref ReadStack state)
         {
             Debug.Assert(enumerableType.IsGenericType);
 
@@ -61,9 +64,6 @@ namespace System.Text.Json.Serialization.Converters
                 case ImmutableListGenericTypeName:
                 case ImmutableListGenericInterfaceTypeName:
                     constructingType = typeof(ImmutableList);
-                    break;
-                case ImmutableArrayGenericTypeName:
-                    constructingType = typeof(ImmutableArray);
                     break;
                 case ImmutableStackGenericTypeName:
                 case ImmutableStackGenericInterfaceTypeName:
@@ -81,7 +81,8 @@ namespace System.Text.Json.Serialization.Converters
                     constructingType = typeof(ImmutableHashSet);
                     break;
                 default:
-                    return sourceList;
+                    ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(enumerableType, reader, state);
+                    return null;
             }
 
             MethodInfo[] constructingTypeMethods = constructingType.GetMethods();
@@ -96,28 +97,26 @@ namespace System.Text.Json.Serialization.Converters
                 }
             }
 
-            if (constructingMethod != null)
+            if (constructingMethod == null)
             {
-                if (elementType == null)
-                {
-                    Type[] args = enumerableType.GetGenericArguments();
-                    Debug.Assert(args.Length == 1);
-
-                    elementType = args[0];
-                }
-
-                MethodInfo mi = typeof(DefaultImmutableConverter).GetMethod("CreateFromListInternal", BindingFlags.NonPublic | BindingFlags.Static);
-
-                if (mi != null)
-                {
-                    MethodInfo createImmutableMethod = constructingMethod.MakeGenericMethod(elementType);
-
-                    MethodInfo createFromListInternalMethod = mi.MakeGenericMethod(elementType);
-                    return (IEnumerable)createFromListInternalMethod.Invoke(null, new object[] { createImmutableMethod, sourceList });
-                }
+                ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(enumerableType, reader, state);
+                return null;
             }
 
-            return sourceList;
+            if (elementType == null)
+            {
+                Type[] args = enumerableType.GetGenericArguments();
+                Debug.Assert(args.Length == 1);
+
+                elementType = args[0];
+            }
+
+            MethodInfo mi = typeof(DefaultImmutableConverter).GetMethod("CreateFromListInternal", BindingFlags.NonPublic | BindingFlags.Static);
+
+            MethodInfo createImmutableMethod = constructingMethod.MakeGenericMethod(elementType);
+
+            MethodInfo createFromListInternalMethod = mi.MakeGenericMethod(elementType);
+            return (IEnumerable)createFromListInternalMethod.Invoke(null, new object[] { createImmutableMethod, sourceList });
         }
     }
 }

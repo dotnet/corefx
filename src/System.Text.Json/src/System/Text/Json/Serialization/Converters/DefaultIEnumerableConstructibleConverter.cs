@@ -27,7 +27,12 @@ namespace System.Text.Json.Serialization.Converters
             return (IEnumerable)Activator.CreateInstance(typeof(TEnumerable), list);
         }
 
-        public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
+        public override IEnumerable CreateFromList(
+            Type enumerableType,
+            Type elementType,
+            IList sourceList,
+            ref Utf8JsonReader reader,
+            ref ReadStack state)
         {
             MethodInfo mi = typeof(DefaultIEnumerableConstructibleConverter).GetMethod(
                 "CreateFromListInternal",

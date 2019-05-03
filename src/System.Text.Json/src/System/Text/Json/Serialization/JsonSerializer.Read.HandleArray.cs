@@ -81,6 +81,7 @@ namespace System.Text.Json.Serialization
 
         private static bool HandleEndArray(
             JsonSerializerOptions options,
+            ref Utf8JsonReader reader,
             ref ReadStack state)
         {
             bool lastFrame = state.IsLastFrame;
@@ -108,7 +109,7 @@ namespace System.Text.Json.Serialization
 
                 Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
                 Type elementType = state.Current.GetElementType();
-                value = converter.CreateFromList(enumerableType, elementType, (IList)value);
+                value = converter.CreateFromList(enumerableType, elementType, (IList)value, ref reader, ref state);
                 setPropertyDirectly = true;
             }
             else

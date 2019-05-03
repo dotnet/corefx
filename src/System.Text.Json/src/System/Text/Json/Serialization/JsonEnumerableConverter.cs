@@ -8,6 +8,11 @@ namespace System.Text.Json.Serialization.Policies
 {
     internal abstract class JsonEnumerableConverter
     {
-        public abstract IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList);
+        public abstract IEnumerable CreateFromList(
+            Type enumerableType,
+            Type elementType,
+            IList sourceList,
+            ref Utf8JsonReader reader,
+            ref ReadStack state);
     }
 }

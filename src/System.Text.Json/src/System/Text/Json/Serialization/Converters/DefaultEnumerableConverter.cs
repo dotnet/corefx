@@ -85,7 +85,12 @@ namespace System.Text.Json.Serialization.Converters
 
     internal sealed class DefaultEnumerableConverter : JsonEnumerableConverter
     {
-        public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
+        public override IEnumerable CreateFromList(
+            Type enumerableType,
+            Type elementType,
+            IList sourceList,
+            ref Utf8JsonReader reader,
+            ref ReadStack state)
         {
             Type t = typeof(JsonEnumerableT<>).MakeGenericType(elementType);
             return (IEnumerable)Activator.CreateInstance(t, sourceList);

@@ -9,7 +9,12 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultArrayConverter : JsonEnumerableConverter
     {
-        public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
+        public override IEnumerable CreateFromList(
+            Type enumerableType,
+            Type elementType,
+            IList sourceList,
+            ref Utf8JsonReader reader,
+            ref ReadStack state)
         {
             Array array;
 
