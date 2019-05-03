@@ -20,7 +20,7 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(~TestPlatforms.Linux)]
         public void Ctor_Netcoreapp_Throws(AddressFamily addressFamily)
         {
-            // All protocols are Linux specific and throw throw on other platforms
+            // All protocols are Linux specific and throw on other platforms
             Assert.Throws<SocketException>(() => new Socket(addressFamily, SocketType.Raw, 0));
         }
 
@@ -31,19 +31,19 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(TestPlatforms.Linux)]
         public void Ctor_Netcoreapp_Success(AddressFamily addressFamily)
         {
+            Socket s = null;
             try
             {
-                Socket s = new Socket(addressFamily, SocketType.Raw, 0);
-                s.Close();
+                s = new Socket(addressFamily, SocketType.Raw, ProtocolType.Raw);
             }
-            catch (SocketException e)
+            catch (SocketException e) when (e.SocketErrorCode == SocketError.AccessDenied ||
+                                            e.SocketErrorCode == SocketError.ProtocolNotSupported ||
+                                            e.SocketErrorCode == SocketError.AddressFamilyNotSupported)
             {
-                // We may fail to create socket because of permission or loaded kernel modules.
-                if (e.SocketErrorCode != SocketError.AccessDenied && e.SocketErrorCode != SocketError.ProtocolNotSupported)
-                {
-                    throw;
-                }
+                // Ignore. We may not have privilege or protocol modules are not loaded.
+                return;
             }
+            s.Close();
         }
     }
 }

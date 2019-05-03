@@ -91,6 +91,12 @@ typedef enum
     ProtocolType_PT_TCP = 6,         // System.Net.ProtocolType.Tcp
     ProtocolType_PT_UDP = 17,        // System.Net.ProtocolType.Udp
     ProtocolType_PT_ICMPV6 = 58,     // System.Net.ProtocolType.IcmpV6
+    ProtocolType_PT_RAW = 255,       // System.Net.ProtocolType.Raw
+    ProtocolType_PT_IGMP = 2,        // System.Net.ProtocolType.Igmp
+    ProtocolType_PT_NONE = 59,       // System.Net.ProtocolType.IPv6NoNextHeader
+    ProtocolType_PT_DSTOPTS = 60,    // System.Net.ProtocolType.IPv6DestinationOptions
+    ProtocolType_PT_ROUTING = 43,    // System.Net.ProtocolType.IPv6RoutingHeader
+    ProtocolType_PT_FRAGMENT = 44,   // System.Net.ProtocolType.IPv6FragmentHeader
 } ProtocolType;
 
 typedef enum

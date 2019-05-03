@@ -55,7 +55,9 @@
 #include <ifaddrs.h>
 #endif
 #endif
-
+#ifdef AF_CAN
+#include <linux/can.h>
+#endif
 #if HAVE_KQUEUE
 #if KEVENT_HAS_VOID_UDATA
 static void* GetKeventUdata(uintptr_t udata)
@@ -532,11 +534,6 @@ static bool TryConvertAddressFamilyPalToPlatform(int32_t palAddressFamily, sa_fa
         case AddressFamily_AF_INET6:
             *platformAddressFamily = AF_INET6;
             return true;
-#ifdef AF_NETLINK
-        case AddressFamily_AF_NETLINK:
-            *platformAddressFamily = AF_NETLINK;
-            return true;
-#endif
 #ifdef AF_PACKET
         case AddressFamily_AF_PACKET:
             *platformAddressFamily = AF_PACKET;
@@ -1947,38 +1944,120 @@ static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_
 {
     assert(platformProtocolType != NULL);
 
-    if (palAddressFamily == AddressFamily_AF_NETLINK || palAddressFamily == AddressFamily_AF_PACKET || palAddressFamily == AddressFamily_AF_CAN)
+    switch(palAddressFamily)
     {
-        // Protocol type is specific to AddressFamily. For non-IP protocols just pass what ever caller give us and let OS to handle it.
-        *platformProtocolType = palProtocolType;
-        return true;
-    }
-
-    switch (palProtocolType)
-    {
-        case ProtocolType_PT_UNSPECIFIED:
-            *platformProtocolType = 0;
+        case AddressFamily_AF_PACKET:
+            // protocol is the IEEE 802.3 protocol number in network order.
+            *platformProtocolType = palProtocolType;
             return true;
 
-        case ProtocolType_PT_ICMP:
-            *platformProtocolType = IPPROTO_ICMP;
-            return true;
+        case AddressFamily_AF_CAN:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
 
-        case ProtocolType_PT_TCP:
-            *platformProtocolType = IPPROTO_TCP;
-            return true;
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = CAN_RAW;
+                    return true;
 
-        case ProtocolType_PT_UDP:
-            *platformProtocolType = IPPROTO_UDP;
-            return true;
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
 
-        case ProtocolType_PT_ICMPV6:
-            *platformProtocolType = IPPROTO_ICMPV6;
-            return true;
+        case AddressFamily_AF_INET:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
+
+                case ProtocolType_PT_ICMP:
+                    *platformProtocolType = IPPROTO_ICMP;
+                    return true;
+
+                case ProtocolType_PT_TCP:
+                    *platformProtocolType = IPPROTO_TCP;
+                    return true;
+
+                case ProtocolType_PT_UDP:
+                    *platformProtocolType = IPPROTO_UDP;
+                    return true;
+
+                case ProtocolType_PT_IGMP:
+                    *platformProtocolType = IPPROTO_IGMP;
+                    return true;
+
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = IPPROTO_RAW;
+                    return true;
+
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+                }
+
+        case AddressFamily_AF_INET6:
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
+
+                case ProtocolType_PT_ICMPV6:
+                case ProtocolType_PT_ICMP:
+                    *platformProtocolType = IPPROTO_ICMPV6;
+                    return true;
+
+                case ProtocolType_PT_TCP:
+                    *platformProtocolType = IPPROTO_TCP;
+                    return true;
+
+                case ProtocolType_PT_UDP:
+                    *platformProtocolType = IPPROTO_UDP;
+                    return true;
+
+                case ProtocolType_PT_IGMP:
+                    *platformProtocolType = IPPROTO_IGMP;
+                    return true;
+
+                case ProtocolType_PT_RAW:
+                    *platformProtocolType = IPPROTO_RAW;
+                    return true;
+
+                case ProtocolType_PT_DSTOPTS:
+                    *platformProtocolType = IPPROTO_DSTOPTS;
+                    return true;
+
+                case ProtocolType_PT_NONE:
+                    *platformProtocolType = IPPROTO_NONE;
+                    return true;
+
+                case ProtocolType_PT_ROUTING:
+                    *platformProtocolType = IPPROTO_ROUTING;
+                    return true;
+
+                case ProtocolType_PT_FRAGMENT:
+                    *platformProtocolType = IPPROTO_FRAGMENT;
+                    return true;
+
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
 
         default:
-            *platformProtocolType = (int)palProtocolType;
-            return false;
+            switch (palProtocolType)
+            {
+                case ProtocolType_PT_UNSPECIFIED:
+                    *platformProtocolType = 0;
+                    return true;
+                default:
+                    *platformProtocolType = (int)palProtocolType;
+                    return false;
+            }
     }
 }
 
