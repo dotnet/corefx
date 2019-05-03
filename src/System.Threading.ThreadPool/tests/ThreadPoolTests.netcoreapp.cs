@@ -194,17 +194,24 @@ namespace System.Threading.ThreadPools.Tests
         public void MetricsTest()
         {
             int processorCount = Environment.ProcessorCount;
+            if (processorCount <= 2)
+            {
+                return;
+            }
 
+            bool waitForWorkStart = false;
             var workStarted = new AutoResetEvent(false);
+            var localWorkScheduled = new AutoResetEvent(false);
             int completeWork = 0;
-            int simultaneousWorkCount = 0;
-            int simultaneousLocalWorkCount = 0;
-            int simultaneousGlobalWorkCount = 0;
+            int queuedWorkCount = 0;
             var allWorkCompleted = new ManualResetEvent(false);
             Exception backgroundEx = null;
             Action work = () =>
             {
-                workStarted.Set();
+                if (waitForWorkStart)
+                {
+                    workStarted.Set();
+                }
                 try
                 {
                     // Blocking can affect thread pool thread injection heuristics, so don't block, pretend like a
@@ -218,99 +225,104 @@ namespace System.Threading.ThreadPools.Tests
                 }
                 finally
                 {
-                    if (Interlocked.Decrement(ref simultaneousWorkCount) == 0)
+                    if (Interlocked.Decrement(ref queuedWorkCount) == 0)
                     {
                         allWorkCompleted.Set();
                     }
                 }
             };
-            WaitCallback threadPoolWork = data => work();
+            WaitCallback threadPoolGlobalWork = data => work();
             Action<object> threadPoolLocalWork = data => work();
-            TimerCallback timerWork = data => work();
-            WaitOrTimerCallback waitWork = (data, timedOut) => work();
+            WaitCallback scheduleThreadPoolLocalWork = data =>
+            {
+                try
+                {
+                    int n = (int)data;
+                    for (int i = 0; i < n; ++i)
+                    {
+                        ThreadPool.QueueUserWorkItem(threadPoolLocalWork, null, preferLocal: true);
+                        if (waitForWorkStart)
+                        {
+                            workStarted.CheckedWait();
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Interlocked.CompareExchange(ref backgroundEx, ex, null);
+                }
+                finally
+                {
+                    localWorkScheduled.Set();
+                }
+            };
 
             var signaledEvent = new ManualResetEvent(true);
             var timers = new List<Timer>();
-            int maxSimultaneousWorkCount = 0;
+            int totalWorkCountToQueue = 0;
             Action scheduleWork = () =>
             {
-                Assert.True(simultaneousWorkCount <= maxSimultaneousWorkCount);
+                Assert.True(queuedWorkCount < totalWorkCountToQueue);
 
-                while (true)
+                int workCount = (totalWorkCountToQueue - queuedWorkCount) / 2;
+                if (workCount > 0)
                 {
-                    if (simultaneousWorkCount >= maxSimultaneousWorkCount)
-                    {
-                        break;
-                    }
-                    ++simultaneousWorkCount;
-                    ++simultaneousGlobalWorkCount;
-                    ThreadPool.QueueUserWorkItem(threadPoolWork);
-                    workStarted.CheckedWait();
-
-                    if (simultaneousWorkCount >= maxSimultaneousWorkCount)
-                    {
-                        break;
-                    }
-                    ++simultaneousWorkCount;
-                    ++simultaneousLocalWorkCount;
-                    ThreadPool.QueueUserWorkItem(threadPoolLocalWork, null, preferLocal: true);
-                    workStarted.CheckedWait();
-
-                    if (simultaneousWorkCount >= maxSimultaneousWorkCount)
-                    {
-                        break;
-                    }
-                    ++simultaneousWorkCount;
-                    ++simultaneousGlobalWorkCount;
-                    timers.Add(new Timer(timerWork, null, 1, Timeout.Infinite));
-                    workStarted.CheckedWait();
-
-                    if (simultaneousWorkCount >= maxSimultaneousWorkCount)
-                    {
-                        break;
-                    }
-                    ++simultaneousWorkCount;
-                    ++simultaneousGlobalWorkCount;
-                    ThreadPool.RegisterWaitForSingleObject(
-                        signaledEvent,
-                        waitWork,
-                        null,
-                        ThreadTestHelpers.UnexpectedTimeoutMilliseconds,
-                        true);
-                    workStarted.CheckedWait();
+                    queuedWorkCount += workCount;
+                    ThreadPool.QueueUserWorkItem(scheduleThreadPoolLocalWork, workCount);
+                    localWorkScheduled.CheckedWait();
                 }
 
-                Assert.Equal(maxSimultaneousWorkCount, simultaneousWorkCount);
+                for (; queuedWorkCount < totalWorkCountToQueue; ++queuedWorkCount)
+                {
+                    ThreadPool.QueueUserWorkItem(threadPoolGlobalWork);
+                    if (waitForWorkStart)
+                    {
+                        workStarted.CheckedWait();
+                    }
+                }
             };
 
+            Interlocked.MemoryBarrierProcessWide(); // get a reasonably accurate value for the following
             long initialCompletedWorkItemCount = ThreadPool.CompletedWorkItemCount;
 
-            // Schedule some simultaneous work that would all be scheduled and verify the thread count
-            maxSimultaneousWorkCount = Math.Max(1, processorCount - 1); // minus one in case this thread is a thread pool thread
-            scheduleWork();
-            Assert.True(ThreadPool.ThreadCount >= maxSimultaneousWorkCount);
+            try
+            {
+                // Schedule some simultaneous work that would all be scheduled and verify the thread count
+                totalWorkCountToQueue = processorCount - 2;
+                Assert.True(totalWorkCountToQueue >= 1);
+                waitForWorkStart = true;
+                scheduleWork();
+                Assert.True(ThreadPool.ThreadCount >= totalWorkCountToQueue);
 
-            // Schedule more work that would not all be scheduled and roughly verify the pending work item count
-            maxSimultaneousWorkCount = processorCount * 64;
-            scheduleWork();
-            // The following is assuming that no more than (processorCount * 8) work items will be scheduled to run
-            // simultaneously
-            int minExpectedPendingLocalWorkCount = Math.Max(1, simultaneousLocalWorkCount - processorCount * 8);
-            int minExpectedPendingGlobalWorkCount = Math.Max(1, simultaneousGlobalWorkCount - processorCount * 8);
-            int minExpectedPendingWorkCount = minExpectedPendingLocalWorkCount + minExpectedPendingGlobalWorkCount;
-            Assert.True(ThreadPool.PendingWorkItemCount >= minExpectedPendingWorkCount);
+                int runningWorkItemCount = queuedWorkCount;
 
-            // Complete the work and verify the completed work item count
-            Interlocked.Exchange(ref completeWork, 1);
+                // Schedule more work that would not all be scheduled and roughly verify the pending work item count
+                totalWorkCountToQueue = processorCount * 64;
+                waitForWorkStart = false;
+                scheduleWork();
+                int minExpectedPendingWorkCount = Math.Max(1, queuedWorkCount - runningWorkItemCount * 8);
+                ThreadTestHelpers.WaitForCondition(() => ThreadPool.PendingWorkItemCount >= minExpectedPendingWorkCount);
+            }
+            finally
+            {
+                // Complete the work
+                Interlocked.Exchange(ref completeWork, 1);
+            }
+
+            // Verify the completed work item count
             allWorkCompleted.CheckedWait();
             backgroundEx = Interlocked.CompareExchange(ref backgroundEx, null, null);
             if (backgroundEx != null)
             {
                 throw new AggregateException(backgroundEx);
             }
+
             // Wait for work items to exit, for counting
             ThreadTestHelpers.WaitForCondition(() =>
-                ThreadPool.CompletedWorkItemCount - initialCompletedWorkItemCount >= maxSimultaneousWorkCount);
+            {
+                Interlocked.MemoryBarrierProcessWide(); // get a reasonably accurate value for the following
+                return ThreadPool.CompletedWorkItemCount - initialCompletedWorkItemCount >= totalWorkCountToQueue;
+            });
         }
     }
 }
