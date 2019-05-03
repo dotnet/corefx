@@ -74,6 +74,7 @@ namespace Microsoft.Win32.SystemEventsTests
             }
         }
 
+        [ActiveIssue(29166)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         public void ConcurrentTimers()
         {
