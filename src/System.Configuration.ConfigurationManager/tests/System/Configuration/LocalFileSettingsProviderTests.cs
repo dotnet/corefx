@@ -31,6 +31,7 @@ namespace System.ConfigurationTests
             Assert.Equal(null, propertyValues["PropertyName"].PropertyValue);
         }
 
+        [ActiveIssue(37364)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         public void GetPropertyValues_NotStoredConnectionStringProperty_ValueEqualsEmptyString()
         {
