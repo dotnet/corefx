@@ -59,6 +59,7 @@ namespace Microsoft.VisualBasic.ApplicationServices.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
         public void WorkingSet()
         {
             // Property is independent of the actual assembly.
