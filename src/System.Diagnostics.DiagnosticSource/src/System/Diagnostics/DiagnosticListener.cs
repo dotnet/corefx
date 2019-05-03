@@ -468,7 +468,7 @@ namespace System.Diagnostics
 
         private static DiagnosticListener s_allListeners;               // linked list of all instances of DiagnosticListeners.  
         private static AllListenerObservable s_allListenerObservable;   // to make callbacks to this object when listeners come into existence. 
-        private static object s_lock = new object();                    // A lock for  
+        private static readonly object s_lock = new object();           // A lock for  
 #if false
         private static readonly DiagnosticListener s_default = new DiagnosticListener("DiagnosticListener.DefaultListener");
 #endif
