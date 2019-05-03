@@ -59,7 +59,7 @@ namespace System.Text.Json.Serialization
                     }
                 }
 
-                ThrowHelper.ThrowJsonSerializationException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.PropertyPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.PropertyPath);
             }
         }
 
@@ -68,7 +68,7 @@ namespace System.Text.Json.Serialization
         {
             if (ValueConverter == null || !ValueConverter.TryRead(RuntimePropertyType, ref reader, out TRuntimeProperty value))
             {
-                ThrowHelper.ThrowJsonSerializationException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.PropertyPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.PropertyPath);
                 return;
             }
 

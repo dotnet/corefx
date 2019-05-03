@@ -18,15 +18,15 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonSerializationException_DeserializeUnableToConvertValue(Type propertyType, in Utf8JsonReader reader, string path)
+        public static void ThrowJsonException_DeserializeUnableToConvertValue(Type propertyType, in Utf8JsonReader reader, string path)
         {
-            ThowJsonSerializationException(SR.Format(SR.DeserializeUnableToConvertValue, propertyType.FullName), in reader, path);
+            ThowJsonException(SR.Format(SR.DeserializeUnableToConvertValue, propertyType.FullName), in reader, path);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowJsonSerializationException_DeserializeCannotBeNull(in Utf8JsonReader reader, string path)
+        public static void ThrowJsonException_DeserializeCannotBeNull(in Utf8JsonReader reader, string path)
         {
-            ThowJsonSerializationException(SR.DeserializeCannotBeNull, in reader, path);
+            ThowJsonException(SR.DeserializeCannotBeNull, in reader, path);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -53,28 +53,30 @@ namespace System.Text.Json
             throw new InvalidOperationException(SR.Format(SR.SerializerPropertyNameNull, jsonClassInfo.Type.FullName, jsonPropertyInfo.PropertyInfo.Name));
         }
 
-        public static void ThrowJsonSerializationException_DeserializeDataRemaining(long length, long bytesRemaining)
+        public static void ThrowJsonException_DeserializeDataRemaining(long length, long bytesRemaining)
         {
-            throw new JsonSerializationException(SR.Format(SR.DeserializeDataRemaining, length, bytesRemaining), "");
+            throw new JsonException(SR.Format(SR.DeserializeDataRemaining, length, bytesRemaining), path: null, lineNumber: null, bytePositionInLine: null);
         }
 
-        public static void ThrowJsonSerializationException_DeserializeDuplicateKey(string key, in Utf8JsonReader reader, string path)
+        public static void ThrowJsonException_DeserializeDuplicateKey(string key, in Utf8JsonReader reader, string path)
         {
-            ThowJsonSerializationException(SR.Format(SR.DeserializeDuplicateKey, key), in reader, path);
+            ThowJsonException(SR.Format(SR.DeserializeDuplicateKey, key), in reader, path);
         }
 
-        private static void ThowJsonSerializationException(string message, in Utf8JsonReader reader, string path)
+        private static void ThowJsonException(string message, in Utf8JsonReader reader, string path)
         {
             long lineNumber = reader.CurrentState._lineNumber;
             long bytePositionInLine = reader.CurrentState._bytePositionInLine;
 
             message += $" Path: {path} | LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.";
-            throw new JsonSerializationException(message, path, lineNumber, bytePositionInLine);
+            throw new JsonException(message, path, lineNumber, bytePositionInLine);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static void ThrowSerializationException(JsonReaderException exception, string path)
+        public static void ReThrowWithPath(JsonException exception, string path)
         {
+            Debug.Assert(exception.Path == null);
+
             string message = exception.Message;
 
             // Insert the "Path" portion before "LineNumber" and "BytePositionInLine".
@@ -88,7 +90,7 @@ namespace System.Text.Json
                 message += $" Path: {path}.";
             }
 
-            throw new JsonSerializationException(message, path, exception.LineNumber, exception.BytePositionInLine, exception);
+            throw new JsonException(message, path, exception.LineNumber, exception.BytePositionInLine, exception);
         }
     }
 }

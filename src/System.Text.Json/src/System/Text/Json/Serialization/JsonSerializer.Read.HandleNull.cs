@@ -27,7 +27,7 @@ namespace System.Text.Json.Serialization
             JsonPropertyInfo propertyInfo = state.Current.JsonPropertyInfo;
             if (!propertyInfo.CanBeNull)
             {
-                ThrowHelper.ThrowJsonSerializationException_DeserializeCannotBeNull(reader, state.PropertyPath);
+                ThrowHelper.ThrowJsonException_DeserializeCannotBeNull(reader, state.PropertyPath);
             }
 
             if (state.Current.IsEnumerable || state.Current.IsDictionary)
