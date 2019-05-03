@@ -80,6 +80,7 @@ namespace System
         public static bool IsNotNetNative { get { throw null; } }
         public static bool IsNotNetNativeRunningAsConsoleApp { get { throw null; } }
         public static bool IsNotOneCoreUAP { get { throw null; } }
+        public static bool IsNotOSX { get { throw null; } }
         public static bool IsNotRedHatFamily { get { throw null; } }
         public static bool IsNotRedHatFamily6 { get { throw null; } }
         public static bool IsNotWindows8x { get { throw null; } }
@@ -130,9 +131,15 @@ namespace System
         public static bool SupportsAlpn { get { throw null; } }
         public static bool SupportsClientAlpn { get { throw null; } }
         public static bool SupportsSsl3 { get { throw null; } }
+        public static bool SupportsTls13 { get { throw null; } }
         public static bool TargetsNetFx452OrLower { get { throw null; } }
         public static int WindowsVersion { get { throw null; } }
         public static string GetDistroVersionString() { throw null; }
+    }
+    public static partial class RetryHelper
+    {
+        public static void Execute(System.Action test, int maxAttempts = 5, System.Func<int, int> backoffFunc = null) { }
+        public static System.Threading.Tasks.Task ExecuteAsync(Func<System.Threading.Tasks.Task> test, int maxAttempts = 5, System.Func<int, int> backoffFunc = null) { throw null; }
     }
     public static partial class TestEnvironment
     {
