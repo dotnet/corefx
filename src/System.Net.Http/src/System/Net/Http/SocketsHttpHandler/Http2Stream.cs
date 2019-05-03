@@ -155,15 +155,15 @@ namespace System.Net.Http
                         {
                             // Pseudo-headers not allowed in trailers.
                             if (NetEventSource.IsEnabled) _connection.Trace("Pseudo-header in trailer headers.");
-                            throw new HttpRequestException(SR.net_http_invalid_response_pseudo_header_in_trailer);
+                            throw new Http2ProtocolException(SR.net_http_invalid_response_pseudo_header_in_trailer);
                         }
 
                         if (name.SequenceEqual(s_statusHeaderName))
                         {
-                            if (_response != null)
+                            if (_response != null && (int)_response.StatusCode > 199)
                             {
                                 if (NetEventSource.IsEnabled) _connection.Trace("Received duplicate status headers.");
-                                throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
+                                throw new Http2ProtocolException(SR.Format(SR.net_http_invalid_response_status_code, "duplicate status"));
                             }
 
                             byte status1, status2, status3;
@@ -172,7 +172,7 @@ namespace System.Net.Http
                                 !IsDigit(status2 = value[1]) ||
                                 !IsDigit(status3 = value[2]))
                             {
-                                throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_status_code, Encoding.ASCII.GetString(value)));
+                                throw new Http2ProtocolException(SR.Format(SR.net_http_invalid_response_status_code, Encoding.ASCII.GetString(value)));
                             }
 
                             int statusValue = (100 * (status1 - '0') + 10 * (status2 - '0') + (status3 - '0'));
@@ -187,7 +187,7 @@ namespace System.Net.Http
                         else
                         {
                             if (NetEventSource.IsEnabled) _connection.Trace("Invalid response pseudo-header '{System.Text.Encoding.ASCII.GetString(name)}'.");
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new Http2ProtocolException(SR.net_http_invalid_response);
                         }
                     }
                     else
@@ -195,7 +195,7 @@ namespace System.Net.Http
                         if (_response == null)
                         {
                             if (NetEventSource.IsEnabled) _connection.Trace($"Received header before status pseudo-header.");
-                            throw new HttpRequestException(SR.net_http_invalid_response);
+                            throw new Http2ProtocolException(SR.net_http_invalid_response);
                         }
 
                         if (!HeaderDescriptor.TryGet(name, out HeaderDescriptor descriptor))
@@ -690,7 +690,7 @@ namespace System.Net.Http
                         return new ValueTask();
                     }
 
-                    if ((int)_http2Stream._response.StatusCode >= 300)
+                    if (http2Stream._response != null && (int)http2Stream._response.StatusCode >= 300)
                     {
                         // If asked to abort sending request body after we started, send RST and ignore rest of the stream.
                         Task ignored = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel);
