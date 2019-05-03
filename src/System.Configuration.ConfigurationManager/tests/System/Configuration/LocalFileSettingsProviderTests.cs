@@ -15,6 +15,7 @@ namespace System.ConfigurationTests
             ["SettingsKey"] = "SettingsKeyFoo"
         };
 
+        [ActiveIssue(37364)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotNetNativeRunningAsConsoleApp))]
         public void GetPropertyValues_NotStoredProperty_ValueEqualsNull()
         {
