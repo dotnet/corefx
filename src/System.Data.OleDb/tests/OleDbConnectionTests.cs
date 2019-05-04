@@ -135,28 +135,6 @@ namespace System.Data.OleDb.Tests
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void GetOleDbSchemaTable_ReturnsTableInfo()
-        {
-            string tableName = Helpers.GetTableName(nameof(GetOleDbSchemaTable_ReturnsTableInfo));
-            command.CommandText = @"CREATE TABLE t1.csv (CustomerName NVARCHAR(40));";
-            command.ExecuteNonQuery();
-            command.CommandText = @"CREATE TABLE t2.csv (CustomerName NVARCHAR(40));";
-            command.ExecuteNonQuery();
-            DataTable listedTables = connection.GetOleDbSchemaTable(
-                OleDbSchemaGuid.Tables, new object[] {null, null, null, "Table"});
-
-            Assert.NotNull(listedTables);
-            Assert.Equal(2, listedTables.Rows.Count);
-            Assert.Equal("t1#csv", listedTables.Rows[0][2].ToString());
-            Assert.Equal("t2#csv", listedTables.Rows[1][2].ToString());
-
-            command.CommandText = @"DROP TABLE t1.csv";
-            command.ExecuteNonQuery();
-            command.CommandText = @"DROP TABLE t2.csv";
-            command.ExecuteNonQuery();
-        }
-
-        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void ChangeDatabase_EmptyDatabase_Throws()
         {
             using (var oleDbConnection = new OleDbConnection(ConnectionString))

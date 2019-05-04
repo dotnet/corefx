@@ -14,17 +14,6 @@ namespace System.Data.OleDb.Tests
     public class OleDbDataReaderTests : OleDbTestBase
     {
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void FieldCount_NoMetadata_ReturnsZero()
-        {
-            command.CommandText = @"CREATE TABLE sample.csv;";
-            using (OleDbDataReader reader = command.ExecuteReader())
-            {
-                Assert.Equal(0, reader.FieldCount);
-                Assert.Equal(0, reader.VisibleFieldCount);
-            }
-        }
-
-        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void ExecuteNonQuery_TableNameWithoutCsvExtension_Throws()
         {
             command.CommandText =
