@@ -125,6 +125,7 @@ namespace Microsoft.Win32.SystemEventsTests
             finally
             {
                 SystemEvents.TimerElapsed -= handler;
+                elapsed.Dispose();
             }
         }
 
