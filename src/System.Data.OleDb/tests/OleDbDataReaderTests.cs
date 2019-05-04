@@ -43,7 +43,7 @@ namespace System.Data.OleDb.Tests
                 Assert.True(reader.HasRows);
                 DataTable schema = reader.GetSchemaTable();
                 Assert.Equal(4, schema.Rows.Count);
-                Helpers.AssertThrowsWithMessage<IndexOutOfRangeException>(
+                AssertExtensions.Throws<IndexOutOfRangeException>(
                     () => reader.GetString(5), 
                     "Index was outside the bounds of the array.");
             });
@@ -57,7 +57,7 @@ namespace System.Data.OleDb.Tests
                 reader.Read();
                 Assert.True(reader.HasRows);
                 object obj;
-                Helpers.AssertThrowsWithMessage<IndexOutOfRangeException>(
+                AssertExtensions.Throws<IndexOutOfRangeException>(
                     () => obj = reader["NonExistentColumn"], "NonExistentColumn");
             });
         }
@@ -85,9 +85,9 @@ namespace System.Data.OleDb.Tests
             RunTest((reader) => {
                 reader.Read();
                 Assert.False(reader.HasRows);
-                Helpers.AssertThrowsWithMessage<InvalidOperationException>(() => reader.GetString(1), expectedMessage);
-                Helpers.AssertThrowsWithMessage<InvalidOperationException>(() => reader.GetValues(new object[1]), expectedMessage);
-                Helpers.AssertThrowsWithMessage<InvalidOperationException>(() => reader.GetData(0), expectedMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => reader.GetString(1), expectedMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => reader.GetValues(new object[1]), expectedMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => reader.GetData(0), expectedMessage);
             }, schemaOnly: true);
         }
 

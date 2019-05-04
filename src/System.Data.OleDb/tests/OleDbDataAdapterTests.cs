@@ -134,7 +134,7 @@ namespace System.Data.OleDb.Tests
                     OleDbDataAdapter adapter = new OleDbDataAdapter(command);
                     if (shouldFail)
                     {
-                        Helpers.AssertThrowsWithMessage<InvalidOperationException>(
+                        AssertExtensions.Throws<InvalidOperationException>(
                             () => adapter.Fill(ds, tableName), 
                             "There is already an open DataReader associated with this Command which must be closed first.");
                     }

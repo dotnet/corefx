@@ -18,7 +18,7 @@ namespace System.Data.OleDb.Tests
         {
             using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
             {
-                Helpers.AssertThrowsWithMessage<ArgumentOutOfRangeException>(
+                AssertExtensions.Throws<ArgumentOutOfRangeException>(
                     () => cmd.CommandType = (CommandType)0, 
                     $"The CommandType enumeration value, 0, is invalid.\r\nParameter name: {nameof(cmd.CommandType)}"
                 );

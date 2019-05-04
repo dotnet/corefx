@@ -28,7 +28,7 @@ namespace System.Data.OleDb.Tests
             using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
             {
                 cmd.CommandType = commandType;
-                Helpers.AssertThrowsWithMessage<InvalidOperationException>(
+                AssertExtensions.Throws<InvalidOperationException>(
                     () => OleDbCommandBuilder.DeriveParameters(cmd), 
                     $"{nameof(OleDbCommand)} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{cmd.CommandType.ToString()}.");
             }
@@ -41,7 +41,7 @@ namespace System.Data.OleDb.Tests
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.CommandText = null;
-                Helpers.AssertThrowsWithMessage<InvalidOperationException>(
+                AssertExtensions.Throws<InvalidOperationException>(
                     () => OleDbCommandBuilder.DeriveParameters(cmd), 
                     $"{nameof(OleDbCommandBuilder.DeriveParameters)}: {nameof(cmd.CommandText)} property has not been initialized");
             }
@@ -58,7 +58,7 @@ namespace System.Data.OleDb.Tests
                     cmd.CommandText = @"SELECT * FROM " + tableName;  
                     cmd.Connection = null;
                     
-                    Helpers.AssertThrowsWithMessage<InvalidOperationException>(
+                    AssertExtensions.Throws<InvalidOperationException>(
                         () => OleDbCommandBuilder.DeriveParameters(cmd), 
                         $"{nameof(OleDbCommandBuilder.DeriveParameters)}: {nameof(cmd.Connection)} property has not been initialized.");
                 }

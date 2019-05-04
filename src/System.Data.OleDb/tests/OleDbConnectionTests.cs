@@ -124,11 +124,12 @@ namespace System.Data.OleDb.Tests
             var exception = Record.Exception(() => schema.Rows[0].Field<string>(columnName));
             Assert.Null(exception);
 
-            Helpers.AssertThrowsWithMessage<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 () => connection.GetSchema(tableName, new string[] { null }), 
-                $"More restrictions were provided than the requested schema ('{0}') supports.", tableName));
+                $"More restrictions were provided than the requested schema ('{tableName}') supports."
+            );
             const string MissingColumn = "MissingColumn";
-            Helpers.AssertThrowsWithMessage<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 () => schema.Rows[0].Field<IEnumerable<char>>(MissingColumn), 
                 $"Column '{MissingColumn}' does not belong to table {tableName}.");
         }
@@ -233,7 +234,7 @@ namespace System.Data.OleDb.Tests
                 ConnectionString }.AsSpan();
             File.WriteAllLines(udlFile, lines.Slice(start, length).ToArray());
 
-            Helpers.AssertThrowsWithMessage<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 () => new OleDbConnection(@"file name = " + udlFile), 
                 "Invalid UDL file.");
         }
