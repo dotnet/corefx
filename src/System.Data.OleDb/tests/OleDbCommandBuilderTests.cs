@@ -30,7 +30,7 @@ namespace System.Data.OleDb.Tests
                 cmd.CommandType = commandType;
                 Helpers.AssertThrowsWithMessage<InvalidOperationException>(
                     () => OleDbCommandBuilder.DeriveParameters(cmd), 
-                    string.Format("{0} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{1}.", nameof(OleDbCommand), cmd.CommandType.ToString()));
+                    $"{nameof(OleDbCommand)} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{cmd.CommandType.ToString()}.");
             }
         }
 
@@ -43,7 +43,7 @@ namespace System.Data.OleDb.Tests
                 cmd.CommandText = null;
                 Helpers.AssertThrowsWithMessage<InvalidOperationException>(
                     () => OleDbCommandBuilder.DeriveParameters(cmd), 
-                    string.Format("{0}: {1} property has not been initialized", nameof(OleDbCommandBuilder.DeriveParameters), nameof(cmd.CommandText)));
+                    $"{nameof(OleDbCommandBuilder.DeriveParameters)}: {nameof(cmd.CommandText)} property has not been initialized");
             }
         }
 
@@ -60,7 +60,7 @@ namespace System.Data.OleDb.Tests
                     
                     Helpers.AssertThrowsWithMessage<InvalidOperationException>(
                         () => OleDbCommandBuilder.DeriveParameters(cmd), 
-                        string.Format("{0}: {1} property has not been initialized.", nameof(OleDbCommandBuilder.DeriveParameters), nameof(cmd.Connection)));
+                        $"{nameof(OleDbCommandBuilder.DeriveParameters)}: {nameof(cmd.Connection)} property has not been initialized.");
                 }
             });
         }
@@ -80,7 +80,7 @@ namespace System.Data.OleDb.Tests
                     Assert.NotNull(exception);
                     Assert.IsType<InvalidOperationException>(exception);
                     Assert.Contains(
-                        string.Format("{0} requires an open and available Connection.", nameof(OleDbCommandBuilder.DeriveParameters)),
+                        $"{nameof(OleDbCommandBuilder.DeriveParameters)} requires an open and available Connection.",
                         exception.Message);
                 }
             });

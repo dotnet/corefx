@@ -126,11 +126,11 @@ namespace System.Data.OleDb.Tests
 
             Helpers.AssertThrowsWithMessage<ArgumentException>(
                 () => connection.GetSchema(tableName, new string[] { null }), 
-                string.Format("More restrictions were provided than the requested schema ('{0}') supports.", tableName));
-
+                $"More restrictions were provided than the requested schema ('{0}') supports.", tableName));
+            const string MissingColumn = "MissingColumn";
             Helpers.AssertThrowsWithMessage<ArgumentException>(
-                () => schema.Rows[0].Field<IEnumerable<char>>("MissingColumn"), 
-                string.Format("Column '{0}' does not belong to table {1}.", "MissingColumn", tableName));
+                () => schema.Rows[0].Field<IEnumerable<char>>(MissingColumn), 
+                $"Column '{MissingColumn}' does not belong to table {tableName}.");
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]

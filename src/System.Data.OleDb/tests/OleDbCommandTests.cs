@@ -20,7 +20,7 @@ namespace System.Data.OleDb.Tests
             {
                 Helpers.AssertThrowsWithMessage<ArgumentOutOfRangeException>(
                     () => cmd.CommandType = (CommandType)0, 
-                    string.Format("The CommandType enumeration value, 0, is invalid.\r\nParameter name: {0}", nameof(cmd.CommandType))
+                    $"The CommandType enumeration value, 0, is invalid.\r\nParameter name: {nameof(cmd.CommandType)}"
                 );
             }
         }
