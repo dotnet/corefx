@@ -1,7 +1,6 @@
 ﻿<Project DefaultTargets="Build">
   <PropertyGroup>
     <BuildConfigurations>
-      netstandard1.1;
       netstandard;
       netcoreapp;
       uap-Windows_NT;
