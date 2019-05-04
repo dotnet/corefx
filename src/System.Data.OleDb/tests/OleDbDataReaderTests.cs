@@ -14,6 +14,17 @@ namespace System.Data.OleDb.Tests
     public class OleDbDataReaderTests : OleDbTestBase
     {
         [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void FieldCount_NoMetadata_ReturnsZero()
+        {
+            command.CommandText = @"CREATE TABLE sample.csv;";
+            using (OleDbDataReader reader = command.ExecuteReader())
+            {
+                Assert.Equal(0, reader.FieldCount);
+                Assert.Equal(0, reader.VisibleFieldCount);
+            }
+        }
+
+        [ConditionalFact(Helpers.IsDriverAvailable)]
         public void ExecuteNonQuery_TableNameWithoutCsvExtension_Throws()
         {
             command.CommandText =
@@ -32,12 +43,9 @@ namespace System.Data.OleDb.Tests
                 Assert.True(reader.HasRows);
                 DataTable schema = reader.GetSchemaTable();
                 Assert.Equal(4, schema.Rows.Count);
-                var exception = Record.Exception(() => reader.GetString(5));
-                Assert.NotNull(exception);
-                Assert.IsType<IndexOutOfRangeException>(exception);
-                Assert.Equal(
-                    "Index was outside the bounds of the array.",
-                    exception.Message);
+                Helpers.AssertThrowsWithMessage<IndexOutOfRangeException>(
+                    () => reader.GetString(5), 
+                    "Index was outside the bounds of the array.");
             });
         }
 
@@ -48,12 +56,9 @@ namespace System.Data.OleDb.Tests
             RunTest((reader) => {
                 reader.Read();
                 Assert.True(reader.HasRows);
-                var exception = Record.Exception(() => reader["NonExistentColumn"]);
-                Assert.NotNull(exception);
-                Assert.IsType<IndexOutOfRangeException>(exception);
-                Assert.Equal(
-                    "NonExistentColumn",
-                    exception.Message);
+                object obj;
+                Helpers.AssertThrowsWithMessage<IndexOutOfRangeException>(
+                    () => obj = reader["NonExistentColumn"], "NonExistentColumn");
             });
         }
 
@@ -76,23 +81,13 @@ namespace System.Data.OleDb.Tests
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void EmptyReader_SchemaOnly_EmptyReader()
         {
+            const string expectedMessage = "No data exists for the row/column.";
             RunTest((reader) => {
                 reader.Read();
                 Assert.False(reader.HasRows);
-                var exception = Record.Exception(() => reader.GetString(1));
-                Assert.NotNull(exception);
-                Assert.IsType<InvalidOperationException>(exception);
-                Assert.Equal(
-                    "No data exists for the row/column.",
-                    exception.Message);
-
-                var values = new object[1];
-                exception = Record.Exception(() => reader.GetValues(values));
-                Assert.NotNull(exception);
-                Assert.IsType<InvalidOperationException>(exception);
-                Assert.Equal(
-                    "No data exists for the row/column.",
-                    exception.Message);
+                Helpers.AssertThrowsWithMessage<InvalidOperationException>(() => reader.GetString(1), expectedMessage);
+                Helpers.AssertThrowsWithMessage<InvalidOperationException>(() => reader.GetValues(new object[1]), expectedMessage);
+                Helpers.AssertThrowsWithMessage<InvalidOperationException>(() => reader.GetData(0), expectedMessage);
             }, schemaOnly: true);
         }
 
@@ -207,51 +202,16 @@ namespace System.Data.OleDb.Tests
 
         [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void Depth_IsClosed_Throws()
+        public void IsClosed_CallReaderApis_Throws()
         {
             RunTest((reader) => {
                 reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.Depth);
-            });
-        }
-
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void FieldCount_IsClosed_Throws()
-        {
-            RunTest((reader) => {
-                reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.FieldCount);
-            });
-        }
-
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void VisibleFieldCount_IsClosed_Throws()
-        {
-            RunTest((reader) => {
-                reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.VisibleFieldCount);
-            });
-        }
-
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void HasRows_IsClosed_Throws()
-        {
-            RunTest((reader) => {
-                reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.HasRows);
-            });
-        }
-
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void GetSchemaTable_IsClosed_Throws()
-        {
-            RunTest((reader) => {
-                reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.GetSchemaTable());
+                Assert.Throws<InvalidOperationException>(() => reader.NextResult());
             });
         }
 

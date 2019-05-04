@@ -113,28 +113,46 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void GetSchema()
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
+        [InlineData(nameof(DbMetaDataCollectionNames.MetaDataCollections), "CollectionName")]
+        [InlineData(nameof(DbMetaDataCollectionNames.DataSourceInformation), "CompositeIdentifierSeparatorPattern")]
+        [InlineData(nameof(DbMetaDataCollectionNames.DataTypes), "TypeName")]
+        public void GetSchema(string tableName, string columnName)
         {
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
+            DataTable schema = connection.GetSchema(tableName);
+            Assert.True(schema != null && schema.Rows.Count > 0);
+            var exception = Record.Exception(() => schema.Rows[0].Field<string>(columnName));
+            Assert.Null(exception);
 
-                DataTable metaDataCollections = oleDbConnection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
-                Assert.True(metaDataCollections != null && metaDataCollections.Rows.Count > 0);
+            Helpers.AssertThrowsWithMessage<ArgumentException>(
+                () => connection.GetSchema(tableName, new string[] { null }), 
+                string.Format("More restrictions were provided than the requested schema ('{0}') supports.", tableName));
 
-                DataTable metaDataSourceInfo = oleDbConnection.GetSchema(DbMetaDataCollectionNames.DataSourceInformation);
-                Assert.True(metaDataSourceInfo != null && metaDataSourceInfo.Rows.Count > 0);
+            Helpers.AssertThrowsWithMessage<ArgumentException>(
+                () => schema.Rows[0].Field<IEnumerable<char>>("MissingColumn"), 
+                string.Format("Column '{0}' does not belong to table {1}.", "MissingColumn", tableName));
+        }
 
-                DataTable metaDataTypes = oleDbConnection.GetSchema(DbMetaDataCollectionNames.DataTypes);
-                Assert.True(metaDataTypes != null && metaDataTypes.Rows.Count > 0);
-                
-                DataTable schema = oleDbConnection.GetSchema();
-                Assert.True(schema != null && schema.Rows.Count > 0);
+        [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void GetOleDbSchemaTable_ReturnsTableInfo()
+        {
+            string tableName = Helpers.GetTableName(nameof(GetOleDbSchemaTable_ReturnsTableInfo));
+            command.CommandText = @"CREATE TABLE t1.csv (CustomerName NVARCHAR(40));";
+            command.ExecuteNonQuery();
+            command.CommandText = @"CREATE TABLE t2.csv (CustomerName NVARCHAR(40));";
+            command.ExecuteNonQuery();
+            DataTable listedTables = connection.GetOleDbSchemaTable(
+                OleDbSchemaGuid.Tables, new object[] {null, null, null, "Table"});
 
-                Assert.Throws<NotSupportedException>(
-                    () => oleDbConnection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections, new string[] { new string('a', 5000) } ));
-            }
+            Assert.NotNull(listedTables);
+            Assert.Equal(2, listedTables.Rows.Count);
+            Assert.Equal("t1#csv", listedTables.Rows[0][2].ToString());
+            Assert.Equal("t2#csv", listedTables.Rows[1][2].ToString());
+
+            command.CommandText = @"DROP TABLE t1.csv";
+            command.ExecuteNonQuery();
+            command.CommandText = @"DROP TABLE t2.csv";
+            command.ExecuteNonQuery();
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
@@ -215,12 +233,9 @@ namespace System.Data.OleDb.Tests
                 ConnectionString }.AsSpan();
             File.WriteAllLines(udlFile, lines.Slice(start, length).ToArray());
 
-            var exception = Record.Exception(() => new OleDbConnection(@"file name = " + udlFile));
-            Assert.NotNull(exception);
-            Assert.IsType<ArgumentException>(exception);
-            Assert.Equal(
-                "Invalid UDL file.",
-                exception.Message);
+            Helpers.AssertThrowsWithMessage<ArgumentException>(
+                () => new OleDbConnection(@"file name = " + udlFile), 
+                "Invalid UDL file.");
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]

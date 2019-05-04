@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using Xunit;
 
 namespace System.Data.OleDb.Tests
 {
@@ -13,6 +14,14 @@ namespace System.Data.OleDb.Tests
         public static bool GetIsDriverAvailable() => Nested.IsAvailable;
         public static string ProviderName => Nested.ProviderName;
         public static string GetTableName(string memberName) => memberName + ".csv";
+
+        public static void AssertThrowsWithMessage<T>(Action throwableAction, string expectedMessage)
+        {
+            var exception = Record.Exception(() => throwableAction());
+            Assert.NotNull(exception);
+            Assert.IsType<T>(exception);
+            Assert.Equal(expectedMessage, exception.Message);
+        }
 
         private class Nested
         {
