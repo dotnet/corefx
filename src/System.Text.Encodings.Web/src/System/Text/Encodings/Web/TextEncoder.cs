@@ -130,7 +130,12 @@ namespace System.Text.Encodings.Web
 
             if (firstCharacterToEncode > 0)
             {
-                new ReadOnlySpan<char>(value, firstCharacterToEncode).CopyTo(new Span<char>(buffer, firstCharacterToEncode));
+                Debug.Assert(firstCharacterToEncode <= valueLength);
+                Buffer.MemoryCopy(source: value,
+                    destination: buffer,
+                    destinationSizeInBytes: sizeof(char) * bufferLength,
+                    sourceBytesToCopy: sizeof(char) * firstCharacterToEncode);
+
                 totalWritten += firstCharacterToEncode;
                 bufferLength -= firstCharacterToEncode;
                 buffer += firstCharacterToEncode;

@@ -14,7 +14,6 @@
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' == 'netstandard'">
     <Reference Include="System.IO" />
-    <Reference Include="System.Memory" />
     <Reference Include="System.Reflection" />
     <Reference Include="System.Resources.ResourceManager" />
     <Reference Include="System.Runtime" />
