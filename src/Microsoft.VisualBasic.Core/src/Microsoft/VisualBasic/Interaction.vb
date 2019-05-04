@@ -4,6 +4,7 @@
 
 Imports System
 Imports System.Runtime.InteropServices
+
 Imports Microsoft.VisualBasic.CompilerServices
 Imports Microsoft.VisualBasic.CompilerServices.ExceptionUtils
 Imports Microsoft.VisualBasic.CompilerServices.Utils
@@ -17,7 +18,11 @@ Namespace Microsoft.VisualBasic
         '============================================================================
 
         Public Sub Beep()
+#If PLATFORM_WINDOWS Then
             UnsafeNativeMethods.MessageBeep(0)
+#Else
+            Throw New PlatformNotSupportedException()
+#End If
         End Sub
 
         Public Function IIf(ByVal Expression As Boolean, ByVal TruePart As Object, ByVal FalsePart As Object) As Object
