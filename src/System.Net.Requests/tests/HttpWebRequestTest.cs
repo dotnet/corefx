@@ -223,18 +223,23 @@ namespace System.Net.Tests
             Assert.True(request.AllowReadStreamBuffering);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task ContentLength_Get_ExpectSameAsGetResponseStream(Uri remoteServer)
+        [Fact]
+        public async Task ContentLength_Get_ExpectSameAsGetResponseStream()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (WebResponse response = await request.GetResponseAsync())
-            using (Stream myStream = response.GetResponseStream())
-            using (StreamReader sr = new StreamReader(myStream))
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                string strContent = sr.ReadToEnd();
-                long length = response.ContentLength;
-                Assert.Equal(strContent.Length, length);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync();
+                using (WebResponse response = await getResponse)
+                using (Stream myStream = response.GetResponseStream())
+                using (var sr = new StreamReader(myStream))
+                {
+                    string strContent = sr.ReadToEnd();
+                    long length = response.ContentLength;
+                    Assert.Equal(strContent.Length, length);
+                }
+            });
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -277,7 +282,7 @@ namespace System.Net.Tests
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
                 Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.AcceptConnectionSendResponseAndCloseAsync();
+                await server.HandleRequestAsync();
                 using (WebResponse response = await getResponse)
                 {
                     Assert.Throws<InvalidOperationException>(() => request.AutomaticDecompression = DecompressionMethods.Deflate);
@@ -1098,18 +1103,24 @@ namespace System.Net.Tests
             });
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public void BeginGetRequestStream_CreateRequestThenBeginGetResponsePrior_ThrowsProtocolViolationException(Uri remoteServer)
+        [Fact]
+        public async Task BeginGetRequestStream_CreateRequestThenBeginGetResponsePrior_ThrowsProtocolViolationException()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-
-            IAsyncResult asyncResult = request.BeginGetResponse(null, null);
-            Assert.Throws<ProtocolViolationException>(() =>
+            await LoopbackServer.CreateServerAsync((server, url) =>
             {
-                request.BeginGetRequestStream(null, null);
+                HttpWebRequest request = HttpWebRequest.CreateHttp(url);
+
+                IAsyncResult asyncResult = request.BeginGetResponse(null, null);
+                Assert.Throws<ProtocolViolationException>(() =>
+                {
+                    request.BeginGetRequestStream(null, null);
+                });
+
+                return Task.FromResult<object>(null);
             });
         }
 
+        [Fact]
         public async Task BeginGetResponse_CreateRequestThenCallTwice_ThrowsInvalidOperationException()
         {
             await LoopbackServer.CreateServerAsync((server, url) =>
@@ -1131,6 +1142,7 @@ namespace System.Net.Tests
             Assert.Equal(WebExceptionStatus.RequestCanceled, ex.Status);
         }
 
+        [Fact]
         public async Task GetRequestStreamAsync_WriteAndDisposeRequestStreamThenOpenRequestStream_ThrowsArgumentException()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -1145,6 +1157,7 @@ namespace System.Net.Tests
             });
         }
 
+        [Fact]
         public async Task GetRequestStreamAsync_SetPOSTThenGet_ExpectNotNull()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -1158,34 +1171,42 @@ namespace System.Net.Tests
             });
         }
 
+        [Fact]
         public async Task GetResponseAsync_GetResponseStream_ExpectNotNull()
         {
             await LoopbackServer.CreateServerAsync(async (server, url) =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(url);
-                using (WebResponse response = await request.GetResponseAsync())
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync();
+                using (WebResponse response = await getResponse)
+                using (Stream myStream = response.GetResponseStream())
                 {
-                    Assert.NotNull(response.GetResponseStream());
+                    Assert.NotNull(myStream);
                 }
             });
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task GetResponseAsync_GetResponseStream_ContainsHost(Uri remoteServer)
+        [Fact]
+        public async Task GetResponseAsync_GetResponseStream_ContainsHost()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.Method = HttpMethod.Get.Method;
-
-            using (WebResponse response = await request.GetResponseAsync())
-            using (Stream myStream = response.GetResponseStream())
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                Assert.NotNull(myStream);
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.Method = HttpMethod.Get.Method;
+
+                string host = uri.Host + ":" + uri.Port;
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Host", host) });
+                string serverReceivedHost = requestData.GetSingleHeaderValue("Host");
+                Assert.Equal(host, serverReceivedHost);
+                using (WebResponse response = await getResponse)
+                using (Stream myStream = response.GetResponseStream())
                 using (var sr = new StreamReader(myStream))
                 {
-                    string strContent = sr.ReadToEnd();
-                    Assert.True(strContent.Contains("\"Host\": \"" + remoteServer.Host + "\""));
+                    Assert.Equal(host, response.Headers["Host"]);
                 }
-            }
+            });
         }
 
         [OuterLoop]
@@ -1209,34 +1230,45 @@ namespace System.Net.Tests
             Assert.Equal(request.Headers["Range"], "bytes=1-5");
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task GetResponseAsync_PostRequestStream_ContainsData(Uri remoteServer)
+        [Fact]
+        public async Task GetResponseAsync_PostRequestStream_ContainsData()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.Method = HttpMethod.Post.Method;
-
-            using (Stream requestStream = await request.GetRequestStreamAsync())
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.Method = HttpMethod.Post.Method;
 
-            using (WebResponse response = await request.GetResponseAsync())
-            using (Stream myStream = response.GetResponseStream())
-            using (var sr = new StreamReader(myStream))
-            {
-                string strContent = sr.ReadToEnd();
-                Assert.True(strContent.Contains(RequestBody));
-            }
+                using (Stream requestStream = await request.GetRequestStreamAsync())
+                {
+                    requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
+                }
+
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync(content: RequestBody);
+                using (WebResponse response = await getResponse)
+                using (Stream myStream = response.GetResponseStream())
+                using (var sr = new StreamReader(myStream))
+                {
+                    string strContent = sr.ReadToEnd();
+                    Assert.True(strContent.Contains(RequestBody));
+                }
+            });
         }
 
-        [Theory]
-        [MemberData(nameof(EchoServers))]
-        public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(Uri remoteServer)
+        [Fact]
+        public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            request.UseDefaultCredentials = true;
-            var response = await request.GetResponseAsync();
-            response.Dispose();
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            {
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.UseDefaultCredentials = true;
+
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync(content: RequestBody);
+                using (WebResponse response = await getResponse)
+                {
+                }
+            });
         }
 
         [OuterLoop] // fails on networks with DNS servers that provide a dummy page for invalid addresses
@@ -1261,27 +1293,38 @@ namespace System.Net.Tests
                 $"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"));
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task HaveResponse_GetResponseAsync_ExpectTrue(Uri remoteServer)
+        [Fact]
+        public async Task HaveResponse_GetResponseAsync_ExpectTrue()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (WebResponse response = await request.GetResponseAsync())
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                Assert.True(request.HaveResponse);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync();
+                using (WebResponse response = await getResponse)
+                {
+                    Assert.True(request.HaveResponse);
+                }
+            });
         }
 
-        [Theory]
-        [MemberData(nameof(EchoServers))]
-        public async Task Headers_GetResponseHeaders_ContainsExpectedValue(Uri remoteServer)
+        [Fact]
+        public async Task Headers_GetResponseHeaders_ContainsExpectedValue()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                string headersString = response.Headers.ToString();
-                string headersPartialContent = "Content-Type: application/json";
-                Assert.True(headersString.Contains(headersPartialContent));
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+
+                const string HeadersPartialContent = "application/json";
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Content-Type", HeadersPartialContent) });
+                using (WebResponse response = await getResponse)
+                {
+                    string headersString = response.Headers.ToString();
+                    Assert.Equal(HeadersPartialContent, response.Headers[HttpResponseHeader.ContentType]);
+                }
+            });
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1360,14 +1403,20 @@ namespace System.Net.Tests
             Assert.Equal(remoteServer, request.RequestUri);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task ResponseUri_GetResponseAsync_ExpectSameUri(Uri remoteServer)
+        [Fact]
+        public async Task ResponseUri_GetResponseAsync_ExpectSameUri()
         {
-            HttpWebRequest request = WebRequest.CreateHttp(remoteServer);
-            using (WebResponse response = await request.GetResponseAsync())
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                Assert.Equal(remoteServer, response.ResponseUri);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync();
+                using (WebResponse response = await getResponse)
+                {
+                    Assert.Equal(uri, response.ResponseUri);
+                }
+            });
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1377,56 +1426,62 @@ namespace System.Net.Tests
             Assert.True(request.SupportsCookieContainer);
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task SimpleScenario_UseGETVerb_Success(Uri remoteServer)
+        [Fact]
+        public async Task SimpleScenario_UseGETVerb_Success()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream responseStream = response.GetResponseStream())
-            using (var sr = new StreamReader(responseStream))
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                string responseBody = sr.ReadToEnd();
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync();
+                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            });
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task SimpleScenario_UsePOSTVerb_Success(Uri remoteServer)
+        [Fact]
+        public async Task SimpleScenario_UsePOSTVerb_Success()
         {
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.Method = HttpMethod.Post.Method;
-
-            using (Stream requestStream = await request.GetRequestStreamAsync())
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
-            }
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.Method = HttpMethod.Post.Method;
 
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream responseStream = response.GetResponseStream())
-            using (var sr = new StreamReader(responseStream))
-            {
-                string responseBody = sr.ReadToEnd();
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-            }
+                using (Stream requestStream = await request.GetRequestStreamAsync())
+                {
+                    requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
+                }
+
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                await server.HandleRequestAsync();
+                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
+                {
+                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+                }
+            });
         }
 
-        [Theory, MemberData(nameof(EchoServers))]
-        public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(Uri remoteServer)
+        [Fact]
+        public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent()
         {
             const string ContentType = "text/plain; charset=utf-8";
-            HttpWebRequest request = HttpWebRequest.CreateHttp(remoteServer);
-            request.ContentType = ContentType;
 
-            using (HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync())
-            using (Stream responseStream = response.GetResponseStream())
-            using (var sr = new StreamReader(responseStream))
+            await LoopbackServer.CreateServerAsync(async (server, uri) =>
             {
-                string responseBody = sr.ReadToEnd();
-                _output.WriteLine(responseBody);
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ContentType = ContentType;
 
-                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                Assert.True(responseBody.Contains($"\"Content-Type\": \"{ContentType}\""));
-            }
+                Task<WebResponse> getResponse = request.GetResponseAsync();
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Content-Type", ContentType) });
+                Assert.Equal(ContentType, requestData.GetSingleHeaderValue("Content-Type"));
+                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
+                {
+                    Assert.Equal(ContentType, response.Headers[HttpResponseHeader.ContentType]);
+                }
+            });
         }
 
         [Theory, MemberData(nameof(EchoServers))]
