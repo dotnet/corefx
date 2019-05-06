@@ -30,7 +30,7 @@ internal static partial class Interop
 
             if (ret != 1)
             {
-                CryptoPool.Return(bytes, clearSize: 0);
+                CryptoPool.Return(bytes);
                 throw Interop.Crypto.CreateOpenSslCryptographicException();
             }
 
