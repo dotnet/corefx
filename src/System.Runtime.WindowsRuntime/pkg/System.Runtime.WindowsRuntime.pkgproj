@@ -62,6 +62,15 @@
     </PackageFile>
     <PackageFile Include=".\build\net461\System.Runtime.WindowsRuntime.targets">
       <TargetPath>\build\net461\</TargetPath>
+    </PackageFile> 
+    <PackageFile Include=".\build\net45\System.Runtime.WindowsRuntime.targets">
+      <TargetPath>\buildTransitive\net45\</TargetPath>
+    </PackageFile>
+    <PackageFile Include=".\build\net451\System.Runtime.WindowsRuntime.targets">
+      <TargetPath>\buildTransitive\net451\</TargetPath>
+    </PackageFile>
+    <PackageFile Include=".\build\net461\System.Runtime.WindowsRuntime.targets">
+      <TargetPath>\buildTransitive\net461\</TargetPath>
     </PackageFile>
 
     <!-- this package is part of the implementation closure of NETStandard.Library
