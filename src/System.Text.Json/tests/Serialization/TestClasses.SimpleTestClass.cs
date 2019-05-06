@@ -69,7 +69,7 @@ namespace System.Text.Json.Serialization.Tests
         public ImmutableList<string> MyStringImmutableListT { get; set; }
         public ImmutableStack<string> MyStringImmutableStackT { get; set; }
         public ImmutableQueue<string> MyStringImmutablQueueT { get; set; }
-        public  ImmutableSortedSet<string> MyStringImmutableSortedSetT { get; set; }
+        public ImmutableSortedSet<string> MyStringImmutableSortedSetT { get; set; }
 
         public static readonly string s_json = $"{{{s_partialJsonProperties},{s_partialJsonArrays}}}";
         public static readonly string s_json_flipped = $"{{{s_partialJsonArrays},{s_partialJsonProperties}}}";

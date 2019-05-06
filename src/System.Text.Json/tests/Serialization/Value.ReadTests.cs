@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -50,6 +51,9 @@ namespace System.Text.Json.Serialization.Tests
             int[] i = JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[1,2]"));
             Assert.Equal(1, i[0]);
             Assert.Equal(2, i[1]);
+
+            i = JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, i.Length);
         }
 
         [Fact]
@@ -311,6 +315,9 @@ namespace System.Text.Json.Serialization.Tests
             List<int> i = JsonSerializer.Parse<List<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
             Assert.Equal(1, i[0]);
             Assert.Equal(2, i[1]);
+
+            i = JsonSerializer.Parse<List<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, i.Count);
         }
 
         [Fact]
@@ -368,6 +375,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<IEnumerable<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -425,6 +435,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<IList<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -482,6 +495,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<ICollection<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -539,6 +555,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<IReadOnlyCollection<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -596,6 +615,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<IReadOnlyList<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -657,6 +679,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected--, i);
             }
+
+            result = JsonSerializer.Parse<Stack<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -714,6 +739,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+            result = JsonSerializer.Parse<Queue<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
+
         }
 
         [Fact]
@@ -771,6 +799,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<HashSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -828,6 +859,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<LinkedList<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -855,6 +889,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<SortedSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -912,6 +949,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<IImmutableList<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -973,6 +1013,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected--, i);
             }
+
+            result = JsonSerializer.Parse<IImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -1030,6 +1073,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<IImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -1095,6 +1141,9 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             Assert.Equal(0, expected.Count);
+
+            result = JsonSerializer.Parse<IImmutableSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -1160,6 +1209,9 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             Assert.Equal(0, expected.Count);
+
+            result = JsonSerializer.Parse<ImmutableHashSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -1217,6 +1269,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<ImmutableList<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -1278,6 +1333,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected--, i);
             }
+
+            result = JsonSerializer.Parse<ImmutableStack<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -1335,6 +1393,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<ImmutableQueue<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         [Fact]
@@ -1362,6 +1423,9 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal(expected++, i);
             }
+
+            result = JsonSerializer.Parse<ImmutableSortedSet<int>>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, result.Count());
         }
 
         public class TestClassWithBadData

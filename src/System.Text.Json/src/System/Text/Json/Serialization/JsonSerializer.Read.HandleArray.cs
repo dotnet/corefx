@@ -113,7 +113,7 @@ namespace System.Text.Json.Serialization
 
                 Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
                 Type elementType = state.Current.GetElementType();
-                value = converter.CreateFromList(enumerableType, elementType, (IList)value, ref reader, ref state);
+                value = converter.CreateFromList(enumerableType, elementType, (IList)value);
                 setPropertyDirectly = true;
             }
             else

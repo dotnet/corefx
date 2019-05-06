@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json.Serialization.Policies;
@@ -11,40 +13,10 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultIEnumerableConstructibleConverter : JsonEnumerableConverter
     {
-        // This method is invoked with reflection in CreateFromList.
-        private static IEnumerable CreateFromListInternal<TEnumerable, TElement>(IList sourceList)
+        public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
         {
-            List<TElement> list = new List<TElement>();
-
-            foreach (object item in sourceList)
-            {
-                if (item is TElement itemTElement)
-                {
-                    list.Add(itemTElement);
-                }
-            }
-
-            return (IEnumerable)Activator.CreateInstance(typeof(TEnumerable), list);
-        }
-
-        public override IEnumerable CreateFromList(
-            Type enumerableType,
-            Type elementType,
-            IList sourceList,
-            ref Utf8JsonReader reader,
-            ref ReadStack state)
-        {
-            MethodInfo mi = typeof(DefaultIEnumerableConstructibleConverter).GetMethod(
-                "CreateFromListInternal",
-                BindingFlags.NonPublic | BindingFlags.Static);
-
-            if (mi == null)
-            {
-                return sourceList;
-            }
-
-            MethodInfo createFromListInternalMethod = mi.MakeGenericMethod(enumerableType, elementType);
-            return (IEnumerable)createFromListInternalMethod.Invoke(null, new object[] { sourceList });
+            Array array = CreateArrayFromList(elementType, sourceList);
+            return (IEnumerable)Activator.CreateInstance(enumerableType, array);
         }
     }
 }

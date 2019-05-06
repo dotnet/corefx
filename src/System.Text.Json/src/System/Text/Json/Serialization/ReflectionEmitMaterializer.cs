@@ -3,9 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 #if BUILDING_INBOX_LIBRARY
+using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
 using System.Reflection.Emit;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -33,6 +35,26 @@ namespace System.Text.Json.Serialization
             generator.Emit(OpCodes.Ret);
 
             return (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(typeof(JsonClassInfo.ConstructorDelegate));
+        }
+
+        public override object ImmutableCreateRange(Type constructingType, Type elementType)
+        {
+            MethodInfo createRange = ImmutableCreateRangeMethod(constructingType, elementType);
+
+            // TODO: create dynamic method and generate IL.
+
+            return createRange.CreateDelegate(
+                typeof(DefaultImmutableConverter.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+        }
+
+        public override DefaultImmutableConverter.CreateImmutableCollectionDelegate CreateImmutableCollection(Type elementType)
+        {
+            MethodInfo createImmutableFromList = CreateImmutableFromListMethod(elementType);
+
+            // TODO: create dynamic method and generate IL.
+
+            return (DefaultImmutableConverter.CreateImmutableCollectionDelegate)createImmutableFromList.CreateDelegate(
+                typeof(DefaultImmutableConverter.CreateImmutableCollectionDelegate), null);
         }
     }
 }

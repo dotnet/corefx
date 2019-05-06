@@ -42,6 +42,7 @@ namespace System.Text.Json.Serialization
 
         public bool IgnoreNullValues { get; private set; }
 
+        internal JsonClassInfo.ConstructorDelegate CreateImmutableCollectionFromList { get; private set; }
 
         // todo: to minimize hashtable lookups, cache JsonClassInfo:
         //public JsonClassInfo ClassInfo;
@@ -227,17 +228,20 @@ namespace System.Text.Json.Serialization
                             EnumerableConverter = s_jsonEnumerableConverter;
                         }
                         // Else if IList can't be assigned from the property type (we populate and return an IList directly)
-                        // and the type can be constructed with an IEnumerable<T>, in this case List<T>, then use the
+                        // and the type can be constructed with an IEnumerable<T>, then use the
                         // IEnumerableConstructible converter to create the instance.
                         else if (!typeof(IList).IsAssignableFrom(RuntimePropertyType) &&
                             RuntimePropertyType.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null)
                         {
                             EnumerableConverter = s_jsonIEnumerableConstuctibleConverter;
                         }
-                        // Else if it's a generic System.Collections.Immutable type.
-                        else if (RuntimePropertyType.IsGenericType &&  RuntimePropertyType.FullName.StartsWith(DefaultImmutableConverter.ImmutableNamespace))
+                        // Else if it's a System.Collections.Immutable type with one generic argument.
+                        else if (RuntimePropertyType.IsGenericType &&
+                            RuntimePropertyType.FullName.StartsWith(DefaultImmutableConverter.ImmutableNamespace) &&
+                            RuntimePropertyType.GetGenericArguments().Length == 1)
                         {
                             EnumerableConverter = s_jsonImmutableConverter;
+                            ((DefaultImmutableConverter)EnumerableConverter).RegisterImmutableCollectionType(RuntimePropertyType, elementType, options);
                         }
                     }
                 }

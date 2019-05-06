@@ -19,10 +19,7 @@ namespace System.Text.Json.Serialization.Converters
 
             foreach (object item in sourceList)
             {
-                if (item is T itemT)
-                {
-                    _list.Add(itemT);
-                }
+                _list.Add((T)item);
             }
         }
 
@@ -85,12 +82,7 @@ namespace System.Text.Json.Serialization.Converters
 
     internal sealed class DefaultEnumerableConverter : JsonEnumerableConverter
     {
-        public override IEnumerable CreateFromList(
-            Type enumerableType,
-            Type elementType,
-            IList sourceList,
-            ref Utf8JsonReader reader,
-            ref ReadStack state)
+        public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
         {
             Type t = typeof(JsonEnumerableT<>).MakeGenericType(elementType);
             return (IEnumerable)Activator.CreateInstance(t, sourceList);

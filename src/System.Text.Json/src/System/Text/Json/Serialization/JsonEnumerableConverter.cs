@@ -8,11 +8,32 @@ namespace System.Text.Json.Serialization.Policies
 {
     internal abstract class JsonEnumerableConverter
     {
-        public abstract IEnumerable CreateFromList(
-            Type enumerableType,
-            Type elementType,
-            IList sourceList,
-            ref Utf8JsonReader reader,
-            ref ReadStack state);
+        public abstract IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList);
+
+        protected static Array CreateArrayFromList(Type elementType, IList sourceList)
+        {
+            Array array;
+
+            if (sourceList.Count > 0 && sourceList[0] is Array probe)
+            {
+                array = Array.CreateInstance(probe.GetType(), sourceList.Count);
+
+                int i = 0;
+                foreach (IList child in sourceList)
+                {
+                    if (child is Array childArray)
+                    {
+                        array.SetValue(childArray, i++);
+                    }
+                }
+            }
+            else
+            {
+                array = Array.CreateInstance(elementType, sourceList.Count);
+                sourceList.CopyTo(array, 0);
+            }
+
+            return array;
+        }
     }
 }
