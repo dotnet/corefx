@@ -21,19 +21,22 @@ namespace System.IO.Compression
         private int _windowBits;                            // The WindowBits parameter passed to Inflater construction
         private ZLibNative.ZLibStreamHandle _zlibStream;    // The handle to the primary underlying zlib stream
         private GCHandle _inputBufferHandle;                // The handle to the buffer that provides input to _zlibStream
+        private long _uncompressedSize;
+        private long _currenInflatedCount = 0;
 
         private object SyncLock => this;                    // Used to make writing to unmanaged structures atomic
 
         /// <summary>
         /// Initialized the Inflater with the given windowBits size
         /// </summary>
-        internal Inflater(int windowBits)
+        internal Inflater(int windowBits, long uncompressedSize = -1)
         {
             Debug.Assert(windowBits >= MinWindowBits && windowBits <= MaxWindowBits);
             _finished = false;
             _isDisposed = false;
             _windowBits = windowBits;
             InflateInit(windowBits);
+            _uncompressedSize = uncompressedSize;
         }
 
         public int AvailableOutput => (int)_zlibStream.AvailOut;
@@ -95,6 +98,12 @@ namespace System.IO.Compression
                         _finished = true;
                     }
                 }
+
+                bytesRead = RestrictStreamWithUnCompressedSize(bytesRead, out bool wasOverLimit);
+
+                if (wasOverLimit)
+                    throw new InvalidDataException(SR.GenericInvalidData);
+
                 return bytesRead;
             }
             finally
@@ -105,6 +114,18 @@ namespace System.IO.Compression
                     DeallocateInputBufferHandle();
                 }
             }
+        }
+
+        private int RestrictStreamWithUnCompressedSize(int bytesRead, out bool wasOverLimit)
+        {
+            wasOverLimit = false;
+            if (_uncompressedSize > 0 && _uncompressedSize - _currenInflatedCount < bytesRead)
+            {
+                wasOverLimit = true;
+                bytesRead = (int)(_uncompressedSize - _currenInflatedCount);
+            }
+            _currenInflatedCount += bytesRead;
+            return bytesRead;
         }
 
         /// <summary>

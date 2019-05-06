@@ -64,10 +64,12 @@ namespace System.IO.Compression
         private readonly byte[] _codeLengthTreeCodeLength;
         private readonly bool _deflate64;
         private HuffmanTree _codeLengthTree;
+        private long _uncompressedSize = -1;
+        private long _currenInflatedCount = 0;
 
         private IFileFormatReader _formatReader; // class to decode header and footer (e.g. gzip)
 
-        internal InflaterManaged(IFileFormatReader reader, bool deflate64)
+        internal InflaterManaged(IFileFormatReader reader, bool deflate64, long uncompressedSize)
         {
             _output = new OutputWindow();
             _input = new InputBuffer();
@@ -75,6 +77,7 @@ namespace System.IO.Compression
             _codeList = new byte[HuffmanTree.MaxLiteralTreeElements + HuffmanTree.MaxDistTreeElements];
             _codeLengthTreeCodeLength = new byte[HuffmanTree.NumberOfCodeLengthTreeElements];
             _deflate64 = deflate64;
+            _uncompressedSize = uncompressedSize;
             if (reader != null)
             {
                 _formatReader = reader;
@@ -134,8 +137,24 @@ namespace System.IO.Compression
                     _formatReader.Validate();
                 }
             }
+            count = RestrictStreamWithUnCompressedSize(count, out bool wasOverLimit);
+
+            if (wasOverLimit)
+                throw new InvalidDataException(SR.GenericInvalidData);
 
             return count;
+        }
+
+        private int RestrictStreamWithUnCompressedSize(int bytesRead, out bool wasOverLimit)
+        {
+            wasOverLimit = false;
+            if (_uncompressedSize > 0 && _uncompressedSize - _currenInflatedCount < bytesRead)
+            {
+                wasOverLimit = true;
+                bytesRead = (int)(_uncompressedSize - _currenInflatedCount);
+            }
+            _currenInflatedCount += bytesRead;
+            return bytesRead;
         }
 
         //Each block of compressed data begins with 3 header bits
