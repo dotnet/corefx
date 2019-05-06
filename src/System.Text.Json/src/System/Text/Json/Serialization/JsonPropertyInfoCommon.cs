@@ -16,8 +16,8 @@ namespace System.Text.Json.Serialization
     /// </summary>
     internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty> : JsonPropertyInfo
     {
-        public Func<object, TDeclaredProperty> Get { get; }
-        public Action<object, TDeclaredProperty> Set { get; }
+        public Func<object, TDeclaredProperty> Get { get; private set; }
+        public Action<object, TDeclaredProperty> Set { get; private set; }
 
         public JsonValueConverter<TRuntimeProperty> ValueConverter { get; internal set; }
 
