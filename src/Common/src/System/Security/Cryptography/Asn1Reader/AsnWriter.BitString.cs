@@ -117,6 +117,7 @@ namespace System.Security.Cryptography.Asn1
             _offset += bitString.Length;
         }
 
+#if netcoreapp || uap || NETCOREAPP
         /// <summary>
         ///   Write a Bit String value via a callback, with a tag UNIVERSAL 3.
         /// </summary>
@@ -281,6 +282,7 @@ namespace System.Security.Cryptography.Asn1
                 _offset += byteLength;
             }
         }
+#endif
 
         private static bool CheckValidLastByte(byte lastByte, int unusedBitCount)
         {
