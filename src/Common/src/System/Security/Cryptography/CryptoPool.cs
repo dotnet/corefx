@@ -11,9 +11,7 @@ namespace System.Security.Cryptography
     {
         internal const int ClearAll = -1;
 
-        private static readonly ArrayPool<byte> s_pool = ArrayPool<byte>.Create();
-
-        internal static byte[] Rent(int minimumLength) => s_pool.Rent(minimumLength);
+        internal static byte[] Rent(int minimumLength) => ArrayPool<byte>.Shared.Rent(minimumLength);
 
         internal static void Return(byte[] array, int clearSize = ClearAll)
         {
@@ -25,7 +23,7 @@ namespace System.Security.Cryptography
                 Array.Clear(array, 0, clearSize);
             }
 
-            s_pool.Return(array, clearWholeArray);
+            ArrayPool<byte>.Shared.Return(array, clearWholeArray);
         }
     }
 }
