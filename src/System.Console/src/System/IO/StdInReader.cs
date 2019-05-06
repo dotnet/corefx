@@ -17,6 +17,7 @@ namespace System.IO
     internal sealed class StdInReader : TextReader
     {
         private static string s_moveLeftString; // string written to move the cursor to the left
+        private static string s_clearToEol;     // string written to clear from cursor to end of line
 
         private readonly StringBuilder _readLineSB; // SB that holds readLine output.  This is a field simply to enable reuse; it's only used in ReadLine.
         private readonly Stack<ConsoleKeyInfo> _tmpKeys = new Stack<ConsoleKeyInfo>(); // temporary working stack; should be empty outside of ReadLine
@@ -136,24 +137,29 @@ namespace System.IO
                             _readLineSB.Length = len - 1;
                             if (!previouslyProcessed)
                             {
-                                if (s_moveLeftString == null)
-                                {
-                                    string moveLeft = ConsolePal.TerminalFormatStrings.Instance.CursorLeft;
-                                    s_moveLeftString = !string.IsNullOrEmpty(moveLeft) ? moveLeft + " " + moveLeft : string.Empty;
-                                }
-
                                 // The ReadLine input may wrap accross terminal rows and we need to handle that.
                                 // note: ConsolePal will cache the cursor position to avoid making many slow cursor position fetch operations.
                                 if (ConsolePal.TryGetCursorPosition(out int left, out int top, reinitializeForRead: true) &&
                                     left == 0 && top > 0)
                                 {
+                                    if (s_clearToEol == null)
+                                    {
+                                        s_clearToEol = ConsolePal.TerminalFormatStrings.Instance.ClrEol ?? string.Empty;
+                                    }
+
                                     // Move to end of previous line
                                     ConsolePal.SetCursorPosition(ConsolePal.WindowWidth - 1, top - 1);
                                     // Clear from cursor to end of the line
-                                    ConsolePal.WriteStdoutAnsiString("\x1B[K", mayChangeCursorPosition: false);
+                                    ConsolePal.WriteStdoutAnsiString(s_clearToEol, mayChangeCursorPosition: false);
                                 }
                                 else
                                 {
+                                    if (s_moveLeftString == null)
+                                    {
+                                        string moveLeft = ConsolePal.TerminalFormatStrings.Instance.CursorLeft;
+                                        s_moveLeftString = !string.IsNullOrEmpty(moveLeft) ? moveLeft + " " + moveLeft : string.Empty;
+                                    }
+
                                     Console.Write(s_moveLeftString);
                                 }
                             }

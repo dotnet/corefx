@@ -1004,6 +1004,8 @@ namespace System
             public readonly string CursorAddress;
             /// <summary>The format string to use to move the cursor to the left.</summary>
             public readonly string CursorLeft;
+            /// <summary>The format string to use to clear to the end of line.</summary>
+            public readonly string ClrEol;
             /// <summary>The ANSI-compatible string for the Cursor Position report request.</summary>
             /// <remarks>
             /// This should really be in user string 7 in the terminfo file, but some terminfo databases
@@ -1042,6 +1044,7 @@ namespace System
                 CursorInvisible = db.GetString(TermInfo.WellKnownStrings.CursorInvisible);
                 CursorAddress = db.GetString(TermInfo.WellKnownStrings.CursorAddress);
                 CursorLeft = db.GetString(TermInfo.WellKnownStrings.CursorLeft);
+                ClrEol = db.GetString(TermInfo.WellKnownStrings.ClrEol);
 
                 Title = GetTitle(db);
 
