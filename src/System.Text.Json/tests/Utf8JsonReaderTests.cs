@@ -2426,7 +2426,7 @@ namespace System.Text.Json.Tests
         {
             if (expectThrow)
             {
-                Assert.Throws<JsonException>(() => PartialReaderLoop(utf8, state));
+                Assert.ThrowsAny<JsonException>(() => PartialReaderLoop(utf8, state));
             }
             else
             {

@@ -368,7 +368,7 @@ namespace System.Text.Json
                         {
                             if (shouldThrow)
                             {
-                                ThrowHelper.ThrowJsonException(
+                                ThrowHelper.ThrowJsonReaderException(
                                     ref reader,
                                     ExceptionResource.ExpectedJsonTokens);
                             }
@@ -404,7 +404,7 @@ namespace System.Text.Json
                                 {
                                     if (shouldThrow)
                                     {
-                                        ThrowHelper.ThrowJsonException(
+                                        ThrowHelper.ThrowJsonReaderException(
                                             ref reader,
                                             ExceptionResource.ExpectedJsonTokens);
                                     }
@@ -518,7 +518,7 @@ namespace System.Text.Json
                                 displayByte = reader.ValueSpan[0];
                             }
 
-                            ThrowHelper.ThrowJsonException(
+                            ThrowHelper.ThrowJsonReaderException(
                                 ref reader,
                                 ExceptionResource.ExpectedStartOfValueNotFound,
                                 displayByte);

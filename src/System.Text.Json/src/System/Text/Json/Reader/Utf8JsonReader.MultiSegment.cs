@@ -141,7 +141,7 @@ namespace System.Text.Json
                 {
                     if (first != JsonConstants.Quote)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
                     }
 
                     long prevTotalConsumed = _totalConsumed;
@@ -202,7 +202,7 @@ namespace System.Text.Json
 
             if (_bitStack.CurrentDepth != 0)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ZeroDepthAtEnd);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ZeroDepthAtEnd);
             }
 
             if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && _tokenType == JsonTokenType.Comment)
@@ -212,7 +212,7 @@ namespace System.Text.Json
 
             if (_tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
             }
 
             return true;
@@ -253,13 +253,13 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, resource);
+                    ThrowHelper.ThrowJsonReaderException(ref this, resource);
                 }
                 if (!GetNextSpan())
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, resource);
+                        ThrowHelper.ThrowJsonReaderException(ref this, resource);
                     }
                     return false;
                 }
@@ -438,13 +438,13 @@ namespace System.Text.Json
                                     {
                                         if (_isNotPrimitive && IsLastSpan && _tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
                                         {
-                                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
+                                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
                                         }
                                         if (!GetNextSpan())
                                         {
                                             if (_isNotPrimitive && IsLastSpan && _tokenType != JsonTokenType.EndArray && _tokenType != JsonTokenType.EndObject)
                                             {
-                                                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
+                                                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidEndOfJsonNonPrimitive);
                                             }
                                             _currentPosition = copy;
                                             return false;
@@ -475,7 +475,7 @@ namespace System.Text.Json
                             }
                             break;
                     }
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
                 }
                 break;
             }
@@ -640,7 +640,7 @@ namespace System.Text.Json
                     resource = ExceptionResource.ExpectedNull;
                     break;
             }
-            return ThrowHelper.GetJsonException(ref this, resource, nextByte: default, bytes: span);
+            return ThrowHelper.GetJsonReaderException(ref this, resource, nextByte: default, bytes: span);
         }
 
         private bool ConsumeNumberMultiSegment()
@@ -660,7 +660,7 @@ namespace System.Text.Json
                 // If there is no more data, and the JSON is not a single value, throw.
                 if (_isNotPrimitive)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
                 }
             }
 
@@ -707,7 +707,7 @@ namespace System.Text.Json
             // The next character must be a key / value seperator. Validate and skip.
             if (first != JsonConstants.KeyValueSeperator)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedSeparatorAfterPropertyNameNotFound, first);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedSeparatorAfterPropertyNameNotFound, first);
             }
 
             _consumed++;
@@ -752,7 +752,7 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.EndOfStringNotFound);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                 }
                 return ConsumeStringNextSegment();
             }
@@ -779,7 +779,7 @@ namespace System.Text.Json
                     _currentPosition = startPosition;
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.EndOfStringNotFound);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                     }
                     return false;
                 }
@@ -833,7 +833,7 @@ namespace System.Text.Json
                                     if (index == -1)
                                     {
                                         _currentPosition = startPosition;
-                                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidCharacterAfterEscapeWithinString, currentByte);
+                                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterAfterEscapeWithinString, currentByte);
                                     }
 
                                     if (currentByte == JsonConstants.Quote)
@@ -865,7 +865,7 @@ namespace System.Text.Json
                                                 if (!JsonReaderHelper.IsHexDigit(nextByte))
                                                 {
                                                     _currentPosition = startPosition;
-                                                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidHexCharacterWithinString, nextByte);
+                                                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidHexCharacterWithinString, nextByte);
                                                 }
                                                 if (j - idx > numberOfHexDigits)
                                                 {
@@ -884,7 +884,7 @@ namespace System.Text.Json
                                                 _currentPosition = startPosition;
                                                 if (IsLastSpan)
                                                 {
-                                                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.EndOfStringNotFound);
+                                                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                                                 }
 
                                                 // We found less than 4 hex digits.
@@ -911,7 +911,7 @@ namespace System.Text.Json
                                 else if (currentByte < JsonConstants.Space)
                                 {
                                     _currentPosition = startPosition;
-                                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
+                                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
                                 }
 
                                 _bytePositionInLine++;
@@ -922,7 +922,7 @@ namespace System.Text.Json
                                 _currentPosition = startPosition;
                                 if (IsLastSpan)
                                 {
-                                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.EndOfStringNotFound);
+                                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                                 }
                                 _lineNumber = prevLineNumber;
                                 _bytePositionInLine = prevPosition;
@@ -1001,7 +1001,7 @@ namespace System.Text.Json
                         if (index == -1)
                         {
                             _currentPosition = startPosition;
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidCharacterAfterEscapeWithinString, currentByte);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterAfterEscapeWithinString, currentByte);
                         }
 
                         if (currentByte == JsonConstants.Quote)
@@ -1032,7 +1032,7 @@ namespace System.Text.Json
                                     if (!JsonReaderHelper.IsHexDigit(nextByte))
                                     {
                                         _currentPosition = startPosition;
-                                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidHexCharacterWithinString, nextByte);
+                                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidHexCharacterWithinString, nextByte);
                                     }
                                     if (j - idx > numberOfHexDigits)
                                     {
@@ -1051,7 +1051,7 @@ namespace System.Text.Json
                                     _currentPosition = startPosition;
                                     if (IsLastSpan)
                                     {
-                                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.EndOfStringNotFound);
+                                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                                     }
 
                                     // We found less than 4 hex digits.
@@ -1082,7 +1082,7 @@ namespace System.Text.Json
                     else if (currentByte < JsonConstants.Space)
                     {
                         _currentPosition = startPosition;
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterWithinString, currentByte);
                     }
 
                     _bytePositionInLine++;
@@ -1093,7 +1093,7 @@ namespace System.Text.Json
                     _currentPosition = startPosition;
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.EndOfStringNotFound);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.EndOfStringNotFound);
                     }
                     _lineNumber = prevLineNumber;
                     _bytePositionInLine = prevLineBytePosition;
@@ -1202,7 +1202,7 @@ namespace System.Text.Json
                 if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
                 {
                     _currentPosition = startPosition;
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
                 }
             }
 
@@ -1231,7 +1231,7 @@ namespace System.Text.Json
                 if (nextByte != 'E' && nextByte != 'e')
                 {
                     _currentPosition = startPosition;
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedNextDigitEValueNotFound, nextByte);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedNextDigitEValueNotFound, nextByte);
                 }
             }
 
@@ -1271,7 +1271,7 @@ namespace System.Text.Json
             Debug.Assert(resultExponent == ConsumeNumberResult.OperationIncomplete);
 
             _currentPosition = startPosition;
-            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, data[i]);
+            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, data[i]);
 
         Done:
             if (HasValueSequence)
@@ -1301,13 +1301,13 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
                     if (!GetNextSpan())
                     {
                         if (IsLastSpan)
                         {
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                         }
                         return ConsumeNumberResult.NeedMoreData;
                     }
@@ -1320,7 +1320,7 @@ namespace System.Text.Json
                 nextByte = data[i];
                 if (!JsonHelpers.IsDigit(nextByte))
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
                 }
             }
             return ConsumeNumberResult.OperationIncomplete;
@@ -1372,7 +1372,7 @@ namespace System.Text.Json
             nextByte = data[i];
             if (nextByte != '.' && nextByte != 'E' && nextByte != 'e')
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, nextByte);
             }
 
             return ConsumeNumberResult.OperationIncomplete;
@@ -1462,13 +1462,13 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                 }
                 if (!GetNextSpan())
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
                     return ConsumeNumberResult.NeedMoreData;
                 }
@@ -1480,7 +1480,7 @@ namespace System.Text.Json
             byte nextByte = data[i];
             if (!JsonHelpers.IsDigit(nextByte))
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundAfterDecimal, nextByte);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterDecimal, nextByte);
             }
             i++;
             _bytePositionInLine++;
@@ -1493,14 +1493,14 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                 }
 
                 if (!GetNextSpan())
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
                     return ConsumeNumberResult.NeedMoreData;
                 }
@@ -1518,14 +1518,14 @@ namespace System.Text.Json
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                     }
 
                     if (!GetNextSpan())
                     {
                         if (IsLastSpan)
                         {
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundEndOfData);
                         }
                         return ConsumeNumberResult.NeedMoreData;
                     }
@@ -1539,7 +1539,7 @@ namespace System.Text.Json
 
             if (!JsonHelpers.IsDigit(nextByte))
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.RequiredDigitNotFoundAfterSign, nextByte);
             }
 
             return ConsumeNumberResult.OperationIncomplete;
@@ -1600,7 +1600,7 @@ namespace System.Text.Json
 
             if (_bitStack.CurrentDepth == 0)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, marker);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, marker);
             }
 
             if (marker == JsonConstants.ListSeparator)
@@ -1614,7 +1614,7 @@ namespace System.Text.Json
                     {
                         _consumed--;
                         _bytePositionInLine--;
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
                     }
                     if (!GetNextSpan())
                     {
@@ -1622,7 +1622,7 @@ namespace System.Text.Json
                         {
                             _consumed--;
                             _bytePositionInLine--;
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
                         }
                         return ConsumeTokenResult.NotEnoughDataRollBackState;
                     }
@@ -1660,9 +1660,9 @@ namespace System.Text.Json
                                 EndObject();
                                 return ConsumeTokenResult.Success;
                             }
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd);
                         }
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
                     }
                     return ConsumePropertyNameMultiSegment() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
@@ -1675,7 +1675,7 @@ namespace System.Text.Json
                             EndArray();
                             return ConsumeTokenResult.Success;
                         }
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd);
                     }
                     return ConsumeValueMultiSegment(first) ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
@@ -1690,7 +1690,7 @@ namespace System.Text.Json
             }
             else
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.FoundInvalidCharacter, marker);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.FoundInvalidCharacter, marker);
             }
             return ConsumeTokenResult.Success;
         }
@@ -1731,7 +1731,7 @@ namespace System.Text.Json
 
             if (_bitStack.CurrentDepth == 0 && _tokenType != JsonTokenType.None)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, first);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, first);
             }
 
             Debug.Assert(first != JsonConstants.Slash);
@@ -1743,7 +1743,7 @@ namespace System.Text.Json
                 // A comma without some JSON value preceding it is invalid
                 if (_previousTokenType <= JsonTokenType.StartObject || _previousTokenType == JsonTokenType.StartArray || _trailingCommaBeforeComment)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueAfterComment, first);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueAfterComment, first);
                 }
 
                 _consumed++;
@@ -1755,7 +1755,7 @@ namespace System.Text.Json
                     {
                         _consumed--;
                         _bytePositionInLine--;
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
                     }
                     if (!GetNextSpan())
                     {
@@ -1763,7 +1763,7 @@ namespace System.Text.Json
                         {
                             _consumed--;
                             _bytePositionInLine--;
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
                         }
                         goto RollBack;
                     }
@@ -1808,10 +1808,10 @@ namespace System.Text.Json
                                 EndObject();
                                 goto Done;
                             }
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd);
                         }
 
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
                     }
                     if (ConsumePropertyNameMultiSegment())
                     {
@@ -1831,7 +1831,7 @@ namespace System.Text.Json
                             EndArray();
                             goto Done;
                         }
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd);
                     }
 
                     if (ConsumeValueMultiSegment(first))
@@ -1873,7 +1873,7 @@ namespace System.Text.Json
                 {
                     if (first != JsonConstants.Quote)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, first);
                     }
 
                     long prevTotalConsumed = _totalConsumed;
@@ -2019,7 +2019,7 @@ namespace System.Text.Json
                 {
                     if (marker != JsonConstants.Quote)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, marker);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, marker);
                     }
 
                     long prevTotalConsumed = _totalConsumed;
@@ -2066,7 +2066,7 @@ namespace System.Text.Json
             }
             else if (_bitStack.CurrentDepth == 0)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, marker);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndAfterSingleJson, marker);
             }
             else if (marker == JsonConstants.ListSeparator)
             {
@@ -2079,7 +2079,7 @@ namespace System.Text.Json
                     {
                         _consumed--;
                         _bytePositionInLine--;
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
                     }
                     if (!GetNextSpan())
                     {
@@ -2087,7 +2087,7 @@ namespace System.Text.Json
                         {
                             _consumed--;
                             _bytePositionInLine--;
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyOrValueNotFound);
                         }
                         return ConsumeTokenResult.NotEnoughDataRollBackState;
                     }
@@ -2124,10 +2124,10 @@ namespace System.Text.Json
                                 EndObject();
                                 goto Done;
                             }
-                            ThrowHelper.ThrowJsonException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd);
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeObjectEnd);
                         }
 
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, marker);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfPropertyNotFound, marker);
                     }
                     return ConsumePropertyNameMultiSegment() ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
@@ -2140,7 +2140,7 @@ namespace System.Text.Json
                             EndArray();
                             goto Done;
                         }
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.TrailingCommaNotAllowedBeforeArrayEnd);
                     }
                     return ConsumeValueMultiSegment(marker) ? ConsumeTokenResult.Success : ConsumeTokenResult.NotEnoughDataRollBackState;
                 }
@@ -2155,7 +2155,7 @@ namespace System.Text.Json
             }
             else
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.FoundInvalidCharacter, marker);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.FoundInvalidCharacter, marker);
             }
 
         Done:
@@ -2176,14 +2176,14 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
                 }
 
                 if (!GetNextSpan())
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
                     }
                     return false;
                 }
@@ -2203,7 +2203,7 @@ namespace System.Text.Json
 
             if (marker != JsonConstants.Asterisk)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
             }
 
             return SkipMultiLineCommentMultiSegment(localBuffer.Slice(1), leftOver);
@@ -2361,14 +2361,14 @@ namespace System.Text.Json
             {
                 if (IsLastSpan)
                 {
-                    ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
                 }
 
                 if (!GetNextSpan())
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, JsonConstants.Slash);
                     }
                     return false;
                 }
@@ -2388,7 +2388,7 @@ namespace System.Text.Json
 
             if (marker != JsonConstants.Asterisk)
             {
-                ThrowHelper.ThrowJsonException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedStartOfValueNotFound, marker);
             }
 
             return ConsumeMultiLineCommentMultiSegment(localBuffer.Slice(1), leftOver, start, _consumed);

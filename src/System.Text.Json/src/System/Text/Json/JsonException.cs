@@ -11,7 +11,7 @@ namespace System.Text.Json
     /// or the JSON text is not compatible with the type of a property on an object.
     /// </summary>
     [Serializable]
-    public sealed class JsonException : Exception
+    public class JsonException : Exception
     {
         /// <summary>
         /// Creates a new exception object to relay error information to the user.
@@ -48,7 +48,7 @@ namespace System.Text.Json
             Path = path;
         }
 
-        private JsonException(SerializationInfo info, StreamingContext context) : base(info, context)
+        protected JsonException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
             LineNumber = (long?)info.GetValue("LineNumber", typeof(long?));
             BytePositionInLine = (long?)info.GetValue("BytePositionInLine", typeof(long?));

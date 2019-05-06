@@ -113,8 +113,9 @@ namespace System.Text.Json
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
     }
-    public sealed partial class JsonException : System.Exception
+    public partial class JsonException : System.Exception
     {
+        protected JsonException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public JsonException(string message, string path, long? lineNumber, long? bytePositionInLine) { }
         public JsonException(string message, string path, long? lineNumber, long? bytePositionInLine, System.Exception innerException) { }
         public long? BytePositionInLine { get { throw null; } }

@@ -119,16 +119,8 @@ namespace System.Text.Json.Serialization
                     }
                 }
             }
-            catch (JsonException e)
+            catch (JsonReaderException e)
             {
-                if (e.Path != null)
-                {
-                    // An alternative is to place the try\catch on every reader and document invocation. However, that has
-                    // overhead for the non-exception flow, so here we live with catching and re-throwing even though the
-                    // exception originated from within the serializer.
-                    throw;
-                }
-
                 // Re-throw with Path information.
                 ThrowHelper.ReThrowWithPath(e, state.PropertyPath);
             }

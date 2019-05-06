@@ -217,13 +217,13 @@ namespace System.Text.Json
                 SR.Format(SR.JsonElementHasWrongType, expectedTypeName, actualType.ToValueType()));
         }
 
-        public static void ThrowJsonException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
+        public static void ThrowJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte = default, ReadOnlySpan<byte> bytes = default)
         {
-            throw GetJsonException(ref json, resource, nextByte, bytes);
+            throw GetJsonReaderException(ref json, resource, nextByte, bytes);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        public static JsonException GetJsonException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte, ReadOnlySpan<byte> bytes)
+        public static JsonException GetJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte, ReadOnlySpan<byte> bytes)
         {
             string message = GetResourceString(ref json, resource, nextByte, Encoding.UTF8.GetString(bytes.ToArray(), 0, bytes.Length));
 
@@ -231,7 +231,7 @@ namespace System.Text.Json
             long bytePositionInLine = json.CurrentState._bytePositionInLine;
 
             message += $" LineNumber: {lineNumber} | BytePositionInLine: {bytePositionInLine}.";
-            return new JsonException(message, path : null, lineNumber, bytePositionInLine);
+            return new JsonReaderException(message, lineNumber, bytePositionInLine);
         }
 
         private static bool IsPrintable(byte value) => value >= 0x20 && value < 0x7F;
