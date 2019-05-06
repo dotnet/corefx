@@ -1951,11 +1951,13 @@ static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_
 
     switch(palAddressFamily)
     {
+#ifdef AF_PACKET
         case AddressFamily_AF_PACKET:
             // protocol is the IEEE 802.3 protocol number in network order.
             *platformProtocolType = palProtocolType;
             return true;
-
+#endif
+#ifdef AF_CAN
         case AddressFamily_AF_CAN:
             switch (palProtocolType)
             {
@@ -1971,7 +1973,7 @@ static bool TryConvertProtocolTypePalToPlatform(int32_t palAddressFamily, int32_
                     *platformProtocolType = (int)palProtocolType;
                     return false;
             }
-
+#endif
         case AddressFamily_AF_INET:
             switch (palProtocolType)
             {
