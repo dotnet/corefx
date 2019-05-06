@@ -125,8 +125,13 @@ namespace System.Linq
                 return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, count, int.MaxValue);
             }
 
-            public IPartition<TResult> Take(int count) =>
-                count >= _source.Length ? (IPartition<TResult>)this : new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
+            public IPartition<TResult> Take(int count)
+            {
+                Debug.Assert(count > 0);
+                return count >= _source.Length ?
+                    (IPartition<TResult>)this :
+                    new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
+            }
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -186,6 +191,7 @@ namespace System.Linq
                 }
 
                 int index = _state++ - 1;
+                Debug.Assert(_start < _end - index);
                 _current = _selector(_start + index);
                 return true;
             }
@@ -233,6 +239,8 @@ namespace System.Linq
 
             public IPartition<TResult> Skip(int count)
             {
+                Debug.Assert(count > 0);
+
                 if (count >= (_end - _start))
                 {
                     return EmptyPartition<TResult>.Instance;
@@ -243,6 +251,8 @@ namespace System.Linq
 
             public IPartition<TResult> Take(int count)
             {
+                Debug.Assert(count > 0);
+
                 if (count >= (_end - _start))
                 {
                     return this;
@@ -333,8 +343,11 @@ namespace System.Linq
                 return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, count, int.MaxValue);
             }
 
-            public IPartition<TResult> Take(int count) =>
-                new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
+            public IPartition<TResult> Take(int count)
+            {
+                Debug.Assert(count > 0);
+                return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
+            }
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -429,8 +442,11 @@ namespace System.Linq
                 return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, count, int.MaxValue);
             }
 
-            public IPartition<TResult> Take(int count) =>
-                new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
+            public IPartition<TResult> Take(int count)
+            {
+                Debug.Assert(count > 0);
+                return new SelectListPartitionIterator<TSource, TResult>(_source, _selector, 0, count - 1);
+            }
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -534,8 +550,11 @@ namespace System.Linq
                 return new SelectIPartitionIterator<TSource, TResult>(_source.Skip(count), _selector);
             }
 
-            public IPartition<TResult> Take(int count) =>
-                new SelectIPartitionIterator<TSource, TResult>(_source.Take(count), _selector);
+            public IPartition<TResult> Take(int count)
+            {
+                Debug.Assert(count > 0);
+                return new SelectIPartitionIterator<TSource, TResult>(_source.Take(count), _selector);
+            }
 
             public TResult TryGetElementAt(int index, out bool found)
             {
@@ -700,6 +719,7 @@ namespace System.Linq
 
             public IPartition<TResult> Take(int count)
             {
+                Debug.Assert(count > 0);
                 int maxIndex = _minIndexInclusive + count - 1;
                 return (uint)maxIndex >= (uint)_maxIndexInclusive ? this : new SelectListPartitionIterator<TSource, TResult>(_source, _selector, _minIndexInclusive, maxIndex);
             }
