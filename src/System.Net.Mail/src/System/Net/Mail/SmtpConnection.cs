@@ -36,7 +36,6 @@ namespace System.Net.Mail
         private SmtpReplyReaderFactory _responseReader;
 
         private ICredentialsByHost _credentials;
-        private int _timeout = 100000;
         private string[] _extensions;
         private ChannelBinding _channelBindingToken = null;
         private bool _enableSsl;
@@ -72,19 +71,6 @@ namespace System.Net.Mail
             }
         }
 
-        internal int Timeout
-        {
-            get
-            {
-                return _timeout;
-            }
-            set
-            {
-                _timeout = value;
-            }
-        }
-
-
         internal X509CertificateCollection ClientCertificates
         {
             get
@@ -99,8 +85,11 @@ namespace System.Net.Mail
 
         internal void InitializeConnection(string host, int port)
         {
-            _tcpClient.Connect(host, port);
-            _networkStream = _tcpClient.GetStream();
+            lock (this)
+            {
+                _tcpClient.Connect(host, port);
+                _networkStream = _tcpClient.GetStream();
+            }
         }
 
         internal IAsyncResult BeginInitializeConnection(string host, int port, AsyncCallback callback, object state)
