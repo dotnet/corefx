@@ -51,8 +51,7 @@ void SystemNative_GetNonCryptographicallySecureRandomBytes(uint8_t* buffer, int3
 
             if (fd != -1)
             {
-                int expected = -1;
-                if (!__atomic_compare_exchange_n(&rand_des, &expected, fd, false, __ATOMIC_SEQ_CST, __ATOMIC_SEQ_CST))
+                if (!__sync_bool_compare_and_swap(&rand_des, -1, fd))
                 {
                     // Another thread has already set the rand_des
                     close(fd);
