@@ -638,7 +638,6 @@ namespace System.Xml.Linq
             using (XmlWriter w = XmlWriter.Create(stream, ws))
             {
                 await WriteToAsync(w, cancellationToken).ConfigureAwait(false);
-                await w.FlushAsync().ConfigureAwait(false);
             }
         }
         
@@ -711,7 +710,6 @@ namespace System.Xml.Linq
             using (XmlWriter w = XmlWriter.Create(textWriter, ws))
             {
                 await WriteToAsync(w, cancellationToken).ConfigureAwait(false);
-                await w.FlushAsync().ConfigureAwait(false);
             }
         }
 
