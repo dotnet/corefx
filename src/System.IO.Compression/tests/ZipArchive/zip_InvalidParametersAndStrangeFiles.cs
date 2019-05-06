@@ -127,6 +127,18 @@ namespace System.IO.Compression.Tests
         }
 
         [Theory]
+        [InlineData("tttt.zip")]
+        public static void ZipArchiveEntry_CorruptedFile(string zipname)
+        {
+            string filename = bad(zipname);
+            using (ZipArchive archive = ZipFile.OpenRead(filename))
+            {
+                ZipArchiveEntry e = archive.GetEntry("tttt.txt");
+                Assert.Throws<InvalidDataException>(() => e.Open());
+            }
+        }
+
+        [Theory]
         [InlineData("CDoffsetOutOfBounds.zip")]
         [InlineData("EOCDmissing.zip")]
         public static async Task ZipArchive_InvalidStream(string zipname)

@@ -120,5 +120,14 @@ namespace System.IO.Compression.Tests
             Assert.Equal(1, results.Length);
             Assert.Equal(fileName, Path.GetFileName(results[0]));
         }
+
+        [Theory]
+        [InlineData("tttt.zip")]
+        public void ZipArchiveEntry_CorruptedFile(string zipname)
+        {
+            string filename = bad(zipname);
+            string tempDir = GetTestFilePath();
+            Assert.Throws<InvalidDataException>(() => ZipFile.ExtractToDirectory(filename, tempDir));
+        }
     }
 }

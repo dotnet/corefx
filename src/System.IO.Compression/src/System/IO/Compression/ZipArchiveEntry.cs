@@ -762,6 +762,12 @@ namespace System.IO.Compression
                     message = SR.LocalFileHeaderCorrupt;
                     return false;
                 }
+                if (OffsetOfCompressedData + _uncompressedSize < _compressedSize)
+                {
+                    message = SR.LocalFileHeaderCorrupt;
+                    return false;
+                }
+
                 // This limitation originally existed because a) it is unreasonable to load > 4GB into memory
                 // but also because the stream reading functions make it hard.  This has been updated to handle
                 // this scenario in a 64-bit process using multiple buffers, delivered first as an OOB for
