@@ -65,7 +65,7 @@ namespace System.Net
             return family;
         }
 
-        public static unsafe void SetAddressFamily(byte[] buffer, AddressFamily family)
+        public static unsafe void SetAddressFamily(Span<byte> buffer, AddressFamily family)
         {
             Interop.Error err;
             fixed (byte* rawAddress = buffer)

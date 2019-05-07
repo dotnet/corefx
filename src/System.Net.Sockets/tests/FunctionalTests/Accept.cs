@@ -289,6 +289,44 @@ namespace System.Net.Sockets.Tests
                 }
             }
         }
+
+        [Fact]
+        public async Task SyncAcceptGetsCancelledByDispose()
+        {
+            if (!UsesSync)
+            {
+                return;
+            }
+
+            var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+            listener.Listen(1);
+
+            Task acceptTask = Task.Run(async () =>
+            {
+                await AcceptAsync(listener);
+            });
+
+            Task disposeTask = Task.Run(async () =>
+            {
+                // Wait a little so the accept is started.
+                await Task.Delay(100);
+
+                listener.Dispose();
+            });
+
+            Task timeoutTask = Task.Delay(30000);
+
+            await Task.WhenAny(disposeTask, acceptTask, timeoutTask);
+
+            Assert.True(!timeoutTask.IsCompleted);
+
+            await disposeTask;
+
+            var acceptException = await Assert.ThrowsAnyAsync<Exception>(() => acceptTask);
+            Assert.True(acceptException is ObjectDisposedException ||
+                        acceptException is SocketException);
+        }
     }
 
     public sealed class AcceptSync : Accept<SocketHelperArraySync>

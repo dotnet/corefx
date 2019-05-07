@@ -151,13 +151,13 @@ namespace System.Net.Sockets
 #endif
 
                 InnerReleaseHandle();
-                innerSocket.DangerousRelease();
+                innerSocket.Close(abortive: true);
             }
 
             return true;
         }
 
-        internal void CloseAsIs()
+        internal void CloseAsIs(bool abortive)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"_innerSocket={_innerSocket}");
 
@@ -175,13 +175,15 @@ namespace System.Net.Sockets
                     SpinWait sw = new SpinWait();
                     while (!_released)
                     {
+                        // The socket was not released due to the SafeHandle being used.
+                        // Try to make those on-going calls return.
+                        innerSocket.TryUnblockSocket(abortive);
                         sw.SpinOnce();
                     }
 
                     InnerReleaseHandle();
 
-                    // Now free it with blocking.
-                    innerSocket.BlockingRelease();
+                    innerSocket.Close(abortive);
                 }
 #if DEBUG
             }
@@ -197,7 +199,7 @@ namespace System.Net.Sockets
         {
             private InnerSafeCloseSocket() : base(true) { }
 
-            private bool _blockable;
+            private bool _abortive = true;
 
             public override bool IsInvalid
             {
@@ -272,16 +274,14 @@ namespace System.Net.Sockets
             }
 #endif
 
-            // Use this method to close the socket handle using the linger options specified on the socket.
-            // Guaranteed to only be called once, under a CER, and not if regular DangerousRelease is called.
-            internal void BlockingRelease()
+            internal void Close(bool abortive)
             {
 #if DEBUG
                 // Expected to have outstanding operations such as Accept.
                 LogRemainingOperations();
 #endif
 
-                _blockable = true;
+                _abortive = abortive;
                 DangerousRelease();
             }
         }

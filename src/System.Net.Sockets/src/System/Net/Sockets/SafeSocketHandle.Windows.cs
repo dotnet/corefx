@@ -124,10 +124,10 @@ namespace System.Net.Sockets
             {
                 SocketError errorCode;
 
-                // If _blockable was set in BlockingRelease, it's safe to block here, which means
+                // If _abortive was set to false in Close, it's safe to block here, which means
                 // we can honor the linger options set on the socket.  It also means closesocket() might return WSAEWOULDBLOCK, in which
                 // case we need to do some recovery.
-                if (_blockable)
+                if (!_abortive)
                 {
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"handle:{handle}, Following 'blockable' branch");
                     errorCode = Interop.Winsock.closesocket(handle);
@@ -177,7 +177,7 @@ namespace System.Net.Sockets
                     // It failed.  Fall through to the regular abortive close.
                 }
 
-                // By default or if CloseAsIs() path failed, set linger timeout to zero to get an abortive close (RST).
+                // By default or if non abortive path failed, set linger timeout to zero to get an abortive close (RST).
                 Interop.Winsock.Linger lingerStruct;
                 lingerStruct.OnOff = 1;
                 lingerStruct.Time = 0;
@@ -229,6 +229,9 @@ namespace System.Net.Sockets
                 }
                 return result;
             }
+
+            internal void TryUnblockSocket(bool abortive)
+            { }
         }
     }
 }

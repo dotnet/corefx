@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -243,10 +244,10 @@ namespace System.Net.Sockets
             {
                 Interop.Error errorCode = Interop.Error.SUCCESS;
 
-                // If _blockable was set in BlockingRelease, it's safe to block here, which means
+                // If _abortive was set to false in Close, it's safe to block here, which means
                 // we can honor the linger options set on the socket.  It also means closesocket() might return WSAEWOULDBLOCK, in which
                 // case we need to do some recovery.
-                if (_blockable)
+                if (!_abortive)
                 {
                     if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"handle:{handle} Following 'blockable' branch.");
 
@@ -268,7 +269,7 @@ namespace System.Net.Sockets
                     // The socket could not be made blocking; fall through to the regular abortive close.
                 }
 
-                // By default or if CloseAsIs() path failed, set linger timeout to zero to get an abortive close (RST).
+                // By default or non abortive path failed, set linger timeout to zero to get an abortive close (RST).
                 var linger = new Interop.Sys.LingerOption
                 {
                     OnOff = 1,
@@ -357,6 +358,43 @@ namespace System.Net.Sockets
                 var res = new InnerSafeCloseSocket();
                 res.SetHandle(acceptedFd);
                 return res;
+            }
+
+            internal unsafe void TryUnblockSocket(bool abortive)
+            {
+                // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
+                // may block indefinitly. This is a best effort attempt to not get blocked and make those operations return.
+                // We need to ensure we keep the expected TCP behavior that is observed by the socket peer (FIN vs RST close).
+                // What we do here isn't specified by POSIX, it works for Linux.
+
+                // Don't touch sockets which don't have the CLOEXEC flag set. These may be shared
+                // with other processes and we want to avoid disconnecting them.
+                int fdFlags = Interop.Sys.Fcntl.GetFD(this);
+                if (fdFlags == 0)
+                {
+                    return;
+                }
+
+                var linger = new Interop.Sys.LingerOption();
+                if (abortive ||
+                    (Interop.Sys.GetLingerOption(this, &linger) == Interop.Error.SUCCESS && linger.OnOff != 0))
+                {
+                    if (abortive || linger.Seconds == 0)
+                    {
+                        // Connect to AF_UNSPEC causes an abortive close (RST).
+                        Span<byte> address = stackalloc byte[32];
+                        SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
+                        fixed (byte* pAddress = address)
+                        {
+                            Interop.Sys.Connect(this, pAddress, address.Length);
+                        }
+                    }
+                }
+                else
+                {
+                    // This causes a regular close (FIN).
+                    Interop.Sys.Shutdown(this, SocketShutdown.Both);
+                }
             }
         }
     }

@@ -949,6 +949,151 @@ namespace System.Net.Sockets.Tests
                 return (client, server);
             }
         }
+
+        [Fact]
+        public async Task SyncUdpReceiveGetsCancelledByDispose()
+        {
+            if (!UsesSync)
+            {
+                return;
+            }
+
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+            socket.BindToAnonymousPort(IPAddress.Loopback);
+
+            Task receiveTask = Task.Run(async () =>
+            {
+                await ReceiveAsync(socket, new ArraySegment<byte>(new byte[1]));
+            });
+
+            Task disposeTask = Task.Run(async () =>
+            {
+                // Wait a little so the receive is started.
+                await Task.Delay(100);
+
+                socket.Dispose();
+            });
+
+            Task timeoutTask = Task.Delay(30000);
+
+            await Task.WhenAny(disposeTask, receiveTask, timeoutTask);
+
+            Assert.True(!timeoutTask.IsCompleted);
+
+            await disposeTask;
+
+            try
+            {
+                await receiveTask;
+            }
+            catch (SocketException)
+            {}
+            catch (ObjectDisposedException)
+            {}
+        }
+
+        [Theory]
+        [InlineData(true, true, false)]
+        [InlineData(true, false, false)]
+        [InlineData(true, false, true)]
+        [InlineData(false, true, false)]
+        [InlineData(false, false, false)]
+        [InlineData(false, false, true)]
+        public async Task SyncTcpReceiveSendGetsCancelledByDisposeOrClose(bool receiveOrSend, bool disposeOrClose, bool timeoutZero)
+        {
+            if (!UsesSync)
+            {
+                return;
+            }
+
+            (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
+            using (socket2)
+            {
+                Task socketOperation = Task.Run(async () =>
+                {
+                    if (receiveOrSend)
+                    {
+                        await ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1]));
+                    }
+                    else
+                    {
+                        var buffer = new ArraySegment<byte>(new byte[4096]);
+                        while (true)
+                        {
+                            await SendAsync(socket1, buffer);
+                        }
+                    }
+                });
+
+                Task disposeTask = Task.Run(async () =>
+                {
+                    // Wait a little so the receive is started.
+                    await Task.Delay(100);
+
+                    if (disposeOrClose)
+                    {
+                        Assert.False(timeoutZero);
+                        socket1.Dispose();
+                    }
+                    else
+                    {
+                        if (timeoutZero)
+                        {
+                            socket1.Close(0);
+                        }
+                        else
+                        {
+                            socket1.Close();
+                        }
+                    }
+                });
+
+                Task timeoutTask = Task.Delay(30000);
+
+                await Task.WhenAny(disposeTask, socketOperation, timeoutTask);
+
+                Assert.True(!timeoutTask.IsCompleted);
+
+                await disposeTask;
+
+                try
+                {
+                    await socketOperation;
+                }
+                catch (SocketException)
+                {}
+                catch (ObjectDisposedException)
+                {}
+
+                bool socketException = false;
+                var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
+                while (true)
+                {
+                    try
+                    {
+                        int received = await ReceiveAsync(socket2, receiveBuffer);
+                        if (received == 0)
+                        {
+                            break;
+                        }
+                    }
+                    catch (SocketException)
+                    {
+                        socketException = true;
+                        break;
+                    }
+                }
+
+                if (timeoutZero)
+                {
+                    Assert.True(socketException);
+                }
+                else
+                {
+                    Assert.False(socketException);
+                }
+            }
+        }
     }
 
     public class SendReceive

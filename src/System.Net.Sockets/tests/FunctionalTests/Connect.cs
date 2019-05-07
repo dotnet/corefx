@@ -85,6 +85,39 @@ namespace System.Net.Sockets.Tests
                 }
             }
         }
+
+        [Fact]
+        public async Task SyncConnectGetsCancelledByDispose()
+        {
+            if (!UsesSync)
+            {
+                return;
+            }
+
+            var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            Task connectTask = Task.Run(async () =>
+            {
+                await ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
+            });
+
+            Task disposeTask = Task.Run(async () =>
+            {
+                // Wait a little so the connect is started.
+                await Task.Delay(100);
+
+                client.Dispose();
+            });
+
+            Task timeoutTask = Task.Delay(30000);
+
+            await Task.WhenAny(disposeTask, connectTask, timeoutTask);
+
+            Assert.True(!timeoutTask.IsCompleted);
+
+            await disposeTask;
+
+            await Assert.ThrowsAnyAsync<SocketException>(() => connectTask);
+        }
     }
 
     public sealed class ConnectSync : Connect<SocketHelperArraySync>

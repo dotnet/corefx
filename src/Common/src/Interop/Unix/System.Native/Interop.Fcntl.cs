@@ -9,7 +9,7 @@ internal static partial class Interop
 {
     internal static partial class Sys
     {
-        internal static class Fcntl
+        internal static partial class Fcntl
         {
             [DllImport(Libraries.SystemNative, EntryPoint = "SystemNative_FcntlSetIsNonBlocking", SetLastError = true)]
             internal static extern int DangerousSetIsNonBlocking(IntPtr fd, int isNonBlocking);
