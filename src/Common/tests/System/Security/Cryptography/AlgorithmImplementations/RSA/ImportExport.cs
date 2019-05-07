@@ -344,6 +344,15 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
+        internal static RSAParameters MakePublic(in RSAParameters rsaParams)
+        {
+            return new RSAParameters
+            {
+                Modulus = rsaParams.Modulus,
+                Exponent = rsaParams.Exponent,
+            };
+        }
+
         private static void VerifyDValue(in RSAParameters rsaParams)
         {
             if (rsaParams.P == null)
