@@ -123,6 +123,7 @@ namespace System.IO.Compression.Tests
 
         [Theory]
         [InlineData("tttt.zip")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Fix not shipped for full framework.")]
         public void ZipArchiveEntry_CorruptedFile(string zipname)
         {
             string filename = bad(zipname);
