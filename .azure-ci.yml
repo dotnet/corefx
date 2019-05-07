@@ -1,0 +1,26 @@
+trigger:
+- release/2.1*
+- release/2.2*
+
+pr:
+- release/2.1*
+- release/2.2*
+
+jobs:
+- job: uwp_aot_x86_release
+  displayName: UWP NETNative x86 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x86 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:uapaot -buildArch=x86 -Release -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:uapaot -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=false
+    displayName: Build tests
