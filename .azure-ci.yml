@@ -59,3 +59,75 @@ jobs:
   - script: build-tests.cmd -framework:netfx -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
     displayName: Build tests
     # TODO: Add Helix submission
+- job: windows_x86_release
+  displayName: Windows x86 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x86 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:netcoreapp -buildArch=x86 -Release -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:netcoreapp -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
+    displayName: Build tests
+    # TODO: Add Helix submission    displayName: Build tests
+    # TODO: Add Helix submission
+- job: windows_x86_release
+  displayName: Windows x86 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x86 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:netcoreapp -buildArch=x86 -Release -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:netcoreapp -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
+    displayName: Build tests
+    # TODO: Add Helix submission
+- job: windows_x64_debug
+  displayName: Windows x64 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x64 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:netcoreapp -buildArch=x64 -Debug -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:netcoreapp -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
+    displayName: Build tests
+    # TODO: Add Helix submission
+- job: packaging_all_x64_debug
+  displayName: Packaging All Configurations x64 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x64 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -allConfigurations -buildArch=x64 -Debug -- /p:RuntimeOS=win10 
+    displayName: Build product
+  - script: build-tests.cmd -allConfigurations -Debug
+    displayName: Build tests
