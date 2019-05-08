@@ -71,7 +71,7 @@ namespace System.Text.Json.Serialization.Tests
             const string ExpectedJson = @"[1,true,{""City"":""MyCity""},null,""foo""]";
             const string ReversedExpectedJson = @"[""foo"",null,{""City"":""MyCity""},true,1]";
 
-            string[] expectedObjects = new string[] { @"""foo""", @"null", @"{""City"":""MyCity""}", @"true", @"1" };
+            string[] expectedObjects = { @"""foo""", @"null", @"{""City"":""MyCity""}", @"true", @"1" };
 
             var address = new Address();
             address.Initialize();

@@ -266,7 +266,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.True(MyStringStackT.Contains("Hello"));
             Assert.True(MyStringStackT.Contains("World"));
 
-            string[] expectedQueue = new string[] { "Hello", "World" };
+            string[] expectedQueue = { "Hello", "World" };
             int i = 0;
             foreach (string item in MyStringQueueT)
             {
