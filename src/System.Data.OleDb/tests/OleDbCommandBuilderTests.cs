@@ -138,37 +138,37 @@ namespace System.Data.OleDb.Tests
                     cmd.Connection.ConnectionString = connection.ConnectionString;
                     
                     using (var adapter = new OleDbDataAdapter(cmd.CommandText, connection))
-                        using (var builder = new OleDbCommandBuilder(adapter))
-                        {
-                            // Custom prefix & suffix
-                            builder.QuotePrefix = "'";
-                            builder.QuoteSuffix = "'";
+                    using (var builder = new OleDbCommandBuilder(adapter))
+                    {
+                        // Custom prefix & suffix
+                        builder.QuotePrefix = "'";
+                        builder.QuoteSuffix = "'";
 
-                            Assert.Equal(adapter, builder.DataAdapter);
-                            Assert.Equal("'Test'", builder.QuoteIdentifier("Test", connection));
-                            Assert.Equal("'Te''st'", builder.QuoteIdentifier("Te'st", connection));
-                            Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", connection));
-                            Assert.Equal("Te'st", builder.UnquoteIdentifier("'Te''st'", connection));
-                            
-                            // Ensure we don't need active connection:
-                            Assert.Equal("'Test'", builder.QuoteIdentifier("Test", null));
-                            Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", null));
+                        Assert.Equal(adapter, builder.DataAdapter);
+                        Assert.Equal("'Test'", builder.QuoteIdentifier("Test", connection));
+                        Assert.Equal("'Te''st'", builder.QuoteIdentifier("Te'st", connection));
+                        Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", connection));
+                        Assert.Equal("Te'st", builder.UnquoteIdentifier("'Te''st'", connection));
+                        
+                        // Ensure we don't need active connection:
+                        Assert.Equal("'Test'", builder.QuoteIdentifier("Test", null));
+                        Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", null));
 
-                            builder.QuotePrefix = string.Empty;
-                            string quoteErrMsg = $"{nameof(builder.QuoteIdentifier)} requires open connection when the quote prefix has not been set.";
-                            string unquoteErrMsg = $"{nameof(builder.UnquoteIdentifier)} requires open connection when the quote prefix has not been set.";
+                        builder.QuotePrefix = string.Empty;
+                        string quoteErrMsg = $"{nameof(builder.QuoteIdentifier)} requires open connection when the quote prefix has not been set.";
+                        string unquoteErrMsg = $"{nameof(builder.UnquoteIdentifier)} requires open connection when the quote prefix has not been set.";
 
-                            Assert.Equal("`Test`", builder.QuoteIdentifier("Test", connection));
-                            Assert.Equal("Test", builder.UnquoteIdentifier("`Test`", connection));
+                        Assert.Equal("`Test`", builder.QuoteIdentifier("Test", connection));
+                        Assert.Equal("Test", builder.UnquoteIdentifier("`Test`", connection));
 
-                            Assert.NotNull(adapter.SelectCommand.Connection);
-                            Assert.Equal("`Test`", builder.QuoteIdentifier("Test"));
-                            Assert.Equal("Test", builder.UnquoteIdentifier("`Test`"));
+                        Assert.NotNull(adapter.SelectCommand.Connection);
+                        Assert.Equal("`Test`", builder.QuoteIdentifier("Test"));
+                        Assert.Equal("Test", builder.UnquoteIdentifier("`Test`"));
 
-                            adapter.SelectCommand.Connection = null;
-                            AssertExtensions.Throws<InvalidOperationException>(() => builder.QuoteIdentifier("Test"), quoteErrMsg);
-                            AssertExtensions.Throws<InvalidOperationException>(() => builder.UnquoteIdentifier("'Test'"), unquoteErrMsg);
-                        }
+                        adapter.SelectCommand.Connection = null;
+                        AssertExtensions.Throws<InvalidOperationException>(() => builder.QuoteIdentifier("Test"), quoteErrMsg);
+                        AssertExtensions.Throws<InvalidOperationException>(() => builder.UnquoteIdentifier("'Test'"), unquoteErrMsg);
+                    }
                 }
             });
         }
