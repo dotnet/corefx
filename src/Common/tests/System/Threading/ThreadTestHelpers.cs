@@ -135,7 +135,7 @@ namespace System.Threading.Tests
                 return;
             }
 
-            var startTime = Environment.TickCount;
+            int startTimeMs = Environment.TickCount;
             while (true)
             {
                 delay();
@@ -145,7 +145,7 @@ namespace System.Threading.Tests
                     return;
                 }
 
-                Assert.True(Environment.TickCount - startTime < UnexpectedTimeoutMilliseconds);
+                Assert.InRange(Environment.TickCount - startTimeMs, 0, UnexpectedTimeoutMilliseconds);
             }
         }
 
