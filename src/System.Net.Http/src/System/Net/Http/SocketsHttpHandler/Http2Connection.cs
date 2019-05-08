@@ -260,6 +260,8 @@ namespace System.Net.Http
             }
             catch (Exception e)
             {
+                if (NetEventSource.IsEnabled) Trace($"ProcessIncomingFramesAsync: {e.Message}");
+
                 if (!_disposed)
                 {
                     Abort(e);
@@ -723,7 +725,7 @@ namespace System.Net.Http
             }
 
             // If the connection has been aborted, then fail now instead of trying to send more data.
-            if (IsAborted())
+            if (_disposed)
             {
                 throw new IOException(SR.net_http_request_aborted);
             }
@@ -1123,20 +1125,16 @@ namespace System.Net.Http
             _outgoingBuffer.Commit(FrameHeader.Size);
         }
 
+         /// <summary>Abort all streams and cause further processing to fail.</summary>
+         /// <param name="abortException">Exception causing Abort to be called.</param>
         private void Abort(Exception abortException)
         {
             // The connection has failed, e.g. failed IO or a connection-level frame error.
-            // Abort all streams and cause further processing to fail.
             if (_abortException == null)
             {
                 _abortException = abortException;
             }
             AbortStreams(0, abortException);
-        }
-
-        private bool IsAborted()
-        {
-            return _disposed;
         }
 
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
@@ -1404,17 +1402,18 @@ namespace System.Net.Http
         {
             lock (SyncObject)
             {
-                if (_nextStream == MaxStreamId || (_disposed && _abortException == null))
+                if (_nextStream == MaxStreamId || _disposed)
                 {
+                    if (_abortException != null)
+                    {
+                        // Aborted because protocol error or IO.
+                        throw new ObjectDisposedException(nameof(Http2Connection));
+                    }
+
                     // We run out of IDs or we have race condition between receiving GOAWAY and processing requests.
                     // Throw a retryable request exception. This will cause retry logic to kick in
                     // and perform another connection attempt. The user should never see this exception.
                     throw new HttpRequestException(null, null, allowRetry: true);
-                }
-
-                if (_disposed)
-                {
-                    throw new ObjectDisposedException(nameof(Http2Connection));
                 }
 
                 int streamId = _nextStream;
@@ -1438,7 +1437,7 @@ namespace System.Net.Http
                 {
                     // Stream can be removed from background ProcessIncomingFramesAsync() when endOfStream is set
                     // or when we hit various error conditions in SendAsync() call.
-                    // Skip logic bellow if stream was already removed.
+                    // Skip logic below if stream was already removed.
                     return;
                 }
 
