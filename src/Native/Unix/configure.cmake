@@ -350,6 +350,10 @@ check_symbol_exists(
     HAVE_FCOPYFILE)
 
 check_include_files(
+    "sys/clonefile.h"
+    HAVE_CLONEFILE)
+
+check_include_files(
      "sys/sockio.h"
      HAVE_SYS_SOCKIO_H)
 
