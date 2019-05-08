@@ -10,6 +10,8 @@ resources:
   containers:
   - container: rhel7_container
     image: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
+  - container: ubuntu_1604_arm64_cross_container
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
 
 jobs:
 - job: uwp_aot_x86_release
@@ -122,12 +124,56 @@ jobs:
     displayName: Build product
   - script: build-tests.cmd -allConfigurations -Debug
     displayName: Build Tests
+
+- job: linux_x64_release
+  displayName: Linux x64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  container: rhel7_container
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./init-tools.sh
+    displayName: Initialize Tools
+  - script: ./sync.sh -p -- /p:ArchGroup=x64
+    displayName: Sync
+  - script: ./build-managed.sh -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true
+    displayName: Generate Version Assets
+  - script: ./build.sh -buildArch=x64 -Release
+    displayName: Build product
+  - script: ./build-tests.sh -buildArch=x64 -Release -SkipTests -- /p:ArchiveTests=true /p:EnableDumpling=true
+    displayName: Build Tests
     
 - job: linux_arm_release
-  displayName: Linux Arm Release
+  displayName: Linux Arm Release Build
   pool:
     vmImage: ubuntu-16.04
   steps:
   - checkout: self
     clean: true
   - script: ./cross/arm32_ci_script.sh --buildConfig=release --arm --linuxCodeName=xenial --verbose
+  
+- job: linux_arm64_release
+  displayName: Linux Arm64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  container: ubuntu_1604_arm64_cross_container
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./init-tools.sh
+    displayName: Initialize Tools
+  - script: ./build-managed.sh -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true
+    displayName: Generate Version Assets
+  - script: ./sync.sh -p -BuildTests=false -- /p:ArchGroup=arm64
+    displayName: Sync    
+  - script: |
+      export ROOTFS_DIR=/crossrootfs/arm64
+      ./build-native.sh -buildArch=arm64 -Release
+    displayName: Build Native
+    # Cross build builds Linux Managed components using x64 target
+    # We do not want x64 packages
+  - script: ./build-managed.sh -BuildPackages=false -buildArch=x64 -Release 
+    displayName: Build Managed
+  - script: ../build-packages.sh -buildArch=arm64 -Release
+    displayName: Build Packages
