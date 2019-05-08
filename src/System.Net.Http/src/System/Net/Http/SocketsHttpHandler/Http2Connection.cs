@@ -1124,7 +1124,7 @@ namespace System.Net.Http
         {
             // The connection has failed, e.g. failed IO or a connection-level frame error.
             // Abort all streams and cause further processing to fail.
-            if (!IsAborted())
+            if (_abortException == null)
             {
                 _abortException = abortException;
             }
@@ -1323,7 +1323,7 @@ namespace System.Net.Http
         private enum FrameFlags : byte
         {
             None = 0,
-            
+
             // Some frame types define bits differently.  Define them all here for simplicity.
 
             EndStream =     0b00000001,
@@ -1401,11 +1401,17 @@ namespace System.Net.Http
         {
             lock (SyncObject)
             {
-                if (_disposed || _nextStream == MaxStreamId)
+                if (_nextStream == MaxStreamId || (_disposed && _abortException == null))
                 {
+                    // We run out of IDs or we have race condition between receiving GOAWAY and processing requests.
                     // Throw a retryable request exception. This will cause retry logic to kick in
                     // and perform another connection attempt. The user should never see this exception.
                     throw new HttpRequestException(null, null, allowRetry: true);
+                }
+
+                if (_disposed)
+                {
+                    throw new ObjectDisposedException(nameof(Http2Connection));
                 }
 
                 int streamId = _nextStream;
@@ -1427,7 +1433,10 @@ namespace System.Net.Http
             {
                 if (!_httpStreams.Remove(http2Stream.StreamId, out Http2Stream removed))
                 {
-                    Debug.Fail("_httpStreams.Remove failed");
+                    // Stream can be removed from background ProcessIncomingFramesAsync() when endOfStream is set
+                    // or when we hit various error conditions in SendAsync() call.
+                    // Skip logic bellow if stream was already removed.
+                    return;
                 }
 
                 _concurrentStreams.AdjustCredit(1);
