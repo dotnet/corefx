@@ -260,7 +260,10 @@ namespace System.Net.Http
             }
             catch (Exception e)
             {
-                Abort(e);
+                if (!_disposed)
+                {
+                    Abort(e);
+                }
             }
         }
 
