@@ -6,6 +6,11 @@ pr:
 - release/2.1*
 - release/2.2*
 
+resources:
+  containers:
+  - container: rhel7_container
+    image: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
+
 jobs:
 - job: uwp_aot_x86_release
   displayName: UWP NETNative x86 Release Build
@@ -23,7 +28,8 @@ jobs:
   - script: build.cmd -framework:uapaot -buildArch=x86 -Release -- /p:RuntimeOS=win10
     displayName: Build product
   - script: build-tests.cmd -framework:uapaot -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=false
-    displayName: Build tests
+    displayName: Build Tests
+
 - job: uwp_coreclr_x64_debug
   displayName: UWP CoreCLR x64 Debug Build
   pool:
@@ -40,7 +46,8 @@ jobs:
   - script: build.cmd -framework:uap -buildArch=x64 -Debug -- /p:RuntimeOS=win10
     displayName: Build product
   - script: build-tests.cmd -framework:uap -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=false
-    displayName: Build tests
+    displayName: Build Tests
+
 - job: netfx_x64_release
   displayName: NETFX x86 Release Build
   pool:
@@ -57,8 +64,9 @@ jobs:
   - script: build.cmd -framework:netfx -buildArch=x86 -Release -- /p:RuntimeOS=win10
     displayName: Build product
   - script: build-tests.cmd -framework:netfx -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
-    displayName: Build tests
+    displayName: Build Tests
     # TODO: Add Helix submission
+    
 - job: windows_x86_release
   displayName: Windows x86 Release Build
   pool:
@@ -75,27 +83,9 @@ jobs:
   - script: build.cmd -framework:netcoreapp -buildArch=x86 -Release -- /p:RuntimeOS=win10
     displayName: Build product
   - script: build-tests.cmd -framework:netcoreapp -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
-    displayName: Build tests
-    # TODO: Add Helix submission    displayName: Build tests
-    # TODO: Add Helix submission
-- job: windows_x86_release
-  displayName: Windows x86 Release Build
-  pool:
-    vmImage: vs2017-win2016
-  steps:
-  - checkout: self
-    clean: true
-  - script: init-tools.cmd
-    displayName: Initialize Tools
-  - script: sync.cmd -p -- /p:ArchGroup=x86 /p:RuntimeOS=win10
-    displayName: Sync
-  - script: build-managed.cmd -GenerateVersion
-    displayName: Generate Version Assets
-  - script: build.cmd -framework:netcoreapp -buildArch=x86 -Release -- /p:RuntimeOS=win10
-    displayName: Build product
-  - script: build-tests.cmd -framework:netcoreapp -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
-    displayName: Build tests
-    # TODO: Add Helix submission
+    displayName: Build Tests
+    # TODO: Add Helix submission    displayName: Build Tests
+    
 - job: windows_x64_debug
   displayName: Windows x64 Debug Build
   pool:
@@ -112,8 +102,9 @@ jobs:
   - script: build.cmd -framework:netcoreapp -buildArch=x64 -Debug -- /p:RuntimeOS=win10
     displayName: Build product
   - script: build-tests.cmd -framework:netcoreapp -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
-    displayName: Build tests
+    displayName: Build Tests
     # TODO: Add Helix submission
+    
 - job: packaging_all_x64_debug
   displayName: Packaging All Configurations x64 Debug Build
   pool:
@@ -130,4 +121,13 @@ jobs:
   - script: build.cmd -allConfigurations -buildArch=x64 -Debug -- /p:RuntimeOS=win10 
     displayName: Build product
   - script: build-tests.cmd -allConfigurations -Debug
-    displayName: Build tests
+    displayName: Build Tests
+    
+- job: linux_arm_release
+  displayName: Linux Arm Release
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./cross/arm32_ci_script.sh --buildConfig=release --arm --linuxCodeName=xenial --verbose
