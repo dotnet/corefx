@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System;
 using System.Diagnostics;
 using System.Collections;
@@ -83,7 +84,7 @@ namespace System.Diagnostics.Tracing
             _count++;
         }
 
-        internal override void WritePayload(float intervalSec)
+        internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
         {
             lock (MyLock)
             {
@@ -103,7 +104,8 @@ namespace System.Diagnostics.Tracing
                 }
                 payload.Min = _min;
                 payload.Max = _max;
-                
+                payload.Series = $"Interval={pollingIntervalMillisec}"; // TODO: This may need to change when we support multi-session
+                payload.CounterType = "Mean";
                 payload.Metadata = GetMetadataString();
                 payload.DisplayName = DisplayName;
                 payload.Name = Name;
@@ -111,6 +113,7 @@ namespace System.Diagnostics.Tracing
                 EventSource.Write("EventCounters", new EventSourceOptions() { Level = EventLevel.LogAlways }, new CounterPayloadType(payload));
             }
         }
+
         private void ResetStatistics()
         {
             Debug.Assert(Monitor.IsEntered(MyLock));
@@ -127,7 +130,7 @@ namespace System.Diagnostics.Tracing
         private const int BufferedSize = 10;
         private const double UnusedBufferSlotValue = double.NegativeInfinity;
         private const int UnsetIndex = -1;
-        private volatile double[] _bufferedValues;
+        private volatile double[] _bufferedValues = null!;
         private volatile int _bufferedValuesIndex;
 
         private void InitializeBuffer()

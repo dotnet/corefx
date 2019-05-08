@@ -31,6 +31,7 @@ namespace System.IO.Tests
             Assert.Equal("HelloWorld", str2);
         }
 
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         [Fact]
         [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public static void NullEncodingThrows()
