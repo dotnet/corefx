@@ -116,7 +116,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [ConditionalFact(Helpers.IsDriverAvailable)]
+        [ConditionalFact(Helpers.IsAceDriverAvailable)]
         public void BeginTransaction_CallTwice_Throws()
         {
             using (var conn = new OleDbConnection(ConnectionString))
@@ -137,7 +137,7 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [ConditionalFact(Helpers.IsDriverAvailable)]
+        [ConditionalFact(Helpers.IsAceDriverAvailable)]
         public void CommitTransaction_AfterConnectionClosed_Throws()
         {
             using (var conn = new OleDbConnection(ConnectionString))
@@ -267,7 +267,7 @@ namespace System.Data.OleDb.Tests
             command.ExecuteNonQuery();
         }
 
-        [ConditionalFact(Helpers.IsDriverAvailable)]
+        [ConditionalFact(Helpers.IsAceDriverAvailable)]
         public void ChangeDatabase_EmptyDatabase_Throws()
         {
             using (var oleDbConnection = new OleDbConnection(ConnectionString))

@@ -8,7 +8,9 @@ namespace System.Data.OleDb.Tests
     public static class Helpers
     {
         public const string IsDriverAvailable = nameof(Helpers) + "." + nameof(GetIsDriverAvailable);
+        public const string IsAceDriverAvailable = nameof(Helpers) + "." + nameof(GetIsAceDriverAvailable);
         public static bool GetIsDriverAvailable() => Nested.IsAvailable;
+        public static bool GetIsAceDriverAvailable() => Nested.IsAvailable && !PlatformDetection.Is32BitProcess;
         public static string ProviderName => Nested.ProviderName;
         public static string GetTableName(string memberName) => memberName + ".csv";
 
