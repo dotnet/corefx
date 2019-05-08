@@ -160,7 +160,6 @@
     <Reference Include="System.Text.Encoding.Extensions" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
     <Reference Include="System.Buffers" />
     <Reference Include="System.Collections.Concurrent" />
     <Reference Include="System.Linq" />
