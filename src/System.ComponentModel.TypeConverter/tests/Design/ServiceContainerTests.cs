@@ -50,6 +50,12 @@ namespace System.ComponentModel.Design.Tests
             var o = new object();
             foreach (IServiceProvider parentProvider in new object[] { null, nullServiceProvider, invalidServiceProvider, validServiceProvider })
             {
+                // .NET Core fixes an InvalidCastException bug.
+                if (PlatformDetection.IsFullFramework && parentProvider == invalidServiceProvider)
+                {
+                    continue;
+                }
+
                 yield return new object[] { parentProvider, typeof(object), o, o };
                 yield return new object[] { parentProvider, typeof(object), "abc", "abc" };
                 yield return new object[] { parentProvider, typeof(string), "abc", "abc" };
@@ -86,6 +92,12 @@ namespace System.ComponentModel.Design.Tests
                 foreach (IServiceProvider parentProvider in new object[] { null, nullServiceProvider, invalidServiceProvider, validServiceProvider })
                 {
                     if (promote && parentProvider == validServiceProvider)
+                    {
+                        continue;
+                    }
+
+                    // .NET Core fixes an InvalidCastException bug.
+                    if (PlatformDetection.IsFullFramework && parentProvider == invalidServiceProvider)
                     {
                         continue;
                     }
@@ -267,6 +279,12 @@ namespace System.ComponentModel.Design.Tests
             ServiceCreatorCallback nullCallback = (container, serviceType) => null;
             foreach (IServiceProvider parentProvider in new object[] { null, nullServiceProvider, invalidServiceProvider, validServiceProvider })
             {
+                // .NET Core fixes an InvalidCastException bug.
+                if (PlatformDetection.IsFullFramework && parentProvider == invalidServiceProvider)
+                {
+                    continue;
+                }
+
                 yield return new object[] { parentProvider, typeof(object), callback, "abc" };
                 yield return new object[] { parentProvider, typeof(string), callback, "abc" };
                 yield return new object[] { parentProvider, typeof(int), callback, null };
@@ -314,6 +332,12 @@ namespace System.ComponentModel.Design.Tests
                 foreach (IServiceProvider parentProvider in new object[] { null, nullServiceProvider, invalidServiceProvider, validServiceProvider })
                 {
                     if (promote && parentProvider == validServiceProvider)
+                    {
+                        continue;
+                    }
+
+                    // .NET Core fixes an InvalidCastException bug.
+                    if (PlatformDetection.IsFullFramework && parentProvider == invalidServiceProvider)
                     {
                         continue;
                     }
@@ -520,6 +544,7 @@ namespace System.ComponentModel.Design.Tests
         [Theory]
         [InlineData(null)]
         [InlineData(typeof(int))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Core fixes a NRE bug.")]
         public void GetService_NoSuchService_ReturnsNull(Type serviceType)
         {
             var container = new ServiceContainer();
@@ -531,17 +556,20 @@ namespace System.ComponentModel.Design.Tests
             var nullServiceProvider = new MockServiceProvider();
             nullServiceProvider.Setup(typeof(IServiceContainer), null);
             nullServiceProvider.Setup(typeof(int), null);
+            yield return new object[] { nullServiceProvider };
 
-            var invalidServiceProvider = new MockServiceProvider();
-            invalidServiceProvider.Setup(typeof(IServiceContainer), new object());
-            invalidServiceProvider.Setup(typeof(int), null);
+            // .NET Core fixes an InvalidCastException bug.
+            if (!PlatformDetection.IsFullFramework)
+            {
+                var invalidServiceProvider = new MockServiceProvider();
+                invalidServiceProvider.Setup(typeof(IServiceContainer), new object());
+                invalidServiceProvider.Setup(typeof(int), null);
+                yield return new object[] { invalidServiceProvider };
+            }
 
             var validServiceProvider = new MockServiceProvider();
             validServiceProvider.Setup(typeof(IServiceContainer), new ServiceContainer());
             validServiceProvider.Setup(typeof(int), null);
-
-            yield return new object[] { nullServiceProvider };
-            yield return new object[] { invalidServiceProvider };
             yield return new object[] { validServiceProvider };
         }
 
@@ -560,21 +588,22 @@ namespace System.ComponentModel.Design.Tests
             var nullServiceProvider = new MockServiceProvider();
             nullServiceProvider.Setup(typeof(IServiceContainer), null);
             nullServiceProvider.Setup(typeof(int), null);
+            yield return new object[] { nullServiceProvider, true };
+            yield return new object[] { nullServiceProvider, false };
 
-            var invalidServiceProvider = new MockServiceProvider();
-            invalidServiceProvider.Setup(typeof(IServiceContainer), new object());
-            invalidServiceProvider.Setup(typeof(int), null);
+            // .NET Core fixes an InvalidCastException bug.
+            if (!PlatformDetection.IsFullFramework)
+            {
+                var invalidServiceProvider = new MockServiceProvider();
+                invalidServiceProvider.Setup(typeof(IServiceContainer), new object());
+                invalidServiceProvider.Setup(typeof(int), null);
+                yield return new object[] { invalidServiceProvider, true };
+                yield return new object[] { invalidServiceProvider, false };
+            }
 
             var validServiceProvider = new MockServiceProvider();
             validServiceProvider.Setup(typeof(IServiceContainer), new ServiceContainer());
             validServiceProvider.Setup(typeof(int), null);
-
-            foreach (bool promote in new bool[] { true, false })
-            {
-                yield return new object[] { nullServiceProvider, promote };
-                yield return new object[] { invalidServiceProvider, promote };
-            }
-
             yield return new object[] { validServiceProvider, false };
         }
 
