@@ -12,6 +12,8 @@ resources:
     image: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
   - container: ubuntu_1604_arm64_cross_container
     image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
+  - container: alpine_36_container
+    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
 
 jobs:
 - job: uwp_aot_x86_release
@@ -175,5 +177,26 @@ jobs:
     # We do not want x64 packages
   - script: ./build-managed.sh -BuildPackages=false -buildArch=x64 -Release 
     displayName: Build Managed
-  - script: ../build-packages.sh -buildArch=arm64 -Release
+  - script: ./build-packages.sh -buildArch=arm64 -Release
     displayName: Build Packages
+    
+- job: linux_musl_x64_debug
+  displayName: Linux-musl x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  container: alpine_36_container
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./init-tools.sh
+    displayName: Initialize Tools
+  - script: ./build-managed.sh -runtimeos=linux-musl -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true /p:PortableBuild=false
+    displayName: Generate Version Assets
+  - script: ./sync.sh -p -runtimeos=linux-musl -- /p:ArchGroup=x64 /p:PortableBuild=false
+    displayName: Sync    
+  - script: ./build.sh -buildArch=x64 -runtimeos=linux-musl -Debug -- /p:PortableBuild=false
+    displayName: Build Product
+  - script: ./build-managed.sh -BuildPackages=false -buildArch=x64 -Release 
+    displayName: Build Managed
+  - script: ./build-tests.sh -buildArch=x64 -Debug -SkipTests -- /p:ArchiveTests=true /p:EnableDumpling=true /p:PortableBuild=false
+    displayName: Build Tests
