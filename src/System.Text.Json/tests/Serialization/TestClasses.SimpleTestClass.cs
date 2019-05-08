@@ -70,6 +70,7 @@ namespace System.Text.Json.Serialization.Tests
         public ImmutableStack<string> MyStringImmutableStackT { get; set; }
         public ImmutableQueue<string> MyStringImmutablQueueT { get; set; }
         public ImmutableSortedSet<string> MyStringImmutableSortedSetT { get; set; }
+        public List<string> MyListOfNullString { get; set; }
 
         public static readonly string s_json = $"{{{s_partialJsonProperties},{s_partialJsonArrays}}}";
         public static readonly string s_json_flipped = $"{{{s_partialJsonArrays},{s_partialJsonProperties}}}";
@@ -135,7 +136,8 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringImmutableListT"" : [""Hello""]," +
                 @"""MyStringImmutableStackT"" : [""Hello""]," +
                 @"""MyStringImmutablQueueT"" : [""Hello""]," +
-                @"""MyStringImmutableSortedSetT"" : [""Hello""]";
+                @"""MyStringImmutableSortedSetT"" : [""Hello""]," +
+                @"""MyListOfNullString"" : [null]";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
@@ -205,6 +207,8 @@ namespace System.Text.Json.Serialization.Tests
             MyStringImmutableStackT = ImmutableStack.CreateRange(new List<string> { "Hello" });
             MyStringImmutablQueueT = ImmutableQueue.CreateRange(new List<string> { "Hello" });
             MyStringImmutableSortedSetT = ImmutableSortedSet.CreateRange(new List<string> { "Hello" });
+
+            MyListOfNullString = new List<string> { null };
         }
 
         public void Verify()
@@ -283,6 +287,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyStringImmutableStackT.First());
             Assert.Equal("Hello", MyStringImmutablQueueT.First());
             Assert.Equal("Hello", MyStringImmutableSortedSetT.First());
+
+            Assert.Null(MyListOfNullString[0]);
         }
     }
 }
