@@ -8,6 +8,7 @@ using Xunit;
 
 namespace System.Data.OleDb.Tests
 {
+    [Collection("System.Data.OleDb")] // not let tests run in parallel
     public class OleDbDataReaderTests : OleDbTestBase
     {
         [OuterLoop]
