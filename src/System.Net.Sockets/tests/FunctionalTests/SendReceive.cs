@@ -1084,14 +1084,7 @@ namespace System.Net.Sockets.Tests
                     }
                 }
 
-                if (timeoutZero)
-                {
-                    Assert.True(socketException);
-                }
-                else
-                {
-                    Assert.False(socketException);
-                }
+                Assert.True(socketException);
             }
         }
     }

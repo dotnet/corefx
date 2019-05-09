@@ -177,7 +177,7 @@ namespace System.Net.Sockets
                     {
                         // The socket was not released due to the SafeHandle being used.
                         // Try to make those on-going calls return.
-                        innerSocket.TryUnblockSocket(abortive);
+                        innerSocket.TryUnblockSocket();
                         sw.SpinOnce();
                     }
 

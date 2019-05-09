@@ -1728,6 +1728,40 @@ static bool TryGetPlatformSocketOption(int32_t socketOptionName, int32_t socketO
     }
 }
 
+static bool TryConvertSocketTypePlatformToPal(int platformSocketType, int32_t* palSocketType)
+{
+    assert(palSocketType != NULL);
+
+    switch (platformSocketType)
+    {
+        case SOCK_STREAM:
+            *palSocketType = SocketType_SOCK_STREAM;
+            return true;
+
+        case SOCK_DGRAM:
+            *palSocketType = SocketType_SOCK_DGRAM;
+            return true;
+
+        case SOCK_RAW:
+            *palSocketType = SocketType_SOCK_RAW;
+            return true;
+
+#ifdef SOCK_RDM
+        case SOCK_RDM:
+            *palSocketType = SocketType_SOCK_RDM;
+            return true;
+#endif
+
+        case SOCK_SEQPACKET:
+            *palSocketType = SocketType_SOCK_SEQPACKET;
+            return true;
+
+        default:
+            *palSocketType = (int32_t)palSocketType;
+            return false;
+    }
+}
+
 int32_t SystemNative_GetSockOpt(
     intptr_t socket, int32_t socketOptionLevel, int32_t socketOptionName, uint8_t* optionValue, int32_t* optionLen)
 {
@@ -1786,6 +1820,7 @@ int32_t SystemNative_GetSockOpt(
 
     socklen_t optLen = (socklen_t)*optionLen;
     int err = getsockopt(fd, optLevel, optName, optionValue, &optLen);
+
     if (err != 0)
     {
         return SystemNative_ConvertErrorPlatformToPal(errno);
@@ -1801,6 +1836,20 @@ int32_t SystemNative_GetSockOpt(
         }
     }
 #endif
+
+    if (socketOptionLevel == SocketOptionLevel_SOL_SOCKET)
+    {
+        if (socketOptionName == SocketOptionName_SO_TYPE)
+        {
+            if (*optionLen != sizeof(int) ||
+                sizeof(int32_t) < sizeof(int) ||
+                !TryConvertSocketTypePlatformToPal(*(int*)optionValue, (int32_t*)optionValue))
+            {
+                return Error_ENOTSUP;
+            }
+            *optionLen = sizeof(int32_t);
+        }
+    }
 
     assert(optLen <= (socklen_t)*optionLen);
     *optionLen = (int32_t)optLen;

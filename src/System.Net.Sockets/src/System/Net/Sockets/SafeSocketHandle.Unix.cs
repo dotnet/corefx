@@ -360,7 +360,7 @@ namespace System.Net.Sockets
                 return res;
             }
 
-            internal unsafe void TryUnblockSocket(bool abortive)
+            internal unsafe void TryUnblockSocket()
             {
                 // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
                 // may block indefinitly. This is a best effort attempt to not get blocked and make those operations return.
@@ -375,13 +375,15 @@ namespace System.Net.Sockets
                     return;
                 }
 
-                var linger = new Interop.Sys.LingerOption();
-                if (abortive ||
-                    (Interop.Sys.GetLingerOption(this, &linger) == Interop.Error.SUCCESS && linger.OnOff != 0))
+                int type = 0;
+                int optLen = sizeof(int);
+                Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
+                Debug.Assert(err == Interop.Error.SUCCESS);
+                if (err == Interop.Error.SUCCESS)
                 {
-                    if (abortive || linger.Seconds == 0)
+                    if (type == (int)SocketType.Stream)
                     {
-                        // Connect to AF_UNSPEC causes an abortive close (RST).
+                        // Connect to AF_UNSPEC causes an abortive close (TCP RST).
                         Span<byte> address = stackalloc byte[32];
                         SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
                         fixed (byte* pAddress = address)
@@ -389,11 +391,10 @@ namespace System.Net.Sockets
                             Interop.Sys.Connect(this, pAddress, address.Length);
                         }
                     }
-                }
-                else
-                {
-                    // This causes a regular close (FIN).
-                    Interop.Sys.Shutdown(this, SocketShutdown.Both);
+                    else
+                    {
+                        Interop.Sys.Shutdown(this, SocketShutdown.Both);
+                    }
                 }
             }
         }

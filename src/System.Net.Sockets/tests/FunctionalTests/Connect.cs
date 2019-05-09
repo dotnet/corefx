@@ -116,7 +116,9 @@ namespace System.Net.Sockets.Tests
 
             await disposeTask;
 
-            await Assert.ThrowsAnyAsync<SocketException>(() => connectTask);
+            var connectException = await Assert.ThrowsAnyAsync<Exception>(() => connectTask);
+            Assert.True(connectException is ObjectDisposedException ||
+                        connectException is SocketException);
         }
     }
 

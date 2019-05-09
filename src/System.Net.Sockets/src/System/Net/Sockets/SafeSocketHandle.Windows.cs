@@ -230,7 +230,7 @@ namespace System.Net.Sockets
                 return result;
             }
 
-            internal void TryUnblockSocket(bool abortive)
+            internal void TryUnblockSocket()
             { }
         }
     }
