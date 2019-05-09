@@ -53,11 +53,10 @@ namespace System.Data.OleDb.Tests
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Open_NoConnectionString_Throws()
         {
-            using (var innerConnection = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
-            {
-                innerConnection.ConnectionString = null;
-                Assert.Throws<InvalidOperationException>(() => innerConnection.Open());
-            }
+            connection.Dispose();
+            connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
+            connection.ConnectionString = null;
+            Assert.Throws<InvalidOperationException>(() => connection.Open());
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
@@ -300,11 +299,12 @@ namespace System.Data.OleDb.Tests
                 "; Everything after this line is an OLE DB initstring",
                 ConnectionString
             }, System.Text.Encoding.Unicode);
-            var oleDbConnection = new OleDbConnection(@"file name = " + udlFile);
-            Assert.NotNull(oleDbConnection);
-            oleDbConnection.Open();
-            Assert.Equal(Helpers.ProviderName, oleDbConnection.Provider);
-            oleDbConnection.Dispose();
+            connection.Dispose();
+            connection = new OleDbConnection(@"file name = " + udlFile);
+            Assert.NotNull(connection);
+            connection.Open();
+            Assert.Equal(Helpers.ProviderName, connection.Provider);
+            connection.Dispose();
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]

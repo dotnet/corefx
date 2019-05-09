@@ -32,7 +32,7 @@ namespace System.Data.OleDb.Tests
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void DeriveParameters_NulllCommandText_Throws()
+        public void DeriveParameters_NullCommandText_Throws()
         {
             using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
             {
@@ -67,64 +67,38 @@ namespace System.Data.OleDb.Tests
         public void DeriveParameters_ClosedConnection_Throws()
         {
             RunTest((command, tableName) => {
-                using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
-                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = conn;
-                    conn.Close();
-                    var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(cmd));
-                    Assert.NotNull(exception);
-                    Assert.IsType<InvalidOperationException>(exception);
-                    Assert.Contains(
-                        $"{nameof(OleDbCommandBuilder.DeriveParameters)} requires an open and available Connection.",
-                        exception.Message);
-                }
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = @"SELECT * FROM " + tableName;
+                connection.Close();
+                var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(command));
+                Assert.NotNull(exception);
+                Assert.IsType<InvalidOperationException>(exception);
+                Assert.Contains(
+                    $"{nameof(OleDbCommandBuilder.DeriveParameters)} requires an open and available Connection.",
+                    exception.Message);
+                command.CommandType = CommandType.Text;
+                connection.Open(); // reopen when done
             });
         }
 
         [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void QuoteIdentifier_Null_Throws()
+        public void QuoteUnquoteIdentifier_Null_Throws()
         {
             RunTest((command, tableName) => {
-                using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
-                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = @"SELECT * FROM " + tableName;
+                using (var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder())
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = conn;
-                    cmd.Transaction = transaction;
-                    using (var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder())
-                    {
-                        AssertExtensions.Throws<ArgumentNullException>(
-                            () => builder.QuoteIdentifier(null, cmd.Connection), 
-                            $"Value cannot be null.\r\nParameter name: unquotedIdentifier");
-                    }
-                }
-            });
-        }
+                    AssertExtensions.Throws<ArgumentNullException>(
+                        () => builder.QuoteIdentifier(null, command.Connection), 
+                        $"Value cannot be null.\r\nParameter name: unquotedIdentifier");
 
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void UnquoteIdentifier_Null_Throws()
-        {
-            RunTest((command, tableName) => {
-                using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
-                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = conn;
-                    cmd.Transaction = transaction;
-                    using (var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder())
-                    {
-                        AssertExtensions.Throws<ArgumentNullException>(
-                            () => builder.UnquoteIdentifier(null, cmd.Connection), 
-                            $"Value cannot be null.\r\nParameter name: quotedIdentifier");
-                    }
+                    AssertExtensions.Throws<ArgumentNullException>(
+                        () => builder.UnquoteIdentifier(null, command.Connection), 
+                        $"Value cannot be null.\r\nParameter name: quotedIdentifier");
                 }
+                command.CommandType = CommandType.Text;
             });
         }
 
@@ -133,48 +107,41 @@ namespace System.Data.OleDb.Tests
         public void QuoteUnquote_CustomPrefixSuffix_Success()
         {
             RunTest((command, tableName) => {
-                using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
-                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = @"SELECT * FROM " + tableName;
+                using (var adapter = new OleDbDataAdapter(command.CommandText, connection))
+                using (var builder = new OleDbCommandBuilder(adapter))
                 {
-                    cmd.Transaction = transaction;
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = conn;
-                    cmd.Connection.ConnectionString = connection.ConnectionString;
+                    // Custom prefix & suffix
+                    builder.QuotePrefix = "'";
+                    builder.QuoteSuffix = "'";
+
+                    Assert.Equal(adapter, builder.DataAdapter);
+                    Assert.Equal("'Test'", builder.QuoteIdentifier("Test", connection));
+                    Assert.Equal("'Te''st'", builder.QuoteIdentifier("Te'st", connection));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", connection));
+                    Assert.Equal("Te'st", builder.UnquoteIdentifier("'Te''st'", connection));
                     
-                    using (var adapter = new OleDbDataAdapter(cmd.CommandText, connection))
-                    using (var builder = new OleDbCommandBuilder(adapter))
-                    {
-                        // Custom prefix & suffix
-                        builder.QuotePrefix = "'";
-                        builder.QuoteSuffix = "'";
+                    // Ensure we don't need active connection:
+                    Assert.Equal("'Test'", builder.QuoteIdentifier("Test", null));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", null));
 
-                        Assert.Equal(adapter, builder.DataAdapter);
-                        Assert.Equal("'Test'", builder.QuoteIdentifier("Test", connection));
-                        Assert.Equal("'Te''st'", builder.QuoteIdentifier("Te'st", connection));
-                        Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", connection));
-                        Assert.Equal("Te'st", builder.UnquoteIdentifier("'Te''st'", connection));
-                        
-                        // Ensure we don't need active connection:
-                        Assert.Equal("'Test'", builder.QuoteIdentifier("Test", null));
-                        Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", null));
+                    builder.QuotePrefix = string.Empty;
+                    string quoteErrMsg = $"{nameof(builder.QuoteIdentifier)} requires open connection when the quote prefix has not been set.";
+                    string unquoteErrMsg = $"{nameof(builder.UnquoteIdentifier)} requires open connection when the quote prefix has not been set.";
 
-                        builder.QuotePrefix = string.Empty;
-                        string quoteErrMsg = $"{nameof(builder.QuoteIdentifier)} requires open connection when the quote prefix has not been set.";
-                        string unquoteErrMsg = $"{nameof(builder.UnquoteIdentifier)} requires open connection when the quote prefix has not been set.";
+                    Assert.Equal("`Test`", builder.QuoteIdentifier("Test", connection));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("`Test`", connection));
 
-                        Assert.Equal("`Test`", builder.QuoteIdentifier("Test", connection));
-                        Assert.Equal("Test", builder.UnquoteIdentifier("`Test`", connection));
+                    Assert.NotNull(adapter.SelectCommand.Connection);
+                    Assert.Equal("`Test`", builder.QuoteIdentifier("Test"));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("`Test`"));
 
-                        Assert.NotNull(adapter.SelectCommand.Connection);
-                        Assert.Equal("`Test`", builder.QuoteIdentifier("Test"));
-                        Assert.Equal("Test", builder.UnquoteIdentifier("`Test`"));
-
-                        adapter.SelectCommand.Connection = null;
-                        AssertExtensions.Throws<InvalidOperationException>(() => builder.QuoteIdentifier("Test"), quoteErrMsg);
-                        AssertExtensions.Throws<InvalidOperationException>(() => builder.UnquoteIdentifier("'Test'"), unquoteErrMsg);
-                    }
+                    adapter.SelectCommand.Connection = null;
+                    AssertExtensions.Throws<InvalidOperationException>(() => builder.QuoteIdentifier("Test"), quoteErrMsg);
+                    AssertExtensions.Throws<InvalidOperationException>(() => builder.UnquoteIdentifier("'Test'"), unquoteErrMsg);
                 }
+                command.CommandType = CommandType.Text;
             });
         }
 
