@@ -33,7 +33,7 @@ namespace System.Text.Json.Serialization
 
                         if (HandleValue(tokenType, options, ref reader, ref state))
                         {
-                            return;
+                            break;
                         }
                     }
                     else if (tokenType == JsonTokenType.PropertyName)
@@ -82,14 +82,14 @@ namespace System.Text.Json.Serialization
                         }
                         else if (HandleValue(tokenType, options, ref reader, ref state))
                         {
-                            return;
+                            break;
                         }
                     }
                     else if (tokenType == JsonTokenType.EndObject)
                     {
                         if (HandleEndObject(options, ref state, ref reader))
                         {
-                            return;
+                            break;
                         }
                     }
                     else if (tokenType == JsonTokenType.StartArray)
@@ -100,21 +100,21 @@ namespace System.Text.Json.Serialization
                         }
                         else if (HandleValue(tokenType, options, ref reader, ref state))
                         {
-                            return;
+                            break;
                         }
                     }
                     else if (tokenType == JsonTokenType.EndArray)
                     {
                         if (HandleEndArray(options, ref state, ref reader))
                         {
-                            return;
+                            break;
                         }
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {
                         if (HandleNull(ref reader, ref state, options))
                         {
-                            return;
+                            break;
                         }
                     }
                 }
@@ -125,7 +125,43 @@ namespace System.Text.Json.Serialization
                 ThrowHelper.ReThrowWithPath(e, state.PropertyPath);
             }
 
+            // Ensure any trailing whitespace or comments (if allowed) are cleaned up
+            ConsumeTrailingWhitespaceAndComments(ref reader, options);
+
             return;
+        }
+
+        private static void ConsumeTrailingWhitespaceAndComments(ref Utf8JsonReader reader, JsonSerializerOptions options)
+        {
+            try
+            {
+                while (reader.Read())
+                {
+                    switch (reader.TokenType)
+                    {
+                        case JsonTokenType.None:
+                            // Consume whitespace
+                            continue;
+
+                        case JsonTokenType.Comment:
+                            // Consume comments if allowed
+                            if (options.ReadCommentHandling != JsonCommentHandling.Disallow)
+                            {
+                                continue;
+                            }
+                            goto default;
+
+                        default:
+                            // Stop at any other token we find
+                            return;
+                    }
+                }
+            }
+            catch (JsonReaderException e)
+            {
+                // Re-throw without path information (outside of an object)
+                ThrowHelper.ReThrowWithPath(e, "<none>");
+            }
         }
 
         private static ReadOnlySpan<byte> GetUnescapedString(ReadOnlySpan<byte> utf8Source, int idx)
