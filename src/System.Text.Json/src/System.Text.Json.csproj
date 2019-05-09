@@ -19,7 +19,6 @@
     <Compile Include="System\Text\Json\JsonHelpers.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.Date.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
-    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterGuid.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.Serialization.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.cs" />
@@ -58,6 +57,7 @@
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterDecimal.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterDouble.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterEnum.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterGuid.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt16.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt32.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt64.cs" />
