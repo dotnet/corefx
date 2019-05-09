@@ -391,7 +391,10 @@ namespace System.Net.Sockets
                             Interop.Sys.Connect(this, pAddress, address.Length);
                         }
                     }
-                    Interop.Sys.Shutdown(this, SocketShutdown.Both);
+                    else
+                    {
+                        Interop.Sys.Shutdown(this, SocketShutdown.Both);
+                    }
                 }
             }
         }
