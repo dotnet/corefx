@@ -29,14 +29,17 @@
        <_contractStrongNameKeyId Condition="'$(_contractAssemblyPublicKey)' == 'b03f5f7f11d50a3a'">Microsoft</_contractStrongNameKeyId>
        <_contractStrongNameKeyId Condition="'$(_contractAssemblyPublicKey)' == '31bf3856ad364e35'">MicrosoftShared</_contractStrongNameKeyId>
        <_contractStrongNameKeyId Condition="'$(_contractAssemblyPublicKey)' == 'cc7b13ffcd2ddd51'">Open</_contractStrongNameKeyId>
-       <_contractProjectContent><![CDATA[<Project Sdk="Microsoft.NET.Sdk">
+       <_contractProjectContent><![CDATA[<Project>
   <!-- this is a generated project, to make changes update the template above this directory
        and rebuild generateShims.proj -->
+  <!-- only import SDK if this project is built directly -->
+  <Import Condition="'%24(MSBuildProjectFullPath)' == '%24(MSBuildThisFileFullPath)'" Project="Sdk.props" Sdk="Microsoft.NET.Sdk" />
   <PropertyGroup>
     <AssemblyVersion>$(_contractAssemblyVersion)</AssemblyVersion>
     <StrongNameKeyId>$(_contractStrongNameKeyId)</StrongNameKeyId>
     <ContractAssemblyPath>%24($(_contractDirProperty))%24(MSBuildProjectName).dll</ContractAssemblyPath>
   </PropertyGroup>
+  <Import Condition="'%24(MSBuildProjectFullPath)' == '%24(MSBuildThisFileFullPath)'" Project="Sdk.targets" Sdk="Microsoft.NET.Sdk" />
 </Project>
 ]]></_contractProjectContent>
      </PropertyGroup>
