@@ -1065,7 +1065,7 @@ namespace System.Net.Sockets.Tests
                 catch (ObjectDisposedException)
                 {}
 
-                bool socketException = false;
+                // bool socketException = false;
                 var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
                 while (true)
                 {
@@ -1079,7 +1079,7 @@ namespace System.Net.Sockets.Tests
                     }
                     catch (SocketException)
                     {
-                        socketException = true;
+                        // socketException = true;
                         break;
                     }
                 }
