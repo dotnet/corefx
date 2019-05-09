@@ -194,7 +194,7 @@ namespace System.Net.Http
                         }
                         else
                         {
-                            _response.Headers.TryAddWithoutValidation(descriptor, headerValue);
+                            _response.Headers.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
                         }
                     }
                 }
