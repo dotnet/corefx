@@ -27,10 +27,9 @@ namespace System.Runtime.CompilerServices.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => cwt.Add(key, key)); // duplicate key
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         [InlineData(1)]
         [InlineData(100)]
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void Add(int numObjects)
         {
             // Isolated to ensure we drop all references even in debug builds where lifetime is extended by the JIT to the end of the method
@@ -232,7 +231,6 @@ namespace System.Runtime.CompilerServices.Tests
             key_out = new WeakReference<object>(key, false);
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetOrCreateValue()
         {
@@ -264,7 +262,6 @@ namespace System.Runtime.CompilerServices.Tests
             key_out = new WeakReference<object>(key, false);
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetValue()
         {

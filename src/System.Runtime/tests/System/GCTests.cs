@@ -74,7 +74,6 @@ namespace System.Tests
             AssertExtensions.Throws<ArgumentOutOfRangeException>("mode", null, () => GC.Collect(2, mode, false)); 
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void Collect_CallsFinalizer()
         {
@@ -112,7 +111,6 @@ namespace System.Tests
             }
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void KeepAlive()
         {
@@ -163,7 +161,6 @@ namespace System.Tests
             }
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void KeepAlive_Null()
         {
@@ -342,7 +339,6 @@ namespace System.Tests
             }
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void GetTotalMemoryTest_ForceCollection()
         {
@@ -382,10 +378,9 @@ namespace System.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         [InlineData(GCLargeObjectHeapCompactionMode.CompactOnce)]
         [InlineData(GCLargeObjectHeapCompactionMode.Default)]
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public static void LargeObjectHeapCompactionModeRoundTrips(GCLargeObjectHeapCompactionMode value)
         {
             GCLargeObjectHeapCompactionMode orig = GCSettings.LargeObjectHeapCompactionMode;

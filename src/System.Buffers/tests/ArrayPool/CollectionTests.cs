@@ -145,11 +145,10 @@ namespace System.Buffers.ArrayPool.Tests
             return parsedTrim;
         }
 
-        [Theory,
-            InlineData(true),
-            InlineData(false)]
-        [ActiveIssue(29866, TargetFrameworkMonikers.UapNotUapAot)]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
+        [InlineData(true)]
+        [InlineData(false)]
+        [ActiveIssue(29866, TargetFrameworkMonikers.UapNotUapAot)]
         public void PollingEventFires(bool trim)
         {
             RemoteInvokeWithTrimming((trimString) =>

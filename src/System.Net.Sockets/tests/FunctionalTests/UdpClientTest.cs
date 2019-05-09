@@ -194,7 +194,6 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ObjectDisposedException>(() => udpClient.Send(null, 0, "localhost", 0));
         }
 
-        [Fact]
         [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void Finalize_NoExceptionsThrown()
         {
