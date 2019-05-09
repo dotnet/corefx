@@ -50,13 +50,13 @@ namespace System.Text.Json.Serialization
                 options = JsonSerializerOptions.s_defaultOptions;
             }
 
-            using (var bufferWriter = new PooledBufferWriter<byte>(options.DefaultBufferSize))
+            using (var output = new PooledBufferWriter<byte>(options.DefaultBufferSize))
             {
-                var cachedWriter = CachedUtf8JsonWriter.Get(bufferWriter, options.GetWriterOptions());
+                CachedUtf8JsonWriter cachedWriter = CachedUtf8JsonWriter.Get(output, options.GetWriterOptions());
 
                 try
                 {
-                    var writer = cachedWriter.GetJsonWriter();
+                    Utf8JsonWriter writer = cachedWriter.GetJsonWriter();
 
                     if (value == null)
                     {
@@ -64,7 +64,7 @@ namespace System.Text.Json.Serialization
                         writer.Flush();
 
 #if BUILDING_INBOX_LIBRARY
-                        await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
+                        await utf8Json.WriteAsync(output.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
                     // todo: stackalloc or pool here?
                     await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
@@ -86,18 +86,18 @@ namespace System.Text.Json.Serialization
                     int flushThreshold;
                     do
                     {
-                        flushThreshold = (int)(bufferWriter.Capacity * .9); //todo: determine best value here
+                        flushThreshold = (int)(output.Capacity * .9); //todo: determine best value here
 
                         isFinalBlock = Write(writer, flushThreshold, options, ref state);
                         writer.Flush();
 
 #if BUILDING_INBOX_LIBRARY
-                        await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
+                        await utf8Json.WriteAsync(output.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
-                    // todo: use pool here to avod extra alloc?
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
+                        // todo: use pool here to avod extra alloc?
+                        await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
 #endif
-                        bufferWriter.Clear();
+                        output.Clear();
                     } while (!isFinalBlock);
                 }
                 finally

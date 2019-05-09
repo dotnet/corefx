@@ -17,14 +17,14 @@ namespace System.Text.Json.Serialization
         private bool _inUse;
 #endif
 
-        private CachedUtf8JsonWriter(IBufferWriter<byte> stream, JsonWriterOptions writerOptions)
+        private CachedUtf8JsonWriter(IBufferWriter<byte> output, JsonWriterOptions writerOptions)
         {
-            _writer = new Utf8JsonWriter(stream, writerOptions);
+            _writer = new Utf8JsonWriter(output, writerOptions);
         }
 
-        public static CachedUtf8JsonWriter Get(IBufferWriter<byte> stream, JsonWriterOptions writerOptions)
+        public static CachedUtf8JsonWriter Get(IBufferWriter<byte> output, JsonWriterOptions writerOptions)
         {
-            var writer = s_cachedInstance ?? new CachedUtf8JsonWriter(stream, writerOptions);
+            var writer = s_cachedInstance ?? new CachedUtf8JsonWriter(output, writerOptions);
 
             // Taken off the thread static
             s_cachedInstance = null;
@@ -36,7 +36,7 @@ namespace System.Text.Json.Serialization
 
             writer._inUse = true;
 #endif
-            writer._writer.Reset(stream);
+            writer._writer.Reset(output);
             return writer;
         }
 

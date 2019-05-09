@@ -94,11 +94,11 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(type != null || value == null);
 
-            var cachedWriter = CachedUtf8JsonWriter.Get(output, options.GetWriterOptions());
+            CachedUtf8JsonWriter cachedWriter = CachedUtf8JsonWriter.Get(output, options.GetWriterOptions());
 
             try
             {
-                var writer = cachedWriter.GetJsonWriter();
+                Utf8JsonWriter writer = cachedWriter.GetJsonWriter();
 
                 if (value == null)
                 {
