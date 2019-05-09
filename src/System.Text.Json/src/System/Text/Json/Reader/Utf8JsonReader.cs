@@ -13,7 +13,7 @@ namespace System.Text.Json
     /// Provides a high-performance API for forward-only, read-only access to the UTF-8 encoded JSON text.
     /// It processes the text sequentially with no caching and adheres strictly to the JSON RFC
     /// by default (https://tools.ietf.org/html/rfc8259). When it encounters invalid JSON, it throws
-    /// a JsonReaderException with basic error information like line number and byte position on the line.
+    /// a JsonException with basic error information like line number and byte position on the line.
     /// Since this type is a ref struct, it does not directly support async. However, it does provide
     /// support for reentrancy to read incomplete data, and continue reading once more data is presented.
     /// To be able to set max depth while reading OR allow skipping comments, create an instance of 
@@ -71,7 +71,31 @@ namespace System.Text.Json
         /// Returns the total amount of bytes consumed by the <see cref="Utf8JsonReader"/> so far
         /// for the current instance of the <see cref="Utf8JsonReader"/> with the given UTF-8 encoded input text.
         /// </summary>
-        public long BytesConsumed => _totalConsumed + _consumed;
+        public long BytesConsumed
+        {
+            get
+            {
+#if DEBUG
+                if (!_isInputSequence)
+                {
+                    Debug.Assert(_totalConsumed == 0);
+                }
+#endif
+                return _totalConsumed + _consumed;
+            }
+        }
+
+        /// <summary>
+        /// Returns the index that the last processed JSON token starts at
+        /// within the given UTF-8 encoded input text, skipping any white space.
+        /// </summary>
+        /// <remarks>
+        /// For JSON strings (including property names), this points to before the start quote.
+        /// </remarks>
+        /// <remarks>
+        /// For comments, this points to before the first comment delimiter (i.e. '/').
+        /// </remarks>
+        public long TokenStartIndex { get; private set; }
 
         /// <summary>
         /// Tracks the recursive depth of the nested objects / arrays within the JSON text
@@ -200,6 +224,7 @@ namespace System.Text.Json
             _bitStack = state._bitStack;
 
             _consumed = 0;
+            TokenStartIndex = 0;
             _totalConsumed = 0;
             _isLastSegment = _isFinalBlock;
             _isMultiSegment = false;
@@ -217,7 +242,7 @@ namespace System.Text.Json
         /// Read the next JSON token from input source.
         /// </summary>
         /// <returns>True if the token was read successfully, else false.</returns>
-        /// <exception cref="JsonReaderException">
+        /// <exception cref="JsonException">
         /// Thrown when an invalid JSON token is encountered according to the JSON RFC
         /// or if the current depth exceeds the recursive limit set by the max depth.
         /// </exception>
@@ -615,6 +640,8 @@ namespace System.Text.Json
                 first = _buffer[_consumed];
             }
 
+            TokenStartIndex = _consumed;
+
             if (_tokenType == JsonTokenType.None)
             {
                 goto ReadFirstToken;
@@ -891,6 +918,8 @@ namespace System.Text.Json
                                         marker = _buffer[_consumed];
                                     }
 
+                                    TokenStartIndex = _consumed;
+
                                     // Skip comments and consume the actual JSON value.
                                     continue;
                                 }
@@ -993,10 +1022,20 @@ namespace System.Text.Json
             {
                 Debug.Assert(IsLastSpan);
 
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
+                // If there is no more data, and the JSON is not a single value, throw.
+                if (_isNotPrimitive)
+                {
+                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.ExpectedEndOfDigitNotFound, _buffer[_consumed - 1]);
+                }
             }
 
-            Debug.Assert(JsonConstants.Delimiters.IndexOf(_buffer[_consumed]) >= 0);
+            // If there is more data and the JSON is not a single value, assert that there is an end of number delimiter.
+            // Else, if either the JSON is a single value XOR if there is no more data, don't assert anything since there won't always be an end of number delimiter.
+            Debug.Assert(
+                ((_consumed < _buffer.Length) &&
+                !_isNotPrimitive &&
+                JsonConstants.Delimiters.IndexOf(_buffer[_consumed]) >= 0)
+                || (_isNotPrimitive ^ (_consumed >= (uint)_buffer.Length)));
 
             return true;
         }
@@ -1553,6 +1592,8 @@ namespace System.Text.Json
                     first = _buffer[_consumed];
                 }
 
+                TokenStartIndex = _consumed;
+
                 if (_readerOptions.CommentHandling == JsonCommentHandling.Allow && first == JsonConstants.Slash)
                 {
                     _trailingCommaBeforeComment = true;
@@ -1646,6 +1687,8 @@ namespace System.Text.Json
 
             Debug.Assert(first != JsonConstants.Slash);
 
+            TokenStartIndex = _consumed;
+
             if (first == JsonConstants.ListSeparator)
             {
                 // A comma without some JSON value preceding it is invalid
@@ -1680,6 +1723,8 @@ namespace System.Text.Json
                     }
                     first = _buffer[_consumed];
                 }
+
+                TokenStartIndex = _consumed;
 
                 if (first == JsonConstants.Slash)
                 {
@@ -1902,6 +1947,8 @@ namespace System.Text.Json
                 goto IncompleteNoRollback;
             }
 
+            TokenStartIndex = _consumed;
+
             if (_tokenType == JsonTokenType.StartObject)
             {
                 if (marker == JsonConstants.CloseBrace)
@@ -1990,6 +2037,8 @@ namespace System.Text.Json
                 {
                     goto IncompleteRollback;
                 }
+
+                TokenStartIndex = _consumed;
 
                 if (_inObject)
                 {

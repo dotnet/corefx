@@ -14,6 +14,8 @@
     <Compile Include="System\Text\Json\BitStack.cs" />
     <Compile Include="System\Text\Json\JsonCommentHandling.cs" />
     <Compile Include="System\Text\Json\JsonConstants.cs" />
+    <Compile Include="System\Text\Json\JsonEncodedText.cs" />
+    <Compile Include="System\Text\Json\JsonException.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.Date.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
@@ -33,9 +35,9 @@
     <Compile Include="System\Text\Json\Document\JsonValueType.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeNumberResult.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeTokenResult.cs" />
-    <Compile Include="System\Text\Json\Reader\JsonReaderException.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderHelper.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderHelper.Unescaping.cs" />
+    <Compile Include="System\Text\Json\Reader\JsonReaderException.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderOptions.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderState.cs" />
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.cs" />
@@ -58,6 +60,8 @@
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt16.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt32.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt64.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterJsonElement.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterObject.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterSByte.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterSingle.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterString.cs" />

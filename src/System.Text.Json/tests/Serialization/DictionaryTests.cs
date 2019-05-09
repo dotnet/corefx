@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using Xunit;
 
@@ -54,21 +55,25 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void DuplicateKeysFail()
         {
-            // todo: this should throw a JsonReaderException
-            Assert.Throws<ArgumentException>(() => JsonSerializer.Parse<Dictionary<string, string>>(
+            // Strongly-typed IDictionary<,> case.
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, string>>(
                 @"{""Hello"":""World"", ""Hello"":""World""}"));
+
+            // Weakly-typed IDictionary case.
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, object>>(
+                @"{""Hello"":null, ""Hello"":null}"));
         }
 
         [Fact]
         public static void DictionaryOfObjectFail()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Dictionary<string, object>>(@"{""Key1"":1"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, object>>(@"{""Key1"":1"));
         }
 
         [Fact]
         public static void FirstGenericArgNotStringFail()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
         }
 
         [Fact]
@@ -260,6 +265,46 @@ namespace System.Text.Json.Serialization.Tests
                 // Verify the name is unescaped after deserialize.
                 obj = JsonSerializer.Parse<Dictionary<string, int>>(json);
                 Assert.Equal(1, obj[longPropertyName]);
+            }
+        }
+
+        [Fact]
+        public static void ObjectToStringFail()
+        {
+            string json = @"{""MyDictionary"":{""Key"":""Value""}}";
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, string>>(json));
+        }
+
+        [Fact]
+        public static void HashtableFail()
+        {
+            {
+                string json = @"{""Key"":""Value""}";
+
+                // Verify we can deserialize into Dictionary<,>
+                JsonSerializer.Parse<Dictionary<string, string>>(json);
+
+                // We don't support non-generic IDictionary
+                Assert.Throws<JsonException>(() => JsonSerializer.Parse<Hashtable>(json));
+            }
+
+            {
+                Hashtable ht = new Hashtable();
+                ht.Add("Key", "Value");
+                Assert.Throws<JsonException>(() => JsonSerializer.ToString(ht));
+            }
+
+            {
+                string json = @"{""Key"":""Value""}";
+
+                // We don't support non-generic IDictionary
+                Assert.Throws<JsonException>(() => JsonSerializer.Parse<IDictionary>(json));
+            }
+
+            {
+                IDictionary ht = new Hashtable();
+                ht.Add("Key", "Value");
+                Assert.Throws<JsonException>(() => JsonSerializer.ToString(ht));
             }
         }
     }
