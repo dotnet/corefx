@@ -43,6 +43,7 @@
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.cs" />
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.MultiSegment.cs" />
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.TryGet.cs" />
+    <Compile Include="System\Text\Json\Serialization\CachedUtf8JsonWriter.cs" />
     <Compile Include="System\Text\Json\Serialization\ClassMaterializer.cs" />
     <Compile Include="System\Text\Json\Serialization\ClassType.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultArrayConverter.cs" />
