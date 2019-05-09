@@ -77,7 +77,7 @@ namespace System.Text.Json.Serialization.Converters
 
             Debug.Assert(_createRangeDelegates.ContainsKey(createRangeDelegateKey));
 
-            IEnumerable immutableCollection = (IEnumerable)((ImmutableCreateRangeDelegate<TElement>)_createRangeDelegates[createRangeDelegateKey]).DynamicInvoke(array);
+            IEnumerable immutableCollection = (IEnumerable)((ImmutableCreateRangeDelegate<TElement>)_createRangeDelegates[createRangeDelegateKey]).Invoke((IEnumerable<TElement>)array);
             return immutableCollection;
         }
 
@@ -136,7 +136,7 @@ namespace System.Text.Json.Serialization.Converters
             Debug.Assert(elementType != null);
             Debug.Assert(_createRangeDelegateKeys.ContainsKey(immutableCollectionType));
 
-            return (IEnumerable)_CreateImmutableCollectionDelegates[elementType.FullName].DynamicInvoke(_createRangeDelegateKeys[immutableCollectionType], sourceList);
+            return (IEnumerable)_CreateImmutableCollectionDelegates[elementType.FullName].Invoke(_createRangeDelegateKeys[immutableCollectionType], sourceList);
         }
     }
 }
