@@ -86,8 +86,8 @@ namespace System.Data.OleDb.Tests
                 timesCalled++;
             };
             connection.StateChange += new StateChangeEventHandler(OnStateChange);  
-            connection.Open();
             connection.Close();
+            connection.Open();
             Assert.Equal(2, timesCalled);
         }
         
@@ -129,9 +129,6 @@ namespace System.Data.OleDb.Tests
                 Assert.Contains(connection.DataSource, TestDirectory);
                 Assert.Empty(connection.Database);
             };
-            VerifyDefaults();
-            connection.ConnectionString = ConnectionString;
-            connection.Open();
             VerifyDefaults();
             connection.Close();
             VerifyDefaults();
