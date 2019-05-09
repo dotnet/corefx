@@ -85,11 +85,8 @@ namespace System.Net.Mail
 
         internal void InitializeConnection(string host, int port)
         {
-            lock (this)
-            {
-                _tcpClient.Connect(host, port);
-                _networkStream = _tcpClient.GetStream();
-            }
+            _tcpClient.Connect(host, port);
+            _networkStream = _tcpClient.GetStream();
         }
 
         internal IAsyncResult BeginInitializeConnection(string host, int port, AsyncCallback callback, object state)
