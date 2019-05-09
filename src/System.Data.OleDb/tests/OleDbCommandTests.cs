@@ -74,14 +74,16 @@ namespace System.Data.OleDb.Tests
             RunTest((command, tableName) => {
                 command.CommandText = @"SELECT * FROM " + tableName;
                 var currentConnection = command.Connection;
-                var oleDbConnection = new OleDbConnection(ConnectionString);
-                oleDbConnection.Open();
-                command.Connection = oleDbConnection;
-                oleDbConnection.Close();
-                AssertExtensions.Throws<InvalidOperationException>(
-                    () => command.Prepare(), 
-                    $"{nameof(command.Prepare)} requires an open and available Connection. The connection's current state is closed."
-                );
+                using (var oleDbConnection = new OleDbConnection(ConnectionString))
+                {
+                    oleDbConnection.Open();
+                    command.Connection = oleDbConnection;
+                    oleDbConnection.Close();
+                    AssertExtensions.Throws<InvalidOperationException>(
+                        () => command.Prepare(), 
+                        $"{nameof(command.Prepare)} requires an open and available Connection. The connection's current state is closed."
+                    );
+                }
                 command.Connection = currentConnection;
             });
         }

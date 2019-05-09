@@ -13,7 +13,7 @@ namespace System.Data.OleDb.Tests
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void OleDbParameterCollection_MultipleScenarios_Success()
         {
-            OleDbParameterCollection opc = new OleDbCommand().Parameters;
+            OleDbParameterCollection opc = command.Parameters;
 
             Assert.True(opc.Count == 0);
             Assert.False(((Collections.IList)opc).IsReadOnly);

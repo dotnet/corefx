@@ -67,11 +67,12 @@ namespace System.Data.OleDb.Tests
         {
             RunTest((command, tableName) => {
                 using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
+                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
-                    cmd.Connection.Close();
+                    cmd.Connection = conn;
+                    conn.Close();
                     var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(cmd));
                     Assert.NotNull(exception);
                     Assert.IsType<InvalidOperationException>(exception);
@@ -88,10 +89,11 @@ namespace System.Data.OleDb.Tests
         {
             RunTest((command, tableName) => {
                 using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
+                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
+                    cmd.Connection = conn;
                     cmd.Transaction = transaction;
                     using (var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder())
                     {
@@ -109,10 +111,11 @@ namespace System.Data.OleDb.Tests
         {
             RunTest((command, tableName) => {
                 using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
+                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
+                    cmd.Connection = conn;
                     cmd.Transaction = transaction;
                     using (var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder())
                     {
@@ -130,11 +133,12 @@ namespace System.Data.OleDb.Tests
         {
             RunTest((command, tableName) => {
                 using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
+                using (var conn = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
                 {
                     cmd.Transaction = transaction;
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
+                    cmd.Connection = conn;
                     cmd.Connection.ConnectionString = connection.ConnectionString;
                     
                     using (var adapter = new OleDbDataAdapter(cmd.CommandText, connection))
