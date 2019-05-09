@@ -36,18 +36,18 @@
     <MicrosoftDotNetBuildTasksFeedPackageVersion>2.2.0-beta.19254.1</MicrosoftDotNetBuildTasksFeedPackageVersion>
     <MicrosoftDotNetVersionToolsTasksPackageVersion>1.0.0-beta.19254.1</MicrosoftDotNetVersionToolsTasksPackageVersion>
     <!-- Core-setup dependencies -->
-    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview6-27706-03</MicrosoftNETCoreAppPackageVersion>
-    <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-preview6-27706-03</MicrosoftNETCoreDotNetHostPackageVersion>
-    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-preview6-27706-03</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
+    <MicrosoftNETCoreAppPackageVersion>3.0.0-preview6-27707-10</MicrosoftNETCoreAppPackageVersion>
+    <MicrosoftNETCoreDotNetHostPackageVersion>3.0.0-preview6-27707-10</MicrosoftNETCoreDotNetHostPackageVersion>
+    <MicrosoftNETCoreDotNetHostPolicyPackageVersion>3.0.0-preview6-27707-10</MicrosoftNETCoreDotNetHostPolicyPackageVersion>
     <!-- Coreclr dependencies -->
     <MicrosoftNETCoreILAsmPackageVersion>3.0.0-preview6-27707-72</MicrosoftNETCoreILAsmPackageVersion>
     <MicrosoftNETCoreRuntimeCoreCLRPackageVersion>3.0.0-preview6-27707-72</MicrosoftNETCoreRuntimeCoreCLRPackageVersion>
     <!-- Corefx dependencies -->
-    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview6.19256.13</MicrosoftNETCorePlatformsPackageVersion>
-    <runtimenativeSystemIOPortsPackageVersion>4.6.0-preview6.19256.13</runtimenativeSystemIOPortsPackageVersion>
+    <MicrosoftNETCorePlatformsPackageVersion>3.0.0-preview6.19257.8</MicrosoftNETCorePlatformsPackageVersion>
+    <runtimenativeSystemIOPortsPackageVersion>4.6.0-preview6.19257.8</runtimenativeSystemIOPortsPackageVersion>
     <!-- Standard dependencies -->
     <NETStandardLibraryPackageVersion>2.1.0-prerelease.19230.1</NETStandardLibraryPackageVersion>
     <!-- dotnet-optimization dependencies -->
-    <optimizationwindows_ntx64IBCCoreFxPackageVersion>99.99.99-master-20190506.1</optimizationwindows_ntx64IBCCoreFxPackageVersion>
+    <optimizationwindows_ntx64IBCCoreFxPackageVersion>99.99.99-master-20190508.1</optimizationwindows_ntx64IBCCoreFxPackageVersion>
   </PropertyGroup>
 </Project>
