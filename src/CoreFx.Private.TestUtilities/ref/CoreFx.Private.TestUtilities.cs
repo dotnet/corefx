@@ -27,6 +27,7 @@ namespace System
         public static void ThrowsAny<TFirstExceptionType, TSecondExceptionType, TThirdExceptionType>(System.Action action) where TFirstExceptionType : System.Exception where TSecondExceptionType : System.Exception where TThirdExceptionType : System.Exception { }
         public static System.Threading.Tasks.Task<T> ThrowsAsync<T>(string paramName, System.Func<System.Threading.Tasks.Task> testCode) where T : System.ArgumentException { throw null; }
         public static void ThrowsIf<T>(bool condition, System.Action action) where T : System.Exception { }
+        public static T Throws<T>(System.Action action) where T : System.Exception { throw null; }
         public static void Throws<T>(System.Action action, string message) where T : System.Exception { }
         public static T Throws<T>(string paramName, System.Action action) where T : System.ArgumentException { throw null; }
         public static T Throws<T>(string paramName, System.Func<object> testCode) where T : System.ArgumentException { throw null; }
@@ -42,13 +43,13 @@ namespace System
         public static bool ClientWebSocketPartialMessagesSupported { get { throw null; } }
         public static bool HasWindowsShell { get { throw null; } }
         public static System.Version ICUVersion { get { throw null; } }
+        public static bool Is32BitProcess { get { throw null; } }
         public static bool IsAlpine { get { throw null; } }
         public static bool IsArgIteratorNotSupported { get { throw null; } }
         public static bool IsArgIteratorSupported { get { throw null; } }
         public static bool IsArm64Process { get { throw null; } }
         public static bool IsArmOrArm64Process { get { throw null; } }
         public static bool IsArmProcess { get { throw null; } }
-        public static bool Is32BitProcess { get { throw null; } }
         public static bool IsCentos6 { get { throw null; } }
         public static bool IsDebian { get { throw null; } }
         public static bool IsDebian8 { get { throw null; } }
@@ -136,6 +137,11 @@ namespace System
         public static int WindowsVersion { get { throw null; } }
         public static string GetDistroVersionString() { throw null; }
     }
+    public static partial class RetryHelper
+    {
+        public static void Execute(System.Action test, int maxAttempts = 5, System.Func<int, int> backoffFunc = null) { }
+        public static System.Threading.Tasks.Task ExecuteAsync(Func<System.Threading.Tasks.Task> test, int maxAttempts = 5, System.Func<int, int> backoffFunc = null) { throw null; }
+    }
     public static partial class TestEnvironment
     {
         public static bool IsStressModeEnabled { get { throw null; } }
@@ -151,6 +157,7 @@ namespace System.IO
     public abstract partial class FileCleanupTestBase : System.IDisposable
     {
         protected FileCleanupTestBase() { }
+        protected static bool IsProcessElevated { get { throw null; } }
         protected string TestDirectory { get { throw null; } }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
