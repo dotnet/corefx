@@ -64,6 +64,32 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadClassWithTrailingWhitespace()
+        {
+            ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(ClassWithComplexObjects.s_json + " \r\n\t");
+            obj.Verify();
+            string reserialized = JsonSerializer.ToString(obj);
+
+            // Properties in the exported json will be in the order that they were reflected, doing a quick check to see that
+            // we end up with the same length (i.e. same amount of data) to start.
+            Assert.Equal(ClassWithComplexObjects.s_json.StripWhitespace().Length, reserialized.Length);
+
+            // Shoving it back through the parser should validate round tripping.
+            obj = JsonSerializer.Parse<ClassWithComplexObjects>(reserialized);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithTrailingComments()
+        {
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
+
+            ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(ClassWithComplexObjects.s_json + "// Single Line\n/* Multi\nLine Comment */ ", options);
+            obj.Verify();
+        }
+
+        [Fact]
         public static void ReadEmpty()
         {
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>("{}");
