@@ -23,16 +23,6 @@ namespace System.Data.OleDb.Tests
             }
         }
 
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void ExecuteNonQuery_TableNameWithoutCsvExtension_Throws()
-        {
-            command.CommandText =
-                @"CREATE TABLE TableNameWithoutCsvExtension (
-                    SomeInt32 INT,
-                    SomeString NVARCHAR(100))";
-            Assert.Throws<OleDbException>(() => command.ExecuteNonQuery());
-        }
-
         [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void InvalidRowIndex()

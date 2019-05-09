@@ -106,18 +106,6 @@ namespace System.Data.OleDb.Tests
                 $"{nameof(OleDbConnection)} does not support parallel transactions."
             );
         }
-
-        [ConditionalFact(Helpers.IsAceDriverAvailable)]
-        public void CommitTransaction_AfterConnectionClosed_Throws()
-        {
-            command.CommandText = "CREATE TABLE table_x.csv (column_y NVARCHAR(40));";
-            command.ExecuteNonQuery();
-            connection.Close();
-            AssertExtensions.Throws<InvalidOperationException>(
-                () => transaction.Commit(),
-                $"This {nameof(OleDbTransaction)} has completed; it is no longer usable."
-            );
-        }
         
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void GetDefaults_AnyGivenState_DoesNotThrow()
