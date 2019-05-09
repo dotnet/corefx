@@ -28,13 +28,11 @@ namespace System.Text.Json.Serialization
                 if (state.Current.IsDictionary)
                 {
                     // Verify that the Dictionary can be deserialized by having <string> as first generic argument.
-                    Debug.Assert(state.Current.JsonClassInfo.Type.GetGenericArguments().Length >= 1);
-                    if (state.Current.JsonClassInfo.Type.GetGenericArguments()[0].UnderlyingSystemType != typeof(string))
+                    Type[] args = state.Current.JsonClassInfo.Type.GetGenericArguments();
+                    if (args.Length == 0 || args[0].UnderlyingSystemType != typeof(string))
                     {
-                        ThrowHelper.ThrowJsonReaderException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state);
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.PropertyPath);
                     }
-
-                    ClassType classType = state.Current.JsonClassInfo.ElementClassInfo.ClassType;
 
                     if (state.Current.ReturnValue == null)
                     {
@@ -44,9 +42,15 @@ namespace System.Text.Json.Serialization
                     }
                     else
                     {
-                        Debug.Assert(classType == ClassType.Object || classType == ClassType.Dictionary);
+                        ClassType classType = state.Current.JsonClassInfo.ElementClassInfo.ClassType;
 
-                        // A nested object or dictionary.
+                        // Verify that the second parameter is not a value.
+                        if (state.Current.JsonClassInfo.ElementClassInfo.ClassType == ClassType.Value)
+                        {
+                            ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.PropertyPath);
+                        }
+
+                        // A nested object, dictionary or enumerable.
                         JsonClassInfo classInfoTemp = state.Current.JsonClassInfo;
                         state.Push();
                         state.Current.JsonClassInfo = classInfoTemp.ElementClassInfo;
@@ -66,7 +70,7 @@ namespace System.Text.Json.Serialization
             state.Current.ReturnValue = classInfo.CreateObject();
         }
 
-        private static bool HandleEndObject(JsonSerializerOptions options, ref ReadStack state)
+        private static bool HandleEndObject(JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
         {
             bool isLastFrame = state.IsLastFrame;
             if (state.Current.Drain)
@@ -87,7 +91,7 @@ namespace System.Text.Json.Serialization
             }
 
             state.Pop();
-            ApplyObjectToEnumerable(value, options, ref state.Current);
+            ApplyObjectToEnumerable(value, options, ref state, ref reader);
             return false;
         }
     }
