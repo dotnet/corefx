@@ -76,7 +76,7 @@ namespace System.Security.Cryptography.Rsa.Tests
                 TestData.RSA1032Parameters);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(ImportExport), nameof(ImportExport.Supports16384))]
         public static void TestRead16384Parameters_Public()
         {
             RSAParameters expectedParameters = ImportExport.MakePublic(TestData.RSA16384Params);
@@ -157,7 +157,7 @@ zM=
                 expectedParameters);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(ImportExport), nameof(ImportExport.Supports16384))]
         public static void TestRead16384Parameters_Private()
         {
             // Bonus trait of this XML: the D parameter is not in

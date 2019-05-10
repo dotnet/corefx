@@ -10,6 +10,8 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public partial class ImportExport
     {
+        public static bool Supports16384 { get; } = TestRsa16384();
+
         [Fact]
         public static void ExportAutoKey()
         {
@@ -401,6 +403,24 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             Array.Reverse(littleEndianBytes);
             return new BigInteger(littleEndianBytes);
+        }
+
+        private static bool TestRsa16384()
+        {
+            try
+            {
+                using (RSA rsa = RSAFactory.Create())
+                {
+                    rsa.ImportParameters(TestData.RSA16384Params);
+                }
+
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                // The key is too big for this platform.
+                return false;
+            }
         }
     }
 }
