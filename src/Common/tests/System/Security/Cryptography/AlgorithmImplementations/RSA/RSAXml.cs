@@ -1014,7 +1014,7 @@ zM=
         {
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.Throws<CryptographicException>(
+                Assert.ThrowsAny<CryptographicException>(
                     () => rsa.FromXmlString(
                         @"
 <RSAKeyValue>
@@ -1049,7 +1049,7 @@ zM=
         {
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.Throws<CryptographicException>(
+                Assert.ThrowsAny<CryptographicException>(
                     () => rsa.FromXmlString(
                         @"
 <RSAKeyValue>
@@ -1087,7 +1087,7 @@ zM=
         {
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.Throws<CryptographicException>(
+                Assert.ThrowsAny<CryptographicException>(
                     () => rsa.FromXmlString(
                         @"
 <RSAKeyValue>
@@ -1123,7 +1123,7 @@ zM=
         {
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.Throws<CryptographicException>(
+                Assert.ThrowsAny<CryptographicException>(
                     () => rsa.FromXmlString(
                         @"
 <RSAKeyValue>
@@ -1159,7 +1159,7 @@ zM=
         {
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.Throws<CryptographicException>(
+                Assert.ThrowsAny<CryptographicException>(
                     () => rsa.FromXmlString(
                         @"
 <RSAKeyValue>
@@ -1195,7 +1195,7 @@ zM=
         {
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.Throws<CryptographicException>(
+                Assert.ThrowsAny<CryptographicException>(
                     () => rsa.FromXmlString(
                         @"
 <RSAKeyValue>
