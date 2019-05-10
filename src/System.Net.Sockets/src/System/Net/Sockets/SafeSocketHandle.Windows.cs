@@ -108,7 +108,7 @@ namespace System.Net.Sockets
             return CreateSocket(InnerSafeCloseSocket.Accept(socketHandle, socketAddress, ref socketAddressSize));
         }
 
-        private void InnerReleaseHandle()
+        private bool InnerReleaseHandle()
         {
             // Keep m_IocpBoundHandle around after disposing it to allow freeing NativeOverlapped.
             // ThreadPoolBoundHandle allows FreeNativeOverlapped even after it has been disposed.
@@ -116,6 +116,8 @@ namespace System.Net.Sockets
             {
                 _iocpBoundHandle.Dispose();
             }
+
+            return false;
         }
 
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid

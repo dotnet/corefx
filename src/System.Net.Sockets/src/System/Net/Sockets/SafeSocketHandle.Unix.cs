@@ -196,12 +196,16 @@ namespace System.Net.Sockets
             return errorCode;
         }
 
-        private void InnerReleaseHandle()
+        private bool InnerReleaseHandle()
         {
+            bool aborted = false;
+
             if (_asyncContext != null)
             {
-                _asyncContext.Close();
+                aborted = _asyncContext.StopAndAbort();
             }
+
+            return aborted;
         }
 
         internal sealed partial class InnerSafeCloseSocket : SafeHandleMinusOneIsInvalid

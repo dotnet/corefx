@@ -183,7 +183,7 @@ namespace System.Net.Sockets
                         sw.SpinOnce();
                     }
 
-                    InnerReleaseHandle();
+                    abortive |= InnerReleaseHandle();
 
                     innerSocket.Close(abortive);
                 }
