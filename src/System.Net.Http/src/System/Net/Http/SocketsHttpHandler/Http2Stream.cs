@@ -186,7 +186,7 @@ namespace System.Net.Http
                         // if the header can't be added, we silently drop it.
                         if (_state == StreamState.ExpectingTrailingHeaders)
                         {
-                            _response.TrailingHeaders.TryAddWithoutValidation(descriptor, headerValue);
+                            _response.TrailingHeaders.TryAddWithoutValidation(descriptor.HeaderType == HttpHeaderType.Request ? descriptor.AsCustomHeader() : descriptor, headerValue);
                         }
                         else if (descriptor.HeaderType == HttpHeaderType.Content)
                         {
