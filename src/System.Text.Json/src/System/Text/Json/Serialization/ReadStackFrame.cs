@@ -33,7 +33,7 @@ namespace System.Text.Json.Serialization
         public int PropertyIndex;
         public List<PropertyRef> PropertyRefCache;
 
-        // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
+        // The current JSON data for a property does not match a given POCO or ShouldDeserialize = false, so ignore the property (recursively).
         public bool Drain;
 
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;

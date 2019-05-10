@@ -75,25 +75,58 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(@"MyString", obj.MyString);
             Assert.Equal(@"MyStringWithIgnore", obj.MyStringWithIgnore);
             Assert.Equal(2, obj.MyStringsWithIgnore.Length);
+            Assert.Equal(@"MyComplexPropertyWithIgnore", obj.MyComplexPropertyWithIgnore.MyProperty);
 
             // Verify serialize.
             string json = JsonSerializer.ToString(obj);
             Assert.Contains(@"""MyString""", json);
             Assert.DoesNotContain(@"MyStringWithIgnore", json);
             Assert.DoesNotContain(@"MyStringsWithIgnore", json);
+            Assert.DoesNotContain(@"MyComplexPropertyWithIgnore", json);
 
             // Verify deserialize default.
             obj = JsonSerializer.Parse<ClassWithIgnoreAttributeProperty>(@"{}");
             Assert.Equal(@"MyString", obj.MyString);
             Assert.Equal(@"MyStringWithIgnore", obj.MyStringWithIgnore);
             Assert.Equal(2, obj.MyStringsWithIgnore.Length);
+            Assert.Equal(@"MyComplexPropertyWithIgnore", obj.MyComplexPropertyWithIgnore.MyProperty);
 
-            // Verify deserialize ignores the json for MyStringWithIgnore and MyStringsWithIgnore.
+            // Verify deserialize ignores the json for MyStringWithIgnore, MyStringsWithIgnore and MyComplexPropertyWithIgnore.
             obj = JsonSerializer.Parse<ClassWithIgnoreAttributeProperty>(
-                @"{""MyString"":""Hello"", ""MyStringWithIgnore"":""IgnoreMe"", ""MyStringsWithIgnore"":[""IgnoreMe""]}");
+                @"{""MyString"":""Hello"", ""MyStringWithIgnore"":""IgnoreMe"", ""MyStringsWithIgnore"":[""IgnoreMe""], ""MyComplexPropertyWithIgnore"":{""MyProperty"":""IgnoreMe""}}");
             Assert.Contains(@"Hello", obj.MyString);
             Assert.Equal(@"MyStringWithIgnore", obj.MyStringWithIgnore);
             Assert.Equal(2, obj.MyStringsWithIgnore.Length);
+            Assert.Equal(@"MyComplexPropertyWithIgnore", obj.MyComplexPropertyWithIgnore.MyProperty);
+        }
+
+        [Fact]
+        public static void JsonIgnoreAttribute_NestedObject()
+        {
+            // Verify default state.
+            var obj = new NestedObjectWithIgnoreAttributeProperty();
+            Assert.Equal(@"MyString", obj.MyString);
+            Assert.Equal(@"MyStringNested", obj.NestedObject.MyStringNested);
+            Assert.Equal(@"MyStringNested2", obj.NestedObject.NestedObject2.MyStringNested2);
+
+            // Verify serialize.
+            string json = JsonSerializer.ToString(obj);
+            Assert.Contains(@"""MyString""", json);
+            Assert.Contains(@"""MyStringNested""", json);
+            Assert.DoesNotContain(@"MyStringNested2", json);
+
+            // Verify deserialize default.
+            obj = JsonSerializer.Parse<NestedObjectWithIgnoreAttributeProperty>(@"{}");
+            Assert.Equal(@"MyString", obj.MyString);
+            Assert.Equal(@"MyStringNested", obj.NestedObject.MyStringNested);
+            Assert.Equal(@"MyStringNested2", obj.NestedObject.NestedObject2.MyStringNested2);
+
+            // Verify deserialize ignores the json for NestedObject2.
+            obj = JsonSerializer.Parse<NestedObjectWithIgnoreAttributeProperty>(
+                @"{""MyString"":""Hello"",""NestedObject"":{""MyStringNested"":""HelloMyStringNested"",""NestedObject2"":{""MyStringNested2"":""IgnoreMe""}}}");
+            Assert.Contains(@"Hello", obj.MyString);
+            Assert.Contains(@"HelloMyStringNested", obj.NestedObject.MyStringNested);
+            Assert.Null(obj.NestedObject.NestedObject2);
         }
 
         // Todo: add tests with missing object property and missing collection property.
@@ -178,6 +211,7 @@ namespace System.Text.Json.Serialization.Tests
                 MyString = "MyString";
                 MyStringWithIgnore = "MyStringWithIgnore";
                 MyStringsWithIgnore = new string[] { "1", "2" };
+                MyComplexPropertyWithIgnore = new ComplexType() { MyProperty = "MyComplexPropertyWithIgnore" };
             }
 
             [JsonIgnore]
@@ -187,6 +221,47 @@ namespace System.Text.Json.Serialization.Tests
 
             [JsonIgnore]
             public string[] MyStringsWithIgnore { get; set; }
+
+            [JsonIgnore]
+            public ComplexType MyComplexPropertyWithIgnore { get; set; }
+        }
+
+        public class ComplexType
+        {
+            public string MyProperty { get; set; }
+        }
+
+        public class NestedObjectWithIgnoreAttributeProperty
+        {
+            public NestedObjectWithIgnoreAttributeProperty()
+            {
+                MyString = "MyString";
+                NestedObject = new NestedObject()
+                {
+                    MyStringNested = "MyStringNested",
+                    NestedObject2 = new NestedObject2()
+                    {
+                        MyStringNested2 = "MyStringNested2"
+                    }
+                };
+            }
+
+            public string MyString { get; set; }
+
+            public NestedObject NestedObject { get; set; }
+        }
+
+        public class NestedObject
+        {
+            public string MyStringNested { get; set; }
+
+            [JsonIgnore]
+            public NestedObject2 NestedObject2 { get; set; }
+        }
+
+        public class NestedObject2
+        {
+            public string MyStringNested2 { get; set; }
         }
     }
 }

@@ -102,6 +102,12 @@ namespace System.Text.Json.Serialization
             // A property that returns an object.
             if (!obtainedValue)
             {
+                if (!jsonPropertyInfo.ShouldSerialize)
+                {
+                    // Ignore writing this property.
+                    state.Current.NextProperty();
+                    return true;
+                }
                 currentValue = jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
             }
 

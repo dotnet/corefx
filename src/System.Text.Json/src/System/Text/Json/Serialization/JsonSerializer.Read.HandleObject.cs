@@ -60,9 +60,18 @@ namespace System.Text.Json.Serialization
                 else
                 {
                     // Nested object.
-                    Type objType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-                    state.Push();
-                    state.Current.Initialize(objType, options);
+                    if (!state.Current.JsonPropertyInfo.ShouldDeserialize)
+                    {
+                        state.Push();
+                        state.Current.Drain = true;
+                        return;
+                    }
+                    else
+                    { 
+                        Type objType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+                        state.Push();
+                        state.Current.Initialize(objType, options);
+                    }
                 }
             }
 
