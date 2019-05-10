@@ -177,6 +177,8 @@ namespace System.Net.Sockets
                     {
                         // The socket was not released due to the SafeHandle being used.
                         // Try to make those on-going calls return.
+                        // On Linux, TryUnblockSocket will unblock current operations but it doesn't prevent
+                        // a new one from starting. So we must call TryUnblockSocket multiple times.
                         innerSocket.TryUnblockSocket();
                         sw.SpinOnce();
                     }

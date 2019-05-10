@@ -951,13 +951,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public async Task SyncUdpReceiveGetsCancelledByDispose()
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
+        public async Task UdpReceiveGetsCanceledByDispose()
         {
-            if (!UsesSync)
-            {
-                return;
-            }
-
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             socket.BindToAnonymousPort(IPAddress.Loopback);
 
@@ -976,9 +972,7 @@ namespace System.Net.Sockets.Tests
 
             Task timeoutTask = Task.Delay(30000);
 
-            await Task.WhenAny(disposeTask, receiveTask, timeoutTask);
-
-            Assert.True(!timeoutTask.IsCompleted);
+            Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, receiveTask, timeoutTask));
 
             await disposeTask;
 
@@ -993,19 +987,11 @@ namespace System.Net.Sockets.Tests
         }
 
         [Theory]
-        [InlineData(true, true, false)]
-        [InlineData(true, false, false)]
-        [InlineData(true, false, true)]
-        [InlineData(false, true, false)]
-        [InlineData(false, false, false)]
-        [InlineData(false, false, true)]
-        public async Task SyncTcpReceiveSendGetsCancelledByDisposeOrClose(bool receiveOrSend, bool disposeOrClose, bool timeoutZero)
+        [InlineData(true)]
+        [InlineData(false)]
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
+        public async Task TcpReceiveSendGetsCanceledByDisposeOrClose(bool receiveOrSend)
         {
-            if (!UsesSync)
-            {
-                return;
-            }
-
             (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
             using (socket2)
             {
@@ -1030,29 +1016,12 @@ namespace System.Net.Sockets.Tests
                     // Wait a little so the receive is started.
                     await Task.Delay(100);
 
-                    if (disposeOrClose)
-                    {
-                        Assert.False(timeoutZero);
-                        socket1.Dispose();
-                    }
-                    else
-                    {
-                        if (timeoutZero)
-                        {
-                            socket1.Close(0);
-                        }
-                        else
-                        {
-                            socket1.Close();
-                        }
-                    }
+                    socket1.Dispose();
                 });
 
                 Task timeoutTask = Task.Delay(30000);
 
-                await Task.WhenAny(disposeTask, socketOperation, timeoutTask);
-
-                Assert.True(!timeoutTask.IsCompleted);
+                Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
 
                 await disposeTask;
 
@@ -1065,7 +1034,7 @@ namespace System.Net.Sockets.Tests
                 catch (ObjectDisposedException)
                 {}
 
-                // bool socketException = false;
+                bool socketException = false;
                 var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
                 while (true)
                 {
@@ -1079,12 +1048,12 @@ namespace System.Net.Sockets.Tests
                     }
                     catch (SocketException)
                     {
-                        // socketException = true;
+                        socketException = true;
                         break;
                     }
                 }
 
-                // Assert.True(socketException);
+                Assert.True(socketException);
             }
         }
     }

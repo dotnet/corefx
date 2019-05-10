@@ -291,13 +291,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        public async Task SyncAcceptGetsCancelledByDispose()
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
+        public async Task AcceptGetsCanceledByDispose()
         {
-            if (!UsesSync)
-            {
-                return;
-            }
-
             var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
             listener.Listen(1);
@@ -317,9 +313,7 @@ namespace System.Net.Sockets.Tests
 
             Task timeoutTask = Task.Delay(30000);
 
-            await Task.WhenAny(disposeTask, acceptTask, timeoutTask);
-
-            Assert.True(!timeoutTask.IsCompleted);
+            Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, acceptTask, timeoutTask));
 
             await disposeTask;
 

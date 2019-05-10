@@ -384,6 +384,7 @@ namespace System.Net.Sockets
                     if (type == (int)SocketType.Stream)
                     {
                         // Connect to AF_UNSPEC causes an abortive close (TCP RST).
+                        // We don't need to clear the address, only the AddressFamily will be used.
                         Span<byte> address = stackalloc byte[32];
                         SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
                         fixed (byte* pAddress = address)
