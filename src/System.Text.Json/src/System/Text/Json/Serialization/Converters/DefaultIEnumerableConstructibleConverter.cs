@@ -15,8 +15,13 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
         {
-            Array array = CreateArrayFromList(elementType, sourceList);
-            return (IEnumerable)Activator.CreateInstance(enumerableType, array);
+            // TODO: Cache reflection here, or modify JsonPropertyInfoCommon to have a TElementType generic parameter.
+            MethodInfo createIEnumerable = typeof(JsonEnumerableConverter).GetMethod(
+                "GetGenericEnumerableFromList",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            createIEnumerable = createIEnumerable.MakeGenericMethod(elementType);
+
+            return (IEnumerable)Activator.CreateInstance(enumerableType, createIEnumerable.Invoke(null, new object[] { sourceList }));
         }
     }
 }

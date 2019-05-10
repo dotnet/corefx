@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 
 namespace System.Text.Json.Serialization.Policies
 {
@@ -10,30 +11,12 @@ namespace System.Text.Json.Serialization.Policies
     {
         public abstract IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList);
 
-        protected static Array CreateArrayFromList(Type elementType, IList sourceList)
+        protected static IEnumerable<T> GetGenericEnumerableFromList<T>(IList sourceList)
         {
-            Array array;
-
-            if (sourceList.Count > 0 && sourceList[0] is Array probe)
+            foreach (object item in sourceList)
             {
-                array = Array.CreateInstance(probe.GetType(), sourceList.Count);
-
-                int i = 0;
-                foreach (IList child in sourceList)
-                {
-                    if (child is Array childArray)
-                    {
-                        array.SetValue(childArray, i++);
-                    }
-                }
+                yield return (T)item;
             }
-            else
-            {
-                array = Array.CreateInstance(elementType, sourceList.Count);
-                sourceList.CopyTo(array, 0);
-            }
-
-            return array;
         }
     }
 }

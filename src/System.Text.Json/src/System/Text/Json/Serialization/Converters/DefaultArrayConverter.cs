@@ -11,7 +11,28 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList)
         {
-            return CreateArrayFromList(elementType, sourceList);
+            Array array;
+
+            if (sourceList.Count > 0 && sourceList[0] is Array probe)
+            {
+                array = Array.CreateInstance(probe.GetType(), sourceList.Count);
+
+                int i = 0;
+                foreach (IList child in sourceList)
+                {
+                    if (child is Array childArray)
+                    {
+                        array.SetValue(childArray, i++);
+                    }
+                }
+            }
+            else
+            {
+                array = Array.CreateInstance(elementType, sourceList.Count);
+                sourceList.CopyTo(array, 0);
+            }
+
+            return array;
         }
     }
 }

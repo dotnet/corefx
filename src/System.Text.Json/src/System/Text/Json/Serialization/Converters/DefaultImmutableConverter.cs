@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Reflection;
 using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json.Serialization.Converters
@@ -35,15 +36,12 @@ namespace System.Text.Json.Serialization.Converters
         private const string ImmutableSetGenericInterfaceTypeName = "System.Collections.Immutable.IImmutableSet`1";
 
         internal delegate object ImmutableCreateRangeDelegate<T>(IEnumerable<T> items);
-        internal delegate IEnumerable CreateImmutableCollectionDelegate(string createRangeDelegateKey, IList sourceList);
-
-        private static readonly ConcurrentDictionary<string, CreateImmutableCollectionDelegate> _CreateImmutableCollectionDelegates = new ConcurrentDictionary<string, CreateImmutableCollectionDelegate>();
+        internal delegate IEnumerable CreateImmutableCollectionDelegate(string delegateKey, IList sourceList);
 
         private static ConcurrentDictionary<string, object> _createRangeDelegates = new ConcurrentDictionary<string, object>();
+        private static readonly ConcurrentDictionary<string, CreateImmutableCollectionDelegate> _createImmutableDelegates = new ConcurrentDictionary<string, CreateImmutableCollectionDelegate>();
 
-        private static readonly ConcurrentDictionary<Type, string> _createRangeDelegateKeys = new ConcurrentDictionary<Type, string>();
-
-        public string GetConstructingTypeName(string immutableCollectionTypeName)
+        private string GetConstructingTypeName(string immutableCollectionTypeName)
         {
             switch (immutableCollectionTypeName)
             {
@@ -62,47 +60,65 @@ namespace System.Text.Json.Serialization.Converters
                 case ImmutableSetGenericInterfaceTypeName:
                     return  ImmutableHashSetTypeName;
                 default:
-                    Debug.Fail("Unknown immutable: " + immutableCollectionTypeName);
-                    return null;
+                    // TODO: Refactor exception throw following serialization exception changes. 
+                    throw new NotSupportedException(SR.Format(SR.DeserializeTypeNotSupported, immutableCollectionTypeName));
             }
+        }
+
+        private string GetDelegateKey(
+            Type immutableCollectionType,
+            Type elementType,
+            out Type underlyingType,
+            out string constructingTypeName,
+            out string elementTypeName)
+        {
+            // Use the generic type definition of the immutable collection to determine an appropriate constructing type,
+            // i.e. a type that we can invoke the `CreateRange<elementType>` method on, which returns an assignable immutable collection.
+            underlyingType = immutableCollectionType.GetGenericTypeDefinition();
+            constructingTypeName = GetConstructingTypeName(underlyingType.FullName);
+
+            elementTypeName = elementType.FullName;
+
+            return $"{constructingTypeName}:{elementTypeName}";
         }
 
         // This method creates a TElement[] and populates it with the items in the sourceList argument,
         // then uses the createRangeDelegateKey argument to identify the appropriate cached
         // CreateRange<TElement> method to create and return the desired immutable collection type.
         // The method is constructed for each element type with reflection and cached.
-        public static IEnumerable CreateImmutableCollectionFromList<TElement>(string createRangeDelegateKey, IList sourceList)
+        public static IEnumerable CreateImmutableCollectionFromList<TElement>(string delegateKey, IList sourceList)
         {
-            Array array = CreateArrayFromList(typeof(TElement), sourceList);
+            // TODO: Cache reflection here, or modify JsonPropertyInfoCommon to have a TElementType generic parameter.
+            MethodInfo createIEnumerable = typeof(JsonEnumerableConverter).GetMethod(
+                "GetGenericEnumerableFromList",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            createIEnumerable = createIEnumerable.MakeGenericMethod(typeof(TElement));
 
-            Debug.Assert(_createRangeDelegates.ContainsKey(createRangeDelegateKey));
+            Debug.Assert(_createRangeDelegates.ContainsKey(delegateKey));
 
-            IEnumerable immutableCollection = (IEnumerable)((ImmutableCreateRangeDelegate<TElement>)_createRangeDelegates[createRangeDelegateKey]).Invoke((IEnumerable<TElement>)array);
+            ImmutableCreateRangeDelegate<TElement> createRangeDelegate = (ImmutableCreateRangeDelegate<TElement>)_createRangeDelegates[delegateKey];
+
+            IEnumerable immutableCollection = (IEnumerable)createRangeDelegate.Invoke(
+                (IEnumerable<TElement>)createIEnumerable.Invoke(null, new object[] { sourceList }));
             return immutableCollection;
         }
 
         public void RegisterImmutableCollectionType(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
         {
+            // Get a unique identifier for a delegate which will point to the appropiate CreateRange method.
+            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out Type underlyingType, out string constructingTypeName, out string elementTypeName);
+
             // If we have registered this immutable collection type:
-            if (_createRangeDelegateKeys.ContainsKey(immutableCollectionType))
+            if (_createImmutableDelegates.ContainsKey(delegateKey))
             {
-                // We must have the appropriate ImmutableX.CreateRange<elementType> delegate cached.
-                Debug.Assert(_createRangeDelegates.ContainsKey(_createRangeDelegateKeys[immutableCollectionType]));
+                // We must have the appropriate CreateImmutableCollectionFromList<elementType> and
+                // ImmutableX.CreateRange<elementType> delegate cached.
+                Debug.Assert(_createImmutableDelegates[delegateKey] != null && _createRangeDelegates[elementTypeName] != null);
                 return;
             }
 
-            // Use the generic type definition of the immutable collection to determine an appropriate constructing type,
-            // i.e. a type that we can invoke the `CreateRange<elementType>` method on, which returns an assignable immutable collection.
-            Type underlyingType = immutableCollectionType.GetGenericTypeDefinition();
-            string constructingTypeName = GetConstructingTypeName(underlyingType.FullName);
-
-            string elementTypeName = elementType.FullName;
-
-            // Construct a unique identifier for a delegate which will point to the appropiate CreateRange method.
-            string createRangeDelegateKey = $"{constructingTypeName}:{elementTypeName}";
-
             // If we haven't yet created and cached a delegate for the appropriate CreateRange method.
-            if(!_createRangeDelegates.ContainsKey(createRangeDelegateKey))
+            if(!_createRangeDelegates.ContainsKey(delegateKey))
             {
                 // Get the constructing type.
                 Type constructingType = underlyingType.Assembly.GetType(constructingTypeName);
@@ -112,31 +128,25 @@ namespace System.Text.Json.Serialization.Converters
                 Debug.Assert(createRangeDelegate != null);
 
                 // Cache the delegate
-                _createRangeDelegates.TryAdd(createRangeDelegateKey, createRangeDelegate);
-                Debug.Assert(_createRangeDelegates.ContainsKey(createRangeDelegateKey));
+                _createRangeDelegates.TryAdd(delegateKey, createRangeDelegate);
             }
 
-            // If we haven't seen this element type before, create a delegate to the above CreateImmutableCollectionFromList<TElement> method.
-            if (!_CreateImmutableCollectionDelegates.ContainsKey(elementTypeName))
-            {
-                CreateImmutableCollectionDelegate createImmutableCollection = options.ClassMaterializerStrategy.CreateImmutableCollection(elementType);
-                Debug.Assert(createImmutableCollection != null);
+            // Create a delegate to the above CreateImmutableCollectionFromList<TElement> method.
+            CreateImmutableCollectionDelegate createImmutableCollection = options.ClassMaterializerStrategy.CreateImmutableCollection(elementType);
+            Debug.Assert(createImmutableCollection != null);
 
-                _CreateImmutableCollectionDelegates.TryAdd(elementTypeName, createImmutableCollection);
-                Debug.Assert(_CreateImmutableCollectionDelegates.ContainsKey(elementTypeName));
-            }
-
-            // Mark the immutable collection type as registered.
-            _createRangeDelegateKeys.TryAdd(immutableCollectionType, createRangeDelegateKey);
-            Debug.Assert(_createRangeDelegateKeys.ContainsKey(immutableCollectionType));
+            _createImmutableDelegates.TryAdd(elementTypeName, createImmutableCollection);
         }
 
         public override IEnumerable CreateFromList(Type immutableCollectionType, Type elementType, IList sourceList)
         {
-            Debug.Assert(elementType != null);
-            Debug.Assert(_createRangeDelegateKeys.ContainsKey(immutableCollectionType));
+            Debug.Assert(immutableCollectionType != null && elementType != null);
 
-            return (IEnumerable)_CreateImmutableCollectionDelegates[elementType.FullName].Invoke(_createRangeDelegateKeys[immutableCollectionType], sourceList);
+            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _, out string elementTypeName);
+
+            Debug.Assert(_createRangeDelegates.ContainsKey(delegateKey) && _createImmutableDelegates.ContainsKey(elementTypeName));
+
+            return _createImmutableDelegates[elementTypeName].Invoke(delegateKey, sourceList);
         }
     }
 }

@@ -140,45 +140,25 @@ namespace System.Text.Json.Serialization.Tests
             ((Address)Address).Initialize();
 
             List = new List<string> { "Hello", "World" };
-
             Array = new string[] { "Hello", "Again" };
-
             IEnumerableT = new List<string> { "Hello", "World" };
-
             IListT = new List<string> { "Hello", "World" };
-
             ICollectionT = new List<string> { "Hello", "World" };
-
             IReadOnlyCollectionT = new List<string> { "Hello", "World" };
-
             IReadOnlyListT = new List<string> { "Hello", "World" };
-
             StackT = new Stack<string>(new List<string> { "Hello", "World" });
-
             QueueT = new Queue<string>(new List<string> { "Hello", "World" });
-
             HashSetT = new HashSet<string>(new List<string> { "Hello", "World" });
-
             LinkedListT = new LinkedList<string>(new List<string> { "Hello", "World" });
-
             SortedSetT = new SortedSet<string>(new List<string> { "Hello", "World" });
-
             IImmutableListT = ImmutableList.CreateRange(new List<string> { "Hello", "World" });
-
             IImmutableStackT = ImmutableStack.CreateRange(new List<string> { "Hello", "World" });
-
             IImmutableQueueT = ImmutableQueue.CreateRange(new List<string> { "Hello", "World" });
-
             IImmutableSetT = ImmutableHashSet.CreateRange(new List<string> { "Hello", "World" });
-
             ImmutableHashSetT = ImmutableHashSet.CreateRange(new List<string> { "Hello", "World" });
-
             ImmutableListT = ImmutableList.CreateRange(new List<string> { "Hello", "World" });
-
             ImmutableStackT = ImmutableStack.CreateRange(new List<string> { "Hello", "World" });
-
             ImmutableQueueT = ImmutableQueue.CreateRange(new List<string> { "Hello", "World" });
-
             ImmutableSortedSetT = ImmutableSortedSet.CreateRange(new List<string> { "Hello", "World" });
 
             NullableInt = new int?(42);
