@@ -1013,8 +1013,14 @@ namespace System.Net.Sockets.Tests
 
                 Task disposeTask = Task.Run(async () =>
                 {
-                    // Wait a little so the receive is started.
-                    await Task.Delay(100);
+                    // Try to wait until the operation is started.
+                    // If we Dispose before that, we won't get the expected socketException.
+                    while (socketOperation.Status == TaskStatus.WaitingForActivation ||
+                           socketOperation.Status == TaskStatus.WaitingToRun)
+                    {
+                        await Task.Delay(100);
+                    }
+                    await Task.Delay(1000);
 
                     socket1.Dispose();
                 });
