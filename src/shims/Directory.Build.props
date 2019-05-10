@@ -20,7 +20,6 @@
 
   <PropertyGroup>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <IsRuntimeAssembly>true</IsRuntimeAssembly>
     <GenFacadesIgnoreMissingTypes>true</GenFacadesIgnoreMissingTypes>
     <IncludeDefaultReferences>false</IncludeDefaultReferences>
     <HasMatchingContract>true</HasMatchingContract>
