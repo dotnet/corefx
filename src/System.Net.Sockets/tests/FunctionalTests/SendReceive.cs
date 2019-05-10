@@ -992,75 +992,73 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task TcpReceiveSendGetsCanceledByDisposeOrClose(bool receiveOrSend)
         {
-            (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
-            using (socket2)
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, the peer won't see a connection aborted.
+            bool peerObservedConnectionAborted = false;
+            for (int i = 0; i < 10 && !peerObservedConnectionAborted; i++)
             {
-                Task socketOperation = Task.Run(async () =>
+                (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
+                using (socket2)
                 {
-                    if (receiveOrSend)
+                    Task socketOperation = Task.Run(async () =>
                     {
-                        await ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1]));
-                    }
-                    else
-                    {
-                        var buffer = new ArraySegment<byte>(new byte[4096]);
-                        while (true)
+                        if (receiveOrSend)
                         {
-                            await SendAsync(socket1, buffer);
+                            await ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1]));
                         }
-                    }
-                });
+                        else
+                        {
+                            var buffer = new ArraySegment<byte>(new byte[4096]);
+                            while (true)
+                            {
+                                await SendAsync(socket1, buffer);
+                            }
+                        }
+                    });
 
-                Task disposeTask = Task.Run(() =>
-                {
-                    // Try to wait until the operation is started.
-                    // If we Dispose before that, we won't get the expected socketException.
-                    while (socketOperation.Status == TaskStatus.WaitingForActivation ||
-                           socketOperation.Status == TaskStatus.WaitingToRun)
+                    Task disposeTask = Task.Run(async () =>
                     {
-                        Thread.Sleep(5);
-                    }
-                    Thread.Sleep(100);
+                        // Wait a little so the operation is started.
+                        await Task.Delay(100);
 
-                    socket1.Dispose();
-                });
+                        socket1.Dispose();
+                    });
 
-                Task timeoutTask = Task.Delay(30000);
+                    Task timeoutTask = Task.Delay(30000);
 
-                Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
+                    Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
 
-                await disposeTask;
+                    await disposeTask;
 
-                try
-                {
-                    await socketOperation;
-                }
-                catch (SocketException)
-                {}
-                catch (ObjectDisposedException)
-                {}
-
-                bool socketException = false;
-                var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
-                while (true)
-                {
                     try
                     {
-                        int received = await ReceiveAsync(socket2, receiveBuffer);
-                        if (received == 0)
+                        await socketOperation;
+                    }
+                    catch (SocketException)
+                    {}
+                    catch (ObjectDisposedException)
+                    {}
+
+                    var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
+                    while (true)
+                    {
+                        try
                         {
+                            int received = await ReceiveAsync(socket2, receiveBuffer);
+                            if (received == 0)
+                            {
+                                break;
+                            }
+                        }
+                        catch (SocketException)
+                        {
+                            peerObservedConnectionAborted = true;
                             break;
                         }
                     }
-                    catch (SocketException)
-                    {
-                        socketException = true;
-                        break;
-                    }
                 }
-
-                Assert.True(socketException);
             }
+            Assert.True(peerObservedConnectionAborted);
         }
     }
 
