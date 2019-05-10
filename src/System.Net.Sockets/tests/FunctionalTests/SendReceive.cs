@@ -1011,7 +1011,7 @@ namespace System.Net.Sockets.Tests
                     }
                 });
 
-                Task disposeTask = Task.Run(async () =>
+                Task disposeTask = Task.Run(() =>
                 {
                     // Try to wait until the operation is started.
                     // If we Dispose before that, we won't get the expected socketException.
