@@ -63,29 +63,23 @@ namespace System.Text.Json.Serialization.Tests
             obj.Verify();
         }
 
-        [Fact]
-        public static void ReadClassWithTrailingWhitespace()
-        {
-            ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(ClassWithComplexObjects.s_json + " \r\n\t");
-            obj.Verify();
-            string reserialized = JsonSerializer.ToString(obj);
-
-            // Properties in the exported json will be in the order that they were reflected, doing a quick check to see that
-            // we end up with the same length (i.e. same amount of data) to start.
-            Assert.Equal(ClassWithComplexObjects.s_json.StripWhitespace().Length, reserialized.Length);
-
-            // Shoving it back through the parser should validate round tripping.
-            obj = JsonSerializer.Parse<ClassWithComplexObjects>(reserialized);
-            obj.Verify();
-        }
-
-        [Fact]
-        public static void ReadClassWithTrailingComments()
+        [Theory]
+        [InlineData("", " ")]
+        [InlineData("", "\t ")]
+        [InlineData("", "//Single Line Comment\r\n")]
+        [InlineData("", "/* Multi\nLine Comment */")]
+        [InlineData("", "\t\t\t\n// Both\n/* Comments */")]
+        [InlineData(" ", "")]
+        [InlineData("\t ", "")]
+        [InlineData("// Leading Comment\n", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "\t// trailing comment\n ")]
+        public static void ReadClassIgnoresLeadingOrTrailingTrivia(string leadingTrivia, string trailingTrivia)
         {
             var options = new JsonSerializerOptions();
             options.ReadCommentHandling = JsonCommentHandling.Skip;
 
-            ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(ClassWithComplexObjects.s_json + "// Single Line\n/* Multi\nLine Comment */ ", options);
+            ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(leadingTrivia + ClassWithComplexObjects.s_json + trailingTrivia, options);
             obj.Verify();
         }
 
