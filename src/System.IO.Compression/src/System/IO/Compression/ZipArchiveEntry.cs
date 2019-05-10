@@ -823,6 +823,8 @@ namespace System.IO.Compression
                 }
                 else // if we are not in streaming mode, we have to decide if we want to write zip64 headers
                 {
+                    // When updating and when we can seek, the data descriptor bit needs to be flipped back to prevent corruption
+                    _generalPurposeBitFlag &= ~BitFlagValues.DataDescriptor;
                     if (SizesTooLarge()
 #if DEBUG_FORCE_ZIP64
                         || (_archive._forceZip64 && _archive.Mode == ZipArchiveMode.Update)
