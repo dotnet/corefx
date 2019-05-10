@@ -17,10 +17,14 @@ namespace System.Text.Json.Serialization.Tests
             string json = JsonSerializer.ToString(obj);
             Assert.Contains(@"""MyString"":""DefaultValue""", json);
             Assert.Contains(@"""MyInts"":[1,2]", json);
+            Assert.Contains(@"""MyProperty"":""MyComplexProperty""", json);
+            Assert.Contains(@"""MyInt"":42", json);
 
-            obj = JsonSerializer.Parse<ClassWithNoSetter>(@"{""MyString"":""IgnoreMe"",""MyInts"":[0]}");
+            obj = JsonSerializer.Parse<ClassWithNoSetter>(@"{""MyInt"": ""0"",""MyString"":""IgnoreMe"",""MyInts"":[0],""MyComplexProperty"":{""MyProperty"":""IgnoreMe""}}");
             Assert.Equal("DefaultValue", obj.MyString);
             Assert.Equal(2, obj.MyInts.Length);
+            Assert.Equal("MyComplexProperty", obj.MyComplexProperty.MyProperty);
+            Assert.Equal(42, obj.MyInt);
         }
 
         [Fact]
@@ -150,12 +154,16 @@ namespace System.Text.Json.Serialization.Tests
         {
             public ClassWithNoSetter()
             {
+                MyInt = 42;
                 MyString = "DefaultValue";
                 MyInts = new int[] { 1, 2 };
+                MyComplexProperty = new ComplexType() { MyProperty = "MyComplexProperty" };
             }
 
+            public int MyInt { get; }
             public string MyString { get; }
             public int[] MyInts { get; }
+            public ComplexType MyComplexProperty { get; }
         }
 
         public class ClassWithNoGetter
