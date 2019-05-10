@@ -478,9 +478,9 @@ S      9      R      /       j       6       9        C        v        C
             using (DSA dsa = DSAFactory.Create())
             {
                 // This is the DSA-512 test case, with the G value from the DSA-1024 case.
-                AssertExtensions.Throws<ArgumentException>(
-                    paramName: null,
-                    () => dsa.FromXmlString(
+                try
+                {
+                    dsa.FromXmlString(
                         @"
 <DSAKeyValue xmlns:yep=""urn:ignored:yep"" xmlns:nope=""urn:ignored:nope"" xmlns:ign=""urn:ignored:ign"">
   <yep:P>1qi38cr3ppZNB2Y/xpHSL2q81Vw3rvWNIHRnQNgv4U4UY2NifZGSUULc3uOEvgoeBO1b9fRxSG9NmG1CoufflQ==</yep:P>
@@ -491,7 +491,16 @@ S      9      R      /       j       6       9        C        v        C
     evRdmrHVnhsT1O + 9F8dkMwJn3eNSwg4FuA2zwQn + i5w =
   </G>
   <ign:Y>wwDg5n2HfmztOf7qqsHywr1WjmoyRnIn4Stq5FqNlHhUGkgKyAA4qshjgn1uOYQGGiWQXBi9JJmoOWY8PKRWBQ==</ign:Y>
-</DSAKeyValue>"));
+</DSAKeyValue>");
+                }
+                catch (ArgumentException)
+                {
+                    // DSACng, DSAOpenSsl
+                }
+                catch (CryptographicException)
+                {
+                    // DSACryptoServiceProvider
+                }
             }
         }
 
