@@ -1018,9 +1018,9 @@ namespace System.Net.Sockets.Tests
                     while (socketOperation.Status == TaskStatus.WaitingForActivation ||
                            socketOperation.Status == TaskStatus.WaitingToRun)
                     {
-                        await Task.Delay(100);
+                        Thread.Sleep(5);
                     }
-                    await Task.Delay(1000);
+                    Thread.Sleep(100);
 
                     socket1.Dispose();
                 });
