@@ -25,6 +25,12 @@ namespace System.Text.Json.Serialization
             }
 
             JsonPropertyInfo propertyInfo = state.Current.JsonPropertyInfo;
+
+            if (!propertyInfo.ShouldDeserialize)
+            {
+                return false;
+            }
+
             if (!propertyInfo.CanBeNull)
             {
                 ThrowHelper.ThrowJsonException_DeserializeCannotBeNull(reader, state.PropertyPath);

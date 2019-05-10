@@ -25,6 +25,12 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(2, obj.MyInts.Length);
             Assert.Equal("MyComplexProperty", obj.MyComplexProperty.MyProperty);
             Assert.Equal(42, obj.MyInt);
+
+            obj = JsonSerializer.Parse<ClassWithNoSetter>(@"{""MyInt"": null,""MyString"":""IgnoreMe"",""MyInts"":[0],""MyComplexProperty"":{""MyProperty"":""IgnoreMe""}}");
+            Assert.Equal("DefaultValue", obj.MyString);
+            Assert.Equal(2, obj.MyInts.Length);
+            Assert.Equal("MyComplexProperty", obj.MyComplexProperty.MyProperty);
+            Assert.Equal(42, obj.MyInt);
         }
 
         [Fact]
