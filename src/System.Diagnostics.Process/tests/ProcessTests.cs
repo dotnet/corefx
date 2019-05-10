@@ -1892,7 +1892,6 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
-        [ActiveIssue(37198)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [ActiveIssue(37054, TestPlatforms.OSX)]
         [Fact]
