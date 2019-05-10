@@ -1360,7 +1360,7 @@ zM=
                 AssertNextElement(iter, "DP", expectedDP);
                 AssertNextElement(iter, "DQ", expectedDQ);
                 AssertNextElement(iter, "InverseQ", expectedInverseQ);
-                AssertNextElement(iter, "D", alternateD, expectedD);
+                AssertNextElement(iter, "D", expectedD, alternateD);
             }
 
             Assert.False(iter.MoveNext(), "Move after last expected value");
