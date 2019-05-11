@@ -634,7 +634,7 @@ zM=
                 ));
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(ImportExport), nameof(ImportExport.Supports16384))]
         [InlineData(true)]
         [InlineData(false)]
         public static void TestWrite16384Parameters(bool includePrivateParameters)
