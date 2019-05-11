@@ -94,37 +94,28 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(type != null || value == null);
 
-            CachedUtf8JsonWriter cachedWriter = CachedUtf8JsonWriter.Get(output, options.GetWriterOptions());
+            Utf8JsonWriter writer = CachedUtf8JsonWriter.Get(output, options.GetWriterOptions());
 
-            try
+            if (value == null)
             {
-                Utf8JsonWriter writer = cachedWriter.GetJsonWriter();
-
-                if (value == null)
+                writer.WriteNullValue();
+            }
+            else
+            {
+                //  We treat typeof(object) special and allow polymorphic behavior.
+                if (type == typeof(object))
                 {
-                    writer.WriteNullValue();
-                }
-                else
-                {
-                    //  We treat typeof(object) special and allow polymorphic behavior.
-                    if (type == typeof(object))
-                    {
-                        type = value.GetType();
-                    }
-
-                    WriteStack state = default;
-                    state.Current.Initialize(type, options);
-                    state.Current.CurrentValue = value;
-
-                    Write(writer, -1, options, ref state);
+                    type = value.GetType();
                 }
 
-                writer.Flush();
+                WriteStack state = default;
+                state.Current.Initialize(type, options);
+                state.Current.CurrentValue = value;
+
+                Write(writer, -1, options, ref state);
             }
-            finally
-            {
-                CachedUtf8JsonWriter.Return(cachedWriter);
-            }
+
+            writer.Flush();
         }
     }
 }

@@ -10,7 +10,7 @@ namespace System.Text.Json
     /// any indentation or extra white space. Also, the <see cref="Utf8JsonWriter"/> will
     /// throw an exception if the user attempts to write structurally invalid JSON.
     /// </summary>
-    public struct JsonWriterOptions
+    public struct JsonWriterOptions : IEquatable<JsonWriterOptions>
     {
         private int _optionsMask;
 
@@ -65,5 +65,39 @@ namespace System.Text.Json
 
         private const int IndentBit = 1;
         private const int SkipValidationBit = 2;
+
+        /// <summary>
+        /// Returns a value that indicates whether this instance is equal to a specified object
+        /// </summary>
+        /// <param name="other">The object to compare with this instance</param>
+        /// <returns>true if other is an instance of <see cref="JsonWriterOptions"/> and equals the value of the instance; otherwise, false</returns>
+        public bool Equals(JsonWriterOptions other)
+        {
+            return _optionsMask == other._optionsMask;
+        }
+
+        /// <summary>
+        /// Returns a value that indicates whether this instance is equal to a specified object
+        /// </summary>
+        /// <param name="obj">The object to compare with this instance</param>
+        /// <returns>true if obj is an instance of <see cref="JsonWriterOptions"/> and equals the value of the instance; otherwise, false</returns>
+        public override bool Equals(object obj)
+        {
+            if (!(obj is JsonWriterOptions))
+            {
+                return false;
+            }
+
+            return Equals((JsonWriterOptions)obj);
+        }
+
+        /// <summary>
+        /// Returns the hash code for this instance.
+        /// </summary>
+        /// <returns>The hash code</returns>
+        public override int GetHashCode()
+        {
+            return _optionsMask.GetHashCode();
+        }
     }
 }

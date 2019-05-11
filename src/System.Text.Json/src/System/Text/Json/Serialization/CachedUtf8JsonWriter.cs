@@ -3,56 +3,26 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
+using System.Collections.Concurrent;
 
 namespace System.Text.Json.Serialization
 {
     internal sealed class CachedUtf8JsonWriter
     {
-        [ThreadStatic]
-        private static CachedUtf8JsonWriter s_cachedInstance;
+        private static readonly ConcurrentDictionary<int, Utf8JsonWriter> _cache = new ConcurrentDictionary<int, Utf8JsonWriter>();
 
-        private readonly Utf8JsonWriter _writer;
-
-#if DEBUG
-        private bool _inUse;
-#endif
-
-        private CachedUtf8JsonWriter(IBufferWriter<byte> output, JsonWriterOptions writerOptions)
+        public static Utf8JsonWriter Get(IBufferWriter<byte> output, JsonWriterOptions writerOptions)
         {
-            _writer = new Utf8JsonWriter(output, writerOptions);
-        }
+            int writerOptionsHash = writerOptions.GetHashCode();
 
-        public static CachedUtf8JsonWriter Get(IBufferWriter<byte> output, JsonWriterOptions writerOptions)
-        {
-            var writer = s_cachedInstance ?? new CachedUtf8JsonWriter(output, writerOptions);
-
-            // Taken off the thread static
-            s_cachedInstance = null;
-#if DEBUG
-            if (writer._inUse)
+            if (!_cache.TryGetValue(writerOptionsHash, out Utf8JsonWriter writer))
             {
-                throw new InvalidOperationException("The writer wasn't returned!");
+                writer = new Utf8JsonWriter(output, writerOptions);
+                _cache.TryAdd(writerOptionsHash, writer);
             }
 
-            writer._inUse = true;
-#endif
-            writer._writer.Reset(output);
+            writer.Reset(output);
             return writer;
-        }
-
-        public static void Return(CachedUtf8JsonWriter writer)
-        {
-            s_cachedInstance = writer;
-            writer._writer.Reset();
-
-#if DEBUG
-            writer._inUse = false;
-#endif
-        }
-
-        public Utf8JsonWriter GetJsonWriter()
-        {
-            return _writer;
         }
     }
 }

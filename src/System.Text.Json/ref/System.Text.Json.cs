@@ -172,11 +172,14 @@ namespace System.Text.Json
         False = (byte)6,
         Null = (byte)7,
     }
-    public partial struct JsonWriterOptions
+    public partial struct JsonWriterOptions : IEquatable<JsonWriterOptions>
     {
         private int _dummyPrimitive;
         public bool Indented { get { throw null; } set { } }
         public bool SkipValidation { get { throw null; } set { } }
+        public bool Equals(JsonWriterOptions other) { throw null; }
+        public override bool Equals(object obj) { throw null; }
+        public override int GetHashCode() { throw null; }
     }
     public ref partial struct Utf8JsonReader
     {

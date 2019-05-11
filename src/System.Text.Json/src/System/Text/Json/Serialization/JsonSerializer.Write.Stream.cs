@@ -52,58 +52,49 @@ namespace System.Text.Json.Serialization
 
             using (var output = new PooledBufferWriter<byte>(options.DefaultBufferSize))
             {
-                CachedUtf8JsonWriter cachedWriter = CachedUtf8JsonWriter.Get(output, options.GetWriterOptions());
+                Utf8JsonWriter writer = CachedUtf8JsonWriter.Get(output, options.GetWriterOptions());
 
-                try
+                if (value == null)
                 {
-                    Utf8JsonWriter writer = cachedWriter.GetJsonWriter();
-
-                    if (value == null)
-                    {
-                        writer.WriteNullValue();
-                        writer.Flush();
+                    writer.WriteNullValue();
+                    writer.Flush();
 
 #if BUILDING_INBOX_LIBRARY
-                        await utf8Json.WriteAsync(output.WrittenMemory, cancellationToken).ConfigureAwait(false);
+                    await utf8Json.WriteAsync(output.WrittenMemory, cancellationToken).ConfigureAwait(false);
 #else
-                    // todo: stackalloc or pool here?
+                // todo: stackalloc or pool here?
+                await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
+#endif
+                    return;
+                }
+
+                if (type == null)
+                {
+                    type = value.GetType();
+                }
+
+                WriteStack state = default;
+                state.Current.Initialize(type, options);
+                state.Current.CurrentValue = value;
+
+                bool isFinalBlock;
+
+                int flushThreshold;
+                do
+                {
+                    flushThreshold = (int)(output.Capacity * .9); //todo: determine best value here
+
+                    isFinalBlock = Write(writer, flushThreshold, options, ref state);
+                    writer.Flush();
+
+#if BUILDING_INBOX_LIBRARY
+                    await utf8Json.WriteAsync(output.WrittenMemory, cancellationToken).ConfigureAwait(false);
+#else
+                    // todo: use pool here to avod extra alloc?
                     await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
 #endif
-                        return;
-                    }
-
-                    if (type == null)
-                    {
-                        type = value.GetType();
-                    }
-
-                    WriteStack state = default;
-                    state.Current.Initialize(type, options);
-                    state.Current.CurrentValue = value;
-
-                    bool isFinalBlock;
-
-                    int flushThreshold;
-                    do
-                    {
-                        flushThreshold = (int)(output.Capacity * .9); //todo: determine best value here
-
-                        isFinalBlock = Write(writer, flushThreshold, options, ref state);
-                        writer.Flush();
-
-#if BUILDING_INBOX_LIBRARY
-                        await utf8Json.WriteAsync(output.WrittenMemory, cancellationToken).ConfigureAwait(false);
-#else
-                        // todo: use pool here to avod extra alloc?
-                        await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
-#endif
-                        output.Clear();
-                    } while (!isFinalBlock);
-                }
-                finally
-                {
-                    CachedUtf8JsonWriter.Return(cachedWriter);
-                }
+                    output.Clear();
+                } while (!isFinalBlock);
             }
             
             // todo: verify that we do want to call FlushAsync here (or above). It seems like leaving it to the caller would be best.
