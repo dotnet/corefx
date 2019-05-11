@@ -30,6 +30,25 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void RootArrayIsNull()
+        {
+            {
+                int[] obj = JsonSerializer.Parse<int[]>("null");
+                Assert.Null(obj);
+            }
+
+            {
+                object[] obj = JsonSerializer.Parse<object[]>("null");
+                Assert.Null(obj);
+            }
+
+            {
+                TestClassWithNull[] obj = JsonSerializer.Parse<TestClassWithNull[]>("null");
+                Assert.Null(obj);
+            }
+        }
+
+        [Fact]
         public static void DefaultIgnoreNullValuesOnRead()
         {
             TestClassWithInitializedProperties obj = JsonSerializer.Parse<TestClassWithInitializedProperties>(TestClassWithInitializedProperties.s_null_json);

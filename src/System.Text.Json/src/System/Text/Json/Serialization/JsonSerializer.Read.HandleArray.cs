@@ -170,7 +170,7 @@ namespace System.Text.Json.Serialization
                 {
                     state.Current.TempEnumerableValues.Add(value);
                 }
-                else
+                else if (state.Current.ReturnValue != null)
                 {
                     ((IList)state.Current.ReturnValue).Add(value);
                 }
@@ -225,7 +225,7 @@ namespace System.Text.Json.Serialization
                 {
                     ((IList<TProperty>)state.Current.TempEnumerableValues).Add(value);
                 }
-                else
+                else if (state.Current.ReturnValue != null)
                 {
                     ((IList<TProperty>)state.Current.ReturnValue).Add(value);
                 }
