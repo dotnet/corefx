@@ -149,6 +149,88 @@ namespace System.IO.Compression.Tests
             }
         }
 
+        [Theory]
+        [InlineData("minimalTwoFiles")]
+        public static void CreateNormal_VerifyDataDescriptor(string folder)
+        {
+            void CreateEntry(ZipArchive archive, string fileName, string fileContents)
+            {
+                ZipArchiveEntry entry = archive.CreateEntry(fileName);
+                using (StreamWriter writer = new StreamWriter(entry.Open()))
+                {
+                    writer.Write(fileContents);
+                }
+            }
+
+            string fileName = folder + ".zip";
+
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+            }
+
+            using (var fileStream = new FileStream(fileName, FileMode.Create))
+            {
+                // We need an unseekable stream so the data descriptor bit is turned on when saving
+                var wrappedStream = new WrappedStream(fileStream, true, true, false, null);
+
+                // Creation will go through the path that sets the data descriptor bit when the stream is unseekable
+                using (var archive = new ZipArchive(wrappedStream, ZipArchiveMode.Create))
+                {
+                    CreateEntry(archive, "A", "xxx");
+                    CreateEntry(archive, "B", "yyy");
+                }
+            }
+
+            using (var fileStream = new FileStream(fileName, FileMode.Open))
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    fileStream.CopyTo(memoryStream);
+                    byte[] fileBytes = memoryStream.ToArray();
+
+                    // We expect the data descriptor to be on in the first local file header after creation
+                    Assert.Equal(8, fileBytes[6]);
+                    Assert.Equal(0, fileBytes[7]);
+                }
+            }
+
+            using (var fileStream = new FileStream(fileName, FileMode.Open))
+            {
+                // Update should flip the data descriptor bit to zero on save
+                using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Update))
+                {
+                    ZipArchiveEntry entry = archive.Entries[0];
+                    using (var entryStream = entry.Open())
+                    {
+                        using (StreamWriter writer = new StreamWriter(entryStream))
+                        {
+                            writer.Write("zzz");
+                        }
+                    }
+                }
+            }
+
+            using (var fileStream = new FileStream(fileName, FileMode.Open))
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    fileStream.CopyTo(memoryStream);
+                    byte[] fileBytes = memoryStream.ToArray();
+
+
+                    // We expect the data descriptor to be off in the first local file header after an update
+                    Assert.Equal(0, fileBytes[6]);
+                    Assert.Equal(0, fileBytes[7]);
+                }
+            }
+
+            if (File.Exists(fileName))
+            {
+                File.Delete(fileName);
+            }
+        }
+
         private static string ReadStringFromSpan(Span<byte> input)
         {
             return Text.Encoding.UTF8.GetString(input.ToArray());
