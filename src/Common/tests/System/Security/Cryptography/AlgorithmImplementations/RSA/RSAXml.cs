@@ -1340,7 +1340,7 @@ zM=
         }
 
         [Fact]
-        [ActiveIssue(37595, TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
+        [ActiveIssue(37595, TestPlatforms.AnyUnix)]
         public static void FromNonsenseXml()
         {
             // This is DiminishedDPParameters XML, but with a P that is way too long.
