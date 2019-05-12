@@ -396,9 +396,9 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class TestClassWithArrayWithElementsOfSameClass
+    public class TestClassWithArrayOfElementsOfTheSameClass
     {
-        public TestClassWithArrayWithElementsOfSameClass[] Array { get; set; }
+        public TestClassWithArrayOfElementsOfTheSameClass[] Array { get; set; }
     }
 
     public class TestClassWithGenericList : ITestClass
