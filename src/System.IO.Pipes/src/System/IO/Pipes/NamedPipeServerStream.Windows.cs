@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.AccessControl;
 using System.Security.Principal;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Win32.SafeHandles;
@@ -183,16 +182,28 @@ namespace System.IO.Pipes
         {
             CheckWriteOperations();
 
-            const int UserNameMaxLength = Interop.Kernel32.CREDUI_MAX_USERNAME_LENGTH + 1;
-            char* userName = stackalloc char[UserNameMaxLength]; // ~1K
+            const uint UserNameMaxLength = Interop.Kernel32.CREDUI_MAX_USERNAME_LENGTH + 1;
+            char* userName = stackalloc char[(int)UserNameMaxLength]; // ~1K
 
-            if (!Interop.Kernel32.GetNamedPipeHandleState(InternalHandle, IntPtr.Zero, IntPtr.Zero,
-                IntPtr.Zero, IntPtr.Zero, userName, UserNameMaxLength))
+            if (Interop.Kernel32.GetNamedPipeHandleStateW(InternalHandle, null, null, null, null, userName, UserNameMaxLength))
             {
-                throw WinIOError(Marshal.GetLastWin32Error());
+                return new string(userName);
             }
 
-            return new string(userName);
+            int error = Marshal.GetLastWin32Error();
+            if (error == Interop.Errors.ERROR_SUCCESS && Environment.Is64BitProcess)
+            {
+                // There is a known problem in Windows where if sspicli is not loaded, this function fails unexpectedly with ERROR_SUCCESS, so we need to load it and reattempt
+                // If sspicli is already loaded, this is a no-op
+                Interop.Kernel32.LoadLibrary("sspicli.dll");
+
+                if (Interop.Kernel32.GetNamedPipeHandleStateW(InternalHandle, null, null, null, null, userName, UserNameMaxLength))
+                {
+                    return new string(userName);
+                }
+                error = Marshal.GetLastWin32Error();
+            }
+            throw WinIOError(error);
         }
 
         // -----------------------------
