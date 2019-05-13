@@ -149,91 +149,62 @@ namespace System.IO.Compression.Tests
             }
         }
 
-        [Theory]
-        [InlineData("minimalTwoFiles")]
-        public static void CreateNormal_VerifyDataDescriptor(string folder)
+        [Fact]
+        public static void CreateNormal_VerifyDataDescriptor()
         {
-            void CreateEntry(ZipArchive archive, string fileName, string fileContents)
+            using var memoryStream = new MemoryStream();
+            // We need an non-seekable stream so the data descriptor bit is turned on when saving
+            var wrappedStream = new WrappedStream(memoryStream, true, true, false, null);
+
+            // Creation will go through the path that sets the data descriptor bit when the stream is unseekable
+            using (var archive = new ZipArchive(wrappedStream, ZipArchiveMode.Create))
             {
-                ZipArchiveEntry entry = archive.CreateEntry(fileName);
-                using (StreamWriter writer = new StreamWriter(entry.Open()))
-                {
-                    writer.Write(fileContents);
-                }
+                CreateEntry(archive, "A", "xxx");
+                CreateEntry(archive, "B", "yyy");
             }
 
-            string fileName = folder + ".zip";
+            AssertDataDescriptor(memoryStream, true);
 
-            if (File.Exists(fileName))
+            // Update should flip the data descriptor bit to zero on save
+            using (var archive = new ZipArchive(memoryStream, ZipArchiveMode.Update))
             {
-                File.Delete(fileName);
+                ZipArchiveEntry entry = archive.Entries[0];
+                using Stream entryStream = entry.Open();
+                StreamReader reader = new StreamReader(entryStream);
+                string content = reader.ReadToEnd();
+                
+                // Append a string to this entry
+                entryStream.Seek(0, SeekOrigin.End);
+                StreamWriter writer = new StreamWriter(entryStream);
+                writer.Write("zzz");
+                writer.Flush();
             }
 
-            using (var fileStream = new FileStream(fileName, FileMode.Create))
-            {
-                // We need an unseekable stream so the data descriptor bit is turned on when saving
-                var wrappedStream = new WrappedStream(fileStream, true, true, false, null);
-
-                // Creation will go through the path that sets the data descriptor bit when the stream is unseekable
-                using (var archive = new ZipArchive(wrappedStream, ZipArchiveMode.Create))
-                {
-                    CreateEntry(archive, "A", "xxx");
-                    CreateEntry(archive, "B", "yyy");
-                }
-            }
-
-            using (var fileStream = new FileStream(fileName, FileMode.Open))
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    fileStream.CopyTo(memoryStream);
-                    byte[] fileBytes = memoryStream.ToArray();
-
-                    // We expect the data descriptor to be on in the first local file header after creation
-                    Assert.Equal(8, fileBytes[6]);
-                    Assert.Equal(0, fileBytes[7]);
-                }
-            }
-
-            using (var fileStream = new FileStream(fileName, FileMode.Open))
-            {
-                // Update should flip the data descriptor bit to zero on save
-                using (var archive = new ZipArchive(fileStream, ZipArchiveMode.Update))
-                {
-                    ZipArchiveEntry entry = archive.Entries[0];
-                    using (var entryStream = entry.Open())
-                    {
-                        using (StreamWriter writer = new StreamWriter(entryStream))
-                        {
-                            writer.Write("zzz");
-                        }
-                    }
-                }
-            }
-
-            using (var fileStream = new FileStream(fileName, FileMode.Open))
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    fileStream.CopyTo(memoryStream);
-                    byte[] fileBytes = memoryStream.ToArray();
-
-
-                    // We expect the data descriptor to be off in the first local file header after an update
-                    Assert.Equal(0, fileBytes[6]);
-                    Assert.Equal(0, fileBytes[7]);
-                }
-            }
-
-            if (File.Exists(fileName))
-            {
-                File.Delete(fileName);
-            }
+            AssertDataDescriptor(memoryStream, false);
         }
 
         private static string ReadStringFromSpan(Span<byte> input)
         {
             return Text.Encoding.UTF8.GetString(input.ToArray());
+        }
+
+        private static void CreateEntry(ZipArchive archive, string fileName, string fileContents)
+        {
+            ZipArchiveEntry entry = archive.CreateEntry(fileName);
+            using StreamWriter writer = new StreamWriter(entry.Open());
+            writer.Write(fileContents);
+        }
+
+        private static void AssertDataDescriptor(MemoryStream memoryStream, bool hasDataDescriptor)
+        {
+            byte[] fileBytes = memoryStream.ToArray();
+            AssertByte(fileBytes, 6, hasDataDescriptor ? 8 : 0);
+            AssertByte(fileBytes, 7, 0);
+        }
+
+        private static void AssertByte(byte[] fileBytes, int byteNumber, int byteValue)
+        {
+            Assert.Equal(byteValue, fileBytes[byteNumber]);
         }
     }
 }
