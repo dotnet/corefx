@@ -754,6 +754,32 @@ namespace System.Diagnostics.Tests
             Assert.InRange(processorTimeAtHalfSpin, processorTimeBeforeSpin, Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds);
         }
 
+       [Fact]
+        public void TotalProcessorTime_PerformLoop_TotalProcessorTimValid()
+        {
+            CreateDefaultProcess();
+
+            DateTime startTime = DateTime.UtcNow;
+            TimeSpan processorTimeBeforeSpin = Process.GetCurrentProcess().TotalProcessorTime;
+           
+            // Perform loop to occupy cpu, takes less than a second.
+            int i = int.MaxValue / 16;
+            while (i > 0)
+            {
+                i--;
+            }
+
+            DateTime endTime = DateTime.UtcNow;
+            TimeSpan processorTimeAfterSpin = Process.GetCurrentProcess().TotalProcessorTime;
+
+            var timeDiff = (endTime - startTime).TotalMilliseconds;
+            var cpuTimeDiff = (processorTimeAfterSpin - processorTimeAfterSpin).TotalMilliseconds;
+
+            var cpuUsage = cpuTimeDiff / (timeDiff * Environment.ProcessorCount);
+
+            Assert.InRange(cpuUsage, 0, 1);
+        }
+
         [Fact]
         public void UserProcessorTime_GetNotStarted_ThrowsInvalidOperationException()
         {
