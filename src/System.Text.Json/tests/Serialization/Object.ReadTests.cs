@@ -71,6 +71,7 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("", "\t\t\t\n// Both\n/* Comments */")]
         [InlineData(" ", "")]
         [InlineData("\t ", "")]
+        [InlineData(" \t", " \n")]
         [InlineData("// Leading Comment\n", "")]
         [InlineData("/* Multi\nLine\nComment */ ", "")]
         [InlineData("/* Multi\nLine\nComment */ ", "\t// trailing comment\n ")]

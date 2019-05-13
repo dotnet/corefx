@@ -57,6 +57,12 @@ namespace System.Text.Json.Serialization.Tests
 
             string s2 = JsonSerializer.Parse<string>(@"  ""Hello"" ");
             Assert.Equal("Hello", s2);
+
+            bool b = JsonSerializer.Parse<bool>(" \ttrue ");
+            Assert.Equal(true, b);
+
+            bool b2 = JsonSerializer.Parse<bool>(" false\n");
+            Assert.Equal(false, b2);
         }
 
         [Fact]
@@ -109,6 +115,8 @@ namespace System.Text.Json.Serialization.Tests
         {
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<int[]>("[2] {3}"));
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[2] {3}")));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<string>(@"""Hello"" 42"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<string>(Encoding.UTF8.GetBytes(@"""Hello"" 42")));
         }
 
         [Fact]
