@@ -1260,9 +1260,10 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
     }
 
 #if HAVE_FCOPYFILE
-    // If fcopyfile is available (OS X), try to use it, as the whole copy
-    // can be performed in the kernel, without lots of unnecessary copying.
-    // Copy data and metadata.
+    // If fcopyfile is available (macOS), try to use it, as it handles
+    // copying both data and metadata. Unlike sendfile below it's
+    // implemented as user space library but future version of macOS
+    // may optimize it.
     ret = fcopyfile(inFd, outFd, NULL, COPYFILE_ALL) == 0 ? 0 : -1;
     close(outFd);
     return ret;
