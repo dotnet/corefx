@@ -1224,13 +1224,16 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
 #if HAVE_CLONEFILE
         // For clonefile we need to unlink the destination file first but we need to
         // check permission first to ensure we don't try to unlink read-only file
-        if (access(destPath, W_OK) == 0)
+        if (access(destPath, W_OK) != 0)
         {
-            ret = unlink(destPath);
-            if (ret != 0)
-            {
-                return ret;
-            }
+            errno = EACCES;
+            return -1;
+        }
+        
+        ret = unlink(destPath);
+        if (ret != 0)
+        {
+            return ret;
         }
 #endif
     }
