@@ -40,20 +40,8 @@ namespace System.Text.Json.Serialization
         {
             MethodInfo createRange = ImmutableCreateRangeMethod(constructingType, elementType);
 
-            // TODO: create dynamic method and generate IL.
-
             return createRange.CreateDelegate(
                 typeof(DefaultImmutableConverter.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
-        }
-
-        public override DefaultImmutableConverter.CreateImmutableCollectionDelegate CreateImmutableCollection(Type elementType)
-        {
-            MethodInfo createImmutableFromList = CreateImmutableFromListMethod(elementType);
-
-            // TODO: create dynamic method and generate IL.
-
-            return (DefaultImmutableConverter.CreateImmutableCollectionDelegate)createImmutableFromList.CreateDelegate(
-                typeof(DefaultImmutableConverter.CreateImmutableCollectionDelegate), null);
         }
     }
 }

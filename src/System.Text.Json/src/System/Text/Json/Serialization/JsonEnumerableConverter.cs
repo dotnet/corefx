@@ -9,14 +9,6 @@ namespace System.Text.Json.Serialization.Policies
 {
     internal abstract class JsonEnumerableConverter
     {
-        public abstract IEnumerable CreateFromList(Type enumerableType, Type elementType, IList sourceList);
-
-        protected static IEnumerable<T> GetGenericEnumerableFromList<T>(IList sourceList)
-        {
-            foreach (object item in sourceList)
-            {
-                yield return (T)item;
-            }
-        }
+        public abstract IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options);
     }
 }

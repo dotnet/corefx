@@ -22,13 +22,5 @@ namespace System.Text.Json.Serialization
             return createRange.CreateDelegate(
                 typeof(DefaultImmutableConverter.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
         }
-
-        public override DefaultImmutableConverter.CreateImmutableCollectionDelegate CreateImmutableCollection(Type elementType)
-        {
-            MethodInfo createImmutableFromList = CreateImmutableFromListMethod(elementType);
-
-            return (DefaultImmutableConverter.CreateImmutableCollectionDelegate)createImmutableFromList.CreateDelegate(
-                typeof(DefaultImmutableConverter.CreateImmutableCollectionDelegate), null);
-        }
     }
 }

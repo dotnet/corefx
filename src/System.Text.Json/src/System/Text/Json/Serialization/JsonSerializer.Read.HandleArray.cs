@@ -106,9 +106,7 @@ namespace System.Text.Json.Serialization
                 JsonEnumerableConverter converter = state.Current.JsonPropertyInfo.EnumerableConverter;
                 Debug.Assert(converter != null);
 
-                Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-                Type elementType = state.Current.GetElementType();
-                value = converter.CreateFromList(enumerableType, elementType, (IList)value);
+                value = converter.CreateFromList(ref state, (IList)value, options);
                 setPropertyDirectly = true;
             }
             else if (!popStackOnEnd)

@@ -42,8 +42,6 @@ namespace System.Text.Json.Serialization
 
         public bool IgnoreNullValues { get; private set; }
 
-        internal JsonClassInfo.ConstructorDelegate CreateImmutableCollectionFromList { get; private set; }
-
         // todo: to minimize hashtable lookups, cache JsonClassInfo:
         //public JsonClassInfo ClassInfo;
 
@@ -273,6 +271,10 @@ namespace System.Text.Json.Serialization
         {
             return (TAttribute)PropertyInfo?.GetCustomAttribute(typeof(TAttribute), inherit: false);
         }
+
+        public abstract IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList);
+
+        public abstract IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList);
 
         public abstract IList CreateConverterList();
 
