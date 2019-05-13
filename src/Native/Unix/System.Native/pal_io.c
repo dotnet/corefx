@@ -1240,7 +1240,11 @@ int32_t SystemNative_CopyFile(intptr_t sourceFd, const char* srcPath, const char
 
 #if HAVE_CLONEFILE
     while ((ret = clonefile(srcPath, destPath, 0)) < 0 && errno == EINTR);
-    if (ret == 0 || (errno != ENOTSUP && errno != EXDEV))
+    // EEXIST can happen due to race condition between the stat/unlink above
+    // and the clonefile here. The file could be (re-)created from another
+    // thread or process before we have a chance to call clonefile. Handle
+    // it by falling back to the slow path.
+    if (ret == 0 || (errno != ENOTSUP && errno != EXDEV && errno != EEXIST))
     {
         return ret;
     }
