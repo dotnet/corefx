@@ -773,7 +773,7 @@ namespace System.Diagnostics.Tests
             TimeSpan processorTimeAfterSpin = Process.GetCurrentProcess().TotalProcessorTime;
 
             var timeDiff = (endTime - startTime).TotalMilliseconds;
-            var cpuTimeDiff = (processorTimeAfterSpin - processorTimeAfterSpin).TotalMilliseconds;
+           var cpuTimeDiff = (processorTimeAfterSpin - processorTimeBeforeSpin).TotalMilliseconds;
 
             var cpuUsage = cpuTimeDiff / (timeDiff * Environment.ProcessorCount);
 
