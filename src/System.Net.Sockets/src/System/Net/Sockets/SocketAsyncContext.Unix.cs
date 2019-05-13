@@ -1104,7 +1104,6 @@ namespace System.Net.Sockets
 
                     if (_tail != null)
                     {
-                        aborted = true;
                         AsyncOperation op = _tail;
                         do
                         {
