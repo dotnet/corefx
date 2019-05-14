@@ -198,13 +198,8 @@ namespace System.IO.Compression.Tests
         private static void AssertDataDescriptor(MemoryStream memoryStream, bool hasDataDescriptor)
         {
             byte[] fileBytes = memoryStream.ToArray();
-            AssertByte(fileBytes, 6, hasDataDescriptor ? 8 : 0);
-            AssertByte(fileBytes, 7, 0);
-        }
-
-        private static void AssertByte(byte[] fileBytes, int byteNumber, int byteValue)
-        {
-            Assert.Equal(byteValue, fileBytes[byteNumber]);
+            Assert.Equal(hasDataDescriptor ? 8 : 0, fileBytes[6]);
+            Assert.Equal(0, fileBytes[7]);
         }
     }
 }
