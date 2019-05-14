@@ -228,10 +228,9 @@ namespace System.Net.Sockets
 
                         case State.Cancelled:
                             // Someone else cancelled the operation.
-                            // Just return true to indicate the operation was cancelled.
                             // The previous canceller will have fired the completion, etc.
                             Trace("Exit, previously cancelled");
-                            return true;
+                            return false;
                     }
                 }
 
