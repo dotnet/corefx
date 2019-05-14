@@ -34,7 +34,7 @@
     <PackageReference Include="xunit" Version="$(XUnitPackageVersion)" />
     <PackageReference Condition="'$(TargetsAot)' == 'true'" Include="xunit.runner.utility" Version="$(XUnitPackageVersion)" />
     <PackageReference Include="$(MicrosoftDotNetXUnitExtensionsPackage)" Version="$(MicrosoftDotNetXUnitExtensionsPackageVersion)" />
-    <PackageReference Include="$(MicrosoftDotNetRemoteExecutorPackage)" Version="$(MicrosoftDotNetRemoteExecutorPackageVersion)" ExcludeAssets="None" />
+    <PackageReference Include="$(MicrosoftDotNetRemoteExecutorPackage)" Version="$(MicrosoftDotNetRemoteExecutorPackageVersion)" ExcludeAssets="compile" />
     <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true'" Include="$(MicrosoftDotNetXUnitConsoleRunnerPackage)" Version="$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)" />
     <PackageReference Condition="'$(TargetsNetFx)' == 'true'" Include="$(XUnitRunnerConsolePackageName)" Version="$(XUnitPackageVersion)" />
     <PackageReference Condition="'$(TargetsUap)' == 'true'" Include="$(MicrosoftDotNetUapTestToolsPackageName)" Version="$(MicrosoftDotNetUapTestToolsPackageVersion)" />

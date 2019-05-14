@@ -3,14 +3,8 @@
     "dotnet": "3.0.100-preview6-011681"
   },
   "msbuild-sdks": {
-<<<<<<< HEAD
-    "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.19262.1",
-    "Microsoft.DotNet.Helix.Sdk": "2.0.0-beta.19262.1",
-    "Microsoft.NET.Sdk.IL": "3.0.0-preview6-27710-71"
-=======
     "Microsoft.DotNet.Arcade.Sdk": "1.0.0-beta.19263.3",
     "Microsoft.DotNet.Helix.Sdk": "2.0.0-beta.19263.3",
     "Microsoft.NET.Sdk.IL": "3.0.0-preview6-27710-71"
->>>>>>> Update dependencies from https://github.com/dotnet/arcade build 20190513.3
   }
 }
