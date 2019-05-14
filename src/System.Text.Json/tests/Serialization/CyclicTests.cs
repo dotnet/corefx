@@ -19,7 +19,7 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-		[ActiveIssue(37313)]
+        [ActiveIssue(37313)]
         public static void WriteTestClassWithArrayOfElementsOfTheSameClassWithoutCyclesDoesNotFail()
         {
             TestClassWithArrayOfElementsOfTheSameClass obj = new TestClassWithArrayOfElementsOfTheSameClass();
