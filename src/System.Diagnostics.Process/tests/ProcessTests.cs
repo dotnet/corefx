@@ -755,7 +755,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
-        public void TotalProcessorTime_PerformLoop_TotalProcessorTimValid()
+        public void TotalProcessorTime_PerformLoop_TotalProcessorTimeValid()
         {
             CreateDefaultProcess();
 
