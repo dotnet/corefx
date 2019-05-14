@@ -2551,6 +2551,17 @@ void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, i
     *addressSize = sizeof(domainSocket);
 }
 
+int32_t SystemNative_Disconnectx(intptr_t socket)
+{
+    int ret = -1;
+#if HAVE_DISCONNECTX
+    int fd = ToFileDescriptor(socket);
+
+    ret = disconnectx(fd, SAE_ASSOCID_ANY, SAE_CONNID_ANY);
+#endif
+    return ret;
+}
+
 int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, int64_t count, int64_t* sent)
 {
     assert(sent != NULL);

@@ -371,6 +371,12 @@ namespace System.Net.Sockets
                 // We need to ensure we keep the expected TCP behavior that is observed by the socket peer (FIN vs RST close).
                 // What we do here isn't specified by POSIX, it works for Linux.
 
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                {
+                    Interop.Sys.Disconnectx(this);
+                    return;
+                }
+
                 // Don't touch sockets which don't have the CLOEXEC flag set. These may be shared
                 // with other processes and we want to avoid disconnecting them.
                 int fdFlags = Interop.Sys.Fcntl.GetFD(this);
