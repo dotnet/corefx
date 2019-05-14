@@ -18,7 +18,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveNonExitedId);
                 Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
-                return new TimeSpan(Convert.ToInt64(info.ri_system_time) / NanoSecondsTo100NanoSecondsFactor);
+                return new TimeSpan(Convert.ToInt64(info.ri_system_time / NanoSecondsTo100NanoSecondsFactor));
             }
         }
 
@@ -92,7 +92,7 @@ namespace System.Diagnostics
             {
                 EnsureState(State.HaveNonExitedId);
                 Interop.libproc.rusage_info_v3 info = Interop.libproc.proc_pid_rusage(_processId);
-                return new TimeSpan(Convert.ToInt64(info.ri_user_time) / NanoSecondsTo100NanoSecondsFactor);
+                return new TimeSpan(Convert.ToInt64(info.ri_user_time / NanoSecondsTo100NanoSecondsFactor));
             }
         }
 

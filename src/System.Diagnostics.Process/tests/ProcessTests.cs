@@ -770,13 +770,13 @@ namespace System.Diagnostics.Tests
                 i--;
             }
 
-            DateTime endTime = DateTime.UtcNow;
             TimeSpan processorTimeAfterSpin = Process.GetCurrentProcess().TotalProcessorTime;
+            DateTime endTime = DateTime.UtcNow;
 
-            var timeDiff = (endTime - startTime).TotalMilliseconds;
-            var cpuTimeDiff = (processorTimeAfterSpin - processorTimeBeforeSpin).TotalMilliseconds;
+            double timeDiff = (endTime - startTime).TotalMilliseconds;
+            double cpuTimeDiff = (processorTimeAfterSpin - processorTimeBeforeSpin).TotalMilliseconds;
 
-            var cpuUsage = cpuTimeDiff / (timeDiff * Environment.ProcessorCount);
+            double cpuUsage = cpuTimeDiff / (timeDiff * Environment.ProcessorCount);
 
             Assert.InRange(cpuUsage, 0, 1);
         }
