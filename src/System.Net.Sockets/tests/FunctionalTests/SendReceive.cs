@@ -951,7 +951,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        // [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task UdpReceiveGetsCanceledByDispose()
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -989,7 +989,7 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        // [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task TcpReceiveSendGetsCanceledByDisposeOrClose(bool receiveOrSend)
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
@@ -1056,7 +1056,6 @@ namespace System.Net.Sockets.Tests
                             break;
                         }
                     }
-                    peerObservedConnectionAborted = true; // TODO
                 }
             }
             Assert.True(peerObservedConnectionAborted);

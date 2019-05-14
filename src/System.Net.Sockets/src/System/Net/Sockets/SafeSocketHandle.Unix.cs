@@ -385,19 +385,18 @@ namespace System.Net.Sockets
                 Debug.Assert(err == Interop.Error.SUCCESS);
                 if (err == Interop.Error.SUCCESS)
                 {
-                    // TODO
-                    // if (type == (int)SocketType.Stream)
-                    // {
-                    //     // Connect to AF_UNSPEC causes an abortive close (TCP RST).
-                    //     // We don't need to clear the address, only the AddressFamily will be used.
-                    //     Span<byte> address = stackalloc byte[32];
-                    //     SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
-                    //     fixed (byte* pAddress = address)
-                    //     {
-                    //         Interop.Sys.Connect(this, pAddress, address.Length);
-                    //     }
-                    // }
-                    // else
+                    if (type == (int)SocketType.Stream)
+                    {
+                        // Connect to AF_UNSPEC causes an abortive close (TCP RST).
+                        // We don't need to clear the address, only the AddressFamily will be used.
+                        Span<byte> address = stackalloc byte[32];
+                        SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
+                        fixed (byte* pAddress = address)
+                        {
+                            Interop.Sys.Connect(this, pAddress, address.Length);
+                        }
+                    }
+                    else
                     {
                         Interop.Sys.Shutdown(this, SocketShutdown.Both);
                     }
