@@ -754,7 +754,7 @@ namespace System.Diagnostics.Tests
             Assert.InRange(processorTimeAtHalfSpin, processorTimeBeforeSpin, Process.GetCurrentProcess().TotalProcessorTime.TotalSeconds);
         }
 
-       [Fact]
+        [Fact]
         public void TotalProcessorTime_PerformLoop_TotalProcessorTimValid()
         {
             CreateDefaultProcess();
