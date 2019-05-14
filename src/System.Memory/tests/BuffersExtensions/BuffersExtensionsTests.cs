@@ -29,6 +29,22 @@ namespace System.Buffers.Tests
             Assert.Equal("Hello World!", bufferWriter.ToString());
         }
 
+        [Fact]
+        public void WritingToEmptyBufferFailsWithException()
+        {
+            IBufferWriter<byte> bufferWriter = new EmptyBufferWriter();
+            Assert.Throws<ArgumentOutOfRangeException>(() => bufferWriter.Write(new byte[1]));
+        }
+
+        private class EmptyBufferWriter : IBufferWriter<byte>
+        {
+            public void Advance(int _) { }
+
+            public Memory<byte> GetMemory(int sizeHint = 0) => Memory<byte>.Empty;
+
+            public Span<byte> GetSpan(int sizeHint) => Span<byte>.Empty;
+        }
+
         private class TestBufferWriterSingleSegment : IBufferWriter<byte>
         {
             private byte[] _buffer = new byte[1000];
