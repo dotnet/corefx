@@ -755,6 +755,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void TotalProcessorTime_PerformLoop_TotalProcessorTimeValid()
         {
             CreateDefaultProcess();
