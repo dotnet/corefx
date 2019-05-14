@@ -21,7 +21,7 @@ namespace System.Net.Mail
         private ICredentialsByHost _credentials;
         private List<SmtpFailedRecipientException> _failedRecipientExceptions = new List<SmtpFailedRecipientException>();
         private bool _identityRequired;
-        private int _aborted;
+        private bool _aborted;
 
         private bool _enableSsl = false;
         private X509CertificateCollection _clientCertificates = null;
@@ -108,10 +108,14 @@ namespace System.Net.Mail
         {
             try
             {
-                Volatile.Write(ref _connection, new SmtpConnection(this, _client, _credentials, _authenticationModules));
-                if (Interlocked.CompareExchange(ref _aborted, 0, 1) == 1)
+                lock (this)
                 {
-                    _connection.Abort();
+                    _connection = new SmtpConnection(this, _client, _credentials, _authenticationModules);
+                    if (_aborted)
+                    {
+                        _connection.Abort();
+                    }
+                    _aborted = false;
                 }
 
                 if (NetEventSource.IsEnabled) NetEventSource.Associate(this, _connection);
@@ -199,14 +203,16 @@ namespace System.Net.Mail
 
         internal void Abort()
         {
-            SmtpConnection connection = Volatile.Read(ref _connection);
-            if (connection != null)
+            lock (this)
             {
-                connection.Abort();
-            }
-            else
-            {
-                Volatile.Write(ref _aborted, 1);
+                if (_connection != null)
+                {
+                    _connection.Abort();
+                }
+                else
+                {
+                    _aborted = true;
+                }
             }
         }
 
