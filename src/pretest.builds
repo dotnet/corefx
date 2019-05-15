@@ -6,7 +6,7 @@
     <GenerateTestSharedFrameworkDepsFile Condition="'$(BinplaceTestSharedFramework)' == 'true'">true</GenerateTestSharedFrameworkDepsFile>
   </PropertyGroup>
 
-  <Target Name="Build" DependsOnTargets="GenerateTestSharedFrameworkDepsFile;GenerateSharedLibraryForILC;GenerateLaunchSettingsFiles" />
+  <Target Name="Build" DependsOnTargets="GenerateTestSharedFrameworkDepsFile;GenerateLaunchSettingsFiles" />
 
   <!-- Generate launch settings support files to enable VS debugging. -->
   <Target Name="GenerateLaunchSettingsFiles" Condition="'$(EnableLaunchSettings)' == 'true'">
