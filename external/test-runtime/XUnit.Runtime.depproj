@@ -310,7 +310,6 @@
   </Target>
 
   <Target Name="AddRemoteExecutorLib"
-          Condition="'$(TargetsNetCoreApp)' == 'true' or '$(TargetsNetFx)' == 'true'"
           BeforeTargets="ResolveReferences">
 
     <Error Condition="!Exists('$(PackagesDir)$(MicrosoftDotNetRemoteExecutorPackage)\$(MicrosoftDotNetRemoteExecutorPackageVersion)\lib\netstandard2.0\Microsoft.DotNet.RemoteExecutor.dll')"
