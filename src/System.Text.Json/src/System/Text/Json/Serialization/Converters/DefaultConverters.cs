@@ -2,25 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Reflection;
 
 namespace System.Text.Json.Serialization.Converters
 {
     internal static class DefaultConverters
     {
-        private static readonly ConcurrentDictionary<Type, object> _valueConverters = new ConcurrentDictionary<Type, object>();
-
-        static DefaultConverters()
+        private static readonly Dictionary<Type, object> s_valueConverters = new Dictionary<Type, object>()
         {
-            _valueConverters.TryAdd(typeof(DateTimeOffset), new JsonValueConverterDateTimeOffset());
-            _valueConverters.TryAdd(typeof(Guid), new JsonValueConverterGuid());
-            _valueConverters.TryAdd(typeof(JsonElement), new JsonValueConverterJsonElement());
-        }
+            { typeof(DateTimeOffset), new JsonValueConverterDateTimeOffset() },
+            { typeof(Guid), new JsonValueConverterGuid() },
+            { typeof(JsonElement), new JsonValueConverterJsonElement() }
+        };
 
         internal static bool IsValueConvertable(Type type)
         {
-            return typeof(IConvertible).IsAssignableFrom(type) || _valueConverters.ContainsKey(type);
+            return typeof(IConvertible).IsAssignableFrom(type) || s_valueConverters.ContainsKey(type);
         }
 
         internal static object Create(Type type)
@@ -69,7 +67,7 @@ namespace System.Text.Json.Serialization.Converters
                     return new JsonValueConverterString();
             }
 
-            if (_valueConverters.TryGetValue(type, out object value))
+            if (s_valueConverters.TryGetValue(type, out object value))
             {
                 return value;
             }
