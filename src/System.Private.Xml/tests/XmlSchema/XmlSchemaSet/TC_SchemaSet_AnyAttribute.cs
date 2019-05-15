@@ -242,11 +242,10 @@ namespace System.Xml.Tests
 
         private static void CompareWildcardNamespaces(string expected, string actual)
         {
-            Action<string>[] inspectors = expected.Split(' ').OrderBy(ns => ns).Select(expectedNs => new Action<string>(actualNs => {
-                Assert.Equal(expectedNs, actualNs);
-            })).ToArray();
-            Assert.NotNull(actual);
-            Assert.Collection(actual.Split(' ').OrderBy(ns => ns), inspectors);
+            var orderedExpected = string.Join(" ", expected.Split(' ').OrderBy(ns => ns));
+            var orderedActual = string.Join(" ", actual.Split(' ').OrderBy(ns => ns));
+
+            Assert.Equal(orderedExpected, orderedActual);
         }
     }
 }
