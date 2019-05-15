@@ -951,7 +951,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        // [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task UdpReceiveGetsCanceledByDispose()
         {
             var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -989,8 +989,7 @@ namespace System.Net.Sockets.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        // [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
-        public async Task TcpReceiveSendGetsCanceledByDisposeOrClose(bool receiveOrSend)
+        public async Task TcpReceiveSendGetsCanceledByDispose(bool receiveOrSend)
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, the peer won't see a connection aborted.
@@ -1056,6 +1055,16 @@ namespace System.Net.Sockets.Tests
                             break;
                         }
                     }
+                }
+
+                // On OSX, we're unable to unblock the on-going socket operations and
+                // perform an abortive close.
+                if (PlatformDetection.IsOSX)
+                {
+                    Assert.False(peerObservedConnectionAborted);
+
+                    // Pretend we've observed an abortive close.
+                    peerObservedConnectionAborted = true;
                 }
             }
             Assert.True(peerObservedConnectionAborted);

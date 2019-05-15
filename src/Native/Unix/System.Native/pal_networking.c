@@ -2551,12 +2551,22 @@ void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, i
     *addressSize = sizeof(domainSocket);
 }
 
-int32_t SystemNative_Disconnectx(intptr_t socket)
+int32_t SystemNative_Disconnect(intptr_t socket)
 {
     int fd = ToFileDescriptor(socket);
     int err;
 
-#if HAVE_DISCONNECTX
+#if defined(__linux__)
+    // On Linux, we can disconnect a socket by connecting to AF_UNSPEC.
+    // For TCP sockets, this causes an abortive close.
+
+    // We don't need to clear the address, only the sa_family will be used.
+    struct sockaddr addr;
+    addr.sa_family = AF_UNSPEC;
+
+    err = connect(fd, &addr, sizeof(addr));
+#elif HAVE_DISCONNECTX
+    // disconnectx causes a FIN close on OSX. It's the best we can do.
     err = disconnectx(fd, SAE_ASSOCID_ANY, SAE_CONNID_ANY);
 #else
     (void)fd;

@@ -369,7 +369,10 @@ namespace System.Net.Sockets
                 // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
                 // may block indefinitly. This is a best effort attempt to not get blocked and make those operations return.
                 // We need to ensure we keep the expected TCP behavior that is observed by the socket peer (FIN vs RST close).
-                // What we do here isn't specified by POSIX, it works for Linux.
+                // What we do here isn't specified by POSIX and doesn't work on all OSes.
+                // On Linux this works well.
+                // On OSX, TCP connections will be closed with a FIN close instead of an abortive RST close.
+                // And, pending TCP connect operations and UDP receive are not abortable.
 
                 // Don't touch sockets which don't have the CLOEXEC flag set. These may be shared
                 // with other processes and we want to avoid disconnecting them.
@@ -379,34 +382,19 @@ namespace System.Net.Sockets
                     return;
                 }
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                int type = 0;
+                int optLen = sizeof(int);
+                Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
+                Debug.Assert(err == Interop.Error.SUCCESS);
+                if (err == Interop.Error.SUCCESS)
                 {
-                    Interop.Sys.Disconnectx(this);
-                    return;
-                }
-                else
-                {
-                    int type = 0;
-                    int optLen = sizeof(int);
-                    Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
-                    Debug.Assert(err == Interop.Error.SUCCESS);
-                    if (err == Interop.Error.SUCCESS)
+                    if (type == (int)SocketType.Stream)
                     {
-                        if (type == (int)SocketType.Stream)
-                        {
-                            // Connect to AF_UNSPEC causes an abortive close (TCP RST).
-                            // We don't need to clear the address, only the AddressFamily will be used.
-                            Span<byte> address = stackalloc byte[32];
-                            SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
-                            fixed (byte* pAddress = address)
-                            {
-                                Interop.Sys.Connect(this, pAddress, address.Length);
-                            }
-                        }
-                        else
-                        {
-                            Interop.Sys.Shutdown(this, SocketShutdown.Both);
-                        }
+                        Interop.Sys.Disconnect(this);
+                    }
+                    else
+                    {
+                        Interop.Sys.Shutdown(this, SocketShutdown.Both);
                     }
                 }
             }

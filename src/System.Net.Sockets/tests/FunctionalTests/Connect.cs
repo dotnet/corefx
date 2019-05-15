@@ -87,7 +87,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        // [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
+        [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task ConnectGetsCanceledByDispose()
         {
             var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);

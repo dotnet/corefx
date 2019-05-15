@@ -298,8 +298,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.GetFD.cs">
       <Link>Common\Interop\Unix\Interop.Fcntl.GetFD.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Disconnectx.cs">
-      <Link>Common\Interop\Unix\Interop.Disconnectx.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Disconnect.cs">
+      <Link>Common\Interop\Unix\Interop.Disconnect.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetBytesAvailable.cs">
       <Link>Interop\Unix\System.Native\Interop.GetBytesAvailable.cs</Link>
