@@ -371,12 +371,6 @@ namespace System.Net.Sockets
                 // We need to ensure we keep the expected TCP behavior that is observed by the socket peer (FIN vs RST close).
                 // What we do here isn't specified by POSIX, it works for Linux.
 
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                {
-                    Interop.Sys.Disconnectx(this);
-                    return;
-                }
-
                 // Don't touch sockets which don't have the CLOEXEC flag set. These may be shared
                 // with other processes and we want to avoid disconnecting them.
                 int fdFlags = Interop.Sys.Fcntl.GetFD(this);
@@ -385,26 +379,34 @@ namespace System.Net.Sockets
                     return;
                 }
 
-                int type = 0;
-                int optLen = sizeof(int);
-                Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
-                Debug.Assert(err == Interop.Error.SUCCESS);
-                if (err == Interop.Error.SUCCESS)
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
-                    if (type == (int)SocketType.Stream)
+                    Interop.Sys.Disconnectx(this);
+                    return;
+                }
+                else
+                {
+                    int type = 0;
+                    int optLen = sizeof(int);
+                    Interop.Error err = Interop.Sys.GetSockOpt(this, SocketOptionLevel.Socket, SocketOptionName.Type, (byte*)&type, &optLen);
+                    Debug.Assert(err == Interop.Error.SUCCESS);
+                    if (err == Interop.Error.SUCCESS)
                     {
-                        // Connect to AF_UNSPEC causes an abortive close (TCP RST).
-                        // We don't need to clear the address, only the AddressFamily will be used.
-                        Span<byte> address = stackalloc byte[32];
-                        SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
-                        fixed (byte* pAddress = address)
+                        if (type == (int)SocketType.Stream)
                         {
-                            Interop.Sys.Connect(this, pAddress, address.Length);
+                            // Connect to AF_UNSPEC causes an abortive close (TCP RST).
+                            // We don't need to clear the address, only the AddressFamily will be used.
+                            Span<byte> address = stackalloc byte[32];
+                            SocketAddressPal.SetAddressFamily(address, AddressFamily.Unspecified);
+                            fixed (byte* pAddress = address)
+                            {
+                                Interop.Sys.Connect(this, pAddress, address.Length);
+                            }
                         }
-                    }
-                    else
-                    {
-                        Interop.Sys.Shutdown(this, SocketShutdown.Both);
+                        else
+                        {
+                            Interop.Sys.Shutdown(this, SocketShutdown.Both);
+                        }
                     }
                 }
             }

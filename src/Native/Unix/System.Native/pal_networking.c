@@ -2553,13 +2553,18 @@ void SystemNative_GetDomainSocketSizes(int32_t* pathOffset, int32_t* pathSize, i
 
 int32_t SystemNative_Disconnectx(intptr_t socket)
 {
-    int ret = -1;
-#if HAVE_DISCONNECTX
     int fd = ToFileDescriptor(socket);
+    int err;
 
-    ret = disconnectx(fd, SAE_ASSOCID_ANY, SAE_CONNID_ANY);
+#if HAVE_DISCONNECTX
+    err = disconnectx(fd, SAE_ASSOCID_ANY, SAE_CONNID_ANY);
+#else
+    (void)fd;
+    err = -1;
+    errno = ENOSYS;
 #endif
-    return ret;
+
+    return err == 0 ? Error_SUCCESS : SystemNative_ConvertErrorPlatformToPal(errno);
 }
 
 int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, int64_t count, int64_t* sent)
