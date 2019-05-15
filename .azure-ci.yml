@@ -196,7 +196,5 @@ jobs:
     displayName: Sync    
   - script: ./build.sh -buildArch=x64 -runtimeos=linux-musl -Debug -- /p:PortableBuild=false
     displayName: Build Product
-  - script: ./build-managed.sh -BuildPackages=false -buildArch=x64 -Release 
-    displayName: Build Managed
   - script: ./build-tests.sh -buildArch=x64 -Debug -SkipTests -- /p:ArchiveTests=true /p:EnableDumpling=true /p:PortableBuild=false
     displayName: Build Tests
