@@ -224,7 +224,7 @@ namespace System.Net.Sockets
 
             internal static InnerSafeCloseSocket Accept(SafeSocketHandle socketHandle, byte[] socketAddress, ref int socketAddressSize)
             {
-                InnerSafeCloseSocket result = Interop.Winsock.accept(socketHandle.DangerousGetHandle(), socketAddress, ref socketAddressSize);
+                InnerSafeCloseSocket result = Interop.Winsock.accept(socketHandle, socketAddress, ref socketAddressSize);
                 if (result.IsInvalid)
                 {
                     result.SetHandleAsInvalid();
