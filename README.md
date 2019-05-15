@@ -12,7 +12,7 @@ Runtime-specific library code ([System.Private.CoreLib](https://github.com/dotne
 
 Official Starting Page: https://dotnet.microsoft.com/
 
-* [How to use .NET Core](https://docs.microsoft.com/en-us/dotnet/core/get-started) (with VS, VS Code, command-line CLI)
+* [How to use .NET Core](https://docs.microsoft.com/dotnet/core/get-started) (with VS, VS Code, command-line CLI)
   * [Install official releases](https://dotnet.microsoft.com/download)
   * [Documentation](https://docs.microsoft.com/dotnet/core) (Get Started, Tutorials, Porting from .NET Framework, API reference, ...)
     * [Deploying apps](https://docs.microsoft.com/dotnet/core/deploying)
