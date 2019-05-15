@@ -103,17 +103,13 @@ namespace System.Tests
                 return previous;
             }
 
-            RemoteExecutor.Invoke(() =>
+            long previous = 0;
+
+            for (int i = 0; i < 1000; ++i)
             {
-                long previous = 0;
-
-                for (int i = 0; i < 1000; ++i)
-                {
-                    stash = new byte[1234];
-                    previous = CallGetTotalAllocatedBytes(previous);
-                }
-
-            }).Dispose();
+                stash = new byte[1234];
+                previous = CallGetTotalAllocatedBytes(previous);
+            }
         }
     }
 }
