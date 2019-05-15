@@ -23,7 +23,7 @@ namespace System
             AssertUserExpectedResults("the characters you typed properly echoed as you typed");
         }
 
-        [Fact]
+        [ConditionalFact(nameof(ManualTestsEnabled))]
         public static void ReadLine_BackSpaceCanMoveAccrossWrappedLines()
         {
             Console.WriteLine("Please press 'a' until it wraps to the next terminal line, then press 'Backspace' until the input is erased, and then type a single 'a' and press 'Enter'.");
