@@ -232,11 +232,11 @@ namespace System.Net.Sockets
                 return result;
             }
 
-            internal unsafe void TryUnblockSocket()
+            internal unsafe bool TryUnblockSocket()
             {
                 // Try to cancel all pending IO.
-                Interop.Kernel32.CancelIoEx(this, null);
-	    }
+                return Interop.Kernel32.CancelIoEx(this, null);
+	        }
         }
     }
 }

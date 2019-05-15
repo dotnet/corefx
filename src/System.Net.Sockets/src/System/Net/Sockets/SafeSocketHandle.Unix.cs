@@ -364,7 +364,7 @@ namespace System.Net.Sockets
                 return res;
             }
 
-            internal unsafe void TryUnblockSocket()
+            internal unsafe bool TryUnblockSocket()
             {
                 // Calling 'close' on a socket that has pending blocking calls (e.g. recv, send, accept, ...)
                 // may block indefinitly. This is a best effort attempt to not get blocked and make those operations return.
@@ -379,7 +379,7 @@ namespace System.Net.Sockets
                 int fdFlags = Interop.Sys.Fcntl.GetFD(this);
                 if (fdFlags == 0)
                 {
-                    return;
+                    return false;
                 }
 
                 int type = 0;
@@ -397,6 +397,8 @@ namespace System.Net.Sockets
                         Interop.Sys.Shutdown(this, SocketShutdown.Both);
                     }
                 }
+
+                return true;
             }
         }
     }
