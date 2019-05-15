@@ -1060,7 +1060,7 @@ namespace System.Net.Sockets.Tests
 
                 // On OSX, we're unable to unblock the on-going socket operations and
                 // perform an abortive close.
-                if (PlatformDetection.IsOSX)
+                if (UsesSync && PlatformDetection.IsOSX)
                 {
                     Assert.Equal(SocketError.Success, peerObservedSocketError);
 
