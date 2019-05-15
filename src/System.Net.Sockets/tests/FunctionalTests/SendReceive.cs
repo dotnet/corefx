@@ -992,9 +992,10 @@ namespace System.Net.Sockets.Tests
         public async Task TcpReceiveSendGetsCanceledByDispose(bool receiveOrSend)
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
-            // before the operation is started, the peer won't see a connection aborted.
-            bool peerObservedConnectionAborted = false;
-            for (int i = 0; i < 10 && !peerObservedConnectionAborted; i++)
+            // before the operation is started, the peer won't see a connection reset.
+
+            SocketError peerObservedSocketError = SocketError.Success;
+            for (int i = 0; i < 10 && peerObservedSocketError == SocketError.Success; i++)
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
                 using (socket2)
@@ -1049,27 +1050,25 @@ namespace System.Net.Sockets.Tests
                                 break;
                             }
                         }
-                        catch (SocketException)
+                        catch (SocketException se)
                         {
-                            peerObservedConnectionAborted = true;
+                            peerObservedSocketError = se.SocketErrorCode;
                             break;
                         }
                     }
                 }
 
-                // trigger CI comment
-
                 // On OSX, we're unable to unblock the on-going socket operations and
                 // perform an abortive close.
                 if (PlatformDetection.IsOSX)
                 {
-                    Assert.False(peerObservedConnectionAborted);
+                    Assert.Equal(SocketError.Success, peerObservedSocketError);
 
-                    // Pretend we've observed an abortive close.
-                    peerObservedConnectionAborted = true;
+                    // Pretend we've observed an RST close.
+                    peerObservedSocketError = SocketError.ConnectionReset;
                 }
             }
-            Assert.True(peerObservedConnectionAborted);
+            Assert.Equal(SocketError.ConnectionReset, peerObservedSocketError);
         }
     }
 
