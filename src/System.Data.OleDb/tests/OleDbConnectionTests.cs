@@ -2,16 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Data.OleDb;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
+using Xunit;
 
 namespace System.Data.OleDb.Tests
 {
+    [Collection("System.Data.OleDb")] // not let tests run in parallel
     public class OleDbConnectionTests : OleDbTestBase
     {
         [ConditionalFact(Helpers.IsDriverAvailable)]
@@ -55,108 +53,173 @@ namespace System.Data.OleDb.Tests
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void Open_NoConnectionString_Throws()
         {
-            using (var innerConnection = (OleDbConnection)OleDbFactory.Instance.CreateConnection())
-            {
-                innerConnection.ConnectionString = null;
-                Assert.Throws<InvalidOperationException>(() => innerConnection.Open());
-            }
+            connection.Dispose();
+            connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
+            connection.ConnectionString = null;
+            Assert.Throws<InvalidOperationException>(() => connection.Open());
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void BeginTransaction_IsolationLevelIsUnspecified_SetsReadCommitted()
         {
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-                using (OleDbTransaction transaction = oleDbConnection.BeginTransaction())
-                {
-                    Assert.Equal(IsolationLevel.ReadCommitted, transaction.IsolationLevel);
-                }
-                using (OleDbTransaction transaction = oleDbConnection.BeginTransaction(IsolationLevel.Unspecified))
-                {
-                    Assert.Equal(IsolationLevel.ReadCommitted, transaction.IsolationLevel);
-                }
-            }
+            Assert.Equal(IsolationLevel.ReadCommitted, transaction.IsolationLevel);
+            transaction.Dispose();
+            transaction = connection.BeginTransaction(IsolationLevel.Unspecified);
+            Assert.Equal(IsolationLevel.ReadCommitted, transaction.IsolationLevel);
         }
         
         [ConditionalTheory(Helpers.IsDriverAvailable)]
         [MemberData(nameof(IsolationLevelsExceptUnspecified))]
         public void BeginTransaction_SpecificIsolationLevel_Success(IsolationLevel isolationLevel)
         {
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-                using (OleDbTransaction transaction = oleDbConnection.BeginTransaction(isolationLevel))
-                {
-                    Assert.Equal(isolationLevel, transaction.IsolationLevel);
-                }
-            }
+            transaction.Dispose();
+            transaction = connection.BeginTransaction(isolationLevel);
+            Assert.Equal(isolationLevel, transaction.IsolationLevel);
+        }
+        
+        [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void StateChange_ChangeState_TriggersEvent()
+        {
+            int timesCalled = 0;
+            Action<object, StateChangeEventArgs> OnStateChange = (sender, args) => {
+                timesCalled++;
+            };
+            connection.StateChange += new StateChangeEventHandler(OnStateChange);  
+            connection.Close();
+            connection.Open();
+            Assert.Equal(2, timesCalled);
         }
         
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void BeginTransaction_InvalidIsolationLevel_Throws()
         {
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-                Assert.Throws<ArgumentOutOfRangeException>(() => oleDbConnection.BeginTransaction((IsolationLevel)0));
-            }
+            transaction.Dispose();
+            Assert.Throws<ArgumentOutOfRangeException>(() => connection.BeginTransaction((IsolationLevel)0));
         }
 
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void Provider_SetProperlyFromCtor()
+        [ConditionalFact(Helpers.IsAceDriverAvailable)]
+        public void BeginTransaction_CallTwice_Throws()
         {
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-                Assert.Equal(Helpers.ProviderName, oleDbConnection.Provider);
-            }
+            // ctor in OleDbTestBase already called BeginTransaction once
+            AssertExtensions.Throws<InvalidOperationException>(
+                () => connection.BeginTransaction(),
+                $"{nameof(OleDbConnection)} does not support parallel transactions."
+            );
         }
-
+        
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void GetSchema()
+        public void GetDefaults_AnyGivenState_DoesNotThrow()
         {
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-
-                DataTable metaDataCollections = oleDbConnection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
-                Assert.True(metaDataCollections != null && metaDataCollections.Rows.Count > 0);
-
-                DataTable metaDataSourceInfo = oleDbConnection.GetSchema(DbMetaDataCollectionNames.DataSourceInformation);
-                Assert.True(metaDataSourceInfo != null && metaDataSourceInfo.Rows.Count > 0);
-
-                DataTable metaDataTypes = oleDbConnection.GetSchema(DbMetaDataCollectionNames.DataTypes);
-                Assert.True(metaDataTypes != null && metaDataTypes.Rows.Count > 0);
-                
-                DataTable schema = oleDbConnection.GetSchema();
-                Assert.True(schema != null && schema.Rows.Count > 0);
-
-                Assert.Throws<NotSupportedException>(
-                    () => oleDbConnection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections, new string[] { new string('a', 5000) } ));
-            }
+            const int DefaultTimeout = 15;
+            Action VerifyDefaults = () => {
+                Assert.Equal(DefaultTimeout, connection.ConnectionTimeout);
+                Assert.Contains(connection.DataSource, TestDirectory);
+                Assert.Empty(connection.Database);
+            };
+            VerifyDefaults();
+            connection.Close();
+            VerifyDefaults();
+        }
+        
+        [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void CreateCommand_AsDbConnection_IsOleDb()
+        {
+            DbConnection dbConnection = connection as DbConnection;
+            DbCommand dbCommand = dbConnection.CreateCommand();
+            Assert.NotNull(dbCommand);
+            Assert.IsType<OleDbCommand>(dbCommand);
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void GetSchema_NoArgs_ReturnsMetaDataCollections()
+        {
+            if (PlatformDetection.IsWindows7)
+            {
+                return; // [ActiveIssue(37438)]
+            }
+
+            DataTable t1 = connection.GetSchema();
+            DataTable t2 = connection.GetSchema(DbMetaDataCollectionNames.MetaDataCollections);
+            Assert.Equal(t1.Rows.Count, t2.Rows.Count);
+
+            foreach (DataColumn dc in t1.Columns)
+            {
+                for (int i = 0; i < t1.Rows.Count; i++)
+                {
+                    Assert.Equal(t1.Rows[i][dc.ColumnName], t2.Rows[i][dc.ColumnName]);
+                }
+            }
+        }
+
+        [ConditionalTheory(Helpers.IsDriverAvailable)]
+        [InlineData(nameof(DbMetaDataCollectionNames.MetaDataCollections), "CollectionName")]
+        [InlineData(nameof(DbMetaDataCollectionNames.DataSourceInformation), "CompositeIdentifierSeparatorPattern")]
+        [InlineData(nameof(DbMetaDataCollectionNames.DataTypes), "TypeName")]
+        public void GetSchema(string tableName, string columnName)
+        {
+            if (PlatformDetection.IsWindows7)
+            {
+                return; // [ActiveIssue(37438)]
+            }
+
+            DataTable schema = connection.GetSchema(tableName);
+            Assert.True(schema != null && schema.Rows.Count > 0);
+            var exception = Record.Exception(() => schema.Rows[0].Field<string>(columnName));
+            Assert.Null(exception);
+
+            AssertExtensions.Throws<ArgumentException>(
+                () => connection.GetSchema(tableName, new string[] { null }), 
+                $"More restrictions were provided than the requested schema ('{tableName}') supports."
+            );
+            const string MissingColumn = "MissingColumn";
+            AssertExtensions.Throws<ArgumentException>(
+                () => schema.Rows[0].Field<IEnumerable<char>>(MissingColumn), 
+                $"Column '{MissingColumn}' does not belong to table {tableName}.");
+        }
+
+        [OuterLoop]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void GetOleDbSchemaTable_ReturnsTableInfo()
+        {
+            string tableName = Helpers.GetTableName(nameof(GetOleDbSchemaTable_ReturnsTableInfo));
+            command.CommandText = @"CREATE TABLE t1.csv (CustomerName NVARCHAR(40));";
+            command.ExecuteNonQuery();
+            command.CommandText = @"CREATE TABLE t2.csv (CustomerName NVARCHAR(40));";
+            command.ExecuteNonQuery();
+            DataTable listedTables = connection.GetOleDbSchemaTable(
+                OleDbSchemaGuid.Tables, new object[] {null, null, null, "Table"});
+
+            Assert.NotNull(listedTables);
+            Assert.Equal(2, listedTables.Rows.Count);
+            Assert.Equal("t1#csv", listedTables.Rows[0][2].ToString());
+            Assert.Equal("t2#csv", listedTables.Rows[1][2].ToString());
+
+            command.CommandText = @"DROP TABLE t1.csv";
+            command.ExecuteNonQuery();
+            command.CommandText = @"DROP TABLE t2.csv";
+            command.ExecuteNonQuery();
+        }
+
+        [ConditionalFact(Helpers.IsAceDriverAvailable)]
         public void ChangeDatabase_EmptyDatabase_Throws()
         {
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-                Assert.Throws<ArgumentException>(() => oleDbConnection.ChangeDatabase(string.Empty));
-            }
+            Assert.Throws<ArgumentException>(() => connection.ChangeDatabase(null));
+            Assert.Throws<ArgumentException>(() => connection.ChangeDatabase(" "));
+            Assert.Throws<ArgumentException>(() => connection.ChangeDatabase(string.Empty));
+            AssertExtensions.Throws<InvalidOperationException>(
+                () => connection.ChangeDatabase("ReadOnlyShouldThrow"), 
+                "The 'current catalog' property was read-only, or the consumer attempted to set values of properties " + 
+                "in the Initialization property group after the data source object was initialized. " + 
+                "Consumers can set the value of a read-only property to its current value. " + 
+                "This status is also returned if a settable column property could not be set for the particular column."
+            );
         }
 
         [ConditionalTheory(Helpers.IsDriverAvailable)]
         [MemberData(nameof(ManufacturedOleDbSchemaGuids))]
         public void GetOleDbSchemaTable_NoRestrictions_Success(Guid oleDbSchemaGuid)
         {
-            DataTable oleDbSchemaTable = null;
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-                oleDbSchemaTable = oleDbConnection.GetOleDbSchemaTable(oleDbSchemaGuid, restrictions: null);
-            }
+            DataTable oleDbSchemaTable = connection.GetOleDbSchemaTable(oleDbSchemaGuid, restrictions: null);
             Assert.NotNull(oleDbSchemaTable);
             Assert.NotNull(oleDbSchemaTable.Rows);
             foreach (DataRow dataRow in oleDbSchemaTable.Rows)
@@ -170,12 +233,7 @@ namespace System.Data.OleDb.Tests
         public void GetOleDbSchemaTable_SomeRestrictions_Throws(Guid oleDbSchemaGuid)
         {
             object[] restrictions = new object[] { null };
-            using (var oleDbConnection = new OleDbConnection(ConnectionString))
-            {
-                oleDbConnection.Open();
-                Assert.Throws<ArgumentException>(() => 
-                    oleDbConnection.GetOleDbSchemaTable(oleDbSchemaGuid, restrictions));
-            }
+            Assert.Throws<ArgumentException>(() => connection.GetOleDbSchemaTable(oleDbSchemaGuid, restrictions));
         }
 
         public static IEnumerable<object[]> ManufacturedOleDbSchemaGuids
@@ -215,12 +273,9 @@ namespace System.Data.OleDb.Tests
                 ConnectionString }.AsSpan();
             File.WriteAllLines(udlFile, lines.Slice(start, length).ToArray());
 
-            var exception = Record.Exception(() => new OleDbConnection(@"file name = " + udlFile));
-            Assert.NotNull(exception);
-            Assert.IsType<ArgumentException>(exception);
-            Assert.Equal(
-                "Invalid UDL file.",
-                exception.Message);
+            AssertExtensions.Throws<ArgumentException>(
+                () => new OleDbConnection(@"file name = " + udlFile), 
+                "Invalid UDL file.");
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
@@ -232,11 +287,12 @@ namespace System.Data.OleDb.Tests
                 "; Everything after this line is an OLE DB initstring",
                 ConnectionString
             }, System.Text.Encoding.Unicode);
-            var oleDbConnection = new OleDbConnection(@"file name = " + udlFile);
-            Assert.NotNull(oleDbConnection);
-            oleDbConnection.Open();
-            Assert.Equal(Helpers.ProviderName, oleDbConnection.Provider);
-            oleDbConnection.Dispose();
+            connection.Dispose();
+            connection = new OleDbConnection(@"file name = " + udlFile);
+            Assert.NotNull(connection);
+            connection.Open();
+            Assert.Equal(Helpers.ProviderName, connection.Provider);
+            connection.Dispose();
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]

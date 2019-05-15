@@ -2,25 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
-using System.Collections.Generic;
-using System.Data.OleDb;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
+using Xunit;
 
 namespace System.Data.OleDb.Tests
 {
+    [Collection("System.Data.OleDb")] // not let tests run in parallel
     public class OleDbDataReaderTests : OleDbTestBase
     {
+        [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void ExecuteNonQuery_TableNameWithoutCsvExtension_Throws()
+        public void FieldCount_NoMetadata_ReturnsZero()
         {
-            command.CommandText =
-                @"CREATE TABLE TableNameWithoutCsvExtension (
-                    SomeInt32 INT,
-                    SomeString NVARCHAR(100))";
-            Assert.Throws<OleDbException>(() => command.ExecuteNonQuery());
+            command.CommandText = @"CREATE TABLE sample.csv;";
+            using (OleDbDataReader reader = command.ExecuteReader())
+            {
+                Assert.Equal(0, reader.FieldCount);
+                Assert.Equal(0, reader.VisibleFieldCount);
+            }
         }
 
         [OuterLoop]
@@ -31,13 +31,10 @@ namespace System.Data.OleDb.Tests
                 reader.Read();
                 Assert.True(reader.HasRows);
                 DataTable schema = reader.GetSchemaTable();
-                Assert.Equal(4, schema.Rows.Count);
-                var exception = Record.Exception(() => reader.GetString(5));
-                Assert.NotNull(exception);
-                Assert.IsType<IndexOutOfRangeException>(exception);
-                Assert.Equal(
-                    "Index was outside the bounds of the array.",
-                    exception.Message);
+                Assert.Equal(5, schema.Rows.Count);
+                AssertExtensions.Throws<IndexOutOfRangeException>(
+                    () => reader.GetString(6), 
+                    "Index was outside the bounds of the array.");
             });
         }
 
@@ -48,12 +45,9 @@ namespace System.Data.OleDb.Tests
             RunTest((reader) => {
                 reader.Read();
                 Assert.True(reader.HasRows);
-                var exception = Record.Exception(() => reader["NonExistentColumn"]);
-                Assert.NotNull(exception);
-                Assert.IsType<IndexOutOfRangeException>(exception);
-                Assert.Equal(
-                    "NonExistentColumn",
-                    exception.Message);
+                object obj;
+                AssertExtensions.Throws<IndexOutOfRangeException>(
+                    () => obj = reader["NonExistentColumn"], "NonExistentColumn");
             });
         }
 
@@ -69,6 +63,7 @@ namespace System.Data.OleDb.Tests
                 Assert.Equal("XYZ", values[1]);
                 Assert.Equal(42.2, values[2]);
                 Assert.Equal(48.3f, values[3]);
+                Assert.Equal(new DateTime(2015, 1, 11, 12, 54, 1), values[4]);
             });
         }
 
@@ -76,23 +71,13 @@ namespace System.Data.OleDb.Tests
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void EmptyReader_SchemaOnly_EmptyReader()
         {
+            const string expectedMessage = "No data exists for the row/column.";
             RunTest((reader) => {
                 reader.Read();
                 Assert.False(reader.HasRows);
-                var exception = Record.Exception(() => reader.GetString(1));
-                Assert.NotNull(exception);
-                Assert.IsType<InvalidOperationException>(exception);
-                Assert.Equal(
-                    "No data exists for the row/column.",
-                    exception.Message);
-
-                var values = new object[1];
-                exception = Record.Exception(() => reader.GetValues(values));
-                Assert.NotNull(exception);
-                Assert.IsType<InvalidOperationException>(exception);
-                Assert.Equal(
-                    "No data exists for the row/column.",
-                    exception.Message);
+                AssertExtensions.Throws<InvalidOperationException>(() => reader.GetString(1), expectedMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => reader.GetValues(new object[1]), expectedMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => reader.GetData(0), expectedMessage);
             }, schemaOnly: true);
         }
 
@@ -102,7 +87,7 @@ namespace System.Data.OleDb.Tests
         {
             RunTest((reader) => {
                 DataTable schema = reader.GetSchemaTable();
-                Assert.Equal(4, schema.Rows.Count);  
+                Assert.Equal(5, schema.Rows.Count);  
                 Assert.Equal("CustomerName", schema.Rows[1].Field<String>("ColumnName"));
                 Assert.Equal(typeof(string), schema.Rows[1].Field<Type>("DataType"));
                 Assert.Equal(40, schema.Rows[1].Field<int>("ColumnSize"));
@@ -115,11 +100,12 @@ namespace System.Data.OleDb.Tests
         {
             RunTest((reader) => {
                 DataTable schema = reader.GetSchemaTable();
-                Assert.Equal(4, schema.Rows.Count);  
+                Assert.Equal(5, schema.Rows.Count);  
                 Assert.Equal("CustomerID", schema.Rows[0].Field<String>("ColumnName"));
                 Assert.Equal("CustomerName", schema.Rows[1].Field<String>("ColumnName"));
                 Assert.Equal("SingleAmount", schema.Rows[2].Field<String>("ColumnName"));
                 Assert.Equal("RealAmount", schema.Rows[3].Field<String>("ColumnName"));
+                Assert.Equal("DateChecked", schema.Rows[4].Field<String>("ColumnName"));
             });
         }
 
@@ -129,11 +115,12 @@ namespace System.Data.OleDb.Tests
         {
             RunTest((reader) => {
                 DataTable schema = reader.GetSchemaTable();
-                Assert.Equal(4, schema.Rows.Count);
+                Assert.Equal(5, schema.Rows.Count);
                 Assert.Equal(typeof(int), schema.Rows[0].Field<Type>("DataType"));
                 Assert.Equal(typeof(string), schema.Rows[1].Field<Type>("DataType"));
                 Assert.Equal(typeof(double), schema.Rows[2].Field<Type>("DataType"));
                 Assert.Equal(typeof(float), schema.Rows[3].Field<Type>("DataType"));
+                Assert.Equal(typeof(DateTime), schema.Rows[4].Field<Type>("DataType"));
             });
         }
 
@@ -186,6 +173,18 @@ namespace System.Data.OleDb.Tests
         }
 
         [OuterLoop]
+        [ConditionalFact(Helpers.IsDriverAvailable)]
+        public void Read_GetDateTime_Success()
+        {
+            RunTest((reader) => {
+                Assert.True(reader.HasRows);
+                reader.Read();
+                Assert.Throws<InvalidCastException>(() => reader.GetFloat(2));
+                Assert.Equal(new DateTime(2015, 1, 11, 12, 54, 1), reader.GetDateTime(4));
+            });
+        }
+
+        [OuterLoop]
         [ConditionalTheory(Helpers.IsDriverAvailable)]
         [InlineData(0)]
         [InlineData(1)]
@@ -207,51 +206,28 @@ namespace System.Data.OleDb.Tests
 
         [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void Depth_IsClosed_Throws()
+        public void IsClosed_CallReaderApis_Throws()
         {
             RunTest((reader) => {
                 reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.Depth);
-            });
-        }
-
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void FieldCount_IsClosed_Throws()
-        {
-            RunTest((reader) => {
-                reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.FieldCount);
-            });
-        }
-
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void VisibleFieldCount_IsClosed_Throws()
-        {
-            RunTest((reader) => {
-                reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.VisibleFieldCount);
-            });
-        }
-
-        [OuterLoop]
-        [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void HasRows_IsClosed_Throws()
-        {
-            RunTest((reader) => {
-                reader.Close();
                 Assert.Throws<InvalidOperationException>(() => reader.HasRows);
+                Assert.Throws<InvalidOperationException>(() => reader.GetSchemaTable());
+                Assert.Throws<InvalidOperationException>(() => reader.NextResult());
             });
         }
 
         [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void GetSchemaTable_IsClosed_Throws()
+        public void InnerReader_OpenReaderExists_Throws()
         {
             RunTest((reader) => {
-                reader.Close();
-                Assert.Throws<InvalidOperationException>(() => reader.GetSchemaTable());
+                AssertExtensions.Throws<InvalidOperationException>(
+                    () => command.ExecuteReader(),
+                    "There is already an open DataReader associated with this Command which must be closed first."
+                );
             });
         }
 
@@ -270,7 +246,8 @@ namespace System.Data.OleDb.Tests
                     CustomerID INT,
                     CustomerName NVARCHAR(40), 
                     SingleAmount FLOAT, 
-                    RealAmount REAL);";
+                    RealAmount REAL,
+                    DateChecked DATETIME);";
             command.ExecuteNonQuery();
             Assert.True(File.Exists(Path.Combine(TestDirectory, tableName)));
 
@@ -281,8 +258,9 @@ namespace System.Data.OleDb.Tests
                         CustomerID,
                         CustomerName, 
                         SingleAmount, 
-                        RealAmount)
-                    VALUES ( 123, 'XYZ', @value, @realValue );";
+                        RealAmount,
+                        DateChecked)
+                    VALUES ( 123, 'XYZ', @value, @realValue, '01/11/2015 12:54:01' );";
 #pragma warning disable 612,618
                 command.Parameters.Add("@value", 42.2);
                 command.Parameters.Add("@realValue", 48.3);
@@ -290,7 +268,7 @@ namespace System.Data.OleDb.Tests
                 command.ExecuteNonQuery();
             }
 
-            command.CommandText = "SELECT CustomerID, CustomerName, SingleAmount, RealAmount FROM " + tableName;
+            command.CommandText = "SELECT CustomerID, CustomerName, SingleAmount, RealAmount, DateChecked FROM " + tableName;
             using (OleDbDataReader reader = schemaOnly ? command.ExecuteReader(CommandBehavior.SchemaOnly) : command.ExecuteReader())
             {
                 testAction(reader);

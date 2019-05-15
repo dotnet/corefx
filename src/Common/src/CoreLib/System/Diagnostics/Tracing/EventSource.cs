@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 // This program uses code hyperlinks available as part of the HyperAddin Visual Studio plug-in.
 // It is available from http://www.codeplex.com/hyperAddin 
 #if ES_BUILD_STANDALONE
@@ -2472,7 +2471,7 @@ namespace System.Diagnostics.Tracing
                 this.TriggersActivityTracking = 0;
                 this.Name = name;
                 this.Message = message;
-                this.Parameters = null;
+                this.Parameters = null!;
                 this.TraceLoggingEventTypes = null;
                 this.ActivityOptions = EventActivityOptions.None;
                 this.ParameterTypes = parameterTypes;
@@ -2609,7 +2608,7 @@ namespace System.Diagnostics.Tracing
                     return typeof(string);
                 default:
                     // TODO: should I throw an exception here?
-                    return null;
+                    return null!;
             }
         }
 #endif

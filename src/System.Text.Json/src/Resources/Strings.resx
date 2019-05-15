@@ -283,13 +283,13 @@
     <value>Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed.</value>
   </data>
   <data name="DeserializeCannotBeNull" xml:space="preserve">
-    <value>The JSON value from {0} cannot be null.</value>
+    <value>The JSON value cannot be null.</value>
   </data>
   <data name="DeserializeDataRemaining" xml:space="preserve">
     <value>The provided data of length {0} has remaining bytes {1}.</value>
   </data>
   <data name="DeserializeUnableToConvertValue" xml:space="preserve">
-    <value>The JSON value from {0} could not be converted to {1}.</value>
+    <value>The JSON value could not be converted to {0}.</value>
   </data>
   <data name="DeserializeWrongType" xml:space="preserve">
     <value>The specified type {0} must derive from the specific value's type {1}.</value>
@@ -335,5 +335,11 @@
   </data>
   <data name="SerializerPropertyNameNull" xml:space="preserve">
     <value>The JSON property name for '{0}.{1}' cannot be null.</value>
+  </data>
+  <data name="DeserializeDuplicateKey" xml:space="preserve">
+    <value>An item with the same property name '{0}' has already been added.</value>
+  </data>
+  <data name="DeserializeTypeNotSupported" xml:space="preserve">
+    <value>Deserialization of type {0} is not supported.</value>
   </data>
 </root>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Runtime.CompilerServices;
 using System.Diagnostics.Tracing;
 using Internal.Runtime.CompilerServices;
@@ -14,7 +13,7 @@ namespace System.Threading.Tasks
         Name = "System.Threading.Tasks.TplEventSource",
         Guid = "2e5dba47-a3d2-4d16-8ee0-6671ffdcd7b5"
 #if CORECLR
-        ,LocalizationResources = "FxResources.System.Private.CoreLib.SR"
+        ,LocalizationResources = "System.Private.CoreLib.Resources.Strings"
 #endif
         )]
     internal sealed class TplEventSource : EventSource

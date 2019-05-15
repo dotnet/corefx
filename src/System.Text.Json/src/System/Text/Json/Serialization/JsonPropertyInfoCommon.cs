@@ -92,16 +92,35 @@ namespace System.Text.Json.Serialization
             return new List<TDeclaredProperty>();
         }
 
-        // Map interfaces to a well-known implementation.
-        public override Type GetConcreteType(Type interfaceType)
+        public override Type GetDictionaryConcreteType()
         {
-            if (interfaceType.IsAssignableFrom(typeof(IDictionary<string, TRuntimeProperty>)) ||
-                interfaceType.IsAssignableFrom(typeof(IReadOnlyDictionary<string, TRuntimeProperty>)))
-            {
-                return typeof(Dictionary<string, TRuntimeProperty>);
-            }
+            return typeof(Dictionary<string, TRuntimeProperty>);
+        }
 
-            return interfaceType;
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the,
+        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
+        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        public override IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList)
+        {
+            Debug.Assert(DefaultImmutableConverter.CreateRangeDelegates.ContainsKey(delegateKey));
+
+            DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
+                (DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty>)DefaultImmutableConverter.CreateRangeDelegates[delegateKey]);
+
+            return (IEnumerable)createRangeDelegate.Invoke(CreateGenericIEnumerableFromList(sourceList));
+        }
+
+        public override IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList)
+        {
+            return (IEnumerable)Activator.CreateInstance(enumerableType, CreateGenericIEnumerableFromList(sourceList));
+        }
+
+        private IEnumerable<TRuntimeProperty> CreateGenericIEnumerableFromList(IList sourceList)
+        {
+            foreach (object item in sourceList)
+            {
+                yield return (TRuntimeProperty)item;
+            }
         }
     }
 }

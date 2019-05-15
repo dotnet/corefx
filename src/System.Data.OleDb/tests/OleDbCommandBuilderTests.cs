@@ -2,16 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
-using System.Collections.Generic;
-using System.Data.OleDb;
 using System.IO;
 using System.Runtime.CompilerServices;
-using System.Text.RegularExpressions;
-using System.Transactions;
+using Xunit;
 
 namespace System.Data.OleDb.Tests
 {
+    [Collection("System.Data.OleDb")] // not let tests run in parallel
     public class OleDbCommandBuilderTests : OleDbTestBase
     {
         [ConditionalFact(Helpers.IsDriverAvailable)]
@@ -28,28 +25,22 @@ namespace System.Data.OleDb.Tests
             using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
             {
                 cmd.CommandType = commandType;
-                var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(cmd));
-                Assert.NotNull(exception);
-                Assert.IsType<InvalidOperationException>(exception);
-                Assert.Equal(
-                    string.Format("{0} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{1}.", nameof(OleDbCommand), cmd.CommandType.ToString()),
-                    exception.Message);
+                AssertExtensions.Throws<InvalidOperationException>(
+                    () => OleDbCommandBuilder.DeriveParameters(cmd), 
+                    $"{nameof(OleDbCommand)} DeriveParameters only supports CommandType.StoredProcedure, not CommandType.{cmd.CommandType.ToString()}.");
             }
         }
 
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void DeriveParameters_NulllCommandText_Throws()
+        public void DeriveParameters_NullCommandText_Throws()
         {
             using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.CommandText = null;  
-                var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(cmd));
-                Assert.NotNull(exception);
-                Assert.IsType<InvalidOperationException>(exception);
-                Assert.Equal(
-                    string.Format("{0}: {1} property has not been initialized", nameof(OleDbCommandBuilder.DeriveParameters), nameof(cmd.CommandText)),
-                    exception.Message);
+                cmd.CommandText = null;
+                AssertExtensions.Throws<InvalidOperationException>(
+                    () => OleDbCommandBuilder.DeriveParameters(cmd), 
+                    $"{nameof(OleDbCommandBuilder.DeriveParameters)}: {nameof(cmd.CommandText)} property has not been initialized");
             }
         }
 
@@ -63,12 +54,10 @@ namespace System.Data.OleDb.Tests
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandText = @"SELECT * FROM " + tableName;  
                     cmd.Connection = null;
-                    var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(cmd));
-                    Assert.NotNull(exception);
-                    Assert.IsType<InvalidOperationException>(exception);
-                    Assert.Equal(
-                        string.Format("{0}: {1} property has not been initialized.", nameof(OleDbCommandBuilder.DeriveParameters), nameof(cmd.Connection)),
-                        exception.Message);
+                    
+                    AssertExtensions.Throws<InvalidOperationException>(
+                        () => OleDbCommandBuilder.DeriveParameters(cmd), 
+                        $"{nameof(OleDbCommandBuilder.DeriveParameters)}: {nameof(cmd.Connection)} property has not been initialized.");
                 }
             });
         }
@@ -78,57 +67,81 @@ namespace System.Data.OleDb.Tests
         public void DeriveParameters_ClosedConnection_Throws()
         {
             RunTest((command, tableName) => {
-                using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
-                    cmd.Connection.Close();
-                    var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(cmd));
-                    Assert.NotNull(exception);
-                    Assert.IsType<InvalidOperationException>(exception);
-                    Assert.Contains(
-                        string.Format("{0} requires an open and available Connection.", nameof(OleDbCommandBuilder.DeriveParameters)),
-                        exception.Message);
-                }
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = @"SELECT * FROM " + tableName;
+                connection.Close();
+                var exception = Record.Exception(() => OleDbCommandBuilder.DeriveParameters(command));
+                Assert.NotNull(exception);
+                Assert.IsType<InvalidOperationException>(exception);
+                Assert.Contains(
+                    $"{nameof(OleDbCommandBuilder.DeriveParameters)} requires an open and available Connection.",
+                    exception.Message);
+                command.CommandType = CommandType.Text;
+                connection.Open(); // reopen when done
             });
         }
 
         [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void UnquoteIdentifier_Null_Throws()
+        public void QuoteUnquoteIdentifier_Null_Throws()
         {
             RunTest((command, tableName) => {
-                using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = @"SELECT * FROM " + tableName;
+                using (var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder())
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
-                    cmd.Transaction = transaction;
-                    var builder = (OleDbCommandBuilder)OleDbFactory.Instance.CreateCommandBuilder();
-                    Assert.Throws<ArgumentNullException>(() => builder.UnquoteIdentifier(null, cmd.Connection));
+                    AssertExtensions.Throws<ArgumentNullException>(
+                        () => builder.QuoteIdentifier(null, command.Connection), 
+                        $"Value cannot be null.\r\nParameter name: unquotedIdentifier");
+
+                    AssertExtensions.Throws<ArgumentNullException>(
+                        () => builder.UnquoteIdentifier(null, command.Connection), 
+                        $"Value cannot be null.\r\nParameter name: quotedIdentifier");
                 }
+                command.CommandType = CommandType.Text;
             });
         }
 
         [OuterLoop]
         [ConditionalFact(Helpers.IsDriverAvailable)]
-        public void Ctor_Defaults()
+        public void QuoteUnquote_CustomPrefixSuffix_Success()
         {
             RunTest((command, tableName) => {
-                using (var cmd = (OleDbCommand)OleDbFactory.Instance.CreateCommand())
+                command.CommandType = CommandType.StoredProcedure;
+                command.CommandText = @"SELECT * FROM " + tableName;
+                using (var adapter = new OleDbDataAdapter(command.CommandText, connection))
+                using (var builder = new OleDbCommandBuilder(adapter))
                 {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.CommandText = @"SELECT * FROM " + tableName;  
-                    cmd.Connection = (OleDbConnection)OleDbFactory.Instance.CreateConnection();
-                    cmd.Connection.ConnectionString = connection.ConnectionString;
-                    cmd.Transaction = transaction;
+                    // Custom prefix & suffix
+                    builder.QuotePrefix = "'";
+                    builder.QuoteSuffix = "'";
+
+                    Assert.Equal(adapter, builder.DataAdapter);
+                    Assert.Equal("'Test'", builder.QuoteIdentifier("Test", connection));
+                    Assert.Equal("'Te''st'", builder.QuoteIdentifier("Te'st", connection));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", connection));
+                    Assert.Equal("Te'st", builder.UnquoteIdentifier("'Te''st'", connection));
                     
-                    DataSet ds = new DataSet();
-                    OleDbDataAdapter adapter = new OleDbDataAdapter(cmd);
-                    OleDbCommandBuilder commandBuilder = new OleDbCommandBuilder(adapter);
-                    Assert.Equal(adapter, commandBuilder.DataAdapter);
+                    // Ensure we don't need active connection:
+                    Assert.Equal("'Test'", builder.QuoteIdentifier("Test", null));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("'Test'", null));
+
+                    builder.QuotePrefix = string.Empty;
+                    string quoteErrMsg = $"{nameof(builder.QuoteIdentifier)} requires open connection when the quote prefix has not been set.";
+                    string unquoteErrMsg = $"{nameof(builder.UnquoteIdentifier)} requires open connection when the quote prefix has not been set.";
+
+                    Assert.Equal("`Test`", builder.QuoteIdentifier("Test", connection));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("`Test`", connection));
+
+                    Assert.NotNull(adapter.SelectCommand.Connection);
+                    Assert.Equal("`Test`", builder.QuoteIdentifier("Test"));
+                    Assert.Equal("Test", builder.UnquoteIdentifier("`Test`"));
+
+                    adapter.SelectCommand.Connection = null;
+                    AssertExtensions.Throws<InvalidOperationException>(() => builder.QuoteIdentifier("Test"), quoteErrMsg);
+                    AssertExtensions.Throws<InvalidOperationException>(() => builder.UnquoteIdentifier("'Test'"), unquoteErrMsg);
                 }
+                command.CommandType = CommandType.Text;
             });
         }
 

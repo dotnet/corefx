@@ -7,6 +7,9 @@
     <Compile Include="..\..\Common\tests\System\Threading\Tasks\Sources\ManualResetValueTaskSource.cs">
       <Link>Common\tests\System\Threading\Tasks\Sources\ManualResetValueTaskSource.cs</Link>
     </Compile>
+    <Compile Include="..\..\System.Threading.Tasks\tests\System.Runtime.CompilerServices\ConfiguredCancelableAsyncEnumerableTests.netcoreapp.cs">
+      <Link>System.Threading.Tasks\tests\System.Runtime.CompilerServices\ConfiguredCancelableAsyncEnumerableTests.netcoreapp.cs</Link>
+    </Compile>
     <Compile Include="..\..\System.Threading.Tasks.Extensions\tests\ManualResetValueTaskSourceTests.cs">
       <Link>System.Threading.Tasks.Extensions\tests\ManualResetValueTaskSourceTests.cs</Link>
     </Compile>

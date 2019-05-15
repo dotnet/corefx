@@ -15,6 +15,7 @@
     <Compile Include="System\Text\Json\JsonCommentHandling.cs" />
     <Compile Include="System\Text\Json\JsonConstants.cs" />
     <Compile Include="System\Text\Json\JsonEncodedText.cs" />
+    <Compile Include="System\Text\Json\JsonException.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.Date.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
@@ -34,9 +35,9 @@
     <Compile Include="System\Text\Json\Document\JsonValueType.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeNumberResult.cs" />
     <Compile Include="System\Text\Json\Reader\ConsumeTokenResult.cs" />
-    <Compile Include="System\Text\Json\Reader\JsonReaderException.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderHelper.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderHelper.Unescaping.cs" />
+    <Compile Include="System\Text\Json\Reader\JsonReaderException.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderOptions.cs" />
     <Compile Include="System\Text\Json\Reader\JsonReaderState.cs" />
     <Compile Include="System\Text\Json\Reader\Utf8JsonReader.cs" />
@@ -48,6 +49,8 @@
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultConverters.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultConvertersOfTValue.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultEnumerableConverter.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\DefaultIEnumerableConstructibleConverter.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\DefaultImmutableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterBoolean.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByte.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterChar.cs" />
@@ -56,6 +59,7 @@
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterDecimal.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterDouble.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterEnum.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterGuid.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt16.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt32.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterInt64.cs" />

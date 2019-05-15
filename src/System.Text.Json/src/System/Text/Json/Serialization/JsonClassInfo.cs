@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -324,9 +325,8 @@ namespace System.Text.Json.Serialization
                         {
                             elementType = args[1];
                         }
-                        else if (args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
+                        else if (GetClassType(propertyType) == ClassType.Enumerable && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
                         {
-                            Debug.Assert(GetClassType(propertyType) == ClassType.Enumerable);
                             elementType = args[0];
                         }
                     }
@@ -350,8 +350,7 @@ namespace System.Text.Json.Serialization
                 type = Nullable.GetUnderlyingType(type);
             }
 
-            // A Type is considered a value if it implements IConvertible or is a DateTimeOffset or JsonElement.
-            if (typeof(IConvertible).IsAssignableFrom(type) || type == typeof(DateTimeOffset) || type == typeof(JsonElement))
+            if (DefaultConverters.IsValueConvertable(type))
             {
                 return ClassType.Value;
             }

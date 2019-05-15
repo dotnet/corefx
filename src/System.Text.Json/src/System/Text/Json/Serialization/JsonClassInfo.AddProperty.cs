@@ -28,10 +28,14 @@ namespace System.Text.Json.Serialization
             // Convert interfaces to concrete types.
             if (propertyType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
             {
-                Type newPropertyType = jsonInfo.ElementClassInfo.GetPolicyProperty().GetConcreteType(propertyType);
-                if (propertyType != newPropertyType)
+                // If a polymorphic case, we have to wait until run-time values are processed.
+                if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
                 {
-                    jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
+                    Type newPropertyType = jsonInfo.ElementClassInfo.GetPolicyProperty().GetDictionaryConcreteType();
+                    if (propertyType != newPropertyType)
+                    {
+                        jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
+                    }
                 }
             }
 
@@ -48,7 +52,7 @@ namespace System.Text.Json.Serialization
             return jsonInfo;
         }
 
-        internal JsonPropertyInfo CreateProperty(Type declaredPropertyType, Type runtimePropertyType, PropertyInfo propertyInfo, Type parentClassType, JsonSerializerOptions options)
+        internal static JsonPropertyInfo CreateProperty(Type declaredPropertyType, Type runtimePropertyType, PropertyInfo propertyInfo, Type parentClassType, JsonSerializerOptions options)
         {
             Type collectionElementType = null;
             switch (GetClassType(runtimePropertyType))
