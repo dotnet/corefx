@@ -90,15 +90,17 @@ namespace System.IO.Pipelines
     }
     public partial class StreamPipeReaderOptions
     {
-        public StreamPipeReaderOptions(System.Buffers.MemoryPool<byte> pool = null, int bufferSize = 4096, int minimumReadSize = 1024) { }
+        public StreamPipeReaderOptions(System.Buffers.MemoryPool<byte> pool = null, int bufferSize = 4096, int minimumReadSize = 1024, bool leaveOpen = false) { }
         public int BufferSize { get { throw null; } }
         public int MinimumReadSize { get { throw null; } }
         public System.Buffers.MemoryPool<byte> Pool { get { throw null; } }
+        public bool LeaveOpen { get { throw null; } }
     }
     public partial class StreamPipeWriterOptions
     {
-        public StreamPipeWriterOptions(System.Buffers.MemoryPool<byte> pool = null, int minimumBufferSize = 4096) { }
+        public StreamPipeWriterOptions(System.Buffers.MemoryPool<byte> pool = null, int minimumBufferSize = 4096, bool leaveOpen = false) { }
         public int MinimumBufferSize { get { throw null; } }
         public System.Buffers.MemoryPool<byte> Pool { get { throw null; } }
+        public bool LeaveOpen { get { throw null; } }
     }
 }

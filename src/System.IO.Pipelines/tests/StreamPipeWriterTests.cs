@@ -458,6 +458,17 @@ namespace System.IO.Pipelines.Tests
             writer.Complete();
         }
 
+        [Fact]
+        public void LeaveUnderlyingStreamOpen()
+        {
+            var stream = new MemoryStream();
+            var writer = PipeWriter.Create(stream, new StreamPipeWriterOptions(leaveOpen: true));
+
+            writer.Complete();
+
+            Assert.True(stream.CanRead);
+        }
+
         private class FlushAsyncAwareStream : WriteOnlyStream
         {
             public bool FlushAsyncCalled { get; set; }
