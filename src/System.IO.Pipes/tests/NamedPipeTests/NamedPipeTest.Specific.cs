@@ -347,68 +347,6 @@ namespace System.IO.Pipes.Tests
             }
         }
 
-
-        [DllImport("kernel32", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern unsafe int GetNamedPipeHandleStateW(
-            SafePipeHandle hNamedPipe,
-            IntPtr lpState,
-            IntPtr lpCurInstances,
-            IntPtr lpMaxCollectionCount,
-            IntPtr lpCollectDataTimeout,
-            char* lpUserName,
-            int nMaxUserNameSize);
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void Test()
-        {
-            TokenImpersonationLevel[] levels = new[] {
-                TokenImpersonationLevel.None,
-                TokenImpersonationLevel.Anonymous,
-                TokenImpersonationLevel.Identification,
-                TokenImpersonationLevel.Impersonation,
-                TokenImpersonationLevel.Delegation
-            };
-
-            foreach (TokenImpersonationLevel level in levels)
-            {
-                string name = Guid.NewGuid().ToString("N");
-                using (var serverStream = new NamedPipeServerStream(name, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None))
-                {
-                    var releaseClient = new TaskCompletionSource<bool>();
-                    try
-                    { 
-                        Task clientTask = Task.Run(async () =>
-                        {
-                            using (var clientStream = new NamedPipeClientStream(".", name, PipeDirection.InOut, PipeOptions.None, level))
-                            {
-                                await clientStream.ConnectAsync();
-                                await releaseClient.Task;
-                            }
-                        });
-
-                        serverStream.WaitForConnectionAsync().GetAwaiter().GetResult();
-
-                        unsafe
-                        {
-                            var userName = stackalloc char[1000];
-                            int result = GetNamedPipeHandleStateW(serverStream.SafePipeHandle, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero, userName, 1000);
-                            int error = Marshal.GetLastWin32Error();
-                            Console.WriteLine($"Result:{result} Error:{error}=>{new Win32Exception(error).Message} Name:{new string(userName)}");
-                        }
-
-                        releaseClient.SetResult(true);
-                        clientTask.GetAwaiter().GetResult();
-                    }
-                    catch (Exception e)
-                    {
-                        Console.WriteLine(level + ": " + e.Message);
-                    }
-                }
-            }
-        }
-
-
         [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Uses P/Invoke to verify the user name
         public async Task Unix_GetImpersonationUserName_Succeed()
