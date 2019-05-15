@@ -442,6 +442,9 @@ namespace System
         private static bool s_firstCursorPositionRequest = true;
 
         /// <summary>Gets the current cursor position.  This involves both writing to stdout and reading stdin.</summary>
+        /// <param name="left">Cursor column.</param>
+        /// <param name="top">Cursor row.</param>
+        /// <param name="reinitializeForRead">Indicates whether this method is called as part of a on-going Read operation.</param>
         internal static unsafe bool TryGetCursorPosition(out int left, out int top, bool reinitializeForRead = false)
         {
             left = top = 0;
