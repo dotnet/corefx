@@ -1057,6 +1057,8 @@ namespace System.Net.Sockets.Tests
                     }
                 }
 
+                // trigger CI comment
+
                 // On OSX, we're unable to unblock the on-going socket operations and
                 // perform an abortive close.
                 if (PlatformDetection.IsOSX)
