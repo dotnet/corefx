@@ -769,6 +769,144 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class TestClassWithStringToObjectDictionaries : ITestClass
+    {
+        public Dictionary<string, SimpleTestClass> MyDict { get; set; }
+
+        // TODO: Add support for classes as dictionary values in class-nested dicitonaries for the following types.
+
+        //public IDictionary<string, SimpleTestClass> MyIDict { get; set; }
+        //public IReadOnlyDictionary<string, SimpleTestClass> MyIReadOnlyDict { get; set; }
+        //public ImmutableDictionary<string, SimpleTestClass> MyImmutableDict { get; set; }
+        //public IImmutableDictionary<string, SimpleTestClass> MyIImmutableDict { get; set; }
+        //public ImmutableSortedDictionary<string, SimpleTestClass> MyImmutableSortedDict { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyDict"":{" +
+                    @"""Key1"":" + SimpleTestClass.s_json + "," +
+                    @"""Key2"":" + SimpleTestClass.s_json +
+                @"}" +
+            //@"""MyIDict"":{" +
+            //    @"""Key1"":" + SimpleTestClass.s_json + "," +
+            //    @"""Key2"":" + SimpleTestClass.s_json +
+            //@"}" +
+            //@"""MyReadOnlyDict"":{" +
+            //    @"""Key1"":" + SimpleTestClass.s_json + "," +
+            //    @"""Key2"":" + SimpleTestClass.s_json +
+            //@"}" +
+            //@"""MyImmutableDict"":{" +
+            //    @"""Key1"":" + SimpleTestClass.s_json + "," +
+            //    @"""Key2"":" + SimpleTestClass.s_json +
+            //@"}," +
+            //@"""MyIImmutableDict"":{" +
+            //    @"""Key1"":" + SimpleTestClass.s_json + "," +
+            //    @"""Key2"":" + SimpleTestClass.s_json +
+            //@"}," +
+            //@"""MyImmutableSortedDict"":{" +
+            //    @"""Key1"":" + SimpleTestClass.s_json + "," +
+            //    @"""Key2"":" + SimpleTestClass.s_json +
+            //@"}" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyDict = new Dictionary<string, SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyDict.TryAdd("Key1", obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyDict.TryAdd("Key2", obj);
+            }
+
+            //MyIDict = new Dictionary<string, SimpleTestClass>();
+            //{
+            //    SimpleTestClass obj = new SimpleTestClass();
+            //    obj.Initialize();
+            //    MyIDict.TryAdd("Key1", obj);
+            //}
+            //{
+            //    SimpleTestClass obj = new SimpleTestClass();
+            //    obj.Initialize();
+            //    MyIDict.TryAdd("Key2", obj);
+            //}
+
+            //{
+            //    SimpleTestClass obj1 = new SimpleTestClass();
+            //    obj1.Initialize();
+
+            //    SimpleTestClass obj2 = new SimpleTestClass();
+            //    obj2.Initialize();
+
+            //    MyIReadOnlyDict = new Dictionary<string, SimpleTestClass>() { { "Key1", obj1 }, { "Key2", obj2 } };
+            //}
+
+            //{
+            //    SimpleTestClass obj1 = new SimpleTestClass();
+            //    obj1.Initialize();
+
+            //    SimpleTestClass obj2 = new SimpleTestClass();
+            //    obj2.Initialize();
+
+            //    Dictionary<string, SimpleTestClass>  tempDict = new Dictionary<string, SimpleTestClass>() { { "Key1", obj1 }, { "Key2", obj2 } };
+            //    MyImmutableDict = ImmutableDictionary.CreateRange(tempDict);
+            //}
+
+            //{
+            //    SimpleTestClass obj1 = new SimpleTestClass();
+            //    obj1.Initialize();
+
+            //    SimpleTestClass obj2 = new SimpleTestClass();
+            //    obj2.Initialize();
+
+            //    Dictionary<string, SimpleTestClass> tempDict = new Dictionary<string, SimpleTestClass>() { { "Key1", obj1 }, { "Key2", obj2 } };
+            //    MyIImmutableDict = ImmutableDictionary.CreateRange(tempDict);
+            //}
+
+            //{
+            //    SimpleTestClass obj1 = new SimpleTestClass();
+            //    obj1.Initialize();
+
+            //    SimpleTestClass obj2 = new SimpleTestClass();
+            //    obj2.Initialize();
+
+            //    Dictionary<string, SimpleTestClass> tempDict = new Dictionary<string, SimpleTestClass>() { { "Key1", obj1 }, { "Key2", obj2 } };
+            //    MyImmutableSortedDict = ImmutableSortedDictionary.CreateRange(tempDict);
+            //}
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyDict.Count);
+            MyDict["Key1"].Verify();
+            MyDict["Key2"].Verify();
+
+            //Assert.Equal(2, MyIDict.Count);
+            //MyIDict["Key1"].Verify();
+            //MyIDict["Key2"].Verify();
+
+            //Assert.Equal(2, MyIReadOnlyDict.Count);
+            //MyIReadOnlyDict["Key1"].Verify();
+            //MyIReadOnlyDict["Key2"].Verify();
+
+            //Assert.Equal(2, MyImmutableDict.Count);
+            //MyImmutableDict["Key1"].Verify();
+            //MyImmutableDict["Key2"].Verify();
+
+            //Assert.Equal(2, MyIImmutableDict.Count);
+            //MyIImmutableDict["Key1"].Verify();
+            //MyIImmutableDict["Key2"].Verify();
+
+            //Assert.Equal(2, MyImmutableSortedDict.Count);
+            //MyImmutableSortedDict["Key1"].Verify();
+            //MyImmutableSortedDict["Key2"].Verify();
+        }
+    }
+
     public class TestClassWithObjectIEnumerableConstructibleTypes : ITestClass
     {
         public Stack<SimpleTestClass> MyStack { get; set; }

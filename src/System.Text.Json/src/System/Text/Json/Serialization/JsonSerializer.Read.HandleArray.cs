@@ -191,8 +191,19 @@ namespace System.Text.Json.Serialization
             }
             else if (state.Current.IsDictionary)
             {
-                Debug.Assert(state.Current.ReturnValue != null);
-                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                object dictionaryObject = null;
+                if (state.Current.ReturnValue != null)
+                {
+                    dictionaryObject = state.Current.ReturnValue;
+                }
+                else if (state.Current.TempDictionaryValues != null)
+                {
+                    dictionaryObject = state.Current.TempDictionaryValues;
+                }
+                Debug.Assert(dictionaryObject != null);
+
+                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(dictionaryObject);
+
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
                 if (!dictionary.Contains(key))
@@ -246,8 +257,18 @@ namespace System.Text.Json.Serialization
             }
             else if (state.Current.IsDictionary)
             {
-                Debug.Assert(state.Current.ReturnValue != null);
-                IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
+                object dictionaryObject = null;
+                if (state.Current.ReturnValue != null)
+                {
+                    dictionaryObject = state.Current.ReturnValue;
+                }
+                else if (state.Current.TempDictionaryValues != null)
+                {
+                    dictionaryObject = state.Current.TempDictionaryValues;
+                }
+                Debug.Assert(dictionaryObject != null);
+
+                IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(dictionaryObject);
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));

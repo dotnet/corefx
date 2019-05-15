@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -90,6 +91,8 @@ namespace System.Text.Json.Serialization
             // A property that returns a dictionary keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
             {
+                state.Current.IsPropertyAnImmutableDictionary = DefaultImmutableConverter.TypeIsImmutableDictionary(jsonPropertyInfo.RuntimePropertyType);
+
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)
                 {

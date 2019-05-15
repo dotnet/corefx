@@ -102,12 +102,25 @@ namespace System.Text.Json.Serialization
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
         public override IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList)
         {
-            Debug.Assert(DefaultImmutableConverter.CreateRangeDelegates.ContainsKey(delegateKey));
+            Debug.Assert(DefaultImmutableConverter.s_createRangeDelegates.ContainsKey(delegateKey));
 
             DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
-                (DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty>)DefaultImmutableConverter.CreateRangeDelegates[delegateKey]);
+                (DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty>)DefaultImmutableConverter.s_createRangeDelegates[delegateKey]);
 
             return (IEnumerable)createRangeDelegate.Invoke(CreateGenericIEnumerableFromList(sourceList));
+        }
+
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the,
+        // sourceList argument then uses the delegateKey argument to identify the appropriate cached
+        // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
+        public override IDictionary CreateImmutableCollectionFromDictionary(string delegateKey, IDictionary sourceDictionary)
+        {
+            Debug.Assert(DefaultImmutableConverter.s_createRangeDelegates.ContainsKey(delegateKey));
+
+            DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty> createRangeDelegate = (
+                (DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty>)DefaultImmutableConverter.s_createRangeDelegates[delegateKey]);
+
+            return (IDictionary)createRangeDelegate.Invoke(CreateGenericIEnumerableFromDictionary(sourceDictionary));
         }
 
         public override IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList)
@@ -120,6 +133,15 @@ namespace System.Text.Json.Serialization
             foreach (object item in sourceList)
             {
                 yield return (TRuntimeProperty)item;
+            }
+        }
+
+        private IEnumerable<KeyValuePair<string, TRuntimeProperty>> CreateGenericIEnumerableFromDictionary(IDictionary sourceDictionary)
+        {
+            foreach (object item in sourceDictionary)
+            {
+                DictionaryEntry itemDictEntry = (DictionaryEntry)item;
+                yield return new KeyValuePair<string, TRuntimeProperty>((string)itemDictEntry.Key, (TRuntimeProperty)itemDictEntry.Value);
             }
         }
     }

@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -34,7 +36,7 @@ namespace System.Text.Json.Serialization
                         ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.PropertyPath);
                     }
 
-                    if (state.Current.ReturnValue == null)
+                    if (state.Current.ReturnValue == null && state.Current.TempDictionaryValues == null)
                     {
                         // The Dictionary created below will be returned to corresponding Parse() etc method.
                         // Ensure any nested array creates a new frame.
@@ -67,7 +69,15 @@ namespace System.Text.Json.Serialization
             }
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
-            state.Current.ReturnValue = classInfo.CreateObject();
+
+            if (state.Current.IsProcessingImmutableDictionary && state.Current.IsImmutableDictionary)
+            {
+                state.Current.TempDictionaryValues = (IDictionary)classInfo.CreateObject();
+            }
+            else
+            {
+                state.Current.ReturnValue = classInfo.CreateObject();
+            }
         }
 
         private static bool HandleEndObject(JsonSerializerOptions options, ref ReadStack state, ref Utf8JsonReader reader)
@@ -81,7 +91,20 @@ namespace System.Text.Json.Serialization
 
             state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
 
-            object value = state.Current.ReturnValue;
+            object value;
+            if (state.Current.TempDictionaryValues != null)
+            {
+                Debug.Assert(state.Current.IsProcessingImmutableDictionary);
+
+                DefaultImmutableConverter converter = (DefaultImmutableConverter)state.Current.JsonPropertyInfo.EnumerableConverter;
+                Debug.Assert(converter != null);
+
+                value = converter.CreateFromDictionary(ref state, (IDictionary)state.Current.TempDictionaryValues, options);
+            }
+            else
+            {
+                value = state.Current.ReturnValue;
+            }
 
             if (isLastFrame)
             {

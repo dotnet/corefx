@@ -189,6 +189,14 @@ namespace System.Text.Json.Serialization
 
                 // We deserialize if there is a setter + no [Ignore] attribute. 
                 ShouldDeserialize = HasSetter;
+
+                if (ClassType == ClassType.Dictionary &&
+                    ShouldDeserialize && DefaultImmutableConverter.TypeIsImmutableDictionary(RuntimePropertyType))
+                {
+                    EnumerableConverter = s_jsonImmutableConverter;
+                    ((DefaultImmutableConverter)EnumerableConverter).RegisterImmutableCollectionType(
+                        RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType), options);
+                }
             }
             else
             {
@@ -273,6 +281,8 @@ namespace System.Text.Json.Serialization
         }
 
         public abstract IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList);
+
+        public abstract IDictionary CreateImmutableCollectionFromDictionary(string delegateKey, IDictionary sourceDictionary);
 
         public abstract IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList);
 

@@ -14,25 +14,29 @@ namespace System.Text.Json.Serialization
     {
         public abstract JsonClassInfo.ConstructorDelegate CreateConstructor(Type classType);
 
-        public abstract object ImmutableCreateRange(Type constructingType, Type elementType);
+        public abstract object ImmutableCreateRange(Type constructingType, Type elementType, bool constructingTypeIsDict);
 
-        protected MethodInfo ImmutableCreateRangeMethod(Type constructingType, Type elementType)
+        protected MethodInfo ImmutableCreateRangeMethod(Type constructingType, Type elementType, bool constructingTypeIsDict)
         {
             MethodInfo[] constructingTypeMethods = constructingType.GetMethods();
-            MethodInfo createRange = null;
 
             foreach (MethodInfo method in constructingTypeMethods)
             {
                 if (method.Name == "CreateRange" && method.GetParameters().Length == 1)
                 {
-                    createRange = method;
-                    break;
+                    if (constructingTypeIsDict)
+                    {
+                        return method.MakeGenericMethod(typeof(string), elementType);
+                    }
+                    else
+                    {
+                        return method.MakeGenericMethod(elementType);
+                    }
                 }
             }
 
-            Debug.Assert(createRange != null);
-
-            return createRange.MakeGenericMethod(elementType);
+            Debug.Fail("Could not create the appropriate CreateRange method.");
+            return null;
         }
     }
 }

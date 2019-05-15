@@ -36,12 +36,26 @@ namespace System.Text.Json.Serialization
             return (JsonClassInfo.ConstructorDelegate)dynamicMethod.CreateDelegate(typeof(JsonClassInfo.ConstructorDelegate));
         }
 
-        public override object ImmutableCreateRange(Type constructingType, Type elementType)
+        public override object ImmutableCreateRange(Type constructingType, Type elementType, bool constructingTypeIsDict)
         {
-            MethodInfo createRange = ImmutableCreateRangeMethod(constructingType, elementType);
+            MethodInfo createRange = ImmutableCreateRangeMethod(constructingType, elementType, constructingTypeIsDict);
 
-            return createRange.CreateDelegate(
+            Debug.Assert(createRange != null);
+
+            object createRangeDelegate;
+            if (constructingTypeIsDict)
+            {
+                createRangeDelegate = createRange.CreateDelegate(
+                    typeof(DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<,>).MakeGenericType(typeof(string), elementType), null);
+            }
+            else
+            {
+                createRangeDelegate = createRange.CreateDelegate(
                 typeof(DefaultImmutableConverter.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+            }
+
+            Debug.Assert(createRangeDelegate != null);
+            return createRangeDelegate;
         }
     }
 }

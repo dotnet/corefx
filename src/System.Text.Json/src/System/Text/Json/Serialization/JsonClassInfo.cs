@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -118,11 +119,22 @@ namespace System.Text.Json.Serialization
                     // Add a single property that maps to the class type so we can have policies applied.
                     JsonPropertyInfo policyProperty = AddPolicyProperty(type, options);
 
-                    // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
-                    CreateObject = options.ClassMaterializerStrategy.CreateConstructor(policyProperty.RuntimePropertyType);
+                    Type elementType = GetElementType(type);
+
+                    if (!DefaultImmutableConverter.TypeIsImmutableDictionary(type))
+                    {
+                        // Use the type from the property policy to get any late-bound concrete types (from an interface like IDictionary).
+                        CreateObject = options.ClassMaterializerStrategy.CreateConstructor(policyProperty.RuntimePropertyType);
+                    }
+                    else
+                    {
+                        // Since immutable dictionaries do not implement Dictionary<,>, the runtime property type could not be set to
+                        // Dictionary<string, TElement>, we have to set CreateObject this way.
+                        CreateObject = options.ClassMaterializerStrategy.CreateConstructor(
+                            typeof(Dictionary<,>).MakeGenericType(typeof(string), elementType));
+                    }
 
                     // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
-                    Type elementType = GetElementType(type);
                     ElementClassInfo = options.GetOrAddClass(elementType);
                     break;
                 case ClassType.Value:
@@ -356,8 +368,9 @@ namespace System.Text.Json.Serialization
             }
 
             if (typeof(IDictionary).IsAssignableFrom(type) || 
-                (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) 
-                || type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
+                (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
+                type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))) ||
+                DefaultImmutableConverter.TypeIsImmutableDictionary(type))
             {
                 return ClassType.Dictionary;
             }

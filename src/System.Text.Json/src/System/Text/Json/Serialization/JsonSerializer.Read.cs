@@ -40,7 +40,7 @@ namespace System.Text.Json.Serialization
                     {
                         if (!state.Current.Drain)
                         {
-                            Debug.Assert(state.Current.ReturnValue != default);
+                            Debug.Assert(state.Current.ReturnValue != default || state.Current.TempDictionaryValues != default);
                             Debug.Assert(state.Current.JsonClassInfo != default);
 
                             if (state.Current.IsDictionary)

@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -16,6 +17,10 @@ namespace System.Text.Json.Serialization
 
         // Support Dictionary keys.
         public string KeyName;
+
+        // Whether the current object is an immutable dictionary.
+        public bool IsImmutableDictionary;
+        public bool IsPropertyAnImmutableDictionary;
 
         // The current enumerator for the IEnumerable or IDictionary.
         public IEnumerator Enumerator;
@@ -41,6 +46,7 @@ namespace System.Text.Json.Serialization
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                IsImmutableDictionary = DefaultImmutableConverter.TypeIsImmutableDictionary(type);
             }
         }
 
@@ -114,6 +120,7 @@ namespace System.Text.Json.Serialization
             JsonClassInfo = null;
             JsonPropertyInfo = null;
             PropertyIndex = 0;
+            IsImmutableDictionary = false;
             PopStackOnEndObject = false;
             PopStackOnEnd = false;
             StartObjectWritten = false;
@@ -123,6 +130,7 @@ namespace System.Text.Json.Serialization
         {
             PropertyIndex = 0;
             PopStackOnEndObject = false;
+            IsPropertyAnImmutableDictionary = false;
             JsonPropertyInfo = null;
         }
 

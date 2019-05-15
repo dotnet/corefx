@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -42,7 +41,7 @@ namespace System.Text.Json.Serialization
                     return true;
                 }
 
-                state.Current.Enumerator = enumerable.GetEnumerator();
+                state.Current.Enumerator = ((IDictionary)enumerable).GetEnumerator();
                 state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer);
             }
 
@@ -110,6 +109,11 @@ namespace System.Text.Json.Serialization
                 // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
                 value = enumerator.Current.Value;
                 key = enumerator.Current.Key;
+            }
+            else if (current.IsImmutableDictionary || current.IsPropertyAnImmutableDictionary)
+            {
+                value = (TProperty)((DictionaryEntry)current.Enumerator.Current).Value;
+                key = (string)((DictionaryEntry)current.Enumerator.Current).Key;
             }
             else
             {

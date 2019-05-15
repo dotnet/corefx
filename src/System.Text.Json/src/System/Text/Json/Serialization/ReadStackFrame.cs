@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -29,6 +30,9 @@ namespace System.Text.Json.Serialization
         public IList TempEnumerableValues;
         public bool EnumerableCreated;
 
+        // Support Immutable dictionary types.
+        public IDictionary TempDictionaryValues;
+
         // For performance, we order the properties by the first deserialize and PropertyIndex helps find the right slot quicker.
         public int PropertyIndex;
         public List<PropertyRef> PropertyRefCache;
@@ -36,8 +40,10 @@ namespace System.Text.Json.Serialization
         // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
         public bool Drain;
 
+        public bool IsImmutableDictionary => DefaultImmutableConverter.TypeIsImmutableDictionary(JsonClassInfo.Type);
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
         public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
+        public bool IsProcessingImmutableDictionary;
         public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsDictionary;
         public bool IsProcessingEnumerable => IsEnumerable || IsPropertyEnumerable;
         public bool IsPropertyEnumerable => JsonPropertyInfo != null ? JsonPropertyInfo.ClassType == ClassType.Enumerable : false;
@@ -68,6 +74,7 @@ namespace System.Text.Json.Serialization
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                IsProcessingImmutableDictionary = DefaultImmutableConverter.TypeIsImmutableDictionary(JsonClassInfo.Type);
             }
         }
 
@@ -87,6 +94,7 @@ namespace System.Text.Json.Serialization
             JsonPropertyInfo = null;
             PopStackOnEnd = false;
             TempEnumerableValues = null;
+            TempDictionaryValues = null;
         }
 
         public void EndObject()
