@@ -93,8 +93,8 @@ namespace System.Net.Sockets.Tests
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, we won't see a SocketException.
 
-            SocketError localSocketError = SocketError.Success;
-            for (int i = 0; i < 10 && localSocketError == SocketError.Success; i++)
+            SocketError? localSocketError = null;
+            for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
             {
                 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                 Task connectTask = Task.Run(async () =>
@@ -127,7 +127,15 @@ namespace System.Net.Sockets.Tests
                 catch (ObjectDisposedException)
                 {}
             }
-            Assert.Equal(SocketError.AddressFamilyNotSupported, localSocketError); // TODO
+            Assert.True(localSocketError.HasValue);
+            if (UsesSync)
+            {
+                Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+            }
+            else
+            {
+                Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+            }
         }
     }
 

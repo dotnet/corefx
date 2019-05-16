@@ -957,8 +957,8 @@ namespace System.Net.Sockets.Tests
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, we won't see a SocketException.
 
-            SocketError localSocketError = SocketError.Success;
-            for (int i = 0; i < 10 && localSocketError == SocketError.Success; i++)
+            SocketError? localSocketError = null;
+            for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
             {
                 var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 socket.BindToAnonymousPort(IPAddress.Loopback);
@@ -993,7 +993,15 @@ namespace System.Net.Sockets.Tests
                 catch (ObjectDisposedException)
                 {}
             }
-            Assert.Equal(SocketError.AddressFamilyNotSupported, localSocketError); // TODO
+            Assert.True(localSocketError.HasValue);
+            if (UsesSync)
+            {
+                Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+            }
+            else
+            {
+                Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+            }
         }
 
         [Theory]
@@ -1005,9 +1013,9 @@ namespace System.Net.Sockets.Tests
             // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
             // see a SocketException either.
 
-            SocketError peerSocketError = SocketError.Success;
-            SocketError localSocketError = SocketError.Success;
-            for (int i = 0; i < 10 && (peerSocketError == SocketError.Success || localSocketError == SocketError.Success); i++)
+            SocketError? peerSocketError = null;
+            SocketError? localSocketError = null;
+            for (int i = 0; i < 10 && (!peerSocketError.HasValue || !localSocketError.HasValue); i++)
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
                 using (socket2)
@@ -1076,14 +1084,23 @@ namespace System.Net.Sockets.Tests
                 // perform an abortive close.
                 if (UsesSync && PlatformDetection.IsOSX)
                 {
-                    Assert.Equal(SocketError.Success, peerSocketError);
+                    Assert.False(peerSocketError.HasValue);
 
                     // Pretend we've observed an RST close.
                     peerSocketError = SocketError.ConnectionReset;
                 }
             }
+            Assert.True(peerSocketError.HasValue);
             Assert.Equal(SocketError.ConnectionReset, peerSocketError);
-            Assert.Equal(SocketError.AddressFamilyNotSupported, localSocketError); // TODO
+            Assert.True(localSocketError.HasValue);
+            if (UsesSync)
+            {
+                Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+            }
+            else
+            {
+                Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+            }
         }
     }
 
