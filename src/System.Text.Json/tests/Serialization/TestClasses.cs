@@ -815,24 +815,24 @@ namespace System.Text.Json.Serialization.Tests
             {
                 SimpleTestClass obj = new SimpleTestClass();
                 obj.Initialize();
-                MyDict.TryAdd("Key1", obj);
+                MyDict["Key1"] = obj;
             }
             {
                 SimpleTestClass obj = new SimpleTestClass();
                 obj.Initialize();
-                MyDict.TryAdd("Key2", obj);
+                MyDict["Key2"] = obj;
             }
 
             //MyIDict = new Dictionary<string, SimpleTestClass>();
             //{
             //    SimpleTestClass obj = new SimpleTestClass();
             //    obj.Initialize();
-            //    MyIDict.TryAdd("Key1", obj);
+            //    MyIDict["Key1"] = obj;
             //}
             //{
             //    SimpleTestClass obj = new SimpleTestClass();
             //    obj.Initialize();
-            //    MyIDict.TryAdd("Key2", obj);
+            //    MyIDict["Key2"] = obj;
             //}
 
             //{

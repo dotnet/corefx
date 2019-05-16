@@ -12,11 +12,8 @@ namespace System.Text.Json.Serialization.Converters
     {
         public static ConcurrentDictionary<Type, JsonPropertyInfo> s_objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
 
-        public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
+        public static JsonPropertyInfo GetElementJsonPropertyInfo(JsonClassInfo elementClassInfo, JsonSerializerOptions options)
         {
-            Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-
             JsonPropertyInfo propertyInfo;
             if (elementClassInfo.ClassType == ClassType.Object)
             {
@@ -37,6 +34,14 @@ namespace System.Text.Json.Serialization.Converters
                 propertyInfo = elementClassInfo.GetPolicyProperty();
             }
 
+            return propertyInfo;
+        }
+
+        public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
+        {
+            Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
+            JsonPropertyInfo propertyInfo = GetElementJsonPropertyInfo(elementClassInfo, options);
             return propertyInfo.CreateIEnumerableConstructibleType(enumerableType, sourceList);
         }
     }

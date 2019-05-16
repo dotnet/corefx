@@ -137,27 +137,7 @@ namespace System.Text.Json.Serialization.Converters
             Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-
-            JsonPropertyInfo propertyInfo;
-            if (elementClassInfo.ClassType == ClassType.Object)
-            {
-                Type objectType = elementClassInfo.Type;
-
-                if (DefaultIEnumerableConstructibleConverter.s_objectJsonProperties.ContainsKey(objectType))
-                {
-                    propertyInfo = DefaultIEnumerableConstructibleConverter.s_objectJsonProperties[objectType];
-                }
-                else
-                {
-                    propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
-                    DefaultIEnumerableConstructibleConverter.s_objectJsonProperties[objectType] = propertyInfo;
-                }
-            }
-            else
-            {
-                propertyInfo = elementClassInfo.GetPolicyProperty();
-            }
-
+            JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
             return propertyInfo.CreateImmutableCollectionFromList(delegateKey, sourceList);
         }
 
@@ -170,27 +150,7 @@ namespace System.Text.Json.Serialization.Converters
             Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-
-            JsonPropertyInfo propertyInfo;
-            if (elementClassInfo.ClassType == ClassType.Object)
-            {
-                Type objectType = elementClassInfo.Type;
-
-                if (DefaultIEnumerableConstructibleConverter.s_objectJsonProperties.ContainsKey(objectType))
-                {
-                    propertyInfo = DefaultIEnumerableConstructibleConverter.s_objectJsonProperties[objectType];
-                }
-                else
-                {
-                    propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
-                    DefaultIEnumerableConstructibleConverter.s_objectJsonProperties[objectType] = propertyInfo;
-                }
-            }
-            else
-            {
-                propertyInfo = elementClassInfo.GetPolicyProperty();
-            }
-
+            JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
             return propertyInfo.CreateImmutableCollectionFromDictionary(delegateKey, sourceDictionary);
         }
     }
