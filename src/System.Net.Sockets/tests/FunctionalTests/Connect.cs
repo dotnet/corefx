@@ -85,6 +85,74 @@ namespace System.Net.Sockets.Tests
                 }
             }
         }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public async Task ConnectGetsCanceledByDispose()
+        {
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, we won't see a SocketException.
+
+            SocketError? localSocketError = null;
+            bool disposedException = false;
+            for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
+            {
+                var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                Task connectTask = Task.Run(async () =>
+                {
+                    await ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
+                });
+
+                Task disposeTask = Task.Run(async () =>
+                {
+                    // Wait a little so the connect is started.
+                    await Task.Delay(100);
+
+                    client.Dispose();
+                });
+
+                Task timeoutTask = Task.Delay(30000);
+
+                Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, connectTask, timeoutTask));
+
+                await disposeTask;
+
+                try
+                {
+                    await connectTask;
+                }
+                catch (SocketException se)
+                {
+                    localSocketError = se.SocketErrorCode;
+                }
+                catch (ObjectDisposedException)
+                {
+                    disposedException = true;
+                }
+
+                if (UsesApm || this is ConnectTask)
+                {
+                    break;
+                }
+            }
+            if (UsesApm || this is ConnectTask)
+            {
+                Assert.False(localSocketError.HasValue);
+                Assert.True(disposedException);
+            }
+            else
+            {
+                Assert.True(localSocketError.HasValue);
+                if (UsesSync)
+                {
+                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                }
+                else
+                {
+                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                }
+            }
+        }
     }
 
     public sealed class ConnectSync : Connect<SocketHelperArraySync>

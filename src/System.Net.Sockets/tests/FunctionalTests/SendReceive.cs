@@ -949,6 +949,189 @@ namespace System.Net.Sockets.Tests
                 return (client, server);
             }
         }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public async Task UdpReceiveGetsCanceledByDispose()
+        {
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, we won't see a SocketException.
+
+            SocketError? localSocketError = null;
+            bool disposedException = false;
+            for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
+            {
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                socket.BindToAnonymousPort(IPAddress.Loopback);
+
+                Task receiveTask = Task.Run(async () =>
+                {
+                    await ReceiveAsync(socket, new ArraySegment<byte>(new byte[1]));
+                });
+
+                Task disposeTask = Task.Run(async () =>
+                {
+                    // Wait a little so the receive is started.
+                    await Task.Delay(100);
+
+                    socket.Dispose();
+                });
+
+                Task timeoutTask = Task.Delay(30000);
+
+                Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, receiveTask, timeoutTask));
+
+                await disposeTask;
+
+                try
+                {
+                    await receiveTask;
+                }
+                catch (SocketException se)
+                {
+                    localSocketError = se.SocketErrorCode;
+                }
+                catch (ObjectDisposedException)
+                {
+                    disposedException = true;
+                }
+
+                if (UsesApm)
+                {
+                    break;
+                }
+            }
+            if (UsesApm)
+            {
+                Assert.False(localSocketError.HasValue);
+                Assert.True(disposedException);
+            }
+            else
+            {
+                Assert.True(localSocketError.HasValue);
+                if (UsesSync)
+                {
+                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                }
+                else
+                {
+                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                }
+            }
+        }
+
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public async Task TcpReceiveSendGetsCanceledByDispose(bool receiveOrSend)
+        {
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
+            // see a SocketException either.
+
+            SocketError? peerSocketError = null;
+            SocketError? localSocketError = null;
+            bool disposedException = false;
+            for (int i = 0; i < 10 && (!peerSocketError.HasValue || (!localSocketError.HasValue && !UsesApm)); i++)
+            {
+                (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
+                using (socket2)
+                {
+                    Task socketOperation = Task.Run(async () =>
+                    {
+                        if (receiveOrSend)
+                        {
+                            await ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1]));
+                        }
+                        else
+                        {
+                            var buffer = new ArraySegment<byte>(new byte[4096]);
+                            while (true)
+                            {
+                                await SendAsync(socket1, buffer);
+                            }
+                        }
+                    });
+
+                    Task disposeTask = Task.Run(async () =>
+                    {
+                        // Wait a little so the operation is started.
+                        await Task.Delay(100);
+
+                        socket1.Dispose();
+                    });
+
+                    Task timeoutTask = Task.Delay(30000);
+
+                    Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
+
+                    await disposeTask;
+
+                    try
+                    {
+                        await socketOperation;
+                    }
+                    catch (SocketException se)
+                    {
+                        localSocketError = se.SocketErrorCode;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        disposedException = true;
+                    }
+
+                    var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
+                    while (true)
+                    {
+                        try
+                        {
+                            int received = await ReceiveAsync(socket2, receiveBuffer);
+                            if (received == 0)
+                            {
+                                break;
+                            }
+                        }
+                        catch (SocketException se)
+                        {
+                            peerSocketError = se.SocketErrorCode;
+                            break;
+                        }
+                    }
+                }
+
+                // On OSX, we're unable to unblock the on-going socket operations and
+                // perform an abortive close.
+                if (UsesSync && PlatformDetection.IsOSX)
+                {
+                    Assert.False(peerSocketError.HasValue);
+
+                    // Pretend we've observed an RST close.
+                    peerSocketError = SocketError.ConnectionReset;
+                }
+            }
+
+            Assert.True(peerSocketError.HasValue);
+            Assert.Equal(SocketError.ConnectionReset, peerSocketError.Value);
+
+            if (UsesApm)
+            {
+                Assert.False(localSocketError.HasValue);
+                Assert.True(disposedException);
+            }
+            else
+            {
+                Assert.True(localSocketError.HasValue);
+                if (UsesSync)
+                {
+                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                }
+                else
+                {
+                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                }
+            }
+        }
     }
 
     public class SendReceive
