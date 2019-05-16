@@ -76,6 +76,12 @@ namespace System.DirectoryServices.Tests
             }
         }
 
+        [Fact]
+        public void TestGetComputerDomain()
+        {
+            Domain.GetComputerDomain();
+        }
+
         [ConditionalFact(nameof(IsLdapConfigurationExist))]
         public void TestPropertyCaching() 
         {
