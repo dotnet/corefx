@@ -199,7 +199,6 @@ namespace System.Buffers
     public readonly partial struct ReadOnlySequence<T>
     {
         private readonly object _dummy;
-        private readonly int _dummyPrimitive;
         public static readonly System.Buffers.ReadOnlySequence<T> Empty;
         public ReadOnlySequence(System.Buffers.ReadOnlySequenceSegment<T> startSegment, int startIndex, System.Buffers.ReadOnlySequenceSegment<T> endSegment, int endIndex) { throw null; }
         public ReadOnlySequence(System.ReadOnlyMemory<T> memory) { throw null; }
@@ -246,16 +245,17 @@ namespace System.Buffers
     }
     public ref partial struct SequenceReader<T> where T : unmanaged, System.IEquatable<T>
     {
+        private readonly object _dummy;
         public SequenceReader(System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
-        public long Consumed { get { throw null; } }
-        public System.ReadOnlySpan<T> CurrentSpan { get { throw null; } }
-        public int CurrentSpanIndex { get { throw null; } }
-        public bool End { get { throw null; } }
-        public long Length { get { throw null; } }
-        public System.SequencePosition Position { get { throw null; } }
-        public long Remaining { get { throw null; } }
-        public System.Buffers.ReadOnlySequence<T> Sequence { get { throw null; } }
-        public System.ReadOnlySpan<T> UnreadSpan { get { throw null; } }
+        public readonly long Consumed { get { throw null; } }
+        public readonly System.ReadOnlySpan<T> CurrentSpan { get { throw null; }  }
+        public readonly int CurrentSpanIndex { get { throw null; } }
+        public readonly bool End { get { throw null; } }
+        public readonly long Length { get { throw null; } }
+        public readonly System.SequencePosition Position { get { throw null; } }
+        public readonly long Remaining { get { throw null; } }
+        public readonly System.Buffers.ReadOnlySequence<T> Sequence { get { throw null; } }
+        public readonly System.ReadOnlySpan<T> UnreadSpan { get { throw null; } }
         public void Advance(long count) { }
         public long AdvancePast(T value) { throw null; }
         public long AdvancePastAny(System.ReadOnlySpan<T> values) { throw null; }
@@ -267,8 +267,8 @@ namespace System.Buffers
         public void Rewind(long count) { }
         public bool TryAdvanceTo(T delimiter, bool advancePastDelimiter = true) { throw null; }
         public bool TryAdvanceToAny(System.ReadOnlySpan<T> delimiters, bool advancePastDelimiter = true) { throw null; }
-        public bool TryCopyTo(System.Span<T> destination) { throw null; }
-        public bool TryPeek(out T value) { throw null; }
+        public readonly bool TryCopyTo(System.Span<T> destination) { throw null; }
+        public readonly bool TryPeek(out T value) { throw null; }
         public bool TryRead(out T value) { throw null; }
         public bool TryReadTo(out System.Buffers.ReadOnlySequence<T> sequence, System.ReadOnlySpan<T> delimiter, bool advancePastDelimiter = true) { throw null; }
         public bool TryReadTo(out System.Buffers.ReadOnlySequence<T> sequence, T delimiter, bool advancePastDelimiter = true) { throw null; }

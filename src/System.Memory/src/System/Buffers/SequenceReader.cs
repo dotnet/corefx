@@ -12,7 +12,6 @@ namespace System.Buffers
         private SequencePosition _currentPosition;
         private SequencePosition _nextPosition;
         private bool _moreData;
-        private long _length;
 
         /// <summary>
         /// Create a <see cref="SequenceReader{T}"/> over the given <see cref="ReadOnlySequence{T}"/>.
@@ -24,7 +23,7 @@ namespace System.Buffers
             Consumed = 0;
             Sequence = sequence;
             _currentPosition = sequence.Start;
-            _length = -1;
+            Length = Sequence.Length;
 
             sequence.GetFirstSpan(out ReadOnlySpan<T> first, out _nextPosition);
             CurrentSpan = first;
@@ -40,33 +39,33 @@ namespace System.Buffers
         /// <summary>
         /// True when there is no more data in the <see cref="Sequence"/>.
         /// </summary>
-        public bool End => !_moreData;
+        public readonly bool End => !_moreData;
 
         /// <summary>
         /// The underlying <see cref="ReadOnlySequence{T}"/> for the reader.
         /// </summary>
-        public ReadOnlySequence<T> Sequence { get; }
+        public readonly ReadOnlySequence<T> Sequence { get; }
 
         /// <summary>
         /// The current position in the <see cref="Sequence"/>.
         /// </summary>
-        public SequencePosition Position
+        public readonly SequencePosition Position
             => Sequence.GetPosition(CurrentSpanIndex, _currentPosition);
 
         /// <summary>
         /// The current segment in the <see cref="Sequence"/> as a span.
         /// </summary>
-        public ReadOnlySpan<T> CurrentSpan { get; private set; }
+        public ReadOnlySpan<T> CurrentSpan { readonly get; private set; }
 
         /// <summary>
         /// The index in the <see cref="CurrentSpan"/>.
         /// </summary>
-        public int CurrentSpanIndex { get; private set; }
+        public int CurrentSpanIndex { readonly get; private set; }
 
         /// <summary>
         /// The unread portion of the <see cref="CurrentSpan"/>.
         /// </summary>
-        public ReadOnlySpan<T> UnreadSpan
+        public readonly ReadOnlySpan<T> UnreadSpan
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get => CurrentSpan.Slice(CurrentSpanIndex);
@@ -75,28 +74,17 @@ namespace System.Buffers
         /// <summary>
         /// The total number of <typeparamref name="T"/>'s processed by the reader.
         /// </summary>
-        public long Consumed { get; private set; }
+        public long Consumed { readonly get; private set; }
 
         /// <summary>
         /// Remaining <typeparamref name="T"/>'s in the reader's <see cref="Sequence"/>.
         /// </summary>
-        public long Remaining => Length - Consumed;
+        public readonly long Remaining => Length - Consumed;
 
         /// <summary>
         /// Count of <typeparamref name="T"/> in the reader's <see cref="Sequence"/>.
         /// </summary>
-        public long Length
-        {
-            get
-            {
-                if (_length < 0)
-                {
-                    // Cache the length
-                    _length = Sequence.Length;
-                }
-                return _length;
-            }
-        }
+        public long Length { readonly get; private set; }
 
         /// <summary>
         /// Peeks at the next value without advancing the reader.
@@ -104,7 +92,7 @@ namespace System.Buffers
         /// <param name="value">The next value or default if at the end.</param>
         /// <returns>False if at the end of the reader.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryPeek(out T value)
+        public readonly bool TryPeek(out T value)
         {
             if (_moreData)
             {
@@ -153,7 +141,7 @@ namespace System.Buffers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Rewind(long count)
         {
-            if (count < 0 || count > Consumed)
+            if ((ulong)count > (ulong)Consumed)
             {
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.count);
             }
@@ -337,7 +325,7 @@ namespace System.Buffers
         /// <param name="destination">Destination span to copy to.</param>
         /// <returns>True if there is enough data to completely fill the <paramref name="destination"/> span.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public bool TryCopyTo(Span<T> destination)
+        public readonly bool TryCopyTo(Span<T> destination)
         {
             // This API doesn't advance to facilitate conditional advancement based on the data returned.
             // We don't provide an advance option to allow easier utilizing of stack allocated destination spans.
@@ -354,7 +342,7 @@ namespace System.Buffers
             return TryCopyMultisegment(destination);
         }
 
-        internal bool TryCopyMultisegment(Span<T> destination)
+        internal readonly bool TryCopyMultisegment(Span<T> destination)
         {
             // If we don't have enough to fill the requested buffer, return false
             if (Remaining < destination.Length)
