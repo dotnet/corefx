@@ -34,6 +34,7 @@ using System.ComponentModel;
 using System.Drawing.Imaging;
 using System.Diagnostics;
 using System.Text;
+using System.Threading;
 using System.IO;
 using System.Collections.Specialized;
 using Gdip = System.Drawing.SafeNativeMethods.Gdip;
@@ -54,20 +55,34 @@ namespace System.Drawing.Printing
         private static readonly Hashtable installed_printers = new Hashtable();
         private static string default_printer = string.Empty;
 
+        private static volatile bool populatedPrinters = false;
+
         #endregion
 
         #region Properties
 
+        private static Hashtable ReadPrinters()
+        {
+            var printers = new Hashtable();
+            printers = LoadPrinters(printers);
+            return printers;
+        }
+
+        /// <summary>
+        /// Returns a list of strings representing printers installed in CUPS
+        /// </summary>
         internal static PrinterSettings.StringCollection InstalledPrinters
         {
             get
             {
-                LoadPrinters();
+                Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
                 PrinterSettings.StringCollection list = new PrinterSettings.StringCollection(Array.Empty<string>());
-                foreach (object key in installed_printers.Keys)
+
+                foreach (object key in printers.Keys)
                 {
                     list.Add(key.ToString());
                 }
+
                 return list;
             }
         }
@@ -76,8 +91,8 @@ namespace System.Drawing.Printing
         {
             get
             {
-                if (installed_printers.Count == 0)
-                    LoadPrinters();
+                if (!populatedPrinters)
+                    Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
                 return default_printer;
             }
         }
@@ -177,7 +192,8 @@ namespace System.Drawing.Printing
             if (!cups_installed || printer == null | printer == string.Empty)
                 return false;
 
-            return installed_printers.Contains(printer);
+            Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
+            return printers.Contains(printer);
         }
 
         /// <summary>
@@ -190,12 +206,17 @@ namespace System.Drawing.Printing
             if (cups_installed == false || (printer == null) || (printer == string.Empty))
                 return;
 
-            if (installed_printers.Count == 0)
-                LoadPrinters();
-
-            if (((SysPrn.Printer)installed_printers[printer]).Settings != null)
+            if (!populatedPrinters)
             {
-                SysPrn.Printer p = (SysPrn.Printer)installed_printers[printer];
+                Hashtable printers = LazyInitializer.EnsureInitialized(ref installed_printers, () => ReadPrinters());
+            }else
+            {
+                Hashtable printers = installed_printers;
+            }   
+
+            if (((SysPrn.Printer)printers[printer]).Settings != null)
+            {
+                SysPrn.Printer p = (SysPrn.Printer)printers[printer];
                 settings.can_duplex = p.Settings.can_duplex;
                 settings.is_plotter = p.Settings.is_plotter;
                 settings.landscape_angle = p.Settings.landscape_angle;
@@ -207,6 +228,7 @@ namespace System.Drawing.Printing
                 settings.supports_color = p.Settings.supports_color;
                 return;
             }
+          
 
             settings.PrinterCapabilities.Clear();
 
@@ -276,7 +298,7 @@ namespace System.Drawing.Printing
 
                 ClosePrinter(ref ppd_handle);
 
-                ((SysPrn.Printer)installed_printers[printer]).Settings = settings;
+                ((SysPrn.Printer)iprinters[printer]).Settings = settings;
             }
             finally
             {
@@ -567,9 +589,11 @@ namespace System.Drawing.Printing
 
         /// <summary>
         /// </summary>
-        private static void LoadPrinters()
+        private static Hashtable LoadPrinters(Hashtable printers)
         {
-            installed_printers.Clear();
+            Volatile.Write(ref installed_printers, null);
+            populatedPrinters = false;
+
             if (cups_installed == false)
                 return;
 
@@ -604,7 +628,6 @@ namespace System.Drawing.Printing
 
                     if (options["printer-comment"] != null)
                         comment = options["printer-state"];
-
                     switch (state)
                     {
                         case 4:
@@ -617,11 +640,11 @@ namespace System.Drawing.Printing
                             status = "Ready";
                             break;
                     }
-
-                    installed_printers.Add(name, new SysPrn.Printer(string.Empty, type, status, comment));
-
+                    printers.Add(name, new SysPrn.Printer(string.Empty, type, status, comment));
                     ptr_printers = (IntPtr)((long)ptr_printers + cups_dests_size);
                 }
+                populatedPrinters = true;
+
 
             }
             finally
@@ -631,6 +654,8 @@ namespace System.Drawing.Printing
 
             if (default_printer.Equals(string.Empty))
                 default_printer = first;
+
+            return printers;
         }
 
         /// <summary>
