@@ -282,11 +282,11 @@
   <Target Name="AddRemoteExecutorLib"
           BeforeTargets="ResolveReferences">
 
-    <Error Condition="!Exists('$(PackagesDir)$(MicrosoftDotNetRemoteExecutorPackage)\$(MicrosoftDotNetRemoteExecutorPackageVersion)\lib\netstandard2.0\Microsoft.DotNet.RemoteExecutor.dll')"
-           Text="Error: looks the package $(PackagesDir)$(MicrosoftDotNetRemoteExecutorPackage)\$(MicrosoftDotNetRemoteExecutorPackageVersion) not restored or missing Microsoft.DotNet.RemoteExecutor.dll." />
+    <Error Condition="!Exists('$(NuGetPackageRoot)$(MicrosoftDotNetRemoteExecutorPackage)\$(MicrosoftDotNetRemoteExecutorPackageVersion)\lib\netstandard2.0\Microsoft.DotNet.RemoteExecutor.dll')"
+           Text="Error: looks the package $(NuGetPackageRoot)$(MicrosoftDotNetRemoteExecutorPackage)\$(MicrosoftDotNetRemoteExecutorPackageVersion) not restored or missing Microsoft.DotNet.RemoteExecutor.dll." />
 
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(PackagesDir)$(MicrosoftDotNetRemoteExecutorPackage)\$(MicrosoftDotNetRemoteExecutorPackageVersion)\lib\netstandard2.0\*.*">
+      <ReferenceCopyLocalPaths Include="$(NuGetPackageRoot)$(MicrosoftDotNetRemoteExecutorPackage)\$(MicrosoftDotNetRemoteExecutorPackageVersion)\lib\netstandard2.0\*.*">
         <Private>false</Private>
         <NuGetPackageId>$(MicrosoftDotNetRemoteExecutorPackage)</NuGetPackageId>
         <NuGetPackageVersion>$(MicrosoftDotNetRemoteExecutorPackageVersion)</NuGetPackageVersion>
