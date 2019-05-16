@@ -93,6 +93,12 @@ namespace System.DirectoryServices.Tests
             }
         }
 
+        [Fact]
+        public void TestGetComputerDomain()
+        {
+            Domain.GetComputerDomain();
+        }
+
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
         public void TestSchemaFilter()
         {
