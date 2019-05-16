@@ -1030,6 +1030,8 @@ namespace System.Net.Sockets.Tests
             // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
             // see a SocketException either.
 
+            // Trigger CI build
+
             SocketError? peerSocketError = null;
             SocketError? localSocketError = null;
             bool disposedException = false;
