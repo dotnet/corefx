@@ -954,36 +954,46 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task UdpReceiveGetsCanceledByDispose()
         {
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
-            socket.BindToAnonymousPort(IPAddress.Loopback);
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, we won't see a SocketException.
 
-            Task receiveTask = Task.Run(async () =>
+            SocketError localSocketError = SocketError.Success;
+            for (int i = 0; i < 10 && localSocketError == SocketError.Success; i++)
             {
-                await ReceiveAsync(socket, new ArraySegment<byte>(new byte[1]));
-            });
+                var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
+                socket.BindToAnonymousPort(IPAddress.Loopback);
 
-            Task disposeTask = Task.Run(async () =>
-            {
-                // Wait a little so the receive is started.
-                await Task.Delay(100);
+                Task receiveTask = Task.Run(async () =>
+                {
+                    await ReceiveAsync(socket, new ArraySegment<byte>(new byte[1]));
+                });
 
-                socket.Dispose();
-            });
+                Task disposeTask = Task.Run(async () =>
+                {
+                    // Wait a little so the receive is started.
+                    await Task.Delay(100);
 
-            Task timeoutTask = Task.Delay(30000);
+                    socket.Dispose();
+                });
 
-            Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, receiveTask, timeoutTask));
+                Task timeoutTask = Task.Delay(30000);
 
-            await disposeTask;
+                Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, receiveTask, timeoutTask));
 
-            try
-            {
-                await receiveTask;
+                await disposeTask;
+
+                try
+                {
+                    await receiveTask;
+                }
+                catch (SocketException se)
+                {
+                    localSocketError = se.SocketErrorCode;
+                }
+                catch (ObjectDisposedException)
+                {}
             }
-            catch (SocketException)
-            {}
-            catch (ObjectDisposedException)
-            {}
+            Assert.Equal(SocketError.AddressFamilyNotSupported, localSocketError); // TODO
         }
 
         [Theory]
@@ -992,10 +1002,12 @@ namespace System.Net.Sockets.Tests
         public async Task TcpReceiveSendGetsCanceledByDispose(bool receiveOrSend)
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
-            // before the operation is started, the peer won't see a connection reset.
+            // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
+            // see a SocketException either.
 
-            SocketError peerObservedSocketError = SocketError.Success;
-            for (int i = 0; i < 10 && peerObservedSocketError == SocketError.Success; i++)
+            SocketError peerSocketError = SocketError.Success;
+            SocketError localSocketError = SocketError.Success;
+            for (int i = 0; i < 10 && (peerSocketError == SocketError.Success || localSocketError == SocketError.Success); i++)
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
                 using (socket2)
@@ -1034,8 +1046,10 @@ namespace System.Net.Sockets.Tests
                     {
                         await socketOperation;
                     }
-                    catch (SocketException)
-                    {}
+                    catch (SocketException se)
+                    {
+                        localSocketError = se.SocketErrorCode;
+                    }
                     catch (ObjectDisposedException)
                     {}
 
@@ -1052,7 +1066,7 @@ namespace System.Net.Sockets.Tests
                         }
                         catch (SocketException se)
                         {
-                            peerObservedSocketError = se.SocketErrorCode;
+                            peerSocketError = se.SocketErrorCode;
                             break;
                         }
                     }
@@ -1062,13 +1076,14 @@ namespace System.Net.Sockets.Tests
                 // perform an abortive close.
                 if (UsesSync && PlatformDetection.IsOSX)
                 {
-                    Assert.Equal(SocketError.Success, peerObservedSocketError);
+                    Assert.Equal(SocketError.Success, peerSocketError);
 
                     // Pretend we've observed an RST close.
-                    peerObservedSocketError = SocketError.ConnectionReset;
+                    peerSocketError = SocketError.ConnectionReset;
                 }
             }
-            Assert.Equal(SocketError.ConnectionReset, peerObservedSocketError);
+            Assert.Equal(SocketError.ConnectionReset, peerSocketError);
+            Assert.Equal(SocketError.AddressFamilyNotSupported, localSocketError); // TODO
         }
     }
 

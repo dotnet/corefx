@@ -293,32 +293,47 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public async Task AcceptGetsCanceledByDispose()
         {
-            var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
-            listener.Listen(1);
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, we won't see a SocketException.
 
-            Task acceptTask = Task.Run(async () =>
+            SocketError localSocketError = SocketError.Success;
+            for (int i = 0; i < 10 && localSocketError == SocketError.Success; i++)
             {
-                await AcceptAsync(listener);
-            });
+                var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(1);
 
-            Task disposeTask = Task.Run(async () =>
-            {
-                // Wait a little so the accept is started.
-                await Task.Delay(100);
+                Task acceptTask = Task.Run(async () =>
+                {
+                    await AcceptAsync(listener);
+                });
 
-                listener.Dispose();
-            });
+                Task disposeTask = Task.Run(async () =>
+                {
+                    // Wait a little so the accept is started.
+                    await Task.Delay(100);
 
-            Task timeoutTask = Task.Delay(30000);
+                    listener.Dispose();
+                });
 
-            Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, acceptTask, timeoutTask));
+                Task timeoutTask = Task.Delay(30000);
 
-            await disposeTask;
+                Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, acceptTask, timeoutTask));
 
-            var acceptException = await Assert.ThrowsAnyAsync<Exception>(() => acceptTask);
-            Assert.True(acceptException is ObjectDisposedException ||
-                        acceptException is SocketException);
+                await disposeTask;
+
+                try
+                {
+                    await acceptTask;
+                }
+                catch (SocketException se)
+                {
+                    localSocketError = se.SocketErrorCode;
+                }
+                catch (ObjectDisposedException)
+                {}
+            }
+            Assert.Equal(SocketError.AddressFamilyNotSupported, localSocketError); // TODO
         }
     }
 

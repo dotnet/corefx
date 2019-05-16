@@ -90,29 +90,44 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task ConnectGetsCanceledByDispose()
         {
-            var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            Task connectTask = Task.Run(async () =>
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, we won't see a SocketException.
+
+            SocketError localSocketError = SocketError.Success;
+            for (int i = 0; i < 10 && localSocketError == SocketError.Success; i++)
             {
-                await ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
-            });
+                var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                Task connectTask = Task.Run(async () =>
+                {
+                    await ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
+                });
 
-            Task disposeTask = Task.Run(async () =>
-            {
-                // Wait a little so the connect is started.
-                await Task.Delay(100);
+                Task disposeTask = Task.Run(async () =>
+                {
+                    // Wait a little so the connect is started.
+                    await Task.Delay(100);
 
-                client.Dispose();
-            });
+                    client.Dispose();
+                });
 
-            Task timeoutTask = Task.Delay(30000);
+                Task timeoutTask = Task.Delay(30000);
 
-            Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, connectTask, timeoutTask));
+                Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, connectTask, timeoutTask));
 
-            await disposeTask;
+                await disposeTask;
 
-            var connectException = await Assert.ThrowsAnyAsync<Exception>(() => connectTask);
-            Assert.True(connectException is ObjectDisposedException ||
-                        connectException is SocketException);
+                try
+                {
+                    await connectTask;
+                }
+                catch (SocketException se)
+                {
+                    localSocketError = se.SocketErrorCode;
+                }
+                catch (ObjectDisposedException)
+                {}
+            }
+            Assert.Equal(SocketError.AddressFamilyNotSupported, localSocketError); // TODO
         }
     }
 
