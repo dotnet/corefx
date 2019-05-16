@@ -15,12 +15,8 @@ namespace System
 
         internal static unsafe string ParseCanonicalName(string str, int start, ref bool isLoopback, ref string scopeId)
         {
-            ushort* numbersPtr = stackalloc ushort[NumberOfLabels];
-            // optimized zeroing of 8 shorts = 2 longs
-            ((long*)numbersPtr)[0] = 0L;
-            ((long*)numbersPtr)[1] = 0L;
-            Span<ushort> numbers = new Span<ushort>(numbersPtr, NumberOfLabels);
-            Parse(str, numbersPtr, start, ref scopeId);
+            Span<ushort> numbers = stackalloc ushort[NumberOfLabels];
+            numbers.Clear();
             isLoopback = IsLoopback(numbers);
 
             // RFC 5952 Sections 4 & 5 - Compressed, lower case, with possible embedded IPv4 addresses.
@@ -120,7 +116,7 @@ namespace System
 
         // Returns true if the IPv6 address should be formated with an embedded IPv4 address:
         // ::192.168.1.1
-        private static unsafe bool ShouldHaveIpv4Embedded(ushort* numbers)
+        private static bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
         {
             // 0:0 : 0:0 : x:x : x.x.x.x
             if (numbers[0] == 0 && numbers[1] == 0 && numbers[2] == 0 && numbers[3] == 0 && numbers[6] != 0)
@@ -187,6 +183,12 @@ namespace System
             bool havePrefix = false;
             bool expectingNumber = true;
             int lastSequence = 1;
+
+            // Starting with a colon character is only valid if another colon follows.
+            if (name[start] == ':' && (start + 1 >= end || name[start + 1] != ':'))
+            {
+                return false;
+            }
 
             int i;
             for (i = start; i < end; ++i)
