@@ -1090,7 +1090,7 @@ namespace System.Diagnostics.Tests
         {
             try
             {
-                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetComputerDomain());
+                Process[] processes = Process.GetProcesses(Environment.MachineName + "." + Domain.GetCurrentDomain());
                 Assert.NotEmpty(processes);
             }
             catch (ActiveDirectoryObjectNotFoundException)
