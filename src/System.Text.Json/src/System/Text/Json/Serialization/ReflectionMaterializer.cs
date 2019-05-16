@@ -19,22 +19,21 @@ namespace System.Text.Json.Serialization
         {
             MethodInfo createRange = ImmutableCreateRangeMethod(constructingType, elementType, constructingTypeIsDict);
 
-            Debug.Assert(createRange != null);
+            if (createRange == null)
+            {
+                return null;
+            }
 
-            object createRangeDelegate;
             if (constructingTypeIsDict)
             {
-                createRangeDelegate = createRange.CreateDelegate(
+                return createRange.CreateDelegate(
                     typeof(DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<,>).MakeGenericType(typeof(string), elementType), null);
             }
             else
             {
-                createRangeDelegate = createRange.CreateDelegate(
-                typeof(DefaultImmutableConverter.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+                return createRange.CreateDelegate(
+                    typeof(DefaultImmutableConverter.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
             }
-
-            Debug.Assert(createRangeDelegate != null);
-            return createRangeDelegate;
         }
     }
 }

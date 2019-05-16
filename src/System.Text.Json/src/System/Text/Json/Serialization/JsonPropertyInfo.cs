@@ -280,9 +280,9 @@ namespace System.Text.Json.Serialization
             return (TAttribute)PropertyInfo?.GetCustomAttribute(typeof(TAttribute), inherit: false);
         }
 
-        public abstract IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList);
+        public abstract IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string propertyPath);
 
-        public abstract IDictionary CreateImmutableCollectionFromDictionary(string delegateKey, IDictionary sourceDictionary);
+        public abstract IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath);
 
         public abstract IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList);
 

@@ -138,7 +138,7 @@ namespace System.Text.Json.Serialization.Converters
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
             JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
-            return propertyInfo.CreateImmutableCollectionFromList(delegateKey, sourceList);
+            return propertyInfo.CreateImmutableCollectionFromList(immutableCollectionType, delegateKey, sourceList, state.PropertyPath);
         }
 
         public IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
@@ -151,7 +151,7 @@ namespace System.Text.Json.Serialization.Converters
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
             JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
-            return propertyInfo.CreateImmutableCollectionFromDictionary(delegateKey, sourceDictionary);
+            return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.PropertyPath);
         }
     }
 }

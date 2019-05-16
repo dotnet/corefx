@@ -72,7 +72,6 @@ namespace System.Text.Json.Serialization
                 return obj;
             }
 
-            Debug.Assert(Get != null);
             return Get((TClass)obj);
         }
 
@@ -100,12 +99,17 @@ namespace System.Text.Json.Serialization
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the,
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList)
+        public override IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string propertyPath)
         {
             Debug.Assert(DefaultImmutableConverter.s_createRangeDelegates.ContainsKey(delegateKey));
 
             DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
                 (DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty>)DefaultImmutableConverter.s_createRangeDelegates[delegateKey]);
+
+            if (createRangeDelegate == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, propertyPath);
+            }
 
             return (IEnumerable)createRangeDelegate.Invoke(CreateGenericIEnumerableFromList(sourceList));
         }
@@ -113,12 +117,17 @@ namespace System.Text.Json.Serialization
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the,
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IDictionary CreateImmutableCollectionFromDictionary(string delegateKey, IDictionary sourceDictionary)
+        public override IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath)
         {
             Debug.Assert(DefaultImmutableConverter.s_createRangeDelegates.ContainsKey(delegateKey));
 
             DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty> createRangeDelegate = (
                 (DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty>)DefaultImmutableConverter.s_createRangeDelegates[delegateKey]);
+
+            if (createRangeDelegate == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, propertyPath);
+            }
 
             return (IDictionary)createRangeDelegate.Invoke(CreateGenericIEnumerableFromDictionary(sourceDictionary));
         }

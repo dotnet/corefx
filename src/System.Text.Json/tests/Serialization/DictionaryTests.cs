@@ -177,7 +177,6 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(3, obj["Key2"][0]);
                 Assert.Equal(4, obj["Key2"][1]);
 
-
                 string json = JsonSerializer.ToString(obj);
                 const string ReorderedJsonString = @"{""Key2"":[3,4],""Key1"":[1,2]}";
                 Assert.True(JsonString == json || ReorderedJsonString == json);
