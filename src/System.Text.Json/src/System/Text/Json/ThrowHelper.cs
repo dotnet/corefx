@@ -338,14 +338,8 @@ namespace System.Text.Json
                 case ExceptionResource.ExpectedJsonTokens:
                     message = SR.ExpectedJsonTokens;
                     break;
-                case ExceptionResource.InvalidCharacterAtStartOfComment:
-                    message = SR.Format(SR.InvalidCharacterAtStartOfComment, character);
-                    break;
-                case ExceptionResource.ExpectedComment:
-                    message = SR.Format(SR.ExpectedComment);
-                    break;
-                case ExceptionResource.UnexpectedEndOfDataWithinStartOfComment:
-                    message = SR.Format(SR.UnexpectedEndOfDataWithinStartOfComment);
+                case ExceptionResource.UnexpectedEndOfDataWhileReadingComment:
+                    message = SR.Format(SR.UnexpectedEndOfDataWhileReadingComment);
                     break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
@@ -554,9 +548,7 @@ namespace System.Text.Json
         ExpectedJsonTokens,
         TrailingCommaNotAllowedBeforeArrayEnd,
         TrailingCommaNotAllowedBeforeObjectEnd,
-        InvalidCharacterAtStartOfComment,
-        ExpectedComment,
-        UnexpectedEndOfDataWithinStartOfComment
+        UnexpectedEndOfDataWhileReadingComment
     }
 
     internal enum NumericType

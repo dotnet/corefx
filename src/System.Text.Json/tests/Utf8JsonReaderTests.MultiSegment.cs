@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Xunit;
-using System.Text.RegularExpressions;
 
 namespace System.Text.Json.Tests
 {
