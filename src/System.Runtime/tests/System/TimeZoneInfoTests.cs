@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -2241,6 +2242,14 @@ namespace System.Tests
                     }
                 }
             }
+        }
+
+        [Fact]
+        public static void EnsureUtcObjectSingleton()
+        {
+            TimeZoneInfo utcObject = TimeZoneInfo.GetSystemTimeZones().Single(x => x.Id.Equals("UTC", StringComparison.OrdinalIgnoreCase));
+            Assert.True(ReferenceEquals(utcObject, TimeZoneInfo.Utc));
+            Assert.True(ReferenceEquals(TimeZoneInfo.FindSystemTimeZoneById("UTC"), TimeZoneInfo.Utc));
         }
 
         private static void VerifyConvertException<TException>(DateTimeOffset inputTime, string destinationTimeZoneId) where TException : Exception
