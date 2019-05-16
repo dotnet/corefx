@@ -361,8 +361,7 @@ namespace System.Text.Json.Serialization
                 type = Nullable.GetUnderlyingType(type);
             }
 
-            // A Type is considered a value if it implements IConvertible or is a DateTimeOffset or JsonElement.
-            if (typeof(IConvertible).IsAssignableFrom(type) || type == typeof(DateTimeOffset) || type == typeof(JsonElement))
+            if (DefaultConverters.IsValueConvertable(type))
             {
                 return ClassType.Value;
             }

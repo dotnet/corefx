@@ -50,7 +50,7 @@ namespace System.Text.Json.Serialization
                 // Check for polymorphism.
                 if (elementClassInfo.ClassType == ClassType.Unknown)
                 {
-                    object currentValue = ((IDictionaryEnumerator)state.Current.Enumerator).Entry;
+                    object currentValue = ((IDictionaryEnumerator)state.Current.Enumerator).Entry.Value;
                     GetRuntimeClassInfo(currentValue, ref elementClassInfo, options);
                 }
 
@@ -109,6 +109,11 @@ namespace System.Text.Json.Serialization
                 // Avoid boxing for strongly-typed enumerators such as returned from IDictionary<string, TRuntimeProperty>
                 value = enumerator.Current.Value;
                 key = enumerator.Current.Key;
+            }
+            else if (current.Enumerator is IEnumerator<KeyValuePair<string, object>> polymorphicEnumerator)
+            {
+                value = (TProperty)polymorphicEnumerator.Current.Value;
+                key = polymorphicEnumerator.Current.Key;
             }
             else if (current.IsImmutableDictionary || current.IsPropertyAnImmutableDictionary)
             {
