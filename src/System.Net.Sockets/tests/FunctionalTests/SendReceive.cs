@@ -958,6 +958,7 @@ namespace System.Net.Sockets.Tests
             // before the operation is started, we won't see a SocketException.
 
             SocketError? localSocketError = null;
+            bool disposedException = false;
             for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
             {
                 var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
@@ -991,16 +992,23 @@ namespace System.Net.Sockets.Tests
                     localSocketError = se.SocketErrorCode;
                 }
                 catch (ObjectDisposedException)
-                {}
+                {
+                    disposedException = true;
+                }
 
                 if (UsesApm)
                 {
                     break;
                 }
             }
-            Assert.True(localSocketError.HasValue ^ UsesApm);
-            if (localSocketError.HasValue)
+            if (UsesApm)
             {
+                Assert.False(localSocketError.HasValue);
+                Assert.True(disposedException);
+            }
+            else
+            {
+                Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
                     Assert.Equal(SocketError.Interrupted, localSocketError.Value);
@@ -1023,6 +1031,7 @@ namespace System.Net.Sockets.Tests
 
             SocketError? peerSocketError = null;
             SocketError? localSocketError = null;
+            bool disposedException = false;
             for (int i = 0; i < 10 && (!peerSocketError.HasValue || (!localSocketError.HasValue && !UsesApm)); i++)
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
@@ -1067,7 +1076,9 @@ namespace System.Net.Sockets.Tests
                         localSocketError = se.SocketErrorCode;
                     }
                     catch (ObjectDisposedException)
-                    {}
+                    {
+                        disposedException = true;
+                    }
 
                     var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
                     while (true)
@@ -1098,12 +1109,18 @@ namespace System.Net.Sockets.Tests
                     peerSocketError = SocketError.ConnectionReset;
                 }
             }
+
             Assert.True(peerSocketError.HasValue);
             Assert.Equal(SocketError.ConnectionReset, peerSocketError.Value);
 
-            Assert.True(localSocketError.HasValue ^ UsesApm);
-            if (localSocketError.HasValue)
+            if (UsesApm)
             {
+                Assert.False(localSocketError.HasValue);
+                Assert.True(disposedException);
+            }
+            else
+            {
+                Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
                     Assert.Equal(SocketError.Interrupted, localSocketError.Value);

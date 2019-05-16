@@ -297,6 +297,7 @@ namespace System.Net.Sockets.Tests
             // before the operation is started, we won't see a SocketException.
 
             SocketError? localSocketError = null;
+            bool disposedException = false;
             for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
             {
                 var listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -331,16 +332,24 @@ namespace System.Net.Sockets.Tests
                     localSocketError = se.SocketErrorCode;
                 }
                 catch (ObjectDisposedException)
-                {}
+                {
+                    disposedException = true;
+                }
 
                 if (UsesApm)
                 {
                     break;
                 }
             }
-            Assert.True(localSocketError.HasValue ^ UsesApm);
-            if (localSocketError.HasValue)
+
+            if (UsesApm)
             {
+                Assert.False(localSocketError.HasValue);
+                Assert.True(disposedException);
+            }
+            else
+            {
+                Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
                     Assert.Equal(SocketError.Interrupted, localSocketError.Value);
