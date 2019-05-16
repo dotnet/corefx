@@ -47,6 +47,7 @@ namespace System
     // For a description of various calendar issues, look at
     //
     //
+    [Obsolete("Use DateTimeOffset instead. Unless a particular DateTime value represents UTC, that date and time value is often ambiguous or limited in its portability, and for compatibility the Kind data is not included in binary serialization. DateTimeOffset should be considered the default date and time type for application development.")]
     [StructLayout(LayoutKind.Auto)]
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
