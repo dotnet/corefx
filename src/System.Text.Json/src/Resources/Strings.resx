@@ -346,7 +346,7 @@
     <value>The data extension property '{0}.{1}' does not match the required signature of IDictionary&lt;string, JsonElement&gt; or IDictionary&lt;string, object&gt;.</value>
   </data>
   <data name="SerializationDuplicateAttribute" xml:space="preserve">
-    <value>The attribute '{0}' cannot exist on more than one property.</value>
+    <value>A class cannot have more than one property that has the attribute '{0}'.</value>
   </data>
   <data name="SerializationNotSupportedCollectionType" xml:space="preserve">
     <value>The collection type '{0}' is not supported.</value>

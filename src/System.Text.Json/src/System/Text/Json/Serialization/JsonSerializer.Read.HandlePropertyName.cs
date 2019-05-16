@@ -121,7 +121,7 @@ namespace System.Text.Json.Serialization
                 jsonElement = jsonDocument.RootElement.Clone();
             }
 
-            string keyName = Encoding.UTF8.GetString(unescapedPropertyName);
+            string keyName = JsonHelpers.Utf8GetString(unescapedPropertyName);
 
             // Currently we don't apply any naming policy. If we do, we'd have to pass it onto the JsonDocument.
 

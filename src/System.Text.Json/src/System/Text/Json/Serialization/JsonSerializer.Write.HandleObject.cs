@@ -126,7 +126,7 @@ namespace System.Text.Json.Serialization
             {
                 if (!jsonPropertyInfo.IgnoreNullValues)
                 {
-                    writer.WriteNull(jsonPropertyInfo._escapedName);
+                    writer.WriteNull(jsonPropertyInfo.EscapedName);
                 }
 
                 state.Current.NextProperty();

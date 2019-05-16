@@ -159,6 +159,8 @@ namespace System.Text.Json.Serialization
 
         private JsonPropertyInfo GetPropertyThatHasAttribute(Type attributeType)
         {
+            Debug.Assert(_propertyRefs != null);
+
             JsonPropertyInfo property = null;
 
             for (int iProperty = 0; iProperty < _propertyRefs.Count; iProperty++)
@@ -185,7 +187,7 @@ namespace System.Text.Json.Serialization
             // If we should compare with case-insensitive, normalize to an uppercase format since that is what is cached on the propertyInfo.
             if (options.PropertyNameCaseInsensitive)
             {
-                string utf16PropertyName = Encoding.UTF8.GetString(propertyName.ToArray());
+                string utf16PropertyName = JsonHelpers.Utf8GetString(propertyName);
                 string upper = utf16PropertyName.ToUpperInvariant();
                 propertyName = Encoding.UTF8.GetBytes(upper);
             }
@@ -300,7 +302,7 @@ namespace System.Text.Json.Serialization
             if (propertyRef.Key == other.Key)
             {
                 if (propertyRef.Info.Name.Length <= PropertyNameKeyLength ||
-                    propertyRef.Info.Name.SequenceEqual(other.Info.Name))
+                    propertyRef.Info.Name.AsSpan().SequenceEqual(other.Info.Name.AsSpan()))
                 {
                     return true;
                 }
@@ -369,15 +371,16 @@ namespace System.Text.Json.Serialization
             if (propertyType.IsGenericType)
             {
                 Type[] args = propertyType.GetGenericArguments();
+                ClassType classType = GetClassType(propertyType);
 
-                if (GetClassType(propertyType) == ClassType.Dictionary &&
+                if (classType == ClassType.Dictionary &&
                     args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
                     args[0].UnderlyingSystemType == typeof(string))
                 {
                     return args[1];
                 }
 
-                if (GetClassType(propertyType) == ClassType.Enumerable && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
+                if (classType == ClassType.Enumerable && args.Length >= 1) // It is >= 1 in case there is an IEnumerable<T, TSomeExtension>.
                 {
                     return args[0];
                 }

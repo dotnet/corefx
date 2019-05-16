@@ -37,33 +37,16 @@ namespace System.Text.Json.Serialization
 
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
 
-        public bool IsDictionaryProperty
-        {
-            get
-            {
-                if (JsonPropertyInfo != null && !JsonPropertyInfo.IsPropertyPolicy && JsonPropertyInfo.ClassType == ClassType.Dictionary)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-        }
+        public bool IsDictionaryProperty => JsonPropertyInfo != null &&
+            !JsonPropertyInfo.IsPropertyPolicy &&
+            JsonPropertyInfo.ClassType == ClassType.Dictionary;
 
         public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
 
-        public bool IsEnumerableProperty
-        {
-            get
-            {
-                if (JsonPropertyInfo != null && !JsonPropertyInfo.IsPropertyPolicy && JsonPropertyInfo.ClassType == ClassType.Enumerable)
-                {
-                    return true;
-                }
-
-                return false;
-            }
-        }
+        public bool IsEnumerableProperty =>
+            JsonPropertyInfo != null &&
+            !JsonPropertyInfo.IsPropertyPolicy &&
+            JsonPropertyInfo.ClassType == ClassType.Enumerable;
 
         public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsProcessingDictionary;
         public bool IsProcessingDictionary => IsDictionary || IsDictionaryProperty;

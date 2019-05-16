@@ -22,21 +22,18 @@ namespace System.Text.Json.Serialization
             Debug.Assert(ElementClassInfo == null);
             Debug.Assert(ShouldDeserialize);
 
-            if (ValueConverter != null)
+            if (ValueConverter != null && ValueConverter.TryRead(s_underlyingType, ref reader, out TProperty value))
             {
-                if (ValueConverter.TryRead(s_underlyingType, ref reader, out TProperty value))
+                if (state.Current.ReturnValue == null)
                 {
-                    if (state.Current.ReturnValue == null)
-                    {
-                        state.Current.ReturnValue = value;
-                    }
-                    else
-                    {
-                        Set((TClass)state.Current.ReturnValue, value);
-                    }
-
-                    return;
+                    state.Current.ReturnValue = value;
                 }
+                else
+                {
+                    Set((TClass)state.Current.ReturnValue, value);
+                }
+
+                return;
             }
 
             ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.PropertyPath);
@@ -80,18 +77,18 @@ namespace System.Text.Json.Serialization
 
                 if (value == null)
                 {
-                    Debug.Assert(_escapedName != null);
+                    Debug.Assert(EscapedName != null);
 
                     if (!IgnoreNullValues)
                     {
-                        writer.WriteNull(_escapedName);
+                        writer.WriteNull(EscapedName);
                     }
                 }
                 else if (ValueConverter != null)
                 {
-                    if (_escapedName != null)
+                    if (EscapedName != null)
                     {
-                        ValueConverter.Write(_escapedName, value.GetValueOrDefault(), writer);
+                        ValueConverter.Write(EscapedName, value.GetValueOrDefault(), writer);
                     }
                     else
                     {

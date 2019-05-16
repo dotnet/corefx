@@ -25,17 +25,15 @@ namespace System.Text.Json.Serialization
         public ClassType ClassType;
 
         // The name of the property with any casing policy or the name specified from JsonPropertyNameAttribute.
-        private byte[] _name { get; set; }
-        public ReadOnlySpan<byte> Name => _name;
+        public byte[] Name { get; private set; }
         public string NameAsString { get; private set; }
 
         // Used to support case-insensitive comparison
-        private byte[] _nameUsedToCompare { get; set; }
-        public ReadOnlySpan<byte> NameUsedToCompare => _nameUsedToCompare;
+        public byte[] NameUsedToCompare { get; private set; }
         public string NameUsedToCompareAsString { get; private set; }
 
         // The escaped name passed to the writer.
-        public byte[] _escapedName { get; private set; }
+        public byte[] EscapedName { get; private set; }
 
         public bool HasGetter { get; set; }
         public bool HasSetter { get; set; }
@@ -102,46 +100,50 @@ namespace System.Text.Json.Serialization
             JsonPropertyNameAttribute nameAttribute = GetAttribute<JsonPropertyNameAttribute>(PropertyInfo);
             if (nameAttribute != null)
             {
-                NameAsString = nameAttribute.Name;
-
-                if (NameAsString == null)
+                string name = nameAttribute.Name;
+                if (name == null)
                 {
                     ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameNull(ParentClassType, this);
                 }
+
+                NameAsString = name;
             }
             else if (options.PropertyNamingPolicy != null)
             {
-                NameAsString = options.PropertyNamingPolicy.ConvertName(PropertyInfo.Name);
-
-                if (NameAsString == null)
+                string name = options.PropertyNamingPolicy.ConvertName(PropertyInfo.Name);
+                if (name == null)
                 {
                     ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameNull(ParentClassType, this);
                 }
+
+                NameAsString = name;
             }
             else
             {
                 NameAsString = PropertyInfo.Name;
             }
 
+            Debug.Assert(NameAsString != null);
+
             // At this point propertyName is valid UTF16, so just call the simple UTF16->UTF8 encoder.
-            _name = Encoding.UTF8.GetBytes(NameAsString);
+            Name = Encoding.UTF8.GetBytes(NameAsString);
 
             // Set the compare name.
             if (options.PropertyNameCaseInsensitive)
             {
                 NameUsedToCompareAsString = NameAsString.ToUpperInvariant();
-                _nameUsedToCompare = Encoding.UTF8.GetBytes(NameUsedToCompareAsString);
+                NameUsedToCompare = Encoding.UTF8.GetBytes(NameUsedToCompareAsString);
             }
             else
             {
                 NameUsedToCompareAsString = NameAsString;
-                _nameUsedToCompare = _name;
+                NameUsedToCompare = Name;
             }
 
             // Cache the escaped name.
 #if true
             // temporary behavior until the writer can accept escaped string.
-            _escapedName = _name;
+            EscapedName = Name;
 #else
             int valueIdx = JsonWriterHelper.NeedsEscaping(_name);
             if (valueIdx == -1)
@@ -252,9 +254,9 @@ namespace System.Text.Json.Serialization
         // Copy any settings defined at run-time to the new property.
         public void CopyRuntimeSettingsTo(JsonPropertyInfo other)
         {
-            other._name = _name;
-            other._nameUsedToCompare = _nameUsedToCompare;
-            other._escapedName = _escapedName;
+            other.Name = Name;
+            other.NameUsedToCompare = NameUsedToCompare;
+            other.EscapedName = EscapedName;
         }
 
         // Create a property that is either ignored at run-time. It uses typeof(int) in order to prevent
