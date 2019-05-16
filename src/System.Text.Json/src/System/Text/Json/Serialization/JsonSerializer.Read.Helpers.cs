@@ -25,14 +25,12 @@ namespace System.Text.Json.Serialization
         }
 
         private static void CheckSupportedOptions(
-            JsonSerializerOptions options,
-            string paramName = null)
+            JsonSerializerOptions options)
         {
             if (options?.ReadCommentHandling == JsonCommentHandling.Allow)
             {
                 throw new ArgumentException(
-                    SR.JsonSerializerDoesNotSupportComments,
-                    paramName ?? nameof(options));
+                    SR.JsonSerializerDoesNotSupportComments);
             }
         }
     }
