@@ -82,8 +82,9 @@ namespace Internal.Cryptography.Pal
             DateTime verificationTime,
             TimeSpan remainingDownloadTime)
         {
-            SafeX509StackHandle systemTrust = StorePal.GetMachineRoot().GetNativeCollection();
-            SafeX509StackHandle systemIntermediate = StorePal.GetMachineIntermediate().GetNativeCollection();
+            CachedSystemStoreProvider.GetNativeCollections(
+                out SafeX509StackHandle systemTrust,
+                out SafeX509StackHandle systemIntermediate);
 
             SafeX509StoreHandle store = null;
             SafeX509StackHandle untrusted = null;

@@ -46,12 +46,17 @@ namespace Internal.Cryptography.Pal
 
                         if (info.Exists)
                         {
+#if PRINT_STORE_RELOAD
+                            Interop.Sys.PrintF($"Reloading user trust (dir=\"{_storePath}\")\n", "");
+#endif
+
                             Interop.Crypto.X509StackAddDirectoryStore(newColl, _storePath);
                             _loadLastWrite = info.LastWriteTimeUtc;
                         }
 
                         ret = newColl;
                         _nativeCollection = newColl;
+                        _recheckStopwatch.Restart();
                     }
                 }
             }
