@@ -1,5 +1,11 @@
 trigger: none
 
+variables:
+  - name: _isOfficialBuild
+    value: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+  - name: _fullMatrix
+    value: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+
 resources:
   containers:
   - container: rhel7_container
@@ -16,16 +22,22 @@ jobs:
   - ${{ if endsWith(variables['Build.DefinitionName'], 'windows') }}:
     - template: /eng/pipelines/windows.yml
       parameters:
+        isOfficialBuild: $(_isOfficialBuild)
+        fullMatrix: $(_fullMatrix)
         isOuterloopBuild: true
 
   # Linux outerloop legs
   - ${{ if endsWith(variables['Build.DefinitionName'], 'linux') }}:
     - template: /eng/pipelines/linux.yml
       parameters:
+        isOfficialBuild: $(_isOfficialBuild)
+        fullMatrix: $(_fullMatrix)
         isOuterloopBuild: true
 
   # MacOS outerloop legs
   - ${{ if endsWith(variables['Build.DefinitionName'], 'osx') }}:
     - template: /eng/pipelines/macos.yml
       parameters:
+        isOfficialBuild: $(_isOfficialBuild)
+        fullMatrix: $(_fullMatrix)
         isOuterloopBuild: true

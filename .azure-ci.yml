@@ -23,6 +23,12 @@ pr:
     - Documentation/*
     - /*.md
 
+variables:
+  - name: _isOfficialBuild
+    value: ${{ and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}
+  - name: _fullMatrix
+    value: ${{ notIn(variables['Build.Reason'], 'PullRequest') }}
+
 resources:
   containers:
   - container: rhel7_container
@@ -46,29 +52,33 @@ resources:
 jobs:
   # Windows legs
   - template: /eng/pipelines/windows.yml
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-      parameters:
-        isOfficialBuild: true
+    parameters:
+      isOfficialBuild: $(_isOfficialBuild)
+      fullMatrix: $(_fullMatrix)
 
   # Linux legs
   - template: /eng/pipelines/linux.yml
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-      parameters:
-        isOfficialBuild: true
+    parameters:
+      isOfficialBuild: $(_isOfficialBuild)
+      fullMatrix: $(_fullMatrix)
 
   # MacOS legs
   - template: /eng/pipelines/macos.yml
-    ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-      parameters:
-        isOfficialBuild: true
+    parameters:
+      isOfficialBuild: $(_isOfficialBuild)
+      fullMatrix: $(_fullMatrix)
 
-  # Only run in official builds
-  - ${{ if and(ne(variables['System.TeamProject'], 'public'), notIn(variables['Build.Reason'], 'PullRequest')) }}:
-    # Redhat6 leg is only for official builds
-    - template: /eng/pipelines/redhat6.yml
+  # RedHat6 leg
+  - template: /eng/pipelines/redhat6.yml
+    parameters:
+      isOfficialBuild: $(_isOfficialBuild)
+      fullMatrix: $(_fullMatrix)
 
     # FreeBSD leg is only for official builds
     # - template: /eng/pipelines/freebsd.yml
+    #   parameters:
+    #     isOfficialBuild: true
+    #     fullMatrix: false
 
     # Publish step
     - template: /eng/pipelines/publish.yml
