@@ -240,7 +240,7 @@
            Text="Error: looks the package $(NuGetPackageRoot)xunit.runner.utility\$(XUnitPackageVersion) not restored or missing xunit.runner.utility.netcoreapp10.dll." />
 
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(PackaNuGetPackageRootgesDir)$(MicrosoftDotNetUapTestToolsPackageName)\$(MicrosoftDotNetUapTestToolsPackageVersion)\lib\netcoreapp2.0\*.dll">
+      <ReferenceCopyLocalPaths Include="$(NuGetPackageRoot)$(MicrosoftDotNetUapTestToolsPackageName)\$(MicrosoftDotNetUapTestToolsPackageVersion)\lib\netcoreapp2.0\*.dll">
         <Private>false</Private>
         <NuGetPackageId>$(MicrosoftDotNetUapTestToolsPackageName)</NuGetPackageId>
         <NuGetPackageVersion>$(MicrosoftDotNetUapTestToolsPackageVersion)</NuGetPackageVersion>
