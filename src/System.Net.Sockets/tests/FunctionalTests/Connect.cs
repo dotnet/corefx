@@ -130,12 +130,12 @@ namespace System.Net.Sockets.Tests
                     disposedException = true;
                 }
 
-                if (UsesApm)
+                if (UsesApm || this is ConnectTask)
                 {
                     break;
                 }
             }
-            if (UsesApm)
+            if (UsesApm || this is ConnectTask)
             {
                 Assert.False(localSocketError.HasValue);
                 Assert.True(disposedException);
