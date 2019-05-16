@@ -11,18 +11,23 @@ namespace Internal.Cryptography.Pal
 {
     internal sealed class CachedDirectoryStoreProvider
     {
+        // These intervals are mostly arbitrary.
+        // Prior to this caching these stores were always read "hot" from disk, and 30 seconds
+        // seems like "long enough" for performance gains with "short enough" that if the filesystem
+        // has LastWrite updating disabled that the process will be mostly responsive.
         private static readonly TimeSpan s_lastWriteRecheckInterval = TimeSpan.FromSeconds(1);
         private static readonly TimeSpan s_assumeInvalidInterval = TimeSpan.FromSeconds(30);
 
         private readonly Stopwatch _recheckStopwatch = new Stopwatch();
-        private readonly string _storePath;
+        private readonly DirectoryInfo _storeDirectoryInfo;
 
         private SafeX509StackHandle _nativeCollection;
         private DateTime _loadLastWrite;
 
         internal CachedDirectoryStoreProvider(string storeName)
         {
-            _storePath = DirectoryBasedStoreProvider.GetStorePath(storeName);
+            string storePath = DirectoryBasedStoreProvider.GetStorePath(storeName);
+            _storeDirectoryInfo = new DirectoryInfo(storePath);
         }
 
         internal SafeX509StackHandle GetNativeCollection()
@@ -35,7 +40,8 @@ namespace Internal.Cryptography.Pal
             {
                 lock (_recheckStopwatch)
                 {
-                    DirectoryInfo info = new DirectoryInfo(_storePath);
+                    _storeDirectoryInfo.Refresh();
+                    DirectoryInfo info = _storeDirectoryInfo;
 
                     if (ret == null ||
                         elapsed >= s_assumeInvalidInterval ||
@@ -46,14 +52,17 @@ namespace Internal.Cryptography.Pal
 
                         if (info.Exists)
                         {
-#if PRINT_STORE_RELOAD
-                            Interop.Sys.PrintF($"Reloading user trust (dir=\"{_storePath}\")\n", "");
-#endif
-
-                            Interop.Crypto.X509StackAddDirectoryStore(newColl, _storePath);
+                            Interop.Crypto.X509StackAddDirectoryStore(newColl, info.FullName);
                             _loadLastWrite = info.LastWriteTimeUtc;
                         }
 
+
+                        // The existing collection is not Disposed here, intentionally.
+                        // It could be in the gap between when they are returned from this method and
+                        // not yet used in a P/Invoke, which would result in an exception being thrown.
+                        // In order to maintain "finalization-free" this method would need to always
+                        // DangerousAddRef, and the callers would need to DangerousRelease,
+                        // adding more interlocked operations on every call.
                         ret = newColl;
                         _nativeCollection = newColl;
                         _recheckStopwatch.Restart();

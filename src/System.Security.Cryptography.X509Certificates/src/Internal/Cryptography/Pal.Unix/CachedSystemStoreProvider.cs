@@ -16,16 +16,27 @@ namespace Internal.Cryptography.Pal
 {
     internal sealed class CachedSystemStoreProvider : IStorePal
     {
+        // These intervals are mostly arbitrary.
+        // Prior to this refreshing cache the system collections were read just once per process, on the
+        // assumption that system trust changes would happen before the process start (or would come
+        // followed by a reboot for a kernel update, etc).
+        // Customers requested something more often than "never" and 5 minutes seems like a reasonable
+        // balance.
+        //
+        // Note that on Ubuntu the LastWrite test always fails, because the system default for SSL_CERT_DIR
+        // is a symlink, so the LastWrite value is always just when the symlink was created (and Ubuntu does
+        // not provide the single-file version at SSL_CERT_FILE, so the file update does not trigger) --
+        // meaning the "assume invalid" interval is Ubuntu's only refresh.
         private static readonly TimeSpan s_lastWriteRecheckInterval = TimeSpan.FromSeconds(5);
         private static readonly TimeSpan s_assumeInvalidInterval = TimeSpan.FromMinutes(5);
         private static readonly Stopwatch s_recheckStopwatch = new Stopwatch();
+        private static readonly DirectoryInfo s_rootStoreDirectoryInfo = SafeOpenRootDirectoryInfo();
+        private static readonly FileInfo s_rootStoreFileInfo = SafeOpenRootFileInfo();
 
         // Use non-Value-Tuple so that it's an atomic update.
         private static Tuple<SafeX509StackHandle,SafeX509StackHandle> s_nativeCollections;
         private static DateTime s_directoryCertsLastWrite;
         private static DateTime s_fileCertsLastWrite;
-        private static string s_rootStoreDirectory = Interop.Crypto.GetX509RootStorePath();
-        private static string s_rootStoreFile = Interop.Crypto.GetX509RootStoreFile();
 
         private readonly bool _isRoot;
 
@@ -90,40 +101,11 @@ namespace Internal.Cryptography.Pal
             {
                 lock (s_recheckStopwatch)
                 {
-                    FileInfo fileInfo = null;
-                    DirectoryInfo dirInfo = null;
+                    FileInfo fileInfo = s_rootStoreFileInfo;
+                    DirectoryInfo dirInfo = s_rootStoreDirectoryInfo;
 
-                    if (!string.IsNullOrEmpty(s_rootStoreFile))
-                    {
-                        try
-                        {
-                            fileInfo = new FileInfo(s_rootStoreFile);
-                        }
-                        catch (ArgumentException)
-                        {
-                            // If SSL_CERT_FILE is set to the empty string, or anything else which gives
-                            // "The path is not of a legal form", then the GetX509RootStoreFile value is ignored.
-                            //
-                            // Rather than do this every reload, just clear out the filename.
-                            s_rootStoreFile = null;
-                        }
-                    }
-
-                    if (!string.IsNullOrEmpty(s_rootStoreDirectory))
-                    {
-                        try
-                        {
-                            dirInfo = new DirectoryInfo(s_rootStoreDirectory);
-                        }
-                        catch (ArgumentException)
-                        {
-                            // If SSL_CERT_DIR is set to the empty string, or anything else which gives
-                            // "The path is not of a legal form", then the GetX509RootStoreFile value is ignored.
-                            //
-                            // Rather than do this every reload, just clear out the filename.
-                            s_rootStoreDirectory = null;
-                        }
-                    }
+                    fileInfo?.Refresh();
+                    dirInfo?.Refresh();
 
                     if (ret == null ||
                         elapsed > s_assumeInvalidInterval ||
@@ -146,10 +128,6 @@ namespace Internal.Cryptography.Pal
             Debug.Assert(
                 Monitor.IsEntered(s_recheckStopwatch),
                 "LoadMachineStores assumes a lock(s_recheckStopwatch)");
-
-#if PRINT_STORE_RELOAD
-            Interop.Sys.PrintF($"Reloading system trust (dir=\"{s_rootStoreDirectory}\", file=\"{s_rootStoreFile}\")\n", "");
-#endif
 
             IEnumerable<FileInfo> trustedCertFiles;
             DateTime newFileTime = default;
@@ -201,7 +179,6 @@ namespace Internal.Cryptography.Pal
                     while (OpenSslX509CertificateReader.TryReadX509PemNoAux(fileBio, out pal) ||
                         OpenSslX509CertificateReader.TryReadX509Der(fileBio, out pal))
                     {
-                        OpenSslX509CertificateReader typedPal = (OpenSslX509CertificateReader)pal;
                         X509Certificate2 cert = new X509Certificate2(pal);
 
                         // The HashSets are just used for uniqueness filters, they do not survive this method.
@@ -266,11 +243,58 @@ namespace Internal.Cryptography.Pal
                 Monitor.IsEntered(s_recheckStopwatch),
                 "LoadMachineStores assumes a lock(s_recheckStopwatch)");
 
+            // The existing collections are not Disposed here, intentionally.
+            // They could be in the gap between when they are returned from this method and not yet used
+            // in a P/Invoke, which would result in exceptions being thrown.
+            // In order to maintain "finalization-free" the GetNativeCollections method would need to
+            // DangerousAddRef, and the callers would need to DangerousRelease, adding more interlocked operations
+            // on every call.
+
             Volatile.Write(ref s_nativeCollections, newCollections);
             s_directoryCertsLastWrite = newDirTime;
             s_fileCertsLastWrite = newFileTime;
             s_recheckStopwatch.Restart();
             return newCollections;
+        }
+
+        private static FileInfo SafeOpenRootFileInfo()
+        {
+            string rootFile = Interop.Crypto.GetX509RootStoreFile();
+
+            if (!string.IsNullOrEmpty(rootFile))
+            {
+                try
+                {
+                    return new FileInfo(rootFile);
+                }
+                catch (ArgumentException)
+                {
+                    // If SSL_CERT_FILE is set to the empty string, or anything else which gives
+                    // "The path is not of a legal form", then the GetX509RootStoreFile value is ignored.
+                }
+            }
+
+            return null;
+        }
+
+        private static DirectoryInfo SafeOpenRootDirectoryInfo()
+        {
+            string rootDirectory = Interop.Crypto.GetX509RootStorePath();
+
+            if (!string.IsNullOrEmpty(rootDirectory))
+            {
+                try
+                {
+                    return new DirectoryInfo(rootDirectory);
+                }
+                catch (ArgumentException)
+                {
+                    // If SSL_CERT_DIR is set to the empty string, or anything else which gives
+                    // "The path is not of a legal form", then the GetX509RootStoreFile value is ignored.
+                }
+            }
+
+            return null;
         }
     }
 }
