@@ -96,7 +96,8 @@ namespace System.DirectoryServices.Tests
         [Fact]
         public void TestGetComputerDomain()
         {
-            Domain.GetComputerDomain();
+            Domain myDomain = Domain.GetComputerDomain();
+            Assert.Equal(myDomain.Name, myDomain.Name);
         }
 
         [ConditionalFact(nameof(IsActiveDirectoryServer))]
