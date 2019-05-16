@@ -35,6 +35,8 @@ namespace System.Text.Json.Serialization
             if (utf8Json == null)
                 throw new ArgumentNullException(nameof(utf8Json));
 
+            CheckSupportedOptions(options);
+
             return ReadAsync<TValue>(utf8Json, typeof(TValue), options, cancellationToken);
         }
 
@@ -68,6 +70,8 @@ namespace System.Text.Json.Serialization
 
             if (returnType == null)
                 throw new ArgumentNullException(nameof(returnType));
+
+            CheckSupportedOptions(options);
 
             return ReadAsync<object>(utf8Json, returnType, options, cancellationToken);
         }

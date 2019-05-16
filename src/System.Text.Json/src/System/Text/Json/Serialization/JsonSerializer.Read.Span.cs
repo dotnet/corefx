@@ -19,6 +19,8 @@ namespace System.Text.Json.Serialization
         /// </exception>
         public static TValue Parse<TValue>(ReadOnlySpan<byte> utf8Json, JsonSerializerOptions options = null)
         {
+            CheckSupportedOptions(options);
+
             return (TValue)ParseCore(utf8Json, typeof(TValue), options);
         }
 
@@ -42,6 +44,8 @@ namespace System.Text.Json.Serialization
         {
             if (returnType == null)
                 throw new ArgumentNullException(nameof(returnType));
+
+            CheckSupportedOptions(options);
 
             return ParseCore(utf8Json, returnType, options);
         }

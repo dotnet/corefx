@@ -28,6 +28,8 @@ namespace System.Text.Json.Serialization
             if (json == null)
                 throw new ArgumentNullException(nameof(json));
 
+            CheckSupportedOptions(options);
+
             return (TValue)ParseCore(json, typeof(TValue), options);
         }
 
@@ -56,6 +58,8 @@ namespace System.Text.Json.Serialization
 
             if (returnType == null)
                 throw new ArgumentNullException(nameof(returnType));
+
+            CheckSupportedOptions(options);
 
             return ParseCore(json, returnType, options);
         }
