@@ -992,15 +992,23 @@ namespace System.Net.Sockets.Tests
                 }
                 catch (ObjectDisposedException)
                 {}
+
+                if (UsesApm)
+                {
+                    break;
+                }
             }
-            Assert.True(localSocketError.HasValue);
-            if (UsesSync)
+            Assert.True(localSocketError.HasValue ^ UsesApm);
+            if (localSocketError.HasValue)
             {
-                Assert.Equal(SocketError.Interrupted, localSocketError.Value);
-            }
-            else
-            {
-                Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                if (UsesSync)
+                {
+                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                }
+                else
+                {
+                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                }
             }
         }
 
@@ -1015,7 +1023,7 @@ namespace System.Net.Sockets.Tests
 
             SocketError? peerSocketError = null;
             SocketError? localSocketError = null;
-            for (int i = 0; i < 10 && (!peerSocketError.HasValue || !localSocketError.HasValue); i++)
+            for (int i = 0; i < 10 && (!peerSocketError.HasValue || (!localSocketError.HasValue && !UsesApm)); i++)
             {
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
                 using (socket2)
@@ -1091,15 +1099,19 @@ namespace System.Net.Sockets.Tests
                 }
             }
             Assert.True(peerSocketError.HasValue);
-            Assert.Equal(SocketError.ConnectionReset, peerSocketError);
-            Assert.True(localSocketError.HasValue);
-            if (UsesSync)
+            Assert.Equal(SocketError.ConnectionReset, peerSocketError.Value);
+
+            Assert.True(localSocketError.HasValue ^ UsesApm);
+            if (localSocketError.HasValue)
             {
-                Assert.Equal(SocketError.Interrupted, localSocketError.Value);
-            }
-            else
-            {
-                Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                if (UsesSync)
+                {
+                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                }
+                else
+                {
+                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                }
             }
         }
     }

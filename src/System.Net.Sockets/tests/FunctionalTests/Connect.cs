@@ -126,15 +126,23 @@ namespace System.Net.Sockets.Tests
                 }
                 catch (ObjectDisposedException)
                 {}
+
+                if (UsesApm)
+                {
+                    break;
+                }
             }
-            Assert.True(localSocketError.HasValue);
-            if (UsesSync)
+            Assert.True(localSocketError.HasValue ^ UsesApm);
+            if (localSocketError.HasValue)
             {
-                Assert.Equal(SocketError.Interrupted, localSocketError.Value);
-            }
-            else
-            {
-                Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                if (UsesSync)
+                {
+                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                }
+                else
+                {
+                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                }
             }
         }
     }
