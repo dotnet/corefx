@@ -1,0 +1,200 @@
+trigger:
+- release/2.1*
+- release/2.2*
+
+pr:
+- release/2.1*
+- release/2.2*
+
+resources:
+  containers:
+  - container: rhel7_container
+    image: microsoft/dotnet-buildtools-prereqs:rhel7_prereqs_2
+  - container: ubuntu_1604_arm64_cross_container
+    image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
+  - container: alpine_36_container
+    image: microsoft/dotnet-buildtools-prereqs:alpine-3.6-WithNode-f4d3fe3-20181213005010
+
+jobs:
+- job: uwp_aot_x86_release
+  displayName: UWP NETNative x86 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x86 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:uapaot -buildArch=x86 -Release -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:uapaot -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=false
+    displayName: Build Tests
+
+- job: uwp_coreclr_x64_debug
+  displayName: UWP CoreCLR x64 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x64 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:uap -buildArch=x64 -Debug -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:uap -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=false
+    displayName: Build Tests
+
+- job: netfx_x64_release
+  displayName: NETFX x86 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x86 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:netfx -buildArch=x86 -Release -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:netfx -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
+    displayName: Build Tests
+    # TODO: Add Helix submission
+    
+- job: windows_x86_release
+  displayName: Windows x86 Release Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x86 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:netcoreapp -buildArch=x86 -Release -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:netcoreapp -buildArch=x86 -Release -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
+    displayName: Build Tests
+    # TODO: Add Helix submission    displayName: Build Tests
+    
+- job: windows_x64_debug
+  displayName: Windows x64 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x64 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -framework:netcoreapp -buildArch=x64 -Debug -- /p:RuntimeOS=win10
+    displayName: Build product
+  - script: build-tests.cmd -framework:netcoreapp -buildArch=x64 -Debug -SkipTests -- /p:RuntimeOS=win10 /p:ArchiveTests=true
+    displayName: Build Tests
+    # TODO: Add Helix submission
+    
+- job: packaging_all_x64_debug
+  displayName: Packaging All Configurations x64 Debug Build
+  pool:
+    vmImage: vs2017-win2016
+  steps:
+  - checkout: self
+    clean: true
+  - script: init-tools.cmd
+    displayName: Initialize Tools
+  - script: sync.cmd -p -- /p:ArchGroup=x64 /p:RuntimeOS=win10
+    displayName: Sync
+  - script: build-managed.cmd -GenerateVersion
+    displayName: Generate Version Assets
+  - script: build.cmd -allConfigurations -buildArch=x64 -Debug -- /p:RuntimeOS=win10 
+    displayName: Build product
+  - script: build-tests.cmd -allConfigurations -Debug
+    displayName: Build Tests
+
+- job: linux_x64_release
+  displayName: Linux x64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  container: rhel7_container
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./init-tools.sh
+    displayName: Initialize Tools
+  - script: ./sync.sh -p -- /p:ArchGroup=x64
+    displayName: Sync
+  - script: ./build-managed.sh -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true
+    displayName: Generate Version Assets
+  - script: ./build.sh -buildArch=x64 -Release
+    displayName: Build product
+  - script: ./build-tests.sh -buildArch=x64 -Release -SkipTests -- /p:ArchiveTests=true /p:EnableDumpling=true
+    displayName: Build Tests
+    
+- job: linux_arm_release
+  displayName: Linux Arm Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./cross/arm32_ci_script.sh --buildConfig=release --arm --linuxCodeName=xenial --verbose
+  
+- job: linux_arm64_release
+  displayName: Linux Arm64 Release Build
+  pool:
+    vmImage: ubuntu-16.04
+  container: ubuntu_1604_arm64_cross_container
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./init-tools.sh
+    displayName: Initialize Tools
+  - script: ./build-managed.sh -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true
+    displayName: Generate Version Assets
+  - script: ./sync.sh -p -BuildTests=false -- /p:ArchGroup=arm64
+    displayName: Sync    
+  - script: |
+      export ROOTFS_DIR=/crossrootfs/arm64
+      ./build-native.sh -buildArch=arm64 -Release
+    displayName: Build Native
+    # Cross build builds Linux Managed components using x64 target
+    # We do not want x64 packages
+  - script: ./build-managed.sh -BuildPackages=false -buildArch=x64 -Release 
+    displayName: Build Managed
+  - script: ./build-packages.sh -buildArch=arm64 -Release
+    displayName: Build Packages
+    
+- job: linux_musl_x64_debug
+  displayName: Linux-musl x64 Debug Build
+  pool:
+    vmImage: ubuntu-16.04
+  container: alpine_36_container
+  steps:
+  - checkout: self
+    clean: true
+  - script: ./init-tools.sh
+    displayName: Initialize Tools
+  - script: ./build-managed.sh -runtimeos=linux-musl -- /t:GenerateVersionSourceFile /p:GenerateVersionSourceFile=true /p:PortableBuild=false
+    displayName: Generate Version Assets
+  - script: ./sync.sh -p -runtimeos=linux-musl -- /p:ArchGroup=x64 /p:PortableBuild=false
+    displayName: Sync    
+  - script: ./build.sh -buildArch=x64 -runtimeos=linux-musl -Debug -- /p:PortableBuild=false
+    displayName: Build Product
+  - script: ./build-tests.sh -buildArch=x64 -Debug -SkipTests -- /p:ArchiveTests=true /p:EnableDumpling=true /p:PortableBuild=false
+    displayName: Build Tests
