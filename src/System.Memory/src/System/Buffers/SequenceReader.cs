@@ -4,6 +4,8 @@
 
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using Internal.Runtime.CompilerServices;
 
 namespace System.Buffers
 {
@@ -12,6 +14,7 @@ namespace System.Buffers
         private SequencePosition _currentPosition;
         private SequencePosition _nextPosition;
         private bool _moreData;
+        private long _length;
 
         /// <summary>
         /// Create a <see cref="SequenceReader{T}"/> over the given <see cref="ReadOnlySequence{T}"/>.
@@ -23,7 +26,7 @@ namespace System.Buffers
             Consumed = 0;
             Sequence = sequence;
             _currentPosition = sequence.Start;
-            Length = Sequence.Length;
+            _length = -1;
 
             sequence.GetFirstSpan(out ReadOnlySpan<T> first, out _nextPosition);
             CurrentSpan = first;
@@ -84,7 +87,18 @@ namespace System.Buffers
         /// <summary>
         /// Count of <typeparamref name="T"/> in the reader's <see cref="Sequence"/>.
         /// </summary>
-        public readonly long Length { get; }
+        public readonly long Length
+        {
+            get
+            {
+                if (_length == -1)
+                {
+                    // Cast-away readonly to initialize lazy field
+                    Volatile.Write(ref Unsafe.AsRef(_length), Sequence.Length);
+                }
+                return _length;
+            }
+        }
 
         /// <summary>
         /// Peeks at the next value without advancing the reader.
