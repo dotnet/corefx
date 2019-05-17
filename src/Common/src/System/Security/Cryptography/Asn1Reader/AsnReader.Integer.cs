@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Diagnostics;
 using System.Numerics;
 
@@ -107,7 +106,9 @@ namespace System.Security.Cryptography.Asn1
             }
             finally
             {
-                CryptoPool.Return(tmp, CryptoPool.ClearAll);
+                // Let CryptoPool.Return clear the whole tmp so that not even the sign bit
+                // is returned to the array pool.
+                CryptoPool.Return(tmp);
             }
 
             _data = _data.Slice(headerLength + contents.Length);

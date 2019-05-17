@@ -250,8 +250,9 @@ namespace System.Security.Cryptography
                     out rentWritten))
                 {
                     int size = rented.Length;
-                    CryptoPool.Return(rented, rentWritten);
+                    byte[] current = rented;
                     rented = CryptoPool.Rent(checked(size * 2));
+                    CryptoPool.Return(current, rentWritten);
                 }
 
                 return KeyFormatHelper.ReencryptPkcs8(
@@ -286,8 +287,9 @@ namespace System.Security.Cryptography
                     out rentWritten))
                 {
                     int size = rented.Length;
-                    CryptoPool.Return(rented, rentWritten);
+                    byte[] current = rented;
                     rented = CryptoPool.Rent(checked(size * 2));
+                    CryptoPool.Return(current, rentWritten);
                 }
 
                 return KeyFormatHelper.ReencryptPkcs8(

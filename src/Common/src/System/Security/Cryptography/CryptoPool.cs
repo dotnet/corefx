@@ -20,7 +20,11 @@ namespace System.Security.Cryptography
 
             if (!clearWholeArray && clearSize != 0)
             {
+#if netcoreapp || uap || NETCOREAPP
+                CryptographicOperations.ZeroMemory(array.AsSpan(0, clearSize));
+#else
                 Array.Clear(array, 0, clearSize);
+#endif
             }
 
             ArrayPool<byte>.Shared.Return(array, clearWholeArray);

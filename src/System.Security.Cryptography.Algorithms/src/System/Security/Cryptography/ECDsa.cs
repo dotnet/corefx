@@ -163,7 +163,7 @@ namespace System.Security.Cryptography
             }
             else
             {
-                // Use ArrayPool.Shared because the array is passed out.
+                // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
                 byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
                 try
                 {
@@ -211,7 +211,7 @@ namespace System.Security.Cryptography
 
         protected virtual bool TryHashData(ReadOnlySpan<byte> data, Span<byte> destination, HashAlgorithmName hashAlgorithm, out int bytesWritten)
         {
-            // Use ArrayPool.Shared because the array is passed out.
+            // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
             byte[] array = ArrayPool<byte>.Shared.Rent(data.Length);
             try
             {
