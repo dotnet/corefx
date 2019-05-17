@@ -114,33 +114,6 @@ namespace System
                                        || (numbers[5] == 0xFFFF))));
         }
 
-        // Returns true if the IPv6 address should be formated with an embedded IPv4 address:
-        // ::192.168.1.1
-        private static bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
-        {
-            // 0:0 : 0:0 : x:x : x.x.x.x
-            if (numbers[0] == 0 && numbers[1] == 0 && numbers[2] == 0 && numbers[3] == 0 && numbers[6] != 0)
-            {
-                // RFC 5952 Section 5 - 0:0 : 0:0 : 0:[0 | FFFF] : x.x.x.x
-                if (numbers[4] == 0 && (numbers[5] == 0 || numbers[5] == 0xFFFF))
-                {
-                    return true;
-                }
-                // SIIT - 0:0 : 0:0 : FFFF:0 : x.x.x.x
-                else if (numbers[4] == 0xFFFF && numbers[5] == 0)
-                {
-                    return true;
-                }
-            }
-            // ISATAP
-            if (numbers[4] == 0 && numbers[5] == 0x5EFE)
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         //
         // InternalIsValid
         //
