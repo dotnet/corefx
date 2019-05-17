@@ -98,18 +98,18 @@ namespace System.Net.Sockets.Tests
             for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
             {
                 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                Task connectTask = Task.Run(async () =>
-                {
-                    await ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
-                });
 
-                Task disposeTask = Task.Run(async () =>
+                Task connectTask = Task.Factory.StartNew(() =>
                 {
-                    // Wait a little so the connect is started.
-                    await Task.Delay(100);
+                    ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23)).GetAwaiter().GetResult();
+                }, TaskCreationOptions.LongRunning);
 
+                // Wait a little so the operation is started, then Dispose.
+                await Task.Delay(100);
+                Task disposeTask = Task.Factory.StartNew(() =>
+                {
                     client.Dispose();
-                });
+                }, TaskCreationOptions.LongRunning);
 
                 Task timeoutTask = Task.Delay(30000);
 
