@@ -23,7 +23,7 @@ parameters:
   #     _helixQueues: Windows.Amd64 (Only needed if submitToHelix -> true.) -- Queues should be separated by + if multiple.
 
   # Required: empty | innerloop | outerloop | all
-  testfilter: ''
+  testFilter: ''
 
   # Optional: _publishTests -> Boolean -> Publish test assets to blob storage if true.
   # Default: false
@@ -78,7 +78,7 @@ jobs:
         - _testFilterArg: ''
 
         - ${{ if ne(parameters.testFilter, '') }}:
-          - _testFilterArg: -testfilter $(testfilter)
+          - _testFilterArg: -testfilter ${{ parameters.testFilter }}
 
         - ${{ if ne(job._jobFramework, '')}}:
           - _finalFrameworkArg: ${{ job._jobFramework }}
@@ -199,7 +199,7 @@ jobs:
                 helixQueues: $(_helixQueues)
                 msbuildScript: $(_msbuildCommand)
                 framework: $(_framework)
-                testfilter: $(_testfilter)
+                testFilter: ${{ parameters.testFilter }}
 
                 ${{ if eq(parameters.isOfficialBuild, 'true') }}:
                   officialBuildId: $(Build.BuildNumber)

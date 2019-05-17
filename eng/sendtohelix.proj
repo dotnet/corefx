@@ -36,9 +36,8 @@
 
   <PropertyGroup Condition="'$(HelixType)' == ''">
     <!-- For PRs we want helixtype to be the same for all frameworks except package testing-->
-    <HelixType>test/functional/cli/</HelixType>
     <TestFilter Condition="'$(TestFilter)' == ''">innerloop</TestFilter>
-    <HelixType Condition="'$(TestFilter)' == 'true'">$(HelixType)/$(TestFilter)/</HelixType>
+    <HelixType>test/functional/cli/$(TestFilter)/</HelixType>
     <HelixType Condition="'$(TargetGroup)' == 'AllConfigurations'">test/functional/packaging/</HelixType>
   </PropertyGroup>
 

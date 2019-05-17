@@ -51,7 +51,7 @@ jobs:
              _buildScriptPrefix: ''
              _buildExtraArguments: /p:RuntimeOS=linux-musl
 
-          ${{ if or(eq(parameters.testfilter, 'outerloop'), eq(parameters.testfilter, 'all')) }}:
+          ${{ if or(eq(parameters.testFilter, 'outerloop'), eq(parameters.testFilter, 'all')) }}:
             x64_Debug:
               _BuildConfig: Debug
               _architecture: x64
@@ -121,7 +121,7 @@ jobs:
 
     # Legs without helix testing
     # Only run this leg in PRs.
-    - ${{ if and(eq(parameters.isOfficialBuild, 'false'), and(ne(parameters.testfilter, 'outerloop'), ne(parameters.testfilter, 'all'))) }}:
+    - ${{ if and(eq(parameters.isOfficialBuild, 'false'), and(ne(parameters.testFilter, 'outerloop'), ne(parameters.testFilter, 'all'))) }}:
       - job: LinuxNoTest
         displayName: Linux
         strategy:
