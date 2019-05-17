@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Reflection;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -35,18 +37,6 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-        private static void VerifyReadNull(SimpleTestClass obj, bool isNull)
-        {
-            if (isNull)
-            {
-                Assert.Null(obj);
-            }
-            else
-            {
-                obj.Verify();
-            }
-        }
-
         [Theory]
         [MemberData(nameof(ReadNullJson))]
         public static void ReadNull(string json, bool element0Null, bool element1Null, bool element2Null)
@@ -62,6 +52,18 @@ namespace System.Text.Json.Serialization.Tests
             VerifyReadNull(list[0], element0Null);
             VerifyReadNull(list[1], element1Null);
             VerifyReadNull(list[2], element2Null);
+
+            static void VerifyReadNull(SimpleTestClass obj, bool isNull)
+            {
+                if (isNull)
+                {
+                    Assert.Null(obj);
+                }
+                else
+                {
+                    obj.Verify();
+                }
+            }
         }
 
         [Fact]
@@ -160,6 +162,32 @@ namespace System.Text.Json.Serialization.Tests
         {
             TestClassWithGenericIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithGenericIReadOnlyListT>(TestClassWithGenericIReadOnlyListT.s_data);
             obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithObjectIEnumerableConstructibleTypes()
+        {
+            TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableConstructibleTypes>(TestClassWithObjectIEnumerableConstructibleTypes.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithObjectImmutableTypes()
+        {
+            TestClassWithObjectImmutableTypes obj = JsonSerializer.Parse<TestClassWithObjectImmutableTypes>(TestClassWithObjectImmutableTypes.s_data);
+            obj.Verify();
+        }
+
+        public static void ClassWithNoSetter()
+        {
+            string json = @"{""MyList"":[1]}";
+            ClassWithListButNoSetter obj = JsonSerializer.Parse<ClassWithListButNoSetter>(json);
+            Assert.Equal(1, obj.MyList[0]);
+        }
+
+        public class ClassWithListButNoSetter
+        {
+            public List<int> MyList { get; } = new List<int>();
         }
     }
 }

@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
-    [DebuggerDisplay("Current: ClassType.{Current.JsonClassInfo.ClassType} {Current.JsonClassInfo.Type.Name}")]
+    [DebuggerDisplay("Current: ClassType.{Current.JsonClassInfo.ClassType}, {Current.JsonClassInfo.Type.Name}")]
     internal struct ReadStack
     {
         // A fields is used instead of a property to avoid value semantics.
@@ -53,15 +53,21 @@ namespace System.Text.Json.Serialization
         {
             get
             {
-                StringBuilder path = new StringBuilder();
+                StringBuilder path;
 
                 if (_previous == null || _index == 0)
                 {
-                    path.Append($"[{Current.JsonClassInfo.Type.FullName}]");
+                    // No path if we've walked beyond the end of our JSON document
+                    if (Current.JsonClassInfo == null)
+                    {
+                        return "<none>";
+                    }
+
+                    path = new StringBuilder($"[{Current.JsonClassInfo.Type.FullName}]");
                 }
                 else
                 {
-                    path.Append($"[{_previous[0].JsonClassInfo.Type.FullName}]");
+                    path = new StringBuilder($"[{_previous[0].JsonClassInfo.Type.FullName}]");
 
                     for (int i = 0; i < _index; i++)
                     {
@@ -77,7 +83,7 @@ namespace System.Text.Json.Serialization
 
         private string GetPropertyName(in ReadStackFrame frame)
         {
-            if (frame.JsonPropertyInfo != null && frame.JsonClassInfo.ClassType == ClassType.Object)
+            if (frame.JsonPropertyInfo?.PropertyInfo != null && frame.JsonClassInfo.ClassType == ClassType.Object)
             {
                 return $".{frame.JsonPropertyInfo.PropertyInfo.Name}";
             }
