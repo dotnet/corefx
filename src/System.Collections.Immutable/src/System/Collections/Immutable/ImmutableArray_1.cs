@@ -92,7 +92,7 @@ namespace System.Collections.Immutable
             }
         }
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
         public ReadOnlySpan<T> AsSpan() => new ReadOnlySpan<T>(array);
 
         public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(array);
