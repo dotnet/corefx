@@ -168,24 +168,9 @@ namespace System.Xml.Serialization
                 name.CodeBase = null;
                 name.CultureInfo = CultureInfo.InvariantCulture;
 
-                string serializerPath = null;
-
                 try
                 {
-                    if (!string.IsNullOrEmpty(type.Assembly.Location))
-                    {
-                        serializerPath = Path.Combine(Path.GetDirectoryName(type.Assembly.Location), serializerName + ".dll");
-                    }
-
-                    if ((string.IsNullOrEmpty(serializerPath) || !File.Exists(serializerPath)) && !string.IsNullOrEmpty(Assembly.GetEntryAssembly().Location))
-                    {
-                        serializerPath = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), serializerName + ".dll");
-                    }
-
-                    if (!string.IsNullOrEmpty(serializerPath))
-                    {
-                        serializer = Assembly.LoadFile(serializerPath);
-                    }
+                    serializer = Assembly.Load(name);
                 }
                 catch (Exception e)
                 {
