@@ -1330,7 +1330,8 @@
         "4.4.0",
         "4.5.1",
         "4.5.0",
-        "4.6.0"
+        "4.6.0",
+        "4.6.1"
       ],
       "BaselineVersion": "4.7.0",
       "InboxOn": {
@@ -2592,9 +2593,10 @@
       "StableVersions": [
         "4.5.0",
         "4.5.1",
-        "4.5.2"
+        "4.5.2",
+        "4.5.3"
       ],
-      "BaselineVersion": "4.5.2",
+      "BaselineVersion": "4.5.3",
       "InboxOn": {
         "netcoreapp2.1": "4.1.0.0",
         "netcoreapp3.0": "4.2.0.0",
