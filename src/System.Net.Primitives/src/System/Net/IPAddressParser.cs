@@ -14,7 +14,7 @@ namespace System.Net
     {
         private const int MaxIPv4StringLength = 15; // 4 numbers separated by 3 periods, with up to 3 digits per number
 
-        iinternal static IPAddress Parse(ReadOnlySpan<char> ipSpan, bool tryParse)
+        internal static IPAddress Parse(ReadOnlySpan<char> ipSpan, bool tryParse)
         {
             if (ipSpan.Contains(':'))
             {
