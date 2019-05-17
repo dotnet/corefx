@@ -338,6 +338,9 @@ namespace System.Text.Json
                 case ExceptionResource.ExpectedJsonTokens:
                     message = SR.ExpectedJsonTokens;
                     break;
+                case ExceptionResource.InvalidCharacterAtStartOfComment:
+                    message = SR.Format(SR.InvalidCharacterAtStartOfComment, character);
+                    break;
                 case ExceptionResource.UnexpectedEndOfDataWhileReadingComment:
                     message = SR.Format(SR.UnexpectedEndOfDataWhileReadingComment);
                     break;
@@ -548,6 +551,7 @@ namespace System.Text.Json
         ExpectedJsonTokens,
         TrailingCommaNotAllowedBeforeArrayEnd,
         TrailingCommaNotAllowedBeforeObjectEnd,
+        InvalidCharacterAtStartOfComment,
         UnexpectedEndOfDataWhileReadingComment
     }
 

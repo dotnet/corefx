@@ -2381,7 +2381,7 @@ namespace System.Text.Json
             byte marker = localBuffer[0];
             if (marker != JsonConstants.Slash && marker != JsonConstants.Asterisk)
             {
-                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWhileReadingComment, marker);
+                ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterAtStartOfComment, marker);
             }
 
             localBuffer = localBuffer.Slice(1);
