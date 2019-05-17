@@ -92,10 +92,11 @@ namespace System.Collections.Immutable
             }
         }
 
+#if FEATURE_ITEMREFAPI
         public ReadOnlySpan<T> AsSpan() => new ReadOnlySpan<T>(array);
 
         public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(array);
-    
+#endif
         /// <summary>
         /// Searches the array for the specified item.
         /// </summary>

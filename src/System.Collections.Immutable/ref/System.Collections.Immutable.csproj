@@ -23,4 +23,7 @@
     <Reference Include="System.Collections" />
     <Reference Include="System.Runtime.InteropServices" />
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Memory" />
+  </ItemGroup>
 </Project>

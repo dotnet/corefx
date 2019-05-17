@@ -115,8 +115,10 @@ namespace System.Collections.Immutable
         bool System.Collections.IList.IsFixedSize { get { throw null; } }
         bool System.Collections.IList.IsReadOnly { get { throw null; } }
         object System.Collections.IList.this[int index] { get { throw null; } set { } }
+#if FEATURE_ITEMREFAPI
         public System.ReadOnlySpan<T> AsSpan() { throw null; }
         public System.ReadOnlyMemory<T> AsMemory() { throw null; }
+#endif
         public System.Collections.Immutable.ImmutableArray<T> Add(T item) { throw null; }
         public System.Collections.Immutable.ImmutableArray<T> AddRange(System.Collections.Generic.IEnumerable<T> items) { throw null; }
         public System.Collections.Immutable.ImmutableArray<T> AddRange(System.Collections.Immutable.ImmutableArray<T> items) { throw null; }
