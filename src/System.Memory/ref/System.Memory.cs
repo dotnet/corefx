@@ -245,10 +245,10 @@ namespace System.Buffers
     }
     public ref partial struct SequenceReader<T> where T : unmanaged, System.IEquatable<T>
     {
-        private readonly object _dummy;
+        private object _dummy;
         public SequenceReader(System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
         public readonly long Consumed { get { throw null; } }
-        public readonly System.ReadOnlySpan<T> CurrentSpan { get { throw null; }  }
+        public readonly System.ReadOnlySpan<T> CurrentSpan { get { throw null; } }
         public readonly int CurrentSpanIndex { get { throw null; } }
         public readonly bool End { get { throw null; } }
         public readonly long Length { get { throw null; } }

@@ -84,7 +84,7 @@ namespace System.Buffers
         /// <summary>
         /// Count of <typeparamref name="T"/> in the reader's <see cref="Sequence"/>.
         /// </summary>
-        public long Length { readonly get; private set; }
+        public readonly long Length { get; }
 
         /// <summary>
         /// Peeks at the next value without advancing the reader.
