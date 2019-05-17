@@ -20,7 +20,7 @@
     <Reference Include="System.Collections" />
     <Reference Include="System.Runtime.InteropServices" />
   </ItemGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netstandard1.3' or '$(TargetGroup)' == 'netstandard'">
     <Reference Include="System.Memory" />
   </ItemGroup>
 </Project>
