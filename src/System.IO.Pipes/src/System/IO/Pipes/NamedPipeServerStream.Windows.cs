@@ -194,8 +194,9 @@ namespace System.IO.Pipes
             if (error == Interop.Errors.ERROR_SUCCESS && Environment.Is64BitProcess)
             {
                 // There is a known problem in Windows where if sspicli is not loaded, this function fails unexpectedly with ERROR_SUCCESS, so we need to load it and reattempt
-                // If sspicli is already loaded, this is a no-op
-                Interop.Kernel32.LoadLibrary("sspicli.dll");
+                // If sspicli is already loaded, this is a no-op. 
+                // We set the handle as invalid so the library won't get unloaded.
+                Interop.Kernel32.LoadLibraryEx("sspicli.dll", IntPtr.Zero, Interop.Kernel32.LOAD_LIBRARY_SEARCH_SYSTEM32)?.SetHandleAsInvalid();
 
                 if (Interop.Kernel32.GetNamedPipeHandleStateW(InternalHandle, null, null, null, null, userName, UserNameMaxLength))
                 {
