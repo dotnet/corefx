@@ -91,7 +91,7 @@ namespace System.Buffers
         {
             get
             {
-                if (_length == -1)
+                if (_length < 0)
                 {
                     // Cast-away readonly to initialize lazy field
                     Volatile.Write(ref Unsafe.AsRef(_length), Sequence.Length);
