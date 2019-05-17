@@ -92,6 +92,10 @@ namespace System.Collections.Immutable
             }
         }
 
+        public ReadOnlySpan<T> AsSpan() => new ReadOnlySpan<T>(array);
+
+        public ReadOnlyMemory<T> AsMemory() => new ReadOnlyMemory<T>(array);
+    
         /// <summary>
         /// Searches the array for the specified item.
         /// </summary>

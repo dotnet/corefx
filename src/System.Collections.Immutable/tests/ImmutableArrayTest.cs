@@ -46,6 +46,44 @@ namespace System.Collections.Immutable.Tests
             Assert.True(s_empty == source.ToImmutableArray().Clear());
         }
 
+        [Theory]
+        [MemberData(nameof(Int32EnumerableData))]
+        public void AsSpanRoundTripTests(IEnumerable<int> source)
+        {
+            ImmutableArray<int> immutableArray = source.ToImmutableArray();
+            ReadOnlySpan<int> span = immutableArray.AsSpan();
+            Assert.Equal(immutableArray, span.ToArray());
+            Assert.Equal(immutableArray.Length, span.Length);
+        }
+
+        [Fact]
+        public void AsSpanRoundTripEmptyArrayTests()
+        {
+            ImmutableArray<int> immutableArray = ImmutableArray.Create(Array.Empty<int>());
+            ReadOnlySpan<int> span = immutableArray.AsSpan();
+            Assert.Equal(immutableArray, span.ToArray());
+            Assert.Equal(immutableArray.Length, span.Length);
+        }
+
+        [Theory]
+        [MemberData(nameof(Int32EnumerableData))]
+        public void AsMemoryRoundTripTests(IEnumerable<int> source)
+        {
+            ImmutableArray<int> immutableArray = source.ToImmutableArray();
+            ReadOnlyMemory<int> memory = immutableArray.AsMemory();
+            Assert.Equal(immutableArray, memory.ToArray());
+            Assert.Equal(immutableArray.Length, memory.Length);
+        }
+
+        [Fact]
+        public void AsMemoryRoundTripEmptyArrayTests()
+        {
+            ImmutableArray<int> immutableArray = ImmutableArray.Create(Array.Empty<int>());
+            ReadOnlyMemory<int> memory = immutableArray.AsMemory();
+            Assert.Equal(immutableArray, memory.ToArray());
+            Assert.Equal(immutableArray.Length, memory.Length);
+        }
+
         [Fact]
         public void CreateEnumerableElementType()
         {
