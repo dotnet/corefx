@@ -6349,6 +6349,7 @@ namespace System.Reflection
         public override bool IsGenericTypeParameter { get { throw null; } }
         public override bool IsSZArray { get { throw null; } }
         public override bool IsTypeDefinition { get { throw null; } }
+        public override bool IsVariableBoundArray { get { throw null; } }
         public override int MetadataToken { get { throw null; } }
         public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
@@ -7866,7 +7867,7 @@ namespace System.Text.Unicode
     public static partial class Utf8
     {
         public static System.Buffers.OperationStatus FromUtf16(System.ReadOnlySpan<char> source, System.Span<byte> destination, out int charsRead, out int bytesWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
-        public static System.Buffers.OperationStatus ToUtf16(System.ReadOnlySpan<byte> source, System.Span<char> destination, out int numBytesRead, out int numCharsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
+        public static System.Buffers.OperationStatus ToUtf16(System.ReadOnlySpan<byte> source, System.Span<char> destination, out int bytesRead, out int charsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
     }
 }
 namespace System.Threading

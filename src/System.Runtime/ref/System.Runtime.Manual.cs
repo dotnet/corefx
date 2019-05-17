@@ -36,10 +36,3 @@ namespace System
         private int _dummyPrimitive;
     }
 }
-namespace System.Reflection
-{
-    public partial class TypeDelegator
-    {
-        public override bool IsVariableBoundArray { get { throw null; } }
-    }
-}

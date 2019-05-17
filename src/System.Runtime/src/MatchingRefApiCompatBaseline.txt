@@ -14,4 +14,4 @@ MembersMustExist : Member 'System.Runtime.Serialization.SerializationInfo.StartD
 MembersMustExist : Member 'System.Runtime.Serialization.SerializationInfo.ThrowIfDeserializationInProgress()' does not exist in the reference but it does exist in the implementation.
 MembersMustExist : Member 'System.Runtime.Serialization.SerializationInfo.ThrowIfDeserializationInProgress(System.String, System.Int32)' does not exist in the reference but it does exist in the implementation.
 MembersMustExist : Member 'System.Runtime.Serialization.SerializationInfo.UpdateValue(System.String, System.Object, System.Type)' does not exist in the reference but it does exist in the implementation.
-Total Issues: 26
+Total Issues: 15
