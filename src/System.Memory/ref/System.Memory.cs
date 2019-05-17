@@ -199,6 +199,7 @@ namespace System.Buffers
     public readonly partial struct ReadOnlySequence<T>
     {
         private readonly object _dummy;
+        private readonly int _dummyPrimitive;
         public static readonly System.Buffers.ReadOnlySequence<T> Empty;
         public ReadOnlySequence(System.Buffers.ReadOnlySequenceSegment<T> startSegment, int startIndex, System.Buffers.ReadOnlySequenceSegment<T> endSegment, int endIndex) { throw null; }
         public ReadOnlySequence(System.ReadOnlyMemory<T> memory) { throw null; }
