@@ -10,28 +10,21 @@ namespace System.Text.Json.Serialization.Converters
 {
     internal sealed class DefaultIEnumerableConstructibleConverter : JsonEnumerableConverter
     {
-        public static ConcurrentDictionary<Type, JsonPropertyInfo> s_objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
+        private static readonly ConcurrentDictionary<Type, JsonPropertyInfo> s_objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
 
         public static JsonPropertyInfo GetElementJsonPropertyInfo(JsonClassInfo elementClassInfo, JsonSerializerOptions options)
         {
-            JsonPropertyInfo propertyInfo;
-            if (elementClassInfo.ClassType == ClassType.Object)
+            if (elementClassInfo.ClassType != ClassType.Object)
             {
-                Type objectType = elementClassInfo.Type;
-
-                if (s_objectJsonProperties.ContainsKey(objectType))
-                {
-                    propertyInfo = s_objectJsonProperties[objectType];
-                }
-                else
-                {
-                    propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
-                    s_objectJsonProperties[objectType] = propertyInfo;
-                }
+                return elementClassInfo.GetPolicyProperty();
             }
-            else
+
+            Type objectType = elementClassInfo.Type;
+
+            if (!s_objectJsonProperties.TryGetValue(objectType, out JsonPropertyInfo propertyInfo))
             {
-                propertyInfo = elementClassInfo.GetPolicyProperty();
+                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
+                s_objectJsonProperties[objectType] = propertyInfo;
             }
 
             return propertyInfo;

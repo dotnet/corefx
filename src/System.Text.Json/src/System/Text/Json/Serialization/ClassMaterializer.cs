@@ -11,9 +11,34 @@ namespace System.Text.Json.Serialization
     {
         public abstract JsonClassInfo.ConstructorDelegate CreateConstructor(Type classType);
 
-        public abstract object ImmutableCreateRange(Type constructingType, Type elementType, bool constructingTypeIsDict);
+        public abstract object ImmutableCollectionCreateRange(Type constructingType, Type elementType);
+        public abstract object ImmutableDictionaryCreateRange(Type constructingType, Type elementType);
 
-        protected MethodInfo ImmutableCreateRangeMethod(Type constructingType, Type elementType, bool constructingTypeIsDict)
+        protected MethodInfo ImmutableCollectionCreateRangeMethod(Type constructingType, Type elementType)
+        {
+            MethodInfo createRangeMethod = FindImmutableCreateRangeMethod(constructingType);
+
+            if (createRangeMethod == null)
+            {
+                return null;
+            }
+
+            return createRangeMethod.MakeGenericMethod(elementType);
+        }
+
+        protected MethodInfo ImmutableDictionaryCreateRangeMethod(Type constructingType, Type elementType)
+        {
+            MethodInfo createRangeMethod = FindImmutableCreateRangeMethod(constructingType);
+
+            if (createRangeMethod == null)
+            {
+                return null;
+            }
+
+            return createRangeMethod.MakeGenericMethod(typeof(string), elementType);
+        }
+
+        private MethodInfo FindImmutableCreateRangeMethod(Type constructingType)
         {
             MethodInfo[] constructingTypeMethods = constructingType.GetMethods();
 
@@ -21,14 +46,7 @@ namespace System.Text.Json.Serialization
             {
                 if (method.Name == "CreateRange" && method.GetParameters().Length == 1)
                 {
-                    if (constructingTypeIsDict)
-                    {
-                        return method.MakeGenericMethod(typeof(string), elementType);
-                    }
-                    else
-                    {
-                        return method.MakeGenericMethod(elementType);
-                    }
+                    return method;
                 }
             }
 

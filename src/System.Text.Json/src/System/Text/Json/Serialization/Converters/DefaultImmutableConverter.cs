@@ -44,9 +44,9 @@ namespace System.Text.Json.Serialization.Converters
         internal delegate object ImmutableCreateRangeDelegate<T>(IEnumerable<T> items);
         internal delegate object ImmutableDictCreateRangeDelegate<TKey, TValue>(IEnumerable<KeyValuePair<TKey, TValue>> items);
 
-        public static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
+        private static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
 
-        private string GetConstructingTypeName(string immutableCollectionTypeName)
+        private static string GetConstructingTypeName(string immutableCollectionTypeName)
         {
             switch (immutableCollectionTypeName)
             {
@@ -70,9 +70,23 @@ namespace System.Text.Json.Serialization.Converters
                 case ImmutableSortedDictionaryGenericTypeName:
                     return ImmutableSortedDictionaryTypeName;
                 default:
-                    // TODO: Refactor exception throw following serialization exception changes. 
+                    // TODO: Refactor exception throw following serialization exception changes.
                     throw new NotSupportedException(SR.Format(SR.DeserializeTypeNotSupported, immutableCollectionTypeName));
             }
+        }
+
+        private static string GetDelegateKey(
+            Type immutableCollectionType,
+            Type elementType,
+            out Type underlyingType,
+            out string constructingTypeName)
+        {
+            // Use the generic type definition of the immutable collection to determine an appropriate constructing type,
+            // i.e. a type that we can invoke the `CreateRange<elementType>` method on, which returns an assignable immutable collection.
+            underlyingType = immutableCollectionType.GetGenericTypeDefinition();
+            constructingTypeName = GetConstructingTypeName(underlyingType.FullName);
+
+            return $"{constructingTypeName}:{elementType.FullName}";
         }
 
         internal static bool TypeIsImmutableDictionary(Type type)
@@ -93,21 +107,12 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        private string GetDelegateKey(
-            Type immutableCollectionType,
-            Type elementType,
-            out Type underlyingType,
-            out string constructingTypeName)
+        internal static bool TryGetCreateRangeDelegate(string delegateKey, out object createRangeDelegate)
         {
-            // Use the generic type definition of the immutable collection to determine an appropriate constructing type,
-            // i.e. a type that we can invoke the `CreateRange<elementType>` method on, which returns an assignable immutable collection.
-            underlyingType = immutableCollectionType.GetGenericTypeDefinition();
-            constructingTypeName = GetConstructingTypeName(underlyingType.FullName);
-
-            return $"{constructingTypeName}:{elementType.FullName}";
+            return s_createRangeDelegates.TryGetValue(delegateKey, out createRangeDelegate) && createRangeDelegate != null;
         }
 
-        public void RegisterImmutableCollectionType(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
+        internal static void RegisterImmutableCollectionType(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
         {
             // Get a unique identifier for a delegate which will point to the appropiate CreateRange method.
             string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out Type underlyingType, out string constructingTypeName);
@@ -122,10 +127,31 @@ namespace System.Text.Json.Serialization.Converters
             Type constructingType = underlyingType.Assembly.GetType(constructingTypeName);
 
             // Create a delegate which will point to the CreateRange method.
-            object createRangeDelegate = options.ClassMaterializerStrategy.ImmutableCreateRange(constructingType, elementType, TypeIsImmutableDictionary(immutableCollectionType));
+            object createRangeDelegate;
+            if (TypeIsImmutableDictionary(immutableCollectionType))
+            {
+                createRangeDelegate = options.ClassMaterializerStrategy.ImmutableDictionaryCreateRange(constructingType, elementType);
+            }
+            else
+            {
+                createRangeDelegate = options.ClassMaterializerStrategy.ImmutableCollectionCreateRange(constructingType, elementType);
+            }
 
             // Cache the delegate
             s_createRangeDelegates.TryAdd(delegateKey, createRangeDelegate);
+        }
+
+        internal IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        {
+            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type elementType = state.Current.GetElementType();
+
+            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
+            Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
+
+            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
+            JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
+            return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.PropertyPath);
         }
 
         public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
@@ -139,19 +165,6 @@ namespace System.Text.Json.Serialization.Converters
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
             JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
             return propertyInfo.CreateImmutableCollectionFromList(immutableCollectionType, delegateKey, sourceList, state.PropertyPath);
-        }
-
-        public IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
-        {
-            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            Type elementType = state.Current.GetElementType();
-
-            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
-            Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
-
-            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-            JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
-            return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.PropertyPath);
         }
     }
 }

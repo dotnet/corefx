@@ -193,9 +193,9 @@ namespace System.Text.Json.Serialization
                 if (ClassType == ClassType.Dictionary &&
                     ShouldDeserialize && DefaultImmutableConverter.TypeIsImmutableDictionary(RuntimePropertyType))
                 {
-                    EnumerableConverter = s_jsonImmutableConverter;
-                    ((DefaultImmutableConverter)EnumerableConverter).RegisterImmutableCollectionType(
+                    DefaultImmutableConverter.RegisterImmutableCollectionType(
                         RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType), options);
+                    EnumerableConverter = s_jsonImmutableConverter;
                 }
             }
             else
@@ -246,8 +246,8 @@ namespace System.Text.Json.Serialization
                             RuntimePropertyType.FullName.StartsWith(DefaultImmutableConverter.ImmutableNamespace) &&
                             RuntimePropertyType.GetGenericArguments().Length == 1)
                         {
+                            DefaultImmutableConverter.RegisterImmutableCollectionType(RuntimePropertyType, elementType, options);
                             EnumerableConverter = s_jsonImmutableConverter;
-                            ((DefaultImmutableConverter)EnumerableConverter).RegisterImmutableCollectionType(RuntimePropertyType, elementType, options);
                         }
                     }
                 }

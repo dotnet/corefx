@@ -96,38 +96,34 @@ namespace System.Text.Json.Serialization
             return typeof(Dictionary<string, TRuntimeProperty>);
         }
 
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the,
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
         public override IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string propertyPath)
         {
-            Debug.Assert(DefaultImmutableConverter.s_createRangeDelegates.ContainsKey(delegateKey));
-
-            DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
-                (DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty>)DefaultImmutableConverter.s_createRangeDelegates[delegateKey]);
-
-            if (createRangeDelegate == null)
+            if (!DefaultImmutableConverter.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, propertyPath);
             }
+
+            DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
+                (DefaultImmutableConverter.ImmutableCreateRangeDelegate<TRuntimeProperty>)createRangeDelegateObj);
 
             return (IEnumerable)createRangeDelegate.Invoke(CreateGenericIEnumerableFromList(sourceList));
         }
 
-        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the,
+        // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
         public override IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath)
         {
-            Debug.Assert(DefaultImmutableConverter.s_createRangeDelegates.ContainsKey(delegateKey));
-
-            DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty> createRangeDelegate = (
-                (DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty>)DefaultImmutableConverter.s_createRangeDelegates[delegateKey]);
-
-            if (createRangeDelegate == null)
+            if (!DefaultImmutableConverter.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, propertyPath);
             }
+
+            DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty> createRangeDelegate = (
+                (DefaultImmutableConverter.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty>)createRangeDelegateObj);
 
             return (IDictionary)createRangeDelegate.Invoke(CreateGenericIEnumerableFromDictionary(sourceDictionary));
         }
@@ -147,10 +143,9 @@ namespace System.Text.Json.Serialization
 
         private IEnumerable<KeyValuePair<string, TRuntimeProperty>> CreateGenericIEnumerableFromDictionary(IDictionary sourceDictionary)
         {
-            foreach (object item in sourceDictionary)
+            foreach (DictionaryEntry item in sourceDictionary)
             {
-                DictionaryEntry itemDictEntry = (DictionaryEntry)item;
-                yield return new KeyValuePair<string, TRuntimeProperty>((string)itemDictEntry.Key, (TRuntimeProperty)itemDictEntry.Value);
+                yield return new KeyValuePair<string, TRuntimeProperty>((string)item.Key, (TRuntimeProperty)item.Value);
             }
         }
     }
