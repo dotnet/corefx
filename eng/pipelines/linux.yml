@@ -6,15 +6,15 @@ parameters:
   # Required: value to specify if the full test matrix should be tested
   #   Default: false
   fullMatrix: false
-  # Optional: value to filter the tests.
+  # Optional: value to scope the tests.
   #   Default: empty
-  testFilter: ''
+  testScope: ''
 
 jobs:
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: ${{ parameters.isOfficialBuild }}
-    testFilter: ${{ parameters.testFilter }}
+    testScope: ${{ parameters.testScope }}
     targetOS: Linux
     jobs:
 
@@ -51,7 +51,7 @@ jobs:
              _buildScriptPrefix: ''
              _buildExtraArguments: /p:RuntimeOS=linux-musl
 
-          ${{ if or(eq(parameters.testFilter, 'outerloop'), eq(parameters.testFilter, 'all')) }}:
+          ${{ if or(eq(parameters.testScope, 'outerloop'), eq(parameters.testScope, 'all')) }}:
             x64_Debug:
               _BuildConfig: Debug
               _architecture: x64
@@ -121,7 +121,7 @@ jobs:
 
     # Legs without helix testing
     # Only run this leg in PRs.
-    - ${{ if and(eq(parameters.isOfficialBuild, 'false'), and(ne(parameters.testFilter, 'outerloop'), ne(parameters.testFilter, 'all'))) }}:
+    - ${{ if and(eq(parameters.isOfficialBuild, 'false'), and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all'))) }}:
       - job: LinuxNoTest
         displayName: Linux
         strategy:

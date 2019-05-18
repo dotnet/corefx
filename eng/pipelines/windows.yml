@@ -6,16 +6,16 @@ parameters:
   # Required: value to specify if the full test matrix should be tested
   #   Default: false
   fullMatrix: false
-  # Optional: value to filter the tests.
+  # Optional: value to scope the tests.
   #   Default: empty
-  testFilter: ''
+  testScope: ''
 
 jobs:
 
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: ${{ parameters.isOfficialBuild }}
-    testFilter: ${{ parameters.testFilter }}
+    testScope: ${{ parameters.testScope }}
     targetOS: Windows_NT
     jobs:
 
@@ -52,7 +52,7 @@ jobs:
               _helixQueues: $(uapNetfxQueues)
 
           # Run arm on the matrix or in Outerloop
-          ${{ if or(eq(parameters.fullMatrix, 'true'), or(eq(parameters.testFilter, 'outerloop'), eq(parameters.testFilter, 'all'))) }}:
+          ${{ if or(eq(parameters.fullMatrix, 'true'), or(eq(parameters.testScope, 'outerloop'), eq(parameters.testScope, 'all'))) }}:
             arm64_Release:
               _BuildConfig: Release
               _architecture: arm64
@@ -120,7 +120,7 @@ jobs:
           - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.Open+Windows.10.Amd64.ServerRS5.Open          
 
     # There is no point of running legs without outerloop tests, when in an outerloop build.
-    - ${{ if and(ne(parameters.testFilter, 'outerloop'), ne(parameters.testFilter, 'all')) }}:
+    - ${{ if and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all')) }}:
       # Packaging all configurations
       - job: AllConfigurations
         displayName: Packaging All Configurations

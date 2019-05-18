@@ -6,15 +6,15 @@ parameters:
   # Required: value to specify if the full test matrix should be tested
   #   Default: false
   fullMatrix: false
-  # Optional: value to filter the tests.
+  # Optional: value to scope the tests.
   #   Default: empty
-  testFilter: ''
+  testScope: ''
 
 jobs:
 - template: corefx-base.yml
   parameters:
     isOfficialBuild: ${{ parameters.isOfficialBuild }}
-    testFilter: ${{ parameters.testFilter }}
+    testScope: ${{ parameters.testScope }}
     targetOS: FreeBSD
     jobs:
 
