@@ -11,7 +11,7 @@ namespace System.Text.Json
     public ref partial struct Utf8JsonReader
     {
         /// <summary>
-        /// Reads the next JSON token value from the source, unescaped, and transcoded as a <see cref="string"/>.
+        /// Parses the current JSON token value from the source, unescaped, and transcoded as a <see cref="string"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of the JSON token that is not a string
@@ -40,7 +40,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source as a <see cref="bool"/>.
+        /// Parses the current JSON token value from the source as a <see cref="bool"/>.
         /// Returns true if the TokenType is JsonTokenType.True and false if the TokenType is JsonTokenType.False.
         /// </summary>
         /// <exception cref="InvalidOperationException">
@@ -68,7 +68,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to an <see cref="int"/>.
+        /// Parses the current JSON token value from the source as an <see cref="int"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to an <see cref="int"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -92,7 +92,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="long"/>.
+        /// Parses the current JSON token value from the source as a <see cref="long"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="long"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -116,7 +116,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="uint"/>.
+        /// Parses the current JSON token value from the source as a <see cref="uint"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="uint"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -141,7 +141,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="ulong"/>.
+        /// Parses the current JSON token value from the source as a <see cref="ulong"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="ulong"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -166,7 +166,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="float"/>.
+        /// Parses the current JSON token value from the source as a <see cref="float"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="float"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -189,7 +189,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="double"/>.
+        /// Parses the current JSON token value from the source as a <see cref="double"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="double"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -212,7 +212,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="decimal"/>.
+        /// Parses the current JSON token value from the source as a <see cref="decimal"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="decimal"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -235,7 +235,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="DateTime"/>.
+        /// Parses the current JSON token value from the source as a <see cref="DateTime"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="DateTime"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -258,7 +258,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="DateTimeOffset"/>.
+        /// Parses the current JSON token value from the source as a <see cref="DateTimeOffset"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="DateTimeOffset"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -281,7 +281,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="Guid"/>.
+        /// Parses the current JSON token value from the source as a <see cref="Guid"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to a <see cref="Guid"/>
         /// value.
         /// Throws exceptions otherwise.
@@ -304,7 +304,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to an <see cref="int"/>.
+        /// Parses the current JSON token value from the source as an <see cref="int"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to an <see cref="int"/> value.
         /// Returns false otherwise.
@@ -325,7 +325,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="long"/>.
+        /// Parses the current JSON token value from the source as a <see cref="long"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="long"/> value.
         /// Returns false otherwise.
@@ -346,7 +346,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="uint"/>.
+        /// Parses the current JSON token value from the source as a <see cref="uint"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="uint"/> value.
         /// Returns false otherwise.
@@ -368,7 +368,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="ulong"/>.
+        /// Parses the current JSON token value from the source as a <see cref="ulong"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="ulong"/> value.
         /// Returns false otherwise.
@@ -390,7 +390,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="float"/>.
+        /// Parses the current JSON token value from the source as a <see cref="float"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="float"/> value.
         /// Returns false otherwise.
@@ -411,7 +411,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="double"/>.
+        /// Parses the current JSON token value from the source as a <see cref="double"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="double"/> value.
         /// Returns false otherwise.
@@ -432,7 +432,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="decimal"/>.
+        /// Parses the current JSON token value from the source as a <see cref="decimal"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="decimal"/> value.
         /// Returns false otherwise.
@@ -453,7 +453,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="DateTime"/>.
+        /// Parses the current JSON token value from the source as a <see cref="DateTime"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="DateTime"/> value.
         /// Returns false otherwise.
@@ -512,7 +512,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="DateTimeOffset"/>.
+        /// Parses the current JSON token value from the source as a <see cref="DateTimeOffset"/>.
         /// Returns true if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="DateTimeOffset"/> value.
         /// Returns false otherwise.
@@ -571,7 +571,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Reads the next JSON token value from the source and parses it to a <see cref="Guid"/>.
+        /// Parses the current JSON token value from the source as a <see cref="Guid"/>.
         /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully
         /// parsed to a <see cref="Guid"/> value. Only supports <see cref="Guid"/> values with hyphens
         /// and without any surrounding decorations.
