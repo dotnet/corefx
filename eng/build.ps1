@@ -7,7 +7,7 @@ Param(
   [string] $os,
   [switch] $allconfigurations,
   [switch] $coverage,
-  [switch] $testscope,
+  [string] $testscope,
   [string] $arch,
   [switch] $clean,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
