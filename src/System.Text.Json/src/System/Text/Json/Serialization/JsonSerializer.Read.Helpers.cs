@@ -23,15 +23,5 @@ namespace System.Text.Json.Serialization
 
             return state.Current.ReturnValue;
         }
-
-        private static void CheckSupportedOptions(
-            JsonSerializerOptions options)
-        {
-            if (options?.ReadCommentHandling == JsonCommentHandling.Allow)
-            {
-                throw new ArgumentException(
-                    SR.JsonSerializerDoesNotSupportComments);
-            }
-        }
     }
 }

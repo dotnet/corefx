@@ -17,35 +17,6 @@ namespace System.Text.Json.Serialization.Tests
             await Assert.ThrowsAsync<ArgumentNullException>(async () => await JsonSerializer.ReadAsync(new MemoryStream(), (Type)null));
         }
 
-
-        [Theory]
-        [InlineData("// comment")]
-        [InlineData("/* multi\nline comment */")]
-        public static async Task ReadCommentsWithAllowFailsAsync(string comments)
-        {
-            byte[] data = Encoding.UTF8.GetBytes(comments);
-
-            {
-                using (MemoryStream stream = new MemoryStream(data))
-                {
-                    var options = new JsonSerializerOptions();
-                    options.ReadCommentHandling = JsonCommentHandling.Allow;
-
-                    await Assert.ThrowsAsync<ArgumentException>(async () => await JsonSerializer.ReadAsync<object>(stream, options));
-                }
-            }
-
-            {
-                using (MemoryStream stream = new MemoryStream(data))
-                {
-                    var options = new JsonSerializerOptions();
-                    options.ReadCommentHandling = JsonCommentHandling.Allow;
-
-                    await Assert.ThrowsAsync<ArgumentException>(async () => await JsonSerializer.ReadAsync(stream, typeof(object), options));
-                }
-            }
-        }
-
         [Fact]
         public static async Task ReadSimpleObjectAsync()
         {
