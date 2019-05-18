@@ -1356,7 +1356,7 @@ namespace System.Text.Json.Tests
                             foundComment = true;
                             indexAfterFirstComment = jsonSlice.BytesConsumed;
                             Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                            string actualComment = json.GetComment();
+                            string actualComment = jsonSlice.GetComment();
                             Assert.Equal(expectedComment, actualComment);
                             break;
                     }
@@ -1380,7 +1380,7 @@ namespace System.Text.Json.Tests
                                 foundComment = true;
                                 indexAfterFirstComment = jsonSlice.BytesConsumed;
                                 Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                                string actualComment = json.GetComment();
+                                string actualComment = jsonSlice.GetComment();
                                 Assert.Equal(expectedComment, actualComment);
                                 break;
                         }
@@ -3362,7 +3362,7 @@ namespace System.Text.Json.Tests
                 {
                     "A string with {0}valid UTF8 \\t tab",
                     "A string with {0}invalid UTF8 \\xc3\\x28",
-                    "A string with {0}valid UTF16 \\u92e म",
+                    "A string with {0}valid UTF16 \\u002e \\u0009 म",
                     "A string with {0}invalid UTF16 \\uDD1E"
                 };
 
