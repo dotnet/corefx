@@ -1259,7 +1259,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan.ToArray()); // TODO: https://github.com/dotnet/corefx/issues/33347
+                        string actualComment = json.GetComment();
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -1329,7 +1329,7 @@ namespace System.Text.Json.Tests
                         foundComment = true;
                         indexAfterFirstComment = json.BytesConsumed;
                         Assert.Equal(indexAfterFirstComment, json.CurrentState.BytesConsumed);
-                        string actualComment = Encoding.UTF8.GetString(json.ValueSpan.ToArray());
+                        string actualComment = json.GetComment();
                         Assert.Equal(expectedComment, actualComment);
                         break;
                 }
@@ -1356,7 +1356,7 @@ namespace System.Text.Json.Tests
                             foundComment = true;
                             indexAfterFirstComment = jsonSlice.BytesConsumed;
                             Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                            string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan.ToArray());
+                            string actualComment = json.GetComment();
                             Assert.Equal(expectedComment, actualComment);
                             break;
                     }
@@ -1380,7 +1380,7 @@ namespace System.Text.Json.Tests
                                 foundComment = true;
                                 indexAfterFirstComment = jsonSlice.BytesConsumed;
                                 Assert.Equal(indexAfterFirstComment, jsonSlice.CurrentState.BytesConsumed);
-                                string actualComment = Encoding.UTF8.GetString(jsonSlice.ValueSpan.ToArray());
+                                string actualComment = json.GetComment();
                                 Assert.Equal(expectedComment, actualComment);
                                 break;
                         }
@@ -2097,8 +2097,8 @@ namespace System.Text.Json.Tests
                     case JsonTokenType.Comment:
                         if (expected != null)
                         {
-                            byte[] data = json.HasValueSequence ? json.ValueSequence.ToArray() : json.ValueSpan.ToArray();
-                            Assert.Equal(expected, Encoding.UTF8.GetString(data));
+                            string actualComment = json.GetComment();
+                            Assert.Equal(expected, actualComment);
                         }
                         else
                         {
