@@ -3385,30 +3385,5 @@ namespace System.Text.Json.Tests
                 return dataList;
             }
         }
-
-        public static IEnumerable<object[]> SingleLineCommentData
-        {
-            get
-            {
-                return new List<object[]>
-                {
-                    // \r as the line separator
-                    new object [] {"//Comment\r" },
-                    new object [] {"//Comment\r" },
-                    new object [] {"//Comment\r" },
-
-                    // \r\n as line separator
-                    new object [] {"//Comment\r\n" },
-                    new object [] {"//Comment\r\n" },
-                    new object [] {"//Comment\r\n" },
-                    new object [] {"//Comment\r\n" },
-
-                    // \n as line separator
-                    new object [] {"//Comment\n" },
-                    new object [] {"//Comment\n" },
-                    new object [] {"//Comment\n" }
-                };
-            }
-        }
     }
 }
