@@ -449,6 +449,66 @@ namespace System.Net.Http.Functional.Tests
             Assert.True(connectionAccepted);
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
+        [Fact]
+        [OuterLoop("Uses external server")]
+        public async Task ProxyTunnelRequest_UserAgentHeaderAdded()
+        {
+            if (!UseSocketsHttpHandler)
+            {
+                return; // Skip test since the fix is only in SocketsHttpHandler.
+            }
+
+            string addressUri = $"https://{Configuration.Http.SecureHost}/";
+            bool connectionAccepted = false;
+
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+                    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
+                    try
+                    { await client.GetAsync(addressUri); }
+                    catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"CONNECT {Configuration.Http.SecureHost}:443 HTTP/1.1", headers);
+                Assert.Contains("User-Agent: Mozilla/5.0", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+
+            connectionAccepted = false;
+
+            // We retry without UserAgent to be sure that we flow header per CONNECT
+            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
+            {
+                using (HttpClientHandler handler = CreateHttpClientHandler())
+                using (var client = new HttpClient(handler))
+                {
+                    handler.Proxy = new WebProxy(proxyUri);
+                    handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+                    try
+                    { await client.GetAsync(addressUri); }
+                    catch { }
+                }
+            }, server => server.AcceptConnectionAsync(async connection =>
+            {
+                connectionAccepted = true;
+                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
+                Assert.Contains($"CONNECT {Configuration.Http.SecureHost}:443 HTTP/1.1", headers);
+                Assert.DoesNotContain("User-Agent:", headers);
+            }));
+
+            Assert.True(connectionAccepted);
+        }
+
         public static IEnumerable<object[]> SecureAndNonSecure_IPBasedUri_MemberData() =>
             from address in new[] { IPAddress.Loopback, IPAddress.IPv6Loopback }
             from useSsl in new[] { true, false }
