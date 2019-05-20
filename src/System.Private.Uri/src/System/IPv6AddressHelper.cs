@@ -17,6 +17,7 @@ namespace System
         {
             Span<ushort> numbers = stackalloc ushort[NumberOfLabels];
             numbers.Clear();
+            Parse(str, numbersPtr, start, ref scopeId);
             isLoopback = IsLoopback(numbers);
 
             // RFC 5952 Sections 4 & 5 - Compressed, lower case, with possible embedded IPv4 addresses.
