@@ -604,12 +604,12 @@ namespace System.PrivateUri.Tests
         // cases as possible. There are two limits imposed on the length of URI strings.
         // The first, 65519, is specified in the documentation and is one of the first checks
         // enforced on a URI. This limit is not enforced after expansion.
-        static int InitialLengthLimit = 65519;
+        private static int InitialLengthLimit = 65519;
 
         // The second, 65535 (ushort.MaxValue) is only reachable via expansion as a result of
         // percent encoding. Exceeding this value used to result in a hang, but now results in
         // an exception.
-        static int ExpandedLengthLimit = 65535;
+        private static int ExpandedLengthLimit = 65535;
 
         // In order to maximize compat, we have to allow a gap between the two maximum
         // values. A URI that starts below 65519 but expands to be in the range [65519,65535)
