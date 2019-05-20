@@ -145,7 +145,7 @@ namespace System.Net.Sockets.Tests
                 Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
-                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                    Assert.Equal(SocketError.NotSocket, localSocketError.Value);
                 }
                 else
                 {
