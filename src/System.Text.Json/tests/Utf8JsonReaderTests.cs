@@ -996,21 +996,7 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void SkipTest()
         {
-            string jsonString = @"
-{
-	""propertyName"": {
-
-        ""foo"": ""bar""
-
-    },
-	""nestedArray"": {
-		""numbers"": [
-			1,
-			2,
-			3
-		]
-    }
-}";
+            string jsonString = @"{""propertyName"": {""foo"": ""bar""},""nestedArray"": {""numbers"": [1,2,3]}}";
 
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -1044,7 +1030,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(1, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndObject, json.TokenType);
-                Assert.Equal(56, json.BytesConsumed);
+                Assert.Equal(31, json.BytesConsumed);
             }
 
             {
@@ -1058,7 +1044,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(1, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndObject, json.TokenType);
-                Assert.Equal(56, json.BytesConsumed);
+                Assert.Equal(31, json.BytesConsumed);
             }
 
             {
@@ -1073,7 +1059,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(2, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.String, json.TokenType);
-                Assert.Equal(47, json.BytesConsumed);
+                Assert.Equal(30, json.BytesConsumed);
             }
 
             {
@@ -1088,7 +1074,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(2, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.String, json.TokenType);
-                Assert.Equal(47, json.BytesConsumed);
+                Assert.Equal(30, json.BytesConsumed);
             }
 
             {
@@ -1103,7 +1089,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(1, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndObject, json.TokenType);
-                Assert.Equal(56, json.BytesConsumed);
+                Assert.Equal(31, json.BytesConsumed);
             }
 
             {
@@ -1118,7 +1104,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(2, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndArray, json.TokenType);
-                Assert.Equal(117, json.BytesConsumed);
+                Assert.Equal(66, json.BytesConsumed);
             }
 
             {
@@ -1133,7 +1119,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(2, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndArray, json.TokenType);
-                Assert.Equal(117, json.BytesConsumed);
+                Assert.Equal(66, json.BytesConsumed);
             }
 
             {
@@ -1148,20 +1134,14 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(3, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.Number, json.TokenType);
-                Assert.Equal(98, json.BytesConsumed);
+                Assert.Equal(61, json.BytesConsumed);
             }
         }
 
         [Fact]
         public static void SkipTestEmpty()
         {
-            string jsonString = @"
-{
-	""nestedArray"": {
-        ""empty"": [],
-        ""empty"": [{}]
-    }
-}";
+            string jsonString = @"{""nestedArray"": {""empty"": [],""empty"": [{}]}}";
 
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
@@ -1177,7 +1157,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(2, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndArray, json.TokenType);
-                Assert.Equal(43, json.BytesConsumed);
+                Assert.Equal(28, json.BytesConsumed);
             }
 
             {
@@ -1192,7 +1172,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(2, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndArray, json.TokenType);
-                Assert.Equal(43, json.BytesConsumed);
+                Assert.Equal(28, json.BytesConsumed);
             }
 
             {
@@ -1207,7 +1187,7 @@ namespace System.Text.Json.Tests
                 json.Skip();
                 Assert.Equal(2, json.CurrentDepth);
                 Assert.Equal(JsonTokenType.EndArray, json.TokenType);
-                Assert.Equal(67, json.BytesConsumed);
+                Assert.Equal(42, json.BytesConsumed);
             }
         }
 
