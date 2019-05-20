@@ -12,7 +12,7 @@
     </PrereleaseLibraryPackage>
   </ItemDefinitionGroup>
 
-  <Target Name="FindNetCoreAppPackages" BeforeTargets="ApplyBaselineToStaticDependencies">
+  <Target Name="FindNetCoreAppPackages" BeforeTargets="GetPackageDependencies">
     <ItemGroup>
       <PkgProjGlobPath Include="$(SourceDir)/**/*.pkgproj" />
     </ItemGroup>
