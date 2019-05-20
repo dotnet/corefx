@@ -1075,6 +1075,10 @@ namespace System.Net.Sockets
             if (errorCode != SocketError.Success)
             {
                 Debug.Assert(acceptedSocketHandle.IsInvalid);
+                if (CleanedUp)
+                {
+                    errorCode = SocketError.Interrupted;
+                }
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
@@ -1157,6 +1161,8 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
+                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+
                 // Update the internal state of this socket according to the error before throwing.
                 UpdateStatusAfterSocketError(errorCode);
                 if (NetEventSource.IsEnabled)
@@ -1216,6 +1222,8 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
+                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+
                 // Update the internal state of this socket according to the error before throwing.
                 UpdateStatusAfterSocketError(errorCode);
                 if (NetEventSource.IsEnabled)
@@ -1257,6 +1265,8 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
+                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+
                 UpdateStatusAfterSocketError(errorCode);
                 if (NetEventSource.IsEnabled) NetEventSource.Error(this, new SocketException((int)errorCode));
                 bytesTransferred = 0;
@@ -1344,6 +1354,8 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
+                errorCode = UpdateSendSocketErrorForCleanedUp(errorCode);
+
                 UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
@@ -1433,6 +1445,8 @@ namespace System.Net.Sockets
             int bytesTransferred;
             errorCode = SocketPal.Receive(_handle, buffer, offset, size, socketFlags, out bytesTransferred);
 
+            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+
             if (errorCode != SocketError.Success)
             {
                 // Update the internal state of this socket according to the error before throwing.
@@ -1479,6 +1493,8 @@ namespace System.Net.Sockets
 
             int bytesTransferred;
             errorCode = SocketPal.Receive(_handle, buffer, socketFlags, out bytesTransferred);
+
+            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
 
             if (errorCode != SocketError.Success)
             {
@@ -1543,6 +1559,8 @@ namespace System.Net.Sockets
                 catch (ObjectDisposedException) { }
             }
 #endif
+
+            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
 
             if (errorCode != SocketError.Success)
             {
@@ -1624,6 +1642,8 @@ namespace System.Net.Sockets
             int bytesTransferred;
             SocketError errorCode = SocketPal.ReceiveMessageFrom(this, _handle, buffer, offset, size, ref socketFlags, socketAddress, out receiveAddress, out ipPacketInformation, out bytesTransferred);
 
+            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
+
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success && errorCode != SocketError.MessageSize)
             {
@@ -1701,6 +1721,8 @@ namespace System.Net.Sockets
 
             int bytesTransferred;
             SocketError errorCode = SocketPal.ReceiveFrom(_handle, buffer, offset, size, socketFlags, socketAddress.Buffer, ref socketAddress.InternalSize, out bytesTransferred);
+
+            errorCode = UpdateReceiveSocketErrorForCleanedUp(errorCode, bytesTransferred);
 
             // If the native call fails we'll throw a SocketException.
             SocketException socketException = null;
@@ -4435,6 +4457,10 @@ namespace System.Net.Sockets
             // Throw an appropriate SocketException if the native call fails.
             if (errorCode != SocketError.Success)
             {
+                if (CleanedUp)
+                {
+                    errorCode = SocketError.NotSocket;
+                }
                 // Update the internal state of this socket according to the error before throwing.
                 SocketException socketException = SocketExceptionFactory.CreateSocketException((int)errorCode, endPointSnapshot);
                 UpdateStatusAfterSocketError(socketException);
@@ -5229,6 +5255,32 @@ namespace System.Net.Sockets
 
         // Helper for SendFile implementations
         private static FileStream OpenFile(string name) => string.IsNullOrEmpty(name) ? null : File.OpenRead(name);
+
+        private SocketError UpdateReceiveSocketErrorForCleanedUp(SocketError socketErrorIn, int bytesReceived)
+        {
+            if (bytesReceived == 0 && CleanedUp)
+            {
+                return IsConnectionOriented ? SocketError.ConnectionAborted : SocketError.Interrupted;
+            }
+            else
+            {
+                return socketErrorIn;
+            }
+        }
+
+        private SocketError UpdateSendSocketErrorForCleanedUp(SocketError socketErrorIn)
+        {
+            if (CleanedUp)
+            {
+                return IsConnectionOriented ? SocketError.ConnectionAborted : SocketError.Interrupted;
+            }
+            else
+            {
+                return socketErrorIn;
+            }
+        }
+
+        private bool IsConnectionOriented => _socketType == SocketType.Stream;
 
         #endregion
     }
