@@ -156,7 +156,7 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.Private.CoreFX.OOB",
+    "Name": "Microsoft.Private.CoreFx.OOB",
     "Description": "Package used to represent out-of-band packages that are not included in NetCoreApp.",
     "CommonTypes": []
   },
