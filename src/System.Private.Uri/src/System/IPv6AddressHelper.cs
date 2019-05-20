@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 
 namespace System
 {
@@ -26,16 +27,14 @@ namespace System
         {
             unsafe
             {
-                ushort* numbers = stackalloc ushort[NumberOfLabels];
-                // optimized zeroing of 8 shorts = 2 longs
-                ((long*)numbers)[0] = 0L;
-                ((long*)numbers)[1] = 0L;
+                Span<ushort> numbers = stackalloc ushort[NumberOfLabels];
+                numbers.Clear();
                 isLoopback = Parse(str, numbers, start, ref scopeId);
                 return '[' + CreateCanonicalName(numbers) + ']';
             }
         }
 
-        internal static unsafe string CreateCanonicalName(ushort* numbers)
+        private static string CreateCanonicalName(ReadOnlySpan<ushort> numbers)
         {
             // RFC 5952 Sections 4 & 5 - Compressed, lower case, with possible embedded IPv4 addresses.
 
@@ -83,7 +82,7 @@ namespace System
         // Longest consecutive sequence of zero segments, minimum 2.
         // On equal, first sequence wins.
         // <-1, -1> for no compression.
-        private static unsafe KeyValuePair<int, int> FindCompressionRange(ushort* numbers)
+        private static KeyValuePair<int, int> FindCompressionRange(ReadOnlySpan<ushort> numbers)
         {
             int longestSequenceLength = 0;
             int longestSequenceStart = -1;
@@ -117,7 +116,7 @@ namespace System
 
         // Returns true if the IPv6 address should be formated with an embedded IPv4 address:
         // ::192.168.1.1
-        private static unsafe bool ShouldHaveIpv4Embedded(ushort* numbers)
+        private static bool ShouldHaveIpv4Embedded(ReadOnlySpan<ushort> numbers)
         {
             // 0:0 : 0:0 : x:x : x.x.x.x
             if (numbers[0] == 0 && numbers[1] == 0 && numbers[2] == 0 && numbers[3] == 0 && numbers[6] != 0)
@@ -184,6 +183,12 @@ namespace System
             bool havePrefix = false;
             bool expectingNumber = true;
             int lastSequence = 1;
+
+            // Starting with a colon character is only valid if another colon follows.
+            if (name[start] == ':' && (start + 1 >= end || name[start + 1] != ':'))
+            {
+                return false;
+            }
 
             int i;
             for (i = start; i < end; ++i)
@@ -379,7 +384,7 @@ namespace System
         //  Nothing
         //
 
-        internal static unsafe bool Parse(string address, ushort* numbers, int start, ref string scopeId)
+        private static bool Parse(string address, Span<ushort> numbers, int start, ref string scopeId)
         {
             int number = 0;
             int index = 0;
