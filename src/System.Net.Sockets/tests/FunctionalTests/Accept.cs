@@ -304,18 +304,17 @@ namespace System.Net.Sockets.Tests
                 listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
                 listener.Listen(1);
 
-                Task acceptTask = Task.Run(async () =>
+                Task acceptTask = Task.Factory.StartNew(() =>
                 {
-                    await AcceptAsync(listener);
-                });
+                    AcceptAsync(listener).GetAwaiter().GetResult();
+                }, TaskCreationOptions.LongRunning);
 
-                Task disposeTask = Task.Run(async () =>
+                // Wait a little so the operation is started, then Dispose.
+                await Task.Delay(100);
+                Task disposeTask = Task.Factory.StartNew(() =>
                 {
-                    // Wait a little so the accept is started.
-                    await Task.Delay(100);
-
                     listener.Dispose();
-                });
+                }, TaskCreationOptions.LongRunning);
 
                 Task timeoutTask = Task.Delay(30000);
 

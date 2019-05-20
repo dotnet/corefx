@@ -964,21 +964,19 @@ namespace System.Net.Sockets.Tests
                 var socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
                 socket.BindToAnonymousPort(IPAddress.Loopback);
 
-                Task receiveTask = Task.Run(async () =>
+                Task receiveTask = Task.Factory.StartNew(() =>
                 {
-                    await ReceiveAsync(socket, new ArraySegment<byte>(new byte[1]));
-                });
+                    ReceiveAsync(socket, new ArraySegment<byte>(new byte[1])).GetAwaiter().GetResult();
+                }, TaskCreationOptions.LongRunning);
 
-                Task disposeTask = Task.Run(async () =>
+                // Wait a little so the operation is started, then Dispose.
+                await Task.Delay(100);
+                Task disposeTask = Task.Factory.StartNew(() =>
                 {
-                    // Wait a little so the receive is started.
-                    await Task.Delay(100);
-
                     socket.Dispose();
-                });
+                }, TaskCreationOptions.LongRunning);
 
                 Task timeoutTask = Task.Delay(30000);
-
                 Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, receiveTask, timeoutTask));
 
                 await disposeTask;
@@ -1029,6 +1027,8 @@ namespace System.Net.Sockets.Tests
             // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
             // see a SocketException either.
 
+            // Trigger CI build
+
             SocketError? peerSocketError = null;
             SocketError? localSocketError = null;
             bool disposedException = false;
@@ -1037,32 +1037,30 @@ namespace System.Net.Sockets.Tests
                 (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
                 using (socket2)
                 {
-                    Task socketOperation = Task.Run(async () =>
+                    Task socketOperation = Task.Factory.StartNew(() =>
                     {
                         if (receiveOrSend)
                         {
-                            await ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1]));
+                            ReceiveAsync(socket1, new ArraySegment<byte>(new byte[1])).GetAwaiter().GetResult();
                         }
                         else
                         {
                             var buffer = new ArraySegment<byte>(new byte[4096]);
                             while (true)
                             {
-                                await SendAsync(socket1, buffer);
+                                SendAsync(socket1, buffer).GetAwaiter().GetResult();
                             }
                         }
-                    });
+                    }, TaskCreationOptions.LongRunning);
 
-                    Task disposeTask = Task.Run(async () =>
+                    // Wait a little so the operation is started, then Dispose.
+                    await Task.Delay(100);
+                    Task disposeTask = Task.Factory.StartNew(() =>
                     {
-                        // Wait a little so the operation is started.
-                        await Task.Delay(100);
-
                         socket1.Dispose();
-                    });
+                    }, TaskCreationOptions.LongRunning);
 
                     Task timeoutTask = Task.Delay(30000);
-
                     Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
 
                     await disposeTask;
@@ -1123,7 +1121,7 @@ namespace System.Net.Sockets.Tests
                 Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
-                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                    Assert.Equal(SocketError.ConnectionAborted, localSocketError.Value);
                 }
                 else
                 {

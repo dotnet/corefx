@@ -90,6 +90,9 @@ namespace System.Net.Sockets.Tests
         [PlatformSpecific(~TestPlatforms.OSX)] // Not supported on OSX.
         public async Task ConnectGetsCanceledByDispose()
         {
+            bool usesApm = UsesApm ||
+                           (this is ConnectTask); // .NET Core ConnectAsync Task API is implemented using Apm
+
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, we won't see a SocketException.
 
@@ -98,18 +101,18 @@ namespace System.Net.Sockets.Tests
             for (int i = 0; i < 10 && !localSocketError.HasValue; i++)
             {
                 var client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                Task connectTask = Task.Run(async () =>
-                {
-                    await ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23));
-                });
 
-                Task disposeTask = Task.Run(async () =>
+                Task connectTask = Task.Factory.StartNew(() =>
                 {
-                    // Wait a little so the connect is started.
-                    await Task.Delay(100);
+                    ConnectAsync(client, new IPEndPoint(IPAddress.Parse("1.1.1.1"), 23)).GetAwaiter().GetResult();
+                }, TaskCreationOptions.LongRunning);
 
+                // Wait a little so the operation is started, then Dispose.
+                await Task.Delay(100);
+                Task disposeTask = Task.Factory.StartNew(() =>
+                {
                     client.Dispose();
-                });
+                }, TaskCreationOptions.LongRunning);
 
                 Task timeoutTask = Task.Delay(30000);
 
@@ -123,6 +126,12 @@ namespace System.Net.Sockets.Tests
                 }
                 catch (SocketException se)
                 {
+                    // On connection timeout, retry.
+                    if (se.SocketErrorCode == SocketError.TimedOut)
+                    {
+                        continue;
+                    }
+
                     localSocketError = se.SocketErrorCode;
                 }
                 catch (ObjectDisposedException)
@@ -130,12 +139,12 @@ namespace System.Net.Sockets.Tests
                     disposedException = true;
                 }
 
-                if (UsesApm || this is ConnectTask)
+                if (usesApm)
                 {
                     break;
                 }
             }
-            if (UsesApm || this is ConnectTask)
+            if (usesApm)
             {
                 Assert.False(localSocketError.HasValue);
                 Assert.True(disposedException);
@@ -145,7 +154,7 @@ namespace System.Net.Sockets.Tests
                 Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
-                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                    Assert.Equal(SocketError.NotSocket, localSocketError.Value);
                 }
                 else
                 {
