@@ -1120,7 +1120,14 @@ namespace System.Net.Sockets.Tests
             else
             {
                 Assert.True(localSocketError.HasValue);
-                Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                if (UsesSync)
+                {
+                    Assert.Equal(SocketError.ConnectionAborted, localSocketError.Value);
+                }
+                else
+                {
+                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                }
             }
         }
     }
