@@ -32,12 +32,6 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Data.SqlClient\pkg\System.Data.SqlClient.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
-    <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.Windows.Compatibility\Microsoft.Windows.Compatibility.builds">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
