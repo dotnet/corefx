@@ -208,6 +208,8 @@ namespace System.Text.Json
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public bool Read() { throw null; }
+        public void Skip() { throw null; }
+        public bool TrySkip() { throw null; }
         public bool TextEquals(System.ReadOnlySpan<byte> otherUtf8Text) { throw null; }
         public bool TextEquals(System.ReadOnlySpan<char> otherText) { throw null; }
         public bool TryGetDateTime(out System.DateTime value) { throw null; }

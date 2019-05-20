@@ -261,6 +261,85 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Skips the children of the current JSON token.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when the reader was given partial data with more data to follow (i.e. _isFinalBlock is false).
+        /// </exception>
+        public void Skip()
+        {
+            if (!_isFinalBlock)
+            {
+                throw ThrowHelper.GetInvalidOperationException_CannotSkipOnPartial();
+            }
+
+            if (TokenType == JsonTokenType.PropertyName)
+            {
+                Read();
+            }
+
+            if (TokenType == JsonTokenType.StartObject || TokenType == JsonTokenType.StartArray)
+            {
+                int depth = CurrentDepth;
+                do
+                {
+                    bool result = Read();
+                    // Since _isFinalBlock == true here, and the JSON token is not a primitive value or comment.
+                    // Read() is guaranteed to return true OR throw for invalid/incomplete data.
+                    Debug.Assert(result);
+                }
+                while (depth < CurrentDepth);
+            }
+        }
+
+        /// <summary>
+        /// Tries to skip the children of the current JSON token.
+        /// </summary>
+        /// <returns>True if there was enough data for the children to be skipped successfully, else false.</returns>
+        /// <remarks>
+        /// If the reader did not have enough data to completely skip the children of the current token,
+        /// it will be reset to the state it was in before the method was called.
+        /// </remarks>
+        public bool TrySkip()
+        {
+            Utf8JsonReader restore = default;
+            bool createdCopy = false;
+            bool result = true;
+
+            if (TokenType == JsonTokenType.PropertyName)
+            {
+                restore = this;
+                createdCopy = true;
+                result = Read();
+            }
+
+            if (result && (TokenType == JsonTokenType.StartObject || TokenType == JsonTokenType.StartArray))
+            {
+                if (!createdCopy)
+                {
+                    restore = this;
+                    createdCopy = true;
+                }
+
+                int depth = CurrentDepth;
+                do
+                {
+                    result = Read();
+                }
+                while (result && depth < CurrentDepth);
+            }
+
+            if (!result)
+            {
+                Debug.Assert(createdCopy);
+                Debug.Assert(!_isFinalBlock);
+                this = restore;
+            }
+
+            return result;
+        }
+
+        /// <summary>
         /// Compares the UTF-8 encoded text to the unescaped JSON token value in the source and returns true if they match.
         /// </summary>
         /// <param name="otherUtf8Text">The UTF-8 encoded text to compare against.</param>
