@@ -11,10 +11,24 @@
       <Version>$(_PreReleasePackageVersion)</Version>
     </PrereleaseLibraryPackage>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <PkgProjGlobPath Include="$(SourceDir)/**/*.pkgproj" />
-    <PrereleaseLibraryPackage Include="@(PrereleaseLibraryPackage -> %(Filename))" />
-    <Dependency Include="@(PrereleaseLibraryPackage)" />
-  </ItemGroup>
+
+  <Target Name="FindNetCoreAppPackages" BeforeTargets="ApplyBaselineToStaticDependencies">
+    <ItemGroup>
+      <PkgProjGlobPath Include="$(SourceDir)/**/*.pkgproj" />
+    </ItemGroup>
+
+    <MSBuild Projects="@(PkgProjGlobPath)"
+             Targets="IsNotNetCoreAppProject"
+             BuildInParallel="true">
+      <Output TaskParameter="TargetOutputs" ItemName="PrereleaseLibraryPackage" />
+    </MSBuild>
+
+    <ItemGroup>
+      <Dependency Include="@(PrereleaseLibraryPackage)"
+                  Condition="!$([System.String]::new('%(Identity)').Contains('Private')) and !$([System.String]::new('%(Identity)').EndsWith('Experimental')) and !$([System.String]::new('%(Identity)').StartsWith('runtime.'))" />
+    </ItemGroup>
+    
+  </Target>
+
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>
