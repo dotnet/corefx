@@ -3339,7 +3339,7 @@ namespace System.Text.Json.Tests
             get
             {
                 var dataList = new List<object[]>();
-                foreach (var delim in new[] { "\r", "\r\n", "\n" })
+                foreach (string delim in new[] { "\r", "\r\n", "\n" })
                 {
                     // NOTE: Leading and trailing spaces in the comments are significant.
                     var singleLineComment = " Single Line Comment ";
@@ -3367,18 +3367,18 @@ namespace System.Text.Json.Tests
                 };
 
                 // single line comments
-                foreach (var raw in rawComments)
+                foreach (string raw in rawComments)
                 {
-                    var str = string.Format(raw, "");
-                    var cmt = "//" + str;
+                    string str = string.Format(raw, "");
+                    string cmt = "//" + str;
                     dataList.Add(new object[] { cmt, str });
                 }
 
                 // multiline comments
-                foreach (var raw in rawComments)
+                foreach (string raw in rawComments)
                 {
-                    var str = string.Format(raw, "\n");
-                    var cmt = "/*" + str + "*/";
+                    string str = string.Format(raw, "\n");
+                    string cmt = "/*" + str + "*/";
                     dataList.Add(new object[] { cmt, str });
                 }
 
