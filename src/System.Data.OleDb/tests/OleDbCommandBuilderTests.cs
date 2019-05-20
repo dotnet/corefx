@@ -165,6 +165,8 @@ namespace System.Data.OleDb.Tests
                 Console.WriteLine($"Base Exception error code : {sehEx.GetBaseException().HResult}");
                 Console.WriteLine($"Base Exception error code : {sehEx.GetBaseException().ToString()}");
                 Console.WriteLine($"Base Inner Exception: {sehEx.InnerException}");
+                
+                // This exception is not expected. So rethrow to indicate test failure.
                 throw;
             }
             Assert.True(File.Exists(Path.Combine(TestDirectory, tableName)));
