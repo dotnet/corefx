@@ -157,7 +157,7 @@ namespace System.Data.OleDb.Tests
                     Nickname NVARCHAR(30))";
             try
             { 
-            command.ExecuteNonQuery();
+                command.ExecuteNonQuery();
             }
             catch (SEHException sehEx)
             {
