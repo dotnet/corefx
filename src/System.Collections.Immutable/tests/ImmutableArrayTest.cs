@@ -39,6 +39,15 @@ namespace System.Collections.Immutable.Tests
             yield return new object[] { s_empty };
         }
 
+        public static IEnumerable<object[]> StringImmutableArrayData()
+        {
+            yield return new object[] { new string[0] };
+            yield return new object[] { new[] { "a" } };
+            yield return new object[] { new[] { "a", "b", "c" } };
+            yield return new object[] { new[] { string.Empty } };
+            yield return new object[] { new[] { (string)null } };
+        }
+
         [Theory]
         [MemberData(nameof(Int32EnumerableData))]
         public void Clear(IEnumerable<int> source)
@@ -65,6 +74,36 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(immutableArray.Length, span.Length);
         }
 
+        [Fact]
+        public void AsSpanRoundTripDefaultArrayTests()
+        {
+            ImmutableArray<int> immutableArray = new ImmutableArray<int>();
+            ReadOnlySpan<int> span = immutableArray.AsSpan();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, span.Length);
+            Assert.True(span.IsEmpty);
+        }
+
+        [Theory]
+        [MemberData(nameof(StringImmutableArrayData))]
+        public void AsSpanRoundTripStringTests(IEnumerable<string> source)
+        {
+            ImmutableArray<string> immutableArray = source.ToImmutableArray();
+            ReadOnlySpan<string> span = immutableArray.AsSpan();
+            Assert.Equal(immutableArray, span.ToArray());
+            Assert.Equal(immutableArray.Length, span.Length);
+        }
+
+        [Fact]
+        public void AsSpanRoundTripDefaultArrayStringTests()
+        {
+            ImmutableArray<string> immutableArray = new ImmutableArray<string>();
+            ReadOnlySpan<string> span = immutableArray.AsSpan();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, span.Length);
+            Assert.True(span.IsEmpty);
+        }
+
         [Theory]
         [MemberData(nameof(Int32EnumerableData))]
         public void AsMemoryRoundTripTests(IEnumerable<int> source)
@@ -82,6 +121,36 @@ namespace System.Collections.Immutable.Tests
             ReadOnlyMemory<int> memory = immutableArray.AsMemory();
             Assert.Equal(immutableArray, memory.ToArray());
             Assert.Equal(immutableArray.Length, memory.Length);
+        }
+
+        [Fact]
+        public void AsMemoryRoundTripDefaultArrayTests()
+        {
+            ImmutableArray<int> immutableArray = new ImmutableArray<int>();
+            ReadOnlyMemory<int> memory = immutableArray.AsMemory();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, memory.Length);
+            Assert.True(memory.IsEmpty);
+        }
+
+        [Theory]
+        [MemberData(nameof(StringImmutableArrayData))]
+        public void AsMemoryRoundTripStringTests(IEnumerable<string> source)
+        {
+            ImmutableArray<string> immutableArray = source.ToImmutableArray();
+            ReadOnlyMemory<string> memory = immutableArray.AsMemory();
+            Assert.Equal(immutableArray, memory.ToArray());
+            Assert.Equal(immutableArray.Length, memory.Length);
+        }
+
+        [Fact]
+        public void AsMemoryRoundTripDefaultArrayStringTests()
+        {
+            ImmutableArray<string> immutableArray = new ImmutableArray<string>();
+            ReadOnlyMemory<string> memory = immutableArray.AsMemory();
+            Assert.True(immutableArray.IsDefault);
+            Assert.Equal(0, memory.Length);
+            Assert.True(memory.IsEmpty);
         }
 
         [Fact]

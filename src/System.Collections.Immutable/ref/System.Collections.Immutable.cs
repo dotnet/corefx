@@ -115,13 +115,13 @@ namespace System.Collections.Immutable
         bool System.Collections.IList.IsFixedSize { get { throw null; } }
         bool System.Collections.IList.IsReadOnly { get { throw null; } }
         object System.Collections.IList.this[int index] { get { throw null; } set { } }
-#if !NETSTANDARD10
-        public System.ReadOnlySpan<T> AsSpan() { throw null; }
-        public System.ReadOnlyMemory<T> AsMemory() { throw null; }
-#endif
         public System.Collections.Immutable.ImmutableArray<T> Add(T item) { throw null; }
         public System.Collections.Immutable.ImmutableArray<T> AddRange(System.Collections.Generic.IEnumerable<T> items) { throw null; }
         public System.Collections.Immutable.ImmutableArray<T> AddRange(System.Collections.Immutable.ImmutableArray<T> items) { throw null; }
+#if !NETSTANDARD10
+        public System.ReadOnlyMemory<T> AsMemory() { throw null; }
+        public System.ReadOnlySpan<T> AsSpan() { throw null; }
+#endif
         public System.Collections.Immutable.ImmutableArray<TOther> As<TOther>() where TOther : class { throw null; }
         public System.Collections.Immutable.ImmutableArray<TOther> CastArray<TOther>() where TOther : class { throw null; }
         public static System.Collections.Immutable.ImmutableArray<T> CastUp<TDerived>(System.Collections.Immutable.ImmutableArray<TDerived> items) where TDerived : class, T { throw null; }
