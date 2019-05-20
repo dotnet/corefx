@@ -946,7 +946,7 @@ namespace System.Text.Json
         /// <summary>
         ///   Write the element into the provided writer as a named object property.
         /// </summary>
-        /// <param name="propertyName">The name for this value within the JSON object, as UTF-16 text.</param>
+        /// <param name="propertyName">The name for this value within the JSON object.</param>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
         ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
