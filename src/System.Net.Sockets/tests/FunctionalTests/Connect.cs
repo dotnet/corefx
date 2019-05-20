@@ -88,9 +88,12 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ConnectTask has different result")]
         public async Task ConnectGetsCanceledByDispose()
         {
+            bool usesApm = UsesApm ||
+                           // TODO: Windows .NET Core ConnectAsync Task API is implemented using Apm
+                           (this is ConnectTask && PlatformDetection.IsWindows);
+
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, we won't see a SocketException.
 
@@ -124,6 +127,12 @@ namespace System.Net.Sockets.Tests
                 }
                 catch (SocketException se)
                 {
+                    // On connection timeout, retry.
+                    if (se.SocketErrorCode == SocketError.TimedOut)
+                    {
+                        continue;
+                    }
+
                     localSocketError = se.SocketErrorCode;
                 }
                 catch (ObjectDisposedException)
@@ -131,12 +140,12 @@ namespace System.Net.Sockets.Tests
                     disposedException = true;
                 }
 
-                if (UsesApm || this is ConnectTask)
+                if (usesApm)
                 {
                     break;
                 }
             }
-            if (UsesApm || this is ConnectTask)
+            if (usesApm)
             {
                 Assert.False(localSocketError.HasValue);
                 Assert.True(disposedException);
