@@ -88,6 +88,7 @@ namespace System.Net.Sockets.Tests
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "ConnectTask has different result")]
         public async Task ConnectGetsCanceledByDispose()
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
