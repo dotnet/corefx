@@ -7,6 +7,7 @@ using System.ComponentModel.Design.Serialization;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.ComponentModel.TypeConverterTests
@@ -460,8 +461,11 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertToInstanceDescriptorTests()
         {
             var conv = new ColorConverter();
-            Assert.NotNull(conv.ConvertTo(Color.Blue, typeof(InstanceDescriptor)));
-            Assert.NotNull(conv.ConvertTo(SystemColors.ActiveCaption, typeof(InstanceDescriptor)));
+            InstanceDescriptor descriptor = (InstanceDescriptor)conv.ConvertTo(Color.Blue, typeof(InstanceDescriptor));
+            Assert.Equal("Blue", descriptor.MemberInfo.Name);
+
+            descriptor = (InstanceDescriptor)conv.ConvertTo(SystemColors.ActiveCaption, typeof(InstanceDescriptor));
+            Assert.Equal("ActiveCaption", descriptor.MemberInfo.Name);
         }
     }
 }
