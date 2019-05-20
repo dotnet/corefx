@@ -19,14 +19,28 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        [ActiveIssue(37313)]
         public static void WriteTestClassWithArrayOfElementsOfTheSameClassWithoutCyclesDoesNotFail()
         {
             TestClassWithArrayOfElementsOfTheSameClass obj = new TestClassWithArrayOfElementsOfTheSameClass();
 
             //It shouldn't throw when there is no real cycle reference, and just empty object is created
             string json = JsonSerializer.ToString(obj);
-            Assert.Equal(@"{}", json);
+            Assert.Equal(@"{""Array"":null}", json);
+        }
+
+        public class TestClassWithCycle
+        {
+            public TestClassWithCycle Parent { get; set; }
+
+            public void Initialize()
+            {
+                Parent = this;
+            }
+        }
+
+        public class TestClassWithArrayOfElementsOfTheSameClass
+        {
+            public TestClassWithArrayOfElementsOfTheSameClass[] Array { get; set; }
         }
     }
 }
