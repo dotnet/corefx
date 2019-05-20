@@ -1,4 +1,4 @@
-﻿<Project DefaultTargets="Build">
+﻿<Project DefaultTargets="Build" InitialTargets="FindNetCoreAppPackages">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
     <!-- We use the PackageVersion property defined in Packaging.props for the Prerelease packages which are using it to be built -->
@@ -6,13 +6,9 @@
     <!-- We don't need to harvest the stable packages to build this -->
     <HarvestStablePackage>false</HarvestStablePackage>
   </PropertyGroup>
-  <ItemDefinitionGroup>
-    <PrereleaseLibraryPackage>
-      <Version>$(_PreReleasePackageVersion)</Version>
-    </PrereleaseLibraryPackage>
-  </ItemDefinitionGroup>
 
-  <Target Name="FindNetCoreAppPackages" BeforeTargets="GetPackageDependencies">
+  <Target Name="FindNetCoreAppPackages">
+
     <ItemGroup>
       <PkgProjGlobPath Include="$(SourceDir)/**/*.pkgproj" />
     </ItemGroup>
