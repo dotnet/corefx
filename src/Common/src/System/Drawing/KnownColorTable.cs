@@ -3,14 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Reflection;
+using Microsoft.Win32;
 
 namespace System.Drawing
 {
-#if FEATURE_SYSTEM_EVENTS
-    using Microsoft.Win32;
-    using System.Drawing.Internal;
-#endif
-
     static internal class KnownColorTable
     {
         private static int[] s_colorTable;
@@ -59,9 +56,17 @@ namespace System.Drawing
         {
             int[] values = new int[(unchecked((int)KnownColor.MenuHighlight)) + 1];
 
-#if FEATURE_SYSTEM_EVENTS
-            SystemEvents.UserPreferenceChanging += new UserPreferenceChangingEventHandler(OnUserPreferenceChanging);
-#endif
+            Type systeEventsType = Type.GetType("Microsoft.Win32.SystemEvents, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
+            EventInfo upEventInfo = systeEventsType?.GetEvent("UserPreferenceChanging", BindingFlags.Public | BindingFlags.Static);
+
+            if (upEventInfo != null)
+            {
+                Type userPrefChangingDelegateType = Type.GetType("Microsoft.Win32.UserPreferenceChangingEventHandler, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
+                MethodInfo mi = Type.GetType("System.Drawing.KnownColorTable")?.GetMethod("OnUserPreferenceChanging", BindingFlags.NonPublic | BindingFlags.Static);
+                Delegate handler = Delegate.CreateDelegate(userPrefChangingDelegateType, mi);
+                upEventInfo.AddEventHandler(null, handler);
+            }
+
             UpdateSystemColors(values);
 
             // just consts...
@@ -438,15 +443,19 @@ namespace System.Drawing
         }
 #endif
 
-#if FEATURE_SYSTEM_EVENTS
-        private static void OnUserPreferenceChanging(object sender, UserPreferenceChangingEventArgs e)
+        private static void OnUserPreferenceChanging(object sender, EventArgs args)
         {
-            if (e.Category == UserPreferenceCategory.Color && s_colorTable != null)
+            PropertyInfo categoryProperty = args.GetType()?.GetProperty("Category", BindingFlags.Instance | BindingFlags.Public);
+
+            if (categoryProperty == null)
+                return;
+
+            int propertyValue = (int)categoryProperty.GetValue(args);
+            if (propertyValue == 2 && s_colorTable != null) // UserPreferenceCategory.Color = 2
             {
                 UpdateSystemColors(s_colorTable);
             }
         }
-#endif
 
         private static void UpdateSystemColors(int[] colorTable)
         {
