@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Text;
 
 namespace System.Net.Http.Headers
 {
@@ -12,6 +13,8 @@ namespace System.Net.Http.Headers
     // Use HeaderDescriptor.TryGet to resolve an arbitrary header name to a HeaderDescriptor.
     internal readonly struct HeaderDescriptor : IEquatable<HeaderDescriptor>
     {
+        private static Encoding s_utf8DecoderWithExceptionFallback = Encoding.GetEncoding("utf-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+
         private readonly string _headerName;
         private readonly KnownHeader _knownHeader;
 
@@ -111,7 +114,42 @@ namespace System.Net.Http.Headers
                 }
             }
 
+            if (KnownHeader != null && KnownHeader.Name == KnownHeaders.Location.Name)
+            {
+                // Normally Location should be in ISO-8859-1, ocassionally some servers respond with UTF-8 though
+                if (TryDecodeUtf8(headerValue, out string decoded))
+                {
+                    return decoded;
+                }
+            }
+
             return HttpRuleParser.DefaultHttpEncoding.GetString(headerValue);
+        }
+
+        private static bool TryDecodeUtf8(ReadOnlySpan<byte> input, out string decoded)
+        {
+            bool possibleUtf8 = false;
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (input[i] > 127)
+                {
+                    possibleUtf8 = true;
+                    break;
+                }
+            }
+
+            if (possibleUtf8)
+            {
+                try
+                {
+                    decoded = s_utf8DecoderWithExceptionFallback.GetString(input);
+                    return true;
+                }
+                catch (ArgumentException) { } // Not actually Utf-8
+            }
+
+            decoded = null;
+            return false;
         }
     }
 }
