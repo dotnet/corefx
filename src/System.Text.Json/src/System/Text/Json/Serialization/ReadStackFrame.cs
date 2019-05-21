@@ -10,7 +10,7 @@ using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
-    [DebuggerDisplay("ClassType.{JsonClassInfo.ClassType} {JsonClassInfo.Type.Name}")]
+    [DebuggerDisplay("ClassType.{JsonClassInfo.ClassType}, {JsonClassInfo.Type.Name}")]
     internal struct ReadStackFrame
     {
         // The object (POCO or IEnumerable) that is being populated
@@ -23,12 +23,11 @@ namespace System.Text.Json.Serialization
         // Current property values.
         public JsonPropertyInfo JsonPropertyInfo;
 
-        // Pop the stack when the current array or dictionary is done.
-        public bool PopStackOnEnd;
-
         // Support System.Array and other types that don't implement IList.
         public IList TempEnumerableValues;
-        public bool EnumerableCreated;
+
+        // Has an array or dictionary property been initialized.
+        public bool PropertyInitialized;
 
         // Support Immutable dictionary types.
         public IDictionary TempDictionaryValues;
@@ -42,18 +41,32 @@ namespace System.Text.Json.Serialization
 
         public bool IsImmutableDictionary => DefaultImmutableConverter.TypeIsImmutableDictionary(JsonClassInfo.Type);
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
-        public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
-        public bool IsProcessingImmutableDictionary;
-        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsDictionary;
-        public bool IsProcessingEnumerable => IsEnumerable || IsPropertyEnumerable;
-        public bool IsPropertyEnumerable => JsonPropertyInfo != null ? JsonPropertyInfo.ClassType == ClassType.Enumerable : false;
 
-        public bool IsProcessingProperty
+        public bool IsDictionaryProperty => JsonPropertyInfo != null &&
+            !JsonPropertyInfo.IsPropertyPolicy &&
+            JsonPropertyInfo.ClassType == ClassType.Dictionary;
+        public bool IsImmutableDictionaryProperty => JsonPropertyInfo != null &&
+            !JsonPropertyInfo.IsPropertyPolicy &&
+            DefaultImmutableConverter.TypeIsImmutableDictionary(JsonPropertyInfo.RuntimePropertyType);
+
+        public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
+
+        public bool IsEnumerableProperty =>
+            JsonPropertyInfo != null &&
+            !JsonPropertyInfo.IsPropertyPolicy &&
+            JsonPropertyInfo.ClassType == ClassType.Enumerable;
+
+        public bool IsProcessingImmutableDictionary => IsImmutableDictionary || IsImmutableDictionaryProperty;
+        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsDictionary;
+        public bool IsProcessingDictionary => IsDictionary || IsDictionaryProperty;
+        public bool IsProcessingEnumerable => IsEnumerable || IsEnumerableProperty;
+
+        public bool IsProcessingValue
         {
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             get
             {
-                if (JsonPropertyInfo == null || Skip())
+                if (JsonPropertyInfo == null || SkipProperty)
                 {
                     return false;
                 }
@@ -61,8 +74,11 @@ namespace System.Text.Json.Serialization
                 // We've got a property info. If we're a Value or polymorphic Value
                 // (ClassType.Unknown), return true.
                 ClassType type = JsonPropertyInfo.ClassType;
-                return type == ClassType.Value || type == ClassType.Unknown
-                    || (type == ClassType.Dictionary && KeyName != null && JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown);
+                return type == ClassType.Value || type == ClassType.Unknown ||
+                    KeyName != null  && (
+                    (IsDictionary && JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
+                    (IsDictionaryProperty && JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown)
+                    );
             }
         }
 
@@ -77,7 +93,6 @@ namespace System.Text.Json.Serialization
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
-                IsProcessingImmutableDictionary = DefaultImmutableConverter.TypeIsImmutableDictionary(JsonClassInfo.Type);
             }
         }
 
@@ -93,9 +108,8 @@ namespace System.Text.Json.Serialization
 
         public void ResetProperty()
         {
-            EnumerableCreated = false;
+            PropertyInitialized = false;
             JsonPropertyInfo = null;
-            PopStackOnEnd = false;
             TempEnumerableValues = null;
             TempDictionaryValues = null;
         }
@@ -120,7 +134,7 @@ namespace System.Text.Json.Serialization
                 }
                 else
                 {
-                    converterList =  new List<object>();
+                    converterList = new List<object>();
                 }
 
                 state.Current.TempEnumerableValues = converterList;
@@ -145,17 +159,12 @@ namespace System.Text.Json.Serialization
 
         public Type GetElementType()
         {
-            if (IsPropertyEnumerable)
+            if (IsEnumerableProperty || IsDictionaryProperty)
             {
                 return JsonPropertyInfo.ElementClassInfo.Type;
             }
 
-            if (IsEnumerable)
-            {
-                return JsonClassInfo.ElementClassInfo.Type;
-            }
-
-            if (IsDictionary)
+            if (IsEnumerable || IsDictionary)
             {
                 return JsonClassInfo.ElementClassInfo.Type;
             }
@@ -183,9 +192,8 @@ namespace System.Text.Json.Serialization
             ReturnValue = value;
         }
 
-        public bool Skip()
-        {
-            return Drain || ReferenceEquals(JsonPropertyInfo, JsonSerializer.s_missingProperty);
-        }
+        public bool SkipProperty => Drain ||
+            ReferenceEquals(JsonPropertyInfo, JsonPropertyInfo.s_missingProperty) ||
+            (JsonPropertyInfo?.IsPropertyPolicy == false && JsonPropertyInfo?.ShouldDeserialize == false);
     }
 }

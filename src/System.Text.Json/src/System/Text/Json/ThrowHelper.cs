@@ -225,7 +225,7 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static JsonException GetJsonReaderException(ref Utf8JsonReader json, ExceptionResource resource, byte nextByte, ReadOnlySpan<byte> bytes)
         {
-            string message = GetResourceString(ref json, resource, nextByte, Encoding.UTF8.GetString(bytes.ToArray(), 0, bytes.Length));
+            string message = GetResourceString(ref json, resource, nextByte, JsonHelpers.Utf8GetString(bytes));
 
             long lineNumber = json.CurrentState._lineNumber;
             long bytePositionInLine = json.CurrentState._bytePositionInLine;
@@ -337,6 +337,12 @@ namespace System.Text.Json
                     break;
                 case ExceptionResource.ExpectedJsonTokens:
                     message = SR.ExpectedJsonTokens;
+                    break;
+                case ExceptionResource.InvalidCharacterAtStartOfComment:
+                    message = SR.Format(SR.InvalidCharacterAtStartOfComment, character);
+                    break;
+                case ExceptionResource.UnexpectedEndOfDataWhileReadingComment:
+                    message = SR.Format(SR.UnexpectedEndOfDataWhileReadingComment);
                     break;
                 default:
                     Debug.Fail($"The ExceptionResource enum value: {resource} is not part of the switch. Add the appropriate case and exception message.");
@@ -545,6 +551,8 @@ namespace System.Text.Json
         ExpectedJsonTokens,
         TrailingCommaNotAllowedBeforeArrayEnd,
         TrailingCommaNotAllowedBeforeObjectEnd,
+        InvalidCharacterAtStartOfComment,
+        UnexpectedEndOfDataWhileReadingComment
     }
 
     internal enum NumericType
