@@ -1103,8 +1103,7 @@ namespace System.Net.Sockets.Tests
                 }
             }
 
-            Assert.True(peerSocketError.HasValue);
-            Assert.Equal(SocketError.ConnectionReset, peerSocketError.Value);
+            Assert.Equal(SocketError.ConnectionReset, peerSocketError);
 
             if (UsesApm)
             {

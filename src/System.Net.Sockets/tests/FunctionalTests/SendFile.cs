@@ -180,6 +180,89 @@ namespace System.Net.Sockets.Tests
             File.Delete(filename);
         }
 
+        [Fact]
+        public async Task SyncSendFileGetsCanceledByDispose()
+        {
+            // We try this a couple of times to deal with a timing race: if the Dispose happens
+            // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
+            // see a SocketException either.
+
+            SocketError? peerSocketError = null;
+            SocketError? localSocketError = null;
+            for (int i = 0; i < 10 && (!peerSocketError.HasValue || !localSocketError.HasValue); i++)
+            {
+                (Socket socket1, Socket socket2) = CreateConnectedSocketPair();
+                using (socket2)
+                {
+                    Task socketOperation = Task.Factory.StartNew(() =>
+                    {
+                        string filename = CreateFileToSend(1024 * 1024 * 5 /* 5 MB */, false, out _, out _, out _);
+                        try
+                        {
+                            socket1.SendFile(filename);
+                        }
+                        finally
+                        {
+                            File.Delete(filename);
+                        }
+                    }, TaskCreationOptions.LongRunning);
+
+                    // Wait a little so the operation is started, then Dispose.
+                    await Task.Delay(100);
+                    Task disposeTask = Task.Factory.StartNew(() =>
+                    {
+                        socket1.Dispose();
+                    }, TaskCreationOptions.LongRunning);
+
+                    Task timeoutTask = Task.Delay(30000);
+                    Assert.NotSame(timeoutTask, await Task.WhenAny(disposeTask, socketOperation, timeoutTask));
+
+                    await disposeTask;
+
+                    try
+                    {
+                        await socketOperation;
+                    }
+                    catch (SocketException se)
+                    {
+                        localSocketError = se.SocketErrorCode;
+                    }
+                    catch (ObjectDisposedException)
+                    { }
+
+                    var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
+                    while (true)
+                    {
+                        try
+                        {
+                            int received = socket2.Receive(receiveBuffer);
+                            if (received == 0)
+                            {
+                                break;
+                            }
+                        }
+                        catch (SocketException se)
+                        {
+                            peerSocketError = se.SocketErrorCode;
+                            break;
+                        }
+                    }
+                }
+
+                // On OSX, we're unable to unblock the on-going socket operations and
+                // perform an abortive close.
+                if (PlatformDetection.IsOSX)
+                {
+                    // Pretend we've observed an RST close.
+                    peerSocketError = SocketError.ConnectionReset;
+                }
+            }
+
+            Assert.Equal(SocketError.ConnectionReset, peerSocketError);
+
+            Assert.Equal(SocketError.ConnectionAborted, localSocketError);
+        }
+
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(SendFile_MemberData))]
@@ -237,6 +320,21 @@ namespace System.Net.Sockets.Tests
 
             // Clean up the file we created
             File.Delete(filename);
+        }
+
+        protected static (Socket, Socket) CreateConnectedSocketPair()
+        {
+            using (Socket listener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                listener.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                listener.Listen(1);
+
+                Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                client.Connect(listener.LocalEndPoint);
+                Socket server = listener.Accept();
+
+                return (client, server);
+            }
         }
     }
 }

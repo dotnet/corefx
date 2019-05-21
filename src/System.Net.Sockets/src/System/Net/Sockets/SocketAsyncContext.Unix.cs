@@ -735,7 +735,7 @@ namespace System.Net.Sockets
                 using (Lock())
                 {
                     observedSequenceNumber = _sequenceNumber;
-                    bool isReady = (_state == QueueState.Ready);
+                    bool isReady = (_state == QueueState.Ready) || (_state == QueueState.Stopped);
 
                     Trace(context, $"{isReady}");
 
