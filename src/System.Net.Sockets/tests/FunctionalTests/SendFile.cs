@@ -197,7 +197,7 @@ namespace System.Net.Sockets.Tests
                     Task socketOperation = Task.Factory.StartNew(() =>
                     {
                         // Create a large file that will cause SendFile to block until the peer starts reading.
-                        string filename = Path.GetTempFileName();
+                        string filename = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString());
                         using (var fs = new FileStream(filename, FileMode.CreateNew, FileAccess.Write))
                         {
                             fs.SetLength(20 * 1024 * 1024 /* 20MB */);
@@ -209,7 +209,12 @@ namespace System.Net.Sockets.Tests
                         }
                         finally
                         {
-                            File.Delete(filename);
+                            try
+                            {
+                                File.Delete(filename);
+                            }
+                            catch
+                            {}
                         }
                     }, TaskCreationOptions.LongRunning);
 
