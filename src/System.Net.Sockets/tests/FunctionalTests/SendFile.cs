@@ -181,6 +181,7 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework returns SocketError.Interrupted instead of SocketError.ConnectionAborted")]
         public async Task SyncSendFileGetsCanceledByDispose()
         {
             // We try this a couple of times to deal with a timing race: if the Dispose happens
