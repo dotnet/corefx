@@ -131,7 +131,7 @@ namespace System.IO.Pipelines
                         consumed = position;
                     }
                     
-                    if (consumed.Equals(default(SequencePosition)) 
+                    if (consumed.Equals(default(SequencePosition)))
                     {
                         consumed = buffer.End;
                     }
