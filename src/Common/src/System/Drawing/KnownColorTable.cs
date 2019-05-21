@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using Microsoft.Win32;
 
 namespace System.Drawing
 {
@@ -56,13 +55,21 @@ namespace System.Drawing
         {
             int[] values = new int[(unchecked((int)KnownColor.MenuHighlight)) + 1];
 
-            Type systeEventsType = Type.GetType("Microsoft.Win32.SystemEvents, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
-            EventInfo upEventInfo = systeEventsType?.GetEvent("UserPreferenceChanging", BindingFlags.Public | BindingFlags.Static);
+            // Previously we only cared about this support for SystemColors which were in Drawing.Common, so we ifdef'ed that linkage.
+            // Now that we've pushed the SystemColors to System.Drawing.Primitives, we need to remove the ifdef.
+            // To avoid pulling Microsoft.Win32.SystemEvents into the shared framework we are calling it through reflection.
+            Type systemEventsType = Type.GetType("Microsoft.Win32.SystemEvents, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
+            EventInfo upEventInfo = systemEventsType?.GetEvent("UserPreferenceChanging", BindingFlags.Public | BindingFlags.Static);
 
             if (upEventInfo != null)
             {
+                // Delegate TargetType
                 Type userPrefChangingDelegateType = Type.GetType("Microsoft.Win32.UserPreferenceChangingEventHandler, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
-                MethodInfo mi = Type.GetType("System.Drawing.KnownColorTable")?.GetMethod("OnUserPreferenceChanging", BindingFlags.NonPublic | BindingFlags.Static);
+
+                // we are using MethodInfo overload because it allows relaxed signature binding i.e. the types dont need to be exact match. It allows base classes as well.
+                MethodInfo mi = typeof(KnownColorTable).GetMethod("OnUserPreferenceChanging", BindingFlags.NonPublic | BindingFlags.Static);                
+
+                // Creating a delegate to use it as event handler.
                 Delegate handler = Delegate.CreateDelegate(userPrefChangingDelegateType, mi);
                 upEventInfo.AddEventHandler(null, handler);
             }
