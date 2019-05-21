@@ -338,7 +338,14 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed)
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -359,7 +366,14 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed) 
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -381,7 +395,14 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed)
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -403,7 +424,14 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed) 
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -424,7 +452,14 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat) && span.Length == bytesConsumed;
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat) 
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -445,7 +480,14 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat) && span.Length == bytesConsumed;
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat)
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+            
+            return true;
         }
 
         /// <summary>
@@ -466,7 +508,14 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat) && span.Length == bytesConsumed;
+            if (!Utf8Parser.TryParse(span, out value, out int bytesConsumed, _numberFormat)
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -522,10 +571,15 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
-            value = default;
-            return (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
-                && span.Length == bytesConsumed;
+            if (span.Length > JsonConstants.MaximumDateTimeOffsetParseLength
+                || !JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -581,10 +635,15 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
-            value = default;
-            return (span.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
-                && span.Length == bytesConsumed;
+            if (span.Length > JsonConstants.MaximumDateTimeOffsetParseLength
+                || !JsonHelpers.TryParseAsISO(span, out value, out int bytesConsumed)
+                || span.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -640,8 +699,14 @@ namespace System.Text.Json
 
             Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
 
-            value = default;
-            return (span.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(span, out value, out _, 'D');
+            if (span.Length != JsonConstants.MaximumFormatGuidLength
+                || !Utf8Parser.TryParse(span, out value, out _, 'D'))
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
     }
 }
