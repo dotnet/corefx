@@ -64,6 +64,9 @@ namespace System.Text.Json.Serialization
             }
         }
 
+        /// <summary>
+        /// Return the JsonClassInfo for the element type, or null if the the property is not an enumerable or dictionary.
+        /// </summary>
         public JsonClassInfo ElementClassInfo
         {
             get
