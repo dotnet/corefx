@@ -241,7 +241,7 @@ namespace System.Net.Sockets.Tests
                     catch (ObjectDisposedException)
                     { }
 
-                    var receiveBuffer = new ArraySegment<byte>(new byte[4096]);
+                    var receiveBuffer = new byte[4096];
                     while (true)
                     {
                         try
