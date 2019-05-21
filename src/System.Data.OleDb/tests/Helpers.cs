@@ -20,22 +20,26 @@ namespace System.Data.OleDb.Tests
             public static readonly string ProviderName;
             public static Nested Instance => s_instance;
             private static readonly Nested s_instance = new Nested();
+            private static readonly string s_expectedProviderName = @"Microsoft.ACE.OLEDB.12.0";
             private Nested() { }
             static Nested()
             {
+                bool shouldSkip = false; 
                 // Get the sources rowset for the SQLOLEDB enumerator
                 DataTable table = (new OleDbEnumerator()).GetElements();
                 DataColumn providersRegistered = table.Columns["SOURCES_NAME"];
                 List<object> providerNames = new List<object>();
                 foreach (DataRow row in table.Rows)
                 {
-                    providerNames.Add(row[providersRegistered]);
+                    var curProvider = (string)row[providersRegistered];
+                    if (curProvider.Contains("JET"))
+                        shouldSkip = true; // JET driver installed 
+                    providerNames.Add(curProvider);
                 }
-                string providerName = PlatformDetection.Is32BitProcess ? 
-                    @"Microsoft.Jet.OLEDB.4.0" : 
-                    @"Microsoft.ACE.OLEDB.12.0";
-                IsAvailable = false; // ActiveIssue #37823 // providerNames.Contains(providerName);
-                ProviderName = IsAvailable ? providerName : null;
+                // skip if x86 or if both drivers available 
+                shouldSkip |= PlatformDetection.Is32BitProcess;
+                IsAvailable = !shouldSkip && providerNames.Contains(s_expectedProviderName);
+                ProviderName = IsAvailable ? s_expectedProviderName : null;
             }
         }
     }
