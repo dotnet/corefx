@@ -1098,8 +1098,6 @@ namespace System.Net.Sockets.Tests
                 // perform an abortive close.
                 if (UsesSync && PlatformDetection.IsOSX)
                 {
-                    Assert.Null(peerSocketError);
-
                     // Pretend we've observed an RST close.
                     peerSocketError = SocketError.ConnectionReset;
                 }
