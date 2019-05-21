@@ -146,19 +146,18 @@ namespace System.Net.Sockets.Tests
             }
             if (usesApm)
             {
-                Assert.False(localSocketError.HasValue);
+                Assert.Null(localSocketError);
                 Assert.True(disposedException);
             }
             else
             {
-                Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
-                    Assert.Equal(SocketError.NotSocket, localSocketError.Value);
+                    Assert.Equal(SocketError.NotSocket, localSocketError);
                 }
                 else
                 {
-                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                    Assert.Equal(SocketError.OperationAborted, localSocketError);
                 }
             }
         }

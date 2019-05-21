@@ -343,19 +343,18 @@ namespace System.Net.Sockets.Tests
 
             if (UsesApm)
             {
-                Assert.False(localSocketError.HasValue);
+                Assert.Null(localSocketError);
                 Assert.True(disposedException);
             }
             else
             {
-                Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
-                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                    Assert.Equal(SocketError.Interrupted, localSocketError);
                 }
                 else
                 {
-                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                    Assert.Equal(SocketError.OperationAborted, localSocketError);
                 }
             }
         }

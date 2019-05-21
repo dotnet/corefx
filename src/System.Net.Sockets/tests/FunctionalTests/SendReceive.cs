@@ -1001,19 +1001,18 @@ namespace System.Net.Sockets.Tests
             }
             if (UsesApm)
             {
-                Assert.False(localSocketError.HasValue);
+                Assert.Null(localSocketError);
                 Assert.True(disposedException);
             }
             else
             {
-                Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
-                    Assert.Equal(SocketError.Interrupted, localSocketError.Value);
+                    Assert.Equal(SocketError.Interrupted, localSocketError);
                 }
                 else
                 {
-                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                    Assert.Equal(SocketError.OperationAborted, localSocketError);
                 }
             }
         }
@@ -1026,8 +1025,6 @@ namespace System.Net.Sockets.Tests
             // We try this a couple of times to deal with a timing race: if the Dispose happens
             // before the operation is started, the peer won't see a ConnectionReset SocketException and we won't
             // see a SocketException either.
-
-            // Trigger CI build
 
             SocketError? peerSocketError = null;
             SocketError? localSocketError = null;
@@ -1101,7 +1098,7 @@ namespace System.Net.Sockets.Tests
                 // perform an abortive close.
                 if (UsesSync && PlatformDetection.IsOSX)
                 {
-                    Assert.False(peerSocketError.HasValue);
+                    Assert.Null(peerSocketError);
 
                     // Pretend we've observed an RST close.
                     peerSocketError = SocketError.ConnectionReset;
@@ -1113,19 +1110,18 @@ namespace System.Net.Sockets.Tests
 
             if (UsesApm)
             {
-                Assert.False(localSocketError.HasValue);
+                Assert.Null(localSocketError);
                 Assert.True(disposedException);
             }
             else
             {
-                Assert.True(localSocketError.HasValue);
                 if (UsesSync)
                 {
-                    Assert.Equal(SocketError.ConnectionAborted, localSocketError.Value);
+                    Assert.Equal(SocketError.ConnectionAborted, localSocketError);
                 }
                 else
                 {
-                    Assert.Equal(SocketError.OperationAborted, localSocketError.Value);
+                    Assert.Equal(SocketError.OperationAborted, localSocketError);
                 }
             }
         }
