@@ -113,9 +113,9 @@ namespace System.IO.Pipelines
             {
                 SequencePosition consumed = default;
 
+                ReadResult result = await ReadAsync(cancellationToken).ConfigureAwait(false);
                 try
                 {
-                    ReadResult result = await ReadAsync(cancellationToken).ConfigureAwait(false);
                     ReadOnlySequence<byte> buffer = result.Buffer;
                     SequencePosition position = buffer.Start;
 
@@ -130,7 +130,12 @@ namespace System.IO.Pipelines
 
                         consumed = position;
                     }
-
+                    
+                    if (consumed.Equals(default(SequencePosition)) 
+                    {
+                        consumed = buffer.End;
+                    }
+                        
                     if (result.IsCompleted)
                     {
                         break;
