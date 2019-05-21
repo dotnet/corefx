@@ -493,10 +493,15 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
-            value = default;
-            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
-                && segment.Length == bytesConsumed;
+            if (segment.Length > JsonConstants.MaximumDateTimeOffsetParseLength
+                || !JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
+                || segment.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -527,10 +532,15 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
-            value = default;
-            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
-                && segment.Length == bytesConsumed;
+            if (segment.Length > JsonConstants.MaximumDateTimeOffsetParseLength
+                || !JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
+                || segment.Length != bytesConsumed)
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -561,8 +571,14 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
-            value = default;
-            return (segment.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(segment, out value, out _, 'D');
+            if (segment.Length != JsonConstants.MaximumFormatGuidLength
+                || !Utf8Parser.TryParse(segment, out value, out _, 'D'))
+            {
+                value = default;
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
