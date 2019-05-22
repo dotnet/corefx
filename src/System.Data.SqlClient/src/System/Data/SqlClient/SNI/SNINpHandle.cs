@@ -8,6 +8,7 @@ using System.IO.Pipes;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Data.SqlClient.SNI
@@ -22,7 +23,7 @@ namespace System.Data.SqlClient.SNI
 
         private readonly string _targetServer;
         private readonly object _callbackObject;
-
+        private readonly object _sendSync;
         private Stream _stream;
         private NamedPipeClientStream _pipeStream;
         private SslOverTdsStream _sslOverTdsStream;
@@ -37,6 +38,7 @@ namespace System.Data.SqlClient.SNI
 
         public SNINpHandle(string serverName, string pipeName, long timerExpire, object callbackObject)
         {
+            _sendSync = new object();
             _targetServer = serverName;
             _callbackObject = callbackObject;
 
@@ -193,20 +195,48 @@ namespace System.Data.SqlClient.SNI
 
         public override uint Send(SNIPacket packet)
         {
-            lock (this)
+            bool releaseLock = false;
+            try
             {
-                try
+                // is the packet is marked out out-of-band (attention packets only) it must be
+                // sent immediately even if a send of recieve operation is already in progress
+                // because out of band packets are used to cancel ongoing operations
+                // so try to take the lock if possible but continue even if it can't be taken
+                if (packet.IsOutOfBand)
                 {
-                    packet.WriteToStream(_stream);
-                    return TdsEnums.SNI_SUCCESS;
+                    Monitor.TryEnter(this, ref releaseLock);
                 }
-                catch (ObjectDisposedException ode)
+                else
                 {
-                    return ReportErrorAndReleasePacket(packet, ode);
+                    Monitor.Enter(this);
+                    releaseLock = true;
                 }
-                catch (IOException ioe)
+
+                // this lock ensures that two packets are not being written to the transport at the same time
+                // so that sending a standard and an out-of-band packet are both written atomically no data is 
+                // interleaved
+                lock (_sendSync)
                 {
-                    return ReportErrorAndReleasePacket(packet, ioe);
+                    try
+                    {
+                        packet.WriteToStream(_stream);
+                        return TdsEnums.SNI_SUCCESS;
+                    }
+                    catch (ObjectDisposedException ode)
+                    {
+                        return ReportErrorAndReleasePacket(packet, ode);
+                    }
+                    catch (IOException ioe)
+                    {
+                        return ReportErrorAndReleasePacket(packet, ioe);
+                    }
+                }
+            }
+            finally
+            {
+                if (releaseLock)
+                {
+                    Monitor.Exit(this);
                 }
             }
         }

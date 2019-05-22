@@ -40,6 +40,15 @@ namespace System.Data.SqlClient.SNI
         /// </summary>
         public bool IsInvalid => _data is null;
 
+        /// <summary>
+        /// Indicates that the packet should be sent out of band bypassing the normal send-recieve lock
+        /// </summary>
+        public bool IsOutOfBand { get; set; }
+
+        /// <summary>
+        /// Indicates the amonut of reserved header space available at the start of this packet.
+        /// Used with SMUX packet headers, see <see cref="GetHeaderBuffer"/> and <see cref="SetHeaderActive"/>
+        /// </summary>
         public int ReservedHeaderSize => _headerLength;
 
         /// <summary>
@@ -74,7 +83,7 @@ namespace System.Data.SqlClient.SNI
         }
 
         /// <summary>
-        /// Read packet data into a buffer without removing it from the packet
+        /// Get packet data
         /// </summary>
         /// <param name="buffer">Buffer</param>
         /// <param name="dataSize">Number of bytes read from the packet into the buffer</param>
