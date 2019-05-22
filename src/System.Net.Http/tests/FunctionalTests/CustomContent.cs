@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace System.Net.Http.Functional.Tests
 {
-    internal class CustomContent : StreamContent
+    internal partial class CustomContent : StreamContent
     {
         private long _length;
 
@@ -156,45 +156,6 @@ namespace System.Net.Http.Functional.Tests
             public override void Write(byte[] buffer, int offset, int count)
             {
                 throw new NotSupportedException("CustomStream.Write");
-            }
-        }
-
-        internal class SlowTestStream : CustomStream
-        {
-            private int _delay = 1000;
-            private int _count;
-            private int _trigger;
-            private byte[] _content;
-            private readonly TaskCompletionSource<bool> _sendingDone;
-            private int _itteration;
-
-            internal SlowTestStream(byte[] content, TaskCompletionSource<bool> tsc, int count=10, int trigger=1) : base(content, false)
-            {
-                _sendingDone = tsc;
-                _trigger = trigger;
-                _count = count;
-                _content = content;
-            }
-
-            public async override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
-            {
-                if (_delay > 0)
-                {
-                    await Task.Delay(_delay);
-                }
-
-                _itteration++;
-                if (_itteration == _trigger)
-                {
-                    _sendingDone.TrySetResult(true);
-                }
-
-                if (_count == _itteration)
-                {
-                    return 0;
-                }
-
-                return _content.Length;
             }
         }
     }
