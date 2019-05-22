@@ -608,7 +608,7 @@ namespace System.Net.Test.Common
             public async Task<List<string>> ReadRequestHeaderAndSendCustomResponseAsync(byte[] response)
             {
                 List<string> lines = await ReadRequestHeaderAsync().ConfigureAwait(false);
-                await _stream.WriteAsync(response).ConfigureAwait(false);
+                await _stream.WriteAsync(response, 0, response.Length).ConfigureAwait(false);
                 return lines;
             }
 
