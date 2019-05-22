@@ -13,7 +13,7 @@ namespace System.Net.Http.Headers
     // Use HeaderDescriptor.TryGet to resolve an arbitrary header name to a HeaderDescriptor.
     internal readonly struct HeaderDescriptor : IEquatable<HeaderDescriptor>
     {
-        private static Encoding s_utf8DecoderWithExceptionFallback = Encoding.GetEncoding("utf-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
+        private static readonly Encoding s_utf8DecoderWithExceptionFallback = Encoding.GetEncoding("utf-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
 
         private readonly string _headerName;
         private readonly KnownHeader _knownHeader;
@@ -102,24 +102,27 @@ namespace System.Net.Http.Headers
             }
 
             // If it's a known header value, use the known value instead of allocating a new string.
-            if (_knownHeader != null && _knownHeader.KnownValues != null)
+            if (_knownHeader != null)
             {
-                string[] knownValues = _knownHeader.KnownValues;
-                for (int i = 0; i < knownValues.Length; i++)
+                if (_knownHeader.KnownValues != null)
                 {
-                    if (ByteArrayHelpers.EqualsOrdinalAsciiIgnoreCase(knownValues[i], headerValue))
+                    string[] knownValues = _knownHeader.KnownValues;
+                    for (int i = 0; i < knownValues.Length; i++)
                     {
-                        return knownValues[i];
+                        if (ByteArrayHelpers.EqualsOrdinalAsciiIgnoreCase(knownValues[i], headerValue))
+                        {
+                            return knownValues[i];
+                        }
                     }
                 }
-            }
 
-            if (KnownHeader != null && KnownHeader.Name == KnownHeaders.Location.Name)
-            {
-                // Normally Location should be in ISO-8859-1, ocassionally some servers respond with UTF-8 though
-                if (TryDecodeUtf8(headerValue, out string decoded))
+                if (KnownHeader == KnownHeaders.Location)
                 {
-                    return decoded;
+                    // Normally Location should be in ISO-8859-1, ocassionally some servers respond with UTF-8 though
+                    if (TryDecodeUtf8(headerValue, out string decoded))
+                    {
+                        return decoded;
+                    }
                 }
             }
 
@@ -128,6 +131,7 @@ namespace System.Net.Http.Headers
 
         private static bool TryDecodeUtf8(ReadOnlySpan<byte> input, out string decoded)
         {
+            // TODO: Utilize vectorization helpers here if/when they're made public
             bool possibleUtf8 = false;
             for (int i = 0; i < input.Length; i++)
             {
