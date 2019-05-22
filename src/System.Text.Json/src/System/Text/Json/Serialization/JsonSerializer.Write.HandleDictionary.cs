@@ -52,7 +52,7 @@ namespace System.Text.Json.Serialization
 
                     if (elementClassInfo.ClassType == ClassType.Value)
                     {
-                        elementClassInfo.GetPolicyProperty().WriteDictionary(options, ref state.Current, writer);
+                        elementClassInfo.GetPolicyProperty().WriteDictionary(ref state.Current, writer);
                     }
                     else if (state.Current.Enumerator.Current == null)
                     {
@@ -171,7 +171,7 @@ namespace System.Text.Json.Serialization
                 Debug.Assert(entry.Key is string);
 
                 string propertyName = (string)entry.Key;
-                element.WriteAsProperty(propertyName.AsSpan(), writer);
+                element.WriteAsProperty(propertyName, writer);
             }
             else
             {

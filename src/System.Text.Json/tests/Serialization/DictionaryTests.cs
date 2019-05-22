@@ -18,41 +18,41 @@ namespace System.Text.Json.Serialization.Tests
             const string JsonString = @"{""Hello"":""World"",""Hello2"":""World2""}";
             const string ReorderedJsonString = @"{""Hello2"":""World2"",""Hello"":""World""}";
 
-            //{
-            //    Dictionary<string, string> obj = JsonSerializer.Parse<Dictionary<string, string>>(JsonString);
-            //    Assert.Equal("World", obj["Hello"]);
-            //    Assert.Equal("World2", obj["Hello2"]);
+            {
+                Dictionary<string, string> obj = JsonSerializer.Parse<Dictionary<string, string>>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
 
-            //    string json = JsonSerializer.ToString(obj);
-            //    Assert.Equal(JsonString, json);
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
 
-            //    json = JsonSerializer.ToString<object>(obj);
-            //    Assert.Equal(JsonString, json);
-            //}
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
 
-            //{
-            //    IDictionary<string, string> obj = JsonSerializer.Parse<IDictionary<string, string>>(JsonString);
-            //    Assert.Equal("World", obj["Hello"]);
-            //    Assert.Equal("World2", obj["Hello2"]);
+            {
+                IDictionary<string, string> obj = JsonSerializer.Parse<IDictionary<string, string>>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
 
-            //    string json = JsonSerializer.ToString(obj);
-            //    Assert.Equal(JsonString, json);
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
 
-            //    json = JsonSerializer.ToString<object>(obj);
-            //    Assert.Equal(JsonString, json);
-            //}
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
 
-            //{
-            //    IReadOnlyDictionary<string, string> obj = JsonSerializer.Parse<IReadOnlyDictionary<string, string>>(JsonString);
-            //    Assert.Equal("World", obj["Hello"]);
-            //    Assert.Equal("World2", obj["Hello2"]);
+            {
+                IReadOnlyDictionary<string, string> obj = JsonSerializer.Parse<IReadOnlyDictionary<string, string>>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
 
-            //    string json = JsonSerializer.ToString(obj);
-            //    Assert.Equal(JsonString, json);
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
 
-            //    json = JsonSerializer.ToString<object>(obj);
-            //    Assert.Equal(JsonString, json);
-            //}
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
 
             {
                 ImmutableDictionary<string, string> obj = JsonSerializer.Parse<ImmutableDictionary<string, string>>(JsonString);
@@ -143,6 +143,7 @@ namespace System.Text.Json.Serialization.Tests
         public static void FirstGenericArgNotStringFail()
         {
             Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<ImmutableDictionary<int, int>>(@"{""Key1"":1}"));
         }
 
         [Fact]
@@ -551,6 +552,13 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Null(obj.MyDictionary);
         }
 
+        [Fact]
+        public static void DeserializeUserDefinedDictionaryThrows()
+        {
+            string json = @"{""Hello"":1,""Hello2"":2}";
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<UserDefinedImmutableDictionary>(json));
+        }
+
         public class ClassWithDictionaryButNoSetter
         {
             public Dictionary<string, string> MyDictionary { get; } = new Dictionary<string, string>();
@@ -564,6 +572,82 @@ namespace System.Text.Json.Serialization.Tests
         public class ClassWithNotSupportedDictionaryButIgnored
         {
             [JsonIgnore] public Dictionary<int, int> MyDictionary { get; set; }
+        }
+
+        public class UserDefinedImmutableDictionary : IImmutableDictionary<string, int>
+        {
+            public int this[string key] => throw new NotImplementedException();
+
+            public IEnumerable<string> Keys => throw new NotImplementedException();
+
+            public IEnumerable<int> Values => throw new NotImplementedException();
+
+            public int Count => throw new NotImplementedException();
+
+            public IImmutableDictionary<string, int> Add(string key, int value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IImmutableDictionary<string, int> AddRange(IEnumerable<KeyValuePair<string, int>> pairs)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IImmutableDictionary<string, int> Clear()
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool Contains(KeyValuePair<string, int> pair)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool ContainsKey(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IEnumerator<KeyValuePair<string, int>> GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            public IImmutableDictionary<string, int> Remove(string key)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IImmutableDictionary<string, int> RemoveRange(IEnumerable<string> keys)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IImmutableDictionary<string, int> SetItem(string key, int value)
+            {
+                throw new NotImplementedException();
+            }
+
+            public IImmutableDictionary<string, int> SetItems(IEnumerable<KeyValuePair<string, int>> items)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool TryGetKey(string equalKey, out string actualKey)
+            {
+                throw new NotImplementedException();
+            }
+
+            public bool TryGetValue(string key, out int value)
+            {
+                throw new NotImplementedException();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
