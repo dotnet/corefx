@@ -380,7 +380,7 @@ namespace System.Text.Json.Serialization.Tests
                 exceptionThrown = true;
 
                 // Exception should contain property path.
-                Assert.True(exception.ToString().Contains("[System.Text.Json.Serialization.Tests.ValueTests+TestClassWithBadData].Children.MyProperty"));
+                Assert.True(exception.ToString().Contains("Path: $.Children[0].MyProperty"));
             }
 
             Assert.True(exceptionThrown);

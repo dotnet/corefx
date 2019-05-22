@@ -36,7 +36,7 @@ namespace System.Text.Json.Serialization
                     jsonPropertyInfo.ElementClassInfo.Type != typeof(object) &&
                     jsonPropertyInfo.ElementClassInfo.Type != typeof(JsonElement))
                 {
-                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.PropertyPath);
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(state.Current.JsonClassInfo.Type, reader, state.JsonPath);
                 }
 
                 JsonClassInfo classInfo = state.Current.JsonClassInfo;
