@@ -155,6 +155,9 @@ namespace System.Net.Tests
             yield return Tuple.Create("%1g", "%1g");
             yield return Tuple.Create("%G1", "%G1");
             yield return Tuple.Create("%1G", "%1G");
+
+            // The "Baz" portion of "http://example.net/Baz" has been double-encoded - one iteration of UrlDecode() should produce a once-encoded string.
+            yield return Tuple.Create("http://example.net/%2542%2561%257A", "http://example.net/%42%61%7A");
         }
 
         public static IEnumerable<Tuple<string, string>> UrlEncode_SharedTestData()

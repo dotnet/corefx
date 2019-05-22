@@ -462,7 +462,9 @@ namespace System.Web.Tests
                 new object[] { "http://example.net/\uFFFD", "http://example.net/\uD800" },
                 new object[] { "http://example.net/\uFFFDa", "http://example.net/\uD800a" },
                 new object[] { "http://example.net/\uFFFD", "http://example.net/\uDC00" },
-                new object[] { "http://example.net/\uFFFDa", "http://example.net/\uDC00a" }
+                new object[] { "http://example.net/\uFFFDa", "http://example.net/\uDC00a" },
+                // The "Baz" portion of "http://example.net/Baz" has been double-encoded - one iteration of UrlDecode() should produce a once-encoded string.
+                new object[] { "http://example.net/%42%61%7A", "http://example.net/%2542%2561%257A"}
             };
 
         public static IEnumerable<object[]> UrlDecodeDataToBytes =>
