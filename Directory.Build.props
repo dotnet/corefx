@@ -1,4 +1,4 @@
-﻿<Project TreatAsLocalProperty="ExcludeRestorePackageImports">
+﻿<Project>
   <!-- Base repo layout properties -->
   <PropertyGroup>
     <RepoRoot>$(MSBuildThisFileDirectory)</RepoRoot>
@@ -86,21 +86,7 @@
     <IsPrerelease>true</IsPrerelease>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Need to set ProjectAssetsFile to something so it doesn't get set to the Tools.proj assets file when we import the generated props -->
-    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == ''">unused</ProjectAssetsFile>
-    <!-- Nuget will normally disable all generated imports as part of a restore to avoid 
-         non-determinism where first restore changes a subsequent restore,
-         but we need these since they define properties (like TargetFramework) needed by restore.
-         In this case we garuntee this is ok since these specific props are not restored by this project's restore. -->
-    <_excludeRestorePackageImports>$(ExcludeRestorePackageImports)</_excludeRestorePackageImports>
-    <ExcludeRestorePackageImports>false</ExcludeRestorePackageImports>
-  </PropertyGroup>
-  <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.props" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.props')" />
-  <PropertyGroup>
-    <ProjectAssetsFile Condition="'$(ProjectAssetsFile)' == 'unused'" />
-    <ExcludeRestorePackageImports>$(_excludeRestorePackageImports)</ExcludeRestorePackageImports>
-  </PropertyGroup>
+  <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
 
   <!-- Common repo directories -->
   <PropertyGroup>
@@ -111,11 +97,6 @@
 
     <!-- Use msbuild path functions as that property is used in bash scripts. -->
     <SourceDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', 'src'))</SourceDir>
-  </PropertyGroup>
-
-  <!-- Enable the analyzers for this repo -->
-  <PropertyGroup>
-    <EnableAnalyzers Condition="'$(EnableAnalyzers)' == '' AND '$(IsSourceProject)' == 'true'">true</EnableAnalyzers>
   </PropertyGroup>
 
   <!-- Default properties for CI builds -->

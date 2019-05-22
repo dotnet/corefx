@@ -1,0 +1,5 @@
+<Project>
+  <Import Project="$(RepositoryEngineeringDir)CodeAnalysis.targets" />
+  
+  <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets')" />
+</Project>

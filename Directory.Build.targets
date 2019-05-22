@@ -35,7 +35,6 @@
   </PropertyGroup>
 
   <Import Project="$(RepositoryEngineeringDir)versioning.targets" />
-  <Import Project="$(RepositoryEngineeringDir)CodeAnalysis.targets" />
 
   <!-- Corefx-specific binplacing properties -->
   <PropertyGroup>
@@ -124,7 +123,7 @@
   <Import Project="$(RepositoryEngineeringDir)references.targets" />
   <Import Project="$(RepositoryEngineeringDir)resolveContract.targets" />
 
-  <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets')" />
+  <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.targets" />
 
   <Import Project="$(RepositoryEngineeringDir)referenceFromRuntime.targets" />
   <Import Project="$(RepositoryEngineeringDir)illink.targets" />
@@ -158,7 +157,7 @@
     <Message Text="Generated reference assembly source code: $(_RefSourceFileOutputPath)" />
   </Target>
 
-  <Import Project="$(RepositoryEngineeringDir)/DisableSourceControlManagement.targets" Condition="'$(EnableSourceLink)' == 'false'" />
+  <Import Project="$(RepositoryEngineeringDir)DisableSourceControlManagement.targets" Condition="'$(EnableSourceLink)' == 'false'" />
 
   <!-- Define this now until we can clean-up targets that depend on it in the packaging targets -->
   <Target Name="CreateVersionFileDuringBuild" />
