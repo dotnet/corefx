@@ -1175,12 +1175,12 @@ namespace System.Net.Http
 
         private void AbortStreams(int lastValidStream, Exception abortException)
         {
+            bool shouldInvalidate = false;
             lock (SyncObject)
             {
                 if (!_disposed)
                 {
-                    _pool.InvalidateHttp2Connection(this);
-
+                    shouldInvalidate = true;
                     _disposed = true;
                 }
 
@@ -1198,6 +1198,12 @@ namespace System.Net.Http
                 }
 
                 CheckForShutdown();
+            }
+
+            if (shouldInvalidate)
+            {
+                // Invalidate outside of lock to avoid race with HttpPool Dispose()
+                _pool.InvalidateHttp2Connection(this);
             }
         }
 
@@ -1355,22 +1361,30 @@ namespace System.Net.Http
             try
             {
                 // Send headers
-                bool hasExpectContinueHeader = request.Content != null && request.HasHeaders && request.Headers.ExpectContinue == true;
+                bool shouldExpectContinue = request.Content != null && request.HasHeaders && request.Headers.ExpectContinue == true;
 
-                if (!hasExpectContinueHeader)
+                http2Stream = await SendHeadersAsync(request, cancellationToken, flush: shouldExpectContinue).ConfigureAwait(false);
+                if (shouldExpectContinue)
                 {
-                    // Send request body, if any
-                    http2Stream = await SendHeadersAsync(request, cancellationToken).ConfigureAwait(false);
-                    await http2Stream.SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
-                    // Wait for response headers to be read.
-                    await http2Stream.ReadResponseHeadersAsync().ConfigureAwait(false);
+                    // Send header and wait a little bit to see if server sends 100, reject code or nothing.
+                    if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing 100-Continue.");
+                    await http2Stream.SendRequestBodyWithExpect100ContinueAsync(cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    // Send header and wait a little bit to see if server sends 100, reject or nothing.
-                    if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing 100-Continue.");
-                    http2Stream = await SendHeadersAsync(request, cancellationToken, flush : true).ConfigureAwait(false);
-                    await http2Stream.SendRequestBodyWithExpect100ContinueAsync(cancellationToken).ConfigureAwait(false);
+                    // Send request body, if any
+                    Task bodyTask = http2Stream.SendRequestBodyAsync(cancellationToken);
+                    if (!request.SendConcurent)
+                    {
+                        await bodyTask.ConfigureAwait(false);
+                        bodyTask = null;
+                    }
+                    // Wait for response headers to be read.
+                    await http2Stream.ReadResponseHeadersAsync().ConfigureAwait(false);
+                    if (bodyTask != null && bodyTask.IsCompleted && bodyTask.IsFaulted)
+                    {
+                        throw bodyTask.Exception;
+                    }
                 }
             }
             catch (Exception e)

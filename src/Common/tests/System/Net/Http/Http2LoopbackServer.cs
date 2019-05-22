@@ -525,6 +525,11 @@ namespace System.Net.Test.Common
             do
             {
                 frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+                if (frame == null || frame.Type == FrameType.RstStream)
+                {
+                    throw new IOException( frame == null ? "End of stream" : "Got RST");
+                }
+
                 Assert.Equal(FrameType.Data, frame.Type);
 
                 if (frame.Length > 1)
@@ -700,14 +705,14 @@ namespace System.Net.Test.Common
             return requestData;
         }
 
-        public async static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<Http2LoopbackServer, Task> serverFunc)
+        public async static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<Http2LoopbackServer, Task> serverFunc, int timeout = 60_000)
         {
             using (var server = Http2LoopbackServer.CreateServer())
             {
                 Task clientTask = clientFunc(server.Address);
                 Task serverTask = serverFunc(server);
 
-                await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed();
+                await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed(timeout);
             }
         }
     }

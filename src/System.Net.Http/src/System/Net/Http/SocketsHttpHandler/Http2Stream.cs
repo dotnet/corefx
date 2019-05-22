@@ -92,13 +92,24 @@ namespace System.Net.Http
                 // Send request body, if any
                 if (_request.Content != null)
                 {
-                    using (Http2WriteStream writeStream = new Http2WriteStream(this))
+                    try
                     {
-                        await _request.Content.CopyToAsync(writeStream, null, cancellationToken).ConfigureAwait(false);
-                    }
+                        using (Http2WriteStream writeStream = new Http2WriteStream(this))
+                        {
+                            await _request.Content.CopyToAsync(writeStream, null, cancellationToken).ConfigureAwait(false);
+                        }
 
-                    // Don't wait for completion, which could happen asynchronously.
-                    Task ignored = _connection.SendEndStreamAsync(_streamId);
+                        // Don't wait for completion, which could happen asynchronously.
+                        Task ignored = _connection.SendEndStreamAsync(_streamId);
+                    }
+                    catch (Exception e) when (e is ObjectDisposedException || e.InnerException is ObjectDisposedException)
+                    {
+                        if (_response == null || (int)_response.StatusCode < 300)
+                        {
+                            // throw only if we did not decided to abort after getting reject status code.
+                            throw;
+                        }
+                    }
                 }
             }
 
@@ -108,7 +119,7 @@ namespace System.Net.Http
                 TaskCompletionSource<bool> allowExpect100ToContinue = new TaskCompletionSource<bool>();
                 bool sendRequestContent;
 
-                Task response = response = ReadResponseHeadersAsync(allowExpect100ToContinue);
+                Task response = ReadResponseHeadersAsync(allowExpect100ToContinue);
 
                 using (var expect100Timer = new Timer(
                             s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
@@ -629,6 +640,11 @@ namespace System.Net.Http
                 public override int Read(Span<byte> destination)
                 {
                     Http2Stream http2Stream = _http2Stream ?? throw new ObjectDisposedException(nameof(Http2ReadStream));
+                    if (http2Stream._abortException != null)
+                    {
+                        throw http2Stream._abortException;
+                    }
+
                     return http2Stream.ReadData(destination);
                 }
 
@@ -638,6 +654,11 @@ namespace System.Net.Http
                     if (http2Stream == null)
                     {
                         return new ValueTask<int>(Task.FromException<int>(new ObjectDisposedException(nameof(Http2ReadStream))));
+                    }
+
+                    if (http2Stream._abortException != null)
+                    {
+                        return new ValueTask<int>(Task.FromException<int>(new HttpRequestException(SR.net_http_client_execution_error, http2Stream._abortException)));
                     }
 
                     return http2Stream.ReadDataAsync(destination, cancellationToken);
@@ -651,7 +672,6 @@ namespace System.Net.Http
             private sealed class Http2WriteStream : HttpBaseStream
             {
                 private Http2Stream _http2Stream;
-                private bool _abortStream;
 
                 public Http2WriteStream(Http2Stream http2Stream)
                 {
@@ -680,22 +700,18 @@ namespace System.Net.Http
                 public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
                 {
                     Http2Stream http2Stream = _http2Stream;
+
                     if (http2Stream == null)
                     {
                         return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
                     }
 
-                    if (_abortStream)
-                    {
-                        return new ValueTask();
-                    }
-
+                    // We got rejected while sending request.
                     if (http2Stream._response != null && (int)http2Stream._response.StatusCode >= 300)
                     {
                         // If asked to abort sending request body after we started, send RST and ignore rest of the stream.
-                        Task ignored = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel);
-                        _abortStream = true;
-                        return new ValueTask();
+                        _ = http2Stream._connection.SendRstStreamAsync(http2Stream._streamId, Http2ProtocolErrorCode.Cancel);
+                        return new ValueTask(Task.FromException(new ObjectDisposedException(nameof(Http2WriteStream))));
                     }
 
                     return new ValueTask(http2Stream.SendDataAsync(buffer, cancellationToken));
