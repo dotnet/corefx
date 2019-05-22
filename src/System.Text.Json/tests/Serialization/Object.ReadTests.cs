@@ -174,12 +174,5 @@ namespace System.Text.Json.Serialization.Tests
             TestClassWithStringToPrimitiveDictionary obj = JsonSerializer.Parse<TestClassWithStringToPrimitiveDictionary>(TestClassWithStringToPrimitiveDictionary.s_data);
             obj.Verify();
         }
-
-        [Fact]
-        public static void ReadClassWithStringToObjectDictionaries()
-        {
-            TestClassWithStringToObjectDictionaries obj = JsonSerializer.Parse<TestClassWithStringToObjectDictionaries>(TestClassWithStringToObjectDictionaries.s_data);
-            obj.Verify();
-        }
     }
 }

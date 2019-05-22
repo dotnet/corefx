@@ -759,47 +759,6 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class TestClassWithStringToObjectDictionaries : ITestClass
-    {
-        // TODO: Add support for classes as dictionary values in class-nested dicitonaries for the following types.
-        //public Dictionary<string, SimpleTestClass> MyDict { get; set; }
-        //public IDictionary<string, SimpleTestClass> MyIDict { get; set; }
-        //public IReadOnlyDictionary<string, SimpleTestClass> MyIReadOnlyDict { get; set; }
-        //public ImmutableDictionary<string, SimpleTestClass> MyImmutableDict { get; set; }
-        //public IImmutableDictionary<string, SimpleTestClass> MyIImmutableDict { get; set; }
-        //public ImmutableSortedDictionary<string, SimpleTestClass> MyImmutableSortedDict { get; set; }
-
-        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
-            @"{" +
-                //@"""MyDict"":{" +
-                //    @"""Key1"":" + SimpleTestClass.s_json + "," +
-                //    @"""Key2"":" + SimpleTestClass.s_json +
-                //@"}" +
-            @"}");
-
-        public void Initialize()
-        {
-            //MyDict = new Dictionary<string, SimpleTestClass>();
-            //{
-            //    SimpleTestClass obj = new SimpleTestClass();
-            //    obj.Initialize();
-            //    MyDict["Key1"] = obj;
-            //}
-            //{
-            //    SimpleTestClass obj = new SimpleTestClass();
-            //    obj.Initialize();
-            //    MyDict["Key2"] = obj;
-            //}
-        }
-
-        public void Verify()
-        {
-            //Assert.Equal(2, MyDict.Count);
-            //MyDict["Key1"].Verify();
-            //MyDict["Key2"].Verify();
-        }
-    }
-
     public class TestClassWithObjectIEnumerableConstructibleTypes : ITestClass
     {
         public Stack<SimpleTestClass> MyStack { get; set; }
