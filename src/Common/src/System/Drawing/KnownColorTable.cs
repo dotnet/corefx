@@ -65,13 +65,21 @@ namespace System.Drawing
             {
                 // Delegate TargetType
                 Type userPrefChangingDelegateType = Type.GetType("Microsoft.Win32.UserPreferenceChangingEventHandler, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089", throwOnError: false);
+                Debug.Assert(userPrefChangingDelegateType != null);
 
-                // we are using MethodInfo overload because it allows relaxed signature binding i.e. the types dont need to be exact match. It allows base classes as well.
-                MethodInfo mi = typeof(KnownColorTable).GetMethod("OnUserPreferenceChanging", BindingFlags.NonPublic | BindingFlags.Static);                
+                if (userPrefChangingDelegateType != null)
+                {
+                    // we are using MethodInfo overload because it allows relaxed signature binding i.e. the types dont need to be exact match. It allows base classes as well.
+                    MethodInfo mi = typeof(KnownColorTable).GetMethod("OnUserPreferenceChanging", BindingFlags.NonPublic | BindingFlags.Static);
+                    Debug.Assert(mi != null);
 
-                // Creating a delegate to use it as event handler.
-                Delegate handler = Delegate.CreateDelegate(userPrefChangingDelegateType, mi);
-                upEventInfo.AddEventHandler(null, handler);
+                    if (mi != null)
+                    {
+                        // Creating a delegate to use it as event handler.
+                        Delegate handler = Delegate.CreateDelegate(userPrefChangingDelegateType, mi);
+                        upEventInfo.AddEventHandler(null, handler);
+                    }
+                }
             }
 
             UpdateSystemColors(values);
@@ -454,6 +462,7 @@ namespace System.Drawing
         {
             PropertyInfo categoryProperty = args.GetType()?.GetProperty("Category", BindingFlags.Instance | BindingFlags.Public);
 
+            Debug.Assert(categoryProperty != null);
             if (categoryProperty == null)
                 return;
 
