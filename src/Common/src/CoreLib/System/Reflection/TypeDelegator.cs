@@ -6,7 +6,6 @@
 // 
 // This class wraps a Type object and delegates all methods to that Type.
 
-#nullable enable
 using CultureInfo = System.Globalization.CultureInfo;
 
 namespace System.Reflection
@@ -102,6 +101,7 @@ namespace System.Reflection
 
         public override bool IsTypeDefinition => typeImpl.IsTypeDefinition;
         public override bool IsSZArray => typeImpl.IsSZArray;
+        public override bool IsVariableBoundArray => typeImpl.IsVariableBoundArray;
 
         protected override bool IsArrayImpl() => typeImpl.IsArray;
         protected override bool IsPrimitiveImpl() => typeImpl.IsPrimitive;

@@ -65,8 +65,6 @@ namespace System.Text.Json.Serialization.Tests
             }
         }
 
-
-
         [Fact]
         public static void WriteClassWithGenericList()
         {
@@ -315,6 +313,52 @@ namespace System.Text.Json.Serialization.Tests
 
             {
                 TestClassWithObjectIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithObjectIReadOnlyListT>(TestClassWithObjectIEnumerableT.s_data);
+                obj.Verify();
+            }
+        }
+
+        [Fact]
+        public static void WriteClassWithObjectIEnumerableConstructibleTypes()
+        {
+            string json;
+
+            {
+                TestClassWithObjectIEnumerableConstructibleTypes obj = new TestClassWithObjectIEnumerableConstructibleTypes();
+                obj.Initialize();
+                obj.Verify();
+                json = JsonSerializer.ToString(obj);
+            }
+
+            {
+                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableConstructibleTypes>(json);
+                obj.Verify();
+            }
+
+            {
+                TestClassWithObjectIEnumerableConstructibleTypes obj = JsonSerializer.Parse<TestClassWithObjectIEnumerableConstructibleTypes>(TestClassWithObjectIEnumerableConstructibleTypes.s_data);
+                obj.Verify();
+            }
+        }
+
+        [Fact]
+        public static void WriteClassWithObjectImmutableTypes()
+        {
+            string json;
+
+            {
+                TestClassWithObjectImmutableTypes obj = new TestClassWithObjectImmutableTypes();
+                obj.Initialize();
+                obj.Verify();
+                json = JsonSerializer.ToString(obj);
+            }
+
+            {
+                TestClassWithObjectImmutableTypes obj = JsonSerializer.Parse<TestClassWithObjectImmutableTypes>(json);
+                obj.Verify();
+            }
+
+            {
+                TestClassWithObjectImmutableTypes obj = JsonSerializer.Parse<TestClassWithObjectImmutableTypes>(TestClassWithObjectImmutableTypes.s_data);
                 obj.Verify();
             }
         }

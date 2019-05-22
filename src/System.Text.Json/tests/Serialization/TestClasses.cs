@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
 
@@ -18,6 +19,17 @@ namespace System.Text.Json.Serialization.Tests
     {
         One = 1,
         Two = 2
+    }
+
+    public enum SampleInt64Enum : long
+    {
+        Min = long.MinValue,
+        Max = long.MaxValue
+    }
+
+    public enum SampleUInt64Enum : ulong
+    {
+        Max = ulong.MaxValue
     }
 
     public class TestClassWithNull
@@ -372,16 +384,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyData[0]);
             Assert.Equal("World", MyData[1]);
             Assert.Equal(2, MyData.Length);
-        }
-    }
-
-    public class TestClassWithCycle
-    {
-        public TestClassWithCycle Parent { get; set; }
-
-        public void Initialize()
-        {
-            Parent = this;
         }
     }
 
@@ -757,6 +759,295 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
+    public class TestClassWithObjectIEnumerableConstructibleTypes : ITestClass
+    {
+        public Stack<SimpleTestClass> MyStack { get; set; }
+        public Queue<SimpleTestClass> MyQueue { get; set; }
+        public HashSet<SimpleTestClass> MyHashSet { get; set; }
+        public LinkedList<SimpleTestClass> MyLinkedList { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyStack"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyQueue"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyHashSet"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyLinkedList"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyStack = new Stack<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyStack.Push(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyStack.Push(obj);
+            }
+
+            MyQueue = new Queue<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyQueue.Enqueue(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyQueue.Enqueue(obj);
+            }
+
+            MyHashSet = new HashSet<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyHashSet.Add(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyHashSet.Add(obj);
+            }
+
+            MyLinkedList = new LinkedList<SimpleTestClass>();
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyLinkedList.AddLast(obj);
+            }
+            {
+                SimpleTestClass obj = new SimpleTestClass();
+                obj.Initialize();
+                MyLinkedList.AddLast(obj);
+            }
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyStack.Count);
+            foreach (SimpleTestClass data in MyStack)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyQueue.Count);
+            foreach (SimpleTestClass data in MyQueue)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyHashSet.Count);
+            foreach (SimpleTestClass data in MyHashSet)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyLinkedList.Count);
+            foreach (SimpleTestClass data in MyLinkedList)
+            {
+                data.Verify();
+            }
+        }
+    }
+
+    public class TestClassWithObjectImmutableTypes : ITestClass
+    {
+        public IImmutableList<SimpleTestClass> MyIImmutableList { get; set; }
+        public IImmutableStack<SimpleTestClass> MyIImmutableStack { get; set; }
+        public IImmutableQueue<SimpleTestClass> MyIImmutableQueue { get; set; }
+        public IImmutableSet<SimpleTestClass> MyIImmutableSet { get; set; }
+        public ImmutableHashSet<SimpleTestClass> MyImmutableHashSet { get; set; }
+        public ImmutableList<SimpleTestClass> MyImmutableList { get; set; }
+        public ImmutableStack<SimpleTestClass> MyImmutableStack { get; set; }
+        public ImmutableQueue<SimpleTestClass> MyImmutableQueue { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                @"""MyIImmutableList"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyIImmutableStack"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyIImmutableQueue"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyIImmutableSet"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableHashSet"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableList"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableStack"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]," +
+                @"""MyImmutableQueue"":[" +
+                    SimpleTestClass.s_json + "," +
+                    SimpleTestClass.s_json +
+                @"]" +
+            @"}");
+
+        public void Initialize()
+        {
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableList = ImmutableList.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableStack = ImmutableStack.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableQueue = ImmutableQueue.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyIImmutableSet = ImmutableHashSet.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableHashSet = ImmutableHashSet.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableList = ImmutableList.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableStack = ImmutableStack.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+            {
+                SimpleTestClass obj1 = new SimpleTestClass();
+                obj1.Initialize();
+
+                SimpleTestClass obj2 = new SimpleTestClass();
+                obj2.Initialize();
+
+                MyImmutableQueue = ImmutableQueue.CreateRange(new List<SimpleTestClass> { obj1, obj2 });
+            }
+        }
+
+        public void Verify()
+        {
+            Assert.Equal(2, MyIImmutableList.Count);
+            foreach (SimpleTestClass data in MyIImmutableList)
+            {
+                data.Verify();
+            }
+
+            int i = 0;
+            foreach (SimpleTestClass data in MyIImmutableStack)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
+
+            i = 0;
+            foreach (SimpleTestClass data in MyIImmutableQueue)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
+
+            Assert.Equal(2, MyIImmutableSet.Count);
+            foreach (SimpleTestClass data in MyIImmutableSet)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyImmutableHashSet.Count);
+            foreach (SimpleTestClass data in MyImmutableHashSet)
+            {
+                data.Verify();
+            }
+
+            Assert.Equal(2, MyImmutableList.Count);
+            foreach (SimpleTestClass data in MyImmutableList)
+            {
+                data.Verify();
+            }
+
+            i = 0;
+            foreach (SimpleTestClass data in MyImmutableStack)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
+
+            i = 0;
+            foreach (SimpleTestClass data in MyImmutableQueue)
+            {
+                data.Verify();
+                i++;
+            }
+            Assert.Equal(2, i);
+        }
+    }
+
     public class SimpleDerivedTestClass : SimpleTestClass
     {
     }
@@ -972,5 +1263,63 @@ namespace System.Text.Json.Serialization.Tests
 
         // A 400 character property name with a unicode character making it 401 bytes.
         public int Aѧ34567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890 { get; set; }
+    }
+
+    public class ClassWithExtensionProperty
+    {
+        public SimpleTestClass MyNestedClass { get; set; }
+        public int MyInt { get; set; }
+
+        [JsonExtensionData]
+        public IDictionary<string, JsonElement> MyOverflow { get; set; }
+    }
+
+    public class TestClassWithNestedObjectCommentsInner : ITestClass
+    {
+        public SimpleTestClass MyData { get; set; }
+
+        public static readonly string s_json =
+            @"{" +
+                @"""MyData"":" + SimpleTestClass.s_json + " // Trailing comment\n" +
+                "/* Multi\nLine Comment with } */\n" +
+            @"}";
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+
+        public void Initialize()
+        {
+            MyData = new SimpleTestClass();
+            MyData.Initialize();
+        }
+
+        public void Verify()
+        {
+            Assert.NotNull(MyData);
+            MyData.Verify();
+        }
+    }
+
+    public class TestClassWithNestedObjectCommentsOuter : ITestClass
+    {
+        public TestClassWithNestedObjectCommentsInner MyData { get; set; }
+
+        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(
+            @"{" +
+                " // This } will be ignored\n" +
+                @"""MyData"":" + TestClassWithNestedObjectCommentsInner.s_json +
+                " /* As will this [ */\n" +
+            @"}");
+
+        public void Initialize()
+        {
+            MyData = new TestClassWithNestedObjectCommentsInner();
+            MyData.Initialize();
+        }
+
+        public void Verify()
+        {
+            Assert.NotNull(MyData);
+            MyData.Verify();
+        }
     }
 }

@@ -29,6 +29,7 @@
     <Compile Include="Serialization\CyclicTests.cs" />
     <Compile Include="Serialization\DictionaryTests.cs" />
     <Compile Include="Serialization\EnumTests.cs" />
+    <Compile Include="Serialization\ExtensionDataTests.cs" />
     <Compile Include="Serialization\JsonElementTests.cs" />
     <Compile Include="Serialization\ExceptionTests.cs" />
     <Compile Include="Serialization\Null.ReadTests.cs" />
@@ -49,9 +50,14 @@
     <Compile Include="Serialization\TestClasses.SimpleTestClassWithObject.cs" />
     <Compile Include="Serialization\TestClasses.SimpleTestClassWithObjectArrays.cs" />
     <Compile Include="Serialization\TestClasses.SimpleTestClassWithSimpleObject.cs" />
+    <Compile Include="Serialization\TestClasses.SimpleTestStruct.cs" />
     <Compile Include="Serialization\TestData.cs" />
     <Compile Include="Serialization\Value.ReadTests.cs" />
+    <Compile Include="Serialization\Value.ReadTests.GenericCollections.cs" />
+    <Compile Include="Serialization\Value.ReadTests.ImmutableCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.cs" />
+    <Compile Include="Serialization\Value.WriteTests.GenericCollections.cs" />
+    <Compile Include="Serialization\Value.WriteTests.ImmutableCollections.cs" />
     <Compile Include="TestCaseType.cs" />
     <Compile Include="TestClasses.ClassWithComplexObjects.cs" />
     <Compile Include="Utf8JsonReaderTests.cs" />

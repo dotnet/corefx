@@ -1,20 +1,9 @@
 Compat issues with assembly System.Runtime:
 TypesMustExist : Type 'System.ArgIterator' does not exist in the implementation but it does exist in the contract.
+MembersMustExist : Member 'System.GC.GetTotalAllocatedBytes(System.Boolean)' does not exist in the implementation but it does exist in the contract.
+CannotRemoveAttribute : Attribute 'System.Runtime.CompilerServices.IsReadOnlyAttribute' exists on 'System.Reflection.CustomAttributeNamedArgument' in the contract but not the implementation.
+TypeCannotChangeClassification : Type 'System.Reflection.CustomAttributeNamedArgument' is marked as readonly in the contract so it must also be marked readonly in the implementation.
+CannotRemoveAttribute : Attribute 'System.Runtime.CompilerServices.IsReadOnlyAttribute' exists on 'System.Reflection.CustomAttributeTypedArgument' in the contract but not the implementation.
+TypeCannotChangeClassification : Type 'System.Reflection.CustomAttributeTypedArgument' is marked as readonly in the contract so it must also be marked readonly in the implementation.
 MembersMustExist : Member 'System.String System.Runtime.CompilerServices.RuntimeFeature.DefaultImplementationsOfInterfaces' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(System.RuntimeMethodHandle)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Runtime.CompilerServices.RuntimeHelpers.PrepareMethod(System.RuntimeMethodHandle, System.RuntimeTypeHandle[])' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.String.GetPinnableReference()' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.DecodeFromUtf16(System.ReadOnlySpan<System.Char>, System.Text.Rune, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.DecodeLastFromUtf16(System.ReadOnlySpan<System.Char>, System.Text.Rune, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.DecodeFromUtf8(System.ReadOnlySpan<System.Byte>, System.Text.Rune, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.DecodeLastFromUtf8(System.ReadOnlySpan<System.Byte>, System.Text.Rune, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.EncodeToUtf16(System.Span<System.Char>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.TryEncodeToUtf16(System.Span<System.Char>, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.EncodeToUtf8(System.Span<System.Byte>)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Text.Rune.TryEncodeToUtf8(System.Span<System.Byte>, System.Int32)' does not exist in the implementation but it does exist in the contract.
-MembersMustExist : Member 'System.Range.GetOffsetAndLength(System.Int32)' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.Range.OffsetAndLength' does not exist in the implementation but it does exist in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'System.Memory<T>' does not implement interface 'System.IEquatable<System.Memory<T>>' in the implementation but it does in the contract.
-CannotRemoveBaseTypeOrInterface : Type 'System.ReadOnlyMemory<T>' does not implement interface 'System.IEquatable<System.ReadOnlyMemory<T>>' in the implementation but it does in the contract.
-MembersMustExist : Member 'System.GC.GetGCMemoryInfo()' does not exist in the implementation but it does exist in the contract.
-TypesMustExist : Type 'System.GCMemoryInfo' does not exist in the implementation but it does exist in the contract.
+Total Issues: 7

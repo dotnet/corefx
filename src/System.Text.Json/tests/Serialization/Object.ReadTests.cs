@@ -9,9 +9,37 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class ObjectTests
     {
         [Fact]
+        public static void ReadSimpleStruct()
+        {
+            SimpleTestStruct obj = JsonSerializer.Parse<SimpleTestStruct>(SimpleTestStruct.s_json);
+            obj.Verify();
+        }
+
+        [Fact]
         public static void ReadSimpleClass()
         {
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(SimpleTestClass.s_json);
+            obj.Verify();
+        }
+
+        [Theory]
+        [InlineData("", " ")]
+        [InlineData("", "\t ")]
+        [InlineData("", "//Single Line Comment\r\n")]
+        [InlineData("", "/* Multi\nLine Comment */")]
+        [InlineData("", "\t\t\t\n// Both\n/* Comments */")]
+        [InlineData(" ", "")]
+        [InlineData("\t ", "")]
+        [InlineData(" \t", " \n")]
+        [InlineData("// Leading Comment\n", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "\t// trailing comment\n ")]
+        public static void ReadSimpleClassIgnoresLeadingOrTrailingTrivia(string leadingTrivia, string trailingTrivia)
+        {
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
+
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(leadingTrivia + SimpleTestClass.s_json + trailingTrivia, options);
             obj.Verify();
         }
 
@@ -29,6 +57,18 @@ namespace System.Text.Json.Serialization.Tests
             // Shoving it back through the parser should validate round tripping.
             obj = JsonSerializer.Parse<SimpleTestClassWithSimpleObject>(reserialized);
             obj.Verify();
+        }
+
+        [Theory]
+        [InlineData("", "//Single Line Comment\r\n")]
+        [InlineData("", "/* Multi\nLine Comment */")]
+        [InlineData("", "\t\t\t\n// Both\n/* Comments */")]
+        [InlineData("// Leading Comment\n", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "\t// trailing comment\n ")]
+        public static void ReadClassWithCommentsThrowsIfDisallowed(string leadingTrivia, string trailingTrivia)
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<ClassWithComplexObjects>(leadingTrivia + ClassWithComplexObjects.s_json + trailingTrivia));
         }
 
         [Fact]
@@ -60,6 +100,37 @@ namespace System.Text.Json.Serialization.Tests
 
             // Shoving it back through the parser should validate round tripping.
             obj = JsonSerializer.Parse<ClassWithComplexObjects>(reserialized);
+            obj.Verify();
+        }
+
+        [Theory]
+        [InlineData("", " ")]
+        [InlineData("", "\t ")]
+        [InlineData("", "//Single Line Comment\r\n")]
+        [InlineData("", "/* Multi\nLine Comment */")]
+        [InlineData("", "\t\t\t\n// Both\n/* Comments */")]
+        [InlineData(" ", "")]
+        [InlineData("\t ", "")]
+        [InlineData(" \t", " \n")]
+        [InlineData("// Leading Comment\n", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "")]
+        [InlineData("/* Multi\nLine\nComment */ ", "\t// trailing comment\n ")]
+        public static void ReadComplexClassIgnoresLeadingOrTrailingTrivia(string leadingTrivia, string trailingTrivia)
+        {
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
+
+            ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(leadingTrivia + ClassWithComplexObjects.s_json + trailingTrivia, options);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithNestedComments()
+        {
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
+
+            TestClassWithNestedObjectCommentsOuter obj = JsonSerializer.Parse<TestClassWithNestedObjectCommentsOuter>(TestClassWithNestedObjectCommentsOuter.s_data, options);
             obj.Verify();
         }
 
