@@ -45,15 +45,9 @@
     <!-- SourceLink -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="$(MicrosoftSourceLinkVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
     <PackageReference Include="Microsoft.SourceLink.Vsts.Git" Version="$(MicrosoftSourceLinkVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
-
-    <!-- analyzers -->
-    <PackageReference Include="Desktop.Analyzers" Version="1.1.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="2.9.0" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="1.1.0" />
-    <PackageReference Include="System.Runtime.Analyzers" Version="1.1.0" />
-    <PackageReference Include="System.Runtime.InteropServices.Analyzers" Version="1.1.0" />
-    <PackageReference Include="System.Security.Cryptography.Hashing.Algorithms.Analyzers" Version="1.1.0" />
   </ItemGroup>
+
+  <Import Condition="'$(DotNetBuildFromSource)' != 'true'" Project="Analyzers.props" />
 
   <UsingTask TaskName="Microsoft.DotNet.Arcade.Sdk.SaveItems" AssemblyFile="$(ArcadeSdkBuildTasksAssembly)" />
 

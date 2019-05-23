@@ -1,5 +1,6 @@
 <Project>
   <Import Project="..\Directory.Build.props" />
+
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
@@ -20,12 +21,53 @@
     <CoverageProbePath Include="shared\Microsoft.NETCore.App\9.9.9" />
   </ItemGroup>
 
+  <ItemDefinitionGroup Condition="'$(IsTestProject)' != 'true'">
+    <!-- Project references for non-test assemblies should never be copied to the output. -->
+    <ProjectReference>
+      <Private>false</Private>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+
   <!--
     The Utf8String package is experimental. We don't want tests to inadvertently take a dependency on this
     feature unless they explicitly opt in to it. (Source projects explicitly reference their dependencies,
     so they can't inadvertently take a dependency on it.)
   -->
-  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(IncludeUtf8StringAsmRef)' != 'true'">
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' and '$(IncludeUtf8StringAsmRef)' != 'true'">
     <DefaultReferenceExclusions Include="System.Utf8String.Experimental" />
   </ItemGroup>
+
+    <!-- Default properties for CI builds -->
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
+    <WithoutCategories>IgnoreForCI</WithoutCategories>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <CLSCompliant Condition="'$(CLSCompliant)' == '' and '$(IsTestProject)' == 'true'">false</CLSCompliant>
+    <CLSCompliant Condition="'$(CLSCompliant)' == ''">true</CLSCompliant>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
+    <XUnitAdapter Condition="'$(TargetsNetCoreApp)' == 'true'">xunit.runner.visualstudio.dotnetcore.testadapter</XUnitAdapter>
+    <XUnitAdapter Condition="'$(TargetsUap)' == 'true'">xunit.runner.visualstudio.uwp.testadapter</XUnitAdapter>
+    <XUnitAdapter Condition="'$(TargetsNetFx)' == 'true'">xunit.runner.visualstudio.testadapter</XUnitAdapter>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
+    <PackageReference Include="Microsoft.DotNet.RemoteExecutor" Version="$(MicrosoftDotNetRemoteExecutorPackageVersion)" />
+    
+    <!-- xunit -->
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsPackageVersion)" />
+    <PackageReference Include="xunit.core" Version="$(XUnitPackageVersion)" />
+    <PackageReference Include="xunit.assert" Version="$(XUnitPackageVersion)" />
+    <PackageReference Include="$(XUnitAdapter)" Version="$(XUnitPackageVersion)" />
+    <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true'" Include="Microsoft.DotNet.XUnitConsoleRunner" Version="$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)" />
+    <PackageReference Condition="'$(TargetsNetFx)' == 'true'" Include="xunit.runner.console" Version="$(XUnitPackageVersion)" />
+
+    <!-- for callstack line numbers -->
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.5.0" />
+  </ItemGroup>
+
+  <Import Condition="'$(DisableRepoRestore)' == 'true' and '$(IsSourceProject)' == 'true'" Project="$(RepositoryEngineeringDir)Analyzers.props" />
 </Project>

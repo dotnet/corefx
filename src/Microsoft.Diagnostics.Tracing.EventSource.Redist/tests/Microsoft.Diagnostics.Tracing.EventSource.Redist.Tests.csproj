@@ -37,4 +37,7 @@
     <Compile Include="$(SDTTestDir)\CustomEventSources\UseAbstractEventSource.cs" />
     <Compile Include="$(SDTTestDir)\CustomEventSources\UseInterfaceEventSource.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Diagnostics.Tracing.TraceEvent" Version="$(TraceEventPackageVersion)" />
+  </ItemGroup>
 </Project>

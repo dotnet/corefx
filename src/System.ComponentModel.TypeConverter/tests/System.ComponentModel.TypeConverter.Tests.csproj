@@ -155,9 +155,7 @@
     <Compile Include="XTypeDescriptionProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(NuGetPackageRoot)system.componentmodel.typeconverter.testdata\1.0.1\content\**\*.*">
-      <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
-    </SupplementalTestData>
+    <PackageReference Include="System.ComponentModel.TypeConverter.TestData" Version="$(SystemComponentModelTypeConverterTestDataPackageVersion)" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\TestResx.resx">

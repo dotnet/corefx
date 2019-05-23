@@ -16,9 +16,6 @@
   </PropertyGroup>
   <!-- Package names if they are used in more then one location in the repo -->
   <PropertyGroup>
-    <MicrosoftDotNetXUnitExtensionsPackage>Microsoft.DotNet.XUnitExtensions</MicrosoftDotNetXUnitExtensionsPackage>
-    <MicrosoftDotNetXUnitConsoleRunnerPackage>microsoft.dotnet.xunitconsolerunner</MicrosoftDotNetXUnitConsoleRunnerPackage>
-    <MicrosoftDotNetRemoteExecutorPackage>microsoft.dotnet.remoteexecutor</MicrosoftDotNetRemoteExecutorPackage>
     <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
   </PropertyGroup>
   <PropertyGroup>
@@ -57,6 +54,14 @@
     <XUnitPackageVersion>2.4.1-pre.build.4059</XUnitPackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
     <MicrosoftDotNetUapTestToolsPackageVersion>1.0.31</MicrosoftDotNetUapTestToolsPackageVersion>
+    <!-- Test data -->
+    <SystemIOCompressionTestDataPackageVersion>1.0.8</SystemIOCompressionTestDataPackageVersion>
+    <SystemIOPackagingTestDataPackageVersion>1.0.1</SystemIOPackagingTestDataPackageVersion>
+    <SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>1.0.3</SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>
+    <SystemNetTestDataPackageVersion>1.0.2</SystemNetTestDataPackageVersion>
+    <SystemComponentModelTypeConverterTestDataPackageVersion>1.0.1</SystemComponentModelTypeConverterTestDataPackageVersion>
+    <SystemDrawingCommonTestDataPackageVersion>1.0.9</SystemDrawingCommonTestDataPackageVersion>
+    <SystemWindowsExtensionsTestDataPackageVersion>1.0.2</SystemWindowsExtensionsTestDataPackageVersion>
     <!-- Code coverage package version -->
     <CoverletConsolePackageVersion>1.5.0</CoverletConsolePackageVersion>
     <DotNetReportGeneratorGlobalToolPackageVersion>4.1.4</DotNetReportGeneratorGlobalToolPackageVersion>
