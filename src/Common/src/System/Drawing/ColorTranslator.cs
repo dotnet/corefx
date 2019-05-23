@@ -36,7 +36,7 @@ namespace System.Drawing
             //    We must never have another method called ToOle() with a different signature.
             //    This is so that we can push into the runtime a custom marshaller for OLE_COLOR to Color.
 
-            if (c.GetIsKnownColor())
+            if (ColorUtil.GetIsKnownColor(c))
             {
                 switch (c.ToKnownColor())
                 {
