@@ -145,7 +145,7 @@ namespace System.Buffers.ArrayPool.Tests
             return parsedTrim;
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         [InlineData(true)]
         [InlineData(false)]
         [ActiveIssue(29866, TargetFrameworkMonikers.UapNotUapAot)]
