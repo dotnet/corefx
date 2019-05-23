@@ -37,12 +37,7 @@ namespace System.IO.Pipelines.Tests.Infrastructure
                 _ms.Write(buffer, offset, count);
                 MidWriteCancellation?.Cancel();
                 _writeCnt += count;
-                if (_waitCnt > 0 && _writeCnt >= _waitCnt)
-                {
-                    _writeCnt = 0;
-                    _waitCnt = 0;
-                    _waitSource.TrySetResult(null);
-                }
+                CheckWaitCount();
             }
         }
 
@@ -57,7 +52,18 @@ namespace System.IO.Pipelines.Tests.Infrastructure
                 _waitCnt = cnt;
                 _waitSource.TrySetCanceled();
                 _waitSource = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+                CheckWaitCount();
                 return _waitSource.Task;
+            }
+        }
+        
+        private void CheckWaitCount() 
+        {
+            if (_waitCnt > 0 && _writeCnt >= _waitCnt)
+            {
+                _writeCnt = 0;
+                _waitCnt = 0;
+                _waitSource.TrySetResult(null);
             }
         }
 
