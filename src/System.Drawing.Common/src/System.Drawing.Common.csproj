@@ -156,7 +156,7 @@
     <Compile Condition="'$(TargetGroup)' == 'netcoreapp2.0'" Include="$(CommonPath)\System\Drawing\ColorConverterCommon.cs">
       <Link>System\Drawing\ColorConverterCommon.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\System\Drawing\ColorTable.cs">
+    <Compile Condition="'$(TargetGroup)' == 'netcoreapp2.0'" Include="$(CommonPath)\System\Drawing\ColorTable.cs">
       <Link>System\Drawing\ColorTable.cs</Link>
     </Compile>
     <Compile Condition="'$(TargetGroup)' == 'netcoreapp2.0'" Include="$(CommonPath)\System\Drawing\ColorTranslator.cs">
