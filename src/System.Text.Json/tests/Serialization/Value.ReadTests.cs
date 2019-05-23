@@ -172,12 +172,6 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<ushort?>((ushort.MinValue - 1).ToString()));
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<ushort?>((ushort.MaxValue + 1).ToString()));
 
-            // To ensure range failure, just use double's MinValue and MaxValue (instead of float.MinValue\MaxValue +-1)
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<float>(double.MinValue.ToString()));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<float>(double.MaxValue.ToString()));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<float?>(double.MinValue.ToString()));
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<float?>(double.MaxValue.ToString()));
-
             // These are natively supported by the reader:
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<int>(((long)int.MinValue - 1).ToString()));
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<int>(((long)int.MaxValue + 1).ToString()));
@@ -204,11 +198,16 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<decimal?>(decimal.MinValue.ToString() + "0"));
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString() + "0"));
 
-            // todo: determine why these don't throw (issue with reader?)
-            //Assert.Throws<JsonException>(() => JsonSerializer.Parse<double>(double.MinValue.ToString() + "0"));
-            //Assert.Throws<JsonException>(() => JsonSerializer.Parse<double>(double.MaxValue.ToString() + "0"));
-            //Assert.Throws<JsonException>(() => JsonSerializer.Parse<double?>(double.MinValue.ToString() + "0"));
-            //Assert.Throws<JsonException>(() => JsonSerializer.Parse<double?>(double.MaxValue.ToString() + "0"));
+            // Overflow on floating point types do not throw.
+            JsonSerializer.Parse<float>(double.MinValue.ToString());
+            JsonSerializer.Parse<float>(double.MaxValue.ToString());
+            JsonSerializer.Parse<float?>(double.MinValue.ToString());
+            JsonSerializer.Parse<float?>(double.MaxValue.ToString());
+
+            JsonSerializer.Parse<double>(double.MinValue.ToString() + "000");
+            JsonSerializer.Parse<double>(double.MaxValue.ToString() + "000");
+            JsonSerializer.Parse<double?>(double.MinValue.ToString() + "000");
+            JsonSerializer.Parse<double?>(double.MaxValue.ToString() + "000");
         }
 
         [Fact]
@@ -226,9 +225,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(ushort.MaxValue, JsonSerializer.Parse<ushort>(ushort.MaxValue.ToString()));
             Assert.Equal(ushort.MaxValue, JsonSerializer.Parse<ushort?>(ushort.MaxValue.ToString()));
 
-            // todo: these fail due to double->float conversion
-            //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float>(float.MaxValue.ToString()));
-            //Assert.Equal(float.MaxValue, JsonSerializer.Parse<float?>(float.MaxValue.ToString()));
+            Assert.Equal(float.MaxValue, JsonSerializer.Parse<float>(float.MaxValue.ToString()));
+            Assert.Equal(float.MaxValue, JsonSerializer.Parse<float?>(float.MaxValue.ToString()));
 
             Assert.Equal(int.MaxValue, JsonSerializer.Parse<int>(int.MaxValue.ToString()));
             Assert.Equal(int.MaxValue, JsonSerializer.Parse<int?>(int.MaxValue.ToString()));
@@ -245,9 +243,8 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal>(decimal.MaxValue.ToString()));
             Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString()));
 
-            // todo: these are failing; do we need round-trip format "R"?
-            //Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString()));
-            //Assert.Equal(double.MaxValue, JsonSerializer.Parse<double?>(double.MaxValue.ToString()));
+            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString()));
+            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double?>(double.MaxValue.ToString()));
         }
 
         [Fact]
