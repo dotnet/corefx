@@ -142,8 +142,8 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void FirstGenericArgNotStringFail()
         {
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<ImmutableDictionary<int, int>>(@"{""Key1"":1}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{1:1}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<ImmutableDictionary<int, int>>(@"{1:1}"));
         }
 
         [Fact]
@@ -161,7 +161,6 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Equal(2, obj["Key2"].Count);
                 Assert.Equal(3, obj["Key2"][0]);
                 Assert.Equal(4, obj["Key2"][1]);
-
 
                 string json = JsonSerializer.ToString(obj);
                 Assert.Equal(JsonString, json);

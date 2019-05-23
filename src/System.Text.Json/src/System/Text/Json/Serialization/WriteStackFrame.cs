@@ -20,7 +20,7 @@ namespace System.Text.Json.Serialization
 
         // Whether the current object is an immutable dictionary.
         public bool IsImmutableDictionary;
-        public bool IsPropertyAnImmutableDictionary;
+        public bool IsImmutableDictionaryProperty;
 
         // The current enumerator for the IEnumerable or IDictionary.
         public IEnumerator Enumerator;
@@ -130,7 +130,7 @@ namespace System.Text.Json.Serialization
         {
             PropertyIndex = 0;
             PopStackOnEndObject = false;
-            IsPropertyAnImmutableDictionary = false;
+            IsImmutableDictionaryProperty = false;
             JsonPropertyInfo = null;
         }
 

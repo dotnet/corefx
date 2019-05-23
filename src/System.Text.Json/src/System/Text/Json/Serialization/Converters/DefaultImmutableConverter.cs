@@ -150,7 +150,7 @@ namespace System.Text.Json.Serialization.Converters
             Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-            JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
+            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
             return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.PropertyPath);
         }
 
@@ -163,7 +163,7 @@ namespace System.Text.Json.Serialization.Converters
             Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-            JsonPropertyInfo propertyInfo = DefaultIEnumerableConstructibleConverter.GetElementJsonPropertyInfo(elementClassInfo, options);
+            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
             return propertyInfo.CreateImmutableCollectionFromList(immutableCollectionType, delegateKey, sourceList, state.PropertyPath);
         }
     }
