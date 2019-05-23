@@ -6,6 +6,7 @@ using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Tests
@@ -874,6 +875,139 @@ namespace System.Text.Json.Tests
 
                 json = new Utf8JsonReader(sequence.Slice(json.BytesConsumed), isFinalBlock: true, json.CurrentState);
                 VerifyReadLoop(ref json, null);
+            }
+        }
+
+        [Theory]
+        [InlineData("//\u2028", 1)]
+        [InlineData("//\u2028", 2)]
+        [InlineData("//\u2028", 3)]
+        [InlineData("//\u2028", 100)]
+        [InlineData("//\u2029", 1)]
+        [InlineData("//\u2029", 2)]
+        [InlineData("//\u2029", 3)]
+        [InlineData("//\u2029", 100)]
+        [InlineData("// \u2028", 1)]
+        [InlineData("// \u2028", 2)]
+        [InlineData("// \u2028", 3)]
+        [InlineData("// \u2028", 100)]
+        [InlineData("//   \u2028", 1)]
+        [InlineData("//   \u2028", 2)]
+        [InlineData("//   \u2028", 3)]
+        [InlineData("//   \u2028", 100)]
+        [InlineData("//  \u2029 ", 1)]
+        [InlineData("//  \u2029 ", 2)]
+        [InlineData("//  \u2029 ", 3)]
+        [InlineData("//  \u2029 ", 100)]
+        [InlineData("//  \u2029  ", 1)]
+        [InlineData("//  \u2029  ", 2)]
+        [InlineData("//  \u2029  ", 3)]
+        [InlineData("//  \u2029  ", 100)]
+        public static void JsonWithSingleLineCommentEndingWithNonStandardLineEndingMultiSegment(string jsonString, int segmentSize)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, segmentSize);
+
+            foreach (bool isFinalBlock in new bool[] { false, true })
+            {
+                var json = new Utf8JsonReader(sequence, isFinalBlock, state);
+
+                try
+                {
+                    json.Read();
+                    Assert.True(false, "Expected JsonException was not thrown.");
+                }
+                catch (JsonException) { }
+            }
+        }
+
+        [Theory]
+        [InlineData("//", "", 1)]
+        [InlineData("//", "", 2)]
+        [InlineData("//", "", 3)]
+        [InlineData("//", "", 100)]
+        [InlineData("//a", "a", 1)]
+        [InlineData("//a", "a", 2)]
+        [InlineData("//a", "a", 3)]
+        [InlineData("//a", "a", 100)]
+        [InlineData("//abc", "abc", 1)]
+        [InlineData("//abc", "abc", 2)]
+        [InlineData("//abc", "abc", 3)]
+        [InlineData("//abc", "abc", 100)]
+        public static void JsonWithSingleLineCommentWithNoLineEndingsFinalBlockMultiSegment(string jsonString, string expectedComment, int segmentSize)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, segmentSize);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state);
+
+            Assert.True(json.Read());
+            Assert.Equal(JsonTokenType.Comment, json.TokenType);
+            Assert.Equal(expectedComment, json.GetComment());
+            Assert.False(json.Read());
+        }
+
+        [Theory]
+        [InlineData("//", "", 1)]
+        [InlineData("//", "", 2)]
+        [InlineData("//", "", 3)]
+        [InlineData("//", "", 100)]
+        [InlineData("//a", "a", 1)]
+        [InlineData("//a", "a", 2)]
+        [InlineData("//a", "a", 3)]
+        [InlineData("//a", "a", 100)]
+        [InlineData("//abc", "abc", 1)]
+        [InlineData("//abc", "abc", 2)]
+        [InlineData("//abc", "abc", 3)]
+        [InlineData("//abc", "abc", 100)]
+        public static void JsonWithSingleLineCommentWithNoLineEndingsNonFinalBlockMultiSegment(string jsonString, string expectedComment, int segmentSize)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, segmentSize);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: false, state);
+
+            Assert.False(json.Read());
+        }
+
+        [Theory]
+        [InlineData("//", "", 1)]
+        [InlineData("//", "", 2)]
+        [InlineData("//", "", 3)]
+        [InlineData("//", "", 100)]
+        [InlineData("//a", "a", 1)]
+        [InlineData("//a", "a", 2)]
+        [InlineData("//a", "a", 3)]
+        [InlineData("//a", "a", 100)]
+        [InlineData("//abc", "abc", 1)]
+        [InlineData("//abc", "abc", 2)]
+        [InlineData("//abc", "abc", 3)]
+        [InlineData("//abc", "abc", 100)]
+        public static void JsonWithSingleLineCommentWithRegularLineEndingMultiSegment(string jsonStringWithoutLineEnding, string expectedComment, int segmentSize)
+        {
+            foreach (string lineEnding in new string[] { "\r", "\r ", "\r\n", "\r\n ", "\n", "\n " })
+            {
+                foreach (bool isFinalBlock in new bool[] { false, true })
+                {
+                    if (!isFinalBlock && lineEnding == "\r")
+                    {
+                        // In this case parser would return false on the first Read (and check for \n on the next segment)
+                        // which is not the purpose of this test and is covered separately
+                        continue;
+                    }
+
+                    byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonStringWithoutLineEnding + lineEnding);
+                    var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+                    ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, segmentSize);
+
+                    var json = new Utf8JsonReader(sequence, isFinalBlock, state);
+
+                    Assert.True(json.Read(), $"Expected read to return true. IsFinalBlock = {isFinalBlock}; LineEnding = {string.Join("", lineEnding.Select((c) => ((byte)c).ToString("X2")))}");
+                    Assert.Equal(JsonTokenType.Comment, json.TokenType);
+                    Assert.Equal(expectedComment, json.GetComment());
+                    Assert.False(json.Read());
+                }
             }
         }
 

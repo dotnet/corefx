@@ -2383,21 +2383,37 @@ namespace System.Text.Json
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.InvalidCharacterAtStartOfComment, marker);
             }
 
+            bool allowEmptyComment = marker == JsonConstants.Slash;
+
             localBuffer = localBuffer.Slice(1);
             if (localBuffer.Length == 0)
             {
-                if (IsLastSpan)
-                {
-                    ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWhileReadingComment);
-                }
-                if (!GetNextSpan())
+                if (IsLastSpan || !GetNextSpan())
                 {
                     if (IsLastSpan)
                     {
-                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWhileReadingComment);
+                        if (allowEmptyComment)
+                        {
+                            if (_tokenType != JsonTokenType.Comment)
+                            {
+                                _previousTokenType = _tokenType;
+                            }
+
+                            _totalConsumed++;
+                            _bytePositionInLine++;
+                            _tokenType = JsonTokenType.Comment;
+                            _consumed += 2;
+                            return true;
+                        }
+                        else
+                        {
+                            ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfDataWhileReadingComment);
+                        }
                     }
+
                     return false;
                 }
+
                 _totalConsumed++;
                 _bytePositionInLine++;
                 localBuffer = _buffer;
@@ -2409,6 +2425,7 @@ namespace System.Text.Json
             {
                 return ConsumeSingleLineCommentMultiSegment(localBuffer, leftOver, start, _consumed);
             }
+
             return ConsumeMultiLineCommentMultiSegment(localBuffer, leftOver, start, _consumed);
         }
 
@@ -2420,6 +2437,8 @@ namespace System.Text.Json
             int idx = -1;
             bool expectLF = false;
             int toConsume = idx;
+            int dangerousLineSeparatorBytesConsumed = 0;
+
             do
             {
                 if (expectLF)
@@ -2431,7 +2450,10 @@ namespace System.Text.Json
                     HasValueSequence = true;
                     break;
                 }
-                idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn);
+
+                idx = FindLineSeparatorMultiSegment(localBuffer, ref dangerousLineSeparatorBytesConsumed);
+                Debug.Assert(dangerousLineSeparatorBytesConsumed >= 0 && dangerousLineSeparatorBytesConsumed <= 2);
+
                 if (idx != -1)
                 {
                     toConsume = idx;
@@ -2452,15 +2474,23 @@ namespace System.Text.Json
                         }
                         break;
                     }
+
                     expectLF = true;
                 }
                 else
                 {
                     end = new SequencePosition(_currentPosition.GetObject(), _currentPosition.GetInteger() + previousConsumed + leftOver + localBuffer.Length);
                 }
+
                 if (IsLastSpan)
                 {
                     idx = localBuffer.Length;
+
+                    if (expectLF)
+                    {
+                        idx--;
+                    }
+
                     toConsume = idx;
                     // Assume everything on this line is a comment and there is no more data.
                     _bytePositionInLine += 2 + localBuffer.Length;
@@ -2469,9 +2499,27 @@ namespace System.Text.Json
 
                 if (!GetNextSpan())
                 {
-                    _totalConsumed = prevTotalConsumed;
-                    return false;
+                    if (IsLastSpan)
+                    {
+                        idx = localBuffer.Length;
+
+                        if (expectLF)
+                        {
+                            idx--;
+                        }
+
+                        toConsume = idx;
+                        // Assume everything on this line is a comment and there is no more data.
+                        _bytePositionInLine += 2 + localBuffer.Length;
+                        goto Done;
+                    }
+                    else
+                    {
+                        _totalConsumed = prevTotalConsumed;
+                        return false;
+                    }
                 }
+
                 HasValueSequence = true;
                 _totalConsumed += localBuffer.Length + leftOver;
                 previousConsumed = 0;
@@ -2512,6 +2560,98 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Comment;
             _consumed += leftOver + idx;
             return true;
+        }
+
+        private int FindLineSeparatorMultiSegment(ReadOnlySpan<byte> localBuffer, ref int dangerousLineSeparatorBytesConsumed)
+        {
+            Debug.Assert(dangerousLineSeparatorBytesConsumed >= 0 && dangerousLineSeparatorBytesConsumed <= 2);
+
+            if (dangerousLineSeparatorBytesConsumed != 0)
+            {
+                ThrowOnDangerousLineSeparatorMultiSegment(localBuffer, ref dangerousLineSeparatorBytesConsumed);
+
+                if (dangerousLineSeparatorBytesConsumed != 0)
+                {
+                    // this can only happen if localBuffer size is 1 and we have previously only consumed 1 byte
+                    // or localBuffer is 0
+                    Debug.Assert(dangerousLineSeparatorBytesConsumed >= 1 && dangerousLineSeparatorBytesConsumed <= 2 && localBuffer.Length <= 1);
+                    return -1;
+                }
+            }
+
+            int totalIdx = 0;
+            while (true)
+            {
+                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.MaybeDangerousLineSeparator);
+                dangerousLineSeparatorBytesConsumed = 0;
+
+                if (idx == -1)
+                    return -1;
+
+                if (localBuffer[idx] != JsonConstants.MaybeDangerousLineSeparator)
+                    return totalIdx + idx;
+
+                int p = idx + 1;
+                localBuffer = localBuffer.Slice(p);
+                totalIdx += p;
+
+                // or dangerousLineSeparatorBytesConsumed = 1
+                dangerousLineSeparatorBytesConsumed++;
+                ThrowOnDangerousLineSeparatorMultiSegment(localBuffer, ref dangerousLineSeparatorBytesConsumed);
+
+                if (dangerousLineSeparatorBytesConsumed != 0)
+                {
+                    // this can only happen in the end of stream
+                    Debug.Assert(localBuffer.Length < 2);
+                    return -1;
+                }
+            }
+        }
+
+        // assumes first byte (JsonConstants.MaybeDangerousLineSeparator) is already read
+        private void ThrowOnDangerousLineSeparatorMultiSegment(ReadOnlySpan<byte> localBuffer, ref int dangerousLineSeparatorBytesConsumed)
+        {
+            Debug.Assert(dangerousLineSeparatorBytesConsumed == 1 || dangerousLineSeparatorBytesConsumed == 2);
+
+            // \u2028 and \u2029 are considered respectively line and paragraph separators
+            // UTF-8 representation for them is E2, 80, A8/A9
+            // we have already read E2 and maybe 80 we need to check for remaining 1 or 2 bytes
+
+            while (true)
+            {
+                if (localBuffer.IsEmpty)
+                {
+                    return;
+                }
+
+                if (dangerousLineSeparatorBytesConsumed == 1)
+                {
+                    if (localBuffer[0] == 0x80)
+                    {
+                        localBuffer = localBuffer.Slice(1);
+                        dangerousLineSeparatorBytesConsumed++;
+                    }
+                    else
+                    {
+                        // no match
+                        dangerousLineSeparatorBytesConsumed = 0;
+                        return;
+                    }
+                }
+                else // dangerousLineSeparatorBytesConsumed == 2
+                {
+                    if (localBuffer[0] == 0xA8 || localBuffer[0] == 0xA9)
+                    {
+                        ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfLineSeparator);
+                    }
+                    else
+                    {
+                        // no match
+                        dangerousLineSeparatorBytesConsumed = 0;
+                        return;
+                    }
+                }
+            }   
         }
 
         private bool ConsumeMultiLineCommentMultiSegment(ReadOnlySpan<byte> localBuffer, int leftOver, SequencePosition start, int previousConsumed)
