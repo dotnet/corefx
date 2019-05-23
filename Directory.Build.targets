@@ -123,6 +123,7 @@
   <Import Project="$(RepositoryEngineeringDir)references.targets" />
   <Import Project="$(RepositoryEngineeringDir)resolveContract.targets" />
 
+  <Import Sdk="Microsoft.DotNet.Build.Tasks.Configuration" Project="Sdk.targets" />
   <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.targets" />
 
   <Import Project="$(RepositoryEngineeringDir)referenceFromRuntime.targets" />

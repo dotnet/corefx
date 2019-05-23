@@ -86,6 +86,11 @@
     <IsPrerelease>true</IsPrerelease>
   </PropertyGroup>
 
+  <PropertyGroup>
+    <DisableRepoRestore Condition="$(MSBuildProjectFullPath.Contains('\tests\')) or $(MSBuildProjectFullPath.Contains('/tests/'))">true</DisableRepoRestore>
+  </PropertyGroup>
+
+  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Build.Tasks.Configuration" />
   <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
 
   <!-- Common repo directories -->
