@@ -27,8 +27,6 @@ namespace System.Net.Http
         private bool _disposed;
         private IDictionary<string, object> _properties;
 
-        internal bool SendConcurent;
-
         public Version Version
         {
             get { return _version; }

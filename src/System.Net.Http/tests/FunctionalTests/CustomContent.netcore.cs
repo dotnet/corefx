@@ -19,7 +19,7 @@ namespace System.Net.Http.Functional.Tests
             private int _trigger;
             private byte[] _content;
             private readonly TaskCompletionSource<bool> _sendingDone;
-            private int _itteration;
+            private int _iteration;
 
             internal SlowTestStream(byte[] content, TaskCompletionSource<bool> tsc, int count=10, int trigger=1) : base(content, false)
             {
@@ -36,13 +36,13 @@ namespace System.Net.Http.Functional.Tests
                     await Task.Delay(_delay);
                 }
 
-                _itteration++;
-                if (_itteration == _trigger)
+                _iteration++;
+                if (_iteration == _trigger)
                 {
                     _sendingDone.TrySetResult(true);
                 }
 
-                if (_count == _itteration)
+                if (_count == _iteration)
                 {
                     return 0;
                 }

@@ -1203,6 +1203,8 @@ namespace System.Net.Http
             if (shouldInvalidate)
             {
                 // Invalidate outside of lock to avoid race with HttpPool Dispose()
+                // We should not try to grab pool lock while holding connection lock as on disposing pool,
+                // we could hold pool lock while trying to grab connection lock in Dispose().
                 _pool.InvalidateHttp2Connection(this);
             }
         }
@@ -1374,16 +1376,35 @@ namespace System.Net.Http
                 {
                     // Send request body, if any
                     Task bodyTask = http2Stream.SendRequestBodyAsync(cancellationToken);
-                    if (!request.SendConcurent)
+                    // read response headers.
+                    Task responseHeadersTask = http2Stream.ReadResponseHeadersAsync();
+                    Task finished = await Task.WhenAny(new Task[] { bodyTask, responseHeadersTask}).ConfigureAwait(false);
+                    if (finished == bodyTask)
                     {
-                        await bodyTask.ConfigureAwait(false);
+                        // Sending request body finished before getting headers.
+                        Task t = bodyTask;
                         bodyTask = null;
+                        await t.ConfigureAwait(false);
+                        // Wait for response headers again.
+                        await responseHeadersTask.ConfigureAwait(false);
                     }
-                    // Wait for response headers to be read.
-                    await http2Stream.ReadResponseHeadersAsync().ConfigureAwait(false);
-                    if (bodyTask != null && bodyTask.IsCompleted && bodyTask.IsFaulted)
+
+                    if (bodyTask != null)
                     {
-                        throw bodyTask.Exception;
+                        if (bodyTask.IsCompleted)
+                        {
+                            Task t = bodyTask;
+                            bodyTask = null;
+                            await t.ConfigureAwait(false);
+                        }
+                        else
+                        {
+                             _ = bodyTask.ContinueWith((t, state) => {
+                                Http2Connection c = (Http2Connection)state;
+                                if (NetEventSource.IsEnabled) c.Trace($"SendRequestBody Task failed.");
+                             }, this, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                             bodyTask = null;
+                        }
                     }
                 }
             }

@@ -5,6 +5,7 @@
 using System.Diagnostics;
 using System.IO;
 using System.Net.Http.Headers;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,6 +19,8 @@ namespace System.Net.Http
         {
             private enum StreamState : byte
             {
+                ExpectingStatus,
+                ExpectingIgnoredHeaders,
                 ExpectingHeaders,
                 ExpectingData,
                 ExpectingTrailingHeaders,
@@ -63,7 +66,7 @@ namespace System.Net.Http
                 _connection = connection;
                 _streamId = streamId;
 
-                _state = StreamState.ExpectingHeaders;
+                _state = StreamState.ExpectingStatus;
 
                 _request = request;
 
@@ -100,7 +103,7 @@ namespace System.Net.Http
                         }
 
                         // Don't wait for completion, which could happen asynchronously.
-                        Task ignored = _connection.SendEndStreamAsync(_streamId);
+                        _ = _connection.SendEndStreamAsync(_streamId);
                     }
                     catch (Exception e) when (e is ObjectDisposedException || e.InnerException is ObjectDisposedException)
                     {
@@ -110,6 +113,12 @@ namespace System.Net.Http
                             throw;
                         }
                     }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine("SendRequestBodyAsync {0}", e); 
+                        throw;
+                    }
+                    Console.WriteLine("SendRequestBodyAsync done");
                 }
             }
 
@@ -134,7 +143,7 @@ namespace System.Net.Http
                     await SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
                 }
 
-                await response;
+                await response.ConfigureAwait(false);
             }
 
             public void OnWindowUpdate(int amount)
@@ -155,9 +164,9 @@ namespace System.Net.Http
 
                 lock (SyncObject)
                 {
-                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
+                    if (_state == StreamState.ExpectingIgnoredHeaders)
                     {
-                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "header", _state));
+                        return;
                     }
 
                     if (name[0] == (byte)':')
@@ -171,7 +180,7 @@ namespace System.Net.Http
 
                         if (name.SequenceEqual(s_statusHeaderName))
                         {
-                            if (_response != null && (int)_response.StatusCode > 199)
+                            if (_state != StreamState.ExpectingStatus)
                             {
                                 if (NetEventSource.IsEnabled) _connection.Trace("Received duplicate status headers.");
                                 throw new Http2ProtocolException(SR.Format(SR.net_http_invalid_response_status_code, "duplicate status"));
@@ -194,6 +203,8 @@ namespace System.Net.Http
                                 Content = new HttpConnectionResponseContent(),
                                 StatusCode = (HttpStatusCode)statusValue
                             };
+                            // We do not process headers from 1xx responses.
+                            _state = statusValue < 200 ? StreamState.ExpectingIgnoredHeaders : StreamState.ExpectingHeaders;
                         }
                         else
                         {
@@ -203,6 +214,12 @@ namespace System.Net.Http
                     }
                     else
                     {
+                        if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
+                        {
+                            if (NetEventSource.IsEnabled) _connection.Trace($"Received header before status pseudo-header.");
+                            throw new Http2ProtocolException(SR.net_http_invalid_response);
+                        }
+
                         if (_response == null)
                         {
                             if (NetEventSource.IsEnabled) _connection.Trace($"Received header before status pseudo-header.");
@@ -212,7 +229,7 @@ namespace System.Net.Http
                         if (!HeaderDescriptor.TryGet(name, out HeaderDescriptor descriptor))
                         {
                             // Invalid header name
-                            throw new HttpRequestException(SR.Format(SR.net_http_invalid_response_header_name, Encoding.ASCII.GetString(name)));
+                            throw new Http2ProtocolException(SR.Format(SR.net_http_invalid_response_header_name, Encoding.ASCII.GetString(name)));
                         }
 
                         string headerValue = descriptor.GetHeaderValue(value);
@@ -239,7 +256,7 @@ namespace System.Net.Http
             {
                 lock (SyncObject)
                 {
-                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingData)
+                    if (_state != StreamState.ExpectingStatus && _state != StreamState.ExpectingData)
                     {
                         throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "headers", _state));
                     }
@@ -251,27 +268,12 @@ namespace System.Net.Http
                 }
             }
 
-            public void OnResponse100Continue()
-            {
-                // This is called when we receive complete set of headers with status 100 Continue.
-                // We need to reset state and wait for another final response.
-                lock (SyncObject)
-                {
-                    if (_state != StreamState.ExpectingData)
-                    {
-                        throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "100 Continue", _state));
-                    }
-
-                   _state = StreamState.ExpectingHeaders;
-                }
-            }
-
             public void OnResponseHeadersComplete(bool endStream)
             {
                 bool signalWaiter;
                 lock (SyncObject)
                 {
-                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders)
+                    if (_state != StreamState.ExpectingHeaders && _state != StreamState.ExpectingTrailingHeaders && _state != StreamState.ExpectingIgnoredHeaders)
                     {
                         throw new Http2ProtocolException(SR.Format(SR.net_http_http2_protocol_state, "headers", _state));
                     }
@@ -279,6 +281,10 @@ namespace System.Net.Http
                     if (_state == StreamState.ExpectingTrailingHeaders || endStream)
                     {
                         _state = StreamState.Complete;
+                    }
+                    else if (_state == StreamState.ExpectingIgnoredHeaders)
+                    {
+                        _state = StreamState.ExpectingStatus;
                     }
                     else
                     {
@@ -376,11 +382,13 @@ namespace System.Net.Http
                     {
                         throw new IOException(SR.net_http_request_aborted, _abortException);
                     }
-                    else if (_state == StreamState.ExpectingHeaders)
+                    else if (_state == StreamState.ExpectingHeaders || _state == StreamState.ExpectingIgnoredHeaders || _state == StreamState.ExpectingStatus)
                     {
-                        Debug.Assert(!_hasWaiter);
-                        _hasWaiter = true;
-                        _waitSource.Reset();
+                        if (!_hasWaiter)
+                        {
+                            _hasWaiter = true;
+                            _waitSource.Reset();
+                        }
                         return (true, false);
                     }
                     else if (_state == StreamState.ExpectingData || _state == StreamState.ExpectingTrailingHeaders)
@@ -395,12 +403,13 @@ namespace System.Net.Http
                 }
             }
 
-            public async Task ReadResponseHeadersAsync(TaskCompletionSource<bool> tcs = null)
+            public async Task ReadResponseHeadersAsync(TaskCompletionSource<bool> shouldSendRequestBody = null)
             {
                 // Wait for response headers to be read.
                 bool emptyResponse;
                 bool wait;
 
+                // Process all informational responses if any and wait for final status.
                 do
                 {
                     (wait, emptyResponse) = TryEnsureHeaders();
@@ -408,21 +417,21 @@ namespace System.Net.Http
                     {
                         await GetWaiterTask().ConfigureAwait(false);
                         (wait, emptyResponse) = TryEnsureHeaders();
-                        Debug.Assert(!wait);
                     }
 
-                    if (Response.StatusCode  == HttpStatusCode.Continue)
+                    if (Response.StatusCode == HttpStatusCode.Continue)
                     {
-                        OnResponse100Continue();
-                        tcs?.TrySetResult(true);
+                        if (NetEventSource.IsEnabled) _connection.Trace("Received 100Continue status.");
+                        shouldSendRequestBody?.TrySetResult(true);
+                        shouldSendRequestBody = null;
                     }
                 }
-                while ((uint)Response.StatusCode < 200);
+                while ((int)Response.StatusCode < 200);
 
                 if ((int)Response.StatusCode >= 300)
                 {
-                    // If we tried 100-Continue and got rejected.
-                    tcs?.TrySetResult(false);
+                    // If we tried 100-Continue and got rejected signal that we should not send request body.
+                    shouldSendRequestBody?.TrySetResult(false);
                 }
 
                 // Start to process the response body.
@@ -642,7 +651,7 @@ namespace System.Net.Http
                     Http2Stream http2Stream = _http2Stream ?? throw new ObjectDisposedException(nameof(Http2ReadStream));
                     if (http2Stream._abortException != null)
                     {
-                        throw http2Stream._abortException;
+                        ExceptionDispatchInfo.Throw(new IOException(SR.net_http_client_execution_error, http2Stream._abortException));
                     }
 
                     return http2Stream.ReadData(destination);
@@ -658,7 +667,7 @@ namespace System.Net.Http
 
                     if (http2Stream._abortException != null)
                     {
-                        return new ValueTask<int>(Task.FromException<int>(new HttpRequestException(SR.net_http_client_execution_error, http2Stream._abortException)));
+                        return new ValueTask<int>(Task.FromException<int>(new IOException(SR.net_http_client_execution_error, http2Stream._abortException)));
                     }
 
                     return http2Stream.ReadDataAsync(destination, cancellationToken);

@@ -469,8 +469,6 @@ namespace System.Net.Http
                 cts = _pendingRequestsCts;
             }
 
-            request.SendConcurent = completionOption == HttpCompletionOption.ResponseHeadersRead;
-
             // Initiate the send.
             Task<HttpResponseMessage> sendTask;
             try

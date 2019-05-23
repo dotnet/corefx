@@ -450,7 +450,7 @@
     <value>The HTTP/2 request failed with protocol error '{0}' ({1}).</value>
   </data>
   <data name="net_http_http2_protocol_state" xml:space="preserve">
-    <value>HTTP/2 PROTOCOL_ERROR. Received '{0}' in '{1}').</value>
+    <value>The HTTP/2 request encountered a protocol error, receiving '{0}' while in the state '{1}'.</value>
   </data>
   <data name="net_MethodNotImplementedException" xml:space="preserve">
     <value>This method is not implemented by this class.</value>
