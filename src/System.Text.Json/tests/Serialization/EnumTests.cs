@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
+using Newtonsoft.Json;
 
 namespace System.Text.Json.Serialization.Tests
 {
@@ -32,6 +34,72 @@ namespace System.Text.Json.Serialization.Tests
                 @"{" +
                 @"""MyUInt64Enum"" : " + ulong.MaxValue +
                 @"}";
+
+        private static readonly string s_jsonByteEnum =
+                @"{" +
+                @"""MyByteEnum"" : " + byte.MaxValue +
+                @"}";
+
+
+        public static IEnumerable<object[]> JsonWithInvalidOutOfBoundNumber
+        {
+            get
+            {
+                const string InvalidNumber = "18446744073709551616"; // ulong.MaxValue + 1;
+                foreach(var i in new dynamic[] { InvalidNumber, ulong.MaxValue })
+                {
+                    yield return new object[] { $"{{ \"MyEnum\" : \"{i}\" }}" };
+                    yield return new object[] { $"{{ \"MyEnum\" : {i} }}" };
+                    yield return new object[] { $"{{ \"MyByteEnum\" : \"{i}\" }}" };
+                    yield return new object[] { $"{{ \"MyByteEnum\" : {i} }}" };
+                    yield return new object[] { $"{{ \"MyUInt32Enum\" : \"{i}\" }}" };
+                    yield return new object[] { $"{{ \"MyUInt32Enum\" : {i} }}" };
+                }
+                foreach(var i in new dynamic[] { InvalidNumber })
+                {
+                    yield return new object[] { $"{{ \"MyUInt64Enum\" : \"{i}\" }}" };
+                    yield return new object[] { $"{{ \"MyUInt64Enum\" : {i} }}" };
+                }
+                foreach(var i in new dynamic[] { -1, (ulong)byte.MaxValue + 2 })
+                {
+                    yield return new object[] { $"{{ \"MyByteEnum\" : \"{i}\" }}" };
+                }
+                foreach(var i in new dynamic[] { -1, (ulong)UInt32.MaxValue + 2 })
+                {
+                    yield return new object[] { $"{{ \"MyUInt32Enum\" : \"{i}\" }}" };
+                }
+            }
+        }
+
+        public static IEnumerable<object[]> JsonWithAcceptableInvalidNumber
+        {
+            get
+            {
+                foreach(var (i,j) in new (dynamic, dynamic)[] { (-1, -1), ((ulong)byte.MaxValue + 2, (ulong)UInt32.MaxValue + 2) })
+                {
+                    yield return new object[] { 
+                        $"{{ \"MyByteEnum\" : {i}, \"MyUInt32Enum\" : {j} }}",
+                        (SampleByteEnum)(i % (byte.MaxValue + 1)), (SampleUInt32Enum)(j % ((long)UInt32.MaxValue + 1))
+                    };
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonWithAcceptableInvalidNumber))]
+        public static void Parse_JsonWithAcceptableInvalidNumber_Success(string json, SampleByteEnum e1, SampleUInt32Enum e2)
+        {
+            SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
+            Assert.Equal(e1, result.MyByteEnum);
+            Assert.Equal(e2, result.MyUInt32Enum);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonWithInvalidOutOfBoundNumber))]
+        public static void Parse_InvalidOutOfBoundsNumber_Throws(string json)
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>(json));
+        }
 
         [Fact]
         public static void EnumAsStringFail()
@@ -65,6 +133,13 @@ namespace System.Text.Json.Serialization.Tests
         {
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonUInt64EnumMax);
             Assert.Equal(SampleUInt64Enum.Max, obj.MyUInt64Enum);
+        }
+
+        [Fact]
+        public static void EnumAsByteMax()
+        {
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonByteEnum);
+            Assert.Equal(SampleByteEnum.Max, obj.MyByteEnum);
         }
     }
 }
