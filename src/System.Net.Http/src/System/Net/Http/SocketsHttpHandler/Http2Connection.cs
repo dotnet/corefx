@@ -1432,7 +1432,11 @@ namespace System.Net.Http
                     }
                 }
 
-                http2Stream?.Dispose();
+                if (http2Stream != null)
+                {
+                    RemoveStream(http2Stream);
+                    http2Stream.Dispose();
+                }
 
                 if (replacementException != null)
                 {

@@ -284,6 +284,12 @@ namespace System.Net.Http
                     }
                     else if (_state == StreamState.ExpectingIgnoredHeaders)
                     {
+                        if (endStream)
+                        {
+                            // we should not get endStream while processing 1xx response.
+                            throw new Http2ProtocolException(SR.net_http_invalid_response);
+                        }
+
                         _state = StreamState.ExpectingStatus;
                     }
                     else
