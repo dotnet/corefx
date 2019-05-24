@@ -47,19 +47,12 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(2)]
         [InlineData(int.MaxValue)]
         [InlineData(int.MaxValue - 1)]
+        [OuterLoop("Uses external servers")]
         public void Set_ValidValues_Success(int validValue)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
-                try
-                {
-                    handler.MaxConnectionsPerServer = validValue;
-                }
-                catch (PlatformNotSupportedException)
-                {
-                    // Some older libcurls used in some of our Linux CI systems don't support this
-                    Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Linux));
-                }
+                handler.MaxConnectionsPerServer = validValue;
             }
         }
 
@@ -71,6 +64,7 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(3, 2, false)]
         [InlineData(3, 2, true)]
         [InlineData(3, 5, false)]
+        [OuterLoop("Uses external servers")]
         public async Task GetAsync_MaxLimited_ConcurrentCallsStillSucceed(int maxConnections, int numRequests, bool secure)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
