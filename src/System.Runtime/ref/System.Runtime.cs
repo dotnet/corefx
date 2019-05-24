@@ -257,7 +257,7 @@ namespace System
         public void SetValue(object? value, params int[] indices) { }
         public void SetValue(object? value, long index) { }
         public void SetValue(object? value, long index1, long index2) { }
-        public void SetValue(object value, long index1, long index2, long index3) { }
+        public void SetValue(object? value, long index1, long index2, long index3) { }
         public void SetValue(object? value, params long[] indices) { }
         public static void Sort(System.Array array) { }
         public static void Sort(System.Array keys, System.Array? items) { }
@@ -1366,7 +1366,7 @@ namespace System
         public string ToString(string? format, System.IFormatProvider? provider) { throw null; }
         public bool TryFormat(System.Span<char> destination, out int charsWritten, System.ReadOnlySpan<char> format = default(System.ReadOnlySpan<char>)) { throw null; }
         public static bool TryParse(System.ReadOnlySpan<char> input, out System.Guid result) { throw null; }
-        public static bool TryParse(string input, out System.Guid result) { throw null; }
+        public static bool TryParse(string? input, out System.Guid result) { throw null; }
         public static bool TryParseExact(System.ReadOnlySpan<char> input, System.ReadOnlySpan<char> format, out System.Guid result) { throw null; }
         public static bool TryParseExact(string? input, string? format, out System.Guid result) { throw null; }
         public bool TryWriteBytes(System.Span<byte> destination) { throw null; }
@@ -2110,10 +2110,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         public System.ModuleHandle GetModuleHandle() { throw null; }
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public static bool operator ==(object left, System.RuntimeTypeHandle right) { throw null; }
-        public static bool operator ==(System.RuntimeTypeHandle left, object right) { throw null; }
-        public static bool operator !=(object left, System.RuntimeTypeHandle right) { throw null; }
-        public static bool operator !=(System.RuntimeTypeHandle left, object right) { throw null; }
+        public static bool operator ==(object? left, System.RuntimeTypeHandle right) { throw null; }
+        public static bool operator ==(System.RuntimeTypeHandle left, object? right) { throw null; }
+        public static bool operator !=(object? left, System.RuntimeTypeHandle right) { throw null; }
+        public static bool operator !=(System.RuntimeTypeHandle left, object? right) { throw null; }
     }
     [System.CLSCompliantAttribute(false)]
     public readonly partial struct SByte : System.IComparable, System.IComparable<sbyte>, System.IConvertible, System.IEquatable<sbyte>, System.IFormattable
@@ -2383,7 +2383,7 @@ namespace System
         public static System.String Join(char separator, params object?[] values) { throw null; }
         public static System.String Join(char separator, params string?[] value) { throw null; }
         public static System.String Join(char separator, string?[] value, int startIndex, int count) { throw null; }
-        public static System.String Join(System.String? separator, System.Collections.Generic.IEnumerable<string> values) { throw null; }
+        public static System.String Join(System.String? separator, System.Collections.Generic.IEnumerable<string?> values) { throw null; }
         public static System.String Join(System.String? separator, params object?[] values) { throw null; }
         public static System.String Join(System.String? separator, params string?[] value) { throw null; }
         public static System.String Join(System.String? separator, string?[] value, int startIndex, int count) { throw null; }
