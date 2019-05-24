@@ -46,12 +46,6 @@
     <CLSCompliant Condition="'$(CLSCompliant)' == '' and '$(IsTestProject)' == 'true'">false</CLSCompliant>
     <CLSCompliant Condition="'$(CLSCompliant)' == ''">true</CLSCompliant>
   </PropertyGroup>
-  
-  <PropertyGroup Condition="'$(IsTestProject)' == 'true'">
-    <XUnitAdapter Condition="'$(TargetsNetCoreApp)' == 'true'">xunit.runner.visualstudio.dotnetcore.testadapter</XUnitAdapter>
-    <XUnitAdapter Condition="'$(TargetsUap)' == 'true'">xunit.runner.visualstudio.uwp.testadapter</XUnitAdapter>
-    <XUnitAdapter Condition="'$(TargetsNetFx)' == 'true'">xunit.runner.visualstudio.testadapter</XUnitAdapter>
-  </PropertyGroup>
 
   <ItemGroup Condition="'$(IsTestProject)' == 'true'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
@@ -61,12 +55,9 @@
     <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsPackageVersion)" />
     <PackageReference Include="xunit.core" Version="$(XUnitPackageVersion)" />
     <PackageReference Include="xunit.assert" Version="$(XUnitPackageVersion)" />
-    <PackageReference Include="$(XUnitAdapter)" Version="$(XUnitPackageVersion)" />
+    <PackageReference Condition="'$(TargetsNetStandard)' != 'true'" Include="xunit.runner.visualstudio" Version="$(XUnitPackageVersion)" />
     <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true'" Include="Microsoft.DotNet.XUnitConsoleRunner" Version="$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)" />
     <PackageReference Condition="'$(TargetsNetFx)' == 'true'" Include="xunit.runner.console" Version="$(XUnitPackageVersion)" />
-
-    <!-- for callstack line numbers -->
-    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.5.0" />
   </ItemGroup>
 
   <Import Condition="'$(DisableRepoRestore)' == 'true' and '$(IsSourceProject)' == 'true'" Project="$(RepositoryEngineeringDir)Analyzers.props" />

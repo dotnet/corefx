@@ -7,6 +7,10 @@
     <SwapNativeForIL Condition="'$(TargetGroup)'=='uap10.0.16299'">false</SwapNativeForIL>
   </PropertyGroup>
 
+  <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
+    <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.7.0" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.NETCore.Platforms" Version="$(MicrosoftNETCorePlatformsPackageVersion)" />
     <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
