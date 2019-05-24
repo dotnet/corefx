@@ -20,10 +20,11 @@
   <Target Name="Restore" DependsOnTargets="GenerateConfigurationProps">
     <ItemGroup>
       <_RestoreProjects Include="external\dir.proj" />
+      <_RestoreProjects Include="$(SourceDir)\tests.builds" Build="false" />
     </ItemGroup>
 
     <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties);DefaultBuildAllTarget=Restore" />
-    <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties)" />
+    <MSBuild Projects="@(_RestoreProjects)" Condition="'%(Build)' != 'false'" Properties="$(ProjectProperties)" />
   </Target>
 
   <Target Name="BuildNative">

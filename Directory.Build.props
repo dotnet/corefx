@@ -86,8 +86,9 @@
     <IsPrerelease>true</IsPrerelease>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <DisableRepoRestore Condition="$(MSBuildProjectFullPath.Contains('\tests\')) or $(MSBuildProjectFullPath.Contains('/tests/'))">true</DisableRepoRestore>
+  <PropertyGroup>    
+    <IsTestProject Condition="$(MSBuildProjectFullPath.Contains('\tests\')) or $(MSBuildProjectFullPath.Contains('/tests/'))">true</IsTestProject>
+    <DisableRepoRestore Condition="'$(IsTestProject)' == 'true'">true</DisableRepoRestore>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Build.Tasks.Configuration" />
@@ -200,6 +201,13 @@
     <!-- Temporarily disable PackageLicenseExpression until we can workaround 
          https://github.com/NuGet/Home/issues/7894 -->
     <!-- PackageLicenseExpression>MIT</PackageLicenseExpression -->
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(DisableRepoRestore)' == 'true'">
+    <!-- We need configuration-specific assets files. -->
+    <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
+    <ProjectAssetsFile>$(RestoreOutputPath)/project.assets.json</ProjectAssetsFile>
+    <MSBuildProjectExtensionsPath>$(IntermediateOutputPath)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
 
   <!-- Import packaging props -->

@@ -1,5 +1,4 @@
-<Project DefaultTargets="Build">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
+<Project Sdk="Microsoft.NET.Sdk" InitialTargets="IncludeProjectReferences">
 
   <PropertyGroup>
     <!-- When building through build-tests.cmd tests.builds is the main project that is being built. We set IsTestProject to true when the project path has /tests/.
@@ -36,4 +35,10 @@
   </ItemGroup>
 
   <Import Project="$(RepositoryEngineeringDir)dir.traversal.targets" />
+
+  <Target Name="IncludeProjectReferences" DependsOnTargets="FilterProjects">
+    <ItemGroup>
+      <ProjectReference Include="@(Project)" />
+    </ItemGroup>
+  </Target>
 </Project>
