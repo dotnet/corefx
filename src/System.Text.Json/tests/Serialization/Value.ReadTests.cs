@@ -199,15 +199,23 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString() + "0"));
 
             // Overflow on floating point types do not throw.
-            JsonSerializer.Parse<float>(double.MinValue.ToString());
-            JsonSerializer.Parse<float>(double.MaxValue.ToString());
-            JsonSerializer.Parse<float?>(double.MinValue.ToString());
-            JsonSerializer.Parse<float?>(double.MaxValue.ToString());
+            Assert.True(float.IsNegativeInfinity(JsonSerializer.Parse<float>(double.MinValue.ToString())));
+            Assert.True(float.IsPositiveInfinity(JsonSerializer.Parse<float>(double.MaxValue.ToString())));
+            Assert.True(float.IsNegativeInfinity(JsonSerializer.Parse<float?>(double.MinValue.ToString()).Value));
+            Assert.True(float.IsPositiveInfinity(JsonSerializer.Parse<float?>(double.MaxValue.ToString()).Value));
 
-            JsonSerializer.Parse<double>(double.MinValue.ToString() + "000");
-            JsonSerializer.Parse<double>(double.MaxValue.ToString() + "000");
-            JsonSerializer.Parse<double?>(double.MinValue.ToString() + "000");
-            JsonSerializer.Parse<double?>(double.MaxValue.ToString() + "000");
+            Assert.True(double.IsNegativeInfinity(JsonSerializer.Parse<double>(double.MinValue.ToString() + "000")));
+            Assert.True(double.IsPositiveInfinity(JsonSerializer.Parse<double>(double.MaxValue.ToString() + "000")));
+            Assert.True(double.IsNegativeInfinity(JsonSerializer.Parse<double?>(double.MinValue.ToString() + "000").Value));
+            Assert.True(double.IsPositiveInfinity(JsonSerializer.Parse<double?>(double.MaxValue.ToString() + "000").Value));
+
+            // Verify sign is correct on floating point types.
+            Assert.Equal(0x00000000u, (uint)BitConverter.SingleToInt32Bits(JsonSerializer.Parse<float>("0")));
+            Assert.Equal(0x80000000u, (uint)BitConverter.SingleToInt32Bits(JsonSerializer.Parse<float>("-0")));
+            Assert.Equal(0x80000000u, (uint)BitConverter.SingleToInt32Bits(JsonSerializer.Parse<float>("-0.0")));
+            Assert.Equal(0x0000000000000000ul, (ulong)BitConverter.DoubleToInt64Bits(JsonSerializer.Parse<double>("0")));
+            Assert.Equal(0x8000000000000000ul, (ulong)BitConverter.DoubleToInt64Bits(JsonSerializer.Parse<double>("-0")));
+            Assert.Equal(0x8000000000000000ul, (ulong)BitConverter.DoubleToInt64Bits(JsonSerializer.Parse<double>("-0.0")));
         }
 
         [Fact]
