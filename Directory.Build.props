@@ -168,10 +168,10 @@
 
   <!-- Set some shortcuts for more terse conditions in project files -->
   <PropertyGroup>
-    <TargetsNetCoreApp Condition="$(TargetGroup.StartsWith('netcoreapp'))">true</TargetsNetCoreApp>
-    <TargetsUap Condition="$(TargetGroup.StartsWith('uap'))">true</TargetsUap>
-    <TargetsNetStandard Condition="$(TargetGroup.StartsWith('netstandard'))">true</TargetsNetStandard>
-    <TargetsNetFx Condition="$(TargetGroup.StartsWith('net4')) OR '$(TargetGroup)' == 'netfx'">true</TargetsNetFx>
+    <TargetsNetCoreApp Condition="$(TargetFramework.StartsWith('netcoreapp'))">true</TargetsNetCoreApp>
+    <TargetsUap Condition="$(TargetFramework.StartsWith('uap'))">true</TargetsUap>
+    <TargetsNetStandard Condition="$(TargetFramework.StartsWith('netstandard'))">true</TargetsNetStandard>
+    <TargetsNetFx Condition="$(TargetFramework.StartsWith('net4'))">true</TargetsNetFx>
   </PropertyGroup>
 
   <!-- set properties for each vertical -->
@@ -201,13 +201,6 @@
     <!-- Temporarily disable PackageLicenseExpression until we can workaround 
          https://github.com/NuGet/Home/issues/7894 -->
     <!-- PackageLicenseExpression>MIT</PackageLicenseExpression -->
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(DisableRepoRestore)' == 'true'">
-    <!-- We need configuration-specific assets files. -->
-    <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
-    <ProjectAssetsFile>$(RestoreOutputPath)/project.assets.json</ProjectAssetsFile>
-    <MSBuildProjectExtensionsPath>$(IntermediateOutputPath)</MSBuildProjectExtensionsPath>
   </PropertyGroup>
 
   <!-- Import packaging props -->
@@ -354,7 +347,7 @@
     <UAPTestSharedFrameworkPath>$(TestHostRootPath)UAPLayout</UAPTestSharedFrameworkPath>
 
     <!-- interop is not available on NETStandard1.0 -->
-    <IncludeDllSafeSearchPathAttribute Condition="'$(TargetGroup)' == 'netstandard1.0'">false</IncludeDllSafeSearchPathAttribute>
+    <IncludeDllSafeSearchPathAttribute Condition="'$(TargetFramework)' == 'netstandard1.0'">false</IncludeDllSafeSearchPathAttribute>
 
     <VersionFileForPackages Condition="'$(VersionFileForPackages)' == ''">$(ArtifactsObjDir)version.txt</VersionFileForPackages>
   </PropertyGroup>
@@ -373,13 +366,13 @@
 
   <!-- Specify the default constants for each target group -->
   <PropertyGroup>
-    <DefineConstants Condition="'$(TargetGroup)' == 'uap'">$(DefineConstants),uap</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netfx'">$(DefineConstants),netfx</DefineConstants>
+    <DefineConstants Condition="'$(TargetsUap)' == 'true'">$(DefineConstants),uap</DefineConstants>
+    <DefineConstants Condition="'$(TargetsNetFx)' == 'true'">$(DefineConstants),netfx</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants),netstandard</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.0'">$(DefineConstants),NETSTANDARD10</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard2.1'">$(DefineConstants),netstandard21</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard1.0'">$(DefineConstants),NETSTANDARD10</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netstandard2.1'">$(DefineConstants),netstandard21</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),netcoreapp</DefineConstants>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants),netcoreapp20</DefineConstants>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp2.0'">$(DefineConstants),netcoreapp20</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
