@@ -1476,7 +1476,6 @@ namespace System.Runtime.InteropServices.ComTypes
         void GetCustData(ref System.Guid guid, out object pVarVal);
         new void GetDllEntry(int memid, System.Runtime.InteropServices.ComTypes.INVOKEKIND invKind, System.IntPtr pBstrDllName, System.IntPtr pBstrName, System.IntPtr pwOrdinal);
         new void GetDocumentation(int index, out string strName, out string strDocString, out int dwHelpContext, out string strHelpFile);
-        [System.Runtime.InteropServices.LCIDConversionAttribute(1)]
         void GetDocumentation2(int memid, out string pbstrHelpString, out int pdwHelpStringContext, out string pbstrHelpStringDll);
         void GetFuncCustData(int index, ref System.Guid guid, out object pVarVal);
         new void GetFuncDesc(int index, out System.IntPtr ppFuncDesc);
@@ -1524,7 +1523,6 @@ namespace System.Runtime.InteropServices.ComTypes
         void GetAllCustData(System.IntPtr pCustData);
         void GetCustData(ref System.Guid guid, out object pVarVal);
         new void GetDocumentation(int index, out string strName, out string strDocString, out int dwHelpContext, out string strHelpFile);
-        [System.Runtime.InteropServices.LCIDConversionAttribute(1)]
         void GetDocumentation2(int index, out string pbstrHelpString, out int pdwHelpStringContext, out string pbstrHelpStringDll);
         new void GetLibAttr(out System.IntPtr ppTLibAttr);
         void GetLibStatistics(System.IntPtr pcUniqueNames, out int pcchUniqueNames);
