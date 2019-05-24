@@ -47,7 +47,6 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(2)]
         [InlineData(int.MaxValue)]
         [InlineData(int.MaxValue - 1)]
-        [OuterLoop("Uses external servers")]
         public void Set_ValidValues_Success(int validValue)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
