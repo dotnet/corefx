@@ -6,15 +6,15 @@
     <CoverageSupported>false</CoverageSupported>
   </PropertyGroup>
   <PropertyGroup>
-    <SkipTestsOnPlatform Condition="'$(TargetGroup)' == 'uap' OR '$(ArchGroup)' == 'arm' OR '$(ArchGroup)' == 'arm64' OR '$(ArchGroup)' == 'armel'">true</SkipTestsOnPlatform>
+    <SkipTestsOnPlatform Condition="'$(TargetsUap)' == 'true' OR '$(ArchGroup)' == 'arm' OR '$(ArchGroup)' == 'arm64' OR '$(ArchGroup)' == 'armel'">true</SkipTestsOnPlatform>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+  <PropertyGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <!-- We're building netcoreap, run on the test CLI
          Reuse the same runtimeconfig that the tests use. -->
     <GeneratorRuntimeConfig>$(TestAssetsDir)netcoreapp.runtimeconfig.json</GeneratorRuntimeConfig>
     <GeneratorCliPath>$(TestHostRootPath)</GeneratorCliPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
+  <PropertyGroup Condition="'$(TargetsNetCoreApp)' != 'true'">
     <!-- We're building some non-netcoreapp target, run on the Tools CLI.
          Reuse the same runtimeconfig used by MSBuild. -->
     <GeneratorRuntimeConfig>$(MSBuildToolsPath)\msbuild.runtimeconfig.json</GeneratorRuntimeConfig>
