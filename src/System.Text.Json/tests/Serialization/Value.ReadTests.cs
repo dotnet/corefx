@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Globalization;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -199,15 +200,15 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString() + "0"));
 
             // Overflow on floating point types do not throw.
-            Assert.True(float.IsNegativeInfinity(JsonSerializer.Parse<float>(double.MinValue.ToString())));
-            Assert.True(float.IsPositiveInfinity(JsonSerializer.Parse<float>(double.MaxValue.ToString())));
-            Assert.True(float.IsNegativeInfinity(JsonSerializer.Parse<float?>(double.MinValue.ToString()).Value));
-            Assert.True(float.IsPositiveInfinity(JsonSerializer.Parse<float?>(double.MaxValue.ToString()).Value));
+            Assert.True(float.IsNegativeInfinity(JsonSerializer.Parse<float>(double.MinValue.ToString(CultureInfo.InvariantCulture))));
+            Assert.True(float.IsPositiveInfinity(JsonSerializer.Parse<float>(double.MaxValue.ToString(CultureInfo.InvariantCulture))));
+            Assert.True(float.IsNegativeInfinity(JsonSerializer.Parse<float?>(double.MinValue.ToString(CultureInfo.InvariantCulture)).Value));
+            Assert.True(float.IsPositiveInfinity(JsonSerializer.Parse<float?>(double.MaxValue.ToString(CultureInfo.InvariantCulture)).Value));
 
-            Assert.True(double.IsNegativeInfinity(JsonSerializer.Parse<double>(double.MinValue.ToString() + "000")));
-            Assert.True(double.IsPositiveInfinity(JsonSerializer.Parse<double>(double.MaxValue.ToString() + "000")));
-            Assert.True(double.IsNegativeInfinity(JsonSerializer.Parse<double?>(double.MinValue.ToString() + "000").Value));
-            Assert.True(double.IsPositiveInfinity(JsonSerializer.Parse<double?>(double.MaxValue.ToString() + "000").Value));
+            Assert.True(double.IsNegativeInfinity(JsonSerializer.Parse<double>(double.MinValue.ToString(CultureInfo.InvariantCulture) + "0")));
+            Assert.True(double.IsPositiveInfinity(JsonSerializer.Parse<double>(double.MaxValue.ToString(CultureInfo.InvariantCulture) + "0")));
+            Assert.True(double.IsNegativeInfinity(JsonSerializer.Parse<double?>(double.MinValue.ToString(CultureInfo.InvariantCulture) + "0").Value));
+            Assert.True(double.IsPositiveInfinity(JsonSerializer.Parse<double?>(double.MaxValue.ToString(CultureInfo.InvariantCulture) + "0").Value));
 
             // Verify sign is correct on floating point types.
             Assert.Equal(0x00000000u, (uint)BitConverter.SingleToInt32Bits(JsonSerializer.Parse<float>("0")));
@@ -248,11 +249,11 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(ulong.MaxValue, JsonSerializer.Parse<ulong>(ulong.MaxValue.ToString()));
             Assert.Equal(ulong.MaxValue, JsonSerializer.Parse<ulong?>(ulong.MaxValue.ToString()));
 
-            Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal>(decimal.MaxValue.ToString()));
-            Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString()));
+            Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal>(decimal.MaxValue.ToString(CultureInfo.InvariantCulture)));
+            Assert.Equal(decimal.MaxValue, JsonSerializer.Parse<decimal?>(decimal.MaxValue.ToString(CultureInfo.InvariantCulture)));
 
-            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString()));
-            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double?>(double.MaxValue.ToString()));
+            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double>(double.MaxValue.ToString(CultureInfo.InvariantCulture)));
+            Assert.Equal(double.MaxValue, JsonSerializer.Parse<double?>(double.MaxValue.ToString(CultureInfo.InvariantCulture)));
         }
 
         [Fact]
