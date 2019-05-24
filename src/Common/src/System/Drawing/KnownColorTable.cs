@@ -86,10 +86,14 @@ namespace System.Drawing
                     PropertyInfo categoryProperty = argsType?.GetProperty("Category", BindingFlags.Instance | BindingFlags.Public);
                     MethodInfo categoryGetter = categoryProperty?.GetGetMethod();
 
-                    // Creating a Delegate pointing to the getter method. 
-                    s_categoryGetter = (Func<EventArgs, int>)typeof(KnownColorTable).GetMethod(nameof(CreateGetter), BindingFlags.NonPublic | BindingFlags.Static)
-                        .MakeGenericMethod(argsType, categoryGetter.ReturnType)
-                        .Invoke(null, new object[] { categoryGetter });
+                    Debug.Assert(categoryGetter != null)
+                    if (categoryGetter != null)
+                    {
+                        // Creating a Delegate pointing to the getter method. 
+                        s_categoryGetter = (Func<EventArgs, int>)typeof(KnownColorTable).GetMethod(nameof(CreateGetter), BindingFlags.NonPublic | BindingFlags.Static)
+                            .MakeGenericMethod(argsType, categoryGetter.ReturnType)
+                            .Invoke(null, new object[] { categoryGetter });
+                    }
                 }
             }
 
@@ -479,7 +483,7 @@ namespace System.Drawing
         private static void OnUserPreferenceChanging(object sender, EventArgs args)
         {
             // Invoking the Delegate.
-            if (s_categoryGetter != null && s_categoryGetter(args) == 2 && s_colorTable != null) // UserPreferenceCategory.Color = 2
+            if (s_colorTable != null && s_categoryGetter != null && s_categoryGetter(args) == 2) // UserPreferenceCategory.Color = 2
             {
                 UpdateSystemColors(s_colorTable);
             }
