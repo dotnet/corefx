@@ -65,15 +65,45 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void DictionaryOfObjectFail()
+        public static void DictionaryOfObject()
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, object>>(@"{""Key1"":1"));
+            Dictionary<string, object> obj = JsonSerializer.Parse<Dictionary<string, object>>(@"{""Key1"":1}");
+            Assert.Equal(1, obj.Count);
+            JsonElement element = (JsonElement)obj["Key1"];
+            Assert.Equal(JsonValueType.Number, element.Type);
+            Assert.Equal(1, element.GetInt32());
+
+            string json = JsonSerializer.ToString(obj);
+            Assert.Equal(@"{""Key1"":1}", json);
+        }
+
+        [Fact]
+        public static void DictionaryOfObject_37569()
+        {
+            // https://github.com/dotnet/corefx/issues/37569
+            Dictionary<string, object> dictionary = new Dictionary<string, object>
+            {
+                ["key"] = new Poco { Id = 10 },
+            };
+
+            string json = JsonSerializer.ToString(dictionary);
+            Assert.Equal(@"{""key"":{""Id"":10}}", json);
+
+            dictionary = JsonSerializer.Parse<Dictionary<string, object>>(json);
+            Assert.Equal(1, dictionary.Count);
+            JsonElement element = (JsonElement)dictionary["key"];
+            Assert.Equal(@"{""Id"":10}", element.ToString());
+        }
+
+        class Poco
+        {
+            public int Id { get; set; }
         }
 
         [Fact]
         public static void FirstGenericArgNotStringFail()
         {
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<Dictionary<int, int>>(@"{""Key1"":1}"));
         }
 
         [Fact]
@@ -178,6 +208,72 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void DictionaryOfDictionaryOfDictionary()
+        {
+            const string JsonString = @"{""Key1"":{""Key1"":{""Key1"":1,""Key2"":2},""Key2"":{""Key1"":3,""Key2"":4}},""Key2"":{""Key1"":{""Key1"":5,""Key2"":6},""Key2"":{""Key1"":7,""Key2"":8}}}";
+            Dictionary<string, Dictionary<string, Dictionary<string, int>>> obj = JsonSerializer.Parse<Dictionary<string, Dictionary<string, Dictionary<string, int>>>>(JsonString);
+
+            Assert.Equal(2, obj.Count);
+            Assert.Equal(2, obj["Key1"].Count);
+            Assert.Equal(2, obj["Key1"]["Key1"].Count);
+            Assert.Equal(2, obj["Key1"]["Key2"].Count);
+
+            Assert.Equal(1, obj["Key1"]["Key1"]["Key1"]);
+            Assert.Equal(2, obj["Key1"]["Key1"]["Key2"]);
+            Assert.Equal(3, obj["Key1"]["Key2"]["Key1"]);
+            Assert.Equal(4, obj["Key1"]["Key2"]["Key2"]);
+
+            Assert.Equal(2, obj["Key2"].Count);
+            Assert.Equal(2, obj["Key2"]["Key1"].Count);
+            Assert.Equal(2, obj["Key2"]["Key2"].Count);
+
+            Assert.Equal(5, obj["Key2"]["Key1"]["Key1"]);
+            Assert.Equal(6, obj["Key2"]["Key1"]["Key2"]);
+            Assert.Equal(7, obj["Key2"]["Key2"]["Key1"]);
+            Assert.Equal(8, obj["Key2"]["Key2"]["Key2"]);
+
+            string json = JsonSerializer.ToString(obj);
+            Assert.Equal(JsonString, json);
+
+            // Verify that typeof(object) doesn't interfere.
+            json = JsonSerializer.ToString<object>(obj);
+            Assert.Equal(JsonString, json);
+        }
+
+        [Fact]
+        public static void DictionaryOfArrayOfDictionary()
+        {
+            const string JsonString = @"{""Key1"":[{""Key1"":1,""Key2"":2},{""Key1"":3,""Key2"":4}],""Key2"":[{""Key1"":5,""Key2"":6},{""Key1"":7,""Key2"":8}]}";
+            Dictionary<string, Dictionary<string, int>[]> obj = JsonSerializer.Parse<Dictionary<string, Dictionary<string, int>[]>>(JsonString);
+
+            Assert.Equal(2, obj.Count);
+            Assert.Equal(2, obj["Key1"].Length);
+            Assert.Equal(2, obj["Key1"][0].Count);
+            Assert.Equal(2, obj["Key1"][1].Count);
+
+            Assert.Equal(1, obj["Key1"][0]["Key1"]);
+            Assert.Equal(2, obj["Key1"][0]["Key2"]);
+            Assert.Equal(3, obj["Key1"][1]["Key1"]);
+            Assert.Equal(4, obj["Key1"][1]["Key2"]);
+
+            Assert.Equal(2, obj["Key2"].Length);
+            Assert.Equal(2, obj["Key2"][0].Count);
+            Assert.Equal(2, obj["Key2"][1].Count);
+
+            Assert.Equal(5, obj["Key2"][0]["Key1"]);
+            Assert.Equal(6, obj["Key2"][0]["Key2"]);
+            Assert.Equal(7, obj["Key2"][1]["Key1"]);
+            Assert.Equal(8, obj["Key2"][1]["Key2"]);
+
+            string json = JsonSerializer.ToString(obj);
+            Assert.Equal(JsonString, json);
+
+            // Verify that typeof(object) doesn't interfere.
+            json = JsonSerializer.ToString<object>(obj);
+            Assert.Equal(JsonString, json);
+        }
+
+        [Fact]
         public static void DictionaryOfClasses()
         {
             Dictionary<string, SimpleTestClass> obj;
@@ -271,8 +367,18 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ObjectToStringFail()
         {
+            // Baseline
             string json = @"{""MyDictionary"":{""Key"":""Value""}}";
+            JsonSerializer.Parse<Dictionary<string, object>>(json);
+
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, string>>(json));
+        }
+
+        [Fact, ActiveIssue("JsonElement fails since it is a struct.")]
+        public static void ObjectToJsonElement()
+        {
+            string json = @"{""MyDictionary"":{""Key"":""Value""}}";
+            JsonSerializer.Parse<Dictionary<string, JsonElement>>(json);
         }
 
         [Fact]
@@ -285,27 +391,77 @@ namespace System.Text.Json.Serialization.Tests
                 JsonSerializer.Parse<Dictionary<string, string>>(json);
 
                 // We don't support non-generic IDictionary
-                Assert.Throws<JsonException>(() => JsonSerializer.Parse<Hashtable>(json));
+                Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<Hashtable>(json));
             }
 
             {
                 Hashtable ht = new Hashtable();
                 ht.Add("Key", "Value");
-                Assert.Throws<JsonException>(() => JsonSerializer.ToString(ht));
+
+                Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(ht));
             }
 
             {
                 string json = @"{""Key"":""Value""}";
 
                 // We don't support non-generic IDictionary
-                Assert.Throws<JsonException>(() => JsonSerializer.Parse<IDictionary>(json));
+                Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<IDictionary>(json));
             }
 
             {
                 IDictionary ht = new Hashtable();
                 ht.Add("Key", "Value");
-                Assert.Throws<JsonException>(() => JsonSerializer.ToString(ht));
+                Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(ht));
             }
+        }
+
+        [Fact]
+        public static void ClassWithNoSetter()
+        {
+            string json = @"{""MyDictionary"":{""Key"":""Value""}}";
+            ClassWithDictionaryButNoSetter obj = JsonSerializer.Parse<ClassWithDictionaryButNoSetter>(json);
+            Assert.Equal("Value", obj.MyDictionary["Key"]);
+        }
+
+        [Fact]
+        public static void DictionaryNotSupported()
+        {
+            string json = @"{""MyDictionary"":{""Key"":""Value""}}";
+
+            try
+            {
+                JsonSerializer.Parse<ClassWithNotSupportedDictionary>(json);
+                Assert.True(false, "Expected NotSupportedException to be thrown.");
+            }
+            catch (NotSupportedException e)
+            {
+                // The exception should contain className.propertyName and the invalid type.
+                Assert.Contains("ClassWithNotSupportedDictionary.MyDictionary", e.Message);
+                Assert.Contains("Dictionary`2[System.Int32,System.Int32]", e.Message);
+            }
+        }
+
+        [Fact]
+        public static void DictionaryNotSupportedButIgnored()
+        {
+            string json = @"{""MyDictionary"":{""Key"":1}}";
+            ClassWithNotSupportedDictionaryButIgnored obj = JsonSerializer.Parse<ClassWithNotSupportedDictionaryButIgnored>(json);
+            Assert.Null(obj.MyDictionary);
+        }
+
+        public class ClassWithDictionaryButNoSetter
+        {
+            public Dictionary<string, string> MyDictionary { get; } = new Dictionary<string, string>();
+        }
+
+        public class ClassWithNotSupportedDictionary
+        {
+            public Dictionary<int, int> MyDictionary { get; set; }
+        }
+
+        public class ClassWithNotSupportedDictionaryButIgnored
+        {
+            [JsonIgnore] public Dictionary<int, int> MyDictionary { get; set; }
         }
     }
 }

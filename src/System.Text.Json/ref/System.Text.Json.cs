@@ -73,6 +73,7 @@ namespace System.Text.Json
         public bool TryGetUInt64(out ulong value) { throw null; }
         public void WriteAsProperty(System.ReadOnlySpan<byte> utf8PropertyName, System.Text.Json.Utf8JsonWriter writer) { }
         public void WriteAsProperty(System.ReadOnlySpan<char> propertyName, System.Text.Json.Utf8JsonWriter writer) { }
+        public void WriteAsProperty(string propertyName, System.Text.Json.Utf8JsonWriter writer) { }
         public void WriteAsValue(System.Text.Json.Utf8JsonWriter writer) { }
         public partial struct ArrayEnumerator : System.Collections.Generic.IEnumerable<System.Text.Json.JsonElement>, System.Collections.Generic.IEnumerator<System.Text.Json.JsonElement>, System.Collections.IEnumerable, System.Collections.IEnumerator, System.IDisposable
         {
@@ -196,6 +197,7 @@ namespace System.Text.Json
         public bool GetBoolean() { throw null; }
         public System.DateTime GetDateTime() { throw null; }
         public System.DateTimeOffset GetDateTimeOffset() { throw null; }
+        public string GetComment() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
         public System.Guid GetGuid() { throw null; }
@@ -349,6 +351,11 @@ namespace System.Text.Json.Serialization
     public abstract partial class JsonAttribute : System.Attribute
     {
         protected JsonAttribute() { }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
+    public sealed partial class JsonExtensionDataAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonExtensionDataAttribute() { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
     public sealed partial class JsonIgnoreAttribute : System.Text.Json.Serialization.JsonAttribute

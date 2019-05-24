@@ -1,13 +1,14 @@
 [CmdletBinding(PositionalBinding=$false)]
 Param(
   [switch][Alias('b')]$build,
+  [switch][Alias('t')]$test,
   [switch] $buildtests,
   [string][Alias('c')]$configuration = "Debug",
   [string][Alias('f')]$framework,
   [string] $os,
   [switch] $allconfigurations,
   [switch] $coverage,
-  [switch] $outerloop,
+  [string] $testscope,
   [string] $arch,
   [switch] $clean,
   [Parameter(ValueFromRemainingArguments=$true)][String[]]$properties
@@ -36,7 +37,7 @@ function Get-Help() {
 
   Write-Host "Advanced settings:"
   Write-Host "  -coverage               Collect code coverage when testing"
-  Write-Host "  -outerloop              Include tests which are marked as OuterLoop"
+  Write-Host "  -testscope              Scope tests, allowed values: innerloop, outerloop, all"
   Write-Host "  -allconfigurations      Build packages for all build configurations"
   Write-Host "  -os                     Build operating system: Windows_NT or Unix"
   Write-Host "  -arch                   Build platform: x86, x64, arm or arm64"
@@ -93,6 +94,8 @@ foreach ($argument in $PSBoundParameters.Keys)
 {
   switch($argument)
   {
+    "build"             { $arguments += " -build" }
+    "test"              { $arguments += " -test" }
     "buildtests"        { $arguments += " /p:BuildTests=true" }
     "clean"             { }
     "configuration"     { $configuration = (Get-Culture).TextInfo.ToTitleCase($($PSBoundParameters[$argument])); $arguments += " /p:ConfigurationGroup=$configuration -configuration $configuration" }
@@ -100,7 +103,7 @@ foreach ($argument in $PSBoundParameters.Keys)
     "os"                { $arguments += " /p:OSGroup=$($PSBoundParameters[$argument])" }
     "allconfigurations" { $arguments += " /p:BuildAllConfigurations=true" }
     "coverage"          { $arguments += " /p:Coverage=true" }
-    "outerloop"         { $arguments += " /p:OuterLoop=true" }
+    "testscope"         { $arguments += " /p:TestScope=$($PSBoundParameters[$argument])" }
     "arch"              { $arguments += " /p:ArchGroup=$($PSBoundParameters[$argument])" }
     "properties"        { $arguments += " " + $properties }
     default             { $arguments += " /p:$argument=$($PSBoundParameters[$argument])" }

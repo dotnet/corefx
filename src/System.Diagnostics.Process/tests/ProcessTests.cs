@@ -755,6 +755,33 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
+        public void TotalProcessorTime_PerformLoop_TotalProcessorTimeValid()
+        {
+            CreateDefaultProcess();
+
+            DateTime startTime = DateTime.UtcNow;
+            TimeSpan processorTimeBeforeSpin = Process.GetCurrentProcess().TotalProcessorTime;
+           
+            // Perform loop to occupy cpu, takes less than a second.
+            int i = int.MaxValue / 16;
+            while (i > 0)
+            {
+                i--;
+            }
+
+            TimeSpan processorTimeAfterSpin = Process.GetCurrentProcess().TotalProcessorTime;
+            DateTime endTime = DateTime.UtcNow;
+
+            double timeDiff = (endTime - startTime).TotalMilliseconds;
+            double cpuTimeDiff = (processorTimeAfterSpin - processorTimeBeforeSpin).TotalMilliseconds;
+
+            double cpuUsage = cpuTimeDiff / (timeDiff * Environment.ProcessorCount);
+
+            Assert.InRange(cpuUsage, 0, 1);
+        }
+
+        [Fact]
         public void UserProcessorTime_GetNotStarted_ThrowsInvalidOperationException()
         {
             var process = new Process();
@@ -923,7 +950,9 @@ namespace System.Diagnostics.Tests
         {
             CreateDefaultProcess();
 
-            Assert.Equal(Path.GetFileNameWithoutExtension(RemoteExecutor.HostRunner), Path.GetFileNameWithoutExtension(_process.ProcessName), StringComparer.OrdinalIgnoreCase);
+            // Process.ProcessName drops the extension when it's exe. 
+            string processName = RemoteExecutor.HostRunner.EndsWith(".exe") ?_process.ProcessName : Path.GetFileNameWithoutExtension(_process.ProcessName);
+            Assert.Equal(Path.GetFileNameWithoutExtension(RemoteExecutor.HostRunner), processName, StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -1892,15 +1921,16 @@ namespace System.Diagnostics.Tests
             Assert.True(p.HasExited);
         }
 
-        [ActiveIssue(37198)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         [ActiveIssue(37054, TestPlatforms.OSX)]
         [Fact]
         public void LongProcessNamesAreSupported()
         {
+            // Alpine implements sleep as a symlink to the busybox executable.
+            // If we rename it, the program will no longer sleep.
             if (PlatformDetection.IsAlpine)
             {
-                return; // https://github.com/dotnet/corefx/issues/37054
+                return;
             }
 
             string programPath = GetProgramPath("sleep");

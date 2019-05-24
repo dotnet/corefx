@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
@@ -11,13 +10,13 @@ namespace System.Text.Json.Serialization
     {
         private static bool HandleNull(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
         {
-            if (state.Current.Skip())
+            if (state.Current.SkipProperty)
             {
                 return false;
             }
 
-            // If we don't have a valid property, that means we read "null" for a root object so just return.
-            if (state.Current.JsonPropertyInfo == null)
+            // If null is read at the top level and the type is nullable, then the root is "null" so just return.
+            if (reader.CurrentDepth == 0 && (state.Current.JsonPropertyInfo == null || state.Current.JsonPropertyInfo.CanBeNull))
             {
                 Debug.Assert(state.IsLastFrame);
                 Debug.Assert(state.Current.ReturnValue == null);
@@ -32,14 +31,14 @@ namespace System.Text.Json.Serialization
 
             if (state.Current.IsEnumerable || state.Current.IsDictionary)
             {
-                ApplyObjectToEnumerable(null, options, ref state, ref reader);
+                ApplyObjectToEnumerable(null, ref state, ref reader);
                 return false;
             }
 
-            if (state.Current.IsPropertyEnumerable)
+            if (state.Current.IsEnumerableProperty || state.Current.IsDictionaryProperty)
             {
-                bool setPropertyToNull = !state.Current.EnumerableCreated;
-                ApplyObjectToEnumerable(null, options, ref state, ref reader, setPropertyDirectly: setPropertyToNull);
+                bool setPropertyToNull = !state.Current.PropertyInitialized;
+                ApplyObjectToEnumerable(null, ref state, ref reader, setPropertyDirectly: setPropertyToNull);
                 return false;
             }
 

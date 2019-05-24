@@ -17,16 +17,9 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
 
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-            if (!jsonPropertyInfo.ShouldSerialize)
-            {
-                // Ignore writing this property.
-                return true;
-            }
-
             if (state.Current.Enumerator == null)
             {
-                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
+                IEnumerable enumerable = (IEnumerable)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
 
                 if (enumerable == null)
                 {
@@ -55,7 +48,7 @@ namespace System.Text.Json.Serialization
 
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
-                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, writer);
+                    elementClassInfo.GetPolicyProperty().WriteEnumerable(ref state.Current, writer);
                 }
                 else if (state.Current.Enumerator.Current == null)
                 {

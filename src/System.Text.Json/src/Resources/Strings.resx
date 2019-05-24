@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -341,5 +340,29 @@
   </data>
   <data name="DeserializeTypeNotSupported" xml:space="preserve">
     <value>Deserialization of type {0} is not supported.</value>
+  </data>
+  <data name="SerializationDataExtensionPropertyInvalid" xml:space="preserve">
+    <value>The data extension property '{0}.{1}' does not match the required signature of IDictionary&lt;string, JsonElement&gt; or IDictionary&lt;string, object&gt;.</value>
+  </data>
+  <data name="SerializationDuplicateAttribute" xml:space="preserve">
+    <value>A class cannot have more than one property that has the attribute '{0}'.</value>
+  </data>
+  <data name="SerializationNotSupportedCollectionType" xml:space="preserve">
+    <value>The collection type '{0}' is not supported.</value>
+  </data>
+  <data name="SerializationDataExtensionPropertyInvalidElement" xml:space="preserve">
+    <value>The data extension property '{0}.{1}' cannot contain dictionary values of type '{2}'. Dictionary values must be of type JsonElement.</value>
+  </data>
+  <data name="SerializationNotSupportedCollection" xml:space="preserve">
+    <value>The collection type '{0}' on '{1}' is not supported.</value>
+  </data>
+  <data name="InvalidCharacterAtStartOfComment" xml:space="preserve">
+    <value>'{0}' is invalid after '/' at the beginning of the comment. Expected either '/' or '*'.</value>
+  </data>
+  <data name="UnexpectedEndOfDataWhileReadingComment" xml:space="preserve">
+    <value>Unexpected end of data while reading a comment.</value>
+  </data>
+  <data name="JsonSerializerDoesNotSupportComments" xml:space="preserve">
+    <value>Comments cannot be stored when deserializing objects, only the Skip and Disallow comment handling modes are supported.</value>
   </data>
 </root>

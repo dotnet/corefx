@@ -8,7 +8,7 @@ namespace System.Text.Json.Serialization
     {
         private static bool HandleValue(JsonTokenType tokenType, JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            if (state.Current.Skip())
+            if (state.Current.SkipProperty)
             {
                 return false;
             }
@@ -25,7 +25,7 @@ namespace System.Text.Json.Serialization
 
             bool lastCall = (!state.Current.IsProcessingEnumerableOrDictionary && state.Current.ReturnValue == null);
 
-            jsonPropertyInfo.Read(tokenType, options, ref state, ref reader);
+            jsonPropertyInfo.Read(tokenType, ref state, ref reader);
             return lastCall;
         }
     }

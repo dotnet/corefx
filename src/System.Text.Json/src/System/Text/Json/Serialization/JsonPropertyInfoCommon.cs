@@ -16,74 +16,71 @@ namespace System.Text.Json.Serialization
     /// </summary>
     internal abstract class JsonPropertyInfoCommon<TClass, TDeclaredProperty, TRuntimeProperty> : JsonPropertyInfo
     {
-        public bool _isPropertyPolicy;
-        public Func<TClass, TDeclaredProperty> Get { get; private set; }
-        public Action<TClass, TDeclaredProperty> Set { get; private set; }
+        public Func<object, TDeclaredProperty> Get { get; private set; }
+        public Action<object, TDeclaredProperty> Set { get; private set; }
 
         public JsonValueConverter<TRuntimeProperty> ValueConverter { get; internal set; }
 
-        // Constructor used for internal identifiers
-        public JsonPropertyInfoCommon() { }
-
-        public JsonPropertyInfoCommon(
+        public override void Initialize(
             Type parentClassType,
             Type declaredPropertyType,
             Type runtimePropertyType,
             PropertyInfo propertyInfo,
             Type elementType,
-            JsonSerializerOptions options) :
-            base(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, elementType, options)
+            JsonSerializerOptions options)
         {
+            base.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, elementType, options);
+
             if (propertyInfo != null)
             {
                 if (propertyInfo.GetMethod?.IsPublic == true)
                 {
                     HasGetter = true;
-                    Get = (Func<TClass, TDeclaredProperty>)Delegate.CreateDelegate(typeof(Func<TClass, TDeclaredProperty>), propertyInfo.GetGetMethod());
+                    Get = MemberAccessor.CreatePropertyGetter<TClass, TDeclaredProperty>(propertyInfo);
                 }
 
                 if (propertyInfo.SetMethod?.IsPublic == true)
                 {
                     HasSetter = true;
-                    Set = (Action<TClass, TDeclaredProperty>)Delegate.CreateDelegate(typeof(Action<TClass, TDeclaredProperty>), propertyInfo.GetSetMethod());
+                    Set = MemberAccessor.CreatePropertySetter<TClass, TDeclaredProperty>(propertyInfo);
                 }
             }
             else
             {
-                _isPropertyPolicy = true;
+                IsPropertyPolicy = true;
                 HasGetter = true;
                 HasSetter = true;
                 ValueConverter = DefaultConverters<TRuntimeProperty>.s_converter;
             }
 
-            GetPolicies(options);
+            GetPolicies();
         }
 
-        public override void GetPolicies(JsonSerializerOptions options)
+        public override void GetPolicies()
         {
             ValueConverter = DefaultConverters<TRuntimeProperty>.s_converter;
-            base.GetPolicies(options);
+            base.GetPolicies();
         }
 
         public override object GetValueAsObject(object obj)
         {
-            if (_isPropertyPolicy)
+            if (IsPropertyPolicy)
             {
                 return obj;
             }
 
-            Debug.Assert(Get != null);
-            return Get((TClass)obj);
+            Debug.Assert(HasGetter);
+            return Get(obj);
         }
 
         public override void SetValueAsObject(object obj, object value)
         {
-            Debug.Assert(Set != null);
+            Debug.Assert(HasSetter);
             TDeclaredProperty typedValue = (TDeclaredProperty)value;
 
             if (typedValue != null || !IgnoreNullValues)
             {
-                Set((TClass)obj, (TDeclaredProperty)value);
+                Set(obj, typedValue);
             }
         }
 

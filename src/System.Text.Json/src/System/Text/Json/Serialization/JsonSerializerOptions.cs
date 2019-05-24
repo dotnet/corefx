@@ -219,6 +219,11 @@ namespace System.Text.Json.Serialization
             set
             {
                 VerifyMutable();
+                if (value == JsonCommentHandling.Allow)
+                {
+                    throw new ArgumentException(SR.JsonSerializerDoesNotSupportComments, nameof(value));
+                }
+
                 _readCommentHandling = value;
             }
         }
@@ -289,7 +294,10 @@ namespace System.Text.Json.Serialization
         {
             return new JsonWriterOptions
             {
-                Indented = WriteIndented
+                Indented = WriteIndented,
+#if !DEBUG
+                SkipValidation = true
+#endif
             };
         }
 
