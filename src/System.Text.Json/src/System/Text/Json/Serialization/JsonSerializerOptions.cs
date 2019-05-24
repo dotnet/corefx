@@ -125,9 +125,11 @@ namespace System.Text.Json.Serialization
         /// <summary>
         /// Determines whether read-only properties are ignored during serialization.
         /// A property is read-only if it contains a public getter but not a public setter.
-        /// Note: Read-only properties will not get deserialized regardless of this setting.
         /// The default value is false.
         /// </summary>
+        /// <remarks>
+        /// Read-only properties will not get deserialized regardless of this setting.
+        /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
         /// </exception>
