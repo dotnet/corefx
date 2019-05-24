@@ -86,7 +86,7 @@ namespace System.Drawing
                     PropertyInfo categoryProperty = argsType?.GetProperty("Category", BindingFlags.Instance | BindingFlags.Public);
                     MethodInfo categoryGetter = categoryProperty?.GetGetMethod();
 
-                    Debug.Assert(categoryGetter != null)
+                    Debug.Assert(categoryGetter != null);
                     if (categoryGetter != null)
                     {
                         // Creating a Delegate pointing to the getter method. 
