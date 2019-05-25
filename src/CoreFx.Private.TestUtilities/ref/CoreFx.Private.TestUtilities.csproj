@@ -7,7 +7,7 @@
   <ItemGroup>
     <Compile Include="CoreFx.Private.TestUtilities.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' OR '$(TargetsUap)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true' or '$(TargetsUap)' == 'true'">
     <Compile Include="CoreFx.Private.TestUtilities.netcoreapp.cs" />
     <ProjectReference Include="..\..\System.Collections\ref\System.Collections.csproj" />
     <ProjectReference Include="..\..\System.Diagnostics.Process\ref\System.Diagnostics.Process.csproj" />
@@ -15,6 +15,6 @@
     <ProjectReference Include="..\..\System.Runtime.InteropServices\ref\System.Runtime.InteropServices.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="xunit.core" Version="$(XUnitPackageVersion)" />
+    <PackageReference Include="xunit.core" Version="$(XUnitPackageVersion)" ExcludeAssets="build" />
   </ItemGroup>
 </Project>

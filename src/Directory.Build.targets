@@ -8,25 +8,6 @@
 
   <Import Project="..\Directory.Build.targets" />
 
-  <Target Name="AddDefaultTestReferences"
-          Condition="'$(IncludeDefaultReferences)' and '$(IsTestProject)' == 'true'"
-          BeforeTargets="SetupDefaultReferences">
-
-    <ItemGroup>
-      <!-- Harmless, but causes PRI targets to run -->
-      <DefaultReferenceExclusions Include="System.Runtime.WindowsRuntime.UI.Xaml" />
-      <DefaultReferenceExclusions Include="@(ReferenceFromRuntime)"/>
-
-      <!-- Reference everything in the targeting pack directory -->
-      <DefaultReferenceDirs Include="$(RefPath)" />
-      <DefaultReferenceItems Include="%(DefaultReferenceDirs.Identity)/*.dll" />
-
-      <!-- Ensure conflict resolution can see these references. -->
-      <Reference Include="%(DefaultReferenceItems.FullPath)" Exclude="@(DefaultReferenceExclusions)"  />
-    </ItemGroup>
-
-  </Target>
-
   <Target Name="AddSkipGetTargetFrameworkToProjectReferences" Condition="'@(ProjectReference)' != ''">
     <ItemGroup>
       <ProjectReference>

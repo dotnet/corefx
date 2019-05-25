@@ -18,7 +18,7 @@
     <UseSharedCompilation>true</UseSharedCompilation>
 
     <ToolSetCommonDirectory>$(MSBuildThisFileDirectory)artifacts\toolset\Common\</ToolSetCommonDirectory>
-    <IsSourceProject>$([System.Text.RegularExpressions.Regex]::IsMatch($(MSBuildProjectDirectory), 'src%24'))</IsSourceProject>
+    <IsSourceProject Condition="'$(MSBuildProjectName)' != 'CoreFx.Private.TestUtilities'">$([System.Text.RegularExpressions.Regex]::IsMatch($(MSBuildProjectDirectory), 'src%24'))</IsSourceProject>
   </PropertyGroup>
 
   <!-- Define vNext UAP Moniker -->
@@ -86,13 +86,14 @@
     <IsPrerelease>true</IsPrerelease>
   </PropertyGroup>
 
+  <Import Sdk="Microsoft.DotNet.Build.Tasks.Configuration" Project="Sdk.props" />
+  <Import Sdk="Microsoft.DotNet.CoreFxTesting" Project="Sdk.props" />
+
   <PropertyGroup>    
-    <IsTestProject Condition="$(MSBuildProjectFullPath.Contains('\tests\')) or $(MSBuildProjectFullPath.Contains('/tests/'))">true</IsTestProject>
     <DisableRepoRestore Condition="'$(IsTestProject)' == 'true'">true</DisableRepoRestore>
     <DisableRepoRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</DisableRepoRestore>
   </PropertyGroup>
 
-  <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Build.Tasks.Configuration" />
   <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
 
   <!-- Common repo directories -->

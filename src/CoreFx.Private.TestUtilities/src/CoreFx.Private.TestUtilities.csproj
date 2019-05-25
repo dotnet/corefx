@@ -9,16 +9,10 @@
     <EnablePInvokeAnalyzer>false</EnablePInvokeAnalyzer>
     <RunMatchingRefApiCompat>false</RunMatchingRefApiCompat>
     <NoWarn Condition="'$(TargetsNetStandard)' == 'true'">$(NoWarn);CS3021</NoWarn>
+    <IncludeDefaultTestReferences>true</IncludeDefaultTestReferences>
     <GeneratePlatformNotSupportedAssemblyMessage Condition="'$(TargetsNetStandard)' == 'true'">Test Utilities are not supported on this platform</GeneratePlatformNotSupportedAssemblyMessage>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netcoreapp2.0-Unix-Debug;netcoreapp2.0-Unix-Release;netcoreapp2.0-Windows_NT-Debug;netcoreapp2.0-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="System\Buffers\BoundedMemory.cs" />
-    <Compile Include="System\Buffers\BoundedMemory.Creation.cs" />
-    <Compile Include="System\Buffers\BoundedMemory.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
-    <Compile Include="System\Buffers\BoundedMemory.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
-    <Compile Include="System\Buffers\PoisonPagePlacement.cs" />
-  </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetStandard)' != 'true'">
     <Compile Include="System\AdminHelpers.cs" />
     <Compile Include="System\IO\FileCleanupTestBase.cs" />
@@ -36,6 +30,11 @@
     <Compile Include="System\AssertExtensions.cs" />
     <Compile Include="System\RetryHelper.cs" />
     <Compile Include="System\TheoryExtensions.cs" />
+    <Compile Include="System\Buffers\BoundedMemory.cs" />
+    <Compile Include="System\Buffers\BoundedMemory.Creation.cs" />
+    <Compile Include="System\Buffers\BoundedMemory.Unix.cs" Condition="'$(TargetsWindows)' != 'true'" />
+    <Compile Include="System\Buffers\BoundedMemory.Windows.cs" Condition="'$(TargetsWindows)' == 'true'" />
+    <Compile Include="System\Buffers\PoisonPagePlacement.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetCurrentProcess_IntPtr.cs">
@@ -89,11 +88,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsPackageVersion)" />
-    <PackageReference Include="xunit.core" Version="$(XUnitPackageVersion)" />
-    <PackageReference Include="xunit.assert" Version="$(XUnitPackageVersion)" />
-  </ItemGroup>
-  <ItemGroup>
     <Reference Include="System.Collections" />
     <Reference Include="System.Memory" />
     <Reference Include="Microsoft.Win32.Registry" />
@@ -126,5 +120,10 @@
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsPackageVersion)" />
+    <PackageReference Include="xunit.core" Version="$(XUnitPackageVersion)" ExcludeAssets="build" />
+    <PackageReference Include="xunit.assert" Version="$(XUnitPackageVersion)" />
   </ItemGroup>
 </Project>
