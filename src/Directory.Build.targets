@@ -9,7 +9,7 @@
   <Import Project="..\Directory.Build.targets" />
 
   <Target Name="AddDefaultTestReferences"
-          Condition="'$(IncludeDefaultReferences)'"
+          Condition="'$(IncludeDefaultReferences)' and '$(IsTestProject)' == 'true'"
           BeforeTargets="SetupDefaultReferences">
 
     <ItemGroup>
