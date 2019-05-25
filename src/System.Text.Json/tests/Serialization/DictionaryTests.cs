@@ -5,7 +5,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -319,6 +318,25 @@ namespace System.Text.Json.Serialization.Tests
 
                 string json = JsonSerializer.ToString(obj);
                 Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
+                ImmutableSortedDictionary<string, ImmutableSortedDictionary<string, int>> obj = JsonSerializer.Parse<ImmutableSortedDictionary<string, ImmutableSortedDictionary<string, int>>>(JsonString);
+
+                Assert.Equal(2, obj.Count);
+                Assert.Equal(2, obj["Key1"].Count);
+                Assert.Equal(1, obj["Key1"]["Key1a"]);
+                Assert.Equal(2, obj["Key1"]["Key1b"]);
+                Assert.Equal(2, obj["Key2"].Count);
+                Assert.Equal(3, obj["Key2"]["Key2a"]);
+                Assert.Equal(4, obj["Key2"]["Key2b"]);
+
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
+
                 json = JsonSerializer.ToString<object>(obj);
                 Assert.Equal(JsonString, json);
             }
