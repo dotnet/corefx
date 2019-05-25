@@ -382,7 +382,7 @@
   </PropertyGroup>
 
   <!-- Test properties for full build. -->
-  <PropertyGroup Condition="'$(BuildAllProjects)' == 'true'">
+  <PropertyGroup Condition="'$(TestAllProjects)' == 'true'">
     <GenerateFullCoverageReport Condition="'$(GenerateFullCoverageReport)' == ''">true</GenerateFullCoverageReport>
   </PropertyGroup>
 
