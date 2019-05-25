@@ -20,9 +20,9 @@
   <Target Name="Restore" DependsOnTargets="GenerateConfigurationProps">
     <ItemGroup>
       <_RestoreProjects Include="external\dir.proj" Build="true" />
-      <_RestoreProjects Include="$(SourceDir)\tests.proj" Build="false" />
-      <_RestoreProjects Include="$(SourceDir)\CoreFx.Private.TestUtilities\ref\CoreFx.Private.TestUtilities.csproj" />
-      <_RestoreProjects Include="$(SourceDir)\CoreFx.Private.TestUtilities\src\CoreFx.Private.TestUtilities.csproj" />
+      <_RestoreProjects Include="$(SourceDir)tests.proj" Build="false" />
+      <_RestoreProjects Include="$(SourceDir)CoreFx.Private.TestUtilities\ref\CoreFx.Private.TestUtilities.csproj" Build="false" />
+      <_RestoreProjects Include="$(SourceDir)CoreFx.Private.TestUtilities\src\CoreFx.Private.TestUtilities.csproj" Build="false" />
     </ItemGroup>
 
     <MSBuild Projects="@(_RestoreProjects)" Targets="Restore" Properties="$(ProjectProperties)" />
