@@ -89,6 +89,7 @@
   <PropertyGroup>    
     <IsTestProject Condition="$(MSBuildProjectFullPath.Contains('\tests\')) or $(MSBuildProjectFullPath.Contains('/tests/'))">true</IsTestProject>
     <DisableRepoRestore Condition="'$(IsTestProject)' == 'true'">true</DisableRepoRestore>
+    <DisableRepoRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</DisableRepoRestore>
   </PropertyGroup>
 
   <Import Project="Sdk.props" Sdk="Microsoft.DotNet.Build.Tasks.Configuration" />
