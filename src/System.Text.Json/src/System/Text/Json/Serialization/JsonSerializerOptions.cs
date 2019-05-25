@@ -128,7 +128,7 @@ namespace System.Text.Json.Serialization
         /// The default value is false.
         /// </summary>
         /// <remarks>
-        /// Read-only properties will not get deserialized regardless of this setting.
+        /// Read-only properties are not deserialized regardless of this setting.
         /// </remarks>
         /// <exception cref="InvalidOperationException">
         /// Thrown if this property is set after serialization or deserialization has occurred.
