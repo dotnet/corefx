@@ -37,27 +37,17 @@
     <DefaultReferenceExclusions Include="System.Utf8String.Experimental" />
   </ItemGroup>
 
-    <!-- Default properties for CI builds -->
-  <PropertyGroup Condition="'$(IsTestProject)' == 'true' and '$(ContinuousIntegrationBuild)' == 'true' and '$(OfficialBuildId)' == ''">
-    <WithoutCategories>IgnoreForCI</WithoutCategories>
-  </PropertyGroup>
-
   <PropertyGroup>
     <CLSCompliant Condition="'$(CLSCompliant)' == '' and '$(IsTestProject)' == 'true'">false</CLSCompliant>
     <CLSCompliant Condition="'$(CLSCompliant)' == ''">true</CLSCompliant>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(IsTestProject)' == 'true'">
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="$(MicrosoftNETTestSdkPackageVersion)" />
-    <PackageReference Condition="'$(IncludeRemoteExecutor)' == 'true'" Include="Microsoft.DotNet.RemoteExecutor" Version="$(MicrosoftDotNetRemoteExecutorPackageVersion)" />
-    
-    <!-- xunit -->
-    <PackageReference Include="Microsoft.DotNet.XUnitExtensions" Version="$(MicrosoftDotNetXUnitExtensionsPackageVersion)" />
-    <PackageReference Include="xunit.core" Version="$(XUnitPackageVersion)" />
-    <PackageReference Include="xunit.assert" Version="$(XUnitPackageVersion)" />
-    <PackageReference Condition="'$(TargetsNetStandard)' != 'true'" Include="xunit.runner.visualstudio" Version="$(XUnitPackageVersion)" />
-    <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true'" Include="Microsoft.DotNet.XUnitConsoleRunner" Version="$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)" />
-    <PackageReference Condition="'$(TargetsNetFx)' == 'true'" Include="xunit.runner.console" Version="$(XUnitPackageVersion)" />
+  <ItemGroup>
+    <!-- TODO: Replace with P2P -->
+    <None Include="$(RuntimePath)CoreFx.Private.TestUtilities.dll"
+          Condition="'$(IsTestProject)' == 'true'"
+          CopyToOutputDirectory="PreserveNewest"
+          Visible="false" />
   </ItemGroup>
 
   <Import Condition="'$(DisableRepoRestore)' == 'true' and '$(IsSourceProject)' == 'true'" Project="$(RepositoryEngineeringDir)Analyzers.props" />
