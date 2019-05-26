@@ -350,11 +350,12 @@ namespace System.Buffers.Text
             Vector256<sbyte> lutHi = ReadVector<Vector256<sbyte>>(s_avxDecodeLutHi);
             Vector256<sbyte> lutLo = ReadVector<Vector256<sbyte>>(s_avxDecodeLutLo);
             Vector256<sbyte> lutShift = ReadVector<Vector256<sbyte>>(s_avxDecodeLutShift);
-            Vector256<sbyte> mask2F = s_avxDecodeMask2F;
+            Vector256<sbyte> mask2F = ReadVector<Vector256<sbyte>>(s_avxDecodeMask2F);
             Vector256<sbyte> shuffleConstant0 = Vector256.Create(0x01400140).AsSByte();
             Vector256<short> shuffleConstant1 = Vector256.Create(0x00011000).AsInt16();
             Vector256<sbyte> shuffleVec = ReadVector<Vector256<sbyte>>(s_avxDecodeShuffleVec);
             Vector256<int> permuteVec = ReadVector<Vector256<sbyte>>(s_avxDecodePermuteVec).AsInt32();
+            Vector256<sbyte> zero = Vector256<sbyte>.Zero;
 
             byte* src = srcBytes;
             byte* dest = destBytes;
@@ -369,7 +370,6 @@ namespace System.Buffers.Text
                 Vector256<sbyte> loNibbles = Avx2.And(str, mask2F);
                 Vector256<sbyte> hi = Avx2.Shuffle(lutHi, hiNibbles);
                 Vector256<sbyte> lo = Avx2.Shuffle(lutLo, loNibbles);
-                Vector256<sbyte> zero = Vector256<sbyte>.Zero;
 
                 // https://github.com/dotnet/coreclr/issues/21247
                 if (Avx2.MoveMask(Avx2.CompareGreaterThan(Avx2.And(lo, hi), zero)) != 0)
@@ -403,10 +403,11 @@ namespace System.Buffers.Text
             Vector128<sbyte> lutHi = ReadVector<Vector128<sbyte>>(s_sseDecodeLutHi);
             Vector128<sbyte> lutLo = ReadVector<Vector128<sbyte>>(s_sseDecodeLutLo);
             Vector128<sbyte> lutShift = ReadVector<Vector128<sbyte>>(s_sseDecodeLutShift);
-            Vector128<sbyte> mask2F = s_sseDecodeMask2F;
+            Vector128<sbyte> mask2F = ReadVector<Vector128<sbyte>>(s_sseDecodeMask2F);
             Vector128<sbyte> shuffleConstant0 = Vector128.Create(0x01400140).AsSByte();
             Vector128<short> shuffleConstant1 = Vector128.Create(0x00011000).AsInt16();
             Vector128<sbyte> shuffleVec = ReadVector<Vector128<sbyte>>(s_sseDecodeShuffleVec);
+            Vector128<sbyte> zero = Vector128<sbyte>.Zero;
 
             byte* src = srcBytes;
             byte* dest = destBytes;
@@ -421,7 +422,6 @@ namespace System.Buffers.Text
                 Vector128<sbyte> loNibbles = Sse2.And(str, mask2F);
                 Vector128<sbyte> hi = Ssse3.Shuffle(lutHi, hiNibbles);
                 Vector128<sbyte> lo = Ssse3.Shuffle(lutLo, loNibbles);
-                Vector128<sbyte> zero = Vector128<sbyte>.Zero;
 
                 if (Sse2.MoveMask(Sse2.CompareGreaterThan(Sse2.And(lo, hi), zero)) != 0)
                     break;
@@ -526,7 +526,12 @@ namespace System.Buffers.Text
             0, 0, 0, 0
         };
 
-        private static readonly Vector128<sbyte> s_sseDecodeMask2F = Sse3.IsSupported ? Vector128.Create((sbyte)0x2F) : default;    // ASCII: /
+        private static ReadOnlySpan<sbyte> s_sseDecodeMask2F => new sbyte[] {	// ASCII: /
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F
+        };
 
         private static ReadOnlySpan<sbyte> s_avxDecodeShuffleVec => new sbyte[] {
             2, 1, 0, 6,
@@ -550,7 +555,16 @@ namespace System.Buffers.Text
             -1, -1, -1, -1
         };
 
-        private static readonly Vector256<sbyte> s_avxDecodeMask2F = Avx2.IsSupported ? Vector256.Create((sbyte)0x2F) : default;        // ASCII: /
+        private static ReadOnlySpan<sbyte> s_avxDecodeMask2F => new sbyte[] {	// ASCII: /
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F,
+            0x2F, 0x2F, 0x2F, 0x2F
+        };
 
         private static ReadOnlySpan<sbyte> s_avxDecodeLutLo => new sbyte[] {
             0x15, 0x11, 0x11, 0x11,
