@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Runtime.Intrinsics;
@@ -94,6 +95,7 @@ namespace System.Buffers.Text
                 {
                     // This should never overflow since destLength here is less than int.MaxValue / 4 * 3 (i.e. 1610612733)
                     // Therefore, (destLength / 3) * 4 will always be less than 2147483641
+                    Debug.Assert(destLength < (int.MaxValue / 4 * 3));
                     maxSrcLength = (destLength / 3) * 4;
                 }
 
