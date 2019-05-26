@@ -222,14 +222,26 @@ namespace System.Buffers.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void Avx2Encode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
+            // If we have AVX2 support, pick off 24 bytes at a time for as long as we can.
+            // But because we read 32 bytes at a time, ensure we have enough room to do a
+            // full 32-byte read without segfaulting.
+
+            // translation from SSSE3 into AVX2 of procedure
+            // This one works with shifted (4 bytes) input in order to
+            // be able to work efficiently in the 2 128-bit lanes
+
+            // srcBytes, bytes MSB to LSB:
+            // 0 0 0 0 x w v u t s r q p o n m
+            // l k j i h g f e d c b a 0 0 0 0
+
             // The JIT won't hoist these "constants", so help it
             Vector256<sbyte> shuffleVec = ReadVector<Vector256<sbyte>>(s_avxEncodeShuffleVec);
-            Vector256<sbyte> shuffleConstant0 = Vector256.Create(0x0fc0fc00).AsSByte();
-            Vector256<sbyte> shuffleConstant2 = Vector256.Create(0x003f03f0).AsSByte();
-            Vector256<ushort> shuffleConstant1 = Vector256.Create(0x04000040).AsUInt16();
-            Vector256<short> shuffleConstant3 = Vector256.Create(0x01000010).AsInt16();
-            Vector256<byte> translationContant0 = Vector256.Create((byte)51);
-            Vector256<sbyte> translationContant1 = Vector256.Create((sbyte)25);
+            Vector256<sbyte> maskAC = Vector256.Create(0x0fc0fc00).AsSByte();
+            Vector256<sbyte> maskBB = Vector256.Create(0x003f03f0).AsSByte();
+            Vector256<ushort> shiftAC = Vector256.Create(0x04000040).AsUInt16();
+            Vector256<short> shiftBB = Vector256.Create(0x01000010).AsInt16();
+            Vector256<byte> const51 = Vector256.Create((byte)51);
+            Vector256<sbyte> const25 = Vector256.Create((sbyte)25);
             Vector256<sbyte> lut = ReadVector<Vector256<sbyte>>(s_avxEncodeLut);
 
             byte* src = srcBytes;
@@ -249,16 +261,88 @@ namespace System.Buffers.Text
             {
                 // Reshuffle
                 str = Avx2.Shuffle(str, shuffleVec);
-                Vector256<sbyte> t0 = Avx2.And(str, shuffleConstant0);
-                Vector256<sbyte> t2 = Avx2.And(str, shuffleConstant2);
-                Vector256<ushort> t1 = Avx2.MultiplyHigh(t0.AsUInt16(), shuffleConstant1);
-                Vector256<short> t3 = Avx2.MultiplyLow(t2.AsInt16(), shuffleConstant3);
+                // str, bytes MSB to LSB:
+                // w x v w
+                // t u s t
+                // q r p q
+                // n o m n
+                // k l j k
+                // h i g h
+                // e f d e
+                // b c a b
+
+                Vector256<sbyte> t0 = Avx2.And(str, maskAC);
+                // bits, upper case are most significant bits, lower case are least significant bits.
+                // 0000wwww XX000000 VVVVVV00 00000000
+                // 0000tttt UU000000 SSSSSS00 00000000
+                // 0000qqqq RR000000 PPPPPP00 00000000
+                // 0000nnnn OO000000 MMMMMM00 00000000
+                // 0000kkkk LL000000 JJJJJJ00 00000000
+                // 0000hhhh II000000 GGGGGG00 00000000
+                // 0000eeee FF000000 DDDDDD00 00000000
+                // 0000bbbb CC000000 AAAAAA00 00000000
+
+                Vector256<sbyte> t2 = Avx2.And(str, maskBB);
+                // 00000000 00xxxxxx 000000vv WWWW0000
+                // 00000000 00uuuuuu 000000ss TTTT0000
+                // 00000000 00rrrrrr 000000pp QQQQ0000
+                // 00000000 00oooooo 000000mm NNNN0000
+                // 00000000 00llllll 000000jj KKKK0000
+                // 00000000 00iiiiii 000000gg HHHH0000
+                // 00000000 00ffffff 000000dd EEEE0000
+                // 00000000 00cccccc 000000aa BBBB0000
+
+                Vector256<ushort> t1 = Avx2.MultiplyHigh(t0.AsUInt16(), shiftAC);
+                // 00000000 00wwwwXX 00000000 00VVVVVV
+                // 00000000 00ttttUU 00000000 00SSSSSS
+                // 00000000 00qqqqRR 00000000 00PPPPPP
+                // 00000000 00nnnnOO 00000000 00MMMMMM
+                // 00000000 00kkkkLL 00000000 00JJJJJJ
+                // 00000000 00hhhhII 00000000 00GGGGGG
+                // 00000000 00eeeeFF 00000000 00DDDDDD
+                // 00000000 00bbbbCC 00000000 00AAAAAA
+
+                Vector256<short> t3 = Avx2.MultiplyLow(t2.AsInt16(), shiftBB);
+                // 00xxxxxx 00000000 00vvWWWW 00000000
+                // 00uuuuuu 00000000 00ssTTTT 00000000
+                // 00rrrrrr 00000000 00ppQQQQ 00000000
+                // 00oooooo 00000000 00mmNNNN 00000000
+                // 00llllll 00000000 00jjKKKK 00000000
+                // 00iiiiii 00000000 00ggHHHH 00000000
+                // 00ffffff 00000000 00ddEEEE 00000000
+                // 00cccccc 00000000 00aaBBBB 00000000
+
                 str = Avx2.Or(t1.AsSByte(), t3.AsSByte());
+                // 00xxxxxx 00wwwwXX 00vvWWWW 00VVVVVV
+                // 00uuuuuu 00ttttUU 00ssTTTT 00SSSSSS
+                // 00rrrrrr 00qqqqRR 00ppQQQQ 00PPPPPP
+                // 00oooooo 00nnnnOO 00mmNNNN 00MMMMMM
+                // 00llllll 00kkkkLL 00jjKKKK 00JJJJJJ
+                // 00iiiiii 00hhhhII 00ggHHHH 00GGGGGG
+                // 00ffffff 00eeeeFF 00ddEEEE 00DDDDDD
+                // 00cccccc 00bbbbCC 00aaBBBB 00AAAAAA
 
                 // Translation
-                Vector256<byte> indices = Avx2.SubtractSaturate(str.AsByte(), translationContant0);
-                Vector256<sbyte> mask = Avx2.CompareGreaterThan(str, translationContant1);
+                // LUT contains Absolute offset for all ranges:
+                // Translate values 0..63 to the Base64 alphabet. There are five sets:
+                // #  From      To         Abs    Index  Characters
+                // 0  [0..25]   [65..90]   +65        0  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                // 1  [26..51]  [97..122]  +71        1  abcdefghijklmnopqrstuvwxyz
+                // 2  [52..61]  [48..57]    -4  [2..11]  0123456789
+                // 3  [62]      [43]       -19       12  +
+                // 4  [63]      [47]       -16       13  /
+
+                // Create LUT indices from input:
+                // the index for range #0 is right, others are 1 less than expected:
+                Vector256<byte> indices = Avx2.SubtractSaturate(str.AsByte(), const51);
+
+                // mask is 0xFF (-1) for range #[1..4] and 0x00 for range #0:
+                Vector256<sbyte> mask = Avx2.CompareGreaterThan(str, const25);
+
+                // substract -1, so add 1 to indices for range #[1..4], All indices are now correct:
                 Vector256<sbyte> tmp = Avx2.Subtract(indices.AsSByte(), mask);
+
+                // Add offsets to input values:
                 str = Avx2.Add(str, Avx2.Shuffle(lut, tmp));
 
                 AssertWrite<Vector256<sbyte>>(dest, destStart, destLength);
@@ -282,14 +366,21 @@ namespace System.Buffers.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void Ssse3Encode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
+            // If we have SSSE3 support, pick off 12 bytes at a time for as long as we can.
+            // But because we read 16 bytes at a time, ensure we have enough room to do a
+            // full 16-byte read without segfaulting.
+
+            // srcBytes, bytes MSB to LSB:
+            // 0 0 0 0 l k j i h g f e d c b a
+
             // The JIT won't hoist these "constants", so help it
             Vector128<sbyte> shuffleVec = ReadVector<Vector128<sbyte>>(s_sseEncodeShuffleVec);
-            Vector128<sbyte> shuffleConstant0 = Vector128.Create(0x0fc0fc00).AsSByte();
-            Vector128<sbyte> shuffleConstant2 = Vector128.Create(0x003f03f0).AsSByte();
-            Vector128<ushort> shuffleConstant1 = Vector128.Create(0x04000040).AsUInt16();
-            Vector128<short> shuffleConstant3 = Vector128.Create(0x01000010).AsInt16();
-            Vector128<byte> translationContant0 = Vector128.Create((byte)51);
-            Vector128<sbyte> translationContant1 = Vector128.Create((sbyte)25);
+            Vector128<sbyte> maskAC = Vector128.Create(0x0fc0fc00).AsSByte();
+            Vector128<sbyte> maskBB = Vector128.Create(0x003f03f0).AsSByte();
+            Vector128<ushort> shiftAC = Vector128.Create(0x04000040).AsUInt16();
+            Vector128<short> shiftBB = Vector128.Create(0x01000010).AsInt16();
+            Vector128<byte> const51 = Vector128.Create((byte)51);
+            Vector128<sbyte> const25 = Vector128.Create((sbyte)25);
             Vector128<sbyte> lut = ReadVector<Vector128<sbyte>>(s_sseEncodeLut);
 
             byte* src = srcBytes;
@@ -303,16 +394,64 @@ namespace System.Buffers.Text
 
                 // Reshuffle
                 str = Ssse3.Shuffle(str, shuffleVec);
-                Vector128<sbyte> t0 = Sse2.And(str, shuffleConstant0);
-                Vector128<sbyte> t2 = Sse2.And(str, shuffleConstant2);
-                Vector128<ushort> t1 = Sse2.MultiplyHigh(t0.AsUInt16(), shuffleConstant1);
-                Vector128<short> t3 = Sse2.MultiplyLow(t2.AsInt16(), shuffleConstant3);
+                // str, bytes MSB to LSB:
+                // k l j k
+                // h i g h
+                // e f d e
+                // b c a b
+
+                Vector128<sbyte> t0 = Sse2.And(str, maskAC);
+                // bits, upper case are most significant bits, lower case are least significant bits
+                // 0000kkkk LL000000 JJJJJJ00 00000000
+                // 0000hhhh II000000 GGGGGG00 00000000
+                // 0000eeee FF000000 DDDDDD00 00000000
+                // 0000bbbb CC000000 AAAAAA00 00000000
+
+                Vector128<sbyte> t2 = Sse2.And(str, maskBB);
+                // 00000000 00llllll 000000jj KKKK0000
+                // 00000000 00iiiiii 000000gg HHHH0000
+                // 00000000 00ffffff 000000dd EEEE0000
+                // 00000000 00cccccc 000000aa BBBB0000
+
+                Vector128<ushort> t1 = Sse2.MultiplyHigh(t0.AsUInt16(), shiftAC);
+                // 00000000 00kkkkLL 00000000 00JJJJJJ
+                // 00000000 00hhhhII 00000000 00GGGGGG
+                // 00000000 00eeeeFF 00000000 00DDDDDD
+                // 00000000 00bbbbCC 00000000 00AAAAAA
+
+                Vector128<short> t3 = Sse2.MultiplyLow(t2.AsInt16(), shiftBB);
+                // 00llllll 00000000 00jjKKKK 00000000
+                // 00iiiiii 00000000 00ggHHHH 00000000
+                // 00ffffff 00000000 00ddEEEE 00000000
+                // 00cccccc 00000000 00aaBBBB 00000000
+
                 str = Sse2.Or(t1.AsSByte(), t3.AsSByte());
+                // 00llllll 00kkkkLL 00jjKKKK 00JJJJJJ
+                // 00iiiiii 00hhhhII 00ggHHHH 00GGGGGG
+                // 00ffffff 00eeeeFF 00ddEEEE 00DDDDDD
+                // 00cccccc 00bbbbCC 00aaBBBB 00AAAAAA
 
                 // Translation
-                Vector128<byte> indices = Sse2.SubtractSaturate(str.AsByte(), translationContant0);
-                Vector128<sbyte> mask = Sse2.CompareGreaterThan(str, translationContant1);
+                // LUT contains Absolute offset for all ranges:
+                // Translate values 0..63 to the Base64 alphabet. There are five sets:
+                // #  From      To         Abs    Index  Characters
+                // 0  [0..25]   [65..90]   +65        0  ABCDEFGHIJKLMNOPQRSTUVWXYZ
+                // 1  [26..51]  [97..122]  +71        1  abcdefghijklmnopqrstuvwxyz
+                // 2  [52..61]  [48..57]    -4  [2..11]  0123456789
+                // 3  [62]      [43]       -19       12  +
+                // 4  [63]      [47]       -16       13  /
+
+                // Create LUT indices from input:
+                // the index for range #0 is right, others are 1 less than expected:
+                Vector128<byte> indices = Sse2.SubtractSaturate(str.AsByte(), const51);
+
+                // mask is 0xFF (-1) for range #[1..4] and 0x00 for range #0:
+                Vector128<sbyte> mask = Sse2.CompareGreaterThan(str, const25);
+
+                // substract -1, so add 1 to indices for range #[1..4], All indices are now correct:
                 Vector128<sbyte> tmp = Sse2.Subtract(indices.AsSByte(), mask);
+
+                // Add offsets to input values:
                 str = Sse2.Add(str, Ssse3.Shuffle(lut, tmp));
 
                 AssertWrite<Vector128<sbyte>>(dest, destStart, destLength);

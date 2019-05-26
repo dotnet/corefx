@@ -348,15 +348,23 @@ namespace System.Buffers.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void Avx2Decode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
+            // If we have AVX2 support, pick off 32 bytes at a time for as long as we can,
+            // but make sure that we quit before seeing any == markers at the end of the
+            // string. Also, because we write 8 zeroes at the end of the output, ensure
+            // that there are at least 11 valid bytes of input data remaining to close the
+            // gap. 32 + 2 + 11 = 45 bytes.
+
+            // See SSSE3-version below for an explanation of how the code works.
+
             // The JIT won't hoist these "constants", so help it
             Vector256<sbyte> lutHi = ReadVector<Vector256<sbyte>>(s_avxDecodeLutHi);
             Vector256<sbyte> lutLo = ReadVector<Vector256<sbyte>>(s_avxDecodeLutLo);
             Vector256<sbyte> lutShift = ReadVector<Vector256<sbyte>>(s_avxDecodeLutShift);
             Vector256<sbyte> mask2F = ReadVector<Vector256<sbyte>>(s_avxDecodeMask2F);
-            Vector256<sbyte> shuffleConstant0 = Vector256.Create(0x01400140).AsSByte();
-            Vector256<short> shuffleConstant1 = Vector256.Create(0x00011000).AsInt16();
-            Vector256<sbyte> shuffleVec = ReadVector<Vector256<sbyte>>(s_avxDecodeShuffleVec);
-            Vector256<int> permuteVec = ReadVector<Vector256<sbyte>>(s_avxDecodePermuteVec).AsInt32();
+            Vector256<sbyte> mergeConstant0 = Vector256.Create(0x01400140).AsSByte();
+            Vector256<short> mergeConstant1 = Vector256.Create(0x00011000).AsInt16();
+            Vector256<sbyte> packBytesInLaneMask = ReadVector<Vector256<sbyte>>(s_avxDecodePackBytesInLaneMask);
+            Vector256<int> packLanesControl = ReadVector<Vector256<sbyte>>(s_avxDecodePackLanesControl).AsInt32();
             Vector256<sbyte> zero = Vector256<sbyte>.Zero;
 
             byte* src = srcBytes;
@@ -381,10 +389,33 @@ namespace System.Buffers.Text
                 Vector256<sbyte> shift = Avx2.Shuffle(lutShift, Avx2.Add(eq2F, hiNibbles));
                 str = Avx2.Add(str, shift);
 
-                Vector256<short> merge_ab_and_bc = Avx2.MultiplyAddAdjacent(str.AsByte(), shuffleConstant0);
-                Vector256<int> output = Avx2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
-                output = Avx2.Shuffle(output.AsSByte(), shuffleVec).AsInt32();
-                str = Avx2.PermuteVar8x32(output, permuteVec).AsSByte();
+                // in, lower lane, bits, upper case are most significant bits, lower case are least significant bits:
+                // 00llllll 00kkkkLL 00jjKKKK 00JJJJJJ
+                // 00iiiiii 00hhhhII 00ggHHHH 00GGGGGG
+                // 00ffffff 00eeeeFF 00ddEEEE 00DDDDDD
+                // 00cccccc 00bbbbCC 00aaBBBB 00AAAAAA
+
+                Vector256<short> merge_ab_and_bc = Avx2.MultiplyAddAdjacent(str.AsByte(), mergeConstant0);
+                // 0000kkkk LLllllll 0000JJJJ JJjjKKKK
+                // 0000hhhh IIiiiiii 0000GGGG GGggHHHH
+                // 0000eeee FFffffff 0000DDDD DDddEEEE
+                // 0000bbbb CCcccccc 0000AAAA AAaaBBBB
+
+                Vector256<int> output = Avx2.MultiplyAddAdjacent(merge_ab_and_bc, mergeConstant1);
+                // 00000000 JJJJJJjj KKKKkkkk LLllllll
+                // 00000000 GGGGGGgg HHHHhhhh IIiiiiii
+                // 00000000 DDDDDDdd EEEEeeee FFffffff
+                // 00000000 AAAAAAaa BBBBbbbb CCcccccc
+
+                // Pack bytes together in each lane:
+                output = Avx2.Shuffle(output.AsSByte(), packBytesInLaneMask).AsInt32();
+                // 00000000 00000000 00000000 00000000
+                // LLllllll KKKKkkkk JJJJJJjj IIiiiiii
+                // HHHHhhhh GGGGGGgg FFffffff EEEEeeee
+                // DDDDDDdd CCcccccc BBBBbbbb AAAAAAaa
+
+                // Pack lanes
+                str = Avx2.PermuteVar8x32(output, packLanesControl).AsSByte();
 
                 AssertWrite<Vector256<sbyte>>(dest, destStart, destLength);
                 Avx.Store(dest, str.AsByte());
@@ -401,14 +432,86 @@ namespace System.Buffers.Text
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static unsafe void Ssse3Decode(ref byte* srcBytes, ref byte* destBytes, byte* srcEnd, int sourceLength, int destLength, byte* srcStart, byte* destStart)
         {
+            // If we have SSSE3 support, pick off 16 bytes at a time for as long as we can,
+            // but make sure that we quit before seeing any == markers at the end of the
+            // string. Also, because we write four zeroes at the end of the output, ensure
+            // that there are at least 6 valid bytes of input data remaining to close the
+            // gap. 16 + 2 + 6 = 24 bytes.
+
+            // The input consists of six character sets in the Base64 alphabet,
+            // which we need to map back to the 6-bit values they represent.
+            // There are three ranges, two singles, and then there's the rest.
+            //
+            //  #  From       To        Add  Characters
+            //  1  [43]       [62]      +19  +
+            //  2  [47]       [63]      +16  /
+            //  3  [48..57]   [52..61]   +4  0..9
+            //  4  [65..90]   [0..25]   -65  A..Z
+            //  5  [97..122]  [26..51]  -71  a..z
+            // (6) Everything else => invalid input
+
+            // We will use LUTS for character validation & offset computation
+            // Remember that 0x2X and 0x0X are the same index for _mm_shuffle_epi8,
+            // this allows to mask with 0x2F instead of 0x0F and thus save one constant declaration (register and/or memory access)
+
+            // For offsets:
+            // Perfect hash for lut = ((src>>4)&0x2F)+((src==0x2F)?0xFF:0x00)
+            // 0000 = garbage
+            // 0001 = /
+            // 0010 = +
+            // 0011 = 0-9
+            // 0100 = A-Z
+            // 0101 = A-Z
+            // 0110 = a-z
+            // 0111 = a-z
+            // 1000 >= garbage
+
+            // For validation, here's the table.
+            // A character is valid if and only if the AND of the 2 lookups equals 0:
+
+            // hi \ lo              0000 0001 0010 0011 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 1111
+            //      LUT             0x15 0x11 0x11 0x11 0x11 0x11 0x11 0x11 0x11 0x11 0x13 0x1A 0x1B 0x1B 0x1B 0x1A
+
+            // 0000 0X10 char        NUL  SOH  STX  ETX  EOT  ENQ  ACK  BEL   BS   HT   LF   VT   FF   CR   SO   SI
+            //           andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+
+            // 0001 0x10 char        DLE  DC1  DC2  DC3  DC4  NAK  SYN  ETB  CAN   EM  SUB  ESC   FS   GS   RS   US
+            //           andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+
+            // 0010 0x01 char               !    "    #    $    %    &    '    (    )    *    +    ,    -    .    /
+            //           andlut     0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x01 0x00 0x01 0x01 0x01 0x00
+
+            // 0011 0x02 char          0    1    2    3    4    5    6    7    8    9    :    ;    <    =    >    ?
+            //           andlut     0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x02 0x02 0x02 0x02 0x02 0x02
+
+            // 0100 0x04 char          @    A    B    C    D    E    F    G    H    I    J    K    L    M    N    0
+            //           andlut     0x04 0x00 0x00 0x00 0X00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+
+            // 0101 0x08 char          P    Q    R    S    T    U    V    W    X    Y    Z    [    \    ]    ^    _
+            //           andlut     0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x08 0x08 0x08 0x08 0x08
+
+            // 0110 0x04 char          `    a    b    c    d    e    f    g    h    i    j    k    l    m    n    o
+            //           andlut     0x04 0x00 0x00 0x00 0X00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+            // 0111 0X08 char          p    q    r    s    t    u    v    w    x    y    z    {    |    }    ~
+            //           andlut     0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x00 0x08 0x08 0x08 0x08 0x08
+
+            // 1000 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+            // 1001 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+            // 1010 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+            // 1011 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+            // 1100 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+            // 1101 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+            // 1110 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+            // 1111 0x10 andlut     0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10 0x10
+
             // The JIT won't hoist these "constants", so help it
             Vector128<sbyte> lutHi = ReadVector<Vector128<sbyte>>(s_sseDecodeLutHi);
             Vector128<sbyte> lutLo = ReadVector<Vector128<sbyte>>(s_sseDecodeLutLo);
             Vector128<sbyte> lutShift = ReadVector<Vector128<sbyte>>(s_sseDecodeLutShift);
             Vector128<sbyte> mask2F = ReadVector<Vector128<sbyte>>(s_sseDecodeMask2F);
-            Vector128<sbyte> shuffleConstant0 = Vector128.Create(0x01400140).AsSByte();
-            Vector128<short> shuffleConstant1 = Vector128.Create(0x00011000).AsInt16();
-            Vector128<sbyte> shuffleVec = ReadVector<Vector128<sbyte>>(s_sseDecodeShuffleVec);
+            Vector128<sbyte> mergeConstant0 = Vector128.Create(0x01400140).AsSByte();
+            Vector128<short> mergeConstant1 = Vector128.Create(0x00011000).AsInt16();
+            Vector128<sbyte> packBytesMask = ReadVector<Vector128<sbyte>>(s_sseDecodePackBytesMask);
             Vector128<sbyte> zero = Vector128<sbyte>.Zero;
 
             byte* src = srcBytes;
@@ -420,21 +523,47 @@ namespace System.Buffers.Text
                 AssertRead<Vector128<sbyte>>(src, srcStart, sourceLength);
                 Vector128<sbyte> str = Sse2.LoadVector128(src).AsSByte();
 
+                // lookup
                 Vector128<sbyte> hiNibbles = Sse2.And(Sse2.ShiftRightLogical(str.AsInt32(), 4).AsSByte(), mask2F);
                 Vector128<sbyte> loNibbles = Sse2.And(str, mask2F);
                 Vector128<sbyte> hi = Ssse3.Shuffle(lutHi, hiNibbles);
                 Vector128<sbyte> lo = Ssse3.Shuffle(lutLo, loNibbles);
 
+                // Check for invalid input: if any "and" values from lo and hi are not zero,
+                // fall back on bytewise code to do error checking and reporting:
                 if (Sse2.MoveMask(Sse2.CompareGreaterThan(Sse2.And(lo, hi), zero)) != 0)
                     break;
 
                 Vector128<sbyte> eq2F = Sse2.CompareEqual(str, mask2F);
                 Vector128<sbyte> shift = Ssse3.Shuffle(lutShift, Sse2.Add(eq2F, hiNibbles));
+
+                // Now simply add the delta values to the input:
                 str = Sse2.Add(str, shift);
 
-                Vector128<short> merge_ab_and_bc = Ssse3.MultiplyAddAdjacent(str.AsByte(), shuffleConstant0);
-                Vector128<int> output = Sse2.MultiplyAddAdjacent(merge_ab_and_bc, shuffleConstant1);
-                str = Ssse3.Shuffle(output.AsSByte(), shuffleVec);
+                // in, bits, upper case are most significant bits, lower case are least significant bits
+                // 00llllll 00kkkkLL 00jjKKKK 00JJJJJJ
+                // 00iiiiii 00hhhhII 00ggHHHH 00GGGGGG
+                // 00ffffff 00eeeeFF 00ddEEEE 00DDDDDD
+                // 00cccccc 00bbbbCC 00aaBBBB 00AAAAAA
+
+                Vector128<short> merge_ab_and_bc = Ssse3.MultiplyAddAdjacent(str.AsByte(), mergeConstant0);
+                // 0000kkkk LLllllll 0000JJJJ JJjjKKKK
+                // 0000hhhh IIiiiiii 0000GGGG GGggHHHH
+                // 0000eeee FFffffff 0000DDDD DDddEEEE
+                // 0000bbbb CCcccccc 0000AAAA AAaaBBBB
+
+                Vector128<int> output = Sse2.MultiplyAddAdjacent(merge_ab_and_bc, mergeConstant1);
+                // 00000000 JJJJJJjj KKKKkkkk LLllllll
+                // 00000000 GGGGGGgg HHHHhhhh IIiiiiii
+                // 00000000 DDDDDDdd EEEEeeee FFffffff
+                // 00000000 AAAAAAaa BBBBbbbb CCcccccc
+
+                // Pack bytes together:
+                str = Ssse3.Shuffle(output.AsSByte(), packBytesMask);
+                // 00000000 00000000 00000000 00000000
+                // LLllllll KKKKkkkk JJJJJJjj IIiiiiii
+                // HHHHhhhh GGGGGGgg FFffffff EEEEeeee
+                // DDDDDDdd CCcccccc BBBBbbbb AAAAAAaa
 
                 AssertWrite<Vector128<sbyte>>(dest, destStart, destLength);
                 Sse2.Store(dest, str.AsByte());
@@ -500,7 +629,7 @@ namespace System.Buffers.Text
             -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
         };
 
-        private static ReadOnlySpan<sbyte> s_sseDecodeShuffleVec => new sbyte[] {
+        private static ReadOnlySpan<sbyte> s_sseDecodePackBytesMask => new sbyte[] {
             2, 1, 0, 6,
             5, 4, 10, 9,
             8, 14, 13, 12,
@@ -535,7 +664,7 @@ namespace System.Buffers.Text
             0x2F, 0x2F, 0x2F, 0x2F
         };
 
-        private static ReadOnlySpan<sbyte> s_avxDecodeShuffleVec => new sbyte[] {
+        private static ReadOnlySpan<sbyte> s_avxDecodePackBytesInLaneMask => new sbyte[] {
             2, 1, 0, 6,
             5, 4, 10, 9,
             8, 14, 13, 12,
@@ -546,7 +675,7 @@ namespace System.Buffers.Text
             -1, -1, -1, -1
         };
 
-        private static ReadOnlySpan<sbyte> s_avxDecodePermuteVec => new sbyte[] {
+        private static ReadOnlySpan<sbyte> s_avxDecodePackLanesControl => new sbyte[] {
             0, 0, 0, 0,
             1, 0, 0, 0,
             2, 0, 0, 0,
