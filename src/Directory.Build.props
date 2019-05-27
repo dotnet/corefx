@@ -18,7 +18,7 @@
 
   <ItemGroup>
     <!-- Link to the testhost folder to probe additional assemblies. -->
-    <CoverageProbePath Include="shared\Microsoft.NETCore.App\9.9.9" />
+    <CoverageProbePath Include="shared\Microsoft.NETCore.App\$(ProductVersion)" />
   </ItemGroup>
 
   <ItemDefinitionGroup Condition="'$(IsTestProject)' != 'true'">
