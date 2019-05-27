@@ -618,7 +618,7 @@ namespace System.Net.Http
                     case HttpConnectionKind.ProxyTunnel:
                     case HttpConnectionKind.SslProxyTunnel:
                         HttpResponseMessage response;
-                        (stream, response) = await EstablishProxyTunnel(request.Headers, cancellationToken).ConfigureAwait(false);
+                        (stream, response) = await EstablishProxyTunnel(request.HasHeaders ? request.Headers : null, cancellationToken).ConfigureAwait(false);
                         if (response != null)
                         {
                             // Return non-success response from proxy.
@@ -673,10 +673,9 @@ namespace System.Net.Http
             HttpRequestMessage tunnelRequest = new HttpRequestMessage(HttpMethod.Connect, _proxyUri);
             tunnelRequest.Headers.Host = $"{_host}:{_port}";    // This specifies destination host/port to connect to
 
-            string userAgent = headers.UserAgent.ToString();
-            if (!string.IsNullOrEmpty(userAgent))
+            if (headers != null && headers.TryGetValues(HttpKnownHeaderNames.UserAgent, out IEnumerable<string> values))
             {
-                tunnelRequest.Headers.TryAddWithoutValidation(HttpKnownHeaderNames.UserAgent, userAgent);
+                tunnelRequest.Headers.TryAddWithoutValidation(HttpKnownHeaderNames.UserAgent, values);
             }
 
             HttpResponseMessage tunnelResponse = await _poolManager.SendProxyConnectAsync(tunnelRequest, _proxyUri, cancellationToken).ConfigureAwait(false);
