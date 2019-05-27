@@ -490,7 +490,7 @@ namespace System.Net.Http.Functional.Tests
                 }
                 else
                 {
-                    Assert.DoesNotContain("User-Agent: Mozilla/5.0", headers);
+                    Assert.DoesNotContain("User-Agent:", headers);
                 }
             }));
 
