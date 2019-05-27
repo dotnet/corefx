@@ -108,7 +108,7 @@
   <Target Name="GetCoreCLRILFiles" DependsOnTargets="GetCoreLibPackagePath">
     <ItemGroup>
       <CoreCLRILFiles Condition="'$(CoreCLROverridePath)' == ''" Include="$(_CoreLibPackagePath)/**/il/*.*" />
-      <CoreCLRILFiles Condition="'$(CoreCLROverridePath)' != ''" Include="$(CoreCLROverridePath)/IL/*.*" />
+      <CoreCLRILFiles Condition="'$(CoreCLROverridePath)' != ''" Include="$(CoreCLROverridePath)/*.*" />
     </ItemGroup>
     <Error Condition="'@(CoreCLRILFiles)' == ''" Text="Could not locate CoreCLR IL files." />
   </Target>
