@@ -4,7 +4,7 @@
   <PropertyGroup>
     <EnableFullCoverageReportTarget>true</EnableFullCoverageReportTarget>
     <GenerateFullCoverageReport>true</GenerateFullCoverageReport>
-    <CoverageReportInputPath>$(TestWorkingDir)**/coverage.xml</CoverageReportInputPath>
+    <CoverageReportInputPath>$(ArtifactsBinDir)*.Tests/**/coverage.xml</CoverageReportInputPath>
     <CoverageReportDir>$(ArtifactsDir)coverage</CoverageReportDir>
     <!-- For UAP we are using an APPX that is registered with a unique ID. Because of that we need to run tests sequentially -->
     <SerializeProjects Condition="'$(BuildingUAPVertical)' == 'true' or '$(Coverage)' == 'true'">true</SerializeProjects>
