@@ -208,15 +208,30 @@ namespace System.Tests
         }
     }
 
-    public class ExceptionDerivedTests : Exception
+    public class DerivedException : Exception
     {
+        public override string ToString()
+        {
+            return "DerivedException.ToString()";
+        }
+
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Exception_SerializeObjectState()
         {
-            var excp = new ExceptionDerivedTests();
+            var excp = new DerivedException();
             Assert.Throws<PlatformNotSupportedException>(() => excp.SerializeObjectState += (exception, eventArgs) => eventArgs.AddSerializedState(null));
             Assert.Throws<PlatformNotSupportedException>(() => excp.SerializeObjectState -= (exception, eventArgs) => eventArgs.AddSerializedState(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void Exception_OverriddenToStringOnInnerException()
+        {
+            var inner = new DerivedException();
+            var excp = new Exception("msg", inner);
+
+            Assert.Contains("DerivedException.ToString()", excp.ToString());
         }
     }
 
