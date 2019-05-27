@@ -360,7 +360,7 @@ namespace System.Buffers.Text
             Vector256<sbyte> lutHi = ReadVector<Vector256<sbyte>>(s_avxDecodeLutHi);
             Vector256<sbyte> lutLo = ReadVector<Vector256<sbyte>>(s_avxDecodeLutLo);
             Vector256<sbyte> lutShift = ReadVector<Vector256<sbyte>>(s_avxDecodeLutShift);
-            Vector256<sbyte> mask2F = ReadVector<Vector256<sbyte>>(s_avxDecodeMask2F);
+            Vector256<sbyte> mask2F = Vector256.Create((sbyte)'/');
             Vector256<sbyte> mergeConstant0 = Vector256.Create(0x01400140).AsSByte();
             Vector256<short> mergeConstant1 = Vector256.Create(0x00011000).AsInt16();
             Vector256<sbyte> packBytesInLaneMask = ReadVector<Vector256<sbyte>>(s_avxDecodePackBytesInLaneMask);
@@ -506,7 +506,7 @@ namespace System.Buffers.Text
             Vector128<sbyte> lutHi = ReadVector<Vector128<sbyte>>(s_sseDecodeLutHi);
             Vector128<sbyte> lutLo = ReadVector<Vector128<sbyte>>(s_sseDecodeLutLo);
             Vector128<sbyte> lutShift = ReadVector<Vector128<sbyte>>(s_sseDecodeLutShift);
-            Vector128<sbyte> mask2F = ReadVector<Vector128<sbyte>>(s_sseDecodeMask2F);
+            Vector128<sbyte> mask2F = Vector128.Create((sbyte)'/');
             Vector128<sbyte> mergeConstant0 = Vector128.Create(0x01400140).AsSByte();
             Vector128<short> mergeConstant1 = Vector128.Create(0x00011000).AsInt16();
             Vector128<sbyte> packBytesMask = ReadVector<Vector128<sbyte>>(s_sseDecodePackBytesMask);
@@ -655,13 +655,6 @@ namespace System.Buffers.Text
             0, 0, 0, 0
         };
 
-        private static ReadOnlySpan<sbyte> s_sseDecodeMask2F => new sbyte[] {	// ASCII: /
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F
-        };
-
         private static ReadOnlySpan<sbyte> s_avxDecodePackBytesInLaneMask => new sbyte[] {
             2, 1, 0, 6,
             5, 4, 10, 9,
@@ -682,17 +675,6 @@ namespace System.Buffers.Text
             6, 0, 0, 0,
             -1, -1, -1, -1,
             -1, -1, -1, -1
-        };
-
-        private static ReadOnlySpan<sbyte> s_avxDecodeMask2F => new sbyte[] {	// ASCII: /
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F,
-            0x2F, 0x2F, 0x2F, 0x2F
         };
 
         private static ReadOnlySpan<sbyte> s_avxDecodeLutLo => new sbyte[] {
