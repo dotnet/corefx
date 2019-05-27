@@ -1036,15 +1036,13 @@ FOR_ALL_OPENSSL_FUNCTIONS
 #define X509_get_X509_PUBKEY local_X509_get_X509_PUBKEY
 #define X509_get_version local_X509_get_version
 #define X509_up_ref local_X509_up_ref
-
-#if OPENSSL_VERSION_NUMBER < OPENSSL_VERSION_1_0_2_RTM
-
-#define X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS 4
-
 #define X509_check_host local_X509_check_host
 #define X509_STORE_CTX_get0_store local_X509_STORE_CTX_get0_store
 
+#ifndef X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS
+#define X509_CHECK_FLAG_NO_PARTIAL_WILDCARDS 4
 #endif
+
 
 // Restore the old names for RENAMED_FUNCTION functions.
 #define EVP_MD_CTX_free EVP_MD_CTX_destroy
