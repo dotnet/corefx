@@ -11,6 +11,10 @@
     <Compile Include="BufferFactory.cs" />
     <Compile Include="BufferSegment.cs" />
     <Compile Include="FixedSizedBufferWriter.cs" />
+    <Compile Include="Imported\CamelCaseTests.cs" />
+    <Compile Include="Imported\EnumConverterTests.cs" />
+    <Compile Include="Imported\ImmutableCollectionsTests.cs" />
+    <Compile Include="Imported\JsonSerializerTests.cs" />
     <Compile Include="InvalidBufferWriter.cs" />
     <Compile Include="JsonDateTimeTestData.cs" />
     <Compile Include="JsonDocumentTests.cs" />
@@ -26,7 +30,9 @@
     <Compile Include="Serialization\Array.WriteTests.cs" />
     <Compile Include="Serialization\CacheTests.cs" />
     <Compile Include="Serialization\CamelCaseUnitTests.cs" />
+    <Compile Include="Imported\CustomObjectConverterTests.cs" />
     <Compile Include="Serialization\CyclicTests.cs" />
+    <Compile Include="Imported\DateTimeConverterTests.cs" />
     <Compile Include="Serialization\DictionaryTests.cs" />
     <Compile Include="Serialization\EnumTests.cs" />
     <Compile Include="Serialization\ExtensionDataTests.cs" />
