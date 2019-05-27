@@ -56,8 +56,8 @@
     <!-- Test data -->
     <SystemIOCompressionTestDataPackageVersion>1.0.8</SystemIOCompressionTestDataPackageVersion>
     <SystemIOPackagingTestDataPackageVersion>1.0.1</SystemIOPackagingTestDataPackageVersion>
-    <SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>1.0.3</SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>
-    <SystemNetTestDataPackageVersion>1.0.2</SystemNetTestDataPackageVersion>
+    <SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>1.0.4</SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>
+    <SystemNetTestDataPackageVersion>1.0.3</SystemNetTestDataPackageVersion>
     <SystemComponentModelTypeConverterTestDataPackageVersion>1.0.1</SystemComponentModelTypeConverterTestDataPackageVersion>
     <SystemDrawingCommonTestDataPackageVersion>1.0.9</SystemDrawingCommonTestDataPackageVersion>
     <SystemWindowsExtensionsTestDataPackageVersion>1.0.2</SystemWindowsExtensionsTestDataPackageVersion>
