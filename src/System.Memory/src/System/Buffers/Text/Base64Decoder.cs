@@ -365,7 +365,6 @@ namespace System.Buffers.Text
             Vector256<short> mergeConstant1 = Vector256.Create(0x00011000).AsInt16();
             Vector256<sbyte> packBytesInLaneMask = ReadVector<Vector256<sbyte>>(s_avxDecodePackBytesInLaneMask);
             Vector256<int> packLanesControl = ReadVector<Vector256<sbyte>>(s_avxDecodePackLanesControl).AsInt32();
-            Vector256<sbyte> zero = Vector256<sbyte>.Zero;
 
             byte* src = srcBytes;
             byte* dest = destBytes;
@@ -381,8 +380,7 @@ namespace System.Buffers.Text
                 Vector256<sbyte> hi = Avx2.Shuffle(lutHi, hiNibbles);
                 Vector256<sbyte> lo = Avx2.Shuffle(lutLo, loNibbles);
 
-                // https://github.com/dotnet/coreclr/issues/21247
-                if (Avx2.MoveMask(Avx2.CompareGreaterThan(Avx2.And(lo, hi), zero)) != 0)
+                if (!Avx.TestZ(lo, hi))
                     break;
 
                 Vector256<sbyte> eq2F = Avx2.CompareEqual(str, mask2F);
