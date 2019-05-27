@@ -450,9 +450,11 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UAP HTTP stack doesn't support .Proxy property")]
-        [Fact]
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
         [OuterLoop("Uses external server")]
-        public async Task ProxyTunnelRequest_UserAgentHeaderAdded()
+        public async Task ProxyTunnelRequest_UserAgentHeaderAdded(bool addUserAgentHeader)
         {
             if (!UseSocketsHttpHandler)
             {
@@ -469,7 +471,10 @@ namespace System.Net.Http.Functional.Tests
                 {
                     handler.Proxy = new WebProxy(proxyUri);
                     handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
-                    client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
+                    if (addUserAgentHeader)
+                    {
+                        client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
+                    }
                     try
                     { await client.GetAsync(addressUri); }
                     catch { }
@@ -479,31 +484,14 @@ namespace System.Net.Http.Functional.Tests
                 connectionAccepted = true;
                 List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
                 Assert.Contains($"CONNECT {Configuration.Http.SecureHost}:443 HTTP/1.1", headers);
-                Assert.Contains("User-Agent: Mozilla/5.0", headers);
-            }));
-
-            Assert.True(connectionAccepted);
-
-            connectionAccepted = false;
-
-            // We retry without UserAgent to be sure that we flow header per CONNECT
-            await LoopbackServer.CreateClientAndServerAsync(async proxyUri =>
-            {
-                using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                if (addUserAgentHeader)
                 {
-                    handler.Proxy = new WebProxy(proxyUri);
-                    handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
-                    try
-                    { await client.GetAsync(addressUri); }
-                    catch { }
+                    Assert.Contains("User-Agent: Mozilla/5.0", headers);
                 }
-            }, server => server.AcceptConnectionAsync(async connection =>
-            {
-                connectionAccepted = true;
-                List<string> headers = await connection.ReadRequestHeaderAndSendResponseAsync();
-                Assert.Contains($"CONNECT {Configuration.Http.SecureHost}:443 HTTP/1.1", headers);
-                Assert.DoesNotContain("User-Agent:", headers);
+                else
+                {
+                    Assert.DoesNotContain("User-Agent: Mozilla/5.0", headers);
+                }
             }));
 
             Assert.True(connectionAccepted);
