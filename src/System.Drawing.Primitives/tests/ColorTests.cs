@@ -497,28 +497,40 @@ namespace System.Drawing.Primitives.Tests
         public void UserPreferenceChangingEventTest()
         {
             int element = 12; // Win32SystemColors.AppWorkSpace.
-            Color color = System.Drawing.SystemColors.AppWorkspace;
+            Color oldColor = System.Drawing.SystemColors.AppWorkspace;
 
             // A call to ToArgb is necessary before changing the system colors because it initializes the knownColorTable.
-            int oldColor = color.ToArgb();
+            int oldColorArgb = oldColor.ToArgb();
+            int oldColorAbgr = GetColorRefValue(oldColor);
+
+            Color newColor = oldColor != Color.Gold ? Color.Gold : Color.Silver;
+            int newColorArgb = newColor.ToArgb();
+            int newColorAbgr = GetColorRefValue(newColor);
+
+            Assert.NotEqual(newColorArgb, oldColorArgb);
 
             try
             {
-                // choosing a random int instead of a defined color to avoid failures for users with that defined color as system color.
-                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { 89 }));
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { newColorAbgr }));
 
                 RetryHelper.Execute(() =>
                 {
-                    Assert.NotEqual(oldColor, color.ToArgb());
+                    Assert.Equal(newColorArgb, oldColor.ToArgb());
                 });
             }
             finally
             {
-                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { oldColor }));
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { oldColorAbgr }));
             }
         }
 
-        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", SetLastError = true)]
         private static extern int SetSysColors(int cElements, int[] lpaElements, int[] lpaRgbValues);
+
+        private static int GetColorRefValue(Color color)
+        {
+            // The COLORREF value has the following hexadecimal form: 0x00bbggrr.
+            return color.B << 16 | color.G << 8 | color.R;
+        }
     }
 }
