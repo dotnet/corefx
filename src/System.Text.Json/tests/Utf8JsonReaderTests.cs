@@ -618,6 +618,157 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [InlineData("[]", 1, 2)]
+        [InlineData("[1, 2, 3, 4, 5]", 1, 15)]
+        [InlineData("{\"foo\":1}", 2, 8)]
+        [InlineData("{\"foo\":[1, 2, 3]}", 2, 16)]
+        public static void BasicSkipTest(string jsonString, int readCount, int expectedConsumed)
+        {
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: true, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                reader.Skip();
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: true, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                Assert.True(reader.TrySkip());
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: false, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                Assert.True(reader.TrySkip());
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+        }
+
+        [Theory]
+        [InlineData("[", 1, 1)]
+        [InlineData("[1, 2, 3, 4, 5", 1, 1)]
+        [InlineData("{\"foo\":1", 2, 7)]
+        [InlineData("{\"foo\":[1, 2, 3", 2, 7)]
+        public static void BasicTrySkipIncomplete(string jsonString, int readCount, int expectedConsumed)
+        {
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: true, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                try
+                {
+                    reader.Skip();
+                    Assert.True(false, "Expected JsonException was not thrown for incomplete JSON payload when skipping.");
+                }
+                catch (JsonException) { }
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: true, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                try
+                {
+                    reader.TrySkip();
+                    Assert.True(false, "Expected JsonException was not thrown for incomplete JSON payload when skipping.");
+                }
+                catch (JsonException) { }
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: false, state: default);
+                for (int i = 0; i < readCount; i++)
+                {
+                    reader.Read();
+                }
+
+                Assert.False(reader.TrySkip());
+                Assert.Equal(expectedConsumed, reader.BytesConsumed);
+            }
+        }
+
+        [Fact]
+        public static void TrySkipOnValuePartialWithWhiteSpace()
+        {
+            string jsonString = "[ 1, ";
+
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: true, state: default);
+                reader.Read();
+                reader.Read();
+                Assert.Equal(3, reader.BytesConsumed);
+                Assert.True(reader.TrySkip());
+                Assert.Equal(3, reader.BytesConsumed);
+
+                try
+                {
+                    reader.Read();
+                    Assert.True(false, "Expected JsonException was not thrown for incomplete JSON payload when reading.");
+                }
+                catch (JsonException) { }
+
+                Assert.Equal(5, reader.BytesConsumed);  // After exception, state is not restored.
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: true, state: default);
+                reader.Read();
+                Assert.Equal(1, reader.BytesConsumed);
+
+                try
+                {
+                    reader.TrySkip();
+                    Assert.True(false, "Expected JsonException was not thrown for incomplete JSON payload when skipping.");
+                }
+                catch (JsonException) { }
+
+                Assert.Equal(5, reader.BytesConsumed);  // After exception, state is not restored.
+            }
+            {
+                var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonString), isFinalBlock: false, state: default);
+                reader.Read();
+                Assert.Equal(1, reader.BytesConsumed);
+                Assert.False(reader.TrySkip());
+                Assert.Equal(1, reader.BytesConsumed);
+            }
+        }
+
+        [Fact]
+        public static void TrySkipPartialAndContinueWithWhiteSpace()
+        {
+            string jsonString = "[ 1, 2]";
+            byte[] utf8Data = Encoding.UTF8.GetBytes(jsonString);
+
+            // "[ 1, "
+            var reader = new Utf8JsonReader(utf8Data.AsSpan(0, 5), isFinalBlock: false, state: default);
+            reader.Read();
+            Assert.Equal(1, reader.BytesConsumed);
+            Assert.False(reader.TrySkip());
+            Assert.Equal(1, reader.BytesConsumed);
+
+            // " 1, 2]"
+            int previousConsumed = (int)reader.BytesConsumed;
+            reader = new Utf8JsonReader(utf8Data.AsSpan(previousConsumed), isFinalBlock: true, reader.CurrentState);
+            Assert.True(reader.TrySkip());
+            Assert.Equal(utf8Data.Length - previousConsumed, reader.BytesConsumed);
+        }
+
+        [Theory]
         [MemberData(nameof(TrySkipValues))]
         public static void TestTrySkipPartial(string jsonString, JsonTokenType lastToken)
         {

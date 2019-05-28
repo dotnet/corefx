@@ -290,7 +290,10 @@ namespace System.Text.Json
 
             if (TokenType == JsonTokenType.PropertyName)
             {
-                Read();
+                bool result = Read();
+                // Since _isFinalBlock == true here, and the JSON token is not a primitive value or comment.
+                // Read() is guaranteed to return true OR throw for invalid/incomplete data.
+                Debug.Assert(result);
             }
 
             if (TokenType == JsonTokenType.StartObject || TokenType == JsonTokenType.StartArray)
@@ -328,41 +331,36 @@ namespace System.Text.Json
 
         private bool TrySkipHelper()
         {
-            Utf8JsonReader restore = default;
-            bool createdCopy = false;
-            bool result = true;
+            Debug.Assert(!_isFinalBlock);
+
+            Utf8JsonReader restore = this;
 
             if (TokenType == JsonTokenType.PropertyName)
             {
-                restore = this;
-                createdCopy = true;
-                result = Read();
+                if (!Read())
+                {
+                    goto Restore;
+                }
             }
 
-            if (result && (TokenType == JsonTokenType.StartObject || TokenType == JsonTokenType.StartArray))
+            if (TokenType == JsonTokenType.StartObject || TokenType == JsonTokenType.StartArray)
             {
-                if (!createdCopy)
-                {
-                    restore = this;
-                    createdCopy = true;
-                }
-
                 int depth = CurrentDepth;
                 do
                 {
-                    result = Read();
+                    if (!Read())
+                    {
+                        goto Restore;
+                    }
                 }
-                while (result && depth < CurrentDepth);
+                while (depth < CurrentDepth);
             }
 
-            if (!result)
-            {
-                Debug.Assert(createdCopy);
-                Debug.Assert(!_isFinalBlock);
-                this = restore;
-            }
+            return true;
 
-            return result;
+        Restore:
+            this = restore;
+            return false;
         }
 
         /// <summary>
