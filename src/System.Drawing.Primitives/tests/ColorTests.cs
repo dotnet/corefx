@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Threading;
 using Xunit;
 
 namespace System.Drawing.Primitives.Tests
@@ -491,5 +493,33 @@ namespace System.Drawing.Primitives.Tests
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.Aquamarine);
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.FromArgb(4, 3, 2, 1));
         }
+
+        [Fact]
+        public void UserPreferenceChangingEventTest()
+        {
+            int element = 12; // Win32SystemColors.AppWorkSpace.
+            Color color = System.Drawing.SystemColors.AppWorkspace;
+
+            // A call to ToArgb is necessary before changing the system colors because it initializes the knownColorTable.
+            int oldColor = color.ToArgb();
+
+            try
+            {
+                // choosing a random int instead of a defined color to avoid failures for users with that defined color as system color.
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { 89 }));
+
+                RetryHelper.Execute(() =>
+                {
+                    Assert.NotEqual(oldColor, color.ToArgb());
+                });
+            }
+            finally
+            {
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { oldColor }));
+            }
+        }
+
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        private static extern int SetSysColors(int cElements, int[] lpaElements, int[] lpaRgbValues);
     }
 }
