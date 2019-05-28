@@ -114,12 +114,12 @@ namespace System.Text.Json.Serialization
         }
 
 #if BUILDING_INBOX_LIBRARY
-        internal ValueTask WriteToAsync(Stream destination, CancellationToken cancellationToken)
+        internal ValueTask WriteToStreamAsync(Stream destination, CancellationToken cancellationToken)
         {
             return destination.WriteAsync(WrittenMemory, cancellationToken);
         }
 #else
-        internal Task WriteToAsync(Stream destination, CancellationToken cancellationToken)
+        internal Task WriteToStreamAsync(Stream destination, CancellationToken cancellationToken)
         {
             return destination.WriteAsync(_rentedBuffer, 0, _index, cancellationToken);
         }

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,7 +59,7 @@ namespace System.Text.Json.Serialization
                     writer.WriteNullValue();
                     writer.Flush();
 
-                    await bufferWriter.WriteToAsync(utf8Json, cancellationToken).ConfigureAwait(false);
+                    await bufferWriter.WriteToStreamAsync(utf8Json, cancellationToken).ConfigureAwait(false);
 
                     return;
                 }
@@ -84,7 +83,7 @@ namespace System.Text.Json.Serialization
                     isFinalBlock = Write(writer, flushThreshold, options, ref state);
                     writer.Flush();
 
-                    await bufferWriter.WriteToAsync(utf8Json, cancellationToken).ConfigureAwait(false);
+                    await bufferWriter.WriteToStreamAsync(utf8Json, cancellationToken).ConfigureAwait(false);
 
                     bufferWriter.Clear();
                 } while (!isFinalBlock);
