@@ -1277,65 +1277,81 @@ namespace System.Net.WebSockets
         {
             Debug.Assert(maskIndex < sizeof(int));
 
-            int maskShift = maskIndex * 8;
-            int shiftedMask = (int)(((uint)mask >> maskShift) | ((uint)mask << (32 - maskShift)));
-
-            // Try to use SIMD.  We can if the number of bytes we're trying to mask is at least as much
-            // as the width of a vector and if the width is an even multiple of the mask.
-            if (Vector.IsHardwareAccelerated &&
-                Vector<byte>.Count % sizeof(int) == 0 &&
-                toMask.Length >= Vector<byte>.Count)
+            fixed (byte* toMaskBeg = toMask)
             {
-                Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(shiftedMask));
-                Span<Vector<byte>> toMaskVector = MemoryMarshal.Cast<byte, Vector<byte>>(toMask);
-                for (int i = 0; i < toMaskVector.Length; i++)
+                byte* toMaskPtr = toMaskBeg;
+                byte* toMaskEnd = toMaskBeg + toMask.Length;
+                byte* maskPtr = (byte*)&mask;
+
+                // use SIMD if possible.
+
+                if (Vector.IsHardwareAccelerated && Vector<byte>.Count % sizeof(int) == 0 && toMask.Length >= Vector<byte>.Count)
                 {
-                    toMaskVector[i] ^= maskVector;
-                }
+                    // align our pointer to Vector<byte>.Count
 
-                // Fall through to processing any remaining bytes that were less than a vector width.
-                toMask = toMask.Slice(Vector<byte>.Count * toMaskVector.Length);
-            }
-
-            // If there are any bytes remaining (either we couldn't use vectors, or the count wasn't
-            // an even multiple of the vector width), process them without vectors.
-            int count = toMask.Length;
-            if (count > 0)
-            {
-                fixed (byte* toMaskPtr = &MemoryMarshal.GetReference(toMask))
-                {
-                    byte* p = toMaskPtr;
-
-                    // Try to go an int at a time if the remaining data is 4-byte aligned and there's enough remaining.
-                    if (((long)p % sizeof(int)) == 0)
+                    while ((long)toMaskPtr % Vector<byte>.Count != 0)
                     {
-                        while (count >= sizeof(int))
-                        {
-                            count -= sizeof(int);
-                            *((int*)p) ^= shiftedMask;
-                            p += sizeof(int);
-                        }
-
-                        // We don't need to update the maskIndex, as its mod-4 value won't have changed.
-                        // `p` points to the remainder.
+                        *toMaskPtr++ ^= maskPtr[maskIndex];
+                        maskIndex = (maskIndex + 1) & 3;
                     }
 
-                    // Process any remaining data a byte at a time.
-                    if (count > 0)
+                    // use SIMD.
+
+                    if (toMaskEnd - toMaskPtr >= Vector<byte>.Count)
                     {
-                        byte* maskPtr = (byte*)&mask;
-                        byte* end = p + count;
-                        while (p < end)
+                        Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(RollRight(mask, maskIndex)));
+
+                        do
                         {
-                            *p++ ^= maskPtr[maskIndex];
-                            maskIndex = (maskIndex + 1) & 3;
+                            *(Vector<byte>*)toMaskPtr ^= maskVector;
+                            toMaskPtr += Vector<byte>.Count;
                         }
+                        while (toMaskEnd - toMaskPtr >= Vector<byte>.Count);
                     }
+                }
+
+                // process remaining data (or all, if couldn't use SIMD) 4 bytes at a time.
+
+                if (toMaskEnd - toMaskPtr >= sizeof(int))
+                {
+                    // align our pointer to sizeof(int)
+
+                    while ((long)toMaskPtr % sizeof(int) != 0)
+                    {
+                        *toMaskPtr++ ^= maskPtr[maskIndex];
+                        maskIndex = (maskIndex + 1) & 3;
+                    }
+
+                    // use int.
+
+                    int rolledMask = RollRight(mask, maskIndex);
+
+                    while (toMaskEnd - toMaskPtr >= sizeof(int))
+                    {
+                        *(int*)toMaskPtr ^= rolledMask;
+                        toMaskPtr += sizeof(int);
+                    }
+                }
+
+                // do any remaining data a byte at a time.
+
+                while (toMaskPtr != toMaskEnd)
+                {
+                    *toMaskPtr++ ^= maskPtr[maskIndex];
+                    maskIndex = (maskIndex + 1) & 3;
                 }
             }
 
-            // Return the updated index.
             return maskIndex;
+        }
+
+        /// <summary>
+        /// Rolls an integer <paramref name="mask"/> to the right by <paramref name="maskIndex"/> bytes. E.g. RollRight(0x11223344, 1) = 0x44112233.
+        /// </summary>
+        private static int RollRight(int mask, int maskIndex)
+        {
+            int maskShift = maskIndex * 8;
+            return (int)(((uint)mask >> maskShift) | ((uint)mask << (32 - maskShift)));
         }
 
         /// <summary>Aborts the websocket and throws an exception if an existing operation is in progress.</summary>
