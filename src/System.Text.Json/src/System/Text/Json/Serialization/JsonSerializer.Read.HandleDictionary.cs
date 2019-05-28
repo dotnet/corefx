@@ -26,10 +26,10 @@ namespace System.Text.Json.Serialization
             {
                 Debug.Assert(state.Current.IsDictionary);
 
-                JsonClassInfo classInfoTemp = state.Current.JsonClassInfo;
                 state.Push();
-                state.Current.JsonClassInfo = classInfoTemp.ElementClassInfo;
+                state.Current.JsonClassInfo = jsonPropertyInfo.ElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
+                state.Current.PropertyInitialized = true;
 
                 ClassType classType = state.Current.JsonClassInfo.ClassType;
                 if (classType == ClassType.Value &&
@@ -50,7 +50,7 @@ namespace System.Text.Json.Serialization
             if (jsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue) == null)
             {
                 // Create the dictionary.
-                JsonClassInfo dictionaryClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
+                JsonClassInfo dictionaryClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 IDictionary value = (IDictionary)dictionaryClassInfo.CreateObject();
                 if (value != null)
                 {

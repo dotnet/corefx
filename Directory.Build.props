@@ -116,12 +116,6 @@
     <SourceDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', 'src'))</SourceDir>
   </PropertyGroup>
 
-  <!-- workaround https://github.com/dotnet/sdk/issues/2288
-       remove once we have a new CLI -->
-  <PropertyGroup>
-    <LanguageTargets Condition="'$(LanguageTargets)' == '' AND '$(MSBuildProjectExtension)' != '.csproj' AND '$(MSBuildProjectExtension)' != '.vbproj' AND '$(MSBuildProjectExtension)' != '.fsproj'">$(MSBuildToolsPath)\Microsoft.Common.targets</LanguageTargets>
-  </PropertyGroup>
-
   <!-- Enable the analyzers for this repo -->
   <PropertyGroup>
     <EnableAnalyzers Condition="'$(EnableAnalyzers)' == '' AND '$(IsSourceProject)' == 'true'">true</EnableAnalyzers>
@@ -303,9 +297,7 @@
     <Features>strict</Features>
     <WarningLevel>4</WarningLevel>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
-    <!-- We cannot enable deterministic builds yet but we would like to in the future see https://github.com/dotnet/corefx/issues/2003 -->
-    <Deterministic>false</Deterministic>
+    <Deterministic>true</Deterministic>
 
     <!-- We decided to keep this disabled by default to see some history of way have a look at https://github.com/dotnet/corefx/issues/3140 -->
     <CheckForOverflowUnderflow>false</CheckForOverflowUnderflow>
@@ -317,8 +309,8 @@
     <CLSCompliant Condition="'$(CLSCompliant)'==''">true</CLSCompliant>
     <GenFacadesIgnoreBuildAndRevisionMismatch>true</GenFacadesIgnoreBuildAndRevisionMismatch>
 
-    <!-- Warnings -->
-    <NoWarn>$(NoWarn);CS8609</NoWarn> <!-- TODO: Remove CS8609 once https://github.com/dotnet/roslyn/issues/23268 is consumed. -->
+    <!-- TODO-NULLABLE: remove CS8609, CS8610 once we consume roslyn that allows nullable covariant overrides -->
+    <NoWarn>$(NoWarn);CS8609;CS8610</NoWarn>
   </PropertyGroup>
 
   <!-- Set up some common paths -->
@@ -348,8 +340,6 @@
     <NetStandardRefPath>$(RefRootPath)netstandard/</NetStandardRefPath>
     <NetStandard21RefPath>$(RefRootPath)netstandard2.1/</NetStandard21RefPath>
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
-    <!-- Keep in sync with property in eng\Tools.props. -->
-    <GlobalToolsDir>$([MSBuild]::NormalizeDirectory('$(RepoRoot)', '.tools', 'globaltools'))</GlobalToolsDir>
     <IbcOptimizationDataDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'ibc'))</IbcOptimizationDataDir>
     <ILAsmToolPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ilasm'))</ILAsmToolPath>
     <ILLinkDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ILLink'))</ILLinkDir>
@@ -413,14 +403,12 @@
     <DefineConstants Condition="'$(TargetGroup)' == 'uapaot'">$(DefineConstants),uapaot</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netfx'">$(DefineConstants),netfx</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netstandard'">$(DefineConstants),netstandard</DefineConstants>
+    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard1.0'">$(DefineConstants),NETSTANDARD10</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp'">$(DefineConstants),netcoreapp</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp2.0'">$(DefineConstants),netcoreapp20</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup>
-    <!-- Don't run tests if we're building another platform's binaries on Windows -->
-    <SkipTests Condition="'$(SkipTests)' == '' and ('$(OsEnvironment)'=='Windows_NT' and '$(TargetsWindows)'!='true' and '$(OSGroup)'!='AnyOS')">true</SkipTests>
-
     <!-- F5 and debugging support for netcoreapp and netfx inside VS. -->
     <EnableLaunchSettings Condition="'$(EnableLaunchSettings)' == ''AND '$(DotNetBuildFromSource)' != 'true'">true</EnableLaunchSettings>
 
@@ -434,6 +422,7 @@
     <GenerateFullCoverageReport Condition="'$(GenerateFullCoverageReport)' == ''">true</GenerateFullCoverageReport>
   </PropertyGroup>
 
+  <Import Project="$(RepositoryEngineeringDir)references.props" />
   <Import Condition="'$(IsTestProject)' == 'true' AND '$(IsTestSupportProject)' != 'true' AND '$(EnableVSTestReferences)' == 'true'" Project="$(RuntimePath)Microsoft.NET.Test.Sdk.props" />
 
   <ItemDefinitionGroup Condition="'$(IsTestProject)' != 'true'">

@@ -187,6 +187,11 @@ namespace System.Text.Json
             return GetInvalidOperationException(tokenType);
         }
 
+        public static InvalidOperationException GetInvalidOperationException_ExpectedComment(JsonTokenType tokenType)
+        {
+            return GetInvalidOperationException("comment", tokenType);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static InvalidOperationException GetInvalidOperationException_CannotSkipOnPartial()
         {
