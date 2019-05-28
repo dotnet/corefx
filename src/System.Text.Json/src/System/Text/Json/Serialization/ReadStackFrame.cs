@@ -39,15 +39,14 @@ namespace System.Text.Json.Serialization
         // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
         public bool Drain;
 
-        public bool IsImmutableDictionary => DefaultImmutableConverter.TypeIsImmutableDictionary(JsonClassInfo.Type);
+        public bool IsImmutableDictionary => JsonClassInfo.ClassType == ClassType.ImmutableDictionary;
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
 
         public bool IsDictionaryProperty => JsonPropertyInfo != null &&
             !JsonPropertyInfo.IsPropertyPolicy &&
             JsonPropertyInfo.ClassType == ClassType.Dictionary;
         public bool IsImmutableDictionaryProperty => JsonPropertyInfo != null &&
-            !JsonPropertyInfo.IsPropertyPolicy &&
-            DefaultImmutableConverter.TypeIsImmutableDictionary(JsonPropertyInfo.RuntimePropertyType);
+            !JsonPropertyInfo.IsPropertyPolicy && (JsonPropertyInfo.RuntimeClassInfo.ClassType == ClassType.ImmutableDictionary);
 
         public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
 
@@ -90,7 +89,10 @@ namespace System.Text.Json.Serialization
 
         public void InitializeJsonPropertyInfo()
         {
-            if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
+            if (JsonClassInfo.ClassType == ClassType.Value ||
+                JsonClassInfo.ClassType == ClassType.Enumerable ||
+                JsonClassInfo.ClassType == ClassType.Dictionary ||
+                JsonClassInfo.ClassType == ClassType.ImmutableDictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
             }
@@ -160,12 +162,12 @@ namespace System.Text.Json.Serialization
 
         public Type GetElementType()
         {
-            if (IsEnumerableProperty || IsDictionaryProperty)
+            if (IsEnumerableProperty || IsDictionaryProperty || IsImmutableDictionaryProperty)
             {
                 return JsonPropertyInfo.ElementClassInfo.Type;
             }
 
-            if (IsEnumerable || IsDictionary)
+            if (IsEnumerable || IsDictionary || IsImmutableDictionary)
             {
                 return JsonClassInfo.ElementClassInfo.Type;
             }

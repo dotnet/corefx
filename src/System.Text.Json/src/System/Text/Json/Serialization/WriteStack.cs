@@ -51,8 +51,13 @@ namespace System.Text.Json.Serialization
             {
                 Current.PopStackOnEnd = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+            }
+            else if (classType == ClassType.ImmutableDictionary)
+            {
+                Current.PopStackOnEnd = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
 
-                Current.IsImmutableDictionary = DefaultImmutableConverter.TypeIsImmutableDictionary(nextClassInfo.Type);
+                Current.IsImmutableDictionary = true;
             }
             else
             {

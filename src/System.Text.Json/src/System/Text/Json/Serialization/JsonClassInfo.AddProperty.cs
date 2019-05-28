@@ -25,8 +25,8 @@ namespace System.Text.Json.Serialization
         {
             JsonPropertyInfo jsonInfo = CreateProperty(propertyType, propertyType, propertyInfo, classType, options);
 
-            // Convert non-immutable interfaces to concrete types.
-            if (propertyType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary && !DefaultImmutableConverter.TypeIsImmutableDictionary(propertyType))
+            // Convert non-immutable dictionary interfaces to concrete types.
+            if (propertyType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
             {
                 // If a polymorphic case, we have to wait until run-time values are processed.
                 if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
@@ -65,6 +65,7 @@ namespace System.Text.Json.Serialization
             {
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
+                case ClassType.ImmutableDictionary:
                 case ClassType.Unknown:
                     collectionElementType = GetElementType(runtimePropertyType, parentClassType, propertyInfo);
                     break;

@@ -11,7 +11,7 @@ namespace System.Text.Json.Serialization
     {
         private static void HandleStartObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary);
+            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingImmutableDictionary);
 
             if (state.Current.IsProcessingEnumerable)
             {
@@ -42,7 +42,7 @@ namespace System.Text.Json.Serialization
 
         private static void HandleEndObject(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            Debug.Assert(!state.Current.IsProcessingDictionary);
+            Debug.Assert(!state.Current.IsProcessingDictionary && !state.Current.IsProcessingImmutableDictionary);
 
             state.Current.JsonClassInfo.UpdateSortedPropertyCache(ref state.Current);
 

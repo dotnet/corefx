@@ -188,18 +188,24 @@ namespace System.Text.Json.Serialization
             }
             else if (state.Current.IsDictionary || (state.Current.IsDictionaryProperty && !setPropertyDirectly))
             {
-                object dictionaryObject = null;
-                if (state.Current.ReturnValue != null)
-                {
-                    dictionaryObject = state.Current.ReturnValue;
-                }
-                else if (state.Current.TempDictionaryValues != null)
-                {
-                    dictionaryObject = state.Current.TempDictionaryValues;
-                }
-                Debug.Assert(dictionaryObject != null);
+                Debug.Assert(state.Current.ReturnValue != null);
+                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
 
-                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(dictionaryObject);
+                string key = state.Current.KeyName;
+                Debug.Assert(!string.IsNullOrEmpty(key));
+                if (!dictionary.Contains(key))
+                {
+                    dictionary.Add(key, value);
+                }
+                else
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.PropertyPath);
+                }
+            }
+            else if (state.Current.IsImmutableDictionary || (state.Current.IsImmutableDictionaryProperty && !setPropertyDirectly))
+            {
+                Debug.Assert(state.Current.TempDictionaryValues != null);
+                IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.TempDictionaryValues);
 
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
@@ -261,18 +267,25 @@ namespace System.Text.Json.Serialization
             }
             else if (state.Current.IsProcessingDictionary)
             {
-                IDictionary<string, TProperty> dictionary = null;
-                if (state.Current.TempDictionaryValues != null)
-                {
-                    dictionary = (IDictionary<string, TProperty>)state.Current.TempDictionaryValues;
-                }
-                else if (state.Current.ReturnValue != null)
-                {
-                    dictionary = (IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
-                }
+                Debug.Assert(state.Current.ReturnValue != null);
+                IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.ReturnValue);
 
-                Debug.Assert(dictionary != null);
-                
+                string key = state.Current.KeyName;
+                Debug.Assert(!string.IsNullOrEmpty(key));
+                if (!dictionary.ContainsKey(key)) // The IDictionary.TryAdd extension method is not available in netstandard.
+                {
+                    dictionary.Add(key, value);
+                }
+                else
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.PropertyPath);
+                }
+            }
+            else if (state.Current.IsProcessingImmutableDictionary)
+            {
+                Debug.Assert(state.Current.TempDictionaryValues != null);
+                IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.TempDictionaryValues;
+
                 string key = state.Current.KeyName;
                 Debug.Assert(!string.IsNullOrEmpty(key));
                 if (!dictionary.ContainsKey(key)) // The IDictionary.TryAdd extension method is not available in netstandard.

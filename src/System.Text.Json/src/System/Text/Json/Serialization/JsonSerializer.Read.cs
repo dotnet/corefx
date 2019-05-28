@@ -52,7 +52,7 @@ namespace System.Text.Json.Serialization
                                 continue;
                             }
                         }
-                        else if (state.Current.IsProcessingDictionary)
+                        else if (state.Current.IsProcessingDictionary || state.Current.IsProcessingImmutableDictionary)
                         {
                             HandleStartDictionary(options, ref reader, ref state);
                         }
@@ -67,7 +67,7 @@ namespace System.Text.Json.Serialization
                         {
                             state.Pop();
                         }
-                        else if (state.Current.IsProcessingDictionary)
+                        else if (state.Current.IsProcessingDictionary || state.Current.IsProcessingImmutableDictionary)
                         {
                             HandleEndDictionary(options, ref reader, ref state);
                         }

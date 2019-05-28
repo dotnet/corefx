@@ -73,7 +73,7 @@ namespace System.Text.Json.Serialization
             {
                 if (_elementClassInfo == null && _elementType != null)
                 {
-                    Debug.Assert(ClassType == ClassType.Enumerable || ClassType == ClassType.Dictionary);
+                    Debug.Assert(ClassType == ClassType.Enumerable || ClassType == ClassType.Dictionary || ClassType == ClassType.ImmutableDictionary);
                     _elementClassInfo = Options.GetOrAddClass(_elementType);
                 }
 
@@ -205,7 +205,7 @@ namespace System.Text.Json.Serialization
 
         private void DetermineSerializationCapabilities()
         {
-            if (ClassType != ClassType.Enumerable && ClassType != ClassType.Dictionary)
+            if (ClassType != ClassType.Enumerable && ClassType != ClassType.Dictionary && ClassType != ClassType.ImmutableDictionary)
             {
                 // We serialize if there is a getter + not ignoring readonly properties.
                 ShouldSerialize = HasGetter && (HasSetter || !Options.IgnoreReadOnlyProperties);
@@ -226,14 +226,6 @@ namespace System.Text.Json.Serialization
                     {
                         ShouldDeserialize = true;
                     }
-
-                    if (ClassType == ClassType.Dictionary &&
-                    ShouldDeserialize && DefaultImmutableConverter.TypeIsImmutableDictionary(RuntimePropertyType))
-                    {
-                        DefaultImmutableConverter.RegisterImmutableCollectionType(
-                            RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, parentType: null, memberInfo: null), Options);
-                        EnumerableConverter = s_jsonImmutableConverter;
-                    }
                 }
                 //else if (HasSetter)
                 //{
@@ -247,6 +239,12 @@ namespace System.Text.Json.Serialization
                     if (RuntimePropertyType.IsArray)
                     {
                         EnumerableConverter = s_jsonArrayConverter;
+                    }
+                    else if (ClassType == ClassType.ImmutableDictionary)
+                    {
+                        DefaultImmutableConverter.RegisterImmutableDictionary(
+                            RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, parentType: null, memberInfo: null), Options);
+                        EnumerableConverter = s_jsonImmutableConverter;
                     }
                     else if (typeof(IEnumerable).IsAssignableFrom(RuntimePropertyType))
                     {
@@ -270,7 +268,7 @@ namespace System.Text.Json.Serialization
                             RuntimePropertyType.FullName.StartsWith(DefaultImmutableConverter.ImmutableNamespace) &&
                             RuntimePropertyType.GetGenericArguments().Length == 1)
                         {
-                            DefaultImmutableConverter.RegisterImmutableCollectionType(RuntimePropertyType, elementType, Options);
+                            DefaultImmutableConverter.RegisterImmutableCollection(RuntimePropertyType, elementType, Options);
                             EnumerableConverter = s_jsonImmutableConverter;
                         }
                     }

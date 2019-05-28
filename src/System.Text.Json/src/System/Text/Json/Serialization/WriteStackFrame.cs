@@ -46,7 +46,11 @@ namespace System.Text.Json.Serialization
             if (JsonClassInfo.ClassType == ClassType.Value || JsonClassInfo.ClassType == ClassType.Enumerable || JsonClassInfo.ClassType == ClassType.Dictionary)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
-                IsImmutableDictionary = DefaultImmutableConverter.TypeIsImmutableDictionary(type);
+            }
+            else if (JsonClassInfo.ClassType == ClassType.ImmutableDictionary)
+            {
+                JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
+                IsImmutableDictionary = true;
             }
         }
 
@@ -81,7 +85,7 @@ namespace System.Text.Json.Serialization
                 Debug.Assert(writeNull == false);
 
                 // Write start without a property name.
-                if (classType == ClassType.Object || classType == ClassType.Dictionary)
+                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.ImmutableDictionary)
                 {
                     writer.WriteStartObject();
                     StartObjectWritten = true;
@@ -100,7 +104,9 @@ namespace System.Text.Json.Serialization
             {
                 writer.WriteNull(propertyName);
             }
-            else if (classType == ClassType.Object || classType == ClassType.Dictionary)
+            else if (classType == ClassType.Object ||
+                classType == ClassType.Dictionary ||
+                classType == ClassType.ImmutableDictionary)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;

@@ -95,7 +95,19 @@ namespace System.Text.Json.Serialization
             // A property that returns a dictionary keeps the same stack frame.
             if (jsonPropertyInfo.ClassType == ClassType.Dictionary)
             {
-                state.Current.IsImmutableDictionaryProperty = DefaultImmutableConverter.TypeIsImmutableDictionary(jsonPropertyInfo.RuntimePropertyType);
+                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                if (endOfEnumerable)
+                {
+                    state.Current.NextProperty();
+                }
+
+                return endOfEnumerable;
+            }
+
+            // A property that returns an immutable dictionary keeps the same stack frame.
+            if (jsonPropertyInfo.ClassType == ClassType.ImmutableDictionary)
+            {
+                state.Current.IsImmutableDictionaryProperty = true;
 
                 bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
                 if (endOfEnumerable)

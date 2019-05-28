@@ -112,7 +112,7 @@ namespace System.Text.Json.Serialization.Converters
             return s_createRangeDelegates.TryGetValue(delegateKey, out createRangeDelegate) && createRangeDelegate != null;
         }
 
-        internal static void RegisterImmutableCollectionType(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
+        internal static void RegisterImmutableCollection(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
         {
             // Get a unique identifier for a delegate which will point to the appropiate CreateRange method.
             string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out Type underlyingType, out string constructingTypeName);
@@ -128,30 +128,32 @@ namespace System.Text.Json.Serialization.Converters
 
             // Create a delegate which will point to the CreateRange method.
             object createRangeDelegate;
-            if (TypeIsImmutableDictionary(immutableCollectionType))
-            {
-                createRangeDelegate = options.ClassMaterializerStrategy.ImmutableDictionaryCreateRange(constructingType, elementType);
-            }
-            else
-            {
-                createRangeDelegate = options.ClassMaterializerStrategy.ImmutableCollectionCreateRange(constructingType, elementType);
-            }
+            createRangeDelegate = options.ClassMaterializerStrategy.ImmutableCollectionCreateRange(constructingType, elementType);
 
             // Cache the delegate
             s_createRangeDelegates.TryAdd(delegateKey, createRangeDelegate);
         }
 
-        internal IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        internal static void RegisterImmutableDictionary(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
         {
-            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            Type elementType = state.Current.GetElementType();
+            // Get a unique identifier for a delegate which will point to the appropiate CreateRange method.
+            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out Type underlyingType, out string constructingTypeName);
 
-            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
-            Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
+            // Exit if we have registered this immutable collection type.
+            if (s_createRangeDelegates.ContainsKey(delegateKey))
+            {
+                return;
+            }
 
-            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
-            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
-            return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.PropertyPath);
+            // Get the constructing type.
+            Type constructingType = underlyingType.Assembly.GetType(constructingTypeName);
+
+            // Create a delegate which will point to the CreateRange method.
+            object createRangeDelegate;
+            createRangeDelegate = options.ClassMaterializerStrategy.ImmutableDictionaryCreateRange(constructingType, elementType);
+
+            // Cache the delegate
+            s_createRangeDelegates.TryAdd(delegateKey, createRangeDelegate);
         }
 
         public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
@@ -165,6 +167,19 @@ namespace System.Text.Json.Serialization.Converters
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
             return propertyInfo.CreateImmutableCollectionFromList(immutableCollectionType, delegateKey, sourceList, state.PropertyPath);
+        }
+
+        internal IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        {
+            Type immutableCollectionType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            Type elementType = state.Current.GetElementType();
+
+            string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out _, out _);
+            Debug.Assert(s_createRangeDelegates.ContainsKey(delegateKey));
+
+            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
+            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+            return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.PropertyPath);
         }
     }
 }
