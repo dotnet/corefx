@@ -210,6 +210,11 @@ namespace System.Tests
 
     public class DerivedException : Exception
     {
+        public override string Message
+        {
+            get => "DerivedException.Message";
+        }
+
         public override string ToString()
         {
             return "DerivedException.ToString()";
@@ -232,6 +237,7 @@ namespace System.Tests
             var excp = new Exception("msg", inner);
 
             Assert.Contains("DerivedException.ToString()", excp.ToString());
+            Assert.DoesNotContain("DerivedException.Message", excp.ToString());
         }
     }
 
