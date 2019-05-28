@@ -213,6 +213,18 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.String;
         }
 
+        internal void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedUtf8PropertyName, string value)
+        {
+            ReadOnlySpan<char> asSpan = value.AsSpan();
+
+            JsonWriterHelper.ValidatePropertyAndValue(escapedUtf8PropertyName, asSpan);
+
+            WriteStringEscapeValueOnly(escapedUtf8PropertyName, asSpan);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = JsonTokenType.String;
+        }
+
         /// <summary>
         /// Writes the pre-encoded property name and UTF-8 text value (as a JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
@@ -573,6 +585,23 @@ namespace System.Text.Json
             else
             {
                 WriteStringByOptions(utf8PropertyName, value);
+            }
+        }
+
+        private void WriteStringEscapeValueOnly(ReadOnlySpan<byte> escapedUtf8PropertyName, ReadOnlySpan<char> value)
+        {
+            Debug.Assert(JsonWriterHelper.NeedsEscaping(escapedUtf8PropertyName) == -1);
+
+            int valueIdx = JsonWriterHelper.NeedsEscaping(value);
+            Debug.Assert(valueIdx >= -1 && valueIdx < value.Length && valueIdx < int.MaxValue / 2);
+
+            if (valueIdx != -1)
+            {
+                WriteStringEscapePropertyOrValue(escapedUtf8PropertyName, value, -1, valueIdx);
+            }
+            else
+            {
+                WriteStringByOptions(escapedUtf8PropertyName, value);
             }
         }
 
