@@ -60,12 +60,8 @@ namespace System.Text.Json.Serialization
                     writer.WriteNullValue();
                     writer.Flush();
 
-#if BUILDING_INBOX_LIBRARY
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
-#else
-                    // todo: stackalloc or pool here?
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
-#endif
+                    await bufferWriter.WriteToAsync(utf8Json, cancellationToken).ConfigureAwait(false);
+
                     return;
                 }
 
@@ -88,12 +84,8 @@ namespace System.Text.Json.Serialization
                     isFinalBlock = Write(writer, flushThreshold, options, ref state);
                     writer.Flush();
 
-#if BUILDING_INBOX_LIBRARY
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
-#else
-                    // todo: use pool here to avod extra alloc?
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
-#endif
+                    await bufferWriter.WriteToAsync(utf8Json, cancellationToken).ConfigureAwait(false);
+
                     bufferWriter.Clear();
                 } while (!isFinalBlock);
             }

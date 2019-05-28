@@ -4,6 +4,9 @@
 
 using System.Buffers;
 using System.Diagnostics;
+using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Text.Json.Serialization
 {
@@ -109,6 +112,18 @@ namespace System.Text.Json.Serialization
             CheckAndResizeBuffer(sizeHint);
             return _rentedBuffer.AsSpan(_index);
         }
+
+#if BUILDING_INBOX_LIBRARY
+        internal ValueTask WriteToAsync(Stream destination, CancellationToken cancellationToken)
+        {
+            return destination.WriteAsync(WrittenMemory, cancellationToken);
+        }
+#else
+        internal Task WriteToAsync(Stream destination, CancellationToken cancellationToken)
+        {
+            return destination.WriteAsync(_rentedBuffer, 0, _index, cancellationToken);
+        }
+#endif
 
         private void CheckAndResizeBuffer(int sizeHint)
         {
