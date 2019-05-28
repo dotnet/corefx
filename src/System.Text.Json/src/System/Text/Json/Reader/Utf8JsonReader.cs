@@ -132,6 +132,13 @@ namespace System.Text.Json
         public bool HasValueSequence { get; private set; }
 
         /// <summary>
+        /// Returns the mode of this instance of the <see cref="Utf8JsonReader"/>.
+        /// True when the reader was constructed with the input span containing the entire data to process.
+        /// False when the reader was constructed knowing that the input span contains partial data with more data to follow.
+        /// </summary>
+        public bool IsFinalBlock => _isFinalBlock;
+
+        /// <summary>
         /// Gets the value of the last processed token as a ReadOnlySpan&lt;byte&gt; slice
         /// of the input payload. If the JSON is provided within a ReadOnlySequence&lt;byte&gt;
         /// and the slice that represents the token value fits in a single segment, then

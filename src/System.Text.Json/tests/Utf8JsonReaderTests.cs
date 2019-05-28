@@ -25,6 +25,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonTokenType.None, json.TokenType);
             Assert.Equal(default, json.Position);
             Assert.False(json.HasValueSequence);
+            Assert.False(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -100,6 +101,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonTokenType.None, json.TokenType);
             Assert.Equal(default, json.Position);
             Assert.False(json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -125,6 +127,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonTokenType.None, json.TokenType);
             Assert.Equal(default, json.Position);
             Assert.False(json.HasValueSequence);
+            Assert.False(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -162,6 +165,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(JsonTokenType.Number, json.TokenType);
             Assert.Equal(default, json.Position);
             Assert.False(json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -519,6 +523,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
             Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -530,6 +535,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
             Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -541,6 +547,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(0, json.BytesConsumed);
             Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -557,6 +564,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
             Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -568,6 +576,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
             Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -579,6 +588,7 @@ namespace System.Text.Json.Tests
             Assert.Equal(0, json.CurrentDepth);
             Assert.Equal(dataUtf8.Length, json.BytesConsumed);
             Assert.Equal(false, json.HasValueSequence);
+            Assert.True(json.IsFinalBlock);
             Assert.True(json.ValueSpan.SequenceEqual(default));
             Assert.True(json.ValueSequence.IsEmpty);
 
@@ -766,6 +776,7 @@ namespace System.Text.Json.Tests
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: false, default);
             try
             {
+                Assert.False(json.IsFinalBlock);
                 json.Skip();
                 Assert.True(false, "Expected InvalidOperationException was not thrown when calling Skip with isFinalBlock = false, even if whole payload is available.");
             }
@@ -779,6 +790,7 @@ namespace System.Text.Json.Tests
 
                 try
                 {
+                    Assert.False(json.IsFinalBlock);
                     json.Skip();
                     Assert.True(false, "Expected InvalidOperationException was not thrown when calling Skip with isFinalBlock = false");
                 }
@@ -807,6 +819,7 @@ namespace System.Text.Json.Tests
                 json = new Utf8JsonReader(dataUtf8.AsSpan((int)consumed), isFinalBlock: true, json.CurrentState);
                 while (true)
                 {
+                    Assert.True(json.IsFinalBlock);
                     json.Skip();
                     Assert.True(json.TokenType != JsonTokenType.PropertyName && json.TokenType != JsonTokenType.StartObject && json.TokenType != JsonTokenType.StartArray);
                     if (bytesConsumed == json.BytesConsumed)
@@ -839,6 +852,7 @@ namespace System.Text.Json.Tests
                 long bytesConsumed = json.BytesConsumed;
                 while (true)
                 {
+                    Assert.True(json.IsFinalBlock);
                     json.Skip();
                     Assert.True(json.TokenType != JsonTokenType.PropertyName && json.TokenType != JsonTokenType.StartObject && json.TokenType != JsonTokenType.StartArray);
                     if (bytesConsumed == json.BytesConsumed)
@@ -869,6 +883,7 @@ namespace System.Text.Json.Tests
                 Assert.Equal(JsonTokenType.StartArray, json.TokenType);
                 try
                 {
+                    Assert.True(json.IsFinalBlock);
                     json.Skip();
                     Assert.True(false, "Expected JsonException was not thrown for invalid JSON payload when skipping.");
                 }
@@ -881,6 +896,7 @@ namespace System.Text.Json.Tests
                 Assert.Equal(JsonTokenType.StartArray, json.TokenType);
                 try
                 {
+                    Assert.True(json.IsFinalBlock);
                     json.TrySkip();
                     Assert.True(false, "Expected JsonException was not thrown for invalid JSON payload when skipping.");
                 }
@@ -893,6 +909,7 @@ namespace System.Text.Json.Tests
                 Assert.Equal(JsonTokenType.StartArray, json.TokenType);
                 try
                 {
+                    Assert.False(json.IsFinalBlock);
                     json.TrySkip();
                     Assert.True(false, "Expected JsonException was not thrown for invalid JSON payload when skipping.");
                 }
@@ -920,6 +937,7 @@ namespace System.Text.Json.Tests
                 Assert.Equal(skipTokenType, json.TokenType);
                 try
                 {
+                    Assert.True(json.IsFinalBlock);
                     json.Skip();
                     Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload when skipping.");
                 }
@@ -936,6 +954,7 @@ namespace System.Text.Json.Tests
                 Assert.Equal(skipTokenType, json.TokenType);
                 try
                 {
+                    Assert.True(json.IsFinalBlock);
                     json.TrySkip();
                     Assert.True(false, "Expected JsonException was not thrown for incomplete/invalid JSON payload when skipping.");
                 }
@@ -951,6 +970,7 @@ namespace System.Text.Json.Tests
                 }
                 Assert.Equal(skipTokenType, json.TokenType);
                 long before = json.BytesConsumed;
+                Assert.False(json.IsFinalBlock);
                 Assert.False(json.TrySkip());
                 Assert.Equal(skipTokenType, json.TokenType);
                 Assert.Equal(before, json.BytesConsumed);
