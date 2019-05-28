@@ -426,7 +426,9 @@ namespace System.Tests
 
             using (Process p = Process.GetCurrentProcess())
             {
-                Assert.InRange(AppDomain.CurrentDomain.MonitoringTotalProcessorTime, p.UserProcessorTime, TimeSpan.MaxValue);
+                TimeSpan processTime = p.UserProcessorTime;
+                TimeSpan monitoringTime = AppDomain.CurrentDomain.MonitoringTotalProcessorTime;
+                Assert.InRange(monitoringTime, processTime, TimeSpan.MaxValue);
             }
         }
 
