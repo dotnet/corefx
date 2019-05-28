@@ -194,6 +194,20 @@ namespace System.Text.Json
             _tokenType = value ? JsonTokenType.True : JsonTokenType.False;
         }
 
+        internal void WriteBooleanEscapeValueOnly(ReadOnlySpan<byte> escapedUtf8PropertyName, bool value)
+        {
+            Debug.Assert(JsonWriterHelper.NeedsEscaping(escapedUtf8PropertyName) == -1);
+
+            JsonWriterHelper.ValidateProperty(escapedUtf8PropertyName);
+
+            ReadOnlySpan<byte> span = value ? JsonConstants.TrueValue : JsonConstants.FalseValue;
+
+            WriteLiteralByOptions(escapedUtf8PropertyName, span);
+
+            SetFlagToAddListSeparatorBeforeNextItem();
+            _tokenType = value ? JsonTokenType.True : JsonTokenType.False;
+        }
+
         private void WriteLiteralEscape(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> value)
         {
             int propertyIdx = JsonWriterHelper.NeedsEscaping(propertyName);
