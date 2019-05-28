@@ -134,7 +134,7 @@ namespace System.Text.Json
         /// <summary>
         /// Returns the mode of this instance of the <see cref="Utf8JsonReader"/>.
         /// True when the reader was constructed with the input span containing the entire data to process.
-        /// False when the reader was constructed knowing that the input span contains partial data with more data to follow.
+        /// False when the reader was constructed knowing that the input span may contain partial data with more data to follow.
         /// </summary>
         public bool IsFinalBlock => _isFinalBlock;
 
@@ -280,6 +280,14 @@ namespace System.Text.Json
                 throw ThrowHelper.GetInvalidOperationException_CannotSkipOnPartial();
             }
 
+            SkipHelper();
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private void SkipHelper()
+        {
+            Debug.Assert(_isFinalBlock);
+
             if (TokenType == JsonTokenType.PropertyName)
             {
                 Read();
@@ -308,6 +316,17 @@ namespace System.Text.Json
         /// it will be reset to the state it was in before the method was called.
         /// </remarks>
         public bool TrySkip()
+        {
+            if (_isFinalBlock)
+            {
+                SkipHelper();
+                return true;
+            }
+
+            return TrySkipHelper();
+        }
+
+        private bool TrySkipHelper()
         {
             Utf8JsonReader restore = default;
             bool createdCopy = false;
