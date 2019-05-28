@@ -476,8 +476,12 @@ namespace System.Net.Http.Functional.Tests
                         client.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
                     }
                     try
-                    { await client.GetAsync(addressUri); }
-                    catch { }
+                    {
+                        await client.GetAsync(addressUri); 
+                    }
+                    catch 
+                    {
+                    }
                 }
             }, server => server.AcceptConnectionAsync(async connection =>
             {
