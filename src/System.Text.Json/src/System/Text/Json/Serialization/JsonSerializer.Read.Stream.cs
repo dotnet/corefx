@@ -195,6 +195,11 @@ namespace System.Text.Json.Serialization
         {
             var reader = new Utf8JsonReader(buffer, isFinalBlock, readerState);
 
+            // If we haven't read in all the data we need to read ahead when reading a json object
+            // or array into a single .NET object so the JsonDocument has all of the needed data
+            // to parse.
+            options.ReadAhead = !isFinalBlock;
+
             ReadCore(
                 options,
                 ref reader,

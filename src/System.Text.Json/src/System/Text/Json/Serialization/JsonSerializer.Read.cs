@@ -5,6 +5,7 @@
 using System.Buffers;
 using System.Collections;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Text.Json.Serialization
 {
@@ -21,18 +22,30 @@ namespace System.Text.Json.Serialization
         {
             try
             {
-                while (reader.Read())
+                JsonReaderState initialState = default;
+
+                while (true)
                 {
+                    if (options.ReadAhead)
+                    {
+                        // When we're reading ahead we always have to save the state
+                        // as we don't know if the next token is an opening object or
+                        // array brace.
+                        initialState = reader.CurrentState;
+                    }
+
+                    if (!reader.Read())
+                    {
+                        break;
+                    }
+
                     JsonTokenType tokenType = reader.TokenType;
 
                     if (JsonHelpers.IsInRangeInclusive(tokenType, JsonTokenType.String, JsonTokenType.False))
                     {
                         Debug.Assert(tokenType == JsonTokenType.String || tokenType == JsonTokenType.Number || tokenType == JsonTokenType.True || tokenType == JsonTokenType.False);
 
-                        if (HandleValue(tokenType, options, ref reader, ref state))
-                        {
-                            continue;
-                        }
+                        HandleValue(tokenType, options, ref reader, ref state);
                     }
                     else if (tokenType == JsonTokenType.PropertyName)
                     {
@@ -47,9 +60,10 @@ namespace System.Text.Json.Serialization
                         }
                         else if (state.Current.IsProcessingValue)
                         {
-                            if (HandleValue(tokenType, options, ref reader, ref state))
+                            if (!HandleObjectAsValue(tokenType, options, ref reader, ref state, ref initialState))
                             {
-                                continue;
+                                // Need more data
+                                break;
                             }
                         }
                         else if (state.Current.IsProcessingDictionary)
@@ -82,24 +96,19 @@ namespace System.Text.Json.Serialization
                         {
                             HandleStartArray(options, ref reader, ref state);
                         }
-                        else if (HandleValue(tokenType, options, ref reader, ref state))
+                        else if (!HandleObjectAsValue(tokenType, options, ref reader, ref state, ref initialState))
                         {
-                            continue;
+                            // Need more data
+                            break;
                         }
                     }
                     else if (tokenType == JsonTokenType.EndArray)
                     {
-                        if (HandleEndArray(options, ref reader, ref state))
-                        {
-                            continue;
-                        }
+                        HandleEndArray(options, ref reader, ref state);
                     }
                     else if (tokenType == JsonTokenType.Null)
                     {
-                        if (HandleNull(ref reader, ref state, options))
-                        {
-                            continue;
-                        }
+                        HandleNull(ref reader, ref state, options);
                     }
                 }
             }
@@ -110,6 +119,31 @@ namespace System.Text.Json.Serialization
             }
 
             return;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static bool HandleObjectAsValue(
+            JsonTokenType tokenType,
+            JsonSerializerOptions options,
+            ref Utf8JsonReader reader,
+            ref ReadStack readStack,
+            ref JsonReaderState readerState)
+        {
+            if (options.ReadAhead)
+            {
+                // Attempt to skip to make sure we have all the data we need.
+                bool complete = reader.TrySkip();
+
+                // We need to restore the state in all cases as we need to be positioned back before the current token.
+                reader = new Utf8JsonReader(reader.OriginalSpan, isFinalBlock: reader.IsFinalBlock, state: readerState);
+                if (!complete)
+                {
+                    // Couldn't read to the end of the object, exit out to get more data in the buffer.
+                    return false;
+                }
+            }
+            HandleValue(tokenType, options, ref reader, ref readStack);
+            return true;
         }
 
         private static ReadOnlySpan<byte> GetUnescapedString(ReadOnlySpan<byte> utf8Source, int idx)
