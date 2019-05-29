@@ -49,9 +49,9 @@ namespace System.IO.Pipelines
         /// Returns a <see cref="Stream"/> that wraps the <see cref="PipeWriter"/>.
         /// </summary>
         /// <returns>The <see cref="Stream"/>.</returns>
-        public virtual Stream AsStream()
+        public virtual Stream AsStream(bool leaveOpen = false)
         {
-            return _stream ?? (_stream = new PipeWriterStream(this));
+            return _stream ?? (_stream = new PipeWriterStream(this, leaveOpen));
         }
 
         /// <summary>

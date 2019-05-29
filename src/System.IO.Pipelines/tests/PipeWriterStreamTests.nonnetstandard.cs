@@ -50,7 +50,7 @@ namespace System.IO.Pipelines.Tests
         {
             byte[] helloBytes = Encoding.ASCII.GetBytes("Hello World");
             var pipe = new Pipe();
-            var stream = new PipeWriterStream(pipe.Writer);
+            var stream = new PipeWriterStream(pipe.Writer, false);
 
             await writeAsync(stream, helloBytes);
 
@@ -165,6 +165,15 @@ namespace System.IO.Pipelines.Tests
             await stream.FlushAsync();
 
             Assert.True(pipeWriter.FlushCalled);
+        }
+
+        [Fact]
+        public void AsStreamDoNotCompleteWriter()
+        {
+            var pipeWriter = new TestPipeWriter();
+
+            // will throw in Complete if it was actually invoked
+            pipeWriter.AsStream(leaveOpen: true).Dispose();
         }
 
         public class TestPipeWriter : PipeWriter

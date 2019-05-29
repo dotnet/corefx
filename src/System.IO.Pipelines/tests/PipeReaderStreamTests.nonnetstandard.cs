@@ -59,7 +59,7 @@ namespace System.IO.Pipelines.Tests
             await pipe.Writer.WriteAsync(helloBytes);
             pipe.Writer.Complete();
 
-            var stream = new PipeReaderStream(pipe.Reader);
+            var stream = new PipeReaderStream(pipe.Reader, false);
 
             var buffer = new byte[1024];
             int read = await readAsync(stream, buffer);
@@ -276,6 +276,15 @@ namespace System.IO.Pipelines.Tests
 
             await consumer;
             Assert.Equal(producedSum, consumedSum);
+        }
+
+        [Fact]
+        public void AsStreamDoNotCompleteReader()
+        {
+            var pipeReader = new TestPipeReader();
+            
+            // will throw in Complete if it was actually invoked
+            pipeReader.AsStream(leaveOpen: true).Dispose();
         }
 
         public class BuggyPipeReader : PipeReader

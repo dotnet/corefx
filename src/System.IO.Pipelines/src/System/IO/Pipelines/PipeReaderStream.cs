@@ -13,16 +13,21 @@ namespace System.IO.Pipelines
     internal sealed class PipeReaderStream : Stream
     {
         private readonly PipeReader _pipeReader;
+        private readonly bool _leaveOpen;
 
-        public PipeReaderStream(PipeReader pipeReader)
+        public PipeReaderStream(PipeReader pipeReader, bool leaveOpen)
         {
             Debug.Assert(pipeReader != null);
             _pipeReader = pipeReader;
+            _leaveOpen = leaveOpen;
         }
 
         protected override void Dispose(bool disposing)
         {
-            _pipeReader.Complete();
+            if (!_leaveOpen)
+            {
+                _pipeReader.Complete();
+            }
             base.Dispose(disposing);
         }
 

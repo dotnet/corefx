@@ -54,9 +54,9 @@ namespace System.IO.Pipelines
         /// Returns a <see cref="Stream"/> that wraps the <see cref="PipeReader"/>.
         /// </summary>
         /// <returns>The <see cref="Stream"/>.</returns>
-        public virtual Stream AsStream()
+        public virtual Stream AsStream(bool leaveOpen = false)
         {
-            return _stream ?? (_stream = new PipeReaderStream(this));
+            return _stream ?? (_stream = new PipeReaderStream(this, leaveOpen));
         }
 
         /// <summary>
