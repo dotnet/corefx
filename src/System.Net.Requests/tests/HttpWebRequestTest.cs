@@ -223,15 +223,18 @@ namespace System.Net.Tests
             Assert.True(request.AllowReadStreamBuffering);
         }
 
-        [Fact]
-        public async Task ContentLength_Get_ExpectSameAsGetResponseStream()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ContentLength_Get_ExpectSameAsGetResponseStream(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync();
-                using (WebResponse response = await getResponse)
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                using (WebResponse response = await request.GetResponseAsync())
                 using (Stream myStream = response.GetResponseStream())
                 using (var sr = new StreamReader(myStream))
                 {
@@ -239,7 +242,7 @@ namespace System.Net.Tests
                     long length = response.ContentLength;
                     Assert.Equal(strContent.Length, length);
                 }
-            });
+            }, server => server.HandleRequestAsync(), options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -282,7 +285,7 @@ namespace System.Net.Tests
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
                 Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync();
+                await server.AcceptConnectionSendResponseAndCloseAsync();
                 using (WebResponse response = await getResponse)
                 {
                     Assert.Throws<InvalidOperationException>(() => request.AutomaticDecompression = DecompressionMethods.Deflate);
@@ -1116,7 +1119,7 @@ namespace System.Net.Tests
                     request.BeginGetRequestStream(null, null);
                 });
 
-                return Task.FromResult<object>(null);
+                return Task.CompletedTask;
             });
         }
 
@@ -1174,39 +1177,41 @@ namespace System.Net.Tests
         [Fact]
         public async Task GetResponseAsync_GetResponseStream_ExpectNotNull()
         {
-            await LoopbackServer.CreateServerAsync(async (server, url) =>
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
-                HttpWebRequest request = WebRequest.CreateHttp(url);
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync();
-                using (WebResponse response = await getResponse)
+                HttpWebRequest request = WebRequest.CreateHttp(uri);
+                using (WebResponse response = await request.GetResponseAsync())
                 using (Stream myStream = response.GetResponseStream())
                 {
                     Assert.NotNull(myStream);
                 }
-            });
+            }, server => server.HandleRequestAsync());
         }
 
-        [Fact]
-        public async Task GetResponseAsync_GetResponseStream_ContainsHost()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetResponseAsync_GetResponseStream_ContainsHost(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl }; 
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.Method = HttpMethod.Get.Method;
-
-                string host = uri.Host + ":" + uri.Port;
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Host", host) });
-                string serverReceivedHost = requestData.GetSingleHeaderValue("Host");
-                Assert.Equal(host, serverReceivedHost);
-                using (WebResponse response = await getResponse)
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                using (WebResponse response = await request.GetResponseAsync())
                 using (Stream myStream = response.GetResponseStream())
                 using (var sr = new StreamReader(myStream))
                 {
-                    Assert.Equal(host, response.Headers["Host"]);
+                    Assert.Equal(uri.Host + ":" + uri.Port, response.Headers["Host"]);
                 }
-            });
+            }, async server => 
+            {
+                string host = server.Uri.Host + ":" + server.Uri.Port;
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Host", host) });
+                string serverReceivedHost = requestData.GetSingleHeaderValue("Host");
+                Assert.Equal(host, serverReceivedHost);
+            }, options);
         }
 
         [OuterLoop]
@@ -1230,45 +1235,48 @@ namespace System.Net.Tests
             Assert.Equal(request.Headers["Range"], "bytes=1-5");
         }
 
-        [Fact]
-        public async Task GetResponseAsync_PostRequestStream_ContainsData()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetResponseAsync_PostRequestStream_ContainsData(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
                 request.Method = HttpMethod.Post.Method;
-
                 using (Stream requestStream = await request.GetRequestStreamAsync())
                 {
                     requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
                 }
 
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync(content: RequestBody);
-                using (WebResponse response = await getResponse)
+                using (WebResponse response = await request.GetResponseAsync())
                 using (Stream myStream = response.GetResponseStream())
                 using (var sr = new StreamReader(myStream))
                 {
                     string strContent = sr.ReadToEnd();
                     Assert.True(strContent.Contains(RequestBody));
                 }
-            });
+            }, server => server.HandleRequestAsync(content: RequestBody), options);
         }
 
-        [Fact]
-        public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task GetResponseAsync_UseDefaultCredentials_ExpectSuccess(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
                 request.UseDefaultCredentials = true;
 
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync(content: RequestBody);
-                using (WebResponse response = await getResponse)
-                {
-                }
-            });
+                using WebResponse response = await request.GetResponseAsync();
+            }, server => server.HandleRequestAsync(), options);
         }
 
         [OuterLoop] // fails on networks with DNS servers that provide a dummy page for invalid addresses
@@ -1293,38 +1301,40 @@ namespace System.Net.Tests
                 $"HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n"));
         }
 
-        [Fact]
-        public async Task HaveResponse_GetResponseAsync_ExpectTrue()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task HaveResponse_GetResponseAsync_ExpectTrue(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.UseDefaultCredentials = true;
 
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync();
-                using (WebResponse response = await getResponse)
-                {
-                    Assert.True(request.HaveResponse);
-                }
-            });
+                using WebResponse response = await request.GetResponseAsync();
+                Assert.True(request.HaveResponse);
+            }, server => server.HandleRequestAsync(), options);
         }
 
-        [Fact]
-        public async Task Headers_GetResponseHeaders_ContainsExpectedValue()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Headers_GetResponseHeaders_ContainsExpectedValue(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            const string HeadersPartialContent = "application/json";
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-
-                const string HeadersPartialContent = "application/json";
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Content-Type", HeadersPartialContent) });
-                using (WebResponse response = await getResponse)
-                {
-                    string headersString = response.Headers.ToString();
-                    Assert.Equal(HeadersPartialContent, response.Headers[HttpResponseHeader.ContentType]);
-                }
-            });
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                using WebResponse response = await request.GetResponseAsync();
+                string headersString = response.Headers.ToString();
+                Assert.Equal(HeadersPartialContent, response.Headers[HttpResponseHeader.ContentType]);
+            }, server => server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Content-Type", HeadersPartialContent) }), options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1403,20 +1413,20 @@ namespace System.Net.Tests
             Assert.Equal(remoteServer, request.RequestUri);
         }
 
-        [Fact]
-        public async Task ResponseUri_GetResponseAsync_ExpectSameUri()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ResponseUri_GetResponseAsync_ExpectSameUri(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync();
-                using (WebResponse response = await getResponse)
-                {
-                    Assert.Equal(uri, response.ResponseUri);
-                }
-            });
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                using WebResponse response = await request.GetResponseAsync();
+                Assert.Equal(uri, response.ResponseUri);
+            }, server => server.HandleRequestAsync(), options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1426,62 +1436,65 @@ namespace System.Net.Tests
             Assert.True(request.SupportsCookieContainer);
         }
 
-        [Fact]
-        public async Task SimpleScenario_UseGETVerb_Success()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task SimpleScenario_UseGETVerb_Success(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync();
-                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                }
-            });
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }, server => server.HandleRequestAsync(), options);
         }
 
-        [Fact]
-        public async Task SimpleScenario_UsePOSTVerb_Success()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task SimpleScenario_UsePOSTVerb_Success(bool useSsl)
         {
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
+
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
                 request.Method = HttpMethod.Post.Method;
-
                 using (Stream requestStream = await request.GetRequestStreamAsync())
                 {
                     requestStream.Write(_requestBodyBytes, 0, _requestBodyBytes.Length);
                 }
 
-                Task<WebResponse> getResponse = request.GetResponseAsync();
-                await server.HandleRequestAsync();
-                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
-                {
-                    Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-                }
-            });
+                using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+                Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+            }, server => server.HandleRequestAsync(), options);
         }
 
-        [Fact]
-        public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task ContentType_AddHeaderWithNoContent_SendRequest_HeaderGetsSent(bool useSsl)
         {
             const string ContentType = "text/plain; charset=utf-8";
+            var options = new LoopbackServer.Options { UseSsl = useSsl };
 
-            await LoopbackServer.CreateServerAsync(async (server, uri) =>
+            await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
+                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
                 request.ContentType = ContentType;
 
-                Task<WebResponse> getResponse = request.GetResponseAsync();
+                using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
+                Assert.Equal(ContentType, response.Headers[HttpResponseHeader.ContentType]);
+            }, async server =>
+            {
                 HttpRequestData requestData = await server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Content-Type", ContentType) });
                 Assert.Equal(ContentType, requestData.GetSingleHeaderValue("Content-Type"));
-                using (HttpWebResponse response = (HttpWebResponse)await getResponse)
-                {
-                    Assert.Equal(ContentType, response.Headers[HttpResponseHeader.ContentType]);
-                }
-            });
+            }, options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
