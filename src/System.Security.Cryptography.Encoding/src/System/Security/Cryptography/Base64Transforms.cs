@@ -5,6 +5,9 @@
 // This file contains two ICryptoTransforms: ToBase64Transform and FromBase64Transform
 // they may be attached to a CryptoStream in either read or write mode
 
+using System.Buffers;
+using System.Buffers.Text;
+using System.Diagnostics;
 using System.Text;
 
 namespace System.Security.Cryptography
@@ -25,18 +28,36 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            if (inputBuffer == null)
+            {
+                ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.inputBuffer);
+            }
+
+            if (outputBuffer == null)
+            {
+                ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
+            }
 
             // For now, only convert 3 bytes to 4
-            byte[] tempBytes = ConvertToBase64(inputBuffer, inputOffset, 3);
+            Span<byte> input = inputBuffer.AsSpan(inputOffset, 3);
+            Span<byte> output = outputBuffer.AsSpan(outputOffset);
 
-            Buffer.BlockCopy(tempBytes, 0, outputBuffer, outputOffset, tempBytes.Length);
-            return tempBytes.Length;
+            OperationStatus status = Base64.EncodeToUtf8(input, output, out int bytesConsumed, out int bytesWritten, isFinalBlock: false);
+            Debug.Assert(status == OperationStatus.NeedMoreData);
+            Debug.Assert(bytesConsumed == 3);
+
+            if (bytesWritten != 4)
+                ThrowHelper.ThrowCryptographicException();
+
+            return bytesWritten;
         }
 
         public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            if (inputBuffer == null)
+            {
+                ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.inputBuffer);
+            }
 
             // Convert.ToBase64CharArray already does padding, so all we have to check is that
             // the inputCount wasn't 0
@@ -46,40 +67,28 @@ namespace System.Security.Cryptography
             }
 
             // Again, for now only a block at a time
-            return ConvertToBase64(inputBuffer, inputOffset, inputCount);
-        }
+            Span<byte> input = inputBuffer.AsSpan(inputOffset, inputCount);
+            byte[] output = new byte[4];
 
-        private byte[] ConvertToBase64(byte[] inputBuffer, int inputOffset, int inputCount)
-        {
-            char[] temp = new char[4];
-            Convert.ToBase64CharArray(inputBuffer, inputOffset, inputCount, temp, 0);
-            byte[] tempBytes = Encoding.ASCII.GetBytes(temp);
-            if (tempBytes.Length != 4)
-                throw new CryptographicException(SR.Cryptography_SSE_InvalidDataSize);
+            OperationStatus status = Base64.EncodeToUtf8(input, output, out int bytesConsumed, out int bytesWritten, isFinalBlock: true);
+            Debug.Assert(status == OperationStatus.Done);
+            Debug.Assert(bytesConsumed == inputCount);
 
-            return tempBytes;
-        }
+            if (bytesWritten != 4)
+                ThrowHelper.ThrowCryptographicException();
 
-        private static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
-        {
-            if (inputBuffer == null) throw new ArgumentNullException(nameof(inputBuffer));
-            if (inputOffset < 0) throw new ArgumentOutOfRangeException(nameof(inputOffset), SR.ArgumentOutOfRange_NeedNonNegNum);
-            if (inputCount < 0 || (inputCount > inputBuffer.Length)) throw new ArgumentException(SR.Argument_InvalidValue);
-            if ((inputBuffer.Length - inputCount) < inputOffset) throw new ArgumentException(SR.Argument_InvalidOffLen);
+            return output;
         }
 
         // Must implement IDisposable, but in this case there's nothing to do.
 
         public void Dispose()
         {
-            Clear();
-        }
-
-        public void Clear()
-        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
+
+        public void Clear() => Dispose();
 
         protected virtual void Dispose(bool disposing) { }
 
@@ -261,6 +270,18 @@ namespace System.Security.Cryptography
         ~FromBase64Transform()
         {
             Dispose(false);
+        }
+    }
+
+    internal class ThrowHelper
+    {
+        public static void ThrowArgumentNull(ExceptionArgument argument) => throw new ArgumentNullException(argument.ToString());
+        public static void ThrowCryptographicException() => throw new CryptographicException(SR.Cryptography_SSE_InvalidDataSize);
+
+        public enum ExceptionArgument
+        {
+            inputBuffer,
+            outputBuffer
         }
     }
 }
