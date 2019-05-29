@@ -218,7 +218,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.True(double.IsNegativeInfinity(JsonSerializer.Parse<double?>(double.MinValue.ToString(CultureInfo.InvariantCulture) + "0").Value));
             Assert.True(double.IsPositiveInfinity(JsonSerializer.Parse<double?>(double.MaxValue.ToString(CultureInfo.InvariantCulture) + "0").Value));
 
-#if !netfx
+#if BUILDING_INBOX_LIBRARY
             // Verify sign is correct; SingleToInt32Bits not available on netfx.
             Assert.Equal(0x00000000u, (uint)BitConverter.SingleToInt32Bits(JsonSerializer.Parse<float>("0")));
             Assert.Equal(0x80000000u, (uint)BitConverter.SingleToInt32Bits(JsonSerializer.Parse<float>("-0")));
