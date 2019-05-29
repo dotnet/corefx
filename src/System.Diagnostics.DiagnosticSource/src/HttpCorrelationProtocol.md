@@ -4,7 +4,6 @@ Starting with System.Diagnostics.DiagnosticSource 4.6.0 (that ships with .Net Co
 
 [Flat Request-Id](FlatRequestId.md) is **deprecated**.
 
-
 # Overview
     
 One of the common problems in microservices development is ability to trace request flow from client (application, browser) through all the services involved in processing.
