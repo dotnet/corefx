@@ -13,7 +13,7 @@ namespace System.Threading
         /// </summary>
         /// <param name="waitHandle">The <see cref="System.Threading.WaitHandle"/> to operate on.</param>
         /// <returns>A <see cref="System.Runtime.InteropServices.SafeHandle"/> representing the native operating system handle.</returns>
-        public static SafeWaitHandle? GetSafeWaitHandle(this WaitHandle waitHandle)
+        public static SafeWaitHandle GetSafeWaitHandle(this WaitHandle waitHandle)
         {
             if (waitHandle == null)
             {
@@ -35,7 +35,7 @@ namespace System.Threading
                 throw new ArgumentNullException(nameof(waitHandle));
             }
 
-            waitHandle.SafeWaitHandle = value;
+            waitHandle.SafeWaitHandle = value!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
         }
     }
 }
