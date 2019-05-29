@@ -1289,7 +1289,7 @@ namespace System.Net.WebSockets
                 {
                     // align our pointer to Vector<byte>.Count
 
-                    while ((long)toMaskPtr % Vector<byte>.Count != 0)
+                    while ((ulong)toMaskPtr % (uint)Vector<byte>.Count != 0)
                     {
                         *toMaskPtr++ ^= maskPtr[maskIndex];
                         maskIndex = (maskIndex + 1) & 3;
@@ -1299,7 +1299,7 @@ namespace System.Net.WebSockets
 
                     if (toMaskEnd - toMaskPtr >= Vector<byte>.Count)
                     {
-                        Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(RollRight(mask, maskIndex)));
+                        Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>((int)BitOperations.RotateRight((uint)mask, maskIndex * 8)));
 
                         do
                         {
@@ -1316,7 +1316,7 @@ namespace System.Net.WebSockets
                 {
                     // align our pointer to sizeof(int)
 
-                    while ((long)toMaskPtr % sizeof(int) != 0)
+                    while ((ulong)toMaskPtr % sizeof(int) != 0)
                     {
                         *toMaskPtr++ ^= maskPtr[maskIndex];
                         maskIndex = (maskIndex + 1) & 3;
@@ -1324,7 +1324,7 @@ namespace System.Net.WebSockets
 
                     // use int.
 
-                    int rolledMask = RollRight(mask, maskIndex);
+                    int rolledMask = (int)BitOperations.RotateRight((uint)mask, maskIndex * 8);
 
                     while (toMaskEnd - toMaskPtr >= sizeof(int))
                     {
@@ -1343,15 +1343,6 @@ namespace System.Net.WebSockets
             }
 
             return maskIndex;
-        }
-
-        /// <summary>
-        /// Rolls an integer <paramref name="mask"/> to the right by <paramref name="maskIndex"/> bytes. E.g. RollRight(0x11223344, 1) = 0x44112233.
-        /// </summary>
-        private static int RollRight(int mask, int maskIndex)
-        {
-            int maskShift = maskIndex * 8;
-            return (int)(((uint)mask >> maskShift) | ((uint)mask << (32 - maskShift)));
         }
 
         /// <summary>Aborts the websocket and throws an exception if an existing operation is in progress.</summary>
