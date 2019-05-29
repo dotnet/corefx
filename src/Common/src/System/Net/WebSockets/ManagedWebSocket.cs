@@ -1300,7 +1300,7 @@ namespace System.Net.WebSockets
 
                 // use SIMD if possible.
 
-                if (Vector.IsHardwareAccelerated && Vector<byte>.Count % sizeof(int) == 0 && toMask.Length >= Vector<byte>.Count)
+                if (Vector.IsHardwareAccelerated && Vector<byte>.Count % sizeof(int) == 0 && (toMaskEnd - toMaskPtr) >= Vector<byte>.Count)
                 {
                     // align our pointer to Vector<byte>.Count
 
