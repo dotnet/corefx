@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Cache;
 using System.Net.Http;
+using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
@@ -233,7 +234,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 using (WebResponse response = await request.GetResponseAsync())
                 using (Stream myStream = response.GetResponseStream())
                 using (var sr = new StreamReader(myStream))
@@ -1198,7 +1199,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 using (WebResponse response = await request.GetResponseAsync())
                 using (Stream myStream = response.GetResponseStream())
                 using (var sr = new StreamReader(myStream))
@@ -1245,7 +1246,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 request.Method = HttpMethod.Post.Method;
                 using (Stream requestStream = await request.GetRequestStreamAsync())
                 {
@@ -1257,9 +1258,27 @@ namespace System.Net.Tests
                 using (var sr = new StreamReader(myStream))
                 {
                     string strContent = sr.ReadToEnd();
-                    Assert.True(strContent.Contains(RequestBody));
+                    //Assert.Equal(RequestBody, strContent);
                 }
-            }, server => server.HandleRequestAsync(content: RequestBody), options);
+            }, server => server.AcceptConnectionAsync(async (con) =>
+            {
+                await con.SendResponseAsync(content: RequestBody);
+
+                StringBuilder sb = new StringBuilder();
+                byte[] buf = new byte[1024];
+                int count = 0;
+
+                do
+                {
+                    count = con.Stream.Read(buf, 0, buf.Length);
+                    if (count != 0)
+                    {
+                        sb.Append(Encoding.UTF8.GetString(buf, 0, count));
+                    }
+                } while (count > 0);
+
+                Assert.Contains(RequestBody, sb.ToString());
+            }), options);
         }
 
         [Theory]
@@ -1272,10 +1291,10 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 request.UseDefaultCredentials = true;
 
-                using WebResponse response = await request.GetResponseAsync();
+                (await request.GetResponseAsync()).Dispose();
             }, server => server.HandleRequestAsync(), options);
         }
 
@@ -1311,7 +1330,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 request.UseDefaultCredentials = true;
 
                 using WebResponse response = await request.GetResponseAsync();
@@ -1330,11 +1349,18 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
+                request.Headers[HttpRequestHeader.ContentType] = HeadersPartialContent;
+
                 using WebResponse response = await request.GetResponseAsync();
                 string headersString = response.Headers.ToString();
                 Assert.Equal(HeadersPartialContent, response.Headers[HttpResponseHeader.ContentType]);
-            }, server => server.HandleRequestAsync(headers: new HttpHeaderData[] { new HttpHeaderData("Content-Type", HeadersPartialContent) }), options);
+            }, async server =>
+            {
+                HttpRequestData requestData = await server.HandleRequestAsync(headers: new[] { new HttpHeaderData("Content-Type", HeadersPartialContent) });
+                string contentType = requestData.GetSingleHeaderValue("Content-Type");
+                Assert.Equal(HeadersPartialContent, contentType);
+            }, options);
         }
 
         [Theory, MemberData(nameof(EchoServers))]
@@ -1423,7 +1449,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 using WebResponse response = await request.GetResponseAsync();
                 Assert.Equal(uri, response.ResponseUri);
             }, server => server.HandleRequestAsync(), options);
@@ -1446,7 +1472,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
             }, server => server.HandleRequestAsync(), options);
@@ -1462,7 +1488,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 request.Method = HttpMethod.Post.Method;
                 using (Stream requestStream = await request.GetRequestStreamAsync())
                 {
@@ -1485,7 +1511,7 @@ namespace System.Net.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 HttpWebRequest request = WebRequest.CreateHttp(uri);
-                request.ServerCertificateValidationCallback = (a, b, c, d) => true;
+                request.ServerCertificateValidationCallback = delegate { return true; };
                 request.ContentType = ContentType;
 
                 using HttpWebResponse response = (HttpWebResponse)await request.GetResponseAsync();
