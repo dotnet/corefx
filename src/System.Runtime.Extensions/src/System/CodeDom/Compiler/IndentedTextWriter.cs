@@ -30,10 +30,12 @@ namespace System.CodeDom.Compiler
 
         public override Encoding Encoding => _writer.Encoding;
 
+#if !uapaot // TODO-NULLABLE: Remove condition once ProjectNtfs Corelib is updated with nullable attributes
         [AllowNull]
+#endif
         public override string NewLine
         {
-            get { return _writer.NewLine; }
+            get { return _writer.NewLine!; } // TODO-NULLABLE: Remove ! when nullable attributes are respected
             set { _writer.NewLine = value; }
         }
 
