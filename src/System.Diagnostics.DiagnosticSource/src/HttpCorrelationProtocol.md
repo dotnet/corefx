@@ -1,6 +1,6 @@
 
 # Note
-Starting with System.Diagnostics.DiagnosticSource 4.6.0 (that ships with .Net Core 3.0), we are moving towards [W3C Trace-Context](https://www.w3.org/TR/trace-context/) standard. We still support Request-Id ([hierarchical](HierarchicalRequestId.md) version) and it is still the default format for `System.Diagnostics.Activity`, but we may change and deprecate it in future major versions.
+Starting with System.Diagnostics.DiagnosticSource 4.6.0 (that ships with .Net Core 3.0), we are moving towards [W3C Trace-Context](https://www.w3.org/TR/trace-context/) standard. We still support Request-Id ([hierarchical](HierarchicalRequestId.md) version) and it is still the default format for `System.Diagnostics.Activity`.
 
 [Flat Request-Id](FlatRequestId.md) is **deprecated**.
 
