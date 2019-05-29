@@ -493,7 +493,8 @@ namespace System.Drawing.Primitives.Tests
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.FromArgb(4, 3, 2, 1));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
+        [PlatformSpecific(TestPlatforms.Windows)]
         public void UserPreferenceChangingEventTest()
         {
             int element = 12; // Win32SystemColors.AppWorkSpace.
