@@ -7,9 +7,6 @@ using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
 {
-    /// <summary>
-    ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-    /// </summary>
     internal sealed class PooledBufferWriter<T> : IBufferWriter<T>, IDisposable
     {
         private T[] _rentedBuffer;
