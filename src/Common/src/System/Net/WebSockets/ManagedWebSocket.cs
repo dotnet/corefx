@@ -1283,6 +1283,21 @@ namespace System.Net.WebSockets
                 byte* toMaskEnd = toMaskBeg + toMask.Length;
                 byte* maskPtr = (byte*)&mask;
 
+                if (toMaskEnd - toMaskPtr < sizeof(int))
+                {
+                    goto small;
+                }
+
+                // align our pointer to sizeof(int)
+
+                while ((ulong)toMaskPtr % sizeof(int) != 0)
+                {
+                    *toMaskPtr++ ^= maskPtr[maskIndex];
+                    maskIndex = (maskIndex + 1) & 3;
+                }
+
+                int rolledMask = (int)BitOperations.RotateRight((uint)mask, maskIndex * 8);
+
                 // use SIMD if possible.
 
                 if (Vector.IsHardwareAccelerated && Vector<byte>.Count % sizeof(int) == 0 && toMask.Length >= Vector<byte>.Count)
@@ -1291,15 +1306,15 @@ namespace System.Net.WebSockets
 
                     while ((ulong)toMaskPtr % (uint)Vector<byte>.Count != 0)
                     {
-                        *toMaskPtr++ ^= maskPtr[maskIndex];
-                        maskIndex = (maskIndex + 1) & 3;
+                        *(int*)toMaskPtr ^= rolledMask;
+                        toMaskPtr += sizeof(int);
                     }
 
                     // use SIMD.
 
                     if (toMaskEnd - toMaskPtr >= Vector<byte>.Count)
                     {
-                        Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>((int)BitOperations.RotateRight((uint)mask, maskIndex * 8)));
+                        Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(rolledMask));
 
                         do
                         {
@@ -1312,29 +1327,15 @@ namespace System.Net.WebSockets
 
                 // process remaining data (or all, if couldn't use SIMD) 4 bytes at a time.
 
-                if (toMaskEnd - toMaskPtr >= sizeof(int))
+                while (toMaskEnd - toMaskPtr >= sizeof(int))
                 {
-                    // align our pointer to sizeof(int)
-
-                    while ((ulong)toMaskPtr % sizeof(int) != 0)
-                    {
-                        *toMaskPtr++ ^= maskPtr[maskIndex];
-                        maskIndex = (maskIndex + 1) & 3;
-                    }
-
-                    // use int.
-
-                    int rolledMask = (int)BitOperations.RotateRight((uint)mask, maskIndex * 8);
-
-                    while (toMaskEnd - toMaskPtr >= sizeof(int))
-                    {
-                        *(int*)toMaskPtr ^= rolledMask;
-                        toMaskPtr += sizeof(int);
-                    }
+                    *(int*)toMaskPtr ^= rolledMask;
+                    toMaskPtr += sizeof(int);
                 }
 
                 // do any remaining data a byte at a time.
 
+            small:
                 while (toMaskPtr != toMaskEnd)
                 {
                     *toMaskPtr++ ^= maskPtr[maskIndex];
