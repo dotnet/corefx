@@ -47,7 +47,7 @@ namespace System.Text.Json.Serialization
                         keyName = options.DictionaryKeyPolicy.ConvertName(keyName);
                     }
 
-                    if (state.Current.IsDictionary)
+                    if (state.Current.IsDictionary || state.Current.IsImmutableDictionary)
                     {
                         state.Current.JsonPropertyInfo = state.Current.JsonClassInfo.GetPolicyProperty();
                     }

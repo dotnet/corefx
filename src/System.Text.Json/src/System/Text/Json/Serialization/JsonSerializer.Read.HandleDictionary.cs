@@ -84,7 +84,7 @@ namespace System.Text.Json.Serialization
 
         private static void HandleEndDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            if (state.Current.IsDictionaryProperty)
+            if (state.Current.IsImmutableDictionaryProperty)
             {
                 if (state.Current.TempDictionaryValues != null)
                 {

@@ -128,7 +128,7 @@ namespace System.Text.Json.Serialization
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsEnumerable || state.Current.IsDictionary)
+                else if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsImmutableDictionary)
                 {
                     // Returning a non-converted list.
                     return true;
