@@ -24,7 +24,7 @@ namespace System.Text.Json
             utf8Unescaped = utf8Unescaped.Slice(0, written);
             Debug.Assert(!utf8Unescaped.IsEmpty);
 
-            bool result = TryDecoderInPlaceHelper(utf8Unescaped, out bytes);
+            bool result = TryDecodeBase64InPlace(utf8Unescaped, out bytes);
 
             if (unescapedArray != null)
             {
@@ -132,7 +132,7 @@ namespace System.Text.Json
             return result;
         }
 
-        public static bool TryDecoderInPlaceHelper(Span<byte> utf8Unescaped, out byte[] bytes)
+        public static bool TryDecodeBase64InPlace(Span<byte> utf8Unescaped, out byte[] bytes)
         {
             OperationStatus status = Base64.DecodeFromUtf8InPlace(utf8Unescaped, out int bytesWritten);
             if (status != OperationStatus.Done)
@@ -144,7 +144,7 @@ namespace System.Text.Json
             return true;
         }
 
-        public static bool TryDecoderHelper(ReadOnlySpan<byte> utf8Unescaped, out byte[] bytes)
+        public static bool TryDecodeBase64(ReadOnlySpan<byte> utf8Unescaped, out byte[] bytes)
         {
             byte[] pooledArray = null;
 
@@ -157,6 +157,13 @@ namespace System.Text.Json
             if (status != OperationStatus.Done)
             {
                 bytes = null;
+
+                if (pooledArray != null)
+                {
+                    byteSpan.Clear();
+                    ArrayPool<byte>.Shared.Return(pooledArray);
+                }
+
                 return false;
             }
             Debug.Assert(bytesConsumed == utf8Unescaped.Length);

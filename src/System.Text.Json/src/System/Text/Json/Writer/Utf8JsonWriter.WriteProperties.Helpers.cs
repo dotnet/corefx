@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Buffers;
-using System.Buffers.Text;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -207,15 +206,6 @@ namespace System.Text.Json
             OperationStatus status = JsonWriterHelper.ToUtf8(byteSpan, output.Slice(BytesPending), out int consumed, out int written);
             Debug.Assert(status == OperationStatus.Done);
             Debug.Assert(consumed == byteSpan.Length);
-            BytesPending += written;
-        }
-
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Base64EncodeAndWrite(ReadOnlySpan<byte> bytes, Span<byte> output)
-        {
-            OperationStatus status = Base64.EncodeToUtf8(bytes, output.Slice(BytesPending), out int consumed, out int written);
-            Debug.Assert(status == OperationStatus.Done);
-            Debug.Assert(consumed == bytes.Length);
             BytesPending += written;
         }
     }

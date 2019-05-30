@@ -283,7 +283,7 @@ namespace System.Text.Json
             }
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
-            return JsonReaderHelper.TryDecoderHelper(segment, out value);
+            return JsonReaderHelper.TryDecodeBase64(segment, out value);
         }
 
         internal bool TryGetValue(int index, out int value)

@@ -11,10 +11,10 @@ namespace System.Text.Json
     public sealed partial class Utf8JsonWriter
     {
         /// <summary>
-        /// Writes the pre-encoded property name and raw bytes value (as a Base64 encoded JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the pre-encoded property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The JSON encoded property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="bytes">The binary data to be written as a Base64 encoded JSON string as part of the name/value pair.</param>
+        /// <param name="bytes">The binary data to be written as a base 64 encoded JSON string as part of the name/value pair.</param>
         /// <remarks>
         /// The property name should already be escaped when the instance of <see cref="JsonEncodedText"/> was created.
         /// </remarks>
@@ -38,7 +38,7 @@ namespace System.Text.Json
         /// Writes the property name and raw bytes value (as a Base64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="bytes">The binary data to be written as a Base64 encoded JSON string as part of the name/value pair.</param>
+        /// <param name="bytes">The binary data to be written as a base 64 encoded JSON string as part of the name/value pair.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -52,10 +52,10 @@ namespace System.Text.Json
             => WriteBase64String(propertyName.AsSpan(), bytes);
 
         /// <summary>
-        /// Writes the property name and raw bytes value (as a Base64 encoded JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="propertyName">The property name of the JSON object to be transcoded and written as UTF-8.</param>
-        /// <param name="bytes">The binary data to be written as a Base64 encoded JSON string as part of the name/value pair.</param>
+        /// <param name="bytes">The binary data to be written as a base 64 encoded JSON string as part of the name/value pair.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
@@ -76,10 +76,10 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        /// Writes the property name and raw bytes value (as a Base64 encoded JSON string) as part of a name/value pair of a JSON object.
+        /// Writes the property name and raw bytes value (as a base 64 encoded JSON string) as part of a name/value pair of a JSON object.
         /// </summary>
         /// <param name="utf8PropertyName">The UTF-8 encoded property name of the JSON object to be written.</param>
-        /// <param name="bytes">The binary data to be written as a Base64 encoded JSON string as part of the name/value pair.</param>
+        /// <param name="bytes">The binary data to be written as a base 64 encoded JSON string as part of the name/value pair.</param>
         /// <remarks>
         /// The property name is escaped before writing.
         /// </remarks>
