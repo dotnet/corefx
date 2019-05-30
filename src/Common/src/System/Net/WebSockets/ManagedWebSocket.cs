@@ -1277,65 +1277,66 @@ namespace System.Net.WebSockets
         {
             Debug.Assert(maskIndex < sizeof(int));
 
-            fixed (byte* toMaskBeg = toMask)
+            fixed (byte* toMaskBeg = &MemoryMarshal.GetReference(toMask))
             {
                 byte* toMaskPtr = toMaskBeg;
                 byte* toMaskEnd = toMaskBeg + toMask.Length;
                 byte* maskPtr = (byte*)&mask;
 
-                if (toMaskEnd - toMaskPtr < sizeof(int))
+                if (toMaskEnd - toMaskPtr >= sizeof(int))
                 {
-                    goto small;
-                }
+                    // align our pointer to sizeof(int)
 
-                // align our pointer to sizeof(int)
+                    while ((ulong)toMaskPtr % sizeof(int) != 0)
+                    {
+                        Debug.Assert(toMaskPtr < toMaskEnd);
 
-                while ((ulong)toMaskPtr % sizeof(int) != 0)
-                {
-                    *toMaskPtr++ ^= maskPtr[maskIndex];
-                    maskIndex = (maskIndex + 1) & 3;
-                }
+                        *toMaskPtr++ ^= maskPtr[maskIndex];
+                        maskIndex = (maskIndex + 1) & 3;
+                    }
 
-                int rolledMask = (int)BitOperations.RotateRight((uint)mask, maskIndex * 8);
+                    int rolledMask = (int)BitOperations.RotateRight((uint)mask, maskIndex * 8);
 
-                // use SIMD if possible.
+                    // use SIMD if possible.
 
-                if (Vector.IsHardwareAccelerated && Vector<byte>.Count % sizeof(int) == 0 && (toMaskEnd - toMaskPtr) >= Vector<byte>.Count)
-                {
-                    // align our pointer to Vector<byte>.Count
+                    if (Vector.IsHardwareAccelerated && Vector<byte>.Count % sizeof(int) == 0 && (toMaskEnd - toMaskPtr) >= Vector<byte>.Count)
+                    {
+                        // align our pointer to Vector<byte>.Count
 
-                    while ((ulong)toMaskPtr % (uint)Vector<byte>.Count != 0)
+                        while ((ulong)toMaskPtr % (uint)Vector<byte>.Count != 0)
+                        {
+                            Debug.Assert(toMaskPtr < toMaskEnd);
+
+                            *(int*)toMaskPtr ^= rolledMask;
+                            toMaskPtr += sizeof(int);
+                        }
+
+                        // use SIMD.
+
+                        if (toMaskEnd - toMaskPtr >= Vector<byte>.Count)
+                        {
+                            Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(rolledMask));
+
+                            do
+                            {
+                                *(Vector<byte>*)toMaskPtr ^= maskVector;
+                                toMaskPtr += Vector<byte>.Count;
+                            }
+                            while (toMaskEnd - toMaskPtr >= Vector<byte>.Count);
+                        }
+                    }
+
+                    // process remaining data (or all, if couldn't use SIMD) 4 bytes at a time.
+
+                    while (toMaskEnd - toMaskPtr >= sizeof(int))
                     {
                         *(int*)toMaskPtr ^= rolledMask;
                         toMaskPtr += sizeof(int);
                     }
-
-                    // use SIMD.
-
-                    if (toMaskEnd - toMaskPtr >= Vector<byte>.Count)
-                    {
-                        Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(rolledMask));
-
-                        do
-                        {
-                            *(Vector<byte>*)toMaskPtr ^= maskVector;
-                            toMaskPtr += Vector<byte>.Count;
-                        }
-                        while (toMaskEnd - toMaskPtr >= Vector<byte>.Count);
-                    }
-                }
-
-                // process remaining data (or all, if couldn't use SIMD) 4 bytes at a time.
-
-                while (toMaskEnd - toMaskPtr >= sizeof(int))
-                {
-                    *(int*)toMaskPtr ^= rolledMask;
-                    toMaskPtr += sizeof(int);
                 }
 
                 // do any remaining data a byte at a time.
 
-            small:
                 while (toMaskPtr != toMaskEnd)
                 {
                     *toMaskPtr++ ^= maskPtr[maskIndex];
