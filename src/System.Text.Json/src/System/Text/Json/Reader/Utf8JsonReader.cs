@@ -271,7 +271,7 @@ namespace System.Text.Json
         /// Skips the children of the current JSON token.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the reader was given partial data with more data to follow (i.e. IsFinalBlock is false).
+        /// Thrown when the reader was given partial data with more data to follow (i.e. <see cref="IsFinalBlock"/> is false).
         /// </exception>
         /// <exception cref="JsonException">
         /// Thrown when an invalid JSON token is encountered while skipping, according to the JSON RFC,
