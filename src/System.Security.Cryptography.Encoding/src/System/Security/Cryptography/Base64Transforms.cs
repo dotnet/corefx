@@ -8,6 +8,7 @@
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Security.Cryptography
 {
@@ -325,14 +326,16 @@ namespace System.Security.Cryptography
 
     internal class ThrowHelper
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             if (inputBuffer == null) ThrowArgumentNull(ExceptionArgument.inputBuffer);
-            if (inputOffset < 0) ThrowArgumentOutOfRangeNeedNonNegNum(ExceptionArgument.inputOffset);
             if ((uint)inputCount > inputBuffer.Length) ThrowArgumentInvalidValue(ExceptionArgument.inputCount);
+            if (inputOffset < 0) ThrowArgumentOutOfRangeNeedNonNegNum(ExceptionArgument.inputOffset);
             if ((inputBuffer.Length - inputCount) < inputOffset) ThrowInvalidOffLen();
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, int inputBlockSize)
         {
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
