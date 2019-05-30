@@ -84,13 +84,15 @@ namespace System.Text.Json.Serialization
 
         private static void HandleEndDictionary(JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            if (state.Current.IsImmutableDictionaryProperty)
+            if (state.Current.IsDictionaryProperty)
             {
-                if (state.Current.TempDictionaryValues != null)
-                {
-                    state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, CreateImmutableDictionaryFromTempValues(ref state, options));
-                }
-
+                // We added the items to the dictionary already.
+                state.Current.ResetProperty();
+            }
+            else if (state.Current.IsImmutableDictionaryProperty)
+            {
+                Debug.Assert(state.Current.TempDictionaryValues != null);
+                state.Current.JsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, CreateImmutableDictionaryFromTempValues(ref state, options));
                 state.Current.ResetProperty();
             }
             else
