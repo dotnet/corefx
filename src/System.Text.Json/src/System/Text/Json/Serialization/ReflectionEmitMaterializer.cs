@@ -19,7 +19,7 @@ namespace System.Text.Json.Serialization
 
             if (realMethod == null && !type.IsValueType)
             {
-                return null;
+                ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(type);
             }
 
             var dynamicMethod = new DynamicMethod(
