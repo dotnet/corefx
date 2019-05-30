@@ -9,6 +9,7 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,8 +44,6 @@ namespace System.Net.Test.Common
         public int Connections => _connections;
         public List<ReceivedRequest> Requests => _requests;
         public Uri Uri => _uri;
-
-        public event ErrorEventHandler Errors;
 
         private LoopbackProxyServer(Options options)
         {
@@ -82,7 +81,7 @@ namespace System.Net.Test.Common
                             }
                             catch (Exception ex)
                             {
-                                Errors?.Invoke(this, new ErrorEventArgs(ex));
+                                EventSourceTestLogging.Log.TestAncillaryError(ex);
                             }
                         });
 
@@ -96,7 +95,7 @@ namespace System.Net.Test.Common
                 }
                 catch (Exception ex)
                 {
-                    Errors?.Invoke(this, new ErrorEventArgs(ex));
+                    EventSourceTestLogging.Log.TestAncillaryError(ex);
                 }
 
                 try
@@ -105,7 +104,7 @@ namespace System.Net.Test.Common
                 }
                 catch (Exception ex)
                 {
-                    Errors?.Invoke(this, new ErrorEventArgs(ex));
+                    EventSourceTestLogging.Log.TestAncillaryError(ex);
                 }
 
                 _serverStopped.Set();
@@ -116,7 +115,7 @@ namespace System.Net.Test.Common
         {
             Interlocked.Increment(ref _connections);
 
-            using (var ns = new NetworkStream(s, true))
+            using (var ns = new NetworkStream(s, ownsSocket: true))
             using (var reader = new StreamReader(ns))
             using (var writer = new StreamWriter(ns) { AutoFlush = true })
             {
@@ -243,18 +242,9 @@ namespace System.Net.Test.Common
                     await clientStream.CopyToAsync(serverStream).ConfigureAwait(false);
                     serverSocket.Shutdown(SocketShutdown.Send);
                 }
-                catch (IOException ex) when (IsRudeDisconnect(ex))
+                catch (Exception ex)
                 {
-                    // Ignore rude disconnects from either side.
-                    // Close sockets to abort the other task.
-                    clientStream.Close();
-                    serverStream.Close();
-                }
-                catch
-                {
-                    clientStream.Close();
-                    serverStream.Close();
-                    throw;
+                    HandleExceptions(ex);
                 }
             });
 
@@ -265,27 +255,52 @@ namespace System.Net.Test.Common
                     await serverStream.CopyToAsync(clientStream).ConfigureAwait(false);
                     clientSocket.Shutdown(SocketShutdown.Send);
                 }
-                catch (IOException ex) when (IsRudeDisconnect(ex))
+                catch (Exception ex)
                 {
-                    // Ignore rude disconnects from either side.
-                    // Close sockets to abort the other task.
-                    clientStream.Close();
-                    serverStream.Close();
-                }
-                catch
-                {
-                    clientStream.Close();
-                    serverStream.Close();
-                    throw;
+                    HandleExceptions(ex);
                 }
             });
 
             await Task.WhenAll(new[] { clientCopyTask, serverCopyTask }).ConfigureAwait(false);
-        }
 
-        static bool IsRudeDisconnect(IOException ex) =>
-            ex.InnerException is SocketException sockEx
-            && (sockEx.SocketErrorCode == SocketError.ConnectionAborted || sockEx.SocketErrorCode == SocketError.ConnectionReset || sockEx.SocketErrorCode == SocketError.OperationAborted);
+            /// <summary>Closes sockets to cause both tasks to end, and eats connection reset/aborted errors.</summary>
+            void HandleExceptions(Exception ex)
+            {
+                SocketError sockErr = (ex.InnerException as SocketException)?.SocketErrorCode ?? SocketError.Success;
+
+                // if aborted, the other task failed and is asking this task to end.
+
+                if (sockErr == SocketError.OperationAborted)
+                {
+                    return;
+                }
+
+                // ask the other task to end by disposing, causing OperationAborted.
+
+                try
+                {
+                    clientSocket.Close();
+                }
+                catch(ObjectDisposedException)
+                {
+                }
+
+                try
+                {
+                    serverSocket.Close();
+                }
+                catch (ObjectDisposedException)
+                {
+                }
+
+                // eat reset/abort.
+
+                if (sockErr != SocketError.ConnectionReset && sockErr != SocketError.ConnectionAborted)
+                {
+                    ExceptionDispatchInfo.Throw(ex);
+                }
+            }
+        }
 
         private void Send200Response(StreamWriter writer)
         {
