@@ -242,7 +242,8 @@ namespace System.IO.Tests
         {
             Assert.Throws<ArgumentException>(paramName, () => Path.GetFullPath(path, basePath));
         }
-
+        
+        [ActiveIssue(38066, TestPlatforms.AnyUnix)]
         [Theory,
             MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
         public void TrimEndingDirectorySeparator_String_CoreTests(string path, string expected)
@@ -252,6 +253,7 @@ namespace System.IO.Tests
             Assert.Same(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
         }
 
+        [ActiveIssue(38066, TestPlatforms.AnyUnix)]
         [Theory,
             MemberData(nameof(TestData_TrimEndingDirectorySeparator))]
         public void TrimEndingDirectorySeparator_ReadOnlySpan_CoreTests(string path, string expected)
@@ -261,6 +263,7 @@ namespace System.IO.Tests
             PathAssert.Equal(trimmed, Path.TrimEndingDirectorySeparator(trimmed));
         }
 
+        [ActiveIssue(38066, TestPlatforms.AnyUnix)]
         [Theory,
             MemberData(nameof(TestData_EndsInDirectorySeparator))]
         public void EndsInDirectorySeparator_String_CoreTests(string path, bool expected)
@@ -268,6 +271,7 @@ namespace System.IO.Tests
             Assert.Equal(expected, Path.EndsInDirectorySeparator(path));
         }
 
+        [ActiveIssue(38066, TestPlatforms.AnyUnix)]
         [Theory,
             MemberData(nameof(TestData_EndsInDirectorySeparator))]
         public void EndsInDirectorySeparator_ReadOnlySpan_CoreTests(string path, bool expected)
