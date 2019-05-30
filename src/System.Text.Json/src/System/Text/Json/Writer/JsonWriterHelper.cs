@@ -120,6 +120,20 @@ namespace System.Text.Json
                 ThrowHelper.ThrowArgumentException(propertyName, value);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidatePropertyAndBytes(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> bytes)
+        {
+            if (propertyName.Length > JsonConstants.MaxCharacterTokenSize || bytes.Length > JsonConstants.MaxBase46ValueTokenSize)
+                ThrowHelper.ThrowArgumentException(propertyName, bytes);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidatePropertyAndBytes(ReadOnlySpan<byte> propertyName, ReadOnlySpan<byte> bytes)
+        {
+            if (propertyName.Length > JsonConstants.MaxTokenSize || bytes.Length > JsonConstants.MaxBase46ValueTokenSize)
+                ThrowHelper.ThrowArgumentException(propertyName, bytes);
+        }
+
         internal static void ValidateNumber(ReadOnlySpan<byte> utf8FormattedNumber)
         {
             // This is a simplified version of the number reader from Utf8JsonReader.TryGetNumber,
