@@ -445,25 +445,6 @@ namespace System.Tests
             Assert.Equal(expected, TimeSpan.FromMilliseconds(value));
         }
 
-        public static IEnumerable<object[]> FromMilliseconds_TestData_Desktop()
-        {
-            yield return new object[] { 1500.5, new TimeSpan(15010000) };
-            yield return new object[] { 2.5, new TimeSpan(30000) };
-            yield return new object[] { 1.0, new TimeSpan(10000) };
-            yield return new object[] { 0.0, new TimeSpan(0) };
-            yield return new object[] { -1.0, new TimeSpan(-10000) };
-            yield return new object[] { -2.5, new TimeSpan(-30000) };
-            yield return new object[] { -1500.5, new TimeSpan(-15010000) };
-        }
-
-        [Theory]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        [MemberData(nameof(FromMilliseconds_TestData_Desktop))]
-        public static void FromMilliseconds_Desktop(double value, TimeSpan expected)
-        {
-            Assert.Equal(expected, TimeSpan.FromMilliseconds(value));
-        }
-
         [Fact]
         public static void FromMilliseconds_Invalid()
         {
