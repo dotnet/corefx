@@ -36,12 +36,12 @@ namespace System.Security.Cryptography
             Span<byte> input = inputBuffer.AsSpan(inputOffset, InputBlockSize);
             Span<byte> output = outputBuffer.AsSpan(outputOffset, OutputBlockSize);
 
-            OperationStatus status = Base64.EncodeToUtf8(input, output, out int consumed, out int written);
+            OperationStatus status = Base64.EncodeToUtf8(input, output, out int consumed, out int written, isFinalBlock: false);
 
             if (written != OutputBlockSize)
                 ThrowHelper.ThrowCryptographicException();
 
-            Debug.Assert(status == OperationStatus.Done);
+            Debug.Assert(status == OperationStatus.NeedMoreData);
             Debug.Assert(consumed == InputBlockSize);
 
             return written;
@@ -67,7 +67,7 @@ namespace System.Security.Cryptography
             Span<byte> input = inputBuffer.AsSpan(inputOffset, inputCount);
             byte[] output = new byte[OutputBlockSize];
 
-            OperationStatus status = Base64.EncodeToUtf8(input, output, out int consumed, out int written);
+            OperationStatus status = Base64.EncodeToUtf8(input, output, out int consumed, out int written, isFinalBlock: true);
 
             if (written != OutputBlockSize)
                 ThrowHelper.ThrowCryptographicException();
@@ -185,21 +185,12 @@ namespace System.Security.Cryptography
                 return Array.Empty<byte>();
             }
 
-            int maxOutputSize = Base64.GetMaxDecodedFromUtf8Length(bytesToTransform);
-            byte[] resultBufferArray = null;
+            int outputSize = GetOutputSize(bytesToTransform, tmpBuffer);
+            byte[] output = new byte[outputSize];
 
-            // The common case for inputCount <= 4 results in maxOutputSize <= 3
-            Span<byte> resultBuffer = maxOutputSize <= 3
-                ? stackalloc byte[4]
-                : maxOutputSize <= 256
-                    ? stackalloc byte[256]
-                    : resultBufferArray = ArrayPool<byte>.Shared.Rent(maxOutputSize);
-
-            ConvertFromBase64(tmpBuffer, resultBuffer, out int consumed, out int written);
+            ConvertFromBase64(tmpBuffer, output, out int consumed, out int written);
             Debug.Assert(consumed == bytesToTransform);
-
-            resultBuffer = resultBuffer.Slice(0, written);
-            byte[] result = resultBuffer.ToArray();
+            Debug.Assert(written == outputSize);
 
             if (tmpBufferArray != null)
             {
@@ -207,16 +198,10 @@ namespace System.Security.Cryptography
                 ArrayPool<byte>.Shared.Return(tmpBufferArray);
             }
 
-            if (resultBufferArray != null)
-            {
-                resultBuffer.Clear();
-                ArrayPool<byte>.Shared.Return(resultBufferArray);
-            }
-
             // reinitialize the transform
             Reset();
 
-            return result;
+            return output;
         }
 
         private Span<byte> GetTempBuffer(Span<byte> inputBuffer, Span<byte> tmpBuffer)
@@ -259,6 +244,21 @@ namespace System.Security.Cryptography
 
             // https://github.com/dotnet/coreclr/issues/914
             return value == 32 || ((uint)value - 9 <= (13 - 9)) ? true : false;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private int GetOutputSize(int bytesToTransform, Span<byte> tmpBuffer)
+        {
+            int outputSize = Base64.GetMaxDecodedFromUtf8Length(bytesToTransform);
+
+            const byte padding = (byte)'=';
+            int len = tmpBuffer.Length;
+
+            // In Base64 there are maximum 2 padding chars
+            if (tmpBuffer[len - 2] == padding) outputSize--;
+            if (tmpBuffer[len - 1] == padding) outputSize--;
+
+            return outputSize;
         }
 
         private void ConvertFromBase64(Span<byte> tmpBuffer, Span<byte> outputBuffer, out int consumed, out int written)
