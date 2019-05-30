@@ -152,7 +152,7 @@ namespace System.Text.Json.Serialization.Tests
             InlineData(10),
             InlineData(20),
             InlineData(1024)]
-        public static void ReadFromStream(int defaultBufferSize)
+        public void ReadJsonElementFromStream(int defaultBufferSize)
         {
             // Streams need to read ahead when they hit objects or arrays that are assigned to JsonElement or object.
 
@@ -163,6 +163,15 @@ namespace System.Text.Json.Serialization.Tests
             data = Encoding.UTF8.GetBytes(@"[1,true,{""City"":""MyCity""},null,""foo""]");
             stream = new MemoryStream(data);
             obj = JsonSerializer.ReadAsync<JsonElement>(stream, new JsonSerializerOptions { DefaultBufferSize = defaultBufferSize }).Result;
+
+            // Ensure we fail with incomplete data
+            data = Encoding.UTF8.GetBytes(@"{""Data"":[1,true,{""City"":""MyCity""},null,""foo""]");
+            stream = new MemoryStream(data);
+            Assert.Throws<JsonException>(() => JsonSerializer.ReadAsync<JsonElement>(stream, new JsonSerializerOptions { DefaultBufferSize = defaultBufferSize }).Result);
+
+            data = Encoding.UTF8.GetBytes(@"[1,true,{""City"":""MyCity""},null,""foo""");
+            stream = new MemoryStream(data);
+            Assert.Throws<JsonException>(() => JsonSerializer.ReadAsync<JsonElement>(stream, new JsonSerializerOptions { DefaultBufferSize = defaultBufferSize }).Result);
         }
     }
 }
