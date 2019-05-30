@@ -85,6 +85,25 @@ namespace System.Text.Json
         }
 
         /// <summary>
+        /// Parses the current JSON token value from the source and decodes the <see cref="Base64"/> encoded JSON string as bytes.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
+        /// <seealso cref="TokenType" />
+        /// It will also throw when the JSON string contains data outside of the expected base 64 range, or if it contains invalid/more than two padding characters,
+        /// or is incomplete (i.e. the JSON string length is not a multiple of 4).
+        /// </exception>
+        public byte[] GetBytes()
+        {
+            if (!TryGetBytes(out byte[] value))
+            {
+                throw ThrowHelper.GetInvalidOperationException_ReadInvalidBase64();
+            }
+
+            return value;
+        }
+
+        /// <summary>
         /// Parses the current JSON token value from the source as an <see cref="int"/>.
         /// Returns the value if the entire UTF-8 encoded token value can be successfully parsed to an <see cref="int"/>
         /// value.
@@ -318,6 +337,36 @@ namespace System.Text.Json
             }
 
             return value;
+        }
+
+        /// <summary>
+        /// Parses the current JSON token value from the source and decodes the <see cref="Base64"/> encoded JSON string as bytes.
+        /// Returns true if the entire token value is encoded as valid <see cref="Base64"/> text and can be successfully
+        /// decoded to <see cref="Base64"/> bytes.
+        /// Returns false otherwise.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        public bool TryGetBytes(out byte[] value)
+        {
+            if (TokenType != JsonTokenType.String)
+            {
+                throw ThrowHelper.GetInvalidOperationException_ExpectedString(TokenType);
+            }
+
+            ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
+
+            if (_stringHasEscaping)
+            {
+                int idx = span.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(idx != -1);
+                return JsonReaderHelper.TryGetUnescapedBase64Bytes(span, idx, out value);
+            }
+
+            Debug.Assert(span.IndexOf(JsonConstants.BackSlash) == -1);
+            return JsonReaderHelper.TryDecoderHelper(span, out value);
         }
 
         /// <summary>

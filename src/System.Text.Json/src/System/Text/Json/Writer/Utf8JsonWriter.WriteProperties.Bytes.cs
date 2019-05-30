@@ -65,9 +65,6 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        /// <remarks>
-        /// Writes the <see cref="DateTime"/> using the round-trippable ('O') <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
-        /// </remarks>
         public void WriteAsBase64String(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
@@ -92,9 +89,6 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        /// <remarks>
-        /// Writes the <see cref="DateTime"/> using the round-trippable ('O') <see cref="StandardFormat"/> , for example: 2017-06-12T05:30:45.7680000.
-        /// </remarks>
         public void WriteAsBase64String(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidateProperty(utf8PropertyName);
@@ -188,11 +182,11 @@ namespace System.Text.Json
             ValidateWritingProperty();
             if (Options.Indented)
             {
-                WriteStringIndented(propertyName, bytes);
+                WriteBase64Indented(propertyName, bytes);
             }
             else
             {
-                WriteStringMinimized(propertyName, bytes);
+                WriteBase64Minimized(propertyName, bytes);
             }
         }
 

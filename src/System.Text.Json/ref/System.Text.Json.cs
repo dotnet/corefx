@@ -203,7 +203,7 @@ namespace System.Text.Json
         public string GetComment() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
-        //public byte[] GetBytes() { throw null; }
+        public byte[] GetBytes() { throw null; }
         public System.Guid GetGuid() { throw null; }
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
@@ -229,7 +229,7 @@ namespace System.Text.Json
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt64(out ulong value) { throw null; }
-        //public byte[] TryGetBytes() { throw null; }
+        public bool TryGetBytes(out byte[] value) { throw null; }
         public bool TrySkip() { throw null; }
     }
     public sealed partial class Utf8JsonWriter : System.IDisposable

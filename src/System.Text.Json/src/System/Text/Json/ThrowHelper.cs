@@ -420,6 +420,11 @@ namespace System.Text.Json
             return new InvalidOperationException(SR.CannotTranscodeInvalidUtf8, innerException);
         }
 
+        public static InvalidOperationException GetInvalidOperationException_ReadInvalidBase64()
+        {
+            return new InvalidOperationException(SR.CannotDecodeInvalidBase64);
+        }
+
         public static ArgumentException GetArgumentException_ReadInvalidUTF16(EncoderFallbackException innerException)
         {
             return new ArgumentException(SR.CannotTranscodeInvalidUtf16, innerException);
