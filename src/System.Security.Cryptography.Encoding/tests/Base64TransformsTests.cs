@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.IO;
-using Test.Cryptography;
 using Xunit;
 
 namespace System.Security.Cryptography.Encoding.Tests
@@ -61,7 +60,7 @@ namespace System.Security.Cryptography.Encoding.Tests
                 InvalidInput_Base64Transform(transform);
 
                 // These exceptions only thrown in ToBase
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("offsetOut", () => transform.TransformFinalBlock(data_5bytes, 0, 5));
+                AssertExtensions.Throws<ArgumentException>(null, () => transform.TransformFinalBlock(data_5bytes, 0, 5));
             }
         }
 
@@ -75,7 +74,7 @@ namespace System.Security.Cryptography.Encoding.Tests
 
             // These exceptions only thrown in FromBase
             transform.Dispose();
-            Assert.Throws<ObjectDisposedException>(() => transform.TransformBlock(data_4bytes, 0, 4, null, 0));
+            Assert.Throws<ObjectDisposedException>(() => transform.TransformBlock(data_4bytes, 0, 4, Array.Empty<byte>(), 0));
             Assert.Throws<ObjectDisposedException>(() => transform.TransformFinalBlock(Array.Empty<byte>(), 0, 0));
         }
 
@@ -85,7 +84,7 @@ namespace System.Security.Cryptography.Encoding.Tests
 
             AssertExtensions.Throws<ArgumentNullException>("inputBuffer", () => transform.TransformBlock(null, 0, 0, null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("inputOffset", () => transform.TransformBlock(Array.Empty<byte>(), -1, 0, null, 0));
-            AssertExtensions.Throws<ArgumentNullException>("dst", () => transform.TransformBlock(data_4bytes, 0, 4, null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("outputBuffer", () => transform.TransformBlock(data_4bytes, 0, 4, null, 0));
             AssertExtensions.Throws<ArgumentException>(null, () => transform.TransformBlock(Array.Empty<byte>(), 0, 1, null, 0));
             AssertExtensions.Throws<ArgumentException>(null, () => transform.TransformBlock(Array.Empty<byte>(), 1, 0, null, 0));
 
@@ -147,7 +146,7 @@ namespace System.Security.Cryptography.Encoding.Tests
                 Assert.True(inputBytes.Length > 4);
 
                 // Test passing blocks > 4 characters to TransformFinalBlock (not supported)
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("offsetOut", () => transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length));
+                AssertExtensions.Throws<ArgumentException>(null, () => transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length));
             }
         }
 
