@@ -229,19 +229,36 @@ namespace System.Security.Cryptography
             return DiscardWhiteSpaces(inputBuffer, tmpBuffer);
         }
 
-        private Span<byte> DiscardWhiteSpaces(Span<byte> inputBuffer, Span<byte> tmpBuffer)
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Span<byte> DiscardWhiteSpaces(Span<byte> inputBuffer, Span<byte> tmpBuffer)
         {
             int count = 0;
 
             for (int i = 0; i < inputBuffer.Length; i++)
             {
-                if (!char.IsWhiteSpace((char)inputBuffer[i]))
+                if (!IsWhitespace(inputBuffer[i]))
                 {
                     tmpBuffer[count++] = inputBuffer[i];
                 }
             }
 
             return tmpBuffer.Slice(0, count);
+        }
+
+        private static bool IsWhitespace(byte value)
+        {
+            // We assume ASCII encoded data. If there is any non-ASCII char, so it is invalid
+            // Base64 and will be caught during decoding.
+
+            // SPACE        32
+            // TAB           9
+            // LF           10
+            // VTAB         11
+            // FORM FEED    12
+            // CR           13
+
+            // https://github.com/dotnet/coreclr/issues/914
+            return value == 32 || ((uint)value - 9 <= (13 - 9)) ? true : false;
         }
 
         private void ConvertFromBase64(Span<byte> tmpBuffer, Span<byte> outputBuffer, out int consumed, out int written)
