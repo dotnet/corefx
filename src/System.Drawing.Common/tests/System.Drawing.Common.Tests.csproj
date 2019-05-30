@@ -104,7 +104,7 @@
     <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\content\bitmaps\invalid.ico">
       <LogicalName>System.Drawing.Tests.invalid.ico</LogicalName>
     </EmbeddedResource>
-	  <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\content\bitmaps\256x256_one_entry_32bit.ico">
+    <EmbeddedResource Include="$(PkgSystem_Drawing_Common_TestData)\content\bitmaps\256x256_one_entry_32bit.ico">
       <LogicalName>System.Drawing.Tests.Icon_toolboxBitmapAttributeTest</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
