@@ -12,6 +12,8 @@ namespace System.Drawing.Primitives.Tests
 {
     public partial class ColorTests
     {
+        public static bool SupportsSystemEvents => PlatformDetection.IsWindows && !PlatformDetection.IsUap && PlatformDetection.IsNotWindowsNanoServer;
+
         public static readonly IEnumerable<object[]> NamedArgbValues =
             new[]
             {
@@ -493,8 +495,7 @@ namespace System.Drawing.Primitives.Tests
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.FromArgb(4, 3, 2, 1));
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(SupportsSystemEvents))]
         public void UserPreferenceChangingEventTest()
         {
             int element = 12; // Win32SystemColors.AppWorkSpace.
