@@ -29,9 +29,16 @@ namespace System.Text.Json.Serialization
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
 
-            if (classInfo.ClassType == ClassType.Object && classInfo.CreateObject is null)
+            if (classInfo.CreateObject is null && classInfo.ClassType == ClassType.Object)
             {
-                ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(classInfo.Type);
+                if (classInfo.Type.IsInterface)
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializePolymorphicInterface(classInfo.Type);
+                }
+                else
+                {
+                    ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(classInfo.Type);
+                }
             }
 
             state.Current.ReturnValue = classInfo.CreateObject();

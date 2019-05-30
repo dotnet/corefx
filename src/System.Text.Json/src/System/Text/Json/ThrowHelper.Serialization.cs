@@ -128,5 +128,11 @@ namespace System.Text.Json
         {
             throw new InvalidOperationException(SR.Format(SR.DeserializeMissingParameterlessConstructor, invalidType));
         }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static void ThrowInvalidOperationException_DeserializePolymorphicInterface(Type invalidType)
+        {
+            throw new InvalidOperationException(SR.Format(SR.DeserializePolymorphicInterface, invalidType));
+        }
     }
 }

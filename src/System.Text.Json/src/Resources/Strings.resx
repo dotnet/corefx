@@ -371,4 +371,7 @@
   <data name="DeserializeMissingParameterlessConstructor" xml:space="preserve">
     <value>Deserialization of reference types without parameterless constructor is not supported. Type {0}</value>
   </data>
+  <data name="DeserializePolymorphicInterface" xml:space="preserve">
+    <value>Deserialization of interface types is not supported. Type {0}</value>
+  </data>
 </root>
