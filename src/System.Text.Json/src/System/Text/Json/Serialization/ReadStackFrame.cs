@@ -55,9 +55,9 @@ namespace System.Text.Json.Serialization
             !JsonPropertyInfo.IsPropertyPolicy &&
             JsonPropertyInfo.ClassType == ClassType.Enumerable;
 
-        public bool IsProcessingImmutableDictionary => IsImmutableDictionary || IsImmutableDictionaryProperty;
-        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsDictionary || IsImmutableDictionary;
+        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsProcessingDictionary || IsProcessingImmutableDictionary;
         public bool IsProcessingDictionary => IsDictionary || IsDictionaryProperty;
+        public bool IsProcessingImmutableDictionary => IsImmutableDictionary || IsImmutableDictionaryProperty;
         public bool IsProcessingEnumerable => IsEnumerable || IsEnumerableProperty;
 
         public bool IsProcessingValue
