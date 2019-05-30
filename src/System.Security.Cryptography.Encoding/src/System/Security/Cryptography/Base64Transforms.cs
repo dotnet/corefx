@@ -164,9 +164,8 @@ namespace System.Security.Cryptography
                 return Array.Empty<byte>();
             }
 
-            byte[] tmpBufferArray = null;
-
             // The common case is <= 4
+            byte[] tmpBufferArray = null;
             Span<byte> tmpBuffer = inputCount <= 4
                 ? stackalloc byte[4]
                 : inputCount <= 256
@@ -265,9 +264,8 @@ namespace System.Security.Cryptography
         {
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
 
-            byte[] transformBufferArray = null;
-
             // Common case for bytesToTransform = 4
+            byte[] transformBufferArray = null;
             Span<byte> transformBuffer = bytesToTransform <= 4
                 ? stackalloc byte[4]
                 : bytesToTransform <= 256
