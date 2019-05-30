@@ -24,7 +24,7 @@ namespace System.Text.Json.Serialization.Converters
             writer.WriteNumberValue(value);
         }
 
-        public override void Write(in JsonEncodedText propertyName, ulong value, Utf8JsonWriter writer)
+        public override void Write(JsonEncodedText propertyName, ulong value, Utf8JsonWriter writer)
         {
             writer.WriteNumber(propertyName, value);
         }

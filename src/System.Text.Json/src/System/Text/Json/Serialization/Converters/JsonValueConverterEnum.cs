@@ -77,7 +77,7 @@ namespace System.Text.Json.Serialization.Converters
             }
         }
 
-        public override void Write(in JsonEncodedText propertyName, TValue value, Utf8JsonWriter writer)
+        public override void Write(JsonEncodedText propertyName, TValue value, Utf8JsonWriter writer)
         {
             if (TreatAsString)
             {

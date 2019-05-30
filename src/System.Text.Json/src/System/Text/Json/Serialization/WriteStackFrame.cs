@@ -73,7 +73,7 @@ namespace System.Text.Json.Serialization
             }
         }
 
-        private void WriteObjectOrArrayStart(ClassType classType, in JsonEncodedText propertyName, Utf8JsonWriter writer, bool writeNull)
+        private void WriteObjectOrArrayStart(ClassType classType, JsonEncodedText propertyName, Utf8JsonWriter writer, bool writeNull)
         {
             if (writeNull)
             {

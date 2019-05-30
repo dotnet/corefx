@@ -32,7 +32,7 @@ namespace System.Text.Json.Serialization.Converters
                 );
         }
 
-        public override void Write(in JsonEncodedText propertyName, char value, Utf8JsonWriter writer)
+        public override void Write(JsonEncodedText propertyName, char value, Utf8JsonWriter writer)
         {
             writer.WriteString(propertyName,
 #if BUILDING_INBOX_LIBRARY
