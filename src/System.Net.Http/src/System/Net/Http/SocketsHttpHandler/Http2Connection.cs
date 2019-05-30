@@ -964,7 +964,7 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool flush = false)
+        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool mustFlush = false)
         {
             // Ensure we don't exceed the max concurrent streams setting.
             await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
@@ -1018,7 +1018,7 @@ namespace System.Net.Http
 
                 // If this is not the end of the stream, we can put off flushing the buffer
                 // since we know that there are going to be data frames following.
-                FinishWrite(mustFlush: flush || (flags & FrameFlags.EndStream) != 0);
+                FinishWrite(mustFlush: mustFlush || (flags & FrameFlags.EndStream) != 0);
             }
             catch
             {
@@ -1365,7 +1365,7 @@ namespace System.Net.Http
                 // Send headers
                 bool shouldExpectContinue = request.Content != null && request.HasHeaders && request.Headers.ExpectContinue == true;
 
-                http2Stream = await SendHeadersAsync(request, cancellationToken, flush: shouldExpectContinue).ConfigureAwait(false);
+                http2Stream = await SendHeadersAsync(request, cancellationToken, mustFlush: shouldExpectContinue).ConfigureAwait(false);
                 if (shouldExpectContinue)
                 {
                     // Send header and wait a little bit to see if server sends 100, reject code or nothing.
@@ -1388,8 +1388,7 @@ namespace System.Net.Http
                         // Wait for response headers again.
                         await responseHeadersTask.ConfigureAwait(false);
                     }
-
-                    if (bodyTask != null)
+                    else
                     {
                         if (bodyTask.IsCompleted)
                         {
@@ -1401,7 +1400,7 @@ namespace System.Net.Http
                         {
                              _ = bodyTask.ContinueWith((t, state) => {
                                 Http2Connection c = (Http2Connection)state;
-                                if (NetEventSource.IsEnabled) c.Trace($"SendRequestBody Task failed.");
+                                if (NetEventSource.IsEnabled) c.Trace($"SendRequestBody Task failed. {t.Exception}");
                              }, this, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
                              bodyTask = null;
                         }
