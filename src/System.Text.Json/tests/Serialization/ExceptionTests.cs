@@ -91,6 +91,27 @@ namespace System.Text.Json.Serialization.Tests
             {
                 Assert.Equal("$.Key2", e.Path);
             }
+
+            try
+            {
+                JsonSerializer.Parse<Dictionary<string, int>>(@"{""Key1"":1, ""Key2"":");
+                Assert.True(false, "Expected JsonException was not thrown.");
+            }
+            catch (JsonException e)
+            {
+                Assert.Equal("$.Key2", e.Path);
+            }
+
+            try
+            {
+                JsonSerializer.Parse<Dictionary<string, int>>(@"{""Key1"":1, ""Key2""");
+                Assert.True(false, "Expected JsonException was not thrown.");
+            }
+            catch (JsonException e)
+            {
+                // Key2 is not yet a valid key name since there is no : delimiter.
+                Assert.Equal("$.Key1", e.Path);
+            }
         }
 
         [Fact]
@@ -103,6 +124,38 @@ namespace System.Text.Json.Serialization.Tests
             }
             catch (JsonException e)
             {
+                Assert.Equal("$[1]", e.Path);
+            }
+
+            try
+            {
+                JsonSerializer.Parse<int[]>(@"[1,");
+                Assert.True(false, "Expected JsonException was not thrown.");
+            }
+            catch (JsonException e)
+            {
+                Assert.Equal("$[1]", e.Path);
+            }
+
+            try
+            {
+                JsonSerializer.Parse<int[]>(@"[1");
+                Assert.True(false, "Expected JsonException was not thrown.");
+            }
+            catch (JsonException e)
+            {
+                // No delimiter.
+                Assert.Equal("$[0]", e.Path);
+            }
+
+            try
+            {
+                JsonSerializer.Parse<int[]>(@"[1 /* comment starts but doesn't end");
+                Assert.True(false, "Expected JsonException was not thrown.");
+            }
+            catch (JsonException e)
+            {
+                // The reader treats the space as a delimiter.
                 Assert.Equal("$[1]", e.Path);
             }
         }
@@ -154,12 +207,12 @@ namespace System.Text.Json.Serialization.Tests
         {
             try
             {
-                JsonSerializer.Parse<RootClass>(@"{""ChildClass"":{""MyInt"":bad]}");
+                JsonSerializer.Parse<RootClass>(@"{""Child"":{""MyInt"":bad]}");
                 Assert.True(false, "Expected JsonException was not thrown.");
             }
             catch (JsonException e)
             {
-                Assert.Equal("$.ChildClass.MyInt", e.Path);
+                Assert.Equal("$.Child.MyInt", e.Path);
             }
         }
 
@@ -168,12 +221,12 @@ namespace System.Text.Json.Serialization.Tests
         {
             try
             {
-                JsonSerializer.Parse<RootClass>(@"{""ChildClass"":{""MyIntArray"":[1, bad]}");
+                JsonSerializer.Parse<RootClass>(@"{""Child"":{""MyIntArray"":[1, bad]}");
                 Assert.True(false, "Expected JsonException was not thrown.");
             }
             catch (JsonException e)
             {
-                Assert.Equal("$.ChildClass.MyIntArray[1]", e.Path);
+                Assert.Equal("$.Child.MyIntArray[1]", e.Path);
             }
         }
 
@@ -182,26 +235,40 @@ namespace System.Text.Json.Serialization.Tests
         {
             try
             {
-                JsonSerializer.Parse<RootClass>(@"{""ChildClass"":{""MyIntDictionary"":{""Key"": bad]");
+                JsonSerializer.Parse<RootClass>(@"{""Child"":{""MyDictionary"":{""Key"": bad]");
                 Assert.True(false, "Expected JsonException was not thrown.");
             }
             catch (JsonException e)
             {
-                Assert.Equal("$.ChildClass.MyIntDictionary.Key", e.Path);
+                Assert.Equal("$.Child.MyDictionary.Key", e.Path);
             }
         }
 
         [Fact]
-        public static void PathForChildDictionaryWithSpecialCharacterFails()
+        public static void PathForSpecialCharacterFails()
         {
             try
             {
-                JsonSerializer.Parse<RootClass>(@"{""ChildClass"":{""MyIntDictionary"":{""K.e.y"": bad]");
+                JsonSerializer.Parse<RootClass>(@"{""Child"":{""MyDictionary"":{""Key1"":{""Children"":[{""MyDictionary"":{""K.e.y"":""");
                 Assert.True(false, "Expected JsonException was not thrown.");
             }
             catch (JsonException e)
             {
-                Assert.Equal("$.ChildClass.MyIntDictionary['K.e.y']", e.Path);
+                Assert.Equal("$.Child.MyDictionary.Key1.Children[0].MyDictionary['K.e.y']", e.Path);
+            }
+        }
+
+        [Fact]
+        public static void PathForSpecialCharacterNestedFails()
+        {
+            try
+            {
+                JsonSerializer.Parse<RootClass>(@"{""Child"":{""Children"":[{}, {""MyDictionary"":{""K.e.y"": {""MyInt"":bad");
+                Assert.True(false, "Expected JsonException was not thrown.");
+            }
+            catch (JsonException e)
+            {
+                Assert.Equal("$.Child.Children[1].MyDictionary['K.e.y'].MyInt", e.Path);
             }
         }
 
@@ -275,14 +342,15 @@ namespace System.Text.Json.Serialization.Tests
 
         public class RootClass
         {
-            public ChildClass ChildClass { get; set; }
+            public ChildClass Child { get; set; }
         }
 
         public class ChildClass
         {
             public int MyInt { get; set; }
             public int[] MyIntArray { get; set; }
-            public Dictionary<string, int> MyIntDictionary { get; set; }
+            public Dictionary<string, ChildClass> MyDictionary { get; set; }
+            public ChildClass[] Children { get; set; }
         }
     }
 }

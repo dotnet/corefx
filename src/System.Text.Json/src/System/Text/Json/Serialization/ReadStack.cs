@@ -53,7 +53,7 @@ namespace System.Text.Json.Serialization
 
         // Return a JSONPath using simple dot-notation when possible. When special characters are present, bracket-notation is used:
         // $.x.y[0].z
-        // $.['PropertyName.With.Special.Chars']
+        // $['PropertyName.With.Special.Chars']
         public string JsonPath
         {
             get

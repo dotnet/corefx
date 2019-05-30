@@ -90,16 +90,17 @@ namespace System.Text.Json.Serialization
 
                     if (state.Current.JsonPropertyInfo.JsonPropertyName == null)
                     {
+                        byte[] propertyNameArray = propertyName.ToArray();
                         if (options.PropertyNameCaseInsensitive)
                         {
                             // Each payload can have a different name here; remember the value on the temporary stack.
-                            state.Current.JsonPropertyName = propertyName.ToArray();
+                            state.Current.JsonPropertyName = propertyNameArray;
                         }
                         else
                         {
                             // Prevent future allocs by caching globally on the JsonPropertyInfo which is specific to a Type+PropertyName
                             // so it will match the incoming payload except when case insensitivity is enabled (which is handled above).
-                            state.Current.JsonPropertyInfo.JsonPropertyName = propertyName.ToArray();
+                            state.Current.JsonPropertyInfo.JsonPropertyName = propertyNameArray;
                         }
                     }
 

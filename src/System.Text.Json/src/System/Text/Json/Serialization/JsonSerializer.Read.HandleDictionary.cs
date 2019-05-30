@@ -24,9 +24,7 @@ namespace System.Text.Json.Serialization
             // A nested object or dictionary so push new frame.
             if (state.Current.PropertyInitialized)
             {
-                Debug.Assert(state.Current.IsDictionary);
-
-                JsonClassInfo classInfoTemp = state.Current.JsonClassInfo;
+                JsonClassInfo classInfoTemp = jsonPropertyInfo.RuntimeClassInfo;
                 state.Push();
                 state.Current.JsonClassInfo = classInfoTemp.ElementClassInfo;
                 state.Current.InitializeJsonPropertyInfo();
