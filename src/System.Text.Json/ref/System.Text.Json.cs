@@ -40,8 +40,8 @@ namespace System.Text.Json
         public bool GetBoolean() { throw null; }
         public System.DateTime GetDateTime() { throw null; }
         public System.DateTimeOffset GetDateTimeOffset() { throw null; }
-        //public byte[] GetBytes() { throw null; }
-        //public byte[] TryGetBytes() { throw null; }
+        public byte[] GetBytes() { throw null; }
+        public bool TryGetBytes(out byte[] value) { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
         public System.Guid GetGuid() { throw null; }
