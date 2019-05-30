@@ -268,20 +268,18 @@ namespace System.Net.Test.Common
             {
                 SocketError sockErr = (ex.InnerException as SocketException)?.SocketErrorCode ?? SocketError.Success;
 
-                // if aborted, the other task failed and is asking this task to end.
-
+                // If aborted, the other task failed and is asking this task to end.
                 if (sockErr == SocketError.OperationAborted)
                 {
                     return;
                 }
 
-                // ask the other task to end by disposing, causing OperationAborted.
-
+                // Ask the other task to end by disposing, causing OperationAborted.
                 try
                 {
                     clientSocket.Close();
                 }
-                catch(ObjectDisposedException)
+                catch (ObjectDisposedException)
                 {
                 }
 
@@ -293,8 +291,7 @@ namespace System.Net.Test.Common
                 {
                 }
 
-                // eat reset/abort.
-
+                // Eat reset/abort.
                 if (sockErr != SocketError.ConnectionReset && sockErr != SocketError.ConnectionAborted)
                 {
                     ExceptionDispatchInfo.Throw(ex);
