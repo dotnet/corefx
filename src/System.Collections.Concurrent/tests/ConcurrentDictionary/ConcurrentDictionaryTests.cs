@@ -678,27 +678,6 @@ namespace System.Collections.Concurrent.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, ".NET Framework hasn't received the fix for https://github.com/dotnet/corefx/issues/18432 yet.")]
-        public static void TestNullComparer_netfx()
-        {
-            Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>((IEqualityComparer<int>)null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null IEqualityComparer is passed");
-
-            Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>(new[] { new KeyValuePair<int, int>(1, 1) }, null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when non null collection and null IEqualityComparer passed");
-
-            Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>(1, new[] { new KeyValuePair<int, int>(1, 1) }, null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null comparer is passed");
-
-            Assert.Throws<ArgumentNullException>(
-               () => new ConcurrentDictionary<int, int>(1, 1, null));
-            // "TestConstructor:  FAILED.  Constructor didn't throw ANE when null comparer is passed");
-        }
-
-        [Fact]
         public static void TestConstructor_Negative()
         {
             Assert.Throws<ArgumentNullException>(
