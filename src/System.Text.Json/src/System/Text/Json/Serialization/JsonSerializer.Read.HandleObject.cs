@@ -28,6 +28,12 @@ namespace System.Text.Json.Serialization
             }
 
             JsonClassInfo classInfo = state.Current.JsonClassInfo;
+
+            if (classInfo.ClassType == ClassType.Object && classInfo.CreateObject is null)
+            {
+                ThrowHelper.ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(classInfo.Type);
+            }
+
             state.Current.ReturnValue = classInfo.CreateObject();
         }
 
