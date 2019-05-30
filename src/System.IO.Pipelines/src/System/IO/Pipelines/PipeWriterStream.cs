@@ -11,23 +11,24 @@ namespace System.IO.Pipelines
     internal sealed class PipeWriterStream : Stream
     {
         private readonly PipeWriter _pipeWriter;
-        private readonly bool _leaveOpen;
 
         public PipeWriterStream(PipeWriter pipeWriter, bool leaveOpen)
         {
             Debug.Assert(pipeWriter != null);
             _pipeWriter = pipeWriter;
-            _leaveOpen = leaveOpen;
+            LeaveOpen = leaveOpen;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (!_leaveOpen)
+            if (!LeaveOpen)
             {
                 _pipeWriter.Complete();
             }
             base.Dispose(disposing);
         }
+
+        internal bool LeaveOpen { get; set; }
 
         public override bool CanRead => false;
 

@@ -13,18 +13,17 @@ namespace System.IO.Pipelines
     internal sealed class PipeReaderStream : Stream
     {
         private readonly PipeReader _pipeReader;
-        private readonly bool _leaveOpen;
 
         public PipeReaderStream(PipeReader pipeReader, bool leaveOpen)
         {
             Debug.Assert(pipeReader != null);
             _pipeReader = pipeReader;
-            _leaveOpen = leaveOpen;
+            LeaveOpen = leaveOpen;
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (!_leaveOpen)
+            if (!LeaveOpen)
             {
                 _pipeReader.Complete();
             }
@@ -40,6 +39,8 @@ namespace System.IO.Pipelines
         public override long Length => throw new NotSupportedException();
 
         public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+        internal bool LeaveOpen { get; set; }
 
         public override void Flush()
         {
