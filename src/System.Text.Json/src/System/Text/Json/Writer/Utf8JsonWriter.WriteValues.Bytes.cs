@@ -24,7 +24,7 @@ namespace System.Text.Json
         /// </exception>
         public void WriteBase64StringValue(ReadOnlySpan<byte> bytes)
         {
-            JsonWriterHelper.ValidateValue(bytes);
+            JsonWriterHelper.ValidateBytes(bytes);
 
             WriteBase64ByOptions(bytes);
 
@@ -49,13 +49,13 @@ namespace System.Text.Json
         // TODO: https://github.com/dotnet/corefx/issues/36958
         private void WriteBase64Minimized(ReadOnlySpan<byte> bytes)
         {
-            int length = Base64.GetMaxEncodedToUtf8Length(bytes.Length);
+            int encodingLength = Base64.GetMaxEncodedToUtf8Length(bytes.Length);
 
-            Debug.Assert(length < int.MaxValue - 3);
+            Debug.Assert(encodingLength < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping) - 3);
 
-            // 2 quotes to surround the base-64 encoded string value
+            // 2 quotes to surround the base-64 encoded string value, with escaping which can by up to 6x.
             // Optionally, 1 list separator
-            int maxRequired = length + 3;
+            int maxRequired = (encodingLength * JsonConstants.MaxExpansionFactorWhileEscaping) + 3;
 
             if (_memory.Length - BytesPending < maxRequired)
             {
@@ -70,7 +70,7 @@ namespace System.Text.Json
             }
             output[BytesPending++] = JsonConstants.Quote;
 
-            Base64EncodeAndWrite(bytes, output);
+            Base64EncodeAndWrite(bytes, output, encodingLength);
 
             output[BytesPending++] = JsonConstants.Quote;
         }
@@ -81,13 +81,13 @@ namespace System.Text.Json
             int indent = Indentation;
             Debug.Assert(indent <= 2 * JsonConstants.MaxWriterDepth);
 
-            int length = Base64.GetMaxEncodedToUtf8Length(bytes.Length);
+            int encodingLength = Base64.GetMaxEncodedToUtf8Length(bytes.Length);
 
-            Debug.Assert(length < int.MaxValue - indent - 3 - s_newLineLength);
+            Debug.Assert(encodingLength < (int.MaxValue / JsonConstants.MaxExpansionFactorWhileEscaping) - indent - 3 - s_newLineLength);
 
-            // indentation + 2 quotes to surround the base-64 encoded string value
+            // indentation + 2 quotes to surround the base-64 encoded string value, with escaping which can by up to 6x.
             // Optionally, 1 list separator, and 1-2 bytes for new line
-            int maxRequired = indent + length + 3 + s_newLineLength;
+            int maxRequired = indent + (encodingLength * JsonConstants.MaxExpansionFactorWhileEscaping) + 3 + s_newLineLength;
 
             if (_memory.Length - BytesPending < maxRequired)
             {
@@ -111,7 +111,7 @@ namespace System.Text.Json
 
             output[BytesPending++] = JsonConstants.Quote;
 
-            Base64EncodeAndWrite(bytes, output);
+            Base64EncodeAndWrite(bytes, output, encodingLength);
 
             output[BytesPending++] = JsonConstants.Quote;
         }

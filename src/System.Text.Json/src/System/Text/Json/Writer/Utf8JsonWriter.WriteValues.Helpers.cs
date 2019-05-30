@@ -31,12 +31,25 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void Base64EncodeAndWrite(ReadOnlySpan<byte> bytes, Span<byte> output)
+        private void Base64EncodeAndWrite(ReadOnlySpan<byte> bytes, Span<byte> output, int encodingLength)
         {
-            OperationStatus status = Base64.EncodeToUtf8(bytes, output.Slice(BytesPending), out int consumed, out int written);
+            byte[] outputText = null;
+
+            Span<byte> encodedBytes = encodingLength <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[encodingLength] :
+                (outputText = ArrayPool<byte>.Shared.Rent(encodingLength));
+
+            OperationStatus status = Base64.EncodeToUtf8(bytes, encodedBytes, out int consumed, out int written);
             Debug.Assert(status == OperationStatus.Done);
             Debug.Assert(consumed == bytes.Length);
+
+            encodedBytes.Slice(0, written).CopyTo(output.Slice(BytesPending));
             BytesPending += written;
+
+            if (outputText != null)
+            {
+                ArrayPool<byte>.Shared.Return(outputText);
+            }
         }
     }
 }

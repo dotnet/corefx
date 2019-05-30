@@ -46,6 +46,13 @@ namespace System.Text.Json
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static void ValidateBytes(ReadOnlySpan<byte> bytes)
+        {
+            if (bytes.Length > JsonConstants.MaxBase46ValueTokenSize)
+                ThrowHelper.ThrowArgumentException_ValueTooLarge(bytes.Length);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateDouble(double value)
         {
 #if BUILDING_INBOX_LIBRARY
