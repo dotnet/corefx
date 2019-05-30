@@ -27,7 +27,7 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount, InputBlockSize);
             if (outputBuffer == null) ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
 
             // For now, only convert 3 bytes to 4
@@ -57,7 +57,7 @@ namespace System.Security.Cryptography
             }
             else if (inputCount > InputBlockSize)
             {
-                ThrowHelper.ThrowInvalidOffLen();
+                ThrowHelper.ThrowArgumentInvalidValue();
             }
 
             // Again, for now only a block at a time
@@ -117,7 +117,7 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount, InputBlockSize);
             if (outputBuffer == null) ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
 
             if (_inputBuffer == null)
@@ -322,6 +322,12 @@ namespace System.Security.Cryptography
             if (inputOffset < 0) ThrowArgumentOutOfRangeNeedNonNegNum(ExceptionArgument.inputOffset);
             if ((uint)inputCount > inputBuffer.Length) ThrowArgumentInvalidValue();
             if ((inputBuffer.Length - inputCount) < inputOffset) ThrowInvalidOffLen();
+        }
+
+        public static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, int inputBlockSize)
+        {
+            ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
+            if (inputCount != inputBlockSize) ThrowArgumentInvalidValue();
         }
 
         public static void ThrowArgumentNull(ExceptionArgument argument) => throw new ArgumentNullException(argument.ToString());
