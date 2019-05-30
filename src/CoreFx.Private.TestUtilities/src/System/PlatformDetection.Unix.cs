@@ -168,19 +168,13 @@ namespace System
                 return new Version(0, 0);
             if (index < versionString.Length)
                 versionString = versionString.Substring(0, index);
-            try
-            {
-               if (versionString.IndexOf('.') != -1)
-                   return new Version(versionString);
-
-               // minor version is required by Version
-               // let's default it to 0
-               return new Version(int.Parse(versionString), 0);
-           } catch
-           {
-               // Version number is out of range. What to do?
-               return new Version(0, 65535);
-           }
+            if (versionString.IndexOf('.') != -1)
+                return Version.TryParse(versionString, out Version version) ? version
+                    : new Version(0, 65535); // Version number is out of range. What to do?
+            // minor version is required by Version
+            // let's default it to 0
+            return int.TryParse(versionString, out int versionInt) ? new Version(versionInt, 0)
+                    : new Version(0, 65535); // Version number is out of range. What to do?
         }
 
         private static (string name, Version version) GetDistroInfo() =>
