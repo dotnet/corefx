@@ -187,6 +187,7 @@ namespace System.Security.Cryptography
 
                 if (resultBufferArray != null)
                 {
+                    resultBuffer.Clear();
                     ArrayPool<byte>.Shared.Return(resultBufferArray);
                 }
 
@@ -258,7 +259,8 @@ namespace System.Security.Cryptography
 
             if (transformBufferArray != null)
             {
-                ArrayPool<byte>.Shared.Return(transformBufferArray, clearArray: true);
+                transformBuffer.Clear();
+                ArrayPool<byte>.Shared.Return(transformBufferArray);
             }
         }
 
