@@ -157,12 +157,30 @@ namespace System
 
         static Version ToVersion(string versionString)
         {
-            if (versionString.IndexOf('.') != -1)
-                return new Version(versionString);
+            if (versionString is null)
+                return new Version(0, 0);
+            // Contrary to popular belief, platform versions in /etc/os-info aren't pure numbers.
+            int index;
+            for (index = 0; index < versionString.Length; ++index)
+                if ((versionString[index] < '0' || versionString[index] > '9') && versionString[index] != '.')
+                    break;
+            if (index == 0)
+                return new Version(0, 0);
+            if (index < versionString.Length)
+                versionString = versionString.Substring(0, index);
+            try
+            {
+               if (versionString.IndexOf('.') != -1)
+                   return new Version(versionString);
 
-            // minor version is required by Version
-            // let's default it to 0
-            return new Version(int.Parse(versionString), 0);
+               // minor version is required by Version
+               // let's default it to 0
+               return new Version(int.Parse(versionString), 0);
+           } catch
+           {
+               // Version number is out of range. What to do?
+               return new Version(0, 65535);
+           }
         }
 
         private static (string name, Version version) GetDistroInfo() =>
