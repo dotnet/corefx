@@ -93,9 +93,9 @@ namespace System.Text.Json
         /// It will also throw when the JSON string contains data outside of the expected base 64 range, or if it contains invalid/more than two padding characters,
         /// or is incomplete (i.e. the JSON string length is not a multiple of 4).
         /// </exception>
-        public byte[] GetBytes()
+        public byte[] GetBytesFromBase64()
         {
-            if (!TryGetBytes(out byte[] value))
+            if (!TryGetBytesFromBase64(out byte[] value))
             {
                 throw ThrowHelper.GetInvalidOperationException_ReadInvalidBase64();
             }
@@ -349,7 +349,7 @@ namespace System.Text.Json
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.String"/>.
         /// <seealso cref="TokenType" />
         /// </exception>
-        public bool TryGetBytes(out byte[] value)
+        public bool TryGetBytesFromBase64(out byte[] value)
         {
             if (TokenType != JsonTokenType.String)
             {

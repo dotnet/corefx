@@ -368,7 +368,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public bool TryGetBytes(out byte[] value)
+        public bool TryGetBytesFromBase64(out byte[] value)
         {
             CheckValidInstance();
 
@@ -392,9 +392,9 @@ namespace System.Text.Json
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
         /// <seealso cref="ToString"/>
-        public byte[] GetBytes()
+        public byte[] GetBytesFromBase64()
         {
-            if (TryGetBytes(out byte[] value))
+            if (TryGetBytesFromBase64(out byte[] value))
             {
                 return value;
             }

@@ -22,7 +22,7 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteAsBase64StringValue(ReadOnlySpan<byte> bytes)
+        public void WriteBase64StringValue(ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidateValue(bytes);
 

@@ -21,10 +21,10 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteAsBase64String(JsonEncodedText propertyName, ReadOnlySpan<byte> bytes)
-            => WriteAsBase64StringHelper(propertyName.EncodedUtf8Bytes, bytes);
+        public void WriteBase64String(JsonEncodedText propertyName, ReadOnlySpan<byte> bytes)
+            => WriteBase64StringHelper(propertyName.EncodedUtf8Bytes, bytes);
 
-        private void WriteAsBase64StringHelper(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> bytes)
+        private void WriteBase64StringHelper(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> bytes)
         {
             Debug.Assert(utf8PropertyName.Length <= JsonConstants.MaxTokenSize);
 
@@ -48,8 +48,8 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteAsBase64String(string propertyName, ReadOnlySpan<byte> bytes)
-            => WriteAsBase64String(propertyName.AsSpan(), bytes);
+        public void WriteBase64String(string propertyName, ReadOnlySpan<byte> bytes)
+            => WriteBase64String(propertyName.AsSpan(), bytes);
 
         /// <summary>
         /// Writes the property name and raw bytes value (as a Base64 encoded JSON string) as part of a name/value pair of a JSON object.
@@ -65,7 +65,7 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteAsBase64String(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> bytes)
+        public void WriteBase64String(ReadOnlySpan<char> propertyName, ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidateProperty(propertyName);
 
@@ -89,7 +89,7 @@ namespace System.Text.Json
         /// <exception cref="InvalidOperationException">
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
-        public void WriteAsBase64String(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> bytes)
+        public void WriteBase64String(ReadOnlySpan<byte> utf8PropertyName, ReadOnlySpan<byte> bytes)
         {
             JsonWriterHelper.ValidateProperty(utf8PropertyName);
 
