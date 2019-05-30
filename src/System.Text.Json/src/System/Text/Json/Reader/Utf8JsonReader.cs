@@ -278,7 +278,7 @@ namespace System.Text.Json
         /// or if the current depth exceeds the recursive limit set by the max depth.
         /// </exception>
         /// <remarks>
-        /// When <see cref="TokenType"/> is <see cref="JsonTokenType.PropertyName" /> the reader first moves to the property value.
+        /// When <see cref="TokenType"/> is <see cref="JsonTokenType.PropertyName" />, the reader first moves to the property value.
         /// When <see cref="TokenType"/> (originally, or after advancing) is <see cref="JsonTokenType.StartObject" /> or 
         /// <see cref="JsonTokenType.StartArray" />, the reader advances to the matching
         /// <see cref="JsonTokenType.EndObject" /> or <see cref="JsonTokenType.EndArray" />.
@@ -336,7 +336,7 @@ namespace System.Text.Json
         /// it will be reset to the state it was in before the method was called.
         /// </remarks>
         /// <remarks>
-        /// When <see cref="TokenType"/> is <see cref="JsonTokenType.PropertyName" /> the reader first moves to the property value.
+        /// When <see cref="TokenType"/> is <see cref="JsonTokenType.PropertyName" />, the reader first moves to the property value.
         /// When <see cref="TokenType"/> (originally, or after advancing) is <see cref="JsonTokenType.StartObject" /> or 
         /// <see cref="JsonTokenType.StartArray" />, the reader advances to the matching
         /// <see cref="JsonTokenType.EndObject" /> or <see cref="JsonTokenType.EndArray" />.
