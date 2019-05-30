@@ -294,7 +294,7 @@ namespace System.Net.Test.Common
                 // Eat reset/abort.
                 if (sockErr != SocketError.ConnectionReset && sockErr != SocketError.ConnectionAborted)
                 {
-                    ExceptionDispatchInfo.Throw(ex);
+                    ExceptionDispatchInfo.Capture(ex).Throw();
                 }
             }
         }
