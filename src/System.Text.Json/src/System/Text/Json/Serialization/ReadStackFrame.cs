@@ -106,6 +106,7 @@ namespace System.Text.Json.Serialization
             JsonPropertyInfo = null;
             TempEnumerableValues = null;
             JsonPropertyName = null;
+            KeyName = null;
         }
 
         public void EndObject()

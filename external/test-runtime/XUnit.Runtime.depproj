@@ -38,6 +38,7 @@
     <PackageReference Condition="'$(TargetsNetCoreApp)' == 'true'" Include="$(MicrosoftDotNetXUnitConsoleRunnerPackage)" Version="$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)" />
     <PackageReference Condition="'$(TargetsNetFx)' == 'true'" Include="$(XUnitRunnerConsolePackageName)" Version="$(XUnitPackageVersion)" />
     <PackageReference Condition="'$(TargetsUap)' == 'true'" Include="$(MicrosoftDotNetUapTestToolsPackageName)" Version="$(MicrosoftDotNetUapTestToolsPackageVersion)" />
+    <PackageReference Include="Microsoft.Diagnostics.Runtime" Version="1.0.5" />
 
     <!-- for callstack line numbers -->
     <PackageReference Include="Microsoft.DiaSymReader.Native" Version="1.5.0" />
@@ -58,6 +59,7 @@
     <PackageToInclude Include="xunit.extensibility.core" />
     <PackageToInclude Include="xunit.extensibility.execution" />
     <PackageToInclude Include="xunit.runner.utility" />
+    <PackageToInclude Include="Microsoft.Diagnostics.Runtime" />
     <PackageToInclude Include="$(MicrosoftDotNetXUnitExtensionsPackage)" />
     <PackageToInclude Include="$(MicrosoftDotNetRemoteExecutorPackage)" />
     <PackageToInclude Condition="'$(TargetsNetCoreApp)' == 'true'" Include="$(MicrosoftDotNetXUnitConsoleRunnerPackage)" />
@@ -179,7 +181,7 @@
           Condition="'$(TargetGroup)' == 'netcoreapp'"
           BeforeTargets="ResolveReferences">
 
-    <Error Condition="!Exists('$(NuGetPackageRoot)$(MicrosoftDotNetXUnitConsoleRunnerPackage)\$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)\lib\netcoreapp2.0\$(XUnitRunner).dll')"
+    <Error Condition="!Exists('$(NuGetPackageRoot)$(MicrosoftDotNetXUnitConsoleRunnerPackage)\$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)\tools\netcoreapp2.1\$(XUnitRunner).dll')"
            Text="Error: looks the package $(NuGetPackageRoot)$(MicrosoftDotNetXUnitConsoleRunnerPackage)\$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion) not restored or missing $(XUnitRunner).dll." />
     <Error Condition="'$(EnableVSTestReferences)' == 'true' AND !Exists('$(NuGetPackageRoot)$(XUnitTestAdapterPackageId)\$(XUnitPackageVersion)\build\netcoreapp1.0\$(XUnitAdapter).dll')"
            Text="Error: looks the package $(NuGetPackageRoot)$(XUnitTestAdapterPackageId)\$(XUnitPackageVersion) not restored or missing $(XUnitAdapter).dll." />
@@ -187,7 +189,7 @@
            Text="Error: looks the package $(NuGetPackageRoot)$(TestPlatformHostPackageId)\$(MicrosoftNETTestSdkPackageVersion) not restored or missing $(TestPlatformHost).dll." />
 
     <ItemGroup>
-      <ReferenceCopyLocalPaths Include="$(NuGetPackageRoot)$(MicrosoftDotNetXUnitConsoleRunnerPackage)\$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)\lib\netcoreapp2.0\*.*">
+      <ReferenceCopyLocalPaths Include="$(NuGetPackageRoot)$(MicrosoftDotNetXUnitConsoleRunnerPackage)\$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)\tools\netcoreapp2.1\*.*" Exclude="$(NuGetPackageRoot)$(MicrosoftDotNetXUnitConsoleRunnerPackage)\$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)\tools\netcoreapp2.1\xunit.core.dll">
         <Private>false</Private>
         <NuGetPackageId>$(MicrosoftDotNetXUnitConsoleRunnerPackage)</NuGetPackageId>
         <NuGetPackageVersion>$(MicrosoftDotNetXUnitConsoleRunnerPackageVersion)</NuGetPackageVersion>
