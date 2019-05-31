@@ -15,7 +15,7 @@ namespace System.Collections.Generic
         private const int DefaultCapacity = 4;
         private const int MaxCoreClrArrayLength = 0x7fefffff; // For byte arrays the limit is slightly larger
 
-        private T[] _array; // Starts out null, initialized on first Add.
+        private T[]? _array; // Starts out null, initialized on first Add.
         private int _count; // Number of items into _array we're using.
 
         /// <summary>
@@ -38,7 +38,7 @@ namespace System.Collections.Generic
         public int Capacity => _array?.Length ?? 0;
 
         /// <summary>Gets the current underlying array.</summary>
-        public T[] Buffer => _array;
+        public T[]? Buffer => _array;
 
         /// <summary>
         /// Gets the number of items in the array currently in use.
@@ -54,7 +54,7 @@ namespace System.Collections.Generic
             get
             {
                 Debug.Assert(index >= 0 && index < _count);
-                return _array[index];
+                return _array![index];
             }
         }
 
@@ -78,7 +78,7 @@ namespace System.Collections.Generic
         public T First()
         {
             Debug.Assert(_count > 0);
-            return _array[0];
+            return _array![0];
         }
 
         /// <summary>
@@ -87,7 +87,7 @@ namespace System.Collections.Generic
         public T Last()
         {
             Debug.Assert(_count > 0);
-            return _array[_count - 1];
+            return _array![_count - 1];
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace System.Collections.Generic
         {
             Debug.Assert(_count < Capacity);
 
-            _array[_count++] = item;
+            _array![_count++] = item;
         }
 
         private void EnsureCapacity(int minimum)
@@ -155,7 +155,7 @@ namespace System.Collections.Generic
             T[] next = new T[nextCapacity];
             if (_count > 0)
             {
-                Array.Copy(_array, 0, next, 0, _count);
+                Array.Copy(_array!, 0, next, 0, _count);
             }
             _array = next;
         }
