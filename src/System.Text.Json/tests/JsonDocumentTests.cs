@@ -681,6 +681,7 @@ namespace System.Text.Json.Tests
                 string street = address.GetProperty("street").GetString();
                 string city = address.GetProperty("city").GetString();
                 double zipCode = address.GetProperty("zip").GetDouble();
+                const string ThrowsAnyway = "throws-anyway";
 
                 Assert.Equal(30, age);
                 Assert.Equal("John", first);
@@ -700,10 +701,9 @@ namespace System.Text.Json.Tests
                 Assert.Throws<InvalidOperationException>(() => address.GetProperty("zip").GetString());
                 Assert.Throws<InvalidOperationException>(() => person.GetProperty("phoneNumbers").GetString());
                 Assert.Throws<InvalidOperationException>(() => person.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
             }
         }
 
@@ -838,10 +838,10 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetBytesFromBase64(out byte[] bytes));
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
@@ -930,10 +930,10 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
@@ -991,10 +991,10 @@ namespace System.Text.Json.Tests
                 Assert.Equal(value, root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
@@ -1052,10 +1052,10 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
@@ -1245,10 +1245,10 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
@@ -1317,10 +1317,10 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
@@ -1373,10 +1373,10 @@ namespace System.Text.Json.Tests
                 Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetUInt64(out ulong _));
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetBytesFromBase64(out byte[] _));
                 Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
@@ -1408,10 +1408,10 @@ namespace System.Text.Json.Tests
                 Assert.Throws<ObjectDisposedException>(() => root.GetUInt64());
                 Assert.Throws<ObjectDisposedException>(() => root.TryGetUInt64(out ulong _));
                 Assert.Throws<ObjectDisposedException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
                 Assert.Throws<ObjectDisposedException>(() => root.GetBytesFromBase64());
                 Assert.Throws<ObjectDisposedException>(() => root.TryGetBytesFromBase64(out byte[] _));
                 Assert.Throws<ObjectDisposedException>(() => root.GetBoolean());
@@ -1456,10 +1456,10 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
             Assert.Throws<InvalidOperationException>(() => root.TryGetUInt64(out ulong _));
             Assert.Throws<InvalidOperationException>(() => root.GetString());
-                const string throwsAnyway = "throws-anyway";
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(throwsAnyway.AsSpan()));
-                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)));
+            const string ThrowsAnyway = "throws-anyway";
+            Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+            Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+            Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
             Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
             Assert.Throws<InvalidOperationException>(() => root.TryGetBytesFromBase64(out byte[] _));
             Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
@@ -1510,14 +1510,20 @@ namespace System.Text.Json.Tests
         {
             // The Arabic ligature Lam-Alef (U+FEFB) (which happens to, as a standalone, mean "no" in English)
             // is UTF-8 EF BB BB.  So let's leave out a BB and put it in quotes.
-            using (JsonDocument doc = JsonDocument.Parse(new byte[] { 0x22, 0xEF, 0xBB, 0x22 }))
+            byte[] badUtf8 = new byte[] { 0x22, 0xEF, 0xBB, 0x22 };
+            using (JsonDocument doc = JsonDocument.Parse(badUtf8))
             {
                 JsonElement root = doc.RootElement;
 
+                const string ErrorMessage = "Cannot transcode invalid UTF-8 JSON text to UTF-16 string.";
                 Assert.Equal(JsonValueType.String, root.Type);
-                AssertExtensions.Throws<InvalidOperationException>(() => root.GetString(), "Cannot transcode invalid UTF-8 JSON text to UTF-16 string.");
-                // Assert.Throws<InvalidOperationException>(() => root.ValueEquals("throws-anyway")); // TODO: Fix error should throw but doesn't
+                AssertExtensions.Throws<InvalidOperationException>(() => root.GetString(), ErrorMessage);
                 Assert.Throws<InvalidOperationException>(() => root.GetRawText());
+                const string DummyString = "dummy-string";
+                Assert.False(root.ValueEquals(badUtf8));
+                Assert.False(root.ValueEquals(DummyString));
+                Assert.False(root.ValueEquals(DummyString.AsSpan()));
+                Assert.False(root.ValueEquals(Encoding.UTF8.GetBytes(DummyString)));
             }
         }
 
@@ -3076,7 +3082,7 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void ValueEquals_Null_FalseForEmptyArgsTrueForNullOrDefault()
+        public static void ValueEquals_Null_TrueForNullFalseForEmpty()
         {
             using (JsonDocument doc = JsonDocument.Parse("   null   "))
             {
@@ -3164,7 +3170,7 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData("\"connectionId\"", "\"conne\\u0063tionId\"")]
-        [InlineData("\"conne\\u0063tionId\"", "bonnecxionId")] // intentionally making mismatch after escaped character
+        [InlineData("\"conne\\u0063tionId\"", "connecxionId")] // intentionally making mismatch after escaped character
         [InlineData("\"conne\\u0063tionId\"", "bonnectionId")] // intentionally changing the expected starting character
         public static void ValueEquals_JsonTokenStringType_False(string jsonString, string otherText)
         {
@@ -3187,14 +3193,14 @@ namespace System.Text.Json.Tests
         [InlineData("{\"connectionId\" : \"123\"}")]
         public static void ValueEquals_JsonTokenNotString_Success(string jsonString)
         {
-            const string errorMessage = "The requested operation requires an element of type 'String', but the target element has type 'Object'.";
+            const string ErrorMessage = "The requested operation requires an element of type 'String', but the target element has type 'Object'.";
             using (JsonDocument doc = JsonDocument.Parse(jsonString))
             {
                 JsonElement jElement = doc.RootElement;
-                const string throwsAnyway = "throws-anyway";
-                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(throwsAnyway), errorMessage);
-                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(throwsAnyway.AsSpan()), errorMessage);
-                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(Encoding.UTF8.GetBytes(throwsAnyway)), errorMessage);
+                const string ThrowsAnyway = "throws-anyway";
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway.AsSpan()), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)), ErrorMessage);
             }
         }
 

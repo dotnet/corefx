@@ -984,10 +984,10 @@ namespace System.Text.Json
         ///   <see langword="false" /> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/> or <see cref="JsonTokenType.PropertyName"/>.
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
         /// <remarks>
-        ///   This method is functionally equal to doing an ordinal comparision of <paramref name="text" /> and
+        ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
         ///   the result of calling <see cref="GetString" />, but avoids creating the string instance.
         /// </remarks>
         public bool ValueEquals(string text)
@@ -1011,10 +1011,10 @@ namespace System.Text.Json
         ///   <paramref name="utf8Text" />, <see langword="false" /> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/> or <see cref="JsonTokenType.PropertyName"/>.
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
         /// <remarks>
-        ///   This method is functionally equal to doing an ordinal comparision of the string produced by UTF-8 decoding
+        ///   This method is functionally equal to doing an ordinal comparison of the string produced by UTF-8 decoding
         ///   <paramref name="utf8Text" /> with the result of calling <see cref="GetString" />, but avoids creating the
         ///   string instances.
         /// </remarks>
@@ -1024,6 +1024,7 @@ namespace System.Text.Json
 
             if (TokenType == JsonTokenType.Null)
             {
+                // This is different than Length == 0, in that it tests true for null, but false for ""
                 return utf8Text == default;
             }
 
@@ -1039,10 +1040,10 @@ namespace System.Text.Json
         ///   <see langword="false" /> otherwise.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/> or <see cref="JsonTokenType.PropertyName"/>.
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
         /// <remarks>
-        ///   This method is functionally equal to doing an ordinal comparision of <paramref name="text" /> and
+        ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
         ///   the result of calling <see cref="GetString" />, but avoids creating the string instance.
         /// </remarks>
         public bool ValueEquals(ReadOnlySpan<char> text)
