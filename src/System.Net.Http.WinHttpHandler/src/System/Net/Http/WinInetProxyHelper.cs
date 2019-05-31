@@ -15,7 +15,7 @@ namespace System.Net.Http
     {
         private bool _useProxy = false;
         private bool _autoDetectionFailed;
-        private long _lastTimeAutoDetectionFailed; // Environment.TickCount64 units (milliseconds).
+        private int _lastTimeAutoDetectionFailed; // Environment.TickCount units (milliseconds).
         private const int _recentAutoDetectionInterval = 120_000; // 2 minutes in milliseconds.
 
         public WinInetProxyHelper()
@@ -73,7 +73,7 @@ namespace System.Net.Http
 
         public bool RecentAutoDetectionFailure =>
             _autoDetectionFailed &&
-            Environment.TickCount64 - _lastTimeAutoDetectionFailed <= _recentAutoDetectionInterval;
+            Environment.TickCount - _lastTimeAutoDetectionFailed <= _recentAutoDetectionInterval;
 
         public bool GetProxyForUrl(
             SafeWinHttpHandle sessionHandle,
@@ -154,7 +154,7 @@ namespace System.Net.Http
                         if (lastError == Interop.WinHttp.ERROR_WINHTTP_AUTODETECTION_FAILED)
                         {
                             _autoDetectionFailed = true;
-                            _lastTimeAutoDetectionFailed = Environment.TickCount64;
+                            _lastTimeAutoDetectionFailed = Environment.TickCount;
                         }
 
                         break;
