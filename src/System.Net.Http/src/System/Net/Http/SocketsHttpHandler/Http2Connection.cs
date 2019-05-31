@@ -1378,32 +1378,35 @@ namespace System.Net.Http
                     Task bodyTask = http2Stream.SendRequestBodyAsync(cancellationToken);
                     // read response headers.
                     Task responseHeadersTask = http2Stream.ReadResponseHeadersAsync();
-                    Task finished = await Task.WhenAny(new Task[] { bodyTask, responseHeadersTask}).ConfigureAwait(false);
-                    if (finished == bodyTask)
+
+                    if (bodyTask == await Task.WhenAny(bodyTask, responseHeadersTask).ConfigureAwait(false) ||
+                        bodyTask.IsCompleted)
                     {
-                        // Sending request body finished before getting headers.
+                        // The sending of the request body completed before receiving all of the request headers.
                         Task t = bodyTask;
                         bodyTask = null;
-                        await t.ConfigureAwait(false);
-                        // Wait for response headers again.
+                        try
+                        {
+                            await t.ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            if (NetEventSource.IsEnabled) Trace($"SendRequestBody Task failed. {e}");
+                            throw;
+                        }
+
                         await responseHeadersTask.ConfigureAwait(false);
                     }
                     else
                     {
-                        if (bodyTask.IsCompleted)
-                        {
-                            Task t = bodyTask;
-                            bodyTask = null;
-                            await t.ConfigureAwait(false);
-                        }
-                        else
-                        {
-                             _ = bodyTask.ContinueWith((t, state) => {
+                        // We received the response headers but the request body hasn't yet finished.
+                        // If the connection is aborted or if we get RST or GOAWAY from server, exception will be
+                        // stored in stream._abortException and propagated to up if possible while processing response.
+                        _ = bodyTask.ContinueWith((t, state) => {
                                 Http2Connection c = (Http2Connection)state;
                                 if (NetEventSource.IsEnabled) c.Trace($"SendRequestBody Task failed. {t.Exception}");
                              }, this, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
-                             bodyTask = null;
-                        }
+                        bodyTask = null;
                     }
                 }
             }
