@@ -22,7 +22,6 @@
     <Compile Include="System\Text\Json\JsonHelpers.cs" />
     <Compile Include="System\Text\Json\JsonHelpers.Date.cs" />
     <Compile Include="System\Text\Json\JsonTokenType.cs" />
-    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByteArray.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.cs" />
     <Compile Include="System\Text\Json\ThrowHelper.Serialization.cs" />
     <Compile Include="System\Text\Json\Document\JsonDocument.cs" />
@@ -57,6 +56,7 @@
     <Compile Include="System\Text\Json\Serialization\Converters\DefaultImmutableConverter.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterBoolean.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByte.cs" />
+    <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterByteArray.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterChar.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterDateTime.cs" />
     <Compile Include="System\Text\Json\Serialization\Converters\JsonValueConverterDateTimeOffset.cs" />

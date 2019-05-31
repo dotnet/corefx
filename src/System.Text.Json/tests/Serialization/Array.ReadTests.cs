@@ -72,6 +72,13 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadByteArrayFail()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""1"""));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""A==="""));
+        }
+
+        [Fact]
         public static void ReadByteArrayAsJsonArrayFail()
         {
             string json = $"[1, 2]";
