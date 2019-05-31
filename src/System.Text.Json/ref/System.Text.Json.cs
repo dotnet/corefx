@@ -381,12 +381,16 @@ namespace System.Text.Json.Serialization
     {
         public static object ReadValue(ref Utf8JsonReader reader, Type returnType, JsonSerializerOptions options = null) { throw null; }
         public static TValue ReadValue<TValue>(ref Utf8JsonReader reader, JsonSerializerOptions options = null) { throw null; }
-        //public static void WriteAsValue(object value, Type type, Utf8JsonWriter writer, JsonSerializerOptions options = null) { throw null; }
-        //public static void WriteAsValue<TValue>(TValue value, Utf8JsonWriter writer, JsonSerializerOptions options = null) { throw null; }
-        //public static void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, object value, Type type, Utf8JsonWriter writer, JsonSerializerOptions options = null) { throw null; }
-        //public static void WriteAsProperty<TValue>(ReadOnlySpan<char> propertyName, TValue value, Utf8JsonWriter writer, JsonSerializerOptions options = null) { throw null; }
-        //public static void WriteAsProperty<TValue>(string propertyName, TValue value, Utf8JsonWriter writer, JsonSerializerOptions options = null) { throw null; }
-        //public static void WriteAsProperty<TValue>(JsonEncodedText propertyName, TValue value, Utf8JsonWriter writer, JsonSerializerOptions options = null) { throw null; }
+        public static void WriteValue(Utf8JsonWriter writer, object value, Type type, JsonSerializerOptions options = null) { throw null; }
+        public static void WriteValue<TValue>(Utf8JsonWriter writer, TValue value, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty(Utf8JsonWriter writer, ReadOnlySpan<byte> utf8PropertyName, object value, Type type, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty(Utf8JsonWriter writer, ReadOnlySpan<char> propertyName, object value, Type type, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty(Utf8JsonWriter writer, string propertyName, object value, Type type, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty(Utf8JsonWriter writer, JsonEncodedText propertyName, object value, Type type, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty<TValue>(Utf8JsonWriter writer, ReadOnlySpan<byte> utf8PropertyName, TValue value, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty<TValue>(Utf8JsonWriter writer, ReadOnlySpan<char> propertyName, TValue value, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty<TValue>(Utf8JsonWriter writer, string propertyName, TValue value, JsonSerializerOptions options = null) { throw null; }
+        //public static void WriteProperty<TValue>(Utf8JsonWriter writer, JsonEncodedText propertyName, TValue value, JsonSerializerOptions options = null) { throw null; }
         public static object Parse(System.ReadOnlySpan<byte> utf8Json, System.Type returnType, System.Text.Json.Serialization.JsonSerializerOptions options = null) { throw null; }
         public static object Parse(string json, System.Type returnType, System.Text.Json.Serialization.JsonSerializerOptions options = null) { throw null; }
         public static TValue Parse<TValue>(System.ReadOnlySpan<byte> utf8Json, System.Text.Json.Serialization.JsonSerializerOptions options = null) { throw null; }
