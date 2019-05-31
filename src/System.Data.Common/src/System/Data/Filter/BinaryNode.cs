@@ -326,7 +326,7 @@ namespace System.Data
             else
             {
                 vLeft = vRight = DBNull.Value;
-                resultType = StorageType.Empty; // shouldnt we make it boolean?
+                resultType = StorageType.Empty; // shouldn't we make it boolean?
             }
 
             object value = DBNull.Value;
@@ -1096,7 +1096,7 @@ namespace System.Data
 
                             if ((vRight == DBNull.Value) || (right.IsSqlColumn && DataStorage.IsObjectSqlNull(vRight)))
                                 continue;
-                            Debug.Assert((!DataStorage.IsObjectNull(vLeft)) && (!DataStorage.IsObjectNull(vRight)), "Imposible..");
+                            Debug.Assert((!DataStorage.IsObjectNull(vLeft)) && (!DataStorage.IsObjectNull(vRight)), "Impossible.");
 
                             resultType = DataStorage.GetStorageType(vLeft.GetType());
 
@@ -1251,7 +1251,7 @@ namespace System.Data
                 case DataTypePrecedence.SqlBinary: return StorageType.SqlBinary;
                 case DataTypePrecedence.SqlMoney: return StorageType.SqlMoney;
                 default:
-                    Debug.Assert(false, "Invalid (unmapped) precedence " + code.ToString());
+                    Debug.Fail("Invalid (unmapped) precedence " + code.ToString());
                     goto case DataTypePrecedence.Error;
             }
         }
@@ -1579,7 +1579,7 @@ namespace System.Data
                     string s2 = substring.TrimEnd(trimChars);
                     return table.IsSuffix(s1, s2);
                 default:
-                    Debug.Assert(false, "Unexpected LIKE kind");
+                    Debug.Fail("Unexpected LIKE kind");
                     return DBNull.Value;
             }
         }

@@ -11,6 +11,7 @@ namespace System.Xml.Serialization
     using System.Text;
     using System.ComponentModel;
     using System.Xml;
+    using System.Xml.Serialization;
 
     // These classes represent a mapping between classes and a particular XML format.
     // There are two class of mapping information: accessors (such as elements and
@@ -645,15 +646,10 @@ namespace System.Xml.Serialization
             {
                 _hasSimpleContent = false;
             }
-            if (!_hasSimpleContent && text != null && !text.Mapping.TypeDesc.CanBeTextValue)
+            if (!_hasSimpleContent && text != null && !text.Mapping.TypeDesc.CanBeTextValue && !(BaseMapping != null && !BaseMapping.TypeDesc.IsRoot && (text.Mapping.TypeDesc.IsEnum || text.Mapping.TypeDesc.IsPrimitive)))
             {
                 throw new InvalidOperationException(SR.Format(SR.XmlIllegalTypedTextAttribute, TypeDesc.FullName, text.Name, text.Mapping.TypeDesc.FullName));
             }
-        }
-
-        internal bool HasElements
-        {
-            get { return _elements != null && _elements.Values.Count > 0; }
         }
 
         internal bool HasExplicitSequence()
@@ -826,37 +822,6 @@ namespace System.Xml.Serialization
                 if (_attribute != null) return _attribute;
                 if (_elements != null && _elements.Length > 0) return _elements[0];
                 return _text;
-            }
-        }
-
-        private static bool IsNeedNullableMember(ElementAccessor element)
-        {
-            if (element.Mapping is ArrayMapping)
-            {
-                ArrayMapping arrayMapping = (ArrayMapping)element.Mapping;
-                if (arrayMapping.Elements != null && arrayMapping.Elements.Length == 1)
-                {
-                    return IsNeedNullableMember(arrayMapping.Elements[0]);
-                }
-                return false;
-            }
-            else
-            {
-                return element.IsNullable && element.Mapping.TypeDesc.IsValueType;
-            }
-        }
-
-        internal bool IsNeedNullable
-        {
-            get
-            {
-                if (_xmlns != null) return false;
-                if (_attribute != null) return false;
-                if (_elements != null && _elements.Length == 1)
-                {
-                    return IsNeedNullableMember(_elements[0]);
-                }
-                return false;
             }
         }
 
@@ -1366,6 +1331,7 @@ namespace System.Xml.Serialization
                     // make sure that user-specified schemas are valid
                     _schemas.ValidationEventHandler += new ValidationEventHandler(ValidationCallbackWithErrorCode);
                     _schemas.Compile();
+
                     // at this point we verified that the information returned by the IXmlSerializable is valid
                     // Now check to see if the type was referenced before:
                     // UNDONE check for the duplcate types

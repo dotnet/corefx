@@ -2,19 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.IO;
-using System.Text;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace System
 {
     public static class Console
     {
-        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
-        private static readonly object InternalSyncObject = new object(); // for synchronizing changing of Console's static fields
+        // Unlike many other buffer sizes throughout .NET, which often only affect performance, this buffer size has a
+        // functional impact on interactive console apps, where the size of the buffer passed to ReadFile/Console impacts
+        // how many characters the cmd window will allow to be typed as part of a single line. It also does affect perf,
+        // in particular when input is redirected and data may be consumed from a larger source. This 4K default size is the
+        // same as is currently used by most other environments/languages tried.
+        internal const int ReadBufferSize = 4096;
+        // There's no visible functional impact to the write buffer size, and as we auto flush on every write,
+        // there's little benefit to having a large buffer.  So we use a smaller buffer size to reduce working set.
+        private const int WriteBufferSize = 256;
+
+        private static object InternalSyncObject = new object(); // for synchronizing changing of Console's static fields
         private static TextReader s_in;
         private static TextWriter s_out, s_error;
         private static Encoding s_inputEncoding;
@@ -22,36 +29,19 @@ namespace System
         private static bool s_isOutTextWriterRedirected = false;
         private static bool s_isErrorTextWriterRedirected = false;
 
-        private static ConsoleCancelEventHandler _cancelCallbacks;
-        private static ConsolePal.ControlCHandlerRegistrar _registrar;
+        private static ConsoleCancelEventHandler s_cancelCallbacks;
+        private static ConsolePal.ControlCHandlerRegistrar s_registrar;
 
-        internal static T EnsureInitialized<T>(ref T field, Func<T> initializer) where T : class
-        {
-            lock (InternalSyncObject)
-            {
-                T result = Volatile.Read(ref field);
-                if (result == null)
-                {
-                    result = initializer();
-                    Volatile.Write(ref field, result);
-                }
-                return result;
-            }
-        }
+        internal static T EnsureInitialized<T>(ref T field, Func<T> initializer) where T : class =>
+            LazyInitializer.EnsureInitialized(ref field, ref InternalSyncObject, initializer);
 
-        public static TextReader In
-        {
-            get
-            {
-                return Volatile.Read(ref s_in) ?? EnsureInitialized(ref s_in, () => ConsolePal.GetOrCreateReader());
-            }
-        }
+        public static TextReader In => EnsureInitialized(ref s_in, () => ConsolePal.GetOrCreateReader());
 
         public static Encoding InputEncoding
         {
             get
             {
-                return Volatile.Read(ref s_inputEncoding) ?? EnsureInitialized(ref s_inputEncoding, () => ConsolePal.InputEncoding);
+                return EnsureInitialized(ref s_inputEncoding, () => ConsolePal.InputEncoding);
             }
             set
             {
@@ -63,7 +53,7 @@ namespace System
 
                     Volatile.Write(ref s_inputEncoding, (Encoding)value.Clone());
 
-                    // We need to reinitialize Console.In in the next call to s_in
+                    // We need to reinitialize 'Console.In' in the next call to s_in
                     // This will discard the current StreamReader, potentially 
                     // losing buffered data.
                     Volatile.Write(ref s_in, null);
@@ -75,7 +65,7 @@ namespace System
         {
             get
             {
-                return Volatile.Read(ref s_outputEncoding) ?? EnsureInitialized(ref s_outputEncoding, () => ConsolePal.OutputEncoding);
+                return EnsureInitialized(ref s_outputEncoding, () => ConsolePal.OutputEncoding);
             }
             set
             {
@@ -128,24 +118,18 @@ namespace System
             return ConsolePal.ReadKey(intercept);
         }
 
-        public static TextWriter Out
-        {
-            get { return Volatile.Read(ref s_out) ?? EnsureInitialized(ref s_out, () => CreateOutputWriter(OpenStandardOutput())); }
-        }
+        public static TextWriter Out => EnsureInitialized(ref s_out, () => CreateOutputWriter(OpenStandardOutput()));
 
-        public static TextWriter Error
-        {
-            get { return Volatile.Read(ref s_error) ?? EnsureInitialized(ref s_error, () => CreateOutputWriter(OpenStandardError())); }
-        }
+        public static TextWriter Error => EnsureInitialized(ref s_error, () => CreateOutputWriter(OpenStandardError()));
 
         private static TextWriter CreateOutputWriter(Stream outputStream)
         {
-            return SyncTextWriter.GetSynchronizedTextWriter(outputStream == Stream.Null ?
+            return TextWriter.Synchronized(outputStream == Stream.Null ?
                 StreamWriter.Null :
                 new StreamWriter(
                     stream: outputStream,
-                    encoding: new ConsoleEncoding(OutputEncoding), // This ensures no prefix is written to the stream.
-                    bufferSize: DefaultConsoleBufferSize,
+                    encoding: OutputEncoding.RemovePreamble(), // This ensures no prefix is written to the stream.
+                    bufferSize: WriteBufferSize,
                     leaveOpen: true) { AutoFlush = true });
         }
 
@@ -157,8 +141,7 @@ namespace System
         {
             get
             {
-                StrongBox<bool> redirected = Volatile.Read(ref _isStdInRedirected) ??
-                    EnsureInitialized(ref _isStdInRedirected, () => new StrongBox<bool>(ConsolePal.IsInputRedirectedCore()));
+                StrongBox<bool> redirected = EnsureInitialized(ref _isStdInRedirected, () => new StrongBox<bool>(ConsolePal.IsInputRedirectedCore()));
                 return redirected.Value;
             }
         }
@@ -167,8 +150,7 @@ namespace System
         {
             get
             {
-                StrongBox<bool> redirected = Volatile.Read(ref _isStdOutRedirected) ??
-                    EnsureInitialized(ref _isStdOutRedirected, () => new StrongBox<bool>(ConsolePal.IsOutputRedirectedCore()));
+                StrongBox<bool> redirected = EnsureInitialized(ref _isStdOutRedirected, () => new StrongBox<bool>(ConsolePal.IsOutputRedirectedCore()));
                 return redirected.Value;
             }
         }
@@ -177,8 +159,7 @@ namespace System
         {
             get
             {
-                StrongBox<bool> redirected = Volatile.Read(ref _isStdErrRedirected) ??
-                    EnsureInitialized(ref _isStdErrRedirected, () => new StrongBox<bool>(ConsolePal.IsErrorRedirectedCore()));
+                StrongBox<bool> redirected = EnsureInitialized(ref _isStdErrRedirected, () => new StrongBox<bool>(ConsolePal.IsErrorRedirectedCore()));
                 return redirected.Value;
             }
         }
@@ -189,9 +170,15 @@ namespace System
             set { ConsolePal.CursorSize = value; }
         }
 
-        public static bool NumberLock { get { return ConsolePal.NumberLock; } }
+        public static bool NumberLock
+        {
+            get { return ConsolePal.NumberLock; }
+        }
 
-        public static bool CapsLock { get { return ConsolePal.CapsLock; } }
+        public static bool CapsLock
+        {
+            get { return ConsolePal.CapsLock; }
+        }
 
         internal const ConsoleColor UnknownColor = (ConsoleColor)(-1);
 
@@ -243,34 +230,14 @@ namespace System
 
         public static int WindowWidth
         {
-            get
-            {
-                return ConsolePal.WindowWidth;
-            }
-            set
-            {
-                if (value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_NeedPosNum);
-                }
-                ConsolePal.WindowWidth = value;
-            }
+            get { return ConsolePal.WindowWidth; }
+            set { ConsolePal.WindowWidth = value; }
         }
 
         public static int WindowHeight
         {
-            get
-            {
-                return ConsolePal.WindowHeight;
-            }
-            set
-            {
-                if (value <= 0)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_NeedPosNum);
-                }
-                ConsolePal.WindowHeight = value;
-            }
+            get { return ConsolePal.WindowHeight; }
+            set { ConsolePal.WindowHeight = value; }
         }
 
         public static void SetWindowPosition(int left, int top)
@@ -311,24 +278,12 @@ namespace System
             set { SetCursorPosition(CursorLeft, value); }
         }
 
-        private const int MaxConsoleTitleLength = 24500; // same value as in .NET Framework
-
         public static string Title
         {
             get { return ConsolePal.Title; }
             set
             {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                if (value.Length > MaxConsoleTitleLength)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_ConsoleTitleTooLong);
-                }
-
-                ConsolePal.Title = value;
+                ConsolePal.Title = value ?? throw new ArgumentNullException(nameof(value));
             }
         }
 
@@ -374,13 +329,13 @@ namespace System
             {
                 lock (InternalSyncObject)
                 {
-                    _cancelCallbacks += value;
+                    s_cancelCallbacks += value;
 
                     // If we haven't registered our control-C handler, do it.
-                    if (_registrar == null)
+                    if (s_registrar == null)
                     {
-                        _registrar = new ConsolePal.ControlCHandlerRegistrar();
-                        _registrar.Register();
+                        s_registrar = new ConsolePal.ControlCHandlerRegistrar();
+                        s_registrar.Register();
                     }
                 }
             }
@@ -388,11 +343,11 @@ namespace System
             {
                 lock (InternalSyncObject)
                 {
-                    _cancelCallbacks -= value;
-                    if (_registrar != null && _cancelCallbacks == null)
+                    s_cancelCallbacks -= value;
+                    if (s_registrar != null && s_cancelCallbacks == null)
                     {
-                        _registrar.Unregister();
-                        _registrar = null;
+                        s_registrar.Unregister();
+                        s_registrar = null;
                     }
                 }
             }
@@ -462,7 +417,7 @@ namespace System
         public static void SetOut(TextWriter newOut)
         {
             CheckNonNull(newOut, nameof(newOut));
-            newOut = SyncTextWriter.GetSynchronizedTextWriter(newOut);
+            newOut = TextWriter.Synchronized(newOut);
             Volatile.Write(ref s_isOutTextWriterRedirected, true);
 
             lock (InternalSyncObject)
@@ -474,7 +429,7 @@ namespace System
         public static void SetError(TextWriter newError)
         {
             CheckNonNull(newError, nameof(newError));
-            newError = SyncTextWriter.GetSynchronizedTextWriter(newError);
+            newError = TextWriter.Synchronized(newError);
             Volatile.Write(ref s_isErrorTextWriterRedirected, true);
 
             lock (InternalSyncObject)
@@ -503,7 +458,7 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static String ReadLine()
+        public static string ReadLine()
         {
             return In.ReadLine();
         }
@@ -583,37 +538,37 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(Object value)
+        public static void WriteLine(object value)
         {
             Out.WriteLine(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String value)
+        public static void WriteLine(string value)
         {
             Out.WriteLine(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, Object arg0)
+        public static void WriteLine(string format, object arg0)
         {
             Out.WriteLine(format, arg0);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, Object arg0, Object arg1)
+        public static void WriteLine(string format, object arg0, object arg1)
         {
             Out.WriteLine(format, arg0, arg1);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, Object arg0, Object arg1, Object arg2)
+        public static void WriteLine(string format, object arg0, object arg1, object arg2)
         {
             Out.WriteLine(format, arg0, arg1, arg2);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void WriteLine(String format, params Object[] arg)
+        public static void WriteLine(string format, params object[] arg)
         {
             if (arg == null)                       // avoid ArgumentNullException from String.Format
                 Out.WriteLine(format, null, null); // faster than Out.WriteLine(format, (Object)arg);
@@ -622,25 +577,25 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, Object arg0)
+        public static void Write(string format, object arg0)
         {
             Out.Write(format, arg0);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, Object arg0, Object arg1)
+        public static void Write(string format, object arg0, object arg1)
         {
             Out.Write(format, arg0, arg1);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, Object arg0, Object arg1, Object arg2)
+        public static void Write(string format, object arg0, object arg1, object arg2)
         {
             Out.Write(format, arg0, arg1, arg2);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String format, params Object[] arg)
+        public static void Write(string format, params object[] arg)
         {
             if (arg == null)                   // avoid ArgumentNullException from String.Format
                 Out.Write(format, null, null); // faster than Out.Write(format, (Object)arg);
@@ -717,105 +672,28 @@ namespace System
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(Object value)
+        public static void Write(object value)
         {
             Out.Write(value);
         }
 
         [MethodImplAttribute(MethodImplOptions.NoInlining)]
-        public static void Write(String value)
+        public static void Write(string value)
         {
             Out.Write(value);
         }
 
-        // TODO: Uncomment when ArgIterator and friends are available in System.Runtime.dll
-        //
-        //[CLSCompliant(false)]
-        //[MethodImplAttribute(MethodImplOptions.NoInlining)]
-        //public static void WriteLine(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
-        //{
-        //    Out.WriteLine(format, ToObjectArgs(arg0, arg1, arg2, arg3, new ArgIterator(__arglist));
-        //}
-        //
-        //[CLSCompliant(false)]
-        //[MethodImplAttribute(MethodImplOptions.NoInlining)]
-        //public static void Write(string format, object arg0, object arg1, object arg2, object arg3, __arglist)
-        //{
-        //    Out.Write(format, ToObjectArgs(arg0, arg1, arg2, arg3, new ArgIterator(__arglist));
-        //}
-        //
-        //private static object[] ToObjectArgs(object arg0, object arg1, object arg2, object arg3, ArgIterator args)
-        //{
-        //    var objArgs = new object[4 + args.GetRemainingCount()] { arg0, arg1, arg2, arg3 };
-        //    for (int i = 4; i < objArgs.Length; i++)
-        //    {
-        //        objArgs[i] = TypedReference.ToObject(args.GetNextArg());
-        //    }
-        //    return objArgs;
-        //}
-
-        private sealed class ControlCDelegateData
-        {
-            private readonly ConsoleSpecialKey _controlKey;
-            private readonly ConsoleCancelEventHandler _cancelCallbacks;
-
-            internal bool Cancel;
-            internal bool DelegateStarted;
-
-            internal ControlCDelegateData(ConsoleSpecialKey controlKey, ConsoleCancelEventHandler cancelCallbacks)
-            {
-                _controlKey = controlKey;
-                _cancelCallbacks = cancelCallbacks;
-            }
-
-            // This is the worker delegate that is called on the Threadpool thread to fire the actual events. It sets the DelegateStarted flag so
-            // the thread that queued the work to the threadpool knows it has started (since it does not want to block indefinitely on the task
-            // to start).
-            internal void HandleBreakEvent()
-            {
-                DelegateStarted = true;
-                var args = new ConsoleCancelEventArgs(_controlKey);
-                _cancelCallbacks(null, args);
-                Cancel = args.Cancel;
-            }
-        }
-
         internal static bool HandleBreakEvent(ConsoleSpecialKey controlKey)
         {
-            // The thread that this gets called back on has a very small stack on some systems. There is
-            // not enough space to handle a managed exception being caught and thrown. So, run a task
-            // on the threadpool for the actual event callback.
-
-            // To avoid the race condition between remove handler and raising the event
-            ConsoleCancelEventHandler cancelCallbacks = Console._cancelCallbacks;
-            if (cancelCallbacks == null)
+            ConsoleCancelEventHandler handler = s_cancelCallbacks;
+            if (handler == null)
             {
                 return false;
             }
 
-            var delegateData = new ControlCDelegateData(controlKey, cancelCallbacks);
-            Task callBackTask = Task.Factory.StartNew(
-                d => ((ControlCDelegateData)d).HandleBreakEvent(),
-                delegateData,
-                CancellationToken.None,
-                TaskCreationOptions.DenyChildAttach,
-                TaskScheduler.Default);
-
-            // Block until the delegate is done. We need to be robust in the face of the task not executing
-            // but we also want to get control back immediately after it is done and we don't want to give the
-            // handler a fixed time limit in case it needs to display UI. Wait on the task twice, once with a
-            // timeout and a second time without if we are sure that the handler actually started.
-            TimeSpan controlCWaitTime = new TimeSpan(0, 0, 30); // 30 seconds
-            callBackTask.Wait(controlCWaitTime);
-            
-            if (!delegateData.DelegateStarted)
-            {
-                Debug.Assert(false, "The task to execute the handler did not start within 30 seconds.");
-                return false;
-            }
-
-            callBackTask.Wait();
-            return delegateData.Cancel;
+            var args = new ConsoleCancelEventArgs(controlKey);
+            handler(null, args);
+            return args.Cancel;
         }
     }
 }

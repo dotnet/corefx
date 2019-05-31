@@ -12,19 +12,18 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> NumberGroupSizes_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, new int[] { 3 } };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, new int[] { 3 } };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, new int[] { 3 } };
 
-            // TODO: when dotnet/corefx#2103 is addressed, we should also check fr-FR
-            if (!PlatformDetection.IsUbuntu1510 && !PlatformDetection.IsUbuntu1604 && !PlatformDetection.IsUbuntu1610
-                && !PlatformDetection.IsWindows7 && !PlatformDetection.IsWindows8x && !PlatformDetection.IsFedora24)
+            // Culture does not exist on Windows 7
+            if (!PlatformDetection.IsWindows7)
             {
-                yield return new object[] { new CultureInfo("ur-IN").NumberFormat, NumberFormatInfoData.UrINNumberGroupSizes() };
+                yield return new object[] { CultureInfo.GetCultureInfo("ur-IN").NumberFormat, NumberFormatInfoData.UrINNumberGroupSizes() };
             }
         }
 
         [Theory]
         [MemberData(nameof(NumberGroupSizes_TestData))]
-        public void NumberGroupSizes_Get(NumberFormatInfo format, int[] expected)
+        public void NumberGroupSizes_Get_ReturnsExpected(NumberFormatInfo format, int[] expected)
         {
             Assert.Equal(expected, format.NumberGroupSizes);
         }
@@ -34,7 +33,7 @@ namespace System.Globalization.Tests
         [InlineData(new int[] { 2, 3, 4 })]
         [InlineData(new int[] { 2, 3, 4, 0 })]
         [InlineData(new int[] { 0 })]
-        public void NumberGroupSizes_Set(int[] newNumberGroupSizes)
+        public void NumberGroupSizes_Set_GetReturnsExpected(int[] newNumberGroupSizes)
         {
             NumberFormatInfo format = new NumberFormatInfo();
             format.NumberGroupSizes = newNumberGroupSizes;
@@ -42,14 +41,25 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
-        public void NumberGroupSizes_Set_Invalid()
+        public void NumberGroupSizes_SetNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = null);
+            var format = new NumberFormatInfo();
+            AssertExtensions.Throws<ArgumentNullException>("value", "NumberGroupSizes", () => format.NumberGroupSizes = null);
+        }
 
-            Assert.Throws<ArgumentException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = new int[] { -1, 1, 2 });
-            Assert.Throws<ArgumentException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = new int[] { 98, 99, 100 });
-            Assert.Throws<ArgumentException>("NumberGroupSizes", () => new NumberFormatInfo().NumberGroupSizes = new int[] { 0, 1, 2 });
+        [Theory]
+        [InlineData(new int[] { -1, 1, 2 })]
+        [InlineData(new int[] { 98, 99, 100 })]
+        [InlineData(new int[] { 0, 1, 2 })]
+        public void NumberGroupSizes_SetInvalid_ThrowsArgumentException(int[] value)
+        {
+            var format = new NumberFormatInfo();
+            AssertExtensions.Throws<ArgumentException>("value", "NumberGroupSizes", () => format.NumberGroupSizes = value);
+        }
 
+        [Fact]
+        public void NumberGroupSizes_SetReadOnly_ThrowsInvalidOperationException()
+        {
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.NumberGroupSizes = new int[] { 1, 2, 3 });
         }
     }

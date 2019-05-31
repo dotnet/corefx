@@ -13,7 +13,6 @@ using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -40,7 +39,7 @@ namespace System.Security.AccessControl
 
         #region Delegates
 
-        internal protected delegate System.Exception ExceptionFromErrorCode(int errorCode, string name, SafeHandle handle, object context);
+        protected internal delegate System.Exception ExceptionFromErrorCode(int errorCode, string name, SafeHandle handle, object context);
 
         #endregion
 
@@ -152,9 +151,13 @@ nameof(name));
                     {
                         exception = new NotSupportedException(SR.AccessControl_NoAssociatedSecurity);
                     }
+                    else if (error == Interop.Errors.ERROR_PIPE_NOT_CONNECTED)
+                    {
+                        exception = new InvalidOperationException(SR.InvalidOperation_DisconnectedPipe);
+                    }
                     else
                     {
-                        Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32GetSecurityInfo() failed with unexpected error code {0}", error));
+                        Debug.Fail($"Win32GetSecurityInfo() failed with unexpected error code {error}");
                         exception = new InvalidOperationException(SR.Format(SR.AccessControl_UnexpectedError, error));
                     }
                 }
@@ -234,7 +237,7 @@ nameof(name));
 
                     if ((_securityDescriptor.ControlFlags & ControlFlags.DiscretionaryAclProtected) != 0)
                     {
-                        securityInfo = (SecurityInfos)((uint)securityInfo | ProtectedDiscretionaryAcl);
+                        securityInfo = unchecked((SecurityInfos)((uint)securityInfo | ProtectedDiscretionaryAcl));
                     }
                     else
                     {
@@ -296,7 +299,7 @@ nameof(name));
                         }
                         else
                         {
-                            Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Unexpected error code {0}", error));
+                            Debug.Fail($"Unexpected error code {error}");
                             exception = new InvalidOperationException(SR.Format(SR.AccessControl_UnexpectedError, error));
                         }
                     }
@@ -342,7 +345,6 @@ nameof(name));
             {
                 throw new ArgumentNullException(nameof(name));
             }
-            Contract.EndContractBlock();
 
             Persist(name, null, includeSections, exceptionContext);
         }
@@ -364,7 +366,6 @@ nameof(name));
             {
                 throw new ArgumentNullException(nameof(handle));
             }
-            Contract.EndContractBlock();
 
             Persist(null, handle, includeSections, exceptionContext);
         }

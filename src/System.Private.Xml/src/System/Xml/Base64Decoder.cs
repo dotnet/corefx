@@ -20,7 +20,7 @@ namespace System.Xml
         private int _bits;
         private int _bitsFilled;
 
-        private static readonly String s_charsBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+        private static readonly string s_charsBase64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
         private static readonly byte[] s_mapBase64 = ConstructMapBase64();
         private const int MaxValidChar = (int)'z';
         private const byte Invalid = unchecked((byte)-1);
@@ -44,7 +44,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecuritySafeCritical]
         internal override unsafe int Decode(char[] chars, int startPos, int len)
         {
             if (chars == null)
@@ -80,7 +79,6 @@ namespace System.Xml
             return charsDecoded;
         }
 
-        [System.Security.SecuritySafeCritical]
         internal override unsafe int Decode(string str, int startPos, int len)
         {
             if (str == null)
@@ -153,7 +151,6 @@ namespace System.Xml
             return mapBase64;
         }
 
-        [System.Security.SecurityCritical]
         private unsafe void Decode(char* pChars, char* pCharsEndPos,
                              byte* pBytes, byte* pBytesEndPos,
                              out int charsDecoded, out int bytesDecoded)
@@ -179,7 +176,7 @@ namespace System.Xml
                 }
                 pChar++;
 
-                // ignore white space
+                // ignore whitespace
                 if (xmlCharType.IsWhiteSpace(ch))
                 {
                     continue;

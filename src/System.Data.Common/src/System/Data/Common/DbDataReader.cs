@@ -32,6 +32,24 @@ namespace System.Data.Common
 
         public virtual void Close() { }
 
+        public virtual Task CloseAsync(CancellationToken cancellationToken = default)
+        {
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return Task.FromCanceled(cancellationToken);
+            }
+
+            try
+            {
+                Close();
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException(e);
+            }
+        }
+
         [EditorBrowsable(EditorBrowsableState.Never)]
         public void Dispose() => Dispose(true);
 
@@ -41,6 +59,12 @@ namespace System.Data.Common
             {
                 Close();
             }
+        }
+
+        public virtual ValueTask DisposeAsync()
+        {
+            Dispose();
+            return default;
         }
 
         public abstract string GetDataTypeName(int ordinal);
@@ -193,7 +217,7 @@ namespace System.Data.Common
             {
                 try
                 {
-                    return IsDBNull(ordinal) ? ADP.s_trueTask : ADP.s_falseTask;
+                    return IsDBNull(ordinal) ? ADP.TrueTask : ADP.FalseTask;
                 }
                 catch (Exception e)
                 {
@@ -218,7 +242,7 @@ namespace System.Data.Common
             {
                 try
                 {
-                    return Read() ? ADP.s_trueTask : ADP.s_falseTask;
+                    return Read() ? ADP.TrueTask : ADP.FalseTask;
                 }
                 catch (Exception e)
                 {
@@ -239,7 +263,7 @@ namespace System.Data.Common
             {
                 try
                 {
-                    return NextResult() ? ADP.s_trueTask : ADP.s_falseTask;
+                    return NextResult() ? ADP.TrueTask : ADP.FalseTask;
                 }
                 catch (Exception e)
                 {

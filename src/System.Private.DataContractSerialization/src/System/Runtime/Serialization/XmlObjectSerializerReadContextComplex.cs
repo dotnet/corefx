@@ -6,7 +6,7 @@ using System.Reflection;
 
 namespace System.Runtime.Serialization
 {
-#if NET_NATIVE
+#if uapaot
     public class XmlObjectSerializerReadContextComplex : XmlObjectSerializerReadContext
 #else
     internal class XmlObjectSerializerReadContextComplex : XmlObjectSerializerReadContext
@@ -127,7 +127,7 @@ namespace System.Runtime.Serialization
             }
             ReadAttributes(xmlReader);
             string objectId = GetObjectId();
-            object oldObj = InternalDeserialize(xmlReader, name, ns, ref dataContract);
+            object oldObj = InternalDeserialize(xmlReader, name, ns, declaredType, ref dataContract);
             object obj = DataContractSurrogateCaller.GetDeserializedObject(_serializationSurrogateProvider, oldObj, dataContract.UnderlyingType, declaredType);
             ReplaceDeserializedObject(objectId, oldObj, obj);
 
@@ -136,7 +136,9 @@ namespace System.Runtime.Serialization
 
         private Type ResolveDataContractTypeInSharedTypeMode(string assemblyName, string typeName, out Assembly assembly)
         {
-            throw new PlatformNotSupportedException();
+            // The method is used only when _mode == SerializationMode.SharedType.
+            // _mode is set to SerializationMode.SharedType only when the context is for NetDataContractSerializer.
+            throw new PlatformNotSupportedException(SR.PlatformNotSupported_NetDataContractSerializer);
         }
 
         private DataContract ResolveDataContractInSharedTypeMode(string assemblyName, string typeName, out Assembly assembly, out Type type)

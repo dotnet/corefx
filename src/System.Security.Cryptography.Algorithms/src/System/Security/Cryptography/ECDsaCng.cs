@@ -58,13 +58,8 @@ namespace System.Security.Cryptography
 
                 Debug.Assert(!keyHandle.IsInvalid);
 
-                _keyHandle = keyHandle;
-                _lastAlgorithm = AlgorithmName.ECDsa;
-
-                int newKeySize = CngKeyLite.GetKeyLength(keyHandle);
-
-                ForceSetKeySize(newKeySize);
-                _lastKeySize = newKeySize;
+                _key.SetHandle(keyHandle, AlgorithmName.ECDsa);
+                ForceSetKeySize(_key.KeySize);
             }
 
             private void ImportKeyBlob(byte[] ecKeyBlob, string curveName, bool includePrivateParameters)
@@ -77,13 +72,8 @@ namespace System.Security.Cryptography
 
                 Debug.Assert(!keyHandle.IsInvalid);
 
-                _keyHandle = keyHandle;
-                _lastAlgorithm = ECCng.EcdsaCurveNameToAlgorithm(curveName);
-
-                int newKeySize = CngKeyLite.GetKeyLength(keyHandle);
-
-                ForceSetKeySize(newKeySize);
-                _lastKeySize = newKeySize;
+                _key.SetHandle(keyHandle, ECCng.EcdsaCurveNameToAlgorithm(curveName));
+                ForceSetKeySize(_key.KeySize);
             }
 
             private byte[] ExportKeyBlob(bool includePrivateParameters)
@@ -108,6 +98,45 @@ namespace System.Security.Cryptography
                 {
                     return CngKeyLite.ExportKeyBlob(keyHandle, blobType);
                 }
+            }
+
+            private byte[] ExportEncryptedPkcs8(ReadOnlySpan<char> pkcs8Password, int kdfCount)
+            {
+                using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
+                {
+                    return CngKeyLite.ExportPkcs8KeyBlob(keyHandle, pkcs8Password, kdfCount);
+                }
+            }
+
+            private bool TryExportEncryptedPkcs8(
+                ReadOnlySpan<char> pkcs8Password,
+                int kdfCount,
+                Span<byte> destination,
+                out int bytesWritten)
+            {
+                using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
+                {
+                    return CngKeyLite.TryExportPkcs8KeyBlob(
+                        keyHandle,
+                        pkcs8Password,
+                        kdfCount,
+                        destination,
+                        out bytesWritten);
+                }
+            }
+
+            private void AcceptImport(CngPkcs8.Pkcs8Response response)
+            {
+                SafeNCryptKeyHandle keyHandle = response.KeyHandle;
+
+                _key.SetHandle(
+                    keyHandle,
+                    CngKeyLite.GetPropertyAsString(
+                        keyHandle,
+                        CngKeyLite.KeyPropertyName.Algorithm,
+                        CngPropertyOptions.None));
+
+                ForceSetKeySize(_key.KeySize);
             }
         }
     }

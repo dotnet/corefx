@@ -2,15 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
 using System.Linq;
-using System.Globalization;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.Cryptography.Pkcs;
-using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
@@ -268,6 +261,60 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        public static void TestUnprotectedAttributes1_EmptySet()
+        {
+            // This tests the behavior of unprotected attribute extraction when one of the attribute sequences declares an
+            // attribute type, but the contained SET OF AttributeValue is empty.
+            //
+            // Attribute ::= SEQUENCE {
+            //      attrType OBJECT IDENTIFIER,
+            //      attrValues SET OF AttributeValue }
+            //
+            // The encoded message was built in ASN.1 editor and tested in framework.It contains an enveloped message
+            // version 2 with a key transport recipient, the enveloped message contains data encrypted with 3DES.
+            //
+            // The attributes set is built as
+            // {
+            //      { attrType: document description, attrValues: { value1, value2 } },
+            //      { attrType: document name, attrValues: { } },
+            // }
+            //
+            // The important part of this test is that there are 0 attributes of a type that is declared within the encoded message.
+            // This should return 2 as it should create a CryptographicAttributeObjectCollection with two CryptographicAttributeObjects, 
+            // the first one holding a list of document description with the two values, the second one holding an empty list of
+            // document name.
+
+            byte[] encodedMessage =
+                ("3082017806092A864886F70D010703A0820169308201650201023181C83081C5020100302E301A311830160603550403"
+                + "130F5253414B65795472616E7366657231021031D935FB63E8CFAB48A0BF7B397B67C0300D06092A864886F70D010101"
+                + "05000481802EE6A4AAA9F907E8EF472D8CD8603098488EC1C462815E6FC5A53A3DF6EB730F3D191746FDBBCA89114C6D"
+                + "45FB6C4F26088043894D5A706889A29D52E03ABEDFAC98336BD01B0A9CFA57CC6C80908F4B42EFCE5E60E7A761451A4D"
+                + "1A39783072000E551062027795A1CEB079791BA48C5F77D360EE48E185DE6C8CCB1C093D4B302B06092A864886F70D01"
+                + "0701301406082A864886F70D03070408F55F613664678EE9800800BC3504D1F59470A168300E060A2B06010401823758"
+                + "020131003056060A2B060104018237580202314804224D00790020004400650073006300720069007000740069006F00"
+                + "6E0020003100000004224D00790020004400650073006300720069007000740069006F006E00200032000000").HexToByteArray();
+
+            EnvelopedCms ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            Assert.Equal(2, ecms.UnprotectedAttributes.Count);
+
+            CryptographicAttributeObjectCollection collection = ecms.UnprotectedAttributes;
+            string attrObj0Oid = collection[0].Oid.Value;
+
+            CryptographicAttributeObject documentDescObj = (attrObj0Oid == Oids.DocumentDescription) ?
+                collection[0] :
+                collection[1];
+
+            CryptographicAttributeObject documentNameObj = (attrObj0Oid == Oids.DocumentName) ?
+                collection[0] :
+                collection[1];
+
+            Assert.Equal(0, documentNameObj.Values.Count);
+            Assert.Equal(2, documentDescObj.Values.Count);
+        }
+
+        [Fact]
         public static void TestUnprotectedAttributes1_Arbitrary_RoundTrip()
         {
             byte[] encodedMessage = CreateEcmsWithAttributes(
@@ -356,6 +403,73 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal(1, attributes.Length);
             AsnEncodedData a = attributes[0];
             Assert.True(a is Pkcs9AttributeObject);
+        }
+
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void PostEncrypt_UnprotectedAttributes()
+        {
+            byte[] docDescription = ("041E4D00790020004400650073006300720069007000740069006F006E000000").HexToByteArray();
+            byte[] docName1 = ("0410AA00790020004E0061006D0065000000").HexToByteArray();
+            byte[] docName2 = ("04104D00790020004E0061006D0065000000").HexToByteArray();
+            ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
+            AsnEncodedData[] attributes = {
+                new AsnEncodedData(Oids.DocumentName, docName1),
+                new AsnEncodedData(Oids.DocumentName, docName2),
+                new AsnEncodedData(Oids.DocumentDescription, docDescription)};
+
+            foreach (AsnEncodedData attribute in attributes)
+            {
+                ecms.UnprotectedAttributes.Add(attribute);
+            }
+
+            AsnEncodedData[] before = ecms.UnprotectedAttributes.FlattenAndSort();
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                ecms.Encrypt(new CmsRecipient(cert));
+            }
+
+            AsnEncodedData[] after = ecms.UnprotectedAttributes.FlattenAndSort();
+
+            // There are three objects, but ecms.UnprotectedAttributes.Count returns the count of different Oids,
+            // not the amount of objects inside.
+            Assert.Equal(2, ecms.UnprotectedAttributes.Count);
+
+            Assert.Equal(before.Length, after.Length);
+            for (int i = 0; i<before.Length; i++)
+            {
+                Assert.Equal(before[i].GetType(), after[i].GetType());
+                Assert.Equal(before[i].Oid.Value, after[i].Oid.Value);
+                Assert.Equal(before[i].RawData, after[i].RawData);
+            }
+        }
+
+        [Theory]
+        [InlineData(false, 0)]
+        [InlineData(true, 2)]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void TestVersionNumber_RoundTrip(bool addUnprotectedAttrs, int expectedVersion)
+        {
+            ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            byte[] docName = ("0410AA00790020004E0061006D0065000000").HexToByteArray();
+            EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
+
+            if (addUnprotectedAttrs)
+                ecms.UnprotectedAttributes.Add(new AsnEncodedData(new Oid(Oids.DocumentName), docName));
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                ecms.Encrypt(new CmsRecipient(cert));
+            }
+
+            byte[] encodedMessage = ecms.Encode();
+
+            ecms = new EnvelopedCms();
+            ecms.Decode(encodedMessage);
+
+            Assert.Equal(expectedVersion, ecms.Version);
         }
 
         private static void AssertIsDocumentationDescription(this AsnEncodedData attribute, string expectedDocumentDescription)

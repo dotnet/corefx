@@ -3,10 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Dynamic.Utils;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Runtime.CompilerServices;
 using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions.Compiler
@@ -43,14 +41,14 @@ namespace System.Linq.Expressions.Compiler
                 _ilg.Emit(OpCodes.Ldsfld, fb);
                 _ilg.Emit(OpCodes.Ldnull);
                 _ilg.Emit(OpCodes.Bne_Un, l);
-                _ilg.EmitArray(array);
+                _ilg.EmitArray(array, this);
                 _ilg.Emit(OpCodes.Stsfld, fb);
                 _ilg.MarkLabel(l);
                 _ilg.Emit(OpCodes.Ldsfld, fb);
             }
             else
             {
-                _ilg.EmitArray(array);
+                _ilg.EmitArray(array, this);
             }
 #endif
         }

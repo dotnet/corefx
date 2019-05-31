@@ -8,6 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Security.Tests
 {
@@ -15,14 +16,17 @@ namespace System.Net.Security.Tests
 
     public class CertificateValidationClientServer : IDisposable
     {
+        private readonly ITestOutputHelper _output;        
         private readonly X509Certificate2 _clientCertificate;
         private readonly X509Certificate2Collection _clientCertificateCollection;
         private readonly X509Certificate2 _serverCertificate;
         private readonly X509Certificate2Collection _serverCertificateCollection;
         private bool _clientCertificateRemovedByFilter;
 
-        public CertificateValidationClientServer()
+        public CertificateValidationClientServer(ITestOutputHelper output)
         {
+            _output = output;
+
             _serverCertificateCollection = Configuration.Certificates.GetServerCertificateCollection();
             _serverCertificate = Configuration.Certificates.GetServerCertificate();
 
@@ -49,8 +53,8 @@ namespace System.Net.Security.Tests
 
             _clientCertificateRemovedByFilter = false;
 
-            if (PlatformDetection.IsWindows7 && 
-                !useClientSelectionCallback && 
+            if (PlatformDetection.IsWindows7 &&
+                !useClientSelectionCallback &&
                 !Capability.IsTrustedRootCertificateInstalled())
             {
                 // https://technet.microsoft.com/en-us/library/hh831771.aspx#BKMK_Changes2012R2
@@ -70,11 +74,7 @@ namespace System.Net.Security.Tests
                 Task clientConnect = clientConnection.ConnectAsync(serverEndPoint.Address, serverEndPoint.Port);
                 Task<TcpClient> serverAccept = server.AcceptTcpClientAsync();
 
-                Assert.True(
-                    Task.WaitAll(
-                        new Task[] { clientConnect, serverAccept },
-                        TestConfiguration.PassingTestTimeoutMilliseconds),
-                    "Client/Server TCP Connect timed out.");
+                await TestConfiguration.WhenAllOrAnyFailedWithTimeout(clientConnect, serverAccept);
 
                 LocalCertificateSelectionCallback clientCertCallback = null;
 
@@ -115,11 +115,7 @@ namespace System.Net.Security.Tests
                         SslProtocolSupport.DefaultSslProtocols,
                         false);
 
-                    Assert.True(
-                        Task.WaitAll(
-                            new Task[] { clientAuthentication, serverAuthentication },
-                            TestConfiguration.PassingTestTimeoutMilliseconds),
-                        "Client/Server Authentication timed out.");
+                    await TestConfiguration.WhenAllOrAnyFailedWithTimeout(clientAuthentication, serverAuthentication);
 
                     if (!_clientCertificateRemovedByFilter)
                     {
@@ -169,7 +165,7 @@ namespace System.Net.Security.Tests
             else
             {
                 // Validate only if we're able to build a trusted chain.
-                CertificateChainValidation.Validate(_clientCertificateCollection, chain);
+                ValidateCertificateAndChain(_clientCertificate, chain);
             }
 
             Assert.Equal(expectedSslPolicyErrors, sslPolicyErrors);
@@ -192,13 +188,30 @@ namespace System.Net.Security.Tests
             else
             {
                 // Validate only if we're able to build a trusted chain.
-                CertificateChainValidation.Validate(_serverCertificateCollection, chain);
+                ValidateCertificateAndChain(_serverCertificate, chain);
             }
 
             Assert.Equal(expectedSslPolicyErrors, sslPolicyErrors);
             Assert.Equal(_serverCertificate, certificate);
 
             return true;
+        }
+
+        private void ValidateCertificateAndChain(X509Certificate2 cert, X509Chain trustedChain)
+        {
+            _output.WriteLine("ValidateCertificateAndChain()");
+
+            // Verify that the certificate is in the trustedChain.
+            _output.WriteLine($"cert: subject={cert.Subject}, issuer={cert.Issuer}, thumbprint={cert.Thumbprint}");
+            Assert.Equal(cert.Thumbprint, trustedChain.ChainElements[0].Certificate.Thumbprint);
+            
+            // Verify that the root certificate in the chain is the one that issued the received certificate.
+            foreach (X509ChainElement element in trustedChain.ChainElements)
+            {
+                _output.WriteLine(
+                    $"chain cert: subject={element.Certificate.Subject}, issuer={element.Certificate.Issuer}, thumbprint={element.Certificate.Thumbprint}");
+            }
+            Assert.Equal(cert.Issuer, trustedChain.ChainElements[1].Certificate.Subject);
         }
     }
 }

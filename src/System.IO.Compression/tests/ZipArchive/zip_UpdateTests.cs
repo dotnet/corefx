@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -134,8 +135,10 @@ namespace System.IO.Compression.Tests
             IsZipSameAsDir(testArchive, zmodified("deleteMove"), ZipArchiveMode.Read, requireExplicit: true, checkTimes: true);
 
         }
-        [Fact]
-        public static async Task AppendToEntry()
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public static async Task AppendToEntry(bool writeWithSpans)
         {
             //append
             Stream testArchive = await StreamHelpers.CreateTempCopyStream(zfile("normal.zip"));
@@ -143,12 +146,19 @@ namespace System.IO.Compression.Tests
             using (ZipArchive archive = new ZipArchive(testArchive, ZipArchiveMode.Update, true))
             {
                 ZipArchiveEntry e = archive.GetEntry("first.txt");
-
-                using (StreamWriter s = new StreamWriter(e.Open()))
+                using (Stream s = e.Open())
                 {
-                    s.BaseStream.Seek(0, SeekOrigin.End);
+                    s.Seek(0, SeekOrigin.End);
 
-                    s.Write("\r\n\r\nThe answer my friend, is blowin' in the wind.");
+                    byte[] data = Encoding.ASCII.GetBytes("\r\n\r\nThe answer my friend, is blowin' in the wind.");
+                    if (writeWithSpans)
+                    {
+                        s.Write(data, 0, data.Length);
+                    }
+                    else
+                    {
+                        s.Write(new ReadOnlySpan<byte>(data));
+                    }
                 }
 
                 var file = FileData.GetFile(zmodified(Path.Combine("append", "first.txt")));
@@ -254,7 +264,7 @@ namespace System.IO.Compression.Tests
         {
             using (LocalMemoryStream ms = await LocalMemoryStream.readAppFileAsync(zfile("normal.zip")))
             {
-                ZipArchive target = new ZipArchive(ms, ZipArchiveMode.Update, true);
+                ZipArchive target = new ZipArchive(ms, ZipArchiveMode.Update, leaveOpen: true);
 
                 ZipArchiveEntry edeleted = target.GetEntry("first.txt");
 
@@ -286,6 +296,45 @@ namespace System.IO.Compression.Tests
                 Assert.Throws<ObjectDisposedException>(() => e.Open());
                 Assert.Throws<ObjectDisposedException>(() => e.Delete());
                 Assert.Throws<ObjectDisposedException>(() => { e.LastWriteTime = new DateTimeOffset(); });
+            }
+        }
+
+        [Fact]
+        public void UpdateUncompressedArchive()
+        {
+            var utf8WithoutBom = new Text.UTF8Encoding(encoderShouldEmitUTF8Identifier: false);
+            byte[] fileContent;
+            using (var memStream = new MemoryStream())
+            {
+                using (var zip = new ZipArchive(memStream, ZipArchiveMode.Create))
+                {
+                    ZipArchiveEntry entry = zip.CreateEntry("testing", CompressionLevel.NoCompression);
+                    using (var writer = new StreamWriter(entry.Open(), utf8WithoutBom))
+                    {
+                        writer.Write("hello");
+                        writer.Flush();
+                    }
+                }
+                fileContent = memStream.ToArray();
+            }
+            byte compressionMethod = fileContent[8];
+            Assert.Equal(0, compressionMethod); // stored => 0, deflate => 8
+            using (var memStream = new MemoryStream())
+            {
+                memStream.Write(fileContent);
+                memStream.Position = 0;
+                using (var archive = new ZipArchive(memStream, ZipArchiveMode.Update))
+                {
+                    ZipArchiveEntry entry = archive.GetEntry("testing");
+                    using (var writer = new StreamWriter(entry.Open(), utf8WithoutBom))
+                    {
+                        writer.Write("new");
+                        writer.Flush();
+                    }
+                }
+                byte[] modifiedTestContent = memStream.ToArray();
+                compressionMethod = modifiedTestContent[8];
+                Assert.Equal(0, compressionMethod); // stored => 0, deflate => 8
             }
         }
     }

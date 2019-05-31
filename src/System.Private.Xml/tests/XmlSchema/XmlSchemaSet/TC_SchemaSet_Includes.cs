@@ -4,14 +4,13 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
 using System.Xml.Schema;
 
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_Includes", Desc = "")]
-    public class TC_SchemaSet_Includes
+    public class TC_SchemaSet_Includes : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 
@@ -238,7 +237,7 @@ namespace System.Xml.Tests
 
             foreach (XmlSchemaExternal s in a.Includes)
             {
-                if (String.IsNullOrEmpty(s.Schema.SourceUri))
+                if (string.IsNullOrEmpty(s.Schema.SourceUri))
                 {
                     CError.Compare(false, "Unexpected null uri");
                 }
@@ -508,7 +507,7 @@ namespace System.Xml.Tests
 
             foreach (XmlSchemaExternal s in a.Includes)
             {
-                if (String.IsNullOrEmpty(s.Schema.SourceUri))
+                if (string.IsNullOrEmpty(s.Schema.SourceUri))
                 {
                     CError.Compare(false, "Unexpected null uri");
                 }
@@ -779,7 +778,7 @@ namespace System.Xml.Tests
 
             foreach (XmlSchemaExternal s in a.Includes)
             {
-                if (String.IsNullOrEmpty(s.Schema.SourceUri))
+                if (string.IsNullOrEmpty(s.Schema.SourceUri))
                 {
                     CError.Compare(false, "Unexpected null uri");
                 }

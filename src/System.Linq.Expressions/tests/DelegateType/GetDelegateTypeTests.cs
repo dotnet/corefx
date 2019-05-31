@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -12,19 +12,19 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NullTypeList()
         {
-            Assert.Throws<ArgumentNullException>("typeArgs", () => Expression.GetDelegateType(default(Type[])));
+            AssertExtensions.Throws<ArgumentNullException>("typeArgs", () => Expression.GetDelegateType(default(Type[])));
         }
 
         [Fact]
         public void NullInTypeList()
         {
-            Assert.Throws<ArgumentNullException>("typeArgs[1]", () => Expression.GetDelegateType(typeof(int), null));
+            AssertExtensions.Throws<ArgumentNullException>("typeArgs[1]", () => Expression.GetDelegateType(typeof(int), null));
         }
 
         [Fact]
         public void EmptyArgs()
         {
-            Assert.Throws<ArgumentException>("typeArgs", () => Expression.GetDelegateType());
+            AssertExtensions.Throws<ArgumentException>("typeArgs", () => Expression.GetDelegateType());
         }
 
         [Theory, MemberData(nameof(ValidTypeArgs), true)]
@@ -53,10 +53,14 @@ namespace System.Linq.Expressions.Tests
         [MemberData(nameof(ExcessiveLengthTypeArgs))]
         [MemberData(nameof(ExcessiveLengthOpenGenericTypeArgs))]
         [MemberData(nameof(ByRefTypeArgs))]
+        [MemberData(nameof(ByRefLikeTypeArgs))]
         [MemberData(nameof(PointerTypeArgs))]
         [MemberData(nameof(ManagedPointerTypeArgs))]
         public void CantBeFunc(Type[] typeArgs)
         {
+#if !FEATURE_COMPILE
+            Assert.Throws<PlatformNotSupportedException>(() => Expression.GetDelegateType(typeArgs));
+#else
             Type delType = Expression.GetDelegateType(typeArgs);
             Assert.True(typeof(MulticastDelegate).IsAssignableFrom(delType));
             Assert.DoesNotMatch(new Regex(@"System\.Action"), delType.FullName);
@@ -64,23 +68,30 @@ namespace System.Linq.Expressions.Tests
             Reflection.MethodInfo method = delType.GetMethod("Invoke");
             Assert.Equal(typeArgs.Last(), method.ReturnType);
             Assert.Equal(typeArgs.Take(typeArgs.Length - 1), method.GetParameters().Select(p => p.ParameterType));
+#endif
         }
 
         [Theory]
         [MemberData(nameof(ExcessiveLengthTypeArgs))]
         [MemberData(nameof(ExcessiveLengthOpenGenericTypeArgs))]
         [MemberData(nameof(ByRefTypeArgs))]
+        [MemberData(nameof(ByRefLikeTypeArgs))]
         [MemberData(nameof(PointerTypeArgs))]
         [MemberData(nameof(ManagedPointerTypeArgs))]
         public void CantBeAction(Type[] typeArgs)
         {
-            Type delType = Expression.GetDelegateType(typeArgs.Append(typeof(void)).ToArray());
+            Type[] delegateArgs = typeArgs.Append(typeof(void)).ToArray();
+#if !FEATURE_COMPILE
+            Assert.Throws<PlatformNotSupportedException>(() => Expression.GetDelegateType(delegateArgs));
+#else
+            Type delType = Expression.GetDelegateType(delegateArgs);
             Assert.True(typeof(MulticastDelegate).IsAssignableFrom(delType));
             Assert.DoesNotMatch(new Regex(@"System\.Action"), delType.FullName);
             Assert.DoesNotMatch(new Regex(@"System\.Func"), delType.FullName);
             Reflection.MethodInfo method = delType.GetMethod("Invoke");
             Assert.Equal(typeof(void), method.ReturnType);
             Assert.Equal(typeArgs, method.GetParameters().Select(p => p.ParameterType));
+#endif
         }
 
         // Open generic type args aren't useful directly with Expressions, but creating them is allowed.
@@ -105,13 +116,13 @@ namespace System.Linq.Expressions.Tests
         [Theory, MemberData(nameof(VoidTypeArgs), false)]
         public void VoidArgToFuncTypeDelegate(Type[] typeArgs)
         {
-            Assert.Throws<ArgumentException>(() => Expression.GetDelegateType(typeArgs));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.GetDelegateType(typeArgs));
         }
 
         [Theory, MemberData(nameof(VoidTypeArgs), false)]
         public void VoidArgToActionTypeDelegate(Type[] typeArgs)
         {
-            Assert.Throws<ArgumentException>(() => Expression.GetDelegateType(typeArgs.Append(typeof(void)).ToArray()));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.GetDelegateType(typeArgs.Append(typeof(void)).ToArray()));
         }
     }
 }

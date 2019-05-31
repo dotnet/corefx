@@ -23,8 +23,11 @@ namespace System.Collections.Generic.Tests
             uint seed = (uint)count;
             for (int i = 0; i < count; i++)
             {
-                seed ^= 0x9e3779b9 + (seed << 6) + (seed >> 2);
-                yield return generator.Generate((int)seed);
+                unchecked
+                {
+                    seed ^= 0x9e3779b9 + (seed << 6) + (seed >> 2);
+                    yield return generator.Generate((int)seed);
+                }
             }
         }
     }
@@ -77,33 +80,6 @@ namespace System.Collections.Generic.Tests
             for (int i = 0; i < count; i++)
             {
                 T item = builder[i];
-            }
-        }
-
-        [Theory]
-        [MemberData(nameof(EnumerableData))]
-        public void AddAndIndexer(IEnumerable<T> seed)
-        {
-            // CreateBuilderFromSequence implicitly tests Add
-            ArrayBuilder<T> builder = CreateBuilderFromSequence(seed);
-
-            // Continuously shift the elements in the builder over
-            // using the get/set indexers, until none are left.
-            for (int left = builder.Count - 1; left >= 0; )
-            {
-                for (int i = 0; i < left; i++)
-                {
-                    builder[i] = builder[i + 1];
-                }
-
-                // Nil out the slot we're no longer using
-                builder[left--] = default(T);
-
-                int offset = (builder.Count - 1) - left; // How much we've skipped into the enumerable
-                IEnumerable<T> expected = seed.Skip(offset)
-                    .Concat(Enumerable.Repeat(default(T), offset)); // The count has not been changed, but slots @ the end have been nil'd out
-
-                VerifyBuilderContents(expected, builder);
             }
         }
 
@@ -186,10 +162,12 @@ namespace System.Collections.Generic.Tests
             {
                 count++;
                 builder.Add(item);
-                
+
                 Assert.Equal(count, builder.Count);
                 Assert.Equal(CalculateExpectedCapacity(count), builder.Capacity);
                 VerifyBuilderContents(sequence.Take(count), builder);
+                Assert.Equal(sequence.First(), builder.First());
+                Assert.Equal(item, builder.Last());
             }
 
             return builder;

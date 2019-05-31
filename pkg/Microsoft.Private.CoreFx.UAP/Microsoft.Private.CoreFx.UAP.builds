@@ -1,0 +1,11 @@
+<Project DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(Directory.Build.props))" />
+
+  <ItemGroup>
+    <!-- Identity project, runtime specific projects are included uap.rids.props. 
+         Will not be built on uapaot builds. https://github.com/dotnet/corefx/issues/18098 -->
+    <Project Include="$(MSBuildProjectName).pkgproj" Condition="'$(TargetGroup)'=='uap'" />
+  </ItemGroup>
+
+  <Import Project="$([MSBuild]::GetPathOfFileAbove(dir.traversal.targets))" />
+</Project>

@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeAttributeArgument
     {
         private string _name;
@@ -24,8 +23,8 @@ namespace System.CodeDom
 
         public string Name
         {
-            get { return _name ?? string.Empty; }
-            set { _name = value; }
+            get => _name ?? string.Empty;
+            set => _name = value;
         }
 
         public CodeExpression Value { get; set; }

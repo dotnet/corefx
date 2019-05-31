@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Net.Security
 {
@@ -26,12 +26,9 @@ namespace System.Net.Security
         private int _InternalOffset;
         private int _InternalBufferCount;
 
-        private FixedSizeReader _FrameReader;
-
         private void InitializeStreamPart()
         {
             _ReadHeader = new byte[4];
-            _FrameReader = new FixedSizeReader(InnerStream);
         }
 
         private byte[] InternalBuffer
@@ -167,13 +164,20 @@ namespace System.Net.Security
                     {
                         // prepare for the next request
                         asyncRequest.SetNextRequest(buffer, offset + chunkBytes, count - chunkBytes, null);
-                        IAsyncResult ar = InnerStream.BeginWrite(outBuffer, 0, encryptedBytes, s_writeCallback, asyncRequest);
-                        if (!ar.CompletedSynchronously)
+                        Task t = InnerStream.WriteAsync(outBuffer, 0, encryptedBytes);
+                        if (t.IsCompleted)
                         {
-                            return;
+                            t.GetAwaiter().GetResult();
                         }
-
-                        InnerStream.EndWrite(ar);
+                        else
+                        {
+                            IAsyncResult ar = TaskToApm.Begin(t, s_writeCallback, asyncRequest);
+                            if (!ar.CompletedSynchronously)
+                            {
+                                return;
+                            }
+                            TaskToApm.End(ar);
+                        }
                     }
                     else
                     {
@@ -259,7 +263,7 @@ namespace System.Net.Security
             if (asyncRequest != null)
             {
                 asyncRequest.SetNextRequest(_ReadHeader, 0, _ReadHeader.Length, s_readCallback);
-                _FrameReader.AsyncReadPacket(asyncRequest);
+                _ = FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
                     return 0;
@@ -269,7 +273,7 @@ namespace System.Net.Security
             }
             else
             {
-                readBytes = _FrameReader.ReadPacket(_ReadHeader, 0, _ReadHeader.Length);
+                readBytes = FixedSizeReader.ReadPacket(InnerStream, _ReadHeader, 0, _ReadHeader.Length);
             }
 
             return StartFrameBody(readBytes, buffer, offset, count, asyncRequest);
@@ -313,7 +317,7 @@ namespace System.Net.Security
             {
                 asyncRequest.SetNextRequest(InternalBuffer, 0, readBytes, s_readCallback);
 
-                _FrameReader.AsyncReadPacket(asyncRequest);
+                _ = FixedSizeReader.ReadPacketAsync(InnerStream, asyncRequest);
 
                 if (!asyncRequest.MustCompleteSynchronously)
                 {
@@ -324,7 +328,7 @@ namespace System.Net.Security
             }
             else //Sync
             {
-                readBytes = _FrameReader.ReadPacket(InternalBuffer, 0, readBytes);
+                readBytes = FixedSizeReader.ReadPacket(InnerStream, InternalBuffer, 0, readBytes);
             }
 
             return ProcessFrameBody(readBytes, buffer, offset, count, asyncRequest);
@@ -384,7 +388,7 @@ namespace System.Net.Security
             try
             {
                 NegotiateStream negoStream = (NegotiateStream)asyncRequest.AsyncObject;
-                negoStream.InnerStream.EndWrite(transportResult);
+                TaskToApm.End(transportResult);
                 if (asyncRequest.Count == 0)
                 {
                     // This was the last chunk.

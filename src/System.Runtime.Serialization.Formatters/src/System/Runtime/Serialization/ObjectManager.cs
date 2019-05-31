@@ -11,7 +11,7 @@ namespace System.Runtime.Serialization
     public class ObjectManager
     {
         private const int DefaultInitialSize = 16;
-        private const int MaxArraySize = 0x1000; //MUST BE A POWER OF 2!
+        private const int MaxArraySize = 0x100000; //MUST BE A POWER OF 2!
         private const int ArrayMask = MaxArraySize - 1;
         private const int MaxReferenceDepth = 100;
 
@@ -184,7 +184,7 @@ namespace System.Runtime.Serialization
                 {
                     if (!holder.CanSurrogatedObjectValueChange && returnValue != holder.ObjectValue)
                     {
-                        throw new SerializationException(string.Format(CultureInfo.CurrentCulture, SR.Serialization_NotCyclicallyReferenceableSurrogate, surrogate.GetType().FullName));
+                        throw new SerializationException(SR.Format(SR.Serialization_NotCyclicallyReferenceableSurrogate, surrogate.GetType().FullName));
                     }
                     holder.SetObjectValue(returnValue, this);
                 }
@@ -316,7 +316,7 @@ namespace System.Runtime.Serialization
                     }
                     if (Nullable.GetUnderlyingType(parentField.FieldType) != null)
                     {
-                        fieldsTemp[currentFieldIndex] = parentField.FieldType.GetField("value", BindingFlags.NonPublic | BindingFlags.Instance);
+                        fieldsTemp[currentFieldIndex] = parentField.FieldType.GetField(nameof(value), BindingFlags.NonPublic | BindingFlags.Instance);
                         currentFieldIndex++;
                     }
 
@@ -352,7 +352,8 @@ namespace System.Runtime.Serialization
                 for (int i = 0; i < currentFieldIndex; i++)
                 {
                     FieldInfo fieldInfo = fieldsTemp[(currentFieldIndex - 1 - i)];
-                    fields[i] = fieldInfo;
+                    SerializationFieldInfo serInfo = fieldInfo as SerializationFieldInfo;
+                    fields[i] = serInfo == null ? fieldInfo : serInfo.FieldInfo;
                 }
 
                 Debug.Assert(fixupObj != null, "[ObjectManager.DoValueTypeFixup]fixupObj!=null");
@@ -649,7 +650,7 @@ namespace System.Runtime.Serialization
             {
                 throw new ArgumentOutOfRangeException(nameof(objectID), SR.ArgumentOutOfRange_ObjectID);
             }
-            if (member != null && !(member is FieldInfo))
+            if (member != null && !(member is FieldInfo)) // desktop checks specifically for RuntimeFieldInfo and SerializationFieldInfo, but the former is an implementation detail in corelib
             {
                 throw new SerializationException(SR.Serialization_UnknownMemberInfo);
             }
@@ -772,8 +773,17 @@ namespace System.Runtime.Serialization
             {
                 throw new SerializationException(SR.Format(SR.Serialization_ConstructorNotFound, t), e);
             }
+            try
+            {
+                constInfo.Invoke(obj, new object[] { info, context });
+            }
+            // This will only throw TargetInvocationExceptions, but to provide a better exception for dangerous deserialization, unwrap that
+            // and re-wrap it in a DeserializationBlockedException (while preserving its stack)
+            catch (TargetInvocationException outerException) when (outerException.InnerException is DeserializationBlockedException)
+            {
+                throw new DeserializationBlockedException(outerException.InnerException);
+            }
 
-            constInfo.Invoke(obj, new object[] { info, context });
         }
 
         internal static ConstructorInfo GetDeserializationConstructor(Type t)
@@ -914,9 +924,9 @@ namespace System.Runtime.Serialization
             {
                 throw new ArgumentNullException(nameof(member));
             }
-            if (!(member is FieldInfo))
+            if (!(member is FieldInfo)) // desktop checks specifically for RuntimeFieldInfo and SerializationFieldInfo, but the former is an implementation detail in corelib
             {
-                throw new SerializationException(SR.Format(SR.Serialization_InvalidType, member.GetType().ToString()));
+                throw new SerializationException(SR.Format(SR.Serialization_InvalidType, member.GetType()));
             }
 
             //Create a new fixup holder
@@ -974,11 +984,6 @@ namespace System.Runtime.Serialization
         internal virtual void AddOnDeserialization(DeserializationEventHandler handler)
         {
             _onDeserializationHandler = (DeserializationEventHandler)Delegate.Combine(_onDeserializationHandler, handler);
-        }
-
-        internal virtual void RemoveOnDeserialization(DeserializationEventHandler handler)
-        {
-            _onDeserializationHandler = (DeserializationEventHandler)Delegate.Remove(_onDeserializationHandler, handler);
         }
 
         internal virtual void AddOnDeserialized(object obj)
@@ -1371,7 +1376,6 @@ namespace System.Runtime.Serialization
         internal long ContainerID => _valueFixup != null ? _valueFixup.ContainerID : 0;
     }
 
-    [Serializable]
     internal sealed class FixupHolder
     {
         internal const int ArrayFixup = 0x1;
@@ -1394,7 +1398,6 @@ namespace System.Runtime.Serialization
         }
     }
 
-    [Serializable]
     internal sealed class FixupHolderList
     {
         internal const int InitialSize = 2;
@@ -1439,7 +1442,6 @@ namespace System.Runtime.Serialization
         }
     }
 
-    [Serializable]
     internal sealed class LongList
     {
         private const int InitialSize = 2;
@@ -1622,7 +1624,7 @@ namespace System.Runtime.Serialization
         }
     }
 
-    internal sealed class TypeLoadExceptionHolder
+    public sealed class TypeLoadExceptionHolder
     {
         internal TypeLoadExceptionHolder(string typeName)
         {
@@ -1632,8 +1634,6 @@ namespace System.Runtime.Serialization
         internal string TypeName { get; }
     }
 
-    // TODO: Temporary workaround.  Remove this once SerializationInfo.UpdateValue is exposed
-    // from coreclr for use by ObjectManager.
     internal static class SerializationInfoExtensions
     {
         private static readonly Action<SerializationInfo, string, object, Type> s_updateValue =

@@ -17,7 +17,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private StringBuilder _outputBuilder;
         private string[] _outputFilter;
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void TestMain()
         {
             Assert.True(RunTestCoreAndCompareWithBaseline());
@@ -307,7 +307,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             internal CarriageReturnLineFeedReplacer(TextWriter output)
             {
                 if (output == null)
-                    throw new ArgumentNullException("output");
+                    throw new ArgumentNullException(nameof(output));
 
                 _output = output;
             }

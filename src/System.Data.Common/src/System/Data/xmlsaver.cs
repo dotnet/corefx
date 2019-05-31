@@ -269,7 +269,7 @@ namespace System.Data
 
             return string.Empty;
             // by default, if we dont map anything, we will map to String
-            // but I can not make Sql Types that will map to string be unmapped, because in schema , I will miss the second part and wont
+            // but I can not make Sql Types that will map to string be unmapped, because in schema , I will miss the second part and won't
             // be able to differenciate between string snd SqlString and others that map to String
         }
 
@@ -534,7 +534,6 @@ namespace System.Data
 
         // SxS: this method can generate XSD files if the input xmlWriter is XmlTextWriter or DataTextWriter and its underlying stream is FileStream
         // These XSDs are located in the same folder as the underlying stream's file path (see SetPath method).
-        // These XSDs are not exposed out of this method, so ResourceExposure annotation is None.
         internal void SchemaTree(XmlDocument xd, XmlWriter xmlWriter, DataSet ds, DataTable dt, bool writeHierarchy)
         {
             _constraintNames = new ArrayList();
@@ -2673,15 +2672,6 @@ namespace System.Data
             {
                 _dTables.Add(table);
             }
-        }
-
-        internal XmlDataTreeWriter(DataSet ds, DataTable dt)
-        { // need to modify this also
-            _ds = ds;
-            _dt = dt;
-
-            _dTables.Add(dt);
-            _topLevelTables = ds.TopLevelTables();
         }
 
         internal XmlDataTreeWriter(DataTable dt, bool writeHierarchy)

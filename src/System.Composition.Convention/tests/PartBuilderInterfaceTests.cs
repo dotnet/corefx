@@ -3,14 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Composition;
-using System.Composition.Convention;
 using System.Composition.Hosting;
 using System.Linq;
 using System.Reflection;
 using Xunit;
 
-namespace System.ComponentModel.Composition
+namespace System.Composition.Convention.Tests
 {
     public class PartBuilderInterfaceTests
     {
@@ -70,7 +68,7 @@ namespace System.ComponentModel.Composition
             builder.ForTypesMatching((t) => true).ExportInterfaces();
             builder.ForTypesMatching((t) => t.GetTypeInfo().ImplementedInterfaces.Where((iface) => iface != typeof(System.IDisposable)).Count() == 0).Export();
 
-            var container = new ContainerConfiguration()
+            CompositionHost container = new ContainerConfiguration()
                 .WithPart<Standard>(builder)
                 .WithPart<Dippy>(builder)
                 .WithPart<Derived>(builder)
@@ -108,7 +106,7 @@ namespace System.ComponentModel.Composition
             builder.ForTypesMatching((t) => true).ExportInterfaces((iface) => iface != typeof(System.IDisposable));
             builder.ForTypesMatching((t) => t.GetTypeInfo().ImplementedInterfaces.Where((iface) => iface != typeof(System.IDisposable)).Count() == 0).Export();
 
-            var container = new ContainerConfiguration()
+            CompositionHost container = new ContainerConfiguration()
                 .WithPart<Standard>(builder)
                 .WithPart<Dippy>(builder)
                 .WithPart<Derived>(builder)
@@ -145,7 +143,7 @@ namespace System.ComponentModel.Composition
             builder.ForTypesMatching((t) => true).ExportInterfaces((iface) => iface != typeof(System.IDisposable), (iface, bldr) => bldr.AsContractType((Type)iface));
             builder.ForTypesMatching((t) => t.GetTypeInfo().ImplementedInterfaces.Where((iface) => iface != typeof(System.IDisposable)).Count() == 0).Export();
 
-            var container = new ContainerConfiguration()
+            CompositionHost container = new ContainerConfiguration()
                 .WithPart<Standard>(builder)
                 .WithPart<Dippy>(builder)
                 .WithPart<Derived>(builder)

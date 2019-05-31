@@ -3,18 +3,20 @@
 // See the LICENSE file in the project root for more information.
 
 
-
-//------------------------------------------------------------------------------
-
+using System.Collections.Specialized;
+using System.Configuration;
 using System.Data.Common;
 using System.Data.ProviderBase;
 using System.Diagnostics;
-
+using System.IO;
 
 namespace System.Data.SqlClient
 {
     sealed internal class SqlConnectionFactory : DbConnectionFactory
     {
+
+        private const string _metaDataXml = "MetaDataXml";
+
         private SqlConnectionFactory() : base() { }
 
         public static readonly SqlConnectionFactory SingletonInstance = new SqlConnectionFactory();
@@ -92,8 +94,8 @@ namespace System.Data.SqlClient
                         // NOTE: Cloning connection option opt to set 'UserInstance=True' and 'Enlist=False'
                         //       This first connection is established to SqlExpress to get the instance name 
                         //       of the UserInstance.
-                        SqlConnectionString sseopt = new SqlConnectionString(opt, opt.DataSource, true /* user instance=true */);
-                        sseConnection = new SqlInternalConnectionTds(identity, sseopt, null, false, applyTransientFaultHandling: applyTransientFaultHandling);
+                        SqlConnectionString sseopt = new SqlConnectionString(opt, opt.DataSource, userInstance: true, setEnlistValue: false);
+                        sseConnection = new SqlInternalConnectionTds(identity, sseopt, key.Credential, null, "", null, false, applyTransientFaultHandling: applyTransientFaultHandling);
                         // NOTE: Retrieve <UserInstanceName> here. This user instance name will be used below to connect to the Sql Express User Instance.
                         instanceName = sseConnection.InstanceName;
 
@@ -127,10 +129,10 @@ namespace System.Data.SqlClient
                 // NOTE: Here connection option opt is cloned to set 'instanceName=<UserInstanceName>' that was
                 //       retrieved from the previous SSE connection. For this UserInstance connection 'Enlist=True'.
                 // options immutable - stored in global hash - don't modify
-                opt = new SqlConnectionString(opt, instanceName, false /* user instance=false */);
+                opt = new SqlConnectionString(opt, instanceName, userInstance: false, setEnlistValue: null);
                 poolGroupProviderInfo = null; // null so we do not pass to constructor below...
             }
-            result = new SqlInternalConnectionTds(identity, opt, poolGroupProviderInfo, redirectedUserInstance, userOpt, recoverySessionData, applyTransientFaultHandling: applyTransientFaultHandling);
+            result = new SqlInternalConnectionTds(identity, opt, key.Credential, poolGroupProviderInfo, "", null, redirectedUserInstance, userOpt, recoverySessionData, applyTransientFaultHandling: applyTransientFaultHandling, key.AccessToken);
             return result;
         }
 
@@ -163,18 +165,18 @@ namespace System.Data.SqlClient
             {    // never pool context connections.
                 int connectionTimeout = opt.ConnectTimeout;
 
-                if ((0 < connectionTimeout) && (connectionTimeout < Int32.MaxValue / 1000))
+                if ((0 < connectionTimeout) && (connectionTimeout < int.MaxValue / 1000))
                     connectionTimeout *= 1000;
-                else if (connectionTimeout >= Int32.MaxValue / 1000)
-                    connectionTimeout = Int32.MaxValue;
+                else if (connectionTimeout >= int.MaxValue / 1000)
+                    connectionTimeout = int.MaxValue;
 
                 poolingOptions = new DbConnectionPoolGroupOptions(
                                                     opt.IntegratedSecurity,
                                                     opt.MinPoolSize,
                                                     opt.MaxPoolSize,
                                                     connectionTimeout,
-                                                    opt.LoadBalanceTimeout
-                                                    );
+                                                    opt.LoadBalanceTimeout,
+                                                    opt.Enlist);
             }
             return poolingOptions;
         }
@@ -266,6 +268,20 @@ namespace System.Data.SqlClient
             {
                 c.SetInnerConnectionTo(to);
             }
+        }
+
+        protected override DbMetaDataFactory CreateMetaDataFactory(DbConnectionInternal internalConnection, out bool cacheMetaDataFactory)
+        {
+            Debug.Assert(internalConnection != null, "internalConnection may not be null.");
+            
+            Stream xmlStream = System.Reflection.Assembly.GetExecutingAssembly().GetManifestResourceStream("System.Data.SqlClient.SqlMetaData.xml");
+            cacheMetaDataFactory = true;
+            
+            Debug.Assert(xmlStream != null, nameof(xmlStream) + " may not be null.");
+
+            return new SqlMetaDataFactory(xmlStream,
+                                          internalConnection.ServerVersion,
+                                          internalConnection.ServerVersion);
         }
     }
 }

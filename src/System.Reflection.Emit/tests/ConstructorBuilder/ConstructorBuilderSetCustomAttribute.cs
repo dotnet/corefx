@@ -31,7 +31,7 @@ namespace System.Reflection.Emit.Tests
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
             ConstructorBuilder constructor = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[0]);
-            Assert.Throws<ArgumentNullException>("con", () => constructor.SetCustomAttribute(null, new byte[0]));
+            AssertExtensions.Throws<ArgumentNullException>("con", () => constructor.SetCustomAttribute(null, new byte[0]));
         }
 
         [Fact]
@@ -49,21 +49,21 @@ namespace System.Reflection.Emit.Tests
             Type createdType = type.CreateTypeInfo().AsType();
 
             ConstructorInfo createdConstructor = createdType.GetConstructor(new Type[0]);
-            Attribute[] customAttributes = createdConstructor.GetCustomAttributes(true).ToArray();
+            Attribute[] customAttributes = (Attribute[])CustomAttributeExtensions.GetCustomAttributes(createdConstructor, true).ToArray();
 
             Assert.Equal(1, customAttributes.Length);
             Assert.Equal(2, ((IntAllAttribute)customAttributes[0])._i);
         }
 
         [Fact]
-        public void SetCustomAttribute_NullCustomAtributeBuilder_ThrowsArgumentNullException()
+        public void SetCustomAttribute_NullCustomAttributeBuilder_ThrowsArgumentNullException()
         {
             TypeBuilder type = Helpers.DynamicType(TypeAttributes.Public);
             ConstructorBuilder constructor = type.DefineConstructor(MethodAttributes.Public, CallingConventions.Standard, new Type[0]);
             ILGenerator ilGenerator = constructor.GetILGenerator();
             ilGenerator.Emit(OpCodes.Ldarg_1);
 
-            Assert.Throws<ArgumentNullException>("customBuilder", () => constructor.SetCustomAttribute(null));
+            AssertExtensions.Throws<ArgumentNullException>("customBuilder", () => constructor.SetCustomAttribute(null));
         }
 
         [Fact]

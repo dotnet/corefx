@@ -30,7 +30,6 @@ namespace System.Text
 
         // Internal Reset
         // For example, what if someone fails a conversion and wants to reset one of our fallback buffers?
-        [System.Security.SecurityCritical]  // auto-generated
         internal unsafe void InternalReset()
         {
             charStart = null;
@@ -41,7 +40,6 @@ namespace System.Text
 
         // Set the above values
         // This can't be part of the constructor because EncoderFallbacks would have to know how to implement these.
-        [System.Security.SecurityCritical]  // auto-generated
         internal unsafe void InternalInitialize(char* _charStart, char* _charEnd, EncoderNLS _encoder, bool _setEncoder)
         {
             charStart = _charStart;
@@ -69,7 +67,6 @@ namespace System.Text
         // Note that this could also change the contents of encoder, which is the same
         // object that the caller is using, so the caller could mess up the encoder for us
         // if they aren't careful.
-        [System.Security.SecurityCritical]  // auto-generated
         internal unsafe bool InternalFallback(char ch, ref char* chars)
         {
             // Shouldn't have null charStart
@@ -79,7 +76,7 @@ namespace System.Text
             int index = (int)(chars - charStart) - 1;
 
             // See if it was a high surrogate
-            if (Char.IsHighSurrogate(ch))
+            if (char.IsHighSurrogate(ch))
             {
                 // See if there's a low surrogate to go with it
                 if (chars >= charEnd)
@@ -102,11 +99,11 @@ namespace System.Text
                 {
                     // Might have a low surrogate
                     char cNext = *chars;
-                    if (Char.IsLowSurrogate(cNext))
+                    if (char.IsLowSurrogate(cNext))
                     {
                         // If already falling back then fail
                         if (bFallingBack && iRecursionCount++ > iMaxRecursion)
-                            ThrowLastCharRecursive(Char.ConvertToUtf32(ch, cNext));
+                            ThrowLastCharRecursive(char.ConvertToUtf32(ch, cNext));
 
                         // Next is a surrogate, add it as surrogate pair, and increment chars
                         chars++;

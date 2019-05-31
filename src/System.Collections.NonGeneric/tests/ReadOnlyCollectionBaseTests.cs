@@ -23,7 +23,7 @@ namespace System.Collections.Tests
         public static void SyncRoot()
         {
             MyReadOnlyCollectionBase collection = CreateCollection();
-            Assert.False(collection.SyncRoot is ArrayList);
+            Assert.True(collection.SyncRoot is ArrayList);
             Assert.Same(collection.SyncRoot, collection.SyncRoot);
         }
 
@@ -33,7 +33,7 @@ namespace System.Collections.Tests
             MyReadOnlyCollectionBase collection = CreateCollection();
             Assert.Equal(100, collection.Count);
         }
-        
+
         [Fact]
         public static void CopyTo_ZeroIndex()
         {
@@ -71,10 +71,10 @@ namespace System.Collections.Tests
         {
             MyReadOnlyCollectionBase collection = CreateCollection();
 
-            Assert.Throws<ArgumentNullException>("dest", () => collection.CopyTo(null, 0)); // Array is null
+            AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => collection.CopyTo(null, 0)); // Array is null
 
-            Assert.Throws<ArgumentException>(string.Empty, () => collection.CopyTo(new Foo[100], 50)); // Index + collection.Count > array.Length
-            Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => collection.CopyTo(new Foo[100], -1)); // Index < 0
+            AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => collection.CopyTo(new Foo[100], 50)); // Index + collection.Count > array.Length
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => collection.CopyTo(new Foo[100], -1)); // Index < 0
         }
 
         [Fact]

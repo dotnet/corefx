@@ -188,7 +188,7 @@ namespace System.Collections.Immutable
                         return value;
                     }
 
-                    throw new KeyNotFoundException();
+                    throw new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
                 }
 
                 set
@@ -201,6 +201,19 @@ namespace System.Collections.Immutable
                     }
                 }
             }
+
+#if !NETSTANDARD10
+            /// <summary>
+            /// Returns a read-only reference to the value associated with the provided key.
+            /// </summary>
+            /// <exception cref="KeyNotFoundException">If the key is not present.</exception>
+            public ref readonly TValue ValueRef(TKey key)
+            {
+                Requires.NotNullAllowStructs(key, nameof(key));
+
+                return ref _root.ValueRef(key, _keyComparer);
+            }
+#endif
 
             #endregion
 
@@ -262,7 +275,7 @@ namespace System.Collections.Immutable
                 {
                     if (_syncRoot == null)
                     {
-                        Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
+                        Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
                     }
 
                     return _syncRoot;

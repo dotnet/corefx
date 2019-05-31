@@ -24,21 +24,28 @@ namespace System.Net.Security.Tests
             _log = TestLogging.GetInstance();
         }
 
-        [OuterLoop] // TODO: Issue #11345
+        [Fact]
+        public async Task ClientAsyncAuthenticate_SslStreamClientServerNone_UseStrongCryptoSet()
+        {
+            SslProtocols protocol = SslProtocols.None;
+            await ClientAsyncSslHelper(protocol, protocol);
+
+            // Additional manual verification.
+            // Step into the code and verify that the 'SCH_USE_STRONG_CRYPTO' flag is being set.
+        }
+
         [Fact]
         public async Task ClientAsyncAuthenticate_ServerRequireEncryption_ConnectWithEncryption()
         {
             await ClientAsyncSslHelper(EncryptionPolicy.RequireEncryption);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task ClientAsyncAuthenticate_ServerNoEncryption_NoConnect()
         {
             await Assert.ThrowsAsync<IOException>(() => ClientAsyncSslHelper(EncryptionPolicy.NoEncryption));
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
         public async Task ClientAsyncAuthenticate_EachSupportedProtocol_Success(SslProtocols protocol)
@@ -46,18 +53,20 @@ namespace System.Net.Security.Tests
             await ClientAsyncSslHelper(protocol, protocol);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [ClassData(typeof(SslProtocolSupport.UnsupportedSslProtocolsTestData))]
-        public async Task ClientAsyncAuthenticate_EachClientUnsupportedProtocol_Fail(SslProtocols protocol)
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public async Task ClientAsyncAuthenticate_Ssl2WithSelf_Success()
         {
-            await Assert.ThrowsAsync<NotSupportedException>(() =>
+            // Test Ssl2 against itself.  This is a standalone test as even on versions where Windows supports Ssl2,
+            // it appears to have rules around not using it when other protocols are mentioned.
+            if (!PlatformDetection.IsWindows10Version1607OrGreater)
             {
-                return ClientAsyncSslHelper(protocol, SslProtocolSupport.SupportedSslProtocols);
-            });
+#pragma warning disable 0618
+                await ClientAsyncSslHelper(SslProtocols.Ssl2, SslProtocols.Ssl2);
+#pragma warning restore 0618
+            }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(ProtocolMismatchData))]
         public async Task ClientAsyncAuthenticate_MismatchProtocols_Fails(
@@ -65,10 +74,11 @@ namespace System.Net.Security.Tests
             SslProtocols clientProtocol,
             Type expectedException)
         {
-            await Assert.ThrowsAsync(expectedException, () => ClientAsyncSslHelper(serverProtocol, clientProtocol));
+            Exception e = await Record.ExceptionAsync(() => ClientAsyncSslHelper(serverProtocol, clientProtocol));
+            Assert.NotNull(e);
+            Assert.IsAssignableFrom(expectedException, e);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task ClientAsyncAuthenticate_AllServerAllClient_Success()
         {
@@ -77,19 +87,6 @@ namespace System.Net.Security.Tests
                 SslProtocolSupport.SupportedSslProtocols);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Fact]
-        public async Task ClientAsyncAuthenticate_UnsupportedAllClient_Fail()
-        {
-            await Assert.ThrowsAsync<NotSupportedException>(() =>
-            {
-                return ClientAsyncSslHelper(
-                    SslProtocolSupport.UnsupportedSslProtocols,
-                    SslProtocolSupport.SupportedSslProtocols);
-            });
-        }
-
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
         public async Task ClientAsyncAuthenticate_AllServerVsIndividualClientSupportedProtocols_Success(
@@ -98,7 +95,6 @@ namespace System.Net.Security.Tests
             await ClientAsyncSslHelper(clientProtocol, SslProtocolSupport.SupportedSslProtocols);
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [ClassData(typeof(SslProtocolSupport.SupportedSslProtocolsTestData))]
         public async Task ClientAsyncAuthenticate_IndividualServerVsAllClientSupportedProtocols_Success(
@@ -109,8 +105,13 @@ namespace System.Net.Security.Tests
             // Servers are not expected to dynamically change versions.
         }
 
-        private static IEnumerable<object[]> ProtocolMismatchData()
+        public static IEnumerable<object[]> ProtocolMismatchData()
         {
+#pragma warning disable 0618
+            yield return new object[] { SslProtocols.Ssl2, SslProtocols.Ssl3, typeof(Exception) };
+            yield return new object[] { SslProtocols.Ssl2, SslProtocols.Tls12, typeof(Exception) };
+            yield return new object[] { SslProtocols.Ssl3, SslProtocols.Tls12, typeof(Exception) };
+#pragma warning restore 0618
             yield return new object[] { SslProtocols.Tls, SslProtocols.Tls11, typeof(IOException) };
             yield return new object[] { SslProtocols.Tls, SslProtocols.Tls12, typeof(IOException) };
             yield return new object[] { SslProtocols.Tls11, SslProtocols.Tls, typeof(AuthenticationException) };

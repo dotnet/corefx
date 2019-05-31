@@ -32,24 +32,22 @@ namespace System.Collections.Generic.Tests
             Assert.False(comparer.Equals(3));
             Assert.False(comparer.Equals("foo"));
             Assert.False(comparer.Equals(Comparer<Task<T>>.Default));
+        }
 
-            // If we are running on full framework/CoreCLR, Comparer<T> additionally
-            // overrides the Equals(object) and GetHashCode() methods for itself,
-            // presumably to support serialization, so test that behavior as well.
-            // This is not done in .NET Native yet: dotnet/corert#1736
-            if (!RuntimeDetection.IsNetNative)
-            {
-                var cloned = ObjectCloner.MemberwiseClone(comparer); // calls MemberwiseClone() on the comparer via reflection, which returns a different instance
+        [Fact]
+        public void Comparer_EqualsShouldBeOverriddenAndWorkForDifferentInstances_cloned()
+        {
+            var comparer = Comparer<T>.Default;
+            var cloned = ObjectCloner.MemberwiseClone(comparer); // calls MemberwiseClone() on the comparer via reflection, which returns a different instance
 
-                // Whatever the type of the comparer, it should have overridden Equals(object) so
-                // it can return true as long as the other object is the same type (not nec. the same instance)
-                Assert.True(cloned.Equals(comparer));
-                Assert.True(comparer.Equals(cloned));
+            // Whatever the type of the comparer, it should have overridden Equals(object) so
+            // it can return true as long as the other object is the same type (not nec. the same instance)
+            Assert.True(cloned.Equals(comparer));
+            Assert.True(comparer.Equals(cloned));
 
-                // Equals() should not return true for null
-                // Prevent a faulty implementation like Equals(obj) => obj is FooComparer<T>, which will be true for null
-                Assert.False(cloned.Equals(null));
-            }
+            // Equals() should not return true for null
+            // Prevent a faulty implementation like Equals(obj) => obj is FooComparer<T>, which will be true for null
+            Assert.False(cloned.Equals(null));
         }
 
         [Fact]
@@ -60,19 +58,17 @@ namespace System.Collections.Generic.Tests
             // Multiple invocations should return the same result,
             // whether GetHashCode() was overridden or not
             Assert.Equal(comparer.GetHashCode(), comparer.GetHashCode());
+        }
 
-            // If we are running on full framework/CoreCLR, Comparer<T> additionally
-            // overrides the Equals(object) and GetHashCode() methods for itself,
-            // presumably to support serialization, so test that behavior as well.
-            // This is not done in .NET Native yet: dotnet/corert#1736
-            if (!RuntimeDetection.IsNetNative)
-            {
-                var cloned = ObjectCloner.MemberwiseClone(comparer);
-                Assert.Equal(cloned.GetHashCode(), cloned.GetHashCode());
+        [Fact]
+        public void Comparer_GetHashCodeShouldBeOverriddenAndBeTheSameAsLongAsTheTypeIsTheSame_cloned()
+        {
+            var comparer = Comparer<T>.Default;
+            var cloned = ObjectCloner.MemberwiseClone(comparer);
+            Assert.Equal(cloned.GetHashCode(), cloned.GetHashCode());
 
-                // Since comparer and cloned should have the same type, they should have the same hash
-                Assert.Equal(comparer.GetHashCode(), cloned.GetHashCode());
-            }
+            // Since comparer and cloned should have the same type, they should have the same hash
+            Assert.Equal(comparer.GetHashCode(), cloned.GetHashCode());
         }
 
         [Fact]
@@ -85,13 +81,13 @@ namespace System.Collections.Generic.Tests
             Task<T> notOfTypeT = Task.FromResult(default(T));
             if (default(T) != null) // if default(T) is null these asserts will fail as IComparer.Compare returns early if either side is null
             {
-                Assert.Throws<ArgumentException>(() => comparer.Compare(notOfTypeT, default(T))); // lhs is the problem
-                Assert.Throws<ArgumentException>(() => comparer.Compare(default(T), notOfTypeT)); // rhs is the problem
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(notOfTypeT, default(T))); // lhs is the problem
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(default(T), notOfTypeT)); // rhs is the problem
             }
             if (!(notOfTypeT is T)) // catch cases where Task<T> actually is a T, like object or non-generic Task
             {
-                Assert.Throws<ArgumentException>(() => comparer.Compare(notOfTypeT, notOfTypeT)); // The implementation should not attempt to short-circuit if both sides have reference equality
-                Assert.Throws<ArgumentException>(() => comparer.Compare(notOfTypeT, Task.FromResult(default(T)))); // And it should also work when they don't
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(notOfTypeT, notOfTypeT)); // The implementation should not attempt to short-circuit if both sides have reference equality
+                AssertExtensions.Throws<ArgumentException>(null, () => comparer.Compare(notOfTypeT, Task.FromResult(default(T)))); // And it should also work when they don't
             }
         }
 
@@ -131,7 +127,7 @@ namespace System.Collections.Generic.Tests
         [Fact]
         public void Comparer_ComparerCreateWithNullComparisonThrows()
         {
-            Assert.Throws<ArgumentNullException>("comparison", () => Comparer<T>.Create(comparison: null));
+            AssertExtensions.Throws<ArgumentNullException>("comparison", () => Comparer<T>.Create(comparison: null));
         }
     }
 }

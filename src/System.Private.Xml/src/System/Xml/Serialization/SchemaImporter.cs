@@ -16,11 +16,6 @@ namespace System.Xml.Serialization
     using System.Diagnostics;
 #endif
 
-    /// <include file='doc\SchemaImporter.uex' path='docs/doc[@for="SchemaImporter"]/*' />
-    ///<internalonly/>
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public abstract class SchemaImporter
     {
         private XmlSchemas _schemas;
@@ -155,7 +150,7 @@ namespace System.Xml.Serialization
             TypeDesc typeDesc = Scope.GetTypeDesc(typeof(object));
             StructMapping mapping = new StructMapping();
             mapping.TypeDesc = typeDesc;
-            mapping.Members = new MemberMapping[0];
+            mapping.Members = Array.Empty<MemberMapping>();
             mapping.IncludeInSchema = false;
             mapping.TypeName = Soap.UrType;
             mapping.Namespace = XmlSchema.Namespace;

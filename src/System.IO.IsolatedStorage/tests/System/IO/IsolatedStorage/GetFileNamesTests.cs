@@ -31,17 +31,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetFileNames_ThrowsIsolatedStorageException()
+        public void GetFileNames_Deleted_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.GetFileNames("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.GetFileNames("foo"));
             }
         }
 
         [Fact]
-        public void GetFileNames_ThrowsInvalidOperationException()
+        public void GetFileNames_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -51,15 +51,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetFileNames_RaisesInvalidPath()
+        [ActiveIssue(25428, TestPlatforms.AnyUnix)]
+        public void GetFileNames_RaisesInvalidPath_Core()
         {
+            // We are no longer as aggressive with filters for enumerating files
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.GetFileNames("\0bad"));
+                isf.GetFileNames("\0bad");
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         public void GetFileNames_GetsFileNames(PresetScopes scope)
         {
             TestHelper.WipeStores();

@@ -3,18 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 namespace System.Xml.Schema
-{
-#if SILVERLIGHT
-    //Empty parent class for XmlSchema
-    public abstract class XmlSchemaObject {}
-#else    
+{ 
     using System.Diagnostics;
     using System.Xml.Serialization;
 
-    /// <include file='doc\XmlSchemaObject.uex' path='docs/doc[@for="XmlSchemaObject"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public abstract class XmlSchemaObject
     {
         private int _lineNum = 0;
@@ -26,10 +18,6 @@ namespace System.Xml.Schema
         //internal
         private bool _isProcessing; //Indicates whether this object is currently being processed
 
-        /// <include file='doc\XmlSchemaObject.uex' path='docs/doc[@for="XmlSchemaObject.LineNum"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlIgnore]
         public int LineNumber
         {
@@ -37,10 +25,6 @@ namespace System.Xml.Schema
             set { _lineNum = value; }
         }
 
-        /// <include file='doc\XmlSchemaObject.uex' path='docs/doc[@for="XmlSchemaObject.LinePos"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlIgnore]
         public int LinePosition
         {
@@ -48,10 +32,6 @@ namespace System.Xml.Schema
             set { _linePos = value; }
         }
 
-        /// <include file='doc\XmlSchemaObject.uex' path='docs/doc[@for="XmlSchemaObject.SourceUri"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         [XmlIgnore]
         public string SourceUri
         {
@@ -59,7 +39,6 @@ namespace System.Xml.Schema
             set { _sourceUri = value; }
         }
 
-        /// <include file='doc\XmlSchemaObject.uex' path='docs/doc[@for="XmlSchemaObject.Parent"]/*' />
         [XmlIgnore]
         public XmlSchemaObject Parent
         {
@@ -67,7 +46,6 @@ namespace System.Xml.Schema
             set { _parent = value; }
         }
 
-        /// <include file='doc\XmlSchemaObject.uex' path='docs/doc[@for="XmlSchemaObject.Namespaces"]/*' />
         [XmlNamespaceDeclarations]
         public XmlSerializerNamespaces Namespaces
         {
@@ -87,8 +65,8 @@ namespace System.Xml.Schema
         [XmlIgnore]
         internal virtual string IdAttribute
         {
-            get { Debug.Assert(false); return null; }
-            set { Debug.Assert(false); }
+            get { Debug.Fail("Should not use base property"); return null; }
+            set { Debug.Fail("Should not use base property"); }
         }
 
         internal virtual void SetUnhandledAttributes(XmlAttribute[] moreAttributes) { }
@@ -97,8 +75,8 @@ namespace System.Xml.Schema
         [XmlIgnore]
         internal virtual string NameAttribute
         {
-            get { Debug.Assert(false); return null; }
-            set { Debug.Assert(false); }
+            get { Debug.Fail("Should not use base property"); return null; }
+            set { Debug.Fail("Should not use base property"); }
         }
 
         [XmlIgnore]
@@ -119,5 +97,4 @@ namespace System.Xml.Schema
             return (XmlSchemaObject)MemberwiseClone();
         }
     }
-#endif
 }

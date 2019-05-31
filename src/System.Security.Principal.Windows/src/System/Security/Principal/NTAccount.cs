@@ -6,7 +6,6 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Runtime.InteropServices;
 
@@ -53,7 +52,6 @@ namespace System.Security.Principal
             {
                 throw new ArgumentException(SR.IdentityReference_DomainNameTooLong, nameof(domainName));
             }
-            Contract.EndContractBlock();
 
             if (domainName == null || domainName.Length == 0)
             {
@@ -81,7 +79,6 @@ namespace System.Security.Principal
             {
                 throw new ArgumentException(SR.IdentityReference_AccountNameTooLong, nameof(name));
             }
-            Contract.EndContractBlock();
 
             _name = name;
         }
@@ -119,7 +116,6 @@ namespace System.Security.Principal
             {
                 throw new ArgumentNullException(nameof(targetType));
             }
-            Contract.EndContractBlock();
 
             if (targetType == typeof(NTAccount))
             {
@@ -180,14 +176,13 @@ namespace System.Security.Principal
 
             return Result;
         }
-        
+
         internal static IdentityReferenceCollection Translate(IdentityReferenceCollection sourceAccounts, Type targetType, out bool someFailed)
         {
             if (sourceAccounts == null)
             {
                 throw new ArgumentNullException(nameof(sourceAccounts));
             }
-            Contract.EndContractBlock();
 
             if (targetType == typeof(SecurityIdentifier))
             {
@@ -241,11 +236,10 @@ namespace System.Security.Principal
             {
                 throw new ArgumentException(SR.Arg_EmptyCollection, nameof(sourceAccounts));
             }
-            Contract.EndContractBlock();
 
-            SafeLsaPolicyHandle LsaHandle = SafeLsaPolicyHandle.InvalidHandle;
-            SafeLsaMemoryHandle ReferencedDomainsPtr = SafeLsaMemoryHandle.InvalidHandle;
-            SafeLsaMemoryHandle SidsPtr = SafeLsaMemoryHandle.InvalidHandle;
+            SafeLsaPolicyHandle LsaHandle = null;
+            SafeLsaMemoryHandle ReferencedDomainsPtr = null;
+            SafeLsaMemoryHandle SidsPtr = null;
 
             try
             {
@@ -253,7 +247,7 @@ namespace System.Security.Principal
                 // Construct an array of unicode strings
                 //
 
-                Interop.UNICODE_STRING[] Names = new Interop.UNICODE_STRING[sourceAccounts.Count];
+                Interop.Advapi32.MARSHALLED_UNICODE_STRING[] Names = new Interop.Advapi32.MARSHALLED_UNICODE_STRING[sourceAccounts.Count];
 
                 int currentName = 0;
                 foreach (IdentityReference id in sourceAccounts)
@@ -271,7 +265,7 @@ namespace System.Security.Principal
                     {
                         // this should never happen since we are already validating account name length in constructor and 
                         // it is less than this limit
-                        Debug.Assert(false, "NTAccount::TranslateToSids - source account name is too long.");
+                        Debug.Fail("NTAccount::TranslateToSids - source account name is too long.");
                         throw new InvalidOperationException();
                     }
 
@@ -293,7 +287,7 @@ namespace System.Security.Principal
                 someFailed = false;
                 uint ReturnCode;
 
-                ReturnCode = Interop.Advapi32.LsaLookupNames2(LsaHandle, 0, sourceAccounts.Count, Names, ref ReferencedDomainsPtr, ref SidsPtr);
+                ReturnCode = Interop.Advapi32.LsaLookupNames2(LsaHandle, 0, sourceAccounts.Count, Names, out ReferencedDomainsPtr, out SidsPtr);
 
                 //
                 // Make a decision regarding whether it makes sense to proceed
@@ -316,14 +310,14 @@ namespace System.Security.Principal
                 }
                 else if (ReturnCode != 0)
                 {
-                    int win32ErrorCode = Interop.NtDll.RtlNtStatusToDosError(unchecked((int)ReturnCode));
+                    uint win32ErrorCode = Interop.Advapi32.LsaNtStatusToWinError(ReturnCode);
 
-                    if (win32ErrorCode != Interop.Errors.ERROR_TRUSTED_RELATIONSHIP_FAILURE)
+                    if (unchecked((int)win32ErrorCode) != Interop.Errors.ERROR_TRUSTED_RELATIONSHIP_FAILURE)
                     {
-                        Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Interop.LsaLookupNames(2) returned unrecognized error {0}", win32ErrorCode));
+                        Debug.Fail($"Interop.LsaLookupNames(2) returned unrecognized error {win32ErrorCode}");
                     }
 
-                    throw new Win32Exception(win32ErrorCode);
+                    throw new Win32Exception(unchecked((int)win32ErrorCode));
                 }
 
                 //
@@ -376,9 +370,9 @@ namespace System.Security.Principal
             }
             finally
             {
-                LsaHandle.Dispose();
-                ReferencedDomainsPtr.Dispose();
-                SidsPtr.Dispose();
+                LsaHandle?.Dispose();
+                ReferencedDomainsPtr?.Dispose();
+                SidsPtr?.Dispose();
             }
         }
         #endregion

@@ -3,19 +3,23 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using Xunit.Abstractions;
-using System;
 using System.IO;
-using System.Net;
-using System.Xml;
 using System.Xml.Schema;
 using System.Xml.XPath;
+using Xunit.Abstractions;
 
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_Add_URL", Desc = "")]
-    public class TC_SchemaSet_Add_URL
+    public class TC_SchemaSet_Add_URL : TC_SchemaSetBase
     {
+        private ITestOutputHelper _output;
+
+        public TC_SchemaSet_Add_URL(ITestOutputHelper output)
+        {
+            _output = output;
+        }
+
         //-----------------------------------------------------------------------------------
         [Fact]
         //[Variation(Desc = "v1 - ns = null, URL = null", Priority = 0)]
@@ -24,7 +28,7 @@ namespace System.Xml.Tests
             try
             {
                 XmlSchemaSet sc = new XmlSchemaSet();
-                sc.Add((String)null, (String)null);
+                sc.Add((string)null, (string)null);
             }
             catch (ArgumentNullException)
             {
@@ -40,7 +44,7 @@ namespace System.Xml.Tests
         public void v2()
         {
             XmlSchemaSet sc = new XmlSchemaSet();
-            XmlSchema Schema = sc.Add((String)null, TestData._FileXSD1);
+            XmlSchema Schema = sc.Add((string)null, TestData._FileXSD1);
             Assert.Equal(Schema != null, true);
 
             return;
@@ -267,7 +271,7 @@ namespace System.Xml.Tests
 
         //====================TFS_298991 XMLSchemaSet.Compile of an XSD containing with a large number of elements results in a System.StackOverflow error
 
-        private static void GenerateSequenceXsdFile(int size, string xsdFileName)
+        private string GenerateSequenceXsdFile(int size, string xsdFileName)
         {
             // generate the xsd file, the file is some thing like this
             //-------------------------------------------------------
@@ -287,36 +291,40 @@ namespace System.Xml.Tests
             //</xsd:element>
             //</xsd:schema>
             //------------------------------------------------------
-            StreamWriter sw = new StreamWriter(new FileStream(xsdFileName, FileMode.Create, FileAccess.Write));
+            string path = Path.Combine(TestDirectory, xsdFileName);
 
-            string head = @"<?xml version='1.0'?>
-            <xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema' >";
+            using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                string head = @"<?xml version='1.0'?>
+                <xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema' >";
 
-            string body = @" <xsd:element name='myFields'>
-                              <xsd:complexType>
-                               <xsd:sequence>";
+                string body = @" <xsd:element name='myFields'>
+                                  <xsd:complexType>
+                                   <xsd:sequence>";
 
-            string end = @"    </xsd:sequence>
-                              </xsd:complexType>
-                            </xsd:element>
-                          </xsd:schema>";
+                string end = @"    </xsd:sequence>
+                                  </xsd:complexType>
+                                </xsd:element>
+                              </xsd:schema>";
 
-            sw.WriteLine(head);
+                sw.WriteLine(head);
 
-            for (int ii = 0; ii < size; ++ii)
-                sw.WriteLine("       <xsd:element name='field{0}' />", ii);
+                for (int ii = 0; ii < size; ++ii)
+                    sw.WriteLine("       <xsd:element name='field{0}' />", ii);
 
-            sw.WriteLine(body);
+                sw.WriteLine(body);
 
-            for (int ii = 0; ii < size; ++ii)
-                sw.WriteLine("  <xsd:element ref='field{0}' minOccurs='0' />", ii);
+                for (int ii = 0; ii < size; ++ii)
+                    sw.WriteLine("  <xsd:element ref='field{0}' minOccurs='0' />", ii);
 
-            sw.WriteLine(end);
+                sw.WriteLine(end);
+            }
 
-            sw.Dispose();
+            return path;
         }
 
-        private static void GenerateChoiceXsdFile(int size, string xsdFileName)
+        private string GenerateChoiceXsdFile(int size, string xsdFileName)
         {
             // generate the xsd file, the file is some thing like this
             //-------------------------------------------------------
@@ -336,33 +344,37 @@ namespace System.Xml.Tests
             //</xsd:element>
             //</xsd:schema>
             //------------------------------------------------------
-            StreamWriter sw = new StreamWriter(new FileStream(xsdFileName, FileMode.Create, FileAccess.Write));
+            string path = Path.Combine(TestDirectory, xsdFileName);
 
-            string head = @"<?xml version='1.0'?>
-            <xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema' >";
+            using (FileStream fs = new FileStream(path, FileMode.Create, FileAccess.Write))
+            using (StreamWriter sw = new StreamWriter(fs))
+            {
+                string head = @"<?xml version='1.0'?>
+                <xsd:schema xmlns:xsd='http://www.w3.org/2001/XMLSchema' >";
 
-            string body = @" <xsd:element name='myFields'>
-                              <xsd:complexType>
-                               <xsd:choice>";
+                string body = @" <xsd:element name='myFields'>
+                                  <xsd:complexType>
+                                   <xsd:choice>";
 
-            string end = @"    </xsd:choice>
-                              </xsd:complexType>
-                            </xsd:element>
-                          </xsd:schema>";
+                string end = @"    </xsd:choice>
+                                  </xsd:complexType>
+                                </xsd:element>
+                              </xsd:schema>";
 
-            sw.WriteLine(head);
+                sw.WriteLine(head);
 
-            for (int ii = 0; ii < size; ++ii)
-                sw.WriteLine("       <xsd:element name='field{0}' />", ii);
+                for (int ii = 0; ii < size; ++ii)
+                    sw.WriteLine("       <xsd:element name='field{0}' />", ii);
 
-            sw.WriteLine(body);
+                sw.WriteLine(body);
 
-            for (int ii = 0; ii < size; ++ii)
-                sw.WriteLine("  <xsd:element ref='field{0}' minOccurs='0' />", ii);
+                for (int ii = 0; ii < size; ++ii)
+                    sw.WriteLine("  <xsd:element ref='field{0}' minOccurs='0' />", ii);
 
-            sw.WriteLine(end);
+                sw.WriteLine(end);
+            }
 
-            sw.Dispose();
+            return path;
         }
 
         public void verifyXsd(string file)
@@ -379,32 +391,25 @@ namespace System.Xml.Tests
             }
         }
 
-        [OuterLoop]
         [Theory]
-        [InlineData(5000, "5000s.xsd")]
-        [InlineData(10000, "10000s.xsd")]
+        [InlineData(1000, "1000s.xsd")]
         //[Variation(Desc = "Bug 298991 XMLSchemaSet.Compile cause StackOverflow - Sequence, 5000", Params = new object[] { 5000, "5000s.xsd" })]
         //[Variation(Desc = "Bug 298991 XMLSchemaSet.Compile cause StackOverflow - Sequence, 10000", Params = new object[] { 10000, "10000s.xsd" })]
         public void bug298991Sequence(int size, string xsdFileName)
         {
-            GenerateSequenceXsdFile(size, xsdFileName);
+            xsdFileName = GenerateSequenceXsdFile(size, xsdFileName);
 
             verifyXsd(xsdFileName);
-
-            return;
         }
 
-        [OuterLoop]
         [Theory]
         [InlineData(5000, "5000c.xsd")]
         //[Variation(Desc = "Bug 298991 XMLSchemaSet.Compile cause StackOverflow - Choice, 5000", Params = new object[] { 5000, "5000c.xsd" })]
         public void bug298991Choice(int size, string xsdFileName)
         {
-            GenerateChoiceXsdFile(size, xsdFileName);
+            xsdFileName = GenerateChoiceXsdFile(size, xsdFileName);
 
             verifyXsd(xsdFileName);
-
-            return;
         }
     }
 }

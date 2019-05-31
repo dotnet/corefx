@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.IO.MemoryMappedFiles.Tests
@@ -25,16 +27,16 @@ namespace System.IO.MemoryMappedFiles.Tests
                 using (mmf)
                 {
                     // Offset
-                    Assert.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewAccessor(-1, mapLength));
-                    Assert.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewAccessor(-1, mapLength, MemoryMappedFileAccess.ReadWrite));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewAccessor(-1, mapLength));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewAccessor(-1, mapLength, MemoryMappedFileAccess.ReadWrite));
 
                     // Size
-                    Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, -1));
-                    Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, -1, MemoryMappedFileAccess.ReadWrite));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, -1));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, -1, MemoryMappedFileAccess.ReadWrite));
                     if (IntPtr.Size == 4)
                     {
-                        Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, 1 + (long)uint.MaxValue));
-                        Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
+                        AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, 1 + (long)uint.MaxValue));
+                        AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewAccessor(0, 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
                     }
                     else
                     {
@@ -49,13 +51,13 @@ namespace System.IO.MemoryMappedFiles.Tests
                     Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewAccessor(mapLength, 1, MemoryMappedFileAccess.ReadWrite));
 
                     // Access
-                    Assert.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewAccessor(0, mapLength, (MemoryMappedFileAccess)(-1)));
-                    Assert.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewAccessor(0, mapLength, (MemoryMappedFileAccess)(42)));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewAccessor(0, mapLength, (MemoryMappedFileAccess)(-1)));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewAccessor(0, mapLength, (MemoryMappedFileAccess)(42)));
                 }
             }
         }
 
-        [Theory]
+        [ConditionalTheory]
         [InlineData(MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileAccess.Read)]
         [InlineData(MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileAccess.ReadWrite)]
@@ -76,33 +78,75 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidAccessLevelCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
-            using (MemoryMappedViewAccessor acc = mmf.CreateViewAccessor(0, Capacity, viewAccess))
+            AssertExtensions.ThrowsIf<IOException>(PlatformDetection.IsUap && mapAccess == MemoryMappedFileAccess.ReadWriteExecute && viewAccess == MemoryMappedFileAccess.ReadWriteExecute,
+            () =>
             {
-                ValidateMemoryMappedViewAccessor(acc, Capacity, viewAccess);
-            }
+                try
+                {
+                    using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+                    using (MemoryMappedViewAccessor acc = mmf.CreateViewAccessor(0, Capacity, viewAccess))
+                    {
+                        ValidateMemoryMappedViewAccessor(acc, Capacity, viewAccess);
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    if (PlatformDetection.IsInContainer && (viewAccess == MemoryMappedFileAccess.ReadExecute || viewAccess == MemoryMappedFileAccess.ReadWriteExecute))
+                    {
+                        throw new SkipTestException("Execute permission failing in container.");
+                    }
+
+                    throw;
+                }
+            });
         }
 
         [Theory]
         [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWrite)]
-        [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWriteExecute)]
         [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWrite)]
         [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadExecute)]
-        [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWriteExecute)]
         [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadExecute)]
-        [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadWriteExecute)]
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWrite)]
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadExecute)]
-        [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWriteExecute)]
         public void InvalidAccessLevelsCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
             {
                 Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewAccessor(0, Capacity, viewAccess));
+            }
+        }
+
+        [Theory]
+        [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWriteExecute)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Windows API returns IO exception error code when viewAccess is ReadWriteExecute")]
+        public void InvalidAccessLevels_ReadWrite_NonUwp(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
+        {
+            const int Capacity = 4096;
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+            {
+                Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewAccessor(0, Capacity, viewAccess));
+            }
+        }
+
+        [Theory]
+        [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWriteExecute)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap, "Windows API returns IO exception error code when viewAccess is ReadWriteExecute")]
+        public void InvalidAccessLevels_ReadWrite_Uwp(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
+        {
+            const int Capacity = 4096;
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+            {
+                Assert.Throws<IOException>(() => mmf.CreateViewAccessor(0, Capacity, viewAccess));
             }
         }
 
@@ -209,63 +253,63 @@ namespace System.IO.MemoryMappedFiles.Tests
             // Failed reads and writes just at the border of the end. This triggers different exception types
             // for some types than when we're completely beyond the end.
             long beyondEnd = acc.Capacity + 1;
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadBoolean(beyondEnd - sizeof(bool)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadByte(beyondEnd - sizeof(byte)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadSByte(beyondEnd - sizeof(sbyte)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadChar(beyondEnd - sizeof(char)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadDecimal(beyondEnd - sizeof(decimal)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadDouble(beyondEnd - sizeof(double)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadInt16(beyondEnd - sizeof(short)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadInt32(beyondEnd - sizeof(int)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadInt64(beyondEnd - sizeof(long)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadSingle(beyondEnd - sizeof(float)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadUInt16(beyondEnd - sizeof(ushort)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadUInt32(beyondEnd - sizeof(uint)));
-            Assert.Throws<ArgumentException>("position", () => acc.ReadUInt64(beyondEnd - sizeof(ulong)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadBoolean(beyondEnd - sizeof(bool)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadByte(beyondEnd - sizeof(byte)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadSByte(beyondEnd - sizeof(sbyte)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadChar(beyondEnd - sizeof(char)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadDecimal(beyondEnd - sizeof(decimal)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadDouble(beyondEnd - sizeof(double)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadInt16(beyondEnd - sizeof(short)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadInt32(beyondEnd - sizeof(int)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadInt64(beyondEnd - sizeof(long)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadSingle(beyondEnd - sizeof(float)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadUInt16(beyondEnd - sizeof(ushort)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadUInt32(beyondEnd - sizeof(uint)));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.ReadUInt64(beyondEnd - sizeof(ulong)));
 
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(bool), false));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(byte), (byte)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(sbyte), (sbyte)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(char), 'c'));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(decimal), (decimal)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(double), (double)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(short), (short)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(int), (int)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(long), (long)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(float), (float)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(ushort), (ushort)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(uint), (uint)0));
-            Assert.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(ulong), (ulong)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(bool), false));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(byte), (byte)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(sbyte), (sbyte)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(char), 'c'));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(decimal), (decimal)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(double), (double)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(short), (short)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(int), (int)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(long), (long)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(float), (float)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(ushort), (ushort)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(uint), (uint)0));
+            AssertExtensions.Throws<ArgumentException>("position", () => acc.Write(beyondEnd - sizeof(ulong), (ulong)0));
 
             // Failed reads and writes well past the end
             beyondEnd = acc.Capacity + 20;
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadBoolean(beyondEnd - sizeof(bool)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadByte(beyondEnd - sizeof(byte)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadSByte(beyondEnd - sizeof(sbyte)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadChar(beyondEnd - sizeof(char)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadDecimal(beyondEnd - sizeof(decimal)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadDouble(beyondEnd - sizeof(double)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadInt16(beyondEnd - sizeof(short)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadInt32(beyondEnd - sizeof(int)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadInt64(beyondEnd - sizeof(long)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadSingle(beyondEnd - sizeof(float)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadUInt16(beyondEnd - sizeof(ushort)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadUInt32(beyondEnd - sizeof(uint)));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadUInt64(beyondEnd - sizeof(ulong)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadBoolean(beyondEnd - sizeof(bool)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadByte(beyondEnd - sizeof(byte)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadSByte(beyondEnd - sizeof(sbyte)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadChar(beyondEnd - sizeof(char)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadDecimal(beyondEnd - sizeof(decimal)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadDouble(beyondEnd - sizeof(double)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadInt16(beyondEnd - sizeof(short)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadInt32(beyondEnd - sizeof(int)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadInt64(beyondEnd - sizeof(long)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadSingle(beyondEnd - sizeof(float)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadUInt16(beyondEnd - sizeof(ushort)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadUInt32(beyondEnd - sizeof(uint)));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.ReadUInt64(beyondEnd - sizeof(ulong)));
 
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(bool), false));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(byte), (byte)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(sbyte), (sbyte)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(char), 'c'));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(decimal), (decimal)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(double), (double)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(short), (short)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(int), (int)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(long), (long)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(float), (float)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(ushort), (ushort)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(uint), (uint)0));
-            Assert.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(ulong), (ulong)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(bool), false));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(byte), (byte)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(sbyte), (sbyte)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(char), 'c'));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(decimal), (decimal)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(double), (double)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(short), (short)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(int), (int)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(long), (long)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(float), (float)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(ushort), (ushort)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(uint), (uint)0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("position", () => acc.Write(beyondEnd - sizeof(ulong), (ulong)0));
         }
 
         /// <summary>Performs and verifies a read and write against an accessor.</summary>
@@ -453,24 +497,31 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void AllowFinalization()
         {
             // Explicitly do not dispose, to allow finalization to happen, just to try to verify
-            // that nothing fails when it does.
+            // that nothing fails/throws when it does.
 
-            MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, 4096);
-            MemoryMappedViewAccessor acc = mmf.CreateViewAccessor();
-
-            var mmfWeak = new WeakReference<MemoryMappedFile>(mmf);
-            var accWeak = new WeakReference<MemoryMappedViewAccessor>(acc);
-
-            mmf = null;
-            acc = null;
+            WeakReference<MemoryMappedFile> mmfWeak;
+            WeakReference<MemoryMappedViewAccessor> mmvaWeak;
+            CreateWeakMmfAndMmva(out mmfWeak, out mmvaWeak);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
+            MemoryMappedFile mmf;
             Assert.False(mmfWeak.TryGetTarget(out mmf));
-            Assert.False(accWeak.TryGetTarget(out acc));
+
+            MemoryMappedViewAccessor mmva;
+            Assert.False(mmvaWeak.TryGetTarget(out mmva));
         }
 
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void CreateWeakMmfAndMmva(out WeakReference<MemoryMappedFile> mmfWeak, out WeakReference<MemoryMappedViewAccessor> mmvaWeak)
+        {
+            MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, 4096);
+            MemoryMappedViewAccessor acc = mmf.CreateViewAccessor();
+
+            mmfWeak = new WeakReference<MemoryMappedFile>(mmf);
+            mmvaWeak = new WeakReference<MemoryMappedViewAccessor>(acc);
+        }
     }
 }

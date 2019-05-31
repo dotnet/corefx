@@ -6,66 +6,54 @@ using System.Threading;
 
 namespace System.Runtime.InteropServices
 {
-    public sealed partial class HandleCollector
+    public sealed class HandleCollector
     {
-        private const int deltaPercent = 10; // this is used for increasing the threshold.        
-        private string _name;
-        private int _initialThreshold;
-        private int _maximumThreshold;
+        // Used for increasing the threshold. 
+        private const int DeltaPercent = 10;
         private int _threshold;
         private int _handleCount;
 
-        private int[] _gc_counts = new int[3];
-        private int _gc_gen = 0;
+        private int[] _gcCounts = new int[3];
+        private int _gcGeneration = 0;
 
-        public HandleCollector(string name, int initialThreshold) :
+        public HandleCollector(string? name, int initialThreshold) :
             this(name, initialThreshold, int.MaxValue)
         {
         }
 
-        public HandleCollector(string name, int initialThreshold, int maximumThreshold)
+        public HandleCollector(string? name, int initialThreshold, int maximumThreshold)
         {
             if (initialThreshold < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(initialThreshold), SR.Arg_NeedNonNegNumRequired);
+                throw new ArgumentOutOfRangeException(nameof(initialThreshold), initialThreshold, SR.Arg_NeedNonNegNumRequired);
             }
-
             if (maximumThreshold < 0)
             {
-                throw new ArgumentOutOfRangeException(nameof(maximumThreshold), SR.Arg_NeedNonNegNumRequired);
+                throw new ArgumentOutOfRangeException(nameof(maximumThreshold), maximumThreshold, SR.Arg_NeedNonNegNumRequired);
             }
-
             if (initialThreshold > maximumThreshold)
             {
-                throw new ArgumentException(SR.Arg_InvalidThreshold);
+                throw new ArgumentException(SR.Arg_InvalidThreshold, nameof(initialThreshold));
             }
 
-            if (name != null)
-            {
-                _name = name;
-            }
-            else
-            {
-                _name = String.Empty;
-            }
-
-            _initialThreshold = initialThreshold;
-            _maximumThreshold = maximumThreshold;
+            Name = name ?? string.Empty;
+            InitialThreshold = initialThreshold;
+            MaximumThreshold = maximumThreshold;
             _threshold = initialThreshold;
             _handleCount = 0;
         }
 
-        public int Count { get { return _handleCount; } }
+        public int Count => _handleCount;
 
-        public int InitialThreshold { get { return _initialThreshold; } }
+        public int InitialThreshold { get; }
 
-        public int MaximumThreshold { get { return _maximumThreshold; } }
+        public int MaximumThreshold { get; }
 
-        public string Name { get { return _name; } }
+        public string Name { get; }
 
         public void Add()
         {
-            int gen_collect = -1;
+            int collectionGeneration = -1;
             Interlocked.Increment(ref _handleCount);
             if (_handleCount < 0)
             {
@@ -76,27 +64,27 @@ namespace System.Runtime.InteropServices
             {
                 lock (this)
                 {
-                    _threshold = _handleCount + (_handleCount / deltaPercent);
-                    gen_collect = _gc_gen;
-                    if (_gc_gen < 2)
+                    _threshold = _handleCount + (_handleCount / DeltaPercent);
+                    collectionGeneration = _gcGeneration;
+                    if (_gcGeneration < 2)
                     {
-                        _gc_gen++;
+                        _gcGeneration++;
                     }
                 }
             }
 
-            if ((gen_collect >= 0) &&
-                    ((gen_collect == 0) ||
-                    (_gc_counts[gen_collect] == GC.CollectionCount(gen_collect))))
+            if ((collectionGeneration >= 0) &&
+                    ((collectionGeneration == 0) ||
+                    (_gcCounts[collectionGeneration] == GC.CollectionCount(collectionGeneration))))
             {
-                GC.Collect(gen_collect);
-                Sleep(10 * gen_collect);
+                GC.Collect(collectionGeneration);
+                Thread.Sleep(10 * collectionGeneration);
             }
 
-            //don't bother with gen0. 
+            // Don't bother with gen0. 
             for (int i = 1; i < 3; i++)
             {
-                _gc_counts[i] = GC.CollectionCount(i);
+                _gcCounts[i] = GC.CollectionCount(i);
             }
         }
 
@@ -108,26 +96,26 @@ namespace System.Runtime.InteropServices
                 throw new InvalidOperationException(SR.InvalidOperation_HCCountOverflow);
             }
 
-            int newThreshold = _handleCount + _handleCount / deltaPercent;
-            if (newThreshold < (_threshold - _threshold / deltaPercent))
+            int newThreshold = _handleCount + _handleCount / DeltaPercent;
+            if (newThreshold < (_threshold - _threshold / DeltaPercent))
             {
                 lock (this)
                 {
-                    if (newThreshold > _initialThreshold)
+                    if (newThreshold > InitialThreshold)
                     {
                         _threshold = newThreshold;
                     }
                     else
                     {
-                        _threshold = _initialThreshold;
+                        _threshold = InitialThreshold;
                     }
-                    _gc_gen = 0;
+                    _gcGeneration = 0;
                 }
             }
 
             for (int i = 1; i < 3; i++)
             {
-                _gc_counts[i] = GC.CollectionCount(i);
+                _gcCounts[i] = GC.CollectionCount(i);
             }
         }
     }

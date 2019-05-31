@@ -140,13 +140,21 @@ namespace System.Linq.Tests
         {
             Assert.Equal(target, Enumerable.Range(0, range).SingleOrDefault(i => i == target));
         }
-        
+
+        [Theory]
+        [InlineData(1, 100)]
+        [InlineData(42, 100)]
+        public void RunOnce(int target, int range)
+        {
+            Assert.Equal(target, Enumerable.Range(0, range).RunOnce().SingleOrDefault(i => i == target));
+        }
+
         [Fact]
         public void ThrowsOnNullSource()
         {
             int[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.SingleOrDefault());
-            Assert.Throws<ArgumentNullException>("source", () => source.SingleOrDefault(i => i % 2 == 0));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.SingleOrDefault());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.SingleOrDefault(i => i % 2 == 0));
         }
 
         [Fact]
@@ -154,7 +162,7 @@ namespace System.Linq.Tests
         {
             int[] source = { };
             Func<int, bool> nullPredicate = null;
-            Assert.Throws<ArgumentNullException>("predicate", () => source.SingleOrDefault(nullPredicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => source.SingleOrDefault(nullPredicate));
         }
     }
 }

@@ -169,7 +169,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         /// <remarks>
         /// For fast performance, avoid using MemoryStream/BinaryReader or reflection/serialization. I measured the difference between several implementations and found that:
         /// * Difference in time performance between using plain byte array versus MemoryStream with BinaryReader is ~ 1/10!
-        /// * Difference between this implementation and serialization via .Net Serialization is ~1/100!
+        /// * Difference between this implementation and serialization via .NET Serialization is ~1/100!
         /// </remarks>
         protected virtual void Serialize(byte[] binState, out int nextOffset)
         {
@@ -256,8 +256,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return Next();
         }
 
-        #region Random core implementation taken from .Net 4.0 source code- DO NOT CHANGE BEYOND THIS POINT
-        // The code below was copied from .Net 4.0 sources of Random class
+        #region DO NOT CHANGE BEYOND THIS POINT
+        // The code below was copied from https://github.com/dotnet/coreclr/blob/master/src/mscorlib/src/System/Random.cs
         // I copy-pasted the source instead of inheritance to get super-fast performance on state management (see State Management section above)
         // which is 100 times faster than using Reflection. See remarks on Serialize method for more details.
 
@@ -460,7 +460,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         ==============================================================================*/
         public virtual void NextBytes(byte[] buffer)
         {
-            if (buffer == null) throw new ArgumentNullException("buffer");
+            if (buffer == null) throw new ArgumentNullException(nameof(buffer));
             for (int i = 0; i < buffer.Length; i++)
             {
                 buffer[i] = (byte)(InternalSample() % (byte.MaxValue + 1));

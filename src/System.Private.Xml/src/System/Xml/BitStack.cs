@@ -74,14 +74,6 @@ namespace System.Xml
         }
 
         /// <summary>
-        /// Return true if there are currently no bits on the stack.
-        /// </summary>
-        public bool IsEmpty
-        {
-            get { return _curr == 0x1; }
-        }
-
-        /// <summary>
         /// this.curr has enough space for 31 bits (minus 1 for sentinel bit).  Once this space is
         /// exhausted, a uint stack is created to handle the overflow.
         /// </summary>
@@ -104,7 +96,7 @@ namespace System.Xml
             if (_stackPos >= len)
             {
                 uint[] bitStackNew = new uint[2 * len];
-                Array.Copy(_bitStack, bitStackNew, len);
+                Array.Copy(_bitStack, 0, bitStackNew, 0, len);
                 _bitStack = bitStackNew;
             }
         }

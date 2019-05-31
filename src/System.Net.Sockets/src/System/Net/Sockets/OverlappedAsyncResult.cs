@@ -2,13 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Threading;
-using Microsoft.Win32;
-using System.Collections.Generic;
-
 namespace System.Net.Sockets
 {
     // OverlappedAsyncResult
@@ -19,7 +12,7 @@ namespace System.Net.Sockets
     {
         private Internals.SocketAddress _socketAddress;
 
-        internal OverlappedAsyncResult(Socket socket, Object asyncState, AsyncCallback asyncCallback) :
+        internal OverlappedAsyncResult(Socket socket, object asyncState, AsyncCallback asyncCallback) :
             base(socket, asyncState, asyncCallback)
         {
         }
@@ -33,7 +26,7 @@ namespace System.Net.Sockets
 
     internal sealed class OriginalAddressOverlappedAsyncResult : OverlappedAsyncResult
     {
-        internal OriginalAddressOverlappedAsyncResult(Socket socket, Object asyncState, AsyncCallback asyncCallback) :
+        internal OriginalAddressOverlappedAsyncResult(Socket socket, object asyncState, AsyncCallback asyncCallback) :
             base(socket, asyncState, asyncCallback)
         {
         }

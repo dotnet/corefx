@@ -45,7 +45,7 @@ namespace System.Xml.Xsl.XsltOld
                         else
                         {
                             // In ForwardCompatibility mode we ignoreing all unknown or incorrect attributes
-                            // If it's mandatory attribute we'l notice it absents later.
+                            // If it's mandatory attribute we'll notice it absence later.
                         }
                     }
                 }
@@ -69,7 +69,7 @@ namespace System.Xml.Xsl.XsltOld
 
         public void CheckEmpty(Compiler compiler)
         {
-            // Really EMPTY means no content at all, but the sake of compatibility with MSXML we allow whitespaces
+            // Really EMPTY means no content at all, but the sake of compatibility with MSXML we allow whitespace
             string elementName = compiler.Input.Name;
             if (compiler.Recurse())
             {

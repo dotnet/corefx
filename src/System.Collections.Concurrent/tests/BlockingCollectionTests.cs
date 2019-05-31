@@ -1,9 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -173,7 +175,19 @@ namespace System.Collections.Concurrent.Tests
         public static void TestDebuggerAttributes()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(new BlockingCollection<int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(new BlockingCollection<int>());
+            BlockingCollection<int> col = new BlockingCollection<int> { 1, 2, 3 };
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(col);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            int[] items = itemProperty.GetValue(info.Instance) as int[];
+            Assert.Equal(col, items);
+        }
+
+        [Fact]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(new BlockingCollection<int>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
         /// <summary>
@@ -280,7 +294,7 @@ namespace System.Collections.Concurrent.Tests
         /// <param name="numOfElementsPerThread">Number of elements to Add/Take per thread.</param>
         [Theory]
         [InlineData(8, 1024)]
-        private static void TestConcurrentAddTake(int numOfThreads, int numOfElementsPerThread)
+        public static void TestConcurrentAddTake(int numOfThreads, int numOfElementsPerThread)
         {
             //If numOfThreads is not an even number, make it even.
             if ((numOfThreads % 2) != 0)
@@ -818,7 +832,7 @@ namespace System.Collections.Concurrent.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => { blockingCollection = new BlockingCollection<int>(new ConcurrentStackCollection<int>(), 0); });
             Assert.Throws<ArgumentOutOfRangeException>(() => { blockingCollection = new BlockingCollection<int>(new ConcurrentStackCollection<int>(), -1); });
 
-            Assert.Throws<ArgumentException>(() => 
+            AssertExtensions.Throws<ArgumentException>(null, () => 
             {
                 ConcurrentStackCollection<int> concurrentStack = new ConcurrentStackCollection<int>();
                 concurrentStack.TryAdd(1);
@@ -881,10 +895,10 @@ namespace System.Collections.Concurrent.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => BlockingCollection<int>.TryAddToAny(blockingCollections, 0, new TimeSpan(0, 0, 0, 1, 2147483647)) );
             Assert.Throws<ArgumentOutOfRangeException>(() => BlockingCollection<int>.TryAddToAny(blockingCollections, 0, -2) );
 
-            Assert.Throws<ArgumentException>(() => BlockingCollection<int>.TryAddToAny(new BlockingCollection<int>[NUM_OF_COLLECTIONS], 0));
-            Assert.Throws<ArgumentException>(() => BlockingCollection<int>.TryAddToAny(new BlockingCollection<int>[0], 0));
+            AssertExtensions.Throws<ArgumentException>("collections", () => BlockingCollection<int>.TryAddToAny(new BlockingCollection<int>[NUM_OF_COLLECTIONS], 0));
+            AssertExtensions.Throws<ArgumentException>("collections", () => BlockingCollection<int>.TryAddToAny(new BlockingCollection<int>[0], 0));
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("collections", () =>
             {
                 blockingCollections[NUM_OF_COLLECTIONS - 1].CompleteAdding();
                 BlockingCollection<int>.TryAddToAny(blockingCollections, 0);
@@ -913,8 +927,8 @@ namespace System.Collections.Concurrent.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => BlockingCollection<int>.TryTakeFromAny(blockingCollections, out item, new TimeSpan(0, 0, 0, 1, 2147483647)) );
             Assert.Throws<ArgumentOutOfRangeException>(() => BlockingCollection<int>.TryTakeFromAny(blockingCollections, out item, -2) );
 
-            Assert.Throws<ArgumentException>(() => BlockingCollection<int>.TryTakeFromAny(new BlockingCollection<int>[NUM_OF_COLLECTIONS], out item) );
-            Assert.Throws<ArgumentException>(() => BlockingCollection<int>.TryTakeFromAny(new BlockingCollection<int>[0], out item) );
+            AssertExtensions.Throws<ArgumentException>("collections", () => BlockingCollection<int>.TryTakeFromAny(new BlockingCollection<int>[NUM_OF_COLLECTIONS], out item) );
+            AssertExtensions.Throws<ArgumentException>("collections", () => BlockingCollection<int>.TryTakeFromAny(new BlockingCollection<int>[0], out item) );
             Assert.Throws<ArgumentNullException>(() => BlockingCollection<int>.TryTakeFromAny(null, out item) );
 
             // new behavior for TakeFromAny after Dev10, to throw ArgumentException if all the collections are completed, 
@@ -923,7 +937,7 @@ namespace System.Collections.Concurrent.Tests
             {
                 blockingCollections[i].CompleteAdding();
             }
-            Assert.Throws<ArgumentException>(() => BlockingCollection<int>.TakeFromAny(blockingCollections, out item) );
+            AssertExtensions.Throws<ArgumentException>("collections", () => BlockingCollection<int>.TakeFromAny(blockingCollections, out item) );
         }
 
         /// <summary>Verifies that the correct exceptions are thrown for invalid inputs.</summary>
@@ -938,14 +952,14 @@ namespace System.Collections.Concurrent.Tests
 
             Assert.Throws<ArgumentNullException>(() => blockingCollection.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => blockingCollection.CopyTo(arr, -1));
-            Assert.Throws<ArgumentException>(() =>  blockingCollection.CopyTo(arr, 2));
-            Assert.Throws<ArgumentException>(() => 
+            AssertExtensions.Throws<ArgumentException>("index", () =>  blockingCollection.CopyTo(arr, 2));
+            AssertExtensions.Throws<ArgumentException>("array", () => 
                 {
                     int[,] twoDArray = new int[2, 2];
                     ((ICollection)blockingCollection).CopyTo(twoDArray, 0);
                 });
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("array", () =>
             {
                 float[,] twoDArray = new float[2, 2];
                 ((ICollection)blockingCollection).CopyTo(twoDArray, 0);
@@ -995,7 +1009,7 @@ namespace System.Collections.Concurrent.Tests
             ConcurrentStackCollection<int> concurrentCollection = new ConcurrentStackCollection<int>();
             int numberToAdd = 0;
             int numOfTrueTryAdds = 0;
-            int capacity = (boundedCapacity == -1) ? Int32.MaxValue : boundedCapacity;
+            int capacity = (boundedCapacity == -1) ? int.MaxValue : boundedCapacity;
 
             int expectedNumOfSuccessfulTryAdds;
             if (numOfAdds <= capacity)

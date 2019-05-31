@@ -11,7 +11,7 @@ namespace System {
     public enum GenericUriParserOptions
     {
         // A hierarchical URI, allows a userinfo, non empty Inet-based authority, path, query and fragment
-        // The URI path gets agressively compressed means dots, slashes and backslashes are unescaped,
+        // The URI path gets aggressively compressed means dots, slashes and backslashes are unescaped,
         // backslashesare converted, and then it compresses the path. It also removes trailing dots,
         // empty segments and dots-only segments
         Default                         = 0x0,
@@ -34,7 +34,7 @@ namespace System {
         // Disables a fragment. A # char is considered as part of the path or query and is escaped
         NoFragment                 = 0x20,
 
-        // if false then converta \ to /, otheriwse does this conversion for the Path component.
+        // if false then converta \ to /, otherwise does this conversion for the Path component.
         DontConvertPathBackslashes = 0x40,
 
         // if false, then a/./b or a/.../b becomes a/b and /a/../b becomes /b

@@ -7,6 +7,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Security;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Diagnostics;
 
 namespace System.IO.Pipes
 {
@@ -18,38 +19,32 @@ namespace System.IO.Pipes
         // Use the maximum number of server instances that the system resources allow
         public const int MaxAllowedServerInstances = -1;
 
-        [SecuritySafeCritical]
-        public NamedPipeServerStream(String pipeName)
+        public NamedPipeServerStream(string pipeName)
             : this(pipeName, PipeDirection.InOut, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        [SecuritySafeCritical]
-        public NamedPipeServerStream(String pipeName, PipeDirection direction)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction)
             : this(pipeName, direction, 1, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        [SecuritySafeCritical]
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances)
             : this(pipeName, direction, maxNumberOfServerInstances, PipeTransmissionMode.Byte, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        [SecuritySafeCritical]
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, PipeOptions.None, 0, 0, HandleInheritability.None)
         {
         }
 
-        [SecuritySafeCritical]
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options, 0, 0, HandleInheritability.None)
         {
         }
 
-        [SecuritySafeCritical]
-        public NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize)
+        public NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances, PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize)
             : this(pipeName, direction, maxNumberOfServerInstances, transmissionMode, options, inBufferSize, outBufferSize, HandleInheritability.None)
         {
         }
@@ -77,12 +72,8 @@ namespace System.IO.Pipes
         /// Note: this size is always advisory; OS uses a suggestion.
         /// </param>
         /// <param name="outBufferSize">Outgoing buffer size, 0 or higher (see above)</param>
-        /// <param name="pipeSecurity">PipeSecurity, or null for default security descriptor</param>
         /// <param name="inheritability">Whether handle is inheritable</param>
-        /// <param name="additionalAccessRights">Combination (logical OR) of PipeAccessRights.TakeOwnership, 
-        /// PipeAccessRights.AccessSystemSecurity, and PipeAccessRights.ChangePermissions</param>
-        [SecuritySafeCritical]
-        private NamedPipeServerStream(String pipeName, PipeDirection direction, int maxNumberOfServerInstances,
+        private NamedPipeServerStream(string pipeName, PipeDirection direction, int maxNumberOfServerInstances,
                 PipeTransmissionMode transmissionMode, PipeOptions options, int inBufferSize, int outBufferSize,
                 HandleInheritability inheritability)
             : base(direction, transmissionMode, outBufferSize)
@@ -95,7 +86,7 @@ namespace System.IO.Pipes
             {
                 throw new ArgumentException(SR.Argument_NeedNonemptyPipeName);
             }
-            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous)) != 0)
+            if ((options & ~(PipeOptions.WriteThrough | PipeOptions.Asynchronous | PipeOptions.CurrentUserOnly)) != 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(options), SR.ArgumentOutOfRange_OptionsInvalid);
             }
@@ -119,12 +110,16 @@ namespace System.IO.Pipes
                 throw new ArgumentOutOfRangeException(nameof(inheritability), SR.ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable);
             }
 
+            if ((options & PipeOptions.CurrentUserOnly) != 0)
+            {
+                IsCurrentUserOnly = true;
+            }
+
             Create(pipeName, direction, maxNumberOfServerInstances, transmissionMode,
-                options, inBufferSize, outBufferSize, inheritability);
+            options, inBufferSize, outBufferSize, inheritability);
         }
 
         // Create a NamedPipeServerStream from an existing server pipe handle.
-        [SecuritySafeCritical]
         public NamedPipeServerStream(PipeDirection direction, bool isAsync, bool isConnected, SafePipeHandle safePipeHandle)
             : base(direction, PipeTransmissionMode.Byte, 0)
         {
@@ -163,7 +158,6 @@ namespace System.IO.Pipes
             TaskToApm.End(asyncResult);
 
         // Server can only connect from Disconnected state
-        [SecurityCritical]
         [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Consistent with security model")]
         private void CheckConnectOperationsServer()
         {
@@ -186,7 +180,6 @@ namespace System.IO.Pipes
         }
 
         // Server is allowed to disconnect from connected and broken states
-        [SecurityCritical]
         private void CheckDisconnectOperations()
         {
             if (State == PipeState.WaitingToConnect)

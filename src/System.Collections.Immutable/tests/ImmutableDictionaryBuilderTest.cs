@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -212,7 +213,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             builder = ImmutableDictionary.Create<string, string>()
                 .Add("a", "1").Add("A", "2").Add("b", "3").ToBuilder();
-            Assert.Throws<ArgumentException>(null, () => builder.KeyComparer = StringComparer.OrdinalIgnoreCase);
+            AssertExtensions.Throws<ArgumentException>(null, () => builder.KeyComparer = StringComparer.OrdinalIgnoreCase);
 
             // Force all values to be considered equal.
             builder.ValueComparer = EverythingEqual<string>.Default;
@@ -250,7 +251,46 @@ namespace System.Collections.Immutable.Tests
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableDictionary.CreateBuilder<string, int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableDictionary.CreateBuilder<int, string>());
+            ImmutableDictionary<int, string>.Builder builder = ImmutableDictionary.CreateBuilder<int, string>();
+            builder.Add(1, "One");
+            builder.Add(2, "Two");
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(builder);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            KeyValuePair<int, string>[] items = itemProperty.GetValue(info.Instance) as KeyValuePair<int, string>[];
+            Assert.Equal(builder, items);
+        }
+
+        [Fact]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableHashSet.Create<string>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
+        }
+
+        [Fact]
+        public void ToImmutableDictionary()
+        {
+            ImmutableDictionary<int, int>.Builder builder =  ImmutableDictionary.CreateBuilder<int, int>();
+            builder.Add(0, 0);
+            builder.Add(1, 1);
+            builder.Add(2, 2);
+
+            var dictionary = builder.ToImmutableDictionary();
+            Assert.Equal(0, dictionary[0]);
+            Assert.Equal(1, dictionary[1]);
+            Assert.Equal(2, dictionary[2]);
+
+            builder[1] = 5;
+            Assert.Equal(5, builder[1]);
+            Assert.Equal(1, dictionary[1]);
+
+            builder.Clear();
+            Assert.True(builder.ToImmutableDictionary().IsEmpty);
+            Assert.False(dictionary.IsEmpty);
+
+            ImmutableDictionary<int, int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableDictionary());
         }
 
         protected override IImmutableDictionary<TKey, TValue> GetEmptyImmutableDictionary<TKey, TValue>()

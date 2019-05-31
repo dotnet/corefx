@@ -39,17 +39,17 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Fact]
         public static void TestSerial()
         {
-            string expectedSerialHex = "B00000000100DD9F3BD08B0AAF11B000000033";
-            byte[] expectedSerial = expectedSerialHex.HexToByteArray();
+            string expectedSerialHex = "33000000B011AF0A8BD03B9FDD0001000000B0";
+            byte[] expectedSerial = "B00000000100DD9F3BD08B0AAF11B000000033".HexToByteArray();
 
             using (X509Certificate2 c = LoadCertificateFromFile())
             {
                 byte[] serial = c.GetSerialNumber();
                 Assert.Equal(expectedSerial, serial);
-#if netstandard17
                 string serialHex = c.GetSerialNumberString();
                 Assert.Equal(expectedSerialHex, serialHex);
-#endif
+                serialHex = c.SerialNumber;
+                Assert.Equal(expectedSerialHex, serialHex);
             }
         }
 
@@ -63,12 +63,95 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 byte[] thumbPrint = c.GetCertHash();
                 Assert.Equal(expectedThumbPrint, thumbPrint);
-#if netstandard17
                 string thumbPrintHex = c.GetCertHashString();
                 Assert.Equal(expectedThumbPrintHex, thumbPrintHex);
-#endif
             }
         }
+
+#if HAVE_THUMBPRINT_OVERLOADS
+        [Theory]
+        [InlineData("SHA1", false)]
+        [InlineData("SHA1", true)]
+        [InlineData("SHA256", false)]
+        [InlineData("SHA256", true)]
+        [InlineData("SHA384", false)]
+        [InlineData("SHA384", true)]
+        [InlineData("SHA512", false)]
+        [InlineData("SHA512", true)]
+        public static void TestThumbprint(string hashAlgName, bool viaSpan)
+        {
+            string expectedThumbprintHex;
+
+            switch (hashAlgName)
+            {
+                case "SHA1":
+                    expectedThumbprintHex =
+                        "108E2BA23632620C427C570B6D9DB51AC31387FE";
+                    break;
+                case "SHA256":
+                    expectedThumbprintHex =
+                        "73FCF982974387FB164C91D0168FE8C3B957DE6526AE239AAD32825C5A63D2A4";
+                    break;
+                case "SHA384":
+                    expectedThumbprintHex =
+                        "E6DCEF0840DAB43E1DBE9BE23142182BD05106AB25F7043BDE6A551928DFB4C7082791B86A5FB5E77B0F43DD92B7A3E5";
+                    break;
+                case "SHA512":
+                    expectedThumbprintHex =
+                        "8435635A12915A1A9C28BC2BCE7C3CAD08EB723FE276F13CD37D1C3B21416994" +
+                        "0661A27B419882DBA643B23A557CA9EBC03ACC3D7EE3D4D591AB4BA0E553B945";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(hashAlgName));
+            }
+
+            HashAlgorithmName alg = new HashAlgorithmName(hashAlgName);
+
+            using (X509Certificate2 c = LoadCertificateFromFile())
+            {
+                if (viaSpan)
+                {
+                    const int WriteOffset = 3;
+                    const byte FillByte = 0x55;
+
+                    int expectedSize = expectedThumbprintHex.Length / 2;
+                    byte[] thumbPrint = new byte[expectedSize + 10];
+                    thumbPrint.AsSpan().Fill(FillByte);
+
+                    Span<byte> writeDest = thumbPrint.AsSpan(WriteOffset);
+                    int bytesWritten;
+
+                    // Too small.
+                    Assert.False(c.TryGetCertHash(alg, writeDest.Slice(0, expectedSize - 1), out bytesWritten));
+                    Assert.Equal(0, bytesWritten);
+                    // Still all 0x55s.
+                    Assert.Equal(new string('5', thumbPrint.Length * 2), thumbPrint.ByteArrayToHex());
+
+                    // Large enough (+7)
+                    Assert.True(c.TryGetCertHash(alg, writeDest, out bytesWritten));
+                    Assert.Equal(expectedSize, bytesWritten);
+
+                    Assert.Equal(expectedThumbprintHex, writeDest.Slice(0, bytesWritten).ByteArrayToHex());
+                    Assert.Equal(FillByte, thumbPrint[expectedSize + WriteOffset]);
+
+                    // Try again with a perfectly sized value
+                    thumbPrint.AsSpan().Fill(FillByte);
+                    Assert.True(c.TryGetCertHash(alg, writeDest.Slice(0, expectedSize), out bytesWritten));
+                    Assert.Equal(expectedSize, bytesWritten);
+
+                    Assert.Equal(expectedThumbprintHex, writeDest.Slice(0, bytesWritten).ByteArrayToHex());
+                    Assert.Equal(FillByte, thumbPrint[expectedSize + WriteOffset]);
+                }
+                else
+                {
+                    byte[] thumbPrint = c.GetCertHash(alg);
+                    Assert.Equal(expectedThumbprintHex, thumbPrint.ByteArrayToHex());
+                    string thumbPrintHex = c.GetCertHashString(alg);
+                    Assert.Equal(expectedThumbprintHex, thumbPrintHex);
+                }
+            }
+        }
+#endif
 
         [Fact]
         public static void TestGetFormat()
@@ -123,16 +206,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 byte[] publicKey = c.GetPublicKey();
                 Assert.Equal(expectedPublicKey, publicKey);
-#if netstandard17
                 string publicKeyHex = c.GetPublicKeyString();
                 Assert.Equal(expectedPublicKeyHex, publicKeyHex, true);
-#endif
             }
         }
 
         [Fact]
         [ActiveIssue(2910, TestPlatforms.AnyUnix)]
-        [ActiveIssue(2667, TestPlatforms.Windows)]
         public static void TestLoadSignedFile()
         {
             // X509Certificate2 can also extract the certificate from a signed file.
@@ -147,30 +227,38 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(
                     "CN=Microsoft Code Signing PCA, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
                     issuer);
-#if netstandard17
 #pragma warning disable 0618
-                Assert.Equal(c.Issuer, c.GetIssuerName());
+                Assert.Equal(
+                    "C=US, S=Washington, L=Redmond, O=Microsoft Corporation, CN=Microsoft Code Signing PCA",
+                    c.GetIssuerName());
 #pragma warning restore 0618
-#endif
 
                 string subject = c.Subject;
                 Assert.Equal(
                     "CN=Microsoft Corporation, OU=MOPR, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
                     subject);
-#if netstandard17
 #pragma warning disable 0618
-                Assert.Equal(subject, c.GetName());
+                Assert.Equal(
+                    "C=US, S=Washington, L=Redmond, O=Microsoft Corporation, OU=MOPR, CN=Microsoft Corporation",
+                    c.GetName());
 #pragma warning restore 0618
-#endif
 
                 string expectedThumbprintHash = "67B1757863E3EFF760EA9EBB02849AF07D3A8080";
                 byte[] expectedThumbprint = expectedThumbprintHash.HexToByteArray();
                 byte[] actualThumbprint = c.GetCertHash();
                 Assert.Equal(expectedThumbprint, actualThumbprint);
-#if netstandard17
                 string actualThumbprintHash = c.GetCertHashString();
                 Assert.Equal(expectedThumbprintHash, actualThumbprintHash);
-#endif
+            }
+        }
+
+        [Fact]
+        public static void TestLoadConcatenatedPemFile()
+        {
+            using (X509Certificate2 c = new X509Certificate2(TestData.ConcatenatedPemFile))
+            {
+                string firstCertifiateThumbprint = "3CFD4BEECFB3F8C4DC71AD9E46EC81C2CCE71CE6";
+                Assert.Equal(firstCertifiateThumbprint, c.GetCertHashString());
             }
         }
 

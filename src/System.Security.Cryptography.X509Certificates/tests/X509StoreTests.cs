@@ -2,12 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if netcoreapp || uap
+#define HAVE_STORE_ISOPEN
+#endif
+
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Security.Cryptography.X509Certificates.Tests
 {
-    public class X509StoreTests
+    public class X509StoreTests : FileCleanupTestBase
     {
         [Fact]
         public static void OpenMyStore()
@@ -15,18 +22,29 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             {
                 store.Open(OpenFlags.ReadOnly);
+                Assert.Equal("My", store.Name);
             }
         }
 
-#if netstandard17
         [Fact]
         public static void Constructor_DefaultStoreName()
         {
             using (X509Store store = new X509Store(StoreLocation.CurrentUser))
             {
-                Assert.Equal("My", store.Name);
+                Assert.Equal("MY", store.Name);
             }
         }
+
+#if HAVE_STORE_ISOPEN
+        [Fact]
+        public static void Constructor_IsNotOpen()
+        {
+            using (X509Store store = new X509Store(StoreLocation.CurrentUser))
+            {
+                Assert.False(store.IsOpen);
+            }
+        }
+#endif
 
         [Fact]
         public static void Constructor_DefaultStoreLocation()
@@ -42,33 +60,42 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)] // Not supported via OpenSSL
         [Fact]
         public static void Constructor_StoreHandle()
         {
             using (X509Store store1 = new X509Store(StoreName.My, StoreLocation.CurrentUser))
             {
                 store1.Open(OpenFlags.ReadOnly);
-                int certCount1;
+                bool hadCerts;
 
                 using (var coll = new ImportedCollection(store1.Certificates))
                 {
-                    certCount1 = coll.Collection.Count;
-                    Assert.True(certCount1 >= 0);
+                    // Use >1 instead of >0 in case the one is an ephemeral accident.
+                    hadCerts = coll.Collection.Count > 1;
+                    Assert.True(coll.Collection.Count >= 0);
                 }
 
                 using (X509Store store2 = new X509Store(store1.StoreHandle))
                 {
                     using (var coll = new ImportedCollection(store2.Certificates))
                     {
-                        int certCount2 = coll.Collection.Count;
-                        Assert.Equal(certCount1, certCount2);
+                        if (hadCerts)
+                        {
+                            // Use InRange here instead of True >= 0 so that the error message
+                            // is different, and we can diagnose a bit of what state we might have been in.
+                            Assert.InRange(coll.Collection.Count, 1, int.MaxValue);
+                        }
+                        else
+                        {
+                            Assert.True(coll.Collection.Count >= 0);
+                        }
                     }
                 }
             }
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)] // API not supported via OpenSSL
         [Fact]
         public static void Constructor_StoreHandle_Unix()
         {
@@ -81,7 +108,45 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             Assert.Throws<PlatformNotSupportedException>(() => new X509Chain(IntPtr.Zero));
         }
 
-        [PlatformSpecific(TestPlatforms.Windows)]
+#if HAVE_STORE_ISOPEN
+        [Fact]
+        public static void Constructor_OpenFlags()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser, OpenFlags.ReadOnly))
+            {
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
+        public static void Constructor_OpenFlags_StoreName()
+        {
+            using (X509Store store = new X509Store("My", StoreLocation.CurrentUser, OpenFlags.ReadOnly))
+            {
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
+        public static void Constructor_OpenFlags_OpenAnyway()
+        {
+            using (X509Store store = new X509Store("My", StoreLocation.CurrentUser, OpenFlags.ReadOnly))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
+        public static void Constructor_OpenFlags_NonExistingStoreName_Throws()
+        {
+            Assert.ThrowsAny<CryptographicException>(() =>
+                new X509Store(new Guid().ToString("D"), StoreLocation.CurrentUser, OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly)
+            );
+        }
+#endif
+
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)] // StoreHandle not supported via OpenSSL
         [Fact]
         public static void TestDispose()
         {
@@ -94,7 +159,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             Assert.Throws<CryptographicException>(() => store.StoreHandle);
         }
-#endif
 
         [Fact]
         public static void ReadMyCertificates()
@@ -115,13 +179,44 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        public static void OpenNotExistant()
+        public static void OpenNotExistent()
         {
             using (X509Store store = new X509Store(Guid.NewGuid().ToString("N"), StoreLocation.CurrentUser))
             {
                 Assert.ThrowsAny<CryptographicException>(() => store.Open(OpenFlags.OpenExistingOnly));
             }
         }
+
+#if HAVE_STORE_ISOPEN
+        [Fact]
+        public static void Open_IsOpenTrue()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                Assert.True(store.IsOpen);
+            }
+        }
+
+        [Fact]
+        public static void Dispose_IsOpenFalse()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            store.Dispose();
+            Assert.False(store.IsOpen);
+        }
+
+        [Fact]
+        public static void ReOpen_IsOpenTrue()
+        {
+            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+            store.Open(OpenFlags.ReadOnly);
+            store.Close();
+            store.Open(OpenFlags.ReadOnly);
+            Assert.True(store.IsOpen);
+        }
+#endif
 
         [Fact]
         public static void AddReadOnlyThrows()
@@ -141,6 +236,19 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                         Assert.ThrowsAny<CryptographicException>(() => store.Add(cert));
                     }
                 }
+            }
+        }
+
+        [Fact]
+        public static void AddDisposedThrowsCryptographicException()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
+            {
+                store.Open(OpenFlags.ReadWrite);
+
+                cert.Dispose();
+                Assert.Throws<CryptographicException>(() => store.Add(cert));
             }
         }
 
@@ -202,6 +310,29 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
+        public static void RemoveReadOnlyNonExistingDoesNotThrow()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
+            {
+                store.Open(OpenFlags.ReadOnly);
+                store.Remove(cert);
+            }
+        }
+
+        [Fact]
+        public static void RemoveDisposedIsIgnored()
+        {
+            using (X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser))
+            using (X509Certificate2 cert = new X509Certificate2(TestData.MsCertificate))
+            {
+                store.Open(OpenFlags.ReadWrite);
+                cert.Dispose();
+                store.Remove(cert);
+            }
+        }
+
         /* Placeholder information for these tests until they can be written to run reliably.
          * Currently such tests would create physical files (Unix) and\or certificates (Windows)
          * which can collide with other running tests that use the same cert, or from a
@@ -216,10 +347,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [Fact]
         public static void TestAddAndRemove() {}
 
-#if netstandard17
         [Fact]
         public static void TestAddRangeAndRemoveRange() {}
-#endif
         */
 
         [Fact]
@@ -253,7 +382,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
         public static void OpenMachineMyStore_Supported()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine))
@@ -263,17 +392,19 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
         public static void OpenMachineMyStore_NotSupported()
         {
             using (X509Store store = new X509Store(StoreName.My, StoreLocation.LocalMachine))
             {
-                Assert.Throws<PlatformNotSupportedException>(() => store.Open(OpenFlags.ReadOnly));
+                Exception e = Assert.Throws<CryptographicException>(() => store.Open(OpenFlags.ReadOnly));
+                Assert.NotNull(e.InnerException);
+                Assert.IsType<PlatformNotSupportedException>(e.InnerException);
             }
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
         [InlineData(OpenFlags.ReadOnly, false)]
         [InlineData(OpenFlags.MaxAllowed, false)]
         [InlineData(OpenFlags.ReadWrite, true)]
@@ -283,7 +414,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             {
                 if (shouldThrow)
                 {
-                    Assert.Throws<PlatformNotSupportedException>(() => store.Open(permissions));
+                    Exception e = Assert.Throws<CryptographicException>(() => store.Open(permissions));
+                    Assert.NotNull(e.InnerException);
+                    Assert.IsType<PlatformNotSupportedException>(e.InnerException);
                 }
                 else
                 {
@@ -316,5 +449,134 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
+
+        [Theory]
+        [PlatformSpecific(TestPlatforms.Windows | TestPlatforms.OSX)]
+        [InlineData(StoreLocation.CurrentUser, true)]
+        [InlineData(StoreLocation.LocalMachine, true)]
+        [InlineData(StoreLocation.CurrentUser, false)]
+        [InlineData(StoreLocation.LocalMachine, false)]
+        public static void EnumerateDisallowedStore(StoreLocation location, bool useEnum)
+        {
+            X509Store store = useEnum
+                ? new X509Store(StoreName.Disallowed, location)
+                // Non-normative casing, proving that we aren't case-sensitive (Windows isn't)
+                : new X509Store("disallowed", location);
+
+            using (store)
+            {
+                store.Open(OpenFlags.ReadOnly | OpenFlags.OpenExistingOnly);
+
+                using (var storeCerts = new ImportedCollection(store.Certificates))
+                {
+                    // That's all.  We enumerated it.
+                    // There might not even be data in it.
+                }
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
+        [InlineData(false, OpenFlags.ReadOnly)]
+        [InlineData(true, OpenFlags.ReadOnly)]
+        [InlineData(false, OpenFlags.ReadWrite)]
+        [InlineData(true, OpenFlags.ReadWrite)]
+        [InlineData(false, OpenFlags.MaxAllowed)]
+        [InlineData(true, OpenFlags.MaxAllowed)]
+        public static void UnixCannotOpenMachineDisallowedStore(bool useEnum, OpenFlags openFlags)
+        {
+            X509Store store = useEnum
+                ? new X509Store(StoreName.Disallowed, StoreLocation.LocalMachine)
+                // Non-normative casing, proving that we aren't case-sensitive (Windows isn't)
+                : new X509Store("disallowed", StoreLocation.LocalMachine);
+
+            using (store)
+            {
+                Exception e = Assert.Throws<CryptographicException>(() => store.Open(openFlags));
+                Assert.NotNull(e.InnerException);
+                Assert.IsType<PlatformNotSupportedException>(e.InnerException);
+                Assert.Equal(e.Message, e.InnerException.Message);
+            }
+        }
+
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
+        [InlineData(false, OpenFlags.ReadOnly)]
+        [InlineData(true, OpenFlags.ReadOnly)]
+        [InlineData(false, OpenFlags.ReadWrite)]
+        [InlineData(true, OpenFlags.ReadWrite)]
+        [InlineData(false, OpenFlags.MaxAllowed)]
+        [InlineData(true, OpenFlags.MaxAllowed)]
+        public static void UnixCannotModifyDisallowedStore(bool useEnum, OpenFlags openFlags)
+        {
+            X509Store store = useEnum
+                ? new X509Store(StoreName.Disallowed, StoreLocation.CurrentUser)
+                // Non-normative casing, proving that we aren't case-sensitive (Windows isn't)
+                : new X509Store("disallowed", StoreLocation.CurrentUser);
+
+            using (store)
+            using (X509Certificate2 cert = new X509Certificate2(TestData.Rsa384CertificatePemBytes))
+            {
+                store.Open(openFlags);
+                Exception e = Assert.Throws<CryptographicException>(() => store.Add(cert));
+
+                if (openFlags == OpenFlags.ReadOnly)
+                {
+                    Assert.Null(e.InnerException);
+                }
+                else
+                {
+                    Assert.NotNull(e.InnerException);
+                    Assert.IsType<PlatformNotSupportedException>(e.InnerException);
+                    Assert.Equal(e.Message, e.InnerException.Message);
+                }
+
+                Assert.Equal(0, store.Certificates.Count);
+            }
+        }
+#if Unix
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Linux)] // Windows/OSX doesn't use SSL_CERT_{DIR,FILE}.
+        private void X509Store_MachineStoreLoadSkipsInvalidFiles()
+        {
+            // We create a folder for our machine store and use it by setting SSL_CERT_{DIR,FILE}.
+            // In the store we'll add some invalid files, but we start and finish with a valid file.
+            // This is to account for the order in which the store is populated.
+            string sslCertDir = GetTestFilePath();
+            Directory.CreateDirectory(sslCertDir);
+
+            // Valid file.
+            File.WriteAllBytes(Path.Combine(sslCertDir, "0.pem"), TestData.SelfSigned1PemBytes);
+
+            // File with invalid content.
+            File.WriteAllText(Path.Combine(sslCertDir, "1.pem"), "This is not a valid cert");
+
+            // File which is not readable by the current user.
+            string unreadableFileName = Path.Combine(sslCertDir, "2.pem");
+            File.WriteAllBytes(unreadableFileName, TestData.SelfSigned2PemBytes);
+            Assert.Equal(0, chmod(unreadableFileName, 0));
+
+            // Valid file.
+            File.WriteAllBytes(Path.Combine(sslCertDir, "3.pem"), TestData.SelfSigned3PemBytes);
+
+            var psi = new ProcessStartInfo();
+            psi.Environment.Add("SSL_CERT_DIR", sslCertDir);
+            psi.Environment.Add("SSL_CERT_FILE", "/nonexisting");
+            RemoteExecutor.Invoke(() =>
+            {
+                using (var store = new X509Store(StoreName.Root, StoreLocation.LocalMachine))
+                {
+                    store.Open(OpenFlags.OpenExistingOnly);
+
+                    // Check nr of certificates in store.
+                    Assert.Equal(2, store.Certificates.Count);
+                }
+                return RemoteExecutor.SuccessExitCode;
+            }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
+        }
+
+        [DllImport("libc")]
+        private static extern int chmod(string path, int mode);
+#endif
     }
 }

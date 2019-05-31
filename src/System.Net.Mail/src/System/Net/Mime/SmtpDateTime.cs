@@ -58,7 +58,7 @@ namespace System.Net.Mime
 
         // array of all possible date time values
         // if a string matches any one of these it will be parsed correctly
-        internal readonly static string[] s_validDateTimeFormats = new string[]
+        internal static readonly string[] s_validDateTimeFormats = new string[]
         {
             DateFormatWithDayOfWeek,
             DateFormatWithoutDayOfWeek,
@@ -66,7 +66,7 @@ namespace System.Net.Mime
             DateFormatWithoutDayOfWeekAndNoSeconds
         };
 
-        internal readonly static char[] s_allowedWhiteSpaceChars = new char[] { ' ', '\t' };
+        internal static readonly char[] s_allowedWhiteSpaceChars = new char[] { ' ', '\t' };
 
         internal static readonly Dictionary<string, TimeSpan> s_timeZoneOffsetLookup = InitializeShortHandLookups();
 
@@ -181,7 +181,7 @@ namespace System.Net.Mime
 
         // outputs the RFC 2822 formatted date string including time zone
         public override string ToString() =>
-            string.Format("{0} {1}", FormatDate(_date), _unknownTimeZone ? UnknownTimeZoneDefaultOffset : TimeSpanToOffset(_timeZone));
+            FormatDate(_date) + " " + (_unknownTimeZone ? UnknownTimeZoneDefaultOffset : TimeSpanToOffset(_timeZone));
 
         // returns true if the offset is of the form [+|-]dddd and 
         // within the range 0000 to 9959
@@ -228,9 +228,9 @@ namespace System.Net.Mime
             // time zones must all be alphabetical characters
             for (int i = 0; i < value.Length; i++)
             {
-                if (!Char.IsLetter(value, i))
+                if (!char.IsLetter(value, i))
                 {
-                    throw new FormatException(SR.MailHeaderFieldInvalidCharacter);
+                    throw new FormatException(SR.Format(SR.MailHeaderFieldInvalidCharacter, value));
                 }
             }
         }
@@ -258,7 +258,7 @@ namespace System.Net.Mime
             // no ':' means invalid value
             if (indexOfHourSeparator == -1)
             {
-                throw new FormatException(SR.MailHeaderFieldInvalidCharacter);
+                throw new FormatException(SR.Format(SR.MailHeaderFieldInvalidCharacter, data));
             }
 
             // now we know where hours and minutes are separated.  The first whitespace after 
@@ -269,7 +269,7 @@ namespace System.Net.Mime
 
             if (indexOfTimeZoneSeparator == -1)
             {
-                throw new FormatException(SR.MailHeaderFieldInvalidCharacter);
+                throw new FormatException(SR.Format(SR.MailHeaderFieldInvalidCharacter, data));
             }
 
             // extract the time portion and remove all leading and trailing whitespace

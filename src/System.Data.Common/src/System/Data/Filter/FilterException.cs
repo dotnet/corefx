@@ -9,6 +9,7 @@ using System.Runtime.Serialization;
 namespace System.Data
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class InvalidExpressionException : DataException
     {
         protected InvalidExpressionException(SerializationInfo info, StreamingContext context)
@@ -23,12 +24,14 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class EvaluateException : InvalidExpressionException
     {
         protected EvaluateException(SerializationInfo info, StreamingContext context)
         : base(info, context)
         {
         }
+
         public EvaluateException() : base() { }
         public EvaluateException(string s) : base(s) { }
 
@@ -36,6 +39,7 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SyntaxErrorException : InvalidExpressionException
     {
         protected SyntaxErrorException(SerializationInfo info, StreamingContext context)
@@ -213,7 +217,7 @@ namespace System.Data
 
         public static Exception ArgumentType(string function, int arg, Type type)
         {
-            return _Eval(SR.Format(SR.Expr_ArgumentType, function, arg.ToString(CultureInfo.InvariantCulture), type.ToString()));
+            return _Eval(SR.Format(SR.Expr_ArgumentType, function, arg.ToString(CultureInfo.InvariantCulture), type));
         }
 
         public static Exception ArgumentTypeInteger(string function, int arg)
@@ -223,12 +227,12 @@ namespace System.Data
 
         public static Exception TypeMismatchInBinop(int op, Type type1, Type type2)
         {
-            return _Eval(SR.Format(SR.Expr_TypeMismatchInBinop, Operators.ToString(op), type1.ToString(), type2.ToString()));
+            return _Eval(SR.Format(SR.Expr_TypeMismatchInBinop, Operators.ToString(op), type1, type2));
         }
 
         public static Exception AmbiguousBinop(int op, Type type1, Type type2)
         {
-            return _Eval(SR.Format(SR.Expr_AmbiguousBinop, Operators.ToString(op), type1.ToString(), type2.ToString()));
+            return _Eval(SR.Format(SR.Expr_AmbiguousBinop, Operators.ToString(op), type1, type2));
         }
 
         public static Exception UnsupportedOperator(int op)

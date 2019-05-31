@@ -15,11 +15,11 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             using (var hmac = new DerivedHMACSHA1())
             {
                 Assert.Throws<ArgumentNullException>(() => hmac.ExposedHashCore(null, 0, 0));
-                Assert.Throws<ArgumentOutOfRangeException>(() => hmac.ExposedHashCore(new byte[1], -1, 1));
-                Assert.Throws<ArgumentOutOfRangeException>(() => hmac.ExposedHashCore(new byte[1], 0, -1));
-                Assert.Throws<ArgumentException>(() => hmac.ExposedHashCore(new byte[1], 0, 2));
-                Assert.Throws<ArgumentException>(() => hmac.ExposedHashCore(new byte[2], 1, 2));
-                Assert.Throws<ArgumentException>(() => hmac.ExposedHashCore(new byte[1], Int32.MaxValue, Int32.MaxValue));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", "inputOffset", () => hmac.ExposedHashCore(new byte[1], -1, 1));
+                AssertExtensions.Throws<ArgumentOutOfRangeException, ArgumentException>("count", null, () => hmac.ExposedHashCore(new byte[1], 0, -1));
+                AssertExtensions.Throws<ArgumentException>(null, () => hmac.ExposedHashCore(new byte[1], 0, 2));
+                AssertExtensions.Throws<ArgumentException>(null, () => hmac.ExposedHashCore(new byte[2], 1, 2));
+                AssertExtensions.Throws<ArgumentException>(null, () => hmac.ExposedHashCore(new byte[1], int.MaxValue, int.MaxValue));
             }
         }
 
@@ -28,8 +28,7 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (SHA1 sha1 = SHA1.Create())
             {
-                Assert.Throws<ArgumentException>(
-                    () => sha1.ComputeHash(new BadReadStream(BadReadStream.ErrorCondition.TooLargeValueFromRead)));
+                AssertExtensions.Throws<ArgumentException>(null, () => sha1.ComputeHash(new BadReadStream(BadReadStream.ErrorCondition.TooLargeValueFromRead)));
                 sha1.ComputeHash(new BadReadStream(BadReadStream.ErrorCondition.NegativeValueFromRead));
             }
         }

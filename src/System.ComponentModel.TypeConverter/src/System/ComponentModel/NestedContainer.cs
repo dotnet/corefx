@@ -2,70 +2,53 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.ComponentModel;
 using System.Globalization;
-using System.IO;
-using System.Security.Permissions;
 
 namespace System.ComponentModel
 {
     /// <summary>
-    ///     A nested container is a container that is owned by another component.  Nested
-    ///     containers can be found by querying a component site's services for NestedConainter.
-    ///     Nested containers are a useful tool to establish owner relationships among components.
-    ///     All components within a nested container are named with the owning component's name
-    ///     as a prefix.
+    /// A nested container is a container that is owned by another component. Nested
+    /// containers can be found by querying a component site's services for NestedConainter.
+    /// Nested containers are a useful tool to establish owner relationships among components.
+    /// All components within a nested container are named with the owning component's name
+    /// as a prefix.
     /// </summary>
     public class NestedContainer : Container, INestedContainer
     {
-        private IComponent _owner;
-
         /// <summary>
-        ///     Creates a new NestedContainer.
+        /// Creates a new NestedContainer.
         /// </summary>
         public NestedContainer(IComponent owner)
         {
-            if (owner == null)
-            {
-                throw new ArgumentNullException(nameof(owner));
-            }
-            _owner = owner;
-            _owner.Disposed += new EventHandler(OnOwnerDisposed);
+            Owner = owner ?? throw new ArgumentNullException(nameof(owner));
+            Owner.Disposed += new EventHandler(OnOwnerDisposed);
         }
 
         /// <summary>
-        ///     The component that owns this nested container.
+        /// The component that owns this nested container.
         /// </summary>
-        public IComponent Owner
-        {
-            get
-            {
-                return _owner;
-            }
-        }
+        public IComponent Owner { get; }
 
         /// <summary>
-        ///     Retrieves the name of the owning component.  This may be overridden to
-        ///     provide a custom owner name.  The default searches the owner's site for
-        ///     INestedSite and calls FullName, or ISite.Name if there is no nested site.
-        ///     If neither is available, this returns null.
+        /// Retrieves the name of the owning component. This may be overridden to
+        /// provide a custom owner name. The default searches the owner's site for
+        /// INestedSite and calls FullName, or ISite.Name if there is no nested site.
+        /// If neither is available, this returns null.
         /// </summary>
         protected virtual string OwnerName
         {
             get
             {
                 string ownerName = null;
-                if (_owner != null && _owner.Site != null)
+                if (Owner != null && Owner.Site != null)
                 {
-                    INestedSite nestedOwnerSite = _owner.Site as INestedSite;
-                    if (nestedOwnerSite != null)
+                    if (Owner.Site is INestedSite nestedOwnerSite)
                     {
                         ownerName = nestedOwnerSite.FullName;
                     }
                     else
                     {
-                        ownerName = _owner.Site.Name;
+                        ownerName = Owner.Site.Name;
                     }
                 }
 
@@ -74,7 +57,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Creates a site for the component within the container.
+        /// Creates a site for the component within the container.
         /// </summary>
         protected override ISite CreateSite(IComponent component, string name)
         {
@@ -86,20 +69,17 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    Override of Container's dispose.
+        /// Override of Container's dispose.
         /// </summary>
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                _owner.Disposed -= new EventHandler(OnOwnerDisposed);
+                Owner.Disposed -= new EventHandler(OnOwnerDisposed);
             }
             base.Dispose(disposing);
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         protected override object GetService(Type service)
         {
             if (service == typeof(INestedContainer))
@@ -113,51 +93,34 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Called when our owning component is destroyed.
+        /// Called when our owning component is destroyed.
         /// </summary>
-        private void OnOwnerDisposed(object sender, EventArgs e)
-        {
-            Dispose();
-        }
+        private void OnOwnerDisposed(object sender, EventArgs e) => Dispose();
 
         /// <summary>
-        ///     Simple site implementation.  We do some special processing to name the site, but 
-        ///     that's about it.
+        /// Simple site implementation. We do some special processing to name the site, but 
+        /// that's about it.
         /// </summary>
         private class Site : INestedSite
         {
-            private IComponent _component;
-            private NestedContainer _container;
             private string _name;
 
             internal Site(IComponent component, NestedContainer container, string name)
             {
-                _component = component;
-                _container = container;
+                Component = component;
+                Container = container;
                 _name = name;
             }
 
             // The component sited by this component site.
-            public IComponent Component
-            {
-                get
-                {
-                    return _component;
-                }
-            }
+            public IComponent Component { get; }
 
             // The container in which the component is sited.
-            public IContainer Container
-            {
-                get
-                {
-                    return _container;
-                }
-            }
+            public IContainer Container { get; }
 
-            public Object GetService(Type service)
+            public object GetService(Type service)
             {
-                return ((service == typeof(ISite)) ? this : _container.GetService(service));
+                return ((service == typeof(ISite)) ? this : ((NestedContainer)Container).GetService(service));
             }
 
             // Indicates whether the component is in design mode.
@@ -165,7 +128,7 @@ namespace System.ComponentModel
             {
                 get
                 {
-                    IComponent owner = _container.Owner;
+                    IComponent owner = ((NestedContainer)Container).Owner;
                     if (owner != null && owner.Site != null)
                     {
                         return owner.Site.DesignMode;
@@ -180,11 +143,11 @@ namespace System.ComponentModel
                 {
                     if (_name != null)
                     {
-                        string ownerName = _container.OwnerName;
+                        string ownerName = ((NestedContainer)Container).OwnerName;
                         string childName = _name;
                         if (ownerName != null)
                         {
-                            childName = string.Format(CultureInfo.InvariantCulture, "{0}.{1}", ownerName, childName);
+                            childName = ownerName + "." + childName;
                         }
 
                         return childName;
@@ -195,18 +158,14 @@ namespace System.ComponentModel
             }
 
             // The name of the component.
-            //
-            public String Name
+            public string Name
             {
-                get
-                {
-                    return _name;
-                }
+                get => _name;
                 set
                 {
                     if (value == null || _name == null || !value.Equals(_name))
                     {
-                        _container.ValidateName(_component, value);
+                        ((NestedContainer)Container).ValidateName(Component, value);
                         _name = value;
                     }
                 }
@@ -214,4 +173,3 @@ namespace System.ComponentModel
         }
     }
 }
-

@@ -10,7 +10,7 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public partial class MiscFunctionalTests : TestModule
     {
         public partial class MiscTests : XLinqTestCase
         {
@@ -37,7 +37,7 @@ namespace CoreXml.Test.XLinq
 
                     foreach (GetNameType type in Enum.GetValues(typeof(GetNameType)))
                     {
-                        TestLog.Compare(Object.ReferenceEquals(name, GetName("nonamespace")), "reference equal for " + type);
+                        TestLog.Compare(object.ReferenceEquals(name, GetName("nonamespace")), "reference equal for " + type);
                     }
                 }
 
@@ -81,7 +81,7 @@ namespace CoreXml.Test.XLinq
 
                     foreach (GetNameType type in Enum.GetValues(typeof(GetNameType)))
                     {
-                        TestLog.Compare(Object.ReferenceEquals(name, GetName("name", "namespace")), "reference equal for " + type);
+                        TestLog.Compare(object.ReferenceEquals(name, GetName("name", "namespace")), "reference equal for " + type);
                     }
                 }
 
@@ -93,7 +93,7 @@ namespace CoreXml.Test.XLinq
                     TestLog.Compare(name.Namespace, XNamespace.Xmlns, "Invalid Namespace");
                     foreach (GetNameType type in Enum.GetValues(typeof(GetNameType)))
                     {
-                        TestLog.Compare(Object.ReferenceEquals(name, GetName("name", "http://www.w3.org/2000/xmlns/")), "reference equal for " + type);
+                        TestLog.Compare(object.ReferenceEquals(name, GetName("name", "http://www.w3.org/2000/xmlns/")), "reference equal for " + type);
                     }
                 }
 
@@ -105,7 +105,7 @@ namespace CoreXml.Test.XLinq
                     TestLog.Compare(name.Namespace, XNamespace.Xml, "Invalid Namespace");
                     foreach (GetNameType type in Enum.GetValues(typeof(GetNameType)))
                     {
-                        TestLog.Compare(Object.ReferenceEquals(name, GetName("name", "http://www.w3.org/XML/1998/namespace")), "reference equal for " + type);
+                        TestLog.Compare(object.ReferenceEquals(name, GetName("name", "http://www.w3.org/XML/1998/namespace")), "reference equal for " + type);
                     }
                 }
 

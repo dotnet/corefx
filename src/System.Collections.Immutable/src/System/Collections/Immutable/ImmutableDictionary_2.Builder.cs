@@ -98,7 +98,7 @@ namespace System.Collections.Immutable
                     if (value != this.KeyComparer)
                     {
                         var comparers = Comparers.Get(value, this.ValueComparer);
-                        var input = new MutationInput(SortedInt32KeyNode<HashBucket>.EmptyNode, comparers, 0);
+                        var input = new MutationInput(SortedInt32KeyNode<HashBucket>.EmptyNode, comparers);
                         var result = ImmutableDictionary<TKey, TValue>.AddRange(this, input);
 
                         _immutable = null;
@@ -262,7 +262,7 @@ namespace System.Collections.Immutable
                 {
                     if (_syncRoot == null)
                     {
-                        Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
+                        Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
                     }
 
                     return _syncRoot;
@@ -372,7 +372,7 @@ namespace System.Collections.Immutable
             /// </summary>
             private MutationInput Origin
             {
-                get { return new MutationInput(this.Root, _comparers, _count); }
+                get { return new MutationInput(this.Root, _comparers); }
             }
 
             /// <summary>
@@ -419,7 +419,7 @@ namespace System.Collections.Immutable
                         return value;
                     }
 
-                    throw new KeyNotFoundException();
+                    throw new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
                 }
 
                 set

@@ -9,15 +9,15 @@ using Xunit;
 
 namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
 {
-    public static class CryptoStreamTests
+    public static partial class CryptoStreamTests
     {
         [Fact]
         public static void Ctor()
         {
             var transform = new IdentityTransform(1, 1, true);
-            Assert.Throws<ArgumentException>(() => new CryptoStream(new MemoryStream(), transform, (CryptoStreamMode)12345));
-            Assert.Throws<ArgumentException>(() => new CryptoStream(new MemoryStream(new byte[0], writable: false), transform, CryptoStreamMode.Write));
-            Assert.Throws<ArgumentException>(() => new CryptoStream(new CryptoStream(new MemoryStream(new byte[0]), transform, CryptoStreamMode.Write), transform, CryptoStreamMode.Read));
+            AssertExtensions.Throws<ArgumentException>(null, () => new CryptoStream(new MemoryStream(), transform, (CryptoStreamMode)12345));
+            AssertExtensions.Throws<ArgumentException>(null, "stream", () => new CryptoStream(new MemoryStream(new byte[0], writable: false), transform, CryptoStreamMode.Write));
+            AssertExtensions.Throws<ArgumentException>(null, "stream", () => new CryptoStream(new CryptoStream(new MemoryStream(new byte[0]), transform, CryptoStreamMode.Write), transform, CryptoStreamMode.Read));
         }
 
         [Theory]
@@ -51,7 +51,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.Throws<ArgumentOutOfRangeException>(() => encryptStream.Write(new byte[0], -1, 0));
                 Assert.Throws<ArgumentOutOfRangeException>(() => encryptStream.Write(new byte[0], 0, -1));
                 Assert.Throws<ArgumentOutOfRangeException>(() => encryptStream.Write(new byte[0], 0, -1));
-                Assert.Throws<ArgumentException>(() => encryptStream.Write(new byte[3], 1, 4));
+                AssertExtensions.Throws<ArgumentException>(null, () => encryptStream.Write(new byte[3], 1, 4));
 
                 byte[] toWrite = Encoding.UTF8.GetBytes(LoremText);
 
@@ -104,7 +104,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.Throws<ArgumentOutOfRangeException>(() => decryptStream.Read(new byte[0], -1, 0));
                 Assert.Throws<ArgumentOutOfRangeException>(() => decryptStream.Read(new byte[0], 0, -1));
                 Assert.Throws<ArgumentOutOfRangeException>(() => decryptStream.Read(new byte[0], 0, -1));
-                Assert.Throws<ArgumentException>(() => decryptStream.Read(new byte[3], 1, 4));
+                AssertExtensions.Throws<ArgumentException>(null, () => decryptStream.Read(new byte[3], 1, 4));
 
                 using (StreamReader reader = new StreamReader(decryptStream))
                 {
@@ -159,7 +159,6 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
             }
         }
 
-#if netstandard17
         [Fact]
         public static void Clear()
         {
@@ -203,7 +202,6 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.True(encryptStream.FlushCalled);
             }
         }
-#endif
 
         [Fact]
         public static void MultipleDispose()
@@ -220,7 +218,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
                 Assert.Equal(false, output.CanRead);
             }
 
-#if netcoreapp11
+#if netcoreapp
             using (MemoryStream output = new MemoryStream())
             {
                 using (CryptoStream encryptStream = new CryptoStream(output, encryptor, CryptoStreamMode.Write, leaveOpen: false))
@@ -257,6 +255,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
         {
             private readonly int _inputBlockSize, _outputBlockSize;
             private readonly bool _canTransformMultipleBlocks;
+            private readonly object _lock = new object();
 
             private long _writePos, _readPos;
             private MemoryStream _stream;
@@ -281,31 +280,36 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
 
             public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
             {
-                _stream.Position = _writePos;
-                _stream.Write(inputBuffer, inputOffset, inputCount);
-                _writePos = _stream.Position;
+                lock (_lock)
+                {
+                    _stream.Position = _writePos;
+                    _stream.Write(inputBuffer, inputOffset, inputCount);
+                    _writePos = _stream.Position;
 
-                _stream.Position = _readPos;
-                int copied = _stream.Read(outputBuffer, outputOffset, outputBuffer.Length - outputOffset);
-                _readPos = _stream.Position;
-
-                return copied;
+                    _stream.Position = _readPos;
+                    int copied = _stream.Read(outputBuffer, outputOffset, outputBuffer.Length - outputOffset);
+                    _readPos = _stream.Position;
+                    return copied;
+                }
             }
 
             public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
             {
-                _stream.Position = _writePos;
-                _stream.Write(inputBuffer, inputOffset, inputCount);
+                lock (_lock)
+                {
+                    _stream.Position = _writePos;
+                    _stream.Write(inputBuffer, inputOffset, inputCount);
 
-                _stream.Position = _readPos;
-                long len = _stream.Length - _stream.Position;
-                byte[] outputBuffer = new byte[len];
-                _stream.Read(outputBuffer, 0, outputBuffer.Length);
+                    _stream.Position = _readPos;
+                    long len = _stream.Length - _stream.Position;
+                    byte[] outputBuffer = new byte[len];
+                    _stream.Read(outputBuffer, 0, outputBuffer.Length);
 
-                _stream = new MemoryStream();
-                _writePos = 0;
-                _readPos = 0;
-                return outputBuffer;
+                    _stream = new MemoryStream();
+                    _writePos = 0;
+                    _readPos = 0;
+                    return outputBuffer;
+                }
             }
         }
 

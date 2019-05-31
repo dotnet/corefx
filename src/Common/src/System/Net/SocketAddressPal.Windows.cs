@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics;
 using System.Net.Sockets;
-using System.Text;
 
 namespace System.Net
 {
@@ -13,7 +10,6 @@ namespace System.Net
     {
         public const int IPv6AddressSize = 28;
         public const int IPv4AddressSize = 16;
-        public const int DataOffset = 2;
 
         public static unsafe AddressFamily GetAddressFamily(byte[] buffer)
         {
@@ -41,25 +37,29 @@ namespace System.Net
             port.HostToNetworkBytes(buffer, 2);
         }
 
-        public static unsafe uint GetIPv4Address(byte[] buffer)
+        public static unsafe uint GetIPv4Address(ReadOnlySpan<byte> buffer)
         {
-            return (uint)((buffer[4] & 0x000000FF) |
-                (buffer[5] << 8 & 0x0000FF00) |
-                (buffer[6] << 16 & 0x00FF0000) |
-                (buffer[7] << 24));
+            unchecked
+            {
+                return (uint)((buffer[4] & 0x000000FF) |
+                    (buffer[5] << 8 & 0x0000FF00) |
+                    (buffer[6] << 16 & 0x00FF0000) |
+                    (buffer[7] << 24));
+            }
         }
 
-        public static unsafe void GetIPv6Address(byte[] buffer, byte[] address, out uint scope)
+        public static unsafe void GetIPv6Address(ReadOnlySpan<byte> buffer, Span<byte> address, out uint scope)
         {
             for (int i = 0; i < address.Length; i++)
             {
                 address[i] = buffer[8 + i];
             }
 
-            scope = (uint)((buffer[27] << 24) +
+            scope = unchecked((uint)(
+                (buffer[27] << 24) +
                 (buffer[26] << 16) +
                 (buffer[25] << 8) +
-                (buffer[24]));
+                (buffer[24])));
         }
 
         public static unsafe void SetIPv4Address(byte[] buffer, uint address)
@@ -71,7 +71,7 @@ namespace System.Net
             buffer[7] = unchecked((byte)(address >> 24));
         }
 
-        public static unsafe void SetIPv6Address(byte[] buffer, byte[] address, uint scope)
+        public static unsafe void SetIPv6Address(byte[] buffer, Span<byte> address, uint scope)
         {
             // No handling for Flow Information
             buffer[4] = (byte)0;
@@ -79,11 +79,14 @@ namespace System.Net
             buffer[6] = (byte)0;
             buffer[7] = (byte)0;
 
-            // Scope serialization
-            buffer[24] = (byte)scope;
-            buffer[25] = (byte)(scope >> 8);
-            buffer[26] = (byte)(scope >> 16);
-            buffer[27] = (byte)(scope >> 24);
+            unchecked
+            {
+                // Scope serialization
+                buffer[24] = (byte)scope;
+                buffer[25] = (byte)(scope >> 8);
+                buffer[26] = (byte)(scope >> 16);
+                buffer[27] = (byte)(scope >> 24);
+            }
 
             // Address serialization
             for (int i = 0; i < address.Length; i++)

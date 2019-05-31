@@ -12,41 +12,18 @@ using System.Text;
 
 namespace System.Xml.Schema
 {
-    /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype"]/*' />
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public abstract class XmlSchemaDatatype
     {
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.ValueType"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public abstract Type ValueType { get; }
 
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.TokenizedType"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public abstract XmlTokenizedType TokenizedType { get; }
 
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.ParseValue"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public abstract object ParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr);
 
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.Variety"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public virtual XmlSchemaDatatypeVariety Variety { get { return XmlSchemaDatatypeVariety.Atomic; } }
 
+        internal XmlSchemaDatatype() {}
 
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.ChangeType1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public virtual object ChangeType(object value, Type targetType)
         {
             if (value == null)
@@ -60,10 +37,6 @@ namespace System.Xml.Schema
             return ValueConverter.ChangeType(value, targetType);
         }
 
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.ChangeType2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public virtual object ChangeType(object value, Type targetType, IXmlNamespaceResolver namespaceResolver)
         {
             if (value == null)
@@ -81,16 +54,8 @@ namespace System.Xml.Schema
             return ValueConverter.ChangeType(value, targetType, namespaceResolver);
         }
 
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.TypeCode"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public virtual XmlTypeCode TypeCode { get { return XmlTypeCode.None; } }
 
-        /// <include file='doc\XmlSchemaDatatype.uex' path='docs/doc[@for="XmlSchemaDatatype.IsDerivedFrom"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public virtual bool IsDerivedFrom(XmlSchemaDatatype datatype)
         {
             return false;
@@ -105,8 +70,6 @@ namespace System.Xml.Schema
         internal abstract RestrictionFacets Restriction { get; set; }
 
         internal abstract int Compare(object value1, object value2);
-
-        internal abstract object ParseValue(string s, Type typDest, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr);
 
         internal abstract object ParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr, bool createAtomicValue);
 
@@ -269,14 +232,14 @@ namespace System.Xml.Schema
         {
             Type t = value.GetType();
             string stringValue = string.Empty;
-            if (t == typeof(IEnumerable) && t != typeof(System.String))
+            if (t == typeof(IEnumerable) && t != typeof(string))
             {
                 StringBuilder bldr = new StringBuilder();
                 IEnumerator enumerator = (value as IEnumerable).GetEnumerator();
                 if (enumerator.MoveNext())
                 {
                     bldr.Append("{");
-                    Object cur = enumerator.Current;
+                    object cur = enumerator.Current;
                     if (cur is IFormattable)
                     {
                         bldr.Append(((IFormattable)cur).ToString("", CultureInfo.InvariantCulture));
@@ -351,7 +314,7 @@ namespace System.Xml.Schema
 
             if (convert)
             {
-                canonicalUri = nameTable.Add(uri.Substring(0, offset) + CultureInfo.InvariantCulture.TextInfo.ToUpper(uri.Substring(offset, uri.Length - offset)));
+                canonicalUri = nameTable.Add(string.Concat(uri.AsSpan(0, offset), CultureInfo.InvariantCulture.TextInfo.ToUpper(uri.Substring(offset, uri.Length - offset))));
             }
             else
             {
@@ -372,83 +335,6 @@ namespace System.Xml.Schema
 
             return canonicalUri;
         }
-
-#if PRIYAL
-        private bool CanConvert(object value, System.Type inputType, System.Type defaultType, out string resId) {
-            resId = null;
-            decimal decimalValue;
-            //TypeCode defaultTypeCode = Type.GetTypeCode(defaultType);
-            if (IsIntegralType(this.TypeCode)){
-                switch (Type.GetTypeCode(inputType)) {
-                    case System.TypeCode.Single:
-                    case System.TypeCode.Double:
-                        decimalValue = new Decimal((double)value);
-                        goto case System.TypeCode.Decimal;
-                    case System.TypeCode.Decimal:
-                        decimalValue = (decimal)value;
-                        if (decimal.Truncate(decimalValue) != decimalValue) { //HasFractionDigits
-                            resId = SR.Sch_XmlTypeHasFraction;
-                            return false;
-                        } 
-                    break;
-
-                    default:
-                        return true;
-                }                
-            }
-            else if (this.TypeCode == XmlTypeCode.Boolean) {
-                if (IsNumericType(inputType)) {
-                    decimalValue = (decimal)value;
-                    if (decimalValue == 0 || decimalValue == 1) {
-                        return true;
-                    }
-                    resId = SR.Sch_InvalidBoolean;
-                    return false;    
-                }
-            }
-            return true;
-        }
-
-        private bool IsIntegralType(XmlTypeCode defaultTypeCode) {
-            switch (defaultTypeCode) {
-                case XmlTypeCode.Integer:
-                case XmlTypeCode.NegativeInteger:
-                case XmlTypeCode.NonNegativeInteger:
-                case XmlTypeCode.NonPositiveInteger:
-                case XmlTypeCode.PositiveInteger:
-                case XmlTypeCode.Long:
-                case XmlTypeCode.Int:
-                case XmlTypeCode.Short:
-                case XmlTypeCode.Byte:
-                case XmlTypeCode.UnsignedLong:
-                case XmlTypeCode.UnsignedInt:
-                case XmlTypeCode.UnsignedShort:
-                case XmlTypeCode.UnsignedByte:
-                   return true;
-                default:
-                    return false;
-            }
-        }
-
-        private bool IsNumericType(System.Type inputType) {
-            switch (Type.GetTypeCode(inputType)) {
-                case System.TypeCode.Decimal:
-                case System.TypeCode.Double:
-                case System.TypeCode.Single:
-                case System.TypeCode.SByte:
-                case System.TypeCode.Byte:
-                case System.TypeCode.Int16:
-                case System.TypeCode.Int32:
-                case System.TypeCode.Int64:
-                case System.TypeCode.UInt16:
-                case System.TypeCode.UInt32:
-                case System.TypeCode.UInt64:
-                    return true;
-                default:
-                    return false;
-            }
-        }
-#endif
     }
 }
 

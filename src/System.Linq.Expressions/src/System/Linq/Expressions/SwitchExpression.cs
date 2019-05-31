@@ -90,9 +90,12 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public SwitchExpression Update(Expression switchValue, IEnumerable<SwitchCase> cases, Expression defaultBody)
         {
-            if (switchValue == SwitchValue && cases == Cases && defaultBody == DefaultBody)
+            if (switchValue == SwitchValue & defaultBody == DefaultBody & cases != null)
             {
-                return this;
+                if (ExpressionUtils.SameElements(ref cases, Cases))
+                {
+                    return this;
+                }
             }
             return Expression.Switch(Type, switchValue, defaultBody, Comparison, cases);
         }
@@ -174,7 +177,7 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="SwitchExpression"/>.</returns>
         public static SwitchExpression Switch(Type type, Expression switchValue, Expression defaultBody, MethodInfo comparison, IEnumerable<SwitchCase> cases)
         {
-            RequiresCanRead(switchValue, nameof(switchValue));
+            ExpressionUtils.RequiresCanRead(switchValue, nameof(switchValue));
             if (switchValue.Type == typeof(void)) throw Error.ArgumentCannotBeOfTypeVoid(nameof(switchValue));
 
             ReadOnlyCollection<SwitchCase> caseList = cases.ToReadOnly();
@@ -194,6 +197,7 @@ namespace System.Linq.Expressions
 
             if (comparison != null)
             {
+                ValidateMethodInfo(comparison, nameof(comparison));
                 ParameterInfo[] pms = comparison.GetParametersCached();
                 if (pms.Length != 2)
                 {

@@ -9,8 +9,6 @@ namespace System.Numerics.Tests
 {
     public static class MyBigIntImp
     {
-        public static BigInteger outParam = 0;
-
         public static BigInteger DoUnaryOperatorMine(BigInteger num1, string op)
         {
             List<byte> bytes1 = new List<byte>(num1.ToByteArray());
@@ -32,7 +30,7 @@ namespace System.Numerics.Tests
                 case "u~":
                     return new BigInteger(Not(bytes1).ToArray());
                 case "uLog10":
-                    factor = (int)BigInteger.Log(num1, 10);
+                    factor = unchecked((int)BigInteger.Log(num1, 10));
                     if (factor > 100)
                     {
                         for (int i = 0; i < factor - 100; i++)
@@ -50,7 +48,7 @@ namespace System.Numerics.Tests
                     }
                     return ApproximateBigInteger(result);
                 case "uLog":
-                    factor = (int)BigInteger.Log(num1, 10);
+                    factor = unchecked((int)BigInteger.Log(num1, 10));
                     if (factor > 100)
                     {
                         for (int i = 0; i < factor - 100; i++)
@@ -86,15 +84,23 @@ namespace System.Numerics.Tests
                 case "u*":
                     return new BigInteger(Multiply(bytes1, bytes1).ToArray());
                 default:
-                    throw new ArgumentException(String.Format("Invalid operation found: {0}", op));
+                    throw new ArgumentException(string.Format("Invalid operation found: {0}", op));
             }
         }
 
         public static BigInteger DoBinaryOperatorMine(BigInteger num1, BigInteger num2, string op)
         {
+            BigInteger num3;
+
+            return DoBinaryOperatorMine(num1, num2, op, out num3);
+        }
+
+        public static BigInteger DoBinaryOperatorMine(BigInteger num1, BigInteger num2, string op, out BigInteger num3)
+        {
             List<byte> bytes1 = new List<byte>(num1.ToByteArray());
             List<byte> bytes2 = new List<byte>(num2.ToByteArray());
 
+            num3 = 0;
             switch (op)
             {
                 case "bMin":
@@ -123,7 +129,7 @@ namespace System.Numerics.Tests
                     BigInteger ret = new BigInteger(Divide(bytes1, bytes2).ToArray());
                     bytes1 = new List<byte>(num1.ToByteArray());
                     bytes2 = new List<byte>(num2.ToByteArray());
-                    outParam = new BigInteger(Remainder(bytes1, bytes2).ToArray());
+                    num3 = new BigInteger(Remainder(bytes1, bytes2).ToArray());
                     return ret;
                 case "bRemainder":
                 case "b%":
@@ -142,7 +148,7 @@ namespace System.Numerics.Tests
                 case "b+":
                     return new BigInteger(Add(bytes1, bytes2).ToArray());
                 default:
-                    throw new ArgumentException(String.Format("Invalid operation found: {0}", op));
+                    throw new ArgumentException(string.Format("Invalid operation found: {0}", op));
             }
         }
 
@@ -158,7 +164,7 @@ namespace System.Numerics.Tests
                     return new BigInteger(ModPow(bytes1, bytes2, bytes3).ToArray());
 
                 default:
-                    throw new ArgumentException(String.Format("Invalid operation found: {0}", op));
+                    throw new ArgumentException(string.Format("Invalid operation found: {0}", op));
             }
         }
 
@@ -871,9 +877,9 @@ namespace System.Numerics.Tests
             return mask;
         }
 
-        public static String Print(byte[] bytes)
+        public static string Print(byte[] bytes)
         {
-            String ret = "make ";
+            string ret = "make ";
 
             for (int i = 0; i < bytes.Length; i++)
             {
@@ -884,9 +890,9 @@ namespace System.Numerics.Tests
             return ret;
         }
         
-        public static String PrintFormatX(byte[] bytes)
+        public static string PrintFormatX(byte[] bytes)
         {
-            string ret = String.Empty;
+            string ret = string.Empty;
             for (int i = 0; i < bytes.Length; i++)
             {
                 ret += bytes[i].ToString("x");
@@ -894,9 +900,9 @@ namespace System.Numerics.Tests
             return ret;
         }
 
-        public static String PrintFormatX2(byte[] bytes)
+        public static string PrintFormatX2(byte[] bytes)
         {
-            string ret = String.Empty;
+            string ret = string.Empty;
             for (int i = 0; i < bytes.Length; i++)
             {
                 ret += bytes[i].ToString("x2") + " ";
@@ -941,15 +947,15 @@ namespace System.Numerics.Tests
         public static BigInteger ApproximateBigInteger(double value)
         {
             //Special case values;
-            if (Double.IsNaN(value))
+            if (double.IsNaN(value))
             {
                 return new BigInteger(-101);
             }
-            if (Double.IsNegativeInfinity(value))
+            if (double.IsNegativeInfinity(value))
             {
                 return new BigInteger(-102);
             }
-            if (Double.IsPositiveInfinity(value))
+            if (double.IsPositiveInfinity(value))
             {
                 return new BigInteger(-103);
             }

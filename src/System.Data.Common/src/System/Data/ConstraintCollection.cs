@@ -498,7 +498,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Returns a matching constriant object.
+        /// Returns a matching constraint object.
         /// </summary>
         internal Constraint FindConstraint(Constraint constraint)
         {
@@ -512,7 +512,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Returns a matching constriant object.
+        /// Returns a matching constraint object.
         /// </summary>
         internal UniqueConstraint FindKeyConstraint(DataColumn[] columns)
         {
@@ -529,7 +529,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Returns a matching constriant object.
+        /// Returns a matching constraint object.
         /// </summary>
         internal UniqueConstraint FindKeyConstraint(DataColumn column)
         {
@@ -544,7 +544,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Returns a matching constriant object.
+        /// Returns a matching constraint object.
         /// </summary>
         internal ForeignKeyConstraint FindForeignKeyConstraint(DataColumn[] parentColumns, DataColumn[] childColumns)
         {
@@ -600,7 +600,7 @@ namespace System.Data
                     if (constraint == (Constraint)List[i])
                         return i;
                 }
-                // didnt find the constraint
+                // didn't find the constraint
             }
             return -1;
         }

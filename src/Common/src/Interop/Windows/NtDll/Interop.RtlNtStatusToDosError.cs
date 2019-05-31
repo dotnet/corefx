@@ -5,11 +5,13 @@
 using System;
 using System.Runtime.InteropServices;
 
-internal static partial class Interop
+internal partial class Interop
 {
-    internal static partial class NtDll
+    internal partial class NtDll
     {
-        [DllImport(Interop.Libraries.NtDll, CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern int RtlNtStatusToDosError(int status);
+        // https://msdn.microsoft.com/en-us/library/windows/desktop/ms680600(v=vs.85).aspx
+        [DllImport(Libraries.NtDll, ExactSpelling = true)]
+        public unsafe static extern uint RtlNtStatusToDosError(
+            int Status);
     }
 }

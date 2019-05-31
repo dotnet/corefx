@@ -7,28 +7,28 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
-        protected class BinOpArgInfo
+        private sealed class BinOpArgInfo
         {
-            public BinOpArgInfo(EXPR op1, EXPR op2)
+            public BinOpArgInfo(Expr op1, Expr op2)
             {
                 Debug.Assert(op1 != null);
                 Debug.Assert(op2 != null);
                 arg1 = op1;
                 arg2 = op2;
-                type1 = arg1.type;
-                type2 = arg2.type;
+                type1 = arg1.Type;
+                type2 = arg2.Type;
                 typeRaw1 = type1.StripNubs();
                 typeRaw2 = type2.StripNubs();
-                pt1 = type1.isPredefined() ? type1.getPredefType() : PredefinedType.PT_COUNT;
-                pt2 = type2.isPredefined() ? type2.getPredefType() : PredefinedType.PT_COUNT;
-                ptRaw1 = typeRaw1.isPredefined() ? typeRaw1.getPredefType() : PredefinedType.PT_COUNT;
-                ptRaw2 = typeRaw2.isPredefined() ? typeRaw2.getPredefType() : PredefinedType.PT_COUNT;
+                pt1 = type1.IsPredefined ? type1.PredefinedType : PredefinedType.PT_COUNT;
+                pt2 = type2.IsPredefined ? type2.PredefinedType : PredefinedType.PT_COUNT;
+                ptRaw1 = typeRaw1.IsPredefined ? typeRaw1.PredefinedType : PredefinedType.PT_COUNT;
+                ptRaw2 = typeRaw2.IsPredefined ? typeRaw2.PredefinedType : PredefinedType.PT_COUNT;
             }
 
-            public EXPR arg1;
-            public EXPR arg2;
+            public Expr arg1;
+            public Expr arg2;
             public PredefinedType pt1;
             public PredefinedType pt2;
             public PredefinedType ptRaw1;
@@ -58,26 +58,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public bool ValidForEnum()
             {
                 return (mask & BinOpMask.Enum) != 0;
-            }
-
-            public bool ValidForPointer()
-            {
-                return (mask & BinOpMask.Ptr) != 0;
-            }
-
-            public bool ValidForVoidPointer()
-            {
-                return (mask & BinOpMask.VoidPtr) != 0;
-            }
-
-            public bool ValidForPointerAndNumber()
-            {
-                return (mask & BinOpMask.PtrNum) != 0;
-            }
-
-            public bool ValidForNumberAndPointer()
-            {
-                return (mask & BinOpMask.NumPtr) != 0;
             }
         }
     }

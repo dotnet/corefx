@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -117,12 +116,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AccessControl_InvalidAccessRuleType" xml:space="preserve">
-    <value>The access rule is not the correct type.</value>
-  </data>
-  <data name="AccessControl_InvalidAuditRuleType" xml:space="preserve">
-    <value>The audit rule is not the correct type.</value>
-  </data>
   <data name="AccessControl_InvalidHandle" xml:space="preserve">
     <value>The supplied handle is invalid. This can happen when trying to set an ACL on an anonymous kernel object.</value>
   </data>
@@ -140,5 +133,14 @@
   </data>
   <data name="ObjectDisposed_FileClosed" xml:space="preserve">
     <value>Cannot access a closed file.</value>
+  </data>
+  <data name="PlatformNotSupported_AccessControl" xml:space="preserve">
+    <value>Access Control List (ACL) APIs are part of resource management on Windows and are not supported on this platform.</value>
+  </data>
+  <data name="TypeUnrecognized_AccessControl" xml:space="preserve">
+    <value>AccessControlType '{0}' unrecognized</value>
+  </data>
+  <data name="InvalidOperation_RemoveFail" xml:space="preserve">
+    <value>Remove access rule failed</value>
   </data>
 </root>

@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Threading.Tasks.Dataflow.Tests
@@ -13,7 +14,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         [Fact]
         public void TestDataflowMessageHeader()
         {
-            Assert.Throws<ArgumentException>(() => new DataflowMessageHeader(0));
+            AssertExtensions.Throws<ArgumentException>("id", () => new DataflowMessageHeader(0));
 
             Assert.False(new DataflowMessageHeader().IsValid);
             Assert.True(new DataflowMessageHeader(1).IsValid);
@@ -121,17 +122,23 @@ namespace System.Threading.Tasks.Dataflow.Tests
             // Make sure that the Completion task returned by a NullTarget
             // is not cached across all NullTargets.  Since it'll never complete,
             // that would be a potentially huge memory leak.
-
-            var state = new object();
-            var wro = new WeakReference<object>(state);
-            DataflowBlock.NullTarget<int>().Completion.ContinueWith(delegate { }, state);
-            state = null;
+            var wro = CreateWeakReferenceToObjectReferencedByNullTargetContinuation();
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
+            object state;
             Assert.False(wro.TryGetTarget(out state));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static WeakReference<object> CreateWeakReferenceToObjectReferencedByNullTargetContinuation()
+        {
+            var state = new object();
+            var wro = new WeakReference<object>(state);
+            DataflowBlock.NullTarget<int>().Completion.ContinueWith(delegate { }, state);
+            return wro;
         }
 
         [Fact]
@@ -721,7 +728,7 @@ namespace System.Threading.Tasks.Dataflow.Tests
         [Fact]
         public void TestSendAsync_ArgumentValidation()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(() => ((ITargetBlock<int>)null).SendAsync(42));
+            Assert.Throws<ArgumentNullException>(() => { ((ITargetBlock<int>)null).SendAsync(42); });
         }
 
         [Fact]
@@ -1186,31 +1193,31 @@ namespace System.Threading.Tasks.Dataflow.Tests
         [Fact]
         public void TestChoose_ArgumentValidation()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int>(null, i => { }, new BufferBlock<int>(), i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int>(new BufferBlock<int>(), i => { }, null, i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int>(new BufferBlock<int>(), null, new BufferBlock<int>(), i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), null));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, null));
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int>(null, i => { }, new BufferBlock<int>(), i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int>(new BufferBlock<int>(), i => { }, null, i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int>(new BufferBlock<int>(), null, new BufferBlock<int>(), i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), null); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, null); });
 
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int, int>(null, i => { }, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, null, i => { }, new BufferBlock<int>(), i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, null, i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), null, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), null, new BufferBlock<int>(), i => { }));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), null));
-            Assert.ThrowsAsync<ArgumentNullException>(
-                () => DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, null));
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int, int>(null, i => { }, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, null, i => { }, new BufferBlock<int>(), i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, null, i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), null, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), null, new BufferBlock<int>(), i => { }); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), null); });
+            Assert.Throws<ArgumentNullException>(
+                () => { DataflowBlock.Choose<int, int, int>(new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, new BufferBlock<int>(), i => { }, null); });
         }
 
         [Fact]
@@ -1836,8 +1843,8 @@ namespace System.Threading.Tasks.Dataflow.Tests
         [Fact]
         public void TestOutputAvailableAsync_ArgumentValidation()
         {
-            Assert.ThrowsAsync<ArgumentNullException>(() => DataflowBlock.OutputAvailableAsync<int>(null));
-            Assert.ThrowsAsync<ArgumentNullException>(() => DataflowBlock.OutputAvailableAsync<int>(null, CancellationToken.None));
+            Assert.Throws<ArgumentNullException>(() => { DataflowBlock.OutputAvailableAsync<int>(null); });
+            Assert.Throws<ArgumentNullException>(() => { DataflowBlock.OutputAvailableAsync<int>(null, CancellationToken.None); });
         }
 
         [Fact]

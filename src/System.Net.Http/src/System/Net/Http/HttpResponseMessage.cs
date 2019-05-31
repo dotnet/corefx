@@ -13,6 +13,7 @@ namespace System.Net.Http
 
         private HttpStatusCode _statusCode;
         private HttpResponseHeaders _headers;
+        private HttpResponseHeaders _trailingHeaders;
         private string _reasonPhrase;
         private HttpRequestMessage _requestMessage;
         private Version _version;
@@ -35,6 +36,8 @@ namespace System.Net.Http
                 _version = value;
             }
         }
+
+        internal void SetVersionWithoutValidation(Version value) => _version = value;
 
         public HttpContent Content
         {
@@ -74,6 +77,8 @@ namespace System.Net.Http
             }
         }
 
+        internal void SetStatusCodeWithoutValidation(HttpStatusCode value) => _statusCode = value;
+
         public string ReasonPhrase
         {
             get
@@ -97,6 +102,8 @@ namespace System.Net.Http
             }
         }
 
+        internal void SetReasonPhraseWithoutValidation(string value) => _reasonPhrase = value;
+
         public HttpResponseHeaders Headers
         {
             get
@@ -106,6 +113,19 @@ namespace System.Net.Http
                     _headers = new HttpResponseHeaders();
                 }
                 return _headers;
+            }
+        }
+
+        public HttpResponseHeaders TrailingHeaders
+        {
+            get
+            {
+                if (_trailingHeaders == null)
+                {
+                    _trailingHeaders = new HttpResponseHeaders();
+                }
+
+                return _trailingHeaders;
             }
         }
 
@@ -149,18 +169,13 @@ namespace System.Net.Http
         {
             if (!IsSuccessStatusCode)
             {
-                // Disposing the content should help users: If users call EnsureSuccessStatusCode(), an exception is
-                // thrown if the response status code is != 2xx. I.e. the behavior is similar to a failed request (e.g.
-                // connection failure). Users don't expect to dispose the content in this case: If an exception is 
-                // thrown, the object is responsible fore cleaning up its state.
-                if (_content != null)
-                {
-                    _content.Dispose();
-                }
-
-                throw new HttpRequestException(string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_message_not_success_statuscode, (int)_statusCode,
+                throw new HttpRequestException(SR.Format(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    SR.net_http_message_not_success_statuscode,
+                    (int)_statusCode,
                     ReasonPhrase));
             }
+
             return this;
         }
 
@@ -181,7 +196,7 @@ namespace System.Net.Http
             sb.Append(_content == null ? "<null>" : _content.GetType().ToString());
 
             sb.Append(", Headers:\r\n");
-            sb.Append(HeaderUtilities.DumpHeaders(_headers, _content == null ? null : _content.Headers));
+            HeaderUtilities.DumpHeaders(sb, _headers, _content?.Headers);
 
             return sb.ToString();
         }

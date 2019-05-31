@@ -6,7 +6,6 @@ using System.Collections;
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeAttributeArgumentCollection : CollectionBase
     {
         public CodeAttributeArgumentCollection() { }
@@ -23,8 +22,8 @@ namespace System.CodeDom
 
         public CodeAttributeArgument this[int index]
         {
-            get { return (CodeAttributeArgument)List[index]; }
-            set { List[index] = value; }
+            get => (CodeAttributeArgument)List[index];
+            set => List[index] = value;
         }
 
         public int Add(CodeAttributeArgument value) => List.Add(value);

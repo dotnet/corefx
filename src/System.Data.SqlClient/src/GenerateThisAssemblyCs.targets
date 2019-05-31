@@ -1,23 +1,18 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup>
-      <CompileDependsOn>
-        GenerateThisAssemblyCs;
-        $(CompileDependsOn)
-      </CompileDependsOn>
-  </PropertyGroup>
+<Project>
   <ItemGroup>
     <Compile Include="$(IntermediateOutputPath)\ThisAssembly.cs"/>
   </ItemGroup>
 
-  <Target Name="GenerateThisAssemblyCs">
+  <Target Name="GenerateThisAssemblyCs"
+          DependsOnTargets="GetAssemblyVersion"
+          BeforeTargets="CoreCompile">
     <PropertyGroup>
       <ThisAssemblyCsContents>
 namespace System
 {
 internal static class ThisAssembly
 {
-internal const string InformationalVersion = "$(AssemblyFileVersion)"%3B
+internal const string InformationalVersion = "$(FileVersion)"%3B
 }
 }
       </ThisAssemblyCsContents>
@@ -32,7 +27,7 @@ internal const string InformationalVersion = "$(AssemblyFileVersion)"%3B
 
     <!-- Write ThisAssembly.cs if this is a new version number, or it is missing -->
     <WriteLinesToFile
-      Condition="('$(LastVersionNumber)'!='$(AssemblyFileVersion)') or !Exists('$(IntermediateOutputPath)\ThisAssembly.cs')"
+      Condition="('$(LastVersionNumber)'!='$(FileVersion)') or !Exists('$(IntermediateOutputPath)\ThisAssembly.cs')"
       File="$(IntermediateOutputPath)\ThisAssembly.cs"
       Lines="$(ThisAssemblyCsContents)"
       Overwrite="true"
@@ -40,9 +35,9 @@ internal const string InformationalVersion = "$(AssemblyFileVersion)"%3B
 
     <!-- Write the new version number (if it has changed) -->
     <WriteLinesToFile
-      Condition="'$(LastVersionNumber)'!='$(AssemblyFileVersion)'"
+      Condition="'$(LastVersionNumber)'!='$(FileVersion)'"
       File="$(IntermediateOutputPath)\LastVersionNumber"
-      Lines="$(AssemblyFileVersion)"
+      Lines="$(FileVersion)"
       Overwrite="true"
       Encoding="Unicode"/>
   </Target>

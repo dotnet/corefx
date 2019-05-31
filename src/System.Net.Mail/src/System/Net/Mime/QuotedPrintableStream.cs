@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
+using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Diagnostics;
 
 namespace System.Net.Mime
 {
@@ -313,8 +312,6 @@ namespace System.Net.Mime
             return cur - offset;
         }
 
-        public Stream GetStream() => this;
-
         public string GetEncodedString() => Encoding.ASCII.GetString(WriteState.Buffer, 0, WriteState.Length);
 
         public override void EndWrite(IAsyncResult asyncResult) => WriteAsyncResult.End(asyncResult);
@@ -376,7 +373,7 @@ namespace System.Net.Mime
             private readonly byte[] _buffer;
             private readonly int _offset;
             private readonly int _count;
-            private readonly static AsyncCallback s_onWrite = new AsyncCallback(OnWrite);
+            private static readonly AsyncCallback s_onWrite = new AsyncCallback(OnWrite);
             private int _written;
 
             internal WriteAsyncResult(QuotedPrintableStream parent, byte[] buffer, int offset, int count, AsyncCallback callback, object state) : base(null, state, callback)

@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using Microsoft.CSharp.RuntimeBinder.Errors;
 using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
@@ -17,25 +16,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Keep this list sorted by containing type and name.
     internal enum PREDEFMETH
     {
-        PM_FIRST = 0,
-
-        PM_ARRAY_GETLENGTH,
-
         PM_DECIMAL_OPDECREMENT,
-        PM_DECIMAL_OPDIVISION,
-        PM_DECIMAL_OPEQUALITY,
-        PM_DECIMAL_OPGREATERTHAN,
-        PM_DECIMAL_OPGREATERTHANOREQUAL,
         PM_DECIMAL_OPINCREMENT,
-        PM_DECIMAL_OPINEQUALITY,
-        PM_DECIMAL_OPLESSTHAN,
-        PM_DECIMAL_OPLESSTHANOREQUAL,
-        PM_DECIMAL_OPMINUS,
-        PM_DECIMAL_OPMODULUS,
-        PM_DECIMAL_OPMULTIPLY,
-        PM_DECIMAL_OPPLUS,
         PM_DECIMAL_OPUNARYMINUS,
-        PM_DECIMAL_OPUNARYPLUS,
 
         PM_DELEGATE_COMBINE,
         PM_DELEGATE_OPEQUALITY,
@@ -53,8 +36,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         PM_EXPRESSION_ARRAYINDEX,
         PM_EXPRESSION_ARRAYINDEX2,
         PM_EXPRESSION_ASSIGN,
-
-        PM_EXPRESSION_CONDITION,
 
         PM_EXPRESSION_CONSTANT_OBJECT_TYPE,
         PM_EXPRESSION_CONVERT,
@@ -107,11 +88,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         PM_EXPRESSION_NEGATECHECKED_USER_DEFINED,
         PM_EXPRESSION_CALL,
         PM_EXPRESSION_NEW,
-        PM_EXPRESSION_NEW_MEMBERS,
         PM_EXPRESSION_NEW_TYPE,
         PM_EXPRESSION_QUOTE,
-        PM_EXPRESSION_ARRAYLENGTH,
-
 
         PM_EXPRESSION_NOT,
         PM_EXPRESSION_NOT_USER_DEFINED,
@@ -122,24 +100,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
 
         PM_EXPRESSION_INVOKE,
-        PM_METHODINFO_CREATEDELEGATE_TYPE_OBJECT,
 
         PM_G_OPTIONAL_CTOR,
-        PM_G_OPTIONAL_GETHASVALUE,
         PM_G_OPTIONAL_GETVALUE,
-        PM_G_OPTIONAL_GET_VALUE_OR_DEF,
 
-        PM_STRING_CONCAT_OBJECT_1,      // NOTE: these 3 must be sequential. See RealizeConcats
         PM_STRING_CONCAT_OBJECT_2,
         PM_STRING_CONCAT_OBJECT_3,
-        PM_STRING_CONCAT_STRING_1,      // NOTE: these 4 must be sequential. See RealizeConcats
         PM_STRING_CONCAT_STRING_2,
-        PM_STRING_CONCAT_STRING_3,
-        PM_STRING_CONCAT_STRING_4,
-        PM_STRING_CONCAT_SZ_OBJECT,
-        PM_STRING_CONCAT_SZ_STRING,
-        PM_STRING_GETCHARS,
-        PM_STRING_GETLENGTH,
         PM_STRING_OPEQUALITY,
         PM_STRING_OPINEQUALITY,
 
@@ -151,17 +118,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // Keep this list sorted by containing type and name.
     internal enum PREDEFPROP
     {
-        PP_FIRST = 0,
-        PP_ARRAY_LENGTH,
         PP_G_OPTIONAL_VALUE,
         PP_COUNT,
     };
-
-    internal enum MethodRequiredEnum
-    {
-        Required,
-        Optional
-    }
 
     internal enum MethodCallingConventionEnum
     {
@@ -190,13 +149,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // start next value at PredefinedType.PT_VOID + 1,
         SIG_CLASS_TYVAR = (int)PredefinedType.PT_VOID + 1,          // next element in signature is index of class tyvar
         SIG_METH_TYVAR,                         // next element in signature is index of method tyvar
-        SIG_SZ_ARRAY,                           // must be followed by signature type of array elements
-        SIG_REF,                                // must be followed by signature of ref type
-        SIG_OUT,                                // must be followed by signature of out type
+        SIG_SZ_ARRAY                            // must be followed by signature type of array elements
     }
 
     // A description of a method the compiler uses while compiling.
-    internal class PredefinedMethodInfo
+    internal sealed class PredefinedMethodInfo
     {
         public PREDEFMETH method;
         public PredefinedType type;
@@ -206,7 +163,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public int cTypeVars;
         public int[] signature;       // Size 8. expand this if a new method has a signature which doesn't fit in the current space
 
-        public PredefinedMethodInfo(PREDEFMETH method, MethodRequiredEnum required, PredefinedType type, PredefinedName name, MethodCallingConventionEnum callingConvention, ACCESS access, int cTypeVars, int[] signature)
+        public PredefinedMethodInfo(PREDEFMETH method, PredefinedType type, PredefinedName name, MethodCallingConventionEnum callingConvention, ACCESS access, int cTypeVars, int[] signature)
         {
             this.method = method;
             this.type = type;
@@ -220,204 +177,54 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
 
     // A description of a method the compiler uses while compiling.
-    internal class PredefinedPropertyInfo
+    internal sealed class PredefinedPropertyInfo
     {
         public PREDEFPROP property;
         public PredefinedName name;
         public PREDEFMETH getter;
-        public PREDEFMETH setter;
 
-        public PredefinedPropertyInfo(PREDEFPROP property, MethodRequiredEnum required, PredefinedName name, PREDEFMETH getter, PREDEFMETH setter)
+        public PredefinedPropertyInfo(PREDEFPROP property, PredefinedName name, PREDEFMETH getter)
         {
             this.property = property;
             this.name = name;
             this.getter = getter;
-            this.setter = setter;
         }
-    };
+    }
 
     // Loads and caches predefined members.
     // Also finds constructors on delegate types.
-    internal class PredefinedMembers
+    internal static class PredefinedMembers
     {
-        protected static void RETAILVERIFY(bool f)
+        private static readonly MethodSymbol[] _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
+        private static readonly PropertySymbol[] _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
+
+        private static PropertySymbol LoadProperty(PREDEFPROP property)
         {
-            if (!f)
-                Debug.Assert(false, "panic!");
+            PredefinedPropertyInfo info = GetPropInfo(property);
+            return LoadProperty(property, NameManager.GetPredefinedName(info.name), info.getter);
         }
 
-        private readonly SymbolLoader _loader;
-        internal SymbolTable RuntimeBinderSymbolTable;
-        private readonly MethodSymbol[] _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
-        private readonly PropertySymbol[] _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
-
-        private Name GetMethName(PREDEFMETH method)
-        {
-            return GetPredefName(GetMethPredefName(method));
-        }
-
-        private AggregateSymbol GetMethParent(PREDEFMETH method)
-        {
-            return GetOptPredefAgg(GetMethPredefType(method));
-        }
-
-        // delegate specific helpers
-        private MethodSymbol FindDelegateConstructor(AggregateSymbol delegateType, int[] signature)
-        {
-            Debug.Assert(delegateType != null && delegateType.IsDelegate());
-            Debug.Assert(signature != null);
-
-            return LoadMethod(
-                                delegateType,
-                                signature,
-                                0,                          // meth ty vars
-                                GetPredefName(PredefinedName.PN_CTOR),
-                                ACCESS.ACC_PUBLIC,
-                                false,                      // MethodCallingConventionEnum.Static
-                                false);                     // MethodCallingConventionEnum.Virtual
-        }
-
-        private MethodSymbol FindDelegateConstructor(AggregateSymbol delegateType)
-        {
-            Debug.Assert(delegateType != null && delegateType.IsDelegate());
-
-            MethodSymbol ctor = FindDelegateConstructor(delegateType, s_DelegateCtorSignature1);
-            if (ctor == null)
-            {
-                ctor = FindDelegateConstructor(delegateType, s_DelegateCtorSignature2);
-            }
-
-            return ctor;
-        }
-
-        public MethodSymbol FindDelegateConstructor(AggregateSymbol delegateType, bool fReportErrors)
-        {
-            MethodSymbol ctor = FindDelegateConstructor(delegateType);
-            if (ctor == null && fReportErrors)
-            {
-                GetErrorContext().Error(ErrorCode.ERR_BadDelegateConstructor, delegateType);
-            }
-
-            return ctor;
-        }
-
-        // property specific helpers
-        private PropertySymbol EnsureProperty(PREDEFPROP property)
-        {
-            RETAILVERIFY((int)property > (int)PREDEFMETH.PM_FIRST && (int)property < (int)PREDEFMETH.PM_COUNT);
-
-            if (_properties[(int)property] == null)
-            {
-                _properties[(int)property] = LoadProperty(property);
-            }
-            return _properties[(int)property];
-        }
-        private PropertySymbol LoadProperty(PREDEFPROP property)
-        {
-            return LoadProperty(
-                        property,
-                        GetPropName(property),
-                        GetPropGetter(property),
-                        GetPropSetter(property));
-        }
-
-        private Name GetPropName(PREDEFPROP property)
-        {
-            return GetPredefName(GetPropPredefName(property));
-        }
-        private PropertySymbol LoadProperty(
+        private static PropertySymbol LoadProperty(
             PREDEFPROP predefProp,
             Name propertyName,
-            PREDEFMETH propertyGetter,
-            PREDEFMETH propertySetter)
+            PREDEFMETH propertyGetter)
         {
             Debug.Assert(propertyName != null);
-            Debug.Assert(propertyGetter > PREDEFMETH.PM_FIRST && propertyGetter < PREDEFMETH.PM_COUNT);
-            Debug.Assert(propertySetter > PREDEFMETH.PM_FIRST && propertySetter <= PREDEFMETH.PM_COUNT);
+            Debug.Assert(propertyGetter >= 0 && propertyGetter < PREDEFMETH.PM_COUNT);
 
-            MethodSymbol getter = GetOptionalMethod(propertyGetter);
-            MethodSymbol setter = null;
-            if (propertySetter != PREDEFMETH.PM_COUNT)
-            {
-                setter = GetOptionalMethod(propertySetter);
-            }
+            SymbolTable.AddPredefinedPropertyToSymbolTable(
+                GetPredefAgg(GetPropPredefType(predefProp)), propertyName);
+            MethodSymbol getter = GetMethod(propertyGetter);
 
-            if (getter == null && setter == null)
-            {
-                RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
-                getter = GetOptionalMethod(propertyGetter);
-                if (propertySetter != PREDEFMETH.PM_COUNT)
-                {
-                    setter = GetOptionalMethod(propertySetter);
-                }
-            }
-
-            if (setter != null)
-            {
-                setter.SetMethKind(MethodKindEnum.PropAccessor);
-            }
-
-            PropertySymbol property = null;
-            if (getter != null)
-            {
-                getter.SetMethKind(MethodKindEnum.PropAccessor);
-                property = getter.getProperty();
-
-                // Didn't find it, so load it.
-                if (property == null)
-                {
-                    RuntimeBinderSymbolTable.AddPredefinedPropertyToSymbolTable(GetOptPredefAgg(GetPropPredefType(predefProp)), propertyName);
-                }
-                property = getter.getProperty();
-                Debug.Assert(property != null);
-
-                if (property.name != propertyName ||
-                    (propertySetter != PREDEFMETH.PM_COUNT &&
-                        (setter == null ||
-                         !setter.isPropertyAccessor() ||
-                         setter.getProperty() != property)) ||
-                    property.getBogus())
-                {
-                    property = null;
-                }
-            }
-
+            getter.SetMethKind(MethodKindEnum.PropAccessor);
+            PropertySymbol property = getter.getProperty();
+            Debug.Assert(property != null);
             return property;
         }
 
-        private SymbolLoader GetSymbolLoader()
-        {
-            Debug.Assert(_loader != null);
+        private static AggregateSymbol GetPredefAgg(PredefinedType pt) => SymbolLoader.GetPredefAgg(pt);
 
-            return _loader;
-        }
-        private ErrorHandling GetErrorContext()
-        {
-            return GetSymbolLoader().GetErrorContext();
-        }
-        private NameManager GetNameManager()
-        {
-            return GetSymbolLoader().GetNameManager();
-        }
-        private TypeManager GetTypeManager()
-        {
-            return GetSymbolLoader().GetTypeManager();
-        }
-        private BSYMMGR getBSymmgr()
-        {
-            return GetSymbolLoader().getBSymmgr();
-        }
-
-        private Name GetPredefName(PredefinedName pn)
-        {
-            return GetNameManager().GetPredefName(pn);
-        }
-        private AggregateSymbol GetOptPredefAgg(PredefinedType pt)
-        {
-            return GetSymbolLoader().GetOptPredefAgg(pt);
-        }
-
-        private CType LoadTypeFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
+        private static CType LoadTypeFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
             Debug.Assert(signature != null);
 
@@ -426,77 +233,38 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             switch (current)
             {
-                case MethodSignatureEnum.SIG_REF:
-                    {
-                        CType refType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (refType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetParameterModifier(refType, false);
-                    }
-                case MethodSignatureEnum.SIG_OUT:
-                    {
-                        CType outType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (outType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetParameterModifier(outType, true);
-                    }
                 case MethodSignatureEnum.SIG_SZ_ARRAY:
-                    {
-                        CType elementType = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                        if (elementType == null)
-                        {
-                            return null;
-                        }
-                        return GetTypeManager().GetArray(elementType, 1);
-                    }
+                    return TypeManager.GetArray(LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars), 1, true);
+
                 case MethodSignatureEnum.SIG_METH_TYVAR:
-                    {
-                        int index = signature[indexIntoSignatures];
-                        indexIntoSignatures++;
-                        return GetTypeManager().GetStdMethTypeVar(index);
-                    }
+                    return TypeManager.GetStdMethTypeVar(signature[indexIntoSignatures++]);
+
                 case MethodSignatureEnum.SIG_CLASS_TYVAR:
-                    {
-                        int index = signature[indexIntoSignatures];
-                        indexIntoSignatures++;
-                        return classTyVars.Item(index);
-                    }
+                    return classTyVars[signature[indexIntoSignatures++]];
+
                 case (MethodSignatureEnum)PredefinedType.PT_VOID:
-                    return GetTypeManager().GetVoid();
+                    return VoidType.Instance;
+
                 default:
+                    Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
+                    AggregateSymbol agg = GetPredefAgg((PredefinedType)current);
+                    int typeCount = agg.GetTypeVars().Count;
+                    if (typeCount == 0)
                     {
-                        Debug.Assert(current >= 0 && (int)current < (int)PredefinedType.PT_COUNT);
-                        AggregateSymbol agg = GetOptPredefAgg((PredefinedType)current);
-                        if (agg != null)
-                        {
-                            CType[] typeArgs = new CType[agg.GetTypeVars().size];
-                            for (int iTypeArg = 0; iTypeArg < agg.GetTypeVars().size; iTypeArg++)
-                            {
-                                typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                                if (typeArgs[iTypeArg] == null)
-                                {
-                                    return null;
-                                }
-                            }
-                            AggregateType type = GetTypeManager().GetAggregate(agg, getBSymmgr().AllocParams(agg.GetTypeVars().size, typeArgs));
-                            if (type.isPredefType(PredefinedType.PT_G_OPTIONAL))
-                            {
-                                return GetTypeManager().GetNubFromNullable(type);
-                            }
-
-                            return type;
-                        }
+                        return TypeManager.GetAggregate(agg, TypeArray.Empty);
                     }
-                    break;
-            }
 
-            return null;
+                    CType[] typeArgs = new CType[typeCount];
+                    for (int iTypeArg = 0; iTypeArg < typeArgs.Length; iTypeArg++)
+                    {
+                        typeArgs[iTypeArg] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
+                    }
+
+                    return TypeManager.GetAggregate(agg, TypeArray.Allocate(typeArgs));
+            }
         }
-        private TypeArray LoadTypeArrayFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
+
+        private static TypeArray LoadTypeArrayFromSignature(int[] signature, ref int indexIntoSignatures, TypeArray classTyVars)
         {
             Debug.Assert(signature != null);
 
@@ -506,76 +274,42 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(count >= 0);
 
             CType[] ptypes = new CType[count];
-            for (int i = 0; i < count; i++)
+            for (int i = 0; i < ptypes.Length; i++)
             {
                 ptypes[i] = LoadTypeFromSignature(signature, ref indexIntoSignatures, classTyVars);
-                if (ptypes[i] == null)
-                {
-                    return null;
-                }
             }
-            return getBSymmgr().AllocParams(count, ptypes);
+
+            return TypeArray.Allocate(ptypes);
         }
 
-        public PredefinedMembers(SymbolLoader loader)
-        {
-            _loader = loader;
-            Debug.Assert(_loader != null);
-
-            _methods = new MethodSymbol[(int)PREDEFMETH.PM_COUNT];
-            _properties = new PropertySymbol[(int)PREDEFPROP.PP_COUNT];
-
 #if DEBUG
+        static PredefinedMembers()
+        {
             // validate the tables
-            for (int i = (int)PREDEFMETH.PM_FIRST + 1; i < (int)PREDEFMETH.PM_COUNT; i++)
+            for (int i = 0; i < (int)PREDEFMETH.PM_COUNT; i++)
             {
                 Debug.Assert((int)GetMethInfo((PREDEFMETH)i).method == i);
             }
-            for (int i = (int)PREDEFPROP.PP_FIRST + 1; i < (int)PREDEFPROP.PP_COUNT; i++)
+            for (int i = 0; i < (int)PREDEFPROP.PP_COUNT; i++)
             {
                 Debug.Assert((int)GetPropInfo((PREDEFPROP)i).property == i);
             }
+        }
 #endif
-        }
 
-        public PropertySymbol GetProperty(PREDEFPROP property)  // Reports an error if the property is not found.
+        public static PropertySymbol GetProperty(PREDEFPROP property)
         {
-            PropertySymbol result = EnsureProperty(property);
-            if (result == null)
-            {
-                ReportError(property);
-            }
-
-            return result;
+            Debug.Assert(property >= 0 && property < PREDEFPROP.PP_COUNT);
+            return _properties[(int)property] ?? (_properties[(int)property] = LoadProperty(property));
         }
 
-        public MethodSymbol GetMethod(PREDEFMETH method)
+        public static MethodSymbol GetMethod(PREDEFMETH method)
         {
-            MethodSymbol result = EnsureMethod(method);
-            if (result == null)
-            {
-                ReportError(method);
-            }
-
-            return result;
+            Debug.Assert(method >= 0 && method < PREDEFMETH.PM_COUNT);
+            return _methods[(int)method] ?? (_methods[(int)method] = LoadMethod(method));
         }
 
-        public MethodSymbol GetOptionalMethod(PREDEFMETH method)
-        {
-            return EnsureMethod(method);
-        }
-
-        private MethodSymbol EnsureMethod(PREDEFMETH method)
-        {
-            RETAILVERIFY(method > PREDEFMETH.PM_FIRST && method < PREDEFMETH.PM_COUNT);
-            if (_methods[(int)method] == null)
-            {
-                _methods[(int)method] = LoadMethod(method);
-            }
-            return _methods[(int)method];
-        }
-
-        private MethodSymbol LoadMethod(
+        private static MethodSymbol LoadMethod(
                         AggregateSymbol type,
                         int[] signature,
                         int cMethodTyVars,
@@ -588,53 +322,40 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             Debug.Assert(signature != null);
             Debug.Assert(cMethodTyVars >= 0);
             Debug.Assert(methodName != null);
-
-            if (type == null)
-            {
-                return null;
-            }
+            Debug.Assert(type != null);
             TypeArray classTyVars = type.GetTypeVarsAll();
 
             int index = 0;
             CType returnType = LoadTypeFromSignature(signature, ref index, classTyVars);
-            if (returnType == null)
-            {
-                return null;
-            }
+            Debug.Assert(returnType != null);
+
             TypeArray argumentTypes = LoadTypeArrayFromSignature(signature, ref index, classTyVars);
-            if (argumentTypes == null)
-            {
-                return null;
-            }
-            TypeArray standardMethodTyVars = GetTypeManager().GetStdMethTyVarArray(cMethodTyVars);
+            Debug.Assert(argumentTypes != null);
 
             MethodSymbol ret = LookupMethodWhileLoading(type, cMethodTyVars, methodName, methodAccess, isStatic, isVirtual, returnType, argumentTypes);
 
             if (ret == null)
             {
-                RuntimeBinderSymbolTable.AddPredefinedMethodToSymbolTable(type, methodName);
+                SymbolTable.AddPredefinedMethodToSymbolTable(type, methodName);
                 ret = LookupMethodWhileLoading(type, cMethodTyVars, methodName, methodAccess, isStatic, isVirtual, returnType, argumentTypes);
             }
             return ret;
         }
 
-        private MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, Name methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
+        private static MethodSymbol LookupMethodWhileLoading(AggregateSymbol type, int cMethodTyVars, Name methodName, ACCESS methodAccess, bool isStatic, bool isVirtual, CType returnType, TypeArray argumentTypes)
         {
-            for (Symbol sym = GetSymbolLoader().LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
+            for (Symbol sym = SymbolLoader.LookupAggMember(methodName, type, symbmask_t.MASK_ALL);
                  sym != null;
-                 sym = GetSymbolLoader().LookupNextSym(sym, type, symbmask_t.MASK_ALL))
+                 sym = sym.LookupNext(symbmask_t.MASK_ALL))
             {
-                if (sym.IsMethodSymbol())
+                if (sym is MethodSymbol methsym)
                 {
-                    MethodSymbol methsym = sym.AsMethodSymbol();
                     if ((methsym.GetAccess() == methodAccess || methodAccess == ACCESS.ACC_UNKNOWN) &&
                         methsym.isStatic == isStatic &&
                         methsym.isVirtual == isVirtual &&
-                        methsym.typeVars.size == cMethodTyVars &&
-                        GetTypeManager().SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, SubstTypeFlags.DenormMeth) &&
-                        GetTypeManager().SubstEqualTypeArrays(methsym.Params, argumentTypes, (TypeArray)null,
-                            methsym.typeVars, SubstTypeFlags.DenormMeth) &&
-                        !methsym.getBogus())
+                        methsym.typeVars.Count == cMethodTyVars &&
+                        TypeManager.SubstEqualTypes(methsym.RetType, returnType, null, methsym.typeVars, true) &&
+                        TypeManager.SubstEqualTypeArrays(methsym.Params, argumentTypes, null, methsym.typeVars))
                     {
                         return methsym;
                     }
@@ -643,34 +364,17 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return null;
         }
 
-        private MethodSymbol LoadMethod(PREDEFMETH method)
+        private static MethodSymbol LoadMethod(PREDEFMETH method)
         {
+            PredefinedMethodInfo info = GetMethInfo(method);
             return LoadMethod(
-                        GetMethParent(method),
-                        GetMethSignature(method),
-                        GetMethTyVars(method),
-                        GetMethName(method),
-                        GetMethAccess(method),
-                        IsMethStatic(method),
-                        IsMethVirtual(method));
-        }
-
-        private void ReportError(PREDEFMETH method)
-        {
-            ReportError(GetMethPredefType(method), GetMethPredefName(method));
-        }
-
-        private void ReportError(PredefinedType type, PredefinedName name)
-        {
-            GetErrorContext().Error(ErrorCode.ERR_MissingPredefinedMember, PredefinedTypes.GetFullName(type), GetPredefName(name));
-        }
-
-        private static readonly int[] s_DelegateCtorSignature1 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_INTPTR };
-        private static readonly int[] s_DelegateCtorSignature2 = { (int)PredefinedType.PT_VOID, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_UINTPTR };
-
-        private static PredefinedName GetPropPredefName(PREDEFPROP property)
-        {
-            return GetPropInfo(property).name;
+                        GetPredefAgg(info.type),
+                        info.signature,
+                        info.cTypeVars,
+                        NameManager.GetPredefinedName(info.name),
+                        info.access,
+                        info.callingConvention == MethodCallingConventionEnum.Static,
+                        info.callingConvention == MethodCallingConventionEnum.Virtual);
         }
 
         private static PREDEFMETH GetPropGetter(PREDEFPROP property)
@@ -678,7 +382,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             PREDEFMETH result = GetPropInfo(property).getter;
 
             // getters are MethodRequiredEnum.Required
-            Debug.Assert(result > PREDEFMETH.PM_FIRST && result < PREDEFMETH.PM_COUNT);
+            Debug.Assert(result >= 0 && result < PREDEFMETH.PM_COUNT);
 
             return result;
         }
@@ -688,193 +392,112 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return GetMethInfo(GetPropGetter(property)).type;
         }
 
-        private static PREDEFMETH GetPropSetter(PREDEFPROP property)
-        {
-            PREDEFMETH result = GetPropInfo(property).setter;
-
-            // setters are not MethodRequiredEnum.Required
-            Debug.Assert(result > PREDEFMETH.PM_FIRST && result <= PREDEFMETH.PM_COUNT);
-
-            return GetPropInfo(property).setter;
-        }
-
-        private void ReportError(PREDEFPROP property)
-        {
-            ReportError(GetPropPredefType(property), GetPropPredefName(property));
-        }
-
         // the list of predefined property definitions.
         // This list must be in the same order as the PREDEFPROP enum.
         private static readonly PredefinedPropertyInfo[] s_predefinedProperties = {
-            new PredefinedPropertyInfo(   PREDEFPROP.PP_FIRST,                                           MethodRequiredEnum.Optional,   PredefinedName.PN_COUNT,                   PREDEFMETH.PM_COUNT,                                           PREDEFMETH.PM_COUNT  ),
-
-            new PredefinedPropertyInfo(   PREDEFPROP.PP_ARRAY_LENGTH,                                    MethodRequiredEnum.Optional,   PredefinedName.PN_LENGTH,                  PREDEFMETH.PM_ARRAY_GETLENGTH,                                 PREDEFMETH.PM_COUNT  ),
-            new PredefinedPropertyInfo(   PREDEFPROP.PP_G_OPTIONAL_VALUE,                                MethodRequiredEnum.Optional,   PredefinedName.PN_CAP_VALUE,               PREDEFMETH.PM_G_OPTIONAL_GETVALUE,                             PREDEFMETH.PM_COUNT  ),
+            new PredefinedPropertyInfo(PREDEFPROP.PP_G_OPTIONAL_VALUE,  PredefinedName.PN_CAP_VALUE,    PREDEFMETH.PM_G_OPTIONAL_GETVALUE)
         };
 
-        public static PredefinedPropertyInfo GetPropInfo(PREDEFPROP property)
+        private static PredefinedPropertyInfo GetPropInfo(PREDEFPROP property)
         {
-            RETAILVERIFY(property > PREDEFPROP.PP_FIRST && property < PREDEFPROP.PP_COUNT);
-            RETAILVERIFY(s_predefinedProperties[(int)property].property == property);
+            Debug.Assert(property >= 0 && property < PREDEFPROP.PP_COUNT);
+            Debug.Assert(s_predefinedProperties[(int)property].property == property);
 
             return s_predefinedProperties[(int)property];
         }
 
-        public static PredefinedMethodInfo GetMethInfo(PREDEFMETH method)
+        private static PredefinedMethodInfo GetMethInfo(PREDEFMETH method)
         {
-            RETAILVERIFY(method > PREDEFMETH.PM_FIRST && method < PREDEFMETH.PM_COUNT);
-            RETAILVERIFY(s_predefinedMethods[(int)method].method == method);
+            Debug.Assert(method >= 0 && method < PREDEFMETH.PM_COUNT);
+            Debug.Assert(s_predefinedMethods[(int)method].method == method);
 
             return s_predefinedMethods[(int)method];
-        }
-
-        private static PredefinedName GetMethPredefName(PREDEFMETH method)
-        {
-            return GetMethInfo(method).name;
-        }
-
-        private static PredefinedType GetMethPredefType(PREDEFMETH method)
-        {
-            return GetMethInfo(method).type;
-        }
-
-        private static bool IsMethStatic(PREDEFMETH method)
-        {
-            return GetMethInfo(method).callingConvention == MethodCallingConventionEnum.Static;
-        }
-
-        private static bool IsMethVirtual(PREDEFMETH method)
-        {
-            return GetMethInfo(method).callingConvention == MethodCallingConventionEnum.Virtual;
-        }
-
-        private static ACCESS GetMethAccess(PREDEFMETH method)
-        {
-            return GetMethInfo(method).access;
-        }
-
-        private static int GetMethTyVars(PREDEFMETH method)
-        {
-            return GetMethInfo(method).cTypeVars;
-        }
-
-        private static int[] GetMethSignature(PREDEFMETH method)
-        {
-            return GetMethInfo(method).signature;
         }
 
         // the list of predefined method definitions.
         // This list must be in the same order as the PREDEFMETH enum.
         private static readonly PredefinedMethodInfo[] s_predefinedMethods = new PredefinedMethodInfo[(int)PREDEFMETH.PM_COUNT] {
-            new PredefinedMethodInfo(   PREDEFMETH.PM_FIRST,                                           MethodRequiredEnum.Optional,   PredefinedType.PT_COUNT,               PredefinedName.PN_COUNT,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_VOID, 0  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_ARRAY_GETLENGTH,                                 MethodRequiredEnum.Optional,   PredefinedType.PT_ARRAY,               PredefinedName.PN_GETLENGTH,               MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_INT, 0  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPDECREMENT,                             MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPDECREMENT,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPDIVISION,                              MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPDIVISION,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPEQUALITY,                              MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPEQUALITY,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPGREATERTHAN,                           MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPGREATERTHAN,           MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPGREATERTHANOREQUAL,                    MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPGREATERTHANOREQUAL,    MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPINCREMENT,                             MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPINCREMENT,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPINEQUALITY,                            MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPINEQUALITY,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPLESSTHAN,                              MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPLESSTHAN,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPLESSTHANOREQUAL,                       MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPLESSTHANOREQUAL,       MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPMINUS,                                 MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPMINUS,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPMODULUS,                               MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPMODULUS,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPMULTIPLY,                              MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPMULTIPLY,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPPLUS,                                  MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPPLUS,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 2, (int)PredefinedType.PT_DECIMAL, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPUNARYMINUS,                            MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPUNARYMINUS,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPUNARYPLUS,                             MethodRequiredEnum.Optional,   PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPUNARYPLUS,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_COMBINE,                                MethodRequiredEnum.Optional,   PredefinedType.PT_DELEGATE,            PredefinedName.PN_COMBINE,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DELEGATE, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_OPEQUALITY,                             MethodRequiredEnum.Optional,   PredefinedType.PT_DELEGATE,            PredefinedName.PN_OPEQUALITY,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_OPINEQUALITY,                           MethodRequiredEnum.Optional,   PredefinedType.PT_DELEGATE,            PredefinedName.PN_OPINEQUALITY,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_REMOVE,                                 MethodRequiredEnum.Optional,   PredefinedType.PT_DELEGATE,            PredefinedName.PN_REMOVE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DELEGATE, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADD,                                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADD,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADD_USER_DEFINED,                     MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADD,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADDCHECKED,                           MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADDCHECKED,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADDCHECKED_USER_DEFINED,              MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADDCHECKED,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_AND,                                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_AND,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_AND_USER_DEFINED,                     MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_AND,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ANDALSO,                              MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ANDALSO,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ANDALSO_USER_DEFINED,                 MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ANDALSO,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ARRAYINDEX,                           MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ARRAYINDEX,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ARRAYINDEX2,                          MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ARRAYINDEX,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_METHODCALLEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ASSIGN,                               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ASSIGN,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONDITION,                            MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONDITION,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_CONDITIONALEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE,                 MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONSTANT,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_CONSTANTEXPRESSION, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_TYPE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERT,                              MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERT,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERT_USER_DEFINED,                 MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERT,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERTCHECKED,                       MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERTCHECKED,          MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERTCHECKED_USER_DEFINED,          MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERTCHECKED,          MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_DIVIDE,                               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_DIVIDE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_DIVIDE_USER_DEFINED,                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_DIVIDE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EQUAL,                                MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EQUAL,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED,                   MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EQUAL,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EXCLUSIVEOR,                          MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EXCLUSIVEOR,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EXCLUSIVEOR_USER_DEFINED,             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EXCLUSIVEOR,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_FIELD,                                MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CAP_FIELD,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_MEMBEREXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_FIELDINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHAN,                          MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHAN,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHAN_USER_DEFINED,             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHAN,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL,                   MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHANOREQUAL,      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL_USER_DEFINED,      MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHANOREQUAL,      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LAMBDA,                               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LAMBDA,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     1,  new int[] { (int)PredefinedType.PT_G_EXPRESSION, (int)MethodSignatureEnum.SIG_METH_TYVAR, 0, 2, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_PARAMETEREXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LEFTSHIFT,                            MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LEFTSHIFT,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LEFTSHIFT_USER_DEFINED,               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LEFTSHIFT,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHAN,                             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHAN,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHAN_USER_DEFINED,                MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHAN,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL,                      MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHANOREQUAL,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL_USER_DEFINED,         MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHANOREQUAL,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MODULO,                               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MODULO,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MODULO_USER_DEFINED,                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MODULO,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLY,                             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLY,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLY_USER_DEFINED,                MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLY,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLYCHECKED,                      MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLYCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLYCHECKED_USER_DEFINED,         MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLYCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOTEQUAL,                             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOTEQUAL,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED,                MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOTEQUAL,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_OR,                                   MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_OR,                      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_OR_USER_DEFINED,                      MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_OR,                      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ORELSE,                               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ORELSE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ORELSE_USER_DEFINED,                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ORELSE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_PARAMETER,                            MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_PARAMETER,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_PARAMETEREXPRESSION, 2, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_STRING  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_RIGHTSHIFT,                           MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_RIGHTSHIFT,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_RIGHTSHIFT_USER_DEFINED,              MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_RIGHTSHIFT,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACT,                             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACT,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACT_USER_DEFINED,                MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACT,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACTCHECKED,                      MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACTCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACTCHECKED_USER_DEFINED,         MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACTCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_UNARYPLUS_USER_DEFINED,               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_PLUS  ,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATE,                               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATE_USER_DEFINED,                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATECHECKED,                        MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATECHECKED,           MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATECHECKED_USER_DEFINED,           MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATECHECKED,           MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CALL,                                 MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CALL,                    MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_METHODCALLEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEW,                                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEW,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWEXPRESSION, 2, (int)PredefinedType.PT_CONSTRUCTORINFO, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEW_MEMBERS,                          MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEW,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWEXPRESSION, 3, (int)PredefinedType.PT_CONSTRUCTORINFO, (int)PredefinedType.PT_G_IENUMERABLE, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_MEMBERINFO  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEW_TYPE,                             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEW,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWEXPRESSION, 1, (int)PredefinedType.PT_TYPE  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_QUOTE,                                MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_QUOTE,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ARRAYLENGTH,                          MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ARRAYLENGTH,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOT,                                  MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOT,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOT_USER_DEFINED,                     MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOT,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEWARRAYINIT,                         MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEWARRAYINIT,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWARRAYEXPRESSION, 2, (int)PredefinedType.PT_TYPE, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_PROPERTY,                             MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EXPRESSION_PROPERTY,     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_MEMBEREXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_PROPERTYINFO }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_INVOKE,                               MethodRequiredEnum.Optional,   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_INVOKE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_INVOCATIONEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_METHODINFO_CREATEDELEGATE_TYPE_OBJECT,           MethodRequiredEnum.Optional,   PredefinedType.PT_METHODINFO,          PredefinedName.PN_CREATEDELEGATE,          MethodCallingConventionEnum.Virtual,    ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DELEGATE, 2, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_OBJECT}),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_CTOR,                                 MethodRequiredEnum.Optional,   PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_CTOR,                    MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_VOID, 1, (int)MethodSignatureEnum.SIG_CLASS_TYVAR, 0  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_GETHASVALUE,                          MethodRequiredEnum.Optional,   PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_GETHASVALUE,             MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 0  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_GETVALUE,                             MethodRequiredEnum.Optional,   PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_GETVALUE,                MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)MethodSignatureEnum.SIG_CLASS_TYVAR, 0, 0  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_GET_VALUE_OR_DEF,                     MethodRequiredEnum.Optional,   PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_GET_VALUE_OR_DEF,        MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)MethodSignatureEnum.SIG_CLASS_TYVAR, 0, 0  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_OBJECT_1,                          MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 1, (int)PredefinedType.PT_OBJECT  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_OBJECT_2,                          MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_OBJECT  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_OBJECT_3,                          MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 3, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_OBJECT  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_STRING_1,                          MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 1, (int)PredefinedType.PT_STRING  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_STRING_2,                          MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 2, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_STRING_3,                          MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 3, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_STRING_4,                          MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 4, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_SZ_OBJECT,                         MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 1, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_OBJECT  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_SZ_STRING,                         MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 1, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_STRING  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_GETCHARS,                                 MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_GETCHARS,                MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_CHAR, 1, (int)PredefinedType.PT_INT  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_GETLENGTH,                                MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_GETLENGTH,               MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_INT, 0,  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_OPEQUALITY,                               MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_OPEQUALITY,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
-            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_OPINEQUALITY,                             MethodRequiredEnum.Optional,   PredefinedType.PT_STRING,              PredefinedName.PN_OPINEQUALITY,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPDECREMENT,                             PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPDECREMENT,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPINCREMENT,                             PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPINCREMENT,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_DECIMAL_OPUNARYMINUS,                            PredefinedType.PT_DECIMAL,             PredefinedName.PN_OPUNARYMINUS,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DECIMAL, 1, (int)PredefinedType.PT_DECIMAL  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_COMBINE,                                PredefinedType.PT_DELEGATE,            PredefinedName.PN_COMBINE,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DELEGATE, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_OPEQUALITY,                             PredefinedType.PT_DELEGATE,            PredefinedName.PN_OPEQUALITY,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_OPINEQUALITY,                           PredefinedType.PT_DELEGATE,            PredefinedName.PN_OPINEQUALITY,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_DELEGATE_REMOVE,                                 PredefinedType.PT_DELEGATE,            PredefinedName.PN_REMOVE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_DELEGATE, 2, (int)PredefinedType.PT_DELEGATE, (int)PredefinedType.PT_DELEGATE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADD,                                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADD,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADD_USER_DEFINED,                     PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADD,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADDCHECKED,                           PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADDCHECKED,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ADDCHECKED_USER_DEFINED,              PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ADDCHECKED,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_AND,                                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_AND,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_AND_USER_DEFINED,                     PredefinedType.PT_EXPRESSION,          PredefinedName.PN_AND,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ANDALSO,                              PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ANDALSO,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ANDALSO_USER_DEFINED,                 PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ANDALSO,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ARRAYINDEX,                           PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ARRAYINDEX,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ARRAYINDEX2,                          PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ARRAYINDEX,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_METHODCALLEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ASSIGN,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ASSIGN,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONSTANT_OBJECT_TYPE,                 PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONSTANT,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_CONSTANTEXPRESSION, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_TYPE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERT,                              PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERT,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERT_USER_DEFINED,                 PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERT,                 MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERTCHECKED,                       PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERTCHECKED,          MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CONVERTCHECKED_USER_DEFINED,          PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CONVERTCHECKED,          MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_DIVIDE,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_DIVIDE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_DIVIDE_USER_DEFINED,                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_DIVIDE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EQUAL,                                PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EQUAL,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EQUAL_USER_DEFINED,                   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EQUAL,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EXCLUSIVEOR,                          PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EXCLUSIVEOR,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_EXCLUSIVEOR_USER_DEFINED,             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EXCLUSIVEOR,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_FIELD,                                PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CAP_FIELD,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_MEMBEREXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_FIELDINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHAN,                          PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHAN,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHAN_USER_DEFINED,             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHAN,             MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL,                   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHANOREQUAL,      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_GREATERTHANOREQUAL_USER_DEFINED,      PredefinedType.PT_EXPRESSION,          PredefinedName.PN_GREATERTHANOREQUAL,      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LAMBDA,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LAMBDA,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     1,  new int[] { (int)PredefinedType.PT_G_EXPRESSION, (int)MethodSignatureEnum.SIG_METH_TYVAR, 0, 2, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_PARAMETEREXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LEFTSHIFT,                            PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LEFTSHIFT,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LEFTSHIFT_USER_DEFINED,               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LEFTSHIFT,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHAN,                             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHAN,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHAN_USER_DEFINED,                PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHAN,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL,                      PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHANOREQUAL,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_LESSTHANOREQUAL_USER_DEFINED,         PredefinedType.PT_EXPRESSION,          PredefinedName.PN_LESSTHANOREQUAL,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MODULO,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MODULO,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MODULO_USER_DEFINED,                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MODULO,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLY,                             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLY,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLY_USER_DEFINED,                PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLY,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLYCHECKED,                      PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLYCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_MULTIPLYCHECKED_USER_DEFINED,         PredefinedType.PT_EXPRESSION,          PredefinedName.PN_MULTIPLYCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOTEQUAL,                             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOTEQUAL,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOTEQUAL_USER_DEFINED,                PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOTEQUAL,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 4, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_BOOL, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_OR,                                   PredefinedType.PT_EXPRESSION,          PredefinedName.PN_OR,                      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_OR_USER_DEFINED,                      PredefinedType.PT_EXPRESSION,          PredefinedName.PN_OR,                      MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ORELSE,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ORELSE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_ORELSE_USER_DEFINED,                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_ORELSE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_PARAMETER,                            PredefinedType.PT_EXPRESSION,          PredefinedName.PN_PARAMETER,               MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_PARAMETEREXPRESSION, 2, (int)PredefinedType.PT_TYPE, (int)PredefinedType.PT_STRING  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_RIGHTSHIFT,                           PredefinedType.PT_EXPRESSION,          PredefinedName.PN_RIGHTSHIFT,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_RIGHTSHIFT_USER_DEFINED,              PredefinedType.PT_EXPRESSION,          PredefinedName.PN_RIGHTSHIFT,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACT,                             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACT,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACT_USER_DEFINED,                PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACT,                MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACTCHECKED,                      PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACTCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_SUBTRACTCHECKED_USER_DEFINED,         PredefinedType.PT_EXPRESSION,          PredefinedName.PN_SUBTRACTCHECKED,         MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BINARYEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_UNARYPLUS_USER_DEFINED,               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_PLUS  ,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATE,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATE_USER_DEFINED,                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATECHECKED,                        PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATECHECKED,           MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEGATECHECKED_USER_DEFINED,           PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEGATECHECKED,           MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_CALL,                                 PredefinedType.PT_EXPRESSION,          PredefinedName.PN_CALL,                    MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_METHODCALLEXPRESSION, 3, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEW,                                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEW,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWEXPRESSION, 2, (int)PredefinedType.PT_CONSTRUCTORINFO, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEW_TYPE,                             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEW,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWEXPRESSION, 1, (int)PredefinedType.PT_TYPE  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_QUOTE,                                PredefinedType.PT_EXPRESSION,          PredefinedName.PN_QUOTE,                   MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOT,                                  PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOT,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 1, (int)PredefinedType.PT_EXPRESSION }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NOT_USER_DEFINED,                     PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NOT,                     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_UNARYEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_METHODINFO }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_NEWARRAYINIT,                         PredefinedType.PT_EXPRESSION,          PredefinedName.PN_NEWARRAYINIT,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_NEWARRAYEXPRESSION, 2, (int)PredefinedType.PT_TYPE, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_PROPERTY,                             PredefinedType.PT_EXPRESSION,          PredefinedName.PN_EXPRESSION_PROPERTY,     MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_MEMBEREXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)PredefinedType.PT_PROPERTYINFO }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_EXPRESSION_INVOKE,                               PredefinedType.PT_EXPRESSION,          PredefinedName.PN_INVOKE,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_INVOCATIONEXPRESSION, 2, (int)PredefinedType.PT_EXPRESSION, (int)MethodSignatureEnum.SIG_SZ_ARRAY, (int)PredefinedType.PT_EXPRESSION }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_CTOR,                                 PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_CTOR,                    MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_VOID, 1, (int)MethodSignatureEnum.SIG_CLASS_TYVAR, 0  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_G_OPTIONAL_GETVALUE,                             PredefinedType.PT_G_OPTIONAL,          PredefinedName.PN_GETVALUE,                MethodCallingConventionEnum.Instance,   ACCESS.ACC_PUBLIC,     0,  new int[] { (int)MethodSignatureEnum.SIG_CLASS_TYVAR, 0, 0  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_OBJECT_2,                          PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 2, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_OBJECT  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_OBJECT_3,                          PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 3, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_OBJECT, (int)PredefinedType.PT_OBJECT  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_CONCAT_STRING_2,                          PredefinedType.PT_STRING,              PredefinedName.PN_CONCAT,                  MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_STRING, 2, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_OPEQUALITY,                               PredefinedType.PT_STRING,              PredefinedName.PN_OPEQUALITY,              MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
+            new PredefinedMethodInfo(   PREDEFMETH.PM_STRING_OPINEQUALITY,                             PredefinedType.PT_STRING,              PredefinedName.PN_OPINEQUALITY,            MethodCallingConventionEnum.Static,     ACCESS.ACC_PUBLIC,     0,  new int[] { (int)PredefinedType.PT_BOOL, 2, (int)PredefinedType.PT_STRING, (int)PredefinedType.PT_STRING  }),
         };
     }
 }

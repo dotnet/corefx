@@ -4,6 +4,7 @@
 
 using System.Runtime.InteropServices;
 using Xunit;
+using System.Linq;
 
 namespace System.IO.Tests
 {
@@ -190,7 +191,7 @@ namespace System.IO.Tests
         [Fact]
         public void SearchPatternIgnoreSubDirectories()
         {
-            //Shouldn't get files on full path by default
+            // Shouldn't get files on full path by default
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             Directory.CreateDirectory(Path.Combine(testDir.FullName, GetTestFileName()));
             using (File.Create(Path.Combine(testDir.FullName, GetTestFileName())))
@@ -204,9 +205,378 @@ namespace System.IO.Tests
             }
         }
 
+        [Theory,
+            // '[' should not matter, but is special to Unix matching APIs
+            InlineData(
+                "[foo]",
+                new string[] { @"f", @"o", @"o", @"foo", @"[foo]" },
+                new string[] { @"[foo]" }),
+            ]
+        public void PatternTests_UnixPatterns(string pattern, string[] sourceFiles, string[] expected)
+        {
+            string testDir = PrepareDirectory(sourceFiles);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        [ActiveIssue(20779, TestPlatforms.AnyUnix)]
+        [Theory,
+            // Question marks collapse (right) to periods
+            InlineData(
+                "f???.txt",
+                new string[] { @"f.txt", @"foo.txt", @"foob.txt", @"fooba.txt", @"foobar.txt" },
+                new string[] { @"f.txt", @"foo.txt", @"foob.txt" }),
+            // Question marks don't collapse to !periods
+            InlineData(
+                "???b??.txt",
+                new string[] { @"f.txt", @"foo.txt", @"foob.txt", @"fooba.txt", @"foobar.txt" },
+                new string[] { @"foob.txt", @"fooba.txt", @"foobar.txt" }),
+            // Question marks collapse (right) to end
+            InlineData(
+                "foo.t??",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo.t", @"foo.tx", @"foo.txt" }),
+            ]
+        public void PatternTests_DosQM(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // Question marks always collapse right to periods or the end of the string if they are contiguous
+            string testDir = PrepareDirectory(sourceFiles);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        [ActiveIssue(20779, TestPlatforms.AnyUnix)]
+        [ActiveIssue(20780, TestPlatforms.AnyUnix)]
+        [Theory,
+            // Periods are optional if left of ? and end of match
+            InlineData(
+                "foo.???",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt" }),
+            // Periods are optional if left of ? and end of match
+            InlineData(
+                "foo.???.?.?.?",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt" }),
+            // Periods are optional if left of ? and end of match
+            InlineData(
+                "foo.?.??.???.?",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t" }),
+            // Periods are optional if left of ? and end of match
+            InlineData(
+                "foo.??.???.?",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t", @"foo.tx" }),
+            // Periods are optional if left of * and end of match, question marks collapse (right) to end
+            InlineData(
+                "foo.*??",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"foo.txxt" }),
+            // Periods are optional if left of * and end of match, question marks collapse (right) to end
+            InlineData(
+                "foo.*??*",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"foo.txxt" })
+                ]
+        public void PatternTests_DosDotQm(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // Tests for collapsing question marks and DOS_DOT, ", which is what periods get changed to when they are followed by a '?' or '*'.
+            string testDir = PrepareDirectory(sourceFiles);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        [ActiveIssue(20780, TestPlatforms.AnyUnix)]
+        [Theory,
+            // Periods are optional if left of * and end of match
+            InlineData(
+                "foo.*",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"foo.txxt" }),
+            // Periods are optional if left of * and end of match
+            InlineData(
+                "foo.*.*.*.*",
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.t", @"foo.tx", @"foo.txt", @"foo.txxt" })
+            ]
+        public void PatternTests_DosDot(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // Tests for DOS_DOT, ", which is what periods get changed to when they are followed by a '?' or '*'.
+            string testDir = PrepareDirectory(sourceFiles);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        [ActiveIssue(20780, TestPlatforms.AnyUnix)]
+        // Can't do these without extended path support on Windows, UsingNewNormalization filters appropriately
+        [ConditionalTheory(nameof(UsingNewNormalization)),
+            // Periods are optional if left of * or ? and end of match
+            InlineData(
+                "foo.*",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"foo.txxt" }),
+            InlineData(
+                "foo.*.*",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"foo.txxt" }),
+            InlineData(
+                "foo.?",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t" }),
+            InlineData(
+                "foo.??",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx" }),
+            InlineData(
+                "foo.?.?",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t" }),
+            InlineData(
+                "foo.??.??",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx" }),
+            InlineData(
+                "foo.?.*",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t" }),
+            InlineData(
+                "foo.??.*",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo.txxt" },
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx" }),
+            ]
+        public void PatternTests_DosDotTrailingDot(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // Tests for DOS_DOT, ", which is what periods get changed to when they are followed by a '?' or '*'.
+            // We don't want to eat trailing space/periods in this test
+            string testDir = PrepareDirectory(sourceFiles, useExtendedPaths: true);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        [ActiveIssue(20781, TestPlatforms.AnyUnix)]
+        [Theory,
+            InlineData(
+                "foo*.",
+                new string[] { @"foo", @"foobar", @"foo.bar" },
+                new string[] { @"foo", @"foobar" })
+                ]
+        public void PatternTests_DosStar(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // Tests for DOS_STAR, which only occurs when the source pattern ends in *.
+            string testDir = PrepareDirectory(sourceFiles);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        [ActiveIssue(20781, TestPlatforms.AnyUnix)]
+        // Can't do these without extended path support on Windows, UsingNewNormalization filters appropriately
+        [ConditionalTheory(nameof(UsingNewNormalization)),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo..", @"foo...", @"foo .", @"foo. . .", @"foo. t" },
+                new string[] { @"foo", @"foo .", @"foo.", @"foo..", @"foo...", @"foo. . ." }),
+            InlineData(
+                "foodies*.",
+                new string[] { @"foodies.", @"foodies. ", @"foodies.  " },
+                new string[] { @"foodies." }),
+            InlineData(
+                "foodies*.",
+                new string[] { @"foodies. ", @"foodies.  ", @"foodies.   " },
+                new string[] { }),
+            InlineData(
+                "foooooo*.",
+                new string[] { @"foooooo.", @"foooooo. ", @"foooooo.  " },
+                new string[] { @"foooooo." }),
+            InlineData(
+                "foooooo*.",
+                new string[] { @"foooooo. ", @"foooooo.  ", @"foooooo.   " },
+                new string[] { }),
+            InlineData(
+                "foodies*.",
+                new string[] { @"foodies.", @"foodies. ", @"foodies.  ", @"foodies.   ", @"foodies.    ", @"foodies.     " },
+                new string[] { @"foodies." }),
+            InlineData(
+                "foodies*.",
+                new string[] { @"foodies. ", @"foodies.  ", @"foodies.   ", @"foodies.    ", @"foodies.     " },
+                new string[] { }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo..", @"foo...", @"foo....", @"foo.....", @"foo......" },
+                new string[] { @"foo..", @"foo...", @"foo....", @"foo.....", @"foo......" }),
+            ]
+        public void PatternTests_DosStarSpace(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // Tests for DOS_STAR, which only occurs when the source pattern ends in *. These are the subset of tests
+            // with trailing spaces that work as documented.
+
+            // We don't want to eat trailing space/periods in this test
+            string testDir = PrepareDirectory(sourceFiles, useExtendedPaths: true);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        [ActiveIssue(20781, TestPlatforms.AnyUnix)]
+        [OuterLoop("These are pretty corner, don't need to run all the time.")]
+        [Theory,
+            // "foo*." actually becomes "foo<" when passed to NT. It matches all characters up to, and including, the final period.
+            //
+            // There is a "bug" somewhere in the Windows stack where *some* files with trailing spaces after the final period will be returned when
+            // using "*." at the end of a string (which becomes "<"). According to the rules (and the actual pattern matcher used FsRtlIsNameInExpression)
+            // *nothing* should match after the final period.
+            //
+            // We've made Core effectively call RtlIsNameInExpression directly, so this test validates the normally buggy cases. See the test above
+            // for what Windows really does. These are super obscure and the bug pattern isn't obvious so we're just going with "correct".
+            InlineData(
+                "foo*.",
+                new string[] { @"foo", @"foo.", @"foo.t", @"foo.tx", @"foo.txt", @"bar.txt", @"foo..", @"foo...", @"foo. ", @"foo.  ", @"foo .", @"foo. . .", @"foo. t" },
+                new string[] { @"foo", @"foo.", @"foo..", @"foo...", @"foo .", @"foo. . ." }),
+            InlineData(
+                "*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t" },
+                new string[] { @"foo.." }),
+            InlineData(
+                "f*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t" },
+                new string[] { @"foo.." }),
+            InlineData(
+                "fo*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t" },
+                new string[] { @"foo.." }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                new string[] { }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo." },
+                new string[] { @"foo." }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                new string[] { @"foo." }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo.", @"foo", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                new string[] { @"foo.", @"foo" }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo" },
+                new string[] { @"foo.", @"foo" }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo.    ", @"foo", @"foo.", @"foo. ", @"foo.  ", @"foo.   " },
+                new string[] { @"foo.", @"foo" }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo.    ", @"foo", @"food", @"foo.", @"foo. ", @"foo.  ", @"foo.   " },
+                new string[] { @"foo.", @"foo", @"food" }),
+            InlineData(
+                "fo*.",
+                new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    " },
+                new string[] { @"foo." }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     " },
+                new string[] { }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo. ", @"foo. .", @"foo. . ", @"foo. . .", @"foo. . . " },
+                new string[] { @"foo. .", @"foo. . ." }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo. ", @"foo. .", @"foo.. .", @"foo.... .", @"foo..... ." },
+                new string[] { @"foo. .", @"foo.. .", @"foo.... .", @"foo..... ." }),
+            InlineData(
+                "fo*.",
+                new string[] { @"foo. ", @"foo. .", @"foo. . ", @"foo. . .", @"foo. . . " },
+                new string[] { @"foo. .", @"foo. . ."}),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo.", @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     " },
+                new string[] { @"foo." }),
+            InlineData(
+                "food*.",
+                new string[] { @"food.", @"food. ", @"food.  ", @"food.   ", @"food.    ", @"food.     " },
+                new string[] { @"food." }),
+            InlineData(
+                "food*.",
+                new string[] { @"food.", @"food. ", @"food.  ", @"food.   ", @"food.    ", @"food.     ", @"foodi." },
+                new string[] { @"food.", @"foodi." }),
+            InlineData(
+                "foodi*.",
+                new string[] { @"foodi.", @"foodi. ", @"foodi.  ", @"foodi.   ", @"foodi.    ", @"foodi.     " },
+                new string[] { @"foodi." }),
+            InlineData(
+                "foodie*.",
+                new string[] { @"foodie.", @"foodie. ", @"foodie.  ", @"foodie.   ", @"foodie.    ", @"foodie.     " },
+                new string[] { @"foodie." }),
+            InlineData(
+                "fooooo*.",
+                new string[] { @"foooooo.", @"foooooo. ", @"foooooo.  " },
+                new string[] { @"foooooo." }),
+            InlineData(
+                "fooooo*.",
+                new string[] { @"foooooo. ", @"foooooo.  ", @"foooooo.   " },
+                new string[] { }),
+            InlineData(
+                "fo*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     " },
+                new string[] { }),
+            InlineData(
+                "fo*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " },
+                new string[] { }),
+            InlineData(
+                "fo*.",
+                new string[] { @"fo. ", @"fo.  ", @"fo.   ", @"fo.    ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " },
+                new string[] { }),
+            InlineData(
+                "fo*.",
+                new string[] { @"fo. ", @"fo.  ", @"fo.   ", @"fo.    ", @"fo.     ", @"fo.      ", @"foo.  ", @"foo.   ", @"foo.    ", @"foo.     ", @"foo.      ", @"foo.       " },
+                new string[] { }),
+            InlineData(
+                "foo*.",
+                new string[] { @"foo. ", @"foo.  ", @"foo..", @"foo. t", @"foo.   ", @"foo.    " },
+                new string[] { @"foo.." }),
+            ]
+        public void PatternTests_DosStarOddSpace_Core(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // Tests for DOS_STAR, which only occurs when the source pattern ends in *.
+            // These cases don't match documented behavior on Windows- matching *should* end at the final period.
+
+            // We don't want to eat trailing space/periods in this test
+            string testDir = PrepareDirectory(sourceFiles, useExtendedPaths: true);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
+
+        private string PrepareDirectory(string[] sourceFiles, bool useExtendedPaths = false)
+        {
+            string testDir = Directory.CreateDirectory(GetTestFilePath()).FullName;
+
+            foreach (string file in sourceFiles)
+                CreateItem(useExtendedPaths && PlatformDetection.IsWindows
+                    ? @"\\?\" + Path.Combine(testDir, file)
+                    : Path.Combine(testDir, file));
+
+            return testDir;
+        }
+
+        private void ValidatePatternMatch(string[] expected, string[] result)
+        {
+            Assert.Equal(expected.OrderBy(s => s), result.Select(Path.GetFileName).OrderBy(s => s));
+        }
+
         #endregion
 
         #region PlatformSpecific
+
+        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [Theory,
+            InlineData(
+                @"foo\bar",
+                new string[] { @"foo", @"bar", @"foo\bar" },
+                new string[] { @"foo\bar" }),
+            ]
+        public void PatternTests_UnixEscape(string pattern, string[] sourceFiles, string[] expected)
+        {
+            // We shouldn't be allowing escaping in Unix filename searches
+            string testDir = PrepareDirectory(sourceFiles);
+            ValidatePatternMatch(expected, GetEntries(testDir, pattern));
+        }
 
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
@@ -216,10 +586,10 @@ namespace System.IO.Tests
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             string longName = new string('k', 257);
 
-            Assert.Throws<PathTooLongException>(() => GetEntries(testDir.FullName, longName));
+            GetEntries(testDir.FullName, longName);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
         public void SearchPatternLongPath()
         {
             // Create a destination path longer than the traditional Windows limit of 256 characters
@@ -242,68 +612,69 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void WindowsSearchPatternWithDoubleDots()
+        public void SearchPatternWithDoubleDots_Core()
         {
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ".."));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
+            // Search pattern with double dots no longer throws ArgumentException
+            string directory = Directory.CreateDirectory(GetTestFilePath()).FullName;
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
+            GetEntries(directory, "..");
+            GetEntries(directory, @".." + Path.DirectorySeparatorChar);
+
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "abc", "..")));
+            GetEntries(directory, Path.Combine("..ab ab.. .. abc..d", "..", "abc"));
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc")));
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(directory, Path.Combine("..", "..ab ab.. .. abc..d", "abc") + Path.DirectorySeparatorChar));
         }
 
-        [ActiveIssue(11584)]
+        private static char[] OldWildcards = new char[] { '*', '?' };
+        private static char[] NewWildcards = new char[] { '<', '>', '\"' };
+
         [Fact]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void WindowsSearchPatternInvalid()
+        public void WindowsSearchPatternInvalid_Core()
         {
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ">"));
+            GetEntries(TestDirectory, "\0");
+            GetEntries(TestDirectory, "|");
 
-            Char[] invalidFileNames = Path.GetInvalidFileNameChars();
-            for (int i = 0; i < invalidFileNames.Length; i++)
+            Assert.All(Path.GetInvalidFileNameChars().Except(OldWildcards).Except(NewWildcards), invalidChar =>
             {
-                switch (invalidFileNames[i])
+                switch (invalidChar)
                 {
                     case '\\':
                     case '/':
-                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
-                        break;
-                    //We don't throw in V1 too
-                    case ':':
-                        //History:
-                        // 1) we assumed that this will work in all non-9x machine
-                        // 2) Then only in XP
-                        // 3) NTFS?
-                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
-                            FileSystemDebugInfo.IsCurrentDriveNTFS()) // testing NTFS
-                        {
-                            Assert.Throws<IOException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
-                        }
-                        else
-                        {
-                            GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString()));
-                        }
-                        break;
-                    case '*':
-                    case '?':
-                        GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString()));
+                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
                         break;
                     default:
-                        Assert.Throws<ArgumentException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidFileNames[i].ToString())));
+                        GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
                         break;
                 }
-            }
+            });
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid search patterns throw
+        public void WindowsSearchPatternInvalid_Wildcards_netcoreapp()
+        {
+            Assert.All(OldWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+            Assert.All(NewWildcards, invalidChar =>
+            {
+                GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));
+            });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid search patterns throws no exception 
         public void UnixSearchPatternInvalid()
         {
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, string.Format("te{0}st", "\0".ToString())));
+            GetEntries(TestDirectory, "\0");
+            GetEntries(TestDirectory, string.Format("te{0}st", "\0".ToString()));
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // ? in search pattern returns results
         public virtual void WindowsSearchPatternQuestionMarks()
         {
             string testDir1Str = GetTestFileName();
@@ -322,7 +693,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Whitespace in search pattern returns nothing
         public void WindowsSearchPatternWhitespace()
         {
             Assert.Empty(GetEntries(TestDirectory, "           "));
@@ -359,66 +730,59 @@ namespace System.IO.Tests
         {
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
             string testBase = GetTestFileName();
-            testDir.CreateSubdirectory(testBase + "aBBb");
-            testDir.CreateSubdirectory(testBase + "aBBB");
+            testDir.CreateSubdirectory(testBase + "yZZz");
+            testDir.CreateSubdirectory(testBase + "yZZZ");
 
-            File.Create(Path.Combine(testDir.FullName, testBase + "AAAA")).Dispose();
-            File.Create(Path.Combine(testDir.FullName, testBase + "aAAa")).Dispose();
+            File.Create(Path.Combine(testDir.FullName, testBase + "YYYY")).Dispose();
+            File.Create(Path.Combine(testDir.FullName, testBase + "yYYy")).Dispose();
 
             if (TestDirectories)
             {
-                Assert.Equal(1, GetEntries(testDir.FullName, "*BB*").Length);
+                Assert.Equal(1, GetEntries(testDir.FullName, "*ZZ*").Length);
             }
             if (TestFiles)
             {
-                Assert.Equal(1, GetEntries(testDir.FullName, "*AA*").Length);
+                Assert.Equal(1, GetEntries(testDir.FullName, "*YY*").Length);
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void UnixSearchPatternFileValidChar()
+        [Theory,
+            InlineData("         "),
+            InlineData(" "),
+            InlineData("\n"),
+            InlineData(">"),
+            InlineData("<"),
+            InlineData("\t")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-valid chars in file search patterns
+        public void UnixSearchPatternFileValidChar(string valid)
         {
             if (TestFiles)
             {
                 DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-                foreach (string valid in WindowsInvalidUnixValid)
-                    File.Create(Path.Combine(testDir.FullName, valid)).Dispose();
+                File.Create(Path.Combine(testDir.FullName, valid)).Dispose();
 
-                foreach (string valid in WindowsInvalidUnixValid)
-                    Assert.Contains(Path.Combine(testDir.FullName, valid), GetEntries(testDir.FullName, valid));
+                Assert.Contains(Path.Combine(testDir.FullName, valid), GetEntries(testDir.FullName, valid));
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void UnixSearchPatternDirectoryValidChar()
+        [Theory,
+            InlineData("         "),
+            InlineData(" "),
+            InlineData("\n"),
+            InlineData(">"),
+            InlineData("<"),
+            InlineData("\t")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-valid chars in directory search patterns
+        public void UnixSearchPatternDirectoryValidChar(string valid)
         {
             if (TestDirectories)
             {
                 DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-                foreach (string valid in WindowsInvalidUnixValid)
-                    testDir.CreateSubdirectory(valid);
 
-                foreach (string valid in WindowsInvalidUnixValid)
-                    Assert.Contains(Path.Combine(testDir.FullName, valid), GetEntries(testDir.FullName, valid));
+                testDir.CreateSubdirectory(valid);
+
+                Assert.Contains(Path.Combine(testDir.FullName, valid), GetEntries(testDir.FullName, valid));
             }
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void UnixSearchPatternWithDoubleDots()
-        {
-            // search pattern is valid but directory doesn't exist
-            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc..")));
-
-            // invalid search pattern trying to go up a directory with ..
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, ".."));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, @".." + Path.DirectorySeparatorChar));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "abc", "..")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..ab ab.. .. abc..d", "..", "abc")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..", "..ab ab.. .. abc..d", "abc")));
-            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, Path.Combine("..", "..ab ab.. .. abc..d", "abc") + Path.DirectorySeparatorChar));
         }
 
         #endregion

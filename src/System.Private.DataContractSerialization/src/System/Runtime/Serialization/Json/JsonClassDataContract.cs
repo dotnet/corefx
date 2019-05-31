@@ -6,6 +6,7 @@ using System.Threading;
 using System.Xml;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Serialization.Json
 {
@@ -17,6 +18,14 @@ namespace System.Runtime.Serialization.Json
             : base(new JsonClassDataContractCriticalHelper(traditionalDataContract))
         {
             _helper = base.Helper as JsonClassDataContractCriticalHelper;
+        }
+
+#if uapaot
+        [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
+#endif
+        private JsonFormatClassReaderDelegate CreateJsonFormatReaderDelegate()
+        {
+            return new ReflectionJsonClassReader(TraditionalClassDataContract).ReflectionReadClass;
         }
 
         internal JsonFormatClassReaderDelegate JsonFormatReaderDelegate
@@ -32,21 +41,21 @@ namespace System.Runtime.Serialization.Json
                             JsonFormatClassReaderDelegate tempDelegate;
                             if (DataContractSerializer.Option == SerializationOption.ReflectionOnly)
                             {
-                                tempDelegate = new ReflectionJsonClassReader(TraditionalClassDataContract).ReflectionReadClass;
+                                tempDelegate = CreateJsonFormatReaderDelegate();
                             }
-#if NET_NATIVE
+#if uapaot
                             else if (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup)
                             {
-                                tempDelegate = JsonDataContract.TryGetReadWriteDelegatesFromGeneratedAssembly(TraditionalClassDataContract).ClassReaderDelegate;
-                                tempDelegate = tempDelegate ?? new ReflectionJsonClassReader(TraditionalClassDataContract).ReflectionReadClass;
+                                tempDelegate = JsonDataContract.TryGetReadWriteDelegatesFromGeneratedAssembly(TraditionalClassDataContract)?.ClassReaderDelegate;
+                                tempDelegate = tempDelegate ?? CreateJsonFormatReaderDelegate();
 
                                 if (tempDelegate == null)
-                                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, TraditionalClassDataContract.UnderlyingType.ToString()));
+                                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, TraditionalClassDataContract.UnderlyingType));
                             }
 #endif
-                            else 
+                            else
                             {
-#if NET_NATIVE
+#if uapaot
                                 tempDelegate = JsonDataContract.GetReadWriteDelegatesFromGeneratedAssembly(TraditionalClassDataContract).ClassReaderDelegate;
 #else   
                                 tempDelegate = new JsonFormatReaderGenerator().GenerateClassReader(TraditionalClassDataContract);
@@ -62,6 +71,14 @@ namespace System.Runtime.Serialization.Json
             }
         }
 
+#if uapaot
+        [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
+#endif
+        private JsonFormatClassWriterDelegate CreateJsonFormatWriterDelegate()
+        {
+            return new ReflectionJsonFormatWriter().ReflectionWriteClass;
+        }
+
         internal JsonFormatClassWriterDelegate JsonFormatWriterDelegate
         {
             get
@@ -75,21 +92,21 @@ namespace System.Runtime.Serialization.Json
                             JsonFormatClassWriterDelegate tempDelegate;
                             if (DataContractSerializer.Option == SerializationOption.ReflectionOnly)
                             {
-                                tempDelegate = new ReflectionJsonFormatWriter().ReflectionWriteClass;
+                                tempDelegate = CreateJsonFormatWriterDelegate();
                             }
-#if NET_NATIVE
+#if uapaot
                             else if (DataContractSerializer.Option == SerializationOption.ReflectionAsBackup)
                             {
                                 tempDelegate = JsonDataContract.TryGetReadWriteDelegatesFromGeneratedAssembly(TraditionalClassDataContract)?.ClassWriterDelegate;
-                                tempDelegate = tempDelegate ?? new ReflectionJsonFormatWriter().ReflectionWriteClass;
+                                tempDelegate = tempDelegate ?? CreateJsonFormatWriterDelegate();
 
                                 if (tempDelegate == null)
-                                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, TraditionalClassDataContract.UnderlyingType.ToString()));
+                                    throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, TraditionalClassDataContract.UnderlyingType));
                             }
 #endif
                             else 
                             {
-#if NET_NATIVE
+#if uapaot
                                 tempDelegate = JsonDataContract.GetReadWriteDelegatesFromGeneratedAssembly(TraditionalClassDataContract).ClassWriterDelegate;
 #else   
                                 tempDelegate = new JsonFormatWriterGenerator().GenerateClassWriter(TraditionalClassDataContract);

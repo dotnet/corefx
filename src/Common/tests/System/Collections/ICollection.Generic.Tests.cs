@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -37,6 +37,8 @@ namespace System.Collections.Tests
         protected virtual bool DuplicateValuesAllowed => true;
         protected virtual bool DefaultValueWhenNotAllowed_Throws => true;
         protected virtual bool IsReadOnly => false;
+        protected virtual bool IsReadOnly_ValidityValue => IsReadOnly;
+        protected virtual bool AddRemoveClear_ThrowsNotSupported => false;
         protected virtual bool DefaultValueAllowed => true;
         protected virtual IEnumerable<T> InvalidValues => Array.Empty<T>();
 
@@ -67,9 +69,9 @@ namespace System.Collections.Tests
         /// <summary>
         /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
         /// </summary>
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
-            get
+            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Add) == ModifyOperation.Add)
             {
                 yield return (IEnumerable<T> enumerable) =>
                 {
@@ -77,6 +79,9 @@ namespace System.Collections.Tests
                     casted.Add(CreateT(2344));
                     return true;
                 };
+            }
+            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Remove) == ModifyOperation.Remove)
+            {
                 yield return (IEnumerable<T> enumerable) =>
                 {
                     var casted = (ICollection<T>)enumerable;
@@ -87,6 +92,9 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
+            }
+            if (!AddRemoveClear_ThrowsNotSupported && (operations & ModifyOperation.Clear) == ModifyOperation.Clear)
+            {
                 yield return (IEnumerable<T> enumerable) =>
                 {
                     var casted = (ICollection<T>)enumerable;
@@ -109,7 +117,7 @@ namespace System.Collections.Tests
         public void ICollection_Generic_IsReadOnly_Validity(int count)
         {
             ICollection<T> collection = GenericICollectionFactory(count);
-            Assert.Equal(IsReadOnly, collection.IsReadOnly);
+            Assert.Equal(IsReadOnly_ValidityValue , collection.IsReadOnly);
         }
 
         #endregion
@@ -130,9 +138,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_Generic_Add_DefaultValue(int count)
+        public virtual void ICollection_Generic_Add_DefaultValue(int count)
         {
-            if (DefaultValueAllowed && !IsReadOnly)
+            if (DefaultValueAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 collection.Add(default(T));
@@ -144,7 +152,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_InvalidValueToMiddleOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -161,7 +169,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_InvalidValueToBeginningOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -178,7 +186,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_InvalidValueToEndOfCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.All(InvalidValues, invalidValue =>
                 {
@@ -193,7 +201,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_DuplicateValue(int count)
         {
-            if (!IsReadOnly && DuplicateValuesAllowed)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DuplicateValuesAllowed)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 T duplicateValue = CreateT(700);
@@ -207,7 +215,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_AfterCallingClear(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 collection.Clear();
@@ -220,7 +228,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_AfterRemovingAnyValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 int seed = 840;
                 ICollection<T> collection = GenericICollectionFactory(count);
@@ -245,7 +253,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_AfterRemovingAllItems(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 List<T> itemsToRemove = collection.ToList();
@@ -253,14 +261,14 @@ namespace System.Collections.Tests
                     collection.Remove(collection.ElementAt(0));
                 collection.Add(CreateT(254));
                 Assert.Equal(1, collection.Count);
-            }
+            }   
         }
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_ToReadOnlyCollection(int count)
         {
-            if (IsReadOnly)
+            if (IsReadOnly || AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 Assert.Throws<NotSupportedException>(() => collection.Add(CreateT(0)));
@@ -272,7 +280,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Add_AfterRemoving(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 int seed = 840;
                 ICollection<T> collection = GenericICollectionFactory(count);
@@ -294,7 +302,7 @@ namespace System.Collections.Tests
         public void ICollection_Generic_Clear(int count)
         {
             ICollection<T> collection = GenericICollectionFactory(count);
-            if (IsReadOnly)
+            if (IsReadOnly || AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.Throws<NotSupportedException>(() => collection.Clear());
                 Assert.Equal(count, collection.Count);
@@ -311,7 +319,7 @@ namespace System.Collections.Tests
         public void ICollection_Generic_Clear_Repeatedly(int count)
         {
             ICollection<T> collection = GenericICollectionFactory(count);
-            if (IsReadOnly)
+            if (IsReadOnly || AddRemoveClear_ThrowsNotSupported)
             {
                 Assert.Throws<NotSupportedException>(() => collection.Clear());
                 Assert.Throws<NotSupportedException>(() => collection.Clear());
@@ -363,11 +371,11 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_Generic_Contains_DefaultValueOnCollectionContainingDefaultValue(int count)
+        public virtual void ICollection_Generic_Contains_DefaultValueOnCollectionContainingDefaultValue(int count)
         {
-            ICollection<T> collection = GenericICollectionFactory(count);
-            if (DefaultValueAllowed && !IsReadOnly)
+            if (DefaultValueAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
+                ICollection<T> collection = GenericICollectionFactory(count);
                 collection.Add(default(T));
                 Assert.True(collection.Contains(default(T)));
             }
@@ -377,7 +385,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Contains_ValidValueThatExistsTwiceInTheCollection(int count)
         {
-            if (DuplicateValuesAllowed && !IsReadOnly)
+            if (DuplicateValuesAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 T item = CreateT(12);
@@ -401,11 +409,11 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public virtual void ICollection_Generic_Contains_DefaultValueWhenNotAllowed(int count)
         {
-            ICollection<T> collection = GenericICollectionFactory(count);
             if (!DefaultValueAllowed && !IsReadOnly)
             {
+                ICollection<T> collection = GenericICollectionFactory(count);
                 if (DefaultValueWhenNotAllowed_Throws)
-                    Assert.Throws<ArgumentNullException>("item", () => collection.Contains(default(T)));
+                    AssertExtensions.Throws<ArgumentNullException>("item", () => collection.Contains(default(T)));
                 else
                     Assert.False(collection.Contains(default(T)));
             }
@@ -494,7 +502,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Remove_OnReadOnlyCollection_ThrowsNotSupportedException(int count)
         {
-            if (IsReadOnly)
+            if (IsReadOnly || AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 Assert.Throws<NotSupportedException>(() => collection.Remove(CreateT(34543)));
@@ -505,7 +513,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Remove_DefaultValueNotContainedInCollection(int count)
         {
-            if (!IsReadOnly && DefaultValueAllowed && !Enumerable.Contains(InvalidValues, default(T)))
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DefaultValueAllowed && !Enumerable.Contains(InvalidValues, default(T)))
             {
                 int seed = count * 21;
                 ICollection<T> collection = GenericICollectionFactory(count);
@@ -524,7 +532,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Remove_NonDefaultValueNotContainedInCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 int seed = count * 251;
                 ICollection<T> collection = GenericICollectionFactory(count);
@@ -538,9 +546,9 @@ namespace System.Collections.Tests
 
         [Theory]
         [MemberData(nameof(ValidCollectionSizes))]
-        public void ICollection_Generic_Remove_DefaultValueContainedInCollection(int count)
+        public virtual void ICollection_Generic_Remove_DefaultValueContainedInCollection(int count)
         {
-            if (!IsReadOnly && DefaultValueAllowed && !Enumerable.Contains(InvalidValues, default(T)))
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DefaultValueAllowed && !Enumerable.Contains(InvalidValues, default(T)))
             {
                 int seed = count * 21;
                 ICollection<T> collection = GenericICollectionFactory(count);
@@ -559,7 +567,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Remove_NonDefaultValueContainedInCollection(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 int seed = count * 251;
                 ICollection<T> collection = GenericICollectionFactory(count);
@@ -578,7 +586,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Remove_ValueThatExistsTwiceInCollection(int count)
         {
-            if (!IsReadOnly && DuplicateValuesAllowed)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported && DuplicateValuesAllowed)
             {
                 int seed = count * 90;
                 ICollection<T> collection = GenericICollectionFactory(count);
@@ -596,7 +604,7 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Remove_EveryValue(int count)
         {
-            if (!IsReadOnly)
+            if (!IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
                 ICollection<T> collection = GenericICollectionFactory(count);
                 Assert.All(collection.ToList(), value =>
@@ -623,9 +631,9 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public void ICollection_Generic_Remove_DefaultValueWhenNotAllowed(int count)
         {
-            ICollection<T> collection = GenericICollectionFactory(count);
-            if (!DefaultValueAllowed && !IsReadOnly)
+            if (!DefaultValueAllowed && !IsReadOnly && !AddRemoveClear_ThrowsNotSupported)
             {
+                ICollection<T> collection = GenericICollectionFactory(count);
                 if (DefaultValueWhenNotAllowed_Throws)
                     Assert.Throws<ArgumentNullException>(() => collection.Remove(default(T)));
                 else

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Reflection;
 using Xunit;
 
 namespace System.ComponentModel.Tests
@@ -104,7 +105,7 @@ namespace System.ComponentModel.Tests
             var properties = TypeDescriptor.GetProperties(component.GetType());
             PropertyDescriptor propertyDescriptor = properties.Find(nameof(component.PropertyWhichThrows), false);
 
-            Assert.ThrowsAny<Exception>(() => propertyDescriptor.GetValue(component));
+            Assert.Throws<TargetInvocationException>(() => propertyDescriptor.GetValue(component));
         }
 
         [Fact]
@@ -141,6 +142,41 @@ namespace System.ComponentModel.Tests
             PropertyDescriptor propertyDescriptor = properties.Find(nameof(component.Property), false);
 
             Assert.True(propertyDescriptor.ShouldSerializeValue(component));
+        }
+
+        [Fact]
+        public static void ReadOnlyPropertyReturnsTrue()
+        {
+            var foo = new ReadOnlyPropertyTestClass();
+            PropertyDescriptor property = TypeDescriptor.GetProperties(foo).Find("BarReadOnly", true);
+            Assert.True(property.IsReadOnly);
+        }
+
+        [Fact]
+        public static void ReadOnlyPropertyReturnsFalse()
+        {
+            var foo = new ReadOnlyPropertyTestClass();
+            PropertyDescriptor property = TypeDescriptor.GetProperties(foo).Find("BarNotReadOnly", true);
+            Assert.False(property.IsReadOnly);
+        }
+
+        [Fact]
+        public static void ReadOnlyVirtualPropertyReturnsTrue()
+        {
+            PropertyDescriptor property = TypeDescriptor.GetProperties(typeof(ReadOnlyPropertyTestClass), new[] { BrowsableAttribute.Yes }).Find("BarReadOnlyBaseClass", true);
+            Assert.True(property.IsReadOnly);
+        }
+
+        class ReadOnlyPropertyTestBaseClass
+        {
+            public virtual bool BarReadOnlyBaseClass { get; }
+        }
+
+        class ReadOnlyPropertyTestClass : ReadOnlyPropertyTestBaseClass
+        {
+            public bool BarReadOnly { get; private set; }
+            public bool BarNotReadOnly { get; set; }
+            public override bool BarReadOnlyBaseClass { get; }
         }
     }
 }

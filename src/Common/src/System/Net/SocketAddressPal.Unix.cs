@@ -5,16 +5,15 @@
 using System;
 using System.Diagnostics;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace System.Net
 {
     internal static class SocketAddressPal
     {
-        public const int DataOffset = 0;
-
-        public readonly static int IPv6AddressSize = GetIPv6AddressSize();
-        public readonly static int IPv4AddressSize = GetIPv4AddressSize();
+        public static readonly int IPv6AddressSize = GetIPv6AddressSize();
+        public static readonly int IPv4AddressSize = GetIPv4AddressSize();
 
         private static unsafe int GetIPv6AddressSize()
         {
@@ -101,11 +100,11 @@ namespace System.Net
             ThrowOnFailure(err);
         }
 
-        public static unsafe uint GetIPv4Address(byte[] buffer)
+        public static unsafe uint GetIPv4Address(ReadOnlySpan<byte> buffer)
         {
             uint ipAddress;
             Interop.Error err;
-            fixed (byte* rawAddress = buffer)
+            fixed (byte* rawAddress = &MemoryMarshal.GetReference(buffer))
             {
                 err = Interop.Sys.GetIPv4Address(rawAddress, buffer.Length, &ipAddress);
             }
@@ -114,12 +113,12 @@ namespace System.Net
             return ipAddress;
         }
 
-        public static unsafe void GetIPv6Address(byte[] buffer, byte[] address, out uint scope)
+        public static unsafe void GetIPv6Address(ReadOnlySpan<byte> buffer, Span<byte> address, out uint scope)
         {
             uint localScope;
             Interop.Error err;
-            fixed (byte* rawAddress = buffer)
-            fixed (byte* ipAddress = address)
+            fixed (byte* rawAddress = &MemoryMarshal.GetReference(buffer))
+            fixed (byte* ipAddress = &MemoryMarshal.GetReference(address))
             {
                 err = Interop.Sys.GetIPv6Address(rawAddress, buffer.Length, ipAddress, address.Length, &localScope);
             }
@@ -145,9 +144,9 @@ namespace System.Net
             SetIPv4Address(buffer, addr);
         }
 
-        public static unsafe void SetIPv6Address(byte[] buffer, byte[] address, uint scope)
+        public static unsafe void SetIPv6Address(byte[] buffer, Span<byte> address, uint scope)
         {
-            fixed (byte* rawInput = address)
+            fixed (byte* rawInput = &MemoryMarshal.GetReference(address))
             {
                 SetIPv6Address(buffer, rawInput, address.Length, scope);
             }

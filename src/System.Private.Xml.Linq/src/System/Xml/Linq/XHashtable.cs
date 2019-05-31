@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Threading;
 using Debug = System.Diagnostics.Debug;
 using Interlocked = System.Threading.Interlocked;
 
@@ -62,8 +63,6 @@ namespace System.Xml.Linq
     {
         private XHashtableState _state;                          // SHARED STATE: Contains all XHashtable state, so it can be atomically swapped when resizes occur
 
-        private const int StartingHash = (5381 << 16) + 5381;   // Starting hash code value for string keys to be hashed
-
         /// <summary>
         /// Prototype of function which is called to extract a string key value from a hashed value.
         /// Returns null if the hashed value is invalid (e.g. value has been released due to a WeakReference TValue being cleaned up).
@@ -109,17 +108,8 @@ namespace System.Xml.Linq
                 lock (this)
                 {
                     XHashtableState newState = _state.Resize();
-
                     // Use memory barrier to ensure that the resized XHashtableState object is fully constructed before it is assigned
-#if !SILVERLIGHT 
                     Thread.MemoryBarrier();
-#else // SILVERLIGHT
-                    // The MemoryBarrier method usage is probably incorrect and should be removed.
-
-                    // Replacing with Interlocked.CompareExchange for now (with no effect)
-                    //   which will do a very similar thing to MemoryBarrier (it's just slower)
-                    System.Threading.Interlocked.CompareExchange<XHashtableState>(ref _state, null, null);
-#endif // SILVERLIGHT
                     _state = newState;
                 }
             }
@@ -302,15 +292,7 @@ namespace System.Xml.Linq
 
                 // Ensure that all writes to the entry can't be reordered past this barrier (or other threads might see new entry
                 // in list before entry has been initialized!).
-#if !SILVERLIGHT
                 Thread.MemoryBarrier();
-#else // SILVERLIGHT
-                // The MemoryBarrier method usage is probably incorrect and should be removed.
-
-                // Replacing with Interlocked.CompareExchange for now (with no effect)
-                //   which will do a very similar thing to MemoryBarrier (it's just slower)
-                System.Threading.Interlocked.CompareExchange<Entry[]>(ref _entries, null, null);
-#endif // SILVERLIGHT
 
                 // Loop until a matching entry is found, a new entry is added, or linked list is found to be full
                 entryIndex = 0;
@@ -413,19 +395,8 @@ namespace System.Xml.Linq
             /// </summary>
             private static int ComputeHashCode(string key, int index, int count)
             {
-                int hashCode = StartingHash;
-                int end = index + count;
                 Debug.Assert(key != null, "key should have been checked previously for null");
-
-                // Hash the key
-                for (int i = index; i < end; i++)
-                    hashCode += (hashCode << 7) ^ key[i];
-
-                // Mix up hash code a bit more and clear the sign bit.  This code was taken from NameTable.cs in System.Xml.
-                hashCode -= hashCode >> 17;
-                hashCode -= hashCode >> 11;
-                hashCode -= hashCode >> 5;
-                return hashCode & 0x7FFFFFFF;
+                return string.GetHashCode(key.AsSpan(index, count));
             }
 
             /// <summary>

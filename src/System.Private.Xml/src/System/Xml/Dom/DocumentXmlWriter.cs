@@ -98,11 +98,6 @@ namespace System.Xml
             }
         }
 
-        internal void SetSettings(XmlWriterSettings value)
-        {
-            _settings = value;
-        }
-
         public DocumentXPathNavigator Navigator
         {
             set
@@ -310,7 +305,7 @@ namespace System.Xml
 
         public override void WriteCharEntity(char ch)
         {
-            WriteString(new string(ch, 1));
+            WriteString(char.ToString(ch));
         }
 
         public override void WriteWhitespace(string text)
@@ -334,7 +329,8 @@ namespace System.Xml
 
         public override void WriteSurrogateCharEntity(char lowCh, char highCh)
         {
-            WriteString(new string(new char[] { highCh, lowCh }));
+            ReadOnlySpan<char> entity = stackalloc char[] { highCh, lowCh };
+            WriteString(new string(entity));
         }
 
         public override void WriteChars(char[] buffer, int index, int count)

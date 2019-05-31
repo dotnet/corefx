@@ -12,7 +12,8 @@ namespace System.Net.NetworkInformation.Tests
     {
         private readonly NetworkAddressChangedEventHandler _addressHandler = delegate { };
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/308
+        [Fact]
+        [ActiveIssue(33530, TestPlatforms.FreeBSD)]
         public void NetworkAddressChanged_AddRemove_Success()
         {
             NetworkChange.NetworkAddressChanged += _addressHandler;
@@ -20,6 +21,7 @@ namespace System.Net.NetworkInformation.Tests
         }
 
         [Fact]
+        [ActiveIssue(33530, TestPlatforms.FreeBSD)]
         public void NetworkAddressChanged_JustRemove_Success()
         {
             NetworkChange.NetworkAddressChanged -= _addressHandler;

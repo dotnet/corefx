@@ -2,14 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using Xunit;
 
 namespace System.Tests
 {
-    public static class ByteTests
+    public partial class ByteTests
     {
         [Fact]
         public static void Ctor_Empty()
@@ -45,22 +44,22 @@ namespace System.Tests
         [InlineData((byte)234, (byte)235, -1)]
         [InlineData((byte)234, byte.MaxValue, -1)]
         [InlineData((byte)234, null, 1)]
-        public static void CompareTo(byte b, object value, int expected)
+        public void CompareTo_Other_ReturnsExpected(byte i, object value, int expected)
         {
-            if (value is byte)
+            if (value is byte byteValue)
             {
-                Assert.Equal(expected, Math.Sign(b.CompareTo((byte)value)));
+                Assert.Equal(expected, Math.Sign(i.CompareTo(byteValue)));
             }
-            IComparable comparable = b;
-            Assert.Equal(expected, Math.Sign(comparable.CompareTo(value)));
+
+            Assert.Equal(expected, Math.Sign(i.CompareTo(value)));
         }
 
-        [Fact]
-        public static void CompareTo_ObjectNotByte_ThrowsArgumentException()
+        [Theory]
+        [InlineData("a")]
+        [InlineData(234)]
+        public void CompareTo_ObjectNotByte_ThrowsArgumentException(object value)
         {
-            IComparable comparable = (byte)234;
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo("a")); // Obj is not a byte
-            Assert.Throws<ArgumentException>(null, () => comparable.CompareTo(234)); // Obj is not a byte
+            AssertExtensions.Throws<ArgumentException>(null, () => ((byte)123).CompareTo(value));
         }
 
         [Theory]
@@ -72,9 +71,8 @@ namespace System.Tests
         [InlineData((byte)78, 78, false)]
         public static void Equals(byte b, object obj, bool expected)
         {
-            if (obj is byte)
+            if (obj is byte b2)
             {
-                byte b2 = (byte)obj;
                 Assert.Equal(expected, b.Equals(b2));
                 Assert.Equal(expected, b.GetHashCode().Equals(b2.GetHashCode()));
                 Assert.Equal(b, b.GetHashCode());
@@ -82,21 +80,43 @@ namespace System.Tests
             Assert.Equal(expected, b.Equals(obj));
         }
 
+        [Fact]
+        public void GetTypeCode_Invoke_ReturnsByte()
+        {
+            Assert.Equal(TypeCode.Byte, ((byte)1).GetTypeCode());
+        }
+
         public static IEnumerable<object[]> ToString_TestData()
         {
-            NumberFormatInfo emptyFormat = NumberFormatInfo.CurrentInfo;
-            yield return new object[] { (byte)0, "G", emptyFormat, "0" };
-            yield return new object[] { (byte)123, "G", emptyFormat, "123" };
-            yield return new object[] { byte.MaxValue, "G", emptyFormat, "255" };
+            foreach (NumberFormatInfo emptyFormat in new[] { null, NumberFormatInfo.CurrentInfo })
+            {
+                yield return new object[] { (byte)0, "G", emptyFormat, "0" };
+                yield return new object[] { (byte)123, "G", emptyFormat, "123" };
+                yield return new object[] { byte.MaxValue, "G", emptyFormat, "255" };
 
-            yield return new object[] { (byte)0x24, "x", emptyFormat, "24" };
-            yield return new object[] { (byte)24, "N", emptyFormat, string.Format("{0:N}", 24.00) };
+                yield return new object[] { (byte)123, "D", emptyFormat, "123" };
+                yield return new object[] { (byte)123, "D99", emptyFormat, "000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000123" };
 
-            NumberFormatInfo customFormat = new NumberFormatInfo();
-            customFormat.NegativeSign = "#";
-            customFormat.NumberDecimalSeparator = "~";
-            customFormat.NumberGroupSeparator = "*";
+                yield return new object[] { (byte)0x24, "x", emptyFormat, "24" };
+                yield return new object[] { (byte)24, "N", emptyFormat, string.Format("{0:N}", 24.00) };
+            }
+
+            var customFormat = new NumberFormatInfo()
+            {
+                NegativeSign = "#",
+                NumberDecimalSeparator = "~",
+                NumberGroupSeparator = "*",
+                PositiveSign = "&",
+                NumberDecimalDigits = 2,
+                PercentSymbol = "@",
+                PercentGroupSeparator = ",",
+                PercentDecimalSeparator = ".",
+                PercentDecimalDigits = 5
+            };
             yield return new object[] { (byte)24, "N", customFormat, "24~00" };
+            yield return new object[] { (byte)123, "E", customFormat, "1~230000E&002" };
+            yield return new object[] { (byte)123, "F", customFormat, "123~00" };
+            yield return new object[] { (byte)123, "P", customFormat, "12,300.00000 @" };
         }
 
         [Theory]
@@ -135,6 +155,10 @@ namespace System.Tests
         public static void ToString_InvalidFormat_ThrowsFormatException()
         {
             byte b = 123;
+            Assert.Throws<FormatException>(() => b.ToString("r")); // Invalid format
+            Assert.Throws<FormatException>(() => b.ToString("r", null)); // Invalid format
+            Assert.Throws<FormatException>(() => b.ToString("R")); // Invalid format
+            Assert.Throws<FormatException>(() => b.ToString("R", null)); // Invalid format
             Assert.Throws<FormatException>(() => b.ToString("Y")); // Invalid format
             Assert.Throws<FormatException>(() => b.ToString("Y", null)); // Invalid format
         }
@@ -167,73 +191,53 @@ namespace System.Tests
 
         [Theory]
         [MemberData(nameof(Parse_Valid_TestData))]
-        public static void Parse(string value, NumberStyles style, IFormatProvider provider, byte expected)
+        public static void Parse_Valid(string value, NumberStyles style, IFormatProvider provider, byte expected)
         {
             byte result;
-            // If no style is specified, use the (String) or (String, IFormatProvider) overload
-            if (style == NumberStyles.Integer)
+
+            // Default style and provider
+            if (style == NumberStyles.Integer && provider == null)
             {
                 Assert.True(byte.TryParse(value, out result));
                 Assert.Equal(expected, result);
-
                 Assert.Equal(expected, byte.Parse(value));
-
-                // If a format provider is specified, but the style is the default, use the (String, IFormatProvider) overload
-                if (provider != null)
-                {
-                    Assert.Equal(expected, byte.Parse(value, provider));
-                }
             }
 
-            // If a format provider isn't specified, test the default one, using a new instance of NumberFormatInfo
-            Assert.True(byte.TryParse(value, style, provider ?? new NumberFormatInfo(), out result));
-            Assert.Equal(expected, result);
-
-            // If a format provider isn't specified, test the default one, using the (String, NumberStyles) overload
+            // Default provider
             if (provider == null)
             {
                 Assert.Equal(expected, byte.Parse(value, style));
+
+                // Substitute default NumberFormatInfo
+                Assert.True(byte.TryParse(value, style, new NumberFormatInfo(), out result));
+                Assert.Equal(expected, result);
+                Assert.Equal(expected, byte.Parse(value, style, new NumberFormatInfo()));
             }
-            Assert.Equal(expected, byte.Parse(value, style, provider ?? new NumberFormatInfo()));
+
+            // Default style
+            if (style == NumberStyles.Integer)
+            {
+                Assert.Equal(expected, byte.Parse(value, provider));
+            }
+
+            // Full overloads
+            Assert.True(byte.TryParse(value, style, provider, out result));
+            Assert.Equal(expected, result);
+            Assert.Equal(expected, byte.Parse(value, style, provider));
         }
 
         public static IEnumerable<object[]> Parse_Invalid_TestData()
         {
-            NumberStyles defaultStyle = NumberStyles.Integer;
+            // Include the test data for wider primitives.
+            foreach (object[] widerTests in UInt16Tests.Parse_Invalid_TestData())
+            {
+                yield return widerTests;
+            }
 
-            NumberFormatInfo customFormat = new NumberFormatInfo();
-            customFormat.CurrencySymbol = "$";
-            customFormat.NumberDecimalSeparator = ".";
+            // > max value
+            yield return new object[] { "256", NumberStyles.Integer, null, typeof(OverflowException) };
+            yield return new object[] { "100", NumberStyles.HexNumber, null, typeof(OverflowException) };
 
-            yield return new object[] { null, defaultStyle, null, typeof(ArgumentNullException) };
-            yield return new object[] { "", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { " \t \n \r ", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "Garbage", defaultStyle, null, typeof(FormatException) };
-
-            yield return new object[] { "ab", defaultStyle, null, typeof(FormatException) }; // Hex value
-            yield return new object[] { "1E23", defaultStyle, null, typeof(FormatException) }; // Exponent
-            yield return new object[] { "(123)", defaultStyle, null, typeof(FormatException) }; // Parentheses
-            yield return new object[] { 100.ToString("C0"), defaultStyle, null, typeof(FormatException) }; // Currency
-            yield return new object[] { 1000.ToString("N0"), defaultStyle, null, typeof(FormatException) }; // Thousands
-            yield return new object[] { 67.90.ToString("F2"), defaultStyle, null, typeof(FormatException) }; // Decimal
-            yield return new object[] { "+-123", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "-+123", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "+abc", NumberStyles.HexNumber, null, typeof(FormatException) };
-            yield return new object[] { "-abc", NumberStyles.HexNumber, null, typeof(FormatException) };
-
-            yield return new object[] { "- 123", defaultStyle, null, typeof(FormatException) };
-            yield return new object[] { "+ 123", defaultStyle, null, typeof(FormatException) };
-
-            yield return new object[] { "ab", NumberStyles.None, null, typeof(FormatException) }; // Hex value
-            yield return new object[] { "  123  ", NumberStyles.None, null, typeof(FormatException) }; // Trailing and leading whitespace
-
-            yield return new object[] { "67.90", defaultStyle, customFormat, typeof(FormatException) }; // Decimal
-
-            yield return new object[] { "-1", defaultStyle, null, typeof(OverflowException) }; // < min value
-            yield return new object[] { "256", defaultStyle, null, typeof(OverflowException) }; // > max value
-            yield return new object[] { "(123)", NumberStyles.AllowParentheses, null, typeof(OverflowException) }; // Parentheses = negative
-
-            yield return new object[] { "2147483648", defaultStyle, null, typeof(OverflowException) }; // Internally, Parse pretends we are inputting an Int32, so this overflows
         }
 
         [Theory]
@@ -241,44 +245,49 @@ namespace System.Tests
         public static void Parse_Invalid(string value, NumberStyles style, IFormatProvider provider, Type exceptionType)
         {
             byte result;
-            // If no style is specified, use the (String) or (String, IFormatProvider) overload
-            if (style == NumberStyles.Integer)
+
+            // Default style and provider
+            if (style == NumberStyles.Integer && provider == null)
             {
                 Assert.False(byte.TryParse(value, out result));
-                Assert.Equal(default(byte), result);
-
+                Assert.Equal(default, result);
                 Assert.Throws(exceptionType, () => byte.Parse(value));
-
-                // If a format provider is specified, but the style is the default, use the (String, IFormatProvider) overload
-                if (provider != null)
-                {
-                    Assert.Throws(exceptionType, () => byte.Parse(value, provider));
-                }
             }
 
-            // If a format provider isn't specified, test the default one, using a new instance of NumberFormatInfo
-            Assert.False(byte.TryParse(value, style, provider ?? new NumberFormatInfo(), out result));
-            Assert.Equal(default(byte), result);
-
-            // If a format provider isn't specified, test the default one, using the (String, NumberStyles) overload
+            // Default provider
             if (provider == null)
             {
                 Assert.Throws(exceptionType, () => byte.Parse(value, style));
+
+                // Substitute default NumberFormatInfo
+                Assert.False(byte.TryParse(value, style, new NumberFormatInfo(), out result));
+                Assert.Equal(default, result);
+                Assert.Throws(exceptionType, () => byte.Parse(value, style, new NumberFormatInfo()));
             }
-            Assert.Throws(exceptionType, () => byte.Parse(value, style, provider ?? new NumberFormatInfo()));
+
+            // Default style
+            if (style == NumberStyles.Integer)
+            {
+                Assert.Throws(exceptionType, () => byte.Parse(value, provider));
+            }
+
+            // Full overloads
+            Assert.False(byte.TryParse(value, style, provider, out result));
+            Assert.Equal(default, result);
+            Assert.Throws(exceptionType, () => byte.Parse(value, style, provider));
         }
 
         [Theory]
-        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses)]
-        [InlineData(unchecked((NumberStyles)0xFFFFFC00))]
-        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style)
+        [InlineData(NumberStyles.HexNumber | NumberStyles.AllowParentheses, null)]
+        [InlineData(unchecked((NumberStyles)0xFFFFFC00), "style")]
+        public static void TryParse_InvalidNumberStyle_ThrowsArgumentException(NumberStyles style, string paramName)
         {
             byte result = 0;
-            Assert.Throws<ArgumentException>(() => byte.TryParse("1", style, null, out result));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => byte.TryParse("1", style, null, out result));
             Assert.Equal(default(byte), result);
 
-            Assert.Throws<ArgumentException>(() => byte.Parse("1", style));
-            Assert.Throws<ArgumentException>(() => byte.Parse("1", style, null));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => byte.Parse("1", style));
+            AssertExtensions.Throws<ArgumentException>(paramName, () => byte.Parse("1", style, null));
         }
     }
 }

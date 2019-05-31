@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.NativeCrypto;
+
 namespace System.Security.Cryptography
 {
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
@@ -29,25 +31,25 @@ namespace System.Security.Cryptography
             {
                 parameters.Validate();
                 ECCurve curve = parameters.Curve;
-                bool includePrivateParamerters = (parameters.D != null);
+                bool includePrivateParameters = (parameters.D != null);
 
                 if (curve.IsPrime)
                 {
-                    byte[] ecExplicitBlob = ECCng.GetPrimeCurveBlob(ref parameters);
-                    ImportFullKeyBlob(ecExplicitBlob, includePrivateParamerters);
+                    byte[] ecExplicitBlob = ECCng.GetPrimeCurveBlob(ref parameters, ecdh: false);
+                    ImportFullKeyBlob(ecExplicitBlob, includePrivateParameters);
                 }
                 else if (curve.IsNamed)
                 {
                     // FriendlyName is required; an attempt was already made to default it in ECCurve
                     if (string.IsNullOrEmpty(curve.Oid.FriendlyName))
-                        throw new PlatformNotSupportedException(string.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value.ToString()));
+                        throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value.ToString()));
 
-                    byte[] ecNamedCurveBlob = ECCng.GetNamedCurveBlob(ref parameters);
-                    ImportKeyBlob(ecNamedCurveBlob, curve.Oid.FriendlyName, includePrivateParamerters);
+                    byte[] ecNamedCurveBlob = ECCng.GetNamedCurveBlob(ref parameters, ecdh: false);
+                    ImportKeyBlob(ecNamedCurveBlob, curve.Oid.FriendlyName, includePrivateParameters);
                 }
                 else
                 {
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
+                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, curve.CurveType.ToString()));
                 }
             }
 
@@ -81,7 +83,8 @@ namespace System.Security.Cryptography
             {
                 ECParameters ecparams = new ECParameters();
 
-                string curveName = GetCurveName();
+                string curveName = GetCurveName(out string oidValue);
+
                 if (string.IsNullOrEmpty(curveName))
                 {
                     byte[] fullKeyBlob = ExportFullKeyBlob(includePrivateParameters);
@@ -91,10 +94,153 @@ namespace System.Security.Cryptography
                 {
                     byte[] keyBlob = ExportKeyBlob(includePrivateParameters);
                     ECCng.ExportNamedCurveParameters(ref ecparams, keyBlob, includePrivateParameters);
-                    ecparams.Curve = ECCurve.CreateFromFriendlyName(curveName);
+                    ecparams.Curve = ECCurve.CreateFromOid(new Oid(oidValue, curveName));
                 }
 
                 return ecparams;
+            }
+
+            public override void ImportPkcs8PrivateKey(ReadOnlySpan<byte> source, out int bytesRead)
+            {
+                CngPkcs8.Pkcs8Response response = CngPkcs8.ImportPkcs8PrivateKey(source, out int localRead);
+
+                ProcessPkcs8Response(response);
+                bytesRead = localRead;
+            }
+
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                CngPkcs8.Pkcs8Response response = CngPkcs8.ImportEncryptedPkcs8PrivateKey(
+                    passwordBytes,
+                    source,
+                    out int localRead);
+
+                ProcessPkcs8Response(response);
+                bytesRead = localRead;
+            }
+
+            public override void ImportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                ReadOnlySpan<byte> source,
+                out int bytesRead)
+            {
+                CngPkcs8.Pkcs8Response response = CngPkcs8.ImportEncryptedPkcs8PrivateKey(
+                    password,
+                    source,
+                    out int localRead);
+
+                ProcessPkcs8Response(response);
+                bytesRead = localRead;
+            }
+
+            private void ProcessPkcs8Response(CngPkcs8.Pkcs8Response response)
+            {
+                // Wrong algorithm?
+                switch (response.GetAlgorithmGroup())
+                {
+                    // CNG ECDH and ECDSA keys can both do ECDSA.
+                    case BCryptNative.AlgorithmName.ECDsa:
+                    case BCryptNative.AlgorithmName.ECDH:
+                        AcceptImport(response);
+                        return;
+                }
+
+                response.FreeKey();
+                throw new CryptographicException(SR.Cryptography_NotValidPublicOrPrivateKey);
+            }
+
+            public override byte[] ExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                PbeParameters pbeParameters)
+            {
+                if (pbeParameters == null)
+                    throw new ArgumentNullException(nameof(pbeParameters));
+
+                return CngPkcs8.ExportEncryptedPkcs8PrivateKey(
+                    this,
+                    passwordBytes,
+                    pbeParameters);
+            }
+
+            public override byte[] ExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                PbeParameters pbeParameters)
+            {
+                if (pbeParameters == null)
+                {
+                    throw new ArgumentNullException(nameof(pbeParameters));
+                }
+
+                PasswordBasedEncryption.ValidatePbeParameters(
+                    pbeParameters,
+                    password,
+                    ReadOnlySpan<byte>.Empty);
+
+                if (CngPkcs8.IsPlatformScheme(pbeParameters))
+                {
+                    return ExportEncryptedPkcs8(password, pbeParameters.IterationCount);
+                }
+
+                return CngPkcs8.ExportEncryptedPkcs8PrivateKey(
+                    this,
+                    password,
+                    pbeParameters);
+            }
+
+            public override bool TryExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<byte> passwordBytes,
+                PbeParameters pbeParameters,
+                Span<byte> destination,
+                out int bytesWritten)
+            {
+                if (pbeParameters == null)
+                    throw new ArgumentNullException(nameof(pbeParameters));
+
+                PasswordBasedEncryption.ValidatePbeParameters(
+                    pbeParameters,
+                    ReadOnlySpan<char>.Empty,
+                    passwordBytes);
+
+                return CngPkcs8.TryExportEncryptedPkcs8PrivateKey(
+                    this,
+                    passwordBytes,
+                    pbeParameters,
+                    destination,
+                    out bytesWritten);
+            }
+
+            public override bool TryExportEncryptedPkcs8PrivateKey(
+                ReadOnlySpan<char> password,
+                PbeParameters pbeParameters,
+                Span<byte> destination,
+                out int bytesWritten)
+            {
+                if (pbeParameters == null)
+                    throw new ArgumentNullException(nameof(pbeParameters));
+
+                PasswordBasedEncryption.ValidatePbeParameters(
+                    pbeParameters,
+                    password,
+                    ReadOnlySpan<byte>.Empty);
+
+                if (CngPkcs8.IsPlatformScheme(pbeParameters))
+                {
+                    return TryExportEncryptedPkcs8(
+                        password,
+                        pbeParameters.IterationCount,
+                        destination,
+                        out bytesWritten);
+                }
+
+                return CngPkcs8.TryExportEncryptedPkcs8PrivateKey(
+                    this,
+                    password,
+                    pbeParameters,
+                    destination,
+                    out bytesWritten);
             }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS
         }

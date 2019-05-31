@@ -38,7 +38,7 @@ namespace System.Runtime.Serialization.Json
             // with the restructuring for multi-file, this is no longer true - instead
             // this has become a normal method
             JsonReadWriteDelegates result;
-#if NET_NATIVE
+#if uapaot
             // The c passed in could be a clone which is different from the original key,
             // We'll need to get the original key data contract from generated assembly.
             DataContract keyDc = (c?.UnderlyingType != null) ?
@@ -55,7 +55,7 @@ namespace System.Runtime.Serialization.Json
             JsonReadWriteDelegates result = GetGeneratedReadWriteDelegates(c);
             if (result == null)
             {
-                throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, c.UnderlyingType.ToString()));
+                throw new InvalidDataContractException(SR.Format(SR.SerializationCodeIsMissingForType, c.UnderlyingType));
             }
             else
             {
@@ -184,7 +184,7 @@ namespace System.Runtime.Serialization.Json
                         int value = s_dataContractID++;
                         if (value >= s_dataContractCache.Length)
                         {
-                            int newSize = (value < Int32.MaxValue / 2) ? value * 2 : Int32.MaxValue;
+                            int newSize = (value < int.MaxValue / 2) ? value * 2 : int.MaxValue;
                             if (newSize <= value)
                             {
                                 Fx.Assert("DataContract cache overflow");
@@ -290,19 +290,13 @@ namespace System.Runtime.Serialization.Json
                                     _knownDataContracts = new Dictionary<XmlQualifiedName, DataContract>();
                                 }
 
-                                if (!_knownDataContracts.ContainsKey(itemContract.StableName))
-                                {
-                                    _knownDataContracts.Add(itemContract.StableName, itemContract);
-                                }
+                                _knownDataContracts.TryAdd(itemContract.StableName, itemContract);
 
-                                if (collectionDataContract.ItemType.GetTypeInfo().IsGenericType
+                                if (collectionDataContract.ItemType.IsGenericType
                                     && collectionDataContract.ItemType.GetGenericTypeDefinition() == typeof(KeyValue<,>))
                                 {
-                                    DataContract itemDataContract = DataContract.GetDataContract(Globals.TypeOfKeyValuePair.MakeGenericType(collectionDataContract.ItemType.GetTypeInfo().GenericTypeArguments));
-                                    if (!_knownDataContracts.ContainsKey(itemDataContract.StableName))
-                                    {
-                                        _knownDataContracts.Add(itemDataContract.StableName, itemDataContract);
-                                    }
+                                    DataContract itemDataContract = DataContract.GetDataContract(Globals.TypeOfKeyValuePair.MakeGenericType(collectionDataContract.ItemType.GenericTypeArguments));
+                                    _knownDataContracts.TryAdd(itemDataContract.StableName, itemDataContract);
                                 }
 
                                 if (!(itemContract is CollectionDataContract))
@@ -318,7 +312,7 @@ namespace System.Runtime.Serialization.Json
         }
     }
 
-#if NET_NATIVE
+#if uapaot
     public class JsonReadWriteDelegates
 #else
     internal class JsonReadWriteDelegates

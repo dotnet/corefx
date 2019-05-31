@@ -7,7 +7,6 @@ using System.Collections.Generic;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-    [Serializable]
     public partial class X509CertificateCollection : System.Collections.CollectionBase
     {
         public X509CertificateCollection()
@@ -114,7 +113,7 @@ namespace System.Security.Cryptography.X509Certificates
             base.OnValidate(value);
 
             if (!(value is X509Certificate))
-              throw new ArgumentException(SR.Arg_InvalidType, "value");
+              throw new ArgumentException(SR.Arg_InvalidType, nameof(value));
         }
     }
 }

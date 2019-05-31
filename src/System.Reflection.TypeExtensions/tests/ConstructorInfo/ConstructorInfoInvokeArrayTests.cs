@@ -68,6 +68,10 @@ namespace System.Reflection.Tests
                     case 2:
                         {
                             int[] invalidLowerBounds = new int[] { -20, 0, 20 };
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                            {
+                                Array.Clear(invalidLowerBounds, 0, invalidLowerBounds.Length);
+                            }
                             int[] invalidLengths = new int[] { -100, -9, -1 };
                             for (int j = 0; j < invalidLengths.Length; j++)
                             {
@@ -75,6 +79,10 @@ namespace System.Reflection.Tests
                             }
 
                             int[] validLowerBounds = new int[] { 0, 1, -1, 2, -3, 5, -10, 99, 100 };
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                            {
+                                Array.Clear(validLowerBounds, 0, validLowerBounds.Length);
+                            }
                             int[] validLengths = new int[] { 0, 1, 3, 2, 3, 5, 10, 99, 0 };
                             for (int j = 0; j < validLengths.Length; j++)
                             {
@@ -134,6 +142,12 @@ namespace System.Reflection.Tests
                             int[] invalidLengths3 = new int[] { -11, -10, 0 };
                             int[] invalidLengths4 = new int[] { -33, 0, -20 };
 
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                            {
+                                Array.Clear(invalidLowerBounds1, 0, invalidLowerBounds1.Length);
+                                Array.Clear(invalidLowerBounds2, 0, invalidLowerBounds2.Length);
+                            }
+
                             for (int j = 0; j < invalidLengths3.Length; j++)
                             {
                                 Assert.Throws<OverflowException>(() => constructors[i].Invoke(new object[] { invalidLowerBounds1[j], invalidLengths3[j], invalidLowerBounds2[j], invalidLengths4[j] }));
@@ -141,10 +155,10 @@ namespace System.Reflection.Tests
 
                             int baseNum = 3;
                             int baseNum4 = baseNum * baseNum * baseNum * baseNum;
-                            int[] validLengths1 = new int[baseNum4];
                             int[] validLowerBounds1 = new int[baseNum4];
-                            int[] validLengths2 = new int[baseNum4];
                             int[] validLowerBounds2 = new int[baseNum4];
+                            int[] validLengths1 = new int[baseNum4];
+                            int[] validLengths2 = new int[baseNum4];
 
                             int cnt = 0;
                             for (int pos1 = 0; pos1 < baseNum; pos1++)
@@ -153,40 +167,52 @@ namespace System.Reflection.Tests
                                         for (int pos4 = 0; pos4 < baseNum; pos4++)
                                         {
                                             int saved = cnt;
-                                            validLengths1[cnt] = saved % baseNum;
-                                            saved = saved / baseNum;
-                                            validLengths2[cnt] = saved % baseNum;
-                                            saved = saved / baseNum;
                                             validLowerBounds1[cnt] = saved % baseNum;
                                             saved = saved / baseNum;
+                                            validLengths1[cnt] = saved % baseNum;
+                                            saved = saved / baseNum;
                                             validLowerBounds2[cnt] = saved % baseNum;
+                                            saved = saved / baseNum;
+                                            validLengths2[cnt] = saved % baseNum;
                                             cnt++;
                                         }
 
-                            for (int j = 0; j < validLengths2.Length; j++)
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
                             {
-                                int[,] arr = (int[,])constructors[i].Invoke(new object[] { validLengths1[j], validLengths2[j], validLowerBounds1[j], validLowerBounds2[j] });
-                                Assert.Equal(validLengths1[j], arr.GetLowerBound(0));
-                                Assert.Equal(validLengths1[j] + validLengths2[j] - 1, arr.GetUpperBound(0));
-                                Assert.Equal(validLowerBounds1[j], arr.GetLowerBound(1));
-                                Assert.Equal(validLowerBounds1[j] + validLowerBounds2[j] - 1, arr.GetUpperBound(1));
-                                Assert.Equal(validLengths2[j] * validLowerBounds2[j], arr.Length);
+                                Array.Clear(validLowerBounds1, 0, validLowerBounds1.Length);
+                                Array.Clear(validLowerBounds2, 0, validLowerBounds2.Length);
+                            }
+
+                            for (int j = 0; j < validLengths1.Length; j++)
+                            {
+                                int[,] arr = (int[,])constructors[i].Invoke(new object[] { validLowerBounds1[j], validLengths1[j], validLowerBounds2[j], validLengths2[j] });
+                                Assert.Equal(validLowerBounds1[j], arr.GetLowerBound(0));
+                                Assert.Equal(validLowerBounds1[j] + validLengths1[j] - 1, arr.GetUpperBound(0));
+                                Assert.Equal(validLowerBounds2[j], arr.GetLowerBound(1));
+                                Assert.Equal(validLowerBounds2[j] + validLengths2[j] - 1, arr.GetUpperBound(1));
+                                Assert.Equal(validLengths1[j] * validLengths2[j], arr.Length);
                             }
 
                             // Lower can be < 0
-                            validLengths1 = new int[] { 10, 10, 65535, 40, 0, -10, -10, -20, -40, 0 };
-                            validLowerBounds1 = new int[] { 5, 99, -100, 30, 4, -5, 99, 100, -30, 0 };
-                            validLengths2 = new int[] { 1, 200, 2, 40, 0, 1, 200, 2, 40, 65535 };
-                            validLowerBounds2 = new int[] { 5, 10, 1, 0, 4, 5, 65535, 1, 0, 4 };
+                            validLowerBounds1 = new int[] { 10, 10, 65535, 40, 0, -10, -10, -20, -40, 0 };
+                            validLowerBounds2 = new int[] { 5, 99, -100, 30, 4, -5, 99, 100, -30, 0 };
+                            validLengths1 = new int[] { 1, 200, 2, 40, 0, 1, 200, 2, 40, 65535 };
+                            validLengths2 = new int[] { 5, 10, 1, 0, 4, 5, 65535, 1, 0, 4 };
 
-                            for (int j = 0; j < validLengths2.Length; j++)
+                            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
                             {
-                                int[,] arr = (int[,])constructors[i].Invoke(new object[] { validLengths1[j], validLengths2[j], validLowerBounds1[j], validLowerBounds2[j] });
-                                Assert.Equal(validLengths1[j], arr.GetLowerBound(0));
-                                Assert.Equal(validLengths1[j] + validLengths2[j] - 1, arr.GetUpperBound(0));
-                                Assert.Equal(validLowerBounds1[j], arr.GetLowerBound(1));
-                                Assert.Equal(validLowerBounds1[j] + validLowerBounds2[j] - 1, arr.GetUpperBound(1));
-                                Assert.Equal(validLengths2[j] * validLowerBounds2[j], arr.Length);
+                                Array.Clear(validLowerBounds1, 0, validLowerBounds1.Length);
+                                Array.Clear(validLowerBounds2, 0, validLowerBounds2.Length);
+                            }
+
+                            for (int j = 0; j < validLengths1.Length; j++)
+                            {
+                                int[,] arr = (int[,])constructors[i].Invoke(new object[] { validLowerBounds1[j], validLengths1[j], validLowerBounds2[j], validLengths2[j] });
+                                Assert.Equal(validLowerBounds1[j], arr.GetLowerBound(0));
+                                Assert.Equal(validLowerBounds1[j] + validLengths1[j] - 1, arr.GetUpperBound(0));
+                                Assert.Equal(validLowerBounds2[j], arr.GetLowerBound(1));
+                                Assert.Equal(validLowerBounds2[j] + validLengths2[j] - 1, arr.GetUpperBound(1));
+                                Assert.Equal(validLengths1[j] * validLengths2[j], arr.Length);
                             }
                         }
                         break;

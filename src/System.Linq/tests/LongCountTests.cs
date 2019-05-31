@@ -56,6 +56,20 @@ namespace System.Linq.Tests
             }
         }
 
+        [Theory]
+        [MemberData(nameof(LongCount_TestData))]
+        public static void LongCountRunOnce(IEnumerable<int> source, Func<int, bool> predicate, long expected)
+        {
+            if (predicate == null)
+            {
+                Assert.Equal(expected, source.RunOnce().LongCount());
+            }
+            else
+            {
+                Assert.Equal(expected, source.RunOnce().LongCount(predicate));
+            }
+        }
+
         [Fact]
         public void NullableArray_IncludesNullValues()
         {
@@ -66,15 +80,15 @@ namespace System.Linq.Tests
         [Fact]
         public void NullSource_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LongCount());
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LongCount(i => i != 0));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LongCount());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LongCount(i => i != 0));
         }
 
         [Fact]
         public void NullPredicate_ThrowsArgumentNullException()
         {
             Func<int, bool> predicate = null;
-            Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).LongCount(predicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).LongCount(predicate));
         }
     }
 }

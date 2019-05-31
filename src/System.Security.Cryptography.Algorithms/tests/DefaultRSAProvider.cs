@@ -10,16 +10,18 @@ namespace System.Security.Cryptography.Rsa.Tests
     {
         private bool? _supports384PrivateKey;
 
-        public RSA Create()
-        {
-            return RSA.Create();
-        }
+        public RSA Create() => RSA.Create();
 
         public RSA Create(int keySize)
         {
+#if netcoreapp
+            return RSA.Create(keySize);
+#else
             RSA rsa = Create();
+            
             rsa.KeySize = keySize;
             return rsa;
+#endif
         }
 
         public bool Supports384PrivateKey
@@ -37,11 +39,11 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        public bool SupportsSha2Oaep
-        {
-            // Currently only RSACng does, which is the default provider on Windows.
-            get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); }
-        }
+        public bool SupportsLargeExponent => true;
+
+        public bool SupportsSha2Oaep { get; } = true;
+
+        public bool SupportsPss { get; } = true;
     }
 
     public partial class RSAFactory

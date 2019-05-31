@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -64,6 +64,22 @@ namespace System.Linq.Expressions.Tests
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]
+        public void Quote_Lambda_Action_MakeUnary(bool useInterpreter)
+        {
+            Expression<Action> e = () => Nop();
+            UnaryExpression q = MakeUnary(ExpressionType.Quote, e, null);
+            Expression<Func<LambdaExpression>> f = Lambda<Func<LambdaExpression>>(q);
+
+            var quote = f.Compile(useInterpreter)();
+
+            Assert.Equal(0, quote.Parameters.Count);
+            Assert.Equal(ExpressionType.Call, quote.Body.NodeType);
+
+            var call = (MethodCallExpression)quote.Body;
+            Assert.Equal(typeof(UnaryQuoteTests).GetMethod(nameof(Nop)), call.Method);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
         public void Quote_Lambda_IdentityFunc(bool useInterpreter)
         {
             Expression<Func<LambdaExpression>> f = () => GetQuote<Func<int, int>>(x => x);
@@ -88,7 +104,8 @@ namespace System.Linq.Expressions.Tests
         [Theory, ClassData(typeof(CompilationTypes))]
         public void Quote_Lambda_Closure2(bool useInterpreter)
         {
-            Expression<Func<int, Func<int, LambdaExpression>>> f = x => y => GetQuote<Func<int>>(() => x + y);
+            // Using an unchecked addition to ensure that an Add expression is used (and not AddChecked)
+            Expression<Func<int, Func<int, LambdaExpression>>> f = x => y => GetQuote<Func<int>>(() => unchecked(x + y));
 
             var quote = f.Compile(useInterpreter)(1)(2);
 
@@ -462,6 +479,38 @@ namespace System.Linq.Expressions.Tests
             vars[1] = 4;
             Assert.Equal(3, vars[0]);
             Assert.Equal(4, vars[1]);
+        }
+
+        [Fact]
+        public void NullLambda()
+        {
+            AssertExtensions.Throws<ArgumentNullException>("expression", () => Quote(null));
+        }
+
+        [Fact]
+        public void QuoteNonLamdba()
+        {
+            Func<int> zero = () => 0;
+            Expression funcConst = Constant(zero);
+            AssertExtensions.Throws<ArgumentException>("expression", () => Quote(funcConst));
+        }
+
+        [Fact]
+        public void CannotReduce()
+        {
+            Expression<Func<int>> exp = () => 2;
+            Expression q = Expression.Quote(exp);
+            Assert.False(q.CanReduce);
+            Assert.Same(q, q.Reduce());
+            AssertExtensions.Throws<ArgumentException>(null, () => q.ReduceAndCheck());
+        }
+
+        [Fact]
+        public void TypeExplicitWithGeneralLambdaArgument()
+        {
+            LambdaExpression lambda = Lambda(Constant(2));
+            Expression q = Quote(lambda);
+            Assert.Equal(typeof(Expression<Func<int>>), q.Type);
         }
 
         private void AssertIsBox<T>(Expression expression, T value, bool isInterpreted)

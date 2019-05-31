@@ -2,10 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-
-//------------------------------------------------------------------------------
-
+using System.Diagnostics;
 
 namespace System.Data.SqlClient
 {
@@ -38,6 +35,7 @@ namespace System.Data.SqlClient
         public const string SPX = "spx";
         public const string VIA = "via";
         public const string LPC = "lpc";
+        public const string ADMIN = "admin";
 
         // network function string constants
         public const string INIT_SSPI_PACKAGE = "InitSSPIPackage";
@@ -203,14 +201,34 @@ namespace System.Data.SqlClient
         // Feature Extension
         public const byte FEATUREEXT_TERMINATOR = 0xFF;
         public const byte FEATUREEXT_SRECOVERY = 0x01;
+        public const byte FEATUREEXT_FEDAUTH = 0x02;
+        public const byte FEATUREEXT_GLOBALTRANSACTIONS = 0x05;
+        public const byte FEATUREEXT_UTF8SUPPORT = 0x0A;
 
         [Flags]
         public enum FeatureExtension : uint
         {
             None = 0,
             SessionRecovery = 1,
+            FedAuth = 2,
+            GlobalTransactions = 16,
+            UTF8Support = 512,
         }
 
+        public const uint UTF8_IN_TDSCOLLATION = 0x4000000;
+
+        public const byte FEDAUTHLIB_LIVEID = 0X00;
+        public const byte FEDAUTHLIB_SECURITYTOKEN = 0x01;
+        public const byte FEDAUTHLIB_ADAL = 0x02;
+        public const byte FEDAUTHLIB_RESERVED = 0X7F;
+
+        public enum FedAuthLibrary : byte
+        {
+            LiveId = FEDAUTHLIB_LIVEID,
+            SecurityToken = FEDAUTHLIB_SECURITYTOKEN,
+            ADAL = FEDAUTHLIB_ADAL, // For later support
+            Default = FEDAUTHLIB_RESERVED
+        }
 
         //    Loginrec defines
         public const byte MAX_LOG_NAME = 30;              // TDS 4.2 login rec max name length
@@ -827,7 +845,10 @@ namespace System.Data.SqlClient
 
         internal enum TransactionManagerRequestType
         {
+            GetDTCAddress = 0,
+            Propagate = 1,
             Begin = 5,
+            Promote = 6,
             Commit = 7,
             Rollback = 8,
             Save = 9
@@ -864,13 +885,54 @@ namespace System.Data.SqlClient
         internal static readonly int[] WHIDBEY_TIME_LENGTH = { 8, 10, 11, 12, 13, 14, 15, 16 };
         internal static readonly int[] WHIDBEY_DATETIME2_LENGTH = { 19, 21, 22, 23, 24, 25, 26, 27 };
         internal static readonly int[] WHIDBEY_DATETIMEOFFSET_LENGTH = { 26, 28, 29, 30, 31, 32, 33, 34 };
+
+        // Needed for UapAot, since we cannot use Enum.GetName() on SniContext.
+        // Enum.GetName() uses reflection, which is blocked on UapAot for internal types
+        // like SniContext.
+        internal static string GetSniContextEnumName(SniContext sniContext)
+        {
+            switch (sniContext)
+            {
+                case SniContext.Undefined:
+                    return "Undefined";
+                case SniContext.Snix_Connect:
+                    return "Snix_Connect";
+                case SniContext.Snix_PreLoginBeforeSuccessfulWrite:
+                    return "Snix_PreLoginBeforeSuccessfulWrite";
+                case SniContext.Snix_PreLogin:
+                    return "Snix_PreLogin";
+                case SniContext.Snix_LoginSspi:
+                    return "Snix_LoginSspi";
+                case SniContext.Snix_ProcessSspi:
+                    return "Snix_ProcessSspi";
+                case SniContext.Snix_Login:
+                    return "Snix_Login";
+                case SniContext.Snix_EnableMars:
+                    return "Snix_EnableMars";
+                case SniContext.Snix_AutoEnlist:
+                    return "Snix_AutoEnlist";
+                case SniContext.Snix_GetMarsSession:
+                    return "Snix_GetMarsSession";
+                case SniContext.Snix_Execute:
+                    return "Snix_Execute";
+                case SniContext.Snix_Read:
+                    return "Snix_Read";
+                case SniContext.Snix_Close:
+                    return "Snix_Close";
+                case SniContext.Snix_SendRows:
+                    return "Snix_SendRows";
+                default:
+                    Debug.Fail($"Received unknown SniContext enum. Value: {sniContext}");
+                    return null;
+            }
+        }
     }
 
     internal enum SniContext
     {
         Undefined = 0,
         Snix_Connect,
-        Snix_PreLoginBeforeSuccessfullWrite,
+        Snix_PreLoginBeforeSuccessfulWrite,
         Snix_PreLogin,
         Snix_LoginSspi,
         Snix_ProcessSspi,
@@ -882,6 +944,31 @@ namespace System.Data.SqlClient
         Snix_Read,
         Snix_Close,
         Snix_SendRows,
+    }
+
+    internal enum ParsingErrorState
+    {
+        Undefined = 0,
+        FedAuthInfoLengthTooShortForCountOfInfoIds = 1,
+        FedAuthInfoLengthTooShortForData = 2,
+        FedAuthInfoFailedToReadCountOfInfoIds = 3,
+        FedAuthInfoFailedToReadTokenStream = 4,
+        FedAuthInfoInvalidOffset = 5,
+        FedAuthInfoFailedToReadData = 6,
+        FedAuthInfoDataNotUnicode = 7,
+        FedAuthInfoDoesNotContainStsurlAndSpn = 8,
+        FedAuthInfoNotReceived = 9,
+        FedAuthNotAcknowledged = 10,
+        FedAuthFeatureAckContainsExtraData = 11,
+        FedAuthFeatureAckUnknownLibraryType = 12,
+        UnrequestedFeatureAckReceived = 13,
+        UnknownFeatureAck = 14,
+        InvalidTdsTokenReceived = 15,
+        SessionStateLengthTooShort = 16,
+        SessionStateInvalidStatus = 17,
+        CorruptedTdsStream = 18,
+        ProcessSniPacketFailed = 19,
+        FedAuthRequiredPreLoginResponseInvalidValue = 20,
     }
 }
 

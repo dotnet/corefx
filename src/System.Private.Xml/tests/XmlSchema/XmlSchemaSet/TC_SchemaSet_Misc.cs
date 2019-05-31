@@ -4,16 +4,14 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
-using System.Xml;
 using System.Xml.Schema;
 using System.Xml.XPath;
 
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_Misc", Desc = "")]
-    public class TC_SchemaSet_Misc
+    public class TC_SchemaSet_Misc : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 
@@ -21,9 +19,7 @@ namespace System.Xml.Tests
         {
             _output = output;
         }
-
-
-        //todo: use rootpath
+        
         public bool bWarningCallback;
 
         public bool bErrorCallback;
@@ -76,7 +72,7 @@ namespace System.Xml.Tests
             }
         }
 
-        //[Variation(Desc = "v2 - Bug115049 - XSD: content model validation for an invalid root element should be adandoned", Priority = 2)]
+        //[Variation(Desc = "v2 - Bug115049 - XSD: content model validation for an invalid root element should be abandoned", Priority = 2)]
         [InlineData()]
         [Theory]
         public void v2()
@@ -687,7 +683,7 @@ namespace System.Xml.Tests
             return;
         }
 
-        //[Variation(Desc = "v109 - 386243, Adding a chameleon schema agsinst to no namaespace throws unexpected warnings", Priority = 1)]
+        //[Variation(Desc = "v109 - 386243, Adding a chameleon schema against to no namespace throws unexpected warnings", Priority = 1)]
         [InlineData()]
         [Theory]
         public void v109()
@@ -839,11 +835,11 @@ namespace System.Xml.Tests
         {
 #pragma warning disable 0618
             XmlSchemaAttribute attribute = new XmlSchemaAttribute();
-            Object attributeType = attribute.AttributeType;
+            object attributeType = attribute.AttributeType;
             XmlSchemaElement element = new XmlSchemaElement();
-            Object elementType = element.ElementType;
+            object elementType = element.ElementType;
             XmlSchemaType schemaType = new XmlSchemaType();
-            Object BaseSchemaType = schemaType.BaseSchemaType;
+            object BaseSchemaType = schemaType.BaseSchemaType;
 #pragma warning restore 0618
         }
 
@@ -932,7 +928,7 @@ namespace System.Xml.Tests
                     }
                     catch (XmlSchemaValidationException ex)
                     {
-                        if (ex.LineNumber == 1 && ex.LinePosition == 2 && !String.IsNullOrEmpty(ex.SourceUri))
+                        if (ex.LineNumber == 1 && ex.LinePosition == 2 && !string.IsNullOrEmpty(ex.SourceUri))
                         {
                             return;
                         }
@@ -1027,8 +1023,8 @@ namespace System.Xml.Tests
             Assert.True(false);
         }
 
-        //[Variation(Desc = "615444 XmlSchema.Write ((XmlWriter)null) throws InvalidOperationException instead of ArgumenNullException")]
-        [Fact(Skip = "TODO: Fix NotImplementedException")]
+        //[Variation(Desc = "615444 XmlSchema.Write ((XmlWriter)null) throws InvalidOperationException instead of ArgumentNullException")]
+        [Fact]
         public void v125()
         {
             XmlSchema xs = new XmlSchema();
@@ -1072,15 +1068,18 @@ namespace System.Xml.Tests
             return;
         }
 
-        [Fact(Skip = "TODO: Fix NotImplementedException")]
+        // Test failure on ILC: Test depends on Xml Serialization and requires reflection on a LOT of types under System.Xml.Schema namespace.
+        // Rd.xml with "<Namespace Name="System.Xml.Schema" Dynamic="Required Public" />" lets this test pass but we should probably be
+        // fixing up XmlSerializer's own rd.xml rather than the test here.
+        [Fact]
         public void GetBuiltinSimpleTypeWorksAsEcpected()
         {
             Initialize();
-            string xml = "<?xml version=\"1.0\" encoding=\"utf-16\"?>" + "\r\n" +
- "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">" + "\r\n" +
- "  <xs:simpleType>" + "\r\n" +
- "    <xs:restriction base=\"xs:anySimpleType\" />" + "\r\n" +
- "  </xs:simpleType>" + "\r\n" +
+            string xml = "<?xml version=\"1.0\" encoding=\"utf-16\"?>" + Environment.NewLine +
+ "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\">" + Environment.NewLine +
+ "  <xs:simpleType>" + Environment.NewLine +
+ "    <xs:restriction base=\"xs:anySimpleType\" />" + Environment.NewLine +
+ "  </xs:simpleType>" + Environment.NewLine +
  "</xs:schema>";
             XmlSchema schema = new XmlSchema();
             XmlSchemaSimpleType stringType = XmlSchemaType.GetBuiltInSimpleType(XmlTypeCode.String);

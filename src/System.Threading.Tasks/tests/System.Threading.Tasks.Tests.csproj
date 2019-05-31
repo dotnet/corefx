@@ -1,20 +1,12 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.Threading.Tasks.Tests</AssemblyName>
     <ProjectGuid>{B6C09633-D161-499A-8FE1-46B2D53A16E7}</ProjectGuid>
-    <NugetTargetMoniker Condition="'$(TargetGroup)'==''">.NETStandard,Version=v1.7</NugetTargetMoniker>
+    <TestRuntime>true</TestRuntime>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
-    <!-- Compile tests against the System.Runtime contract, but copy our local-built implementation for testing -->
-    <ProjectReference Include="..\pkg\System.Threading.Tasks.pkgproj" />
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="Helpers.cs" />
     <Compile Include="XunitAssemblyAttributes.cs" />
     <Compile Include="UnwrapTests.cs" />
     <Compile Include="AggregateExceptionTests.cs" />
@@ -23,6 +15,7 @@
     <Compile Include="MethodCoverage.cs" />
     <Compile Include="CESchedulerPairTests.cs" />
     <!-- Task -->
+    <Compile Include="Task\ExecutionContextFlowTest.cs" />
     <Compile Include="Task\RunContinuationsAsynchronouslyTests.cs" />
     <Compile Include="Task\TPLTestException.cs" />
     <Compile Include="Task\TaskRunSyncTests.cs" />
@@ -38,6 +31,7 @@
     <Compile Include="Task\TaskContinueWhenAllTests.cs" />
     <Compile Include="Task\TaskFromAsyncWork.cs" />
     <Compile Include="Task\TaskFromAsyncTest.cs" />
+    <Compile Include="Task\TaskFromAsyncTest2.cs" />
     <Compile Include="Task\TaskCancelWaitTests.cs" />
     <Compile Include="Task\TaskCancelWaitTest.cs" />
     <Compile Include="Task\TaskRtTests.cs" />
@@ -55,9 +49,20 @@
     <Compile Include="$(CommonTestPath)\System\Threading\ThreadPoolHelpers.cs">
       <Link>CommonTest\System\Threading\ThreadPoolHelpers.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
+      <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
+    </Compile>
+    <Compile Include="Task\TaskDisposeTests.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
-    <Compile Include="Task\TaskDisposeTests.netstandard1.7.cs" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="CancellationTokenTests.netcoreapp.cs" />
+    <Compile Include="Task\TaskCanceledExceptionTests.netcoreapp.cs" />
+    <Compile Include="Task\TaskStatusTest.netcoreapp.cs" />
+    <Compile Include="System.Runtime.CompilerServices\AsyncTaskMethodBuilderTests.netcoreapp.cs" />
+    <Compile Include="System.Runtime.CompilerServices\ConfiguredAsyncDisposable.netcoreapp.cs" />
+    <Compile Include="System.Runtime.CompilerServices\ConfiguredCancelableAsyncEnumerableTests.netcoreapp.cs" />
+    <Compile Include="$(CommonTestPath)\System\Diagnostics\Tracing\TestEventListener.cs">
+      <Link>Common\System\Diagnostics\Tracing\TestEventListener.cs</Link>
+    </Compile>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

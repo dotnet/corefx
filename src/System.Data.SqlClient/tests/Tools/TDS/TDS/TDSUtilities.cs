@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -21,7 +21,7 @@ namespace Microsoft.SqlServer.TDS
         /// <summary>
         /// Object lock for log writer
         /// </summary>
-        private static Object s_logWriterLock = new Object();
+        private static object s_logWriterLock = new object();
 
         /// <summary>
         /// Read unsigned long from the stream
@@ -69,10 +69,13 @@ namespace Microsoft.SqlServer.TDS
         /// </summary>
         public static void WriteUInt(Stream destination, uint value)
         {
-            destination.WriteByte((byte)value);
-            destination.WriteByte((byte)(value >> 8));
-            destination.WriteByte((byte)(value >> 16));
-            destination.WriteByte((byte)(value >> 24));
+            unchecked
+            {
+                destination.WriteByte((byte)value);
+                destination.WriteByte((byte)(value >> 8));
+                destination.WriteByte((byte)(value >> 16));
+                destination.WriteByte((byte)(value >> 24));
+            }
         }
 
         /// <summary>
@@ -110,7 +113,7 @@ namespace Microsoft.SqlServer.TDS
         /// </summary>
         internal static void WriteUShort(Stream destination, ushort value)
         {
-            destination.WriteByte((byte)value);
+            destination.WriteByte(unchecked((byte)value));
             destination.WriteByte((byte)(value >> 8));
         }
 
@@ -336,7 +339,7 @@ namespace Microsoft.SqlServer.TDS
             // Check if null
             if (instance == null)
             {
-                SerializedWriteLineToLog(log, String.Format("{0}: <null>", prefix));
+                SerializedWriteLineToLog(log, string.Format("{0}: <null>", prefix));
 
                 return;
             }
@@ -360,7 +363,7 @@ namespace Microsoft.SqlServer.TDS
                 || instance is float
                 || instance is Version)
             {
-                SerializedWriteLineToLog(log, String.Format("{0}: {1}", prefix, instance));
+                SerializedWriteLineToLog(log, string.Format("{0}: {1}", prefix, instance));
 
                 return;
             }
@@ -380,18 +383,18 @@ namespace Microsoft.SqlServer.TDS
                 // Check if we logged anything
                 if (index == 0)
                 {
-                    SerializedWriteLineToLog(log, String.Format("{0}: <empty>", prefix));
+                    SerializedWriteLineToLog(log, string.Format("{0}: <empty>", prefix));
                 }
             }
             else if (objectType.IsArray)
             {
                 // Prepare prefix
-                string preparedLine = String.Format("{0}: [", prefix);
+                string preparedLine = string.Format("{0}: [", prefix);
 
                 // Log values
                 foreach (object o in (instance as Array))
                 {
-                    preparedLine += String.Format("{0:X} ", o);
+                    preparedLine += string.Format("{0:X} ", o);
                 }
 
                 // Finish the line

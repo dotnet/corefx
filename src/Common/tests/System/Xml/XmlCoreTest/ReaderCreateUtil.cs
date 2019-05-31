@@ -5,7 +5,7 @@
 /// This class is primarily used to test buffer boundary integrity of readers.
 ///	This class constructs a memory stream from the given buffer boundary length such that
 ///	the required tag completely lies exactly on the start and end of buffer boundary.
-/// The class makes up the additional bytes by filling in white spaces if so.
+/// The class makes up the additional bytes by filling in whitespace if so.
 ///	The first buffer length consists of the XML Decl and the Root Start (done by PrepareStream() )
 /// The next buffer length consists of the actual start and end text with the variable content stretched
 /// out to end at the buffer boundary.
@@ -479,7 +479,7 @@ namespace XmlCoreTest.Common
             }
         }
 
-        public static XmlReader Create(String inputUri, XmlReaderSettings settings, XmlParserContext inputContext)
+        public static XmlReader Create(string inputUri, XmlReaderSettings settings, XmlParserContext inputContext)
         {
             if (AsyncUtil.IsAsyncEnabled)
             {
@@ -515,7 +515,7 @@ namespace XmlCoreTest.Common
             }
         }
 
-        public static XmlReader Create(Stream input, XmlReaderSettings settings, String baseUri)
+        public static XmlReader Create(Stream input, XmlReaderSettings settings, string baseUri)
         {
             if (AsyncUtil.IsAsyncEnabled)
             {
@@ -563,7 +563,7 @@ namespace XmlCoreTest.Common
             }
         }
 
-        public static XmlReader Create(TextReader input, XmlReaderSettings settings, String baseUri)
+        public static XmlReader Create(TextReader input, XmlReaderSettings settings, string baseUri)
         {
             if (AsyncUtil.IsAsyncEnabled)
             {

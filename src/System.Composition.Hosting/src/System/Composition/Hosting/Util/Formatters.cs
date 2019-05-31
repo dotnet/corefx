@@ -4,7 +4,6 @@
 
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Util
 {
@@ -12,15 +11,21 @@ namespace System.Composition.Hosting.Util
     {
         public static string ReadableList(IEnumerable<string> items)
         {
-            Assumes.NotNull(items);
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
 
-            string reply = string.Join(Properties.Resources.Formatter_ListSeparatorWithSpace, items.OrderBy(t => t));
-            return !string.IsNullOrEmpty(reply) ? reply : Properties.Resources.Formatter_None;
+            string reply = string.Join(SR.Formatter_ListSeparatorWithSpace, items.OrderBy(t => t));
+            return !string.IsNullOrEmpty(reply) ? reply : SR.Formatter_None;
         }
 
         public static string Format(Type type)
         {
-            Assumes.NotNull(type);
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
             if (type.IsConstructedGenericType)
             {
@@ -31,8 +36,15 @@ namespace System.Composition.Hosting.Util
 
         private static string FormatClosedGeneric(Type closedGenericType)
         {
-            Assumes.NotNull(closedGenericType);
-            Assumes.IsTrue(closedGenericType.IsConstructedGenericType);
+            if (closedGenericType == null)
+            {
+                throw new ArgumentNullException(nameof(closedGenericType));
+            }
+
+            if (!closedGenericType.IsConstructedGenericType)
+            {
+                throw new Exception(SR.Diagnostic_InternalExceptionMessage);
+            }
 
             var name = closedGenericType.Name.Substring(0, closedGenericType.Name.IndexOf("`"));
             var args = closedGenericType.GenericTypeArguments.Select(t => Format(t));

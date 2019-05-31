@@ -2,10 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Immutable;
 using System.IO;
 using System.Reflection.Metadata;
 using System.Reflection.Metadata.Ecma335;
 using System.Reflection.Metadata.Tests;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Reflection.PortableExecutable.Tests
@@ -54,8 +57,8 @@ namespace System.Reflection.PortableExecutable.Tests
         [Fact]
         public void Ctor_Streams()
         {
-            Assert.Throws<ArgumentException>(() => new PEReader(new CustomAccessMemoryStream(canRead: false, canSeek: false, canWrite: false)));
-            Assert.Throws<ArgumentException>(() => new PEReader(new CustomAccessMemoryStream(canRead: true, canSeek: false, canWrite: false)));
+            AssertExtensions.Throws<ArgumentException>("peStream", () => new PEReader(new CustomAccessMemoryStream(canRead: false, canSeek: false, canWrite: false)));
+            AssertExtensions.Throws<ArgumentException>("peStream", () => new PEReader(new CustomAccessMemoryStream(canRead: true, canSeek: false, canWrite: false)));
 
             var s = new CustomAccessMemoryStream(canRead: true, canSeek: true, canWrite: false);
 
@@ -204,7 +207,7 @@ namespace System.Reflection.PortableExecutable.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes to get module handles
         public void GetMethodBody_Loaded()
         {
             LoaderUtilities.LoadPEAndValidate(Misc.Members, reader =>
@@ -228,7 +231,7 @@ namespace System.Reflection.PortableExecutable.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes to get module handles
         public void GetSectionData_Loaded()
         {
             LoaderUtilities.LoadPEAndValidate(Misc.Members, ValidateSectionData);
@@ -297,6 +300,7 @@ namespace System.Reflection.PortableExecutable.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
         public void TryOpenAssociatedPortablePdb_Args()
         {
             var peStream = new MemoryStream(PortablePdbs.DocumentsDll);
@@ -308,7 +312,24 @@ namespace System.Reflection.PortableExecutable.Tests
                 Assert.False(reader.TryOpenAssociatedPortablePdb(@"b.dll", _ => null, out pdbProvider, out pdbPath));
                 Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(@"b.dll", null, out pdbProvider, out pdbPath));
                 Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(null, _ => null, out pdbProvider, out pdbPath));
-                Assert.Throws<ArgumentException>("peImagePath", () => reader.TryOpenAssociatedPortablePdb("C:\\a\\\0\\b", _ => null, out pdbProvider, out pdbPath));
+                AssertExtensions.Throws<ArgumentException>("peImagePath", () => reader.TryOpenAssociatedPortablePdb("C:\\a\\\0\\b", _ => null, out pdbProvider, out pdbPath));
+            }
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public void TryOpenAssociatedPortablePdb_Args_Core()
+        {
+            var peStream = new MemoryStream(PortablePdbs.DocumentsDll);
+            using (var reader = new PEReader(peStream))
+            {
+                MetadataReaderProvider pdbProvider;
+                string pdbPath;
+
+                Assert.False(reader.TryOpenAssociatedPortablePdb(@"b.dll", _ => null, out pdbProvider, out pdbPath));
+                Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(@"b.dll", null, out pdbProvider, out pdbPath));
+                Assert.Throws<ArgumentNullException>(() => reader.TryOpenAssociatedPortablePdb(null, _ => null, out pdbProvider, out pdbPath));
+                Assert.False(reader.TryOpenAssociatedPortablePdb("C:\\a\\\0\\b", _ => null, out pdbProvider, out pdbPath));
             }
         }
 
@@ -504,7 +525,7 @@ namespace System.Reflection.PortableExecutable.Tests
             var ddBuilder = new DebugDirectoryBuilder();
             ddBuilder.AddCodeViewEntry(@"/a/b/a.pdb", id, portablePdbVersion: 0);
             ddBuilder.AddReproducibleEntry();
-            ddBuilder.AddCodeViewEntry(@"/a/b/c.pdb", id, portablePdbVersion: 0x0100);
+            ddBuilder.AddCodeViewEntry(@"/a/b/c.pdb", id, portablePdbVersion: 0x0100, age: 0x1234);
             ddBuilder.AddCodeViewEntry(@"/a/b/d.pdb", id, portablePdbVersion: 0x0100);
 
             var peStream = new MemoryStream(TestBuilders.BuildPEWithDebugDirectory(ddBuilder));
@@ -755,7 +776,7 @@ namespace System.Reflection.PortableExecutable.Tests
                 string pdbPath;
 
                 // pass-thru:
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>(null, () =>
                     reader.TryOpenAssociatedPortablePdb(Path.Combine("pedir", "file.exe"), _ => { throw new ArgumentException(); }, out pdbProvider, out pdbPath));
 
                 Assert.Throws<InvalidOperationException>(() =>
@@ -813,6 +834,21 @@ namespace System.Reflection.PortableExecutable.Tests
             Assert.Equal(13, pdbReader.Documents.Count);
 
             embeddedPdbProvider.Dispose();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static MetadataReader GetMetadataReaderFromPEReader()
+            => new PEReader(Misc.Debug.ToImmutableArray()).GetMetadataReader();
+
+        [Fact, MethodImpl(MethodImplOptions.NoOptimization)]
+        public void KeepMetadataAlive()
+        {
+            var reader = GetMetadataReaderFromPEReader();
+
+            GC.Collect(GC.MaxGeneration, GCCollectionMode.Forced, blocking: true, compacting: true);
+            GC.WaitForPendingFinalizers();
+
+            Assert.Equal(@"Debug", reader.GetString(reader.GetAssemblyDefinition().Name));
         }
     }
 }

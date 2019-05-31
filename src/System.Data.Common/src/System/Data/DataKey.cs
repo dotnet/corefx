@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace System.Data
 {
-    internal struct DataKey
+    internal readonly struct DataKey
     {
         private const int maxColumns = 32;
 
@@ -145,17 +145,13 @@ namespace System.Data
 
         public override int GetHashCode()
         {
-            Debug.Assert(false, "don't put DataKey into a Hashtable");
+            Debug.Fail("don't put DataKey into a Hashtable");
             return base.GetHashCode();
         }
-
-        public static bool operator ==(DataKey x, DataKey y) => x.Equals((object)y);
-
-        public static bool operator !=(DataKey x, DataKey y) => !x.Equals((object)y);
-
+        
         public override bool Equals(object value)
         {
-            Debug.Assert(false, "need to directly call Equals(DataKey)");
+            Debug.Fail("need to directly call Equals(DataKey)");
             return Equals((DataKey)value);
         }
 

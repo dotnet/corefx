@@ -19,7 +19,7 @@ namespace System.Net.Sockets.Tests
 
         private void TestLingerState_ArgumentException(Socket sock, bool enabled, int lingerTime)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>("optionValue.LingerTime", () =>
             {
                 sock.LingerState = new LingerOption(enabled, lingerTime);
             });
@@ -39,24 +39,24 @@ namespace System.Net.Sockets.Tests
             TestLingerState_Success(sock, true, 0);
             TestLingerState_Success(sock, true, 120);
 
-            TestLingerState_ArgumentException(sock, true, UInt16.MaxValue + 1);
+            TestLingerState_ArgumentException(sock, true, ushort.MaxValue + 1);
         }
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        [PlatformSpecific(~TestPlatforms.OSX)]
+        [PlatformSpecific(~TestPlatforms.OSX)]  // The upper bound for linger time is drastically different on OS X.
         public void Socket_LingerState_Upper_Boundaries_CorrectBehavior()
         {
             Socket sock = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            TestLingerState_Success(sock, true, Int16.MaxValue);
-            TestLingerState_Success(sock, true, Int16.MaxValue + 1);
-            TestLingerState_Success(sock, true, UInt16.MaxValue);
+            TestLingerState_Success(sock, true, short.MaxValue);
+            TestLingerState_Success(sock, true, short.MaxValue + 1);
+            TestLingerState_Success(sock, true, ushort.MaxValue);
         }
 
         [OuterLoop] // TODO: Issue #11345
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX)]  // The upper bound for linger time is drastically different on OS X.
         public void Socket_LingerState_Upper_Boundaries_CorrectBehavior_OSX()
         {
             // The upper bound for linger time is drastically different on OS X.
@@ -64,17 +64,17 @@ namespace System.Net.Sockets.Tests
 
             Assert.Throws<SocketException>(() =>
             {
-                sock.LingerState = new LingerOption(true, Int16.MaxValue);
+                sock.LingerState = new LingerOption(true, short.MaxValue);
             });
 
             Assert.Throws<SocketException>(() =>
             {
-                sock.LingerState = new LingerOption(true, Int16.MaxValue + 1);
+                sock.LingerState = new LingerOption(true, short.MaxValue + 1);
             });
 
             Assert.Throws<SocketException>(() =>
             {
-                sock.LingerState = new LingerOption(true, UInt16.MaxValue);
+                sock.LingerState = new LingerOption(true, ushort.MaxValue);
             });
         }
 

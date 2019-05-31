@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
@@ -49,18 +50,17 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(IDictionaryDebugView<,>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class SortedList<TKey, TValue> :
-        IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue>
+        IDictionary<TKey, TValue>, IDictionary, IReadOnlyDictionary<TKey, TValue> where TKey : object
     {
-        private TKey[] _keys;
-        private TValue[] _values;
-        private int _size;
-        private int _version;
-        private IComparer<TKey> _comparer;
-        private KeyList _keyList;
-        private ValueList _valueList;
-        [NonSerialized]
-        private object _syncRoot;
+        private TKey[] keys; // Do not rename (binary serialization)
+        private TValue[] values; // Do not rename (binary serialization)
+        private int _size; // Do not rename (binary serialization)
+        private int version; // Do not rename (binary serialization)
+        private IComparer<TKey> comparer; // Do not rename (binary serialization)
+        private KeyList? keyList; // Do not rename (binary serialization)
+        private ValueList? valueList; // Do not rename (binary serialization)
 
         private const int DefaultCapacity = 4;
 
@@ -72,10 +72,10 @@ namespace System.Collections.Generic
         // all entries added to the sorted list.
         public SortedList()
         {
-            _keys = Array.Empty<TKey>();
-            _values = Array.Empty<TValue>();
+            keys = Array.Empty<TKey>();
+            values = Array.Empty<TValue>();
             _size = 0;
-            _comparer = Comparer<TKey>.Default;
+            comparer = Comparer<TKey>.Default;
         }
 
         // Constructs a new sorted list. The sorted list is initially empty and has
@@ -89,9 +89,9 @@ namespace System.Collections.Generic
         {
             if (capacity < 0)
                 throw new ArgumentOutOfRangeException(nameof(capacity), capacity, SR.ArgumentOutOfRange_NeedNonNegNum);
-            _keys = new TKey[capacity];
-            _values = new TValue[capacity];
-            _comparer = Comparer<TKey>.Default;
+            keys = new TKey[capacity];
+            values = new TValue[capacity];
+            comparer = Comparer<TKey>.Default;
         }
 
         // Constructs a new sorted list with a given IComparer
@@ -104,12 +104,12 @@ namespace System.Collections.Generic
         // interface, which in that case must be implemented by the keys of all
         // entries added to the sorted list.
         // 
-        public SortedList(IComparer<TKey> comparer)
+        public SortedList(IComparer<TKey>? comparer)
             : this()
         {
             if (comparer != null)
             {
-                _comparer = comparer;
+                this.comparer = comparer;
             }
         }
 
@@ -122,7 +122,7 @@ namespace System.Collections.Generic
         // the IComparable interface, which in that case must be implemented
         // by the keys of all entries added to the sorted list.
         // 
-        public SortedList(int capacity, IComparer<TKey> comparer)
+        public SortedList(int capacity, IComparer<TKey>? comparer)
             : this(comparer)
         {
             Capacity = capacity;
@@ -147,7 +147,7 @@ namespace System.Collections.Generic
         // by the keys of all entries in the given dictionary as well as keys
         // subsequently added to the sorted list.
         // 
-        public SortedList(IDictionary<TKey, TValue> dictionary, IComparer<TKey> comparer)
+        public SortedList(IDictionary<TKey, TValue> dictionary, IComparer<TKey>? comparer)
             : this((dictionary != null ? dictionary.Count : 0), comparer)
         {
             if (dictionary == null)
@@ -156,14 +156,14 @@ namespace System.Collections.Generic
             int count = dictionary.Count;
             if (count != 0)
             {
-                TKey[] keys = _keys;
+                TKey[] keys = this.keys;
                 dictionary.Keys.CopyTo(keys, 0);
-                dictionary.Values.CopyTo(_values, 0);
-                Debug.Assert(count == _keys.Length);
+                dictionary.Values.CopyTo(values, 0);
+                Debug.Assert(count == this.keys.Length);
                 if (count > 1)
                 {
                     comparer = Comparer; // obtain default if this is null.
-                    Array.Sort<TKey, TValue>(keys, _values, comparer);
+                    Array.Sort<TKey, TValue>(keys, values, comparer);
                     for (int i = 1; i != keys.Length; ++i)
                     {
                         if (comparer.Compare(keys[i - 1], keys[i]) == 0)
@@ -183,7 +183,7 @@ namespace System.Collections.Generic
         public void Add(TKey key, TValue value)
         {
             if (key == null) throw new ArgumentNullException(nameof(key));
-            int i = Array.BinarySearch<TKey>(_keys, 0, _size, key, _comparer);
+            int i = Array.BinarySearch<TKey>(keys, 0, _size, key, comparer);
             if (i >= 0)
                 throw new ArgumentException(SR.Format(SR.Argument_AddingDuplicate, key), nameof(key));
             Insert(~i, key, value);
@@ -197,7 +197,7 @@ namespace System.Collections.Generic
         bool ICollection<KeyValuePair<TKey, TValue>>.Contains(KeyValuePair<TKey, TValue> keyValuePair)
         {
             int index = IndexOfKey(keyValuePair.Key);
-            if (index >= 0 && EqualityComparer<TValue>.Default.Equals(_values[index], keyValuePair.Value))
+            if (index >= 0 && EqualityComparer<TValue>.Default.Equals(values[index], keyValuePair.Value))
             {
                 return true;
             }
@@ -207,7 +207,7 @@ namespace System.Collections.Generic
         bool ICollection<KeyValuePair<TKey, TValue>>.Remove(KeyValuePair<TKey, TValue> keyValuePair)
         {
             int index = IndexOfKey(keyValuePair.Key);
-            if (index >= 0 && EqualityComparer<TValue>.Default.Equals(_values[index], keyValuePair.Value))
+            if (index >= 0 && EqualityComparer<TValue>.Default.Equals(values[index], keyValuePair.Value))
             {
                 RemoveAt(index);
                 return true;
@@ -225,11 +225,11 @@ namespace System.Collections.Generic
         {
             get
             {
-                return _keys.Length;
+                return keys.Length;
             }
             set
             {
-                if (value != _keys.Length)
+                if (value != keys.Length)
                 {
                     if (value < _size)
                     {
@@ -242,16 +242,16 @@ namespace System.Collections.Generic
                         TValue[] newValues = new TValue[value];
                         if (_size > 0)
                         {
-                            Array.Copy(_keys, 0, newKeys, 0, _size);
-                            Array.Copy(_values, 0, newValues, 0, _size);
+                            Array.Copy(keys, 0, newKeys, 0, _size);
+                            Array.Copy(values, 0, newValues, 0, _size);
                         }
-                        _keys = newKeys;
-                        _values = newValues;
+                        keys = newKeys;
+                        values = newValues;
                     }
                     else
                     {
-                        _keys = Array.Empty<TKey>();
-                        _values = Array.Empty<TValue>();
+                        keys = Array.Empty<TKey>();
+                        values = Array.Empty<TValue>();
                     }
                 }
             }
@@ -261,16 +261,16 @@ namespace System.Collections.Generic
         {
             get
             {
-                return _comparer;
+                return comparer;
             }
         }
 
-        void IDictionary.Add(object key, object value)
+        void IDictionary.Add(object key, object? value)
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
 
-            if (value == null && !(default(TValue) == null))    // null is an invalid value for Value types
+            if (value == null && !(default(TValue)! == null))    // null is an invalid value for Value types // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
                 throw new ArgumentNullException(nameof(value));
 
             if (!(key is TKey))
@@ -279,7 +279,7 @@ namespace System.Collections.Generic
             if (!(value is TValue) && value != null)            // null is a valid value for Reference Types
                 throw new ArgumentException(SR.Format(SR.Arg_WrongType, value, typeof(TValue)), nameof(value));
 
-            Add((TKey)key, (TValue)value);
+            Add((TKey)key, (TValue)value!);
         }
 
         // Returns the number of entries in this sorted list.
@@ -364,16 +364,16 @@ namespace System.Collections.Generic
 
         private KeyList GetKeyListHelper()
         {
-            if (_keyList == null)
-                _keyList = new KeyList(this);
-            return _keyList;
+            if (keyList == null)
+                keyList = new KeyList(this);
+            return keyList;
         }
 
         private ValueList GetValueListHelper()
         {
-            if (_valueList == null)
-                _valueList = new ValueList(this);
-            return _valueList;
+            if (valueList == null)
+                valueList = new ValueList(this);
+            return valueList;
         }
 
         bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly
@@ -397,26 +397,22 @@ namespace System.Collections.Generic
         }
 
         // Synchronization root for this object.
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    Threading.Interlocked.CompareExchange(ref _syncRoot, new object(), null);
-                }
-                return _syncRoot;
-            }
-        }
+        object ICollection.SyncRoot => this;
 
         // Removes all entries from this sorted list.
         public void Clear()
         {
             // clear does not change the capacity
-            _version++;
+            version++;
             // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
-            Array.Clear(_keys, 0, _size);
-            Array.Clear(_values, 0, _size);
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>())
+            {
+                Array.Clear(keys, 0, _size);
+            }
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
+            {
+                Array.Clear(values, 0, _size);
+            }
             _size = 0;
         }
 
@@ -465,7 +461,7 @@ namespace System.Collections.Generic
 
             for (int i = 0; i < Count; i++)
             {
-                KeyValuePair<TKey, TValue> entry = new KeyValuePair<TKey, TValue>(_keys[i], _values[i]);
+                KeyValuePair<TKey, TValue> entry = new KeyValuePair<TKey, TValue>(keys[i], values[i]);
                 array[arrayIndex + i] = entry;
             }
         }
@@ -497,17 +493,17 @@ namespace System.Collections.Generic
                 throw new ArgumentException(SR.Arg_ArrayPlusOffTooSmall);
             }
 
-            KeyValuePair<TKey, TValue>[] keyValuePairArray = array as KeyValuePair<TKey, TValue>[];
+            KeyValuePair<TKey, TValue>[]? keyValuePairArray = array as KeyValuePair<TKey, TValue>[];
             if (keyValuePairArray != null)
             {
                 for (int i = 0; i < Count; i++)
                 {
-                    keyValuePairArray[i + index] = new KeyValuePair<TKey, TValue>(_keys[i], _values[i]);
+                    keyValuePairArray[i + index] = new KeyValuePair<TKey, TValue>(keys[i], values[i]);
                 }
             }
             else
             {
-                object[] objects = array as object[];
+                object[]? objects = array as object[];
                 if (objects == null)
                 {
                     throw new ArgumentException(SR.Argument_InvalidArrayType, nameof(array));
@@ -517,7 +513,7 @@ namespace System.Collections.Generic
                 {
                     for (int i = 0; i < Count; i++)
                     {
-                        objects[i + index] = new KeyValuePair<TKey, TValue>(_keys[i], _values[i]);
+                        objects[i + index] = new KeyValuePair<TKey, TValue>(keys[i], values[i]);
                     }
                 }
                 catch (ArrayTypeMismatchException)
@@ -535,7 +531,7 @@ namespace System.Collections.Generic
         // to min, whichever is larger.
         private void EnsureCapacity(int min)
         {
-            int newCapacity = _keys.Length == 0 ? DefaultCapacity : _keys.Length * 2;
+            int newCapacity = keys.Length == 0 ? DefaultCapacity : keys.Length * 2;
             // Allow the list to grow to maximum possible capacity (~2G elements) before encountering overflow.
             // Note that this check works even when _items.Length overflowed thanks to the (uint) cast
             if ((uint)newCapacity > MaxArrayLength) newCapacity = MaxArrayLength;
@@ -548,7 +544,7 @@ namespace System.Collections.Generic
         {
             if (index < 0 || index >= _size)
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
-            return _values[index];
+            return values[index];
         }
 
         public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
@@ -576,7 +572,7 @@ namespace System.Collections.Generic
         {
             if (index < 0 || index >= _size)
                 throw new ArgumentOutOfRangeException(nameof(index), index, SR.ArgumentOutOfRange_Index);
-            return _keys[index];
+            return keys[index];
         }
 
         // Returns the value associated with the given key. If an entry with the
@@ -587,26 +583,25 @@ namespace System.Collections.Generic
             {
                 int i = IndexOfKey(key);
                 if (i >= 0)
-                    return _values[i];
+                    return values[i];
 
-                throw new KeyNotFoundException();
-                // return default(TValue);
+                throw new KeyNotFoundException(SR.Format(SR.Arg_KeyNotFoundWithKey, key.ToString()));
             }
             set
             {
                 if (((object)key) == null) throw new ArgumentNullException(nameof(key));
-                int i = Array.BinarySearch<TKey>(_keys, 0, _size, key, _comparer);
+                int i = Array.BinarySearch<TKey>(keys, 0, _size, key, comparer);
                 if (i >= 0)
                 {
-                    _values[i] = value;
-                    _version++;
+                    values[i] = value;
+                    version++;
                     return;
                 }
                 Insert(~i, key, value);
             }
         }
 
-        object IDictionary.this[object key]
+        object? IDictionary.this[object key]
         {
             get
             {
@@ -615,7 +610,7 @@ namespace System.Collections.Generic
                     int i = IndexOfKey((TKey)key);
                     if (i >= 0)
                     {
-                        return _values[i];
+                        return values[i];
                     }
                 }
 
@@ -628,13 +623,13 @@ namespace System.Collections.Generic
                     throw new ArgumentNullException(nameof(key));
                 }
 
-                if (value == null && !(default(TValue) == null))
+                if (value == null && !(default(TValue)! == null)) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
                     throw new ArgumentNullException(nameof(value));
 
                 TKey tempKey = (TKey)key;
                 try
                 {
-                    this[tempKey] = (TValue)value;
+                    this[tempKey] = (TValue)value!;
                 }
                 catch (InvalidCastException)
                 {
@@ -653,7 +648,7 @@ namespace System.Collections.Generic
         {
             if (key == null)
                 throw new ArgumentNullException(nameof(key));
-            int ret = Array.BinarySearch<TKey>(_keys, 0, _size, key, _comparer);
+            int ret = Array.BinarySearch<TKey>(keys, 0, _size, key, comparer);
             return ret >= 0 ? ret : -1;
         }
 
@@ -664,34 +659,34 @@ namespace System.Collections.Generic
         // given value using the Object.Equals method.
         public int IndexOfValue(TValue value)
         {
-            return Array.IndexOf(_values, value, 0, _size);
+            return Array.IndexOf(values, value, 0, _size);
         }
 
         // Inserts an entry with a given key and value at a given index.
         private void Insert(int index, TKey key, TValue value)
         {
-            if (_size == _keys.Length) EnsureCapacity(_size + 1);
+            if (_size == keys.Length) EnsureCapacity(_size + 1);
             if (index < _size)
             {
-                Array.Copy(_keys, index, _keys, index + 1, _size - index);
-                Array.Copy(_values, index, _values, index + 1, _size - index);
+                Array.Copy(keys, index, keys, index + 1, _size - index);
+                Array.Copy(values, index, values, index + 1, _size - index);
             }
-            _keys[index] = key;
-            _values[index] = value;
+            keys[index] = key;
+            values[index] = value;
             _size++;
-            _version++;
+            version++;
         }
 
-        public bool TryGetValue(TKey key, out TValue value)
+        public bool TryGetValue(TKey key, out TValue value) // TODO-NULLABLE-GENERIC
         {
             int i = IndexOfKey(key);
             if (i >= 0)
             {
-                value = _values[i];
+                value = values[i];
                 return true;
             }
 
-            value = default(TValue);
+            value = default(TValue)!; // TODO-NULLABLE-GENERIC
             return false;
         }
 
@@ -704,12 +699,18 @@ namespace System.Collections.Generic
             _size--;
             if (index < _size)
             {
-                Array.Copy(_keys, index + 1, _keys, index, _size - index);
-                Array.Copy(_values, index + 1, _values, index, _size - index);
+                Array.Copy(keys, index + 1, keys, index, _size - index);
+                Array.Copy(values, index + 1, values, index, _size - index);
             }
-            _keys[_size] = default(TKey);
-            _values[_size] = default(TValue);
-            _version++;
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<TKey>())
+            {
+                keys[_size] = default(TKey)!;
+            }
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<TValue>())
+            {
+                values[_size] = default(TValue)!;
+            }
+            version++;
         }
 
         // Removes an entry from this sorted list. If an entry with the specified
@@ -741,7 +742,7 @@ namespace System.Collections.Generic
         // SortedList.TrimExcess();
         public void TrimExcess()
         {
-            int threshold = (int)(((double)_keys.Length) * 0.9);
+            int threshold = (int)(((double)keys.Length) * 0.9);
             if (_size < threshold)
             {
                 Capacity = _size;
@@ -758,7 +759,6 @@ namespace System.Collections.Generic
             return (key is TKey);
         }
         
-        [Serializable]
         private struct Enumerator : IEnumerator<KeyValuePair<TKey, TValue>>, IDictionaryEnumerator
         {
             private SortedList<TKey, TValue> _sortedList;
@@ -775,17 +775,17 @@ namespace System.Collections.Generic
             {
                 _sortedList = sortedList;
                 _index = 0;
-                _version = _sortedList._version;
+                _version = _sortedList.version;
                 _getEnumeratorRetType = getEnumeratorRetType;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default(TKey)!; // TODO-NULLABLE-GENERIC
+                _value = default(TValue)!; // TODO-NULLABLE-GENERIC
             }
 
             public void Dispose()
             {
                 _index = 0;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default(TKey)!; // TODO-NULLABLE-GENERIC
+                _value = default(TValue)!; // TODO-NULLABLE-GENERIC
             }
 
             object IDictionaryEnumerator.Key
@@ -803,19 +803,19 @@ namespace System.Collections.Generic
 
             public bool MoveNext()
             {
-                if (_version != _sortedList._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
+                if (_version != _sortedList.version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
 
                 if ((uint)_index < (uint)_sortedList.Count)
                 {
-                    _key = _sortedList._keys[_index];
-                    _value = _sortedList._values[_index];
+                    _key = _sortedList.keys[_index];
+                    _value = _sortedList.values[_index];
                     _index++;
                     return true;
                 }
 
                 _index = _sortedList.Count + 1;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default(TKey)!; // TODO-NULLABLE-GENERIC
+                _value = default(TValue)!; // TODO-NULLABLE-GENERIC
                 return false;
             }
 
@@ -840,7 +840,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -860,7 +860,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IDictionaryEnumerator.Value
+            object? IDictionaryEnumerator.Value
             {
                 get
                 {
@@ -875,53 +875,52 @@ namespace System.Collections.Generic
 
             void IEnumerator.Reset()
             {
-                if (_version != _sortedList._version)
+                if (_version != _sortedList.version)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
 
                 _index = 0;
-                _key = default(TKey);
-                _value = default(TValue);
+                _key = default(TKey)!; // TODO-NULLABLE-GENERIC
+                _value = default(TValue)!; // TODO-NULLABLE-GENERIC
             }
         }
 
-        [Serializable]
         private sealed class SortedListKeyEnumerator : IEnumerator<TKey>, IEnumerator
         {
             private SortedList<TKey, TValue> _sortedList;
             private int _index;
             private int _version;
-            private TKey _currentKey;
+            private TKey _currentKey = default!;
 
             internal SortedListKeyEnumerator(SortedList<TKey, TValue> sortedList)
             {
                 _sortedList = sortedList;
-                _version = sortedList._version;
+                _version = sortedList.version;
             }
 
             public void Dispose()
             {
                 _index = 0;
-                _currentKey = default(TKey);
+                _currentKey = default(TKey)!; // TODO-NULLABLE-GENERIC
             }
 
             public bool MoveNext()
             {
-                if (_version != _sortedList._version)
+                if (_version != _sortedList.version)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
 
                 if ((uint)_index < (uint)_sortedList.Count)
                 {
-                    _currentKey = _sortedList._keys[_index];
+                    _currentKey = _sortedList.keys[_index];
                     _index++;
                     return true;
                 }
 
                 _index = _sortedList.Count + 1;
-                _currentKey = default(TKey);
+                _currentKey = default(TKey)!; // TODO-NULLABLE-GENERIC
                 return false;
             }
 
@@ -933,7 +932,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -948,51 +947,50 @@ namespace System.Collections.Generic
 
             void IEnumerator.Reset()
             {
-                if (_version != _sortedList._version)
+                if (_version != _sortedList.version)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
                 _index = 0;
-                _currentKey = default(TKey);
+                _currentKey = default(TKey)!; // TODO-NULLABLE-GENERIC
             }
         }
 
-        [Serializable]
         private sealed class SortedListValueEnumerator : IEnumerator<TValue>, IEnumerator
         {
             private SortedList<TKey, TValue> _sortedList;
             private int _index;
             private int _version;
-            private TValue _currentValue;
+            private TValue _currentValue = default!;
 
             internal SortedListValueEnumerator(SortedList<TKey, TValue> sortedList)
             {
                 _sortedList = sortedList;
-                _version = sortedList._version;
+                _version = sortedList.version;
             }
 
             public void Dispose()
             {
                 _index = 0;
-                _currentValue = default(TValue);
+                _currentValue = default(TValue)!; // TODO-NULLABLE-GENERIC
             }
 
             public bool MoveNext()
             {
-                if (_version != _sortedList._version)
+                if (_version != _sortedList.version)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
 
                 if ((uint)_index < (uint)_sortedList.Count)
                 {
-                    _currentValue = _sortedList._values[_index];
+                    _currentValue = _sortedList.values[_index];
                     _index++;
                     return true;
                 }
 
                 _index = _sortedList.Count + 1;
-                _currentValue = default(TValue);
+                _currentValue = default(TValue)!; // TODO-NULLABLE-GENERIC
                 return false;
             }
 
@@ -1004,7 +1002,7 @@ namespace System.Collections.Generic
                 }
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get
                 {
@@ -1019,21 +1017,21 @@ namespace System.Collections.Generic
 
             void IEnumerator.Reset()
             {
-                if (_version != _sortedList._version)
+                if (_version != _sortedList.version)
                 {
                     throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 }
                 _index = 0;
-                _currentValue = default(TValue);
+                _currentValue = default(TValue)!; // TODO-NULLABLE-GENERIC
             }
         }
 
         [DebuggerTypeProxy(typeof(DictionaryKeyCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
         [Serializable]
-        private sealed class KeyList : IList<TKey>, ICollection
+        public sealed class KeyList : IList<TKey>, ICollection
         {
-            private SortedList<TKey, TValue> _dict;
+            private SortedList<TKey, TValue> _dict; // Do not rename (binary serialization)
 
             internal KeyList(SortedList<TKey, TValue> dictionary)
             {
@@ -1078,7 +1076,7 @@ namespace System.Collections.Generic
             public void CopyTo(TKey[] array, int arrayIndex)
             {
                 // defer error checking to Array.Copy
-                Array.Copy(_dict._keys, 0, array, arrayIndex, _dict.Count);
+                Array.Copy(_dict.keys, 0, array, arrayIndex, _dict.Count);
             }
 
             void ICollection.CopyTo(Array array, int arrayIndex)
@@ -1089,7 +1087,7 @@ namespace System.Collections.Generic
                 try
                 {
                     // defer error checking to Array.Copy
-                    Array.Copy(_dict._keys, 0, array, arrayIndex, _dict.Count);
+                    Array.Copy(_dict.keys, 0, array!, arrayIndex, _dict.Count);
                 }
                 catch (ArrayTypeMismatchException)
                 {
@@ -1129,8 +1127,8 @@ namespace System.Collections.Generic
                 if (((object)key) == null)
                     throw new ArgumentNullException(nameof(key));
 
-                int i = Array.BinarySearch<TKey>(_dict._keys, 0,
-                                          _dict.Count, key, _dict._comparer);
+                int i = Array.BinarySearch<TKey>(_dict.keys, 0,
+                                          _dict.Count, key, _dict.comparer);
                 if (i >= 0) return i;
                 return -1;
             }
@@ -1150,9 +1148,9 @@ namespace System.Collections.Generic
         [DebuggerTypeProxy(typeof(DictionaryValueCollectionDebugView<,>))]
         [DebuggerDisplay("Count = {Count}")]
         [Serializable]
-        private sealed class ValueList : IList<TValue>, ICollection
+        public sealed class ValueList : IList<TValue>, ICollection
         {
-            private SortedList<TKey, TValue> _dict;
+            private SortedList<TKey, TValue> _dict; // Do not rename (binary serialization)
 
             internal ValueList(SortedList<TKey, TValue> dictionary)
             {
@@ -1197,7 +1195,7 @@ namespace System.Collections.Generic
             public void CopyTo(TValue[] array, int arrayIndex)
             {
                 // defer error checking to Array.Copy
-                Array.Copy(_dict._values, 0, array, arrayIndex, _dict.Count);
+                Array.Copy(_dict.values, 0, array, arrayIndex, _dict.Count);
             }
 
             void ICollection.CopyTo(Array array, int index)
@@ -1208,7 +1206,7 @@ namespace System.Collections.Generic
                 try
                 {
                     // defer error checking to Array.Copy
-                    Array.Copy(_dict._values, 0, array, index, _dict.Count);
+                    Array.Copy(_dict.values, 0, array!, index, _dict.Count);
                 }
                 catch (ArrayTypeMismatchException)
                 {
@@ -1245,7 +1243,7 @@ namespace System.Collections.Generic
 
             public int IndexOf(TValue value)
             {
-                return Array.IndexOf(_dict._values, value, 0, _dict.Count);
+                return Array.IndexOf(_dict.values, value, 0, _dict.Count);
             }
 
             public bool Remove(TValue value)

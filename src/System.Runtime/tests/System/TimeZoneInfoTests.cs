@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Linq;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Globalization;
@@ -15,6 +17,7 @@ namespace System.Tests
     {
         private static readonly bool s_isWindows = RuntimeInformation.IsOSPlatform(OSPlatform.Windows);
         private static readonly bool s_isOSX = RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+        private static readonly bool s_isOSXAndNotHighSierra = s_isOSX && !PlatformDetection.IsMacOsHighSierraOrHigher;
 
         private static string s_strPacific = s_isWindows ? "Pacific Standard Time" : "America/Los_Angeles";
         private static string s_strSydney = s_isWindows ? "AUS Eastern Standard Time" : "Australia/Sydney";
@@ -32,6 +35,7 @@ namespace System.Tests
         private static string s_strCatamarca = s_isWindows ? "Argentina Standard Time" : "America/Argentina/Catamarca";
         private static string s_strLisbon = s_isWindows ? "GMT Standard Time" : "Europe/Lisbon";
         private static string s_strNewfoundland = s_isWindows ? "Newfoundland Standard Time" : "America/St_Johns";
+        private static string s_strIran = s_isWindows ? "Iran Standard Time" : "Asia/Tehran";
 
         private static TimeZoneInfo s_myUtc = TimeZoneInfo.Utc;
         private static TimeZoneInfo s_myLocal = TimeZoneInfo.Local;
@@ -129,6 +133,22 @@ namespace System.Tests
             DateTime dt = new DateTime(2011, 12, 31, 23, 30, 0);
             TimeSpan o = tz.GetUtcOffset(dt);
             Assert.True(o.Equals(TimeSpan.FromHours(4)), string.Format("Expected {0} and got {1}", TimeSpan.FromHours(4), o));
+        }
+
+        [Fact]
+        public static void CaseInsensitiveLookup()
+        {
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia), TimeZoneInfo.FindSystemTimeZoneById(s_strBrasilia.ToLowerInvariant()));
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg), TimeZoneInfo.FindSystemTimeZoneById(s_strJohannesburg.ToUpperInvariant()));
+
+            // Populate internal cache with all timezones. The implementation takes different path for lookup by id
+            // when all timezones are populated.
+            TimeZoneInfo.GetSystemTimeZones();
+
+            // The timezones used for the tests after GetSystemTimeZones calls have to be different from the ones used before GetSystemTimeZones to
+            // exercise the rare path.
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strSydney), TimeZoneInfo.FindSystemTimeZoneById(s_strSydney.ToLowerInvariant()));
+            Assert.Equal(TimeZoneInfo.FindSystemTimeZoneById(s_strPerth), TimeZoneInfo.FindSystemTimeZoneById(s_strPerth.ToUpperInvariant()));
         }
 
         [Fact]
@@ -293,6 +313,13 @@ namespace System.Tests
             time3 = new DateTime(2003, 10, 26, 3, 0, 1);
             VerifyConvert(time3, s_strGMT, s_strTonga, time3.AddHours(13));
             VerifyConvert(time3, s_strTonga, s_strGMT, time3.AddHours(-12));
+
+            // Iran has Utc offset 4:30 during the DST and 3:30 during standard time.
+            time3 = new DateTime(2018, 4, 20, 7, 0, 0, DateTimeKind.Utc);
+            VerifyConvert(time3, s_strIran, time3.AddHours(4.5), DateTimeKind.Unspecified); // DST time
+
+            time3 = new DateTime(2018, 1, 20, 7, 0, 0, DateTimeKind.Utc);
+            VerifyConvert(time3, s_strIran, time3.AddHours(3.5), DateTimeKind.Unspecified); // DST time
         }
 
         [Fact]
@@ -914,11 +941,11 @@ namespace System.Tests
         [Fact]
         public static void ConvertTime_NullTimeZone_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("destinationTimeZone", () => TimeZoneInfo.ConvertTime(new DateTime(), null));
-            Assert.Throws<ArgumentNullException>("destinationTimeZone", () => TimeZoneInfo.ConvertTime(new DateTimeOffset(), null));
+            AssertExtensions.Throws<ArgumentNullException>("destinationTimeZone", () => TimeZoneInfo.ConvertTime(new DateTime(), null));
+            AssertExtensions.Throws<ArgumentNullException>("destinationTimeZone", () => TimeZoneInfo.ConvertTime(new DateTimeOffset(), null));
 
-            Assert.Throws<ArgumentNullException>("sourceTimeZone", () => TimeZoneInfo.ConvertTime(new DateTime(), null, s_casablancaTz));
-            Assert.Throws<ArgumentNullException>("destinationTimeZone", () => TimeZoneInfo.ConvertTime(new DateTime(), s_casablancaTz, null));
+            AssertExtensions.Throws<ArgumentNullException>("sourceTimeZone", () => TimeZoneInfo.ConvertTime(new DateTime(), null, s_casablancaTz));
+            AssertExtensions.Throws<ArgumentNullException>("destinationTimeZone", () => TimeZoneInfo.ConvertTime(new DateTime(), s_casablancaTz, null));
         }
 
         [Fact]
@@ -1672,7 +1699,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix and Windows rules differ in this case
         public static void IsDaylightSavingTime_CatamarcaMultiYearDaylightSavings()
         {
             // America/Catamarca had DST from
@@ -1695,7 +1722,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Linux will use local mean time for DateTimes before standard time came into effect.
         [InlineData("1940-02-24T23:59:59.0000000Z", false, "0:00:00")]
         [InlineData("1940-02-25T00:00:00.0000000Z", true, "1:00:00")]
         [InlineData("1940-11-20T00:00:00.0000000Z", true, "1:00:00")]
@@ -1719,7 +1746,7 @@ namespace System.Tests
         }
 
         [Theory]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Linux will use local mean time for DateTimes before standard time came into effect.
         // in 1996 Europe/Lisbon changed from standard time to DST without changing the UTC offset
         [InlineData("1995-09-30T17:00:00.0000000Z", false, "1:00:00")]
         [InlineData("1996-03-31T00:59:59.0000000Z", false, "1:00:00")]
@@ -1831,12 +1858,12 @@ namespace System.Tests
         }
 
         /// <summary>
-        /// Ensure Africa/Johannesburg transitions from +3 to +2 at 
+        /// Ensure Africa/Johannesburg transitions from +3 to +2 at
         /// 1943-02-20T23:00:00Z, and not a tick before that.
         /// See https://github.com/dotnet/coreclr/issues/2185
         /// </summary>
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)] // Linux and Windows rules differ in this case
         public static void DaylightTransitionsExactTime_Johannesburg()
         {
             DateTimeOffset transition = new DateTimeOffset(1943, 3, 20, 23, 0, 0, TimeSpan.Zero);
@@ -1845,7 +1872,7 @@ namespace System.Tests
             Assert.Equal(TimeSpan.FromHours(3), s_johannesburgTz.GetUtcOffset(transition.AddTicks(-1)));
             Assert.Equal(TimeSpan.FromHours(2), s_johannesburgTz.GetUtcOffset(transition));
         }
-        
+
         public static IEnumerable<object[]> Equals_TestData()
         {
             yield return new object[] { s_casablancaTz, s_casablancaTz, true };
@@ -1872,28 +1899,371 @@ namespace System.Tests
             }
         }
 
-        private static void VerifyConvertException<EXCTYPE>(DateTimeOffset inputTime, string destinationTimeZoneId) where EXCTYPE : Exception
+        [Fact]
+        public static void ClearCachedData()
         {
-            Assert.ThrowsAny<EXCTYPE>(() =>
+            TimeZoneInfo cst = TimeZoneInfo.FindSystemTimeZoneById(s_strSydney);
+            TimeZoneInfo local = TimeZoneInfo.Local;
+
+            TimeZoneInfo.ClearCachedData();
+            Assert.ThrowsAny<ArgumentException>(() =>
             {
-                DateTimeOffset dt = TimeZoneInfo.ConvertTime(inputTime, TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId));
+                TimeZoneInfo.ConvertTime(DateTime.Now, local, cst);
             });
         }
 
-        private static void VerifyConvertException<EXCTYPE>(DateTime inputTime, string destinationTimeZoneId) where EXCTYPE : Exception
+        [Fact]
+        public static void ConvertTime_DateTimeOffset_NullDestination_ArgumentNullException()
         {
-            Assert.ThrowsAny<EXCTYPE>(() =>
-            {
-                DateTime dt = TimeZoneInfo.ConvertTime(inputTime, TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId));
-            });
+            DateTimeOffset time1 = new DateTimeOffset(2006, 5, 12, 0, 0, 0, TimeSpan.Zero);
+            VerifyConvertException<ArgumentNullException>(time1, null);
         }
 
-        private static void VerifyConvertException<EXCTYPE>(DateTime inputTime, string sourceTimeZoneId, string destinationTimeZoneId) where EXCTYPE : Exception
+        public static IEnumerable<object[]> ConvertTime_DateTimeOffset_InvalidDestination_TimeZoneNotFoundException_MemberData()
         {
-            Assert.ThrowsAny<EXCTYPE>(() =>
+            yield return new object[] { string.Empty };
+            yield return new object[] { "    " };
+            yield return new object[] { "\0" };
+            yield return new object[] { s_strPacific.Substring(0, s_strPacific.Length / 2) }; // whole string must match
+            yield return new object[] { s_strPacific + " Zone" }; // no extra characters
+            yield return new object[] { " " + s_strPacific }; // no leading space
+            yield return new object[] { s_strPacific + " " }; // no trailing space
+            yield return new object[] { "\0" + s_strPacific }; // no leading null
+            yield return new object[] { s_strPacific + "\0" }; // no trailing null
+            yield return new object[] { s_strPacific + "\\  " }; // no trailing null
+            yield return new object[] { s_strPacific + "\\Display" };
+            yield return new object[] { s_strPacific + "\n" }; // no trailing newline
+            yield return new object[] { new string('a', 100) }; // long string
+        }
+
+        [Theory]
+        [MemberData(nameof(ConvertTime_DateTimeOffset_InvalidDestination_TimeZoneNotFoundException_MemberData))]
+        public static void ConvertTime_DateTimeOffset_InvalidDestination_TimeZoneNotFoundException(string destinationId)
+        {
+            DateTimeOffset time1 = new DateTimeOffset(2006, 5, 12, 0, 0, 0, TimeSpan.Zero);
+            VerifyConvertException<TimeZoneNotFoundException>(time1, destinationId);
+        }
+
+        [Fact]
+        public static void ConvertTimeFromUtc()
+        {
+            // destination timezone is null
+            Assert.Throws<ArgumentNullException>(() =>
             {
-                DateTime dt = TimeZoneInfo.ConvertTime(inputTime, TimeZoneInfo.FindSystemTimeZoneById(sourceTimeZoneId), TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId));
+                DateTime dt = TimeZoneInfo.ConvertTimeFromUtc(new DateTime(2007, 5, 3, 11, 8, 0), null);
             });
+
+            // destination timezone is UTC
+            DateTime now = DateTime.UtcNow;
+            DateTime convertedNow = TimeZoneInfo.ConvertTimeFromUtc(now, TimeZoneInfo.Utc);
+            Assert.Equal(now, convertedNow);
+        }
+
+        [Fact]
+        public static void ConvertTimeToUtc()
+        {
+            // null source
+            VerifyConvertToUtcException<ArgumentNullException>(new DateTime(2007, 5, 3, 12, 16, 0), null);
+
+            TimeZoneInfo london = CreateCustomLondonTimeZone();
+
+            // invalid DateTime
+            DateTime invalidDate = new DateTime(2007, 3, 25, 1, 30, 0);
+            VerifyConvertToUtcException<ArgumentException>(invalidDate, london);
+
+            // DateTimeKind and source types don't match
+            VerifyConvertToUtcException<ArgumentException>(new DateTime(2007, 5, 3, 12, 8, 0, DateTimeKind.Utc), london);
+
+            // correct UTC conversion
+            DateTime date = new DateTime(2007, 01, 01, 0, 0, 0);
+            Assert.Equal(date.ToUniversalTime(), TimeZoneInfo.ConvertTimeToUtc(date));
+        }
+
+        [Fact]
+        public static void ConvertTimeFromToUtc()
+        {
+            TimeZoneInfo london = CreateCustomLondonTimeZone();
+
+            DateTime utc = DateTime.UtcNow;
+            Assert.Equal(DateTimeKind.Utc, utc.Kind);
+
+            DateTime converted = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.Utc);
+            Assert.Equal(DateTimeKind.Utc, converted.Kind);
+            DateTime back = TimeZoneInfo.ConvertTimeToUtc(converted, TimeZoneInfo.Utc);
+            Assert.Equal(DateTimeKind.Utc, back.Kind);
+            Assert.Equal(utc, back);
+
+            converted = TimeZoneInfo.ConvertTimeFromUtc(utc, TimeZoneInfo.Local);
+            DateTimeKind expectedKind = (TimeZoneInfo.Local == TimeZoneInfo.Utc) ? DateTimeKind.Utc : DateTimeKind.Local;
+            Assert.Equal(expectedKind, converted.Kind);
+            back = TimeZoneInfo.ConvertTimeToUtc(converted, TimeZoneInfo.Local);
+            Assert.Equal(back.Kind, DateTimeKind.Utc);
+            Assert.Equal(utc, back);
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Expected behavior specific to Unix
+        public static void ConvertTimeFromToUtc_UnixOnly()
+        {
+            // DateTime Kind is Local
+            Assert.ThrowsAny<ArgumentException>(() =>
+            {
+                DateTime dt = TimeZoneInfo.ConvertTimeFromUtc(new DateTime(2007, 5, 3, 11, 8, 0, DateTimeKind.Local), TimeZoneInfo.Local);
+            });
+
+            TimeZoneInfo london = CreateCustomLondonTimeZone();
+
+            // winter (no DST)
+            DateTime winter = new DateTime(2007, 12, 25, 12, 0, 0);
+            DateTime convertedWinter = TimeZoneInfo.ConvertTimeFromUtc(winter, london);
+            Assert.Equal(winter, convertedWinter);
+
+            // summer (DST)
+            DateTime summer = new DateTime(2007, 06, 01, 12, 0, 0);
+            DateTime convertedSummer = TimeZoneInfo.ConvertTimeFromUtc(summer, london);
+            Assert.Equal(summer + new TimeSpan(1, 0, 0), convertedSummer);
+
+            // Kind and source types don't match
+            VerifyConvertToUtcException<ArgumentException>(new DateTime(2007, 5, 3, 12, 8, 0, DateTimeKind.Local), london);
+
+            // Test the ambiguous date
+            DateTime utcAmbiguous = new DateTime(2016, 10, 30, 0, 14, 49, DateTimeKind.Utc);
+            DateTime convertedAmbiguous = TimeZoneInfo.ConvertTimeFromUtc(utcAmbiguous, london);
+            Assert.Equal(DateTimeKind.Unspecified, convertedAmbiguous.Kind);
+            Assert.True(london.IsAmbiguousTime(convertedAmbiguous), $"Expected to have {convertedAmbiguous} is ambiguous");
+
+            // convert to London time and back
+            DateTime utc = DateTime.UtcNow;
+            Assert.Equal(DateTimeKind.Utc, utc.Kind);
+            DateTime converted = TimeZoneInfo.ConvertTimeFromUtc(utc, london);
+            Assert.Equal(DateTimeKind.Unspecified, converted.Kind);
+            DateTime back = TimeZoneInfo.ConvertTimeToUtc(converted, london);
+            Assert.Equal(DateTimeKind.Utc, back.Kind);
+
+            if (london.IsAmbiguousTime(converted))
+            {
+                // if the time is ambiguous this will not round trip the original value because this ambiguous time can be mapped into
+                // 2 UTC times. usually we return the value with the DST delta added to it.
+                back = back.AddTicks(- london.GetAdjustmentRules()[0].DaylightDelta.Ticks);
+            }
+
+            Assert.Equal(utc, back);
+        }
+
+        [Fact]
+        public static void CreateCustomTimeZone()
+        {
+            TimeZoneInfo.TransitionTime s1 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 4, 0, 0), 3, 2, DayOfWeek.Sunday);
+            TimeZoneInfo.TransitionTime e1 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 4, 0, 0), 10, 2, DayOfWeek.Sunday);
+            TimeZoneInfo.AdjustmentRule r1 = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(new DateTime(2000, 1, 1), new DateTime(2005, 1, 1), new TimeSpan(1, 0, 0), s1, e1);
+
+            // supports DST
+            TimeZoneInfo tz1 = TimeZoneInfo.CreateCustomTimeZone("mytimezone", new TimeSpan(6, 0, 0), null, null, null, new TimeZoneInfo.AdjustmentRule[] { r1 });
+            Assert.True(tz1.SupportsDaylightSavingTime);
+
+            // doesn't support DST
+            TimeZoneInfo tz2 = TimeZoneInfo.CreateCustomTimeZone("mytimezone", new TimeSpan(4, 0, 0), null, null, null, new TimeZoneInfo.AdjustmentRule[] { r1 }, true);
+            Assert.False(tz2.SupportsDaylightSavingTime);
+
+            TimeZoneInfo tz3 = TimeZoneInfo.CreateCustomTimeZone("mytimezone", new TimeSpan(6, 0, 0), null, null, null, null);
+            Assert.False(tz3.SupportsDaylightSavingTime);
+        }
+
+        [Fact]
+        public static void CreateCustomTimeZone_Invalid()
+        {
+            VerifyCustomTimeZoneException<ArgumentNullException>(null, new TimeSpan(0), null, null);                // null Id
+            VerifyCustomTimeZoneException<ArgumentException>("", new TimeSpan(0), null, null);                      // empty string Id
+            VerifyCustomTimeZoneException<ArgumentException>("mytimezone", new TimeSpan(0, 0, 55), null, null);     // offset not minutes
+            VerifyCustomTimeZoneException<ArgumentException>("mytimezone", new TimeSpan(14, 1, 0), null, null);     // offset too big
+            VerifyCustomTimeZoneException<ArgumentException>("mytimezone", - new TimeSpan(14, 1, 0), null, null);   // offset too small
+        }
+
+        [Fact]
+        public static void CreateCustomTimeZone_InvalidTimeZone()
+        {
+            TimeZoneInfo.TransitionTime s1 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 4, 0, 0), 3, 2, DayOfWeek.Sunday);
+            TimeZoneInfo.TransitionTime e1 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 4, 0, 0), 10, 2, DayOfWeek.Sunday);
+            TimeZoneInfo.TransitionTime s2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 4, 0, 0), 2, 2, DayOfWeek.Sunday);
+            TimeZoneInfo.TransitionTime e2 = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 4, 0, 0), 11, 2, DayOfWeek.Sunday);
+
+            TimeZoneInfo.AdjustmentRule r1 = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(new DateTime(2000, 1, 1), new DateTime(2005, 1, 1), new TimeSpan(1, 0, 0), s1, e1);
+
+            // AdjustmentRules overlap
+            TimeZoneInfo.AdjustmentRule r2 = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(new DateTime(2004, 1, 1), new DateTime(2007, 1, 1), new TimeSpan(1, 0, 0), s2, e2);
+            VerifyCustomTimeZoneException<InvalidTimeZoneException>("mytimezone", new TimeSpan(6, 0, 0), null, null, null, new TimeZoneInfo.AdjustmentRule[] { r1, r2 });
+
+            // AdjustmentRules not ordered
+            TimeZoneInfo.AdjustmentRule r3 = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(new DateTime(2006, 1, 1), new DateTime(2007, 1, 1), new TimeSpan(1, 0, 0), s2, e2);
+            VerifyCustomTimeZoneException<InvalidTimeZoneException>("mytimezone", new TimeSpan(6, 0, 0), null, null, null, new TimeZoneInfo.AdjustmentRule[] { r3, r1 });
+
+            // Offset out of range
+            TimeZoneInfo.AdjustmentRule r4 = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(new DateTime(2000, 1, 1), new DateTime(2005, 1, 1), new TimeSpan(3, 0, 0), s1, e1);
+            VerifyCustomTimeZoneException<InvalidTimeZoneException>("mytimezone", new TimeSpan(12, 0, 0), null, null, null, new TimeZoneInfo.AdjustmentRule[] { r4 });
+
+            // overlapping AdjustmentRules for a date
+            TimeZoneInfo.AdjustmentRule r5 = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(new DateTime(2005, 1, 1), new DateTime(2007, 1, 1), new TimeSpan(1, 0, 0), s2, e2);
+            VerifyCustomTimeZoneException<InvalidTimeZoneException>("mytimezone", new TimeSpan(6, 0, 0), null, null, null, new TimeZoneInfo.AdjustmentRule[] { r1, r5 });
+
+            // null AdjustmentRule
+            VerifyCustomTimeZoneException<InvalidTimeZoneException>("mytimezone", new TimeSpan(12, 0, 0), null, null, null, new TimeZoneInfo.AdjustmentRule[] { null });
+        }
+
+        [Fact]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // TimeZone not found on Windows
+        public static void HasSameRules_RomeAndVatican()
+        {
+            TimeZoneInfo rome = TimeZoneInfo.FindSystemTimeZoneById("Europe/Rome");
+            TimeZoneInfo vatican = TimeZoneInfo.FindSystemTimeZoneById("Europe/Vatican");
+            Assert.True(rome.HasSameRules(vatican));
+        }
+
+        [Fact]
+        public static void HasSameRules_NullAdjustmentRules()
+        {
+            TimeZoneInfo utc = TimeZoneInfo.Utc;
+            TimeZoneInfo custom = TimeZoneInfo.CreateCustomTimeZone("Custom", new TimeSpan(0), "Custom", "Custom");
+            Assert.True(utc.HasSameRules(custom));
+        }
+
+        [Fact]
+        public static void ConvertTimeBySystemTimeZoneIdTests()
+        {
+            DateTime now = DateTime.Now;
+            DateTime utcNow = TimeZoneInfo.ConvertTimeToUtc(now);
+
+            Assert.Equal(now, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcNow, TimeZoneInfo.Local.Id));
+            Assert.Equal(utcNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(now, TimeZoneInfo.Utc.Id));
+
+            Assert.Equal(now, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcNow, TimeZoneInfo.Utc.Id, TimeZoneInfo.Local.Id));
+            Assert.Equal(utcNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(now, TimeZoneInfo.Local.Id, TimeZoneInfo.Utc.Id));
+
+            DateTimeOffset offsetNow = new DateTimeOffset(now);
+            DateTimeOffset utcOffsetNow = new DateTimeOffset(utcNow);
+
+            Assert.Equal(offsetNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(utcOffsetNow, TimeZoneInfo.Local.Id));
+            Assert.Equal(utcOffsetNow, TimeZoneInfo.ConvertTimeBySystemTimeZoneId(offsetNow, TimeZoneInfo.Utc.Id));
+        }
+
+        public static IEnumerable<object[]> SystemTimeZonesTestData()
+        {
+            foreach (TimeZoneInfo tz in TimeZoneInfo.GetSystemTimeZones())
+            {
+                yield return new object[] { tz };
+            }
+        }
+
+        [ActiveIssue(14797, TestPlatforms.AnyUnix)]
+        [Theory]
+        [MemberData(nameof(SystemTimeZonesTestData))]
+        public static void ToSerializedString_FromSerializedString_RoundTrips(TimeZoneInfo timeZone)
+        {
+            string serialized = timeZone.ToSerializedString();
+            TimeZoneInfo deserializedTimeZone = TimeZoneInfo.FromSerializedString(serialized);
+            Assert.Equal(timeZone, deserializedTimeZone);
+            Assert.Equal(serialized, deserializedTimeZone.ToSerializedString());
+        }
+
+        [Fact]
+        public static void TimeZoneInfo_DoesNotCreateAdjustmentRulesWithOffsetOutsideOfRange()
+        {
+            // On some OSes with some time zones setting
+            // time zone may contain old adjustment rule which have offset higher than 14h
+            // Assert.DoesNotThrow
+            DateTimeOffset.FromFileTime(0);
+        }
+
+        [Fact]
+        public static void TimeZoneInfo_DoesConvertTimeForOldDatesOfTimeZonesWithExceedingMaxRange()
+        {
+            // On some OSes this time zone contains old adjustment rules which have offset higher than 14h
+            TimeZoneInfo tzi = TryGetSystemTimeZone("Asia/Manila");
+            if (tzi == null)
+            {
+                // Time zone could not be found
+                return;
+            }
+
+            // Assert.DoesNotThrow
+            TimeZoneInfo.ConvertTime(new DateTimeOffset(1800, 4, 4, 10, 10, 4, 2, TimeSpan.Zero), tzi);
+        }
+
+        [Fact]
+        public static void GetSystemTimeZones_AllTimeZonesHaveOffsetInValidRange()
+        {
+            foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
+            {
+                foreach (TimeZoneInfo.AdjustmentRule ar in tzi.GetAdjustmentRules())
+                {
+                    Assert.True(Math.Abs((tzi.GetUtcOffset(ar.DateStart)).TotalHours) <= 14.0);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TimeZoneInfo_DaylightDeltaIsNoMoreThan12Hours()
+        {
+            foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
+            {
+                foreach (TimeZoneInfo.AdjustmentRule ar in tzi.GetAdjustmentRules())
+                {
+                    Assert.True(Math.Abs(ar.DaylightDelta.TotalHours) <= 12.0);
+                }
+            }
+        }
+
+        [Fact]
+        public static void TimeZoneInfo_DisplayNameStartsWithOffset()
+        {
+            foreach (TimeZoneInfo tzi in TimeZoneInfo.GetSystemTimeZones())
+            {
+                if (tzi.Id != "UTC")
+                {
+                    Assert.False(string.IsNullOrWhiteSpace(tzi.StandardName));
+                    Assert.Matches(@"^\(UTC(\+|-)[0-9]{2}:[0-9]{2}\) \S.*", tzi.DisplayName);
+
+                    // see https://github.com/dotnet/corefx/pull/33204#issuecomment-438782500
+                    if (PlatformDetection.IsNotWindowsNanoServer && !PlatformDetection.IsWindows7)
+                    {
+                        string offset = Regex.Match(tzi.DisplayName, @"(-|)[0-9]{2}:[0-9]{2}").Value;
+                        TimeSpan ts = TimeSpan.Parse(offset);
+                        if (tzi.BaseUtcOffset != ts && tzi.Id.IndexOf("Morocco", StringComparison.Ordinal) >= 0)
+                        {
+                            // Windows data can report display name with UTC+01:00 offset which is not matching the actual BaseUtcOffset.
+                            // We special case this in the test to avoid the test failures like:
+                            //      01:00 != 00:00:00, dn:(UTC+01:00) Casablanca, sn:Morocco Standard Time
+                            Assert.True(tzi.BaseUtcOffset == new TimeSpan(0, 0, 0), $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.StandardName}");
+                        }
+                        else
+                        {
+                            Assert.True(tzi.BaseUtcOffset == ts, $"{offset} != {tzi.BaseUtcOffset}, dn:{tzi.DisplayName}, sn:{tzi.StandardName}");
+                        }
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public static void EnsureUtcObjectSingleton()
+        {
+            TimeZoneInfo utcObject = TimeZoneInfo.GetSystemTimeZones().Single(x => x.Id.Equals("UTC", StringComparison.OrdinalIgnoreCase));
+            Assert.True(ReferenceEquals(utcObject, TimeZoneInfo.Utc));
+            Assert.True(ReferenceEquals(TimeZoneInfo.FindSystemTimeZoneById("UTC"), TimeZoneInfo.Utc));
+        }
+
+        private static void VerifyConvertException<TException>(DateTimeOffset inputTime, string destinationTimeZoneId) where TException : Exception
+        {
+            Assert.ThrowsAny<TException>(() => TimeZoneInfo.ConvertTime(inputTime, TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId)));
+        }
+
+        private static void VerifyConvertException<TException>(DateTime inputTime, string destinationTimeZoneId) where TException : Exception
+        {
+            Assert.ThrowsAny<TException>(() => TimeZoneInfo.ConvertTime(inputTime, TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId)));
+        }
+
+        private static void VerifyConvertException<TException>(DateTime inputTime, string sourceTimeZoneId, string destinationTimeZoneId) where TException : Exception
+        {
+            Assert.ThrowsAny<TException>(() => TimeZoneInfo.ConvertTime(inputTime, TimeZoneInfo.FindSystemTimeZoneById(sourceTimeZoneId), TimeZoneInfo.FindSystemTimeZoneById(destinationTimeZoneId)));
         }
 
         private static void VerifyConvert(DateTimeOffset inputTime, string destinationTimeZoneId, DateTimeOffset expectedTime)
@@ -1943,12 +2313,9 @@ namespace System.Tests
             }
         }
 
-        private static void VerifyAmbiguousOffsetsException<EXCTYPE>(TimeZoneInfo tz, DateTime dt) where EXCTYPE : Exception
+        private static void VerifyAmbiguousOffsetsException<TException>(TimeZoneInfo tz, DateTime dt) where TException : Exception
         {
-            Assert.Throws<EXCTYPE>(() =>
-            {
-                TimeSpan[] ret = tz.GetAmbiguousTimeOffsets(dt);
-            });
+            Assert.Throws<TException>(() => tz.GetAmbiguousTimeOffsets(dt));
         }
 
         private static void VerifyOffsets(TimeZoneInfo tz, DateTime dt, TimeSpan[] expectedOffsets)
@@ -1957,7 +2324,7 @@ namespace System.Tests
             VerifyTimeSpanArray(ret, expectedOffsets, string.Format("Wrong offsets when used {0} with the zone {1}", dt, tz.Id));
         }
 
-        static public void VerifyTimeSpanArray(TimeSpan[] actual, TimeSpan[] expected, string errorMsg)
+        public static void VerifyTimeSpanArray(TimeSpan[] actual, TimeSpan[] expected, string errorMsg)
         {
             Assert.True(actual != null);
             Assert.True(expected != null);
@@ -1994,10 +2361,10 @@ namespace System.Tests
         /// </summary>
         /// <remarks>
         /// Windows uses the current daylight savings rules for early times.
-        /// 
-        /// OSX has V1 tzfiles, which means for early times it uses the first standard offset in the tzfile.
+        ///
+        /// OSX before High Sierra version has V1 tzfiles, which means for early times it uses the first standard offset in the tzfile.
         /// For Pacific Standard Time it is UTC-8.  For Sydney, it is UTC+10.
-        /// 
+        ///
         /// Other Unix distros use V2 tzfiles, which use local mean time (LMT), which is based on the solar time.
         /// The Pacific Standard Time LMT is UTC-07:53.  For Sydney, LMT is UTC+10:04.
         /// </remarks>
@@ -2005,7 +2372,7 @@ namespace System.Tests
         {
             if (timeZoneId == s_strPacific)
             {
-                if (s_isWindows || s_isOSX)
+                if (s_isWindows || s_isOSXAndNotHighSierra)
                 {
                     return TimeSpan.FromHours(-8);
                 }
@@ -2020,7 +2387,7 @@ namespace System.Tests
                 {
                     return TimeSpan.FromHours(11);
                 }
-                else if (s_isOSX)
+                else if (s_isOSXAndNotHighSierra)
                 {
                     return TimeSpan.FromHours(10);
                 }
@@ -2033,6 +2400,46 @@ namespace System.Tests
             {
                 throw new NotSupportedException(string.Format("The timeZoneId '{0}' is not supported by GetEarlyTimesOffset.", timeZoneId));
             }
+        }
+
+        private static TimeZoneInfo TryGetSystemTimeZone(string id)
+        {
+            try
+            {
+                return TimeZoneInfo.FindSystemTimeZoneById(id);
+            }
+            catch (TimeZoneNotFoundException)
+            {
+                return null;
+            }
+        }
+
+        private static TimeZoneInfo CreateCustomLondonTimeZone()
+        {
+            TimeZoneInfo.TransitionTime start = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 1, 0, 0), 3, 5, DayOfWeek.Sunday);
+            TimeZoneInfo.TransitionTime end = TimeZoneInfo.TransitionTime.CreateFloatingDateRule(new DateTime(1, 1, 1, 2, 0, 0), 10, 5, DayOfWeek.Sunday);
+            TimeZoneInfo.AdjustmentRule rule = TimeZoneInfo.AdjustmentRule.CreateAdjustmentRule(DateTime.MinValue.Date, DateTime.MaxValue.Date, new TimeSpan(1, 0, 0), start, end);
+            return TimeZoneInfo.CreateCustomTimeZone("Europe/London", new TimeSpan(0), "Europe/London", "British Standard Time", "British Summer Time", new TimeZoneInfo.AdjustmentRule[] { rule });
+        }
+
+        private static void VerifyConvertToUtcException<TException>(DateTime dateTime, TimeZoneInfo sourceTimeZone) where TException : Exception
+        {
+            Assert.ThrowsAny<TException>(() => TimeZoneInfo.ConvertTimeToUtc(dateTime, sourceTimeZone));
+        }
+
+        private static void VerifyCustomTimeZoneException<TException>(string id, TimeSpan baseUtcOffset, string displayName, string standardDisplayName, string daylightDisplayName = null, TimeZoneInfo.AdjustmentRule[] adjustmentRules = null) where TException : Exception
+        {
+            Assert.ThrowsAny<TException>(() =>
+            {
+                if (daylightDisplayName == null && adjustmentRules == null)
+                {
+                    TimeZoneInfo.CreateCustomTimeZone(id, baseUtcOffset, displayName, standardDisplayName);
+                }
+                else
+                {
+                    TimeZoneInfo.CreateCustomTimeZone(id, baseUtcOffset, displayName, standardDisplayName, daylightDisplayName, adjustmentRules);
+                }
+            });
         }
     }
 }

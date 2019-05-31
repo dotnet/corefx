@@ -4,9 +4,10 @@
 
 using System;
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
-public class ReadKey : RemoteExecutorTestBase
+public class ReadKey
 {
     [Fact]
     public static void KeyAvailable()
@@ -37,6 +38,20 @@ public class ReadKey : RemoteExecutorTestBase
         Assert.Throws<ArgumentOutOfRangeException>(() => new ConsoleKeyInfo('\0', (ConsoleKey)256, false, false, false));
     }
 
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    public void NumberLock_GetUnix_ThrowsPlatformNotSupportedException()
+    {
+        Assert.Throws<PlatformNotSupportedException>(() => Console.NumberLock);
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    public void CapsLock_GetUnix_ThrowsPlatformNotSupportedException()
+    {
+        Assert.Throws<PlatformNotSupportedException>(() => Console.CapsLock);
+    }
+
     private static void RunRemote(Func<int> func, ProcessStartInfo psi = null)
     {
         var options = new RemoteInvokeOptions();
@@ -45,6 +60,6 @@ public class ReadKey : RemoteExecutorTestBase
             options.StartInfo = psi;
         }
 
-        RemoteInvoke(func, options).Dispose();
+        RemoteExecutor.Invoke(func, options).Dispose();
     }
 }

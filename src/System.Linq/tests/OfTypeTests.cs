@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.OfType<int>(), q.OfType<int>());
@@ -23,8 +23,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.OfType<int>(), q.OfType<int>());
@@ -80,6 +80,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void RunOnce()
+        {
+            object[] source = { 3.5m, -4, "Test", "Check", 4, 8.0, 10.5, 9 };
+            int[] expected = { -4, 4, 9 };
+
+            Assert.Equal(expected, source.RunOnce().OfType<int>());
+        }
+
+        [Fact]
         public void IntFromNullableInt()
         {
             int[] source = { -4, 4, 9 };
@@ -114,7 +123,7 @@ namespace System.Linq.Tests
         [Fact]
         public void NullSource()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<object>)null).OfType<string>());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<object>)null).OfType<string>());
         }
 
         [Fact]

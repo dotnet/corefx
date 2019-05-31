@@ -1,10 +1,11 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Linq.Expressions.Tests;
 using Microsoft.CSharp.RuntimeBinder;
 using Xunit;
 
@@ -27,15 +28,15 @@ namespace System.Dynamic.Tests
 
         private static readonly int[] SomeInt32 = {0, 1, 2, -1, int.MinValue, int.MaxValue, int.MaxValue - 1};
 
-        private static IEnumerable<object[]> CrossJoinInt32()
+        public static IEnumerable<object[]> CrossJoinInt32()
             => from i in SomeInt32 from j in SomeInt32 select new object[] {i, j};
 
         private static readonly double[] SomeDouble = {0.0, 1.0, 2.0, -1.0, double.PositiveInfinity, double.NaN};
 
-        private static IEnumerable<object[]> CrossJoinDouble()
+        public static IEnumerable<object[]> CrossJoinDouble()
             => from i in SomeDouble from j in SomeDouble select new object[] {i, j};
 
-        private static IEnumerable<object[]> BinaryExpressionTypes()
+        public static IEnumerable<object[]> BinaryExpressionTypes()
         {
             yield return new object[] {ExpressionType.Add};
             yield return new object[] {ExpressionType.And};
@@ -68,7 +69,7 @@ namespace System.Dynamic.Tests
             yield return new object[] {ExpressionType.SubtractAssign};
         }
 
-        private static IEnumerable<object[]> NonBinaryExpressionTypes()
+        public static IEnumerable<object[]> NonBinaryExpressionTypes()
         {
             yield return new object[] {ExpressionType.AddChecked};
             yield return new object[] {ExpressionType.AndAlso};
@@ -133,7 +134,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x + y, dX + dY);
+            Assert.Equal(unchecked(x + y), unchecked(dX + dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -250,7 +251,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x * y, dX * dY);
+            Assert.Equal(unchecked(x * y), unchecked(dX * dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -301,7 +302,7 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            Assert.Equal(x - y, dX - dY);
+            Assert.Equal(unchecked(x - y), unchecked(dX - dY));
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -328,8 +329,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX += dY;
-            Assert.Equal(x + y, dX);
+
+            unchecked
+            {
+                dX += dY;
+                Assert.Equal(x + y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -419,8 +424,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX *= dY;
-            Assert.Equal(x * y, dX);
+
+            unchecked
+            {
+                dX *= dY;
+                Assert.Equal(x * y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -467,8 +476,12 @@ namespace System.Dynamic.Tests
         {
             dynamic dX = x;
             dynamic dY = y;
-            dX -= dY;
-            Assert.Equal(x - y, dX);
+
+            unchecked
+            {
+                dX -= dY;
+                Assert.Equal(x - y, dX);
+            }
         }
 
         [Theory, MemberData(nameof(CrossJoinInt32))]
@@ -631,7 +644,7 @@ namespace System.Dynamic.Tests
         [Theory, MemberData(nameof(NonBinaryExpressionTypes))]
         public void NonBinaryOperations(ExpressionType type)
         {
-            Assert.Throws<ArgumentException>("operation", () => new MinimumOverrideBinaryOperationBinder(type));
+            AssertExtensions.Throws<ArgumentException>("operation", () => new MinimumOverrideBinaryOperationBinder(type));
         }
 
         [Theory, MemberData(nameof(BinaryExpressionTypes))]
@@ -651,7 +664,7 @@ namespace System.Dynamic.Tests
         {
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
             var arg = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
-            Assert.Throws<ArgumentNullException>("target", () => binder.Bind(null, new[] {arg}));
+            AssertExtensions.Throws<ArgumentNullException>("target", () => binder.Bind(null, new[] {arg}));
         }
 
         [Fact]
@@ -659,7 +672,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentNullException>("args", () => binder.Bind(target, null));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => binder.Bind(target, null));
         }
 
         [Fact]
@@ -667,7 +680,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentException>("args", () => binder.Bind(target, Array.Empty<DynamicMetaObject>()));
+            AssertExtensions.Throws<ArgumentException>("args", () => binder.Bind(target, Array.Empty<DynamicMetaObject>()));
         }
 
         [Fact]
@@ -677,7 +690,7 @@ namespace System.Dynamic.Tests
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
             var arg0 = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var arg1 = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
-            Assert.Throws<ArgumentException>("args", () => binder.Bind(target, new[] {arg0, arg1}));
+            AssertExtensions.Throws<ArgumentException>("args", () => binder.Bind(target, new[] {arg0, arg1}));
         }
 
         [Fact]
@@ -685,7 +698,7 @@ namespace System.Dynamic.Tests
         {
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideBinaryOperationBinder(ExpressionType.Add);
-            Assert.Throws<ArgumentNullException>("args", () => binder.Bind(target, new DynamicMetaObject[1]));
+            AssertExtensions.Throws<ArgumentNullException>("args", () => binder.Bind(target, new DynamicMetaObject[1]));
         }
 
         [Fact]
@@ -697,6 +710,58 @@ namespace System.Dynamic.Tests
             dX = 23;
             dY = 49;
             Assert.Throws<RuntimeBinderException>(() => dX && dY);
+        }
+
+        [Fact]
+        public void LiteralDoubleNaN()
+        {
+            dynamic d = double.NaN;
+            Assert.False(d == double.NaN);
+            Assert.True(d != double.NaN);
+            d = 3.0;
+            Assert.True(double.IsNaN(d + double.NaN));
+        }
+
+        [Fact]
+        public void LiteralSingleNaN()
+        {
+            dynamic d = float.NaN;
+            Assert.False(d == float.NaN);
+            Assert.True(d != float.NaN);
+            d = 3.0F;
+            Assert.True(float.IsNaN(d + float.NaN));
+        }
+
+        [Theory]
+        [ClassData(typeof(CompilationTypes))]
+        public void BinaryCallSiteBinder_DynamicExpression(bool useInterpreter)
+        {
+            DynamicExpression expression = DynamicExpression.Dynamic(
+                new BinaryCallSiteBinder(),
+                typeof(object),
+                Expression.Constant(40, typeof(object)),
+                Expression.Constant(2, typeof(object)));
+            Func<object> func = Expression.Lambda<Func<object>>(expression).Compile(useInterpreter);
+            Assert.Equal("42", func().ToString());
+        }
+
+        private class BinaryCallSiteBinder : BinaryOperationBinder
+        {
+            public BinaryCallSiteBinder() : base(ExpressionType.Add) {}
+
+            public override DynamicMetaObject FallbackBinaryOperation(DynamicMetaObject target, DynamicMetaObject arg, DynamicMetaObject errorSuggestion)
+            {
+                return new DynamicMetaObject(
+                    Expression.Convert(
+                    Expression.Add(
+                        Expression.Convert(target.Expression, typeof(int)),
+                        Expression.Convert(arg.Expression, typeof(int))
+                    ), typeof(object)),
+
+                    BindingRestrictions.GetTypeRestriction(target.Expression, typeof(int)).Merge(
+                        BindingRestrictions.GetTypeRestriction(arg.Expression, typeof(int))
+                    ));
+            }
         }
     }
 }

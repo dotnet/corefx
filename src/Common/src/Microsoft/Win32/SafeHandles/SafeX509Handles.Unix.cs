@@ -4,14 +4,30 @@
 
 using System;
 using System.Diagnostics;
-using System.Security;
 using System.Runtime.InteropServices;
 
 namespace Microsoft.Win32.SafeHandles
 {
-    [SecurityCritical]
     internal sealed class SafeX509Handle : SafeHandle
     {
+#if DEBUG
+        private static readonly bool s_captureTrace =
+            Environment.GetEnvironmentVariable("DEBUG_SAFEX509HANDLE_FINALIZATION") != null;
+
+        private readonly StackTrace _stacktrace =
+            s_captureTrace ? new StackTrace(fNeedFileInfo: true) : null;
+
+        ~SafeX509Handle()
+        {
+            if (s_captureTrace)
+            {
+                Interop.Sys.PrintF(
+                    "%s\n\n",
+                    $"0x{handle.ToInt64():x} {_stacktrace?.ToString() ?? "no stacktrace..."}");
+            }
+        }
+#endif
+
         internal static readonly SafeX509Handle InvalidHandle = new SafeX509Handle();
 
         private SafeX509Handle() : 
@@ -19,7 +35,6 @@ namespace Microsoft.Win32.SafeHandles
         {
         }
 
-        [SecurityCritical]
         protected override bool ReleaseHandle()
         {
             Interop.Crypto.X509Destroy(handle);
@@ -29,7 +44,6 @@ namespace Microsoft.Win32.SafeHandles
 
         public override bool IsInvalid
         {
-            [SecurityCritical]
             get { return handle == IntPtr.Zero; }
         }
     }
@@ -54,7 +68,6 @@ namespace Microsoft.Win32.SafeHandles
         }
     }
 
-    [SecurityCritical]
     internal sealed class SafeX509StoreHandle : SafeHandle
     {
         private SafeX509StoreHandle() :

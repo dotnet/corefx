@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -12,7 +11,6 @@ namespace System.IO
     /* SyncTextReader intentionally locks on itself rather than a private lock object.
      * This is done to synchronize different console readers(Issue#2855).
      */
-    [Serializable]
     internal sealed partial class SyncTextReader : TextReader
     {
         internal readonly TextReader _in;
@@ -72,7 +70,7 @@ namespace System.IO
             }
         }
 
-        public override String ReadLine()
+        public override string ReadLine()
         {
             lock (this)
             {
@@ -80,7 +78,7 @@ namespace System.IO
             }
         }
 
-        public override String ReadToEnd()
+        public override string ReadToEnd()
         {
             lock (this)
             {
@@ -93,12 +91,12 @@ namespace System.IO
         // No explicit locking is needed, as they all just delegate
         //
 
-        public override Task<String> ReadLineAsync()
+        public override Task<string> ReadLineAsync()
         {
             return Task.FromResult(ReadLine());
         }
 
-        public override Task<String> ReadToEndAsync()
+        public override Task<string> ReadToEndAsync()
         {
             return Task.FromResult(ReadToEnd());
         }
@@ -111,7 +109,6 @@ namespace System.IO
                 throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - index < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
-            Contract.EndContractBlock();
 
             return Task.FromResult(ReadBlock(buffer, index, count));
         }
@@ -124,7 +121,6 @@ namespace System.IO
                 throw new ArgumentOutOfRangeException(index < 0 ? nameof(index) : nameof(count), SR.ArgumentOutOfRange_NeedNonNegNum);
             if (buffer.Length - index < count)
                 throw new ArgumentException(SR.Argument_InvalidOffLen);
-            Contract.EndContractBlock();
 
             return Task.FromResult(Read(buffer, index, count));
         }

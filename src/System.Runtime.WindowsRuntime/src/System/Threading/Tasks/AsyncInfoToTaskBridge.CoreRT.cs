@@ -2,24 +2,16 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 using Internal.Interop;
 using Internal.Threading.Tasks;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
-using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices.WindowsRuntime;
 using System.Runtime.InteropServices;
-using System.Runtime.WindowsRuntime.Internal;
-using System.Threading;
 using Windows.Foundation;
 
 namespace System.Threading.Tasks
 {
     /// <summary>Provides a bridge between IAsyncOperation* and Task.</summary>
     /// <typeparam name="TResult">Specifies the type of the result of the asynchronous operation.</typeparam>
-    /// <typeparam name="TProgress">Specifies the type of progress notification data.</typeparam>
     internal sealed class AsyncInfoToTaskBridge<TResult> : TaskCompletionSource<TResult>
     {
         /// <summary>The CancellationToken associated with this operation.</summary>
@@ -48,7 +40,6 @@ namespace System.Threading.Tasks
 
         /// <summary>Registers the async operation for cancellation.</summary>
         /// <param name="asyncInfo">The asynchronous operation.</param>
-        /// <param name="cancellationToken">The token used to request cancellation of the asynchronous operation.</param>
         internal void RegisterForCancellation(IAsyncInfo asyncInfo)
         {
             Debug.Assert(asyncInfo != null);
@@ -69,7 +60,7 @@ namespace System.Threading.Tasks
                     }
 
                     if (disposeOfCtr)
-                        ctr.TryDeregister();
+                        ctr.Unregister();
                 }
             }
             catch (Exception ex)
@@ -80,7 +71,7 @@ namespace System.Threading.Tasks
 
                 if (!base.Task.IsFaulted)
                 {
-                    Debug.Assert(false, String.Format("Expected base task to already be faulted but found it in state {0}", base.Task.Status));
+                    Debug.Fail($"Expected base task to already be faulted but found it in state {base.Task.Status}");
                     base.TrySetException(ex);
                 }
             }
@@ -95,6 +86,7 @@ namespace System.Threading.Tasks
 
 
         /// <summary>Bridge to Completed handler on IAsyncActionWithProgress{TProgress}.</summary>
+        /// <typeparam name="TProgress">Specifies the type of progress notification data.</typeparam>
         internal void CompleteFromAsyncActionWithProgress<TProgress>(IAsyncActionWithProgress<TProgress> asyncInfo, AsyncStatus asyncStatus)
         {
             Complete(asyncInfo, null, asyncStatus);
@@ -109,6 +101,7 @@ namespace System.Threading.Tasks
 
 
         /// <summary>Bridge to Completed handler on IAsyncOperationWithProgress{TResult,TProgress}.</summary>
+        /// <typeparam name="TProgress">Specifies the type of progress notification data.</typeparam>
         internal void CompleteFromAsyncOperationWithProgress<TProgress>(IAsyncOperationWithProgress<TResult, TProgress> asyncInfo, AsyncStatus asyncStatus)
         {
             // delegate cached by compiler:
@@ -125,8 +118,6 @@ namespace System.Threading.Tasks
             if (asyncInfo == null)
                 throw new ArgumentNullException(nameof(asyncInfo));
 
-            Contract.EndContractBlock();
-            
             AsyncCausalitySupport.RemoveFromActiveTasks(this.Task);
 
             try
@@ -152,7 +143,7 @@ namespace System.Threading.Tasks
                     ctr = _ctr; // under lock to avoid torn reads
                     _ctr = default(CancellationTokenRegistration);
                 }
-                ctr.TryDeregister(); // It's ok if we end up unregistering a not-initialized registration; it'll just be a nop.
+                ctr.Unregister(); // It's ok if we end up unregistering a not-initialized registration; it'll just be a nop.
 
                 try
                 {
@@ -176,7 +167,7 @@ namespace System.Threading.Tasks
                         // Defend against a faulty IAsyncInfo implementation:
                         if (error == null)
                         {
-                            Debug.Assert(false, "IAsyncInfo.Status == Error, but ErrorCode returns a null Exception (implying S_OK).");
+                            Debug.Fail("IAsyncInfo.Status == Error, but ErrorCode returns a null Exception (implying S_OK).");
                             error = new InvalidOperationException(SR.InvalidOperation_InvalidAsyncCompletion);
                         }
                         else
@@ -226,7 +217,7 @@ namespace System.Threading.Tasks
                 {
                     // This really shouldn't happen, but could in a variety of misuse cases
                     // such as a faulty underlying IAsyncInfo implementation.
-                    Debug.Assert(false, string.Format("Unexpected exception in Complete: {0}", exc.ToString()));
+                    Debug.Fail($"Unexpected exception in Complete: {exc}");
 
                     if (AsyncCausalitySupport.LoggingOn)
                         AsyncCausalitySupport.TraceOperationCompletedError(this.Task);
@@ -236,7 +227,7 @@ namespace System.Threading.Tasks
                     // do we allow it to be propagated out to the invoker of the Completed handler.
                     if (!base.TrySetException(exc))
                     {
-                        Debug.Assert(false, "The task was already completed and thus the exception couldn't be stored.");
+                        Debug.Fail("The task was already completed and thus the exception couldn't be stored.");
                         throw;
                     }
                 }

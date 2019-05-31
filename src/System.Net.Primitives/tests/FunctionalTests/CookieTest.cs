@@ -144,11 +144,18 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public static void Name_GetSet_Success()
         {
-            Cookie c = new Cookie();
-            Assert.Equal(string.Empty, c.Name);
+            Cookie c1 = new Cookie();
+            Assert.Equal(string.Empty, c1.Name);
 
-            c.Name = "hello";
-            Assert.Equal("hello", c.Name);
+            c1.Name = "hello";
+            Assert.Equal("hello", c1.Name);
+
+            if (!PlatformDetection.IsFullFramework)
+            {
+                Cookie c2 = new Cookie();
+                c2.Name = "hello world";
+                Assert.Equal("hello world", c2.Name);
+            }
         }
 
         [Theory]
@@ -156,6 +163,7 @@ namespace System.Net.Primitives.Functional.Tests
         [InlineData("")]
         [InlineData("$hello")]
         [InlineData("hello ")]
+        [InlineData(" hello")]
         [InlineData("hello\t")]
         [InlineData("hello\r")]
         [InlineData("hello\n")]
@@ -239,13 +247,12 @@ namespace System.Net.Primitives.Functional.Tests
             c.Value = null;
             Assert.Equal(string.Empty, c.Value);
         }
-        
-        // NOTE: This test is expected to fail on the full desktop.
-        // The behavior this tests was only recently added in #8206.
+
         [Fact]
         public static void Value_PassNullToCtor_GetReturnsEmptyString()
         {
             var cookie = new Cookie("SomeName", null);
+            // Cookie.Value returns empty string on netcore.
             Assert.Equal(string.Empty, cookie.Value);
         }
 

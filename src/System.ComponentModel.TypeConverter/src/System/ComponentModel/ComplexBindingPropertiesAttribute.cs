@@ -2,105 +2,63 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Security.Permissions;
-
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>Specifies the data source and data member properties for a component.</para>
+    /// Specifies the data source and data member properties for a component.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public sealed class ComplexBindingPropertiesAttribute : Attribute
     {
-        private readonly string _dataSource;
-        private readonly string _dataMember;
-
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of
-        ///       the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
         /// </summary>
         public ComplexBindingPropertiesAttribute()
         {
-            _dataSource = null;
-            _dataMember = null;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of
-        ///       the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
         /// </summary>
         public ComplexBindingPropertiesAttribute(string dataSource)
         {
-            _dataSource = dataSource;
-            _dataMember = null;
+            DataSource = dataSource;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of
-        ///       the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/> class.
         /// </summary>
         public ComplexBindingPropertiesAttribute(string dataSource, string dataMember)
         {
-            _dataSource = dataSource;
-            _dataMember = dataMember;
+            DataSource = dataSource;
+            DataMember = dataMember;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name of the data source property for the component this attribute is
-        ///       bound to.
-        ///    </para>
+        /// Gets the name of the data source property for the component this attribute is
+        /// bound to.
         /// </summary>
-        public string DataSource
-        {
-            get
-            {
-                return _dataSource;
-            }
-        }
+        public string DataSource { get; }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name of the data member property for the component this attribute is
-        ///       bound to.
-        ///    </para>
+        /// Gets the name of the data member property for the component this attribute is
+        /// bound to.
         /// </summary>
-        public string DataMember
-        {
-            get
-            {
-                return _dataMember;
-            }
-        }
+        public string DataMember { get; }
 
         /// <summary>
-        ///    <para>
-        ///       Specifies the default value for the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/>, which is <see langword='null'/>. This
-        ///    <see langword='static '/>field is read-only. 
-        ///    </para>
+        /// Specifies the default value for the <see cref='System.ComponentModel.ComplexBindingPropertiesAttribute'/>, which is <see langword='null'/>. This
+        /// <see langword='static '/>field is read-only. 
         /// </summary>
         public static readonly ComplexBindingPropertiesAttribute Default = new ComplexBindingPropertiesAttribute();
 
         public override bool Equals(object obj)
         {
-            ComplexBindingPropertiesAttribute other = obj as ComplexBindingPropertiesAttribute;
-            return other != null &&
-                   other.DataSource == _dataSource &&
-                   other.DataMember == _dataMember;
+            return obj is ComplexBindingPropertiesAttribute other &&
+                   other.DataSource == DataSource &&
+                   other.DataMember == DataMember;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

@@ -1,0 +1,10 @@
+﻿<Project>
+  <Import Project="..\Directory.Build.props" />
+  <PropertyGroup>
+    <PackageVersion>1.6.0</PackageVersion>
+    <AssemblyVersion>1.2.4.0</AssemblyVersion>
+    <StrongNameKeyId>Microsoft</StrongNameKeyId>
+    <IsNETCoreApp>true</IsNETCoreApp>
+    <IsUAP>true</IsUAP>
+  </PropertyGroup>
+</Project>

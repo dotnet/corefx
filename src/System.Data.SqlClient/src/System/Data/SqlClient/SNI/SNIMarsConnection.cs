@@ -16,12 +16,11 @@ namespace System.Data.SqlClient.SNI
         private readonly Guid _connectionId = Guid.NewGuid();
         private readonly Dictionary<int, SNIMarsHandle> _sessions = new Dictionary<int, SNIMarsHandle>();
         private readonly byte[] _headerBytes = new byte[SNISMUXHeader.HEADER_LENGTH];
-
+        private readonly SNISMUXHeader _currentHeader = new SNISMUXHeader();
         private SNIHandle _lowerHandle;
         private ushort _nextSessionId = 0;
         private int _currentHeaderByteCount = 0;
         private int _dataBytesLeft = 0;
-        private SNISMUXHeader _currentHeader;
         private SNIPacket _currentPacket;
 
         /// <summary>
@@ -45,7 +44,7 @@ namespace System.Data.SqlClient.SNI
             _lowerHandle.SetAsyncCallbacks(HandleReceiveComplete, HandleSendComplete);
         }
 
-        public SNIMarsHandle CreateSession(object callbackObject, bool async)
+        public SNIMarsHandle CreateMarsSession(object callbackObject, bool async)
         {
             lock (this)
             {
@@ -95,7 +94,7 @@ namespace System.Data.SqlClient.SNI
         {
             lock (this)
             {
-                return _lowerHandle.SendAsync(packet, callback);
+                return _lowerHandle.SendAsync(packet, false, callback);
             }
         }
 
@@ -115,7 +114,6 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Check SNI handle connection
         /// </summary>
-        /// <param name="handle"></param>
         /// <returns>SNI error status</returns>
         public uint CheckConnection()
         {
@@ -128,13 +126,14 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Process a receive error
         /// </summary>
-        public void HandleReceiveError()
+        public void HandleReceiveError(SNIPacket packet)
         {
             Debug.Assert(Monitor.IsEntered(this), "HandleReceiveError was called without being locked.");
             foreach (SNIMarsHandle handle in _sessions.Values)
             {
-                handle.HandleReceiveError();
+                handle.HandleReceiveError(packet);
             }
+            packet?.Dispose();
         }
 
         /// <summary>
@@ -162,7 +161,7 @@ namespace System.Data.SqlClient.SNI
             {
                 lock (this)
                 {
-                    HandleReceiveError();
+                    HandleReceiveError(packet);
                     return;
                 }
             }
@@ -184,6 +183,8 @@ namespace System.Data.SqlClient.SNI
 
                             if (bytesTaken == 0)
                             {
+                                packet.Dispose();
+                                packet = null;
                                 sniErrorCode = ReceiveAsync(ref packet);
 
                                 if (sniErrorCode == TdsEnums.SNI_SUCCESS_IO_PENDING)
@@ -191,24 +192,14 @@ namespace System.Data.SqlClient.SNI
                                     return;
                                 }
 
-                                HandleReceiveError();
+                                HandleReceiveError(packet);
                                 return;
                             }
                         }
 
-                        _currentHeader = new SNISMUXHeader()
-                        {
-                            SMID = _headerBytes[0],
-                            flags = _headerBytes[1],
-                            sessionId = BitConverter.ToUInt16(_headerBytes, 2),
-                            length = BitConverter.ToUInt32(_headerBytes, 4) - SNISMUXHeader.HEADER_LENGTH,
-                            sequenceNumber = BitConverter.ToUInt32(_headerBytes, 8),
-                            highwater = BitConverter.ToUInt32(_headerBytes, 12)
-                        };
-
+                        _currentHeader.Read(_headerBytes);
                         _dataBytesLeft = (int)_currentHeader.length;
-                        _currentPacket = new SNIPacket(null);
-                        _currentPacket.Allocate((int)_currentHeader.length);
+                        _currentPacket = new SNIPacket((int)_currentHeader.length);
                     }
 
                     currentHeader = _currentHeader;
@@ -223,6 +214,8 @@ namespace System.Data.SqlClient.SNI
 
                             if (_dataBytesLeft > 0)
                             {
+                                packet.Dispose();
+                                packet = null;
                                 sniErrorCode = ReceiveAsync(ref packet);
 
                                 if (sniErrorCode == TdsEnums.SNI_SUCCESS_IO_PENDING)
@@ -230,7 +223,7 @@ namespace System.Data.SqlClient.SNI
                                     return;
                                 }
 
-                                HandleReceiveError();
+                                HandleReceiveError(packet);
                                 return;
                             }
                         }
@@ -241,7 +234,7 @@ namespace System.Data.SqlClient.SNI
                     if (!_sessions.ContainsKey(_currentHeader.sessionId))
                     {
                         SNILoadHandle.SingletonInstance.LastError = new SNIError(SNIProviders.SMUX_PROV, 0, SNICommon.InvalidParameterError, string.Empty);
-                        HandleReceiveError();
+                        HandleReceiveError(packet);
                         _lowerHandle.Dispose();
                         _lowerHandle = null;
                         return;
@@ -278,6 +271,8 @@ namespace System.Data.SqlClient.SNI
                 {
                     if (packet.DataLeft == 0)
                     {
+                        packet.Dispose();
+                        packet = null;
                         sniErrorCode = ReceiveAsync(ref packet);
 
                         if (sniErrorCode == TdsEnums.SNI_SUCCESS_IO_PENDING)
@@ -285,7 +280,7 @@ namespace System.Data.SqlClient.SNI
                             return;
                         }
 
-                        HandleReceiveError();
+                        HandleReceiveError(packet);
                         return;
                     }
                 }

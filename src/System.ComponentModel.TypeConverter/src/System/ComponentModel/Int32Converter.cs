@@ -7,56 +7,35 @@ using System.Globalization;
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>Provides a type converter to convert 32-bit signed integer objects to and
-    ///       from various other representations.</para>
+    /// Provides a type converter to convert 32-bit signed integer objects to and
+    /// from various other representations.
     /// </summary>
     public class Int32Converter : BaseNumberConverter
     {
         /// <summary>
         /// The Type this converter is targeting (e.g. Int16, UInt32, etc.)
         /// </summary>
-        internal override Type TargetType
-        {
-            get
-            {
-                return typeof(Int32);
-            }
-        }
+        internal override Type TargetType => typeof(int);
 
         /// <summary>
         /// Convert the given value to a string using the given radix
         /// </summary>
-        internal override object FromString(string value, int radix)
-        {
-            return Convert.ToInt32(value, radix);
-        }
+        internal override object FromString(string value, int radix) => Convert.ToInt32(value, radix);
 
         /// <summary>
         /// Convert the given value to a string using the given formatInfo
         /// </summary>
         internal override object FromString(string value, NumberFormatInfo formatInfo)
         {
-            return Int32.Parse(value, NumberStyles.Integer, formatInfo);
+            return int.Parse(value, NumberStyles.Integer, formatInfo);
         }
-
-
-        /// <summary>
-        /// Convert the given value to a string using the given CultureInfo
-        /// </summary>
-        internal override object FromString(string value, CultureInfo culture)
-        {
-            return Int32.Parse(value, culture);
-        }
-
-
 
         /// <summary>
         /// Convert the given value from a string using the given formatInfo
         /// </summary>
         internal override string ToString(object value, NumberFormatInfo formatInfo)
         {
-            return ((Int32)value).ToString("G", formatInfo);
+            return ((int)value).ToString("G", formatInfo);
         }
     }
 }
-

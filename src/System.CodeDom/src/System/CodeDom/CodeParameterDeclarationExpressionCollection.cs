@@ -6,7 +6,6 @@ using System.Collections;
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeParameterDeclarationExpressionCollection : CollectionBase
     {
         public CodeParameterDeclarationExpressionCollection() { }
@@ -23,8 +22,8 @@ namespace System.CodeDom
 
         public CodeParameterDeclarationExpression this[int index]
         {
-            get { return (CodeParameterDeclarationExpression)List[index]; }
-            set { List[index] = value; }
+            get => (CodeParameterDeclarationExpression)List[index];
+            set => List[index] = value;
         }
 
         public int Add(CodeParameterDeclarationExpression value) => List.Add(value);

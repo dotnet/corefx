@@ -5,6 +5,7 @@
 namespace System.Data.Common
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public abstract class DbException : System.Runtime.InteropServices.ExternalException
     {
         protected DbException() : base() { }
@@ -15,6 +16,8 @@ namespace System.Data.Common
 
         protected DbException(string message, int errorCode) : base(message, errorCode) { }
 
-        protected DbException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+        protected DbException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context)
+        {
+        }
     }
 }

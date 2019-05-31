@@ -19,7 +19,7 @@ The version is composed by two parts; the build number major and the build numbe
 Calculating BuildNumberMajor
 ----------------------------
 
-The BuildNumberMajor is represented by 5 digits, and is determined by calculating the time that has happened between the latest commit's date(SeedDate) and a VersionComparisonDate that gets passed in. In the case where VersionComparisonDate is not passed in, we will use April 1st 1996 as default. The reason why we use this specific date, is to ensure that the version produced by SeedDate is higher than the already shipped versions of the same library. The first portion of the BuildNumberMajor (first 3 digits) represent the number of month(s) since the VersionComparisonDate. The second portion of the BuildNumberMajor (last 2 digits) represent the day of the month of SeedDate. This part of the version is reproducible. 
+The BuildNumberMajor is represented by 5 digits, and is determined by calculating the time that has happened between the latest commit's date(SeedDate) and a VersionComparisonDate that gets passed in. In the case where VersionComparisonDate is not passed in, we will use April 1st 1996 as default. The reason why we use this specific date, is to ensure that the version produced by SeedDate is higher than the already shipped versions of the same library. The first portion of the BuildNumberMajor (first 3 digits) represent the number of month(s) since the VersionComparisonDate. The second portion of the BuildNumberMajor (last 2 digits) represent the day of the month of SeedDate. This part of the version is reproducible.
 
 Calculating BuildNumberMinor
 ----------------------------
@@ -34,7 +34,7 @@ In the case of packages, there is one small difference compared to the assembly 
 How does the Official Build workflow works
 ------------------------------------------
 
-Our Official Builds are a little different than the regular dev flow, and that is because Official Builds need the ability to not only force a specific BuildNumberMinor, but also a BuildNumberMajor. The way they do it, is by passing in the parameter `OfficialBuildId` which specifies the SeedDate that should be used and the revision of the build. For example, the following invocation: `build.cmd -OfficialBuildId=20160523.99` will use May 23 2016 as the SeedDate to generate the version, and it will set '99' as the BuildNumberMinor. With this funcionality, our OfficialBuilds are able to have an orchestrator that triggers different builds and force all of them to have the same version.
+Our Official Builds are a little different than the regular dev flow, and that is because Official Builds need the ability to not only force a specific BuildNumberMinor, but also a BuildNumberMajor. The way they do it, is by passing in the parameter `OfficialBuildId` which specifies the SeedDate that should be used and the revision of the build. For example, the following invocation: `build.cmd -OfficialBuildId=20160523.99` will use May 23 2016 as the SeedDate to generate the version, and it will set '99' as the BuildNumberMinor. With this functionality, our OfficialBuilds are able to have an orchestrator that triggers different builds and force all of them to have the same version.
 
 Getting the version of a native binary in non-Windows platforms
 ========================================================
@@ -46,9 +46,9 @@ When trying to get a version of a native binary in non-Windows, there are two wa
 How to force a dev build to produce a specific version
 ======================================================
 
-If you need to manually specify the version you want to produce your build output with, you can accomplish this by running the following from the root of the repo: 
-- `build-managed.cmd -BuildNumberMajor=00001 -BuildNumberMinor=01` in Windows
-- `build-managed.sh  -BuildNumberMajor=00001 -BuildNumberMinor=01` in non-Windows
+If you need to manually specify the version you want to produce your build output with, you can accomplish this by running the following from the root of the repo:
+- `build.cmd /p:BuildNumberMajor=00001 /p:BuildNumberMinor=01` in Windows
+- `build.sh  /p:BuildNumberMajor=00001 /p:BuildNumberMinor=01` in non-Windows
 
 Where is the version being consumed
 ===================================

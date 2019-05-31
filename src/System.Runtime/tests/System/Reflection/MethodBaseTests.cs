@@ -23,9 +23,9 @@ namespace System.Reflection.Tests
         }
 
         [Fact]
-        public static void Test_GetCurrentMethod_GenericMethod()
+        public static void Test_GetCurrentMethod_GenericMethodDefinition()
         {
-            MethodBase m = MyFakeGenericMethod<Byte>();
+            MethodBase m = MyFakeGenericMethod<byte>();
             
             Assert.Equal("MyFakeGenericMethod", m.Name);
             Assert.Equal("MethodBaseTests", m.ReflectedType.Name);
@@ -33,6 +33,22 @@ namespace System.Reflection.Tests
             Assert.True(m.IsGenericMethodDefinition);
             Assert.Equal(1, m.GetGenericArguments().Length);
             Assert.Equal("T", m.GetGenericArguments()[0].Name);
+        }
+
+        [Fact]
+        public static void Test_GetCurrentMethod_Inlineable()
+        {
+            // Verify that the result is not affected by inlining optimizations
+            MethodBase m = GetCurrentMethod_InlineableWrapper();
+            Assert.Equal("GetCurrentMethod_InlineableWrapper", m.Name);
+            Assert.True(m.IsStatic);
+            Assert.False(m.IsPublic);
+            Assert.True(m.DeclaringType == typeof(MethodBaseTests));
+        }
+
+        private static MethodBase GetCurrentMethod_InlineableWrapper()
+        {
+            return MethodBase.GetCurrentMethod();
         }
 
         [Theory]

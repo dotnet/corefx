@@ -19,7 +19,7 @@ using RTWebSocketError = Windows.Networking.Sockets.WebSocketError;
 
 namespace System.Net.WebSockets
 {
-    internal partial struct WebSocketHandle
+    internal readonly partial struct WebSocketHandle
     {
         private readonly WinRTWebSocket _webSocket;
 
@@ -39,6 +39,11 @@ namespace System.Net.WebSockets
         
         public async Task ConnectAsyncCore(Uri uri, CancellationToken cancellationToken, ClientWebSocketOptions options)
         {
+            if (options.RemoteCertificateValidationCallback != null)
+            {
+                throw new PlatformNotSupportedException(SR.net_WebSockets_RemoteValidationCallbackNotSupported);
+            }
+
             try
             {
                 await _webSocket.ConnectAsync(uri, cancellationToken, options).ConfigureAwait(false);
@@ -47,7 +52,7 @@ namespace System.Net.WebSockets
             {
                 WebErrorStatus status = RTWebSocketError.GetStatus(ex.HResult);
                 var inner = new Exception(status.ToString(), ex);
-                WebSocketException wex = new WebSocketException(SR.net_webstatus_ConnectFailure, inner);
+                WebSocketException wex = new WebSocketException(WebSocketError.Faulted, SR.net_webstatus_ConnectFailure, inner);
                 if (NetEventSource.IsEnabled) NetEventSource.Error(_webSocket, wex);
                 throw wex;
             }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -22,22 +23,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // variables.
     // ----------------------------------------------------------------------------
 
-    internal class MethodOrPropertySymbol : ParentSymbol
+    internal abstract class MethodOrPropertySymbol : ParentSymbol
     {
         public uint modOptCount;              // number of CMOD_OPTs in signature and return type
 
         public new bool isStatic;               // Static member?
         public bool isOverride;             // Overrides an inherited member. Only valid if isVirtual is set.
-        // false implies that a new vtable slot is required for this method.
-        public bool useMethInstead;         // Only valid iff isBogus == TRUE && IsPropertySymbol().
-        // If this is true then tell the user to call the accessors directly.
+                                            // false implies that a new vtable slot is required for this method.
         public bool isOperator;             // a user defined operator (or default indexed property)
         public bool isParamArray;           // new style varargs
         public bool isHideByName;           // this property hides all below it regardless of signature
         public List<Name> ParameterNames { get; private set; }
         private bool[] _optionalParameterIndex;
         private bool[] _defaultParameterIndex;
-        private CONSTVAL[] _defaultParameters;
+        private ConstVal[] _defaultParameters;
         private CType[] _defaultParameterConstValTypes;
         private bool[] _marshalAsIndex;
         private UnmanagedType[] _marshalAsBuffer;
@@ -49,7 +48,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // If this symbol is a property and an explicit interface member implementation, the swtSlot
         // may be an event. This is filled in during prepare.
         public SymWithType swtSlot;
-        public ErrorType errExpImpl;          // If name == NULL but swtExpImpl couldn't be resolved, this contains error information.
         public CType RetType;            // Return type.
 
         private TypeArray _Params;
@@ -61,17 +59,27 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             set
             {
-                // Should only be set once!
+                Debug.Assert(_Params == null, "Should only be set once");
                 _Params = value;
-                _optionalParameterIndex = new bool[_Params.size];
-                _defaultParameterIndex = new bool[_Params.size];
-                _defaultParameters = new CONSTVAL[_Params.size];
-                _defaultParameterConstValTypes = new CType[_Params.size];
-                _marshalAsIndex = new bool[_Params.size];
-                _marshalAsBuffer = new UnmanagedType[_Params.size];
+                int count = value.Count;
+                if (count == 0)
+                {
+                    _optionalParameterIndex = _defaultParameterIndex = _marshalAsIndex = Array.Empty<bool>();
+                    _defaultParameters = Array.Empty<ConstVal>();
+                    _defaultParameterConstValTypes = Array.Empty<CType>();
+                    _marshalAsBuffer = Array.Empty<UnmanagedType>();
+                }
+                else
+                {
+                    _optionalParameterIndex = new bool[count];
+                    _defaultParameterIndex = new bool[count];
+                    _defaultParameters = new ConstVal[count];
+                    _defaultParameterConstValTypes = new CType[count];
+                    _marshalAsIndex = new bool[count];
+                    _marshalAsBuffer = new UnmanagedType[count];
+                }
             }
-        }             // array of cParams parameter types.
-        public AggregateDeclaration declaration;       // containing declaration
+        }
 
         public MethodOrPropertySymbol()
         {
@@ -82,7 +90,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool IsParameterOptional(int index)
         {
-            Debug.Assert(index < Params.size);
+            Debug.Assert(index < Params.Count);
 
             if (_optionalParameterIndex == null)
             {
@@ -115,21 +123,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool HasDefaultParameterValue(int index)
         {
-            Debug.Assert(index < Params.size);
+            Debug.Assert(index < Params.Count);
             Debug.Assert(_defaultParameterIndex != null);
             return _defaultParameterIndex[index];
         }
 
-        public void SetDefaultParameterValue(int index, CType type, CONSTVAL cv)
+        public void SetDefaultParameterValue(int index, CType type, ConstVal cv)
         {
             Debug.Assert(_defaultParameterIndex != null);
-            ConstValFactory factory = new ConstValFactory();
             _defaultParameterIndex[index] = true;
-            _defaultParameters[index] = factory.Copy(type.constValKind(), cv);
+            _defaultParameters[index] = cv;
             _defaultParameterConstValTypes[index] = type;
         }
 
-        public CONSTVAL GetDefaultParameterValue(int index)
+        public ConstVal GetDefaultParameterValue(int index)
         {
             Debug.Assert(HasDefaultParameterValue(index));
             Debug.Assert(_defaultParameterIndex != null);
@@ -142,7 +149,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _defaultParameterConstValTypes[index];
         }
 
-        public bool IsMarshalAsParameter(int index)
+        private bool IsMarshalAsParameter(int index)
         {
             return _marshalAsIndex[index];
         }
@@ -153,7 +160,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _marshalAsBuffer[index] = umt;
         }
 
-        public UnmanagedType GetMarshalAsParameterValue(int index)
+        private UnmanagedType GetMarshalAsParameterValue(int index)
         {
             Debug.Assert(IsMarshalAsParameter(index));
             return _marshalAsBuffer[index];
@@ -161,29 +168,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public bool MarshalAsObject(int index)
         {
-            UnmanagedType marshalAsType = default(UnmanagedType);
-
             if (IsMarshalAsParameter(index))
             {
-                marshalAsType = GetMarshalAsParameterValue(index);
+                UnmanagedType marshalAsType = GetMarshalAsParameterValue(index);
+                return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown || marshalAsType == UnmanagedType.IDispatch;
             }
 
-            return marshalAsType == UnmanagedType.Interface || marshalAsType == UnmanagedType.IUnknown;
+            return false;
         }
 
-        public AggregateSymbol getClass()
-        {
-            return parent.AsAggregateSymbol();
-        }
+        public AggregateSymbol getClass() => parent as AggregateSymbol;
 
         public bool IsExpImpl()
         {
             return name == null;
-        }
-
-        public AggregateDeclaration containingDeclaration()
-        {
-            return declaration;
         }
     }
 }

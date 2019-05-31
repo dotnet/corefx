@@ -3,10 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 
 using Xunit;
 
-namespace System.Net.WebHeaderCollectionTests
+namespace System.Net.Tests
 {
     public partial class WebHeaderCollectionTest
     {
@@ -138,7 +139,7 @@ namespace System.Net.WebHeaderCollectionTests
         public void Setter_NullOrEmptyName_Throws(string name)
         {
             WebHeaderCollection w = new WebHeaderCollection();
-            Assert.Throws<ArgumentNullException>("name", () => w[name] = "test");
+            AssertExtensions.Throws<ArgumentNullException>("name", () => w[name] = "test");
         }
 
         public static object[][] InvalidNames = {
@@ -151,7 +152,7 @@ namespace System.Net.WebHeaderCollectionTests
         public void Setter_InvalidName_Throws(string name)
         {
             WebHeaderCollection w = new WebHeaderCollection();
-            Assert.Throws<ArgumentException>("name", () => w[name] = "test");
+            AssertExtensions.Throws<ArgumentException>("name", () => w[name] = "test");
         }
 
         public static object[][] InvalidValues = {
@@ -166,7 +167,7 @@ namespace System.Net.WebHeaderCollectionTests
         public void Setter_InvalidValue_Throws(string value)
         {
             WebHeaderCollection w = new WebHeaderCollection();
-            Assert.Throws<ArgumentException>("value", () => w["custom"] = value);
+            AssertExtensions.Throws<ArgumentException>("value", () => w["custom"] = value);
         }
 
         public static object[][] ValidValues = {
@@ -203,19 +204,45 @@ namespace System.Net.WebHeaderCollectionTests
         }
 
         [Theory]
+        [InlineData("name")]
+        [InlineData("nAMe")]
+        public void Remove_HeaderExists_RemovesFromCollection(string name)
+        {
+            var headers = new WebHeaderCollection()
+            {
+                { "name", "value" }
+            };
+            headers.Remove(name);
+            Assert.Empty(headers);
+
+            headers.Remove(name);
+            Assert.Empty(headers);
+        }
+
+        [Theory]
         [InlineData(null)]
         [InlineData("")]
-        public void Remove_NullOrEmptyName_Throws(string name)
+        public void Remove_NullOrEmptyHeader_ThrowsArgumentNullException(string name)
         {
-            WebHeaderCollection w = new WebHeaderCollection();
-            Assert.Throws<ArgumentNullException>("name", () => w.Remove(name));
+            var headers = new WebHeaderCollection();
+            AssertExtensions.Throws<ArgumentNullException>("name", () => headers.Remove(name));
+        }
+
+        [Theory]
+        [InlineData(" \r \t \n")]
+        [InlineData("  name  ")]
+        [MemberData(nameof(InvalidValues))]
+        public void Remove_InvalidHeader_ThrowsArgumentException(string name)
+        {
+            var headers = new WebHeaderCollection();
+            AssertExtensions.Throws<ArgumentException>("name", () => headers.Remove(name));
         }
 
         [Fact]
         public void Remove_IllegalCharacter_Throws()
         {
             WebHeaderCollection w = new WebHeaderCollection();
-            Assert.Throws<ArgumentException>("name", () => w.Remove("{"));
+            AssertExtensions.Throws<ArgumentException>("name", () => w.Remove("{"));
         }
 
         [Fact]
@@ -387,5 +414,347 @@ namespace System.Net.WebHeaderCollectionTests
                 e.Reset();
             }
         }
+
+        public static IEnumerable<object[]> SerializeDeserialize_Roundtrip_MemberData()
+        {
+            for (int i = 0; i < 10; i++)
+            {
+                var wc = new WebHeaderCollection();
+                for (int j = 0; j < i; j++)
+                {
+                    wc[$"header{j}"] = $"value{j}";
+                }
+                yield return new object[] { wc };
+            }
+        }
+
+        public static IEnumerable<object[]> Add_Value_TestData()
+        {
+            yield return new object[] { null, string.Empty };
+            yield return new object[] { string.Empty, string.Empty };
+            yield return new object[] { "VaLue", "VaLue" };
+            yield return new object[] { "  value  ", "value" };
+
+            // Documentation says this should fail but it does not.
+            string longString = new string('a', 65536);
+            yield return new object[] { longString, longString };
+        }
+
+        [Theory]
+        [MemberData(nameof(Add_Value_TestData))]
+        public void Add_ValidValue_Success(string value, string expectedValue)
+        {
+            var headers = new WebHeaderCollection
+            {
+                { "name", value }
+            };
+
+            Assert.Equal(expectedValue, headers["name"]);
+        }
+
+        [Fact]
+        public void Add_HeaderAlreadyExists_AppendsValue()
+        {
+            var headers = new WebHeaderCollection
+            {
+                { "name", "value1" },
+                { "name", null },
+                { "name", "value2" },
+                { "NAME", "value3" },
+                { "name", "" }
+            };
+            Assert.Equal("value1,,value2,value3,", headers["name"]);
+        }
+
+        [Fact]
+        public void Add_NullName_ThrowsArgumentNullException()
+        {
+            var headers = new WebHeaderCollection();
+            AssertExtensions.Throws<ArgumentNullException>("name", () => headers.Add(null, "value"));
+        }
+
+        [Theory]
+        [InlineData("")]
+        [InlineData("(")]
+        [InlineData("\r \t \n")]
+        [InlineData("  name  ")]
+        [MemberData(nameof(InvalidValues))]
+        public void Add_InvalidName_ThrowsArgumentException(string name)
+        {
+            var headers = new WebHeaderCollection();
+            AssertExtensions.Throws<ArgumentException>("name", () => headers.Add(name, "value"));
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidValues))]
+        public void Add_InvalidValue_ThrowsArgumentException(string value)
+        {
+            var headers = new WebHeaderCollection();
+            AssertExtensions.Throws<ArgumentException>("value", () => headers.Add("name", value));
+        }
+
+        [Fact]
+        public void Add_ValidHeader_AddsToHeaders()
+        {
+            var headers = new WebHeaderCollection()
+            {
+                "name:value1",
+                "name:",
+                "NaMe:value2",
+                "name:  ",
+            };
+            Assert.Equal("value1,,value2,", headers["name"]);
+        }
+
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        public void Add_NullHeader_ThrowsArgumentNullException(string header)
+        {
+            var headers = new WebHeaderCollection();
+            AssertExtensions.Throws<ArgumentNullException>("header", () => headers.Add(header));
+        }
+
+        [Theory]
+        [InlineData(" \r \t \n", "header")]
+        [InlineData("nocolon", "header")]
+        [InlineData("  :value", "name")]
+        [InlineData("name  :value", "name")]
+        [InlineData("name:va\rlue", "value")]
+        public void Add_InvalidHeader_ThrowsArgumentException(string header, string paramName)
+        {
+            var headers = new WebHeaderCollection();
+            AssertExtensions.Throws<ArgumentException>(paramName, () => headers.Add(header));
+        }
+
+        private const string HeaderType = "Set-Cookie";
+        private const string Cookie1 = "locale=en; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000";
+        private const string Cookie2 = "uuid=123abc; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000; secure; HttpOnly";
+        private const string Cookie3 = "country=US; path=/; expires=Fri, 05 Oct 2018 06:28:57 -0000";
+        private const string Cookie4 = "m_session=session1; path=/; expires=Sun, 08 Oct 2017 00:28:57 -0000; secure; HttpOnly";
+        
+        private const string Cookie1NoAttribute = "locale=en";
+        private const string Cookie2NoAttribute = "uuid=123abc";
+        private const string Cookie3NoAttribute = "country=US";
+        private const string Cookie4NoAttribute = "m_session=session1";
+        
+        private const string CookieInvalid = "helloWorld";
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "Does not work in Mono")]
+        public void GetValues_MultipleSetCookieHeadersWithExpiresAttribute_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HeaderType, Cookie1);
+            w.Add(HeaderType, Cookie2);
+            w.Add(HeaderType, Cookie3);
+            w.Add(HeaderType, Cookie4);
+
+            string[] values = w.GetValues(HeaderType);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(Cookie1, values[0]);
+            Assert.Equal(Cookie2, values[1]);
+            Assert.Equal(Cookie3, values[2]);
+            Assert.Equal(Cookie4, values[3]);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "Does not work in Mono")]
+        public void GetValues_SingleSetCookieHeaderWithMultipleCookiesWithExpiresAttribute_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HeaderType, Cookie1 + "," + Cookie2 + "," + Cookie3 + "," + Cookie4);
+
+            string[] values = w.GetValues(HeaderType);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(Cookie1, values[0]);
+            Assert.Equal(Cookie2, values[1]);
+            Assert.Equal(Cookie3, values[2]);
+            Assert.Equal(Cookie4, values[3]);
+        }
+        
+        [Fact]
+        public void GetValues_MultipleSetCookieHeadersWithNoAttribute_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HeaderType, Cookie1NoAttribute);
+            w.Add(HeaderType, Cookie2NoAttribute);
+            w.Add(HeaderType, Cookie3NoAttribute);
+            w.Add(HeaderType, Cookie4NoAttribute);
+
+            string[] values = w.GetValues(HeaderType);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(Cookie1NoAttribute, values[0]);
+            Assert.Equal(Cookie2NoAttribute, values[1]);
+            Assert.Equal(Cookie3NoAttribute, values[2]);
+            Assert.Equal(Cookie4NoAttribute, values[3]);
+        }
+
+        [Fact]
+        public void GetValues_SingleSetCookieHeaderWithMultipleCookiesWithNoAttribute_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HeaderType, Cookie1NoAttribute + "," + Cookie2NoAttribute + "," + Cookie3NoAttribute + "," + Cookie4NoAttribute);
+
+            string[] values = w.GetValues(HeaderType);
+            Assert.Equal(4, values.Length);
+            Assert.Equal(Cookie1NoAttribute, values[0]);
+            Assert.Equal(Cookie2NoAttribute, values[1]);
+            Assert.Equal(Cookie3NoAttribute, values[2]);
+            Assert.Equal(Cookie4NoAttribute, values[3]);
+        }
+        
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Mono, "Does not work in Mono")]
+        public void GetValues_InvalidSetCookieHeader_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HeaderType, CookieInvalid);
+
+            string[] values = w.GetValues(HeaderType);
+            Assert.Equal(0, values.Length);
+        }
+        
+        [Fact]
+        public void GetValues_MultipleValuesHeader_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            string headerType = "Accept";
+            w.Add(headerType, "text/plain, text/html");
+            string[] values = w.GetValues(headerType);
+            Assert.Equal(2, values.Length);
+            Assert.Equal("text/plain", values[0]);
+            Assert.Equal("text/html", values[1]);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_Add_Rmemove_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HttpRequestHeader.Warning, "Warning1");
+
+            Assert.Equal(1, w.Count);
+            Assert.Equal("Warning1", w[HttpRequestHeader.Warning]);
+            Assert.Equal("Warning", w.AllKeys[0]);
+
+            w.Remove(HttpRequestHeader.Warning);
+            Assert.Equal(0, w.Count);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_Get_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add("header1", "value1");
+            w.Add("header1", "value2");
+            string[] values = w.GetValues(0);
+            Assert.Equal("value1", values[0]);
+            Assert.Equal("value2", values[1]);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_ToByteArray_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add("header1", "value1");
+            w.Add("header1", "value2");
+            byte[] byteArr = w.ToByteArray();
+            Assert.NotEmpty(byteArr);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_GetKey_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add("header1", "value1");
+            w.Add("header1", "value2");
+            Assert.NotEmpty(w.GetKey(0));
+        }
+
+        [Fact]
+        public void HttpRequestHeader_GetValues_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add("header1", "value1");
+            Assert.Equal("value1", w.GetValues("header1")[0]);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_Clear_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add("header1", "value1");
+            w.Add("header1", "value2");
+            w.Clear();
+            Assert.Equal(0, w.Count);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_IsRestricted_Success()
+        {
+            Assert.True(WebHeaderCollection.IsRestricted("Accept"));
+            Assert.False(WebHeaderCollection.IsRestricted("Age"));
+            Assert.False(WebHeaderCollection.IsRestricted("Accept", true));
+        }
+
+        [Fact]
+        public void HttpRequestHeader_AddHeader_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HttpRequestHeader.ContentLength, "10");
+            w.Add(HttpRequestHeader.ContentType, "text/html");
+            Assert.Equal(2,w.Count);
+        }
+
+        [Fact]
+        public void WebHeaderCollection_Keys_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Add(HttpRequestHeader.ContentLength, "10");
+            w.Add(HttpRequestHeader.ContentType, "text/html");
+            Assert.Equal(2, w.Keys.Count);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_AddHeader_Failure()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            char[] arr = new char[ushort.MaxValue + 1];
+            string maxStr = new string(arr);
+            AssertExtensions.Throws<ArgumentException>("value", () => w.Add(HttpRequestHeader.ContentLength,maxStr));
+            AssertExtensions.Throws<ArgumentException>("value", () => w.Add("ContentLength", maxStr));
+        }
+
+        [Fact]
+        public void HttpResponseHeader_Set_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Set(HttpResponseHeader.ProxyAuthenticate, "value123");
+
+            Assert.Equal("value123", w[HttpResponseHeader.ProxyAuthenticate]);
+        }
+
+        [Fact]
+        public void HttpRequestHeader_Set_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Set(HttpRequestHeader.Connection, "keep-alive");
+
+            Assert.Equal(1, w.Count);
+            Assert.Equal("keep-alive", w[HttpRequestHeader.Connection]);
+            Assert.Equal("Connection", w.AllKeys[0]);
+        }
+
+        [Fact]
+        public void NameValue_Set_Success()
+        {
+            WebHeaderCollection w = new WebHeaderCollection();
+            w.Set("firstName", "first");
+            Assert.Equal(1, w.Count);
+            Assert.NotEmpty(w);
+            Assert.NotEmpty(w.AllKeys);
+            Assert.Equal(new[] { "firstName" }, w.AllKeys);
+            Assert.Equal("first", w["firstName"]);
+        }        
     }
 }

@@ -50,10 +50,13 @@ internal partial class Interop
             Debug.Assert(blob != null);
             Debug.Assert(offset >= 0);
 
-            blob[offset++] = ((byte)(value >> 24));
-            blob[offset++] = ((byte)(value >> 16));
-            blob[offset++] = ((byte)(value >> 8));
-            blob[offset++] = ((byte)(value));
+            unchecked
+            {
+                blob[offset++] = ((byte)(value >> 24));
+                blob[offset++] = ((byte)(value >> 16));
+                blob[offset++] = ((byte)(value >> 8));
+                blob[offset++] = ((byte)(value));
+            }
         }
 
         /// <summary>
@@ -142,7 +145,7 @@ internal partial class Interop
         ///     The BCRYPT_DSA_KEY_BLOB structure is used as a v1 header for a DSA public key or private key BLOB in memory.
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        unsafe internal struct BCRYPT_DSA_KEY_BLOB
+        internal unsafe struct BCRYPT_DSA_KEY_BLOB
         {
             internal KeyBlobMagicNumber Magic;
             internal int cbKey;
@@ -155,7 +158,7 @@ internal partial class Interop
         ///     The BCRYPT_DSA_KEY_BLOB structure is used as a v2 header for a DSA public key or private key BLOB in memory.
         /// </summary>
         [StructLayout(LayoutKind.Sequential)]
-        unsafe internal struct BCRYPT_DSA_KEY_BLOB_V2
+        internal unsafe struct BCRYPT_DSA_KEY_BLOB_V2
         {
             internal KeyBlobMagicNumber Magic;
             internal int cbKey;
@@ -278,6 +281,36 @@ internal partial class Interop
             internal int cbCofactor;             //Byte length of cofactor of G in E.
             internal int cbSeed;                 //Byte length of the seed used to generate the curve.
             // The rest of the buffer contains the domain parameters
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        internal unsafe struct BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO
+        {
+            int cbSize;
+            uint dwInfoVersion;
+            internal byte* pbNonce;
+            internal int cbNonce;
+            internal byte* pbAuthData;
+            internal int cbAuthData;
+            internal byte* pbTag;
+            internal int cbTag;
+            internal byte* pbMacContext;
+            internal int cbMacContext;
+            internal int cbAAD;
+            internal ulong cbData;
+            internal uint dwFlags;
+
+            public static BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO Create()
+            {
+                BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO ret = new BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO();
+
+                ret.cbSize = sizeof(BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO);
+
+                const uint BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO_VERSION = 1;
+                ret.dwInfoVersion = BCRYPT_AUTHENTICATED_CIPHER_MODE_INFO_VERSION;
+
+                return ret;
+            }
         }
     }
 }

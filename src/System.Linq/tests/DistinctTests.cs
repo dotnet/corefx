@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 0, 9999, 0, 888, -1, 66, -1, -777, 1, 2, -12345, 66, 66, -1, -1 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.Distinct(), q.Distinct());
@@ -24,7 +24,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsStringQuery()
         {
             var q = from x in new[] { "!@#$%^", "C", "AAA", "Calling Twice", "SoS" }
-                    where String.IsNullOrEmpty(x)
+                    where string.IsNullOrEmpty(x)
                     select x;
 
 
@@ -36,6 +36,13 @@ namespace System.Linq.Tests
         {
             int[] source = { };
             Assert.Empty(source.Distinct());
+        }
+
+        [Fact]
+        public void EmptySourceRunOnce()
+        {
+            int[] source = { };
+            Assert.Empty(source.RunOnce().Distinct());
         }
 
         [Fact]
@@ -92,6 +99,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void SomeDuplicatesIncludingNullsRunOnce()
+        {
+            int?[] source = { 1, 1, 1, 2, 2, 2, null, null };
+            int?[] expected = { 1, 2, null };
+
+            Assert.Equal(expected, source.RunOnce().Distinct());
+        }
+
+        [Fact]
         public void LastSameAsFirst()
         {
             int[] source = { 1, 2, 3, 4, 5, 1 };
@@ -111,6 +127,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void RepeatsNonConsecutiveRunOnce()
+        {
+            int[] source = { 1, 1, 2, 2, 4, 3, 1, 3, 2 };
+            int[] expected = { 1, 2, 4, 3 };
+
+            Assert.Equal(expected, source.RunOnce().Distinct());
+        }
+
+        [Fact]
         public void NullComparer()
         {
             string[] source = { "Bob", "Tim", "bBo", "miT", "Robert", "iTm" };
@@ -124,7 +149,7 @@ namespace System.Linq.Tests
         {
             string[] source = null;
 
-            Assert.Throws<ArgumentNullException>("source", () => source.Distinct());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Distinct());
         }
 
         [Fact]
@@ -132,7 +157,7 @@ namespace System.Linq.Tests
         {
             string[] source = null;
 
-            Assert.Throws<ArgumentNullException>("source", () => source.Distinct(StringComparer.Ordinal));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Distinct(StringComparer.Ordinal));
         }
 
         [Fact]
@@ -144,8 +169,17 @@ namespace System.Linq.Tests
             Assert.Equal(expected, source.Distinct(new AnagramEqualityComparer()), new AnagramEqualityComparer());
         }
 
+        [Fact]
+        public void CustomEqualityComparerRunOnce()
+        {
+            string[] source = { "Bob", "Tim", "bBo", "miT", "Robert", "iTm" };
+            string[] expected = { "Bob", "Tim", "Robert" };
+
+            Assert.Equal(expected, source.RunOnce().Distinct(new AnagramEqualityComparer()), new AnagramEqualityComparer());
+        }
+
         [Theory, MemberData(nameof(SequencesWithDuplicates))]
-        public void FindDistinctAndValidate<T>(T unusedArgumentToForceTypeInference, IEnumerable<T> original)
+        public void FindDistinctAndValidate<T>(IEnumerable<T> original)
         {
             // Convert to list to avoid repeated enumerations of the enumerables.
             var originalList = original.ToList();
@@ -164,13 +198,13 @@ namespace System.Linq.Tests
         public static IEnumerable<object[]> SequencesWithDuplicates()
         {
             // Validate an array of different numeric data types.
-            yield return new object[] { 0, new int[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
-            yield return new object[] { 0L, new long[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
-            yield return new object[] { 0F, new float[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
-            yield return new object[] { 0.0, new double[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
-            yield return new object[] { 0M, new decimal[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
+            yield return new object[] { new int[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
+            yield return new object[] { new long[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
+            yield return new object[] { new float[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
+            yield return new object[] { new double[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
+            yield return new object[] { new decimal[] { 1, 1, 1, 2, 3, 5, 5, 6, 6, 10 } };
             // Try strings
-            yield return new object[] { "", new []
+            yield return new object[] { new []
                 {
                     "add",
                     "add",

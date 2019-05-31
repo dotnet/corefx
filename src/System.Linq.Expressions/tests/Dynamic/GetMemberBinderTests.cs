@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -40,7 +40,7 @@ namespace System.Dynamic.Tests
             "horrid name with" + (char)0xD800 + "a half surrogate", "new", "break"
         };
 
-        private static IEnumerable<object[]> NamesAndBools() => Names.Select((n, i) => new object[] {n, i % 2 == 0});
+        public static IEnumerable<object[]> NamesAndBools() => Names.Select((n, i) => new object[] {n, i % 2 == 0});
 
         [Fact]
         public void InvokeInstanceProperty()
@@ -73,8 +73,8 @@ namespace System.Dynamic.Tests
         [Fact]
         public void NullName()
         {
-            Assert.Throws<ArgumentNullException>("name", () => new MinimumOverrideGetMemberBinder(null, false));
-            Assert.Throws<ArgumentNullException>("name", () => new MinimumOverrideGetMemberBinder(null, true));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => new MinimumOverrideGetMemberBinder(null, false));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => new MinimumOverrideGetMemberBinder(null, true));
         }
 
         [Theory, MemberData(nameof(NamesAndBools))]

@@ -3,7 +3,9 @@ syntax: glob
 ### VisualStudio ###
 
 # Tool Runtime Dir
-/[Tt]ools/
+.dotnet/
+.packages/
+.tools/
 
 # User-specific files
 *.suo
@@ -12,12 +14,12 @@ syntax: glob
 *.sln.docstates
 
 # Build results
+artifacts/
+.idea/
 [Dd]ebug/
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
-x64/
-x86/
 build/
 bld/
 [Bb]in/
@@ -25,16 +27,19 @@ bld/
 msbuild.log
 msbuild.err
 msbuild.wrn
+msbuild.binlog
+.deps/
+.dirstamp
+.libs/
+*.lo
+*.o
 
 # Cross building rootfs
 cross/rootfs/
+cross/android-rootfs/
 
-# Visual Studio 2015
+# Visual Studio
 .vs/
-
-# Visual Studio 2015 Pre-CTP6
-*.sln.ide
-*.ide/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -173,6 +178,7 @@ ClientBin/
 node_modules/
 *.metaproj
 *.metaproj.tmp
+bin.localpkg/
 
 # RIA/Silverlight projects
 Generated_Code/
@@ -267,3 +273,6 @@ Session.vim
 # Private test configuration and binaries.
 config.ps1
 **/IISApplications
+
+# VS debug support files
+launchSettings.json

@@ -4,8 +4,8 @@
 
 namespace System.Diagnostics
 {
-    // This class uses high-resolution performance counter if installed hardware 
-    // does not support it. Otherwise, the class will fall back to DateTime class
+    // This class uses high-resolution performance counter if the installed
+    // hardware supports it. Otherwise, the class will fall back to DateTime
     // and uses ticks as a measurement.
 
     public partial class Stopwatch
@@ -31,20 +31,9 @@ namespace System.Diagnostics
 
         static Stopwatch()
         {
-            bool succeeded = QueryPerformanceFrequency(out Frequency);
-
-            if (!succeeded)
-            {
-                IsHighResolution = false;
-                Frequency = TicksPerSecond;
-                s_tickFrequency = 1;
-            }
-            else
-            {
-                IsHighResolution = true;
-                s_tickFrequency = TicksPerSecond;
-                s_tickFrequency /= Frequency;
-            }
+            Frequency = QueryPerformanceFrequency();
+            IsHighResolution = true;
+            s_tickFrequency = (double)TicksPerSecond / Frequency;
         }
 
         public Stopwatch()
@@ -81,7 +70,7 @@ namespace System.Diagnostics
 
                 if (_elapsed < 0)
                 {
-                    // When measuring small time periods the StopWatch.Elapsed* 
+                    // When measuring small time periods the Stopwatch.Elapsed* 
                     // properties can return negative values.  This is due to 
                     // bugs in the basic input/output system (BIOS) or the hardware
                     // abstraction layer (HAL) on machines with variable-speed CPUs
@@ -129,16 +118,8 @@ namespace System.Diagnostics
 
         public static long GetTimestamp()
         {
-            if (IsHighResolution)
-            {
-                long timestamp = 0;
-                QueryPerformanceCounter(out timestamp);
-                return timestamp;
-            }
-            else
-            {
-                return DateTime.UtcNow.Ticks;
-            }
+            Debug.Assert(IsHighResolution);
+            return QueryPerformanceCounter();
         }
 
         // Get the elapsed ticks.        
@@ -148,7 +129,7 @@ namespace System.Diagnostics
 
             if (_isRunning)
             {
-                // If the StopWatch is running, add elapsed time since
+                // If the Stopwatch is running, add elapsed time since
                 // the Stopwatch is started last time. 
                 long currentTimeStamp = GetTimestamp();
                 long elapsedUntilNow = currentTimeStamp - _startTimeStamp;
@@ -160,18 +141,9 @@ namespace System.Diagnostics
         // Get the elapsed ticks.        
         private long GetElapsedDateTimeTicks()
         {
-            long rawTicks = GetRawElapsedTicks();
-            if (IsHighResolution)
-            {
-                // convert high resolution perf counter to DateTime ticks
-                double dticks = rawTicks;
-                dticks *= s_tickFrequency;
-                return unchecked((long)dticks);
-            }
-            else
-            {
-                return rawTicks;
-            }
+            Debug.Assert(IsHighResolution);
+            // convert high resolution perf counter to DateTime ticks
+            return unchecked((long)(GetRawElapsedTicks() * s_tickFrequency));
         }
     }
 }

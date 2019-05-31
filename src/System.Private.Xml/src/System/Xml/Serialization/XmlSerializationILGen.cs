@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if !NET_NATIVE
+#if !FEATURE_SERIALIZATION_UAPAOT
 namespace System.Xml.Serialization
 {
     using System;
@@ -67,7 +67,7 @@ namespace System.Xml.Serialization
         internal TypeAttributes TypeAttributes { get { return _typeAttributes; } }
 
         private static Dictionary<string, Regex> s_regexs = new Dictionary<string, Regex>();
-        static internal Regex NewRegex(string pattern)
+        internal static Regex NewRegex(string pattern)
         {
             Regex regex;
             lock (s_regexs)
@@ -214,7 +214,7 @@ namespace System.Xml.Serialization
             {
                 MethodInfo Hashtable_set_Item = typeof(Hashtable).GetMethod(
                     "set_Item",
-                    new Type[] { typeof(Object), typeof(Object) }
+                    new Type[] { typeof(object), typeof(object) }
                     );
                 for (int i = 0; i < methods.Length; i++)
                 {
@@ -246,12 +246,12 @@ namespace System.Xml.Serialization
 
                 if (type == null)
                     continue;
-                if (!type.GetTypeInfo().IsPublic && !type.GetTypeInfo().IsNestedPublic)
+                if (!type.IsPublic && !type.IsNestedPublic)
                     continue;
                 if (!uniqueTypes.Add(type))
                     continue;
                 // DDB172141: Wrong generated CS for serializer of List<string> type
-                if (type.GetTypeInfo().IsGenericType || type.GetTypeInfo().ContainsGenericParameters)
+                if (type.IsGenericType || type.ContainsGenericParameters)
                     continue;
                 ilg.Ldarg("type");
                 ilg.Ldc(type);
@@ -327,7 +327,7 @@ namespace System.Xml.Serialization
 
             ilg = new CodeGenerator(typedSerializerTypeBuilder);
             ilg.BeginMethod(
-                typeof(Boolean),
+                typeof(bool),
                 "CanDeserialize",
                 new Type[] { typeof(XmlReader) },
                 new string[] { "xmlReader" },
@@ -345,7 +345,7 @@ namespace System.Xml.Serialization
                 MethodInfo XmlReader_IsStartElement = typeof(XmlReader).GetMethod(
                      "IsStartElement",
                      CodeGenerator.InstanceBindingFlags,
-                     new Type[] { typeof(String), typeof(String) }
+                     new Type[] { typeof(string), typeof(string) }
                      );
                 ilg.Ldarg(ilg.GetArg("xmlReader"));
                 ilg.Ldstr(GetCSharpString(mapping.Accessor.Name));
@@ -415,7 +415,7 @@ namespace System.Xml.Serialization
             MethodInfo Hashtable_Add = typeof(Hashtable).GetMethod(
                 "Add",
                 CodeGenerator.InstanceBindingFlags,
-                new Type[] { typeof(Object), typeof(Object) }
+                new Type[] { typeof(object), typeof(object) }
                 );
 
             foreach (string key in serializers.Keys)
@@ -451,10 +451,10 @@ namespace System.Xml.Serialization
                     Type type = xmlMappings[i].Accessor.Mapping.TypeDesc.Type;
                     if (type == null)
                         continue;
-                    if (!type.GetTypeInfo().IsPublic && !type.GetTypeInfo().IsNestedPublic)
+                    if (!type.IsPublic && !type.IsNestedPublic)
                         continue;
                     // DDB172141: Wrong generated CS for serializer of List<string> type
-                    if (type.GetTypeInfo().IsGenericType || type.GetTypeInfo().ContainsGenericParameters)
+                    if (type.IsGenericType || type.ContainsGenericParameters)
                         continue;
                     ilg.Ldarg("type");
                     ilg.Ldc(type);

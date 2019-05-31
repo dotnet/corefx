@@ -13,7 +13,7 @@ using System.Reflection;
 namespace System.Xml.Xsl
 {
     /// <summary>
-    /// Implementation of read-only IList and IList<T> interfaces.  Derived classes can inherit from
+    /// Implementation of read-only IList and IList{T} interfaces.  Derived classes can inherit from
     /// this class and implement only two methods, Count and Item, rather than the entire IList interface.
     /// </summary>
     internal abstract class ListBase<T> : IList<T>, System.Collections.IList
@@ -193,7 +193,7 @@ namespace System.Xml.Xsl
 
         private static bool IsCompatibleType(object value)
         {
-            if ((value == null && !typeof(T).GetTypeInfo().IsValueType) || (value is T))
+            if ((value == null && !typeof(T).IsValueType) || (value is T))
                 return true;
 
             return false;
@@ -201,7 +201,7 @@ namespace System.Xml.Xsl
     }
 
     /// <summary>
-    /// Implementation of IEnumerator<T> and IEnumerator over an IList<T>.
+    /// Implementation of IEnumerator{T} and IEnumerator over an IList{T}.
     /// </summary>
     internal struct IListEnumerator<T> : IEnumerator<T>, System.Collections.IEnumerator
     {

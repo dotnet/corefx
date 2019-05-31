@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Net.Sockets;
 using System.Security;
 using System.Threading;
@@ -16,7 +18,6 @@ namespace System.IO.Pipes
     /// </summary>
     public sealed partial class NamedPipeClientStream : PipeStream
     {
-        [SecurityCritical]
         private bool TryConnect(int timeout, CancellationToken cancellationToken)
         {
             // timeout and cancellationToken aren't used as Connect will be very fast,
@@ -33,10 +34,7 @@ namespace System.IO.Pipes
             }
             catch (SocketException e)
             {
-                if (clientHandle != null)
-                {
-                    clientHandle.Dispose();
-                }
+                clientHandle?.Dispose();
                 socket.Dispose();
 
                 switch (e.SocketErrorCode)
@@ -53,6 +51,17 @@ namespace System.IO.Pipes
                 }
             }
 
+            try
+            {
+                ValidateRemotePipeUser(clientHandle);
+            }
+            catch (Exception)
+            {
+                clientHandle.Dispose();
+                socket.Dispose();
+                throw;
+            }
+
             InitializeHandle(clientHandle, isExposed: false, isAsync: (_pipeOptions & PipeOptions.Asynchronous) != 0);
             State = PipeState.Connected;
             return true;
@@ -60,7 +69,6 @@ namespace System.IO.Pipes
 
         public int NumberOfServerInstances
         {
-            [SecurityCritical]
             [SuppressMessage("Microsoft.Security", "CA2122:DoNotIndirectlyExposeMethodsWithLinkDemands", Justification = "Security model of pipes: demand at creation but no subsequent demands")]
             get
             {
@@ -86,6 +94,23 @@ namespace System.IO.Pipes
                 CheckPipePropertyOperations();
                 if (!CanWrite) throw new NotSupportedException(SR.NotSupported_UnwritableStream);
                 return InternalHandle?.NamedPipeSocket?.SendBufferSize ?? 0;
+            }
+        }
+
+        private void ValidateRemotePipeUser(SafePipeHandle handle)
+        {
+            if (!IsCurrentUserOnly)
+                return;
+
+            uint userId = Interop.Sys.GetEUid();
+            if (Interop.Sys.GetPeerID(handle, out uint serverOwner) == -1)
+            {
+                throw CreateExceptionForLastError();
+            }
+
+            if (userId != serverOwner)
+            {
+                throw new UnauthorizedAccessException(SR.UnauthorizedAccess_NotOwnedByCurrentUser);
             }
         }
 

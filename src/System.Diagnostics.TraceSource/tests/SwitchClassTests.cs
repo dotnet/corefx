@@ -10,9 +10,9 @@ namespace System.Diagnostics.TraceSourceTests
     {
         class TestSwitch : Switch
         {
-            public TestSwitch(String description = null) : base(null, description) { }
+            public TestSwitch(string description = null) : base(null, description) { }
 
-            public String SwitchValue
+            public string SwitchValue
             {
                 get { return this.Value; }
                 set { this.Value = value; }
@@ -37,12 +37,17 @@ namespace System.Diagnostics.TraceSourceTests
             Assert.Equal("", item.Description);
         }
 
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static WeakReference PruneMakeRef()
+        {
+            return new WeakReference(new TestSwitch());
+        }
+
         [Fact]
         public void PruneTest()
         {
             var strongSwitch = new TestSwitch();
-            var weakSwitch = new WeakReference(new TestSwitch());
-            Assert.True(weakSwitch.IsAlive);
+            var weakSwitch = PruneMakeRef();
             GC.Collect(2);
             Trace.Refresh();
             Assert.False(weakSwitch.IsAlive);

@@ -20,7 +20,7 @@ namespace System.Net.Sockets
         }
 #endif
 
-        private const int NativeErrorToSocketErrorCount = 41;
+        private const int NativeErrorToSocketErrorCount = 42;
         private const int SocketErrorToNativeErrorCount = 40;
 
         // No Interop.Errors are included for the following SocketErrors, as there's no good mapping:
@@ -40,7 +40,7 @@ namespace System.Net.Sockets
             { Interop.Error.EAFNOSUPPORT, SocketError.AddressFamilyNotSupported },
             { Interop.Error.EAGAIN, SocketError.WouldBlock },
             { Interop.Error.EALREADY, SocketError.AlreadyInProgress },
-            { Interop.Error.EBADF, SocketError.InvalidArgument },
+            { Interop.Error.EBADF, SocketError.OperationAborted },
             { Interop.Error.ECANCELED, SocketError.OperationAborted },
             { Interop.Error.ECONNABORTED, SocketError.ConnectionAborted },
             { Interop.Error.ECONNREFUSED, SocketError.ConnectionRefused },
@@ -67,6 +67,7 @@ namespace System.Net.Sockets
             { Interop.Error.ENOTCONN, SocketError.NotConnected },
             { Interop.Error.ENOTSOCK, SocketError.NotSocket },
             { Interop.Error.ENOTSUP, SocketError.OperationNotSupported },
+            { Interop.Error.EPERM, SocketError.AccessDenied },
             { Interop.Error.EPIPE, SocketError.Shutdown },
             { Interop.Error.EPFNOSUPPORT, SocketError.ProtocolFamilyNotSupported },
             { Interop.Error.EPROTONOSUPPORT, SocketError.ProtocolNotSupported },
@@ -81,11 +82,11 @@ namespace System.Net.Sockets
         {
             // This is *mostly* an inverse mapping of s_nativeErrorToSocketError.  However, some options have multiple mappings and thus
             // can't be inverted directly.  Other options don't have a mapping from native to SocketError, but when presented with a SocketError,
-            // we want to provide the closest relevant Error possible, e.g. EINPROGRESS maps to SocketError.InProgress, and vice versa, but 
+            // we want to provide the closest relevant Error possible, e.g. EINPROGRESS maps to SocketError.InProgress, and vice versa, but
             // SocketError.IOPending also maps closest to EINPROGRESS.  As such, roundtripping won't necessarily provide the original value 100% of the time,
             // but it's the best we can do given the mismatch between Interop.Error and SocketError.
 
-            { SocketError.AccessDenied, Interop.Error.EACCES},
+            { SocketError.AccessDenied, Interop.Error.EACCES}, // could also have been EPERM
             { SocketError.AddressAlreadyInUse, Interop.Error.EADDRINUSE  },
             { SocketError.AddressNotAvailable, Interop.Error.EADDRNOTAVAIL },
             { SocketError.AddressFamilyNotSupported, Interop.Error.EAFNOSUPPORT  },
@@ -97,11 +98,11 @@ namespace System.Net.Sockets
             { SocketError.Disconnecting, Interop.Error.ESHUTDOWN },
             { SocketError.Fault, Interop.Error.EFAULT },
             { SocketError.HostDown, Interop.Error.EHOSTDOWN },
-            { SocketError.HostNotFound, Interop.Error.ENXIO }, // not perfect, but closest match available
+            { SocketError.HostNotFound, Interop.Error.EHOSTNOTFOUND },
             { SocketError.HostUnreachable, Interop.Error.EHOSTUNREACH },
             { SocketError.InProgress, Interop.Error.EINPROGRESS },
             { SocketError.Interrupted, Interop.Error.EINTR },
-            { SocketError.InvalidArgument, Interop.Error.EINVAL }, // could also have been EBADF, though that's logically an invalid argument
+            { SocketError.InvalidArgument, Interop.Error.EINVAL },
             { SocketError.IOPending, Interop.Error.EINPROGRESS },
             { SocketError.IsConnected, Interop.Error.EISCONN },
             { SocketError.MessageSize, Interop.Error.EMSGSIZE },
@@ -138,9 +139,17 @@ namespace System.Net.Sockets
         internal static Interop.Error GetNativeErrorForSocketError(SocketError error)
         {
             Interop.Error errno;
-            return s_socketErrorToNativeError.TryGetValue(error, out errno) ?
-                errno :
-                (Interop.Error)(int)error; // pass through the SocketError's value, as it at least retains some useful info
-        } 
+            if (!TryGetNativeErrorForSocketError(error, out errno))
+            {
+                // Use the SocketError's value, as it at least retains some useful info
+                errno = (Interop.Error)(int)error;
+            }
+            return errno;
+        }
+
+        internal static bool TryGetNativeErrorForSocketError(SocketError error, out Interop.Error errno)
+        {
+            return s_socketErrorToNativeError.TryGetValue(error, out errno);
+        }
     }
 }

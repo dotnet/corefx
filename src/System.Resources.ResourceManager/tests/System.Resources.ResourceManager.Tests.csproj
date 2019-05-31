@@ -1,16 +1,12 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.Resources.ResourceManager.Tests</AssemblyName>
-    <RootNamespace>System.Resources.Tests</RootNamespace>
     <ProjectGuid>{1D51A16C-B6D8-4E8F-98DE-21AD9A7062A1}</ProjectGuid>
-    <NugetTargetMoniker Condition=" '$(TargetGroup)' == '' ">.NETStandard,Version=v1.7</NugetTargetMoniker>
+    <RootNamespace>System.Resources.Tests</RootNamespace>
+    <BinPlaceSatelliteAssemblies>true</BinPlaceSatelliteAssemblies>
+    <TestRuntime>true</TestRuntime>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
     <Compile Include="MissingManifestResourceExceptionTests.cs" />
     <Compile Include="NeutralResourcesLanguageAttributeTests.cs" />
@@ -21,33 +17,47 @@
       <DependentUpon>TestResx.resx</DependentUpon>
     </Compile>
     <Compile Include="SatelliteContractVersionAttributeTests.cs" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetGroup)' == '' ">
-    <Compile Include="$(CommonTestPath)/System/Runtime/Serialization/Formatters/BinaryFormatterHelpers.cs">
-      <Link>System/Runtime/Serialization/Formatters/BinaryFormatterHelpers.cs</Link>
-    </Compile>
-    <Compile Include="MissingManifestResourceExceptionTests.netstandard17.cs"/>
-    <Compile Include="MissingSatelliteAssemblyException.cs"/>
-    <Compile Include="ResourceManagerTests.netstandard17.cs" />
+    <Compile Include="MissingSatelliteAssemblyException.cs" />
     <Compile Include="ResourceSetTests.cs" />
-    <EmbeddedResource Include="Resources\TestResx.netstandard17.resx">
+    <Compile Include="$(CommonTestPath)\System\Drawing\Helpers.cs">
+        <Link>Common\System\Drawing\Helpers.cs</Link>
+    </Compile>
+    <EmbeddedResource Include="Resources\TestResx.netstandard17.resources">
+      <WithCulture>false</WithCulture>
+      <Type>Non-Resx</Type>
+    </EmbeddedResource>
+    <_WorkaroundCoreMSBuildResource Include="Resources\TestResx.netstandard17.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TestResx.netstandard17.Designer.cs</LastGenOutput>
-    </EmbeddedResource>
+    </_WorkaroundCoreMSBuildResource>
     <Compile Include="Resources\TestResx.netstandard17.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>TestResx.netstandard17.resx</DependentUpon>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="../pkg/System.Resources.ResourceManager.pkgproj"/>
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Resources\TestResx.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>TestResx.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\TestResx.es.resx"/>
+    <EmbeddedResource Include="Resources\TestResx.es-MX.resx"/>
+    <EmbeddedResource Include="Resources\TestResx.fr-FR.resx"/>
+    <EmbeddedResource Include="Resources\TestClassWithoutNeutralResources.fr.resx"/>
+    <SupplementalTestData Include="Resources\TestResx.netstandard17.resources" />
+    <SupplementalTestData Include="Resources\bitmap.bmp" />
+    <SupplementalTestData Include="Resources\icon.ico" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <!--
+    MSBuild on .NET Core doesn't support non-string resources. See https://github.com/Microsoft/msbuild/issues/2221
+    Workaround this for now by invoking the desktop resgen.exe on Windows manually to regenerate the resource files.
+  -->
+  <Target Name="RegenerateNonStringResources">
+    <PropertyGroup>
+      <_ResourceRelativeDir>%(_WorkaroundCoreMSBuildResource.RelativeDir)</_ResourceRelativeDir>
+      <_ResourceRelativeDir>$(_ResourceRelativeDir.TrimEnd('\'))</_ResourceRelativeDir>
+      <_ResourceOutputName>$(_ResourceRelativeDir)\%(_WorkaroundCoreMSBuildResource.FileName).resources</_ResourceOutputName>
+    </PropertyGroup>
+
+    <Exec Command="resgen.exe %(_WorkaroundCoreMSBuildResource.Identity) $(_ResourceOutputName)" />
+  </Target>
 </Project>

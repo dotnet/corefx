@@ -1,25 +1,15 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{95DFC527-4DC1-495E-97D7-E94EE1F7140D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>System.Collections.Immutable.Test</RootNamespace>
-    <AssemblyName>System.Collections.Immutable.Tests</AssemblyName>
-    <FileAlignment>512</FileAlignment>
-    <NuGetPackageImportStamp>7a9bfb7d</NuGetPackageImportStamp>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <NoWarn>0436</NoWarn>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
   <ItemGroup>
+    <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" Condition="'$(TargetsNetFx)' == 'true'">
+      <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
+    </Compile>
     <Compile Include="BadHasher.cs" />
     <Compile Include="EverythingEqual.cs" />
-    <Compile Include="ImmutableArrayBuilderTest.cs" />
     <Compile Include="ImmutableArrayExtensionsTest.cs" />
     <Compile Include="ImmutableArrayTest.cs" />
     <Compile Include="ImmutableArrayTestBase.cs" />
@@ -29,11 +19,8 @@
     <Compile Include="ImmutableDictionaryBuilderTest.cs" />
     <Compile Include="ImmutableHashSetBuilderTest.cs" />
     <Compile Include="ImmutableInterlockedTests.cs" />
-    <Compile Include="ImmutableListTestBase.cs" />
-    <Compile Include="ImmutableListBuilderTest.cs" />
     <Compile Include="ImmutableDictionaryTest.cs" />
     <Compile Include="ImmutableHashSetTest.cs" />
-    <Compile Include="ImmutableListTest.cs" />
     <Compile Include="ImmutableDictionaryTestBase.cs" />
     <Compile Include="ImmutableQueueTest.cs" />
     <Compile Include="ImmutableSetTest.cs" />
@@ -44,7 +31,6 @@
     <Compile Include="ImmutableStackTest.cs" />
     <Compile Include="ImmutableTestBase.cs" />
     <Compile Include="IndexOfTests.cs" />
-    <Compile Include="RequiresTests.cs" />
     <Compile Include="SimpleElementImmutablesTestBase.cs" />
     <Compile Include="TestExtensionsMethods.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
@@ -56,6 +42,9 @@
     <!-- Common Collections tests -->
     <Compile Include="$(CommonTestPath)\System\Collections\CollectionAsserts.cs">
       <Link>Common\System\Collections\CollectionAsserts.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Collections\DelegateEqualityComparer.cs">
+      <Link>Common\System\Collections\DelegateEqualityComparer.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\Collections\ICollection.NonGeneric.Tests.cs">
       <Link>Common\System\Collections\ICollection.NonGeneric.Tests.cs</Link>
@@ -107,16 +96,28 @@
     <None Include="ClassDiagram1.cd" />
     <Compile Include="ImmutableArray\ImmutableArray.Generic.Tests.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Collections.Immutable.pkgproj">
-      <Project>{1dd0ff15-6234-4bd6-850a-317f05479554}</Project>
-      <Name>System.Collections.Immutable</Name>
-      <Private>true</Private>
-    </ProjectReference>
+  <ItemGroup Condition="'$(TargetsNetFx)' != 'true'">
+    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
+    <DefaultReferenceExclusions Include="System.Collections.Immutable" />
+    <ReferenceFromRuntime Include="System.Collections.Immutable" />
+    <Compile Include="ImmutableListTestBase.cs" />
+    <Compile Include="ImmutableListTest.cs" />
+    <Compile Include="ImmutableListBuilderTest.cs" />
+    <Compile Include="RequiresTests.cs" />
+    <Compile Include="ImmutableArrayBuilderTest.cs" />
+    <Compile Include="ImmutableDictionaryTestBase.nonnetstandard.cs" />
+    <Compile Include="ImmutableDictionaryTest.nonnetstandard.cs" />
+    <Compile Include="TestExtensionsMethods.nonnetstandard.cs" />
+    <Compile Include="ImmutableSetTest.nonnetstandard.cs" />
+    <Compile Include="ImmutableHashSetTest.nonnetstandard.cs" />
+    <Compile Include="ImmutableSortedSetTest.nonnetstandard.cs" />
+    <Compile Include="ImmutableTestBase.nonnetstandard.cs" />
+    <Compile Include="ImmutableDictionaryBuilderTestBase.nonnetstandard.cs" />
+    <Compile Include="ImmutableSortedSetBuilderDebuggerProxyTest.cs" />
+    <Compile Include="ImmutableSortedSetBuilderTest.nonnetstandard.cs" />
+    <Compile Include="ImmutableSortedDictionaryTest.nonnetstandard.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <ItemGroup />
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

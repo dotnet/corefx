@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-/**
+/*
 * Routines used to manipulate IEEE 754 double-precision numbers, taken from JScript codebase.
 *
 * Define NOPARSE if you do not need FloatingDecimal -> double conversions
@@ -26,7 +26,7 @@ namespace System.Xml.Xsl
 
         public static uint DblLo(double dbl)
         {
-            return (uint)BitConverter.DoubleToInt64Bits(dbl);
+            return unchecked((uint)BitConverter.DoubleToInt64Bits(dbl));
         }
 
         // Returns true if value is infinite or NaN (exponent bits are all ones)
@@ -37,20 +37,25 @@ namespace System.Xml.Xsl
 
 #if DEBUG
         // Returns the next representable neighbor of x in the direction toward y
-        public static double NextAfter(double x, double y) {
+        public static double NextAfter(double x, double y)
+        {
             long bits;
 
-            if (Double.IsNaN(x)) {
+            if (Double.IsNaN(x))
+            {
                 return x;
             }
-            if (Double.IsNaN(y)) {
+            if (Double.IsNaN(y))
+            {
                 return y;
             }
-            if (x == y) {
+            if (x == y)
+            {
                 return y;
             }
-            if (x == 0) {
-                bits = BitConverter.DoubleToInt64Bits(y) & 1L<<63;
+            if (x == 0)
+            {
+                bits = BitConverter.DoubleToInt64Bits(y) & 1L << 63;
                 return BitConverter.Int64BitsToDouble(bits | 1);
             }
 
@@ -60,19 +65,24 @@ namespace System.Xml.Xsl
             // integer.
 
             bits = BitConverter.DoubleToInt64Bits(x);
-            if (0 < x && x < y || 0 > x && x > y) {
+            if (0 < x && x < y || 0 > x && x > y)
+            {
                 bits++;
-            } else {
+            }
+            else
+            {
                 bits--;
             }
             return BitConverter.Int64BitsToDouble(bits);
         }
 
-        public static double Succ(double x) {
+        public static double Succ(double x)
+        {
             return NextAfter(x, Double.PositiveInfinity);
         }
 
-        public static double Pred(double x) {
+        public static double Pred(double x)
+        {
             return NextAfter(x, Double.NegativeInfinity);
         }
 #endif
@@ -98,7 +108,7 @@ namespace System.Xml.Xsl
         */
         public static uint AddU(ref uint u1, uint u2)
         {
-            u1 += u2;
+            u1 = unchecked(u1 + u2);
             return u1 < u2 ? 1u : 0u;
         }
 
@@ -112,7 +122,7 @@ namespace System.Xml.Xsl
         {
             ulong result = (ulong)u1 * u2;
             uHi = (uint)(result >> 32);
-            return (uint)result;
+            return unchecked((uint)result);
         }
 
         /*  ----------------------------------------------------------------------------
@@ -587,7 +597,7 @@ namespace System.Xml.Xsl
                 exp = bn._exp + 1022;
                 if (exp >= 2047)
                 {
-                    return Double.PositiveInfinity;
+                    return double.PositiveInfinity;
                 }
 
                 // Round after filling in the bits. In the extra uint, we set the low bit
@@ -688,7 +698,7 @@ namespace System.Xml.Xsl
                 Debug.Assert(_error < 0xFFFFFFFF);
                 uint uT = (_error + 1) >> 1;
 
-                if (0 != uT && 0 == AddU(ref _u0, (uint)-(int)uT) && 0 == AddU(ref _u1, 0xFFFFFFFF))
+                if (0 != uT && 0 == AddU(ref _u0, unchecked((uint)-(int)uT)) && 0 == AddU(ref _u1, 0xFFFFFFFF))
                 {
                     AddU(ref _u2, 0xFFFFFFFF);
                     if (0 == (0x80000000 & _u2))
@@ -1015,15 +1025,17 @@ namespace System.Xml.Xsl
 
 #if DEBUG
                 // Verify that precise is working and gives the same answer
-                if (mantissaSize > 0) {
+                if (mantissaSize > 0)
+                {
                     byte[] mantissaPrec = new byte[20];
-                    int    exponentPrec, mantissaSizePrec, idx;
+                    int exponentPrec, mantissaSizePrec, idx;
 
                     DblToRgbPrecise(dbl, mantissaPrec, out exponentPrec, out mantissaSizePrec);
                     Debug.Assert(exponent == exponentPrec && mantissaSize == mantissaSizePrec);
                     // Assert(!memcmp(mantissa, mantissaPrec, mantissaSizePrec - 1));
                     bool equal = true;
-                    for (idx = 0; idx < mantissaSize; idx++) {
+                    for (idx = 0; idx < mantissaSize; idx++)
+                    {
                         equal &= (
                             (mantissa[idx] == mantissaPrec[idx]) ||
                             (idx == mantissaSize - 1) && Math.Abs(mantissa[idx] - mantissaPrec[idx]) <= 1
@@ -2148,7 +2160,7 @@ namespace System.Xml.Xsl
 
             LNegative:
                 // bi was bigger than this.
-                Debug.Assert(false, "Who's subtracting to negative?");
+                Debug.Fail("Who's subtracting to negative?");
                 _length = 0;
                 AssertValid();
             }
@@ -2369,13 +2381,16 @@ namespace System.Xml.Xsl
             }
 
 #if DEBUG
-            private bool Equals(FloatingDecimal other) {
+            private bool Equals(FloatingDecimal other)
+            {
                 if (_exponent != other._exponent || _sign != other._sign || _mantissaSize != other._mantissaSize)
                 {
                     return false;
                 }
-                for (int idx = 0; idx < _mantissaSize; idx++) {
-                    if (_mantissa[idx] != other._mantissa[idx]) {
+                for (int idx = 0; idx < _mantissaSize; idx++)
+                {
+                    if (_mantissa[idx] != other._mantissa[idx])
+                    {
                         return false;
                     }
                 }
@@ -2509,7 +2524,8 @@ namespace System.Xml.Xsl
                     // verify that the results are the same.
                     dblLowPrec = dbl;
                 }
-                else {
+                else
+                {
                     dblLowPrec = Double.NaN;
                 }
 #else
@@ -2520,7 +2536,7 @@ namespace System.Xml.Xsl
                 if (dec._exponent >= MaxExp10)
                 {
                     // Overflow to infinity.
-                    dbl = Double.PositiveInfinity;
+                    dbl = double.PositiveInfinity;
                     goto LDone;
                 }
 
@@ -2579,7 +2595,7 @@ namespace System.Xml.Xsl
                 // which is _probably_ within expected errror. I did not take the time to fully
                 // investigate whether this really does meet the ECMA spec...
                 //
-                Debug.Assert(Double.IsNaN(dblLowPrec) || dblLowPrec == dbl);
+                Debug.Assert(double.IsNaN(dblLowPrec) || dblLowPrec == dbl);
                 return dec._sign < 0 ? -dbl : dbl;
             }
 
@@ -2879,12 +2895,12 @@ namespace System.Xml.Xsl
             // Handle NaN and infinity
             if (IsSpecial(dbl))
             {
-                if (Double.IsNaN(dbl))
+                if (double.IsNaN(dbl))
                 {
                     return "NaN";
                 }
 
-                Debug.Assert(Double.IsInfinity(dbl));
+                Debug.Assert(double.IsInfinity(dbl));
                 return dbl < 0 ? "-Infinity" : "Infinity";
             }
 
@@ -2977,7 +2993,7 @@ namespace System.Xml.Xsl
 
         private static bool IsAsciiDigit(char ch)
         {
-            return (uint)(ch - '0') <= 9;
+            return unchecked((uint)(ch - '0')) <= 9;
         }
 
         private static bool IsWhitespace(char ch)
@@ -3057,7 +3073,7 @@ namespace System.Xml.Xsl
                 }
 
                 // Nothing digested - set the result to NaN and exit.
-                return Double.NaN;
+                return double.NaN;
 
             LGetLeft:
                 // Get digits to the left of the decimal point
@@ -3118,7 +3134,7 @@ namespace System.Xml.Xsl
                 if (pch < pchEnd && SkipWhitespace(pch) < pchEnd)
                 {
                     // If we're not at the end of the string, this is not a valid number
-                    return Double.NaN;
+                    return double.NaN;
                 }
 
                 if (numDig == 0)
@@ -3188,7 +3204,7 @@ namespace System.Xml.Xsl
                     dec.Sign = sign;
                     dec.MantissaSize = numDig;
 
-                    fixed (byte* pin = dec.Mantissa)
+                    fixed (byte* pin = &dec.Mantissa[0])
                     {
                         byte* mantissa = pin;
                         while (pchFirstDig < pch)

@@ -130,14 +130,14 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void NullVariableList()
         {
-            Assert.Throws<ArgumentNullException>("variables", () => Expression.RuntimeVariables(default(ParameterExpression[])));
-            Assert.Throws<ArgumentNullException>("variables", () => Expression.RuntimeVariables(default(IEnumerable<ParameterExpression>)));
+            AssertExtensions.Throws<ArgumentNullException>("variables", () => Expression.RuntimeVariables(default(ParameterExpression[])));
+            AssertExtensions.Throws<ArgumentNullException>("variables", () => Expression.RuntimeVariables(default(IEnumerable<ParameterExpression>)));
         }
 
         [Fact]
         public void NullVariableInList()
         {
-            Assert.Throws<ArgumentNullException>("variables[1]", () => Expression.RuntimeVariables(Expression.Variable(typeof(int)), null));
+            AssertExtensions.Throws<ArgumentNullException>("variables[1]", () => Expression.RuntimeVariables(Expression.Variable(typeof(int)), null));
         }
 
         [Theory]
@@ -156,13 +156,15 @@ namespace System.Linq.Expressions.Tests
             RuntimeVariablesExpression vars = Expression.RuntimeVariables(Expression.Variable(typeof(int)));
             Assert.False(vars.CanReduce);
             Assert.Same(vars, vars.Reduce());
-            Assert.Throws<ArgumentException>(null, () => vars.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => vars.ReduceAndCheck());
         }
 
         [Fact]
         public void UpdateSameCollectionSameNode()
         {
-            RuntimeVariablesExpression varExp = Expression.RuntimeVariables(Enumerable.Repeat(Expression.Variable(typeof(RuntimeVariablesTests)), 1));
+            ParameterExpression[] variables = {Expression.Variable(typeof(RuntimeVariablesTests))};
+            RuntimeVariablesExpression varExp = Expression.RuntimeVariables(variables);
+            Assert.Same(varExp, varExp.Update(variables));
             Assert.Same(varExp, varExp.Update(varExp.Variables));
             Assert.Same(varExp, NoOpVisitor.Instance.Visit(varExp));
         }
@@ -172,6 +174,21 @@ namespace System.Linq.Expressions.Tests
         {
             RuntimeVariablesExpression varExp = Expression.RuntimeVariables(Enumerable.Repeat(Expression.Variable(typeof(RuntimeVariablesTests)), 1));
             Assert.NotSame(varExp, varExp.Update(new[] { Expression.Variable(typeof(RuntimeVariablesTests)) }));
+        }
+
+
+        [Fact]
+        public void UpdateDoesntRepeatEnumeration()
+        {
+            RuntimeVariablesExpression varExp = Expression.RuntimeVariables(Enumerable.Repeat(Expression.Variable(typeof(RuntimeVariablesTests)), 1));
+            Assert.NotSame(varExp, varExp.Update(new RunOnceEnumerable<ParameterExpression>(new[] { Expression.Variable(typeof(RuntimeVariablesTests)) })));
+        }
+
+        [Fact]
+        public void UpdateNullThrows()
+        {
+            RuntimeVariablesExpression varExp = Expression.RuntimeVariables(Enumerable.Repeat(Expression.Variable(typeof(RuntimeVariablesTests)), 0));
+            AssertExtensions.Throws<ArgumentNullException>("variables", () => varExp.Update(null));
         }
 
         [Fact]

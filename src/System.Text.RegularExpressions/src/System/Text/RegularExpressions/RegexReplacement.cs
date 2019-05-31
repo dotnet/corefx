@@ -8,20 +8,18 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 
 namespace System.Text.RegularExpressions
 {
     internal sealed class RegexReplacement
     {
         // Constants for special insertion patterns
-        internal const int Specials = 4;
-        internal const int LeftPortion = -1;
-        internal const int RightPortion = -2;
-        internal const int LastGroup = -3;
-        internal const int WholeString = -4;
+        private const int Specials = 4;
+        public const int LeftPortion = -1;
+        public const int RightPortion = -2;
+        public const int LastGroup = -3;
+        public const int WholeString = -4;
 
-        private readonly string _rep;
         private readonly List<string> _strings; // table of string constants
         private readonly List<int> _rules;      // negative -> group #, positive -> string #
 
@@ -30,12 +28,13 @@ namespace System.Text.RegularExpressions
         /// the constructor takes a RegexNode which is a concatenation
         /// of constant strings and backreferences.
         /// </summary>
-        internal RegexReplacement(string rep, RegexNode concat, Hashtable _caps)
+        public RegexReplacement(string rep, RegexNode concat, Hashtable _caps)
         {
             if (concat.Type() != RegexNode.Concatenate)
                 throw new ArgumentException(SR.ReplacementError);
 
-            StringBuilder sb = StringBuilderCache.Acquire();
+            Span<char> buffer = stackalloc char[256];
+            ValueStringBuilder vsb = new ValueStringBuilder(buffer);
             List<string> strings = new List<string>();
             List<int> rules = new List<int>();
 
@@ -46,21 +45,21 @@ namespace System.Text.RegularExpressions
                 switch (child.Type())
                 {
                     case RegexNode.Multi:
-                        sb.Append(child._str);
+                        vsb.Append(child.Str);
                         break;
 
                     case RegexNode.One:
-                        sb.Append(child._ch);
+                        vsb.Append(child.Ch);
                         break;
 
                     case RegexNode.Ref:
-                        if (sb.Length > 0)
+                        if (vsb.Length > 0)
                         {
                             rules.Add(strings.Count);
-                            strings.Add(sb.ToString());
-                            sb.Length = 0;
+                            strings.Add(vsb.ToString());
+                            vsb.Length = 0;
                         }
-                        int slot = child._m;
+                        int slot = child.M;
 
                         if (_caps != null && slot >= 0)
                             slot = (int)_caps[slot];
@@ -73,105 +72,106 @@ namespace System.Text.RegularExpressions
                 }
             }
 
-            if (sb.Length > 0)
+            if (vsb.Length > 0)
             {
                 rules.Add(strings.Count);
-                strings.Add(sb.ToString());
+                strings.Add(vsb.ToString());
             }
 
-            StringBuilderCache.Release(sb);
-
-            _rep = rep;
+            Pattern = rep;
             _strings = strings;
             _rules = rules;
         }
 
         /// <summary>
-        /// Given a Match, emits into the StringBuilder the evaluated
-        /// substitution pattern.
+        /// Either returns a weakly cached RegexReplacement helper or creates one and caches it.
         /// </summary>
-        private void ReplacementImpl(StringBuilder sb, Match match)
+        /// <returns></returns>
+        public static RegexReplacement GetOrCreate(WeakReference<RegexReplacement> replRef, string replacement, Hashtable caps,
+            int capsize, Hashtable capnames, RegexOptions roptions)
         {
-            for (int i = 0; i < _rules.Count; i++)
-            {
-                int r = _rules[i];
-                if (r >= 0)   // string lookup
-                    sb.Append(_strings[r]);
-                else if (r < -Specials) // group lookup
-                    sb.Append(match.GroupToStringImpl(-Specials - 1 - r));
-                else
-                {
-                    switch (-Specials - 1 - r)
-                    { // special insertion patterns
-                        case LeftPortion:
-                            sb.Append(match.GetLeftSubstring());
-                            break;
-                        case RightPortion:
-                            sb.Append(match.GetRightSubstring());
-                            break;
-                        case LastGroup:
-                            sb.Append(match.LastGroupToStringImpl());
-                            break;
-                        case WholeString:
-                            sb.Append(match.GetOriginalString());
-                            break;
-                    }
-                }
-            }
-        }
+            RegexReplacement repl;
 
-        /// <summary>
-        /// Given a Match, emits into the List<string> the evaluated
-        /// Right-to-Left substitution pattern.
-        /// </summary>
-        private void ReplacementImplRTL(List<string> al, Match match)
-        {
-            for (int i = _rules.Count - 1; i >= 0; i--)
+            if (!replRef.TryGetTarget(out repl) || !repl.Pattern.Equals(replacement))
             {
-                int r = _rules[i];
-                if (r >= 0)  // string lookup
-                    al.Add(_strings[r]);
-                else if (r < -Specials) // group lookup
-                    al.Add(match.GroupToStringImpl(-Specials - 1 - r));
-                else
-                {
-                    switch (-Specials - 1 - r)
-                    { // special insertion patterns
-                        case LeftPortion:
-                            al.Add(match.GetLeftSubstring());
-                            break;
-                        case RightPortion:
-                            al.Add(match.GetRightSubstring());
-                            break;
-                        case LastGroup:
-                            al.Add(match.LastGroupToStringImpl());
-                            break;
-                        case WholeString:
-                            al.Add(match.GetOriginalString());
-                            break;
-                    }
-                }
+                repl = RegexParser.ParseReplacement(replacement, roptions, caps, capsize, capnames);
+                replRef.SetTarget(repl);
             }
+
+            return repl;
         }
 
         /// <summary>
         /// The original pattern string
         /// </summary>
-        internal string Pattern
-        {
-            get { return _rep; }
-        }
+        public string Pattern { get; }
 
         /// <summary>
-        /// Returns the replacement result for a single match
+        /// Given a Match, emits into the StringBuilder the evaluated
+        /// substitution pattern.
         /// </summary>
-        internal string Replacement(Match match)
+        public void ReplacementImpl(ref ValueStringBuilder vsb, Match match)
         {
-            StringBuilder sb = StringBuilderCache.Acquire();
+            for (int i = 0; i < _rules.Count; i++)
+            {
+                int r = _rules[i];
+                if (r >= 0)   // string lookup
+                    vsb.Append(_strings[r]);
+                else if (r < -Specials) // group lookup
+                    vsb.Append(match.GroupToStringImpl(-Specials - 1 - r));
+                else
+                {
+                    switch (-Specials - 1 - r)
+                    { // special insertion patterns
+                        case LeftPortion:
+                            vsb.Append(match.GetLeftSubstring());
+                            break;
+                        case RightPortion:
+                            vsb.Append(match.GetRightSubstring());
+                            break;
+                        case LastGroup:
+                            vsb.Append(match.LastGroupToStringImpl());
+                            break;
+                        case WholeString:
+                            vsb.Append(match.Text);
+                            break;
+                    }
+                }
+            }
+        }
 
-            ReplacementImpl(sb, match);
-
-            return StringBuilderCache.GetStringAndRelease(sb);
+       /// <summary>
+        /// Given a Match, emits into the ValueStringBuilder the evaluated
+        /// Right-to-Left substitution pattern.
+        /// </summary>
+        public void ReplacementImplRTL(ref ValueStringBuilder vsb, Match match)
+        {
+            for (int i = _rules.Count - 1; i >= 0; i--)
+            {
+                int r = _rules[i];
+                if (r >= 0)  // string lookup
+                    vsb.AppendReversed(_strings[r]);
+                else if (r < -Specials) // group lookup
+                    vsb.AppendReversed(match.GroupToStringImpl(-Specials - 1 - r));
+                else
+                {
+                    switch (-Specials - 1 - r)
+                    { // special insertion patterns
+                        case LeftPortion:
+                            vsb.AppendReversed(match.GetLeftSubstring());
+                            break;
+                        case RightPortion:
+                            vsb.AppendReversed(match.GetRightSubstring());
+                            break;
+                        case LastGroup:
+                            vsb.AppendReversed(match.LastGroupToStringImpl());
+                            break;
+                        case WholeString:
+                            vsb.AppendReversed(match.Text);
+                            break;
+                    }
+                }
+            }
         }
 
         // Three very similar algorithms appear below: replace (pattern),
@@ -186,7 +186,7 @@ namespace System.Text.RegularExpressions
         /// The right-to-left case is split out because StringBuilder
         /// doesn't handle right-to-left string building directly very well.
         /// </summary>
-        internal string Replace(Regex regex, string input, int count, int startat)
+        public string Replace(Regex regex, string input, int count, int startat)
         {
             if (count < -1)
                 throw new ArgumentOutOfRangeException(nameof(count), SR.CountTooSmall);
@@ -203,7 +203,8 @@ namespace System.Text.RegularExpressions
             }
             else
             {
-                StringBuilder sb = StringBuilderCache.Acquire();
+                Span<char> charInitSpan = stackalloc char[256];
+                var vsb = new ValueStringBuilder(charInitSpan);
 
                 if (!regex.RightToLeft)
                 {
@@ -212,10 +213,10 @@ namespace System.Text.RegularExpressions
                     do
                     {
                         if (match.Index != prevat)
-                            sb.Append(input, prevat, match.Index - prevat);
+                            vsb.Append(input.AsSpan(prevat, match.Index - prevat));
 
                         prevat = match.Index + match.Length;
-                        ReplacementImpl(sb, match);
+                        ReplacementImpl(ref vsb, match);
                         if (--count == 0)
                             break;
 
@@ -223,20 +224,23 @@ namespace System.Text.RegularExpressions
                     } while (match.Success);
 
                     if (prevat < input.Length)
-                        sb.Append(input, prevat, input.Length - prevat);
+                        vsb.Append(input.AsSpan(prevat, input.Length - prevat));
                 }
                 else
                 {
-                    List<string> al = new List<string>();
+                    // In right to left mode append all the inputs in reversed order to avoid an extra dynamic data structure
+                    // and to be able to work with Spans. A final reverse of the transformed reversed input string generates
+                    // the desired output. Similar to Tower of Hanoi.
+
                     int prevat = input.Length;
 
                     do
                     {
                         if (match.Index + match.Length != prevat)
-                            al.Add(input.Substring(match.Index + match.Length, prevat - match.Index - match.Length));
+                            vsb.AppendReversed(input.AsSpan(match.Index + match.Length, prevat - match.Index - match.Length));
 
                         prevat = match.Index;
-                        ReplacementImplRTL(al, match);
+                        ReplacementImplRTL(ref vsb, match);
                         if (--count == 0)
                             break;
 
@@ -244,199 +248,12 @@ namespace System.Text.RegularExpressions
                     } while (match.Success);
 
                     if (prevat > 0)
-                        sb.Append(input, 0, prevat);
+                        vsb.AppendReversed(input.AsSpan(0, prevat));
 
-                    for (int i = al.Count - 1; i >= 0; i--)
-                    {
-                        sb.Append(al[i]);
-                    }
+                    vsb.Reverse();
                 }
 
-                return StringBuilderCache.GetStringAndRelease(sb);
-            }
-        }
-
-        /// <summary>
-        /// Replaces all occurrences of the regex in the string with the
-        /// replacement evaluator.
-        ///
-        /// Note that the special case of no matches is handled on its own:
-        /// with no matches, the input string is returned unchanged.
-        /// The right-to-left case is split out because StringBuilder
-        /// doesn't handle right-to-left string building directly very well.
-        /// </summary>
-        internal static string Replace(MatchEvaluator evaluator, Regex regex,
-                                       string input, int count, int startat)
-        {
-            if (evaluator == null)
-                throw new ArgumentNullException(nameof(evaluator));
-            if (count < -1)
-                throw new ArgumentOutOfRangeException(nameof(count), SR.CountTooSmall);
-            if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
-
-            if (count == 0)
-                return input;
-
-            Match match = regex.Match(input, startat);
-
-            if (!match.Success)
-            {
-                return input;
-            }
-            else
-            {
-                StringBuilder sb = StringBuilderCache.Acquire();
-
-                if (!regex.RightToLeft)
-                {
-                    int prevat = 0;
-
-                    do
-                    {
-                        if (match.Index != prevat)
-                            sb.Append(input, prevat, match.Index - prevat);
-
-                        prevat = match.Index + match.Length;
-
-                        sb.Append(evaluator(match));
-
-                        if (--count == 0)
-                            break;
-
-                        match = match.NextMatch();
-                    } while (match.Success);
-
-                    if (prevat < input.Length)
-                        sb.Append(input, prevat, input.Length - prevat);
-                }
-                else
-                {
-                    List<string> al = new List<string>();
-                    int prevat = input.Length;
-
-                    do
-                    {
-                        if (match.Index + match.Length != prevat)
-                            al.Add(input.Substring(match.Index + match.Length, prevat - match.Index - match.Length));
-
-                        prevat = match.Index;
-
-                        al.Add(evaluator(match));
-
-                        if (--count == 0)
-                            break;
-
-                        match = match.NextMatch();
-                    } while (match.Success);
-
-                    if (prevat > 0)
-                        sb.Append(input, 0, prevat);
-
-                    for (int i = al.Count - 1; i >= 0; i--)
-                    {
-                        sb.Append(al[i]);
-                    }
-                }
-
-                return StringBuilderCache.GetStringAndRelease(sb);
-            }
-        }
-
-        /// <summary>
-        /// Does a split. In the right-to-left case we reorder the
-        /// array to be forwards.
-        /// </summary>
-        internal static string[] Split(Regex regex, string input, int count, int startat)
-        {
-            if (count < 0)
-                throw new ArgumentOutOfRangeException(nameof(count), SR.CountTooSmall);
-            if (startat < 0 || startat > input.Length)
-                throw new ArgumentOutOfRangeException(nameof(startat), SR.BeginIndexNotNegative);
-
-            string[] result;
-
-            if (count == 1)
-            {
-                result = new string[1];
-                result[0] = input;
-                return result;
-            }
-
-            count -= 1;
-
-            Match match = regex.Match(input, startat);
-
-            if (!match.Success)
-            {
-                result = new string[1];
-                result[0] = input;
-                return result;
-            }
-            else
-            {
-                List<string> al = new List<string>();
-
-                if (!regex.RightToLeft)
-                {
-                    int prevat = 0;
-
-                    for (; ;)
-                    {
-                        al.Add(input.Substring(prevat, match.Index - prevat));
-
-                        prevat = match.Index + match.Length;
-
-                        // add all matched capture groups to the list.
-                        for (int i = 1; i < match.Groups.Count; i++)
-                        {
-                            if (match.IsMatched(i))
-                                al.Add(match.Groups[i].ToString());
-                        }
-
-                        if (--count == 0)
-                            break;
-
-                        match = match.NextMatch();
-
-                        if (!match.Success)
-                            break;
-                    }
-
-                    al.Add(input.Substring(prevat, input.Length - prevat));
-                }
-                else
-                {
-                    int prevat = input.Length;
-
-                    for (; ;)
-                    {
-                        al.Add(input.Substring(match.Index + match.Length, prevat - match.Index - match.Length));
-
-                        prevat = match.Index;
-
-                        // add all matched capture groups to the list.
-                        for (int i = 1; i < match.Groups.Count; i++)
-                        {
-                            if (match.IsMatched(i))
-                                al.Add(match.Groups[i].ToString());
-                        }
-
-                        if (--count == 0)
-                            break;
-
-                        match = match.NextMatch();
-
-                        if (!match.Success)
-                            break;
-                    }
-
-                    al.Add(input.Substring(0, prevat));
-
-                    al.Reverse(0, al.Count);
-                }
-
-                return al.ToArray();
+                return vsb.ToString();
             }
         }
     }

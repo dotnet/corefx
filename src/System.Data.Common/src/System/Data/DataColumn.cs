@@ -79,7 +79,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Inititalizes a new instance of the <see cref='System.Data.DataColumn'/> class
+        /// Initializes a new instance of the <see cref='System.Data.DataColumn'/> class
         /// using the specified column name.
         /// </summary>
         public DataColumn(string columnName) : this(columnName, typeof(string), null, MappingType.Element)
@@ -87,7 +87,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Inititalizes a new instance of the <see cref='System.Data.DataColumn'/> class
+        /// Initializes a new instance of the <see cref='System.Data.DataColumn'/> class
         /// using the specified column name and data type.
         /// </summary>
         public DataColumn(string columnName, Type dataType) : this(columnName, dataType, null, MappingType.Element)
@@ -468,7 +468,7 @@ namespace System.Data
         internal DataExpression DataExpression => _expression;
 
         /// <summary>
-        /// The type of data stored in thecolumn.
+        /// The type of data stored in the column.
         /// </summary>
         [DefaultValue(typeof(string))]
         [RefreshProperties(RefreshProperties.All)]
@@ -699,7 +699,7 @@ namespace System.Data
         internal void BindExpression() => DataExpression.Bind(_table);
 
         /// <summary>
-        /// Gets or sets the expresssion used to either filter rows, calculate the column's
+        /// Gets or sets the expression used to either filter rows, calculate the column's
         /// value, or create an aggregate column.
         /// </summary>
         [RefreshProperties(RefreshProperties.All)]
@@ -1156,7 +1156,7 @@ namespace System.Data
                     DataRow dr = GetDataRow(record);
                     if (dr != null)
                     {
-                        // at initialization time (datatable.NewRow(), we would fill the storage with default value, but at that time we wont have datarow)
+                        // at initialization time (datatable.NewRow(), we would fill the storage with default value, but at that time we won't have datarow)
                         dr.LastChangedColumn = this;
                     }
                 }
@@ -1187,7 +1187,7 @@ namespace System.Data
 
             DataRow dr = GetDataRow(record);
             if (dr != null)
-            {  // at initialization time (datatable.NewRow(), we would fill the storage with default value, but at that time we wont have datarow)
+            {  // at initialization time (datatable.NewRow(), we would fill the storage with default value, but at that time we won't have datarow)
                 dr.LastChangedColumn = this;
             }
         }
@@ -1398,7 +1398,7 @@ namespace System.Data
             }
         }
 
-        internal protected void CheckNotAllowNull()
+        protected internal void CheckNotAllowNull()
         {
             if (_storage == null)
             {
@@ -1767,7 +1767,7 @@ namespace System.Data
 
         internal object ConvertXmlToObject(string s)
         {
-            Debug.Assert(s != null, "Caller is resposible for missing element/attribure case");
+            Debug.Assert(s != null, "Caller is resposible for missing element/attribute case");
             InsureStorage();
             return _storage.ConvertXmlToObject(s);
         }
@@ -1930,7 +1930,7 @@ namespace System.Data
         }
 
         /// <summary>Get and sets the stepping value.</summary>
-        /// <exception cref="ArugmentException">if value is 0</exception>
+        /// <exception cref="ArgumentException">if value is 0</exception>
         internal override long Step
         {
             get { return _step; }
@@ -2011,7 +2011,7 @@ namespace System.Data
         }
 
         /// <summary>Get and sets the stepping value.</summary>
-        /// <exception cref="ArugmentException">if value is 0</exception>
+        /// <exception cref="ArgumentException">if value is 0</exception>
         internal override long Step
         {
             get { return (long)_step; }

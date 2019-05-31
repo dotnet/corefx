@@ -18,12 +18,12 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetLastWriteTime_ThrowsIsolatedStorageException()
+        public void GetLastWriteTime_Deleted_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.GetLastWriteTime("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.GetLastWriteTime("foo"));
             }
         }
 
@@ -39,7 +39,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void GetLastWriteTime_ThrowsInvalidOperationException()
+        public void GetLastWriteTime_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -53,7 +53,7 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.GetLastWriteTime("\0bad"));
+                AssertExtensions.Throws<ArgumentException>("path", null, () => isf.GetLastWriteTime("\0bad"));
             }
         }
 

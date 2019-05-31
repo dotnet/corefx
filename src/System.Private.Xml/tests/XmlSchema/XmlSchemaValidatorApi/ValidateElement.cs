@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
 using System.IO;
-using System.Xml;
 using System.Xml.Schema;
 using Xunit;
 using Xunit.Abstractions;
@@ -17,9 +15,12 @@ namespace System.Xml.Tests
     public class TCValidateElement : CXmlSchemaValidatorTestCase
     {
         private ITestOutputHelper _output;
+        private ExceptionVerifier _exVerifier;
+
         public TCValidateElement(ITestOutputHelper output): base(output)
         {
             _output = output;
+            _exVerifier = new ExceptionVerifier("System.Xml", _output);
         }
 
         [Theory]
@@ -27,7 +28,7 @@ namespace System.Xml.Tests
         [InlineData("name", "second")]
         [InlineData("ns", "first")]
         [InlineData("ns", "second")]
-        public void PassNull_LocalName_NamespaceUri_Invalid_First_Second_Overload(String type, String overload)
+        public void PassNull_LocalName_NamespaceUri_Invalid_First_Second_Overload(string type, string overload)
         {
             XmlSchemaValidator val = CreateValidator(CreateSchemaSetFromXml("<root />"));
             string name = "root";
@@ -58,7 +59,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("first")]
         [InlineData("second")]
-        public void PassNullXmlSchemaInfo__Valid_First_Second_Overload(String overload)
+        public void PassNullXmlSchemaInfo__Valid_First_Second_Overload(string overload)
         {
             XmlSchemaValidator val = CreateValidator(CreateSchemaSetFromXml("<root />"));
 
@@ -74,7 +75,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("first")]
         [InlineData("second")]
-        public void PassInvalidName_First_Second_Overload(String overload)
+        public void PassInvalidName_First_Second_Overload(string overload)
         {
             XmlSchemaValidator val = CreateValidator(CreateSchemaSetFromXml("<root />"));
 
@@ -87,9 +88,9 @@ namespace System.Xml.Tests
                 else
                     val.ValidateElement("$$##", "", null, null, null, null, null);
             }
-            catch (XmlSchemaValidationException)
+            catch (XmlSchemaValidationException e)
             {
-                //XmlExceptionVerifier.IsExceptionOk(e, "Sch_UndeclaredElement", new string[] { "$$##" });
+                _exVerifier.IsExceptionOk(e, "Sch_UndeclaredElement", new string[] { "$$##" });
                 return;
             }
 
@@ -105,7 +106,7 @@ namespace System.Xml.Tests
         [InlineData("ElementOnlyElement", XmlSchemaContentType.ElementOnly, "second")]
         [InlineData("EmptyElement", XmlSchemaContentType.Empty, "second")]
         [InlineData("MixedElement", XmlSchemaContentType.Mixed, "second")]
-        public void CallValidateElementAndCHeckXmlSchemaInfoFOr_Simple_Complex_Empty_Mixed_Element_First_Second_Overload(String elemType, XmlSchemaContentType schemaContentType, String overload)
+        public void CallValidateElementAndCHeckXmlSchemaInfoFOr_Simple_Complex_Empty_Mixed_Element_First_Second_Overload(string elemType, XmlSchemaContentType schemaContentType, string overload)
         {
             XmlSchemaValidator val;
             XmlSchemaSet schemas = new XmlSchemaSet();
@@ -198,7 +199,7 @@ namespace System.Xml.Tests
             else
             {
                 Assert.True(holder.IsCalledA);
-                //XmlExceptionVerifier.IsExceptionOk(holder.lastException);
+                _exVerifier.IsExceptionOk(holder.lastException, "Sch_XsiTypeNotFound", new string[] { "uri:tempuri:type1" });
             }
 
             return;
@@ -233,7 +234,7 @@ namespace System.Xml.Tests
             else
             {
                 Assert.True(holder.IsCalledA);
-                //XmlExceptionVerifier.IsExceptionOk(holder.lastException);
+                _exVerifier.IsExceptionOk(holder.lastException, "Sch_XsiTypeNotFound", new string[] { "type1" });
             }
 
             return;
@@ -242,7 +243,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData(null)]
         [InlineData("false")]
-        public void CallWith_Null_False_XsiNil(String xsiNil)
+        public void CallWith_Null_False_XsiNil(string xsiNil)
         {
             XmlSchemaValidator val;
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -257,11 +258,11 @@ namespace System.Xml.Tests
             {
                 val.ValidateEndElement(info);
             }
-            catch (XmlSchemaValidationException)
+            catch (XmlSchemaValidationException e)
             {
-                //XmlExceptionVerifier.IsExceptionOk(e, new object[] { "Sch_IncompleteContentExpecting",
-																//	new object[] { "Sch_ElementName", "NillableElement" },
-																//	new object[] { "Sch_ElementName", "foo" } });
+                _exVerifier.IsExceptionOk(e, new object[] { "Sch_IncompleteContentExpecting",
+                    new object[] { "Sch_ElementName", "NillableElement" },
+                    new object[] { "Sch_ElementName", "foo" } });
                 return;
             }
 
@@ -322,9 +323,9 @@ namespace System.Xml.Tests
             {
                 val.ValidateElement("foo", "uri:tempuri", null, "type1", null, null, null);
             }
-            catch (XmlSchemaValidationException)
+            catch (XmlSchemaValidationException e)
             {
-                //XmlExceptionVerifier.IsExceptionOk(e, "Sch_XsiTypeNotFound", new string[] { "type1" });
+                _exVerifier.IsExceptionOk(e, "Sch_XsiTypeNotFound", new string[] { "type1" });
                 return;
             }
             Assert.True(false);
@@ -356,7 +357,7 @@ namespace System.Xml.Tests
 
             Assert.True(holder.IsCalledA);
             Assert.Equal(holder.lastSeverity, XmlSeverityType.Warning);
-            //XmlExceptionVerifier.IsExceptionOk(holder.lastException, "Sch_CannotLoadSchema", new string[] { "uri:tempuri", null });
+            _exVerifier.IsExceptionOk(holder.lastException, "Sch_CannotLoadSchema", new string[] { "uri:tempuri", null });
 
             return;
         }
@@ -384,7 +385,7 @@ namespace System.Xml.Tests
 
             Assert.True(holder.IsCalledA);
             Assert.Equal(holder.lastSeverity, XmlSeverityType.Warning);
-            //XmlExceptionVerifier.IsExceptionOk(holder.lastException, "Sch_CannotLoadSchema", new string[] { "", null });
+            _exVerifier.IsExceptionOk(holder.lastException, "Sch_CannotLoadSchema", new string[] { "", null });
 
             return;
         }
@@ -405,7 +406,7 @@ namespace System.Xml.Tests
 
             Assert.True(holder.IsCalledA);
             Assert.Equal(holder.lastSeverity, XmlSeverityType.Warning);
-            //XmlExceptionVerifier.IsExceptionOk(holder.lastException, "Sch_NoElementSchemaFound", new string[] { "undefined" });
+            _exVerifier.IsExceptionOk(holder.lastException, "Sch_NoElementSchemaFound", new string[] { "undefined" });
 
             return;
         }
@@ -456,7 +457,6 @@ namespace System.Xml.Tests
             return;
         }
 
-        //Dev10_40497
         [Fact]
         public void StringPassedToValidateEndElementDoesNotSatisfyIdentityConstraints()
         {

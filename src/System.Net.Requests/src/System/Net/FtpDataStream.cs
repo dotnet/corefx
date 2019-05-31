@@ -4,6 +4,7 @@
 
 using System.IO;
 using System.Net.Sockets;
+using System.Runtime.ExceptionServices;
 
 namespace System.Net
 {
@@ -56,6 +57,8 @@ namespace System.Net
             }
         }
 
+        //TODO: Add this to FxCopBaseline.cs once https://github.com/dotnet/roslyn/issues/15728 is fixed
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2002:DoNotLockOnObjectsWithWeakIdentity")]
         void ICloseEx.CloseEx(CloseExState closeState)
         {
             if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"state = {closeState}");
@@ -231,7 +234,7 @@ namespace System.Net
             catch { }
         }
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
         {
             CheckError();
             LazyAsyncResult userResult = new LazyAsyncResult(this, state, callback);
@@ -253,8 +256,10 @@ namespace System.Net
             {
                 object result = ((LazyAsyncResult)ar).InternalWaitForCompletion();
 
-                if (result is Exception)
-                    throw (Exception)result;
+                if (result is Exception e)
+                {
+                    ExceptionDispatchInfo.Throw(e);
+                }
 
                 return (int)result;
             }
@@ -264,7 +269,7 @@ namespace System.Net
             }
         }
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, Object state)
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int size, AsyncCallback callback, object state)
         {
             CheckError();
             try

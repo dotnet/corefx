@@ -24,13 +24,16 @@ namespace System.Reflection.PortableExecutable.Tests
             Assert.Equal(128 + 4 + 20 + 224 + 16, new PEHeaderBuilder(Machine.Amd64).ComputeSizeOfPEHeaders(0));
             Assert.Equal(128 + 4 + 20 + 224 + 16 + 40 * 1, new PEHeaderBuilder(Machine.Amd64).ComputeSizeOfPEHeaders(1));
             Assert.Equal(128 + 4 + 20 + 224 + 16 + 40 * 2, new PEHeaderBuilder(Machine.Amd64).ComputeSizeOfPEHeaders(2));
+            Assert.Equal(128 + 4 + 20 + 224 + 16, new PEHeaderBuilder(Machine.Arm64).ComputeSizeOfPEHeaders(0));
+            Assert.Equal(128 + 4 + 20 + 224 + 16 + 40 * 1, new PEHeaderBuilder(Machine.Arm64).ComputeSizeOfPEHeaders(1));
+            Assert.Equal(128 + 4 + 20 + 224 + 16 + 40 * 2, new PEHeaderBuilder(Machine.Arm64).ComputeSizeOfPEHeaders(2));
         }
 
         [Fact]
         public void Ctor_Streams()
         {
-            Assert.Throws<ArgumentException>(() => new PEHeaders(new CustomAccessMemoryStream(canRead: false, canSeek: false, canWrite: false)));
-            Assert.Throws<ArgumentException>(() => new PEHeaders(new CustomAccessMemoryStream(canRead: true, canSeek: false, canWrite: false)));
+            AssertExtensions.Throws<ArgumentException>("peStream", () => new PEHeaders(new CustomAccessMemoryStream(canRead: false, canSeek: false, canWrite: false)));
+            AssertExtensions.Throws<ArgumentException>("peStream", () => new PEHeaders(new CustomAccessMemoryStream(canRead: true, canSeek: false, canWrite: false)));
 
             var s = new CustomAccessMemoryStream(canRead: true, canSeek: true, canWrite: false, buffer: Misc.Members);
 

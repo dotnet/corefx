@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Xml;
 using System.Xml.Schema;
 using Xunit;
 using Xunit.Abstractions;
@@ -37,7 +35,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064.xsd", 1, 1, 1, 0)]
         [InlineData("Wildcards", "wildG007.xsd", 1, 1, 2, 0)]
         [InlineData("Wildcards", "wildG010.xsd", 3, 1, 5, 0)]
-        public void v1(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
+        public void v1(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile);
@@ -91,7 +89,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064", 1, 1, 1, 0)]
         [InlineData("Wildcards", "wildG007", 1, 1, 2, 0)]
         [InlineData("Wildcards", "wildG010", 3, 1, 5, 0)]
-        public void v2(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
+        public void v2(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile + ".xsd");
@@ -156,7 +154,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064.xsd", 1, 1, 1, 0, 0, 0)]
         [InlineData("Wildcards", "wildG007.xsd", 1, 1, 2, 0, 0, 0)]
         [InlineData("Wildcards", "wildG010.xsd", 3, 1, 5, 0, 3, 1)]
-        public void v1(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
+        public void v1(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile);
@@ -220,7 +218,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064", 1, 1, 1, 0, 0, 0)]
         [InlineData("Wildcards", "wildG007", 1, 1, 2, 0, 0, 0)]
         [InlineData("Wildcards", "wildG010", 3, 1, 5, 0, 3, 1)]
-        public void v2(String testDir, String testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
+        public void v2(string testDir, string testFile, int expCount, int expCountGT, int expCountGE, int expCountGA, int expCountGER, int expCountGERC)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile + ".xsd");
@@ -292,7 +290,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064.xsd", 1)]
         [InlineData("Wildcards", "wildG007.xsd", 1)]
         [InlineData("Wildcards", "wildG010.xsd", 3)]
-        public void v1(String testDir, String TestFile, int expCount)
+        public void v1(string testDir, string TestFile, int expCount)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, TestFile);
@@ -357,7 +355,7 @@ namespace System.Xml.Tests
         [InlineData("simpleType", "stE064", 1)]
         [InlineData("Wildcards", "wildG007", 1)]
         [InlineData("Wildcards", "wildG010", 3)]
-        public void v2(String testDir, String testFile, int expCount)
+        public void v2(string testDir, string testFile, int expCount)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile + ".xsd");
@@ -425,7 +423,7 @@ namespace System.Xml.Tests
         [InlineData("SCHEMA", "schB1_a.xsd", 1, 3, 3)]
         [InlineData("SCHEMA", "schM2_a.xsd", 1, 3, 3)]
         [InlineData("SCHEMA", "schH2_a.xsd", 1, 3, 3)]
-        public void AddValid_Import_Include_Redefine(String testDir, String testFile, int expCount, int expCountGT, int expCountGE)
+        public void AddValid_Import_Include_Redefine(string testDir, string testFile, int expCount, int expCountGT, int expCountGE)
         {
             string xsd = Path.Combine(path, testDir, testFile);
 
@@ -452,7 +450,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("SCHEMA", "schE9.xsd", 1, 1)]
         [InlineData("SCHEMA", "schA7_a.xsd", 2, 2)]
-        public void AddEditInvalidImport(String testDir, String testFile, int expCountGT, int expCountGE)
+        public void AddEditInvalidImport(string testDir, string testFile, int expCountGT, int expCountGE)
         {
             string xsd = Path.Combine(path, testDir, testFile);
 
@@ -506,7 +504,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("include_v7_a.xsd", 4, 7)]
         [InlineData("include_v1_a.xsd", 3, 3)]
-        public void AddEditInvalidIncludeSchema(String testFile, int expCountGT, int expCountGE)
+        public void AddEditInvalidIncludeSchema(string testFile, int expCountGT, int expCountGE)
         {
             string xsd = Path.Combine(testData, testFile);
 
@@ -563,7 +561,7 @@ namespace System.Xml.Tests
         [InlineData("SCHEMA", "schE1i.xsd")]
         [InlineData("SCHEMA", "schB4_a.xsd")]
         [InlineData("SCHEMA", "schB1i.xsd")]
-        public void AddInvalid_Import_Include(String testDir, String testFile)
+        public void AddInvalid_Import_Include(string testDir, string testFile)
         {
             Initialize();
             string xsd = Path.Combine(path, testDir, testFile);
@@ -771,7 +769,7 @@ namespace System.Xml.Tests
  </sub>
 </root>";
 
-        public void CreateSchema1()
+        public void CreateSchema1(string testDirectory)
         {
             string commonxsd = @"<?xml version='1.0' encoding='utf-8'?>
 <Schema:schema  elementFormDefault='qualified'
@@ -800,21 +798,21 @@ namespace System.Xml.Tests
  <Schema:element name='sub' type='CommonType'/>
 </Schema:schema>";
 
-            using (XmlWriter w = XmlWriter.Create("commonstructure.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "commonstructure.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(commonxsd)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema1.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema1.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub1)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema2.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema2.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub2)))
                 {
@@ -823,7 +821,7 @@ namespace System.Xml.Tests
             }
         }
 
-        public void CreateSchema2()
+        public void CreateSchema2(string testDirectory)
         {
             string sub1 = @"<?xml version='1.0' encoding='utf-8'?>
 <Schema:schema targetNamespace='sub1'
@@ -864,28 +862,28 @@ namespace System.Xml.Tests
  </Schema:complexType>
 </Schema:schema>";
 
-            using (XmlWriter w = XmlWriter.Create("commonstructure1.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "commonstructure1.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(commonxsd1)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("commonstructure2.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "commonstructure2.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(commonxsd2)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema1.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema1.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub1)))
                 {
                     w.WriteNode(r, true);
                 }
             }
-            using (XmlWriter w = XmlWriter.Create("subschema2.xsd"))
+            using (XmlWriter w = XmlWriter.Create(Path.Combine(testDirectory, "subschema2.xsd")))
             {
                 using (XmlReader r = XmlReader.Create(new StringReader(sub2)))
                 {
@@ -894,50 +892,64 @@ namespace System.Xml.Tests
             }
         }
 
-        //TFS_538324
         [Fact]
         public void XSDValidationGeneratesInvalidError_1()
         {
-            Initialize();
-            CreateSchema1();
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd)));
-            settings.ValidationType = ValidationType.Schema;
-            XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
-            XmlDocument doc = new XmlDocument();
+            using (var tempDirectory = new TempDirectory())
+            {
+                Initialize();
+                CreateSchema1(tempDirectory.Path);
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.XmlResolver = new XmlUrlResolver();
+                settings.Schemas.XmlResolver = new XmlUrlResolver();
+                // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
+                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, EnsureTrailingSlash(tempDirectory.Path)));
+                settings.ValidationType = ValidationType.Schema;
+                XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
+                XmlDocument doc = new XmlDocument();
 
-            doc.Load(reader);
+                doc.Load(reader);
 
-            ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
-            doc.Validate(valEventHandler);
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 0);
-            return;
+                ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
+                doc.Validate(valEventHandler);
+                Assert.Equal(warningCount, 0);
+                Assert.Equal(errorCount, 0);
+            }
         }
 
-        //TFS_538324
         [Fact]
         public void XSDValidationGeneratesInvalidError_2()
         {
-            Initialize();
-            CreateSchema2();
-            XmlReaderSettings settings = new XmlReaderSettings();
-            settings.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.XmlResolver = new XmlUrlResolver();
-            settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd)));
-            settings.ValidationType = ValidationType.Schema;
-            XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
-            XmlDocument doc = new XmlDocument();
+            using (var tempDirectory = new TempDirectory())
+            {
+                Initialize();
+                CreateSchema2(tempDirectory.Path);
+                XmlReaderSettings settings = new XmlReaderSettings();
+                settings.XmlResolver = new XmlUrlResolver();
+                settings.Schemas.XmlResolver = new XmlUrlResolver();
+                // TempDirectory path must end with a DirectorySeratorChar, otherwise it will throw in the Xml validation.
+                settings.Schemas.Add("mainschema", XmlReader.Create(new StringReader(xsd), null, EnsureTrailingSlash(tempDirectory.Path)));
+                settings.ValidationType = ValidationType.Schema;
+                XmlReader reader = XmlReader.Create(new StringReader(xml), settings);
+                XmlDocument doc = new XmlDocument();
 
-            doc.Load(reader);
+                doc.Load(reader);
 
-            ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
-            doc.Validate(valEventHandler);
-            Assert.Equal(warningCount, 0);
-            Assert.Equal(errorCount, 0);
-            return;
+                ValidationEventHandler valEventHandler = new ValidationEventHandler(ValidationCallback);
+                doc.Validate(valEventHandler);
+                Assert.Equal(warningCount, 0);
+                Assert.Equal(errorCount, 0);
+            }
+        }
+
+        private string EnsureTrailingSlash(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException();
+
+            return path[path.Length - 1] == Path.DirectorySeparatorChar ? 
+                path : 
+                path + Path.DirectorySeparatorChar;
         }
 
         private static string xsd445844 = @"<?xml version='1.0' encoding='utf-8' ?>

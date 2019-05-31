@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Runtime.Serialization.Formatters.Tests;
 using Xunit;
 
 namespace System.Resources.Tests
@@ -42,14 +41,6 @@ namespace System.Resources.Tests
             MissingSatelliteAssemblyException msae = new MissingSatelliteAssemblyException(message, innerException);
             Assert.Equal(message, msae.Message);
             Assert.Same(innerException, msae.InnerException);
-        }
-
-        [Fact]
-        public void Serialization()
-        {
-            const string cultureName = "fr-FR";
-            MissingSatelliteAssemblyException msae = new MissingSatelliteAssemblyException("message", cultureName);
-            BinaryFormatterHelpers.AssertRoundtrips(msae);
         }
     }
 }

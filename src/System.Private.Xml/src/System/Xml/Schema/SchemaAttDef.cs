@@ -21,7 +21,7 @@ namespace System.Xml.Schema
             XmlLang
         };
 
-        private String _defExpanded;  // default value in its expanded form
+        private string _defExpanded;  // default value in its expanded form
 
         private int _lineNum;
         private int _linePos;
@@ -30,32 +30,23 @@ namespace System.Xml.Schema
 
         private Reserve _reserved = Reserve.None; // indicate the attribute type, such as xml:lang or xml:space   
 
-#if SILVERLIGHT
-        XmlTokenizedType tokenizedType;
-#endif
-
-#if !SILVERLIGHT
         private bool _defaultValueChecked;
-        private bool _hasEntityRef;  // whether there is any entity reference in the default value
         private XmlSchemaAttribute _schemaAttribute;
 
         public static readonly SchemaAttDef Empty = new SchemaAttDef();
-#endif
 
         //
         // Constructors
         //
-        public SchemaAttDef(XmlQualifiedName name, String prefix)
+        public SchemaAttDef(XmlQualifiedName name, string prefix)
             : base(name, prefix)
         {
         }
 
-#if !SILVERLIGHT
         public SchemaAttDef(XmlQualifiedName name) : base(name, null)
         {
         }
         private SchemaAttDef() { }
-#endif
 
         //
         // IDtdAttributeInfo interface
@@ -109,11 +100,7 @@ namespace System.Xml.Schema
 
         object IDtdDefaultAttributeInfo.DefaultValueTyped
         {
-#if SILVERLIGHT
-            get { return null; }
-#else
             get { return ((SchemaAttDef)this).DefaultValueTyped; }
-#endif
         }
 
         int IDtdDefaultAttributeInfo.ValueLineNumber
@@ -154,9 +141,9 @@ namespace System.Xml.Schema
             set { _valueLineNum = value; }
         }
 
-        internal String DefaultValueExpanded
+        internal string DefaultValueExpanded
         {
-            get { return (_defExpanded != null) ? _defExpanded : String.Empty; }
+            get { return (_defExpanded != null) ? _defExpanded : string.Empty; }
             set { _defExpanded = value; }
         }
 
@@ -164,19 +151,11 @@ namespace System.Xml.Schema
         {
             get
             {
-#if SILVERLIGHT
-                return tokenizedType;
-#else
                 return Datatype.TokenizedType;
-#endif
             }
             set
             {
-#if SILVERLIGHT
-                tokenizedType = value;
-#else
                 this.Datatype = XmlSchemaDatatype.FromXmlTokenizedType(value);
-#endif
             }
         }
 
@@ -186,19 +165,12 @@ namespace System.Xml.Schema
             set { _reserved = value; }
         }
 
-#if !SILVERLIGHT
         internal bool DefaultValueChecked
         {
             get
             {
                 return _defaultValueChecked;
             }
-        }
-
-        internal bool HasEntityRef
-        {
-            get { return _hasEntityRef; }
-            set { _hasEntityRef = value; }
         }
 
         internal XmlSchemaAttribute SchemaAttribute
@@ -213,11 +185,11 @@ namespace System.Xml.Schema
                 (values != null) &&
                 (values.Count <= 2))
             {
-                String s1 = values[0].ToString();
+                string s1 = values[0].ToString();
 
                 if (values.Count == 2)
                 {
-                    String s2 = values[1].ToString();
+                    string s2 = values[1].ToString();
 
                     if ((s1 == "default" || s2 == "default") &&
                         (s1 == "preserve" || s2 == "preserve"))
@@ -240,6 +212,5 @@ namespace System.Xml.Schema
         {
             return (SchemaAttDef)MemberwiseClone();
         }
-#endif
     }
 }

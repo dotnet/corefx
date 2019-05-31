@@ -10,7 +10,7 @@ using Microsoft.Test.ModuleCore;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public partial class MiscFunctionalTests : TestModule
     {
         public partial class MiscTests : XLinqTestCase
         {
@@ -193,7 +193,7 @@ namespace CoreXml.Test.XLinq
                 //[Variation(Priority = 1, Desc = "XmlWriter interference")]
                 public void var_7()
                 {
-                    // Element "D" should use the defalut namespace defined in ancestor element "A" but it does not
+                    // Element "D" should use the default namespace defined in ancestor element "A" but it does not
                     // since the auto generated default name space in parent element "C".  So a new default namespace is added for
                     // "D". 
                     XElement e = new XElement("A", new XAttribute(XNamespace.Xmlns + "a", "a"),
@@ -211,7 +211,7 @@ namespace CoreXml.Test.XLinq
                     {
                         return;
                     }
-                    throw new TestFailedException("Expected comparsion mismatch and an exception.");
+                    throw new TestFailedException("Expected comparison mismatch and an exception.");
                 }
             }
         }

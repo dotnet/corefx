@@ -2,27 +2,44 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRBINOP : EXPR
+    internal sealed class ExprBinOp : ExprOperator
     {
-        private EXPR _OptionalLeftChild;
-        public EXPR GetOptionalLeftChild() { return _OptionalLeftChild; }
-        public void SetOptionalLeftChild(EXPR value) { _OptionalLeftChild = value; }
+        public ExprBinOp(ExpressionKind kind, CType type, Expr left, Expr right)
+            : base(kind, type)
+        {
+            Debug.Assert(kind > ExpressionKind.TypeLimit);
+            Debug.Assert(left != null);
+            Debug.Assert(right != null);
+            Flags = EXPRFLAG.EXF_BINOP;
+            OptionalLeftChild = left;
+            OptionalRightChild = right;
+        }
 
-        private EXPR _OptionalRightChild;
-        public EXPR GetOptionalRightChild() { return _OptionalRightChild; }
-        public void SetOptionalRightChild(EXPR value) { _OptionalRightChild = value; }
+        public ExprBinOp(ExpressionKind kind, CType type, Expr left, Expr right, Expr call, MethPropWithInst userMethod)
+            : base(kind, type, call, userMethod)
+        {
+            Debug.Assert(kind > ExpressionKind.TypeLimit);
+            Debug.Assert(left != null);
+            Debug.Assert(right != null);
+            Debug.Assert(call != null);
+            Flags = EXPRFLAG.EXF_BINOP;
+            OptionalLeftChild = left;
+            OptionalRightChild = right;
+        }
 
-        private EXPR _OptionalUserDefinedCall;
-        public EXPR GetOptionalUserDefinedCall() { return _OptionalUserDefinedCall; }
-        public void SetOptionalUserDefinedCall(EXPR value) { _OptionalUserDefinedCall = value; }
+        public Expr OptionalLeftChild { get; set; }
 
-        public MethWithInst predefinedMethodToCall;
-        public bool isLifted;
+        public Expr OptionalRightChild { get; set; }
 
-        private MethPropWithInst _UserDefinedCallMethod;
-        public MethPropWithInst GetUserDefinedCallMethod() { return _UserDefinedCallMethod; }
-        public void SetUserDefinedCallMethod(MethPropWithInst value) { _UserDefinedCallMethod = value; }
+        public bool IsLifted { get; set; }
+
+        public void SetAssignment()
+        {
+            Flags |= EXPRFLAG.EXF_ASSGOP;
+        }
     }
 }

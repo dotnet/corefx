@@ -5,7 +5,6 @@
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Diagnostics;
@@ -15,7 +14,7 @@ using System.Text;
 
 namespace Microsoft.VisualBasic
 {
-    internal sealed class VBCodeGenerator : CodeCompiler
+    internal sealed partial class VBCodeGenerator : CodeCompiler
     {
         private static readonly char[] s_periodArray = new char[] { '.' };
         private const int MaxLineLength = 80;
@@ -264,14 +263,22 @@ namespace Microsoft.VisualBasic
 
         private void EnsureInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
         {
-            if (fInDoubleQuotes) return;
+            if (fInDoubleQuotes)
+            {
+                return;
+            }
+
             b.Append("&\"");
             fInDoubleQuotes = true;
         }
 
         private void EnsureNotInDoubleQuotes(ref bool fInDoubleQuotes, StringBuilder b)
         {
-            if (!fInDoubleQuotes) return;
+            if (!fInDoubleQuotes)
+            {
+                return;
+            }
+
             b.Append('\"');
             fInDoubleQuotes = false;
         }
@@ -339,12 +346,10 @@ namespace Microsoft.VisualBasic
 
                 if (i > 0 && i % MaxLineLength == 0)
                 {
-                    //
                     // If current character is a high surrogate and the following 
-                    // character is a low surrogate, don't break them. 
+                    // character is a low surrogate, don't break them.
                     // Otherwise when we write the string to a file, we might lose 
                     // the characters.
-                    // 
                     if (char.IsHighSurrogate(value[i])
                         && (i < value.Length - 1)
                         && char.IsLowSurrogate(value[i + 1]))
@@ -490,7 +495,6 @@ namespace Microsoft.VisualBasic
             // Visual Basic does not need to adorn the calling point with a direction, so just output the expression.
             GenerateExpression(e.Expression);
         }
-
 
         protected override void OutputFieldScopeModifier(MemberAttributes attributes)
         {
@@ -862,7 +866,7 @@ namespace Microsoft.VisualBasic
                 string typeName = GetTypeOutput(e.CreateType);
                 Output.Write(typeName);
 
-                if (typeName.IndexOf('(') == -1)
+                if (typeName.IndexOf('(') == -1) // string.Contains(char) is .NetCore2.1+ specific
                 {
                     Output.Write("()");
                 }
@@ -1434,7 +1438,7 @@ namespace Microsoft.VisualBasic
             string eventName = e.Name;
             if (e.PrivateImplementationType != null)
             {
-                string impl = GetBaseTypeOutput(e.PrivateImplementationType);
+                string impl = GetBaseTypeOutput(e.PrivateImplementationType, preferBuiltInTypes: false);
                 impl = impl.Replace('.', '_');
                 e.Name = impl + "_" + e.Name;
             }
@@ -1561,7 +1565,7 @@ namespace Microsoft.VisualBasic
             string methodName = e.Name;
             if (e.PrivateImplementationType != null)
             {
-                string impl = GetBaseTypeOutput(e.PrivateImplementationType);
+                string impl = GetBaseTypeOutput(e.PrivateImplementationType, preferBuiltInTypes: false);
                 impl = impl.Replace('.', '_');
                 e.Name = impl + "_" + e.Name;
             }
@@ -1714,7 +1718,7 @@ namespace Microsoft.VisualBasic
             string propName = e.Name;
             if (e.PrivateImplementationType != null)
             {
-                string impl = GetBaseTypeOutput(e.PrivateImplementationType);
+                string impl = GetBaseTypeOutput(e.PrivateImplementationType, preferBuiltInTypes: false);
                 impl = impl.Replace('.', '_');
                 e.Name = impl + "_" + e.Name;
             }
@@ -2040,7 +2044,7 @@ namespace Microsoft.VisualBasic
         }
 
         // In VB, constraints are put right after the type paramater name.
-        // In C#, there is a seperate "where" statement
+        // In C#, there is a separate "where" statement
         private void OutputTypeParameterConstraints(CodeTypeParameter typeParameter)
         {
             CodeTypeReferenceCollection constraints = typeParameter.Constraints;
@@ -2179,9 +2183,6 @@ namespace Microsoft.VisualBasic
             Output.WriteLine(SR.AutoGen_Comment_Line1);
             Output.Write("'     ");
             Output.WriteLine(SR.AutoGen_Comment_Line2);
-            Output.Write("'     ");
-            Output.Write(SR.AutoGen_Comment_Line3);
-            Output.WriteLine(Environment.Version.ToString());
             Output.WriteLine("'");
             Output.Write("'     ");
             Output.WriteLine(SR.AutoGen_Comment_Line4);
@@ -2399,80 +2400,56 @@ namespace Microsoft.VisualBasic
             return name;
         }
 
-        private string GetBaseTypeOutput(CodeTypeReference typeRef)
+        private string GetBaseTypeOutput(CodeTypeReference typeRef, bool preferBuiltInTypes = true)
         {
             string baseType = typeRef.BaseType;
 
-            if (baseType.Length == 0)
+            if (preferBuiltInTypes)
             {
-                return "Void";
+                if (baseType.Length == 0)
+                {
+                    return "Void";
+                }
+
+                string lowerCaseString = baseType.ToLowerInvariant();
+
+                switch (lowerCaseString)
+                {
+                    case "system.byte":
+                        return "Byte";
+                    case "system.sbyte":
+                        return "SByte";
+                    case "system.int16":
+                        return "Short";
+                    case "system.int32":
+                        return "Integer";
+                    case "system.int64":
+                        return "Long";
+                    case "system.uint16":
+                        return "UShort";
+                    case "system.uint32":
+                        return "UInteger";
+                    case "system.uint64":
+                        return "ULong";
+                    case "system.string":
+                        return "String";
+                    case "system.datetime":
+                        return "Date";
+                    case "system.decimal":
+                        return "Decimal";
+                    case "system.single":
+                        return "Single";
+                    case "system.double":
+                        return "Double";
+                    case "system.boolean":
+                        return "Boolean";
+                    case "system.char":
+                        return "Char";
+                    case "system.object":
+                        return "Object";
+                }
             }
-            else if (string.Equals(baseType, "System.Byte", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Byte";
-            }
-            else if (string.Equals(baseType, "System.SByte", StringComparison.OrdinalIgnoreCase))
-            {
-                return "SByte";
-            }
-            else if (string.Equals(baseType, "System.Int16", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Short";
-            }
-            else if (string.Equals(baseType, "System.Int32", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Integer";
-            }
-            else if (string.Equals(baseType, "System.Int64", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Long";
-            }
-            else if (string.Equals(baseType, "System.UInt16", StringComparison.OrdinalIgnoreCase))
-            {
-                return "UShort";
-            }
-            else if (string.Equals(baseType, "System.UInt32", StringComparison.OrdinalIgnoreCase))
-            {
-                return "UInteger";
-            }
-            else if (string.Equals(baseType, "System.UInt64", StringComparison.OrdinalIgnoreCase))
-            {
-                return "ULong";
-            }
-            else if (string.Equals(baseType, "System.String", StringComparison.OrdinalIgnoreCase))
-            {
-                return "String";
-            }
-            else if (string.Equals(baseType, "System.DateTime", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Date";
-            }
-            else if (string.Equals(baseType, "System.Decimal", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Decimal";
-            }
-            else if (string.Equals(baseType, "System.Single", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Single";
-            }
-            else if (string.Equals(baseType, "System.Double", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Double";
-            }
-            else if (string.Equals(baseType, "System.Boolean", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Boolean";
-            }
-            else if (string.Equals(baseType, "System.Char", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Char";
-            }
-            else if (string.Equals(baseType, "System.Object", StringComparison.OrdinalIgnoreCase))
-            {
-                return "Object";
-            }
-            else
-            {
+
                 var sb = new StringBuilder(baseType.Length + 10);
                 if ((typeRef.Options & CodeTypeReferenceOptions.GlobalReference) != 0)
                 {
@@ -2525,7 +2502,6 @@ namespace Microsoft.VisualBasic
                 }
 
                 return sb.ToString();
-            }
         }
 
         private string GetTypeOutputWithoutArrayPostFix(CodeTypeReference typeRef)
@@ -2607,22 +2583,6 @@ namespace Microsoft.VisualBasic
             {
                 _statementDepth--;
             }
-        }
-
-
-
-        protected override CompilerResults FromFileBatch(CompilerParameters options, string[] fileNames)
-        {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-            if (fileNames == null)
-            {
-                throw new ArgumentNullException(nameof(fileNames));
-            }
-
-            throw new PlatformNotSupportedException();
         }
     }
 }

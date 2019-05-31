@@ -4,26 +4,19 @@
 
 namespace System.Xml.Serialization
 {
-    using System.IO;
     using System;
-    using System.Security;
     using System.Collections;
+    using System.Globalization;
+    using System.IO;
     using System.Reflection;
-    using System.Text;
+    using System.Security;
     using System.Xml;
     using System.Xml.Schema;
-    using System.ComponentModel;
-    using System.Globalization;
-    using System.Diagnostics;
-    using System.Threading;
-    using System.Configuration;
-    using System.Xml.Serialization.Configuration;
 
     ///<internalonly/>
     public abstract class XmlSerializationReader : XmlSerializationGeneratedCode
     {
         private XmlReader _r;
-        private XmlCountingReader _countingReader;
         private XmlDocument _d;
         private Hashtable _callbacks;
         private Hashtable _types;
@@ -111,13 +104,15 @@ namespace System.Xml.Serialization
         private string _guidID;
         private string _timeSpanID;
 
-        private static bool s_checkDeserializeAdvances;
+        private static bool s_checkDeserializeAdvances=false;
 
         protected abstract void InitIDs();
 
+#if FEATURE_SERIALIZATION_UAPAOT
         // this method must be called before any generated deserialization methods are called
-        internal void Init(XmlReader r, string encodingStyle)
+        internal void Init(XmlReader r, XmlDeserializationEvents events, string encodingStyle)
         {
+            _events = events;
             _r = r;
             _soap12 = (encodingStyle == Soap12.Encoding);
 
@@ -143,18 +138,13 @@ namespace System.Xml.Serialization
             _urTypeID = r.NameTable.Add(Soap.UrType);
             InitIDs();
         }
+#endif
 
         // this method must be called before any generated deserialization methods are called
         internal void Init(XmlReader r, XmlDeserializationEvents events, string encodingStyle, TempAssembly tempAssembly)
         {
             _events = events;
-            if (s_checkDeserializeAdvances)
-            {
-                _countingReader = new XmlCountingReader(r);
-                _r = _countingReader;
-            }
-            else
-                _r = r;
+            _r = r;
             _d = null;
             _soap12 = (encodingStyle == Soap12.Encoding);
             Init(tempAssembly);
@@ -204,10 +194,7 @@ namespace System.Xml.Serialization
 
         protected int ReaderCount
         {
-            get
-            {
-                return s_checkDeserializeAdvances ? _countingReader.AdvanceCount : 0;
-            }
+            get { return 0; }
         }
 
         protected XmlDocument Document
@@ -372,13 +359,13 @@ namespace System.Xml.Serialization
                 else if ((object)typeName.Name == (object)_unsignedByteID)
                     return typeof(byte);
                 else if ((object)typeName.Name == (object)_byteID)
-                    return typeof(SByte);
+                    return typeof(sbyte);
                 else if ((object)typeName.Name == (object)_unsignedShortID)
-                    return typeof(UInt16);
+                    return typeof(ushort);
                 else if ((object)typeName.Name == (object)_unsignedIntID)
-                    return typeof(UInt32);
+                    return typeof(uint);
                 else if ((object)typeName.Name == (object)_unsignedLongID)
-                    return typeof(UInt64);
+                    return typeof(ulong);
                 else
                     throw CreateUnknownTypeException(typeName);
             }
@@ -436,13 +423,13 @@ namespace System.Xml.Serialization
                 else if ((object)typeName.Name == (object)_hexBinaryID)
                     return typeof(byte[]);
                 else if ((object)typeName.Name == (object)_byteID)
-                    return typeof(SByte);
+                    return typeof(sbyte);
                 else if ((object)typeName.Name == (object)_unsignedShortID)
-                    return typeof(UInt16);
+                    return typeof(ushort);
                 else if ((object)typeName.Name == (object)_unsignedIntID)
-                    return typeof(UInt32);
+                    return typeof(uint);
                 else if ((object)typeName.Name == (object)_unsignedLongID)
-                    return typeof(UInt64);
+                    return typeof(ulong);
                 else
                     throw CreateUnknownTypeException(typeName);
             }
@@ -765,7 +752,7 @@ namespace System.Xml.Serialization
                 else if ((object)type.Name == (object)_booleanID)
                     value = default(Nullable<bool>);
                 else if ((object)type.Name == (object)_shortID)
-                    value = default(Nullable<Int16>);
+                    value = default(Nullable<short>);
                 else if ((object)type.Name == (object)_longID)
                     value = default(Nullable<long>);
                 else if ((object)type.Name == (object)_floatID)
@@ -785,13 +772,13 @@ namespace System.Xml.Serialization
                 else if ((object)type.Name == (object)_unsignedByteID)
                     value = default(Nullable<byte>);
                 else if ((object)type.Name == (object)_byteID)
-                    value = default(Nullable<SByte>);
+                    value = default(Nullable<sbyte>);
                 else if ((object)type.Name == (object)_unsignedShortID)
-                    value = default(Nullable<UInt16>);
+                    value = default(Nullable<ushort>);
                 else if ((object)type.Name == (object)_unsignedIntID)
-                    value = default(Nullable<UInt32>);
+                    value = default(Nullable<uint>);
                 else if ((object)type.Name == (object)_unsignedLongID)
-                    value = default(Nullable<UInt64>);
+                    value = default(Nullable<ulong>);
                 else if ((object)type.Name == (object)_hexBinaryID)
                     value = null;
                 else if ((object)type.Name == (object)_base64BinaryID)
@@ -807,7 +794,7 @@ namespace System.Xml.Serialization
                     value = default(Nullable<char>);
                 else if ((object)type.Name == (object)_guidID)
                     value = default(Nullable<Guid>);
-                else if ((object) type.Name == (object) _timeSpanID)
+                else if ((object)type.Name == (object)_timeSpanID)
                     value = default(Nullable<TimeSpan>);
                 else
                     value = null;
@@ -835,8 +822,8 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    attr.Value = _r.LookupNamespace(attr.Value.Substring(0, colon)) + ":" +
-                        attr.Value.Substring(colon + 1);
+                    attr.Value = string.Concat(_r.LookupNamespace(attr.Value.Substring(0, colon)), ":",
+                        attr.Value.AsSpan(colon + 1));
                 }
             }
             return;
@@ -858,12 +845,9 @@ namespace System.Xml.Serialization
                 return true;
             }
             _r.ReadStartElement();
-            int whileIterations = 0;
-            int readerCount = ReaderCount;
             while (_r.NodeType != XmlNodeType.EndElement)
             {
                 UnknownNode(null);
-                CheckReaderCount(ref whileIterations, ref readerCount);
             }
             ReadEndElement();
             return true;
@@ -942,12 +926,9 @@ namespace System.Xml.Serialization
                 _r.MoveToContent();
                 if (_r.NodeType != XmlNodeType.EndElement)
                     node = Document.ReadNode(_r);
-                int whileIterations = 0;
-                int readerCount = ReaderCount;
                 while (_r.NodeType != XmlNodeType.EndElement)
                 {
                     UnknownNode(null);
-                    CheckReaderCount(ref whileIterations, ref readerCount);
                 }
                 _r.ReadEndElement();
             }
@@ -1048,10 +1029,10 @@ namespace System.Xml.Serialization
             int len = charsLength - pos - 2;
             if (len > 0)
             {
-                string lengthString = new String(chars, pos + 1, len);
+                string lengthString = new string(chars, pos + 1, len);
                 try
                 {
-                    soapArrayInfo.length = Int32.Parse(lengthString, CultureInfo.InvariantCulture);
+                    soapArrayInfo.length = int.Parse(lengthString, CultureInfo.InvariantCulture);
                 }
                 catch (Exception e)
                 {
@@ -1086,7 +1067,7 @@ namespace System.Xml.Serialization
             soapArrayInfo.dimensions = 1;
 
             // everything else is qname - validation of qnames?
-            soapArrayInfo.qname = new String(chars, 0, pos + 1);
+            soapArrayInfo.qname = new string(chars, 0, pos + 1);
             return soapArrayInfo;
         }
 
@@ -1103,7 +1084,7 @@ namespace System.Xml.Serialization
             if (arraySize != null && arraySize.Length > 0)
                 dimensions = arraySize.Split(null);
             else
-                dimensions = new string[0];
+                dimensions = Array.Empty<string>();
 
             soapArrayInfo.dimensions = 0;
             soapArrayInfo.length = -1;
@@ -1119,7 +1100,7 @@ namespace System.Xml.Serialization
                     {
                         try
                         {
-                            soapArrayInfo.length = Int32.Parse(dimensions[i], CultureInfo.InvariantCulture);
+                            soapArrayInfo.length = int.Parse(dimensions[i], CultureInfo.InvariantCulture);
                             soapArrayInfo.dimensions++;
                         }
                         catch (Exception e)
@@ -1202,7 +1183,7 @@ namespace System.Xml.Serialization
             }
             if (prefix == null || prefix.Length == 0)
             {
-                return new XmlQualifiedName(_r.NameTable.Add(value), _r.LookupNamespace(String.Empty));
+                return new XmlQualifiedName(_r.NameTable.Add(value), _r.LookupNamespace(string.Empty));
             }
             else
             {
@@ -1424,40 +1405,6 @@ namespace System.Xml.Serialization
             Array b = Array.CreateInstance(elementType, length);
             Array.Copy(a, b, length);
             return b;
-        }
-        // This is copied from Core's XmlReader.ReadString, as it is not exposed in the Contract.
-        protected virtual string ReadString()
-        {
-            if (Reader.ReadState != ReadState.Interactive)
-            {
-                return string.Empty;
-            }
-            Reader.MoveToElement();
-            if (Reader.NodeType == XmlNodeType.Element)
-            {
-                if (Reader.IsEmptyElement)
-                {
-                    return string.Empty;
-                }
-                else if (!Reader.Read())
-                {
-                    throw new InvalidOperationException(SR.Xml_InvalidOperation);
-                }
-                if (Reader.NodeType == XmlNodeType.EndElement)
-                {
-                    return string.Empty;
-                }
-            }
-            string result = string.Empty;
-            while (IsTextualNode(Reader.NodeType))
-            {
-                result += Reader.Value;
-                if (!Reader.Read())
-                {
-                    break;
-                }
-            }
-            return result;
         }
 
         // 0x6018
@@ -1734,14 +1681,14 @@ namespace System.Xml.Serialization
                                 isPrimitive = true;
                             }
                             else
-                                isPrimitive = elementType.GetTypeInfo().IsPrimitive;
+                                isPrimitive = elementType.IsPrimitive;
                             if (newQname != null) qname = newQname;
                         }
                     }
                 }
             }
             else
-                isPrimitive = elementType.GetTypeInfo().IsPrimitive;
+                isPrimitive = elementType.IsPrimitive;
 
             if (!_soap12 && arrayInfo.jaggedDimensions > 0)
             {
@@ -1761,23 +1708,20 @@ namespace System.Xml.Serialization
             int arrayLength = 0;
             Array array = null;
 
-            if (elementType.GetTypeInfo().IsValueType)
+            if (elementType.IsValueType)
             {
-                if (!isPrimitive && !elementType.GetTypeInfo().IsEnum)
+                if (!isPrimitive && !elementType.IsEnum)
                 {
                     throw new NotSupportedException(SR.Format(SR.XmlRpcArrayOfValueTypes, elementType.FullName));
                 }
                 // CONSIDER, erikc, we could have specialized read functions here
                 // for primitives, which would avoid boxing.
-                int whileIterations = 0;
-                int readerCount = ReaderCount;
                 while (_r.NodeType != XmlNodeType.EndElement)
                 {
                     array = EnsureArrayIndex(array, arrayLength, elementType);
                     array.SetValue(ReadReferencedElement(qname.Name, qname.Namespace), arrayLength);
                     arrayLength++;
                     _r.MoveToContent();
-                    CheckReaderCount(ref whileIterations, ref readerCount);
                 }
                 array = ShrinkArray(array, arrayLength, elementType, false);
             }
@@ -1788,8 +1732,6 @@ namespace System.Xml.Serialization
                 string[] ids = null;
                 int idsLength = 0;
 
-                int whileIterations = 0;
-                int readerCount = ReaderCount;
                 while (_r.NodeType != XmlNodeType.EndElement)
                 {
                     array = EnsureArrayIndex(array, arrayLength, elementType);
@@ -1813,7 +1755,6 @@ namespace System.Xml.Serialization
                     idsLength++;
                     // CONSIDER, erikc, sparse arrays, perhaps?
                     _r.MoveToContent();
-                    CheckReaderCount(ref whileIterations, ref readerCount);
                 }
 
                 // special case for soap 1.2: try to get a better fit than object[] when no metadata is known
@@ -1827,7 +1768,7 @@ namespace System.Xml.Serialization
                         if (currItem != null)
                         {
                             Type currItemType = currItem.GetType();
-                            if (currItemType.GetTypeInfo().IsValueType)
+                            if (currItemType.IsValueType)
                             {
                                 itemType = null;
                                 break;
@@ -1864,13 +1805,10 @@ namespace System.Xml.Serialization
         {
             _r.MoveToContent();
             string dummy;
-            int whileIterations = 0;
-            int readerCount = ReaderCount;
             while (_r.NodeType != XmlNodeType.EndElement && _r.NodeType != XmlNodeType.None)
             {
                 ReadReferencingElement(null, null, true, out dummy);
                 _r.MoveToContent();
-                CheckReaderCount(ref whileIterations, ref readerCount);
             }
             DoFixups();
 
@@ -1901,17 +1839,7 @@ namespace System.Xml.Serialization
         protected object ReadReferencingElement(string name, string ns, bool elementCanBeType, out string fixupReference)
         {
             object o = null;
-
-            if (_callbacks == null)
-            {
-                _callbacks = new Hashtable();
-                _types = new Hashtable();
-                XmlQualifiedName urType = new XmlQualifiedName(_urTypeID, _r.NameTable.Add(XmlSchema.Namespace));
-                _types.Add(urType, typeof(object));
-                _typesReverse = new Hashtable();
-                _typesReverse.Add(typeof(object), urType);
-                InitCallbacks();
-            }
+            EnsureCallbackTables();
 
             _r.MoveToContent();
 
@@ -1943,6 +1871,20 @@ namespace System.Xml.Serialization
             AddTarget(id, o);
 
             return o;
+        }
+
+        internal void EnsureCallbackTables()
+        {
+            if (_callbacks == null)
+            {
+                _callbacks = new Hashtable();
+                _types = new Hashtable();
+                XmlQualifiedName urType = new XmlQualifiedName(_urTypeID, _r.NameTable.Add(XmlSchema.Namespace));
+                _types.Add(urType, typeof(object));
+                _typesReverse = new Hashtable();
+                _typesReverse.Add(typeof(object), urType);
+                InitCallbacks();
+            }
         }
 
         protected void AddReadCallback(string name, string ns, Type type, XmlSerializationReadCallback read)
@@ -2032,15 +1974,12 @@ namespace System.Xml.Serialization
             {
                 Reader.ReadStartElement();
                 Reader.MoveToContent();
-                int whileIterations = 0;
-                int readerCount = ReaderCount;
                 while (Reader.NodeType != System.Xml.XmlNodeType.EndElement)
                 {
                     XmlNode xmlNode = Document.ReadNode(_r);
                     xmlNodeList.Add(xmlNode);
                     if (unknownElement != null) unknownElement.AppendChild(xmlNode);
                     Reader.MoveToContent();
-                    CheckReaderCount(ref whileIterations, ref readerCount);
                 }
                 ReadEndElement();
             }
@@ -2057,16 +1996,6 @@ namespace System.Xml.Serialization
 
         protected void CheckReaderCount(ref int whileIterations, ref int readerCount)
         {
-            if (s_checkDeserializeAdvances)
-            {
-                whileIterations++;
-                if ((whileIterations & 0x80) == 0x80)
-                {
-                    if (readerCount == ReaderCount)
-                        throw new InvalidOperationException(SR.XmlInternalErrorReaderAdvance);
-                    readerCount = ReaderCount;
-                }
-            }
         }
 
         ///<internalonly/>
@@ -2145,6 +2074,7 @@ namespace System.Xml.Serialization
     ///<internalonly/>
     public delegate object XmlSerializationReadCallback();
 
+#if !FEATURE_SERIALIZATION_UAPAOT
     internal class XmlSerializationReaderCodeGen : XmlSerializationCodeGen
     {
         private Hashtable _idNames = new Hashtable();
@@ -2350,7 +2280,7 @@ namespace System.Xml.Serialization
             Writer.Write(" class ");
             Writer.Write(ClassName);
             Writer.Write(" : ");
-            Writer.Write(typeof(XmlSerializationReader).FullName);
+            Writer.Write(typeof(System.Xml.Serialization.XmlSerializationReader).FullName);
             Writer.WriteLine(" {");
             Writer.Indent++;
             foreach (TypeScope scope in Scopes)
@@ -2401,10 +2331,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal void GenerateEnd()
-        {
-            GenerateEnd(new string[0], new XmlMapping[0], new Type[0]);
-        }
         internal void GenerateEnd(string[] methods, XmlMapping[] xmlMappings, Type[] types)
         {
             GenerateReferencedMethods();
@@ -2606,10 +2532,9 @@ namespace System.Xml.Serialization
             Writer.WriteLine("];");
             InitializeValueTypes("p", mappings);
 
-            int wrapperLoopIndex = 0;
             if (hasWrapperElement)
             {
-                wrapperLoopIndex = WriteWhileNotLoopStart();
+                WriteWhileNotLoopStart();
                 Writer.Indent++;
                 WriteIsStartTag(element.Name, element.Form == XmlSchemaForm.Qualified ? element.Namespace : "");
             }
@@ -2712,14 +2637,14 @@ namespace System.Xml.Serialization
             {
                 Writer.WriteLine("int state = 0;");
             }
-            int loopIndex = WriteWhileNotLoopStart();
+            WriteWhileNotLoopStart();
             Writer.Indent++;
 
             string unknownNode = "UnknownNode((object)p, " + ExpectedElements(members) + ");";
             WriteMemberElements(members, unknownNode, unknownNode, anyElement, anyText, null);
 
             Writer.WriteLine("Reader.MoveToContent();");
-            WriteWhileLoopEnd(loopIndex);
+            WriteWhileLoopEnd();
 
             WriteMemberEnd(textOrArrayMembers);
 
@@ -2733,7 +2658,7 @@ namespace System.Xml.Serialization
                 WriteUnknownNode("UnknownNode", "null", element, true);
 
                 Writer.WriteLine("Reader.MoveToContent();");
-                WriteWhileLoopEnd(wrapperLoopIndex);
+                WriteWhileLoopEnd();
             }
 
             Writer.WriteLine("return p;");
@@ -2840,14 +2765,14 @@ namespace System.Xml.Serialization
                 WriteInitCheckTypeHrefList(checkTypeHrefSource);
 
             WriteParamsRead(mappings.Length);
-            int loopIndex = WriteWhileNotLoopStart();
+            WriteWhileNotLoopStart();
             Writer.Indent++;
 
             string unrecognizedElementSource = checkTypeHrefSource == null ? "UnknownNode((object)p);" : "if (Reader.GetAttribute(\"id\", null) != null) { ReadReferencedElement(); } else { UnknownNode((object)p); }";
             WriteMemberElements(members, unrecognizedElementSource, "UnknownNode((object)p);", null, null, checkTypeHrefSource);
             Writer.WriteLine("Reader.MoveToContent();");
 
-            WriteWhileLoopEnd(loopIndex);
+            WriteWhileLoopEnd();
 
             if (hasWrapperElement)
                 Writer.WriteLine("if (!isEmptyWrapper) ReadEndElement();");
@@ -3182,7 +3107,7 @@ namespace System.Xml.Serialization
         {
             for (StructMapping derived = mapping.DerivedMappings; derived != null; derived = derived.NextDerivedMapping)
             {
-                Writer.Write("else if (");
+                Writer.Write("if (");
                 WriteQNameEqual("xsiType", derived.TypeName, derived.Namespace);
                 Writer.WriteLine(")");
                 Writer.Indent++;
@@ -3219,7 +3144,7 @@ namespace System.Xml.Serialization
                     if (m is EnumMapping)
                     {
                         EnumMapping mapping = (EnumMapping)m;
-                        Writer.Write("else if (");
+                        Writer.Write("if (");
                         WriteQNameEqual("xsiType", mapping.TypeName, mapping.Namespace);
                         Writer.WriteLine(") {");
                         Writer.Indent++;
@@ -3242,7 +3167,7 @@ namespace System.Xml.Serialization
                         ArrayMapping mapping = (ArrayMapping)m;
                         if (mapping.TypeDesc.HasDefaultConstructor)
                         {
-                            Writer.Write("else if (");
+                            Writer.Write("if (");
                             WriteQNameEqual("xsiType", mapping.TypeName, mapping.Namespace);
                             Writer.WriteLine(") {");
                             Writer.Indent++;
@@ -3389,10 +3314,10 @@ namespace System.Xml.Serialization
                 Writer.Indent--;
             }
             Writer.WriteLine("}");
+            Writer.WriteLine("else {");
+            Writer.Indent++;
             WriteDerivedTypes(structMapping, !useReflection && !structMapping.TypeDesc.IsRoot, typeName);
             if (structMapping.TypeDesc.IsRoot) WriteEnumAndArrayTypes();
-            Writer.WriteLine("else");
-            Writer.Indent++;
             if (structMapping.TypeDesc.IsRoot)
                 Writer.Write("return ReadTypedPrimitive((");
             else
@@ -3401,7 +3326,9 @@ namespace System.Xml.Serialization
             Writer.WriteLine(")xsiType);");
             Writer.Indent--;
             Writer.WriteLine("}");
-
+            if (structMapping.TypeDesc.IsRoot)
+                Writer.Indent--;
+            Writer.WriteLine("}");
             if (structMapping.TypeDesc.IsNullable)
                 Writer.WriteLine("if (isNull) return null;");
 
@@ -3522,13 +3449,13 @@ namespace System.Xml.Serialization
                 {
                     Writer.WriteLine("int state = 0;");
                 }
-                int loopIndex = WriteWhileNotLoopStart();
+                WriteWhileNotLoopStart();
                 Writer.Indent++;
                 string unknownNode = "UnknownNode((object)o, " + ExpectedElements(allMembers) + ");";
                 WriteMemberElements(allMembers, unknownNode, unknownNode, anyElement, anyText, null);
                 Writer.WriteLine("Reader.MoveToContent();");
 
-                WriteWhileLoopEnd(loopIndex);
+                WriteWhileLoopEnd();
                 WriteMemberEnd(arraysToSet);
 
                 Writer.WriteLine("ReadEndElement();");
@@ -3563,7 +3490,7 @@ namespace System.Xml.Serialization
                 Writer.Write(", ");
                 WriteQuotedCSharpString(structMapping.Namespace);
                 Writer.WriteLine(");");
-                members = new Member[0];
+                members = Array.Empty<Member>();
                 anyFixups = false;
                 fixupMethodName = null;
             }
@@ -3598,13 +3525,13 @@ namespace System.Xml.Serialization
                 Writer.WriteLine("if (Reader.IsEmptyElement) { Reader.Skip(); return o; }");
                 Writer.WriteLine("Reader.ReadStartElement();");
 
-                int loopIndex = WriteWhileNotLoopStart();
+                WriteWhileNotLoopStart();
                 Writer.Indent++;
 
                 WriteMemberElements(members, "UnknownNode((object)o);", "UnknownNode((object)o);", null, null, null);
                 Writer.WriteLine("Reader.MoveToContent();");
 
-                WriteWhileLoopEnd(loopIndex);
+                WriteWhileLoopEnd();
 
                 Writer.WriteLine("ReadEndElement();");
                 Writer.WriteLine("return o;");
@@ -4342,16 +4269,27 @@ namespace System.Xml.Serialization
                     ElementAccessor e = elements[j];
                     string ns = e.Form == XmlSchemaForm.Qualified ? e.Namespace : "";
                     if (!isSequence && e.Any && (e.Name == null || e.Name.Length == 0)) continue;
-                    if (!firstElement || (!isSequence && count > 0))
+                    if (!isSequence)
                     {
-                        Writer.Write("else ");
+                        if (firstElement && count == 0)
+                        {
+                            Writer.WriteLine("do {");
+                            Writer.Indent++;
+                        }
                     }
-                    else if (isSequence)
+                    else
                     {
-                        Writer.Write("case ");
-                        Writer.Write(cases.ToString(CultureInfo.InvariantCulture));
-                        Writer.WriteLine(":");
-                        Writer.Indent++;
+                        if (!firstElement || (!isSequence && count > 0))
+                        {
+                            Writer.Write("else ");
+                        }
+                        else if (isSequence)
+                        {
+                            Writer.Write("case ");
+                            Writer.Write(cases.ToString(CultureInfo.InvariantCulture));
+                            Writer.WriteLine(":");
+                            Writer.Indent++;
+                        }
                     }
                     count++;
                     firstElement = false;
@@ -4441,6 +4379,10 @@ namespace System.Xml.Serialization
                         Writer.Write(member.ParamsReadSource);
                         Writer.WriteLine(" = true;");
                     }
+                    if (!isSequence)
+                    {
+                        Writer.WriteLine("break;");
+                    }
                     Writer.Indent--;
                     Writer.WriteLine("}");
                 }
@@ -4467,10 +4409,10 @@ namespace System.Xml.Serialization
             if (count > 0)
             {
                 if (isSequence)
+                {
                     Writer.WriteLine("default:");
-                else
-                    Writer.WriteLine("else {");
-                Writer.Indent++;
+                    Writer.Indent++;
+                }
             }
             WriteMemberElementsElse(anyElement, elementElseString);
             if (count > 0)
@@ -4480,7 +4422,14 @@ namespace System.Xml.Serialization
                     Writer.WriteLine("break;");
                 }
                 Writer.Indent--;
-                Writer.WriteLine("}");
+                if (!isSequence)
+                {
+                    Writer.WriteLine("} while (false);");
+                }
+                else
+                {
+                    Writer.WriteLine("}");
+                }
             }
         }
 
@@ -4697,14 +4646,14 @@ namespace System.Xml.Serialization
                 Writer.Indent++;
 
                 Writer.WriteLine("Reader.ReadStartElement();");
-                int loopIndex = WriteWhileNotLoopStart();
+                WriteWhileNotLoopStart();
                 Writer.Indent++;
 
                 string unknownNode = "UnknownNode(null, " + ExpectedElements(members) + ");";
                 WriteMemberElements(members, unknownNode, unknownNode, null, null, null);
                 Writer.WriteLine("Reader.MoveToContent();");
 
-                WriteWhileLoopEnd(loopIndex);
+                WriteWhileLoopEnd();
                 Writer.Indent--;
                 Writer.WriteLine("ReadEndElement();");
                 Writer.WriteLine("}");
@@ -4787,27 +4736,50 @@ namespace System.Xml.Serialization
                 }
                 Writer.Indent++;
 
-                WriteSourceBegin(source);
-                if (element.Mapping.TypeDesc == QnameTypeDesc)
-                    Writer.Write("ReadElementQualifiedName()");
+                if (element.Mapping.TypeDesc.Type == typeof(TimeSpan))
+                {
+                    Writer.WriteLine("if (Reader.IsEmptyElement) {");
+                    Writer.Indent++;
+                    Writer.WriteLine("Reader.Skip();");
+                    WriteSourceBegin(source);
+                    Writer.Write("default(System.TimeSpan)");
+                    WriteSourceEnd(source);
+                    Writer.WriteLine(";");
+                    Writer.Indent--;
+                    Writer.WriteLine("}");
+                    Writer.WriteLine("else {");
+                    Writer.Indent++;
+                    WriteSourceBegin(source);
+                    WritePrimitive(element.Mapping, "Reader.ReadElementString()");
+                    WriteSourceEnd(source);
+                    Writer.WriteLine(";");
+                    Writer.Indent--;
+                    Writer.WriteLine("}");
+                }
                 else
                 {
-                    string readFunc;
-                    switch (element.Mapping.TypeDesc.FormatterName)
+                    WriteSourceBegin(source);
+                    if (element.Mapping.TypeDesc == QnameTypeDesc)
+                        Writer.Write("ReadElementQualifiedName()");
+                    else
                     {
-                        case "ByteArrayBase64":
-                        case "ByteArrayHex":
-                            readFunc = "false";
-                            break;
-                        default:
-                            readFunc = "Reader.ReadElementString()";
-                            break;
+                        string readFunc;
+                        switch (element.Mapping.TypeDesc.FormatterName)
+                        {
+                            case "ByteArrayBase64":
+                            case "ByteArrayHex":
+                                readFunc = "false";
+                                break;
+                            default:
+                                readFunc = "Reader.ReadElementString()";
+                                break;
+                        }
+                        WritePrimitive(element.Mapping, readFunc);
                     }
-                    WritePrimitive(element.Mapping, readFunc);
-                }
 
-                WriteSourceEnd(source);
-                Writer.WriteLine(";");
+                    WriteSourceEnd(source);
+                    Writer.WriteLine(";");
+                }
                 Writer.Indent--;
                 Writer.WriteLine("}");
             }
@@ -5022,35 +4994,20 @@ namespace System.Xml.Serialization
             }
         }
 
-        private int WriteWhileNotLoopStart()
+        private void WriteWhileNotLoopStart()
         {
             Writer.WriteLine("Reader.MoveToContent();");
-            int loopIndex = WriteWhileLoopStartCheck();
             Writer.Write("while (Reader.NodeType != ");
             Writer.Write(typeof(XmlNodeType).FullName);
             Writer.Write(".EndElement && Reader.NodeType != ");
             Writer.Write(typeof(XmlNodeType).FullName);
             Writer.WriteLine(".None) {");
-            return loopIndex;
         }
 
-        private void WriteWhileLoopEnd(int loopIndex)
+        private void WriteWhileLoopEnd()
         {
-            WriteWhileLoopEndCheck(loopIndex);
             Writer.Indent--;
             Writer.WriteLine("}");
-        }
-
-        private int WriteWhileLoopStartCheck()
-        {
-            Writer.WriteLine(String.Format(CultureInfo.InvariantCulture, "int whileIterations{0} = 0;", _nextWhileLoopIndex));
-            Writer.WriteLine(String.Format(CultureInfo.InvariantCulture, "int readerCount{0} = ReaderCount;", _nextWhileLoopIndex));
-            return _nextWhileLoopIndex++;
-        }
-
-        private void WriteWhileLoopEndCheck(int loopIndex)
-        {
-            Writer.WriteLine(String.Format(CultureInfo.InvariantCulture, "CheckReaderCount(ref whileIterations{0}, ref readerCount{1});", loopIndex, loopIndex));
         }
 
         private void WriteParamsRead(int length)
@@ -5063,7 +5020,6 @@ namespace System.Xml.Serialization
         private void WriteReadNonRoots()
         {
             Writer.WriteLine("Reader.MoveToContent();");
-            int loopIndex = WriteWhileLoopStartCheck();
             Writer.Write("while (Reader.NodeType == ");
             Writer.Write(typeof(XmlNodeType).FullName);
             Writer.WriteLine(".Element) {");
@@ -5076,7 +5032,7 @@ namespace System.Xml.Serialization
             Writer.WriteLine(".ToBoolean(root)) break;");
             Writer.WriteLine("ReadReferencedElement();");
             Writer.WriteLine("Reader.MoveToContent();");
-            WriteWhileLoopEnd(loopIndex);
+            WriteWhileLoopEnd();
         }
 
         private void WriteBooleanValue(bool value)
@@ -5217,4 +5173,5 @@ namespace System.Xml.Serialization
             RaCodeGen.WriteLocalDecl(typeFullName, variableName, initValue, useReflection);
         }
     }
+#endif
 }

@@ -12,11 +12,10 @@
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
-
+using System.ComponentModel;
 namespace System.Security.AccessControl
 {
     [Flags]
@@ -103,7 +102,7 @@ namespace System.Security.AccessControl
 
         #region Constructors
 
-        protected GenericSecurityDescriptor()
+        internal GenericSecurityDescriptor()
         { }
 
         #endregion
@@ -241,12 +240,12 @@ namespace System.Security.AccessControl
                 // Indicates that the marshaling logic in GetBinaryForm is busted
                 //
 
-                Debug.Assert(false, "binaryForm produced invalid output");
+                Debug.Fail("binaryForm produced invalid output");
                 throw new InvalidOperationException();
             }
             else if (error != Interop.Errors.ERROR_SUCCESS)
             {
-                Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Win32.ConvertSdToSddl returned {0}", error));
+                Debug.Fail($"Win32.ConvertSdToSddl returned {error}");
                 throw new InvalidOperationException();
             }
 
@@ -276,7 +275,6 @@ namespace System.Security.AccessControl
 nameof(binaryForm),
                     SR.ArgumentOutOfRange_ArrayTooSmall);
             }
-            Contract.EndContractBlock();
 
             //
             // the offset will grow as we go for each additional field (owner, group,
@@ -305,7 +303,7 @@ nameof(binaryForm),
 
             binaryForm[offset + 0] = Revision;
             binaryForm[offset + 1] = rmControl;
-            binaryForm[offset + 2] = (byte)((int)materializedControlFlags >> 0);
+            binaryForm[offset + 2] = unchecked((byte)((int)materializedControlFlags >> 0));
             binaryForm[offset + 3] = (byte)((int)materializedControlFlags >> 8);
 
             //
@@ -512,7 +510,6 @@ nameof(binaryForm),
                 throw new ArgumentOutOfRangeException(nameof(binaryForm),
                      SR.AccessControl_InvalidSecurityDescriptorRevision);
             }
-            Contract.EndContractBlock();
 
 
             ControlFlags flags;
@@ -632,7 +629,6 @@ nameof(binaryForm));
             {
                 throw new ArgumentNullException(nameof(sddlForm));
             }
-            Contract.EndContractBlock();
 
             int error;
             IntPtr byteArray = IntPtr.Zero;
@@ -670,9 +666,8 @@ nameof(sddlForm));
                     }
                     else if (error != Interop.Errors.ERROR_SUCCESS)
                     {
-                        Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Unexpected error out of Win32.ConvertStringSdToSd: {0}", error));
-                        // TODO : This should be a Win32Exception once that type is available
-                        throw new Exception();
+                        Debug.Fail($"Unexpected error out of Win32.ConvertStringSdToSd: {error}");
+                        throw new Win32Exception(error, SR.Format(SR.AccessControl_UnexpectedError, error));
                     }
                 }
 
@@ -952,7 +947,6 @@ nameof(discretionaryAcl));
             {
                 throw new ArgumentNullException(nameof(rawSecurityDescriptor));
             }
-            Contract.EndContractBlock();
 
             CreateFromParts(
                 isContainer,
@@ -1213,7 +1207,6 @@ nameof(value));
             {
                 throw new ArgumentNullException(nameof(sid));
             }
-            Contract.EndContractBlock();
 
             if (DiscretionaryAcl != null)
             {
@@ -1227,7 +1220,6 @@ nameof(value));
             {
                 throw new ArgumentNullException(nameof(sid));
             }
-            Contract.EndContractBlock();
 
             if (SystemAcl != null)
             {

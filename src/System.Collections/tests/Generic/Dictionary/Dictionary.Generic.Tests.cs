@@ -11,8 +11,12 @@ namespace System.Collections.Tests
     /// <summary>
     /// Contains tests that ensure the correctness of the Dictionary class.
     /// </summary>
-    public abstract class Dictionary_Generic_Tests<TKey, TValue> : IDictionary_Generic_Tests<TKey, TValue>
+    public abstract partial class Dictionary_Generic_Tests<TKey, TValue> : IDictionary_Generic_Tests<TKey, TValue>
     {
+        protected override ModifyOperation ModifyEnumeratorThrows => ModifyOperation.Add | ModifyOperation.Insert;
+
+        protected override ModifyOperation ModifyEnumeratorAllowed => ModifyOperation.Remove | ModifyOperation.Clear;
+
         #region IDictionary<TKey, TValue Helper Methods
 
         protected override IDictionary<TKey, TValue> GenericIDictionaryFactory()
@@ -43,8 +47,7 @@ namespace System.Collections.Tests
             IDictionary<TKey, TValue> source = GenericIDictionaryFactory(count);
             Dictionary<TKey, TValue> copied = new Dictionary<TKey, TValue>(source, comparer);
             Assert.Equal(source, copied);
-            if (typeof(TKey) != typeof(string) || comparer != EqualityComparer<TKey>.Default)   // Dictionary special-cases the default comparer when TKEy=string
-                Assert.Equal(comparer, copied.Comparer);
+            Assert.Equal(comparer, copied.Comparer);
         }
 
         [Theory]
@@ -55,8 +58,7 @@ namespace System.Collections.Tests
             IDictionary<TKey, TValue> source = GenericIDictionaryFactory(count);
             Dictionary<TKey, TValue> copied = new Dictionary<TKey, TValue>(source, comparer);
             Assert.Equal(source, copied);
-            if (typeof(TKey) != typeof(string) || comparer != EqualityComparer<TKey>.Default)   // Dictionary special-cases the default comparer when TKEy=string
-                Assert.Equal(comparer, copied.Comparer);
+            Assert.Equal(comparer, copied.Comparer);
         }
 
         [Theory]
@@ -74,9 +76,7 @@ namespace System.Collections.Tests
             IEqualityComparer<TKey> comparer = GetKeyIEqualityComparer();
             Dictionary<TKey, TValue> dictionary = new Dictionary<TKey, TValue>(count, comparer);
             Assert.Equal(0, dictionary.Count);
-            // Dictionary with TKey string when 
-            if (typeof(TKey) != typeof(string) || comparer != EqualityComparer<TKey>.Default)   // Dictionary special-cases the default comparer when TKEy=string
-                Assert.Equal(comparer, dictionary.Comparer);
+            Assert.Equal(comparer, dictionary.Comparer);
         }
 
         #endregion

@@ -25,7 +25,7 @@ namespace System.Xml.Serialization
         {
         }
     }
-
+#if !FEATURE_SERIALIZATION_UAPAOT
     internal class XmlSerializationCodeGen
     {
         private IndentedWriter _writer;
@@ -95,7 +95,7 @@ namespace System.Xml.Serialization
             if (a == null) return new TypeMapping[32];
             if (index < a.Length) return a;
             TypeMapping[] b = new TypeMapping[a.Length + 32];
-            Array.Copy(a, b, index);
+            Array.Copy(a, 0, b, 0, index);
             return b;
         }
 
@@ -185,13 +185,13 @@ namespace System.Xml.Serialization
 
                 if (type == null)
                     continue;
-                if (!type.GetTypeInfo().IsPublic && !type.GetTypeInfo().IsNestedPublic)
+                if (!type.IsPublic && !type.IsNestedPublic)
                     continue;
                 if (uniqueTypes[type] != null)
                     continue;
                 if (DynamicAssemblies.IsTypeDynamic(type))
                     continue;
-                if (type.GetTypeInfo().IsGenericType || type.GetTypeInfo().ContainsGenericParameters && DynamicAssemblies.IsTypeDynamic(type.GetGenericArguments()))
+                if (type.IsGenericType || type.ContainsGenericParameters && DynamicAssemblies.IsTypeDynamic(type.GetGenericArguments()))
                     continue;
                 uniqueTypes[type] = type;
                 _writer.Write("if (type == typeof(");
@@ -212,12 +212,12 @@ namespace System.Xml.Serialization
             _writer.Write("public abstract class ");
             _writer.Write(CodeIdentifier.GetCSharpName(baseSerializer));
             _writer.Write(" : ");
-            _writer.Write(typeof(XmlSerializer).FullName);
+            _writer.Write(typeof(System.Xml.Serialization.XmlSerializer).FullName);
             _writer.WriteLine(" {");
             _writer.Indent++;
 
             _writer.Write("protected override ");
-            _writer.Write(typeof(XmlSerializationReader).FullName);
+            _writer.Write(typeof(System.Xml.Serialization.XmlSerializationReader).FullName);
             _writer.WriteLine(" CreateReader() {");
             _writer.Indent++;
             _writer.Write("return new ");
@@ -227,7 +227,7 @@ namespace System.Xml.Serialization
             _writer.WriteLine("}");
 
             _writer.Write("protected override ");
-            _writer.Write(typeof(XmlSerializationWriter).FullName);
+            _writer.Write(typeof(System.Xml.Serialization.XmlSerializationWriter).FullName);
             _writer.WriteLine(" CreateWriter() {");
             _writer.Indent++;
             _writer.Write("return new ");
@@ -282,7 +282,7 @@ namespace System.Xml.Serialization
             {
                 _writer.WriteLine();
                 _writer.Write("protected override void Serialize(object objectToSerialize, ");
-                _writer.Write(typeof(XmlSerializationWriter).FullName);
+                _writer.Write(typeof(System.Xml.Serialization.XmlSerializationWriter).FullName);
                 _writer.WriteLine(" writer) {");
                 _writer.Indent++;
                 _writer.Write("((");
@@ -302,7 +302,7 @@ namespace System.Xml.Serialization
             {
                 _writer.WriteLine();
                 _writer.Write("protected override object Deserialize(");
-                _writer.Write(typeof(XmlSerializationReader).FullName);
+                _writer.Write(typeof(System.Xml.Serialization.XmlSerializationReader).FullName);
                 _writer.WriteLine(" reader) {");
                 _writer.Indent++;
                 _writer.Write("return ((");
@@ -339,7 +339,7 @@ namespace System.Xml.Serialization
         private void GenerateGetSerializer(Hashtable serializers, XmlMapping[] xmlMappings)
         {
             _writer.Write("public override ");
-            _writer.Write(typeof(XmlSerializer).FullName);
+            _writer.Write(typeof(System.Xml.Serialization.XmlSerializer).FullName);
             _writer.Write(" GetSerializer(");
             _writer.Write(typeof(Type).FullName);
             _writer.WriteLine(" type) {");
@@ -352,11 +352,11 @@ namespace System.Xml.Serialization
                     Type type = xmlMappings[i].Accessor.Mapping.TypeDesc.Type;
                     if (type == null)
                         continue;
-                    if (!type.GetTypeInfo().IsPublic && !type.GetTypeInfo().IsNestedPublic)
+                    if (!type.IsPublic && !type.IsNestedPublic)
                         continue;
                     if (DynamicAssemblies.IsTypeDynamic(type))
                         continue;
-                    if (type.GetTypeInfo().IsGenericType || type.GetTypeInfo().ContainsGenericParameters && DynamicAssemblies.IsTypeDynamic(type.GetGenericArguments()))
+                    if (type.IsGenericType || type.ContainsGenericParameters && DynamicAssemblies.IsTypeDynamic(type.GetGenericArguments()))
                         continue;
                     _writer.Write("if (type == typeof(");
                     _writer.Write(CodeIdentifier.GetCSharpName(type));
@@ -374,18 +374,18 @@ namespace System.Xml.Serialization
         {
             _writer.WriteLine();
             _writer.Write("public class XmlSerializerContract : global::");
-            _writer.Write(typeof(XmlSerializerImplementation).FullName);
+            _writer.Write(typeof(System.Xml.Serialization.XmlSerializerImplementation).FullName);
             _writer.WriteLine(" {");
             _writer.Indent++;
 
             _writer.Write("public override global::");
-            _writer.Write(typeof(XmlSerializationReader).FullName);
+            _writer.Write(typeof(System.Xml.Serialization.XmlSerializationReader).FullName);
             _writer.Write(" Reader { get { return new ");
             _writer.Write(readerType);
             _writer.WriteLine("(); } }");
 
             _writer.Write("public override global::");
-            _writer.Write(typeof(XmlSerializationWriter).FullName);
+            _writer.Write(typeof(System.Xml.Serialization.XmlSerializationWriter).FullName);
             _writer.Write(" Writer { get { return new ");
             _writer.Write(writerType);
             _writer.WriteLine("(); } }");
@@ -407,4 +407,5 @@ namespace System.Xml.Serialization
             return mapping.TypeDesc.CanBeElementValue;
         }
     }
+#endif
 }

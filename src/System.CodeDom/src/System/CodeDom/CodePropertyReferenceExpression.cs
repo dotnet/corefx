@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodePropertyReferenceExpression : CodeExpression
     {
         private string _propertyName;
@@ -21,8 +20,8 @@ namespace System.CodeDom
 
         public string PropertyName
         {
-            get { return _propertyName ?? string.Empty; }
-            set { _propertyName = value; }
+            get => _propertyName ?? string.Empty;
+            set => _propertyName = value;
         }
     }
 }

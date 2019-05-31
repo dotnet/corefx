@@ -2,18 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-//------------------------------------------------------------------------------
-
-using System.Security.Principal;
-
-
 namespace System.Data.ProviderBase
 {
-    [Serializable]
     sealed internal partial class DbConnectionPoolIdentity
     {
-        static public readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(String.Empty, false, true);
+        public static readonly DbConnectionPoolIdentity NoIdentity = new DbConnectionPoolIdentity(string.Empty, false, true);
 
         private readonly string _sidString;
         private readonly bool _isRestricted;
@@ -48,6 +41,15 @@ namespace System.Data.ProviderBase
         override public int GetHashCode()
         {
             return _hashCode;
+        }
+
+        internal static DbConnectionPoolIdentity GetCurrentManaged()
+        {
+            string sidString = (!string.IsNullOrWhiteSpace(System.Environment.UserDomainName) ? System.Environment.UserDomainName + "\\" : "")
+                                + System.Environment.UserName;
+            bool isNetwork = false;
+            bool isRestricted = false;
+            return new DbConnectionPoolIdentity(sidString, isRestricted, isNetwork);
         }
     }
 }

@@ -853,7 +853,7 @@ namespace System.Xml.XPath
         }
     }
 
-    internal struct XPathEvaluator
+    internal readonly struct XPathEvaluator
     {
         public object Evaluate<T>(XNode node, string expression, IXmlNamespaceResolver resolver) where T : class
         {
@@ -878,12 +878,12 @@ namespace System.Xml.XPath
                 XText t = r as XText;
                 if (t != null && t.GetParent() != null)
                 {
-                    foreach (XNode node in t.GetParent().Nodes())
+                    do
                     {
-                        t = node as XText;
+                        t = t.NextNode as XText;
                         if (t == null) break;
                         yield return (T)(object)t;
-                    }
+                    } while (t != t.GetParent().LastNode);
                 }
             }
         }

@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System.Tests;
 
 namespace System.IO.Tests
 {
@@ -32,7 +33,7 @@ namespace System.IO.Tests
             var innerException = new Exception("Inner exception");
             var exception = new FileNotFoundException(message, innerException);
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: HResults.COR_E_FILENOTFOUND, innerException: innerException, message: message);
-            Assert.Equal(null, exception.FileName);
+            Assert.Null(exception.FileName);
         }
 
         [Fact]
@@ -78,7 +79,6 @@ namespace System.IO.Tests
             }
         }
 
-#if netstandard17
         [Fact]
         public static void FusionLogTest()
         {
@@ -89,6 +89,5 @@ namespace System.IO.Tests
 
             Assert.Null(exception.FusionLog);
         }
-#endif
     }
 }

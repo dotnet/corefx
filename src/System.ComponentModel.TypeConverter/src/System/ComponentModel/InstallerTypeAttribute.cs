@@ -2,15 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-using System.Security.Permissions;
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2113:SecureLateBindingMethods", Scope = "member", Target = "System.ComponentModel.InstallerTypeAttribute.get_InstallerType():System.Type")]
+using System.Diagnostics.CodeAnalysis;
+
+[assembly: SuppressMessage("Microsoft.Security", "CA2113:SecureLateBindingMethods", Scope = "member", Target = "System.ComponentModel.InstallerTypeAttribute.get_InstallerType():System.Type")]
 
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>Specifies the installer
-    ///       to use for a type to install components.</para>
+    /// Specifies the installer to use for a type to install components.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
     public class InstallerTypeAttribute : Attribute
@@ -18,32 +17,27 @@ namespace System.ComponentModel
         private string _typeName;
 
         /// <summary>
-        /// <para>Initializes a new instance of the System.Windows.Forms.ComponentModel.InstallerTypeAttribute class.</para>
+        /// Initializes a new instance of the System.Windows.Forms.ComponentModel.InstallerTypeAttribute class.
         /// </summary>
         public InstallerTypeAttribute(Type installerType)
         {
+            if (installerType == null)
+            {
+                throw new ArgumentNullException(nameof(installerType));
+            }
+
             _typeName = installerType.AssemblyQualifiedName;
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         public InstallerTypeAttribute(string typeName)
         {
             _typeName = typeName;
         }
 
         /// <summary>
-        ///    <para> Gets the
-        ///       type of installer associated with this attribute.</para>
+        /// Gets the type of installer associated with this attribute.
         /// </summary>
-        public virtual Type InstallerType
-        {
-            get
-            {
-                return Type.GetType(_typeName);
-            }
-        }
+        public virtual Type InstallerType => Type.GetType(_typeName);
 
         public override bool Equals(object obj)
         {
@@ -52,14 +46,9 @@ namespace System.ComponentModel
                 return true;
             }
 
-            InstallerTypeAttribute other = obj as InstallerTypeAttribute;
-
-            return (other != null) && other._typeName == _typeName;
+            return (obj is InstallerTypeAttribute other) && other._typeName == _typeName;
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
     }
 }

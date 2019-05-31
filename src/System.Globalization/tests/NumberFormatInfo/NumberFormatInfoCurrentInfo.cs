@@ -4,53 +4,53 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
-    public class NumberFormatInfoCurrentInfo : RemoteExecutorTestBase
+    public class NumberFormatInfoCurrentInfo
     {
         public static IEnumerable<object[]> CurrentInfo_CustomCulture_TestData()
         {
-            yield return new object[] { new CultureInfo("en") };
-            yield return new object[] { new CultureInfo("en-US") };
+            yield return new object[] { CultureInfo.GetCultureInfo("en") };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US") };
             yield return new object[] { CultureInfo.InvariantCulture };
         }
 
+        [ActiveIssue(33904, TargetFrameworkMonikers.Uap)]
         [Theory]
         [MemberData(nameof(CurrentInfo_CustomCulture_TestData))]
         public void CurrentInfo_CustomCulture(CultureInfo newCurrentCulture)
         {
-            RemoteInvoke((cultureName) =>
+            RemoteExecutor.Invoke((cultureName) =>
             {
-                if (cultureName.Equals("EmptyString"))
-                    cultureName = string.Empty;
-                CultureInfo newCulture = new CultureInfo(cultureName);
+                CultureInfo newCulture = CultureInfo.GetCultureInfo(cultureName);
                 CultureInfo.CurrentCulture = newCulture;
                 Assert.Same(newCulture.NumberFormat, NumberFormatInfo.CurrentInfo);
-                return SuccessExitCode;
-            }, newCurrentCulture.Name.Length > 0 ? newCurrentCulture.Name : "EmptyString").Dispose();
+                return RemoteExecutor.SuccessExitCode;
+            }, newCurrentCulture.Name).Dispose();
         }
 
         [Fact]
         public void CurrentInfo_Subclass_OverridesGetFormat()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfoSubclassOverridesGetFormat("en-US");
                 Assert.Same(CultureInfoSubclassOverridesGetFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public void CurrentInfo_Subclass_OverridesNumberFormat()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentCulture = new CultureInfoSubclassOverridesNumberFormat("en-US");
                 Assert.Same(CultureInfoSubclassOverridesNumberFormat.CustomFormat, NumberFormatInfo.CurrentInfo);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -58,7 +58,7 @@ namespace System.Globalization.Tests
         {
             public CultureInfoSubclassOverridesGetFormat(string name): base(name) { }
 
-            public static NumberFormatInfo CustomFormat { get; } = new CultureInfo("fr-FR").NumberFormat;
+            public static NumberFormatInfo CustomFormat { get; } = CultureInfo.GetCultureInfo("fr-FR").NumberFormat;
 
             public override object GetFormat(Type formatType) => CustomFormat;
         }
@@ -67,7 +67,7 @@ namespace System.Globalization.Tests
         {
             public CultureInfoSubclassOverridesNumberFormat(string name): base(name) { }
 
-            public static NumberFormatInfo CustomFormat { get; } = new CultureInfo("fr-FR").NumberFormat;
+            public static NumberFormatInfo CustomFormat { get; } = CultureInfo.GetCultureInfo("fr-FR").NumberFormat;
 
             public override NumberFormatInfo NumberFormat
             {

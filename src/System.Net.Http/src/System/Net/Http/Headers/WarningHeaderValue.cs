@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.IO;
 using System.Text;
 
 namespace System.Net.Http.Headers
@@ -74,7 +75,7 @@ namespace System.Net.Http.Headers
 
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = StringBuilderCache.Acquire();
 
             // Warning codes are always 3 digits according to RFC2616
             sb.Append(_code.ToString("000", NumberFormatInfo.InvariantInfo));
@@ -87,11 +88,11 @@ namespace System.Net.Http.Headers
             if (_date.HasValue)
             {
                 sb.Append(" \"");
-                sb.Append(HttpRuleParser.DateToString(_date.Value));
+                sb.Append(HttpDateParser.DateToString(_date.Value));
                 sb.Append('\"');
             }
 
-            return sb.ToString();
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         public override bool Equals(object obj)
@@ -244,9 +245,9 @@ namespace System.Net.Http.Headers
                 return false;
             }
 
-            if (!HeaderUtilities.TryParseInt32(input.Substring(current, codeLength), out code))
+            if (!HeaderUtilities.TryParseInt32(input, current, codeLength, out code))
             {
-                Debug.Assert(false, "Unable to parse value even though it was parsed as <=3 digits string. Input: '" +
+                Debug.Fail("Unable to parse value even though it was parsed as <=3 digits string. Input: '" +
                     input + "', Current: " + current + ", CodeLength: " + codeLength);
                 return false;
             }
@@ -300,7 +301,7 @@ namespace System.Net.Http.Headers
                 }
 
                 DateTimeOffset temp;
-                if (!HttpRuleParser.TryStringToDate(input.Substring(dateStartIndex, current - dateStartIndex), out temp))
+                if (!HttpDateParser.TryStringToDate(input.AsSpan(dateStartIndex, current - dateStartIndex), out temp))
                 {
                     return false;
                 }
@@ -339,7 +340,7 @@ namespace System.Net.Http.Headers
             string host = null;
             if (HttpRuleParser.GetHostLength(agent, 0, true, out host) != agent.Length)
             {
-                throw new FormatException(string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_headers_invalid_value, agent));
+                throw new FormatException(SR.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_headers_invalid_value, agent));
             }
         }
     }

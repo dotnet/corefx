@@ -27,6 +27,7 @@ namespace System.Data.SqlClient
             Int16,
             Int32,
             Int64,
+            Guid,
             Money,
             Single,
             String,
@@ -43,61 +44,63 @@ namespace System.Data.SqlClient
         internal struct DateTimeInfo
         {
             // This is used to store DateTime
-            internal Int32 daypart;
-            internal Int32 timepart;
+            internal int daypart;
+            internal int timepart;
         }
 
         internal struct NumericInfo
         {
             // This is used to store Decimal data
-            internal Int32 data1;
-            internal Int32 data2;
-            internal Int32 data3;
-            internal Int32 data4;
-            internal Byte precision;
-            internal Byte scale;
-            internal Boolean positive;
+            internal int data1;
+            internal int data2;
+            internal int data3;
+            internal int data4;
+            internal byte precision;
+            internal byte scale;
+            internal bool positive;
         }
 
         internal struct TimeInfo
         {
-            internal Int64 ticks;
+            internal long ticks;
             internal byte scale;
         }
 
         internal struct DateTime2Info
         {
-            internal Int32 date;
+            internal int date;
             internal TimeInfo timeInfo;
         }
 
         internal struct DateTimeOffsetInfo
         {
             internal DateTime2Info dateTime2Info;
-            internal Int16 offset;
+            internal short offset;
         }
 
         [StructLayout(LayoutKind.Explicit)]
         internal struct Storage
         {
             [FieldOffset(0)]
-            internal Boolean _boolean;
+            internal bool _boolean;
             [FieldOffset(0)]
-            internal Byte _byte;
+            internal byte _byte;
             [FieldOffset(0)]
             internal DateTimeInfo _dateTimeInfo;
             [FieldOffset(0)]
-            internal Double _double;
+            internal double _double;
             [FieldOffset(0)]
             internal NumericInfo _numericInfo;
             [FieldOffset(0)]
-            internal Int16 _int16;
+            internal short _int16;
             [FieldOffset(0)]
-            internal Int32 _int32;
+            internal int _int32;
             [FieldOffset(0)]
-            internal Int64 _int64;     // also used to store Money, UtcDateTime, Date , and Time
+            internal long _int64;     // also used to store Money, UtcDateTime, Date , and Time
             [FieldOffset(0)]
-            internal Single _single;
+            internal Guid _guid;
+            [FieldOffset(0)]
+            internal float _single;
             [FieldOffset(0)]
             internal TimeInfo _timeInfo;
             [FieldOffset(0)]
@@ -147,7 +150,7 @@ namespace System.Data.SqlClient
             get { return _type; }
         }
 
-        internal Boolean Boolean
+        internal bool Boolean
         {
             get
             {
@@ -157,7 +160,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._boolean;
                 }
-                return (Boolean)this.Value; // anything else we haven't thought of goes through boxing.
+                return (bool)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -168,7 +171,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Byte Byte
+        internal byte Byte
         {
             get
             {
@@ -178,7 +181,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._byte;
                 }
-                return (Byte)this.Value; // anything else we haven't thought of goes through boxing.
+                return (byte)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -189,7 +192,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Byte[] ByteArray
+        internal byte[] ByteArray
         {
             get
             {
@@ -220,7 +223,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Decimal Decimal
+        internal decimal Decimal
         {
             get
             {
@@ -232,7 +235,7 @@ namespace System.Data.SqlClient
                     {
                         throw new OverflowException(SQLResource.ConversionOverflowMessage);
                     }
-                    return new Decimal(_value._numericInfo.data1, _value._numericInfo.data2, _value._numericInfo.data3, !_value._numericInfo.positive, _value._numericInfo.scale);
+                    return new decimal(_value._numericInfo.data1, _value._numericInfo.data2, _value._numericInfo.data3, !_value._numericInfo.positive, _value._numericInfo.scale);
                 }
                 if (StorageType.Money == _type)
                 {
@@ -243,13 +246,13 @@ namespace System.Data.SqlClient
                         isNegative = true;
                         l = -l;
                     }
-                    return new Decimal((int)(l & 0xffffffff), (int)(l >> 32), 0, isNegative, 4);
+                    return new decimal((int)(l & 0xffffffff), (int)(l >> 32), 0, isNegative, 4);
                 }
-                return (Decimal)this.Value; // anything else we haven't thought of goes through boxing.
+                return (decimal)this.Value; // anything else we haven't thought of goes through boxing.
             }
         }
 
-        internal Double Double
+        internal double Double
         {
             get
             {
@@ -259,7 +262,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._double;
                 }
-                return (Double)this.Value; // anything else we haven't thought of goes through boxing.
+                return (double)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -275,11 +278,27 @@ namespace System.Data.SqlClient
             get
             {
                 ThrowIfNull();
-                return this.SqlGuid.Value;
+                if (StorageType.Guid == _type)
+                {
+                    return _value._guid;
+                }
+                else if (StorageType.SqlGuid == _type)
+                {
+                    return ((SqlGuid)_object).Value;
+                }
+                return (Guid)this.Value;
+            }
+            set
+            {
+                Debug.Assert(IsEmpty, "setting value a second time?");
+
+                _type = StorageType.Guid;
+                _value._guid = value;
+                _isNull = false;
             }
         }
 
-        internal Int16 Int16
+        internal short Int16
         {
             get
             {
@@ -289,7 +308,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._int16;
                 }
-                return (Int16)this.Value; // anything else we haven't thought of goes through boxing.
+                return (short)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -300,7 +319,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Int32 Int32
+        internal int Int32
         {
             get
             {
@@ -310,7 +329,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._int32;
                 }
-                return (Int32)this.Value; // anything else we haven't thought of goes through boxing.
+                return (int)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -321,7 +340,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Int64 Int64
+        internal long Int64
         {
             get
             {
@@ -331,7 +350,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._int64;
                 }
-                return (Int64)this.Value; // anything else we haven't thought of goes through boxing.
+                return (long)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -342,7 +361,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal Single Single
+        internal float Single
         {
             get
             {
@@ -352,7 +371,7 @@ namespace System.Data.SqlClient
                 {
                     return _value._single;
                 }
-                return (Single)this.Value; // anything else we haven't thought of goes through boxing.
+                return (float)this.Value; // anything else we haven't thought of goes through boxing.
             }
             set
             {
@@ -363,7 +382,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        internal String String
+        internal string String
         {
             get
             {
@@ -371,13 +390,13 @@ namespace System.Data.SqlClient
 
                 if (StorageType.String == _type)
                 {
-                    return (String)_object;
+                    return (string)_object;
                 }
                 else if (StorageType.SqlCachedBuffer == _type)
                 {
                     return ((SqlCachedBuffer)(_object)).ToString();
                 }
-                return (String)this.Value; // anything else we haven't thought of goes through boxing.
+                return (string)this.Value; // anything else we haven't thought of goes through boxing.
             }
         }
 
@@ -441,7 +460,7 @@ namespace System.Data.SqlClient
                     byte scale = _value._dateTimeOffsetInfo.dateTime2Info.timeInfo.scale;
                     return dto.ToString(s_katmaiDateTimeOffsetFormatByScale[scale], DateTimeFormatInfo.InvariantInfo);
                 }
-                return (String)this.Value; // anything else we haven't thought of goes through boxing.
+                return (string)this.Value; // anything else we haven't thought of goes through boxing.
             }
         }
 
@@ -657,9 +676,13 @@ namespace System.Data.SqlClient
         {
             get
             {
-                if (StorageType.SqlGuid == _type)
+                if (StorageType.Guid == _type)
                 {
-                    return (SqlGuid)_object;
+                    return new SqlGuid(_value._guid); 
+                }
+                else if (StorageType.SqlGuid == _type)
+                {
+                    return IsNull ? SqlGuid.Null : (SqlGuid)_object;
                 }
                 return (SqlGuid)this.SqlValue; // anything else we haven't thought of goes through boxing.
             }
@@ -762,7 +785,7 @@ namespace System.Data.SqlClient
                     {
                         return SqlString.Null;
                     }
-                    return new SqlString((String)_object);
+                    return new SqlString((string)_object);
                 }
                 else if (StorageType.SqlCachedBuffer == _type)
                 {
@@ -792,9 +815,11 @@ namespace System.Data.SqlClient
                     case StorageType.Int16: return SqlInt16;
                     case StorageType.Int32: return SqlInt32;
                     case StorageType.Int64: return SqlInt64;
+                    case StorageType.Guid: return SqlGuid;
                     case StorageType.Money: return SqlMoney;
                     case StorageType.Single: return SqlSingle;
                     case StorageType.String: return SqlString;
+
                     case StorageType.SqlCachedBuffer:
                         {
                             SqlCachedBuffer data = (SqlCachedBuffer)(_object);
@@ -810,14 +835,13 @@ namespace System.Data.SqlClient
                         return _object;
 
                     case StorageType.SqlXml:
+                        if (_isNull)
                         {
-                            if (_isNull)
-                            {
-                                return SqlXml.Null;
-                            }
-                            Debug.Assert(null != _object);
-                            return (SqlXml)_object;
+                            return SqlXml.Null;
                         }
+                        Debug.Assert(null != _object);
+                        return (SqlXml)_object;
+                        
                     case StorageType.Date:
                     case StorageType.DateTime2:
                         if (_isNull)
@@ -825,12 +849,14 @@ namespace System.Data.SqlClient
                             return DBNull.Value;
                         }
                         return DateTime;
+
                     case StorageType.DateTimeOffset:
                         if (_isNull)
                         {
                             return DBNull.Value;
                         }
                         return DateTimeOffset;
+
                     case StorageType.Time:
                         if (_isNull)
                         {
@@ -841,6 +867,9 @@ namespace System.Data.SqlClient
                 return null; // need to return the value as an object of some SQL type
             }
         }
+
+        private static readonly object s_cachedTrueObject = true;
+        private static readonly object s_cachedFalseObject = false;
 
         internal object Value
         {
@@ -853,7 +882,7 @@ namespace System.Data.SqlClient
                 switch (_type)
                 {
                     case StorageType.Empty: return DBNull.Value;
-                    case StorageType.Boolean: return Boolean;
+                    case StorageType.Boolean: return Boolean ? s_cachedTrueObject : s_cachedFalseObject;
                     case StorageType.Byte: return Byte;
                     case StorageType.DateTime: return DateTime;
                     case StorageType.Decimal: return Decimal;
@@ -861,6 +890,7 @@ namespace System.Data.SqlClient
                     case StorageType.Int16: return Int16;
                     case StorageType.Int32: return Int32;
                     case StorageType.Int64: return Int64;
+                    case StorageType.Guid: return Guid;
                     case StorageType.Money: return Decimal;
                     case StorageType.Single: return Single;
                     case StorageType.String: return String;
@@ -895,44 +925,50 @@ namespace System.Data.SqlClient
             {
                 switch (_type)
                 {
-                    case SqlBuffer.StorageType.Empty: return null;
-                    case SqlBuffer.StorageType.Boolean: return typeof(SqlBoolean);
-                    case SqlBuffer.StorageType.Byte: return typeof(SqlByte);
-                    case SqlBuffer.StorageType.DateTime: return typeof(SqlDateTime);
-                    case SqlBuffer.StorageType.Decimal: return typeof(SqlDecimal);
-                    case SqlBuffer.StorageType.Double: return typeof(SqlDouble);
-                    case SqlBuffer.StorageType.Int16: return typeof(SqlInt16);
-                    case SqlBuffer.StorageType.Int32: return typeof(SqlInt32);
-                    case SqlBuffer.StorageType.Int64: return typeof(SqlInt64);
-                    case SqlBuffer.StorageType.Money: return typeof(SqlMoney);
-                    case SqlBuffer.StorageType.Single: return typeof(SqlSingle);
-                    case SqlBuffer.StorageType.String: return typeof(SqlString);
-                    case SqlBuffer.StorageType.SqlCachedBuffer: return typeof(SqlString);
-                    case SqlBuffer.StorageType.SqlBinary: return typeof(object);
-                    case SqlBuffer.StorageType.SqlGuid: return typeof(object);
-                    case SqlBuffer.StorageType.SqlXml: return typeof(SqlXml);
+                    case StorageType.Empty: return null;
+                    case StorageType.Boolean: return typeof(SqlBoolean);
+                    case StorageType.Byte: return typeof(SqlByte);
+                    case StorageType.DateTime: return typeof(SqlDateTime);
+                    case StorageType.Decimal: return typeof(SqlDecimal);
+                    case StorageType.Double: return typeof(SqlDouble);
+                    case StorageType.Int16: return typeof(SqlInt16);
+                    case StorageType.Int32: return typeof(SqlInt32);
+                    case StorageType.Int64: return typeof(SqlInt64);
+                    case StorageType.Guid: return typeof(SqlGuid);
+                    case StorageType.Money: return typeof(SqlMoney);
+                    case StorageType.Single: return typeof(SqlSingle);
+                    case StorageType.String: return typeof(SqlString);
+                    case StorageType.SqlCachedBuffer: return typeof(SqlString);
+                    case StorageType.SqlBinary: return typeof(object);
+                    case StorageType.SqlGuid: return typeof(SqlGuid);
+                    case StorageType.SqlXml: return typeof(SqlXml);
+                    // Date DateTime2 and DateTimeOffset have no direct Sql type to contain them
                 }
             }
             else
             { //Is CLR Type
                 switch (_type)
                 {
-                    case SqlBuffer.StorageType.Empty: return null;
-                    case SqlBuffer.StorageType.Boolean: return typeof(Boolean);
-                    case SqlBuffer.StorageType.Byte: return typeof(Byte);
-                    case SqlBuffer.StorageType.DateTime: return typeof(DateTime);
-                    case SqlBuffer.StorageType.Decimal: return typeof(Decimal);
-                    case SqlBuffer.StorageType.Double: return typeof(Double);
-                    case SqlBuffer.StorageType.Int16: return typeof(Int16);
-                    case SqlBuffer.StorageType.Int32: return typeof(Int32);
-                    case SqlBuffer.StorageType.Int64: return typeof(Int64);
-                    case SqlBuffer.StorageType.Money: return typeof(Decimal);
-                    case SqlBuffer.StorageType.Single: return typeof(Single);
-                    case SqlBuffer.StorageType.String: return typeof(String);
-                    case SqlBuffer.StorageType.SqlBinary: return typeof(Byte[]);
-                    case SqlBuffer.StorageType.SqlCachedBuffer: return typeof(string);
-                    case SqlBuffer.StorageType.SqlGuid: return typeof(Guid);
-                    case SqlBuffer.StorageType.SqlXml: return typeof(string);
+                    case StorageType.Empty: return null;
+                    case StorageType.Boolean: return typeof(bool);
+                    case StorageType.Byte: return typeof(byte);
+                    case StorageType.DateTime: return typeof(DateTime);
+                    case StorageType.Decimal: return typeof(decimal);
+                    case StorageType.Double: return typeof(double);
+                    case StorageType.Int16: return typeof(short);
+                    case StorageType.Int32: return typeof(int);
+                    case StorageType.Int64: return typeof(long);
+                    case StorageType.Guid: return typeof(Guid);
+                    case StorageType.Money: return typeof(decimal);
+                    case StorageType.Single: return typeof(float);
+                    case StorageType.String: return typeof(string);
+                    case StorageType.SqlBinary: return typeof(byte[]);
+                    case StorageType.SqlCachedBuffer: return typeof(string);
+                    case StorageType.SqlGuid: return typeof(Guid);
+                    case StorageType.SqlXml: return typeof(string);
+                    case StorageType.Date: return typeof(DateTime);
+                    case StorageType.DateTime2: return typeof(DateTime);
+                    case StorageType.DateTimeOffset: return typeof(DateTimeOffset);
                 }
             }
 
@@ -1024,109 +1060,67 @@ namespace System.Data.SqlClient
             _isNull = false;
         }
 
-        internal void SetToDate(byte[] bytes)
+        internal void SetToDate(ReadOnlySpan<byte> bytes)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
 
             _type = StorageType.Date;
-            _value._int32 = GetDateFromByteArray(bytes, 0);
+            _value._int32 = GetDateFromByteArray(bytes);
             _isNull = false;
         }
 
-        internal void SetToDate(DateTime date)
+        internal void SetToTime(ReadOnlySpan<byte> bytes, byte scale)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.Date;
-            _value._int32 = date.Subtract(DateTime.MinValue).Days;
-            _isNull = false;
-        }
-
-        internal void SetToTime(byte[] bytes, int length, byte scale)
-        {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
             _type = StorageType.Time;
-            FillInTimeInfo(ref _value._timeInfo, bytes, length, scale);
+            FillInTimeInfo(ref _value._timeInfo, bytes, scale);
             _isNull = false;
         }
 
-        internal void SetToTime(TimeSpan timeSpan, byte scale)
+        internal void SetToDateTime2(ReadOnlySpan<byte> bytes, byte scale)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.Time;
-            _value._timeInfo.ticks = timeSpan.Ticks;
-            _value._timeInfo.scale = scale;
-            _isNull = false;
-        }
-
-        internal void SetToDateTime2(byte[] bytes, int length, byte scale)
-        {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
+            int length = bytes.Length;
             _type = StorageType.DateTime2;
-            FillInTimeInfo(ref _value._dateTime2Info.timeInfo, bytes, length - 3, scale); // remaining 3 bytes is for date
-            _value._dateTime2Info.date = GetDateFromByteArray(bytes, length - 3); // 3 bytes for date
+            FillInTimeInfo(ref _value._dateTime2Info.timeInfo, bytes.Slice(0, length - 3), scale); // remaining 3 bytes is for date
+            _value._dateTime2Info.date = GetDateFromByteArray(bytes.Slice(length - 3)); // 3 bytes for date
             _isNull = false;
         }
 
-        internal void SetToDateTime2(DateTime dateTime, byte scale)
+        internal void SetToDateTimeOffset(ReadOnlySpan<byte> bytes, byte scale)
         {
             Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.DateTime2;
-            _value._dateTime2Info.timeInfo.ticks = dateTime.TimeOfDay.Ticks;
-            _value._dateTime2Info.timeInfo.scale = scale;
-            _value._dateTime2Info.date = dateTime.Subtract(DateTime.MinValue).Days;
-            _isNull = false;
-        }
-
-        internal void SetToDateTimeOffset(byte[] bytes, int length, byte scale)
-        {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
+            int length = bytes.Length;
             _type = StorageType.DateTimeOffset;
-            FillInTimeInfo(ref _value._dateTimeOffsetInfo.dateTime2Info.timeInfo, bytes, length - 5, scale); // remaining 5 bytes are for date and offset
-            _value._dateTimeOffsetInfo.dateTime2Info.date = GetDateFromByteArray(bytes, length - 5); // 3 bytes for date
-            _value._dateTimeOffsetInfo.offset = (Int16)(bytes[length - 2] + (bytes[length - 1] << 8)); // 2 bytes for offset (Int16)
+            FillInTimeInfo(ref _value._dateTimeOffsetInfo.dateTime2Info.timeInfo, bytes.Slice(0, length - 5), scale); // remaining 5 bytes are for date and offset
+            _value._dateTimeOffsetInfo.dateTime2Info.date = GetDateFromByteArray(bytes.Slice(length - 5)); // 3 bytes for date
+            _value._dateTimeOffsetInfo.offset = (short)(bytes[length - 2] + (bytes[length - 1] << 8)); // 2 bytes for offset (Int16)
             _isNull = false;
         }
 
-        internal void SetToDateTimeOffset(DateTimeOffset dateTimeOffset, byte scale)
+        private static void FillInTimeInfo(ref TimeInfo timeInfo, ReadOnlySpan<byte> timeBytes, byte scale)
         {
-            Debug.Assert(IsEmpty, "setting value a second time?");
-
-            _type = StorageType.DateTimeOffset;
-            DateTime utcDateTime = dateTimeOffset.UtcDateTime; // timeInfo stores the utc datetime of a datatimeoffset
-            _value._dateTimeOffsetInfo.dateTime2Info.timeInfo.ticks = utcDateTime.TimeOfDay.Ticks;
-            _value._dateTimeOffsetInfo.dateTime2Info.timeInfo.scale = scale;
-            _value._dateTimeOffsetInfo.dateTime2Info.date = utcDateTime.Subtract(DateTime.MinValue).Days;
-            _value._dateTimeOffsetInfo.offset = (Int16)dateTimeOffset.Offset.TotalMinutes;
-            _isNull = false;
-        }
-
-        private static void FillInTimeInfo(ref TimeInfo timeInfo, byte[] timeBytes, int length, byte scale)
-        {
+            int length = timeBytes.Length;
             Debug.Assert(3 <= length && length <= 5, "invalid data length for timeInfo: " + length);
             Debug.Assert(0 <= scale && scale <= 7, "invalid scale: " + scale);
 
-            Int64 tickUnits = (Int64)timeBytes[0] + ((Int64)timeBytes[1] << 8) + ((Int64)timeBytes[2] << 16);
+            long tickUnits = (long)timeBytes[0] + ((long)timeBytes[1] << 8) + ((long)timeBytes[2] << 16);
             if (length > 3)
             {
-                tickUnits += ((Int64)timeBytes[3] << 24);
+                tickUnits += ((long)timeBytes[3] << 24);
             }
             if (length > 4)
             {
-                tickUnits += ((Int64)timeBytes[4] << 32);
+                tickUnits += ((long)timeBytes[4] << 32);
             }
             timeInfo.ticks = tickUnits * TdsEnums.TICKS_FROM_SCALE[scale];
             timeInfo.scale = scale;
         }
 
-        private static Int32 GetDateFromByteArray(byte[] buf, int offset)
+        private static int GetDateFromByteArray(ReadOnlySpan<byte> buf)
         {
-            return buf[offset] + (buf[offset + 1] << 8) + (buf[offset + 2] << 16);
+            byte thirdByte = buf[2]; // reordered to optimize JIT generated bounds checks to a single instance, review generated asm before changing
+            return buf[0] + (buf[1] << 8) + (thirdByte << 16);
         }
 
         private void ThrowIfNull()
@@ -1135,6 +1129,61 @@ namespace System.Data.SqlClient
             {
                 throw new SqlNullValueException();
             }
+        }
+
+        // [Field]As<T> method explanation:
+        // these methods are used to bridge generic to non-generic access to value type fields on the storage struct
+        // where typeof(T) == typeof(field) 
+        //   1) RyuJIT will recognise the pattern of (T)(object)T as being redundant and eliminate 
+        //   the T and object casts leaving T, so while this looks like it will put every value type instance in a box the 
+        //   enerated assembly will be short and direct
+        //   2) another jit may not recognise the pattern and should emit the code as seen. this will box and then unbox the
+        //   value type which is no worse than the mechanism that this code replaces
+        // where typeof(T) != typeof(field)
+        //   the jit will emit all the cast operations as written. this will put the value into a box and then attempt to
+        //   cast it, because it is an object even no conversions are use and this will generate the desired InvalidCastException 
+        //   so users cannot widen a short to an int preserving external expectations 
+
+        internal T ByteAs<T>()
+        {
+            ThrowIfNull();
+            return (T)(object)_value._byte;
+        }
+
+        internal T BooleanAs<T>()
+        {
+            ThrowIfNull();
+            return (T)(object)_value._boolean;
+        }
+
+        internal T Int32As<T>()
+        {
+            ThrowIfNull();
+            return (T)(object)_value._int32;
+        }
+
+        internal T Int16As<T>()
+        {
+            ThrowIfNull();
+            return (T)(object)_value._int16;
+        }
+
+        internal T Int64As<T>()
+        {
+            ThrowIfNull();
+            return (T)(object)_value._int64;
+        }
+
+        internal T DoubleAs<T>()
+        {
+            ThrowIfNull();
+            return (T)(object)_value._double;
+        }
+
+        internal T SingleAs<T>()
+        {
+            ThrowIfNull();
+            return (T)(object)_value._single;
         }
     }
 }// namespace

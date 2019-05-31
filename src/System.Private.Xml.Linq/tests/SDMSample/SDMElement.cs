@@ -93,7 +93,7 @@ namespace XDocumentTests.SDMSample
 
             Assert.Empty(elementCopy.Attributes());
 
-            // Hsh codes of equal elements shoukd be equal.
+            // Hsh codes of equal elements should be equal.
             Assert.Equal(XNode.EqualityComparer.GetHashCode(element), XNode.EqualityComparer.GetHashCode(elementCopy));
 
             // Null element is not allowed.
@@ -393,14 +393,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XElement e1 = new XElement("x");
             XElement e2 = new XElement("x", "bogus");
-            XElement e3 = new XElement("x", "5e+500");
             XElement e4 = new XElement("x", "5.0");
 
             Assert.Throws<FormatException>(() => (float)e1);
             Assert.Throws<FormatException>(() => (float)e2);
-            Assert.Throws<OverflowException>(() => (float)e3);
 
             Assert.Equal(5.0f, (float)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit float conversion operator on XElement.
+        /// </summary>
+        [Fact]
+        public void ElementExplicitToFloat_NotNetFramework()
+        {
+            XElement e3 = new XElement("x", "5e+500");
+            Assert.Equal(float.PositiveInfinity, (float)e3);
         }
 
         /// <summary>
@@ -415,14 +423,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XElement e1 = new XElement("x");
             XElement e2 = new XElement("x", "bogus");
-            XElement e3 = new XElement("x", "5e+5000");
             XElement e4 = new XElement("x", "5.0");
 
             Assert.Throws<FormatException>(() => (double)e1);
             Assert.Throws<FormatException>(() => (double)e2);
-            Assert.Throws<OverflowException>(() => (double)e3);
 
             Assert.Equal(5.0, (double)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit double conversion operator on XElement.
+        /// </summary>
+        [Fact]
+        public void ElementExplicitToDouble_NotNetFramework()
+        {
+            XElement e3 = new XElement("x", "5e+5000");
+            Assert.Equal(double.PositiveInfinity, (double)e3);
         }
 
         /// <summary>
@@ -658,11 +674,11 @@ namespace XDocumentTests.SDMSample
             e2.RemoveAttributes();
             Assert.Empty(e2.Attributes());
 
-            // Removal of non-existant attribute
+            // Removal of non-existent attribute
             e1.SetAttributeValue("foo", null);
             Assert.Empty(e1.Attributes());
 
-            // Add of non-existant attribute
+            // Add of non-existent attribute
             e1.SetAttributeValue("foo", "foo-value");
             Assert.Equal(e1.Attribute("foo").Name.ToString(), "foo");
             Assert.Equal(e1.Attribute("foo").Value, "foo-value");
@@ -723,11 +739,11 @@ namespace XDocumentTests.SDMSample
         {
             XElement e1 = new XElement("x");
 
-            // Removal of non-existant element
+            // Removal of non-existent element
             e1.SetElementValue("foo", null);
             Assert.Empty(e1.Elements());
 
-            // Add of non-existant element
+            // Add of non-existent element
             e1.SetElementValue("foo", "foo-value");
             Assert.Equal(new XElement[] { new XElement("foo", "foo-value") }, e1.Elements(), XNode.EqualityComparer);
 
@@ -769,7 +785,7 @@ namespace XDocumentTests.SDMSample
             XElement e = new XElement(ns + "foo");
 
             Assert.Throws<ArgumentNullException>(() => e.GetNamespaceOfPrefix(null));
-            Assert.Throws<ArgumentException>(() => e.GetNamespaceOfPrefix(string.Empty));
+            AssertExtensions.Throws<ArgumentException>(null, () => e.GetNamespaceOfPrefix(string.Empty));
 
             XNamespace n = e.GetNamespaceOfPrefix("xmlns");
             Assert.Equal("http://www.w3.org/2000/xmlns/", n.NamespaceName);

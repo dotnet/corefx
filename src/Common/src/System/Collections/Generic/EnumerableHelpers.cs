@@ -2,39 +2,14 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
-
+#nullable enable
 namespace System.Collections.Generic
 {
-    /// <summary>Internal helper functions for working with enumerables.</summary>
-    internal static class EnumerableHelpers
+    /// <summary>
+    /// Internal helper functions for working with enumerables.
+    /// </summary>
+    internal static partial class EnumerableHelpers
     {
-        /// <summary>Converts an enumerable to an array.</summary>
-        /// <param name="source">The enumerable to convert.</param>
-        /// <returns>The resulting array.</returns>
-        internal static T[] ToArray<T>(IEnumerable<T> source)
-        {
-            Debug.Assert(source != null);
-
-            var collection = source as ICollection<T>;
-            if (collection != null)
-            {
-                int count = collection.Count;
-                if (count == 0)
-                {
-                    return Array.Empty<T>();
-                }
-
-                var result = new T[count];
-                collection.CopyTo(result, arrayIndex: 0);
-                return result;
-            }
-
-            var builder = new LargeArrayBuilder<T>(initialize: true);
-            builder.AddRange(source);
-            return builder.ToArray();
-        }
-
         /// <summary>Converts an enumerable to an array using the same logic as List{T}.</summary>
         /// <param name="source">The enumerable to convert.</param>
         /// <param name="length">The number of items stored in the resulting array, 0-indexed.</param>
@@ -44,8 +19,7 @@ namespace System.Collections.Generic
         /// </returns>
         internal static T[] ToArray<T>(IEnumerable<T> source, out int length)
         {
-            ICollection<T> ic = source as ICollection<T>;
-            if (ic != null)
+            if (source is ICollection<T> ic)
             {
                 int count = ic.Count;
                 if (count != 0)
@@ -100,7 +74,7 @@ namespace System.Collections.Generic
                                     newLength = MaxArrayLength <= count ? count + 1 : MaxArrayLength;
                                 }
 
-                                Array.Resize(ref arr, newLength);
+                                Array.Resize(ref arr!, newLength); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
                             }
 
                             arr[count++] = en.Current;

@@ -10,9 +10,12 @@ using System.Runtime.Serialization;
 namespace System.Data
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DataException : SystemException
     {
-        protected DataException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected DataException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public DataException() : base(SR.DataSet_DefaultDataException)
         {
@@ -28,9 +31,12 @@ namespace System.Data
     };
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ConstraintException : DataException
     {
-        protected ConstraintException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ConstraintException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public ConstraintException() : base(SR.DataSet_DefaultConstraintException)
         {
@@ -49,9 +55,12 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DeletedRowInaccessibleException : DataException
     {
-        protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected DeletedRowInaccessibleException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref='System.Data.DeletedRowInaccessibleException'/> class.
@@ -76,9 +85,12 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DuplicateNameException : DataException
     {
-        protected DuplicateNameException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected DuplicateNameException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public DuplicateNameException() : base(SR.DataSet_DefaultDuplicateNameException)
         {
@@ -97,9 +109,12 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class InRowChangingEventException : DataException
     {
-        protected InRowChangingEventException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected InRowChangingEventException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public InRowChangingEventException() : base(SR.DataSet_DefaultInRowChangingEventException)
         {
@@ -118,9 +133,12 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class InvalidConstraintException : DataException
     {
-        protected InvalidConstraintException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected InvalidConstraintException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public InvalidConstraintException() : base(SR.DataSet_DefaultInvalidConstraintException)
         {
@@ -139,9 +157,12 @@ namespace System.Data
     }
 
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class MissingPrimaryKeyException : DataException
     {
-        protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected MissingPrimaryKeyException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public MissingPrimaryKeyException() : base(SR.DataSet_DefaultMissingPrimaryKeyException)
         {
@@ -158,11 +179,14 @@ namespace System.Data
             HResult = HResults.DataMissingPrimaryKey;
         }
     }
-
+    
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class NoNullAllowedException : DataException
     {
-        protected NoNullAllowedException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected NoNullAllowedException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public NoNullAllowedException() : base(SR.DataSet_DefaultNoNullAllowedException)
         {
@@ -179,11 +203,14 @@ namespace System.Data
             HResult = HResults.DataNoNullAllowed;
         }
     }
-
+    
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class ReadOnlyException : DataException
     {
-        protected ReadOnlyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected ReadOnlyException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public ReadOnlyException() : base(SR.DataSet_DefaultReadOnlyException)
         {
@@ -200,11 +227,14 @@ namespace System.Data
             HResult = HResults.DataReadOnly;
         }
     }
-
+    
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class RowNotInTableException : DataException
     {
-        protected RowNotInTableException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected RowNotInTableException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public RowNotInTableException() : base(SR.DataSet_DefaultRowNotInTableException)
         {
@@ -221,11 +251,14 @@ namespace System.Data
             HResult = HResults.DataRowNotInTable;
         }
     }
-
+    
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class VersionNotFoundException : DataException
     {
-        protected VersionNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        protected VersionNotFoundException(SerializationInfo info, StreamingContext context) : base(info, context)
+        {
+        }
 
         public VersionNotFoundException() : base(SR.DataSet_DefaultVersionNotFoundException)
         {
@@ -610,7 +643,7 @@ namespace System.Data
         //
         // Storage
         //
-        public static Exception AggregateException(AggregateType aggregateType, Type type) => _Data(SR.Format(SR.DataStorage_AggregateException, aggregateType.ToString(), type.Name));
+        public static Exception AggregateException(AggregateType aggregateType, Type type) => _Data(SR.Format(SR.DataStorage_AggregateException, aggregateType, type.Name));
         public static Exception InvalidStorageType(TypeCode typecode) => _Data(SR.Format(SR.DataStorage_InvalidStorageType, typecode.ToString()));
         public static Exception RangeArgument(int min, int max) => _Argument(SR.Format(SR.Range_Argument, (min).ToString(CultureInfo.InvariantCulture), (max).ToString(CultureInfo.InvariantCulture)));
         public static Exception NullRange() => _Data(SR.Range_NullRange);
@@ -646,10 +679,10 @@ namespace System.Data
         public static Exception ColumnTypeConflict(string name) => _Data(SR.Format(SR.Xml_ColumnConflict, name));
         public static Exception CannotConvert(string name, string type) => _Data(SR.Format(SR.Xml_CannotConvert, name, type));
         public static Exception MissingRefer(string name) => _Data(SR.Format(SR.Xml_MissingRefer, Keywords.REFER, Keywords.XSD_KEYREF, name));
-        public static Exception InvalidPrefix(string name) => _Data(SR.Format(SR.Xml_InvalidPrefix, name));
+        public static Exception InvalidPrefix(string name) => _Data(SR.Format(SR.Xml_InvalidPrefix_SpecialCharacters, name));
         public static Exception CanNotDeserializeObjectType() => _InvalidOperation(SR.Xml_CanNotDeserializeObjectType);
         public static Exception IsDataSetAttributeMissingInSchema() => _Data(SR.Xml_IsDataSetAttributeMissingInSchema);
-        public static Exception TooManyIsDataSetAtributeInSchema() => _Data(SR.Xml_TooManyIsDataSetAtributeInSchema);
+        public static Exception TooManyIsDataSetAttributesInSchema() => _Data(SR.Xml_TooManyIsDataSetAttributesInSchema);
 
         // XML save
         public static Exception NestedCircular(string name) => _Data(SR.Format(SR.Xml_NestedCircular, name));

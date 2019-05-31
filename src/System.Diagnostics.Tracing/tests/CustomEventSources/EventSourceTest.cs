@@ -5,7 +5,11 @@
 using System;
 using System.Linq;
 using System.Diagnostics;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
+#endif
 
 // We wish to test both Microsoft.Diagnostics.Tracing (Nuget)
 // and System.Diagnostics.Tracing (Framework), we use this Ifdef make each kind 
@@ -15,7 +19,10 @@ namespace SdtEventSources
     /// <summary>
     /// A sample Event source. The Guid and Name attributes are "idempotent", i.e. they 
     /// don't change the default computed by EventSource; they're specified here just to 
-    /// increase the code coverage.
+    /// increase the code coverage. 
+    /// 
+    /// Also, this EventSource uses manifest-based ETW and is not self-describing. That means
+    /// it does not support complex data types, including nullables, as event arguments.
     /// </summary>
     [EventSource(Guid = "69e2aa3e-083b-5014-cad4-3e511a0b94cf", Name = "EventSourceTest")]
     public sealed class EventSourceTest : EventSource
@@ -26,7 +33,7 @@ namespace SdtEventSources
 
         protected override void OnEventCommand(EventCommandEventArgs command)
         {
-            Debug.WriteLine(String.Format("EventSourceTest: Got Command {0}", command.Command));
+            Debug.WriteLine(string.Format("EventSourceTest: Got Command {0}", command.Command));
             Debug.WriteLine("  Args: " + string.Join(", ", command.Arguments.Select((pair) => string.Format("{0} -> {1}", pair.Key, pair.Value))));
         }
 
@@ -76,7 +83,7 @@ namespace SdtEventSources
         public void StartTrackingActivity() { WriteEvent(15); }
         
         [Event(17, Keywords = Keywords.Transfer | Keywords.HasStringArgs, Opcode = EventOpcode.Send, Task = Tasks.WorkItem)]
-        unsafe public void LogTaskScheduled(Guid RelatedActivityId, string message)
+        public unsafe void LogTaskScheduled(Guid RelatedActivityId, string message)
         {
             unsafe
             {
@@ -133,13 +140,12 @@ namespace SdtEventSources
         public void EventDateTime(DateTime dt) { WriteEvent(24, dt); }
 
         [Event(25, Keywords = Keywords.HasNoArgs, Level = EventLevel.Informational)]
-        public void EventWithManyTypeArgs(string msg, long l, uint ui, UInt64 ui64,
+        public void EventWithManyTypeArgs(string msg, long l, uint ui, ulong ui64, char c,
                                           byte b, sbyte sb, short sh, ushort ush,
                                           float f, double d, Guid guid)
         {
             if (IsEnabled(EventLevel.Informational, Keywords.HasNoArgs))
-                // 4.5 EventSource does not support "Char" type
-                WriteEvent(25, msg, l, ui, ui64, b, sb, sh, ush, f, d, guid);
+                WriteEvent(25, msg, l, ui, ui64, c, b, sb, sh, ush, f, d, guid);
         }
 
         [Event(26)]
@@ -160,7 +166,7 @@ namespace SdtEventSources
         }
 
         [Event(29, Keywords = Keywords.Transfer | Keywords.HasNoArgs, Level = EventLevel.Informational, Opcode = EventOpcode.Send, Task = Tasks.WorkManyArgs)]
-        public void EventWithXferManyTypeArgs(Guid RelatedActivityId, long l, uint ui, UInt64 ui64, char ch,
+        public void EventWithXferManyTypeArgs(Guid RelatedActivityId, long l, uint ui, ulong ui64, char ch,
                                           byte b, sbyte sb, short sh, ushort ush,
                                           float f, double d, Guid guid)
         {

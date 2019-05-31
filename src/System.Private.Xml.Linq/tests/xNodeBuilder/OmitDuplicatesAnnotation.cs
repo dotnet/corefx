@@ -15,7 +15,7 @@ using XmlCoreTest.Common;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public partial class XNodeBuilderFunctionalTests : TestModule
     {
         public partial class XNodeBuilderTests : XLinqTestCase
         {
@@ -59,7 +59,7 @@ namespace CoreXml.Test.XLinq
                     // create normal reader for comparison
                     using (XmlReader r1 = XmlReader.Create(FilePathUtil.getStream(fileName), new XmlReaderSettings() { IgnoreWhitespace = true, DtdProcessing = DtdProcessing.Ignore }))
                     {
-                        // create readr from Xlinq
+                        // create reader from Xlinq
                         XContainer c = GetContainer(fileName, t);
                         using (XmlReader r2 = c.CreateReader())
                         {

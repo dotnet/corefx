@@ -43,7 +43,7 @@ namespace System.Data
             _name = name;
             for (int i = 0; i < s_funcs.Length; i++)
             {
-                if (string.Compare(s_funcs[i]._name, name, StringComparison.OrdinalIgnoreCase) == 0)
+                if (string.Equals(s_funcs[i]._name, name, StringComparison.OrdinalIgnoreCase))
                 {
                     // we found the reserved word..
                     _info = i;
@@ -126,7 +126,7 @@ namespace System.Data
                 argumentValues[1] = GetDataType(_arguments[1]);
             }
             else if (s_funcs[_info]._id != FunctionId.Iif)
-            { // We do not want to evaluate arguments of IIF, we =will alread do it in EvalFunction/ second point: we may go to div by 0
+            { // We do not want to evaluate arguments of IIF, we will already do it in EvalFunction/ second point: we may go to div by 0
                 for (int i = 0; i < _argumentCount; i++)
                 {
                     argumentValues[i] = _arguments[i].Eval(row, version);

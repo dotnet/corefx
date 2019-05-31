@@ -12,6 +12,7 @@
 
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Runtime.CompilerServices;
 
 namespace System.Collections.Generic
 {
@@ -20,6 +21,7 @@ namespace System.Collections.Generic
     [DebuggerTypeProxy(typeof(QueueDebugView<>))]
     [DebuggerDisplay("Count = {Count}")]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class Queue<T> : IEnumerable<T>,
         System.Collections.ICollection,
         IReadOnlyCollection<T>
@@ -29,8 +31,6 @@ namespace System.Collections.Generic
         private int _tail;       // The index at which to enqueue if the queue isn't full.
         private int _size;       // Number of elements.
         private int _version;
-        [NonSerialized]
-        private object _syncRoot;
 
         private const int MinimumGrow = 4;
         private const int GrowFactor = 200;  // double each time
@@ -72,29 +72,24 @@ namespace System.Collections.Generic
             get { return false; }
         }
 
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    Threading.Interlocked.CompareExchange<object>(ref _syncRoot, new object(), null);
-                }
-                return _syncRoot;
-            }
-        }
+        object ICollection.SyncRoot => this;
 
         // Removes all Objects from the queue.
         public void Clear()
         {
             if (_size != 0)
             {
-                if (_head < _tail)
-                    Array.Clear(_array, _head, _size);
-                else
+                if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
                 {
-                    Array.Clear(_array, _head, _array.Length - _head);
-                    Array.Clear(_array, 0, _tail);
+                    if (_head < _tail)
+                    {
+                        Array.Clear(_array, _head, _size);
+                    }
+                    else
+                    {
+                        Array.Clear(_array, _head, _array.Length - _head);
+                        Array.Clear(_array, 0, _tail);
+                    }
                 }
 
                 _size = 0;
@@ -227,29 +222,41 @@ namespace System.Collections.Generic
         // InvalidOperationException.
         public T Dequeue()
         {
+            int head = _head;
+            T[] array = _array;
+            
             if (_size == 0)
             {
                 ThrowForEmptyQueue();
             }
 
-            T removed = _array[_head];
-            _array[_head] = default(T);
+            T removed = array[head];
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                array[head] = default!;
+            }
             MoveNext(ref _head);
             _size--;
             _version++;
             return removed;
         }
 
-        public bool TryDequeue(out T result)
+        public bool TryDequeue(out T result) // TODO-NULLABLE-GENERIC
         {
+            int head = _head;
+            T[] array = _array;
+
             if (_size == 0)
             {
-            	result = default(T);
-            	return false;
+            	result = default!; // TODO-NULLABLE-GENERIC
+                return false;
             }
 
-            result = _array[_head];
-            _array[_head] = default(T);
+            result = array[head];
+            if (RuntimeHelpers.IsReferenceOrContainsReferences<T>())
+            {
+                array[head] = default!;
+            }
             MoveNext(ref _head);
             _size--;
             _version++;
@@ -269,12 +276,12 @@ namespace System.Collections.Generic
             return _array[_head];
         }
 
-        public bool TryPeek(out T result)
+        public bool TryPeek(out T result) // TODO-NULLABLE-GENERIC
         {
             if (_size == 0)
             {
-            	result = default(T);
-            	return false;
+            	result = default!; // TODO-NULLABLE-GENERIC
+                return false;
             }
 
             result = _array[_head];
@@ -354,10 +361,15 @@ namespace System.Collections.Generic
         // Increments the index wrapping it if necessary.
         private void MoveNext(ref int index)
         {
-            // It is tempting to use the remainder operator here but it is actually much slower 
-            // than a simple comparison and a rarely taken branch.   
+            // It is tempting to use the remainder operator here but it is actually much slower
+            // than a simple comparison and a rarely taken branch.
+            // JIT produces better code than with ternary operator ?:
             int tmp = index + 1;
-            index = (tmp == _array.Length) ? 0 : tmp;
+            if (tmp == _array.Length)
+            {
+                tmp = 0;
+            }
+            index = tmp;
         }
 
         private void ThrowForEmptyQueue()
@@ -379,7 +391,6 @@ namespace System.Collections.Generic
         // internal version number of the list to ensure that no modifications are
         // made to the list while an enumeration is in progress.
         [SuppressMessage("Microsoft.Performance", "CA1815:OverrideEqualsAndOperatorEqualsOnValueTypes", Justification = "not an expected scenario")]
-        [Serializable]
         public struct Enumerator : IEnumerator<T>,
             System.Collections.IEnumerator
         {
@@ -393,13 +404,13 @@ namespace System.Collections.Generic
                 _q = q;
                 _version = q._version;
                 _index = -1;
-                _currentElement = default(T);
+                _currentElement = default!; // TODO-NULLABLE-GENERIC
             }
 
             public void Dispose()
             {
                 _index = -2;
-                _currentElement = default(T);
+                _currentElement = default!; // TODO-NULLABLE-GENERIC
             }
 
             public bool MoveNext()
@@ -415,7 +426,7 @@ namespace System.Collections.Generic
                 {
                     // We've run past the last element
                     _index = -2;
-                    _currentElement = default(T);
+                    _currentElement = default!; // TODO-NULLABLE-GENERIC
                     return false;
                 }
 
@@ -458,7 +469,7 @@ namespace System.Collections.Generic
                 throw new InvalidOperationException(_index == -1 ? SR.InvalidOperation_EnumNotStarted : SR.InvalidOperation_EnumEnded);
             }
 
-            object IEnumerator.Current
+            object? IEnumerator.Current
             {
                 get { return Current; }
             }
@@ -467,7 +478,7 @@ namespace System.Collections.Generic
             {
                 if (_version != _q._version) throw new InvalidOperationException(SR.InvalidOperation_EnumFailedVersion);
                 _index = -1;
-                _currentElement = default(T);
+                _currentElement = default!; // TODO-NULLABLE-GENERIC
             }
         }
     }

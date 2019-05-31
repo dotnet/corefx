@@ -4,9 +4,15 @@
 
 namespace System.Net.NetworkInformation
 {
-    public class NetworkChange
+    public partial class NetworkChange
     {
         public static event NetworkAddressChangedEventHandler NetworkAddressChanged
+        {
+            add { throw new PlatformNotSupportedException(); }
+            remove { throw new PlatformNotSupportedException(); }
+        }
+
+        public static event NetworkAvailabilityChangedEventHandler NetworkAvailabilityChanged
         {
             add { throw new PlatformNotSupportedException(); }
             remove { throw new PlatformNotSupportedException(); }

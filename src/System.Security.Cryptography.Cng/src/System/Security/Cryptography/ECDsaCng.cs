@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using Internal.Cryptography;
 
 namespace System.Security.Cryptography
@@ -9,6 +10,22 @@ namespace System.Security.Cryptography
     public sealed partial class ECDsaCng : ECDsa
     {
         private CngAlgorithmCore _core;
+        private CngAlgorithm _hashAlgorithm = CngAlgorithm.Sha256;
+
+        /// <summary>
+        ///     Hash algorithm to use when generating a signature over arbitrary data
+        /// </summary>
+        public CngAlgorithm HashAlgorithm
+        {
+            get
+            {
+                return _hashAlgorithm;
+            }
+            set
+            {
+                _hashAlgorithm = value ?? throw new ArgumentNullException(nameof(value));
+            }
+        }
 
         /// <summary>
         ///     Creates a new ECDsaCng object that will use the specified key. The key's
@@ -50,41 +67,84 @@ namespace System.Security.Cryptography
             return algorithmGroup == CngAlgorithmGroup.ECDsa || algorithmGroup == CngAlgorithmGroup.ECDiffieHellman;
         }
 
-        internal string GetCurveName()
+        internal string GetCurveName(out string oidValue)
         {
-            return Key.GetCurveName();
+            return Key.GetCurveName(out oidValue);
         }
 
         private void ImportFullKeyBlob(byte[] ecfullKeyBlob, bool includePrivateParameters)
         {
-#if !NETNATIVE
             Key = ECCng.ImportFullKeyBlob(ecfullKeyBlob, includePrivateParameters);
-#endif //!NETNATIVE
         }
 
         private void ImportKeyBlob(byte[] ecfullKeyBlob, string curveName, bool includePrivateParameters)
         {
-#if !NETNATIVE
             Key = ECCng.ImportKeyBlob(ecfullKeyBlob, curveName, includePrivateParameters);
-#endif //!NETNATIVE
         }
 
         private byte[] ExportKeyBlob(bool includePrivateParameters)
         {
-#if NETNATIVE
-            return null;
-#else
             return ECCng.ExportKeyBlob(Key, includePrivateParameters);
-#endif //NETNATIVE
         }
 
         private byte[] ExportFullKeyBlob(bool includePrivateParameters)
         {
-#if NETNATIVE
-            return null;
-#else
             return ECCng.ExportFullKeyBlob(Key, includePrivateParameters);
-#endif //NETNATIVE
         }
+
+        private void AcceptImport(CngPkcs8.Pkcs8Response response)
+        {
+            Key = response.Key;
+        }
+
+        public override bool TryExportPkcs8PrivateKey(Span<byte> destination, out int bytesWritten)
+        {
+            return Key.TryExportKeyBlob(
+                Interop.NCrypt.NCRYPT_PKCS8_PRIVATE_KEY_BLOB,
+                destination,
+                out bytesWritten);
+        }
+
+        private byte[] ExportEncryptedPkcs8(ReadOnlySpan<char> pkcs8Password, int kdfCount)
+        {
+            return Key.ExportPkcs8KeyBlob(pkcs8Password, kdfCount);
+        }
+
+        private bool TryExportEncryptedPkcs8(
+            ReadOnlySpan<char> pkcs8Password,
+            int kdfCount,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            return Key.TryExportPkcs8KeyBlob(
+                pkcs8Password,
+                kdfCount,
+                destination,
+                out bytesWritten);
+        }
+
+        public void FromXmlString(string xml, ECKeyXmlFormat format)
+            => throw new PlatformNotSupportedException();
+
+        public byte[] SignData(byte[] data)
+            => SignData(data, new HashAlgorithmName(HashAlgorithm.Algorithm));
+
+        public byte[] SignData(byte[] data, int offset, int count) =>
+            SignData(data, offset, count, new HashAlgorithmName(HashAlgorithm.Algorithm));
+
+        public byte[] SignData(Stream data)
+            => SignData(data, new HashAlgorithmName(HashAlgorithm.Algorithm));
+
+        public string ToXmlString(ECKeyXmlFormat format)
+            => throw new PlatformNotSupportedException();
+
+        public bool VerifyData(byte[] data, byte[] signature)
+            => VerifyData(data, signature, new HashAlgorithmName(HashAlgorithm.Algorithm));
+
+        public bool VerifyData(byte[] data, int offset, int count, byte[] signature)
+            => VerifyData(data, offset, count, signature, new HashAlgorithmName(HashAlgorithm.Algorithm));
+
+        public bool VerifyData(Stream data, byte[] signature)
+            => VerifyData(data, signature, new HashAlgorithmName(HashAlgorithm.Algorithm));
     }
 }

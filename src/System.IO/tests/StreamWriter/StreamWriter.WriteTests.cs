@@ -5,6 +5,7 @@
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Tests
@@ -19,7 +20,7 @@ namespace System.IO.Tests
         [Fact]
         public void WriteChars()
         {
-            char[] chArr = setupArray();
+            char[] chArr = TestDataProvider.CharData;
 
             // [] Write a wide variety of characters and read them back
 
@@ -39,30 +40,6 @@ namespace System.IO.Tests
             }
         }
 
-        private static char[] setupArray()
-        {
-            return new char[]{
-            char.MinValue
-            ,char.MaxValue
-            ,'\t'
-            ,' '
-            ,'$'
-            ,'@'
-            ,'#'
-            ,'\0'
-            ,'\v'
-            ,'\''
-            ,'\u3190'
-            ,'\uC3A0'
-            ,'A'
-            ,'5'
-            ,'\uFE70' 
-            ,'-'
-            ,';'
-            ,'\u00E6'
-        };
-        }
-
         [Fact]
         public void NullArray()
         {
@@ -77,7 +54,7 @@ namespace System.IO.Tests
         [Fact]
         public void NegativeOffset()
         {
-            char[] chArr = setupArray();
+            char[] chArr = TestDataProvider.CharData;
 
             // [] Exception if offset is negative
             Stream ms = CreateStream();
@@ -90,7 +67,7 @@ namespace System.IO.Tests
         [Fact]
         public void NegativeCount()
         {
-            char[] chArr = setupArray();
+            char[] chArr = TestDataProvider.CharData;
 
             // [] Exception if count is negative
             Stream ms = CreateStream();
@@ -103,7 +80,7 @@ namespace System.IO.Tests
         [Fact]
         public void WriteCustomLenghtStrings()
         {
-            char[] chArr = setupArray();
+            char[] chArr = TestDataProvider.CharData;
 
             // [] Write some custom length strings
             Stream ms = CreateStream();
@@ -126,7 +103,7 @@ namespace System.IO.Tests
         [Fact]
         public void WriteToStreamWriter()
         {
-            char[] chArr = setupArray();
+            char[] chArr = TestDataProvider.CharData;
             // [] Just construct a streamwriter and write to it    
             //-------------------------------------------------             
             Stream ms = CreateStream();
@@ -148,18 +125,18 @@ namespace System.IO.Tests
         [Fact]
         public void TestWritingPastEndOfArray()
         {
-            char[] chArr = setupArray();
+            char[] chArr = TestDataProvider.CharData;
             Stream ms = CreateStream();
             StreamWriter sw = new StreamWriter(ms);
 
-            Assert.Throws<ArgumentException>(() => sw.Write(chArr, 1, chArr.Length));
+            AssertExtensions.Throws<ArgumentException>(null, () => sw.Write(chArr, 1, chArr.Length));
             sw.Dispose();
         }
 
         [Fact]
         public void VerifyWrittenString()
         {
-            char[] chArr = setupArray();
+            char[] chArr = TestDataProvider.CharData;
             // [] Write string with wide selection of characters and read it back        
 
             StringBuilder sb = new StringBuilder(40);
@@ -191,6 +168,26 @@ namespace System.IO.Tests
             sw.Write((string)null);
             sw.Flush();
             Assert.Equal(0, ms.Length);
+        }
+
+        [Fact]
+        public async Task NullNewLineAsync()
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                string newLine;
+                using (StreamWriter sw = new StreamWriter(ms, Encoding.UTF8, 16, true))
+                {
+                    newLine = sw.NewLine;
+                    await sw.WriteLineAsync(default(string));
+                    await sw.WriteLineAsync(default(string));
+                }
+                ms.Seek(0, SeekOrigin.Begin);
+                using (StreamReader sr = new StreamReader(ms))
+                {
+                    Assert.Equal(newLine + newLine, await sr.ReadToEndAsync());
+                }
+            }
         }
     }
 }

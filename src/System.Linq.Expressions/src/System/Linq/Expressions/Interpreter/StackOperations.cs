@@ -61,25 +61,23 @@ namespace System.Linq.Expressions.Interpreter
         private PopInstruction() { }
 
         public override int ConsumedStack => 1;
-        public override string InstructionName =>"Pop";
+        public override string InstructionName => "Pop";
 
         public override int Run(InterpretedFrame frame)
         {
             frame.Pop();
             return 1;
         }
-
-        public override string ToString() => "Pop()";
     }
 
     internal sealed class DupInstruction : Instruction
     {
-        internal readonly static DupInstruction Instance = new DupInstruction();
+        internal static readonly DupInstruction Instance = new DupInstruction();
 
         private DupInstruction() { }
 
-        public override int ConsumedStack => 0;
         public override int ProducedStack => 1;
+
         public override string InstructionName => "Dup";
 
         public override int Run(InterpretedFrame frame)
@@ -87,7 +85,5 @@ namespace System.Linq.Expressions.Interpreter
             frame.Dup();
             return 1;
         }
-
-        public override string ToString() => "Dup()";
     }
 }

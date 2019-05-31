@@ -58,14 +58,14 @@ namespace MockInterop01
         [StructLayout(LayoutKind.Sequential)]
         public struct InnterStruct
         {
-            public Int16 x;
-            public Int64 y;
+            public short x;
+            public long y;
             public IntPtr z;
         }
         [DispId(1)]
         public Guid GuidField;
         [DispId(2)]
-        public Decimal DecimalField;
+        public decimal DecimalField;
         [DispId(3), ComConversionLoss, ComAliasName("MockInterop01.UnionStruct"), MarshalAs(UnmanagedType.Struct)]
         public UnionStruct UnionField;
     }
@@ -139,7 +139,6 @@ namespace MockInterop01
     public delegate void EventDele02(InteropEnum p);
     public delegate void EventDele03(ComplexStruct p);
 
-    [ComVisible(false)]
     // [TypeIdentifier("71B8C65D-7748-447A-B786-64682CBEF136", "MockInterop01.InteropDeleWithStructArray")]
     [UnmanagedFunctionPointerAttribute(CallingConvention.StdCall, BestFitMapping = false, CharSet = CharSet.Auto)]
     public delegate void InteropDeleWithStructArray([In, Out, ComAliasName("MockInterop01.UnionStruct"), MarshalAs(UnmanagedType.LPArray)] UnionStruct[] p);

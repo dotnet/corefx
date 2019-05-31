@@ -80,7 +80,7 @@ namespace System.Data.Common
                     }
 
                     // Mutate name if it contains space(s)
-                    if (columnName.IndexOf(' ') >= 0)
+                    if (columnName.Contains(' '))
                     {
                         columnName = columnName.Replace(' ', '_');
                         isMutatedName = true;
@@ -197,7 +197,7 @@ namespace System.Data.Common
                                 // found duplicate name
                                 // the name unchanged name wins
                                 int iMutatedName = _isMutatedName[j] ? j : i;
-                                Debug.Assert(_isMutatedName[iMutatedName], string.Format(CultureInfo.InvariantCulture, "{0} expected to be a mutated name", _baseParameterNames[iMutatedName]));
+                                Debug.Assert(_isMutatedName[iMutatedName], $"{_baseParameterNames[iMutatedName]} expected to be a mutated name");
                                 _baseParameterNames[iMutatedName] = null;   // null out the culprit
                             }
                         }
@@ -215,7 +215,7 @@ namespace System.Data.Common
                 //    generate name based on current index
                 //    increment index
                 //    search name in base names
-                //   loop while name occures in base names
+                //   loop while name occurs in base names
                 //  end for
                 // end foreach
                 string name;
@@ -601,7 +601,7 @@ namespace System.Data.Common
                     }
                     else
                     {
-                        Debug.Assert(false, "Rowcount expected to be 1");
+                        Debug.Fail("Rowcount expected to be 1");
                         useColumnsForParameterNames = false;
                     }
                 }
@@ -1304,23 +1304,6 @@ namespace System.Data.Common
             return select;
         }
 
-        // open connection is required by OleDb/OdbcCommandBuilder.QuoteIdentifier and UnquoteIdentifier 
-        // to get literals quotes from the driver
-        internal DbConnection GetConnection()
-        {
-            DbDataAdapter adapter = DataAdapter;
-            if (adapter != null)
-            {
-                DbCommand select = adapter.SelectCommand;
-                if (select != null)
-                {
-                    return select.Connection;
-                }
-            }
-
-            return null;
-        }
-
         public DbCommand GetInsertCommand()
         {
             return GetInsertCommand(null, false);
@@ -1556,7 +1539,7 @@ namespace System.Data.Common
                         switch (stmtType)
                         {
                             case StatementType.Select:
-                                Debug.Assert(false, "how did we get here?");
+                                Debug.Fail("how did we get here?");
                                 return; // don't mess with it
                             case StatementType.Insert:
                                 command = InsertCommand;
@@ -1621,7 +1604,7 @@ namespace System.Data.Common
                     break;
 #if DEBUG
                 case StatementType.Select:
-                    Debug.Assert(false, "how did we get here?");
+                    Debug.Fail("how did we get here?");
                     goto default;
 #endif
                 default:
@@ -1648,91 +1631,6 @@ namespace System.Data.Common
         protected abstract string GetParameterName(string parameterName);
         protected abstract string GetParameterPlaceholder(int parameterOrdinal);
         protected abstract void SetRowUpdatingHandler(DbDataAdapter adapter);
-
-
-        // Note: Per definition (ODBC reference) the CatalogSeparator comes before and after the
-        // catalog name, the SchemaSeparator is undefined. Does it come between Schema and Table?
-        //
-        internal static string[] ParseProcedureName(string name, string quotePrefix, string quoteSuffix)
-        {
-            // Procedure may consist of up to four parts:
-            // 0) Server
-            // 1) Catalog
-            // 2) Schema
-            // 3) ProcedureName
-            //
-            // Parse the string into four parts, allowing the last part to contain '.'s.
-            // If less than four period delimited parts, use the parts from procedure backwards.
-            //
-            const string Separator = ".";
-
-            string[] qualifiers = new string[4];
-            if (!string.IsNullOrEmpty(name))
-            {
-                bool useQuotes = !string.IsNullOrEmpty(quotePrefix) && !string.IsNullOrEmpty(quoteSuffix);
-
-                int currentPos = 0, parts;
-                for (parts = 0; (parts < qualifiers.Length) && (currentPos < name.Length); ++parts)
-                {
-                    int startPos = currentPos;
-
-                    // does the part begin with a quotePrefix?
-                    if (useQuotes && (name.IndexOf(quotePrefix, currentPos, quotePrefix.Length, StringComparison.Ordinal) == currentPos))
-                    {
-                        currentPos += quotePrefix.Length; // move past the quotePrefix
-
-                        // search for the quoteSuffix (or end of string)
-                        while (currentPos < name.Length)
-                        {
-                            currentPos = name.IndexOf(quoteSuffix, currentPos, StringComparison.Ordinal);
-                            if (currentPos < 0)
-                            {
-                                // error condition, no quoteSuffix
-                                currentPos = name.Length;
-                                break;
-                            }
-                            else
-                            {
-                                currentPos += quoteSuffix.Length; // move past the quoteSuffix
-
-                                // is this a double quoteSuffix?
-                                if ((currentPos < name.Length) && (name.IndexOf(quoteSuffix, currentPos, quoteSuffix.Length, StringComparison.Ordinal) == currentPos))
-                                {
-                                    // a second quoteSuffix, continue search for terminating quoteSuffix
-                                    currentPos += quoteSuffix.Length; // move past the second quoteSuffix
-                                }
-                                else
-                                {
-                                    // found the terminating quoteSuffix
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    // search for separator (either no quotePrefix or already past quoteSuffix)
-                    if (currentPos < name.Length)
-                    {
-                        currentPos = name.IndexOf(Separator, currentPos, StringComparison.Ordinal);
-                        if ((currentPos < 0) || (parts == qualifiers.Length - 1))
-                        {
-                            // last part that can be found
-                            currentPos = name.Length;
-                        }
-                    }
-
-                    qualifiers[parts] = name.Substring(startPos, currentPos - startPos);
-                    currentPos += Separator.Length;
-                }
-
-                // allign the qualifiers if we had less than MaxQualifiers
-                for (int j = qualifiers.Length - 1; 0 <= j; --j)
-                {
-                    qualifiers[j] = ((0 < parts) ? qualifiers[--parts] : null);
-                }
-            }
-            return qualifiers;
-        }
     }
 }
 

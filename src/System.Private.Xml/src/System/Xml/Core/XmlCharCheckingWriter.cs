@@ -214,7 +214,7 @@ namespace System.Xml
             {
                 ws = string.Empty;
             }
-            // "checkNames" is intentional here; if false, the whitespaces are checked in XmlWellformedWriter
+            // "checkNames" is intentional here; if false, the whitespace is checked in XmlWellformedWriter
             if (_checkNames)
             {
                 int i;
@@ -340,7 +340,7 @@ namespace System.Xml
             int len = ValidateNames.ParseNCName(ncname, 0);
             if (len != ncname.Length)
             {
-                throw new ArgumentException(string.Format(len == 0 ? SR.Xml_BadStartNameChar : SR.Xml_BadNameChar, XmlException.BuildCharExceptionArgs(ncname, len)));
+                throw new ArgumentException(SR.Format(len == 0 ? SR.Xml_BadStartNameChar : SR.Xml_BadNameChar, XmlException.BuildCharExceptionArgs(ncname, len)));
             }
         }
 

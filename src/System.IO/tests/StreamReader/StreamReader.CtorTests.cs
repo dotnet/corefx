@@ -4,6 +4,7 @@
 
 using System;
 using System.IO;
+using System.Text;
 using Xunit;
 
 namespace System.IO.Tests
@@ -21,7 +22,7 @@ namespace System.IO.Tests
             var ms2 = new MemoryStream();
             ms2.Dispose();
 
-            Assert.Throws<ArgumentException>(() => new StreamReader(ms2, false));
+            AssertExtensions.Throws<ArgumentException>(null, () => new StreamReader(ms2, false));
         }
 
         [Fact]

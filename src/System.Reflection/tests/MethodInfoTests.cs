@@ -154,6 +154,40 @@ namespace System.Reflection.Tests
         }
 
         [Theory]
+        //Verify two same MethodInfo objects are equal 
+        [InlineData("DummyMethod1", "DummyMethod1", true)]
+        //Verify two different MethodInfo objects are not equal 
+        [InlineData("DummyMethod1", "DummyMethod2", false)]
+
+        public void Equality1(string str1, string str2, bool expected)
+        {
+            MethodInfo mi1 = GetMethod(typeof(MethodInfoTests), str1);
+            MethodInfo mi2 = GetMethod(typeof(MethodInfoTests), str2);
+
+            Assert.Equal(expected, mi1 == mi2);
+            Assert.NotEqual(expected, mi1 != mi2);
+        }
+
+        public static IEnumerable<object[]> TestEqualityMethodData2()
+        {
+            //Verify two different MethodInfo objects with same name from two different classes are not equal 
+            yield return new object[] { typeof(Sample), typeof(SampleG<>), "Method1", "Method1", false};
+            //Verify two different MethodInfo objects with same name from two different classes are not equal 
+            yield return new object[] { typeof(Sample), typeof(SampleG<string>), "Method2", "Method2", false };
+        }
+
+        [Theory]
+        [MemberData(nameof(TestEqualityMethodData2))]
+        public void Equality2(Type sample1, Type sample2, string str1, string str2, bool expected)
+        {
+            MethodInfo mi1 = GetMethod(sample1, str1);
+            MethodInfo mi2 = GetMethod(sample2, str2);
+
+            Assert.Equal(expected, mi1 == mi2);
+            Assert.NotEqual(expected, mi1 != mi2);
+        }        
+
+        [Theory]
         [InlineData(typeof(MethodInfoBaseDefinitionBaseClass), "InterfaceMethod1", typeof(MethodInfoBaseDefinitionBaseClass))]
         [InlineData(typeof(MethodInfoBaseDefinitionSubClass), "InterfaceMethod1", typeof(MethodInfoBaseDefinitionBaseClass))]
         [InlineData(typeof(MethodInfoBaseDefinitionSubClass), "BaseClassVirtualMethod", typeof(MethodInfoBaseDefinitionBaseClass))]
@@ -296,7 +330,7 @@ namespace System.Reflection.Tests
         [Fact]
         public static void Invoke_OptionalParameterUnassingableFromMissing_WithMissingValue_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(() => GetMethod(typeof(MethodInfoDefaultParameters), "OptionalStringParameter").Invoke(new MethodInfoDefaultParameters(), new object[] { Type.Missing }));
+            AssertExtensions.Throws<ArgumentException>(null, () => GetMethod(typeof(MethodInfoDefaultParameters), "OptionalStringParameter").Invoke(new MethodInfoDefaultParameters(), new object[] { Type.Missing }));
         }
 
         [Theory]
@@ -318,14 +352,14 @@ namespace System.Reflection.Tests
         [Fact]
         public void MakeGenericMethod_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("methodInstantiation", () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod1)).MakeGenericMethod(null)); // TypeArguments is null
-            Assert.Throws<ArgumentNullException>(null, () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod2)).MakeGenericMethod(typeof(string), null)); // TypeArguments has null Type
+            Assert.Throws<ArgumentNullException>(() => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod1)).MakeGenericMethod(null)); // TypeArguments is null
+            Assert.Throws<ArgumentNullException>(() => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod2)).MakeGenericMethod(typeof(string), null)); // TypeArguments has null Type
             Assert.Throws<InvalidOperationException>(() => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.VoidMethodReturningInt)).MakeGenericMethod(typeof(int))); // Method is non generic
 
             // Number of typeArguments does not match
-            Assert.Throws<ArgumentException>(null, () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod1)).MakeGenericMethod());
-            Assert.Throws<ArgumentException>(null, () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod1)).MakeGenericMethod(typeof(string), typeof(int)));
-            Assert.Throws<ArgumentException>(null, () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod2)).MakeGenericMethod(typeof(int)));
+            AssertExtensions.Throws<ArgumentException>(null, () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod1)).MakeGenericMethod());
+            AssertExtensions.Throws<ArgumentException>(null, () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod1)).MakeGenericMethod(typeof(string), typeof(int)));
+            AssertExtensions.Throws<ArgumentException>(null, () => GetMethod(typeof(MI_SubClass), nameof(MI_SubClass.GenericMethod2)).MakeGenericMethod(typeof(int)));
         }
 
         [Theory]
@@ -526,6 +560,15 @@ namespace System.Reflection.Tests
         {
             Assert.Equal(expected, methodInfo.ToString());
         }
+
+        //Methods for Reflection Metadata  
+        public void DummyMethod1(string str, int iValue, long lValue)
+        {
+        }
+
+        public void DummyMethod2()
+        {
+        }        
 
         private static MethodInfo GetMethod(Type type, string name)
         {
@@ -742,5 +785,29 @@ namespace System.Reflection.Tests
     public delegate T Delegate_Void_T<T>();
 
     public class DummyClass { }
+
+    public class Sample
+    {
+        public string Method1(DateTime t)
+        {
+            return "";
+        }
+        public string Method2<T, S>(string t2, T t1, S t3)
+        {
+            return "";
+        }
+    }
+
+    public class SampleG<T>
+    {
+        public T Method1(T t)
+        {
+            return t;
+        }
+        public T Method2<S>(S t1, T t2, string t3)
+        {
+            return t2;
+        }
+    }    
 #pragma warning restore 0414
 }

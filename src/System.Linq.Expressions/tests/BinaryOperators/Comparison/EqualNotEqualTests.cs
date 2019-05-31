@@ -28,6 +28,7 @@ namespace System.Linq.Expressions.Tests
                 yield return new object[] { new ushort[] { 0, 1, ushort.MaxValue }, useInterpreter };
                 yield return new object[] { new TestClass[] { new TestClass(), new TestClass() }, useInterpreter };
                 yield return new object[] { new TestEnum[] { new TestEnum(), new TestEnum() }, useInterpreter };
+                yield return new object[] { new E[] {E.A, E.B, (E)int.MinValue}, useInterpreter };
 
                 yield return new object[] { new bool?[] { null, true, false }, useInterpreter };
                 yield return new object[] { new byte?[] { null, 0, 1, byte.MaxValue }, useInterpreter };
@@ -42,6 +43,7 @@ namespace System.Linq.Expressions.Tests
                 yield return new object[] { new uint?[] { null, 0, 1, uint.MaxValue }, useInterpreter };
                 yield return new object[] { new ulong?[] { null, 0, 1, ulong.MaxValue }, useInterpreter };
                 yield return new object[] { new ushort?[] { null, 0, 1, ushort.MaxValue }, useInterpreter };
+                yield return new object[] { new E?[] {null, E.A, E.B, (E)int.MaxValue, (E)int.MinValue}, useInterpreter };
             }
         }
 
@@ -115,7 +117,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.Equal(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
@@ -124,21 +126,21 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.NotEqual(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public static void ThrowsOnLeftNull()
         {
-            Assert.Throws<ArgumentNullException>("left", () => Expression.Equal(null, Expression.Constant("")));
-            Assert.Throws<ArgumentNullException>("left", () => Expression.NotEqual(null, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.Equal(null, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.NotEqual(null, Expression.Constant("")));
         }
 
         [Fact]
         public static void ThrowsOnRightNull()
         {
-            Assert.Throws<ArgumentNullException>("right", () => Expression.Equal(Expression.Constant(""), null));
-            Assert.Throws<ArgumentNullException>("right", () => Expression.NotEqual(Expression.Constant(""), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.Equal(Expression.Constant(""), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.NotEqual(Expression.Constant(""), null));
         }
 
         private static class Unreadable<T>
@@ -153,16 +155,16 @@ namespace System.Linq.Expressions.Tests
         public static void ThrowsOnLeftUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("left", () => Expression.Equal(value, Expression.Constant(1)));
-            Assert.Throws<ArgumentException>("left", () => Expression.NotEqual(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.Equal(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.NotEqual(value, Expression.Constant(1)));
         }
 
         [Fact]
         public static void ThrowsOnRightUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("right", () => Expression.Equal(Expression.Constant(1), value));
-            Assert.Throws<ArgumentException>("right", () => Expression.NotEqual(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.Equal(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.NotEqual(Expression.Constant(1), value));
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]

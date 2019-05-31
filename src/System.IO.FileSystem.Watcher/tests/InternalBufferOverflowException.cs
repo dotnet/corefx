@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System.Runtime.Serialization.Formatters.Tests;
 
 namespace System.IO.Tests
 {
@@ -35,12 +34,6 @@ namespace System.IO.Tests
 
             Assert.Equal(message, ide.Message);
             Assert.Same(innerException, ide.InnerException);
-        }
-
-        [Fact]
-        public static void ExceptionRoundtrips()
-        {
-            BinaryFormatterHelpers.AssertRoundtrips(new InternalBufferOverflowException());
         }
     }
 }

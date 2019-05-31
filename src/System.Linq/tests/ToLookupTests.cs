@@ -4,11 +4,13 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Reflection;
 using Xunit;
 
 namespace System.Linq.Tests
 {
-    public class ToLookupTests : EnumerableTests
+    public partial class ToLookupTests : EnumerableTests
     {
         private static void AssertMatches<K, T>(IEnumerable<K> keys, IEnumerable<T> elements, System.Linq.ILookup<K, T> lookup)
         {
@@ -108,6 +110,24 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void RunOnce()
+        {
+            string[] key = { "Chris", "Prakash", "Robert" };
+            int[] element = { 50, 80, 100, 95, 99, 56 };
+            var source = new[]
+            {
+                new { Name = key[0], Score = element[0] },
+                new { Name = key[1], Score = element[2] },
+                new { Name = key[2], Score = element[5] },
+                new { Name = key[1], Score = element[3] },
+                new { Name = key[0], Score = element[1] },
+                new { Name = key[1], Score = element[4] }
+            };
+
+            AssertMatches(key, element, source.RunOnce().ToLookup(e => e.Name, e => e.Score, new AnagramEqualityComparer()));
+        }
+
+        [Fact]
         public void Count()
         {
             string[] key = { "Chris", "Prakash", "Robert" };
@@ -149,70 +169,70 @@ namespace System.Linq.Tests
         public void NullSource()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10));
         }
 
         [Fact]
         public void NullSourceExplicitComparer()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullSourceElementSelector()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2));
         }
 
         [Fact]
         public void NullSourceElementSelectorExplicitComparer()
         {
             IEnumerable<int> source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.ToLookup(i => i / 10, i => i + 2, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullKeySelector()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector));
         }
 
         [Fact]
         public void NullKeySelectorExplicitComparer()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullKeySelectorElementSelector()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2));
         }
 
         [Fact]
         public void NullKeySelectorElementSelectorExplicitComparer()
         {
             Func<int, int> keySelector = null;
-            Assert.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("keySelector", () => Enumerable.Range(0, 1000).ToLookup(keySelector, i => i + 2, EqualityComparer<int>.Default));
         }
 
         [Fact]
         public void NullElementSelector()
         {
             Func<int, int> elementSelector = null;
-            Assert.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector));
+            AssertExtensions.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector));
         }
 
         [Fact]
         public void NullElementSelectorExplicitComparer()
         {
             Func<int, int> elementSelector = null;
-            Assert.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("elementSelector", () => Enumerable.Range(0, 1000).ToLookup(i => i / 10, elementSelector, EqualityComparer<int>.Default));
         }
 
         [Theory]
@@ -247,7 +267,7 @@ namespace System.Linq.Tests
                 });
 
             IEnumerable<RoleMetadata> result;
-            switch(enumType)
+            switch (enumType)
             {
                 case 1:
                     result = grouping.ToList();
@@ -260,7 +280,7 @@ namespace System.Linq.Tests
                     break;
             }
 
-            var expected = new []
+            var expected = new[]
             {
                 new RoleMetadata {Role = new Role {Id = 1}, CountA = 17, CountrB = 0 },
                 new RoleMetadata {Role = new Role {Id = 2}, CountA = 0, CountrB = 17 },

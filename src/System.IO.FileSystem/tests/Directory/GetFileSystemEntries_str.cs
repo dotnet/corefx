@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.IO.Tests
@@ -11,13 +12,24 @@ namespace System.IO.Tests
     {
         #region Utilities
 
-        public static string[] WindowsInvalidUnixValid = new string[] { "         ", " ", "\n", ">", "<", "\t" };
+
         protected virtual bool TestFiles { get { return true; } }       // True if the virtual GetEntries mmethod returns files
         protected virtual bool TestDirectories { get { return true; } } // True if the virtual GetEntries mmethod returns Directories
 
         public virtual string[] GetEntries(string dirName)
         {
             return Directory.GetFileSystemEntries(dirName);
+        }
+
+        /// <summary>
+        /// Create a file at the given path or directory if GetEntries doesn't return files
+        /// </summary>
+        protected void CreateItem(string path)
+        {
+            if (TestFiles)
+                File.WriteAllText(path, path);
+            else
+                Directory.CreateDirectory(path);
         }
 
         #endregion
@@ -137,10 +149,18 @@ namespace System.IO.Tests
             }
         }
 
-        [Fact]
-        public void NonexistentPath()
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingFile_ThrowsDirectoryNotFound(char trailingChar)
         {
-            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(GetTestFilePath()));
+            string path = GetTestFilePath() + trailingChar;
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(path));
+        }
+
+        [Theory, MemberData(nameof(TrailingCharacters))]
+        public void MissingDirectory_ThrowsDirectoryNotFound(char trailingChar)
+        {
+            string path = Path.Combine(GetTestFilePath(), "file" + trailingChar);
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(path));
         }
 
         [Fact]
@@ -156,75 +176,125 @@ namespace System.IO.Tests
             }
         }
 
+        [Fact]
+        public void HiddenFilesAreReturned()
+        {
+            // Note that APIs that take EnumerationOptions do NOT find hidden files by default
+
+            DirectoryInfo testDirectory = Directory.CreateDirectory(GetTestFilePath());
+            FileInfo fileOne = new FileInfo(Path.Combine(testDirectory.FullName, GetTestFileName()));
+
+            // Put a period in front to make it hidden on Unix
+            FileInfo fileTwo = new FileInfo(Path.Combine(testDirectory.FullName, "." + GetTestFileName()));
+            fileOne.Create().Dispose();
+            fileTwo.Create().Dispose();
+            if (PlatformDetection.IsWindows)
+                fileTwo.Attributes = fileTwo.Attributes | FileAttributes.Hidden;
+
+            if (TestFiles)
+            {
+                FSAssert.EqualWhenOrdered(new string[] { fileOne.FullName, fileTwo.FullName }, GetEntries(testDirectory.FullName));
+            }
+            else
+            {
+                Assert.Empty(GetEntries(testDirectory.FullName));
+            }
+        }
+
         #endregion
 
         #region PlatformSpecific
 
         [Fact]
-        public void InvalidPath()
+        public void InvalidPath_Core()
         {
             foreach (char invalid in Path.GetInvalidFileNameChars())
             {
-                if (invalid == '/' || invalid == '\\')
+                string badPath = string.Format($"{TestDirectory}{Path.DirectorySeparatorChar}te{invalid}st");
+                switch (invalid)
                 {
-                    Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Path.Combine(TestDirectory, string.Format("te{0}st", invalid.ToString()))));
-                }
-                else if (invalid == ':')
-                {
-                    if (FileSystemDebugInfo.IsCurrentDriveNTFS())
-                        Assert.Throws<NotSupportedException>(() => GetEntries(Path.Combine(TestDirectory, string.Format("te{0}st", invalid.ToString()))));
-                }
-                else
-                {
-                    Assert.Throws<ArgumentException>(() => GetEntries(Path.Combine(TestDirectory, string.Format("te{0}st", invalid.ToString()))));
+                    case '/':
+                    case '\\':
+                    case ':':
+                        Assert.Throws<DirectoryNotFoundException>(() => GetEntries(badPath));
+                        break;
+                    case '\0':
+                        Assert.Throws<ArgumentException>(() => GetEntries(badPath));
+                        break;
+                    default:
+                        Assert.Throws<IOException>(() => GetEntries(badPath));
+                        break;
                 }
             }
         }
 
-        [Fact]
+        [Theory,
+            InlineData("         "),
+            InlineData(" ")]
         [PlatformSpecific(TestPlatforms.Windows)]
-        public void WindowsInvalidCharsPath()
+        public void WindowsWhitespaceOnlyPath(string invalid)
         {
-            Assert.All(WindowsInvalidUnixValid, invalid =>
-                Assert.Throws<ArgumentException>(() => GetEntries(invalid)));
+            Assert.Throws<ArgumentException>(() => GetEntries(invalid));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void UnixValidCharsFilePath()
+        [Theory,
+            InlineData("\n"),
+            InlineData(">"),
+            InlineData("<"),
+            InlineData("\t")]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void WindowsInvalidCharsPath_Core(string invalid)
+        {
+            Assert.Throws<IOException>(() => GetEntries(invalid));
+        }
+
+        [Theory,
+            InlineData("         "),
+            InlineData(" "),
+            InlineData("\n"),
+            InlineData(">"),
+            InlineData("<"),
+            InlineData("\t")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-only valid chars in file path
+        public void UnixValidCharsFilePath(string valid)
         {
             if (TestFiles)
             {
                 DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-                foreach (string valid in WindowsInvalidUnixValid)
-                    File.Create(Path.Combine(testDir.FullName, valid)).Dispose();
+
+                File.Create(Path.Combine(testDir.FullName, valid)).Dispose();
 
                 string[] results = GetEntries(testDir.FullName);
-                Assert.All(WindowsInvalidUnixValid, valid =>
-                    Assert.Contains(Path.Combine(testDir.FullName, valid), results));
+                Assert.Contains(Path.Combine(testDir.FullName, valid), results);
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void UnixValidCharsDirectoryPath()
+        [Theory,
+            InlineData("         "),
+            InlineData(" "),
+            InlineData("\n"),
+            InlineData(">"),
+            InlineData("<"),
+            InlineData("\t")]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Windows-only invalid chars in directory path
+        public void UnixValidCharsDirectoryPath(string valid)
         {
             if (TestDirectories)
             {
                 DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-                foreach (string valid in WindowsInvalidUnixValid)
-                    testDir.CreateSubdirectory(valid);
+                
+                testDir.CreateSubdirectory(valid);
 
                 string[] results = GetEntries(testDir.FullName);
-                Assert.All(WindowsInvalidUnixValid, valid => 
-                    Assert.Contains(Path.Combine(testDir.FullName, valid), results));
+                 
+                Assert.Contains(Path.Combine(testDir.FullName, valid), results);
             }
         }
 
         #endregion
     }
 
-    public sealed class Directory_GetEntries_CurrentDirectory : RemoteExecutorTestBase
+    public sealed class Directory_GetEntries_CurrentDirectory : FileCleanupTestBase
     {
         [Fact]
         public void CurrentDirectory()
@@ -233,7 +303,7 @@ namespace System.IO.Tests
             Directory.CreateDirectory(testDir);
             File.WriteAllText(Path.Combine(testDir, GetTestFileName()), "cat");
             Directory.CreateDirectory(Path.Combine(testDir, GetTestFileName()));
-            RemoteInvoke((testDirectory) =>
+            RemoteExecutor.Invoke((testDirectory) =>
             {
                 Directory.SetCurrentDirectory(testDirectory);
 
@@ -267,7 +337,7 @@ namespace System.IO.Tests
                 Assert.NotEmpty(Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*", SearchOption.AllDirectories));
                 Assert.NotEmpty(Directory.EnumerateFiles(Directory.GetCurrentDirectory(), "*", SearchOption.TopDirectoryOnly));
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, testDir).Dispose();
         }
     }

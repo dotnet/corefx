@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
+using System;
 using System.Collections;
 using System.Diagnostics.Tracing;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace System.Diagnostics.TraceSourceTests
         [Fact]
         public void CorrelationManager_NullOperationId()
         {
-            Assert.Throws<ArgumentNullException>("operationId", () => Trace.CorrelationManager.StartLogicalOperation(null));
+            AssertExtensions.Throws<ArgumentNullException>("operationId", () => Trace.CorrelationManager.StartLogicalOperation(null));
         }
 
         [Fact]
@@ -83,7 +84,7 @@ namespace System.Diagnostics.TraceSourceTests
         }
 
         [Fact]
-        public async Task CorrelationManager_ActivtyIdAcrossAwait()
+        public async Task CorrelationManager_ActivityIdAcrossAwait()
         {
             Guid g = Guid.NewGuid();
             Trace.CorrelationManager.ActivityId = g;
@@ -125,7 +126,7 @@ namespace System.Diagnostics.TraceSourceTests
             // Note: this reverts the stack 
             Stack currentStack = new Stack(input);
 
-            // The expected values are passed in in the order they are supposed to be in the original stack
+            // The expected values are passed in the order they are supposed to be in the original stack
             // so we need to match them from the end of the array since the stack is also reversed
             for (int i = expectedContents.Length - 1; i >= 0; i--)
             {

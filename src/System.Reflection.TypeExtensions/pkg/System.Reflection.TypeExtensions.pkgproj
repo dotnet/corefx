@@ -1,20 +1,26 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Reflection.TypeExtensions.csproj">
-      <SupportedFramework>net462;netcoreapp1.0;uap10.1;$(AllXamarinFrameworks)</SupportedFramework>
-      <Preserve>true</Preserve>
+      <SupportedFramework>net461</SupportedFramework>
     </ProjectReference>
-    <ProjectReference Include="..\src\System.Reflection.TypeExtensions.builds" />
+    <ProjectReference Include="..\src\System.Reflection.TypeExtensions.csproj" />
+    <HarvestIncludePaths Include="ref/net46;lib/net46" />
+    <HarvestIncludePaths Include="lib/netcore50;runtimes/aot/lib/netcore50" />
+    <HarvestIncludePaths Include="ref/netstandard1.3" />
+    <HarvestIncludePaths Include="ref/netstandard1.5" />
+    <HarvestIncludePaths Include="lib/netcoreapp1.0" />
   </ItemGroup>
   <ItemGroup>
-    <InboxOnTargetFramework Include="MonoAndroid10" />
-    <InboxOnTargetFramework Include="MonoTouch10" />
-    <InboxOnTargetFramework Include="xamarinios10" />
-    <InboxOnTargetFramework Include="xamarinmac20" />
-    <InboxOnTargetFramework Include="xamarintvos10" />
-    <InboxOnTargetFramework Include="xamarinwatchos10" />
+    <InboxOnTargetFramework Include="netcoreapp2.0" />
+    <InboxOnTargetFramework Include="uap10.0.16299" />
+    <File Include="$(PlaceholderFile)">
+      <TargetPath>runtimes/aot/lib/uap10.0.16299</TargetPath>
+    </File>
+    <InboxOnTargetFramework Include="$(AllXamarinFrameworks)" />
+    <!-- this package is part of the implementation closure of NETStandard.Library
+         therefore it cannot reference NETStandard.Library -->
+    <SuppressMetaPackage Include="NETStandard.Library" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

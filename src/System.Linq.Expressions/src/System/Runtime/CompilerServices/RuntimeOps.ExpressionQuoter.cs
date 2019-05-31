@@ -111,7 +111,7 @@ namespace System.Runtime.CompilerServices
             {
                 if (node.Variable != null)
                 {
-                    _shadowedVars.Push(new HashSet<ParameterExpression>{ node.Variable });
+                    _shadowedVars.Push(new HashSet<ParameterExpression> { node.Variable });
                 }
                 Expression b = Visit(node.Body);
                 Expression f = Visit(node.Filter);
@@ -132,7 +132,7 @@ namespace System.Runtime.CompilerServices
                 var boxes = new List<IStrongBox>();
                 var vars = new List<ParameterExpression>();
                 var indexes = new int[count];
-                for (int i = 0; i < count; i++)
+                for (int i = 0; i < indexes.Length; i++)
                 {
                     IStrongBox box = GetBox(node.Variables[i]);
                     if (box == null)

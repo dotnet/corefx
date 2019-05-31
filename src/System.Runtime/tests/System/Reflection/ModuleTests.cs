@@ -107,7 +107,6 @@ namespace System.Reflection.Tests
         [Theory]
         [InlineData(typeof(ModuleTests))]
         [InlineData(typeof(PointerTests))]
-        [InlineData(typeof(EventInfoTests))]
         public void TestGetType(Type type)
         {
             Assert.Equal(type, Module.GetType(type.FullName, true, true));
@@ -122,33 +121,30 @@ namespace System.Reflection.Tests
         [Fact]
         public void IsDefined_NullType()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = AssertExtensions.Throws<ArgumentNullException>("attributeType", () =>
             {
                 Module.IsDefined(null, false);
             });
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Equal("attributeType", ex.ParamName);
         }
 
         [Fact]
         public void GetField_NullName()
         {
-            ArgumentNullException ex = Assert.Throws<ArgumentNullException>(() =>
+            ArgumentNullException ex = AssertExtensions.Throws<ArgumentNullException>("name", () =>
             {
                 Module.GetField(null);
             });
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Equal("name", ex.ParamName);
 
-            ex = Assert.Throws<ArgumentNullException>(() =>
+            ex = AssertExtensions.Throws<ArgumentNullException>("name", () =>
             {
                 Module.GetField(null, 0);
             });
             Assert.Null(ex.InnerException);
             Assert.NotNull(ex.Message);
-            Assert.Equal("name", ex.ParamName);
         }
 
         [Fact]
@@ -188,7 +184,6 @@ namespace System.Reflection.Tests
             {
                 new object[] { 1234 },
                 new object[] { typeof(ModuleTests).GetMethod("ResolveType").MetadataToken },
-                new object[] { typeof(ModuleTests).MetadataToken + 1000 },
             };
 
         [Theory]
@@ -300,12 +295,6 @@ namespace System.Reflection.Tests
             List<Type> types = TestModule.GetTypes().ToList();
             Assert.Equal(1, types.Count);
             Assert.Equal("System.Reflection.TestModule.Dummy, System.Reflection.TestModule, Version=1.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", types[0].AssemblyQualifiedName);
-        }
-
-        [Fact]
-        public void SerializeModule()
-        {
-            Assert.Equal(TestModule, BinaryFormatterHelpers.Clone(TestModule));
         }
     }
 

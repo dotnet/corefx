@@ -175,7 +175,7 @@ namespace System.Linq.Expressions.Tests
         {
             Func<Expression, Expression, Expression> withAssignment = (Func<Expression, Expression, Expression>)assign.CreateDelegate(typeof(Func<Expression, Expression, Expression>));
 
-            Assert.Throws<ArgumentException>("left", () => withAssignment(Expression.Default(type), Expression.Default(type)));
+            AssertExtensions.Throws<ArgumentException>("left", () => withAssignment(Expression.Default(type), Expression.Default(type)));
         }
 
         [Theory]
@@ -225,7 +225,7 @@ namespace System.Linq.Expressions.Tests
 
             Type unreadableType = typeof(Unreadable<>).MakeGenericType(type);
             Expression property = Expression.Property(null, unreadableType.GetProperty("WriteOnly"));
-            Assert.Throws<ArgumentException>("left", () => withAssignment(property, Expression.Default(type)));
+            AssertExtensions.Throws<ArgumentException>("left", () => withAssignment(property, Expression.Default(type)));
         }
 
         [Theory]
@@ -237,7 +237,7 @@ namespace System.Linq.Expressions.Tests
             Type unreadableType = typeof(Unreadable<>).MakeGenericType(type);
             Expression property = Expression.Property(null, unreadableType.GetProperty("WriteOnly"));
             Expression variable = Expression.Variable(type);
-            Assert.Throws<ArgumentException>("right", () => withAssignment(variable, property));
+            AssertExtensions.Throws<ArgumentException>("right", () => withAssignment(variable, property));
         }
 
         [Theory]
@@ -251,7 +251,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Throws<InvalidOperationException>(() => withAssignment(variable, value));
         }
 
-        private static IEnumerable<object[]> AssignmentMethods()
+        public static IEnumerable<object[]> AssignmentMethods()
         {
             MethodInfo[] expressionMethods = typeof(Expression).GetMethods().Where(mi => mi.GetParameters().Length == 2).ToArray();
             foreach (Tuple<string, string> names in AssignAndEquivalentMethodNames(true))
@@ -260,7 +260,7 @@ namespace System.Linq.Expressions.Tests
                 yield return new object[] { expressionMethods.First(mi => mi.Name == names.Item2), typeof(double) };
         }
 
-        private static IEnumerable<object[]> AssignmentMethodsWithoutTypes()
+        public static IEnumerable<object[]> AssignmentMethodsWithoutTypes()
         {
             MethodInfo[] expressionMethods = typeof(Expression).GetMethods().Where(mi => mi.GetParameters().Length == 2).ToArray();
             return AssignAndEquivalentMethodNames(true).Concat(AssignAndEquivalentMethodNames(false))
@@ -269,7 +269,7 @@ namespace System.Linq.Expressions.Tests
                 .Select(i => new object[] { expressionMethods.First(mi => mi.Name == i) });
         }
 
-        private static IEnumerable<object[]> AssignAndEquivalentMethods()
+        public static IEnumerable<object[]> AssignAndEquivalentMethods()
         {
             MethodInfo[] expressionMethods = typeof(Expression).GetMethods().Where(mi => mi.GetParameters().Length == 2).ToArray();
             foreach (Tuple<string, string> names in AssignAndEquivalentMethodNames(true))
@@ -286,7 +286,7 @@ namespace System.Linq.Expressions.Tests
                 };
         }
 
-        private static IEnumerable<Tuple<string, string>> AssignAndEquivalentMethodNames(bool integral)
+        public static IEnumerable<Tuple<string, string>> AssignAndEquivalentMethodNames(bool integral)
         {
             yield return Tuple.Create("Add", "AddAssign");
             yield return Tuple.Create("AddChecked", "AddAssignChecked");
@@ -316,7 +316,7 @@ namespace System.Linq.Expressions.Tests
             Assert.Equal($"(a {symbol} b)", e.ToString());
         }
 
-        private static IEnumerable<object[]> ToStringData()
+        public static IEnumerable<object[]> ToStringData()
         {
             return ToStringDataImpl().Select(t => new object[] { t.Item1, t.Item2, t.Item3 });
         }
@@ -472,7 +472,7 @@ namespace System.Linq.Expressions.Tests
             var lhs = Expression.Parameter(typeof(int));
             var rhs = Expression.Constant(25);
             MethodInfo meth = GetType().GetMethod(nameof(FiftyNinthBear));
-            Assert.Throws<ArgumentException>(
+            AssertExtensions.Throws<ArgumentException>(
                 "conversion", () => Expression.MakeBinary(type, lhs, rhs, false, meth, conversion));
         }
 
@@ -519,7 +519,7 @@ namespace System.Linq.Expressions.Tests
         {
             var lhs = Expression.Parameter(typeof(AddsToSomethingElse));
             var rhs = Expression.Constant(new AddsToSomethingElse(3));
-            Assert.Throws<ArgumentException>(null, () => Expression.AddAssign(lhs, rhs));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.AddAssign(lhs, rhs));
         }
 
         [Theory, ClassData(typeof(CompilationTypes))]

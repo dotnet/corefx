@@ -160,7 +160,7 @@ namespace System.Data.SqlClient.Tests
             IList list = CreateCollection();
             list.Add(new SqlBulkCopyColumnMapping());
 
-            // The following operations should really throw ArgumentExpection due to the
+            // The following operations should really throw ArgumentException due to the
             // mismatched types, but do not throw in the full framework.
             string bogus = "Bogus";
             list[0] = bogus;
@@ -468,9 +468,9 @@ namespace System.Data.SqlClient.Tests
             list.Remove(item2);
             Assert.Equal(0, list.Count);
 
-            Assert.Throws<ArgumentException>(() => list.Remove(item2));
-            Assert.Throws<ArgumentException>(() => list.Remove(new SqlBulkCopyColumnMapping(2, 2)));
-            Assert.Throws<ArgumentException>(() => list.Remove("bogus"));
+            AssertExtensions.Throws<ArgumentException>(null, () => list.Remove(item2));
+            AssertExtensions.Throws<ArgumentException>(null, () => list.Remove(new SqlBulkCopyColumnMapping(2, 2)));
+            AssertExtensions.Throws<ArgumentException>(null, () => list.Remove("bogus"));
         }
 
         [Fact]

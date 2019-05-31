@@ -19,7 +19,6 @@ namespace System.Diagnostics
     /// </devdoc>
     public class DefaultTraceListener : TraceListener
     {
-        private const int InternalWriteSize = 16384;
         private bool _assertUIEnabled; 
         private bool _settingsInitialized;
         private string _logFileName;
@@ -41,7 +40,7 @@ namespace System.Diagnostics
                 return _assertUIEnabled; 
             }
             set 
-            { 
+            {
                 if (!_settingsInitialized) InitializeSettings();
                 _assertUIEnabled = value; 
             }
@@ -81,12 +80,24 @@ namespace System.Diagnostics
         /// </devdoc>
         public override void Fail(string message, string detailMessage)
         {
-            // UIAssert is not enabled.
-            WriteAssert(String.Empty, message, detailMessage);
+            string stackTrace;
+            try
+            {
+                stackTrace = new StackTrace(fNeedFileInfo:true).ToString();
+            }
+            catch
+            {
+                stackTrace = "";
+            }
+            WriteAssert(stackTrace, message, detailMessage);
+            if (AssertUiEnabled)
+            {
+                DebugProvider.FailCore(stackTrace, message, detailMessage, "Assertion Failed");
+            }
         }
 
-         private void InitializeSettings() 
-         {
+        private void InitializeSettings() 
+        {
             // don't use the property setters here to avoid infinite recursion.
             _assertUIEnabled = DiagnosticsConfiguration.AssertUIEnabled;
             _logFileName = DiagnosticsConfiguration.LogFileName;
@@ -95,57 +106,74 @@ namespace System.Diagnostics
 
         private void WriteAssert(string stackTrace, string message, string detailMessage)
         {
-            string assertMessage = SR.DebugAssertBanner + Environment.NewLine
-                                            + SR.DebugAssertShortMessage + Environment.NewLine
-                                            + message + Environment.NewLine
-                                            + SR.DebugAssertLongMessage + Environment.NewLine +
-                                            detailMessage + Environment.NewLine
-                                            + stackTrace;
-            WriteLine(assertMessage);
-
-            // In case the debugger is attached we break the debugger.
-            if (Debugger.IsAttached)
-                Debugger.Break();
+            WriteLine(SR.DebugAssertBanner + Environment.NewLine
+                   + SR.DebugAssertShortMessage + Environment.NewLine
+                   + message + Environment.NewLine
+                   + SR.DebugAssertLongMessage + Environment.NewLine
+                   + detailMessage + Environment.NewLine
+                   + stackTrace);
         }
 
         /// <devdoc>
         ///    <para>
-        ///       Writes the output using <see cref="System.Diagnostics.Debug.Write"/>.
+        ///       Writes the output using <see cref="System.Diagnostics.Debug.Write(string)"/>.
         ///    </para>
         /// </devdoc>
         public override void Write(string message)
         {
-            if (NeedIndent) WriteIndent();
-
-            // really huge messages mess up both VS and dbmon, so we chop it up into 
-            // reasonable chunks if it's too big
-            if (message == null || message.Length <= InternalWriteSize)
-            {
-                Debug.Write(message);
-            }
-            else
-            {
-                int offset;
-                for (offset = 0; offset < message.Length - InternalWriteSize; offset += InternalWriteSize)
-                {
-                    Debug.Write(message.Substring(offset, InternalWriteSize));
-                }
-                Debug.Write(message.Substring(offset));
-            }
+            Write(message, useLogFile: true);
         }
 
         /// <devdoc>
         ///    <para>
-        ///       Writes the output followed by a line terminator using <see cref="System.Diagnostics.Debug.Write"/>.
+        ///       Writes the output followed by a line terminator using <see cref="System.Diagnostics.Debug.Write(string)"/>.
         ///    </para>
         /// </devdoc>
         public override void WriteLine(string message)
         {
-            if (NeedIndent) WriteIndent();
-            // I do the concat here to make sure it goes as one call to the output.
-            // we would save a stringbuilder operation by calling Write twice.
-            Write(message + Environment.NewLine);
+            WriteLine(message, useLogFile: true);
+        }
+
+        private void WriteLine(string message, bool useLogFile)
+        {
+            if (NeedIndent) 
+                WriteIndent();
+
+            // The concat is done here to enable a single call to Write
+            Write(message + Environment.NewLine, useLogFile); 
             NeedIndent = true;
+        }
+
+        private void Write(string message, bool useLogFile)
+        {
+            if (message == null)
+            {
+                message = string.Empty;
+            }
+
+            if (NeedIndent && message.Length != 0)
+            {
+                WriteIndent();
+            }
+
+            DebugProvider.WriteCore(message);
+
+            if (useLogFile && !string.IsNullOrEmpty(LogFileName))
+            {
+                WriteToLogFile(message);
+            }
+        }
+
+        private void WriteToLogFile(string message)
+        {
+            try
+            {
+                File.AppendAllText(LogFileName, message);
+            }
+            catch (Exception e)
+            {
+                WriteLine(SR.Format(SR.ExceptionOccurred, LogFileName, e), useLogFile: false);
+            }
         }
     }
 }

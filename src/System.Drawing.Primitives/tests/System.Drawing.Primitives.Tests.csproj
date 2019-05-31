@@ -1,46 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <MinimumVisualStudioVersion>11.0</MinimumVisualStudioVersion>
-    <OutputType>Library</OutputType>
-    <RootNamespace>System.Drawing.Primitives.Tests</RootNamespace>
-    <AssemblyName>System.Drawing.Primitives.Tests</AssemblyName>
-    <ProjectGuid>{297A9116-1005-499D-A895-2063D03E4C94}</ProjectGuid>
-    <NugetTargetMoniker Condition="'$(TargetGroup)'==''">.NETStandard,Version=v1.7</NugetTargetMoniker>
-  </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'netstandard1.7_Release|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU' ">
+    <ProjectGuid>{CF54638C-A382-4A78-9AD6-2304CEEFEB01}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Drawing.Primitives.pkgproj">
-      <Project>{F9DF2357-81B4-4317-908E-512DA9395583}</Project>
-      <Name>System.Drawing.Primitives</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <Compile Include="DataContractSerializerTests.cs" />
     <Compile Include="PointFTests.cs" />
     <Compile Include="PointTests.cs" />
     <Compile Include="RectangleFTests.cs" />
     <Compile Include="RectangleTests.cs" />
     <Compile Include="SizeFTests.cs" />
     <Compile Include="SizeTests.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
     <Compile Include="ColorTests.cs" />
-    <Compile Include="SerializationTests.cs" />
     <Compile Include="$(CommonTestPath)\System\Diagnostics\DebuggerAttributes.cs">
       <Link>Common\System\Diagnostics\DebuggerAttributes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
-      <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
-    </Compile>
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\DataContractSerializerHelper.cs" />
+    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Utils.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+    <Compile Include="SizeFTests.netcoreapp.cs" />
+    <Compile Include="ColorTests.netcoreapp.cs" />
+    <Compile Include="SizeTests.netcoreapp.cs" />
+  </ItemGroup>
 </Project>

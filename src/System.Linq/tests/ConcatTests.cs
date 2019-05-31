@@ -58,14 +58,14 @@ namespace System.Linq.Tests
         [Fact]
         public void FirstNull()
         {
-            Assert.Throws<ArgumentNullException>("first", () => ((IEnumerable<int>)null).Concat(Enumerable.Range(0, 0)));
-            Assert.Throws<ArgumentNullException>("first", () => ((IEnumerable<int>)null).Concat(null)); // If both inputs are null, throw for "first" first
+            AssertExtensions.Throws<ArgumentNullException>("first", () => ((IEnumerable<int>)null).Concat(Enumerable.Range(0, 0)));
+            AssertExtensions.Throws<ArgumentNullException>("first", () => ((IEnumerable<int>)null).Concat(null)); // If both inputs are null, throw for "first" first
         }
 
         [Fact]
         public void SecondNull()
         {
-            Assert.Throws<ArgumentNullException>("second", () => Enumerable.Range(0, 0).Concat(null));
+            AssertExtensions.Throws<ArgumentNullException>("second", () => Enumerable.Range(0, 0).Concat(null));
         }
 
         [Theory]
@@ -221,6 +221,22 @@ namespace System.Linq.Tests
             }
         }
 
+        [Theory]
+        [MemberData(nameof(ManyConcatsData))]
+        public void ManyConcatsRunOnce(IEnumerable<IEnumerable<int>> sources, IEnumerable<int> expected)
+        {
+            foreach (var transform in IdentityTransforms<int>())
+            {
+                IEnumerable<int> concatee = Enumerable.Empty<int>();
+                foreach (var source in sources)
+                {
+                    concatee = concatee.RunOnce().Concat(transform(source));
+                }
+
+                Assert.Equal(sources.Sum(s => s.Count()), concatee.Count());
+            }
+        }
+
         public static IEnumerable<object[]> ManyConcatsData()
         {
             yield return new object[] { Enumerable.Repeat(Enumerable.Empty<int>(), 256), Enumerable.Empty<int>() };
@@ -235,20 +251,25 @@ namespace System.Linq.Tests
             var supposedlyLargeCollection = new DelegateBasedCollection<int> { CountWorker = () => int.MaxValue };
             var tinyCollection = new DelegateBasedCollection<int> { CountWorker = () => 1 };
 
+            Action<Action> assertThrows = (testCode) =>
+            {
+                Assert.Throws<OverflowException>(testCode);
+            };
+
             // We need to use checked arithmetic summing up the collections' counts.
-            Assert.Throws<OverflowException>(() => supposedlyLargeCollection.Concat(tinyCollection).Count());
-            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).Count());
-            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(tinyCollection).Concat(supposedlyLargeCollection).Count());
+            assertThrows(() => supposedlyLargeCollection.Concat(tinyCollection).Count());
+            assertThrows(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).Count());
+            assertThrows(() => tinyCollection.Concat(tinyCollection).Concat(tinyCollection).Concat(supposedlyLargeCollection).Count());
 
             // This applies to ToArray() and ToList() as well, which try to preallocate the exact size
             // needed if all inputs are ICollections.
-            Assert.Throws<OverflowException>(() => supposedlyLargeCollection.Concat(tinyCollection).ToArray());
-            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).ToArray());
-            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(tinyCollection).Concat(supposedlyLargeCollection).ToArray());
+            assertThrows(() => supposedlyLargeCollection.Concat(tinyCollection).ToArray());
+            assertThrows(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).ToArray());
+            assertThrows(() => tinyCollection.Concat(tinyCollection).Concat(tinyCollection).Concat(supposedlyLargeCollection).ToArray());
 
-            Assert.Throws<OverflowException>(() => supposedlyLargeCollection.Concat(tinyCollection).ToList());
-            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).ToList());
-            Assert.Throws<OverflowException>(() => tinyCollection.Concat(tinyCollection).Concat(tinyCollection).Concat(supposedlyLargeCollection).ToList());
+            assertThrows(() => supposedlyLargeCollection.Concat(tinyCollection).ToList());
+            assertThrows(() => tinyCollection.Concat(tinyCollection).Concat(supposedlyLargeCollection).ToList());
+            assertThrows(() => tinyCollection.Concat(tinyCollection).Concat(tinyCollection).Concat(supposedlyLargeCollection).ToList());
         }
 
         [Fact]
@@ -385,6 +406,124 @@ namespace System.Linq.Tests
                 Assert.True(en.MoveNext());
                 Assert.Equal(0xf00, en.Current);
             }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetToArrayDataSources))]
+        public void CollectionInterleavedWithLazyEnumerables_ToArray(IEnumerable<int>[] arrays)
+        {
+            // See https://github.com/dotnet/corefx/issues/23680
+
+            IEnumerable<int> concats = arrays[0];
+
+            for (int i = 1; i < arrays.Length; i++)
+            {
+                concats = concats.Concat(arrays[i]);
+            }
+
+            int[] results = concats.ToArray();
+
+            for (int i = 0; i < results.Length; i++)
+            {
+                Assert.Equal(i, results[i]);
+            }
+        }
+
+        public static IEnumerable<object[]> GetToArrayDataSources()
+        {
+            // Marker at the end
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(new int[] { 0 }),
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new TestEnumerable<int>(new int[] { 2 }),
+                    new int[] { 3 },
+                }
+            };
+
+            // Marker at beginning
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new int[] { 0 },
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new TestEnumerable<int>(new int[] { 2 }),
+                    new TestEnumerable<int>(new int[] { 3 }),
+                }
+            };
+
+            // Marker in middle
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(new int[] { 0 }),
+                    new int[] { 1 },
+                    new TestEnumerable<int>(new int[] { 2 }),
+                }
+            };
+
+            // Non-marker in middle
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new int[] { 0 },
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new int[] { 2 },
+                }
+            };
+
+            // Big arrays (marker in middle)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(Enumerable.Range(0, 100).ToArray()),
+                    Enumerable.Range(100, 100).ToArray(),
+                    new TestEnumerable<int>(Enumerable.Range(200, 100).ToArray()),
+                }
+            };
+
+            // Big arrays (non-marker in middle)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    Enumerable.Range(0, 100).ToArray(),
+                    new TestEnumerable<int>(Enumerable.Range(100, 100).ToArray()),
+                    Enumerable.Range(200, 100).ToArray(),
+                }
+            };
+
+            // Interleaved (first marker)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new int[] { 0 },
+                    new TestEnumerable<int>(new int[] { 1 }),
+                    new int[] { 2 },
+                    new TestEnumerable<int>(new int[] { 3 }),
+                    new int[] { 4 },
+                }
+            };
+
+            // Interleaved (first non-marker)
+            yield return new object[]
+            {
+                new IEnumerable<int>[]
+                {
+                    new TestEnumerable<int>(new int[] { 0 }),
+                    new int[] { 1 },
+                    new TestEnumerable<int>(new int[] { 2 }),
+                    new int[] { 3 },
+                    new TestEnumerable<int>(new int[] { 4 }),
+                }
+            };
         }
     }
 }

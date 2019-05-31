@@ -17,33 +17,33 @@ namespace System.Data.SqlTypes
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlInt64 : INullable, IComparable, IXmlSerializable
     {
-        private bool _fNotNull; // false if null
-        private long _value;
+        private bool m_fNotNull; // false if null. Do not rename (binary serialization)
+        private long m_value; // Do not rename (binary serialization)
 
         private static readonly long s_lLowIntMask = 0xffffffff;
         private static readonly long s_lHighIntMask = unchecked((long)0xffffffff00000000);
-
 
         // constructor
         // construct a Null
         private SqlInt64(bool fNull)
         {
-            _fNotNull = false;
-            _value = 0;
+            m_fNotNull = false;
+            m_value = 0;
         }
 
         public SqlInt64(long value)
         {
-            _value = value;
-            _fNotNull = true;
+            m_value = value;
+            m_fNotNull = true;
         }
 
         // INullable
         public bool IsNull
         {
-            get { return !_fNotNull; }
+            get { return !m_fNotNull; }
         }
 
         // property: Value
@@ -51,8 +51,8 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                if (_fNotNull)
-                    return _value;
+                if (m_fNotNull)
+                    return m_value;
                 else
                     throw new SqlNullValueException();
             }
@@ -72,29 +72,27 @@ namespace System.Data.SqlTypes
 
         public override string ToString()
         {
-            return IsNull ? SQLResource.s_nullString : _value.ToString((IFormatProvider)null);
+            return IsNull ? SQLResource.NullString : m_value.ToString((IFormatProvider)null);
         }
 
         public static SqlInt64 Parse(string s)
         {
-            if (s == SQLResource.s_nullString)
+            if (s == SQLResource.NullString)
                 return SqlInt64.Null;
             else
                 return new SqlInt64(long.Parse(s, null));
         }
 
-
         // Unary operators
         public static SqlInt64 operator -(SqlInt64 x)
         {
-            return x.IsNull ? Null : new SqlInt64(-x._value);
+            return x.IsNull ? Null : new SqlInt64(-x.m_value);
         }
 
         public static SqlInt64 operator ~(SqlInt64 x)
         {
-            return x.IsNull ? Null : new SqlInt64(~x._value);
+            return x.IsNull ? Null : new SqlInt64(~x.m_value);
         }
-
 
         // Binary operators
 
@@ -104,9 +102,9 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            long lResult = x._value + y._value;
-            if (SameSignLong(x._value, y._value) && !SameSignLong(x._value, lResult))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+            long lResult = x.m_value + y.m_value;
+            if (SameSignLong(x.m_value, y.m_value) && !SameSignLong(x.m_value, lResult))
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlInt64(lResult);
         }
@@ -116,9 +114,9 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            long lResult = x._value - y._value;
-            if (!SameSignLong(x._value, y._value) && SameSignLong(y._value, lResult))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+            long lResult = x.m_value - y.m_value;
+            if (!SameSignLong(x.m_value, y.m_value) && SameSignLong(y.m_value, lResult))
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlInt64(lResult);
         }
@@ -130,8 +128,8 @@ namespace System.Data.SqlTypes
 
             bool fNeg = false;
 
-            long lOp1 = x._value;
-            long lOp2 = y._value;
+            long lOp1 = x.m_value;
+            long lOp2 = y.m_value;
             long lResult;
             long lPartialResult = 0;
 
@@ -154,31 +152,31 @@ namespace System.Data.SqlTypes
 
             // if both of the high order dwords are non-zero then overflow results
             if (lHigh1 != 0 && lHigh2 != 0)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             lResult = lLow1 * lLow2;
 
             if (lResult < 0)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             if (lHigh1 != 0)
             {
                 Debug.Assert(lHigh2 == 0);
                 lPartialResult = lHigh1 * lLow2;
                 if (lPartialResult < 0 || lPartialResult > long.MaxValue)
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
             }
             else if (lHigh2 != 0)
             {
                 Debug.Assert(lHigh1 == 0);
                 lPartialResult = lLow1 * lHigh2;
                 if (lPartialResult < 0 || lPartialResult > long.MaxValue)
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
             }
 
             lResult += lPartialResult << 32;
             if (lResult < 0)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             if (fNeg)
                 lResult = -lResult;
@@ -191,15 +189,15 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            if (y._value != 0)
+            if (y.m_value != 0)
             {
-                if ((x._value == long.MinValue) && (y._value == -1))
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                if ((x.m_value == long.MinValue) && (y.m_value == -1))
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
 
-                return new SqlInt64(x._value / y._value);
+                return new SqlInt64(x.m_value / y.m_value);
             }
             else
-                throw new DivideByZeroException(SQLResource.s_divideByZeroMessage);
+                throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
         }
 
         public static SqlInt64 operator %(SqlInt64 x, SqlInt64 y)
@@ -207,33 +205,32 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            if (y._value != 0)
+            if (y.m_value != 0)
             {
-                if ((x._value == long.MinValue) && (y._value == -1))
-                    throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                if ((x.m_value == long.MinValue) && (y.m_value == -1))
+                    throw new OverflowException(SQLResource.ArithOverflowMessage);
 
-                return new SqlInt64(x._value % y._value);
+                return new SqlInt64(x.m_value % y.m_value);
             }
             else
-                throw new DivideByZeroException(SQLResource.s_divideByZeroMessage);
+                throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
         }
 
         // Bitwise operators
         public static SqlInt64 operator &(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlInt64(x._value & y._value);
+            return (x.IsNull || y.IsNull) ? Null : new SqlInt64(x.m_value & y.m_value);
         }
 
         public static SqlInt64 operator |(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlInt64(x._value | y._value);
+            return (x.IsNull || y.IsNull) ? Null : new SqlInt64(x.m_value | y.m_value);
         }
 
         public static SqlInt64 operator ^(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? Null : new SqlInt64(x._value ^ y._value);
+            return (x.IsNull || y.IsNull) ? Null : new SqlInt64(x.m_value ^ y.m_value);
         }
-
 
         // Implicit conversions
 
@@ -261,7 +258,6 @@ namespace System.Data.SqlTypes
             return x.IsNull ? Null : new SqlInt64(x.Value);
         }
 
-
         // Explicit conversions
 
         // Explicit conversion from SqlSingle to SqlInt64
@@ -272,7 +268,7 @@ namespace System.Data.SqlTypes
 
             float value = x.Value;
             if (value > long.MaxValue || value < long.MinValue)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlInt64((long)value);
         }
@@ -285,7 +281,7 @@ namespace System.Data.SqlTypes
 
             double value = x.Value;
             if (value > long.MaxValue || value < long.MinValue)
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
             else
                 return new SqlInt64((long)value);
         }
@@ -310,14 +306,14 @@ namespace System.Data.SqlTypes
 
             // More than 8 bytes of data will always overflow
             if (ssnumTemp._bLen > 2)
-                throw new OverflowException(SQLResource.s_conversionOverflowMessage);
+                throw new OverflowException(SQLResource.ConversionOverflowMessage);
 
             // If 8 bytes of data, see if fits in LONGLONG
             if (ssnumTemp._bLen == 2)
             {
                 ulong dwl = SqlDecimal.DWL(ssnumTemp._data1, ssnumTemp._data2);
                 if (dwl > SqlDecimal.s_llMax && (ssnumTemp.IsPositive || dwl != 1 + SqlDecimal.s_llMax))
-                    throw new OverflowException(SQLResource.s_conversionOverflowMessage);
+                    throw new OverflowException(SQLResource.ConversionOverflowMessage);
                 llRetVal = (long)dwl;
             }
             // 4 bytes of data always fits in a LONGLONG
@@ -347,7 +343,7 @@ namespace System.Data.SqlTypes
         // Overloading comparison operators
         public static SqlBoolean operator ==(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value == y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value == y.m_value);
         }
 
         public static SqlBoolean operator !=(SqlInt64 x, SqlInt64 y)
@@ -357,22 +353,22 @@ namespace System.Data.SqlTypes
 
         public static SqlBoolean operator <(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value < y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value < y.m_value);
         }
 
         public static SqlBoolean operator >(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value > y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value > y.m_value);
         }
 
         public static SqlBoolean operator <=(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value <= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value <= y.m_value);
         }
 
         public static SqlBoolean operator >=(SqlInt64 x, SqlInt64 y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value >= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value >= y.m_value);
         }
 
         //--------------------------------------------------
@@ -520,7 +516,6 @@ namespace System.Data.SqlTypes
             return (SqlString)this;
         }
 
-
         // IComparable
         // Compares this object to another object, returning an integer that
         // indicates the relationship.
@@ -584,12 +579,12 @@ namespace System.Data.SqlTypes
             {
                 // Read the next value.
                 reader.ReadElementString();
-                _fNotNull = false;
+                m_fNotNull = false;
             }
             else
             {
-                _value = XmlConvert.ToInt64(reader.ReadElementString());
-                _fNotNull = true;
+                m_value = XmlConvert.ToInt64(reader.ReadElementString());
+                m_fNotNull = true;
             }
         }
 
@@ -601,7 +596,7 @@ namespace System.Data.SqlTypes
             }
             else
             {
-                writer.WriteString(XmlConvert.ToString(_value));
+                writer.WriteString(XmlConvert.ToString(m_value));
             }
         }
 

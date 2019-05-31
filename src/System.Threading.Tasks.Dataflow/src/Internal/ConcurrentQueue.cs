@@ -1,8 +1,6 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
-#pragma warning disable 0420
-
 
 // =+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+=+
 //
@@ -18,7 +16,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
-using System.Runtime.Serialization;
 using System.Security;
 using System.Threading;
 
@@ -36,15 +33,9 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
     [DebuggerTypeProxy(typeof(SystemCollectionsConcurrent_ProducerConsumerCollectionDebugView<>))]
     internal class ConcurrentQueue<T> : IProducerConsumerCollection<T>
     {
-        //fields of ConcurrentQueue
         private volatile Segment _head;
-
         private volatile Segment _tail;
-
-        private T[] _serializationArray; // Used for custom serialization.
-
         private const int SEGMENT_SIZE = 32;
-
         //number of snapshot takers, GetEnumerator(), ToList() and ToArray() operations take snapshot.
         internal volatile int _numSnapshotTakers = 0;
 
@@ -98,27 +89,6 @@ namespace System.Threading.Tasks.Dataflow.Internal.Collections
             }
 
             InitializeFromCollection(collection);
-        }
-
-        /// <summary>
-        /// Get the data array to be serialized
-        /// </summary>
-        [OnSerializing]
-        private void OnSerializing(StreamingContext context)
-        {
-            // save the data into the serialization array to be saved
-            _serializationArray = ToArray();
-        }
-
-        /// <summary>
-        /// Construct the queue from a previously serialized one
-        /// </summary>
-        [OnDeserialized]
-        private void OnDeserialized(StreamingContext context)
-        {
-            Debug.Assert(_serializationArray != null);
-            InitializeFromCollection(_serializationArray);
-            _serializationArray = null;
         }
 
         /// <summary>

@@ -17,19 +17,33 @@ namespace System.IO.Tests
         [InlineData(@"C:\", @"C:\b", @"b")]
         [InlineData(@"C:\a", @"C:\b", @"..\b")]
         [InlineData(@"C:\a", @"C:\b\", @"..\b\")]
+        [InlineData(@"C:\a\b", @"C:\a", @"..")]
+        [InlineData(@"C:\a\b", @"C:\a\", @"..")]
+        [InlineData(@"C:\a\b\", @"C:\a", @"..")]
+        [InlineData(@"C:\a\b\", @"C:\a\", @"..")]
+        [InlineData(@"C:\a\b\c", @"C:\a\b", @"..")]
+        [InlineData(@"C:\a\b\c", @"C:\a\b\", @"..")]
+        [InlineData(@"C:\a\b\c", @"C:\a", @"..\..")]
+        [InlineData(@"C:\a\b\c", @"C:\a\", @"..\..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a\b", @"..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a\b\", @"..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a", @"..\..")]
+        [InlineData(@"C:\a\b\c\", @"C:\a\", @"..\..")]
         [InlineData(@"C:\a\", @"C:\b", @"..\b")]
         [InlineData(@"C:\a", @"C:\a\b", @"b")]
         [InlineData(@"C:\a", @"C:\A\b", @"b")]
         [InlineData(@"C:\a", @"C:\b\c", @"..\b\c")]
         [InlineData(@"C:\a\", @"C:\a\b", @"b")]
+        [InlineData(@"C:\", @"D:\", @"D:\")]
         [InlineData(@"C:\", @"D:\b", @"D:\b")]
+        [InlineData(@"C:\", @"D:\b\", @"D:\b\")]
         [InlineData(@"C:\a", @"D:\b", @"D:\b")]
         [InlineData(@"C:\a\", @"D:\b", @"D:\b")]
         [InlineData(@"C:\ab", @"C:\a", @"..\a")]
         [InlineData(@"C:\a", @"C:\ab", @"..\ab")]
         [InlineData(@"C:\", @"\\LOCALHOST\Share\b", @"\\LOCALHOST\Share\b")]
         [InlineData(@"\\LOCALHOST\Share\a", @"\\LOCALHOST\Share\b", @"..\b")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Tests Windows-specific paths
         public static void GetRelativePath_Windows(string relativeTo, string path, string expected)
         {
             string result = Path.GetRelativePath(relativeTo, path);
@@ -56,7 +70,7 @@ namespace System.IO.Tests
         [InlineData(@"/a/", @"/a/b", @"b")]
         [InlineData(@"/ab", @"/a", @"../a")]
         [InlineData(@"/a", @"/ab", @"../ab")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests Unix-specific paths
         public static void GetRelativePath_AnyUnix(string relativeTo, string path, string expected)
         {
             string result = Path.GetRelativePath(relativeTo, path);
@@ -72,7 +86,7 @@ namespace System.IO.Tests
         [InlineData(@"/a", @"/A/", @"../A/")]
         [InlineData(@"/a/", @"/A", @"../A")]
         [InlineData(@"/a/", @"/A/b", @"../A/b")]
-        [PlatformSpecific(TestPlatforms.Linux)]
+        [PlatformSpecific(TestPlatforms.Linux)]  // Tests Linux relative path behavior
         public static void GetRelativePath_Linux(string relativeTo, string path, string expected)
         {
             string result = Path.GetRelativePath(relativeTo, path);
@@ -88,7 +102,7 @@ namespace System.IO.Tests
         [InlineData(@"/a", @"/A/", @"../A/")]
         [InlineData(@"/a/", @"/A", @"../A")]
         [InlineData(@"/a/", @"/A/b", @"../A/b")]
-        [PlatformSpecific(TestPlatforms.FreeBSD)]
+        [PlatformSpecific(TestPlatforms.FreeBSD)]  // Tests FreeBSD relative path behavior
         public static void GetRelativePath_FreeBSD(string relativeTo, string path, string expected)
         {
             string result = Path.GetRelativePath(relativeTo, path);
@@ -104,7 +118,7 @@ namespace System.IO.Tests
         [InlineData(@"/a", @"/A/", @"../A/")]
         [InlineData(@"/a/", @"/A", @"../A")]
         [InlineData(@"/a/", @"/A/b", @"../A/b")]
-        [PlatformSpecific(TestPlatforms.NetBSD)]
+        [PlatformSpecific(TestPlatforms.NetBSD)]  // Tests NetBSD relative path behavior
         public static void GetRelativePath_NetBSD(string relativeTo, string path, string expected)
         {
             string result = Path.GetRelativePath(relativeTo, path);
@@ -120,7 +134,7 @@ namespace System.IO.Tests
         [InlineData(@"/a", @"/A/", @".")]
         [InlineData(@"/a/", @"/A", @".")]
         [InlineData(@"/a/", @"/A/b", @"b")]
-        [PlatformSpecific(TestPlatforms.OSX)]
+        [PlatformSpecific(TestPlatforms.OSX)]  // Tests OSX relative path behavior
         public static void GetRelativePath_Mac(string relativeTo, string path, string expected)
         {
             string result = Path.GetRelativePath(relativeTo, path);

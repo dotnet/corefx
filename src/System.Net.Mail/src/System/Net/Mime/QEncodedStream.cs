@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Text;
-using System.Diagnostics;
 
 namespace System.Net.Mime
 {
@@ -263,8 +263,6 @@ namespace System.Net.Mime
         private static bool IsAsciiLetter(char character) =>
             (character >= 'a' && character <= 'z') || (character >= 'A' && character <= 'Z');
 
-        public Stream GetStream() => this;
-
         public string GetEncodedString() => Encoding.ASCII.GetString(WriteState.Buffer, 0, WriteState.Length);
 
         public override void EndWrite(IAsyncResult asyncResult) => WriteAsyncResult.End(asyncResult);
@@ -322,7 +320,7 @@ namespace System.Net.Mime
 
         private class WriteAsyncResult : LazyAsyncResult
         {
-            private readonly static AsyncCallback s_onWrite = OnWrite;
+            private static readonly AsyncCallback s_onWrite = OnWrite;
 
             private readonly QEncodedStream _parent;
             private readonly byte[] _buffer;

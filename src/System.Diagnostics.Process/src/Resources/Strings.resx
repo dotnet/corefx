@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -117,9 +116,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="PriorityClassNotSupported" xml:space="preserve">
-    <value>The AboveNormal and BelowNormal priority classes are not available on this platform.</value>
-  </data>
   <data name="NoAssociatedProcess" xml:space="preserve">
     <value>No process is associated with this object.</value>
   </data>
@@ -155,12 +151,6 @@
   </data>
   <data name="ThreadExited" xml:space="preserve">
     <value>The request cannot be processed because the thread ({0}) has exited.</value>
-  </data>
-  <data name="ProcessNotFound" xml:space="preserve">
-    <value>Thread {0} found, but no process {1} found.</value>
-  </data>
-  <data name="CantGetProcessId" xml:space="preserve">
-    <value>Cannot retrieve process identifier from the process handle.</value>
   </data>
   <data name="ProcessDisabled" xml:space="preserve">
     <value>Process performance counter is disabled, so the requested operation cannot be performed.</value>
@@ -216,23 +206,14 @@
   <data name="CantRedirectStreams" xml:space="preserve">
     <value>The Process object must have the UseShellExecute property set to false in order to redirect IO streams.</value>
   </data>
-  <data name="CantUseEnvVars" xml:space="preserve">
-    <value>The Process object must have the UseShellExecute property set to false in order to use environment variables.</value>
-  </data>
-  <data name="EnvironmentBlockTooLong" xml:space="preserve">
-    <value>The environment block used to start a process cannot be longer than 65535 bytes.  Your environment block is {0} bytes long.  Remove some environment variables and try again.</value>
+  <data name="DirectoryNotValidAsInput" xml:space="preserve">
+    <value>The FileName property should not be a directory unless UseShellExecute is set.</value>
   </data>
   <data name="PendingAsyncOperation" xml:space="preserve">
     <value>An async read operation has already been started on the stream.</value>
   </data>
-  <data name="UseShellExecute" xml:space="preserve">
-    <value>UseShellExecute must always be set to false.</value>
-  </data>
   <data name="InvalidParameter" xml:space="preserve">
     <value>Invalid value '{1}' for parameter '{0}'.</value>
-  </data>
-  <data name="InvalidEnumArgument" xml:space="preserve">
-    <value>The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.</value>
   </data>
   <data name="CategoryHelpCorrupt" xml:space="preserve">
     <value>Cannot load Category Help data because an invalid index '{0}' was read from the registry.</value>
@@ -252,26 +233,29 @@
   <data name="CantGetAllPids" xml:space="preserve">
     <value>Could not get all running Process IDs.</value>
   </data>
-  <data name="CantFindProcessExecutablePath" xml:space="preserve">
-    <value>The path for process {0} can't be found.</value>
-  </data>
   <data name="NegativePidNotSupported" xml:space="preserve">
     <value>Process IDs cannot be negative.</value>
   </data>
   <data name="ProcessorAffinityNotSupported" xml:space="preserve">
-    <value>Processor affinity for processes or threads is not supported.</value>
+    <value>Processor affinity for processes or threads is not supported on this platform.</value>
   </data>
-  <data name="ResourceLimitQueryFailure" xml:space="preserve">
-    <value>Failed to retrieve process resource limits for the current process. See the error code for OS-specific error information.</value>
+  <data name="ProcessStartWithPasswordAndDomainNotSupported" xml:space="preserve">
+    <value>Starting a process as another user with a specified password and domain is not supported on this platform.</value>
+  </data>
+  <data name="ProcessStartSingleFeatureNotSupported" xml:space="preserve">
+    <value>The {0} property is not supported on this platform.</value>
   </data>
   <data name="RUsageFailure" xml:space="preserve">
     <value>Failed to set or retrieve rusage information. See the error code for OS-specific error information.</value>
   </data>
   <data name="MinimumWorkingSetNotSupported" xml:space="preserve">
-    <value>Setting the minimum working set is not supported.</value>
+    <value>Setting the minimum working set is not supported on this platform.</value>
   </data>
   <data name="OsxExternalProcessWorkingSetNotSupported" xml:space="preserve">
-    <value>Getting or setting the working set limits on other processes is not supported.</value>
+    <value>Getting or setting the working set limits on other processes is not supported on this platform.</value>
+  </data>
+  <data name="ThreadPriorityNotSupported" xml:space="preserve">
+    <value>Getting or setting the thread priority is not supported on this platform.</value>
   </data>
   <data name="ProcessInformationUnavailable" xml:space="preserve">
     <value>Unable to retrieve the specified information about the process or thread.  It may have exited or may be privileged.</value>
@@ -281,5 +265,68 @@
   </data>
   <data name="CantSetDuplicatePassword" xml:space="preserve">
     <value>ProcessStartInfo.Password and ProcessStartInfo.PasswordInClearText cannot both be set. Use only one of them.</value>
+  </data>
+  <data name="ArgumentNull_Array" xml:space="preserve">
+    <value>Array cannot be null.</value>
+  </data>
+  <data name="ArgumentOutOfRange_IndexCountBuffer" xml:space="preserve">
+    <value>Index and count must refer to a location within the buffer.</value>
+  </data>
+  <data name="ArgumentOutOfRange_IndexCount" xml:space="preserve">
+    <value>Index and count must refer to a location within the string.</value>
+  </data>
+  <data name="ArgumentOutOfRange_Index" xml:space="preserve">
+    <value>Index was out of range. Must be non-negative and less than the size of the collection.</value>
+  </data>
+  <data name="Argument_EncodingConversionOverflowBytes" xml:space="preserve">
+    <value>The output byte buffer is too small to contain the encoded data, encoding '{0}' fallback '{1}'.</value>
+  </data>
+  <data name="Argument_EncodingConversionOverflowChars" xml:space="preserve">
+    <value>The output char buffer is too small to contain the decoded characters, encoding '{0}' fallback '{1}'.</value>
+  </data>
+  <data name="ArgumentOutOfRange_GetByteCountOverflow" xml:space="preserve">
+    <value>Too many characters. The resulting number of bytes is larger than what can be returned as an int.</value>
+  </data>
+  <data name="ArgumentOutOfRange_GetCharCountOverflow" xml:space="preserve">
+    <value>Too many bytes. The resulting number of chars is larger than what can be returned as an int.</value>
+  </data>
+  <data name="Argument_InvalidCharSequenceNoIndex" xml:space="preserve">
+    <value>String contains invalid Unicode code points.</value>
+  </data>
+  <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
+    <value>Non-negative number required.</value>
+  </data>
+  <data name="CantStartAsUser" xml:space="preserve">
+    <value>The Process object must have the UseShellExecute property set to false in order to start a process as a user.</value>
+  </data>
+  <data name="CantUseEnvVars" xml:space="preserve">
+    <value>The Process object must have the UseShellExecute property set to false in order to use environment variables.</value>
+  </data>
+  <data name="UseShellExecuteNotSupported" xml:space="preserve">
+    <value>UseShellExecute is not supported on this platform.</value>
+  </data>
+  <data name="GetProcessInfoNotSupported" xml:space="preserve">
+    <value>Retrieving information about local processes is not supported on this platform.</value>
+  </data>
+  <data name="StandardInputEncodingNotAllowed" xml:space="preserve">
+    <value>StandardInputEncoding is only supported when standard input is redirected.</value>
+  </data>
+  <data name="UserDoesNotExist" xml:space="preserve">
+    <value>User with name '{0}' was not found.</value>
+  </data>
+  <data name="UserGroupsCannotBeDetermined" xml:space="preserve">
+    <value>Cannot determine groups that user '{0}' belongs to.</value>
+  </data>
+  <data name="ArgumentAndArgumentListInitialized" xml:space="preserve">
+    <value>Only one of Arguments or ArgumentList may be used.</value>
+  </data>
+  <data name="KillEntireProcessTree_DisallowedBecauseTreeContainsCallingProcess" xml:space="preserve">
+    <value>Cannot be used to terminate a process tree containing the calling process.</value>
+  </data>
+  <data name="KillEntireProcessTree_TerminationIncomplete" xml:space="preserve">
+    <value>Not all processes in process tree could be terminated.</value>
+  </data>
+  <data name="InvalidSysctl" xml:space="preserve">
+    <value>sysctl {0} failed with {1} error.</value>
   </data>
 </root>

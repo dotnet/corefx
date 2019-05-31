@@ -6,13 +6,12 @@ using System.Diagnostics;
 
 namespace System.Runtime.Versioning
 {
-    [Serializable]
-    public sealed class FrameworkName : IEquatable<FrameworkName>
+    public sealed class FrameworkName : IEquatable<FrameworkName?>
     {
         private readonly string _identifier;
-        private readonly Version _version;
+        private readonly Version _version = null!;
         private readonly string _profile;
-        private string _fullName;
+        private string? _fullName;
 
         private const char ComponentSeparator = ',';
         private const char KeyValueSeparator = '=';
@@ -72,19 +71,20 @@ namespace System.Runtime.Versioning
                             Profile;
                     }
                 }
+
                 Debug.Assert(_fullName != null);
                 return _fullName;
             }
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as FrameworkName);
         }
 
-        public bool Equals(FrameworkName other)
+        public bool Equals(FrameworkName? other)
         {
-            if (object.ReferenceEquals(other, null))
+            if (other is null)
             {
                 return false;
             }
@@ -99,7 +99,9 @@ namespace System.Runtime.Versioning
             return Identifier.GetHashCode() ^ Version.GetHashCode() ^ Profile.GetHashCode();
         }
 
+#pragma warning disable CS8609 // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
         public override string ToString()
+#pragma warning restore CS8609
         {
             return FullName;
         }
@@ -109,7 +111,7 @@ namespace System.Runtime.Versioning
         {
         }
 
-        public FrameworkName(string identifier, Version version, string profile)
+        public FrameworkName(string identifier, Version version, string? profile)
         {
             if (identifier == null)
             {
@@ -182,8 +184,8 @@ namespace System.Runtime.Versioning
                 }
 
                 // Get the key and value, trimming any whitespace
-                string key = component.Substring(0, separatorIndex).Trim();
-                string value = component.Substring(separatorIndex + 1).Trim();
+                ReadOnlySpan<char> key = component.AsSpan(0, separatorIndex).Trim();
+                ReadOnlySpan<char> value = component.AsSpan(separatorIndex + 1).Trim();
 
                 //
                 // 2) Parse the required "Version" key value
@@ -195,11 +197,11 @@ namespace System.Runtime.Versioning
                     // Allow the version to include a 'v' or 'V' prefix...
                     if (value.Length > 0 && (value[0] == VersionValuePrefix || value[0] == 'V'))
                     {
-                        value = value.Substring(1);
+                        value = value.Slice(1);
                     }
                     try
                     {
-                        _version = new Version(value);
+                        _version = Version.Parse(value);
                     }
                     catch (Exception e)
                     {
@@ -211,9 +213,9 @@ namespace System.Runtime.Versioning
                 //
                 else if (key.Equals(ProfileKey, StringComparison.OrdinalIgnoreCase))
                 {
-                    if (!string.IsNullOrEmpty(value))
+                    if (value.Length > 0)
                     {
-                        _profile = value;
+                        _profile = value.ToString();
                     }
                 }
                 else
@@ -228,16 +230,17 @@ namespace System.Runtime.Versioning
             }
         }
 
-        public static bool operator ==(FrameworkName left, FrameworkName right)
+        public static bool operator ==(FrameworkName? left, FrameworkName? right)
         {
-            if (object.ReferenceEquals(left, null))
+            if (left is null)
             {
-                return object.ReferenceEquals(right, null);
+                return right is null;
             }
+
             return left.Equals(right);
         }
 
-        public static bool operator !=(FrameworkName left, FrameworkName right)
+        public static bool operator !=(FrameworkName? left, FrameworkName? right)
         {
             return !(left == right);
         }

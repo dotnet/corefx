@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -64,6 +65,17 @@ namespace System.Tests
             {
                 EnvironmentStackTrace.StaticFrame(null);
             }
+        }
+
+        [Fact]
+        public void StackTraceDoesNotStartWithInternalFrame()
+        {
+             string stackTrace = Environment.StackTrace;
+
+             // Find first line of the stacktrace and verify that it is Environment.get_StackTrace itself, not an internal frame
+             string firstFrame = new StringReader(stackTrace).ReadLine();
+
+             Assert.True(firstFrame.IndexOf("System.Environment.get_StackTrace()") != -1);
         }
     }
 }

@@ -3,13 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Collections;
-using System.IO;
-using System.Globalization;
 using System.Reflection;
 using System.Resources;
-using Microsoft.CSharp.RuntimeBinder;
-using Xunit;
 
 public enum ErrorElementId
 {
@@ -197,7 +192,7 @@ public class ErrorVerifier
     private static ResourceManager s_rm2;
     public static string GetErrorElement(ErrorElementId id)
     {
-        return String.Empty;
+        return string.Empty;
     }
 
     public static bool Verify(ErrorMessageId id, string actualError, params string[] args)

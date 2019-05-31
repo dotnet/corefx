@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace System.Linq
 {
@@ -12,7 +13,7 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (count <= 0)
@@ -26,34 +27,24 @@ namespace System.Linq
 
                 count = 0;
             }
-            else
+            else if (source is IPartition<TSource> partition)
             {
-                IPartition<TSource> partition = source as IPartition<TSource>;
-                if (partition != null)
-                {
-                    return partition.Skip(count);
-                }
+                return partition.Skip(count);
             }
 
-            IList<TSource> sourceList = source as IList<TSource>;
-            if (sourceList != null)
-            {
-                return new ListPartition<TSource>(sourceList, count, int.MaxValue);
-            }
-
-            return new EnumerablePartition<TSource>(source, count, -1);
+            return SkipIterator(source, count);
         }
 
         public static IEnumerable<TSource> SkipWhile<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (predicate == null)
             {
-                throw Error.ArgumentNull(nameof(predicate));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
             return SkipWhileIterator(source, predicate);
@@ -84,12 +75,12 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (predicate == null)
             {
-                throw Error.ArgumentNull(nameof(predicate));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
             return SkipWhileIterator(source, predicate);
@@ -117,6 +108,50 @@ namespace System.Linq
                         }
 
                         yield break;
+                    }
+                }
+            }
+        }
+
+        public static IEnumerable<TSource> SkipLast<TSource>(this IEnumerable<TSource> source, int count)
+        {
+            if (source == null)
+            {
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
+            }
+
+            if (count <= 0)
+            {
+                return source.Skip(0);
+            }
+
+            return SkipLastIterator(source, count);
+        }
+
+        private static IEnumerable<TSource> SkipLastIterator<TSource>(IEnumerable<TSource> source, int count)
+        {
+            Debug.Assert(source != null);
+            Debug.Assert(count > 0);
+
+            var queue = new Queue<TSource>();
+
+            using (IEnumerator<TSource> e = source.GetEnumerator())
+            {
+                while (e.MoveNext())
+                {
+                    if (queue.Count == count)
+                    {
+                        do
+                        {
+                            yield return queue.Dequeue();
+                            queue.Enqueue(e.Current);
+                        }
+                        while (e.MoveNext());
+                        break;
+                    }
+                    else
+                    {
+                        queue.Enqueue(e.Current);
                     }
                 }
             }

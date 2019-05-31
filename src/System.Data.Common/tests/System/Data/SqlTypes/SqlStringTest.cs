@@ -31,17 +31,17 @@ using System.IO;
 using System.Xml;
 using System.Xml.Serialization;
 using System.Text;
-
+using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Data.Tests.SqlTypes
 {
-    public class SqlStringTest : IDisposable
+    public class SqlStringTest
     {
         private SqlString _test1;
         private SqlString _test2;
         private SqlString _test3;
-        private CultureInfo _originalCulture;
 
         static SqlStringTest()
         {
@@ -50,16 +50,9 @@ namespace System.Data.Tests.SqlTypes
 
         public SqlStringTest()
         {
-            _originalCulture = CultureInfo.CurrentCulture; ;
-            CultureInfo.CurrentCulture = new CultureInfo("en-AU");
             _test1 = new SqlString("First TestString");
             _test2 = new SqlString("This is just a test SqlString");
             _test3 = new SqlString("This is just a test SqlString");
-        }
-
-        public void Dispose()
-        {
-            CultureInfo.CurrentCulture = _originalCulture;
         }
 
         [Fact]
@@ -180,24 +173,32 @@ namespace System.Data.Tests.SqlTypes
         [Fact]
         public void Properties()
         {
-            // CompareInfo
-            Assert.Equal(3081, _test1.CompareInfo.LCID);
+            RemoteExecutor.Invoke(() =>
+            {
+                CultureInfo.CurrentCulture = new CultureInfo("en-AU");
+                var one = new SqlString("First TestString");
 
-            // CultureInfo
-            Assert.Equal(3081, _test1.CultureInfo.LCID);
+                // CompareInfo
+                Assert.Equal(3081, one.CompareInfo.LCID);
 
-            // LCID
-            Assert.Equal(3081, _test1.LCID);
+                // CultureInfo
+                Assert.Equal(3081, one.CultureInfo.LCID);
 
-            // IsNull
-            Assert.True(!_test1.IsNull);
-            Assert.True(SqlString.Null.IsNull);
+                // LCID
+                Assert.Equal(3081, one.LCID);
 
-            // SqlCompareOptions
-            Assert.Equal("IgnoreCase, IgnoreKanaType, IgnoreWidth", _test1.SqlCompareOptions.ToString());
+                // IsNull
+                Assert.True(!one.IsNull);
+                Assert.True(SqlString.Null.IsNull);
 
-            // Value
-            Assert.Equal("First TestString", _test1.Value);
+                // SqlCompareOptions
+                Assert.Equal("IgnoreCase, IgnoreKanaType, IgnoreWidth", one.SqlCompareOptions.ToString());
+
+                // Value
+                Assert.Equal("First TestString", one.Value);
+
+                return RemoteExecutor.SuccessExitCode;
+            }).Dispose();
         }
 
         // PUBLIC METHODS
@@ -206,7 +207,7 @@ namespace System.Data.Tests.SqlTypes
         public void CompareToArgumentException()
         {
             SqlByte Test = new SqlByte(1);
-            Assert.Throws<ArgumentException>(() => _test1.CompareTo(Test));
+            AssertExtensions.Throws<ArgumentException>(null, () => _test1.CompareTo(Test));
         }
 
         [Fact]
@@ -662,7 +663,7 @@ namespace System.Data.Tests.SqlTypes
         public void SqlDoubleToSqlString()
         {
             SqlDouble TestDouble = new SqlDouble(64E+64);
-            Assert.Equal("6.4E+65", ((SqlString)TestDouble).Value);
+            Assert.Equal(6.4E+65.ToString(), ((SqlString)TestDouble).Value);
         }
 
         [Fact]
@@ -728,14 +729,14 @@ namespace System.Data.Tests.SqlTypes
         public void SqlMoneyToSqlString()
         {
             SqlMoney TestMoney = new SqlMoney(646464.6464);
-            Assert.Equal("646464.6464", ((SqlString)TestMoney).Value);
+            Assert.Equal(646464.6464.ToString(), ((SqlString)TestMoney).Value);
         }
 
         [Fact]
         public void SqlSingleToSqlString()
         {
             SqlSingle TestSingle = new SqlSingle(3E+20);
-            Assert.Equal("3E+20", ((SqlString)TestSingle).Value);
+            Assert.Equal(3E+20.ToString(), ((SqlString)TestSingle).Value);
         }
 
         [Fact]

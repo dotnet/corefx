@@ -4,7 +4,7 @@
 
 using System.Buffers;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,9 +23,7 @@ namespace System.IO.Compression
         private int _activeAsyncOperation; // 1 == true, 0 == false
         private bool _wroteBytes;
 
-        #region Public Constructors
-
-        public DeflateStream(Stream stream, CompressionMode mode): this(stream, mode, false)
+        public DeflateStream(Stream stream, CompressionMode mode) : this(stream, mode, leaveOpen: false)
         {
         }
 
@@ -34,7 +32,7 @@ namespace System.IO.Compression
         }
 
         // Implies mode = Compress
-        public DeflateStream(Stream stream, CompressionLevel compressionLevel) : this(stream, compressionLevel, false)
+        public DeflateStream(Stream stream, CompressionLevel compressionLevel) : this(stream, compressionLevel, leaveOpen: false)
         {
         }
 
@@ -42,10 +40,6 @@ namespace System.IO.Compression
         public DeflateStream(Stream stream, CompressionLevel compressionLevel, bool leaveOpen) : this(stream, compressionLevel, leaveOpen, ZLibNative.Deflate_DefaultWindowBits)
         {
         }
-
-        #endregion
-
-        #region Private Constructors and Initializers
 
         /// <summary>
         /// Internal constructor to check stream validity and call the correct initialization function depending on
@@ -129,15 +123,7 @@ namespace System.IO.Compression
             }
         }
 
-        #endregion
-
-        public Stream BaseStream
-        {
-            get
-            {
-                return _stream;
-            }
-        }
+        public Stream BaseStream => _stream;
 
         public override bool CanRead
         {
@@ -165,33 +151,17 @@ namespace System.IO.Compression
             }
         }
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanSeek => false;
 
         public override long Length
         {
-            get
-            {
-                throw new NotSupportedException(SR.NotSupported);
-            }
+            get { throw new NotSupportedException(SR.NotSupported); }
         }
 
         public override long Position
         {
-            get
-            {
-                throw new NotSupportedException(SR.NotSupported);
-            }
-
-            set
-            {
-                throw new NotSupportedException(SR.NotSupported);
-            }
+            get { throw new NotSupportedException(SR.NotSupported); }
+            set { throw new NotSupportedException(SR.NotSupported); }
         }
 
         public override void Flush()
@@ -228,7 +198,7 @@ namespace System.IO.Compression
                     flushSuccessful = _deflater.Flush(_buffer, out compressedBytes);
                     if (flushSuccessful)
                     {
-                        await _stream.WriteAsync(_buffer, 0, compressedBytes, cancellationToken).ConfigureAwait(false);
+                        await _stream.WriteAsync(new ReadOnlyMemory<byte>(_buffer, 0, compressedBytes), cancellationToken).ConfigureAwait(false);
                     }
                     Debug.Assert(flushSuccessful == (compressedBytes > 0));
                 } while (flushSuccessful);
@@ -262,49 +232,70 @@ namespace System.IO.Compression
 
         public override int Read(byte[] array, int offset, int count)
         {
-            EnsureDecompressionMode();
             ValidateParameters(array, offset, count);
+            return ReadCore(new Span<byte>(array, offset, count));
+        }
+
+        public override int Read(Span<byte> buffer)
+        {
+            if (GetType() != typeof(DeflateStream))
+            {
+                // DeflateStream is not sealed, and a derived type may have overridden Read(byte[], int, int) prior
+                // to this Read(Span<byte>) overload being introduced.  In that case, this Read(Span<byte>) overload
+                // should use the behavior of Read(byte[],int,int) overload.
+                return base.Read(buffer);
+            }
+            else
+            {
+                return ReadCore(buffer);
+            }
+        }
+
+        internal int ReadCore(Span<byte> buffer)
+        {
+            EnsureDecompressionMode();
             EnsureNotDisposed();
             EnsureBufferInitialized();
 
-            int bytesRead;
-            int currentOffset = offset;
-            int remainingCount = count;
+            int totalRead = 0;
 
             while (true)
             {
-                bytesRead = _inflater.Inflate(array, currentOffset, remainingCount);
-                currentOffset += bytesRead;
-                remainingCount -= bytesRead;
-
-                if (remainingCount == 0)
+                int bytesRead = _inflater.Inflate(buffer.Slice(totalRead));
+                totalRead += bytesRead;
+                if (totalRead == buffer.Length)
                 {
                     break;
                 }
 
-                if (_inflater.Finished())
-                {
-                    // if we finished decompressing, we can't have anything left in the outputwindow.
-                    Debug.Assert(_inflater.AvailableOutput == 0, "We should have copied all stuff out!");
-                    break;
-                }
-
-                int bytes = _stream.Read(_buffer, 0, _buffer.Length);
-                if (bytes <= 0)
+                // If the stream is finished then we have a few potential cases here:
+                // 1. DeflateStream => return
+                // 2. GZipStream that is finished but may have an additional GZipStream appended => feed more input
+                // 3. GZipStream that is finished and appended with garbage => return
+                if (_inflater.Finished() && (!_inflater.IsGzipStream() || !_inflater.NeedsInput()))
                 {
                     break;
                 }
-                else if (bytes > _buffer.Length)
-                {
-                    // The stream is either malicious or poorly implemented and returned a number of
-                    // bytes larger than the buffer supplied to it.
-                    throw new InvalidDataException(SR.GenericInvalidData);
-                }
 
-                _inflater.SetInput(_buffer, 0, bytes);
+                if (_inflater.NeedsInput())
+                {
+                    int bytes = _stream.Read(_buffer, 0, _buffer.Length);
+                    if (bytes <= 0)
+                    {
+                        break;
+                    }
+                    else if (bytes > _buffer.Length)
+                    {
+                        // The stream is either malicious or poorly implemented and returned a number of
+                        // bytes larger than the buffer supplied to it.
+                        throw new InvalidDataException(SR.GenericInvalidData);
+                    }
+
+                     _inflater.SetInput(_buffer, 0, bytes);
+                }
             }
 
-            return count - remainingCount;
+            return totalRead;
         }
 
         private void ValidateParameters(byte[] array, int offset, int count)
@@ -328,7 +319,6 @@ namespace System.IO.Compression
                 ThrowStreamClosedException();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowStreamClosedException()
         {
             throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
@@ -340,7 +330,6 @@ namespace System.IO.Compression
                 ThrowCannotReadFromDeflateStreamException();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowCannotReadFromDeflateStreamException()
         {
             throw new InvalidOperationException(SR.CannotReadFromDeflateStream);
@@ -352,113 +341,157 @@ namespace System.IO.Compression
                 ThrowCannotWriteToDeflateStreamException();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowCannotWriteToDeflateStreamException()
         {
             throw new InvalidOperationException(SR.CannotWriteToDeflateStream);
         }
 
-#if netstandard17
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
 
         public override int EndRead(IAsyncResult asyncResult) =>
             TaskToApm.End<int>(asyncResult);
-#endif
 
         public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
-            // We use this checking order for compat to earlier versions:
+            ValidateParameters(array, offset, count);
+            return ReadAsyncMemory(new Memory<byte>(array, offset, count), cancellationToken).AsTask();
+        }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if (GetType() != typeof(DeflateStream))
+            {
+                // Ensure that existing streams derived from DeflateStream and that override ReadAsync(byte[],...)
+                // get their existing behaviors when the newer Memory-based overload is used.
+                return base.ReadAsync(buffer, cancellationToken);
+            }
+            else
+            {
+                return ReadAsyncMemory(buffer, cancellationToken);
+            }
+        }
+
+        internal ValueTask<int> ReadAsyncMemory(Memory<byte> buffer, CancellationToken cancellationToken)
+        {
             EnsureDecompressionMode();
             EnsureNoActiveAsyncOperation();
-            ValidateParameters(array, offset, count);
             EnsureNotDisposed();
 
             if (cancellationToken.IsCancellationRequested)
             {
-                return Task.FromCanceled<int>(cancellationToken);
+                return new ValueTask<int>(Task.FromCanceled<int>(cancellationToken));
             }
 
             EnsureBufferInitialized();
-            Task<int> readTask = null;
 
+            bool cleanup = true;
             AsyncOperationStarting();
             try
             {
-                // Try to read decompressed data in output buffer
-                int bytesRead = _inflater.Inflate(array, offset, count);
-                if (bytesRead != 0)
+                while (true)
                 {
-                    // If decompression output buffer is not empty, return immediately.
-                    return Task.FromResult(bytesRead);
-                }
+                    // Finish inflating any bytes in the input buffer
+                    int bytesRead = 0, bytesReadIteration = -1;
+                    while (bytesRead < buffer.Length && bytesReadIteration != 0)
+                    {
+                        bytesReadIteration = _inflater.Inflate(buffer.Span.Slice(bytesRead));
+                        bytesRead += bytesReadIteration;
+                    }
 
-                if (_inflater.Finished())
-                {
-                    // end of compression stream
-                    return Task.FromResult(0);
-                }
+                    if (bytesRead != 0)
+                    {
+                        // If decompression output buffer is not empty, return immediately.
+                        return new ValueTask<int>(bytesRead);
+                    }
 
-                // If there is no data on the output buffer and we are not at 
-                // the end of the stream, we need to get more data from the base stream
-                readTask = _stream.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
-                if (readTask == null)
-                {
-                    throw new InvalidOperationException(SR.NotSupported_UnreadableStream);
-                }
+                    // If the stream is finished then we have a few potential cases here:
+                    // 1. DeflateStream that is finished => return
+                    // 2. GZipStream that is finished but may have an additional GZipStream appended => feed more input
+                    // 3. GZipStream that is finished and appended with garbage => return
+                    if (_inflater.Finished() && (!_inflater.IsGzipStream() || !_inflater.NeedsInput()))
+                    {
+                        return new ValueTask<int>(0);
+                    }
 
-                return ReadAsyncCore(readTask, array, offset, count, cancellationToken);
+                    if (_inflater.NeedsInput())
+                    {
+                        // If there is no data on the output buffer and we are not at
+                        // the end of the stream, we need to get more data from the base stream
+                        ValueTask<int> readTask = _stream.ReadAsync(_buffer, cancellationToken);
+                        cleanup = false;
+                        return FinishReadAsyncMemory(readTask, buffer, cancellationToken);
+                    }
+                }
             }
             finally
             {
                 // if we haven't started any async work, decrement the counter to end the transaction
-                if (readTask == null)
+                if (cleanup)
                 {
                     AsyncOperationCompleting();
                 }
             }
         }
 
-        private async Task<int> ReadAsyncCore(Task<int> readTask, byte[] array, int offset, int count, CancellationToken cancellationToken)
+        private async ValueTask<int> FinishReadAsyncMemory(
+            ValueTask<int> readTask, Memory<byte> buffer, CancellationToken cancellationToken)
         {
             try
             {
                 while (true)
                 {
-                    int bytesRead = await readTask.ConfigureAwait(false);
-                    EnsureNotDisposed();
-
-                    if (bytesRead <= 0)
+                    if (_inflater.NeedsInput())
                     {
-                        // This indicates the base stream has received EOF
+                        int bytesRead = await readTask.ConfigureAwait(false);
+                        EnsureNotDisposed();
+
+                        if (bytesRead <= 0)
+                        {
+                            // This indicates the base stream has received EOF
+                            return 0;
+                        }
+                        else if (bytesRead > _buffer.Length)
+                        {
+                            // The stream is either malicious or poorly implemented and returned a number of
+                            // bytes larger than the buffer supplied to it.
+                            throw new InvalidDataException(SR.GenericInvalidData);
+                        }
+
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        // Feed the data from base stream into decompression engine
+                        _inflater.SetInput(_buffer, 0, bytesRead);
+                    }
+
+                    // Finish inflating any bytes in the input buffer
+                    int inflatedBytes = 0, bytesReadIteration = -1;
+                    while (inflatedBytes < buffer.Length && bytesReadIteration != 0)
+                    {
+                        bytesReadIteration = _inflater.Inflate(buffer.Span.Slice(inflatedBytes));
+                        inflatedBytes += bytesReadIteration;
+                    }
+
+                    // There are a few different potential states here
+                    // 1. DeflateStream or GZipStream that succesfully read bytes => return those bytes
+                    // 2. DeflateStream or GZipStream that didn't read bytes and isn't finished => feed more input
+                    // 3. DeflateStream that didn't read bytes, but is finished => return 0
+                    // 4. GZipStream that is finished but is appended with another gzip stream => feed more input
+                    // 5. GZipStream that is finished and appended with garbage => return 0
+                    if (inflatedBytes != 0)
+                    {
+                        // If decompression output buffer is not empty, return immediately.
+                        return inflatedBytes;
+                    }
+                    else if (_inflater.Finished() && (!_inflater.IsGzipStream() || !_inflater.NeedsInput()))
+                    {
                         return 0;
                     }
-                    else if (bytesRead > _buffer.Length)
-                    {
-                        // The stream is either malicious or poorly implemented and returned a number of
-                        // bytes larger than the buffer supplied to it.
-                        throw new InvalidDataException(SR.GenericInvalidData);
-                    }
-
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    // Feed the data from base stream into decompression engine
-                    _inflater.SetInput(_buffer, 0, bytesRead);
-                    bytesRead = _inflater.Inflate(array, offset, count);
-
-                    if (bytesRead == 0 && !_inflater.Finished())
+                    else if (_inflater.NeedsInput())
                     {
                         // We could have read in head information and didn't get any data.
-                        // Read from the base stream again.   
-                        readTask = _stream.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
-                        if (readTask == null)
-                        {
-                            throw new InvalidOperationException(SR.NotSupported_UnreadableStream);
-                        }
-                    }
-                    else
-                    {
-                        return bytesRead;
+                        // Read from the base stream again.
+                        readTask = _stream.ReadAsync(_buffer, cancellationToken);
                     }
                 }
             }
@@ -470,18 +503,43 @@ namespace System.IO.Compression
 
         public override void Write(byte[] array, int offset, int count)
         {
-            // Validate the state and the parameters
-            EnsureCompressionMode();
             ValidateParameters(array, offset, count);
+            WriteCore(new ReadOnlySpan<byte>(array, offset, count));
+        }
+
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            if (GetType() != typeof(DeflateStream))
+            {
+                // DeflateStream is not sealed, and a derived type may have overridden Write(byte[], int, int) prior
+                // to this Write(ReadOnlySpan<byte>) overload being introduced.  In that case, this Write(ReadOnlySpan<byte>) overload
+                // should use the behavior of Write(byte[],int,int) overload.
+                base.Write(buffer);
+            }
+            else
+            {
+                WriteCore(buffer);
+            }
+        }
+
+        internal void WriteCore(ReadOnlySpan<byte> buffer)
+        {
+            EnsureCompressionMode();
             EnsureNotDisposed();
 
             // Write compressed the bytes we already passed to the deflater:
             WriteDeflaterOutput();
 
-            // Pass new bytes through deflater and write them too:
-            _deflater.SetInput(array, offset, count);
-            WriteDeflaterOutput();
-            _wroteBytes = true;
+            unsafe
+            {
+                // Pass new bytes through deflater and write them too:
+                fixed (byte* bufferPtr = &MemoryMarshal.GetReference(buffer))
+                {
+                    _deflater.SetInput(bufferPtr, buffer.Length);
+                    WriteDeflaterOutput();
+                    _wroteBytes = true;
+                }
+            }
         }
 
         private void WriteDeflaterOutput()
@@ -531,7 +589,7 @@ namespace System.IO.Compression
 
             if (_mode != CompressionMode.Compress)
                 return;
-            
+
             // Some deflaters (e.g. ZLib) write more than zero bytes for zero byte inputs.
             // This round-trips and we should be ok with this, but our legacy managed deflater
             // always wrote zero output for zero input and upstack code (e.g. ZipArchiveEntry)
@@ -555,11 +613,58 @@ namespace System.IO.Compression
             }
             else
             {
-                // In case of zero length buffer, we still need to clean up the native created stream before 
-                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during 
-                // the dispose operation and although it frees the stream but it return error code because the 
-                // stream state was still marked as in use. The symptoms of this problem will not be seen except 
+                // In case of zero length buffer, we still need to clean up the native created stream before
+                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during
+                // the dispose operation and although it frees the stream but it return error code because the
+                // stream state was still marked as in use. The symptoms of this problem will not be seen except
                 // if running any diagnostic tools which check for disposing safe handle objects
+                bool finished;
+                do
+                {
+                    int compressedBytes;
+                    finished = _deflater.Finish(_buffer, out compressedBytes);
+                } while (!finished);
+            }
+        }
+
+        private async Task PurgeBuffersAsync()
+        {
+            // Same logic as PurgeBuffers, except with async counterparts.
+
+            if (_stream == null)
+                return;
+
+            if (_mode != CompressionMode.Compress)
+                return;
+
+            // Some deflaters (e.g. ZLib) write more than zero bytes for zero byte inputs.
+            // This round-trips and we should be ok with this, but our legacy managed deflater
+            // always wrote zero output for zero input and upstack code (e.g. ZipArchiveEntry)
+            // took dependencies on it. Thus, make sure to only "flush" when we actually had
+            // some input.
+            if (_wroteBytes)
+            {
+                // Compress any bytes left
+                await WriteDeflaterOutputAsync(default).ConfigureAwait(false);
+
+                // Pull out any bytes left inside deflater:
+                bool finished;
+                do
+                {
+                    int compressedBytes;
+                    finished = _deflater.Finish(_buffer, out compressedBytes);
+
+                    if (compressedBytes > 0)
+                        await _stream.WriteAsync(new ReadOnlyMemory<byte>(_buffer, 0, compressedBytes)).ConfigureAwait(false);
+                } while (!finished);
+            }
+            else
+            {
+                // In case of zero length buffer, we still need to clean up the native created stream before
+                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during
+                // the dispose operation and although it frees the stream, it returns an error code because the
+                // stream state was still marked as in use. The symptoms of this problem will not be seen except
+                // if running any diagnostic tools which check for disposing safe handle objects.
                 bool finished;
                 do
                 {
@@ -615,29 +720,96 @@ namespace System.IO.Compression
             }
         }
 
-#if netstandard17
+        public override ValueTask DisposeAsync()
+        {
+            return GetType() == typeof(DeflateStream) ?
+                DisposeAsyncCore() :
+                base.DisposeAsync();
+        }
+
+        private async ValueTask DisposeAsyncCore()
+        {
+            // Same logic as Dispose(true), except with async counterparts.
+            try
+            {
+                await PurgeBuffersAsync().ConfigureAwait(false);
+            }
+            finally
+            {
+                // Close the underlying stream even if PurgeBuffers threw.
+                // Stream.Close() may throw here (may or may not be due to the same error).
+                // In this case, we still need to clean up internal resources, hence the inner finally blocks.
+                Stream stream = _stream;
+                _stream = null;
+                try
+                {
+                    if (!_leaveOpen && stream != null)
+                        await stream.DisposeAsync().ConfigureAwait(false);
+                }
+                finally
+                {
+                    try
+                    {
+                        _deflater?.Dispose();
+                        _inflater?.Dispose();
+                    }
+                    finally
+                    {
+                        _deflater = null;
+                        _inflater = null;
+
+                        byte[] buffer = _buffer;
+                        if (buffer != null)
+                        {
+                            _buffer = null;
+                            if (!AsyncOperationIsActive)
+                            {
+                                ArrayPool<byte>.Shared.Return(buffer);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         public override IAsyncResult BeginWrite(byte[] array, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
             TaskToApm.Begin(WriteAsync(array, offset, count, CancellationToken.None), asyncCallback, asyncState);
 
         public override void EndWrite(IAsyncResult asyncResult) =>
             TaskToApm.End(asyncResult);
-#endif
 
         public override Task WriteAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
-            // We use this checking order for compat to earlier versions:
-            EnsureCompressionMode();
-            EnsureNoActiveAsyncOperation();
             ValidateParameters(array, offset, count);
-            EnsureNotDisposed();
-
-            if (cancellationToken.IsCancellationRequested)
-                return Task.FromCanceled<int>(cancellationToken);
-
-            return WriteAsyncCore(array, offset, count, cancellationToken);
+            return WriteAsyncMemory(new ReadOnlyMemory<byte>(array, offset, count), cancellationToken).AsTask();
         }
 
-        private async Task WriteAsyncCore(byte[] array, int offset, int count, CancellationToken cancellationToken)
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+        {
+            if (GetType() != typeof(DeflateStream))
+            {
+                // Ensure that existing streams derived from DeflateStream and that override WriteAsync(byte[],...)
+                // get their existing behaviors when the newer Memory-based overload is used.
+                return base.WriteAsync(buffer, cancellationToken);
+            }
+            else
+            {
+                return WriteAsyncMemory(buffer, cancellationToken);
+            }
+        }
+
+        internal ValueTask WriteAsyncMemory(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
+        {
+            EnsureCompressionMode();
+            EnsureNoActiveAsyncOperation();
+            EnsureNotDisposed();
+
+            return new ValueTask(cancellationToken.IsCancellationRequested ?
+                Task.FromCanceled<int>(cancellationToken) :
+                WriteAsyncMemoryCore(buffer, cancellationToken));
+        }
+
+        private async Task WriteAsyncMemoryCore(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken)
         {
             AsyncOperationStarting();
             try
@@ -645,7 +817,7 @@ namespace System.IO.Compression
                 await WriteDeflaterOutputAsync(cancellationToken).ConfigureAwait(false);
 
                 // Pass new bytes through deflater
-                _deflater.SetInput(array, offset, count);
+                _deflater.SetInput(buffer);
 
                 await WriteDeflaterOutputAsync(cancellationToken).ConfigureAwait(false);
 
@@ -667,9 +839,19 @@ namespace System.IO.Compression
                 int compressedBytes = _deflater.GetDeflateOutput(_buffer);
                 if (compressedBytes > 0)
                 {
-                    await _stream.WriteAsync(_buffer, 0, compressedBytes, cancellationToken).ConfigureAwait(false);
+                    await _stream.WriteAsync(new ReadOnlyMemory<byte>(_buffer, 0, compressedBytes), cancellationToken).ConfigureAwait(false);
                 }
             }
+        }
+
+        public override void CopyTo(Stream destination, int bufferSize)
+        {
+            StreamHelpers.ValidateCopyToArgs(this, destination, bufferSize);
+
+            EnsureDecompressionMode();
+            EnsureNotDisposed();
+
+            new CopyToStream(this, destination, bufferSize).CopyFromSourceToDestination();
         }
 
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)
@@ -689,18 +871,22 @@ namespace System.IO.Compression
             }
 
             // Do the copy
-            return new CopyToAsyncStream(this, destination, bufferSize, cancellationToken).CopyFromSourceToDestination();
+            return new CopyToStream(this, destination, bufferSize, cancellationToken).CopyFromSourceToDestinationAsync();
         }
 
-        private sealed class CopyToAsyncStream : Stream
+        private sealed class CopyToStream : Stream
         {
             private readonly DeflateStream _deflateStream;
             private readonly Stream _destination;
             private readonly CancellationToken _cancellationToken;
             private byte[] _arrayPoolBuffer;
-            private int _arrayPoolBufferHighWaterMark;
 
-            public CopyToAsyncStream(DeflateStream deflateStream, Stream destination, int bufferSize, CancellationToken cancellationToken)
+            public CopyToStream(DeflateStream deflateStream, Stream destination, int bufferSize) :
+                this(deflateStream, destination, bufferSize, CancellationToken.None)
+            {
+            }
+
+            public CopyToStream(DeflateStream deflateStream, Stream destination, int bufferSize, CancellationToken cancellationToken)
             {
                 Debug.Assert(deflateStream != null);
                 Debug.Assert(destination != null);
@@ -712,7 +898,7 @@ namespace System.IO.Compression
                 _arrayPoolBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
             }
 
-            public async Task CopyFromSourceToDestination()
+            public async Task CopyFromSourceToDestinationAsync()
             {
                 _deflateStream.AsyncOperationStarting();
                 try
@@ -723,10 +909,12 @@ namespace System.IO.Compression
                         int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
                         if (bytesRead > 0)
                         {
-                            if (bytesRead > _arrayPoolBufferHighWaterMark) _arrayPoolBufferHighWaterMark = bytesRead;
-                            await _destination.WriteAsync(_arrayPoolBuffer, 0, bytesRead, _cancellationToken).ConfigureAwait(false);
+                            await _destination.WriteAsync(new ReadOnlyMemory<byte>(_arrayPoolBuffer, 0, bytesRead), _cancellationToken).ConfigureAwait(false);
                         }
-                        else break;
+                        else
+                        {
+                            break;
+                        }
                     }
 
                     // Now, use the source stream's CopyToAsync to push directly to our inflater via this helper stream
@@ -736,8 +924,35 @@ namespace System.IO.Compression
                 {
                     _deflateStream.AsyncOperationCompleting();
 
-                    Array.Clear(_arrayPoolBuffer, 0, _arrayPoolBufferHighWaterMark); // clear only the most we used
-                    ArrayPool<byte>.Shared.Return(_arrayPoolBuffer, clearArray: false);
+                    ArrayPool<byte>.Shared.Return(_arrayPoolBuffer);
+                    _arrayPoolBuffer = null;
+                }
+            }
+
+            public void CopyFromSourceToDestination()
+            {
+                try
+                {
+                    // Flush any existing data in the inflater to the destination stream.
+                    while (true)
+                    {
+                        int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
+                        if (bytesRead > 0)
+                        {
+                            _destination.Write(_arrayPoolBuffer, 0, bytesRead);
+                        }
+                        else
+                        {
+                            break;
+                        }
+                    }
+
+                    // Now, use the source stream's CopyToAsync to push directly to our inflater via this helper stream
+                    _deflateStream._stream.CopyTo(this, _arrayPoolBuffer.Length);
+                }
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(_arrayPoolBuffer);
                     _arrayPoolBuffer = null;
                 }
             }
@@ -753,7 +968,7 @@ namespace System.IO.Compression
                 }
                 else if (count > buffer.Length - offset)
                 {
-                    // The source stream is either malicious or poorly implemented and returned a number of
+                    // The buffer stream is either malicious or poorly implemented and returned a number of
                     // bytes larger than the buffer supplied to it.
                     throw new InvalidDataException(SR.GenericInvalidData);
                 }
@@ -761,23 +976,58 @@ namespace System.IO.Compression
                 // Feed the data from base stream into the decompression engine.
                 _deflateStream._inflater.SetInput(buffer, offset, count);
 
-                // While there's more decompressed data available, forward it to the destination stream.
+                // While there's more decompressed data available, forward it to the buffer stream.
                 while (true)
                 {
-                    int bytesRead = _deflateStream._inflater.Inflate(_arrayPoolBuffer, 0, _arrayPoolBuffer.Length);
+                    int bytesRead = _deflateStream._inflater.Inflate(new Span<byte>(_arrayPoolBuffer));
                     if (bytesRead > 0)
                     {
-                        if (bytesRead > _arrayPoolBufferHighWaterMark) _arrayPoolBufferHighWaterMark = bytesRead;
-                        await _destination.WriteAsync(_arrayPoolBuffer, 0, bytesRead, cancellationToken).ConfigureAwait(false);
+                        await _destination.WriteAsync(new ReadOnlyMemory<byte>(_arrayPoolBuffer, 0, bytesRead), cancellationToken).ConfigureAwait(false);
                     }
-                    else break;
+                    else
+                    {
+                        break;
+                    }
                 }
             }
 
-            public override void Write(byte[] buffer, int offset, int count) => WriteAsync(buffer, offset, count, default(CancellationToken)).GetAwaiter().GetResult();
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                // Validate inputs
+                Debug.Assert(buffer != _arrayPoolBuffer);
+                _deflateStream.EnsureNotDisposed();
+
+                if (count <= 0)
+                {
+                    return;
+                }
+                else if (count > buffer.Length - offset)
+                {
+                    // The buffer stream is either malicious or poorly implemented and returned a number of
+                    // bytes larger than the buffer supplied to it.
+                    throw new InvalidDataException(SR.GenericInvalidData);
+                }
+
+                // Feed the data from base stream into the decompression engine.
+                _deflateStream._inflater.SetInput(buffer, offset, count);
+
+                // While there's more decompressed data available, forward it to the buffer stream.
+                while (true)
+                {
+                    int bytesRead = _deflateStream._inflater.Inflate(new Span<byte>(_arrayPoolBuffer));
+                    if (bytesRead > 0)
+                    {
+                        _destination.Write(_arrayPoolBuffer, 0, bytesRead);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
             public override bool CanWrite => true;
             public override void Flush() { }
-
             public override bool CanRead => false;
             public override bool CanSeek => false;
             public override long Length { get { throw new NotSupportedException(); } }
@@ -809,7 +1059,6 @@ namespace System.IO.Compression
             Debug.Assert(oldValue == 1, $"Expected {nameof(_activeAsyncOperation)} to be 1, got {oldValue}");
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowInvalidBeginCall()
         {
             throw new InvalidOperationException(SR.InvalidBeginCall);

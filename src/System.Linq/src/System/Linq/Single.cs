@@ -12,16 +12,18 @@ namespace System.Linq
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+            if (source is IList<TSource> list)
             {
                 switch (list.Count)
                 {
-                    case 0: throw Error.NoElements();
-                    case 1: return list[0];
+                    case 0:
+                        ThrowHelper.ThrowNoElementsException();
+                        return default;
+                    case 1:
+                        return list[0];
                 }
             }
             else
@@ -30,7 +32,7 @@ namespace System.Linq
                 {
                     if (!e.MoveNext())
                     {
-                        throw Error.NoElements();
+                        ThrowHelper.ThrowNoElementsException();
                     }
 
                     TSource result = e.Current;
@@ -41,19 +43,20 @@ namespace System.Linq
                 }
             }
 
-            throw Error.MoreThanOneElement();
+            ThrowHelper.ThrowMoreThanOneElementException();
+            return default;
         }
 
         public static TSource Single<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (predicate == null)
             {
-                throw Error.ArgumentNull(nameof(predicate));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -67,7 +70,7 @@ namespace System.Linq
                         {
                             if (predicate(e.Current))
                             {
-                                throw Error.MoreThanOneMatch();
+                                ThrowHelper.ThrowMoreThanOneMatchException();
                             }
                         }
 
@@ -76,23 +79,25 @@ namespace System.Linq
                 }
             }
 
-            throw Error.NoMatch();
+            ThrowHelper.ThrowNoMatchException();
+            return default;
         }
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source)
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+            if (source is IList<TSource> list)
             {
                 switch (list.Count)
                 {
-                    case 0: return default(TSource);
-                    case 1: return list[0];
+                    case 0:
+                        return default(TSource);
+                    case 1:
+                        return list[0];
                 }
             }
             else
@@ -112,19 +117,20 @@ namespace System.Linq
                 }
             }
 
-            throw Error.MoreThanOneElement();
+            ThrowHelper.ThrowMoreThanOneElementException();
+            return default;
         }
 
         public static TSource SingleOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (predicate == null)
             {
-                throw Error.ArgumentNull(nameof(predicate));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
             using (IEnumerator<TSource> e = source.GetEnumerator())
@@ -138,7 +144,7 @@ namespace System.Linq
                         {
                             if (predicate(e.Current))
                             {
-                                throw Error.MoreThanOneMatch();
+                                ThrowHelper.ThrowMoreThanOneMatchException();
                             }
                         }
 

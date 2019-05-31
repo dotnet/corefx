@@ -1,18 +1,15 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using System.Linq;
-using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.Collections;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Resources;
 using System.Text.RegularExpressions;
-using System.Xml;
 
 namespace System.Xml.Tests
 {
@@ -28,7 +25,7 @@ namespace System.Xml.Tests
         {
             LineNumber = lineNum;
             LinePosition = linePos;
-            FilePath = String.Empty;
+            FilePath = string.Empty;
         }
 
         public LineInfo(int lineNum, int linePos, string filePath)
@@ -110,19 +107,12 @@ namespace System.Xml.Tests
                     case "SYSTEM.XML":
                         {
                             var dom = new XmlDocument();
-                            _asm = dom.GetType().GetTypeInfo().Assembly;
+                            _asm = dom.GetType().Assembly;
                         }
                         break;
-                    //case "SYSTEM.DATA":
-                    //{
-                    //    var ds = new DataSet();
-                    //    asm = ds.GetType().Assembly;
-                    //}
-                    //    break;
                     default:
-                        throw new FileLoadException("Cannot load assembly from " + GetRuntimeInstallDir() + assemblyName + ".dll");
-                        //asm = Assembly.LoadFrom(GetRuntimeInstallDir() + assemblyName + ".dll");
-                        //break;
+                        _asm = Assembly.LoadFrom(GetRuntimeInstallDir() + assemblyName + ".dll");
+                        break;
                 }
 
                 if (_asm == null)
@@ -186,7 +176,6 @@ namespace System.Xml.Tests
                         }
                         resReader.Dispose();
                     }
-                    //break;
                 }
             }
 
@@ -197,7 +186,7 @@ namespace System.Xml.Tests
         private static string GetRuntimeInstallDir()
         {
             // Get mscorlib path
-            var s = typeof(object).GetTypeInfo().Module.FullyQualifiedName;
+            var s = typeof(object).Module.FullyQualifiedName;
             // Remove mscorlib.dll from the path
             return Directory.GetParent(s).ToString() + "\\";
         }
@@ -211,7 +200,7 @@ namespace System.Xml.Tests
             // Use reflection to obtain "res" property value
             var exceptionType = _ex.GetType();
             var fInfo = exceptionType.GetField("res", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase) ??
-                        exceptionType.GetTypeInfo().BaseType.GetField("res", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
+                        exceptionType.BaseType.GetField("res", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.IgnoreCase);
 
             if (fInfo == null)
                 throw new VerifyException("Cannot obtain Resource ID from Exception.");
@@ -220,8 +209,7 @@ namespace System.Xml.Tests
                             "\n===== Original Exception Message =====\n" + _ex.Message +
                             "\n===== Resource Id =====\n" + fInfo.GetValue(_ex) +
                             "\n===== HelpLink =====\n" + _ex.HelpLink +
-                            "\n===== Source =====\n" + _ex.Source /*+
-                            "\n===== TargetSite =====\n" + ex.TargetSite + "\n"*/);
+                            "\n===== Source =====\n" + _ex.Source);
 
             _output.WriteLine(
                             "\n===== InnerException =====\n" + _ex.InnerException +
@@ -270,6 +258,7 @@ namespace System.Xml.Tests
             // ignore case
             _expectedMessage = _expectedMessage.ToLowerInvariant();
             _actualMessage = _actualMessage.ToLowerInvariant();
+
             if (Regex.Match(_actualMessage, _expectedMessage, RegexOptions.Singleline).ToString() != _actualMessage)
             {
                 // Unescape before printing the expected message string
@@ -360,11 +349,11 @@ namespace System.Xml.Tests
                     var lineInfo = (IdsAndParams[1] as LineInfo);
 
                     // Xml_ErrorPosition = "Line {0}, position {1}."
-                    lineInfoMessage = String.IsNullOrEmpty(lineInfo.FilePath) ? _resources["Xml_ErrorPosition"].ToString() : _resources["Xml_ErrorFilePosition"].ToString();
+                    lineInfoMessage = string.IsNullOrEmpty(lineInfo.FilePath) ? _resources["Xml_ErrorPosition"].ToString() : _resources["Xml_ErrorFilePosition"].ToString();
 
                     var lineNumber = lineInfo.LineNumber.ToString();
                     var linePosition = lineInfo.LinePosition.ToString();
-                    lineInfoMessage = String.IsNullOrEmpty(lineInfo.FilePath) ? String.Format(lineInfoMessage, lineNumber, linePosition) : String.Format(lineInfoMessage, lineInfo.FilePath, lineNumber, linePosition);
+                    lineInfoMessage = string.IsNullOrEmpty(lineInfo.FilePath) ? string.Format(lineInfoMessage, lineNumber, linePosition) : string.Format(lineInfoMessage, lineInfo.FilePath, lineNumber, linePosition);
                 }
                 else
                     lineInfoMessage = ESCAPE_ANY;

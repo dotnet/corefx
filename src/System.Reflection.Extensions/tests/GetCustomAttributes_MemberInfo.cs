@@ -25,9 +25,9 @@ namespace System.Reflection.Tests
         {
             Assert.True(CustomAttributeExtensions.IsDefined(s_typeTestClass.GetTypeInfo(), typeof(MyAttribute_Single_M)));
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
-                CustomAttributeExtensions.IsDefined(s_typeTestClass.GetTypeInfo(), typeof(String));
+                CustomAttributeExtensions.IsDefined(s_typeTestClass.GetTypeInfo(), typeof(string));
             });
 
             Assert.Throws<ArgumentNullException>(() =>
@@ -93,9 +93,9 @@ namespace System.Reflection.Tests
                 attribute = CustomAttributeExtensions.GetCustomAttribute(s_typeTestClass.GetTypeInfo(), typeof(MyAttribute_AllowMultiple_Inherited));
             });
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
-                attribute = CustomAttributeExtensions.GetCustomAttribute(s_typeTestClass.GetTypeInfo(), typeof(String));
+                attribute = CustomAttributeExtensions.GetCustomAttribute(s_typeTestClass.GetTypeInfo(), typeof(string));
             });
 
             Assert.Throws<ArgumentNullException>(() =>
@@ -113,9 +113,9 @@ namespace System.Reflection.Tests
             attributes = CustomAttributeExtensions.GetCustomAttributes(s_typeTestClass.GetTypeInfo(), typeof(SecurityCriticalAttribute));
             Assert.Equal(0, attributes.Count());
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
-                attributes = CustomAttributeExtensions.GetCustomAttributes(s_typeTestClass.GetTypeInfo(), typeof(String));
+                attributes = CustomAttributeExtensions.GetCustomAttributes(s_typeTestClass.GetTypeInfo(), typeof(string));
             });
 
             Assert.Throws<ArgumentNullException>(() =>
@@ -165,36 +165,36 @@ namespace System.Reflection.Tests
 
     public class MyAttributeBase_M : Attribute
     {
-        private String _name;
-        public MyAttributeBase_M(String name)
+        private string _name;
+        public MyAttributeBase_M(string name)
         {
             _name = name;
         }
-        public override String ToString() { return this.GetType() + " " + _name; }
+        public override string ToString() { return this.GetType() + " " + _name; }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = false)]
     public class MyAttribute_Single_M : MyAttributeBase_M
     {
-        public MyAttribute_Single_M(String name) : base(name) { }
+        public MyAttribute_Single_M(string name) : base(name) { }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = false)]
     public class MyAttribute_AllowMultiple_M : MyAttributeBase_M
     {
-        public MyAttribute_AllowMultiple_M(String name) : base(name) { }
+        public MyAttribute_AllowMultiple_M(string name) : base(name) { }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = false, Inherited = true)]
     public class MyAttribute_Single_Inherited : MyAttributeBase_M
     {
-        public MyAttribute_Single_Inherited(String name) : base(name) { }
+        public MyAttribute_Single_Inherited(string name) : base(name) { }
     }
 
     [AttributeUsage(AttributeTargets.All, AllowMultiple = true, Inherited = true)]
     public class MyAttribute_AllowMultiple_Inherited : MyAttributeBase_M
     {
-        public MyAttribute_AllowMultiple_Inherited(String name) : base(name) { }
+        public MyAttribute_AllowMultiple_Inherited(string name) : base(name) { }
     }
 
     public class TestClassWithoutAttribute

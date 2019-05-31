@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Contracts;
@@ -16,10 +15,10 @@ namespace System.Collections.Immutable
     /// </summary>
     /// <typeparam name="T">The type of element stored by the stack.</typeparam>
     [DebuggerDisplay("IsEmpty = {IsEmpty}; Top = {_head}")]
-    [DebuggerTypeProxy(typeof(ImmutableStackDebuggerProxy<>))]
+    [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
     [SuppressMessage("Microsoft.Naming", "CA1710:IdentifiersShouldHaveCorrectSuffix", Justification = "Ignored")]
     [SuppressMessage("Microsoft.Naming", "CA1711:IdentifiersShouldNotHaveIncorrectSuffix", Justification = "Ignored")]
-    public sealed class ImmutableStack<T> : IImmutableStack<T>
+    public sealed partial class ImmutableStack<T> : IImmutableStack<T>
     {
         /// <summary>
         /// The singleton empty stack.
@@ -54,7 +53,8 @@ namespace System.Collections.Immutable
         /// <param name="tail">The rest of the elements on the stack.</param>
         private ImmutableStack(T head, ImmutableStack<T> tail)
         {
-            Requires.NotNull(tail, nameof(tail));
+            Debug.Assert(tail != null);
+            
             _head = head;
             _tail = tail;
         }
@@ -66,9 +66,7 @@ namespace System.Collections.Immutable
         {
             get
             {
-                Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-                Contract.Ensures(Contract.Result<ImmutableStack<T>>().IsEmpty);
-                Contract.Assume(s_EmptyField.IsEmpty);
+                Debug.Assert(s_EmptyField.IsEmpty);
                 return s_EmptyField;
             }
         }
@@ -78,9 +76,7 @@ namespace System.Collections.Immutable
         /// </summary>
         public ImmutableStack<T> Clear()
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>().IsEmpty);
-            Contract.Assume(s_EmptyField.IsEmpty);
+            Debug.Assert(s_EmptyField.IsEmpty);
             return Empty;
         }
 
@@ -121,6 +117,26 @@ namespace System.Collections.Immutable
             return _head;
         }
 
+#if !NETSTANDARD10
+        /// <summary>
+        /// Gets a read-only reference to the element on the top of the stack.
+        /// </summary>
+        /// <returns>
+        /// A read-only reference to the element on the top of the stack. 
+        /// </returns>
+        /// <exception cref="InvalidOperationException">Thrown when the stack is empty.</exception>
+        [Pure]
+        public ref readonly T PeekRef()
+        {
+            if (this.IsEmpty)
+            {
+                throw new InvalidOperationException(SR.InvalidEmptyOperation);
+            }
+
+            return ref _head;
+        }
+#endif
+
         /// <summary>
         /// Pushes an element onto a stack and returns the new stack.
         /// </summary>
@@ -129,8 +145,6 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableStack<T> Push(T value)
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-            Contract.Ensures(!Contract.Result<ImmutableStack<T>>().IsEmpty);
             return new ImmutableStack<T>(value, this);
         }
 
@@ -153,12 +167,12 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableStack<T> Pop()
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
             if (this.IsEmpty)
             {
                 throw new InvalidOperationException(SR.InvalidEmptyOperation);
             }
 
+            Debug.Assert(_tail != null);
             return _tail;
         }
 
@@ -209,7 +223,9 @@ namespace System.Collections.Immutable
         [Pure]
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return new EnumeratorObject(this);
+            return this.IsEmpty ?
+                Enumerable.Empty<T>().GetEnumerator() :
+                new EnumeratorObject(this);
         }
 
         /// <summary>
@@ -231,232 +247,15 @@ namespace System.Collections.Immutable
         [Pure]
         internal ImmutableStack<T> Reverse()
         {
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>() != null);
-            Contract.Ensures(Contract.Result<ImmutableStack<T>>().IsEmpty == this.IsEmpty);
-
             var r = this.Clear();
             for (ImmutableStack<T> f = this; !f.IsEmpty; f = f.Pop())
             {
                 r = r.Push(f.Peek());
             }
 
+            Debug.Assert(r != null);
+            Debug.Assert(r.IsEmpty == IsEmpty);
             return r;
-        }
-
-        /// <summary>
-        /// Enumerates a stack with no memory allocations.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        public struct Enumerator
-        {
-            /// <summary>
-            /// The original stack being enumerated.
-            /// </summary>
-            private readonly ImmutableStack<T> _originalStack;
-
-            /// <summary>
-            /// The remaining stack not yet enumerated.
-            /// </summary>
-            private ImmutableStack<T> _remainingStack;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="Enumerator"/> struct.
-            /// </summary>
-            /// <param name="stack">The stack to enumerator.</param>
-            internal Enumerator(ImmutableStack<T> stack)
-            {
-                Requires.NotNull(stack, nameof(stack));
-                _originalStack = stack;
-                _remainingStack = null;
-            }
-
-            /// <summary>
-            /// Gets the current element.
-            /// </summary>
-            public T Current
-            {
-                get
-                {
-                    if (_remainingStack == null || _remainingStack.IsEmpty)
-                    {
-                        throw new InvalidOperationException();
-                    }
-                    else
-                    {
-                        return _remainingStack.Peek();
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Moves to the first or next element.
-            /// </summary>
-            /// <returns>A value indicating whether there are any more elements.</returns>
-            public bool MoveNext()
-            {
-                if (_remainingStack == null)
-                {
-                    // initial move
-                    _remainingStack = _originalStack;
-                }
-                else if (!_remainingStack.IsEmpty)
-                {
-                    _remainingStack = _remainingStack.Pop();
-                }
-
-                return !_remainingStack.IsEmpty;
-            }
-        }
-
-        /// <summary>
-        /// Enumerates a stack with no memory allocations.
-        /// </summary>
-        private class EnumeratorObject : IEnumerator<T>
-        {
-            /// <summary>
-            /// The original stack being enumerated.
-            /// </summary>
-            private readonly ImmutableStack<T> _originalStack;
-
-            /// <summary>
-            /// The remaining stack not yet enumerated.
-            /// </summary>
-            private ImmutableStack<T> _remainingStack;
-
-            /// <summary>
-            /// A flag indicating whether this enumerator has been disposed.
-            /// </summary>
-            private bool _disposed;
-
-            /// <summary>
-            /// Initializes a new instance of the <see cref="EnumeratorObject"/> class.
-            /// </summary>
-            /// <param name="stack">The stack to enumerator.</param>
-            internal EnumeratorObject(ImmutableStack<T> stack)
-            {
-                Requires.NotNull(stack, nameof(stack));
-                _originalStack = stack;
-            }
-
-            /// <summary>
-            /// Gets the current element.
-            /// </summary>
-            public T Current
-            {
-                get
-                {
-                    this.ThrowIfDisposed();
-                    if (_remainingStack == null || _remainingStack.IsEmpty)
-                    {
-                        throw new InvalidOperationException();
-                    }
-                    else
-                    {
-                        return _remainingStack.Peek();
-                    }
-                }
-            }
-
-            /// <summary>
-            /// Gets the current element.
-            /// </summary>
-            object IEnumerator.Current
-            {
-                get { return this.Current; }
-            }
-
-            /// <summary>
-            /// Moves to the first or next element.
-            /// </summary>
-            /// <returns>A value indicating whether there are any more elements.</returns>
-            public bool MoveNext()
-            {
-                this.ThrowIfDisposed();
-
-                if (_remainingStack == null)
-                {
-                    // initial move
-                    _remainingStack = _originalStack;
-                }
-                else if (!_remainingStack.IsEmpty)
-                {
-                    _remainingStack = _remainingStack.Pop();
-                }
-
-                return !_remainingStack.IsEmpty;
-            }
-
-            /// <summary>
-            /// Resets the position to just before the first element in the list.
-            /// </summary>
-            public void Reset()
-            {
-                this.ThrowIfDisposed();
-                _remainingStack = null;
-            }
-
-            /// <summary>
-            /// Disposes this instance.
-            /// </summary>
-            public void Dispose()
-            {
-                _disposed = true;
-            }
-
-            /// <summary>
-            /// Throws an <see cref="ObjectDisposedException"/> if this 
-            /// enumerator has already been disposed.
-            /// </summary>
-            private void ThrowIfDisposed()
-            {
-                if (_disposed)
-                {
-                    Requires.FailObjectDisposed(this);
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// A simple view of the immutable collection that the debugger can show to the developer.
-    /// </summary>
-    internal class ImmutableStackDebuggerProxy<T>
-    {
-        /// <summary>
-        /// The collection to be enumerated.
-        /// </summary>
-        private readonly ImmutableStack<T> _stack;
-
-        /// <summary>
-        /// The simple view of the collection.
-        /// </summary>
-        private T[] _contents;
-
-        /// <summary>   
-        /// Initializes a new instance of the <see cref="ImmutableStackDebuggerProxy{T}"/> class.
-        /// </summary>
-        /// <param name="stack">The collection to display in the debugger</param>
-        public ImmutableStackDebuggerProxy(ImmutableStack<T> stack)
-        {
-            Requires.NotNull(stack, nameof(stack));
-            _stack = stack;
-        }
-
-        /// <summary>
-        /// Gets a simple debugger-viewable collection.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Contents
-        {
-            get
-            {
-                if (_contents == null)
-                {
-                    _contents = _stack.ToArray();
-                }
-
-                return _contents;
-            }
         }
     }
 }

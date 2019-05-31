@@ -4,6 +4,7 @@
 
 internal partial class Interop
 {
+    // https://msdn.microsoft.com/en-us/library/windows/desktop/ms681382.aspx
     internal partial class Errors
     {
         internal const int ERROR_SUCCESS = 0x0;
@@ -17,13 +18,19 @@ internal partial class Interop
         internal const int ERROR_INVALID_DRIVE = 0xF;
         internal const int ERROR_NO_MORE_FILES = 0x12;
         internal const int ERROR_NOT_READY = 0x15;
+        internal const int ERROR_BAD_COMMAND = 0x16;
         internal const int ERROR_BAD_LENGTH = 0x18;
         internal const int ERROR_SHARING_VIOLATION = 0x20;
         internal const int ERROR_LOCK_VIOLATION = 0x21;
         internal const int ERROR_HANDLE_EOF = 0x26;
+        internal const int ERROR_BAD_NETPATH = 0x35;
+        internal const int ERROR_NETWORK_ACCESS_DENIED = 0x41;
+        internal const int ERROR_BAD_NET_NAME = 0x43;
         internal const int ERROR_FILE_EXISTS = 0x50;
         internal const int ERROR_INVALID_PARAMETER = 0x57;
         internal const int ERROR_BROKEN_PIPE = 0x6D;
+        internal const int ERROR_SEM_TIMEOUT = 0x79;
+        internal const int ERROR_CALL_NOT_IMPLEMENTED  = 0x78;
         internal const int ERROR_INSUFFICIENT_BUFFER = 0x7A;
         internal const int ERROR_INVALID_NAME = 0x7B;
         internal const int ERROR_NEGATIVE_SEEK = 0x83;
@@ -41,15 +48,23 @@ internal partial class Interop
         internal const int ERROR_PIPE_NOT_CONNECTED = 0xE9;
         internal const int ERROR_MORE_DATA = 0xEA;
         internal const int ERROR_NO_MORE_ITEMS = 0x103;
+        internal const int ERROR_DIRECTORY = 0x10B;
         internal const int ERROR_PARTIAL_COPY = 0x12B;
         internal const int ERROR_ARITHMETIC_OVERFLOW = 0x216;
         internal const int ERROR_PIPE_CONNECTED = 0x217;
         internal const int ERROR_PIPE_LISTENING = 0x218;
         internal const int ERROR_OPERATION_ABORTED = 0x3E3;
+        internal const int ERROR_IO_INCOMPLETE = 0x3E4;
         internal const int ERROR_IO_PENDING = 0x3E5;
         internal const int ERROR_NO_TOKEN = 0x3f0;
+        internal const int ERROR_SERVICE_DOES_NOT_EXIST = 0x424;
         internal const int ERROR_DLL_INIT_FAILED = 0x45A;
+        internal const int ERROR_COUNTER_TIMEOUT = 0x461;
+        internal const int ERROR_NO_ASSOCIATION = 0x483;
+        internal const int ERROR_DDE_FAIL = 0x484;
+        internal const int ERROR_DLL_NOT_FOUND = 0x485;
         internal const int ERROR_NOT_FOUND = 0x490;
+        internal const int ERROR_NETWORK_UNREACHABLE = 0x4CF;
         internal const int ERROR_NON_ACCOUNT_SID = 0x4E9;
         internal const int ERROR_NOT_ALL_ASSIGNED = 0x514;
         internal const int ERROR_UNKNOWN_REVISION = 0x519;
@@ -63,6 +78,8 @@ internal partial class Interop
         internal const int ERROR_BAD_IMPERSONATION_LEVEL = 0x542;
         internal const int ERROR_CANT_OPEN_ANONYMOUS = 0x543;
         internal const int ERROR_NO_SECURITY_ON_OBJECT = 0x546;
+        internal const int ERROR_CLASS_ALREADY_EXISTS = 0x582;
+        internal const int ERROR_EVENTLOG_FILE_CHANGED = 0x5DF;
         internal const int ERROR_TRUSTED_RELATIONSHIP_FAILURE = 0x6FD;
         internal const int ERROR_RESOURCE_LANG_NOT_FOUND = 0x717;
         internal const int EFail = unchecked((int)0x80004005);

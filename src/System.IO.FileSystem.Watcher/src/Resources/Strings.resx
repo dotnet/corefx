@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -117,9 +116,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ObjectDisposed_FileClosed" xml:space="preserve">
-    <value>Cannot access a closed file.</value>
-  </data>
   <data name="BufferSizeTooLarge" xml:space="preserve">
     <value>The specified buffer size is too large. FileSystemWatcher cannot allocate {0} bytes for the internal buffer.</value>
   </data>
@@ -131,6 +127,9 @@
   </data>
   <data name="InvalidDirName" xml:space="preserve">
     <value>The directory name {0} is invalid.</value>
+  </data>
+  <data name="InvalidDirName_NotExists" xml:space="preserve">
+    <value>The directory name '{0}' does not exist.</value>
   </data>
   <data name="InvalidEnumArgument" xml:space="preserve">
     <value>The value of argument '{0}' ({1}) is invalid for Enum type '{2}'.</value>
@@ -172,21 +171,24 @@
     <value>Failed to start the EventStream</value>
   </data>
   <data name="Argument_InvalidPathChars" xml:space="preserve">
-    <value>Illegal characters in path.</value>
+    <value>Illegal characters in path '{0}'.</value>
   </data>
   <data name="IOException_INotifyInstanceSystemLimitExceeded" xml:space="preserve">
     <value>The system limit on the number of inotify instances has been reached.</value>
   </data>
   <data name="IOException_INotifyInstanceUserLimitExceeded_Value" xml:space="preserve">
-    <value>The configured user limit ({0}) on the number of inotify instances has been reached.</value>
+    <value>The configured user limit ({0}) on the number of inotify instances has been reached, or the per-process limit on the number of open file descriptors has been reached.</value>
   </data>
   <data name="IOException_INotifyWatchesUserLimitExceeded_Value" xml:space="preserve">
-    <value>The configured user limit ({0}) on the number of inotify watches has been reached.</value>
+    <value>The configured user limit ({0}) on the number of inotify watches has been reached, or the operating system failed to allocate a required resource.</value>
   </data>
   <data name="IOException_INotifyInstanceUserLimitExceeded" xml:space="preserve">
-    <value>The configured user limit on the number of inotify instances has been reached.</value>
+    <value>The configured user limit on the number of inotify instances has been reached, or the per-process limit on the number of open file descriptors has been reached.</value>
   </data>
   <data name="IOException_INotifyWatchesUserLimitExceeded" xml:space="preserve">
-    <value>The configured user limit on the number of inotify watches has been reached.</value>
+    <value>The configured user limit on the number of inotify watches has been reached, or the operating system failed to allocate a required resource.</value>
+  </data>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
   </data>
 </root>

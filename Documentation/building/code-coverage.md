@@ -1,9 +1,7 @@
 Code Coverage
 =============
 
-"Code coverage" is a measure that indicates how much of our library code is exercised by our test suites.  We measure code coverage using the [OpenCover](https://github.com/opencover/opencover), and a report of our latest code coverage results can be seen by clicking the coverage badge on the [CoreFX home page](https://github.com/dotnet/corefx):
-
-[![Coverage status](https://img.shields.io/badge/coverage-report-blue.svg)](http://dotnet-ci.cloudapp.net/job/dotnet_corefx_coverage_windows/lastBuild/Code_Coverage_Report/)
+"Code coverage" is a measure that indicates how much of our library code is exercised by our test suites.  We measure code coverage using the [Coverlet](https://github.com/tonerdo/coverlet), and a report of our latest code coverage results can be seen by clicking the coverage badge on the [CoreFX home page](https://github.com/dotnet/corefx), linking to the latest [Coverage Report](https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows/Code_Coverage_Report/).
 
 This report shows each library currently being tested with code coverage and provides statistics around the quality of the code coverage for the library.  It also provides a line-by-line breakdown of what lines are being covered and what lines are not.
 
@@ -22,61 +20,58 @@ Our default, somewhat-arbitrary initial goal for a library is 90% code coverage.
 
 ## Issues
 
-Issues are opened for a library when a cursory examination of its code coverage reveal that there are likely still some meaningful gaps that need to be addressed.  We welcome contributions to our test suites to help address these gaps and close these issues.  Many of these issues are marked as "up for grabs".
+Issues are opened for a library when a cursory examination of its code coverage reveal that there are likely still some meaningful gaps that need to be addressed.  We welcome contributions to our test suites to help address these gaps and close these issues.  Many of these issues are marked as [up-for-grabs](https://github.com/dotnet/corefx/labels/up-for-grabs).
 
-An issue need not be addressed in its entirety.  We happily accept contributions that improve our tests and work towards improving code coverage numbers even if they only incrementally improve the situation.
+An issue need not be addressed in its entirety. We happily accept contributions that improve our tests and work towards improving code coverage numbers even if they only incrementally improve the situation.
 
 ## Automated Code Coverage Runs
 
-Code coverage runs are performed by Jenkins approximately twice a day.  The results of these runs are all available from the site linked to by the code coverage badge on the home page.
+Code coverage runs are performed approximately twice a day. The results of these runs are all available from the site linked to by the code coverage badge on the home page.
+
+## PR Code Coverage Runs
+
+Jenkins can create a coverage report using your PR. Ask for it using `@dotnet-bot test code coverage please`.
+
+After it's done the report can be found in the build log, it looks like eg
+`https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows_prtest/16/artifact/bin/tests/coverage`
+then add index.htm on the end:
+`https://ci.dot.net/job/dotnet_corefx/job/master/job/code_coverage_windows_prtest/16/artifact/bin/tests/coverage/index.htm`
+You can navigate to this from your PR by clicking the "Details" link to the right of the code coverage job listed at the bottom of the PR after having issued the above request to dotnet-bot.  In the Jenkins UI for the resulting build, click the "Build Artifacts" link and navigate through the resulting hierarchy to the index.htm file.
 
 ## Local Code Coverage Runs
 
-You can perform code coverage runs locally on your own machine.  Normally to build your entire CoreFX repo, from the root of your repo you'd run:
+You can perform code coverage runs for the entire repository locally by adding the `coverage` switch (assuming that  source and test assemblies are already built):
 
-    build
+    build -test -coverage
 
-To include code coverage in this run, augment it with the `coverage` argument:
+This runs the tests and generates the full code coverage report. The resulting index.htm file providing the results of the run should be available at:
 
-    build -coverage
+    artifacts\coverage\index.htm
 
-This will do the build and testing as with the normal ```build```, but it will run the tests using the OpenCover tool.  A resulting index.htm file providing the results of the run will be available at:
+You can also build and test with code coverage for a particular test project rather than for the whole repo with the ```/p:Coverage=true``` argument:
 
-    bin\tests\coverage\index.htm
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true
 
-You can also build and test with code coverage for a particular test project rather than for the whole repo.  Normally to build and test a particular test suite, from the same directory as that test suite's .csproj, you'd run:
-
-    msbuild /t:BuildAndTest
-
-To do so with code coverage, as with ```build``` append the ```/p:Coverage=true``` argument:
-
-    msbuild /t:BuildAndTest /p:Coverage=true
-
-The results for this one library will then also show up in the aforementioned index.htm file. For example, to build, test, and get code coverage results for the System.Diagnostics.Debug library, from the root of my repo I can do:
+The results for this one library will then show up in the aforementioned index.htm file. For example, to build, test, and get code coverage results for the System.Diagnostics.Debug library, from the root of the repo one can do:
 
     cd src\System.Diagnostics.Debug\tests\
-    msbuild /t:BuildAndTest /p:Coverage=true
-    
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true
+
 And then once the run completes:
-    
-    ..\..\..\bin\tests\coverage\index.htm
 
-## Code coverage with mscorlib code
+    $(TestPath)\report\index.htm
 
-Some of the libraries for which contracts and tests live in the corefx repo are actually implemented in the core runtime library in another repo, e.g. the implementation that backs the System.Runtime contract is in System.Private.Corlib.dll in either the coreclr or corert repo. To run coverage reports for these projects, you need to build mscorlib locally from the coreclr repo.
+**Note:** If you only want to measure the coverage of your local changes (that haven't been pushed to git), run:
 
-The following steps can be used manually to produce a coverage report, but a customizable batch file can be found [here](facade-code-coverage.bat). Changing the parameters in the first couple of lines lets you run a coverage report easily for any facade project.
+    dotnet msbuild /t:BuildAndTest /p:Coverage=true /p:CoverageSourceLink=false
 
-1. Build the local test project (`msbuild /T:Build`)
-3. Build coreclr locally in Debug or Release (`build.cmd all Debug skiptests`)
-2. Navigate to the built test directory in the corefx bin (e.g. `bin/tests/AnyOS.AnyCPU.Debug/System.Runtime/netcoreapp1.0` for `System.Runtime`
-4. Delete `coreclr.dll`, `mscorlib.dll`, `mscorlib.ni.dll`, `System.Private.CoreLib.dll` and `System.Private.CoreLib.ni.dll` from that directory
-5. Copy all files in the coreclr `bin` directory to the test directory
-6. Copy all files in the coreclr `bin/PDB` directory to the test directory
-7. Run an OpenCover command with `xunit.console.netcore.exe`. For example:
 
-	<corefx-root>/packages/OpenCover/<opencover-version>/tools/OpenCover.Console.exe -oldStyle -filter:"+[*]* -[*.Tests]* -[xunit.*]*" -excludebyfile:"*\Common\src\System\SR.*" -nodefaultfilters -excludebyattribute:*.ExcludeFromCodeCoverage* -skipautoprops -hideskipped:All -threshold:1 -returntargetcode -register:user -targetdir:<path-to corefx-bin> -target:CoreRun.exe -output:coverage.xml -targetargs:"xunit.console.netcore.exe System.Runtime.Tests -xml testResults.xml -notrait Benchmark=true -notrait category=OuterLoop -notrait category=failing -notrait category=nonwindowstests"
+## Code coverage with System.Private.CoreLib code
 
-8. Run a ReportGenerator command with the generated `coverage.xml` file. For example:
+Some of the libraries for which contracts and tests live in the corefx repo are actually fully or partially implemented in the core runtime library in another repo, e.g. the implementation that backs the System.Runtime contract is in System.Private.CoreLib.dll in either the coreclr or corert repo. Test projects for code that lives, fully or partially, in System.Private.CoreLib, should have the property `TestRuntime` set to `true` in order to obtain proper code coverage reports.
 
-	<corefx-root>/packages/ReportGenerator/<opencover-version>/tools/ReportGenerator.exe -reporttypes:Html;Badges -reports:coverage.xml
+If the test project does not set the property `TestRuntime` to `true` and you want to collect code coverage that includes types in System.Private.CoreLib.dll add `/p:TestRuntime=true` to the coverage build command listed above.
+
+If you want to get coverage report against a private build of System.Private.CoreLib follow the steps outlined at [Testing with Private CoreClr Bits](https://github.com/dotnet/corefx/blob/master/Documentation/project-docs/developer-guide.md#testing-with-private-coreclr-bits).
+
+The build and test projects take care of copying assemblies and PDBs as needed for coverage runs. The resulting code coverage report should now also include details for System.Private.CoreLib.

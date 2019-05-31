@@ -13,9 +13,8 @@ namespace System.Reflection.Metadata.Ecma335
     {
         private readonly MetadataReader _metadataReader;
         private readonly object _namespaceTableAndListLock = new object();
-        private Dictionary<NamespaceDefinitionHandle, NamespaceData> _namespaceTable;
+        private volatile Dictionary<NamespaceDefinitionHandle, NamespaceData> _namespaceTable;
         private NamespaceData _rootNamespace;
-        private ImmutableArray<NamespaceDefinitionHandle> _namespaceList;
         private uint _virtualNamespaceCounter;
 
         internal NamespaceCache(MetadataReader reader)
@@ -73,7 +72,7 @@ namespace System.Reflection.Metadata.Ecma335
         ///   reader.GetString(GetSimpleName(handle, 3)) == "Test"
         ///   reader.GetString(GetSimpleName(handle, 1000)) == "Test"
         /// </summary>
-        private StringHandle GetSimpleName(NamespaceDefinitionHandle fullNamespaceHandle, int segmentIndex = Int32.MaxValue)
+        private StringHandle GetSimpleName(NamespaceDefinitionHandle fullNamespaceHandle, int segmentIndex = int.MaxValue)
         {
             StringHandle handleContainingSegment = fullNamespaceHandle.GetFullName();
             Debug.Assert(!handleContainingSegment.IsVirtual);
@@ -127,7 +126,7 @@ namespace System.Reflection.Metadata.Ecma335
                     new NamespaceDataBuilder(
                         rootNamespace,
                         rootNamespace.GetFullName(),
-                        String.Empty));
+                        string.Empty));
 
                 PopulateTableWithTypeDefinitions(namespaceBuilderTable);
                 PopulateTableWithExportedTypes(namespaceBuilderTable);
@@ -155,8 +154,8 @@ namespace System.Reflection.Metadata.Ecma335
                     }
                 }
 
-                _namespaceTable = namespaceTable;
                 _rootNamespace = namespaceTable[rootNamespace];
+                _namespaceTable = namespaceTable;
             }
         }
 
@@ -264,7 +263,7 @@ namespace System.Reflection.Metadata.Ecma335
                     }
                     else
                     {
-                        parentName = String.Empty;
+                        parentName = string.Empty;
                     }
                 }
                 else
@@ -313,9 +312,9 @@ namespace System.Reflection.Metadata.Ecma335
         private void ResolveParentChildRelationships(Dictionary<string, NamespaceDataBuilder> namespaces, out List<NamespaceDataBuilder> virtualNamespaces)
         {
             virtualNamespaces = null;
-            foreach (var namespaceData in namespaces.Values)
+            foreach (var namespaceData in namespaces)
             {
-                LinkChildToParentNamespace(namespaces, namespaceData, ref virtualNamespaces);
+                LinkChildToParentNamespace(namespaces, namespaceData.Value, ref virtualNamespaces);
             }
         }
 
@@ -385,35 +384,6 @@ namespace System.Reflection.Metadata.Ecma335
         }
 
         /// <summary>
-        /// Populates namespaceList with distinct namespaces. No ordering is guaranteed.
-        /// </summary>
-        private void PopulateNamespaceList()
-        {
-            lock (_namespaceTableAndListLock)
-            {
-                if (_namespaceList != null)
-                {
-                    return;
-                }
-
-                Debug.Assert(_namespaceTable != null);
-                var namespaceNameSet = new HashSet<string>();
-                var namespaceListBuilder = ImmutableArray.CreateBuilder<NamespaceDefinitionHandle>();
-
-                foreach (var group in _namespaceTable)
-                {
-                    var data = group.Value;
-                    if (namespaceNameSet.Add(data.FullName))
-                    {
-                        namespaceListBuilder.Add(group.Key);
-                    }
-                }
-
-                _namespaceList = namespaceListBuilder.ToImmutable();
-            }
-        }
-
-        /// <summary>
         /// If the namespace table doesn't exist, populates it!
         /// </summary>
         private void EnsureNamespaceTableIsPopulated()
@@ -424,18 +394,6 @@ namespace System.Reflection.Metadata.Ecma335
                 PopulateNamespaceTable();
             }
             Debug.Assert(_namespaceTable != null);
-        }
-
-        /// <summary>
-        /// If the namespace list doesn't exist, populates it!
-        /// </summary>
-        private void EnsureNamespaceListIsPopulated()
-        {
-            if (_namespaceList == null)
-            {
-                PopulateNamespaceList();
-            }
-            Debug.Assert(_namespaceList != null);
         }
 
         /// <summary>

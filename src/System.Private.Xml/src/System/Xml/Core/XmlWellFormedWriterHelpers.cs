@@ -379,13 +379,13 @@ namespace System.Xml
                             writer.WriteValue((string)item.data);
                             break;
                         default:
-                            Debug.Assert(false, "Unexpected ItemType value.");
+                            Debug.Fail("Unexpected ItemType value.");
                             break;
                     }
                 }
             }
 
-            // This method trims whitespaces from the beginning and the end of the string and cached writer events
+            // This method trims whitespace from the beginning and the end of the string and cached writer events
             internal void Trim()
             {
                 // if only one string value -> trim the write spaces directly
@@ -511,7 +511,7 @@ namespace System.Xml
                 else if (_items.Length == newItemIndex)
                 {
                     Item[] newItems = new Item[newItemIndex * 2];
-                    Array.Copy(_items, newItems, newItemIndex);
+                    Array.Copy(_items, 0, newItems, 0, newItemIndex);
                     _items = newItems;
                 }
                 if (_items[newItemIndex] == null)

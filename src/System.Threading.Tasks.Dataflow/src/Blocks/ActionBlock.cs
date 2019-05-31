@@ -14,7 +14,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks.Dataflow.Internal;
 
@@ -73,8 +72,6 @@ namespace System.Threading.Tasks.Dataflow
             // Validate arguments
             if (action == null) throw new ArgumentNullException(nameof(action));
             if (dataflowBlockOptions == null) throw new ArgumentNullException(nameof(dataflowBlockOptions));
-            Contract.Ensures((_spscTarget != null) ^ (_defaultTarget != null), "One and only one of the two targets must be non-null after construction");
-            Contract.EndContractBlock();
 
             // Ensure we have options that can't be changed by the caller
             dataflowBlockOptions = dataflowBlockOptions.DefaultOrClone();
@@ -125,6 +122,8 @@ namespace System.Threading.Tasks.Dataflow
                 etwLog.DataflowBlockCreated(this, dataflowBlockOptions);
             }
 #endif
+
+            Debug.Assert((_spscTarget != null) ^ (_defaultTarget != null), "One and only one of the two targets must be non-null after construction");
         }
 
         /// <summary>Processes the message with a user-provided action.</summary>
@@ -234,7 +233,6 @@ namespace System.Threading.Tasks.Dataflow
         void IDataflowBlock.Fault(Exception exception)
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
-            Contract.EndContractBlock();
 
             if (_defaultTarget != null)
             {
@@ -280,7 +278,7 @@ namespace System.Threading.Tasks.Dataflow
         }
 
         /// <include file='XmlDocs/CommonXmlDocComments.xml' path='CommonXmlDocComments/Targets/Member[@name="OfferMessage"]/*' />
-        DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, Boolean consumeToAccept)
+        DataflowMessageStatus ITargetBlock<TInput>.OfferMessage(DataflowMessageHeader messageHeader, TInput messageValue, ISourceBlock<TInput> source, bool consumeToAccept)
         {
             return _defaultTarget != null ?
                 _defaultTarget.OfferMessage(messageHeader, messageValue, source, consumeToAccept) :
@@ -357,7 +355,7 @@ namespace System.Threading.Tasks.Dataflow
             }
 
             /// <summary>Gets the number of outstanding input operations.</summary>
-            public Int32 CurrentDegreeOfParallelism
+            public int CurrentDegreeOfParallelism
             {
                 get { return _defaultDebugInfo != null ? _defaultDebugInfo.CurrentDegreeOfParallelism : _spscDebugInfo.CurrentDegreeOfParallelism; }
             }

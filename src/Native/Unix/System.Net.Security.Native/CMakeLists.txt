@@ -1,6 +1,8 @@
-project(System.Net.Security.Native)
+project(System.Net.Security.Native C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+
+add_compile_options(-Wno-incompatible-pointer-types-discards-qualifiers)
 
 add_definitions(-DPIC=1)
 
@@ -24,7 +26,7 @@ else()
 endif()
 
 set(NATIVEGSS_SOURCES
-    pal_gssapi.cpp
+    pal_gssapi.c
 )
 
 add_library(System.Net.Security.Native
@@ -33,8 +35,19 @@ add_library(System.Net.Security.Native
     ${VERSION_FILE_PATH}
 )
 
+add_library(System.Net.Security.Native-Static
+    STATIC
+    ${NATIVEGSS_SOURCES}
+    ${VERSION_FILE_PATH}
+)
+
+# Disable the "lib" prefix and override default name
+set_target_properties(System.Net.Security.Native-Static PROPERTIES PREFIX "")
+set_target_properties(System.Net.Security.Native-Static PROPERTIES OUTPUT_NAME System.Net.Security.Native CLEAN_DIRECT_OUTPUT 1)
+
 target_link_libraries(System.Net.Security.Native
     ${LIBGSS}
 )
 
 install_library_and_symbols (System.Net.Security.Native)
+install (TARGETS System.Net.Security.Native-Static DESTINATION .)

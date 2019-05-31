@@ -10,7 +10,7 @@ namespace System.IO.Tests
 {
     public class Directory_NotifyFilter_Tests : FileSystemWatcherTest
     {
-        [DllImport( "api-ms-win-security-provider-l1-1-0.dll", EntryPoint = "SetNamedSecurityInfoW", 
+        [DllImport("advapi32.dll", EntryPoint = "SetNamedSecurityInfoW",
             CallingConvention = CallingConvention.Winapi, SetLastError = true, ExactSpelling = true, CharSet = CharSet.Unicode)]
         private static extern uint SetSecurityInfoByHandle( string name, uint objectType, uint securityInformation, 
             IntPtr owner, IntPtr group, IntPtr dacl, IntPtr sacl);
@@ -87,8 +87,6 @@ namespace System.IO.Tests
                 WatcherChangeTypes expected = 0;
                 if (filter == NotifyFilters.DirectoryName)
                     expected |= WatcherChangeTypes.Renamed;
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && (filter == NotifyFilters.FileName))
-                    expected |= WatcherChangeTypes.Renamed;
 
                 ExpectEvent(watcher, expected, action, cleanup, targetPath);
             }
@@ -141,8 +139,36 @@ namespace System.IO.Tests
         }
 
         [Theory]
+        [OuterLoop]
         [MemberData(nameof(FilterTypes))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        public void FileSystemWatcher_Directory_NotifyFilter_LastWriteTime_TwoFilters(NotifyFilters filter)
+        {
+            Assert.All(FilterTypes(), (filter2Arr =>
+            {
+                using (var testDirectory = new TempDirectory(GetTestFilePath()))
+                using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
+                using (var watcher = new FileSystemWatcher(testDirectory.Path, Path.GetFileName(dir.Path)))
+                {
+                    filter |= (NotifyFilters)filter2Arr[0];
+                    watcher.NotifyFilter = filter;
+                    Action action = () => Directory.SetLastWriteTime(dir.Path, DateTime.Now + TimeSpan.FromSeconds(10));
+
+                    WatcherChangeTypes expected = 0;
+                    if ((filter & NotifyFilters.LastWrite) > 0)
+                        expected |= WatcherChangeTypes.Changed;
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && ((filter & LinuxFiltersForAttribute) > 0))
+                        expected |= WatcherChangeTypes.Changed;
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX) && ((filter & OSXFiltersForModify) > 0))
+                        expected |= WatcherChangeTypes.Changed;
+                    ExpectEvent(watcher, expected, action, expectedPath: dir.Path);
+                }
+            }));
+        }
+
+        [Theory]
+        [MemberData(nameof(FilterTypes))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes to set security info
+        [ActiveIssue(21109, TargetFrameworkMonikers.Uap)]
         public void FileSystemWatcher_Directory_NotifyFilter_Security(NotifyFilters filter)
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
@@ -251,6 +277,36 @@ namespace System.IO.Tests
 
                 WatcherChangeTypes expected = 0;
                 expected |= WatcherChangeTypes.Deleted | WatcherChangeTypes.Changed;
+                ExpectEvent(watcher, expected, action, cleanup, new string[] { otherDir, dir.Path });
+            }
+        }
+
+        [Fact]
+        public void FileSystemWatcher_Directory_NotifyFilter_DirectoryNameDoesntTriggerOnFileEvent()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
+            using (var watcher = new FileSystemWatcher(testDirectory.Path, "*"))
+            {
+                watcher.NotifyFilter = NotifyFilters.FileName;
+                string renameDirSource = Path.Combine(testDirectory.Path, "dir2_source");
+                string renameDirDest = Path.Combine(testDirectory.Path, "dir2_dest");
+                string otherDir = Path.Combine(testDirectory.Path, "dir3");
+                Directory.CreateDirectory(renameDirSource);
+
+                Action action = () =>
+                {
+                    Directory.CreateDirectory(otherDir);
+                    Directory.Move(renameDirSource, renameDirDest);
+                    Directory.SetLastWriteTime(dir.Path, DateTime.Now + TimeSpan.FromSeconds(10));
+                    Directory.Delete(otherDir);
+                };
+                Action cleanup = () =>
+                {
+                    Directory.Move(renameDirDest, renameDirSource);
+                };
+
+                WatcherChangeTypes expected = 0;
                 ExpectEvent(watcher, expected, action, cleanup, new string[] { otherDir, dir.Path });
             }
         }

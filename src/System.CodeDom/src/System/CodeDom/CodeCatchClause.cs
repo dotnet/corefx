@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeCatchClause
     {
         private CodeStatementCollection _statements;
@@ -33,14 +32,14 @@ namespace System.CodeDom
 
         public string LocalName
         {
-            get { return _localName ?? string.Empty; }
-            set { _localName = value; }
+            get => _localName ?? string.Empty;
+            set => _localName = value;
         }
 
         public CodeTypeReference CatchExceptionType
         {
-            get { return _catchExceptionType ?? (_catchExceptionType = new CodeTypeReference(typeof(Exception))); }
-            set { _catchExceptionType = value; }
+            get => _catchExceptionType ?? (_catchExceptionType = new CodeTypeReference(typeof(Exception)));
+            set => _catchExceptionType = value;
         }
 
         public CodeStatementCollection Statements => _statements ?? (_statements = new CodeStatementCollection());

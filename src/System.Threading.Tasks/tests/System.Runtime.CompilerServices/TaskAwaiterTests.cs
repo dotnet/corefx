@@ -35,7 +35,7 @@ namespace System.Threading.Tasks.Tests
                 bool postedInContext = false;
                 Action callback = () =>
                 {
-                    postedInContext = ValidateCorrectContextSynchronizationContext.IsPostedInContext;
+                    postedInContext = ValidateCorrectContextSynchronizationContext.t_isPostedInContext;
                     mres.Set();
                 };
                 if (generic)
@@ -124,6 +124,53 @@ namespace System.Threading.Tasks.Tests
         }
 
         [Fact]
+        public async Task Await_TaskCompletesOnNonDefaultSyncCtx_ContinuesOnDefaultSyncCtx()
+        {
+            await Task.Run(async delegate // escape xunit's sync context
+            {
+                Assert.Null(SynchronizationContext.Current);
+                Assert.Same(TaskScheduler.Default, TaskScheduler.Current);
+
+                var ctx = new ValidateCorrectContextSynchronizationContext();
+                var tcs = new TaskCompletionSource<bool>();
+                var ignored = Task.Delay(1).ContinueWith(_ =>
+                {
+                    SynchronizationContext orig = SynchronizationContext.Current;
+                    SynchronizationContext.SetSynchronizationContext(ctx);
+                    try
+                    {
+                        tcs.SetResult(true);
+                    }
+                    finally
+                    {
+                        SynchronizationContext.SetSynchronizationContext(orig);
+                    }
+                }, TaskScheduler.Default);
+                await tcs.Task;
+
+                Assert.Null(SynchronizationContext.Current);
+                Assert.Same(TaskScheduler.Default, TaskScheduler.Current);
+            });
+        }
+
+        [Fact]
+        public async Task Await_TaskCompletesOnNonDefaultScheduler_ContinuesOnDefaultScheduler()
+        {
+            await Task.Run(async delegate // escape xunit's sync context
+            {
+                Assert.Null(SynchronizationContext.Current);
+                Assert.Same(TaskScheduler.Default, TaskScheduler.Current);
+
+                var tcs = new TaskCompletionSource<bool>();
+                var ignored = Task.Delay(1).ContinueWith(_ => tcs.SetResult(true), new QUWITaskScheduler());
+                await tcs.Task;
+
+                Assert.Null(SynchronizationContext.Current);
+                Assert.Same(TaskScheduler.Default, TaskScheduler.Current);
+            });
+        }
+
+        [Fact]
         public static void GetResult_Completed_Success()
         {
             Task task = Task.CompletedTask;
@@ -182,14 +229,14 @@ namespace System.Threading.Tasks.Tests
             Task<string> task = Task.FromException<string>(exception);
 
             // Task.GetAwaiter and Task<T>.GetAwaiter
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => ((Task)task).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => task.GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => ((Task)task).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => task.GetAwaiter().GetResult()));
 
             // w/ ConfigureAwait false and true
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => ((Task)task).ConfigureAwait(false).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => ((Task)task).ConfigureAwait(true).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => task.ConfigureAwait(false).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => task.ConfigureAwait(true).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => ((Task)task).ConfigureAwait(false).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => ((Task)task).ConfigureAwait(true).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => task.ConfigureAwait(false).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => task.ConfigureAwait(true).GetAwaiter().GetResult()));
         }
 
         [Fact]
@@ -201,14 +248,14 @@ namespace System.Threading.Tasks.Tests
             Task<string> task = tcs.Task;
 
             // Task.GetAwaiter and Task<T>.GetAwaiter
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => ((Task)task).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => task.GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => ((Task)task).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => task.GetAwaiter().GetResult()));
 
             // w/ ConfigureAwait false and true
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => ((Task)task).ConfigureAwait(false).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => ((Task)task).ConfigureAwait(true).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => task.ConfigureAwait(false).GetAwaiter().GetResult()));
-            Assert.Same(exception, Assert.Throws<ArgumentException>(() => task.ConfigureAwait(true).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => ((Task)task).ConfigureAwait(false).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => ((Task)task).ConfigureAwait(true).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => task.ConfigureAwait(false).GetAwaiter().GetResult()));
+            Assert.Same(exception, AssertExtensions.Throws<ArgumentException>(null, () => task.ConfigureAwait(true).GetAwaiter().GetResult()));
         }
 
         [Fact]
@@ -330,7 +377,7 @@ namespace System.Threading.Tasks.Tests
         private class ValidateCorrectContextSynchronizationContext : SynchronizationContext
         {
             [ThreadStatic]
-            internal static bool IsPostedInContext;
+            internal static bool t_isPostedInContext;
 
             internal int PostCount;
             internal int SendCount;
@@ -342,12 +389,12 @@ namespace System.Threading.Tasks.Tests
                 {
                     try
                     {
-                        IsPostedInContext = true;
+                        t_isPostedInContext = true;
                         d(state);
                     }
                     finally
                     {
-                        IsPostedInContext = false;
+                        t_isPostedInContext = false;
                     }
                 });
             }

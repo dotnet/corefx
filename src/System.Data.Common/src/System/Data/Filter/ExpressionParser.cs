@@ -47,7 +47,7 @@ namespace System.Data
         private const int Expr = 2;   /* The previous operand was a complex expression */
 
 
-        private struct ReservedWords
+        private readonly struct ReservedWords
         {
             internal readonly string _word;      // the word
             internal readonly Tokens _token;
@@ -307,7 +307,7 @@ namespace System.Data
                                 node = new ConstNode(_table, ValueType.Date, str);
                                 break;
                             default:
-                                Debug.Assert(false, "unhandled token");
+                                Debug.Fail("unhandled token");
                                 break;
                         }
 
@@ -762,7 +762,7 @@ namespace System.Data
                         break;
 
                     default:
-                        Debug.Assert(false, "Unhandled operator type");
+                        Debug.Fail("Unhandled operator type");
                         goto end_loop;
                 }
                 Debug.Assert(expr != null, "Failed to create expression");
@@ -1196,7 +1196,7 @@ namespace System.Data
         }
 
         /// <summary>
-        ///     is the character a white space character?
+        ///     is the character a whitespace character?
         ///     Consider using CharacterInfo().IsWhiteSpace(ch) (System.Globalization)
         /// </summary>
         private bool IsWhiteSpace(char ch)

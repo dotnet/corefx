@@ -1,32 +1,27 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <AssemblyName>System.Text.Encodings.Web.Tests</AssemblyName>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{95DFC527-4DC1-495E-97D7-E94EE1F7140D}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>System.Text.Encodings.Web.Tests</RootNamespace>
+    <ProjectGuid>{2337A55E-7077-4FBE-8132-2CD8DDC18671}</ProjectGuid>
     <FileAlignment>512</FileAlignment>
     <ReferencePath>$(ProgramFiles)\Common Files\microsoft shared\VSTT\11.0\UITestExtensionPackages</ReferencePath>
     <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
-    <NuGetPackageImportStamp>7a9bfb7d</NuGetPackageImportStamp>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
   <ItemGroup>
     <CodeAnalysisDependentAssemblyPaths Condition=" '$(VS100COMNTOOLS)' != '' " Include="$(VS100COMNTOOLS)..\IDE\PrivateAssemblies">
       <Visible>False</Visible>
     </CodeAnalysisDependentAssemblyPaths>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\src\System\Text\Encodings\Web\HexUtil.cs" Link="HexUtil.cs" />
+    <Compile Include="..\src\System\Text\Internal\AllowedCharactersBitmap.cs" Link="AllowedCharactersBitmap.cs" />
+    <Compile Include="..\src\System\Text\Unicode\UnicodeHelpers.cs" Link="UnicodeHelpers.cs" />
+    <Compile Include="..\src\System\Text\Unicode\UnicodeHelpers.generated.cs" Link="UnicodeHelpers.generated.cs" />
     <Compile Include="AllowedCharsBitmapTests.cs" />
+    <Compile Include="TextEncoderTests.cs" />
+    <Compile Include="ScalarTestEncoder.cs" />
     <Compile Include="CommonTestEncoder.cs" />
-    <Compile Include="BufferInternalTests.cs" />
     <Compile Include="EncoderCommon.cs" />
     <Compile Include="EncoderCommonTests.cs" />
     <Compile Include="EncoderExtensionsTests.cs" />
@@ -45,22 +40,14 @@
     <Compile Include="UnicodeEncoderBaseTests.cs" />
     <Compile Include="UnicodeHelpersTests.cs" />
     <Compile Include="UnicodeRangesTests.cs" />
+    <Compile Include="UnicodeRangesTests.generated.cs" />
     <Compile Include="UnicodeRangeTests.cs" />
     <Compile Include="UrlEncoderTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Text.Encodings.Web.pkgproj">
-      <Project>{1dd0ff15-6234-4bd6-850a-317f05479554}</Project>
-      <Name>System.Text.Encodings.Web</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.8.0.txt">
-        <LogicalName>UnicodeData.8.0.txt</LogicalName>
+    <EmbeddedResource Include="$(CommonTestPath)\Data\UnicodeData.12.1.txt">
+      <LogicalName>UnicodeData.12.1.txt</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

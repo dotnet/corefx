@@ -42,7 +42,7 @@ namespace System.Collections.Specialized.Tests
             var eqComp = new CaseInsensitiveEqualityComparer();
             var d1 = new OrderedDictionary(eqComp);
             d1.Add("foo", "bar");
-            Assert.Throws<ArgumentException>(() => d1.Add("FOO", "bar"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d1.Add("FOO", "bar"));
 
             // The equality comparer should also test for a non-existent key 
             d1.Remove("foofoo");
@@ -144,7 +144,7 @@ namespace System.Collections.Specialized.Tests
             ICollection keys = d.Keys;
 
             Assert.False(keys.IsSynchronized);
-            Assert.NotEqual(d, keys.SyncRoot);
+            Assert.NotSame(d, keys.SyncRoot);
             Assert.Equal(d.Count, keys.Count);
 
             foreach (var key in d.Keys)
@@ -165,8 +165,8 @@ namespace System.Collections.Specialized.Tests
                 Assert.True(d.Contains(array[i]));
             }
             
-            Assert.Throws<ArgumentNullException>("array", () => keys.CopyTo(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => keys.CopyTo(new object[keys.Count], -1));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => keys.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => keys.CopyTo(new object[keys.Count], -1));
         }
 
         // bool System.Collections.ICollection.IsSynchronized { get; }
@@ -186,16 +186,12 @@ namespace System.Collections.Specialized.Tests
             object sync1 = orderedDictionary1.SyncRoot;
             object sync2 = orderedDictionary2.SyncRoot;
 
-            // Sync root does not refer to the dictionary
-            Assert.NotEqual(sync1, orderedDictionary1);
-            Assert.NotEqual(sync2, orderedDictionary2);
-
             // Sync root objects for the same dictionaries are equivalent
-            Assert.Equal(orderedDictionary1.SyncRoot, orderedDictionary1.SyncRoot);
-            Assert.Equal(orderedDictionary2.SyncRoot, orderedDictionary2.SyncRoot);
+            Assert.Same(orderedDictionary1.SyncRoot, orderedDictionary1.SyncRoot);
+            Assert.Same(orderedDictionary2.SyncRoot, orderedDictionary2.SyncRoot);
 
             // Sync root objects for different dictionaries are not equivalent
-            Assert.NotEqual(sync1, sync2);
+            Assert.NotSame(sync1, sync2);
         }
 
         // bool System.Collections.IDictionary.IsFixedSize { get; }
@@ -274,7 +270,7 @@ namespace System.Collections.Specialized.Tests
             ICollection values = d.Values;
 
             Assert.False(values.IsSynchronized);
-            Assert.NotEqual(d, values.SyncRoot);
+            Assert.NotSame(d, values.SyncRoot);
             Assert.Equal(d.Count, values.Count);
 
             foreach (var val in values)
@@ -295,8 +291,8 @@ namespace System.Collections.Specialized.Tests
                 Assert.Equal(array[i], "bar_" + (i - 50));
             }
             
-            Assert.Throws<ArgumentNullException>("array", () => values.CopyTo(null, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => values.CopyTo(new object[values.Count], -1));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => values.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => values.CopyTo(new object[values.Count], -1));
         }
 
         // public void Add(object key, object value);
@@ -322,12 +318,12 @@ namespace System.Collections.Specialized.Tests
             d.Add("5", "foo6");
             Assert.Equal("foo6", d["5"]);
 
-            Assert.Throws<ArgumentException>(() => d.Add((int)5, "foo"));
-            Assert.Throws<ArgumentException>(() => d.Add((double)5, "foo"));
-            Assert.Throws<ArgumentException>(() => d.Add((long)5, "foo"));
-            Assert.Throws<ArgumentException>(() => d.Add((short)5, "foo"));
-            Assert.Throws<ArgumentException>(() => d.Add((uint)5, "foo"));
-            Assert.Throws<ArgumentException>(() => d.Add("5", "foo"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Add((int)5, "foo"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Add((double)5, "foo"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Add((long)5, "foo"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Add((short)5, "foo"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Add((uint)5, "foo"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Add("5", "foo"));
 
             Assert.Throws<ArgumentNullException>(() => d.Add(null, "foobar"));
         }
@@ -403,7 +399,7 @@ namespace System.Collections.Specialized.Tests
 
             Assert.Throws<ArgumentNullException>(() => d.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => d.CopyTo(arr, -1));
-            Assert.Throws<ArgumentException>(() => d.CopyTo(arr, 3));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.CopyTo(arr, 3));
 
             d.CopyTo(arr, 0);
             for (int i = 0; i < 2; i++)
@@ -497,7 +493,7 @@ namespace System.Collections.Specialized.Tests
             d.Insert(0, "foo", "bar");
             Assert.Equal("bar", d["foo"]);
             Assert.Equal("bar", d[0]);
-            Assert.Throws<ArgumentException>(() => d.Insert(0, "foo", "bar"));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Insert(0, "foo", "bar"));
 
             d.Insert(0, "aaa", "bbb");
             Assert.Equal("bbb", d["aaa"]);

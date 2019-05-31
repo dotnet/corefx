@@ -138,7 +138,7 @@ namespace System.Xml.Schema
                     return false;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected root type {rootType}");
                     break;
             }
             return true;
@@ -462,7 +462,7 @@ namespace System.Xml.Schema
                     case XmlNodeType.EndEntity:
                         if (eref.ChildNodes.Count == 0)
                         {
-                            eref.AppendChild(_dummyDocument.CreateTextNode(String.Empty));
+                            eref.AppendChild(_dummyDocument.CreateTextNode(string.Empty));
                         }
                         return eref;
                     case XmlNodeType.EntityReference:

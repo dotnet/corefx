@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.Dynamic.Utils;
 using System.Reflection;
 using System.Reflection.Emit;
-using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Linq.Expressions.Compiler
 {
@@ -94,17 +93,17 @@ namespace System.Linq.Expressions.Compiler
             {
                 EmitNullableCoalesce(b);
             }
-            else if (b.Left.Type.GetTypeInfo().IsValueType)
-            {
-                throw Error.CoalesceUsedOnNonNullType();
-            }
-            else if (b.Conversion != null)
-            {
-                EmitLambdaReferenceCoalesce(b);
-            }
             else
             {
-                EmitReferenceCoalesceWithoutConversion(b);
+                Debug.Assert(!b.Left.Type.IsValueType);
+                if (b.Conversion != null)
+                {
+                    EmitLambdaReferenceCoalesce(b);
+                }
+                else
+                {
+                    EmitReferenceCoalesceWithoutConversion(b);
+                }
             }
         }
 
@@ -145,19 +144,22 @@ namespace System.Linq.Expressions.Compiler
                 }
 
                 // emit call to invoke
-                _ilg.Emit(OpCodes.Callvirt, b.Conversion.Type.GetMethod("Invoke"));
+                _ilg.Emit(OpCodes.Callvirt, b.Conversion.Type.GetInvokeMethod());
             }
-            else if (!TypeUtils.AreEquivalent(b.Type, nnLeftType))
+            else if (TypeUtils.AreEquivalent(b.Type, b.Left.Type))
             {
-                _ilg.Emit(OpCodes.Ldloca, loc);
-                _ilg.EmitGetValueOrDefault(b.Left.Type);
-                _ilg.EmitConvertToType(nnLeftType, b.Type, isChecked: true);
+                _ilg.Emit(OpCodes.Ldloc, loc);
             }
             else
             {
                 _ilg.Emit(OpCodes.Ldloca, loc);
                 _ilg.EmitGetValueOrDefault(b.Left.Type);
+                if (!TypeUtils.AreEquivalent(b.Type, nnLeftType))
+                {
+                    _ilg.EmitConvertToType(nnLeftType, b.Type, isChecked: true, locals: this);
+                }
             }
+
             FreeLocal(loc);
 
             _ilg.Emit(OpCodes.Br, labEnd);
@@ -165,7 +167,7 @@ namespace System.Linq.Expressions.Compiler
             EmitExpression(b.Right);
             if (!TypeUtils.AreEquivalent(b.Right.Type, b.Type))
             {
-                _ilg.EmitConvertToType(b.Right.Type, b.Type, isChecked: true);
+                _ilg.EmitConvertToType(b.Right.Type, b.Type, isChecked: true, locals: this);
             }
             _ilg.MarkLabel(labEnd);
         }
@@ -179,9 +181,7 @@ namespace System.Linq.Expressions.Compiler
             EmitExpression(b.Left);
             _ilg.Emit(OpCodes.Dup);
             _ilg.Emit(OpCodes.Stloc, loc);
-            _ilg.Emit(OpCodes.Ldnull);
-            _ilg.Emit(OpCodes.Ceq);
-            _ilg.Emit(OpCodes.Brfalse, labNotNull);
+            _ilg.Emit(OpCodes.Brtrue, labNotNull);
             EmitExpression(b.Right);
             _ilg.Emit(OpCodes.Br, labEnd);
 
@@ -197,7 +197,7 @@ namespace System.Linq.Expressions.Compiler
             FreeLocal(loc);
 
             // emit call to invoke
-            _ilg.Emit(OpCodes.Callvirt, b.Conversion.Type.GetMethod("Invoke"));
+            _ilg.Emit(OpCodes.Callvirt, b.Conversion.Type.GetInvokeMethod());
 
             _ilg.MarkLabel(labEnd);
         }
@@ -209,14 +209,12 @@ namespace System.Linq.Expressions.Compiler
             Label labCast = _ilg.DefineLabel();
             EmitExpression(b.Left);
             _ilg.Emit(OpCodes.Dup);
-            _ilg.Emit(OpCodes.Ldnull);
-            _ilg.Emit(OpCodes.Ceq);
-            _ilg.Emit(OpCodes.Brfalse, labCast);
+            _ilg.Emit(OpCodes.Brtrue, labCast);
             _ilg.Emit(OpCodes.Pop);
             EmitExpression(b.Right);
             if (!TypeUtils.AreEquivalent(b.Right.Type, b.Type))
             {
-                if (b.Right.Type.GetTypeInfo().IsValueType)
+                if (b.Right.Type.IsValueType)
                 {
                     _ilg.Emit(OpCodes.Box, b.Right.Type);
                 }
@@ -226,7 +224,7 @@ namespace System.Linq.Expressions.Compiler
             _ilg.MarkLabel(labCast);
             if (!TypeUtils.AreEquivalent(b.Left.Type, b.Type))
             {
-                Debug.Assert(!b.Left.Type.GetTypeInfo().IsValueType);
+                Debug.Assert(!b.Left.Type.IsValueType);
                 _ilg.Emit(OpCodes.Castclass, b.Type);
             }
             _ilg.MarkLabel(labEnd);
@@ -239,63 +237,47 @@ namespace System.Linq.Expressions.Compiler
         private void EmitLiftedAndAlso(BinaryExpression b)
         {
             Type type = typeof(bool?);
-            Label labComputeRight = _ilg.DefineLabel();
-            Label labReturnFalse = _ilg.DefineLabel();
-            Label labReturnNull = _ilg.DefineLabel();
-            Label labReturnValue = _ilg.DefineLabel();
-            Label labExit = _ilg.DefineLabel();
-            LocalBuilder locLeft = GetLocal(type);
-            LocalBuilder locRight = GetLocal(type);
+            Label returnLeft = _ilg.DefineLabel();
+            Label returnRight = _ilg.DefineLabel();
+            Label exit = _ilg.DefineLabel();
+            // Compute left
             EmitExpression(b.Left);
+            LocalBuilder locLeft = GetLocal(type);
             _ilg.Emit(OpCodes.Stloc, locLeft);
             _ilg.Emit(OpCodes.Ldloca, locLeft);
             _ilg.EmitHasValue(type);
-            _ilg.Emit(OpCodes.Brfalse, labComputeRight);
             _ilg.Emit(OpCodes.Ldloca, locLeft);
             _ilg.EmitGetValueOrDefault(type);
-            _ilg.Emit(OpCodes.Ldc_I4_0);
-            _ilg.Emit(OpCodes.Ceq);
-            _ilg.Emit(OpCodes.Brtrue, labReturnFalse);
-            // compute right
-            _ilg.MarkLabel(labComputeRight);
+            _ilg.Emit(OpCodes.Not);
+            _ilg.Emit(OpCodes.And);
+            // if left == false
+            _ilg.Emit(OpCodes.Brtrue, returnLeft);
+            // Compute right
             EmitExpression(b.Right);
+            LocalBuilder locRight = GetLocal(type);
             _ilg.Emit(OpCodes.Stloc, locRight);
-            _ilg.Emit(OpCodes.Ldloca, locRight);
-            _ilg.EmitHasValue(type);
-            _ilg.Emit(OpCodes.Brfalse_S, labReturnNull);
+            _ilg.Emit(OpCodes.Ldloca, locLeft);
+            _ilg.EmitGetValueOrDefault(type);
+            // if left == true
+            _ilg.Emit(OpCodes.Brtrue_S, returnRight);
             _ilg.Emit(OpCodes.Ldloca, locRight);
             _ilg.EmitGetValueOrDefault(type);
-            _ilg.Emit(OpCodes.Ldc_I4_0);
-            _ilg.Emit(OpCodes.Ceq);
-            _ilg.Emit(OpCodes.Brtrue_S, labReturnFalse);
-            // check left for null again
-            _ilg.Emit(OpCodes.Ldloca, locLeft);
-            _ilg.EmitHasValue(type);
-            _ilg.Emit(OpCodes.Brfalse, labReturnNull);
-            // return true
-            _ilg.Emit(OpCodes.Ldc_I4_1);
-            _ilg.Emit(OpCodes.Br_S, labReturnValue);
-            // return false
-            _ilg.MarkLabel(labReturnFalse);
-            _ilg.Emit(OpCodes.Ldc_I4_0);
-            _ilg.Emit(OpCodes.Br_S, labReturnValue);
-            _ilg.MarkLabel(labReturnValue);
-            ConstructorInfo ci = type.GetConstructor(ArrayOfType_Bool);
-            _ilg.Emit(OpCodes.Newobj, ci);
-            _ilg.Emit(OpCodes.Stloc, locLeft);
-            _ilg.Emit(OpCodes.Br, labExit);
-            // return null
-            _ilg.MarkLabel(labReturnNull);
-            _ilg.Emit(OpCodes.Ldloca, locLeft);
-            _ilg.Emit(OpCodes.Initobj, type);
-            _ilg.MarkLabel(labExit);
+            // if right == true
+            _ilg.Emit(OpCodes.Brtrue_S, returnLeft);
+            _ilg.MarkLabel(returnRight);
+            _ilg.Emit(OpCodes.Ldloc, locRight);
+            FreeLocal(locRight);
+            _ilg.Emit(OpCodes.Br_S, exit);
+            _ilg.MarkLabel(returnLeft);
             _ilg.Emit(OpCodes.Ldloc, locLeft);
             FreeLocal(locLeft);
-            FreeLocal(locRight);
+            _ilg.MarkLabel(exit);
         }
 
         private void EmitMethodAndAlso(BinaryExpression b, CompilationFlags flags)
         {
+            Debug.Assert(b.Method.IsStatic);
+
             Label labEnd = _ilg.DefineLabel();
             EmitExpression(b.Left);
             _ilg.Emit(OpCodes.Dup);
@@ -304,25 +286,13 @@ namespace System.Linq.Expressions.Compiler
             _ilg.Emit(OpCodes.Call, opFalse);
             _ilg.Emit(OpCodes.Brtrue, labEnd);
 
-            //store the value of the left value before emitting b.Right to empty the evaluation stack
-            LocalBuilder locLeft = GetLocal(b.Left.Type);
-            _ilg.Emit(OpCodes.Stloc, locLeft);
-
             EmitExpression(b.Right);
-            //store the right value to local
-            LocalBuilder locRight = GetLocal(b.Right.Type);
-            _ilg.Emit(OpCodes.Stloc, locRight);
-
-            Debug.Assert(b.Method.IsStatic);
-            _ilg.Emit(OpCodes.Ldloc, locLeft);
-            _ilg.Emit(OpCodes.Ldloc, locRight);
             if ((flags & CompilationFlags.EmitAsTailCallMask) == CompilationFlags.EmitAsTail)
             {
                 _ilg.Emit(OpCodes.Tailcall);
             }
+
             _ilg.Emit(OpCodes.Call, b.Method);
-            FreeLocal(locLeft);
-            FreeLocal(locRight);
             _ilg.MarkLabel(labEnd);
         }
 
@@ -342,17 +312,20 @@ namespace System.Linq.Expressions.Compiler
         {
             BinaryExpression b = (BinaryExpression)expr;
 
-            if (b.Method != null && !b.IsLiftedLogical)
+            if (b.Method != null)
             {
-                EmitMethodAndAlso(b, flags);
+                if (b.IsLiftedLogical)
+                {
+                    EmitExpression(b.ReduceUserdefinedLifted());
+                }
+                else
+                {
+                    EmitMethodAndAlso(b, flags);
+                }
             }
             else if (b.Left.Type == typeof(bool?))
             {
                 EmitLiftedAndAlso(b);
-            }
-            else if (b.IsLiftedLogical)
-            {
-                EmitExpression(b.ReduceUserdefinedLifted());
             }
             else
             {
@@ -367,59 +340,32 @@ namespace System.Linq.Expressions.Compiler
         private void EmitLiftedOrElse(BinaryExpression b)
         {
             Type type = typeof(bool?);
-            Label labComputeRight = _ilg.DefineLabel();
-            Label labReturnTrue = _ilg.DefineLabel();
-            Label labReturnNull = _ilg.DefineLabel();
-            Label labReturnValue = _ilg.DefineLabel();
-            Label labExit = _ilg.DefineLabel();
+            Label returnLeft = _ilg.DefineLabel();
+            Label exit = _ilg.DefineLabel();
             LocalBuilder locLeft = GetLocal(type);
-            LocalBuilder locRight = GetLocal(type);
             EmitExpression(b.Left);
             _ilg.Emit(OpCodes.Stloc, locLeft);
             _ilg.Emit(OpCodes.Ldloca, locLeft);
-            _ilg.EmitHasValue(type);
-            _ilg.Emit(OpCodes.Brfalse, labComputeRight);
-            _ilg.Emit(OpCodes.Ldloca, locLeft);
             _ilg.EmitGetValueOrDefault(type);
-            _ilg.Emit(OpCodes.Ldc_I4_0);
-            _ilg.Emit(OpCodes.Ceq);
-            _ilg.Emit(OpCodes.Brfalse, labReturnTrue);
-            // compute right
-            _ilg.MarkLabel(labComputeRight);
+            // if left == true
+            _ilg.Emit(OpCodes.Brtrue, returnLeft);
             EmitExpression(b.Right);
+            LocalBuilder locRight = GetLocal(type);
             _ilg.Emit(OpCodes.Stloc, locRight);
             _ilg.Emit(OpCodes.Ldloca, locRight);
-            _ilg.EmitHasValue(type);
-            _ilg.Emit(OpCodes.Brfalse_S, labReturnNull);
-            _ilg.Emit(OpCodes.Ldloca, locRight);
             _ilg.EmitGetValueOrDefault(type);
-            _ilg.Emit(OpCodes.Ldc_I4_0);
-            _ilg.Emit(OpCodes.Ceq);
-            _ilg.Emit(OpCodes.Brfalse_S, labReturnTrue);
-            // check left for null again
             _ilg.Emit(OpCodes.Ldloca, locLeft);
             _ilg.EmitHasValue(type);
-            _ilg.Emit(OpCodes.Brfalse, labReturnNull);
-            // return false
-            _ilg.Emit(OpCodes.Ldc_I4_0);
-            _ilg.Emit(OpCodes.Br_S, labReturnValue);
-            // return true
-            _ilg.MarkLabel(labReturnTrue);
-            _ilg.Emit(OpCodes.Ldc_I4_1);
-            _ilg.Emit(OpCodes.Br_S, labReturnValue);
-            _ilg.MarkLabel(labReturnValue);
-            ConstructorInfo ci = type.GetConstructor(ArrayOfType_Bool);
-            _ilg.Emit(OpCodes.Newobj, ci);
-            _ilg.Emit(OpCodes.Stloc, locLeft);
-            _ilg.Emit(OpCodes.Br, labExit);
-            // return null
-            _ilg.MarkLabel(labReturnNull);
-            _ilg.Emit(OpCodes.Ldloca, locLeft);
-            _ilg.Emit(OpCodes.Initobj, type);
-            _ilg.MarkLabel(labExit);
+            _ilg.Emit(OpCodes.Or);
+            // if !(right == true | left != null)
+            _ilg.Emit(OpCodes.Brfalse_S, returnLeft);
+            _ilg.Emit(OpCodes.Ldloc, locRight);
+            FreeLocal(locRight);
+            _ilg.Emit(OpCodes.Br_S, exit);
+            _ilg.MarkLabel(returnLeft);
             _ilg.Emit(OpCodes.Ldloc, locLeft);
             FreeLocal(locLeft);
-            FreeLocal(locRight);
+            _ilg.MarkLabel(exit);
         }
 
         private void EmitUnliftedOrElse(BinaryExpression b)
@@ -436,33 +382,23 @@ namespace System.Linq.Expressions.Compiler
 
         private void EmitMethodOrElse(BinaryExpression b, CompilationFlags flags)
         {
+            Debug.Assert(b.Method.IsStatic);
+
             Label labEnd = _ilg.DefineLabel();
             EmitExpression(b.Left);
             _ilg.Emit(OpCodes.Dup);
             MethodInfo opTrue = TypeUtils.GetBooleanOperator(b.Method.DeclaringType, "op_True");
             Debug.Assert(opTrue != null, "factory should check that the method exists");
+
             _ilg.Emit(OpCodes.Call, opTrue);
             _ilg.Emit(OpCodes.Brtrue, labEnd);
-
-            //store the value of the left value before emitting b.Right to empty the evaluation stack
-            LocalBuilder locLeft = GetLocal(b.Left.Type);
-            _ilg.Emit(OpCodes.Stloc, locLeft);
-
             EmitExpression(b.Right);
-            //store the right value to local
-            LocalBuilder locRight = GetLocal(b.Right.Type);
-            _ilg.Emit(OpCodes.Stloc, locRight);
-
-            Debug.Assert(b.Method.IsStatic);
-            _ilg.Emit(OpCodes.Ldloc, locLeft);
-            _ilg.Emit(OpCodes.Ldloc, locRight);
             if ((flags & CompilationFlags.EmitAsTailCallMask) == CompilationFlags.EmitAsTail)
             {
                 _ilg.Emit(OpCodes.Tailcall);
             }
+
             _ilg.Emit(OpCodes.Call, b.Method);
-            FreeLocal(locLeft);
-            FreeLocal(locRight);
             _ilg.MarkLabel(labEnd);
         }
 
@@ -470,17 +406,20 @@ namespace System.Linq.Expressions.Compiler
         {
             BinaryExpression b = (BinaryExpression)expr;
 
-            if (b.Method != null && !b.IsLiftedLogical)
+            if (b.Method != null)
             {
-                EmitMethodOrElse(b, flags);
+                if (b.IsLiftedLogical)
+                {
+                    EmitExpression(b.ReduceUserdefinedLifted());
+                }
+                else
+                {
+                    EmitMethodOrElse(b, flags);
+                }
             }
             else if (b.Left.Type == typeof(bool?))
             {
                 EmitLiftedOrElse(b);
-            }
-            else if (b.IsLiftedLogical)
-            {
-                EmitExpression(b.ReduceUserdefinedLifted());
             }
             else
             {
@@ -518,36 +457,35 @@ namespace System.Linq.Expressions.Compiler
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1800:DoNotCastUnnecessarily")]
         private void EmitExpressionAndBranch(bool branchValue, Expression node, Label label)
         {
+            Debug.Assert(node.Type == typeof(bool));
             CompilationFlags startEmitted = EmitExpressionStart(node);
-            try
+            switch (node.NodeType)
             {
-                if (node.Type == typeof(bool))
-                {
-                    switch (node.NodeType)
-                    {
-                        case ExpressionType.Not:
-                            EmitBranchNot(branchValue, (UnaryExpression)node, label);
-                            return;
-                        case ExpressionType.AndAlso:
-                        case ExpressionType.OrElse:
-                            EmitBranchLogical(branchValue, (BinaryExpression)node, label);
-                            return;
-                        case ExpressionType.Block:
-                            EmitBranchBlock(branchValue, (BlockExpression)node, label);
-                            return;
-                        case ExpressionType.Equal:
-                        case ExpressionType.NotEqual:
-                            EmitBranchComparison(branchValue, (BinaryExpression)node, label);
-                            return;
-                    }
-                }
-                EmitExpression(node, CompilationFlags.EmitAsNoTail | CompilationFlags.EmitNoExpressionStart);
-                EmitBranchOp(branchValue, label);
+                case ExpressionType.Not:
+                    EmitBranchNot(branchValue, (UnaryExpression)node, label);
+                    break;
+
+                case ExpressionType.AndAlso:
+                case ExpressionType.OrElse:
+                    EmitBranchLogical(branchValue, (BinaryExpression)node, label);
+                    break;
+
+                case ExpressionType.Block:
+                    EmitBranchBlock(branchValue, (BlockExpression)node, label);
+                    break;
+
+                case ExpressionType.Equal:
+                case ExpressionType.NotEqual:
+                    EmitBranchComparison(branchValue, (BinaryExpression)node, label);
+                    break;
+
+                default:
+                    EmitExpression(node, CompilationFlags.EmitAsNoTail | CompilationFlags.EmitNoExpressionStart);
+                    EmitBranchOp(branchValue, label);
+                    break;
             }
-            finally
-            {
-                EmitExpressionEnd(startEmitted);
-            }
+
+            EmitExpressionEnd(startEmitted);
         }
 
         private void EmitBranchOp(bool branch, Label label)
@@ -563,6 +501,7 @@ namespace System.Linq.Expressions.Compiler
                 EmitBranchOp(branch, label);
                 return;
             }
+
             EmitExpressionAndBranch(!branch, node.Operand, label);
         }
 
@@ -590,7 +529,7 @@ namespace System.Linq.Expressions.Compiler
                 }
                 else
                 {
-                    Debug.Assert(!node.Right.Type.GetTypeInfo().IsValueType);
+                    Debug.Assert(!node.Right.Type.IsValueType);
                     EmitExpression(GetEqualityOperand(node.Right));
                 }
                 EmitBranchOp(!branchWhenEqual, label);
@@ -604,7 +543,7 @@ namespace System.Linq.Expressions.Compiler
                 }
                 else
                 {
-                    Debug.Assert(!node.Left.Type.GetTypeInfo().IsValueType);
+                    Debug.Assert(!node.Left.Type.IsValueType);
                     EmitExpression(GetEqualityOperand(node.Left));
                 }
                 EmitBranchOp(!branchWhenEqual, label);
@@ -620,15 +559,7 @@ namespace System.Linq.Expressions.Compiler
             {
                 EmitExpression(GetEqualityOperand(node.Left));
                 EmitExpression(GetEqualityOperand(node.Right));
-                if (branchWhenEqual)
-                {
-                    _ilg.Emit(OpCodes.Beq, label);
-                }
-                else
-                {
-                    _ilg.Emit(OpCodes.Ceq);
-                    _ilg.Emit(OpCodes.Brfalse, label);
-                }
+                _ilg.Emit(branchWhenEqual ? OpCodes.Beq : OpCodes.Bne_Un, label);
             }
         }
 

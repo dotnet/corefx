@@ -16,7 +16,7 @@ namespace System.Linq.Tests
                     where x > int.MinValue
                     select x;
 
-            Assert.Equal(q.ElementAt(3), q.ElementAt(3));
+            Assert.Equal(q.ElementAtOrDefault(3), q.ElementAtOrDefault(3));
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace System.Linq.Tests
                     where !string.IsNullOrEmpty(x)
                     select x;
 
-            Assert.Equal(q.ElementAt(4), q.ElementAt(4));
+            Assert.Equal(q.ElementAtOrDefault(4), q.ElementAtOrDefault(4));
         }
 
         public static IEnumerable<object[]> TestData()
@@ -52,6 +52,13 @@ namespace System.Linq.Tests
             Assert.Equal(expected, source.ElementAtOrDefault(index));
         }
 
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void ElementAtOrDefaultRunOnce(IEnumerable<int> source, int index, int expected)
+        {
+            Assert.Equal(expected, source.RunOnce().ElementAtOrDefault(index));
+        }
+
         [Fact]
         public void NullableArray_NegativeIndex_ReturnsNull()
         {
@@ -71,7 +78,7 @@ namespace System.Linq.Tests
         [Fact]
         public void NullSource_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).ElementAtOrDefault(2));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).ElementAtOrDefault(2));
         }
     }
 }

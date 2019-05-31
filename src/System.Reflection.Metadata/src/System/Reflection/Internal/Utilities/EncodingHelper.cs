@@ -46,7 +46,7 @@ namespace System.Reflection.Internal
     /// (lightUpAttemptFailed || prefix != null), we give up and allocate a temporary array,
     /// copy to it, decode, and throw it away.
     /// </summary>
-    internal unsafe static class EncodingHelper
+    internal static unsafe class EncodingHelper
     {
         // Size of pooled buffers. Input larger than that is prefixed or given to us on a
         // platform that doesn't have unsafe Encoding.GetString, will cause us to
@@ -69,7 +69,7 @@ namespace System.Reflection.Internal
 
             if (byteCount == 0)
             {
-                return String.Empty;
+                return string.Empty;
             }
 
             return utf8Decoder.GetString(bytes, byteCount);
@@ -83,7 +83,7 @@ namespace System.Reflection.Internal
 
             if (prefixedByteCount == 0)
             {
-                return String.Empty;
+                return string.Empty;
             }
 
             byte[] buffer = AcquireBuffer(prefixedByteCount);
@@ -92,7 +92,7 @@ namespace System.Reflection.Internal
             Marshal.Copy((IntPtr)bytes, buffer, prefix.Length, byteCount);
 
             string result;
-            fixed (byte* prefixedBytes = buffer)
+            fixed (byte* prefixedBytes = &buffer[0])
             {
                 result = utf8Decoder.GetString(prefixedBytes, prefixedByteCount);
             }
@@ -172,7 +172,7 @@ namespace System.Reflection.Internal
 
             MethodInfo getStringInfo = LightUpHelper.GetMethod(typeof(Encoding), "GetString", typeof(byte*), typeof(int));
 
-            if (getStringInfo != null && getStringInfo.ReturnType == typeof(String))
+            if (getStringInfo != null && getStringInfo.ReturnType == typeof(string))
             {
                 try
                 {
@@ -217,7 +217,7 @@ namespace System.Reflection.Internal
                     && parameters[0].ParameterType == typeof(byte*)
                     && parameters[1].ParameterType == typeof(int)
                     && parameters[2].ParameterType == typeof(Encoding)
-                    && methodInfo.ReturnType == typeof(String))
+                    && methodInfo.ReturnType == typeof(string))
                 {
                     try
                     {

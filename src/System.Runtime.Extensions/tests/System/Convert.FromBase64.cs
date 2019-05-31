@@ -208,6 +208,16 @@ namespace System.Tests
             VerifyInvalidInput("abcdab==abcd");
             VerifyInvalidInput("abcda===abcd");
             VerifyInvalidInput("abcd====abcd");
+
+            // Input must not contain extra trailing padding characters
+            VerifyInvalidInput("=");
+            VerifyInvalidInput("abc===");
+        }
+
+        [Fact]
+        public static void ExtraPaddingCharacter()
+        {
+            VerifyInvalidInput("abcdxyz=" + "=");
         }
 
         [Fact]

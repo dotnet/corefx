@@ -12,18 +12,12 @@ namespace System.IO.Compression.Tests
 {
     public partial class ZipFileTestBase : FileCleanupTestBase
     {
-        #region filename helpers
-
-        public static string bad(string filename) { return Path.Combine("ZipTestData", "badzipfiles", filename); }
-        public static string compat(string filename) { return Path.Combine("ZipTestData", "compat", filename); }
-        public static string strange(string filename) { return Path.Combine("ZipTestData", "StrangeZipFiles", filename); }
-        public static string zfile(string filename) { return Path.Combine("ZipTestData", "refzipfiles", filename); }
-        public static string zfolder(string filename) { return Path.Combine("ZipTestData", "refzipfolders", filename); }
-        public static string zmodified(string filename) { return Path.Combine("ZipTestData", "modified", filename); }
-
-        #endregion
-
-        #region helpers
+        public static string bad(string filename) => Path.Combine("ZipTestData", "badzipfiles", filename);
+        public static string compat(string filename) => Path.Combine("ZipTestData", "compat", filename);
+        public static string strange(string filename) => Path.Combine("ZipTestData", "StrangeZipFiles", filename);
+        public static string zfile(string filename) => Path.Combine("ZipTestData", "refzipfiles", filename);
+        public static string zfolder(string filename) => Path.Combine("ZipTestData", "refzipfolders", filename);
+        public static string zmodified(string filename) => Path.Combine("ZipTestData", "modified", filename);
 
         protected TempFile CreateTempCopyFile(string path, string newPath)
         {
@@ -48,7 +42,7 @@ namespace System.IO.Compression.Tests
             return totalBytes;
         }
 
-        //reads exactly bytesToRead out of stream, unless it is out of bytes
+        // reads exactly bytesToRead out of stream, unless it is out of bytes
         public static void ReadBytes(Stream stream, byte[] buffer, long bytesToRead)
         {
             int bytesLeftToRead;
@@ -121,26 +115,34 @@ namespace System.IO.Compression.Tests
                 ac = ast.Read(ad, 0, 4096);
                 bc = bst.Read(bd, 0, 4096);
 
-                Assert.Equal(ac, bc);
+                if (ac != bc)
+                {
+                    bd = NormalizeLineEndings(bd);
+                }
+
                 Assert.True(ArraysEqual<byte>(ad, bd, ac), "Stream contents not equal: " + ast.ToString() + ", " + bst.ToString());
 
                 blocksRead++;
             } while (ac == 4096);
         }
 
-        #endregion
-
-        #region "Validation"
-
         public static async Task IsZipSameAsDirAsync(string archiveFile, string directory, ZipArchiveMode mode)
         {
-            await IsZipSameAsDirAsync(archiveFile, directory, mode, false, false);
+            await IsZipSameAsDirAsync(archiveFile, directory, mode, requireExplicit: false, checkTimes: false);
         }
 
         public static async Task IsZipSameAsDirAsync(string archiveFile, string directory, ZipArchiveMode mode, bool requireExplicit, bool checkTimes)
         {
             var s = await StreamHelpers.CreateTempCopyStream(archiveFile);
             IsZipSameAsDir(s, directory, mode, requireExplicit, checkTimes);
+        }
+
+        public static byte[] NormalizeLineEndings(byte[] str)
+        {
+            string rep = Text.Encoding.Default.GetString(str);
+            rep = rep.Replace("\r\n", "\n");
+            rep = rep.Replace("\n", "\r\n");
+            return Text.Encoding.Default.GetBytes(rep);
         }
 
         public static void IsZipSameAsDir(Stream archiveFile, string directory, ZipArchiveMode mode, bool requireExplicit, bool checkTimes)
@@ -170,8 +172,18 @@ namespace System.IO.Compression.Tests
                         using (Stream entrystream = entry.Open())
                         {
                             entrystream.Read(buffer, 0, buffer.Length);
+#if netcoreapp || uap
+                            uint zipcrc = entry.Crc32;
+                            Assert.Equal(CRC.CalculateCRC(buffer), zipcrc.ToString());
+#endif
+
+                            if (file.Length != givenLength)
+                            {
+                                buffer = NormalizeLineEndings(buffer);
+                            }
+
+                            Assert.Equal(file.Length, buffer.Length);
                             string crc = CRC.CalculateCRC(buffer);
-                            Assert.Equal(file.Length, givenLength);
                             Assert.Equal(file.CRC, crc);
                         }
 
@@ -250,8 +262,8 @@ namespace System.IO.Compression.Tests
             var actualCount = actualList.Length + actualFolders.Length;
             Assert.Equal(expectedList.Count, actualCount);
 
-            ItemEqual(actualList, expectedList, true);
-            ItemEqual(actualFolders, expectedList, false);
+            ItemEqual(actualList, expectedList, isFile: true);
+            ItemEqual(actualFolders, expectedList, isFile: false);
         }
 
         public static void DirFileNamesEqual(string actual, string expected)
@@ -289,7 +301,9 @@ namespace System.IO.Compression.Tests
             }
         }
 
-        public static async Task CreateFromDir(string directory, Stream archiveStream, ZipArchiveMode mode)
+        /// <param name="useSpansForWriting">Tests the Span overloads of Write</param>
+        /// <param name="writeInChunks">Writes in chunks of 5 to test Write with a nonzero offset</param>
+        public static async Task CreateFromDir(string directory, Stream archiveStream, ZipArchiveMode mode, bool useSpansForWriting = false, bool writeInChunks = false)
         {
             var files = FileData.InPath(directory);
             using (ZipArchive archive = new ZipArchive(archiveStream, mode, true))
@@ -319,7 +333,30 @@ namespace System.IO.Compression.Tests
                             e.LastWriteTime = i.LastModifiedDate;
                             using (Stream entryStream = e.Open())
                             {
-                                installStream.CopyTo(entryStream);
+                                int bytesRead;
+                                var buffer = new byte[1024];
+                                if (useSpansForWriting)
+                                {
+                                    while ((bytesRead = installStream.Read(new Span<byte>(buffer))) != 0)
+                                    {
+                                        entryStream.Write(new ReadOnlySpan<byte>(buffer, 0, bytesRead));
+                                    }
+                                }
+                                else if (writeInChunks)
+                                {
+                                    while ((bytesRead = installStream.Read(buffer, 0, buffer.Length)) != 0)
+                                    {
+                                        for (int k = 0; k < bytesRead; k += 5)
+                                            entryStream.Write(buffer, k, Math.Min(5, bytesRead - k));
+                                    }
+                                }
+                                else
+                                {
+                                    while ((bytesRead = installStream.Read(buffer, 0, buffer.Length)) != 0)
+                                    {
+                                        entryStream.Write(buffer, 0, bytesRead);
+                                    }
+                                }
                             }
                         }
                     }
@@ -336,7 +373,5 @@ namespace System.IO.Compression.Tests
                 w.WriteLine(contents);
             }
         }
-
-        #endregion
     }
 }

@@ -23,8 +23,6 @@ namespace System.Collections.Specialized.Tests
         protected override Type ICollection_NonGeneric_CopyTo_ArrayOfIncorrectReferenceType_ThrowType => typeof(InvalidCastException);
         protected override Type ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType_ThrowType => typeof(InvalidCastException);
 
-        protected override Type ICollection_NonGeneric_SyncRootType => typeof(HybridDictionary);
-
         protected override object CreateTKey(int seed)
         {
             int stringLength = seed % 10 + 5;
@@ -37,10 +35,12 @@ namespace System.Collections.Specialized.Tests
         protected override object CreateTValue(int seed) => CreateTKey(seed);
 
         [Theory]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Netcoreapp1_0, "dotnet/corefx#11566")]
         [MemberData(nameof(ValidCollectionSizes))]
         public override void ICollection_NonGeneric_CopyTo_NonZeroLowerBound(int count)
         {
+            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                return;
+
             ICollection collection = NonGenericICollectionFactory(count);
             Array arr = Array.CreateInstance(typeof(object), new int[] { count }, new int[] { 2 });
             Assert.Equal(1, arr.Rank);

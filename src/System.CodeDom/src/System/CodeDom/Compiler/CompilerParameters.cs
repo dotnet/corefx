@@ -3,21 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Specialized;
-using System.Security.Policy;
 
 namespace System.CodeDom.Compiler
 {
-    [Serializable]
-    public class CompilerParameters
+    public partial class CompilerParameters
     {
-        private readonly StringCollection _assemblyNames = new StringCollection();
-        private readonly StringCollection _embeddedResources = new StringCollection();
-        private readonly StringCollection _linkedResources = new StringCollection();
-
-        [NonSerialized]
         private TempFileCollection _tempFiles;
-        [NonSerialized]
-        private Evidence _evidence;
 
         public CompilerParameters() : this(null, null)
         {
@@ -63,16 +54,15 @@ namespace System.CodeDom.Compiler
 
         public bool GenerateInMemory { get; set; }
 
-        public StringCollection ReferencedAssemblies => _assemblyNames;
-
+        public StringCollection ReferencedAssemblies { get; } = new StringCollection();
         public string MainClass { get; set; }
 
         public string OutputAssembly { get; set; }
 
         public TempFileCollection TempFiles
         {
-            get { return _tempFiles ?? (_tempFiles = new TempFileCollection()); }
-            set { _tempFiles = value; }
+            get => _tempFiles ?? (_tempFiles = new TempFileCollection());
+            set => _tempFiles = value;
         }
 
         public bool IncludeDebugInformation { get; set; }
@@ -85,26 +75,10 @@ namespace System.CodeDom.Compiler
 
         public string Win32Resource { get; set; }
 
-        public StringCollection EmbeddedResources => _embeddedResources;
+        public StringCollection EmbeddedResources { get; } = new StringCollection();
 
-        public StringCollection LinkedResources => _linkedResources;
+        public StringCollection LinkedResources { get; } = new StringCollection();
 
         public IntPtr UserToken { get; set; }
-
-        [Obsolete("CAS policy is obsolete and will be removed in a future release of the .NET Framework."
-                + " Please see http://go2.microsoft.com/fwlink/?LinkId=131738 for more information.")]
-        public Evidence Evidence
-        {
-            get
-            {
-                Evidence e = null;
-                if (_evidence != null)
-                {
-                    e = _evidence.Clone();
-                }
-                return e;
-            }
-            set { _evidence = value?.Clone(); }
-        }
     }
 }

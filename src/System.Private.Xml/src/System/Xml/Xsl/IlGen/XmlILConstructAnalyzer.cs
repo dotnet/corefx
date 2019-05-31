@@ -357,7 +357,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// This annotation is only applicable to Function nodes.  It contains a list of XmlILConstructInfo annontations
+        /// This annotation is only applicable to Function nodes.  It contains a list of XmlILConstructInfo annotations
         /// for all QilInvoke nodes which call the annotated function.
         /// </summary>
         public ArrayList CallersInfo
@@ -508,7 +508,7 @@ namespace System.Xml.Xsl.IlGen
                     case QilNodeType.Function: this.xstates = this.parentInfo.InitialStates; break;
                     case QilNodeType.RtfCtor: this.xstates = PossibleXmlStates.WithinContent; break;
                     case QilNodeType.Choice: this.xstates = PossibleXmlStates.Any; break;
-                    default: Debug.Assert(false, ndConstr.NodeType + " is not handled by XmlILStateAnalyzer."); break;
+                    default: Debug.Fail($"{ndConstr.NodeType} is not handled by XmlILStateAnalyzer."); break;
                 }
 
                 if (ndContent != null)

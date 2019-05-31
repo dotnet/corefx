@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Microsoft.Win32.SafeHandles;
 using System.Diagnostics;
 using System.Threading;
@@ -14,15 +15,9 @@ namespace System.Net.NetworkInformation
     // OSX implementation of NetworkChange
     // See <SystemConfiguration/SystemConfiguration.h> and its documentation, as well as
     // the documentation for CFRunLoop for more information on the components involved.
-    public class NetworkChange
+    public partial class NetworkChange
     {
         private static object s_lockObj = new object();
-
-        // The list of current address-changed subscribers.
-        private static NetworkAddressChangedEventHandler s_addressChangedSubscribers;
-
-        // The list of current availability-changed subscribers.
-        private static NetworkAvailabilityChangedEventHandler s_availabilityChangedSubscribers;
 
         // The dynamic store. We listen to changes in the IPv4 and IPv6 address keys.
         // When those keys change, our callback below is called (OnAddressChanged).
@@ -46,34 +41,38 @@ namespace System.Net.NetworkInformation
         private static readonly AutoResetEvent s_runLoopStartedEvent = new AutoResetEvent(false);
         private static readonly AutoResetEvent s_runLoopEndedEvent = new AutoResetEvent(false);
 
-        //introduced for supporting design-time loading of System.Windows.dll
-        [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-        public static void RegisterNetworkChange(NetworkChange nc) { }
-
         public static event NetworkAddressChangedEventHandler NetworkAddressChanged
         {
             add
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    if (s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    lock (s_lockObj)
                     {
-                        CreateAndStartRunLoop();
-                    }
+                        if (s_addressChangedSubscribers.Count == 0 && 
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            CreateAndStartRunLoop();
+                        }
 
-                    s_addressChangedSubscribers += value;
+                        s_addressChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
+                    }
                 }
             }
             remove
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    bool hadAddressChangedSubscribers = s_addressChangedSubscribers != null;
-                    s_addressChangedSubscribers -= value;
-
-                    if (hadAddressChangedSubscribers && s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    lock (s_lockObj)
                     {
-                        StopRunLoop();
+                        bool hadAddressChangedSubscribers = s_addressChangedSubscribers.Count != 0;
+                        s_addressChangedSubscribers.Remove(value);
+
+                        if (hadAddressChangedSubscribers && s_addressChangedSubscribers.Count == 0 &&
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            StopRunLoop();
+                        }
                     }
                 }
             }
@@ -83,30 +82,39 @@ namespace System.Net.NetworkInformation
         {
             add
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    if (s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    lock (s_lockObj)
                     {
-                        CreateAndStartRunLoop();
-                    }
-                    else
-                    {
-                        Debug.Assert(s_runLoop != IntPtr.Zero);
-                    }
+                        if (s_addressChangedSubscribers.Count == 0 &&
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            CreateAndStartRunLoop();
+                        }
+                        else
+                        {
+                            Debug.Assert(s_runLoop != IntPtr.Zero);
+                        }
 
-                    s_availabilityChangedSubscribers += value;
+                        s_availabilityChangedSubscribers.TryAdd(value, ExecutionContext.Capture());
+                    }
                 }
             }
             remove
             {
-                lock (s_lockObj)
+                if (value != null)
                 {
-                    bool hadSubscribers = s_addressChangedSubscribers != null || s_availabilityChangedSubscribers != null;
-                    s_availabilityChangedSubscribers -= value;
-
-                    if (hadSubscribers && s_addressChangedSubscribers == null && s_availabilityChangedSubscribers == null)
+                    lock (s_lockObj)
                     {
-                        StopRunLoop();
+                        bool hadSubscribers = s_addressChangedSubscribers.Count != 0 ||
+                                              s_availabilityChangedSubscribers.Count != 0;
+                        s_availabilityChangedSubscribers.Remove(value);
+
+                        if (hadSubscribers && s_addressChangedSubscribers.Count == 0 &&
+                            s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            StopRunLoop();
+                        }
                     }
                 }
             }
@@ -153,7 +161,7 @@ namespace System.Net.NetworkInformation
                         {
                             ipv4Pattern.DangerousGetHandle(),
                             ipv6Pattern.DangerousGetHandle()
-                        }, 2))
+                        }, (UIntPtr)2))
                 {
                     // Try to register our pattern strings with the dynamic store instance.
                     if (patterns.IsInvalid || !Interop.SystemConfiguration.SCDynamicStoreSetNotificationKeys(
@@ -221,8 +229,61 @@ namespace System.Net.NetworkInformation
 
         private static void OnAddressChanged(IntPtr store, IntPtr changedKeys, IntPtr info)
         {
-            s_addressChangedSubscribers?.Invoke(null, EventArgs.Empty);
-            s_availabilityChangedSubscribers?.Invoke(null, new NetworkAvailabilityEventArgs(NetworkInterface.GetIsNetworkAvailable()));
+            Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> addressChangedSubscribers = null;
+            Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> availabilityChangedSubscribers = null;
+
+            lock (s_lockObj)
+            {
+                if (s_addressChangedSubscribers.Count > 0)
+                {
+                    addressChangedSubscribers = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_addressChangedSubscribers);
+                }
+                if (s_availabilityChangedSubscribers.Count > 0)
+                {
+                    availabilityChangedSubscribers = new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityChangedSubscribers);
+                }
+            }
+
+            if (addressChangedSubscribers != null)
+            {
+                foreach (KeyValuePair<NetworkAddressChangedEventHandler, ExecutionContext> 
+                    subscriber in addressChangedSubscribers)
+                {
+                    NetworkAddressChangedEventHandler handler = subscriber.Key;
+                    ExecutionContext ec = subscriber.Value;
+
+                    if (ec == null) // Flow supressed
+                    {
+                        handler(null, EventArgs.Empty);
+                    }
+                    else
+                    {
+                        ExecutionContext.Run(ec, s_runAddressChangedHandler, handler);
+                    }
+                }
+            }
+
+            if (availabilityChangedSubscribers != null)
+            {
+                bool isAvailable = NetworkInterface.GetIsNetworkAvailable();
+                NetworkAvailabilityEventArgs args = isAvailable ? s_availableEventArgs : s_notAvailableEventArgs;
+                ContextCallback callbackContext = isAvailable ? s_runHandlerAvailable : s_runHandlerNotAvailable;
+                foreach (KeyValuePair<NetworkAvailabilityChangedEventHandler, ExecutionContext>
+                    subscriber in availabilityChangedSubscribers)
+                {
+                    NetworkAvailabilityChangedEventHandler handler = subscriber.Key;
+                    ExecutionContext ec = subscriber.Value;
+
+                    if (ec == null) // Flow supressed
+                    {
+                        handler(null, args);
+                    }
+                    else
+                    {
+                        ExecutionContext.Run(ec, callbackContext, handler);
+                    }
+                }
+            }
         }
     }
 }

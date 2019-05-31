@@ -2022,7 +2022,7 @@ namespace System.Xml.Xsl.IlGen
                         return true;
 
                     default:
-                        Debug.Assert(false, "Pattern " + step.NodeType + " should have been handled.");
+                        Debug.Fail($"Pattern {step.NodeType} should have been handled.");
                         break;
                 }
             }
@@ -2057,7 +2057,7 @@ namespace System.Xml.Xsl.IlGen
                 _helper.LoadInteger(_indexId);
                 _helper.Emit(OpCodes.Ldloc, locIndex);
 
-                // Generate code to iterate over the the nodes which are being indexed ($iterNodes in the pattern)
+                // Generate code to iterate over the nodes which are being indexed ($iterNodes in the pattern)
                 StartNestedIterator(nodes, lblOnEnd);
                 StartBinding(nodes);
 
@@ -2264,7 +2264,7 @@ namespace System.Xml.Xsl.IlGen
             XmlILStorageMethods methods = XmlILMethods.StorageMethods[itemStorageType];
             locCache = _helper.DeclareLocal("$$$cache", methods.SeqType);
             _helper.Emit(OpCodes.Ldloc, locCache);
-            _helper.CallToken(methods.SeqReuse);
+            _helper.Call(methods.SeqReuse);
             _helper.Emit(OpCodes.Stloc, locCache);
             _helper.Emit(OpCodes.Ldloc, locCache);
 
@@ -2375,7 +2375,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.DocOrderDistinct.
+        /// Generate code for QilNodeType.DocOrderDistinct.
         /// </summary>
         protected override QilNode VisitDocOrderDistinct(QilUnary ndDod)
         {
@@ -2466,7 +2466,7 @@ namespace System.Xml.Xsl.IlGen
                             return true;
 
                         default:
-                            Debug.Assert(false, "Pattern " + step.NodeType + " should have been handled.");
+                            Debug.Fail($"Pattern {step.NodeType} should have been handled.");
                             break;
                     }
                 }
@@ -2492,7 +2492,7 @@ namespace System.Xml.Xsl.IlGen
                             return true;
 
                         default:
-                            Debug.Assert(false, "Pattern " + step.NodeType + " should have been handled.");
+                            Debug.Fail($"Pattern {step.NodeType} should have been handled.");
                             break;
                     }
                 }
@@ -2537,7 +2537,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.Invoke.
+        /// Generate code for QilNodeType.Invoke.
         /// </summary>
         protected override QilNode VisitInvoke(QilInvoke ndInvoke)
         {
@@ -2578,7 +2578,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.Content.
+        /// Generate code for QilNodeType.Content.
         /// </summary>
         protected override QilNode VisitContent(QilUnary ndContent)
         {
@@ -2587,7 +2587,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.Attribute.
+        /// Generate code for QilNodeType.Attribute.
         /// </summary>
         protected override QilNode VisitAttribute(QilBinary ndAttr)
         {
@@ -2612,7 +2612,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.Parent.
+        /// Generate code for QilNodeType.Parent.
         /// </summary>
         protected override QilNode VisitParent(QilUnary ndParent)
         {
@@ -2632,7 +2632,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.Root.
+        /// Generate code for QilNodeType.Root.
         /// </summary>
         protected override QilNode VisitRoot(QilUnary ndRoot)
         {
@@ -2676,7 +2676,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.DescendantOrSelf.
+        /// Generate code for QilNodeType.DescendantOrSelf.
         /// </summary>
         protected override QilNode VisitDescendantOrSelf(QilUnary ndDesc)
         {
@@ -2746,7 +2746,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.Deref.
+        /// Generate code for QilNodeType.Deref.
         /// </summary>
         protected override QilNode VisitDeref(QilBinary ndDeref)
         {
@@ -3028,7 +3028,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.RtfCtor.
+        /// Generate code for QilNodeType.RtfCtor.
         /// </summary>
         protected override QilNode VisitRtfCtor(QilBinary ndRtf)
         {
@@ -3129,7 +3129,7 @@ namespace System.Xml.Xsl.IlGen
                     break;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected node type {ndProp.NodeType}");
                     break;
             }
 
@@ -3548,7 +3548,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.XsltInvokeLateBound.
+        /// Generate code for QilNodeType.XsltInvokeLateBound.
         /// </summary>
         protected override QilNode VisitXsltInvokeLateBound(QilInvokeLateBound ndInvoke)
         {
@@ -3594,7 +3594,7 @@ namespace System.Xml.Xsl.IlGen
         }
 
         /// <summary>
-        /// Generate code for for QilNodeType.XsltInvokeEarlyBound.
+        /// Generate code for QilNodeType.XsltInvokeEarlyBound.
         /// </summary>
         protected override QilNode VisitXsltInvokeEarlyBound(QilInvokeEarlyBound ndInvoke)
         {
@@ -3710,7 +3710,7 @@ namespace System.Xml.Xsl.IlGen
                 _helper.Call(XmlILMethods.ChangeTypeXsltResult);
                 _helper.TreatAs(typeof(object), clrTypeRetDst);
             }
-            else if (ndName.NamespaceUri.Length != 0 && !clrTypeRetSrc.GetTypeInfo().IsValueType)
+            else if (ndName.NamespaceUri.Length != 0 && !clrTypeRetSrc.IsValueType)
             {
                 // Check for null if a user-defined extension function returns a reference type
                 Label lblSkip = _helper.DefineLabel();
@@ -4297,7 +4297,7 @@ namespace System.Xml.Xsl.IlGen
                             case QilNodeType.Le: opcode = OpCodes.Bgt_Un; break;
                             case QilNodeType.Eq: opcode = OpCodes.Bne_Un; break;
                             case QilNodeType.Ne: opcode = OpCodes.Beq; break;
-                            default: Debug.Assert(false); opcode = OpCodes.Nop; break;
+                            default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                         }
                     }
                     else
@@ -4310,7 +4310,7 @@ namespace System.Xml.Xsl.IlGen
                             case QilNodeType.Le: opcode = OpCodes.Bgt; break;
                             case QilNodeType.Eq: opcode = OpCodes.Bne_Un; break;
                             case QilNodeType.Ne: opcode = OpCodes.Beq; break;
-                            default: Debug.Assert(false); opcode = OpCodes.Nop; break;
+                            default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                         }
                     }
                     _helper.Emit(opcode, _iterCurr.LabelBranch);
@@ -4326,7 +4326,7 @@ namespace System.Xml.Xsl.IlGen
                         case QilNodeType.Le: opcode = OpCodes.Ble; break;
                         case QilNodeType.Eq: opcode = OpCodes.Beq; break;
                         case QilNodeType.Ne: opcode = OpCodes.Bne_Un; break;
-                        default: Debug.Assert(false); opcode = OpCodes.Nop; break;
+                        default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                     }
                     _helper.Emit(opcode, _iterCurr.LabelBranch);
                     _iterCurr.Storage = StorageDescriptor.None();
@@ -4345,7 +4345,7 @@ namespace System.Xml.Xsl.IlGen
                                 case QilNodeType.Ge: opcode = OpCodes.Bge_S; break;
                                 case QilNodeType.Le: opcode = OpCodes.Ble_S; break;
                                 case QilNodeType.Ne: opcode = OpCodes.Bne_Un_S; break;
-                                default: Debug.Assert(false); opcode = OpCodes.Nop; break;
+                                default: Debug.Fail($"Unexpected rel op {relOp}"); opcode = OpCodes.Nop; break;
                             }
 
                             // Push "true" if comparison succeeds, "false" otherwise
@@ -4592,7 +4592,7 @@ namespace System.Xml.Xsl.IlGen
                 case QilNodeType.NamespaceDecl: return XPathNodeType.Namespace;
             }
 
-            Debug.Assert(false, "Cannot map QilNodeType " + typ + " to an XPathNodeType");
+            Debug.Fail($"Cannot map QilNodeType {typ} to an XPathNodeType");
             return XPathNodeType.All;
         }
 
@@ -4869,14 +4869,14 @@ namespace System.Xml.Xsl.IlGen
             {
                 // cache = XmlQuerySequence.CreateOrReuse(cache, item);
                 NestedVisitEnsureStack(nd, cacheType, false);
-                _helper.CallToken(methods.SeqReuseSgl);
+                _helper.Call(methods.SeqReuseSgl);
                 _helper.Emit(OpCodes.Stloc, locCache);
             }
             else
             {
                 // XmlQuerySequence<T> cache;
                 // cache = XmlQuerySequence.CreateOrReuse(cache);
-                _helper.CallToken(methods.SeqReuse);
+                _helper.Call(methods.SeqReuse);
                 _helper.Emit(OpCodes.Stloc, locCache);
                 _helper.Emit(OpCodes.Ldloc, locCache);
 

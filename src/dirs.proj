@@ -1,29 +1,29 @@
-<Project ToolsVersion="14.0" DefaultTargets="BuildAndTest" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="dir.props" />
+<Project>
+  <Import Project="Directory.Build.props" />
 
-  <ItemGroup>
+  <!-- required to build the projects in their specified order -->
+  <PropertyGroup>
+    <SerializeProjects>true</SerializeProjects>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(DirectoryToBuild)' == ''">
     <Project Include="ref.builds" />
+    <Project Include="shims\generated\*.csproj" />
+    <Project Include="Native\native-binplace.proj" />
     <Project Include="src.builds" />
+    <Project Include="shims\manual\*.csproj" />
+    <Project Include="shims\ApiCompat.proj" Condition="'$(DotNetBuildFromSource)' != 'true'" />
+    <Project Include="pretest.builds" Condition="'$(DotNetBuildFromSource)' != 'true'" />
   </ItemGroup>
 
-  <Import Project="..\dir.targets" />
-  <Import Project="..\dir.traversal.targets" />
+  <!-- Don't build System.Text.Encodings.Web tools as part of build; they're intended to be run manually. -->
+  <ItemGroup>
+    <ProjectExclusions Include="$(SourceDir)System.Text.Encodings.Web/tools/**/*.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup Condition="'$(DirectoryToBuild)' != ''">
+    <Project Include="$(DirectoryToBuild)/**/*.csproj" Exclude="@(ProjectExclusions)" />
+  </ItemGroup>
 
-  <Import Project="$(ToolsDir)packages.targets" Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'" />
-  <Import Project="$(ToolsDir)UpdateBuildValues.targets" Condition="Exists('$(ToolsDir)UpdateBuildValues.targets')" />
-
-  <PropertyGroup Condition="Exists('$(ToolsDir)packages.targets') and '$(ImportGetNuGetPackageVersions)' != 'false'">
-    <TraversalBuildDependsOn>
-      $(TraversalBuildDependsOn);
-      BuildPackages;
-    </TraversalBuildDependsOn>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="Exists('$(ToolsDir)toolruntime.targets')">
-    <TraversalBuildDependsOn>
-      EnsureBuildToolsRuntime;
-      $(TraversalBuildDependsOn)
-    </TraversalBuildDependsOn>
-  </PropertyGroup>
-
+  <Import Project="$(RepositoryEngineeringDir)dir.traversal.targets" />
 </Project>

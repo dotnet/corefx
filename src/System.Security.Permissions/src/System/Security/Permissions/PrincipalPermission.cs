@@ -9,7 +9,6 @@ using System.Threading;
 
 namespace System.Security.Permissions
 {
-    [Serializable]
     public sealed class PrincipalPermission : IPermission, ISecurityEncodable, IUnrestrictedPermission
     {
         private IDRole[] _idArray;
@@ -79,7 +78,7 @@ namespace System.Security.Permissions
             }
             else if (!VerifyType(target))
             {
-                throw new ArgumentException(SR.Argument_WrongType, GetType().FullName);
+                throw new ArgumentException(SR.Format(SR.Argument_WrongType, GetType().FullName), nameof(target));
             }
 
             PrincipalPermission operand = (PrincipalPermission)target;
@@ -122,7 +121,7 @@ namespace System.Security.Permissions
             }
             else if (!VerifyType(target))
             {
-                throw new ArgumentException(SR.Argument_WrongType, GetType().FullName);
+                throw new ArgumentException(SR.Format(SR.Argument_WrongType, GetType().FullName), nameof(target));
             }
             else if (IsUnrestricted())
             {
@@ -179,7 +178,7 @@ namespace System.Security.Permissions
             }
             else if (!VerifyType(other))
             {
-                throw new ArgumentException(SR.Argument_WrongType, GetType().FullName);
+                throw new ArgumentException(SR.Format(SR.Argument_WrongType, GetType().FullName), nameof(other));
             }
 
             PrincipalPermission operand = (PrincipalPermission)other;
@@ -292,7 +291,7 @@ namespace System.Security.Permissions
                 }
             }
             else
-                _idArray = new IDRole[0];
+                _idArray = Array.Empty<IDRole>();
         }
 
         public override string ToString()

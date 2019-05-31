@@ -9,25 +9,25 @@ include (GenerateExportHeader)
 
 if($ENV{__BuildArch} STREQUAL x86 OR $ENV{__BuildArch} STREQUAL x64)
     set(NATIVECOMPRESSION_SOURCES
-        clrcompression.def
         zlib-intel/adler32.c
+        zlib-intel/compress.c
         zlib-intel/crc_folding.c
         zlib-intel/crc32.c
+        zlib-intel/deflate_medium.c
         zlib-intel/deflate_quick.c
         zlib-intel/deflate.c
-        zlib-intel/fill_window_sse.c
+        zlib-intel/inffast.c
+        zlib-intel/inflate.c
+        zlib-intel/inftrees.c
         zlib-intel/match.c
+        zlib-intel/slide_sse.c
         zlib-intel/trees.c
         zlib-intel/x86.c
         zlib-intel/zutil.c
-        zlib/compress.c 
-        zlib/inffast.c
-        zlib/inflate.c
-        zlib/inftrees.c
+        ../../AnyOS/zlib/pal_zlib.c
 )
 elseif($ENV{__BuildArch} STREQUAL arm OR $ENV{__BuildArch} STREQUAL arm64)
     set(NATIVECOMPRESSION_SOURCES
-        clrcompression.def
         zlib/adler32.c
         zlib/compress.c
         zlib/crc32.c
@@ -37,28 +37,54 @@ elseif($ENV{__BuildArch} STREQUAL arm OR $ENV{__BuildArch} STREQUAL arm64)
         zlib/inftrees.c
         zlib/trees.c
         zlib/zutil.c
+        ../../AnyOS/zlib/pal_zlib.c
     )
 endif()
 
-if ($ENV{__VSVersion} STREQUAL vs2015)
-    add_definitions(-DHAVE_VSNPRINTF)
-endif ()
-
-if(__LinkCustomCRT STREQUAL true)
-    set(NATIVECOMPRESSION_SOURCES
+if($ENV{__appContainer} STREQUAL true)
+    set (NATIVECOMPRESSION_SOURCES
         ${NATIVECOMPRESSION_SOURCES}
-        crt.cpp
+        clrcompression.Uap.def
+    )
+else()
+    set (NATIVECOMPRESSION_SOURCES
+        ${NATIVECOMPRESSION_SOURCES}
+        clrcompression.def
+        ../../AnyOS/brotli/common/dictionary.c
+        ../../AnyOS/brotli/common/transform.c
+        ../../AnyOS/brotli/dec/bit_reader.c
+        ../../AnyOS/brotli/dec/decode.c
+        ../../AnyOS/brotli/dec/huffman.c
+        ../../AnyOS/brotli/dec/state.c
+        ../../AnyOS/brotli/enc/backward_references.c
+        ../../AnyOS/brotli/enc/backward_references_hq.c
+        ../../AnyOS/brotli/enc/bit_cost.c
+        ../../AnyOS/brotli/enc/block_splitter.c
+        ../../AnyOS/brotli/enc/brotli_bit_stream.c
+        ../../AnyOS/brotli/enc/cluster.c
+        ../../AnyOS/brotli/enc/compress_fragment.c
+        ../../AnyOS/brotli/enc/compress_fragment_two_pass.c
+        ../../AnyOS/brotli/enc/dictionary_hash.c
+        ../../AnyOS/brotli/enc/encode.c
+        ../../AnyOS/brotli/enc/encoder_dict.c
+        ../../AnyOS/brotli/enc/entropy_encode.c
+        ../../AnyOS/brotli/enc/histogram.c
+        ../../AnyOS/brotli/enc/literal_cost.c
+        ../../AnyOS/brotli/enc/memory.c
+        ../../AnyOS/brotli/enc/metablock.c
+        ../../AnyOS/brotli/enc/static_dict.c
+        ../../AnyOS/brotli/enc/utf8_util.c
     )
 endif()
 
-# Include 'bin/obj' dir since it contains _version.h
-include_directories("${CMAKE_BINARY_DIR}/../../")
+#Include Brotli include files
+include_directories("../../AnyOS/brotli/include")
 
 add_library(clrcompression
     SHARED
     ${NATIVECOMPRESSION_SOURCES}
     # This will add versioning to the library
-    ${CMAKE_SOURCE_DIR}/../../../Tools/NativeVersion.rc
+    ${CMAKE_SOURCE_DIR}/../../../artifacts/obj/NativeVersion.rc
 )
 
 # Allow specification of arguments that should be passed to the linker

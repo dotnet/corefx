@@ -22,7 +22,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsStringQuery()
         {
             var q = from x in new[] { "!@#$%^" }
-                    where !String.IsNullOrEmpty(x)
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.Single(), q.Single());
@@ -144,13 +144,21 @@ namespace System.Linq.Tests
         {
             Assert.Equal(target, Enumerable.Range(0, range).Single(i => i == target));
         }
-        
+
+        [Theory]
+        [InlineData(1, 100)]
+        [InlineData(42, 100)]
+        public void RunOnce(int target, int range)
+        {
+            Assert.Equal(target, Enumerable.Range(0, range).RunOnce().Single(i => i == target));
+        }
+
         [Fact]
         public void ThrowsOnNullSource()
         {
             int[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.Single());
-            Assert.Throws<ArgumentNullException>("source", () => source.Single(i => i % 2 == 0));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Single());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Single(i => i % 2 == 0));
         }
 
         [Fact]
@@ -158,7 +166,7 @@ namespace System.Linq.Tests
         {
             int[] source = { };
             Func<int, bool> nullPredicate = null;
-            Assert.Throws<ArgumentNullException>("predicate", () => source.Single(nullPredicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => source.Single(nullPredicate));
         }
     }
 }

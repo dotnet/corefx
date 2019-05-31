@@ -5,9 +5,7 @@
 using System;
 using System.CodeDom;
 using System.CodeDom.Compiler;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
@@ -16,7 +14,7 @@ using System.Text;
 
 namespace Microsoft.CSharp
 {
-    internal sealed class CSharpCodeGenerator : ICodeCompiler, ICodeGenerator
+    internal sealed partial class CSharpCodeGenerator : ICodeCompiler, ICodeGenerator
     {
         private static readonly char[] s_periodArray = new char[] { '.' };
 
@@ -168,16 +166,16 @@ namespace Microsoft.CSharp
 
         private bool _generatingForLoop = false;
 
-        private string FileExtension { get { return ".cs"; } }
+        private string FileExtension => ".cs";
 
-        private string CompilerName { get { return "csc.exe"; } }
+        private string CompilerName => "csc.exe";
 
         private string CurrentTypeName => _currentClass != null ? _currentClass.Name : "<% unknown %>";
 
         private int Indent
         {
-            get { return _output.Indent; }
-            set { _output.Indent = value; }
+            get => _output.Indent;
+            set => _output.Indent = value;
         }
 
         private bool IsCurrentInterface => _currentClass != null && !(_currentClass is CodeTypeDelegate) ? _currentClass.IsInterface : false;
@@ -191,8 +189,6 @@ namespace Microsoft.CSharp
         private bool IsCurrentDelegate => _currentClass != null && _currentClass is CodeTypeDelegate;
 
         private string NullToken => "null";
-
-        private CodeGeneratorOptions Options => _options;
 
         private TextWriter Output => _output;
 
@@ -242,12 +238,10 @@ namespace Microsoft.CSharp
 
                 if (i > 0 && i % MaxLineLength == 0)
                 {
-                    //
                     // If current character is a high surrogate and the following 
-                    // character is a low surrogate, don't break them. 
+                    // character is a low surrogate, don't break them.
                     // Otherwise when we write the string to a file, we might lose 
                     // the characters.
-                    // 
                     if (char.IsHighSurrogate(value[i]) && (i < value.Length - 1) && char.IsLowSurrogate(value[i + 1]))
                     {
                         b.Append(value[++i]);
@@ -290,7 +284,7 @@ namespace Microsoft.CSharp
             // If the string is short, use C style quoting (e.g "\r\n")
             // Also do it if it is too long to fit in one line
             // If the string contains '\0', verbatim style won't work.
-            if (value.Length < 256 || value.Length > 1500 || (value.IndexOf('\0') != -1))
+            if (value.Length < 256 || value.Length > 1500 || (value.IndexOf('\0') != -1)) // string.Contains(char) is .NetCore2.1+ specific
                 return QuoteSnippetStringCStyle(value);
 
             // Otherwise, use 'verbatim' style quoting (e.g. @"foo")
@@ -853,7 +847,7 @@ namespace Microsoft.CSharp
             }
             else
             {
-                throw new ArgumentException(SR.Format(SR.InvalidPrimitiveType, e.Value.GetType().ToString()));
+                throw new ArgumentException(SR.Format(SR.InvalidPrimitiveType, e.Value.GetType()));
             }
         }
 
@@ -1042,7 +1036,7 @@ namespace Microsoft.CSharp
             if (falseStatemetns.Count > 0)
             {
                 Output.Write('}');
-                if (Options.ElseOnClosing)
+                if (_options.ElseOnClosing)
                 {
                     Output.Write(' ');
                 }
@@ -1072,7 +1066,7 @@ namespace Microsoft.CSharp
                 foreach (CodeCatchClause current in catches)
                 {
                     Output.Write('}');
-                    if (Options.ElseOnClosing)
+                    if (_options.ElseOnClosing)
                     {
                         Output.Write(' ');
                     }
@@ -1096,7 +1090,7 @@ namespace Microsoft.CSharp
             if (finallyStatements.Count > 0)
             {
                 Output.Write('}');
-                if (Options.ElseOnClosing)
+                if (_options.ElseOnClosing)
                 {
                     Output.Write(' ');
                 }
@@ -1213,7 +1207,7 @@ namespace Microsoft.CSharp
             string name = e.Name;
             if (e.PrivateImplementationType != null)
             {
-                name = GetBaseTypeOutput(e.PrivateImplementationType) + "." + name;
+                name = GetBaseTypeOutput(e.PrivateImplementationType, preferBuiltInTypes: false) + "." + name;
             }
             OutputTypeNamePair(e.Type, name);
             Output.WriteLine(';');
@@ -1472,7 +1466,7 @@ namespace Microsoft.CSharp
             Output.Write(' ');
             if (e.PrivateImplementationType != null)
             {
-                Output.Write(GetBaseTypeOutput(e.PrivateImplementationType));
+                Output.Write(GetBaseTypeOutput(e.PrivateImplementationType, preferBuiltInTypes: false));
                 Output.Write('.');
             }
             OutputIdentifier(e.Name);
@@ -1558,7 +1552,7 @@ namespace Microsoft.CSharp
 
             if (e.PrivateImplementationType != null && !IsCurrentInterface)
             {
-                Output.Write(GetBaseTypeOutput(e.PrivateImplementationType));
+                Output.Write(GetBaseTypeOutput(e.PrivateImplementationType, preferBuiltInTypes: false));
                 Output.Write('.');
             }
 
@@ -1935,7 +1929,7 @@ namespace Microsoft.CSharp
 
             GenerateTypeStart(e);
 
-            if (Options.VerbatimOrder)
+            if (_options.VerbatimOrder)
             {
                 foreach (CodeTypeMember member in e.Members)
                 {
@@ -2527,9 +2521,6 @@ namespace Microsoft.CSharp
             Output.WriteLine(SR.AutoGen_Comment_Line1);
             Output.Write("//     ");
             Output.WriteLine(SR.AutoGen_Comment_Line2);
-            Output.Write("//     ");
-            Output.Write(SR.AutoGen_Comment_Line3);
-            Output.WriteLine(Environment.Version.ToString());
             Output.WriteLine("//");
             Output.Write("//     ");
             Output.WriteLine(SR.AutoGen_Comment_Line4);
@@ -2541,7 +2532,7 @@ namespace Microsoft.CSharp
             Output.WriteLine();
 
             // CSharp needs to put assembly attributes after using statements.
-            // Since we need to create a empty namespace even if we don't need it,
+            // Since we need to create an empty namespace even if we don't need it,
             // using will generated after assembly attributes.
             var importList = new SortedSet<string>(StringComparer.Ordinal);
             foreach (CodeNamespace nspace in e.Namespaces)
@@ -2803,68 +2794,56 @@ namespace Microsoft.CSharp
         }
 
         // returns the type name without any array declaration.
-        private string GetBaseTypeOutput(CodeTypeReference typeRef)
+        private string GetBaseTypeOutput(CodeTypeReference typeRef, bool preferBuiltInTypes = true)
         {
             string s = typeRef.BaseType;
-            if (s.Length == 0)
+
+            if (preferBuiltInTypes)
             {
-                s = "void";
-                return s;
+                if (s.Length == 0)
+                {
+                    return "void";
+                }
+
+                string lowerCaseString = s.ToLower(CultureInfo.InvariantCulture).Trim();
+
+                switch (lowerCaseString)
+                {
+                    case "system.int16":
+                        return "short";
+                    case "system.int32":
+                        return "int";
+                    case "system.int64":
+                        return "long";
+                    case "system.string":
+                        return "string";
+                    case "system.object":
+                        return "object";
+                    case "system.boolean":
+                        return "bool";
+                    case "system.void":
+                        return "void";
+                    case "system.char":
+                        return "char";
+                    case "system.byte":
+                        return "byte";
+                    case "system.uint16":
+                        return "ushort";
+                    case "system.uint32":
+                        return "uint";
+                    case "system.uint64":
+                        return "ulong";
+                    case "system.sbyte":
+                        return "sbyte";
+                    case "system.single":
+                        return "float";
+                    case "system.double":
+                        return "double";
+                    case "system.decimal":
+                        return "decimal";
+                }
             }
 
-            string lowerCaseString = s.ToLower(CultureInfo.InvariantCulture).Trim();
-
-            switch (lowerCaseString)
-            {
-                case "system.int16":
-                    s = "short";
-                    break;
-                case "system.int32":
-                    s = "int";
-                    break;
-                case "system.int64":
-                    s = "long";
-                    break;
-                case "system.string":
-                    s = "string";
-                    break;
-                case "system.object":
-                    s = "object";
-                    break;
-                case "system.boolean":
-                    s = "bool";
-                    break;
-                case "system.void":
-                    s = "void";
-                    break;
-                case "system.char":
-                    s = "char";
-                    break;
-                case "system.byte":
-                    s = "byte";
-                    break;
-                case "system.uint16":
-                    s = "ushort";
-                    break;
-                case "system.uint32":
-                    s = "uint";
-                    break;
-                case "system.uint64":
-                    s = "ulong";
-                    break;
-                case "system.sbyte":
-                    s = "sbyte";
-                    break;
-                case "system.single":
-                    s = "float";
-                    break;
-                case "system.double":
-                    s = "double";
-                    break;
-                case "system.decimal":
-                    s = "decimal";
-                    break;
-                default:
                     // replace + with . for nested classes.
                     //
                     var sb = new StringBuilder(s.Length + 10);
@@ -2919,8 +2898,6 @@ namespace Microsoft.CSharp
                         sb.Append(CreateEscapedIdentifier(baseType.Substring(lastIndex)));
 
                     return sb.ToString();
-            }
-            return s;
         }
 
         private string GetTypeArgumentsOutput(CodeTypeReferenceCollection typeArguments)
@@ -2982,7 +2959,7 @@ namespace Microsoft.CSharp
 
         private void OutputStartingBrace()
         {
-            if (Options.BracingStyle == "C")
+            if (_options.BracingStyle == "C")
             {
                 Output.WriteLine();
                 Output.WriteLine('{');
@@ -2991,20 +2968,6 @@ namespace Microsoft.CSharp
             {
                 Output.WriteLine(" {");
             }
-        }
-
-        private CompilerResults FromFileBatch(CompilerParameters options, string[] fileNames)
-        {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-            if (fileNames == null)
-            {
-                throw new ArgumentNullException(nameof(fileNames));
-            }
-
-            throw new PlatformNotSupportedException();
         }
 
         CompilerResults ICodeCompiler.CompileAssemblyFromDom(CompilerParameters options, CodeCompileUnit e)
@@ -3184,7 +3147,7 @@ namespace Microsoft.CSharp
                 using (var fs = new FileStream(filenames[i], FileMode.Create, FileAccess.Write, FileShare.Read))
                 using (StreamWriter sw = new StreamWriter(fs, Encoding.UTF8))
                 {
-                    ((ICodeGenerator)this).GenerateCodeFromCompileUnit(ea[i], sw, Options);
+                    ((ICodeGenerator)this).GenerateCodeFromCompileUnit(ea[i], sw, _options);
                     sw.Flush();
                 }
             }

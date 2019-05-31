@@ -97,7 +97,18 @@ namespace Internal.Cryptography
             byte[] outputData;
             if (ciphertext.Length > 0)
             {
-                outputData = DepadBlock(decryptedBytes, 0, decryptedBytes.Length);
+                unsafe
+                {
+                    fixed (byte* decryptedBytesPtr = decryptedBytes)
+                    {
+                        outputData = DepadBlock(decryptedBytes, 0, decryptedBytes.Length);
+
+                        if (outputData != decryptedBytes)
+                        {
+                            CryptographicOperations.ZeroMemory(decryptedBytes);
+                        }
+                    }
+                }
             }
             else
             {
@@ -147,8 +158,8 @@ namespace Internal.Cryptography
                     case PaddingMode.None:
                         return false;
                     default:
-                        Debug.Fail($"Invalid padding mode {PaddingMode}.");
-                        throw new CryptographicException(SR.Cryptography_InvalidPadding);
+                        Debug.Fail($"Unknown padding mode {PaddingMode}.");
+                        throw new CryptographicException(SR.Cryptography_UnknownPaddingMode);
                 }
             }
         }

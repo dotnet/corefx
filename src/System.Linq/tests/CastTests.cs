@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void CastIntToLongThrows()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             var rst = q.Cast<long>();
@@ -48,7 +48,17 @@ namespace System.Linq.Tests
 
             Assert.Equal(expected, source.Cast<int?>());
         }
-        
+
+        [Fact]
+        public void NullableIntFromAppropriateObjectsRunOnce()
+        {
+            int? i = 10;
+            object[] source = { -4, 1, 2, 3, 9, i };
+            int?[] expected = { -4, 1, 2, 3, 9, i };
+
+            Assert.Equal(expected, source.RunOnce().Cast<int?>());
+        }
+
         [Fact]
         public void LongFromNullableIntInObjectsThrows()
         {
@@ -124,6 +134,15 @@ namespace System.Linq.Tests
             string[] expected = { "Test1", "4.5", null, "Test2" };
 
             Assert.Equal(expected, source.Cast<string>());
+        }
+
+        [Fact]
+        public void CastToStringRunOnce()
+        {
+            object[] source = { "Test1", "4.5", null, "Test2" };
+            string[] expected = { "Test1", "4.5", null, "Test2" };
+
+            Assert.Equal(expected, source.RunOnce().Cast<string>());
         }
 
         [Fact]
@@ -206,7 +225,7 @@ namespace System.Linq.Tests
         [Fact]
         public void NullSource()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<object>)null).Cast<string>());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<object>)null).Cast<string>());
         }
 
         [Fact]

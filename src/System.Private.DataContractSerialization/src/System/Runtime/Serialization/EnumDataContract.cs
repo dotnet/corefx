@@ -16,7 +16,7 @@ using System.Linq;
 
 namespace System.Runtime.Serialization
 {
-#if NET_NATIVE
+#if uapaot
     public sealed class EnumDataContract : DataContract
 #else
     internal sealed class EnumDataContract : DataContract
@@ -101,7 +101,7 @@ namespace System.Runtime.Serialization
                 Add(typeof(ulong), "unsignedLong");
             }
 
-            static internal void Add(Type type, string localName)
+            internal static void Add(Type type, string localName)
             {
                 XmlQualifiedName stableName = CreateQualifiedName(localName, Globals.SchemaNamespace);
                 s_typeToName.Add(type, stableName);
@@ -118,7 +118,7 @@ namespace System.Runtime.Serialization
                 this.StableName = DataContract.GetStableName(type, out _hasDataContract);
                 Type baseType = Enum.GetUnderlyingType(type);
                 ImportBaseType(baseType);
-                IsFlags = type.GetTypeInfo().IsDefined(Globals.TypeOfFlagsAttribute, false);
+                IsFlags = type.IsDefined(Globals.TypeOfFlagsAttribute, false);
                 ImportDataMembers();
 
                 XmlDictionary dictionary = new XmlDictionary(2 + Members.Count);
@@ -339,13 +339,38 @@ namespace System.Runtime.Serialization
             for (int i = 0; i < Members.Count; i++)
             {
                 string memberName = Members[i].Name;
-                if (memberName.Length == count && String.CompareOrdinal(value, index, memberName, 0, count) == 0)
+                if (memberName.Length == count && string.CompareOrdinal(value, index, memberName, 0, count) == 0)
                 {
                     return Values[i];
                 }
             }
             throw DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.InvalidEnumValueOnRead, value.Substring(index, count), DataContract.GetClrTypeFullName(UnderlyingType))));
         }
+
+        internal string GetStringFromEnumValue(long value)
+        {
+            if (IsULong)
+            {
+                return XmlConvert.ToString((ulong)value);
+            }
+            else
+            {
+                return XmlConvert.ToString(value);
+            }
+        }
+
+        internal long GetEnumValueFromString(string value)
+        {
+            if (IsULong)
+            {
+                return (long)XmlConverter.ToUInt64(value);
+            }
+            else
+            {
+                return XmlConverter.ToInt64(value);
+            }
+        }
+
         public override void WriteXmlValue(XmlWriterDelegator xmlWriter, object obj, XmlObjectSerializerWriteContext context)
         {
             WriteEnumValue(xmlWriter, obj);

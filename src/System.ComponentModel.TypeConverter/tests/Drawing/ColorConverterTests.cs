@@ -3,9 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.ComponentModel.Design.Serialization;
 using System.Drawing;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.ComponentModel.TypeConverterTests
@@ -76,7 +78,7 @@ namespace System.ComponentModel.TypeConverterTests
                         {
                             for (int b = 0; b < 256; b += 67)
                             {
-                                yield return new object[] {a, r, g, b};
+                                yield return new object[] { a, r, g, b };
                             }
                         }
                     }
@@ -84,26 +86,27 @@ namespace System.ComponentModel.TypeConverterTests
             }
         }
 
-        public static IEnumerable<object[]> ColorNames =>
-            Enum.GetNames(typeof(KnownColor)).Select(n => new object[] {n});
+        public static IEnumerable<object[]> ColorNames => typeof(Color).GetProperties()
+                .Where(p => p.PropertyType == typeof(Color))
+                .Select(p => new object[] { p.Name });
 
         [Theory]
         [MemberData(nameof(ColorData))]
         public void ConvertFrom(int a, int r, int g, int b)
         {
             var conv = new ColorConverter();
-            Color color = (Color) conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"#0x{a:x2}{r:x2}{g:x2}{b:x2}");
+            Color color = (Color)conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"#0x{a:x2}{r:x2}{g:x2}{b:x2}");
             Assert.Equal(a, color.A);
             Assert.Equal(r, color.R);
             Assert.Equal(g, color.G);
             Assert.Equal(b, color.B);
 
             Assert.Equal(color,
-                (Color) conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"#0X{a:x2}{r:x2}{g:x2}{b:x2}"));
+                (Color)conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"#0X{a:x2}{r:x2}{g:x2}{b:x2}"));
             Assert.Equal(color,
-                (Color) conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"0x{a:x2}{r:x2}{g:x2}{b:x2}"));
+                (Color)conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"0x{a:x2}{r:x2}{g:x2}{b:x2}"));
             Assert.Equal(color,
-                (Color) conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"0X{a:x2}{r:x2}{g:x2}{b:x2}"));
+                (Color)conv.ConvertFrom(null, CultureInfo.InvariantCulture, $"0X{a:x2}{r:x2}{g:x2}{b:x2}"));
         }
 
         [Theory]
@@ -145,8 +148,8 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             var color = Color.FromName(name);
-            Assert.Equal(color, (Color) conv.ConvertFrom(name));
-            Assert.Equal(color, (Color) conv.ConvertFrom(" " + name + " "));
+            Assert.Equal(color, (Color)conv.ConvertFrom(name));
+            Assert.Equal(color, (Color)conv.ConvertFrom(" " + name + " "));
         }
 
         [Fact]
@@ -154,8 +157,8 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             var color = Color.Empty;
-            Assert.Equal(color, (Color) conv.ConvertFrom(string.Empty));
-            Assert.Equal(color, (Color) conv.ConvertFrom(" "));
+            Assert.Equal(color, (Color)conv.ConvertFrom(string.Empty));
+            Assert.Equal(color, (Color)conv.ConvertFrom(" "));
         }
 
         [Theory]
@@ -165,7 +168,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFrom_ArgumentException(string value)
         {
             var conv = new ColorConverter();
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 conv.ConvertFrom(null, CultureInfo.InvariantCulture, value);
             });
@@ -176,7 +179,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFrom_Exception(string value)
         {
             var conv = new ColorConverter();
-            Assert.Throws<Exception>(() =>
+            AssertExtensions.Throws<ArgumentException, Exception>(() =>
             {
                 conv.ConvertFrom(null, CultureInfo.InvariantCulture, value);
             });
@@ -207,7 +210,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFrom_NullCulture()
         {
             var conv = new ColorConverter();
-            var color = (Color) conv.ConvertFrom(null, null, "#0x23190A44");
+            var color = (Color)conv.ConvertFrom(null, null, "#0x23190A44");
             Assert.Equal(35, color.A);
             Assert.Equal(25, color.R);
             Assert.Equal(10, color.G);
@@ -220,7 +223,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             Assert.Equal($"{a}, {r}, {g}, {b}",
-                (string) conv.ConvertTo(null, CultureInfo.InvariantCulture, Color.FromArgb(a, r, g, b), typeof(string)));
+                (string)conv.ConvertTo(null, CultureInfo.InvariantCulture, Color.FromArgb(a, r, g, b), typeof(string)));
         }
 
         [Theory]
@@ -229,7 +232,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             Assert.Equal(name,
-                (string) conv.ConvertTo(null, CultureInfo.InvariantCulture, Color.FromName(name), typeof(string)));
+                (string)conv.ConvertTo(null, CultureInfo.InvariantCulture, Color.FromName(name), typeof(string)));
         }
 
         [Fact]
@@ -237,7 +240,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             Assert.Equal(string.Empty,
-                (string) conv.ConvertTo(null, CultureInfo.InvariantCulture, Color.Empty, typeof(string)));
+                (string)conv.ConvertTo(null, CultureInfo.InvariantCulture, Color.Empty, typeof(string)));
         }
 
         [Theory]
@@ -305,7 +308,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFromInvariantString(int a, int r, int g, int b)
         {
             var conv = new ColorConverter();
-            var color = (Color) conv.ConvertFromInvariantString($"{a}, {r}, {g}, {b}");
+            var color = (Color)conv.ConvertFromInvariantString($"{a}, {r}, {g}, {b}");
             Assert.Equal(a, color.A);
             Assert.Equal(r, color.R);
             Assert.Equal(g, color.G);
@@ -318,14 +321,14 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             var color = Color.FromName(name);
-            Assert.Equal(color, (Color) conv.ConvertFromInvariantString(name));
+            Assert.Equal(color, (Color)conv.ConvertFromInvariantString(name));
         }
 
         [Fact]
         public void ConvertFromInvariantString_Invalid()
         {
             var conv = new ColorConverter();
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 conv.ConvertFromInvariantString("1, 2, 3, 4, 5");
             });
@@ -335,7 +338,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFromInvariantString_NotNumber()
         {
             var conv = new ColorConverter();
-            var ex = Assert.Throws<Exception>(() =>
+            var ex = AssertExtensions.Throws<ArgumentException, Exception>(() =>
             {
                 conv.ConvertFromInvariantString("hello");
             });
@@ -364,14 +367,14 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             var color = Color.FromName(name);
-            Assert.Equal(color, (Color) conv.ConvertFromString(name));
+            Assert.Equal(color, (Color)conv.ConvertFromString(name));
         }
 
         [Fact]
         public void ConvertFromString_Invalid()
         {
             var conv = new ColorConverter();
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 conv.ConvertFromString(string.Format("1{0} 2{0} 3{0} 4{0} 5", CultureInfo.CurrentCulture.TextInfo.ListSeparator));
             });
@@ -381,7 +384,7 @@ namespace System.ComponentModel.TypeConverterTests
         public void ConvertFromString_NotNumber()
         {
             var conv = new ColorConverter();
-            var ex = Assert.Throws<Exception>(() =>
+            var ex = AssertExtensions.Throws<ArgumentException, Exception>(() =>
             {
                 conv.ConvertFromString("hello");
             });
@@ -436,8 +439,7 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
 
-            Assert.Equal((int) KnownColor.MenuHighlight, conv.GetStandardValues().Count);
-            Assert.Equal((int) KnownColor.MenuHighlight, conv.GetStandardValues(null).Count);
+            Assert.True(conv.GetStandardValues().Count > 0);
         }
 
         [Fact]
@@ -445,6 +447,25 @@ namespace System.ComponentModel.TypeConverterTests
         {
             var conv = new ColorConverter();
             Assert.False(conv.GetStandardValuesExclusive());
+        }
+
+        [Fact]
+        public void ConvertToStringTests()
+        {
+            var conv = new ColorConverter();
+            Assert.Equal("Blue", conv.ConvertTo(Color.Blue, typeof(string)));
+            Assert.Equal("ActiveCaption", conv.ConvertTo(SystemColors.ActiveCaption, typeof(string)));
+        }
+
+        [Fact]
+        public void ConvertToInstanceDescriptorTests()
+        {
+            var conv = new ColorConverter();
+            InstanceDescriptor descriptor = (InstanceDescriptor)conv.ConvertTo(Color.Blue, typeof(InstanceDescriptor));
+            Assert.Equal("Blue", descriptor.MemberInfo.Name);
+
+            descriptor = (InstanceDescriptor)conv.ConvertTo(SystemColors.ActiveCaption, typeof(InstanceDescriptor));
+            Assert.Equal("ActiveCaption", descriptor.MemberInfo.Name);
         }
     }
 }

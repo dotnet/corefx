@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 namespace System
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class AppDomainUnloadedException : SystemException
     {
         internal const int COR_E_APPDOMAINUNLOADED = unchecked((int)0x80131014); // corresponds to __HResults.COR_E_APPDOMAINUNLOADED in corelib
@@ -16,21 +17,18 @@ namespace System
             HResult = COR_E_APPDOMAINUNLOADED;
         }
 
-        public AppDomainUnloadedException(String message)
+        public AppDomainUnloadedException(string? message)
             : base(message)
         {
             HResult = COR_E_APPDOMAINUNLOADED;
         }
 
-        public AppDomainUnloadedException(String message, Exception innerException)
+        public AppDomainUnloadedException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = COR_E_APPDOMAINUNLOADED;
         }
 
-        //
-        //This constructor is required for serialization.
-        //
         protected AppDomainUnloadedException(SerializationInfo info, StreamingContext context) : base(info, context)
         {
         }

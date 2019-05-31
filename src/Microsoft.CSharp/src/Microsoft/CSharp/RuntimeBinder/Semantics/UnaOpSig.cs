@@ -7,13 +7,14 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
-        protected class UnaOpSig
+        private class UnaOpSig
         {
-            public UnaOpSig()
+            protected UnaOpSig()
             {
             }
+
             public UnaOpSig(PredefinedType pt, UnaOpMask grfuom, int cuosSkip, PfnBindUnaOp pfn, UnaOpFuncKind fnkind)
             {
                 this.pt = pt;
@@ -29,7 +30,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             public UnaOpFuncKind fnkind;
         }
 
-        protected class UnaOpFullSig : UnaOpSig
+        private sealed class UnaOpFullSig : UnaOpSig
         {
             private readonly LiftFlags _grflt;
             private readonly CType _type;
@@ -40,6 +41,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 this.grfuom = UnaOpMask.None;
                 this.cuosSkip = 0;
                 this.pfn = pfn;
+                Debug.Assert(type != null);
                 _type = type;
                 _grflt = grflt;
                 this.fnkind = fnkind;
@@ -55,7 +57,8 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 this.cuosSkip = uos.cuosSkip;
                 this.pfn = uos.pfn;
                 this.fnkind = uos.fnkind;
-                _type = pt != PredefinedType.PT_UNDEFINEDINDEX ? fnc.GetOptPDT(pt) : null;
+                Debug.Assert(pt != PredefinedType.PT_UNDEFINEDINDEX);
+                _type = pt != PredefinedType.PT_UNDEFINEDINDEX ? GetPredefindType(pt) : null;
                 _grflt = LiftFlags.None;
             }
             public bool FPreDef()

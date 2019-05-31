@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,7 +10,7 @@ using Xunit;
 
 namespace System.IO.Tests
 {
-    public class NullTests
+    public partial class NullTests
     {
         [Fact]
         public async static Task TestNullStream_Flush()
@@ -69,10 +67,10 @@ namespace System.IO.Tests
             
             var readOnlyStream = new MemoryStream(new byte[1], writable: false);
             
-            await Assert.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null));
-            await Assert.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null, -123)); // Should check if destination == null first
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, 0)); // 0 shouldn't be a valid buffer size
-            await Assert.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, -123));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("destination", () => Stream.Null.CopyToAsync(null, -123)); // Should check if destination == null first
+            await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, 0)); // 0 shouldn't be a valid buffer size
+            await AssertExtensions.ThrowsAsync<ArgumentOutOfRangeException>("bufferSize", () => Stream.Null.CopyToAsync(Stream.Null, -123));
             await Assert.ThrowsAsync<ObjectDisposedException>(() => Stream.Null.CopyToAsync(disposedStream));
             await Assert.ThrowsAsync<NotSupportedException>(() => Stream.Null.CopyToAsync(readOnlyStream));
         }
@@ -87,8 +85,8 @@ namespace System.IO.Tests
             int read = source.Read(buffer, offset, count);
             Assert.Equal(0, read);
             Assert.Equal(copy, buffer); // Make sure Read doesn't modify the buffer
-            Assert.Equal(0, source.Position);            
-            
+            Assert.Equal(0, source.Position);
+
             read = await source.ReadAsync(buffer, offset, count);
             Assert.Equal(0, read);
             Assert.Equal(copy, buffer);
@@ -114,8 +112,8 @@ namespace System.IO.Tests
             
             source.Write(buffer, offset, count);
             Assert.Equal(copy, buffer); // Make sure Write doesn't modify the buffer
-            Assert.Equal(0, source.Position);            
-            
+            Assert.Equal(0, source.Position);
+
             await source.WriteAsync(buffer, offset, count);
             Assert.Equal(copy, buffer);
             Assert.Equal(0, source.Position);

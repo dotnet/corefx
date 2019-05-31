@@ -2,24 +2,18 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
-using Xunit;
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
-using Microsoft.Diagnostics.Tracing.Session;
 #endif
-using System.IO;
-using System.Threading;
 
 namespace BasicEventSourceTests
 {
     public class TestShutdown
     {
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
+        // TODO: Depends on desktop APIs (AppDomainSetup and Evidence).
+#if FALSE
         /// <summary>
         /// Test for manifest event being logged during AD/Process shutdown during EventSource Dispose(bool) method.
         /// </summary>
@@ -85,7 +79,6 @@ namespace BasicEventSourceTests
                 };
 
                 // Parse all the events as best we can, and also send unhandled events there as well.  
-                traceEventSource.Registered.All += onEvent;
                 traceEventSource.Dynamic.All += onEvent;
                 traceEventSource.UnhandledEvent += onEvent;
                 traceEventSource.Process();
@@ -96,7 +89,7 @@ namespace BasicEventSourceTests
 
             logger.Dispose();
         }
-#endif //USE_ETW
+#endif
 
         public sealed class ADShutdownEventSourceTester //: MarshalByRefObject
         {

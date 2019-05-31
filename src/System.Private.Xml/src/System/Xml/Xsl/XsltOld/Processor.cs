@@ -4,17 +4,16 @@
 
 namespace System.Xml.Xsl.XsltOld
 {
-    using System.Globalization;
-    using System.Diagnostics;
-    using System.IO;
-    using System.Xml.XPath;
-    using MS.Internal.Xml.XPath;
-    using System.Text;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Xml.Xsl.XsltOld.Debugger;
+    using System.Diagnostics;
+    using System.Globalization;
+    using System.IO;
     using System.Reflection;
-    using System.Security;
+    using System.Text;
+    using System.Xml.XPath;
+    using System.Xml.Xsl.XsltOld.Debugger;
+    using MS.Internal.Xml.XPath;
 
     internal sealed class Processor : IXsltProcessor
     {
@@ -175,7 +174,7 @@ namespace System.Xml.Xsl.XsltOld
                 _documentCache = new Hashtable();
             }
 
-            Object input = _resolver.GetEntity(ruri, null, null);
+            object input = _resolver.GetEntity(ruri, null, null);
             if (input is Stream)
             {
                 XmlTextReaderImpl tr = new XmlTextReaderImpl(ruri.ToString(), (Stream)input);
@@ -222,22 +221,21 @@ namespace System.Xml.Xsl.XsltOld
             {
                 return null;
             }
-            // TODO: use typecode there.
             if (
                 parameter is XPathNodeIterator ||
                 parameter is XPathNavigator ||
-                parameter is Boolean ||
-                parameter is Double ||
-                parameter is String
+                parameter is bool ||
+                parameter is double ||
+                parameter is string
             )
             {
                 // doing nothing
             }
             else if (
-              parameter is Int16 || parameter is UInt16 ||
-              parameter is Int32 || parameter is UInt32 ||
-              parameter is Int64 || parameter is UInt64 ||
-              parameter is Single || parameter is Decimal
+              parameter is short || parameter is ushort ||
+              parameter is int || parameter is uint ||
+              parameter is long || parameter is ulong ||
+              parameter is float || parameter is decimal
           )
             {
                 parameter = XmlConvert.ToXPathDouble(parameter);
@@ -270,13 +268,13 @@ namespace System.Xml.Xsl.XsltOld
         }
 
 #if DEBUG
-        private bool stringBuilderLocked = false;
+        private bool _stringBuilderLocked = false;
 #endif
 
         internal StringBuilder GetSharedStringBuilder()
         {
 #if DEBUG
-            Debug.Assert(! stringBuilderLocked);
+            Debug.Assert(!_stringBuilderLocked);
 #endif
             if (_sharedStringBuilder == null)
             {
@@ -287,7 +285,7 @@ namespace System.Xml.Xsl.XsltOld
                 _sharedStringBuilder.Length = 0;
             }
 #if DEBUG
-            stringBuilderLocked = true;
+            _stringBuilderLocked = true;
 #endif
             return _sharedStringBuilder;
         }
@@ -296,7 +294,7 @@ namespace System.Xml.Xsl.XsltOld
         {
             // don't clean stringBuilderLocked here. ToString() will happen after this call
 #if DEBUG
-            stringBuilderLocked = false;
+            _stringBuilderLocked = false;
 #endif
         }
 
@@ -320,11 +318,6 @@ namespace System.Xml.Xsl.XsltOld
         internal HWStack ActionStack
         {
             get { return _actionStack; }
-        }
-
-        internal RecordBuilder Builder
-        {
-            get { return _builder; }
         }
 
         internal XsltOutput Output
@@ -602,7 +595,7 @@ namespace System.Xml.Xsl.XsltOld
             }
         }
 
-        internal String ValueOf(ActionFrame context, int key)
+        internal string ValueOf(ActionFrame context, int key)
         {
             string result;
 
@@ -622,7 +615,7 @@ namespace System.Xml.Xsl.XsltOld
             return result;
         }
 
-        internal String ValueOf(XPathNavigator n)
+        internal string ValueOf(XPathNavigator n)
         {
             if (_stylesheet.Whitespace && n.NodeType == XPathNodeType.Element)
             {
@@ -669,7 +662,6 @@ namespace System.Xml.Xsl.XsltOld
             object result = query.Evaluate(context);
             if (result is XPathNodeIterator)
             {
-                // ToDo: We create XPathSelectionIterator to count positions, but it's better create special query in this case at compile time.
                 return new XPathSelectionIterator(context.Current, query);
             }
             throw XsltException.Create(SR.XPath_NodeSetExpected);
@@ -766,7 +758,7 @@ namespace System.Xml.Xsl.XsltOld
             return BeginEvent(nodeType, prefix, name, nspace, empty, null, true);
         }
 
-        internal bool BeginEvent(XPathNodeType nodeType, string prefix, string name, string nspace, bool empty, Object htmlProps, bool search)
+        internal bool BeginEvent(XPathNodeType nodeType, string prefix, string name, string nspace, bool empty, object htmlProps, bool search)
         {
             Debug.Assert(_xsm != null);
 
@@ -1130,17 +1122,6 @@ namespace System.Xml.Xsl.XsltOld
         {
             Debug.Assert(this.Debugger != null, "We don't generate calls this function if ! debugger");
             ((DebuggerFrame)_debuggerStack[_debuggerStack.Length - 1]).currentMode = mode;
-        }
-
-        // ----------------------- IXsltProcessor : --------------------
-        int IXsltProcessor.StackDepth
-        {
-            get { return _debuggerStack.Length; }
-        }
-
-        IStackFrame IXsltProcessor.GetStackFrame(int depth)
-        {
-            return ((DebuggerFrame)_debuggerStack[depth]).actionFrame;
         }
     }
 }

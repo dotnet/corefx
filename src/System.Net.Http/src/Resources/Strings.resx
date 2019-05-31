@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -123,6 +122,9 @@
   <data name="net_http_httpmethod_format_error" xml:space="preserve">
     <value>The format of the HTTP method is invalid.</value>
   </data>
+  <data name="net_http_httpmethod_notsupported_error" xml:space="preserve">
+    <value>The HTTP method '{0}' is not supported on this platform.</value>
+  </data>
   <data name="net_http_reasonphrase_format_error" xml:space="preserve">
     <value>The reason phrase must not contain new-line characters.</value>
   </data>
@@ -198,15 +200,6 @@
   <data name="net_http_client_http_baseaddress_required" xml:space="preserve">
     <value>Only 'http' and 'https' schemes are allowed.</value>
   </data>
-  <data name="net_http_client_send_error" xml:space="preserve">
-    <value>An error occurred while sending {0}. {1}</value>
-  </data>
-  <data name="net_http_client_send_canceled" xml:space="preserve">
-    <value>Request for {0} was canceled.</value>
-  </data>
-  <data name="event_ClientSendCompleted" xml:space="preserve">
-    <value>Request for {0} completed successfully. Returning response {1}: {2}</value>
-  </data>
   <data name="net_http_parser_invalid_base64_string" xml:space="preserve">
     <value>Value '{0}' is not a valid Base64 string. Error: {1}</value>
   </data>
@@ -222,9 +215,6 @@
   <data name="net_http_content_field_too_long" xml:space="preserve">
     <value>The field cannot be longer than {0} characters.</value>
   </data>
-  <data name="event_HeadersInvalidValue" xml:space="preserve">
-    <value>Value for header '{0}' has invalid format. Value: '{1}'.</value>
-  </data>
   <data name="net_http_log_headers_no_newlines" xml:space="preserve">
     <value>Value for header '{0}' contains invalid new-line characters. Value: '{1}'.</value>
   </data>
@@ -233,12 +223,6 @@
   </data>
   <data name="net_http_log_headers_wrong_email_format" xml:space="preserve">
     <value>Value '{0}' is not a valid email address. Error: {1}</value>
-  </data>
-  <data name="net_http_log_content_no_task_returned_copytoasync" xml:space="preserve">
-    <value>Type '{0}.CopyToAsync()' did not return a System.Threading.Tasks.Task object.</value>
-  </data>
-  <data name="event_ContentNull" xml:space="preserve">
-    <value>Content set to '&lt;null&gt;'.</value>
   </data>
   <data name="net_http_handler_not_assigned" xml:space="preserve">
     <value>The inner handler has not been assigned.</value>
@@ -263,9 +247,6 @@
   </data>
   <data name="net_http_chunked_not_allowed_with_empty_content" xml:space="preserve">
     <value>'Transfer-Encoding: chunked' header can not be used when content object is not specified.</value>
-  </data>
-  <data name="net_http_chunked_not_allowed_with_content_length" xml:space="preserve">
-    <value>Both 'Content-Length' and 'Transfer-Encoding: chunked' headers can not be specified at the same time.</value>
   </data>
   <data name="net_http_invalid_cookiecontainer" xml:space="preserve">
     <value>When using CookieUsePolicy.UseSpecifiedCookieContainer, the CookieContainer property must not be null.</value>
@@ -293,12 +274,6 @@
   </data>
   <data name="net_cookie_attribute" xml:space="preserve">
     <value>The '{0}'='{1}' part of the cookie is invalid.</value>
-  </data>
-  <data name="net_http_invalid_cookiecontainer_unix" xml:space="preserve">
-    <value>CookieContainer property must not be null.</value>
-  </data>
-  <data name="net_http_unix_invalid_certcallback_option" xml:space="preserve">
-    <value>The libcurl library in use ({0}) and its SSL backend ("{1}") do not support custom handling of certificates. A libcurl built with OpenSSL is required.</value>
   </data>
   <data name="net_http_unix_invalid_credential" xml:space="preserve">
     <value>The libcurl library in use ({0}) does not support different credentials for different authentication schemes.</value>
@@ -348,8 +323,47 @@
   <data name="net_http_no_concurrent_io_allowed" xml:space="preserve">
     <value>The stream does not support concurrent I/O read or write operations.</value>
   </data>
-  <data name="net_http_unix_invalid_response" xml:space="preserve">
+  <data name="net_http_invalid_response" xml:space="preserve">
     <value>The server returned an invalid or unrecognized response.</value>
+  </data>
+  <data name="net_http_invalid_response_premature_eof" xml:space="preserve">
+    <value>The response ended prematurely.</value>
+  </data>
+  <data name="net_http_invalid_response_premature_eof_bytecount" xml:space="preserve">
+    <value>The response ended prematurely, with at least {0} additional bytes expected.</value>
+  </data>
+  <data name="net_http_invalid_response_chunk_header_invalid" xml:space="preserve">
+    <value>Received chunk header length could not be parsed: '{0}'.</value>
+  </data>
+  <data name="net_http_invalid_response_chunk_extension_invalid" xml:space="preserve">
+    <value>Received an invalid chunk extension: '{0}'.</value>
+  </data>
+  <data name="net_http_invalid_response_chunk_terminator_invalid" xml:space="preserve">
+    <value>Received an invalid chunk terminator: '{0}'.</value>
+  </data>
+  <data name="net_http_invalid_response_status_line" xml:space="preserve">
+    <value>Received an invalid status line: '{0}'.</value>
+  </data>
+  <data name="net_http_invalid_response_status_code" xml:space="preserve">
+    <value>Received an invalid status code: '{0}'.</value>
+  </data>
+  <data name="net_http_invalid_response_status_reason" xml:space="preserve">
+    <value>Received status phrase could not be decoded with iso-8859-1: '{0}'.</value>
+  </data>
+  <data name="net_http_invalid_response_header_folder" xml:space="preserve">
+    <value>Received an invalid folded header.</value>
+  </data>
+  <data name="net_http_invalid_response_header_line" xml:space="preserve">
+    <value>Received an invalid header line: '{0}'.</value>
+  </data>
+  <data name="net_http_invalid_response_header_name" xml:space="preserve">
+    <value>Received an invalid header name: '{0}'.</value>
+  </data>
+  <data name="net_http_request_aborted" xml:space="preserve">
+    <value>The request was aborted.</value>
+  </data>
+  <data name="net_http_invalid_response_pseudo_header_in_trailer" xml:space="preserve">
+    <value>Received an HTTP/2 pseudo-header as a trailing header.</value>
   </data>
   <data name="net_http_unix_handler_disposed" xml:space="preserve">
     <value>The handler was disposed of while active operations were in progress.</value>
@@ -359,6 +373,9 @@
   </data>
   <data name="net_http_response_headers_exceeded_length" xml:space="preserve">
     <value>The HTTP response headers length exceeded the set limit of {0} bytes.</value>
+  </data>
+  <data name="ArgumentOutOfRange_NeedNonNegativeNum" xml:space="preserve">
+    <value>Non-negative number required.</value>
   </data>
   <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
     <value>Positive number required.</value>
@@ -370,6 +387,120 @@
     <value>Stream does not support writing.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Can not access a closed Stream.</value>
+    <value>Cannot access a closed stream.</value>
+  </data>
+  <data name="net_http_libcurl_callback_notsupported_sslbackend" xml:space="preserve">
+    <value>The handler does not support custom handling of certificates with this combination of libcurl ({0}) and its SSL backend ("{1}"). An SSL backend based on "{2}" is required. Consider using System.Net.Http.SocketsHttpHandler.</value>
+  </data>
+  <data name="net_http_libcurl_callback_notsupported_os" xml:space="preserve">
+    <value>The handler does not support custom handling of certificates on this operating system. Consider using System.Net.Http.SocketsHttpHandler.</value>
+  </data>
+  <data name="net_http_libcurl_clientcerts_notsupported_sslbackend" xml:space="preserve">
+    <value>The handler does not support client authentication certificates with this combination of libcurl ({0}) and its SSL backend ("{1}"). An SSL backend based on "{2}" is required. Consider using System.Net.Http.SocketsHttpHandler.</value>
+  </data>
+  <data name="net_http_libcurl_clientcerts_notsupported_os" xml:space="preserve">
+    <value>The handler does not support client authentication certificates on this operating system. Consider using System.Net.Http.SocketsHttpHandler.</value>
+  </data>
+  <data name="net_http_libcurl_revocation_notsupported_sslbackend" xml:space="preserve">
+    <value>The handler does not support changing revocation settings with this combination of libcurl ({0}) and its SSL backend ("{1}"). An SSL backend based on "{2}" is required. Consider using System.Net.Http.SocketsHttpHandler.</value>
+  </data>
+  <data name="net_http_feature_requires_Windows10Version1607" xml:space="preserve">
+    <value>Using this feature requires Windows 10 Version 1607.</value>
+  </data>
+  <data name="net_http_feature_UWPClientCertSupportRequiresCertInPersonalCertificateStore" xml:space="preserve">
+    <value>Client certificate was not found in the personal (\"MY\") certificate store. In UWP, client certificates are only supported if they have been added to that certificate store.</value>
+  </data>
+  <data name="net_http_invalid_proxy_scheme" xml:space="preserve">
+    <value>Only the 'http' scheme is allowed for proxies.</value>
+  </data>
+  <data name="net_http_request_invalid_char_encoding" xml:space="preserve">
+    <value>Request headers must contain only ASCII characters.</value>
+  </data>
+  <data name="net_http_ssl_connection_failed" xml:space="preserve">
+    <value>The SSL connection could not be established, see inner exception.</value>
+  </data>
+  <data name="net_http_unsupported_chunking" xml:space="preserve">
+    <value>HTTP 1.0 does not support chunking.</value>
+  </data>
+  <data name="net_http_unsupported_version" xml:space="preserve">
+    <value>Request HttpVersion 0.X is not supported.  Use 1.0 or above.</value>
+  </data>
+  <data name="IO_SeekBeforeBegin" xml:space="preserve">
+    <value>An attempt was made to move the position before the beginning of the stream.</value>
+  </data>
+  <data name="net_ssl_app_protocols_invalid" xml:space="preserve">
+    <value>The application protocol list is invalid.</value>
+  </data>
+  <data name="net_ssl_http2_requires_tls12" xml:space="preserve">
+    <value>HTTP/2 requires TLS 1.2 or newer, but '{0}' was negotiated.</value>
+  </data>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
+  </data>
+  <data name="net_http_request_no_host" xml:space="preserve">
+    <value>CONNECT request must contain Host header.</value>
+  </data>
+  <data name="net_http_winhttp_error" xml:space="preserve">
+    <value>Error {0} calling {1}, '{2}'.</value>
+  </data>
+  <data name="net_http_http2_protocol_error" xml:space="preserve">
+    <value>The HTTP/2 request failed with protocol error '{0}' (0x{1}).</value>
+  </data>
+  <data name="net_MethodNotImplementedException" xml:space="preserve">
+    <value>This method is not implemented by this class.</value>
+  </data>
+  <data name="event_OperationReturnedSomething" xml:space="preserve">
+    <value>{0} returned {1}.</value>
+  </data>
+  <data name="net_log_operation_failed_with_error" xml:space="preserve">
+    <value>{0} failed with error {1}.</value>
+  </data>
+  <data name="net_completed_result" xml:space="preserve">
+    <value>This operation cannot be performed on a completed asynchronous result object.</value>
+  </data>
+  <data name="net_invalid_enum" xml:space="preserve">
+    <value>The specified value is not valid in the '{0}' enumeration.</value>
+  </data>
+  <data name="net_auth_message_not_encrypted" xml:space="preserve">
+    <value>Protocol error: A received message contains a valid signature but it was not encrypted as required by the effective Protection Level.</value>
+  </data>
+  <data name="net_securitypackagesupport" xml:space="preserve">
+    <value>The requested security package is not supported.</value>
+  </data>
+  <data name="SSPIInvalidHandleType" xml:space="preserve">
+    <value>'{0}' is not a supported handle type.</value>
+  </data>
+  <data name="net_http_authconnectionfailure" xml:space="preserve">
+    <value>Authentication failed because the connection could not be reused.</value>
+  </data>
+  <data name="net_nego_server_not_supported" xml:space="preserve">
+    <value>Server implementation is not supported</value>
+  </data>
+  <data name="net_nego_protection_level_not_supported" xml:space="preserve">
+    <value>Requested protection level is not supported with the GSSAPI implementation currently installed.</value>
+  </data>
+  <data name="net_context_buffer_too_small" xml:space="preserve">
+    <value>Insufficient buffer space. Required: {0} Actual: {1}.</value>
+  </data>
+  <data name="net_gssapi_operation_failed_detailed" xml:space="preserve">
+    <value>GSSAPI operation failed with error - {0} ({1}).</value>
+  </data>
+  <data name="net_gssapi_operation_failed" xml:space="preserve">
+    <value>GSSAPI operation failed with status: {0} (Minor status: {1}).</value>
+  </data>
+  <data name="net_gssapi_operation_failed_detailed_majoronly" xml:space="preserve">
+    <value>GSSAPI operation failed with error - {0}.</value>
+  </data>
+  <data name="net_gssapi_operation_failed_majoronly" xml:space="preserve">
+    <value>GSSAPI operation failed with status: {0}.</value>
+  </data>
+  <data name="net_gssapi_ntlm_missing_plugin" xml:space="preserve">
+    <value>NTLM authentication requires the GSSAPI plugin 'gss-ntlmssp'.</value>
+  </data>
+  <data name="net_ntlm_not_possible_default_cred" xml:space="preserve">
+    <value>NTLM authentication is not possible with default credentials on this platform.</value>
+  </data>
+  <data name="net_nego_not_supported_empty_target_with_defaultcreds" xml:space="preserve">
+    <value>Target name should be non empty if default credentials are passed.</value>
   </data>
 </root>

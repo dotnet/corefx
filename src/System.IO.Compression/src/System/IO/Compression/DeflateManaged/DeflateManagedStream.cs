@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace System.IO.Compression
 {
-    internal partial class DeflateManagedStream : Stream
+    internal sealed partial class DeflateManagedStream : Stream
     {
         internal const int DefaultBufferSize = 8192;
 
@@ -26,22 +26,6 @@ namespace System.IO.Compression
         private bool _wroteHeader;
         private bool _wroteBytes;
 
-        public DeflateManagedStream(Stream stream, CompressionMode mode) : this(stream, mode, false)
-        {
-        }
-        
-        // Since a reader is being taken, CompressionMode.Decompress is implied
-        internal DeflateManagedStream(Stream stream, bool leaveOpen, IFileFormatReader reader)
-        {
-            Debug.Assert(reader != null, "The IFileFormatReader passed to the internal DeflateStream constructor must be non-null");
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-            if (!stream.CanRead)
-                throw new ArgumentException(SR.NotSupported_UnreadableStream, nameof(stream));
-
-            InitializeInflater(stream, leaveOpen, reader);
-        }
-
         // A specific constructor to allow decompression of Deflate64
         internal DeflateManagedStream(Stream stream, ZipArchiveEntry.CompressionMethodValues method)
         {
@@ -52,41 +36,6 @@ namespace System.IO.Compression
 
             InitializeInflater(stream, false, null, method);
         }
-
-        public DeflateManagedStream(Stream stream, CompressionMode mode, bool leaveOpen)
-        {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            switch (mode)
-            {
-                case CompressionMode.Decompress:
-                    InitializeInflater(stream, leaveOpen);
-                    break;
-
-                case CompressionMode.Compress:
-                    InitializeDeflater(stream, leaveOpen, CompressionLevel.Optimal);
-                    break;
-
-                default:
-                    throw new ArgumentException(SR.ArgumentOutOfRange_Enum, nameof(mode));
-            }
-        }
-
-        // Implies mode = Compress
-        public DeflateManagedStream(Stream stream, CompressionLevel compressionLevel) : this(stream, compressionLevel, false)
-        {
-        }
-
-        // Implies mode = Compress
-        public DeflateManagedStream(Stream stream, CompressionLevel compressionLevel, bool leaveOpen)
-        {
-            if (stream == null)
-                throw new ArgumentNullException(nameof(stream));
-
-            InitializeDeflater(stream, leaveOpen, compressionLevel);
-        }
-
 
         /// <summary>
         /// Sets up this DeflateManagedStream to be used for Inflation/Decompression
@@ -106,36 +55,11 @@ namespace System.IO.Compression
             _buffer = new byte[DefaultBufferSize];
         }
 
-        /// <summary>
-        /// Sets up this DeflateManagedStream to be used for Deflation/Compression
-        /// </summary>
-        internal void InitializeDeflater(Stream stream, bool leaveOpen, CompressionLevel compressionLevel)
-        {
-            Debug.Assert(stream != null);
-            if (!stream.CanWrite)
-                throw new ArgumentException(SR.NotSupported_UnwritableStream, nameof(stream));
-
-            _deflater = new DeflaterManaged();
-
-            _stream = stream;
-            _mode = CompressionMode.Compress;
-            _leaveOpen = leaveOpen;
-            _buffer = new byte[DefaultBufferSize];
-        }
-
         internal void SetFileFormatWriter(IFileFormatWriter writer)
         {
             if (writer != null)
             {
                 _formatWriter = writer;
-            }
-        }
-
-        public Stream BaseStream
-        {
-            get
-            {
-                return _stream;
             }
         }
 
@@ -165,33 +89,17 @@ namespace System.IO.Compression
             }
         }
 
-        public override bool CanSeek
-        {
-            get
-            {
-                return false;
-            }
-        }
+        public override bool CanSeek => false;
 
         public override long Length
         {
-            get
-            {
-                throw new NotSupportedException(SR.NotSupported);
-            }
+            get { throw new NotSupportedException(SR.NotSupported); }
         }
 
         public override long Position
         {
-            get
-            {
-                throw new NotSupportedException(SR.NotSupported);
-            }
-
-            set
-            {
-                throw new NotSupportedException(SR.NotSupported);
-            }
+            get { throw new NotSupportedException(SR.NotSupported); }
+            set { throw new NotSupportedException(SR.NotSupported); }
         }
 
         public override void Flush()
@@ -284,7 +192,6 @@ namespace System.IO.Compression
                 ThrowStreamClosedException();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowStreamClosedException()
         {
             throw new ObjectDisposedException(null, SR.ObjectDisposed_StreamClosed);
@@ -296,7 +203,6 @@ namespace System.IO.Compression
                 ThrowCannotReadFromDeflateManagedStreamException();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowCannotReadFromDeflateManagedStreamException()
         {
             throw new InvalidOperationException(SR.CannotReadFromDeflateStream);
@@ -308,19 +214,16 @@ namespace System.IO.Compression
                 ThrowCannotWriteToDeflateManagedStreamException();
         }
 
-        [MethodImpl(MethodImplOptions.NoInlining)]
         private static void ThrowCannotWriteToDeflateManagedStreamException()
         {
             throw new InvalidOperationException(SR.CannotWriteToDeflateStream);
         }
 
-#if netstandard17
         public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
             TaskToApm.Begin(ReadAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
 
         public override int EndRead(IAsyncResult asyncResult) =>
             TaskToApm.End<int>(asyncResult);
-#endif
 
         public override Task<int> ReadAsync(byte[] array, int offset, int count, CancellationToken cancellationToken)
         {
@@ -357,7 +260,7 @@ namespace System.IO.Compression
                     return Task.FromResult(0);
                 }
 
-                // If there is no data on the output buffer and we are not at 
+                // If there is no data on the output buffer and we are not at
                 // the end of the stream, we need to get more data from the base stream
                 readTask = _stream.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
                 if (readTask == null)
@@ -407,7 +310,7 @@ namespace System.IO.Compression
                     if (bytesRead == 0 && !_inflater.Finished())
                     {
                         // We could have read in head information and didn't get any data.
-                        // Read from the base stream again.   
+                        // Read from the base stream again.
                         readTask = _stream.ReadAsync(_buffer, 0, _buffer.Length, cancellationToken);
                         if (readTask == null)
                         {
@@ -457,8 +360,10 @@ namespace System.IO.Compression
             }
         }
 
-        // Perform deflate-mode maintenance required due to custom header and footer writers
-        // (e.g. set by GZipStream):
+        /// <summary>
+        /// Perform deflate-mode maintenance required due to custom header and footer writers
+        /// (e.g. set by GZipStream).
+        /// </summary>
         private void DoMaintenance(byte[] array, int offset, int count)
         {
             // If no bytes written, do nothing:
@@ -521,10 +426,10 @@ namespace System.IO.Compression
             }
             else
             {
-                // In case of zero length buffer, we still need to clean up the native created stream before 
-                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during 
-                // the dispose operation and although it frees the stream but it return error code because the 
-                // stream state was still marked as in use. The symptoms of this problem will not be seen except 
+                // In case of zero length buffer, we still need to clean up the native created stream before
+                // the object get disposed because eventually ZLibNative.ReleaseHandle will get called during
+                // the dispose operation and although it frees the stream but it return error code because the
+                // stream state was still marked as in use. The symptoms of this problem will not be seen except
                 // if running any diagnostic tools which check for disposing safe handle objects
                 bool finished;
                 do
@@ -564,10 +469,8 @@ namespace System.IO.Compression
 
                     try
                     {
-                        if (_deflater != null)
-                            _deflater.Dispose();
-                        if (_inflater != null)
-                            _inflater.Dispose();
+                        _deflater?.Dispose();
+                        _inflater?.Dispose();
                     }
                     finally
                     {
@@ -608,5 +511,11 @@ namespace System.IO.Compression
                 Interlocked.Decrement(ref _asyncOperations);
             }
         }
+
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback asyncCallback, object asyncState) =>
+            TaskToApm.Begin(WriteAsync(buffer, offset, count, CancellationToken.None), asyncCallback, asyncState);
+
+        public override void EndWrite(IAsyncResult asyncResult) =>
+            TaskToApm.End(asyncResult);
     }
 }

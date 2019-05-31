@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Collections.Immutable.Tests
 {
-    public abstract class ImmutableDictionaryBuilderTestBase : ImmutablesTestBase
+    public abstract partial class ImmutableDictionaryBuilderTestBase : ImmutablesTestBase
     {
         [Fact]
         public void Add()
@@ -43,7 +43,7 @@ namespace System.Collections.Immutable.Tests
         {
             var builder = this.GetBuilder<string, int>();
             builder.Add("five", 5);
-            Assert.Throws<ArgumentException>(null, () => builder.Add("five", 6));
+            AssertExtensions.Throws<ArgumentException>(null, () => builder.Add("five", 6));
         }
 
         [Fact]
@@ -104,7 +104,7 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(new KeyValuePair<string, int>(), array[0]);
             Assert.Equal(new KeyValuePair<string, int>("five", 5), array[1]);
 
-            Assert.Throws<ArgumentNullException>("array", () => builder.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => builder.CopyTo(null, 0));
         }
 
         [Fact]
@@ -142,22 +142,6 @@ namespace System.Collections.Immutable.Tests
             Assert.True(builder.TryGetValue("six", out value) && value == 6);
             Assert.False(builder.TryGetValue("four", out value));
             Assert.Equal(0, value);
-        }
-
-        [Fact]
-        public void TryGetKey()
-        {
-            var builder = Empty<int>(StringComparer.OrdinalIgnoreCase)
-                .Add("a", 1).ToBuilder();
-            string actualKey;
-            Assert.True(TryGetKeyHelper(builder, "a", out actualKey));
-            Assert.Equal("a", actualKey);
-
-            Assert.True(TryGetKeyHelper(builder, "A", out actualKey));
-            Assert.Equal("a", actualKey);
-
-            Assert.False(TryGetKeyHelper(builder, "b", out actualKey));
-            Assert.Equal("b", actualKey);
         }
 
         [Fact]

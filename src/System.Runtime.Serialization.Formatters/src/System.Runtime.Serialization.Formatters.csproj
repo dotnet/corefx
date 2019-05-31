@@ -1,20 +1,13 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <ProjectGuid>{CA488507-3B6E-4494-B7BE-7B4EEEB2C4D1}</ProjectGuid>
+    <ProjectGuid>{CF80D24A-787A-43DB-B9E7-10BCA02D10EA}</ProjectGuid>
     <AssemblyName>System.Runtime.Serialization.Formatters</AssemblyName>
     <RootNamespace>System.Runtime.Serialization.Formatters</RootNamespace>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netcoreapp1.1'">$(DefineConstants);netcoreapp11</DefineConstants>
+    <NoWarn>$(NoWarn);CS1573</NoWarn>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' " />
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' " />
-  <ItemGroup Condition="'$(TargetGroup)' == '' Or '$(TargetGroup)' == 'netcoreapp1.1'">
+  <ItemGroup>
     <Compile Include="System.Runtime.Serialization.Formatters.TypeForwards.cs" />
-    <Compile Include="System\TemporaryStubs.cs" />
     <Compile Include="System\Runtime\Serialization\DeserializationEventHandler.cs" />
     <Compile Include="System\Runtime\Serialization\Formatter.cs" />
     <Compile Include="System\Runtime\Serialization\FormatterConverter.cs" />
@@ -27,6 +20,7 @@
     <Compile Include="System\Runtime\Serialization\ObjectManager.cs" />
     <Compile Include="System\Runtime\Serialization\SerializationBinder.cs" />
     <Compile Include="System\Runtime\Serialization\SerializationEventsCache.cs" />
+    <Compile Include="System\Runtime\Serialization\SerializationFieldInfo.cs" />
     <Compile Include="System\Runtime\Serialization\SerializationObjectManager.cs" />
     <Compile Include="System\Runtime\Serialization\SurrogateSelector.cs" />
     <Compile Include="System\Runtime\Serialization\ValueTypeFixupInfo.cs" />
@@ -61,9 +55,19 @@
     <Compile Include="System\Runtime\Serialization\Formatters\Binary\BinaryObjectWriter.cs" />
     <Compile Include="System\Runtime\Serialization\Formatters\Binary\BinaryParser.cs" />
     <Compile Include="System\Runtime\Serialization\Formatters\Binary\BinaryUtilClasses.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Collections\HashHelpers.cs">
+      <Link>Common\System\Collections\HashHelpers.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ProjectReference Include="..\..\System.Runtime.CompilerServices.Unsafe\src\System.Runtime.CompilerServices.Unsafe.ilproj" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
+    <ProjectReference Include="..\..\System.Collections\src\System.Collections.csproj" />
+    <ProjectReference Include="..\..\System.Collections.Concurrent\src\System.Collections.Concurrent.csproj" />
+    <ProjectReference Include="..\..\System.Collections.NonGeneric\src\System.Collections.NonGeneric.csproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\System.Runtime.Serialization.Formatters.rd.xml" />
+  </ItemGroup>
 </Project>

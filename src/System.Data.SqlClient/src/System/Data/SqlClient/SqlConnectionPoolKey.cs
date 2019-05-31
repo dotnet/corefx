@@ -7,6 +7,7 @@
 //------------------------------------------------------------------------------
 
 using System.Data.Common;
+using System.Diagnostics;
 
 namespace System.Data.SqlClient
 {
@@ -15,18 +16,25 @@ namespace System.Data.SqlClient
     internal class SqlConnectionPoolKey : DbConnectionPoolKey
     {
         private int _hashValue;
+        private SqlCredential _credential;
+        private readonly string _accessToken;
 
-        internal SqlConnectionPoolKey(string connectionString) : base(connectionString)
+        internal SqlConnectionPoolKey(string connectionString, SqlCredential credential, string accessToken) : base(connectionString)
         {
+            Debug.Assert(_credential == null || _accessToken == null, "Credential and AccessToken can't have the value at the same time.");
+            _credential = credential;
+            _accessToken = accessToken;
             CalculateHashCode();
         }
 
         private SqlConnectionPoolKey(SqlConnectionPoolKey key) : base(key)
         {
+            _credential = key.Credential;
+            _accessToken = key.AccessToken;
             CalculateHashCode();
         }
 
-        internal override DbConnectionPoolKey Clone()
+        public override object Clone()
         {
             return new SqlConnectionPoolKey(this);
         }
@@ -45,13 +53,20 @@ namespace System.Data.SqlClient
             }
         }
 
+        internal SqlCredential Credential => _credential;
 
+        internal string AccessToken
+        {
+            get
+            {
+                return _accessToken;
+            }
+        }
 
         public override bool Equals(object obj)
         {
             SqlConnectionPoolKey key = obj as SqlConnectionPoolKey;
-            return (key != null &&
-                ConnectionString == key.ConnectionString);
+            return (key != null && _credential == key._credential && ConnectionString == key.ConnectionString && Object.ReferenceEquals(_accessToken, key._accessToken));
         }
 
         public override int GetHashCode()
@@ -62,6 +77,21 @@ namespace System.Data.SqlClient
         private void CalculateHashCode()
         {
             _hashValue = base.GetHashCode();
+
+            if (_credential != null)
+            {
+                unchecked
+                {
+                    _hashValue = _hashValue * 17 + _credential.GetHashCode();
+                }
+            }
+            else if (_accessToken != null)
+            {
+                unchecked
+                {
+                    _hashValue = _hashValue * 17 + _accessToken.GetHashCode();
+                }
+            }
         }
     }
 }

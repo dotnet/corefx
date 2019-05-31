@@ -55,12 +55,6 @@ namespace System.Net
             _lineLength = writeStateInfo.MaxLineLength;
         }
 
-        internal Base64Stream(Stream stream, int lineLength) : base(stream)
-        {
-            _lineLength = lineLength;
-            _writeState = new Base64WriteStateInfo();
-        }
-
         internal Base64Stream(Base64WriteStateInfo writeStateInfo) : base(new MemoryStream())
         {
             _lineLength = writeStateInfo.MaxLineLength;
@@ -172,12 +166,12 @@ namespace System.Net
                             break;
                         case 1:
                             *dest++ = (byte)(ReadState.Val + (s >> 4));
-                            ReadState.Val = (byte)(s << 4);
+                            ReadState.Val = unchecked((byte)(s << 4));
                             ReadState.Pos++;
                             break;
                         case 2:
                             *dest++ = (byte)(ReadState.Val + (s >> 2));
-                            ReadState.Val = (byte)(s << 6);
+                            ReadState.Val = unchecked((byte)(s << 6));
                             ReadState.Pos++;
                             break;
                         case 3:
@@ -213,6 +207,7 @@ namespace System.Net
                     {
                         WriteState.LastBits = (byte)((buffer[cur] & 0x0f) << 2);
                         WriteState.Padding = 1;
+                        cur++;
                         return cur - offset;
                     }
                     WriteState.Append(s_base64EncodeMap[((buffer[cur] & 0x0f) << 2) | ((buffer[cur + 1] & 0xc0) >> 6)]);
@@ -302,8 +297,6 @@ namespace System.Net
             WriteState.AppendFooter();
             return cur - offset;
         }
-
-        public Stream GetStream() => this;
 
         public string GetEncodedString() => Encoding.ASCII.GetString(WriteState.Buffer, 0, WriteState.Length);
 
@@ -499,7 +492,7 @@ namespace System.Net
 
         private sealed class WriteAsyncResult : LazyAsyncResult
         {
-            private readonly static AsyncCallback s_onWrite = OnWrite;
+            private static readonly AsyncCallback s_onWrite = OnWrite;
 
             private readonly Base64Stream _parent;
             private readonly byte[] _buffer;

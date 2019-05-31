@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -118,7 +117,10 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
-    <value>Non negative number is required.</value>
+    <value>Non-negative number required.</value>
+  </data>
+  <data name="ArgumentOutOfRange_NeedValidPipeAccessRights" xml:space="preserve">
+    <value>Invalid PipeAccessRights value.</value>
   </data>
   <data name="Argument_InvalidOffLen" xml:space="preserve">
     <value>Offset and length were out of bounds for the array or count is greater than the number of elements from index to the end of the source collection.</value>
@@ -126,20 +128,20 @@
   <data name="Argument_NeedNonemptyPipeName" xml:space="preserve">
     <value>pipeName cannot be an empty string.</value>
   </data>
+  <data name="Argument_NonContainerInvalidAnyFlag" xml:space="preserve">
+    <value>This flag may not be set on a pipe.</value>
+  </data>
   <data name="Argument_EmptyServerName" xml:space="preserve">
     <value>serverName cannot be an empty string.  Use \\\".\\\" for current machine.</value>
   </data>
   <data name="Argument_InvalidHandle" xml:space="preserve">
-    <value>Invalid handle.</value>
+    <value>Handle has been disposed or is invalid.</value>
   </data>
   <data name="ArgumentNull_Buffer" xml:space="preserve">
     <value>Buffer cannot be null.</value>
   </data>
   <data name="ArgumentNull_ServerName" xml:space="preserve">
     <value>serverName cannot be null. Use \".\" for current machine.</value>
-  </data>
-  <data name="ArgumentOutOfRange_AdditionalAccessLimited" xml:space="preserve">
-    <value>additionalAccessRights is limited to the PipeAccessRights.ChangePermissions, PipeAccessRights.TakeOwnership, and PipeAccessRights.AccessSystemSecurity flags when creating NamedPipeServerStreams.</value>
   </data>
   <data name="ArgumentOutOfRange_AnonymousReserved" xml:space="preserve">
     <value>The pipeName \"anonymous\" is reserved.</value>
@@ -159,17 +161,11 @@
   <data name="ArgumentOutOfRange_HandleInheritabilityNoneOrInheritable" xml:space="preserve">
     <value>HandleInheritability.None or HandleInheritability.Inheritable required.</value>
   </data>
-  <data name="ArgumentOutOfRange_InvalidPipeAccessRights" xml:space="preserve">
-    <value>Invalid PipeAccessRights flag.</value>
-  </data>
   <data name="ArgumentOutOfRange_InvalidTimeout" xml:space="preserve">
     <value>Timeout must be non-negative or equal to -1 (Timeout.Infinite)</value>
   </data>
   <data name="ArgumentOutOfRange_MaxNumServerInstances" xml:space="preserve">
     <value>maxNumberOfServerInstances must either be a value between 1 and 254, or NamedPipeServerStream.MaxAllowedServerInstances (to obtain the maximum number allowed by system resources).</value>
-  </data>
-  <data name="ArgumentOutOfRange_PathLengthInvalid" xml:space="preserve">
-    <value>The path '{0}' is of an invalid length for use with domain sockets on this platform.  The length must be between 1 and {1} characters, inclusive.</value>
   </data>
   <data name="ArgumentOutOfRange_NeedPosNum" xml:space="preserve">
     <value>Positive number required.</value>
@@ -205,18 +201,15 @@
     <value>Could not find file '{0}'.</value>
   </data>
   <data name="IO_AlreadyExists_Name" xml:space="preserve">
-    <value>Cannot create \"{0}\" because a file or directory with the same name already exists.</value>
-  </data>
-  <data name="IO_BindHandleFailed" xml:space="preserve">
-    <value>BindHandle for ThreadPool failed on this handle.</value>
+    <value>Cannot create '{0}' because a file or directory with the same name already exists.</value>
   </data>
   <data name="IO_FileExists_Name" xml:space="preserve">
     <value>The file '{0}' already exists.</value>
   </data>
-  <data name="IO_NoPermissionToDirectoryName" xml:space="preserve">
-    <value>&lt;Path discovery permission to the specified directory was denied.&gt;</value>
+  <data name="IO_IO_PipeBroken" xml:space="preserve">
+    <value>Pipe is broken.</value>
   </data>
-  <data name="IO_OperationAborted" xml:space="preserve">
+  <data name="IO_OperationAborted_Unexpected" xml:space="preserve">
     <value>IO operation was aborted unexpectedly.</value>
   </data>
   <data name="IO_SharingViolation_File" xml:space="preserve">
@@ -264,9 +257,6 @@
   <data name="UnauthorizedAccess_IODenied_NoPathName" xml:space="preserve">
     <value>Access to the path is denied.</value>
   </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error '{0}'.</value>
-  </data>
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>
   </data>
@@ -276,10 +266,25 @@
   <data name="PlatformNotSupported_RemotePipes" xml:space="preserve">
     <value>Access to remote named pipes is not supported on this platform.</value>
   </data>
-  <data name="PlatformNotSupproted_InvalidNameChars" xml:space="preserve">
-    <value>The name of a pipe on this platform must only include characters valid in file names.</value>
+  <data name="PlatformNotSupported_InvalidPipeNameChars" xml:space="preserve">
+    <value>The name of a pipe on this platform must be a valid file name or a valid absolute path to a file name.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Cannot access a closed Stream.</value>
+    <value>Cannot access a closed stream.</value>
+  </data>
+  <data name="PlatformNotSupported_OperatingSystemError" xml:space="preserve">
+    <value>The operating system returned error '{0}' indicating that the operation is not supported.</value>
+  </data>
+  <data name="IO_AllPipeInstancesAreBusy" xml:space="preserve">
+    <value>All pipe instances are busy.</value>
+  </data>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
+  </data>
+  <data name="UnauthorizedAccess_NotOwnedByCurrentUser" xml:space="preserve">
+    <value>Could not connect to the pipe because it was not owned by the current user.</value>
+  </data>
+  <data name="UnauthorizedAccess_ClientIsNotCurrentUser" xml:space="preserve">
+    <value>Client connection (user id {0}) was refused because it was not owned by the current user (id {1}).</value>
   </data>
 </root>

@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeVariableDeclarationStatement : CodeStatement
     {
         private CodeTypeReference _type;
@@ -55,14 +54,14 @@ namespace System.CodeDom
 
         public string Name
         {
-            get { return _name ?? string.Empty; }
-            set { _name = value; }
+            get => _name ?? string.Empty;
+            set => _name = value;
         }
 
         public CodeTypeReference Type
         {
-            get { return _type ?? (_type = new CodeTypeReference("")); }
-            set { _type = value; }
+            get => _type ?? (_type = new CodeTypeReference(""));
+            set => _type = value;
         }
     }
 }

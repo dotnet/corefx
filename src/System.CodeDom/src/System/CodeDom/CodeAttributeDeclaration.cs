@@ -2,10 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeAttributeDeclaration
     {
         private string _name;
@@ -43,7 +41,7 @@ namespace System.CodeDom
 
         public string Name
         {
-            get { return _name ?? string.Empty; }
+            get => _name ?? string.Empty;
             set
             {
                 _name = value;

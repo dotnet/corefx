@@ -10,80 +10,46 @@ using System.Reflection;
 namespace System.ComponentModel
 {
     /// <summary>
-    /// <para>Provides a type converter to convert <see cref='System.Decimal'/>
-    /// objects to and from various
-    /// other representations.</para>
+    /// Provides a type converter to convert <see cref='System.Decimal'/>
+    /// objects to and from various other representations.
     /// </summary>
     public class DecimalConverter : BaseNumberConverter
     {
         /// <summary>
         /// Determines whether this editor will attempt to convert hex (0x or #) strings
         /// </summary>
-        internal override bool AllowHex
-        {
-            get
-            {
-                return false;
-            }
-        }
+        internal override bool AllowHex => false;
 
         /// <summary>
         /// The Type this converter is targeting (e.g. Int16, UInt32, etc.)
         /// </summary>
-        internal override Type TargetType
-        {
-            get
-            {
-                return typeof(Decimal);
-            }
-        }
+        internal override Type TargetType => typeof(decimal);
 
         /// <summary>
-        ///    <para>
-        ///        Gets a value indicating whether this converter can
-        ///        convert an object to the given destination type using the context.
-        ///    </para>
+        /// Gets a value indicating whether this converter can convert an
+        /// object to the given destination type using the context.
         /// </summary>
         public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
         {
-            if (destinationType == typeof(InstanceDescriptor))
-            {
-                return true;
-            }
-            return base.CanConvertTo(context, destinationType);
+            return destinationType == typeof(InstanceDescriptor) || base.CanConvertTo(context, destinationType);
         }
 
         /// <summary>
-        ///      Converts the given object to another type.  The most common types to convert
-        ///      are to and from a string object.  The default implementation will make a call
-        ///      to ToString on the object if the object is valid and if the destination
-        ///      type is string.  If this cannot convert to the desitnation type, this will
-        ///      throw a NotSupportedException.
+        /// Converts the given object to another type. The most common types to convert
+        /// are to and from a string object. The default implementation will make a call
+        /// to ToString on the object if the object is valid and if the destination
+        /// type is string. If this cannot convert to the destination type, this will
+        /// throw a NotSupportedException.
         /// </summary>
         public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
         {
-            if (destinationType == null)
+            if (destinationType == typeof(InstanceDescriptor) && value is decimal decimalValue)
             {
-                throw new ArgumentNullException(nameof(destinationType));
+                ConstructorInfo ctor = typeof(decimal).GetConstructor(new Type[] { typeof(int[]) });
+                Debug.Assert(ctor != null, "Expected constructor to exist.");
+                return new InstanceDescriptor(ctor, new object[] { decimal.GetBits(decimalValue) });
             }
 
-            if (destinationType == typeof(InstanceDescriptor) && value is Decimal)
-            {
-
-                object[] args = new object[] { Decimal.GetBits((Decimal)value) };
-                MemberInfo member = typeof(Decimal).GetConstructor(new Type[] { typeof(Int32[]) });
-
-                Debug.Assert(member != null, "Could not convert decimal to member.  Did someone change method name / signature and not update DecimalConverter?");
-                if (member != null)
-                {
-                    return new InstanceDescriptor(member, args);
-                }
-                else
-                {
-                    return null;
-                }
-            }
-            
             return base.ConvertTo(context, culture, value, destinationType);
         }
 
@@ -100,16 +66,7 @@ namespace System.ComponentModel
         /// </summary>
         internal override object FromString(string value, NumberFormatInfo formatInfo)
         {
-            return Decimal.Parse(value, NumberStyles.Float, formatInfo);
-        }
-
-
-        /// <summary>
-        /// Convert the given value to a string using the given CultureInfo
-        /// </summary>
-        internal override object FromString(string value, CultureInfo culture)
-        {
-            return Decimal.Parse(value, culture);
+            return decimal.Parse(value, NumberStyles.Float, formatInfo);
         }
 
         /// <summary>
@@ -117,8 +74,7 @@ namespace System.ComponentModel
         /// </summary>
         internal override string ToString(object value, NumberFormatInfo formatInfo)
         {
-            return ((Decimal)value).ToString("G", formatInfo);
+            return ((decimal)value).ToString("G", formatInfo);
         }
     }
 }
-

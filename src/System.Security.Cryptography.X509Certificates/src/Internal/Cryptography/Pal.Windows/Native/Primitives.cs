@@ -169,11 +169,7 @@ namespace Internal.Cryptography.Pal.Native
         CERT_KEY_IDENTIFIER_PROP_ID  = 20,
         CERT_PUBKEY_ALG_PARA_PROP_ID = 22,
         CERT_NCRYPT_KEY_HANDLE_PROP_ID = 78,
-
-        // CERT_DELETE_KEYSET_PROP_ID is not defined by Windows. It's a custom property set by the framework
-        // as a backchannel message from the portion of X509Certificate2Collection.Import() that loads up the PFX
-        // to the X509Certificate2..ctor(IntPtr) call that creates the managed wrapper.
-        CERT_DELETE_KEYSET_PROP_ID = 101,
+        CERT_CLR_DELETE_KEY_PROP_ID = 125,
     }
 
     [Flags]
@@ -293,11 +289,15 @@ namespace Internal.Cryptography.Pal.Native
         public static FILETIME FromDateTime(DateTime dt)
         {
             long fileTime = dt.ToFileTime();
-            return new FILETIME()
+
+            unchecked
             {
-                ftTimeLow = (uint)fileTime,
-                ftTimeHigh = (uint)(fileTime >> 32),
-            };
+                return new FILETIME()
+                {
+                    ftTimeLow = (uint)fileTime,
+                    ftTimeHigh = (uint)(fileTime >> 32),
+                };
+            }
         }
     }
 
@@ -397,22 +397,7 @@ namespace Internal.Cryptography.Pal.Native
         EXPORT_PRIVATE_KEYS                   = 0x00000004,
         None                                  = 0x00000000,
     }
-
-    internal enum KeyContextSpec : uint
-    {
-        AT_KEYEXCHANGE = 1,
-        AT_SIGNATURE = 2,
-        CERT_NCRYPT_KEY_SPEC = 0xFFFFFFFF,
-    }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct CERT_KEY_CONTEXT
-    {
-        public int cbSize;
-        public IntPtr hProvOrNcryptKey;
-        public KeyContextSpec dwKeySpec;
-    }
-
+    
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct CRYPT_KEY_PROV_INFO
     {
@@ -456,14 +441,6 @@ namespace Internal.Cryptography.Pal.Native
     internal enum FormatObjectType : int
     {
         None = 0,
-    }
-
-    [Flags]
-    internal enum FormatObjectStringType : int
-    {
-        CRYPT_FORMAT_STR_MULTI_LINE = 0x00000001,
-        CRYPT_FORMAT_STR_NO_HEX     = 0x00000010,
-        None                        = 0x00000000,
     }
 
     internal enum FormatObjectStructType : int
@@ -561,15 +538,6 @@ namespace Internal.Cryptography.Pal.Native
     {
         DSS_MAGIC = 0x31535344,
     }
-
-    [StructLayout(LayoutKind.Sequential)]
-    internal struct BLOBHEADER
-    {
-        public byte bType;
-        public byte bVersion;
-        public short reserved;
-        public uint aiKeyAlg;
-    };
 
     [StructLayout(LayoutKind.Sequential)]
     internal unsafe struct CERT_BASIC_CONSTRAINTS_INFO
@@ -770,13 +738,6 @@ namespace Internal.Cryptography.Pal.Native
 
         // Following is updated with unique Id when the chain context is logged.
         public Guid ChainId;
-    }
-
-    [Flags]
-    internal enum FormatMessageFlags : int
-    {
-        FORMAT_MESSAGE_FROM_SYSTEM = 0x00001000,
-        FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200,
     }
 
     [StructLayout(LayoutKind.Sequential)]

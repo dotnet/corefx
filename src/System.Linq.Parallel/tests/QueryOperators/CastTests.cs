@@ -146,7 +146,7 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Cast_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((ParallelQuery<object>)null).Cast<int>());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((ParallelQuery<object>)null).Cast<int>());
         }
 
         private class Castable
@@ -160,7 +160,7 @@ namespace System.Linq.Parallel.Tests
 
             public int Value { get { return _value; } }
 
-            public static explicit operator Castable(Int32 value)
+            public static explicit operator Castable(int value)
             {
                 return new Castable(value);
             }

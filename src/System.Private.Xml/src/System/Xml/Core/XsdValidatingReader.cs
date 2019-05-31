@@ -156,7 +156,7 @@ namespace System.Xml
             _currentAttrIndex = -1;
             _attributePSVINodes = new AttributePSVIInfo[InitialAttributeCount];
             _valueGetter = new XmlValueGetter(GetStringValue);
-            s_typeOfString = typeof(System.String);
+            s_typeOfString = typeof(string);
             _xmlSchemaInfo = new XmlSchemaInfo();
 
             //Add common strings to be compared to NameTable
@@ -247,7 +247,7 @@ namespace System.Xml
                     string prefix = _validator.GetDefaultAttributePrefix(_cachedNode.Namespace);
                     if (prefix != null && prefix.Length != 0)
                     {
-                        return string.Concat(prefix + ":" + _cachedNode.LocalName);
+                        return prefix + ":" + _cachedNode.LocalName;
                     }
                     return _cachedNode.LocalName;
                 }
@@ -407,7 +407,7 @@ namespace System.Xml
                 switch (NodeType)
                 {
                     case XmlNodeType.Element:
-                    case XmlNodeType.EndElement: //TODO Check that context is not popped to parents in the validator
+                    case XmlNodeType.EndElement:
                         if (_xmlSchemaInfo.ContentType == XmlSchemaContentType.TextOnly)
                         {
                             return _xmlSchemaInfo.SchemaType.Datatype.ValueType;
@@ -711,7 +711,7 @@ namespace System.Xml
 
             object typedValue = InternalReadContentAsObject(false, out originalStringValue);
 
-            XmlSchemaType xmlType = NodeType == XmlNodeType.Attribute ? AttributeXmlType : ElementXmlType; //TODO special case for xsd:duration and xsd:dateTime
+            XmlSchemaType xmlType = NodeType == XmlNodeType.Attribute ? AttributeXmlType : ElementXmlType;
             try
             {
                 if (xmlType != null)
@@ -894,7 +894,7 @@ namespace System.Xml
             }
         }
 
-        public override Decimal ReadElementContentAsDecimal()
+        public override decimal ReadElementContentAsDecimal()
         {
             if (this.NodeType != XmlNodeType.Element)
             {
@@ -1011,13 +1011,13 @@ namespace System.Xml
 
             try
             {
-                if (xmlType != null)
+                if (xmlType != null && typedValue != null)
                 {
                     return xmlType.ValueConverter.ToString(typedValue);
                 }
                 else
                 {
-                    return typedValue as string;
+                    return typedValue as string ?? string.Empty;
                 }
             }
             catch (InvalidCastException e)
@@ -1939,9 +1939,6 @@ namespace System.Xml
             }
         }
 
-        // SxS: This function calls ValidateElement on XmlSchemaValidator which is annotated with ResourceExposure attribute.
-        // Since the resource names (namespace location) are not provided directly by the user (they are read from the source
-        // document) and the function does not expose any resources it is fine to suppress the SxS warning. 
         private void ProcessElementEvent()
         {
             if (_processInlineSchema && IsXSDRoot(_coreReader.LocalName, _coreReader.NamespaceURI) && _coreReader.Depth > 0)
@@ -2451,7 +2448,7 @@ namespace System.Xml
                 switch (_coreReader.NodeType)
                 {
                     case XmlNodeType.Element:
-                        Debug.Assert(false); //Should not happen as the caching reader does not cache elements in simple content
+                        Debug.Fail("Should not happen as the caching reader does not cache elements in simple content");
                         break;
 
                     case XmlNodeType.Text:
@@ -2504,7 +2501,7 @@ namespace System.Xml
                         switch (_coreReader.NodeType)
                         {
                             case XmlNodeType.Element:
-                                Debug.Assert(false); //Should not happen as the caching reader does not cache elements in simple content
+                                Debug.Fail("Should not happen as the caching reader does not cache elements in simple content");
                                 break;
 
                             case XmlNodeType.Text:

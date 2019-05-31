@@ -10,14 +10,15 @@ using Xunit;
 
 namespace System.Collections.Concurrent.Tests
 {
-    public class ConcurrentBagTests : ProducerConsumerCollectionTests
+    public partial class ConcurrentBagTests : ProducerConsumerCollectionTests
     {
-        protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
-        protected override IProducerConsumerCollection<int> CreateProducerConsumerCollection() => new ConcurrentBag<int>();
+        protected override IProducerConsumerCollection<T> CreateProducerConsumerCollection<T>() => new ConcurrentBag<T>();
         protected override IProducerConsumerCollection<int> CreateProducerConsumerCollection(IEnumerable<int> collection) => new ConcurrentBag<int>(collection);
         protected override bool IsEmpty(IProducerConsumerCollection<int> pcc) => ((ConcurrentBag<int>)pcc).IsEmpty;
-        protected override bool TryPeek(IProducerConsumerCollection<int> pcc, out int result) => ((ConcurrentBag<int>)pcc).TryPeek(out result);
+        protected override bool TryPeek<T>(IProducerConsumerCollection<T> pcc, out T result) => ((ConcurrentBag<T>)pcc).TryPeek(out result);
         protected override IProducerConsumerCollection<int> CreateOracle(IEnumerable<int> collection) => new BagOracle(collection);
+
+        protected override string CopyToNoLengthParamName => "index";
 
         [Theory]
         [InlineData(1, 10)]
@@ -89,6 +90,62 @@ namespace System.Collections.Concurrent.Tests
                     Assert.Equal(i, item); // Testing an implementation detail rather than guaranteed ordering
                 }
             }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default).GetAwaiter().GetResult();
+        }
+
+        [Fact]
+        public static void SingleProducerAdding_MultiConsumerTaking_SemaphoreThrottling_AllTakesSucceed()
+        {
+            var bag = new ConcurrentBag<int>();
+            var s = new SemaphoreSlim(0);
+            CountdownEvent ce = null;
+            const int ItemCount = 200_000;
+
+            int producerNextValue = 0;
+            Action producer = null;
+            producer = delegate
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    bag.Add(producerNextValue++);
+                    s.Release();
+                    if (producerNextValue < ItemCount)
+                    {
+                        producer();
+                    }
+                    else
+                    {
+                        ce.Signal();
+                    }
+                });
+            };
+
+            int consumed = 0;
+            Action consumer = null;
+            consumer = delegate
+            {
+                ThreadPool.QueueUserWorkItem(delegate
+                {
+                    if (s.Wait(0))
+                    {
+                        Assert.True(bag.TryTake(out _), "There's an item available, but we couldn't take it.");
+                        Interlocked.Increment(ref consumed);
+                    }
+                    else if (Volatile.Read(ref consumed) >= ItemCount)
+                    {
+                        ce.Signal();
+                        return;
+                    }
+
+                    consumer();
+                });
+            };
+
+            // one producer, two consumers
+            ce = new CountdownEvent(3);
+            producer();
+            consumer();
+            consumer();
+            ce.Wait();
         }
 
         [Theory]

@@ -4,17 +4,12 @@
 
 using System.Collections.Specialized;
 using System.Reflection;
-using System.Security.Policy;
 
 namespace System.CodeDom.Compiler
 {
-    [Serializable]
-    public class CompilerResults
+    public partial class CompilerResults
     {
-        private readonly CompilerErrorCollection _errors = new CompilerErrorCollection();
-        private readonly StringCollection _output = new StringCollection();
         private Assembly _compiledAssembly;
-        private Evidence _evidence;
 
         public CompilerResults(TempFileCollection tempFiles)
         {
@@ -22,21 +17,6 @@ namespace System.CodeDom.Compiler
         }
 
         public TempFileCollection TempFiles { get; set; }
-
-        [Obsolete("CAS policy is obsolete and will be removed in a future release of the .NET Framework. Please see http://go2.microsoft.com/fwlink/?LinkId=131738 for more information.")]
-        public Evidence Evidence
-        {
-            get
-            {
-                Evidence e = null;
-                if (_evidence != null)
-                {
-                    e = _evidence.Clone();
-                }
-                return e;
-            }
-            set { _evidence = value?.Clone(); }
-        }
 
         public Assembly CompiledAssembly
         {
@@ -48,13 +28,12 @@ namespace System.CodeDom.Compiler
                 }
                 return _compiledAssembly;
             }
-            set { _compiledAssembly = value; }
+            set => _compiledAssembly = value;
         }
 
-        public CompilerErrorCollection Errors => _errors;
+        public CompilerErrorCollection Errors { get; } = new CompilerErrorCollection();
 
-        public StringCollection Output => _output;
-
+        public StringCollection Output { get; } = new StringCollection();
         public string PathToAssembly { get; set; }
 
         public int NativeCompilerReturnValue { get; set; }

@@ -59,7 +59,7 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
 
         private static void CompareNodeTypes(XPathNodeType a, XPathNodeType b)
         {
-            // XPath.XDocument interprets whitespaces as XPathNodeType.Text
+            // XPath.XDocument interprets whitespace as XPathNodeType.Text
             // while other XPath navigators do it properly
             Assert.Equal(IsWhitespaceOrText(a), IsWhitespaceOrText(b));
             Assert.Equal(IsNamespaceOrAttribute(a), IsNamespaceOrAttribute(b));
@@ -149,7 +149,7 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
             }
         }
 
-        public override Double ValueAsDouble
+        public override double ValueAsDouble
         {
             get
             {
@@ -160,7 +160,7 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
             }
         }
 
-        public override Int32 ValueAsInt
+        public override int ValueAsInt
         {
             get
             {
@@ -171,7 +171,7 @@ namespace System.Xml.XPath.XDocument.Tests.XDocument
             }
         }
 
-        public override Int64 ValueAsLong
+        public override long ValueAsLong
         {
             get
             {

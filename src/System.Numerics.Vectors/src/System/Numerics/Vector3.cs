@@ -18,11 +18,25 @@ namespace System.Numerics
         /// <summary>
         /// Returns the vector (0,0,0).
         /// </summary>
-        public static Vector3 Zero { get { return new Vector3(); } }
+        public static Vector3 Zero
+        {
+            [Intrinsic]
+            get
+            {
+                return new Vector3();
+            }
+        }
         /// <summary>
         /// Returns the vector (1,1,1).
         /// </summary>
-        public static Vector3 One { get { return new Vector3(1.0f, 1.0f, 1.0f); } }
+        public static Vector3 One
+        {
+            [Intrinsic]
+            get
+            {
+                return new Vector3(1.0f, 1.0f, 1.0f);
+            }
+        }
         /// <summary>
         /// Returns the vector (1,0,0).
         /// </summary>
@@ -43,7 +57,7 @@ namespace System.Numerics
         /// Returns the hash code for this instance.
         /// </summary>
         /// <returns>The hash code.</returns>
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             int hash = this.X.GetHashCode();
             hash = HashHelpers.Combine(hash, this.Y.GetHashCode());
@@ -57,7 +71,7 @@ namespace System.Numerics
         /// <param name="obj">The Object to compare against.</param>
         /// <returns>True if the Object is equal to this Vector3; False otherwise.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
             if (!(obj is Vector3))
                 return false;
@@ -68,7 +82,7 @@ namespace System.Numerics
         /// Returns a String representing this Vector3 instance.
         /// </summary>
         /// <returns>The string representation.</returns>
-        public override string ToString()
+        public override readonly string ToString()
         {
             return ToString("G", CultureInfo.CurrentCulture);
         }
@@ -78,7 +92,7 @@ namespace System.Numerics
         /// </summary>
         /// <param name="format">The format of individual elements.</param>
         /// <returns>The string representation.</returns>
-        public string ToString(string format)
+        public readonly string ToString(string format)
         {
             return ToString(format, CultureInfo.CurrentCulture);
         }
@@ -90,7 +104,7 @@ namespace System.Numerics
         /// <param name="format">The format of individual elements.</param>
         /// <param name="formatProvider">The format provider to use when formatting elements.</param>
         /// <returns>The string representation.</returns>
-        public string ToString(string format, IFormatProvider formatProvider)
+        public readonly string ToString(string? format, IFormatProvider? formatProvider)
         {
             StringBuilder sb = new StringBuilder();
             string separator = NumberFormatInfo.GetInstance(formatProvider).NumberGroupSeparator;
@@ -111,17 +125,17 @@ namespace System.Numerics
         /// </summary>
         /// <returns>The vector's length.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float Length()
+        public readonly float Length()
         {
             if (Vector.IsHardwareAccelerated)
             {
                 float ls = Vector3.Dot(this, this);
-                return (float)System.Math.Sqrt(ls);
+                return MathF.Sqrt(ls);
             }
             else
             {
                 float ls = X * X + Y * Y + Z * Z;
-                return (float)System.Math.Sqrt(ls);
+                return MathF.Sqrt(ls);
             }
         }
 
@@ -130,7 +144,7 @@ namespace System.Numerics
         /// </summary>
         /// <returns>The vector's length squared.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public float LengthSquared()
+        public readonly float LengthSquared()
         {
             if (Vector.IsHardwareAccelerated)
             {
@@ -157,7 +171,7 @@ namespace System.Numerics
             {
                 Vector3 difference = value1 - value2;
                 float ls = Vector3.Dot(difference, difference);
-                return (float)System.Math.Sqrt(ls);
+                return MathF.Sqrt(ls);
             }
             else
             {
@@ -167,7 +181,7 @@ namespace System.Numerics
 
                 float ls = dx * dx + dy * dy + dz * dz;
 
-                return (float)System.Math.Sqrt((double)ls);
+                return MathF.Sqrt(ls);
             }
         }
 
@@ -211,7 +225,7 @@ namespace System.Numerics
             else
             {
                 float ls = value.X * value.X + value.Y * value.Y + value.Z * value.Z;
-                float length = (float)System.Math.Sqrt(ls);
+                float length = MathF.Sqrt(ls);
                 return new Vector3(value.X / length, value.Y / length, value.Z / length);
             }
         }
@@ -268,18 +282,17 @@ namespace System.Numerics
         {
             // This compare order is very important!!!
             // We must follow HLSL behavior in the case user specified min value is bigger than max value.
-
             float x = value1.X;
-            x = (x > max.X) ? max.X : x;
-            x = (x < min.X) ? min.X : x;
+            x = (min.X > x) ? min.X : x;  // max(x, minx)
+            x = (max.X < x) ? max.X : x;  // min(x, maxx)
 
             float y = value1.Y;
-            y = (y > max.Y) ? max.Y : y;
-            y = (y < min.Y) ? min.Y : y;
+            y = (min.Y > y) ? min.Y : y;  // max(y, miny)
+            y = (max.Y < y) ? max.Y : y;  // min(y, maxy)
 
             float z = value1.Z;
-            z = (z > max.Z) ? max.Z : z;
-            z = (z < min.Z) ? min.Z : z;
+            z = (min.Z > z) ? min.Z : z;  // max(z, minz)
+            z = (max.Z < z) ? max.Z : z;  // min(z, maxz)
 
             return new Vector3(x, y, z);
         }
@@ -417,7 +430,7 @@ namespace System.Numerics
         /// <param name="right">The scalar value.</param>
         /// <returns>The scaled vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Multiply(Vector3 left, Single right)
+        public static Vector3 Multiply(Vector3 left, float right)
         {
             return left * right;
         }
@@ -429,7 +442,7 @@ namespace System.Numerics
         /// <param name="right">The source vector.</param>
         /// <returns>The scaled vector.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Multiply(Single left, Vector3 right)
+        public static Vector3 Multiply(float left, Vector3 right)
         {
             return left * right;
         }
@@ -453,7 +466,7 @@ namespace System.Numerics
         /// <param name="divisor">The scalar value.</param>
         /// <returns>The result of the division.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector3 Divide(Vector3 left, Single divisor)
+        public static Vector3 Divide(Vector3 left, float divisor)
         {
             return left / divisor;
         }

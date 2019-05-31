@@ -13,7 +13,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.Count(), q.Count());
@@ -22,8 +22,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.Count(), q.Count());
@@ -59,6 +59,19 @@ namespace System.Linq.Tests
             }
         }
 
+        [Theory, MemberData(nameof(Int_TestData))]
+        public void IntRunOnce(IEnumerable<int> source, Func<int, bool> predicate, int expected)
+        {
+            if (predicate == null)
+            {
+                Assert.Equal(expected, source.RunOnce().Count());
+            }
+            else
+            {
+                Assert.Equal(expected, source.RunOnce().Count(predicate));
+            }
+        }
+
         [Fact]
         public void NullableIntArray_IncludesNullObjects()
         {
@@ -68,18 +81,23 @@ namespace System.Linq.Tests
 
         [Theory]
         [MemberData(nameof(CountsAndTallies))]
-        public void CountMatchesTally<T, TEn>(T unusedArgumentToForceTypeInference, int count, TEn enumerable)
-            where TEn : IEnumerable<T>
+        public void CountMatchesTally<T>(int count, IEnumerable<T> enumerable)
         {
             Assert.Equal(count, enumerable.Count());
         }
 
+        [Theory, MemberData(nameof(CountsAndTallies))]
+        public void RunOnce<T>(int count, IEnumerable<T> enumerable)
+        {
+            Assert.Equal(count, enumerable.RunOnce().Count());
+        }
+
         private static IEnumerable<object[]> EnumerateCollectionTypesAndCounts<T>(int count, IEnumerable<T> enumerable)
         {
-            yield return new object[] { default(T), count, enumerable };
-            yield return new object[] { default(T), count, enumerable.ToArray() };
-            yield return new object[] { default(T), count, enumerable.ToList() };
-            yield return new object[] { default(T), count, new Stack<T>(enumerable) };
+            yield return new object[] { count, enumerable };
+            yield return new object[] { count, enumerable.ToArray() };
+            yield return new object[] { count, enumerable.ToList() };
+            yield return new object[] { count, new Stack<T>(enumerable) };
         }
 
         public static IEnumerable<object[]> CountsAndTallies()
@@ -99,15 +117,15 @@ namespace System.Linq.Tests
         [Fact]
         public void NullSource_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Count());
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Count(i => i != 0));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Count());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).Count(i => i != 0));
         }
 
         [Fact]
         public void NullPredicate_ThrowsArgumentNullException()
         {
             Func<int, bool> predicate = null;
-            Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).Count(predicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).Count(predicate));
         }
     }
 }

@@ -5,19 +5,14 @@
 namespace System.Xml.Serialization
 {
     using System;
-    using System.IO;
-    using System.Reflection;
     using System.Collections;
     using System.Collections.Generic;
-    using System.Xml.Schema;
-    using System.Xml;
-    using System.Text;
-    using System.ComponentModel;
-    using System.Globalization;
-    using System.Security.Cryptography;
     using System.Diagnostics;
-    using System.Linq;
+    using System.Reflection;
+    using System.Text;
+    using System.Xml;
     using System.Xml.Extensions;
+    using System.Xml.Schema;
 
     // These classes provide a higher level view on reflection specific to 
     // Xml serialization, for example:
@@ -106,10 +101,6 @@ namespace System.Xml.Serialization
             _dataType = dataType;
             _formatterName = formatterName;
         }
-
-        internal TypeDesc(string name, string fullName, XmlSchemaType dataType, TypeKind kind, TypeDesc baseTypeDesc, TypeFlags flags)
-            : this(name, fullName, dataType, kind, baseTypeDesc, flags, null)
-        { }
 
         internal TypeDesc(string name, string fullName, TypeKind kind, TypeDesc baseTypeDesc, TypeFlags flags)
             : this(name, fullName, (XmlSchemaType)null, kind, baseTypeDesc, flags, null)
@@ -398,11 +389,6 @@ namespace System.Xml.Serialization
             }
         }
 
-        internal string ArrayLengthName
-        {
-            get { return _kind == TypeKind.Array ? "Length" : "Count"; }
-        }
-
         internal TypeDesc ArrayElementTypeDesc
         {
             get { return _arrayElementTypeDesc; }
@@ -518,10 +504,10 @@ namespace System.Xml.Serialization
             AddPrimitive(typeof(DateTime), "dateTime", "DateTime", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.HasCustomFormatter | TypeFlags.XmlEncodingNotRequired);
             AddPrimitive(typeof(XmlQualifiedName), "QName", "XmlQualifiedName", TypeFlags.CanBeAttributeValue | TypeFlags.HasCustomFormatter | TypeFlags.HasIsEmpty | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired | TypeFlags.Reference);
             AddPrimitive(typeof(byte), "unsignedByte", "Byte", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddPrimitive(typeof(SByte), "byte", "SByte", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddPrimitive(typeof(UInt16), "unsignedShort", "UInt16", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddPrimitive(typeof(UInt32), "unsignedInt", "UInt32", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddPrimitive(typeof(UInt64), "unsignedLong", "UInt64", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddPrimitive(typeof(sbyte), "byte", "SByte", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddPrimitive(typeof(ushort), "unsignedShort", "UInt16", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddPrimitive(typeof(uint), "unsignedInt", "UInt32", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddPrimitive(typeof(ulong), "unsignedLong", "UInt64", TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
 
             // Types without direct mapping (ambiguous)
             AddPrimitive(typeof(DateTime), "date", "Date", TypeFlags.AmbiguousDataType | TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.HasCustomFormatter | TypeFlags.XmlEncodingNotRequired);
@@ -542,8 +528,8 @@ namespace System.Xml.Serialization
             guidPattern.Value = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}";
 
             AddNonXsdPrimitive(typeof(Guid), "guid", UrtTypes.Namespace, "Guid", new XmlQualifiedName("string", XmlSchema.Namespace), new XmlSchemaFacet[] { guidPattern }, TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired | TypeFlags.IgnoreDefault);
-            AddNonXsdPrimitive(typeof(char), "char", UrtTypes.Namespace, "Char", new XmlQualifiedName("unsignedShort", XmlSchema.Namespace), new XmlSchemaFacet[0], TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.HasCustomFormatter | TypeFlags.IgnoreDefault);
-            AddNonXsdPrimitive(typeof(TimeSpan), "TimeSpan", UrtTypes.Namespace, "TimeSpan", new XmlQualifiedName("string", XmlSchema.Namespace), new XmlSchemaFacet[0], TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired | TypeFlags.IgnoreDefault);
+            AddNonXsdPrimitive(typeof(char), "char", UrtTypes.Namespace, "Char", new XmlQualifiedName("unsignedShort", XmlSchema.Namespace), Array.Empty<XmlSchemaFacet>(), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.HasCustomFormatter | TypeFlags.IgnoreDefault);
+            AddNonXsdPrimitive(typeof(TimeSpan), "TimeSpan", UrtTypes.Namespace, "TimeSpan", new XmlQualifiedName("duration", XmlSchema.Namespace), Array.Empty<XmlSchemaFacet>(), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
 
             AddSoapEncodedTypes(Soap.Encoding);
 
@@ -561,7 +547,7 @@ namespace System.Xml.Serialization
         {
             if (type == typeof(object))
                 return true;
-            if (type.GetTypeInfo().IsEnum)
+            if (type.IsEnum)
                 return false;
 
             switch (type.GetTypeCode())
@@ -588,12 +574,12 @@ namespace System.Xml.Serialization
                         return true;
                     else if (type == typeof(Guid))
                         return true;
-                    else if (type == typeof (TimeSpan))
+                    else if (type == typeof(TimeSpan))
                         return true;
                     else if (type == typeof(XmlNode[]))
                         return true;
                     break;
-             }
+            }
             return false;
         }
 
@@ -616,10 +602,10 @@ namespace System.Xml.Serialization
             AddSoapEncodedPrimitive(typeof(DateTime), "dateTime", ns, "DateTime", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.HasCustomFormatter | TypeFlags.XmlEncodingNotRequired);
             AddSoapEncodedPrimitive(typeof(XmlQualifiedName), "QName", ns, "XmlQualifiedName", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.HasCustomFormatter | TypeFlags.HasIsEmpty | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired | TypeFlags.Reference);
             AddSoapEncodedPrimitive(typeof(byte), "unsignedByte", ns, "Byte", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddSoapEncodedPrimitive(typeof(SByte), "byte", ns, "SByte", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddSoapEncodedPrimitive(typeof(UInt16), "unsignedShort", ns, "UInt16", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddSoapEncodedPrimitive(typeof(UInt32), "unsignedInt", ns, "UInt32", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
-            AddSoapEncodedPrimitive(typeof(UInt64), "unsignedLong", ns, "UInt64", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddSoapEncodedPrimitive(typeof(sbyte), "byte", ns, "SByte", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddSoapEncodedPrimitive(typeof(ushort), "unsignedShort", ns, "UInt16", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddSoapEncodedPrimitive(typeof(uint), "unsignedInt", ns, "UInt32", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
+            AddSoapEncodedPrimitive(typeof(ulong), "unsignedLong", ns, "UInt64", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.XmlEncodingNotRequired);
 
             // Types without direct mapping (ambigous)
             AddSoapEncodedPrimitive(typeof(DateTime), "date", ns, "Date", new XmlQualifiedName("string", XmlSchema.Namespace), TypeFlags.AmbiguousDataType | TypeFlags.CanBeAttributeValue | TypeFlags.CanBeElementValue | TypeFlags.HasCustomFormatter | TypeFlags.XmlEncodingNotRequired);
@@ -668,7 +654,7 @@ namespace System.Xml.Serialization
 
         private static void AddSoapEncodedPrimitive(Type type, string dataTypeName, string ns, string formatterName, XmlQualifiedName baseTypeName, TypeFlags flags)
         {
-            AddNonXsdPrimitive(type, dataTypeName, ns, formatterName, baseTypeName, new XmlSchemaFacet[0], flags);
+            AddNonXsdPrimitive(type, dataTypeName, ns, formatterName, baseTypeName, Array.Empty<XmlSchemaFacet>(), flags);
         }
 
         internal TypeDesc GetTypeDesc(string name, string ns)
@@ -699,11 +685,6 @@ namespace System.Xml.Serialization
             return GetTypeDesc(type, null, true, true);
         }
 
-        internal TypeDesc GetTypeDesc(Type type, MemberInfo source)
-        {
-            return GetTypeDesc(type, source, true, true);
-        }
-
         internal TypeDesc GetTypeDesc(Type type, MemberInfo source, bool directReference)
         {
             return GetTypeDesc(type, source, directReference, true);
@@ -711,9 +692,9 @@ namespace System.Xml.Serialization
 
         internal TypeDesc GetTypeDesc(Type type, MemberInfo source, bool directReference, bool throwOnError)
         {
-            if (type.GetTypeInfo().ContainsGenericParameters)
+            if (type.ContainsGenericParameters)
             {
-                throw new InvalidOperationException(SR.Format(SR.XmlUnsupportedOpenGenericType, type.ToString()));
+                throw new InvalidOperationException(SR.Format(SR.XmlUnsupportedOpenGenericType, type));
             }
             TypeDesc typeDesc = (TypeDesc)s_primitiveTypes[type];
             if (typeDesc == null)
@@ -745,6 +726,7 @@ namespace System.Xml.Serialization
             return typeDesc;
         }
 
+#if !FEATURE_SERIALIZATION_UAPAOT
         internal TypeMapping GetTypeMappingFromTypeDesc(TypeDesc typeDesc)
         {
             foreach (TypeMapping typeMapping in TypeMappings)
@@ -766,6 +748,7 @@ namespace System.Xml.Serialization
             }
             return null;
         }
+#endif
 
         private TypeDesc ImportTypeDesc(Type type, MemberInfo memberInfo, bool directReference)
         {
@@ -776,12 +759,12 @@ namespace System.Xml.Serialization
             TypeFlags flags = 0;
             Exception exception = null;
 
-            if (!type.GetTypeInfo().IsVisible)
+            if (!type.IsVisible)
             {
                 flags |= TypeFlags.Unsupported;
                 exception = new InvalidOperationException(SR.Format(SR.XmlTypeInaccessible, type.FullName));
             }
-            else if (directReference && (type.GetTypeInfo().IsAbstract && type.GetTypeInfo().IsSealed))
+            else if (directReference && (type.IsAbstract && type.IsSealed))
             {
                 flags |= TypeFlags.Unsupported;
                 exception = new InvalidOperationException(SR.Format(SR.XmlTypeStatic, type.FullName));
@@ -790,7 +773,7 @@ namespace System.Xml.Serialization
             {
                 flags |= TypeFlags.UseReflection;
             }
-            if (!type.GetTypeInfo().IsValueType)
+            if (!type.IsValueType)
                 flags |= TypeFlags.Reference;
 
             if (type == typeof(object))
@@ -841,7 +824,7 @@ namespace System.Xml.Serialization
             {
                 kind = TypeKind.Primitive;
             }
-            else if (type.GetTypeInfo().IsPrimitive)
+            else if (type.IsPrimitive)
             {
                 kind = TypeKind.Primitive;
                 flags |= TypeFlags.Unsupported;
@@ -850,11 +833,11 @@ namespace System.Xml.Serialization
                     exception = new NotSupportedException(SR.Format(SR.XmlSerializerUnsupportedType, type.FullName));
                 }
             }
-            else if (type.GetTypeInfo().IsEnum)
+            else if (type.IsEnum)
             {
                 kind = TypeKind.Enum;
             }
-            else if (type.GetTypeInfo().IsValueType)
+            else if (type.IsValueType)
             {
                 kind = TypeKind.Struct;
                 if (IsOptionalValue(type))
@@ -864,11 +847,11 @@ namespace System.Xml.Serialization
                 }
                 else
                 {
-                    baseType = type.GetTypeInfo().BaseType;
+                    baseType = type.BaseType;
                 }
-                if (type.GetTypeInfo().IsAbstract) flags |= TypeFlags.Abstract;
+                if (type.IsAbstract) flags |= TypeFlags.Abstract;
             }
-            else if (type.GetTypeInfo().IsClass)
+            else if (type.IsClass)
             {
                 if (type == typeof(XmlAttribute))
                 {
@@ -878,7 +861,7 @@ namespace System.Xml.Serialization
                 else if (typeof(XmlNode).IsAssignableFrom(type))
                 {
                     kind = TypeKind.Node;
-                    baseType = type.GetTypeInfo().BaseType;
+                    baseType = type.BaseType;
                     flags |= TypeFlags.Special | TypeFlags.CanBeElementValue | TypeFlags.CanBeTextValue;
                     if (typeof(XmlText).IsAssignableFrom(type))
                         flags &= ~TypeFlags.CanBeElementValue;
@@ -890,12 +873,12 @@ namespace System.Xml.Serialization
                 else
                 {
                     kind = TypeKind.Class;
-                    baseType = type.GetTypeInfo().BaseType;
-                    if (type.GetTypeInfo().IsAbstract)
+                    baseType = type.BaseType;
+                    if (type.IsAbstract)
                         flags |= TypeFlags.Abstract;
                 }
             }
-            else if (type.GetTypeInfo().IsInterface)
+            else if (type.IsInterface)
             {
                 kind = TypeKind.Void;
                 flags |= TypeFlags.Unsupported;
@@ -922,7 +905,7 @@ namespace System.Xml.Serialization
             }
 
             // check to see if the type has public default constructor for classes
-            if (kind == TypeKind.Class && !type.GetTypeInfo().IsAbstract)
+            if (kind == TypeKind.Class && !type.IsAbstract)
             {
                 flags |= GetConstructorFlags(type, ref exception);
             }
@@ -966,9 +949,9 @@ namespace System.Xml.Serialization
             {
                 typeDesc.BaseTypeDesc = GetTypeDesc(baseType, memberInfo, false, false);
             }
-            if (type.GetTypeInfo().IsNestedPublic)
+            if (type.IsNestedPublic)
             {
-                for (Type t = type.DeclaringType; t != null && !t.GetTypeInfo().ContainsGenericParameters && !(t.GetTypeInfo().IsAbstract && t.GetTypeInfo().IsSealed); t = t.DeclaringType)
+                for (Type t = type.DeclaringType; t != null && !t.ContainsGenericParameters && !(t.IsAbstract && t.IsSealed); t = t.DeclaringType)
                     GetTypeDesc(t, null, false);
             }
             return typeDesc;
@@ -976,12 +959,12 @@ namespace System.Xml.Serialization
 
         private static bool IsArraySegment(Type t)
         {
-            return t.GetTypeInfo().IsGenericType && (t.GetGenericTypeDefinition() == typeof(ArraySegment<>));
+            return t.IsGenericType && (t.GetGenericTypeDefinition() == typeof(ArraySegment<>));
         }
 
         internal static bool IsOptionalValue(Type type)
         {
-            if (type.GetTypeInfo().IsGenericType)
+            if (type.IsGenericType)
             {
                 if (type.GetGenericTypeDefinition() == typeof(Nullable<>).GetGenericTypeDefinition())
                     return true;
@@ -1003,7 +986,7 @@ namespace System.Xml.Serialization
             {
                 return "ArrayOf" + TypeName(t.GetElementType());
             }
-            else if (t.GetTypeInfo().IsGenericType)
+            else if (t.IsGenericType)
             {
                 StringBuilder typeName = new StringBuilder();
                 StringBuilder ns = new StringBuilder();
@@ -1140,7 +1123,7 @@ namespace System.Xml.Serialization
             }
 
             // The scenario here is that user has one base class A and one derived class B and wants to serialize/deserialize an object of B.
-            // There's one virtual property defined in A and overrided by B. Without the replacing logic below, the code generated will always
+            // There's one virtual property defined in A and overridden by B. Without the replacing logic below, the code generated will always
             // try to access the property defined in A, rather than B.
             // The logic here is to:
             // 1) Check current members inside memberInfos dictionary and figure out whether there's any override or new properties defined in the derived class.
@@ -1170,8 +1153,7 @@ namespace System.Xml.Serialization
                 }
                 for (int i = 0; i < mappings.Length; i++)
                 {
-                    MemberInfo mi;
-                    if (replaceList.TryGetValue(mappings[i].Name, out mi))
+                    if (replaceList.TryGetValue(mappings[i].Name, out MemberInfo mi))
                     {
                         MemberMapping newMapping = mappings[i].Clone();
                         newMapping.MemberInfo = mi;
@@ -1201,10 +1183,19 @@ namespace System.Xml.Serialization
                             replacedInfo = info;
                             if (replacedInfo != memberInfoToBeReplaced)
                             {
+                                if (!info.GetMethod.IsPublic
+                                    && memberInfoToBeReplaced is PropertyInfo
+                                    && ((PropertyInfo)memberInfoToBeReplaced).GetMethod.IsPublic
+                                   )
+                                {
+                                    break;
+                                }
+
                                 return true;
                             }
                         }
                     }
+
                     foreach (FieldInfo info in currentInfo.DeclaredFields)
                     {
                         if (info.Name == memberInfoToBeReplaced.Name)
@@ -1219,7 +1210,7 @@ namespace System.Xml.Serialization
                     }
 
                     // we go one level down and try again
-                    currentType = currentType.GetTypeInfo().BaseType;
+                    currentType = currentType.BaseType;
                 }
             }
 
@@ -1255,7 +1246,7 @@ namespace System.Xml.Serialization
         {
             if (typeof(IEnumerable).IsAssignableFrom(type))
             {
-                MethodInfo enumerator = type.GetMethod("GetEnumerator", new Type[0]);
+                MethodInfo enumerator = type.GetMethod("GetEnumerator", Array.Empty<Type>());
 
                 if (enumerator == null || !typeof(IEnumerator).IsAssignableFrom(enumerator.ReturnType))
                 {
@@ -1329,7 +1320,7 @@ namespace System.Xml.Serialization
             PropertyInfo indexer = null;
             if (defaultMembers != null && defaultMembers.Length > 0)
             {
-                for (Type t = type; t != null; t = t.GetTypeInfo().BaseType)
+                for (Type t = type; t != null; t = t.BaseType)
                 {
                     for (int i = 0; i < defaultMembers.Length; i++)
                     {
@@ -1366,7 +1357,7 @@ namespace System.Xml.Serialization
             return GetDefaultIndexer(type, memberInfo).PropertyType;
         }
 
-        static internal XmlQualifiedName ParseWsdlArrayType(string type, out string dims, XmlSchemaObject parent)
+        internal static XmlQualifiedName ParseWsdlArrayType(string type, out string dims, XmlSchemaObject parent)
         {
             string ns;
             string name;
@@ -1396,8 +1387,7 @@ namespace System.Xml.Serialization
             {
                 if (parent.Namespaces != null)
                 {
-                    string wsdlNs = (string)parent.Namespaces.Namespaces[ns];
-                    if (wsdlNs != null)
+                    if (parent.Namespaces.Namespaces.TryGetValue(ns, out string wsdlNs) && wsdlNs != null)
                     {
                         ns = wsdlNs;
                         break;
@@ -1405,6 +1395,7 @@ namespace System.Xml.Serialization
                 }
                 parent = parent.Parent;
             }
+
             return new XmlQualifiedName(name, ns);
         }
 

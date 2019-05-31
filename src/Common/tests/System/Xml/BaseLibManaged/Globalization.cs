@@ -4,7 +4,7 @@
 
 using System;
 
-[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAssembly]
 
 namespace WebData.BaseLib
 {
@@ -21,11 +21,11 @@ namespace WebData.BaseLib
         public int seed;
         private string _fileLocation = string.Empty;
 
-        static protected int[] cWhitespaceMap = {
+        protected static int[] cWhitespaceMap = {
                 0x20, 0x9, 0xD, 0xA
             };
 
-        static protected int[] cBaseCharMap = {
+        protected static int[] cBaseCharMap = {
             //Base Chars::
             0x0041, 0x005A, 0x0061, 0x007A, 0x00C0, 0x00D6, 0x00D8, 0x00F6, 0x00F8, 0x00FF,
                 0x0100, 0x0131, 0x0134, 0x013E, 0x0141, 0x0148, 0x014A, 0x017E, 0x0180, 0x01C3,
@@ -93,11 +93,11 @@ namespace WebData.BaseLib
                 0x309D, 0x309E, 0x30FC, 0x30FE
             };
 
-        public static String GetIllegalXmlString(int iMaxChar, bool bAbsolute)
+        public static string GetIllegalXmlString(int iMaxChar, bool bAbsolute)
         {
             return WebData.BaseLib.StringGen.GetIllegalXmlStringWithSeed(iMaxChar, bAbsolute, 0);
         }
-        public static String GetIllegalXmlStringWithSeed(int iMaxChar, bool bAbsolute, int iSeed)
+        public static string GetIllegalXmlStringWithSeed(int iMaxChar, bool bAbsolute, int iSeed)
         {
             int i = 0;
             Random cRandom;
@@ -110,7 +110,7 @@ namespace WebData.BaseLib
             {
                 cRandom = new Random();
             }
-            String sResult = String.Empty;
+            string sResult = string.Empty;
             int iStrLen = bAbsolute ? iMaxChar : cRandom.Next(1, iMaxChar);
 
             //get the maximum number of illegal characters in the valid range.

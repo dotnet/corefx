@@ -9,7 +9,7 @@ namespace System.Net.Mail
     internal static class MailHeaderInfo
     {
         // Structure that wraps information about a single mail header
-        private struct HeaderInfo
+        private readonly struct HeaderInfo
         {
             public readonly string NormalizedName;
             public readonly bool IsSingleton;
@@ -107,12 +107,6 @@ namespace System.Net.Mail
             return s_headerDictionary.TryGetValue(name, out id) ? (MailHeaderID)id : MailHeaderID.Unknown;
         }
 
-        internal static bool IsWellKnown(string name)
-        {
-            int dummy;
-            return s_headerDictionary.TryGetValue(name, out dummy);
-        }
-
         internal static bool IsUserSettable(string name)
         {
             //values not in the list of well-known headers are always user-settable
@@ -130,12 +124,6 @@ namespace System.Net.Mail
         {
             int index;
             return s_headerDictionary.TryGetValue(name, out index) ? s_headerInfo[index].NormalizedName : name;
-        }
-
-        internal static bool IsMatch(string name, MailHeaderID header)
-        {
-            int index;
-            return s_headerDictionary.TryGetValue(name, out index) && (MailHeaderID)index == header;
         }
 
         internal static bool AllowsUnicode(string name)

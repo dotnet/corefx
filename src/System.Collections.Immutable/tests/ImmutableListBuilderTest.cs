@@ -5,6 +5,8 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
@@ -123,8 +125,8 @@ namespace System.Collections.Immutable.Tests
             mutable.Insert(2, 3);
             Assert.Equal(new[] { 0, 1, 3 }, mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.Insert(-1, 0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.Insert(4, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable.Insert(-1, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable.Insert(4, 0));
         }
 
         [Fact]
@@ -155,7 +157,7 @@ namespace System.Collections.Immutable.Tests
             mutable.AddRange(new int[0]);
             Assert.Equal(new[] { 1, 4, 5, 2, 3 }, mutable);
 
-            Assert.Throws<ArgumentNullException>("items", () => mutable.AddRange(null));
+            AssertExtensions.Throws<ArgumentNullException>("items", () => mutable.AddRange(null));
         }
 
         [Fact]
@@ -178,6 +180,18 @@ namespace System.Collections.Immutable.Tests
         }
 
         [Fact]
+        public void RemoveAllBugTest()
+        {
+            var builder = ImmutableList.CreateBuilder<int>();
+            var elemsToRemove = new[]{0, 1, 2, 3, 4, 5}.ToImmutableHashSet();
+            // NOTE: this uses Add instead of AddRange because AddRange doesn't exhibit the same issue due to a different order of tree building.  Don't change it without testing with the bug repro from issue #20609
+            foreach(var elem in new[]{0, 1, 2, 3, 4, 5, 6})
+                builder.Add(elem);
+            builder.RemoveAll(elemsToRemove.Contains);
+            Assert.Equal(new[]{ 6 }, builder);
+        }
+
+        [Fact]
         public void RemoveAt()
         {
             var mutable = ImmutableList<int>.Empty.ToBuilder();
@@ -189,14 +203,14 @@ namespace System.Collections.Immutable.Tests
             mutable.RemoveAt(0);
             Assert.Equal(new[] { 2 }, mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(1));
 
             mutable.RemoveAt(0);
             Assert.Equal(new int[0], mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(0));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable.RemoveAt(1));
         }
 
         [Fact]
@@ -237,10 +251,10 @@ namespace System.Collections.Immutable.Tests
             mutable[2] = -3;
             Assert.Equal(new[] { -2, 5, -3 }, mutable);
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[3] = 4);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[-1] = 4);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[3]);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => mutable[-1]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable[3] = 4);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable[-1] = 4);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable[3]);
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => mutable[-1]);
         }
 
         [Fact]
@@ -332,7 +346,71 @@ namespace System.Collections.Immutable.Tests
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableList.CreateBuilder<int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableList.CreateBuilder<string>());
+            ImmutableList<string>.Builder builder = ImmutableList.CreateBuilder<string>();
+            builder.Add("One");
+            builder.Add("Two");
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(builder);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            string[] items = itemProperty.GetValue(info.Instance) as string[];
+            Assert.Equal(builder, items);
+        }
+
+        [Fact]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableList.CreateBuilder<string>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
+        }
+
+        [Fact]
+        public void ItemRef()
+        {
+            var list = new[] { 1, 2, 3 }.ToImmutableList();
+            var builder = new ImmutableList<int>.Builder(list);
+
+            ref readonly var safeRef = ref builder.ItemRef(1);
+            ref var unsafeRef = ref Unsafe.AsRef(safeRef);
+
+            Assert.Equal(2, builder.ItemRef(1));
+
+            unsafeRef = 4;
+
+            Assert.Equal(4, builder.ItemRef(1));
+        }
+
+        [Fact]
+        public void ItemRef_OutOfBounds()
+        {
+            var list = new[] { 1, 2, 3 }.ToImmutableList();
+            var builder = new ImmutableList<int>.Builder(list);
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => builder.ItemRef(5));
+        }
+
+        [Fact]
+        public void ToImmutableList()
+        {
+            ImmutableList<int>.Builder builder = ImmutableList.CreateBuilder<int>();
+            builder.Add(0);
+            builder.Add(1);
+            builder.Add(2);
+
+            var list = builder.ToImmutableList();
+            Assert.Equal(0, builder[0]);
+            Assert.Equal(1, builder[1]);
+            Assert.Equal(2, builder[2]);
+
+            builder[1] = 5;
+            Assert.Equal(5, builder[1]);
+            Assert.Equal(1, list[1]);
+
+            builder.Clear();
+            Assert.True(builder.ToImmutableList().IsEmpty);
+            Assert.False(list.IsEmpty);
+
+            ImmutableList<int>.Builder nullBuilder = null;
+            AssertExtensions.Throws<ArgumentNullException>("builder", () => nullBuilder.ToImmutableList());
         }
 
         protected override IEnumerable<T> GetEnumerableOf<T>(params T[] contents)

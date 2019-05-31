@@ -4,7 +4,7 @@
 
 using Xunit;
 
-namespace System.Security.Cryptography.ECDiffieHellman.Tests
+namespace System.Security.Cryptography.EcDiffieHellman.Tests
 {
     public class ECDiffieHellmanPublicKeyTests
     {
@@ -16,7 +16,7 @@ namespace System.Security.Cryptography.ECDiffieHellman.Tests
         [Fact]
         public void TestInvalidConstructorArgs()
         {
-            Assert.Throws<ArgumentNullException>("keyBlob", () => new TestDerived(null));
+            AssertExtensions.Throws<ArgumentNullException>("keyBlob", () => new TestDerived(null));
         }
 
         [Fact]

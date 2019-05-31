@@ -15,10 +15,11 @@ namespace System.Collections.Tests
         protected override Type ICollection_NonGeneric_CopyTo_ArrayOfIncorrectValueType_ThrowType => typeof(InvalidCastException);
         protected override bool IsReadOnly => true;
         protected override EnumerableOrder Order => EnumerableOrder.Unspecified;
+        protected override bool SupportsSerialization => false;
 
         protected override bool Enumerator_Current_UndefinedOperation_Throws => true;
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables => new List<ModifyEnumerable>();
-        
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations) => new List<ModifyEnumerable>();
+
         protected override ICollection NonGenericICollectionFactory() => new Hashtable().Keys;
 
         protected override ICollection NonGenericICollectionFactory(int count)
@@ -45,6 +46,9 @@ namespace System.Collections.Tests
         [MemberData(nameof(ValidCollectionSizes))]
         public override void ICollection_NonGeneric_CopyTo_NonZeroLowerBound(int count)
         {
+            if (!PlatformDetection.IsNonZeroLowerBoundArraySupported)
+                return;
+
             ICollection collection = NonGenericICollectionFactory(count);
             Array arr = Array.CreateInstance(typeof(object), new int[] { count }, new int[] { 2 });
             Assert.Equal(1, arr.Rank);

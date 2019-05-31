@@ -5,7 +5,6 @@
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -20,7 +19,7 @@ namespace System.ComponentModel.DataAnnotations
             EnumType = enumType;
         }
 
-        public Type EnumType { get; private set; }
+        public Type EnumType { get; }
 
         public override bool IsValid(object value)
         {
@@ -28,10 +27,9 @@ namespace System.ComponentModel.DataAnnotations
             {
                 throw new InvalidOperationException(SR.EnumDataTypeAttribute_TypeCannotBeNull);
             }
-            if (!EnumType.GetTypeInfo().IsEnum)
+            if (!EnumType.IsEnum)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    SR.EnumDataTypeAttribute_TypeNeedsToBeAnEnum, EnumType.FullName));
+                throw new InvalidOperationException(SR.Format(SR.EnumDataTypeAttribute_TypeNeedsToBeAnEnum, EnumType.FullName));
             }
 
             if (value == null)
@@ -39,19 +37,19 @@ namespace System.ComponentModel.DataAnnotations
                 return true;
             }
             var stringValue = value as string;
-            if (stringValue != null && string.IsNullOrEmpty(stringValue))
+            if (stringValue?.Length == 0)
             {
                 return true;
             }
 
             Type valueType = value.GetType();
-            if (valueType.GetTypeInfo().IsEnum && EnumType != valueType)
+            if (valueType.IsEnum && EnumType != valueType)
             {
                 // don't match a different enum that might map to the same underlying integer
                 return false;
             }
 
-            if (!valueType.GetTypeInfo().IsValueType && valueType != typeof(string))
+            if (!valueType.IsValueType && valueType != typeof(string))
             {
                 // non-value types cannot be converted
                 return false;
@@ -68,7 +66,7 @@ namespace System.ComponentModel.DataAnnotations
             }
 
             object convertedValue;
-            if (valueType.GetTypeInfo().IsEnum)
+            if (valueType.IsEnum)
             {
                 Debug.Assert(valueType == value.GetType(), "The valueType should equal the Type of the value");
                 convertedValue = value;
@@ -77,14 +75,9 @@ namespace System.ComponentModel.DataAnnotations
             {
                 try
                 {
-                    if (stringValue != null)
-                    {
-                        convertedValue = Enum.Parse(EnumType, stringValue, false);
-                    }
-                    else
-                    {
-                        convertedValue = Enum.ToObject(EnumType, value);
-                    }
+                    convertedValue = stringValue != null
+                        ? Enum.Parse(EnumType, stringValue, false)
+                        : Enum.ToObject(EnumType, value);
                 }
                 catch (ArgumentException)
                 {
@@ -107,16 +100,10 @@ namespace System.ComponentModel.DataAnnotations
             return Enum.IsDefined(EnumType, convertedValue);
         }
 
-        private static bool IsEnumTypeInFlagsMode(Type enumType)
-        {
-            return enumType.GetTypeInfo().GetCustomAttributes(typeof(FlagsAttribute), false).Any();
-        }
+        private static bool IsEnumTypeInFlagsMode(Type enumType) =>
+            enumType.GetCustomAttributes(typeof(FlagsAttribute), false).Any();
 
-
-        private static string GetUnderlyingTypeValueString(Type enumType, object enumValue)
-        {
-            return
-                Convert.ChangeType(enumValue, Enum.GetUnderlyingType(enumType), CultureInfo.InvariantCulture).ToString();
-        }
+        private static string GetUnderlyingTypeValueString(Type enumType, object enumValue) =>
+            Convert.ChangeType(enumValue, Enum.GetUnderlyingType(enumType), CultureInfo.InvariantCulture).ToString();
     }
 }

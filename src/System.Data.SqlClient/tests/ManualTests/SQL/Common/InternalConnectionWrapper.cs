@@ -12,12 +12,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public class InternalConnectionWrapper
     {
-        private static class SNIInternals
-        {
-            [DllImport("sniinternals.dll", CallingConvention = CallingConvention.Cdecl)]
-            internal static extern uint SNIKillConnection(SafeHandle connection);
-        }
-
         private static Dictionary<string, string> s_killByTSqlConnectionStrings = new Dictionary<string, string>();
         private static ReaderWriterLockSlim s_killByTSqlConnectionStringsLock = new ReaderWriterLockSlim();
 
@@ -32,7 +26,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public InternalConnectionWrapper(SqlConnection connection, bool supportKillByTSql = false)
         {
             if (connection == null)
-                throw new ArgumentNullException("connection");
+                throw new ArgumentNullException(nameof(connection));
 
             _internalConnection = connection.GetInternalConnection();
             ConnectionString = connection.ConnectionString;
@@ -61,7 +55,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         public bool IsInternalConnectionOf(SqlConnection connection)
         {
             if (connection == null)
-                throw new ArgumentNullException("connection");
+                throw new ArgumentNullException(nameof(connection));
 
             return (_internalConnection == connection.GetInternalConnection());
         }
@@ -157,8 +151,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 try
                 {
                     s_killByTSqlConnectionStringsLock.EnterWriteLock();
-                    if (!s_killByTSqlConnectionStrings.ContainsKey(ConnectionString))
-                        s_killByTSqlConnectionStrings.Add(ConnectionString, killConnectionString);
+                    s_killByTSqlConnectionStrings.TryAdd(ConnectionString, killConnectionString);
                 }
                 finally
                 {

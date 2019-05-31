@@ -19,31 +19,85 @@ namespace System.Tests
             {
                 TOutput result = convert(testValues[i]);
                 Assert.Equal(expectedValues[i], result);
+
+                if (testValues[i] is IConvertible convertible)
+                {
+                    Assert.Equal(expectedValues[i], convertible.ToType(typeof(TOutput), null));
+
+                    switch (expectedValues[i])
+                    {
+                        case bool expected:
+                            Assert.Equal(expected, convertible.ToBoolean(null));
+                            break;
+                        case char expected:
+                            Assert.Equal(expected, convertible.ToChar(null));
+                            break;
+                        case sbyte expected:
+                            Assert.Equal(expected, convertible.ToSByte(null));
+                            break;
+                        case byte expected:
+                            Assert.Equal(expected, convertible.ToByte(null));
+                            break;
+                        case short expected:
+                            Assert.Equal(expected, convertible.ToInt16(null));
+                            break;
+                        case ushort expected:
+                            Assert.Equal(expected, convertible.ToUInt16(null));
+                            break;
+                        case int expected:
+                            Assert.Equal(expected, convertible.ToInt32(null));
+                            break;
+                        case uint expected:
+                            Assert.Equal(expected, convertible.ToUInt32(null));
+                            break;
+                        case long expected:
+                            Assert.Equal(expected, convertible.ToInt64(null));
+                            break;
+                        case ulong expected:
+                            Assert.Equal(expected, convertible.ToUInt64(null));
+                            break;
+                        case float expected:
+                            Assert.Equal(expected, convertible.ToSingle(null));
+                            break;
+                        case double expected:
+                            Assert.Equal(expected, convertible.ToDouble(null));
+                            break;
+                        case decimal expected:
+                            Assert.Equal(expected, convertible.ToDecimal(null));
+                            break;
+                        case DateTime expected:
+                            Assert.Equal(expected, convertible.ToDateTime(null));
+                            break;
+                        case string expected:
+                            Assert.Equal(expected, convertible.ToString(null));
+                            break;
+                    }
+                }
             }
         }
 
         /// <summary>
         /// Verify that the provided convert delegates produce expectedValues given testValues
         /// </summary>
-        protected void VerifyFromString(Func<String, TOutput> convert, Func<String, IFormatProvider, TOutput> convertWithFormatProvider, String[] testValues, TOutput[] expectedValues)
+        protected void VerifyFromString(Func<string, TOutput> convert, Func<string, IFormatProvider, TOutput> convertWithFormatProvider, string[] testValues, TOutput[] expectedValues)
         {
-            Verify<String>(convert, testValues, expectedValues);
-            Verify<String>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues, expectedValues);
+            Verify<string>(convert, testValues, expectedValues);
+            Verify<string>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues, expectedValues);
         }
 
         /// <summary>
         /// Verify that the provided convert delegates produce expectedValues given testValues
         /// </summary>
-        protected void VerifyFromObject(Func<Object, TOutput> convert, Func<Object, IFormatProvider, TOutput> convertWithFormatProvider, Object[] testValues, TOutput[] expectedValues)
+        protected void VerifyFromObject(Func<object, TOutput> convert, Func<object, IFormatProvider, TOutput> convertWithFormatProvider, object[] testValues, TOutput[] expectedValues)
         {
-            Verify<Object>(convert, testValues, expectedValues);
-            Verify<Object>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues, expectedValues);
+            Verify<object>(convert, testValues, expectedValues);
+            Verify<object>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues, expectedValues);
         }
 
         /// <summary>
         /// Verify that the provided convert delegate produces expectedValues given testValues and testBases
         /// </summary>
-        protected void VerifyFromStringWithBase(Func<String, Int32, TOutput> convert, String[] testValues, Int32[] testBases, TOutput[] expectedValues)
+        protected void VerifyFromStringWithBase(Func<string, int, TOutput> convert, string[] testValues, int[] testBases, TOutput[] expectedValues)
         {
             Assert.Equal(testValues.Length, testBases.Length);
             Assert.Equal(testValues.Length, expectedValues.Length);
@@ -58,7 +112,7 @@ namespace System.Tests
         /// <summary>
         /// Verify that the provided convert delegate throws an exception of type TException given testValues and testBases
         /// </summary>
-        protected void VerifyFromStringWithBaseThrows<TException>(Func<String, Int32, TOutput> convert, String[] testValues, Int32[] testBases) where TException : Exception
+        protected void VerifyFromStringWithBaseThrows<TException>(Func<string, int, TOutput> convert, string[] testValues, int[] testBases) where TException : Exception
         {
             Assert.Equal(testValues.Length, testBases.Length);
 
@@ -70,7 +124,7 @@ namespace System.Tests
                 }
                 catch (Exception e)
                 {
-                    String message = String.Format("Expected {0} converting '{1}' (base {2}) to '{3}'", typeof(TException).FullName, testValues[i], testBases[i], typeof(TOutput).FullName);
+                    string message = string.Format("Expected {0} converting '{1}' (base {2}) to '{3}'", typeof(TException).FullName, testValues[i], testBases[i], typeof(TOutput).FullName);
                     throw new AggregateException(message, e);
                 }
             }
@@ -86,10 +140,64 @@ namespace System.Tests
                 try
                 {
                     Assert.Throws<TException>(() => convert(testValues[i]));
+
+                    if (testValues[i] is IConvertible convertible)
+                    {
+                        Assert.Throws<TException>(() => convertible.ToType(typeof(TOutput), null));
+
+                        switch (default(TOutput))
+                        {
+                            case bool _:
+                                Assert.Throws<TException>(() => convertible.ToBoolean(null));
+                                break;
+                            case char _:
+                                Assert.Throws<TException>(() => convertible.ToChar(null));
+                                break;
+                            case sbyte _:
+                                Assert.Throws<TException>(() => convertible.ToSByte(null));
+                                break;
+                            case byte _:
+                                Assert.Throws<TException>(() => convertible.ToByte(null));
+                                break;
+                            case short _:
+                                Assert.Throws<TException>(() => convertible.ToInt16(null));
+                                break;
+                            case ushort _:
+                                Assert.Throws<TException>(() => convertible.ToUInt16(null));
+                                break;
+                            case int _:
+                                Assert.Throws<TException>(() => convertible.ToInt32(null));
+                                break;
+                            case uint _:
+                                Assert.Throws<TException>(() => convertible.ToUInt32(null));
+                                break;
+                            case long _:
+                                Assert.Throws<TException>(() => convertible.ToInt64(null));
+                                break;
+                            case ulong _:
+                                Assert.Throws<TException>(() => convertible.ToUInt64(null));
+                                break;
+                            case float _:
+                                Assert.Throws<TException>(() => convertible.ToSingle(null));
+                                break;
+                            case double _:
+                                Assert.Throws<TException>(() => convertible.ToDouble(null));
+                                break;
+                            case decimal _:
+                                Assert.Throws<TException>(() => convertible.ToDecimal(null));
+                                break;
+                            case DateTime _:
+                                Assert.Throws<TException>(() => convertible.ToDateTime(null));
+                                break;
+                            case string _:
+                                Assert.Throws<TException>(() => convertible.ToString(null));
+                                break;
+                        }
+                    }
                 }
                 catch (Exception e)
                 {
-                    String message = String.Format("Expected {0} converting '{1}' ({2}) to {3}", typeof(TException).FullName, testValues[i], typeof(TInput).FullName, typeof(TOutput).FullName);
+                    string message = string.Format("Expected {0} converting '{1}' ({2}) to {3}", typeof(TException).FullName, testValues[i], typeof(TInput).FullName, typeof(TOutput).FullName);
                     throw new AggregateException(message, e);
                 }
             }
@@ -98,19 +206,19 @@ namespace System.Tests
         /// <summary>
         /// Verify that the provided convert delegates throws an exception of type TException given testValues
         /// </summary>
-        protected void VerifyFromStringThrows<TException>(Func<String, TOutput> convert, Func<String, IFormatProvider, TOutput> convertWithFormatProvider, String[] testValues) where TException : Exception
+        protected void VerifyFromStringThrows<TException>(Func<string, TOutput> convert, Func<string, IFormatProvider, TOutput> convertWithFormatProvider, string[] testValues) where TException : Exception
         {
-            VerifyThrows<TException, String>(convert, testValues);
-            VerifyThrows<TException, String>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues);
+            VerifyThrows<TException, string>(convert, testValues);
+            VerifyThrows<TException, string>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues);
         }
 
         /// <summary>
         /// Verify that the provided convert delegates throw exception of type TException given testValues
         /// </summary>
-        protected void VerifyFromObjectThrows<TException>(Func<Object, TOutput> convert, Func<Object, IFormatProvider, TOutput> convertWithFormatProvider, Object[] testValues) where TException : Exception
+        protected void VerifyFromObjectThrows<TException>(Func<object, TOutput> convert, Func<object, IFormatProvider, TOutput> convertWithFormatProvider, object[] testValues) where TException : Exception
         {
-            VerifyThrows<TException, Object>(convert, testValues);
-            VerifyThrows<TException, Object>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues);
+            VerifyThrows<TException, object>(convert, testValues);
+            VerifyThrows<TException, object>(input => convertWithFormatProvider(input, TestFormatProvider.s_instance), testValues);
         }
 
         /// <summary>
@@ -124,12 +232,12 @@ namespace System.Tests
             {
             }
 
-            public Object GetFormat(Type formatType)
+            public object GetFormat(Type formatType)
             {
                 return this;
             }
 
-            public String Format(String format, Object arg, IFormatProvider formatProvider)
+            public string Format(string format, object arg, IFormatProvider formatProvider)
             {
                 return arg.ToString();
             }

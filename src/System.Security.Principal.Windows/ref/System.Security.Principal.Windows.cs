@@ -5,16 +5,13 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace Microsoft.Win32.SafeHandles
 {
-    [System.Security.SecurityCriticalAttribute]
     public sealed partial class SafeAccessTokenHandle : System.Runtime.InteropServices.SafeHandle
     {
-        public SafeAccessTokenHandle(System.IntPtr handle) : base(default(System.IntPtr), default(bool)) { }
-        public static Microsoft.Win32.SafeHandles.SafeAccessTokenHandle InvalidHandle {[System.Security.SecurityCriticalAttribute]get { throw null; } }
-        public override bool IsInvalid {[System.Security.SecurityCriticalAttribute]get { throw null; } }
-        [System.Security.SecurityCriticalAttribute]
+        public SafeAccessTokenHandle(System.IntPtr handle) : base (default(System.IntPtr), default(bool)) { }
+        public static Microsoft.Win32.SafeHandles.SafeAccessTokenHandle InvalidHandle { get { throw null; } }
+        public override bool IsInvalid { get { throw null; } }
         protected override bool ReleaseHandle() { throw null; }
     }
 }
@@ -25,8 +22,8 @@ namespace System.Security.Principal
         public IdentityNotMappedException() { }
         public IdentityNotMappedException(string message) { }
         public IdentityNotMappedException(string message, System.Exception inner) { }
-        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public System.Security.Principal.IdentityReferenceCollection UnmappedIdentities { get { throw null; } }
+        public override void GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
     }
     public abstract partial class IdentityReference
     {
@@ -98,107 +95,155 @@ namespace System.Security.Principal
     [System.FlagsAttribute]
     public enum TokenAccessLevels
     {
-        AdjustDefault = 128,
-        AdjustGroups = 64,
-        AdjustPrivileges = 32,
-        AdjustSessionId = 256,
-        AllAccess = 983551,
         AssignPrimary = 1,
         Duplicate = 2,
         Impersonate = 4,
-        MaximumAllowed = 33554432,
         Query = 8,
         QuerySource = 16,
+        AdjustPrivileges = 32,
+        AdjustGroups = 64,
+        AdjustDefault = 128,
+        AdjustSessionId = 256,
         Read = 131080,
         Write = 131296,
+        AllAccess = 983551,
+        MaximumAllowed = 33554432,
     }
     public enum WellKnownSidType
     {
-        AccountAdministratorSid = 38,
-        AccountCertAdminsSid = 46,
-        AccountComputersSid = 44,
-        AccountControllersSid = 45,
-        AccountDomainAdminsSid = 41,
-        AccountDomainGuestsSid = 43,
-        AccountDomainUsersSid = 42,
-        AccountEnterpriseAdminsSid = 48,
-        AccountGuestSid = 39,
-        AccountKrbtgtSid = 40,
-        AccountPolicyAdminsSid = 49,
-        AccountRasAndIasServersSid = 50,
-        AccountSchemaAdminsSid = 47,
-        AnonymousSid = 13,
-        AuthenticatedUserSid = 17,
-        BatchSid = 10,
-        BuiltinAccountOperatorsSid = 30,
-        BuiltinAdministratorsSid = 26,
-        BuiltinAuthorizationAccessSid = 59,
-        BuiltinBackupOperatorsSid = 33,
-        BuiltinDomainSid = 25,
-        BuiltinGuestsSid = 28,
-        BuiltinIncomingForestTrustBuildersSid = 56,
-        BuiltinNetworkConfigurationOperatorsSid = 37,
-        BuiltinPerformanceLoggingUsersSid = 58,
-        BuiltinPerformanceMonitoringUsersSid = 57,
-        BuiltinPowerUsersSid = 29,
-        BuiltinPreWindows2000CompatibleAccessSid = 35,
-        BuiltinPrintOperatorsSid = 32,
-        BuiltinRemoteDesktopUsersSid = 36,
-        BuiltinReplicatorSid = 34,
-        BuiltinSystemOperatorsSid = 31,
-        BuiltinUsersSid = 27,
-        CreatorGroupServerSid = 6,
+        NullSid = 0,
+        WorldSid = 1,
+        LocalSid = 2,
+        CreatorOwnerSid = 3,
         CreatorGroupSid = 4,
         CreatorOwnerServerSid = 5,
-        CreatorOwnerSid = 3,
-        DialupSid = 8,
-        DigestAuthenticationSid = 52,
-        EnterpriseControllersSid = 15,
-        InteractiveSid = 11,
-        LocalServiceSid = 23,
-        LocalSid = 2,
-        LocalSystemSid = 22,
-        LogonIdsSid = 21,
-        MaxDefined = 60,
-        NetworkServiceSid = 24,
-        NetworkSid = 9,
+        CreatorGroupServerSid = 6,
         NTAuthoritySid = 7,
-        NtlmAuthenticationSid = 51,
-        NullSid = 0,
-        OtherOrganizationSid = 55,
-        ProxySid = 14,
-        RemoteLogonIdSid = 20,
-        RestrictedCodeSid = 18,
-        SChannelAuthenticationSid = 53,
-        SelfSid = 16,
+        DialupSid = 8,
+        NetworkSid = 9,
+        BatchSid = 10,
+        InteractiveSid = 11,
         ServiceSid = 12,
+        AnonymousSid = 13,
+        ProxySid = 14,
+        EnterpriseControllersSid = 15,
+        SelfSid = 16,
+        AuthenticatedUserSid = 17,
+        RestrictedCodeSid = 18,
         TerminalServerSid = 19,
+        RemoteLogonIdSid = 20,
+        LogonIdsSid = 21,
+        LocalSystemSid = 22,
+        LocalServiceSid = 23,
+        NetworkServiceSid = 24,
+        BuiltinDomainSid = 25,
+        BuiltinAdministratorsSid = 26,
+        BuiltinUsersSid = 27,
+        BuiltinGuestsSid = 28,
+        BuiltinPowerUsersSid = 29,
+        BuiltinAccountOperatorsSid = 30,
+        BuiltinSystemOperatorsSid = 31,
+        BuiltinPrintOperatorsSid = 32,
+        BuiltinBackupOperatorsSid = 33,
+        BuiltinReplicatorSid = 34,
+        BuiltinPreWindows2000CompatibleAccessSid = 35,
+        BuiltinRemoteDesktopUsersSid = 36,
+        BuiltinNetworkConfigurationOperatorsSid = 37,
+        AccountAdministratorSid = 38,
+        AccountGuestSid = 39,
+        AccountKrbtgtSid = 40,
+        AccountDomainAdminsSid = 41,
+        AccountDomainUsersSid = 42,
+        AccountDomainGuestsSid = 43,
+        AccountComputersSid = 44,
+        AccountControllersSid = 45,
+        AccountCertAdminsSid = 46,
+        AccountSchemaAdminsSid = 47,
+        AccountEnterpriseAdminsSid = 48,
+        AccountPolicyAdminsSid = 49,
+        AccountRasAndIasServersSid = 50,
+        NtlmAuthenticationSid = 51,
+        DigestAuthenticationSid = 52,
+        SChannelAuthenticationSid = 53,
         ThisOrganizationSid = 54,
+        OtherOrganizationSid = 55,
+        BuiltinIncomingForestTrustBuildersSid = 56,
+        BuiltinPerformanceMonitoringUsersSid = 57,
+        BuiltinPerformanceLoggingUsersSid = 58,
+        BuiltinAuthorizationAccessSid = 59,
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
+        [System.ObsoleteAttribute("This member has been depcreated and is only maintained for backwards compatability. WellKnownSidType values greater than MaxDefined may be defined in future releases.")]
+        MaxDefined = 60,
         WinBuiltinTerminalServerLicenseServersSid = 60,
-        WorldSid = 1,
+        WinBuiltinDCOMUsersSid = 61,
+        WinBuiltinIUsersSid = 62,
+        WinIUserSid = 63,
+        WinBuiltinCryptoOperatorsSid = 64,
+        WinUntrustedLabelSid = 65,
+        WinLowLabelSid = 66,
+        WinMediumLabelSid = 67,
+        WinHighLabelSid = 68,
+        WinSystemLabelSid = 69,
+        WinWriteRestrictedCodeSid = 70,
+        WinCreatorOwnerRightsSid = 71,
+        WinCacheablePrincipalsGroupSid = 72,
+        WinNonCacheablePrincipalsGroupSid = 73,
+        WinEnterpriseReadonlyControllersSid = 74,
+        WinAccountReadonlyControllersSid = 75,
+        WinBuiltinEventLogReadersGroup = 76,
+        WinNewEnterpriseReadonlyControllersSid = 77,
+        WinBuiltinCertSvcDComAccessGroup = 78,
+        WinMediumPlusLabelSid = 79,
+        WinLocalLogonSid = 80,
+        WinConsoleLogonSid = 81,
+        WinThisOrganizationCertificateSid = 82,
+        WinApplicationPackageAuthoritySid = 83,
+        WinBuiltinAnyPackageSid = 84,
+        WinCapabilityInternetClientSid = 85,
+        WinCapabilityInternetClientServerSid = 86,
+        WinCapabilityPrivateNetworkClientServerSid = 87,
+        WinCapabilityPicturesLibrarySid = 88,
+        WinCapabilityVideosLibrarySid = 89,
+        WinCapabilityMusicLibrarySid = 90,
+        WinCapabilityDocumentsLibrarySid = 91,
+        WinCapabilitySharedUserCertificatesSid = 92,
+        WinCapabilityEnterpriseAuthenticationSid = 93,
+        WinCapabilityRemovableStorageSid = 94,
+    }
+    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
+    public enum WindowsAccountType
+    {
+        Normal = 0,
+        Guest = 1,
+        System = 2,
+        Anonymous = 3,
     }
     public enum WindowsBuiltInRole
     {
-        AccountOperator = 548,
         Administrator = 544,
-        BackupOperator = 551,
+        User = 545,
         Guest = 546,
         PowerUser = 547,
-        PrintOperator = 550,
-        Replicator = 552,
+        AccountOperator = 548,
         SystemOperator = 549,
-        User = 545,
+        PrintOperator = 550,
+        BackupOperator = 551,
+        Replicator = 552,
     }
-    public partial class WindowsIdentity : System.Security.Claims.ClaimsIdentity, System.IDisposable, System.Runtime.Serialization.ISerializable, System.Runtime.Serialization.IDeserializationCallback
+    public partial class WindowsIdentity : System.Security.Claims.ClaimsIdentity, System.IDisposable, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
     {
         public new const string DefaultIssuer = "AD AUTHORITY";
         public WindowsIdentity(System.IntPtr userToken) { }
         public WindowsIdentity(System.IntPtr userToken, string type) { }
-        public WindowsIdentity(string sUserPrincipalName) { }
+        public WindowsIdentity(System.IntPtr userToken, string type, System.Security.Principal.WindowsAccountType acctType) { }
+        public WindowsIdentity(System.IntPtr userToken, string type, System.Security.Principal.WindowsAccountType acctType, bool isAuthenticated) { }
         public WindowsIdentity(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle AccessToken {[System.Security.SecurityCriticalAttribute]get { throw null; } }
+        protected WindowsIdentity(System.Security.Principal.WindowsIdentity identity) { }
+        public WindowsIdentity(string sUserPrincipalName) { }
+        public Microsoft.Win32.SafeHandles.SafeAccessTokenHandle AccessToken { get { throw null; } }
         public sealed override string AuthenticationType { get { throw null; } }
         public override System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> Claims { get { throw null; } }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> DeviceClaims { get { throw null; } }
         public System.Security.Principal.IdentityReferenceCollection Groups { get { throw null; } }
         public System.Security.Principal.TokenImpersonationLevel ImpersonationLevel { get { throw null; } }
         public virtual bool IsAnonymous { get { throw null; } }
@@ -207,8 +252,9 @@ namespace System.Security.Principal
         public virtual bool IsSystem { get { throw null; } }
         public override string Name { get { throw null; } }
         public System.Security.Principal.SecurityIdentifier Owner { get { throw null; } }
-        public virtual IntPtr Token { get { throw null; } }
+        public virtual System.IntPtr Token { get { throw null; } }
         public System.Security.Principal.SecurityIdentifier User { get { throw null; } }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> UserClaims { get { throw null; } }
         public override System.Security.Claims.ClaimsIdentity Clone() { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
@@ -216,15 +262,17 @@ namespace System.Security.Principal
         public static System.Security.Principal.WindowsIdentity GetCurrent() { throw null; }
         public static System.Security.Principal.WindowsIdentity GetCurrent(bool ifImpersonating) { throw null; }
         public static System.Security.Principal.WindowsIdentity GetCurrent(System.Security.Principal.TokenAccessLevels desiredAccess) { throw null; }
-        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
         public static void RunImpersonated(Microsoft.Win32.SafeHandles.SafeAccessTokenHandle safeAccessTokenHandle, System.Action action) { }
         public static T RunImpersonated<T>(Microsoft.Win32.SafeHandles.SafeAccessTokenHandle safeAccessTokenHandle, System.Func<T> func) { throw null; }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class WindowsPrincipal : System.Security.Claims.ClaimsPrincipal
     {
         public WindowsPrincipal(System.Security.Principal.WindowsIdentity ntIdentity) { }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> DeviceClaims { get { throw null; } }
         public override System.Security.Principal.IIdentity Identity { get { throw null; } }
+        public virtual System.Collections.Generic.IEnumerable<System.Security.Claims.Claim> UserClaims { get { throw null; } }
         public virtual bool IsInRole(int rid) { throw null; }
         public virtual bool IsInRole(System.Security.Principal.SecurityIdentifier sid) { throw null; }
         public virtual bool IsInRole(System.Security.Principal.WindowsBuiltInRole role) { throw null; }

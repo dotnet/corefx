@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeSnippetExpression : CodeExpression
     {
         private string _value;
@@ -18,8 +17,8 @@ namespace System.CodeDom
 
         public string Value
         {
-            get { return _value ?? string.Empty; }
-            set { _value = value; }
+            get => _value ?? string.Empty;
+            set => _value = value;
         }
     }
 }

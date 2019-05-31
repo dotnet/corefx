@@ -1,0 +1,36 @@
+<Project>
+  <Import Project="..\Directory.Build.props" />
+  <PropertyGroup>
+    <EnableDefaultItems>false</EnableDefaultItems>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
+    <DisableImplicitConfigurationDefines>true</DisableImplicitConfigurationDefines>
+
+    <!-- Disable code paths that require project.assets.json files to be present or to be computed. -->
+    <GenerateDependencyFile>false</GenerateDependencyFile>
+    <ComputeNETCoreBuildOutputFiles>false</ComputeNETCoreBuildOutputFiles>
+    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
+
+    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
+  </PropertyGroup>
+
+  <!-- Use msbuild path functions as that property is used in bash scripts. -->
+  <ItemGroup>
+    <CoverageExcludeFile Include="$([MSBuild]::NormalizePath('$(SourceDir)', 'Common', 'src', 'System', 'SR.*'))" />
+    <CoverageExcludeFile Include="$([MSBuild]::NormalizePath('$(SourceDir)', 'Common', 'src', 'System', 'NotImplemented.cs'))" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Link to the testhost folder to probe additional assemblies. -->
+    <CoverageProbePath Include="shared\Microsoft.NETCore.App\9.9.9" />
+  </ItemGroup>
+
+  <!--
+    The Utf8String package is experimental. We don't want tests to inadvertently take a dependency on this
+    feature unless they explicitly opt in to it. (Source projects explicitly reference their dependencies,
+    so they can't inadvertently take a dependency on it.)
+  -->
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(IncludeUtf8StringAsmRef)' != 'true'">
+    <DefaultReferenceExclusions Include="System.Utf8String.Experimental" />
+  </ItemGroup>
+</Project>

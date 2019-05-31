@@ -9,11 +9,12 @@ using Xunit;
 public partial class ThreadPoolBoundHandleTests
 {
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public unsafe void FreeNativeOverlapped_NullAsNativeOverlapped_ThrowsArgumentNullException()
     {
         using(ThreadPoolBoundHandle handle = CreateThreadPoolBoundHandle())
         {
-            Assert.Throws<ArgumentNullException>("overlapped", () =>
+            AssertExtensions.Throws<ArgumentNullException>("overlapped", () =>
             {
                 handle.FreeNativeOverlapped((NativeOverlapped*)null);
             });
@@ -21,6 +22,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public unsafe void FreeNativeOverlapped_WhenDisposed_DoesNotThrow()
     {
         ThreadPoolBoundHandle boundHandle = CreateThreadPoolBoundHandle();
@@ -30,6 +32,7 @@ public partial class ThreadPoolBoundHandleTests
     }
 
     [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)] // ThreadPoolBoundHandle.BindHandle is not supported on Unix
     public unsafe void FreeNativeOverlapped_WithWrongHandle_ThrowsArgumentException()
     {
         using(ThreadPoolBoundHandle handle = CreateThreadPoolBoundHandle())
@@ -38,7 +41,7 @@ public partial class ThreadPoolBoundHandleTests
 
             using (ThreadPoolBoundHandle handle2 = CreateThreadPoolBoundHandle())
             {
-                Assert.Throws<ArgumentException>(() =>
+                AssertExtensions.Throws<ArgumentException>("overlapped", () =>
                 {
                     handle2.FreeNativeOverlapped(overlapped);
                 });

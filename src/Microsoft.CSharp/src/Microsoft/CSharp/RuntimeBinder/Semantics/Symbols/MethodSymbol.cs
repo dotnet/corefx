@@ -13,7 +13,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // MethodSymbol - a symbol representing a method. Parent is a struct, interface
     // or class (aggregate). No children.
 
-    internal class MethodSymbol : MethodOrPropertySymbol
+    internal sealed class MethodSymbol : MethodOrPropertySymbol
     {
         private MethodKindEnum _methKind; // An extra bit to prevent sign-extension
         private bool _inferenceMustFail; // Inference must fail if there are no type variables or if
@@ -23,11 +23,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         private PropertySymbol _prop;     // For property accessors, this is the PropertySymbol.
         private EventSymbol _evt;     // For event accessors, this is the EventSymbol.
 
-        public bool isExtension;  // is the method a extension method
-        public bool isExternal;            // Has external definition.
         public bool isVirtual;              // Virtual member?
-        public bool isAbstract;             // Abstract method?
-        public bool isVarargs;              // has varargs
         public MemberInfo AssociatedMemberInfo;
 
         public TypeArray typeVars;          // All the type variables for a generic method, as declarations.
@@ -44,19 +40,19 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
             Debug.Assert(!_inferenceMustFail);
             _checkedInfMustFail = true;
-            for (int ivar = 0; ivar < typeVars.Size; ivar++)
+            for (int ivar = 0; ivar < typeVars.Count; ivar++)
             {
-                TypeParameterType var = typeVars.ItemAsTypeParameterType(ivar);
+                TypeParameterType var = (TypeParameterType)typeVars[ivar];
                 // See if type var is used in a parameter.
                 for (int ipar = 0; ; ipar++)
                 {
-                    if (ipar >= Params.Size)
+                    if (ipar >= Params.Count)
                     {
                         // This type variable is not in any parameter.
                         _inferenceMustFail = true;
                         return true;
                     }
-                    if (TypeManager.TypeContainsType(Params.Item(ipar), var))
+                    if (TypeManager.TypeContainsType(Params[ipar], var))
                     {
                         break;
                     }
@@ -66,15 +62,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return false;
         }
 
-        public bool IsExtension()
-        {
-            return isExtension;
-        }
-
-        public MethodKindEnum MethKind()
-        {
-            return _methKind;
-        }
+        public MethodKindEnum MethKind => _methKind;
 
         public bool IsConstructor()
         {
@@ -84,14 +72,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public bool IsNullableConstructor()
         {
             return getClass().isPredefAgg(PredefinedType.PT_G_OPTIONAL) &&
-                Params.Size == 1 &&
-                Params.Item(0).IsGenericParameter &&
+                Params.Count == 1 &&
+                Params[0] is TypeParameterType &&
                 IsConstructor();
-        }
-
-        public bool IsDestructor()              // Is a destructor
-        {
-            return _methKind == MethodKindEnum.Destructor;
         }
 
         public bool isPropertyAccessor()  // true if this method is a property set or get method
@@ -104,19 +87,9 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return _methKind == MethodKindEnum.EventAccessor;
         }
 
-        public bool isExplicit()          // is user defined explicit conversion operator
-        {
-            return _methKind == MethodKindEnum.ExplicitConv;
-        }
-
         public bool isImplicit()          // is user defined implicit conversion operator
         {
             return _methKind == MethodKindEnum.ImplicitConv;
-        }
-
-        public bool isInvoke()            // Invoke method on a delegate - isn't user callable
-        {
-            return _methKind == MethodKindEnum.Invoke;
         }
 
         public void SetMethKind(MethodKindEnum mk)
@@ -126,14 +99,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
         public MethodSymbol ConvNext()
         {
-            Debug.Assert(isImplicit() || isExplicit());
+            AssertIsConversionOperator();
             return _convNext;
         }
 
         public void SetConvNext(MethodSymbol conv)
         {
-            Debug.Assert(isImplicit() || isExplicit());
-            Debug.Assert(conv == null || conv.isImplicit() || conv.isExplicit());
+            AssertIsConversionOperator();
+            conv?.AssertIsConversionOperator();
             _convNext = conv;
         }
 
@@ -161,9 +134,10 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             _evt = evt;
         }
 
-        public bool isConversionOperator()
+        [Conditional("DEBUG")]
+        private void AssertIsConversionOperator()
         {
-            return (isExplicit() || isImplicit());
+            Debug.Assert(MethKind == MethodKindEnum.ExplicitConv || MethKind == MethodKindEnum.ImplicitConv);
         }
 
         public new bool isUserCallable()
@@ -171,7 +145,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return !isOperator && !isAnyAccessor();
         }
 
-        public bool isAnyAccessor()
+        private bool isAnyAccessor()
         {
             return isPropertyAccessor() || isEventAccessor();
         }
@@ -190,27 +164,11 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
 
             if (property == null)
             {
-                Debug.Assert(false, "cannot find property for accessor");
+                Debug.Fail("cannot find property for accessor");
                 return false;
             }
 
-            return (this == property.methSet);
+            return (this == property.SetterMethod);
         }
-    }
-
-    // ----------------------------------------------------------------------------
-    //
-    // InterfaceImplementationMethodSymbol
-    //
-    // an explicit method impl generated by the compiler
-    // used for CMOD_OPT interop
-    // ----------------------------------------------------------------------------
-
-    internal class InterfaceImplementationMethodSymbol : MethodSymbol
-    {
-    }
-
-    internal class IteratorFinallyMethodSymbol : MethodSymbol
-    {
     }
 }

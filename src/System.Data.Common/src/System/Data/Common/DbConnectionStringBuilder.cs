@@ -4,6 +4,7 @@
 
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
@@ -237,7 +238,7 @@ namespace System.Data.Common
                     values[i] = this[keylist.Current];
                     Debug.Assert(null != values[i], "null value " + keylist.Current);
                 }
-                return new System.Data.Common.ReadOnlyCollection<object>(values);
+                return new ReadOnlyCollection<object>(values);
             }
         }
 
@@ -547,7 +548,7 @@ namespace System.Data.Common
 
             // Create a new array that only contains the filtered properties
             PropertyDescriptor[] filteredPropertiesArray = new PropertyDescriptor[index];
-            Array.Copy(propertiesArray, filteredPropertiesArray, index);
+            Array.Copy(propertiesArray, 0, filteredPropertiesArray, 0, index);
 
             return new PropertyDescriptorCollection(filteredPropertiesArray);
         }

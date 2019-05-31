@@ -13,7 +13,7 @@ namespace System.Linq.Expressions
     /// Represents initializing members of a member of a newly created object.
     /// </summary>
     /// <remarks>
-    /// Use the <see cref="Expression.MemberBind"/> factory methods to create a <see cref="MemberMemberBinding"/>.
+    /// Use the <see cref="Expression.MemberBind(MemberInfo, MemberBinding[])"/> factory methods to create a <see cref="MemberMemberBinding"/>.
     /// The value of the <see cref="MemberBinding.BindingType"/> property of a <see cref="MemberMemberBinding"/> object is <see cref="MemberBinding"/>.
     /// </remarks>
     public sealed class MemberMemberBinding : MemberBinding
@@ -40,11 +40,19 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public MemberMemberBinding Update(IEnumerable<MemberBinding> bindings)
         {
-            if (bindings == Bindings)
+            if (bindings != null)
             {
-                return this;
+                if (ExpressionUtils.SameElements(ref bindings, Bindings))
+                {
+                    return this;
+                }
             }
+
             return Expression.MemberBind(Member, bindings);
+        }
+
+        internal override void ValidateAsDefinedHere(int index)
+        {
         }
     }
 
@@ -111,23 +119,31 @@ namespace System.Linq.Expressions
 
         private static void ValidateGettableFieldOrPropertyMember(MemberInfo member, out Type memberType)
         {
-            FieldInfo fi = member as FieldInfo;
-            if (fi == null)
+            Type decType = member.DeclaringType;
+            if (decType == null)
             {
-                PropertyInfo pi = member as PropertyInfo;
-                if (pi == null)
-                {
-                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo(nameof(member));
-                }
-                if (!pi.CanRead)
-                {
-                    throw Error.PropertyDoesNotHaveGetter(pi, nameof(member));
-                }
-                memberType = pi.PropertyType;
+                throw Error.NotAMemberOfAnyType(member, nameof(member));
             }
-            else
+
+            // Null paramName as there are several paths here with different parameter names at the API
+            TypeUtils.ValidateType(decType, null, allowByRef: true, allowPointer: true);
+            switch (member)
             {
-                memberType = fi.FieldType;
+                case PropertyInfo pi:
+                    if (!pi.CanRead)
+                    {
+                        throw Error.PropertyDoesNotHaveGetter(pi, nameof(member));
+                    }
+
+                    memberType = pi.PropertyType;
+                    break;
+
+                case FieldInfo fi:
+                    memberType = fi.FieldType;
+                    break;
+
+                default:
+                    throw Error.ArgumentMustBeFieldInfoOrPropertyInfo(nameof(member));
             }
         }
 
@@ -137,6 +153,7 @@ namespace System.Linq.Expressions
             {
                 MemberBinding b = bindings[i];
                 ContractUtils.RequiresNotNull(b, nameof(bindings));
+                b.ValidateAsDefinedHere(i);
                 if (!b.Member.DeclaringType.IsAssignableFrom(type))
                 {
                     throw Error.NotAMemberOfType(b.Member.Name, type, nameof(bindings), i);

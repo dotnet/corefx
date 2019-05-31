@@ -209,9 +209,9 @@ namespace System.Diagnostics.TraceSourceTests
 
         public abstract bool IsFixedSize { get; }
 
-        public virtual Object CreateNonItem()
+        public virtual object CreateNonItem()
         {
-            return new Object();
+            return new object();
         }
 
         [Fact]
@@ -243,7 +243,7 @@ namespace System.Diagnostics.TraceSourceTests
             }
             else
             {
-                Assert.Throws<ArgumentException>(() => list.Add(item));
+                AssertExtensions.Throws<ArgumentException>("value", () => list.Add(item));
             }
         }
 
@@ -275,7 +275,7 @@ namespace System.Diagnostics.TraceSourceTests
                 Assert.Equal(item, list[1]);
 
                 var nonItem = CreateNonItem();
-                Assert.Throws<ArgumentException>(() => list[1] = nonItem);
+                AssertExtensions.Throws<ArgumentException>("value", () => list[1] = nonItem);
             }
         }
 
@@ -307,7 +307,7 @@ namespace System.Diagnostics.TraceSourceTests
         public virtual void InsertExceptionTest()
         {
             var list = Create(2);
-            Assert.Throws<ArgumentException>(() => list.Insert(1, null));
+            AssertExtensions.Throws<ArgumentException>("value", () => list.Insert(1, null));
         }
 
         [Fact]
@@ -382,7 +382,7 @@ namespace System.Diagnostics.TraceSourceTests
         public virtual void CopyToTest()
         {
             var list = Create(4);
-            var arr = new Object[4];
+            var arr = new object[4];
             list.CopyTo(arr, 0);
         }
 
@@ -390,7 +390,7 @@ namespace System.Diagnostics.TraceSourceTests
         public virtual void CopyToTest2()
         {
             var list = Create(4);
-            var arr = new Object[6];
+            var arr = new object[6];
             list.CopyTo(arr, 2);
             Assert.Null(arr[0]);
             Assert.Null(arr[1]);
@@ -400,8 +400,8 @@ namespace System.Diagnostics.TraceSourceTests
         public virtual void CopyToExceptionTest()
         {
             var list = Create(4);
-            var arr = new Object[2];
-            Assert.Throws<ArgumentException>(() => list.CopyTo(arr, 0));
+            var arr = new object[2];
+            AssertExtensions.Throws<ArgumentException>("destinationArray", "", () => list.CopyTo(arr, 0));
         }
     }
 
@@ -411,7 +411,7 @@ namespace System.Diagnostics.TraceSourceTests
     {
         public abstract T Create(int count = 0);
 
-        public abstract Object CreateItem();
+        public abstract object CreateItem();
 
         [Fact]
         public virtual void GetEnumeratorEmptyTest()

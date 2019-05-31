@@ -3,9 +3,11 @@
 // See the LICENSE file in the project root for more information.
 
 #include "pal_types.h"
+#include "pal_compiler.h"
 #include "opensslshim.h"
 
-typedef enum : int32_t {
+typedef enum
+{
     Unspecified = 0,
     PrimeShortWeierstrass = 1,
     PrimeTwistedEdwards = 2,
@@ -17,43 +19,43 @@ typedef enum : int32_t {
 /*
 Returns the ECCurveType given the key.
 */
-extern "C" ECCurveType CryptoNative_EcKeyGetCurveType(
+DLLEXPORT ECCurveType CryptoNative_EcKeyGetCurveType(
     const EC_KEY* key);
 
 /*
 Returns the ECC key parameters.
 */
-extern "C" int32_t CryptoNative_GetECKeyParameters(
+DLLEXPORT int32_t CryptoNative_GetECKeyParameters(
     const EC_KEY* key,
     int32_t includePrivate,
-    BIGNUM** qx, int32_t* cbQx,
-    BIGNUM** qy, int32_t* cbQy,
-    BIGNUM** d, int32_t* cbD);
+    const BIGNUM** qx, int32_t* cbQx,
+    const BIGNUM** qy, int32_t* cbQy,
+    const BIGNUM** d, int32_t* cbD);
 
 /*
 Returns the ECC key and curve parameters.
 */
-extern "C" int32_t CryptoNative_GetECCurveParameters(
+DLLEXPORT int32_t CryptoNative_GetECCurveParameters(
     const EC_KEY* key,
     int32_t includePrivate,
     ECCurveType* curveType,
-    BIGNUM** qx, int32_t* cbx,
-    BIGNUM** qy, int32_t* cby,
-    BIGNUM** d, int32_t* cbd,
-    BIGNUM** p, int32_t* cbP,
-    BIGNUM** a, int32_t* cbA,
-    BIGNUM** b, int32_t* cbB,
-    BIGNUM** gx, int32_t* cbGx,
-    BIGNUM** gy, int32_t* cbGy,
-    BIGNUM** order, int32_t* cbOrder,
-    BIGNUM** cofactor, int32_t* cbCofactor,
-    BIGNUM** seed, int32_t* cbSeed);
+    const BIGNUM** qx, int32_t* cbx,
+    const BIGNUM** qy, int32_t* cby,
+    const BIGNUM** d, int32_t* cbd,
+    const BIGNUM** p, int32_t* cbP,
+    const BIGNUM** a, int32_t* cbA,
+    const BIGNUM** b, int32_t* cbB,
+    const BIGNUM** gx, int32_t* cbGx,
+    const BIGNUM** gy, int32_t* cbGy,
+    const BIGNUM** order, int32_t* cbOrder,
+    const BIGNUM** cofactor, int32_t* cbCofactor,
+    const BIGNUM** seed, int32_t* cbSeed);
 
 /*
 Creates the new EC_KEY instance using the curve oid (friendly name or value) and public key parameters.
 Returns 1 upon success, -1 if oid was not found, otherwise 0.
 */
-extern "C" int32_t CryptoNative_EcKeyCreateByKeyParameters(
+DLLEXPORT int32_t CryptoNative_EcKeyCreateByKeyParameters(
     EC_KEY** key,
     const char* oid,
     uint8_t* qx, int32_t qxLength, 
@@ -63,7 +65,7 @@ extern "C" int32_t CryptoNative_EcKeyCreateByKeyParameters(
 /*
 Returns the new EC_KEY instance using the explicit parameters.
 */
-extern "C" EC_KEY* CryptoNative_EcKeyCreateByExplicitParameters(
+DLLEXPORT EC_KEY* CryptoNative_EcKeyCreateByExplicitParameters(
     ECCurveType curveType,
     uint8_t* qx, int32_t qxLength,
     uint8_t* qy, int32_t qyLength,

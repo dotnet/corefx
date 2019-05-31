@@ -10,10 +10,10 @@ namespace System.Runtime.Versioning.Tests
     public static class VersioningHelperTests
     {
         [Fact]
-        public static void Test1()
+        public static void MakeVersionSafeNameTest()
         {
             string str1 = VersioningHelper.MakeVersionSafeName("TestFile", ResourceScope.Process, ResourceScope.AppDomain);
-            Assert.Equal("TestFile_r3", str1);
-        }
+            Assert.Equal($"TestFile_r3_ad{AppDomain.CurrentDomain.Id}", str1);
+        }      
     }
 }

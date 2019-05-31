@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 
 namespace System.Net
 {
-    [Serializable]
     public class FileWebRequest : WebRequest, ISerializable
     {
         private readonly WebHeaderCollection _headers = new WebHeaderCollection();
@@ -37,17 +36,10 @@ namespace System.Net
             _uri = uri;
         }
 
-        [Obsolete("Serialization is obsoleted for this type. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("Serialization is obsoleted for this type. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected FileWebRequest(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
-            _headers = (WebHeaderCollection)serializationInfo.GetValue("headers", typeof(WebHeaderCollection));
-            Proxy = (IWebProxy)serializationInfo.GetValue("proxy", typeof(IWebProxy));
-            _uri = (Uri)serializationInfo.GetValue("uri", typeof(Uri));
-            ConnectionGroupName = serializationInfo.GetString("connectionGroupName");
-            _method = serializationInfo.GetString("method");
-            _contentLength = serializationInfo.GetInt64("contentLength");
-            _timeout = serializationInfo.GetInt32("timeout");
-            _fileAccess = (FileAccess)serializationInfo.GetInt32("fileAccess");
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext) =>
@@ -55,16 +47,7 @@ namespace System.Net
 
         protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            serializationInfo.AddValue("headers", _headers, typeof(WebHeaderCollection));
-            serializationInfo.AddValue("proxy", Proxy, typeof(IWebProxy));
-            serializationInfo.AddValue("uri", _uri, typeof(Uri));
-            serializationInfo.AddValue("connectionGroupName", ConnectionGroupName);
-            serializationInfo.AddValue("method", _method);
-            serializationInfo.AddValue("contentLength", _contentLength);
-            serializationInfo.AddValue("timeout", _timeout);
-            serializationInfo.AddValue("fileAccess", _fileAccess);
-            serializationInfo.AddValue("preauthenticate", false);
-            base.GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         internal bool Aborted => _aborted != 0;
@@ -306,8 +289,8 @@ namespace System.Net
 
         public override bool UseDefaultCredentials
         {
-            get { throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException); }
-            set { throw NotImplemented.ByDesignWithMessage(SR.net_PropertyNotImplementedException); }
+            get { throw new NotSupportedException(SR.net_PropertyNotSupportedException); }
+            set { throw new NotSupportedException(SR.net_PropertyNotSupportedException); }
         }
 
         public override void Abort()

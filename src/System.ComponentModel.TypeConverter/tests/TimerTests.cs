@@ -4,7 +4,6 @@
 
 using Xunit;
 using System.Threading;
-using System.Timers;
 
 using TestTimer = System.Timers.Timer;
 
@@ -20,7 +19,7 @@ namespace System.Timers.Tests
         [InlineData(double.MaxValue)]
         public void NegativeTests(double interval)
         {
-            Assert.Throws<ArgumentException>(null, () => new TestTimer(interval));
+            AssertExtensions.Throws<ArgumentException>(null, () => new TestTimer(interval));
         }
 
         [Fact]

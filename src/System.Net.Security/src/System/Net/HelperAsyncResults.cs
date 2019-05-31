@@ -34,12 +34,13 @@ namespace System.Net
         public LazyAsyncResult UserAsyncResult;
         public int Result;
         public object AsyncState;
+        public readonly CancellationToken CancellationToken;
 
         public byte[] Buffer; // Temporary buffer reused by a protocol.
         public int Offset;
         public int Count;
 
-        public AsyncProtocolRequest(LazyAsyncResult userAsyncResult)
+        public AsyncProtocolRequest(LazyAsyncResult userAsyncResult, CancellationToken cancellationToken = default)
         {
             if (userAsyncResult == null)
             {
@@ -50,37 +51,14 @@ namespace System.Net
                 NetEventSource.Fail(this, "userAsyncResult is already completed.");
             }
             UserAsyncResult = userAsyncResult;
-        }
-
-        public void Reset(LazyAsyncResult userAsyncResult)
-        {
-            if (userAsyncResult == null)
-            {
-                NetEventSource.Fail(this, "userAsyncResult == null");
-            }
-            if (userAsyncResult.InternalPeekCompleted)
-            {
-                NetEventSource.Fail(this, "userAsyncResult is already completed.");
-            }
-            UserAsyncResult = userAsyncResult;
-
-            _callback = null;
-            _completionStatus = 0;
-            Result = 0;
-            AsyncState = null;
-            Buffer = null;
-            Offset = 0;
-            Count = 0;
-#if DEBUG
-            _DebugAsyncChain = 0;
-#endif
+            CancellationToken = cancellationToken;
         }
 
         public void SetNextRequest(byte[] buffer, int offset, int count, AsyncProtocolCallback callback)
         {
             if (_completionStatus != StatusNotStarted)
             {
-                throw new InternalException(); // Pending operation is in progress.
+                throw new InternalException(_completionStatus); // Pending operation is in progress.
             }
 
             Buffer = buffer;

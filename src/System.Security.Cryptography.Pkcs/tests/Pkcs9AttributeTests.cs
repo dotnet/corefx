@@ -2,17 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Diagnostics;
-using System.Globalization;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.Cryptography.Pkcs;
-using System.Security.Cryptography.Xml;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 
 using Test.Cryptography;
@@ -37,6 +27,82 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Assert.Throws<ArgumentNullException>(() => ign = new Pkcs9AttributeObject(a));
         }
 
+        [Fact]
+        public static void InputDateTimeAsWindowsFileTimeBefore1601()
+        {
+            DateTime dt = new DateTime(1600, 12, 31, 11, 59, 59, DateTimeKind.Utc);
+            AssertExtensions.Throws<CryptographicException, ArgumentOutOfRangeException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void Pkcs9SigningTime_DateTimeMinValue()
+        {
+            AssertExtensions.Throws<CryptographicException, ArgumentOutOfRangeException>(() => new Pkcs9SigningTime(DateTime.MinValue));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeBefore1950_Utc()
+        {
+            DateTime dt = new DateTime(1949, 12, 31, 23, 59, 59, DateTimeKind.Utc);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeBefore1950_Unspecified()
+        {
+            DateTime dt = new DateTime(1949, 12, 30);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeBefore1950_Local()
+        {
+            DateTime dt = new DateTime(1949, 12, 30, 00, 00, 00, DateTimeKind.Local);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeAfter2049_Utc()
+        {
+            DateTime dt = new DateTime(2050, 01, 01, 00, 00, 00, DateTimeKind.Utc);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeAfter2049_Unspecified()
+        {
+            DateTime dt = new DateTime(2050, 01, 02);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeAfter2049_Local()
+        {
+            DateTime dt = new DateTime(2050, 01, 02, 00, 00, 00, DateTimeKind.Local);
+            Assert.ThrowsAny<CryptographicException>(() => new Pkcs9SigningTime(dt));
+        }
+
+        [Fact]
+        public static void InputDateTimeAsX509TimeBetween1950And2049_Utc()
+        {
+            var exception = Record.Exception(() => {
+                DateTime dt = new DateTime(1950, 1, 1, 00, 00, 00, DateTimeKind.Utc);
+                Pkcs9SigningTime st = new Pkcs9SigningTime(dt);
+                dt = new DateTime(2049, 12, 31, 23, 59, 59, DateTimeKind.Utc);
+                st = new Pkcs9SigningTime(dt);
+
+                dt = new DateTime(1950, 1, 2);
+                st = new Pkcs9SigningTime(dt);
+                dt = new DateTime(2049, 12, 30);
+                st = new Pkcs9SigningTime(dt); 
+
+                dt = new DateTime(1950, 1, 2, 00, 00, 00, DateTimeKind.Local);
+                st = new Pkcs9SigningTime(dt);
+                dt = new DateTime(2049, 12, 30, 23, 59, 59, DateTimeKind.Local);
+                st = new Pkcs9SigningTime(dt);
+            });
+            Assert.Null(exception);
+        }
 
         [Fact]
         public static void Pkcs9AttributeAsnEncodedDataCtorNullOidValue()
@@ -57,7 +123,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             AsnEncodedData a = new AsnEncodedData(oid, new byte[3]);
             object ign;
-            Assert.Throws<ArgumentException>(() => ign = new Pkcs9AttributeObject(a));
+            AssertExtensions.Throws<ArgumentException>("oid.Value", () => ign = new Pkcs9AttributeObject(a));
         }
 
         [Fact]
@@ -74,7 +140,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Pkcs9AttributeObject p = new Pkcs9AttributeObject();
             byte[] rawData = "041e4d00790020004400650073006300720069007000740069006f006e000000".HexToByteArray();
             AsnEncodedData a = new AsnEncodedData(Oids.DocumentName, rawData);
-            Assert.Throws<ArgumentException>(() => p.CopyFrom(a));
+            AssertExtensions.Throws<ArgumentException>(null, () => p.CopyFrom(a));
         }
 
         [Fact]
@@ -166,6 +232,7 @@ namespace System.Security.Cryptography.Pkcs.Tests
 
             // the default constructor initializes with DateTime.Now. 
             Assert.NotNull(p.RawData);
+            Assert.Equal(DateTimeKind.Local, p.SigningTime.Kind);
             string oid = p.Oid.Value;
             Assert.Equal(s_OidSigningTime, oid);
         }
@@ -178,13 +245,14 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Pkcs9SigningTime p = new Pkcs9SigningTime(rawData);
             Assert.Equal(rawData, p.RawData);
             DateTime cookedData = p.SigningTime;
+            Assert.Equal(DateTimeKind.Utc, cookedData.Kind);
             Assert.Equal(dateTime, cookedData);
             string oid = p.Oid.Value;
             Assert.Equal(s_OidSigningTime, oid);
         }
 
         [Fact]
-        public static void SigningTimeFromCookedData()
+        public static void SigningTimeFromCookedData_Unspecified()
         {
             DateTime dateTime = new DateTime(2015, 4, 1);
             Pkcs9SigningTime p = new Pkcs9SigningTime(dateTime);
@@ -194,6 +262,35 @@ namespace System.Security.Cryptography.Pkcs.Tests
             Pkcs9SigningTime p2 = new Pkcs9SigningTime(p.RawData);
             DateTime cookedData = p2.SigningTime;
             Assert.Equal(dateTime, cookedData);
+            Assert.Equal(DateTimeKind.Utc, cookedData.Kind);
+        }
+
+        [Fact]
+        public static void SigningTimeFromCookedData_Local()
+        {
+            DateTime dateTime = new DateTime(2015, 4, 1, 0, 0, 0, DateTimeKind.Local);
+            Pkcs9SigningTime p = new Pkcs9SigningTime(dateTime);
+            string oid = p.Oid.Value;
+            Assert.Equal(s_OidSigningTime, oid);
+
+            Pkcs9SigningTime p2 = new Pkcs9SigningTime(p.RawData);
+            DateTime cookedData = p2.SigningTime;
+            Assert.Equal(dateTime, cookedData.ToLocalTime());
+            Assert.Equal(DateTimeKind.Utc, cookedData.Kind);
+        }
+
+        [Fact]
+        public static void SigningTimeFromCookedData_Utc()
+        {
+            DateTime dateTime = new DateTime(2015, 4, 1, 0, 0, 0, DateTimeKind.Utc);
+            Pkcs9SigningTime p = new Pkcs9SigningTime(dateTime);
+            string oid = p.Oid.Value;
+            Assert.Equal(s_OidSigningTime, oid);
+
+            Pkcs9SigningTime p2 = new Pkcs9SigningTime(p.RawData);
+            DateTime cookedData = p2.SigningTime;
+            Assert.Equal(dateTime, cookedData);
+            Assert.Equal(DateTimeKind.Utc, cookedData.Kind);
         }
 
         [Fact]

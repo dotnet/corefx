@@ -10,12 +10,12 @@ namespace System.Xml.Schema
     internal sealed class SchemaEntity : IDtdEntityInfo
     {
         private XmlQualifiedName _qname;      // Name of entity
-        private String _url;                  // Url for external entity (system id)
-        private String _pubid;                // Pubid for external entity
-        private String _text;                 // Text for internal entity
+        private string _url;                  // Url for external entity (system id)
+        private string _pubid;                // Pubid for external entity
+        private string _text;                 // Text for internal entity
         private XmlQualifiedName _ndata = XmlQualifiedName.Empty; // NDATA identifier
         private int _lineNumber;           // line number
-        private int _linePosition;         // character postion
+        private int _linePosition;         // character position
         private bool _isParameter;          // parameter entity flag
         private bool _isExternal;           // external entity flag
         private bool _parsingInProgress;      // whether entity is being parsed (DtdParser infinite recursion check)
@@ -102,8 +102,7 @@ namespace System.Xml.Schema
         //
         // Internal methods and properties
         //
-#if !SILVERLIGHT
-        internal static bool IsPredefinedEntity(String n)
+        internal static bool IsPredefinedEntity(string n)
         {
             return (n == "lt" ||
                    n == "gt" ||
@@ -111,20 +110,19 @@ namespace System.Xml.Schema
                    n == "apos" ||
                    n == "quot");
         }
-#endif
 
         internal XmlQualifiedName Name
         {
             get { return _qname; }
         }
 
-        internal String Url
+        internal string Url
         {
             get { return _url; }
             set { _url = value; _isExternal = true; }
         }
 
-        internal String Pubid
+        internal string Pubid
         {
             get { return _pubid; }
             set { _pubid = value; }
@@ -148,7 +146,7 @@ namespace System.Xml.Schema
             set { _ndata = value; }
         }
 
-        internal String Text
+        internal string Text
         {
             get { return _text; }
             set { _text = value; _isExternal = false; }
@@ -166,9 +164,9 @@ namespace System.Xml.Schema
             set { _linePosition = value; }
         }
 
-        internal String BaseURI
+        internal string BaseURI
         {
-            get { return (_baseURI == null) ? String.Empty : _baseURI; }
+            get { return (_baseURI == null) ? string.Empty : _baseURI; }
             set { _baseURI = value; }
         }
 
@@ -178,9 +176,9 @@ namespace System.Xml.Schema
             set { _parsingInProgress = value; }
         }
 
-        internal String DeclaredURI
+        internal string DeclaredURI
         {
-            get { return (_declaredURI == null) ? String.Empty : _declaredURI; }
+            get { return (_declaredURI == null) ? string.Empty : _declaredURI; }
             set { _declaredURI = value; }
         }
     };

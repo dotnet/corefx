@@ -8,7 +8,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
+#endif
 using System.Reflection;
 
 namespace BasicEventSourceTests
@@ -45,6 +49,10 @@ namespace BasicEventSourceTests
             using (var es = new LifetimeTestEventSource())
             {
                 FieldInfo field = es.GetType().GetTypeInfo().BaseType.GetField("m_provider", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                if(field == null)
+                {
+                    field = es.GetType().GetTypeInfo().BaseType.GetField("m_etwProvider", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+                }
                 object provider = field.GetValue(es);
                 wrProvider.Target = provider;
                 wrEventSource.Target = es;

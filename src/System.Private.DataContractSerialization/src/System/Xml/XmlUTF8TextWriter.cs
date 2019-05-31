@@ -35,6 +35,11 @@ namespace System.Xml
             _writer.SetOutput(stream, ownsStream, encoding);
             SetOutput(_writer);
         }
+
+        protected override XmlSigningNodeWriter CreateSigningNodeWriter()
+        {
+            return new XmlSigningNodeWriter(true);
+        }
     }
 
     internal class XmlUTF8NodeWriter : XmlStreamNodeWriter
@@ -108,14 +113,6 @@ namespace System.Xml
             base.SetOutput(stream, ownsStream, utf8Encoding);
             _encoding = encoding;
             _inAttribute = false;
-        }
-
-        public Encoding Encoding
-        {
-            get
-            {
-                return _encoding;
-            }
         }
 
         private byte[] GetCharEntityBuffer()
@@ -435,7 +432,7 @@ namespace System.Xml
             WriteEscapedText(s.Value);
         }
 
-        unsafe public override void WriteEscapedText(string s)
+        public unsafe override void WriteEscapedText(string s)
         {
             int count = s.Length;
             if (count > 0)
@@ -447,7 +444,7 @@ namespace System.Xml
             }
         }
 
-        unsafe public override void WriteEscapedText(char[] s, int offset, int count)
+        public unsafe override void WriteEscapedText(char[] s, int offset, int count)
         {
             if (count > 0)
             {
@@ -518,7 +515,7 @@ namespace System.Xml
             WriteUTF8Chars(chars, offset, count);
         }
 
-        unsafe public override void WriteText(char[] chars, int offset, int count)
+        public unsafe override void WriteText(char[] chars, int offset, int count)
         {
             if (count > 0)
             {

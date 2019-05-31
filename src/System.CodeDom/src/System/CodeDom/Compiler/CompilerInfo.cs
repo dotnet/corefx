@@ -19,9 +19,9 @@ namespace System.CodeDom.Compiler
 
         private CompilerInfo() { } // Not createable
 
-        public string[] GetLanguages() => CloneCompilerLanguages();
+        public string[] GetLanguages() => (string[])_compilerLanguages.Clone();
 
-        public string[] GetExtensions() => CloneCompilerExtensions();
+        public string[] GetExtensions() => (string[])_compilerExtensions.Clone();
 
         public Type CodeDomProviderType
         {
@@ -78,19 +78,11 @@ namespace System.CodeDom.Compiler
             }
             else
             {
-                throw new InvalidOperationException(SR.Format(SR.Provider_does_not_support_options, CodeDomProviderType.ToString()));
+                throw new InvalidOperationException(SR.Format(SR.Provider_does_not_support_options, CodeDomProviderType));
             }
         }
 
         public CompilerParameters CreateDefaultCompilerParameters() => CloneCompilerParameters();
-
-        internal CompilerInfo(CompilerParameters compilerParams, string codeDomProviderTypeName, string[] compilerLanguages, string[] compilerExtensions)
-        {
-            _compilerLanguages = compilerLanguages;
-            _compilerExtensions = compilerExtensions;
-            _codeDomProviderTypeName = codeDomProviderTypeName;
-            _compilerParams = compilerParams ?? new CompilerParameters();
-        }
 
         internal CompilerInfo(CompilerParameters compilerParams, string codeDomProviderTypeName)
         {
@@ -102,13 +94,8 @@ namespace System.CodeDom.Compiler
 
         public override bool Equals(object o)
         {
-            CompilerInfo other = o as CompilerInfo;
-            if (o == null)
-            {
-                return false;
-            }
-
             return
+                o is CompilerInfo other &&
                 CodeDomProviderType == other.CodeDomProviderType &&
                 CompilerParams.WarningLevel == other.CompilerParams.WarningLevel &&
                 CompilerParams.IncludeDebugInformation == other.CompilerParams.IncludeDebugInformation &&
@@ -125,12 +112,6 @@ namespace System.CodeDom.Compiler
             return copy;
         }
 
-        private string[] CloneCompilerLanguages() => (string[])_compilerLanguages.Clone();
-
-        private string[] CloneCompilerExtensions() => (string[])_compilerExtensions.Clone();
-
         internal CompilerParameters CompilerParams => _compilerParams;
-
-        internal IDictionary<string, string> ProviderOptions => _providerOptions;
     }
 }

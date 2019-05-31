@@ -55,6 +55,17 @@ namespace Microsoft.SqlServer.TDS.Servers
             }
 
             // Prepare response message
+            return CreateQueryResponse(session, batchRequest);
+        }
+
+        /// <summary>
+        /// Create a response for the query
+        /// </summary>
+        /// <param name="session"></param>
+        /// <param name="batchRequest"></param>
+        /// <returns></returns>
+        protected virtual TDSMessageCollection CreateQueryResponse(ITDSServerSession session, TDSSQLBatchToken batchRequest)
+        {
             TDSMessage responseMessage = new TDSMessage(TDSMessageType.Response);
 
             // Prepare query text
@@ -349,6 +360,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             return new TDSMessageCollection(responseMessage);
         }
 
+
         /// <summary>
         /// Handle attention from the client
         /// </summary>
@@ -611,7 +623,7 @@ namespace Microsoft.SqlServer.TDS.Servers
             // Prepare result data
             TDSRowToken rowToken = new TDSRowToken(metadataToken);
 
-            // Per http://msdn.microsoft.com/en-us/library/ms174396.aspx
+            // Per https://docs.microsoft.com/en-us/sql/t-sql/functions/serverproperty-transact-sql
             // 4 = Express (This is returned for Express, Express with Advanced Services, and Windows Embedded SQL.)
             rowToken.Data.Add(4);
 
@@ -1469,7 +1481,7 @@ namespace Microsoft.SqlServer.TDS.Servers
         }
 
         /// <summary>
-        /// Prepare response for arithmethic abort
+        /// Prepare response for arithmetic abort
         /// </summary>
         private TDSMessage _PrepareArithAbortResponse(ITDSServerSession session)
         {

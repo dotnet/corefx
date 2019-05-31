@@ -5,16 +5,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Globalization.Tests
 {
-    public class CurrentCultureTests : RemoteExecutorTestBase
+    public class CurrentCultureTests
     {
         [Fact]
         public void CurrentCulture()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newCulture = new CultureInfo(CultureInfo.CurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.CurrentCulture = newCulture;
@@ -27,20 +28,20 @@ namespace System.Globalization.Tests
                 Assert.Equal(CultureInfo.CurrentCulture, newCulture);
                 Assert.Equal("de-DE_phoneb", newCulture.CompareInfo.Name);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public void CurrentCulture_Set_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentCulture = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentCulture = null);
         }
 
         [Fact]
         public void CurrentUICulture()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newUICulture = new CultureInfo(CultureInfo.CurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.CurrentUICulture = newUICulture;
@@ -52,14 +53,15 @@ namespace System.Globalization.Tests
 
                 Assert.Equal(CultureInfo.CurrentUICulture, newUICulture);
                 Assert.Equal("de-DE_phoneb", newUICulture.CompareInfo.Name);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void DefaultThreadCurrentCulture()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newCulture = new CultureInfo(CultureInfo.DefaultThreadCurrentCulture == null || CultureInfo.DefaultThreadCurrentCulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.DefaultThreadCurrentCulture = newCulture;
@@ -71,14 +73,15 @@ namespace System.Globalization.Tests
                 ((IAsyncResult)task).AsyncWaitHandle.WaitOne();
                 task.Wait();
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Thread cultures is not honored in UWP.")]
         public void DefaultThreadCurrentUICulture()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo newUICulture = new CultureInfo(CultureInfo.DefaultThreadCurrentUICulture == null || CultureInfo.DefaultThreadCurrentUICulture.Name.Equals("ja-JP", StringComparison.OrdinalIgnoreCase) ? "ar-SA" : "ja-JP");
                 CultureInfo.DefaultThreadCurrentUICulture = newUICulture;
@@ -90,17 +93,17 @@ namespace System.Globalization.Tests
                 ((IAsyncResult)task).AsyncWaitHandle.WaitOne();
                 task.Wait();
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public void CurrentUICulture_Set_Null_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentUICulture = null);
+            AssertExtensions.Throws<ArgumentNullException>("value", () => CultureInfo.CurrentUICulture = null);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Windows locale support doesn't rely on LANG variable
         [Theory]
         [InlineData("en-US.UTF-8", "en-US")]
         [InlineData("en-US", "en-US")]
@@ -116,7 +119,7 @@ namespace System.Globalization.Tests
 
             psi.Environment["LANG"] = langEnvVar;
 
-            RemoteInvoke(expected =>
+            RemoteExecutor.Invoke(expected =>
             {
                 Assert.NotNull(CultureInfo.CurrentCulture);
                 Assert.NotNull(CultureInfo.CurrentUICulture);
@@ -124,11 +127,11 @@ namespace System.Globalization.Tests
                 Assert.Equal(expected, CultureInfo.CurrentCulture.Name);
                 Assert.Equal(expected, CultureInfo.CurrentUICulture.Name);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, expectedCultureName, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // When LANG is empty or unset, should default to the invariant culture on Unix.
         [Theory]
         [InlineData("")]
         [InlineData(null)]
@@ -144,7 +147,7 @@ namespace System.Globalization.Tests
                psi.Environment["LANG"] = langEnvVar;
             }
 
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 Assert.NotNull(CultureInfo.CurrentCulture);
                 Assert.NotNull(CultureInfo.CurrentUICulture);
@@ -152,7 +155,7 @@ namespace System.Globalization.Tests
                 Assert.Equal("", CultureInfo.CurrentCulture.Name);
                 Assert.Equal("", CultureInfo.CurrentUICulture.Name);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, new RemoteInvokeOptions { StartInfo = psi }).Dispose();
         }
 

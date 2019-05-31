@@ -21,20 +21,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         private const string warningInfoMessage = "Test of info messages";
         private const string orderIdQuery = "select orderid from orders where orderid < 10250";
 
-#if MANAGED_SNI
-        [CheckConnStrSetupFact]
-        public static void NonWindowsIntAuthFailureTest()
-        {
-            string connectionString = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { IntegratedSecurity = true }).ConnectionString;
-            Assert.Throws<NotSupportedException>(() => new SqlConnection(connectionString).Open());
-
-            // Should not receive any exception when using IntAuth=false
-            connectionString = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { IntegratedSecurity = false }).ConnectionString;
-            new SqlConnection(connectionString).Open();
-        }
-#endif
-
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void WarningTest()
         {
             Action<object, SqlInfoMessageEventArgs> warningCallback =
@@ -60,7 +47,22 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        private static bool EmployeesTableHasFullTextIndex()
+        {
+            if (DataTestUtility.TcpConnStr == null)
+                return false;
+
+            using (SqlConnection conn = new SqlConnection(DataTestUtility.TcpConnStr))
+            using (SqlCommand cmd = conn.CreateCommand())
+            {
+                conn.Open();
+                cmd.CommandText = "SELECT object_id FROM sys.fulltext_indexes WHERE object_id = object_id('Northwind.dbo.Employees')";
+
+                return (cmd.ExecuteScalar() != null);
+            }
+        }
+
+        [ConditionalFact(nameof(EmployeesTableHasFullTextIndex))]
         public static void WarningsBeforeRowsTest()
         {
             bool hitWarnings = false;
@@ -145,7 +147,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             return true;
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void ExceptionTests()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
@@ -156,12 +158,14 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             VerifyConnectionFailure<SqlException>(() => GenerateConnectionException(badBuilder.ConnectionString), sqlsvrBadConn, VerifyException);
 
             // tests incorrect password - thrown from the adapter
-            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { Password = string.Empty };
+            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { Password = string.Empty, IntegratedSecurity = false };
             string errorMessage = string.Format(CultureInfo.InvariantCulture, logonFailedErrorMessage, badBuilder.UserID);
             VerifyConnectionFailure<SqlException>(() => GenerateConnectionException(badBuilder.ConnectionString), errorMessage, (ex) => VerifyException(ex, 1, 18456, 1, 14));
 
             // tests incorrect database name - exception thrown from adapter
-            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { InitialCatalog = "NotADatabase" };
+            // (Forcing Pooling here, so that differing ClientConnectionId's in the exceptions won't make the test fail
+            // in CheckThatExceptionsAreDistinctButHaveSameData)
+            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { InitialCatalog = "NotADatabase", Pooling = true };
             errorMessage = string.Format(CultureInfo.InvariantCulture, "Cannot open database \"{0}\" requested by the login. The login failed.", badBuilder.InitialCatalog);
             SqlException firstAttemptException = VerifyConnectionFailure<SqlException>(() => GenerateConnectionException(badBuilder.ConnectionString), errorMessage, (ex) => VerifyException(ex, 2, 4060, 1, 11));
 
@@ -169,12 +173,12 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             VerifyConnectionFailure<SqlException>(() => GenerateConnectionException(badBuilder.ConnectionString), errorMessage, (ex) => CheckThatExceptionsAreDistinctButHaveSameData(firstAttemptException, ex));
 
             // tests incorrect user name - exception thrown from adapter
-            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { UserID = "NotAUser" };
+            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { UserID = "NotAUser", IntegratedSecurity = false };
             errorMessage = string.Format(CultureInfo.InvariantCulture, logonFailedErrorMessage, badBuilder.UserID);
             VerifyConnectionFailure<SqlException>(() => GenerateConnectionException(badBuilder.ConnectionString), errorMessage, (ex) => VerifyException(ex, 1, 18456, 1, 14));
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void VariousExceptionTests()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
@@ -192,7 +196,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
 
             // Test 1 - B
-            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { Password = string.Empty };
+            badBuilder = new SqlConnectionStringBuilder(builder.ConnectionString) { Password = string.Empty, IntegratedSecurity = false };
             using (var sqlConnection = new SqlConnection(badBuilder.ConnectionString))
             {
                 string errorMessage = string.Format(CultureInfo.InvariantCulture, logonFailedErrorMessage, badBuilder.UserID);
@@ -200,7 +204,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void IndependentConnectionExceptionTest()
         {
             SqlConnectionStringBuilder builder = new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr);
@@ -219,7 +223,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static async Task UnobservedTaskExceptionTest()
         {
             List<Exception> exceptionsSeen = new List<Exception>();

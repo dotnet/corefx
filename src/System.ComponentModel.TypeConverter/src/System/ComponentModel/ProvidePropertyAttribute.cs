@@ -5,58 +5,43 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para> Specifies which methods are extender
-    ///       properties.</para>
+    /// Specifies which methods are extender properties.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public sealed class ProvidePropertyAttribute : Attribute
     {
-        private readonly string _propertyName;
-        private readonly string _receiverTypeName;
-
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.
         /// </summary>
         public ProvidePropertyAttribute(string propertyName, Type receiverType)
         {
-            _propertyName = propertyName;
-            _receiverTypeName = receiverType.AssemblyQualifiedName;
+            if (receiverType == null)
+            {
+                throw new ArgumentNullException(nameof(receiverType));
+            }
+
+            PropertyName = propertyName;
+            ReceiverTypeName = receiverType.AssemblyQualifiedName;
         }
 
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.ProvidePropertyAttribute'/> class.
         /// </summary>
         public ProvidePropertyAttribute(string propertyName, string receiverTypeName)
         {
-            _propertyName = propertyName;
-            _receiverTypeName = receiverTypeName;
+            PropertyName = propertyName;
+            ReceiverTypeName = receiverTypeName;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name of a property that this class provides.
-        ///    </para>
+        /// Gets the name of a property that this class provides.
         /// </summary>
-        public string PropertyName
-        {
-            get
-            {
-                return _propertyName;
-            }
-        }
+        public string PropertyName { get; }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the name of the data type this property can extend
-        ///    </para>
+        /// Gets the name of the data type this property can extend
         /// </summary>
-        public string ReceiverTypeName
-        {
-            get
-            {
-                return _receiverTypeName;
-            }
-        }
+        public string ReceiverTypeName { get; }
 
         public override bool Equals(object obj)
         {
@@ -65,24 +50,16 @@ namespace System.ComponentModel
                 return true;
             }
 
-            ProvidePropertyAttribute other = obj as ProvidePropertyAttribute;
-
-            return (other != null) && other._propertyName == _propertyName && other._receiverTypeName == _receiverTypeName;
+            return obj is ProvidePropertyAttribute other
+                && other.PropertyName == PropertyName
+                && other.ReceiverTypeName == ReceiverTypeName;
         }
 
         public override int GetHashCode()
         {
-            return _propertyName.GetHashCode() ^ _receiverTypeName.GetHashCode();
+            return (PropertyName?.GetHashCode() ?? 0) ^ (ReceiverTypeName?.GetHashCode() ?? 0);
         }
 
-        public override object TypeId
-        {
-            get
-            {
-                return base.GetType().FullName + _propertyName;
-            }
-        }
+        public override object TypeId => GetType().FullName + PropertyName;
     }
 }
-
-

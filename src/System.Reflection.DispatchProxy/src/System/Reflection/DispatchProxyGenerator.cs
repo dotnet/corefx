@@ -34,7 +34,7 @@ namespace System.Reflection
     //         The generated DispatchProxy proxy type does not need to generate implementation methods
     //         for the base type's interfaces, because the base type already must have implemented them.
     //  4. RealProxy required a proxy instance to hold a backpointer to the RealProxy instance to mirror
-    //     the .Net Remoting design that required the proxy and RealProxy to be separate instances.
+    //     the .NET Remoting design that required the proxy and RealProxy to be separate instances.
     //     But the DispatchProxy design encourages the proxy type to *be* an DispatchProxy.  Therefore,
     //     the proxy's 'this' becomes the equivalent of RealProxy's backpointer to RealProxy, so we were
     //     able to remove an extraneous field and ctor arg from the DispatchProxy proxies.
@@ -214,8 +214,7 @@ namespace System.Reflection
                 {
                     if (_ignoresAccessChecksToAttributeConstructor == null)
                     {
-                        TypeInfo attributeTypeInfo = GenerateTypeInfoOfIgnoresAccessChecksToAttribute();
-                        _ignoresAccessChecksToAttributeConstructor = attributeTypeInfo.DeclaredConstructors.Single();
+                        _ignoresAccessChecksToAttributeConstructor = IgnoreAccessChecksToAttributeBuilder.AddToModule(_mb);
                     }
 
                     return _ignoresAccessChecksToAttributeConstructor;
@@ -226,94 +225,6 @@ namespace System.Reflection
                 int nextId = Interlocked.Increment(ref _typeId);
                 TypeBuilder tb = _mb.DefineType(name + "_" + nextId, TypeAttributes.Public, proxyBaseType);
                 return new ProxyBuilder(this, tb, proxyBaseType);
-            }
-
-            // Generate the declaration for the IgnoresAccessChecksToAttribute type.
-            // This attribute will be both defined and used in the dynamic assembly.
-            // Each usage identifies the name of the assembly containing non-public
-            // types the dynamic assembly needs to access.  Normally those types
-            // would be inaccessible, but this attribute allows them to be visible.
-            // It works like a reverse InternalsVisibleToAttribute.
-            // This method returns the TypeInfo of the generated attribute.
-            private TypeInfo GenerateTypeInfoOfIgnoresAccessChecksToAttribute()
-            {
-                TypeBuilder attributeTypeBuilder = 
-                    _mb.DefineType("System.Runtime.CompilerServices.IgnoresAccessChecksToAttribute", 
-                                   TypeAttributes.Public | TypeAttributes.Class, 
-                                   typeof(Attribute));
-
-                // Create backing field as:
-                // private string assemblyName;
-                FieldBuilder assemblyNameField = 
-                    attributeTypeBuilder.DefineField("assemblyName", typeof(String), FieldAttributes.Private);
-
-                // Create ctor as:
-                // public IgnoresAccessChecksToAttribute(string)
-                ConstructorBuilder constructorBuilder = attributeTypeBuilder.DefineConstructor(MethodAttributes.Public, 
-                                                             CallingConventions.HasThis, 
-                                                             new Type[] { assemblyNameField.FieldType });
-
-                ILGenerator il = constructorBuilder.GetILGenerator();
-
-                // Create ctor body as:
-                // this.assemblyName = {ctor parameter 0}
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldarg, 1);
-                il.Emit(OpCodes.Stfld, assemblyNameField);
-
-                // return
-                il.Emit(OpCodes.Ret);
-
-                // Define property as:
-                // public string AssemblyName {get { return this.assemblyName; } }
-                PropertyBuilder getterPropertyBuilder = attributeTypeBuilder.DefineProperty(
-                                                       "AssemblyName",
-                                                       PropertyAttributes.None,
-                                                       CallingConventions.HasThis,
-                                                       returnType: typeof(String),
-                                                       parameterTypes: null);
-
-                MethodBuilder getterMethodBuilder = attributeTypeBuilder.DefineMethod(
-                                                       "get_AssemblyName",
-                                                       MethodAttributes.Public,
-                                                       CallingConventions.HasThis,
-                                                       returnType: typeof(String),
-                                                       parameterTypes: null);
-
-                // Generate body:
-                // return this.assemblyName;
-                il = getterMethodBuilder.GetILGenerator();
-                il.Emit(OpCodes.Ldarg_0);
-                il.Emit(OpCodes.Ldfld, assemblyNameField);
-                il.Emit(OpCodes.Ret);
-
-                // Generate the AttributeUsage attribute for this attribute type:
-                // [AttributeUsage(AttributeTargets.Assembly, AllowMultiple = true)]
-                TypeInfo attributeUsageTypeInfo = typeof(AttributeUsageAttribute).GetTypeInfo();
-
-                // Find the ctor that takes only AttributeTargets
-                ConstructorInfo attributeUsageConstructorInfo =
-                    attributeUsageTypeInfo.DeclaredConstructors
-                        .Single(c => c.GetParameters().Count() == 1 &&
-                                     c.GetParameters()[0].ParameterType == typeof(AttributeTargets));
-
-                // Find the property to set AllowMultiple
-                PropertyInfo allowMultipleProperty =
-                    attributeUsageTypeInfo.DeclaredProperties
-                        .Single(f => String.Equals(f.Name, "AllowMultiple"));
-
-                // Create a builder to construct the instance via the ctor and property
-                CustomAttributeBuilder customAttributeBuilder = 
-                    new CustomAttributeBuilder(attributeUsageConstructorInfo,
-                                                new object[] { AttributeTargets.Assembly },
-                                                new PropertyInfo[] { allowMultipleProperty },
-                                                new object[] { true });
-
-                // Attach this attribute instance to the newly defined attribute type
-                attributeTypeBuilder.SetCustomAttribute(customAttributeBuilder);
-
-                // Make the TypeInfo real so the constructor can be used.
-                return attributeTypeBuilder.CreateTypeInfo();
             }
 
             // Generates an instance of the IgnoresAccessChecksToAttribute to
@@ -452,6 +363,11 @@ namespace System.Reflection
 
                 foreach (MethodInfo mi in iface.GetRuntimeMethods())
                 {
+                    // Skip regular/non-virtual instance methods, static methods, and methods that cannot be overriden
+                    // ("methods that cannot be overriden" includes default implementation of other interface methods).
+                    if (!mi.IsVirtual || mi.IsFinal)
+                        continue;
+
                     MethodBuilder mdb = AddMethodImpl(mi);
                     PropertyAccessorInfo associatedProperty;
                     if (propertyMap.TryGetValue(mi, out associatedProperty))
@@ -477,6 +393,13 @@ namespace System.Reflection
                 foreach (PropertyInfo pi in iface.GetRuntimeProperties())
                 {
                     PropertyAccessorInfo ai = propertyMap[pi.GetMethod ?? pi.SetMethod];
+
+                    // If we didn't make an overriden accessor above, this was a static property, non-virtual property,
+                    // or a default implementation of a property of a different interface. In any case, we don't need
+                    // to redeclare it.
+                    if (ai.GetMethodBuilder == null && ai.SetMethodBuilder == null)
+                        continue;
+
                     PropertyBuilder pb = _tb.DefineProperty(pi.Name, pi.Attributes, pi.PropertyType, pi.GetIndexParameters().Select(p => p.ParameterType).ToArray());
                     if (ai.GetMethodBuilder != null)
                         pb.SetGetMethod(ai.GetMethodBuilder);
@@ -487,6 +410,13 @@ namespace System.Reflection
                 foreach (EventInfo ei in iface.GetRuntimeEvents())
                 {
                     EventAccessorInfo ai = eventMap[ei.AddMethod ?? ei.RemoveMethod];
+
+                    // If we didn't make an overriden accessor above, this was a static event, non-virtual event,
+                    // or a default implementation of an event of a different interface. In any case, we don't
+                    // need to redeclare it.
+                    if (ai.AddMethodBuilder == null && ai.RemoveMethodBuilder == null && ai.RaiseMethodBuilder == null)
+                        continue;
+
                     EventBuilder eb = _tb.DefineEvent(ei.Name, ei.Attributes, ei.EventHandlerType);
                     if (ai.AddMethodBuilder != null)
                         eb.SetAddOnMethod(ai.AddMethodBuilder);
@@ -528,7 +458,9 @@ namespace System.Reflection
                 for (int i = 0; i < parameters.Length; i++)
                 {
                     // args[i] = argi;
-                    if (!parameters[i].IsOut)
+                    bool isOutRef = parameters[i].IsOut && parameters[i].ParameterType.IsByRef && !parameters[i].IsIn;
+
+                    if (!isOutRef)
                     {
                         argsArr.BeginSet(i);
                         args.Get(i);
@@ -557,7 +489,7 @@ namespace System.Reflection
                 // packed[PackedArgs.MethodTokenPosition] = iface method token;
                 packedArr.BeginSet(PackedArgs.MethodTokenPosition);
                 il.Emit(OpCodes.Ldc_I4, methodToken);
-                packedArr.EndSet(typeof(Int32));
+                packedArr.EndSet(typeof(int));
 
                 // packed[PackedArgs.ArgsPosition] = args;
                 packedArr.BeginSet(PackedArgs.ArgsPosition);
@@ -629,49 +561,49 @@ namespace System.Reflection
                 if (type == null)
                     return 0;   // TypeCode.Empty;
 
-                if (type == typeof(Boolean))
+                if (type == typeof(bool))
                     return 3;   // TypeCode.Boolean;
 
-                if (type == typeof(Char))
+                if (type == typeof(char))
                     return 4;   // TypeCode.Char;
 
-                if (type == typeof(SByte))
+                if (type == typeof(sbyte))
                     return 5;   // TypeCode.SByte;
 
-                if (type == typeof(Byte))
+                if (type == typeof(byte))
                     return 6;   // TypeCode.Byte;
 
-                if (type == typeof(Int16))
+                if (type == typeof(short))
                     return 7;   // TypeCode.Int16;
 
-                if (type == typeof(UInt16))
+                if (type == typeof(ushort))
                     return 8;   // TypeCode.UInt16;
 
-                if (type == typeof(Int32))
+                if (type == typeof(int))
                     return 9;   // TypeCode.Int32;
 
-                if (type == typeof(UInt32))
+                if (type == typeof(uint))
                     return 10;  // TypeCode.UInt32;
 
-                if (type == typeof(Int64))
+                if (type == typeof(long))
                     return 11;  // TypeCode.Int64;
 
-                if (type == typeof(UInt64))
+                if (type == typeof(ulong))
                     return 12;  // TypeCode.UInt64;
 
-                if (type == typeof(Single))
+                if (type == typeof(float))
                     return 13;  // TypeCode.Single;
 
-                if (type == typeof(Double))
+                if (type == typeof(double))
                     return 14;  // TypeCode.Double;
 
-                if (type == typeof(Decimal))
+                if (type == typeof(decimal))
                     return 15;  // TypeCode.Decimal;
 
                 if (type == typeof(DateTime))
                     return 16;  // TypeCode.DateTime;
 
-                if (type == typeof(String))
+                if (type == typeof(string))
                     return 18;  // TypeCode.String;
 
                 if (type.GetTypeInfo().IsEnum)
@@ -781,7 +713,7 @@ namespace System.Reflection
                 }
                 else if (targetTypeInfo.IsAssignableFrom(sourceTypeInfo))
                 {
-                    if (sourceTypeInfo.IsValueType)
+                    if (sourceTypeInfo.IsValueType || source.IsGenericParameter)
                     {
                         if (isAddress)
                             Ldind(il, source);
@@ -793,8 +725,6 @@ namespace System.Reflection
                     Debug.Assert(sourceTypeInfo.IsAssignableFrom(targetTypeInfo) || targetTypeInfo.IsInterface || sourceTypeInfo.IsInterface);
                     if (target.IsGenericParameter)
                     {
-                        // T GetProperty<T>() where T : class;
-                        Debug.Assert(targetTypeInfo.GenericParameterAttributes == GenericParameterAttributes.ReferenceTypeConstraint);
                         il.Emit(OpCodes.Unbox_Any, target);
                     }
                     else

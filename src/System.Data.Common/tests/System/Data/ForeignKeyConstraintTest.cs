@@ -220,7 +220,7 @@ namespace System.Data.Tests
                 table2.Constraints.Add(fkc);
                 throw new ApplicationException("An Exception was expected");
             }
-            // LAMESPEC : spec says InvalidConstraintException but throws this
+            // spec says InvalidConstraintException but throws this
             catch (NullReferenceException)
             {
             }
@@ -300,7 +300,7 @@ namespace System.Data.Tests
             });
 
             //zero length collection
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 fkc = new ForeignKeyConstraint(new DataColumn[] { }, new DataColumn[] { });
             });
@@ -332,7 +332,7 @@ namespace System.Data.Tests
             ForeignKeyConstraint fkc;
 
             //Columns must belong to a Table
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 fkc = new ForeignKeyConstraint(col, _ds.Tables[0].Columns[0]);
             });
@@ -355,7 +355,7 @@ namespace System.Data.Tests
                 new DataColumn[] { _ds.Tables[0].Columns[0], _ds.Tables[0].Columns[1] };
 
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 fkc = new ForeignKeyConstraint(twoCol,
                     new DataColumn[] { _ds.Tables[0].Columns[0] });
@@ -399,7 +399,7 @@ namespace System.Data.Tests
         [Fact]
         public void ViolationTest()
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 DataTable parent = _ds.Tables[0];
                 DataTable child = _ds.Tables[1];

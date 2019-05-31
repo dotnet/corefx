@@ -2,24 +2,35 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRCALL : EXPR
+    internal sealed class ExprCall : ExprWithArgs
     {
-        private EXPR _OptionalArguments;
-        public EXPR GetOptionalArguments() { return _OptionalArguments; }
-        public void SetOptionalArguments(EXPR value) { _OptionalArguments = value; }
+        public ExprCall(CType type, EXPRFLAG flags, Expr arguments, ExprMemberGroup member, MethWithInst method)
+            : base(ExpressionKind.Call, type)
+        {
+            Debug.Assert(
+                (flags & ~(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CONSTRAINED
+                           | EXPRFLAG.EXF_NEWSTRUCTASSG | EXPRFLAG.EXF_IMPLICITSTRUCTASSG | EXPRFLAG.EXF_MASK_ANY)) == 0);
+            Flags = flags;
+            OptionalArguments = arguments;
+            MemberGroup = member;
+            NullableCallLiftKind = NullableCallLiftKind.NotLifted;
+            MethWithInst = method;
+        }
 
-        private EXPRMEMGRP _MemberGroup;
-        public EXPRMEMGRP GetMemberGroup() { return _MemberGroup; }
-        public void SetMemberGroup(EXPRMEMGRP value) { _MemberGroup = value; }
+        public MethWithInst MethWithInst { get; set; }
 
-        public MethWithInst mwi;
+        public PREDEFMETH PredefinedMethod { get; set; } = PREDEFMETH.PM_COUNT;
 
-        public PREDEFMETH PredefinedMethod;
+        public NullableCallLiftKind NullableCallLiftKind { get; set; }
 
-        public NullableCallLiftKind nubLiftKind;
-        public EXPR pConversions;
-        public EXPR castOfNonLiftedResultToLiftedType;
+        public Expr PConversions { get; set; }
+
+        public Expr CastOfNonLiftedResultToLiftedType { get; set; }
+
+        public override SymWithType GetSymWithType() => MethWithInst;
     }
 }

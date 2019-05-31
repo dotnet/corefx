@@ -8,7 +8,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct TypeDefinition
+    public readonly struct TypeDefinition
     {
         private readonly MetadataReader _reader;
 
@@ -51,6 +51,11 @@ namespace System.Reflection.Metadata
                 return GetProjectedFlags();
             }
         }
+
+        /// <summary>
+        /// Indicates whether this is a nested type.
+        /// </summary>
+        public bool IsNested => Attributes.IsNested();
 
         /// <summary>
         /// Name of the type.

@@ -32,7 +32,6 @@ namespace System.Net.Security.Tests
             return true;  // allow everything
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task ServerRequireEncryption_ClientRequireEncryption_ConnectWithEncryption()
         {
@@ -53,7 +52,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public async Task ServerRequireEncryption_ClientAllowNoEncryption_ConnectWithEncryption()
         {
@@ -74,7 +72,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SupportsNullEncryption))]
         public async Task ServerRequireEncryption_ClientNoEncryption_NoConnect()
         {
@@ -86,7 +83,7 @@ namespace System.Net.Security.Tests
                 using (var sslStream = new SslStream(client.GetStream(), false, AllowAnyServerCertificate, null, EncryptionPolicy.NoEncryption))
                 {
                     await Assert.ThrowsAsync<IOException>(() =>
-                        sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocolSupport.DefaultSslProtocols, false));
+                        sslStream.AuthenticateAsClientAsync("localhost", null, SslProtocols.Tls | SslProtocols.Tls11 |  SslProtocols.Tls12, false));
                 }
             }
         }

@@ -5,22 +5,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reflection;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
 {
-    public class ImmutableHashSetTest : ImmutableSetTest
+    public partial class ImmutableHashSetTest : ImmutableSetTest
     {
         protected override bool IncludesGetHashCodeDerivative
         {
             get { return true; }
-        }
-
-        [Fact]
-        public void EmptyTest()
-        {
-            this.EmptyTestHelper(Empty<int>(), 5, null);
-            this.EmptyTestHelper(EmptyTyped<string>().WithComparer(StringComparer.OrdinalIgnoreCase), "a", StringComparer.OrdinalIgnoreCase);
         }
 
         [Fact]
@@ -68,6 +62,13 @@ namespace System.Collections.Immutable.Tests
         {
             var emptySet = this.EmptyTyped<int>().WithComparer(new BadHasher<int>());
             this.EnumeratorTestHelper(emptySet, null, 3, 1, 5);
+        }
+
+        [Fact]
+        public void EnumeratorWithHashCollisionsTest_RefType()
+        {
+            var emptySet = this.EmptyTyped<string>().WithComparer(new BadHasher<string>());
+            this.EnumeratorTestHelper(emptySet, null, "c", "a", "e");
         }
 
         [Fact]
@@ -133,6 +134,12 @@ namespace System.Collections.Immutable.Tests
             set = ImmutableHashSet.CreateRange(comparer, (IEnumerable<string>)new[] { "a", "b" });
             Assert.Equal(2, set.Count);
             Assert.Same(comparer, set.KeyComparer);
+
+            set = ImmutableHashSet.Create(default(string));
+            Assert.Equal(1, set.Count);
+
+            set = ImmutableHashSet.CreateRange(new[] { null, "a", null, "b" });
+            Assert.Equal(3, set.Count);
         }
 
         /// <summary>
@@ -150,24 +157,45 @@ namespace System.Collections.Immutable.Tests
             Assert.Equal(new[] { 6 }, setAfterRemovingFive);
         }
 
+        /// <summary>
+        /// Verifies the non-removal of an item that does not belong to the set,
+        /// but which happens to have a colliding hash code with another value
+        /// that *is* in the set.
+        /// </summary>
         [Fact]
-        public void TryGetValueTest()
+        public void RemoveValuesFromCollidedHashCode_RefType()
         {
-            this.TryGetValueTestHelper(ImmutableHashSet<string>.Empty.WithComparer(StringComparer.OrdinalIgnoreCase));
+            var set = ImmutableHashSet.Create<string>(new BadHasher<string>(), "a", "b");
+            Assert.Same(set, set.Remove("c"));
+            var setAfterRemovingA = set.Remove("a");
+            Assert.Equal(1, setAfterRemovingA.Count);
+            Assert.Equal(new[] { "b" }, setAfterRemovingA);
         }
 
         [Fact]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableHashSet.Create<string>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableHashSet.Create<int>(1, 2, 3));
+            ImmutableHashSet<int> set = ImmutableHashSet.Create(1, 2, 3);
+            DebuggerAttributeInfo info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(set);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            int[] items = itemProperty.GetValue(info.Instance) as int[];
+            Assert.Equal(set, items);
+        }
+
+        [Fact]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableHashSet.Create<string>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
         [Fact]
         public void SymmetricExceptWithComparerTests()
         {
             var set = ImmutableHashSet.Create<string>("a").WithComparer(StringComparer.OrdinalIgnoreCase);
-            var otherCollection = new[] {"A"};
+            var otherCollection = new[] { "A" };
 
             var expectedSet = new HashSet<string>(set, set.KeyComparer);
             expectedSet.SymmetricExceptWith(otherCollection);
@@ -189,35 +217,6 @@ namespace System.Collections.Immutable.Tests
         protected override ISet<T> EmptyMutable<T>()
         {
             return new HashSet<T>();
-        }
-
-        internal override IBinaryTree GetRootNode<T>(IImmutableSet<T> set)
-        {
-            return ((ImmutableHashSet<T>)set).Root;
-        }
-
-        /// <summary>
-        /// Tests various aspects of an unordered set.
-        /// </summary>
-        /// <typeparam name="T">The type of element stored in the set.</typeparam>
-        /// <param name="emptySet">The empty set.</param>
-        /// <param name="value">A value that could be placed in the set.</param>
-        /// <param name="comparer">The comparer used to obtain the empty set, if any.</param>
-        private void EmptyTestHelper<T>(IImmutableSet<T> emptySet, T value, IEqualityComparer<T> comparer)
-        {
-            Assert.NotNull(emptySet);
-
-            this.EmptyTestHelper(emptySet);
-            Assert.Same(emptySet, emptySet.ToImmutableHashSet(comparer));
-            Assert.Same(comparer ?? EqualityComparer<T>.Default, ((IHashKeyCollection<T>)emptySet).KeyComparer);
-
-            if (comparer == null)
-            {
-                Assert.Same(emptySet, ImmutableHashSet<T>.Empty);
-            }
-
-            var reemptied = emptySet.Add(value).Clear();
-            Assert.Same(reemptied, reemptied.ToImmutableHashSet(comparer)); //, "Getting the empty set from a non-empty instance did not preserve the comparer.");
         }
     }
 }

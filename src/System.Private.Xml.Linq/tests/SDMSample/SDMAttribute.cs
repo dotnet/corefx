@@ -264,14 +264,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XAttribute e1 = new XAttribute("x", string.Empty);
             XAttribute e2 = new XAttribute("x", "bogus");
-            XAttribute e3 = new XAttribute("x", "5e+500");
             XAttribute e4 = new XAttribute("x", "5.0");
 
             Assert.Throws<FormatException>(() => (float)e1);
             Assert.Throws<FormatException>(() => (float)e2);
-            Assert.Throws<OverflowException>(() => (float)e3);
 
             Assert.Equal(5.0f, (float)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit float conversion operator on XAttribute.
+        /// </summary>
+        [Fact]
+        public void AttributeExplicitToFloat_NotNetFramework()
+        {
+            XAttribute e3 = new XAttribute("x", "5e+500");
+            Assert.Equal(float.PositiveInfinity, (float)e3);
         }
 
         /// <summary>
@@ -286,14 +294,22 @@ namespace XDocumentTests.SDMSample
             // Test various values.
             XAttribute e1 = new XAttribute("x", string.Empty);
             XAttribute e2 = new XAttribute("x", "bogus");
-            XAttribute e3 = new XAttribute("x", "5e+5000");
             XAttribute e4 = new XAttribute("x", "5.0");
 
             Assert.Throws<FormatException>(() => (double)e1);
             Assert.Throws<FormatException>(() => (double)e2);
-            Assert.Throws<OverflowException>(() => (double)e3);
 
             Assert.Equal(5.0, (double)e4);
+        }
+
+        /// <summary>
+        /// Validates the explicit double conversion operator on XAttribute.
+        /// </summary>
+        [Fact]
+        public void AttributeExplicitToDouble_NotNetFramework()
+        {
+            XAttribute e3 = new XAttribute("x", "5e+5000");
+            Assert.Equal(double.PositiveInfinity, (double)e3);
         }
 
         /// <summary>

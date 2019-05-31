@@ -11,7 +11,6 @@ using System.Xml.XPath;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     internal enum XmlState
     {
         WithinSequence = 0,     // Adding items to a top-level sequence
@@ -1021,7 +1020,7 @@ namespace System.Xml.Xsl.Runtime
                     break;
 
                 default:
-                    Debug.Assert(false, "Text cannot be output in the " + _xstate + " state.");
+                    Debug.Fail("Text cannot be output in the " + _xstate + " state.");
                     break;
             }
 
@@ -1192,7 +1191,7 @@ namespace System.Xml.Xsl.Runtime
                     break;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected node type {navigator.NodeType}");
                     break;
             }
 
@@ -1340,7 +1339,7 @@ namespace System.Xml.Xsl.Runtime
                 case XmlState.WithinPI: return XPathNodeType.ProcessingInstruction;
             }
 
-            Debug.Assert(false, xstate.ToString() + " is not a valid XmlState.");
+            Debug.Fail(xstate.ToString() + " is not a valid XmlState.");
             return XPathNodeType.Element;
         }
 

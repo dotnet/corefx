@@ -29,17 +29,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void FileExists_ThrowsIsolatedStorageException()
+        public void FileExists_Removed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.FileExists("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.FileExists("foo"));
             }
         }
 
         [Fact]
-        public void FileExists_ThrowsInvalidOperationException()
+        public void FileExists_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -49,15 +49,16 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void FileExists_RaisesArgumentException()
+        public void FileExists_False()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.FileExists("\0bad"));
+                Assert.False(isf.FileExists("\0bad"));
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory]
+        [MemberData(nameof(ValidStores))]
         public void FileExists_Existance(PresetScopes scope)
         {
             using (var isf = GetPresetScope(scope))

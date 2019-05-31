@@ -2,9 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.IO;
-using System.Xml;
 using System.Xml.Schema;
 using Xunit;
 using Xunit.Abstractions;
@@ -16,9 +14,12 @@ namespace System.Xml.Tests
     public class TCInitialize : CXmlSchemaValidatorTestCase
     {
         private ITestOutputHelper _output;
+        private ExceptionVerifier _exVerifier;
+
         public TCInitialize(ITestOutputHelper output): base(output)
         {
             _output = output;
+            _exVerifier = new ExceptionVerifier("System.Xml", _output);
         }
 
         [Fact]
@@ -197,7 +198,7 @@ namespace System.Xml.Tests
         [InlineData("other")]
         [InlineData("type")]
         [InlineData("attribute")]
-        public void InitializeWithElementValidate_OtherElement_Type_Attribute(String typeToValidate)
+        public void InitializeWithElementValidate_OtherElement_Type_Attribute(string typeToValidate)
         {
             XmlSchemaValidator val;
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -230,9 +231,23 @@ namespace System.Xml.Tests
                         break;
                 }
             }
-            catch (XmlSchemaValidationException)
+            catch (XmlSchemaValidationException e)
             {
-                //XmlExceptionVerifier.IsExceptionOk(e, (string)null);
+                switch (typeToValidate)
+                {
+                    case "other":
+                        _exVerifier.IsExceptionOk(e, "Sch_SchemaElementNameMismatch", new string[] { "PartialElement2", "PartialElement" });
+                        break;
+                    case "type":
+                        _exVerifier.IsExceptionOk(e, "Sch_SchemaElementNameMismatch", new string[] { "foo", "PartialElement" });
+                        break;
+                    case "attribute":
+                        _exVerifier.IsExceptionOk(e, "Sch_ValidateAttributeInvalidCall");
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
+                }
                 return;
             }
 
@@ -265,7 +280,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("other")]
         [InlineData("attribute")]
-        public void IntializeWithTypeValidate_OtherType_Attribute(String typeToValidate)
+        public void InitializeWithTypeValidate_OtherType_Attribute(string typeToValidate)
         {
             XmlSchemaValidator val;
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -285,10 +300,6 @@ namespace System.Xml.Tests
                         val.ValidateElement("foo", "", info, "PartialType2", null, null, null);
                         break;
 
-                    case "element":
-                        val.ValidateElement("PartialElement", "", info);
-                        break;
-
                     case "attribute":
                         val.ValidateAttribute("PartialAttribute", "", StringGetter("123"), info);
                         break;
@@ -298,10 +309,20 @@ namespace System.Xml.Tests
                         break;
                 }
             }
-            catch (XmlSchemaValidationException)
+            catch (XmlSchemaValidationException e)
             {
-                //XmlExceptionVerifier.IsExceptionOk(e, (string)null);
-
+                switch (typeToValidate)
+                {
+                    case "other":
+                        _exVerifier.IsExceptionOk(e, "Sch_XsiTypeBlockedEx", new string[] { "PartialType2", "foo" });
+                        break;
+                    case "attribute":
+                        _exVerifier.IsExceptionOk(e, "Sch_ValidateAttributeInvalidCall");
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
+                }
                 return;
             }
 
@@ -358,7 +379,7 @@ namespace System.Xml.Tests
         [InlineData("other")]
         [InlineData("element")]
         [InlineData("type")]
-        public void InitializeWithAttributeValidate_OtherAttribute_Element_Type(String typeToValidate)
+        public void InitializeWithAttributeValidate_OtherAttribute_Element_Type(string typeToValidate)
         {
             XmlSchemaValidator val;
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -391,10 +412,23 @@ namespace System.Xml.Tests
                         break;
                 }
             }
-            catch (XmlSchemaValidationException)
+            catch (XmlSchemaValidationException e)
             {
-                //XmlExceptionVerifier.IsExceptionOk(e, (string)null);
-
+                switch (typeToValidate)
+                {
+                    case "other":
+                        _exVerifier.IsExceptionOk(e, "Sch_SchemaAttributeNameMismatch", new string[] { "PartialAttribute2", "PartialAttribute" });
+                        break;
+                    case "element":
+                        _exVerifier.IsExceptionOk(e, "Sch_ValidateElementInvalidCall");
+                        break;
+                    case "type":
+                        _exVerifier.IsExceptionOk(e, "Sch_ValidateElementInvalidCall");
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
+                }
                 return;
             }
 
@@ -405,7 +439,7 @@ namespace System.Xml.Tests
         [InlineData("annotation")]
         [InlineData("group")]
         [InlineData("any")]
-        public void Pass_XmlSchemaAnnotation_XmlSchemaGroup_XmlSchemaAny_Invalid(String TypeToPass)
+        public void Pass_XmlSchemaAnnotation_XmlSchemaGroup_XmlSchemaAny_Invalid(string TypeToPass)
         {
             XmlSchemaValidator val = CreateValidator(new XmlSchemaSet());
             XmlSchemaObject obj = new XmlSchemaAnnotation();
@@ -444,7 +478,7 @@ namespace System.Xml.Tests
         [Theory]
         [InlineData("text")]
         [InlineData("whitespace")]
-        public void SetPartiaValidationAndCallValidate_Text_WhiteSpace_Valid(String typeToValidate)
+        public void SetPartiaValidationAndCallValidate_Text_WhiteSpace_Valid(string typeToValidate)
         {
             XmlSchemaValidator val;
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -459,7 +493,7 @@ namespace System.Xml.Tests
             if (typeToValidate == "text")
                 val.ValidateText(StringGetter("foo"));
             else
-                val.ValidateWhitespace(StringGetter("\r\n\t "));
+                val.ValidateWhitespace(StringGetter(Environment.NewLine + "\t "));
 
             return;
         }
@@ -470,9 +504,12 @@ namespace System.Xml.Tests
     public class TCEndValidation : CXmlSchemaValidatorTestCase
     {
         private ITestOutputHelper _output;
+        private ExceptionVerifier _exVerifier;
+
         public TCEndValidation(ITestOutputHelper output): base(output)
         {
             _output = output;
+            _exVerifier = new ExceptionVerifier("System.Xml", _output);
         }
 
         [Fact]
@@ -490,7 +527,7 @@ namespace System.Xml.Tests
         [InlineData("valid")]
         [InlineData("missing")]
         [InlineData("ignore")]
-        public void TestForRootLevelIdentityConstraints_Valid_IDREFMissingInvalid_IgnoreIdentityConstraintsIsSetInvalid(String validity)
+        public void TestForRootLevelIdentityConstraints_Valid_IDREFMissingInvalid_IgnoreIdentityConstraintsIsSetInvalid(string validity)
         {
             XmlSchemaValidator val;
             XmlSchemaInfo info = new XmlSchemaInfo();
@@ -559,9 +596,9 @@ namespace System.Xml.Tests
                     val.EndValidation();
                     Assert.True(false);
                 }
-                catch (XmlSchemaValidationException)
+                catch (XmlSchemaValidationException e)
                 {
-                    //XmlExceptionVerifier.IsExceptionOk(e, "Sch_UndeclaredId", new string[] { "a3" });
+                    _exVerifier.IsExceptionOk(e, "Sch_UndeclaredId", new string[] { "a3" });
                     return;
                 }
             }

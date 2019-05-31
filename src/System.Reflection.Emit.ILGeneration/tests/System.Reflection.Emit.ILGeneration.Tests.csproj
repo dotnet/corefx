@@ -1,19 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.Reflection.Emit.ILGeneration.Tests</AssemblyName>
-    <RootNamespace>System.Reflection.Emit.ILGeneration.Tests</RootNamespace>
     <ProjectGuid>{FB037640-0591-4DF4-A331-0BEFE50A200B}</ProjectGuid>
-    <NugetTargetMoniker>.NETStandard,Version=v1.3</NugetTargetMoniker>
-  </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
+    <TestRuntime>true</TestRuntime>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ILGenerator\DeclareLocalTests.cs" />
@@ -21,6 +10,7 @@
     <Compile Include="ILGenerator\Emit1Tests.cs" />
     <Compile Include="ILGenerator\Emit2Tests.cs" />
     <Compile Include="ILGenerator\Emit3Tests.cs" />
+    <Compile Include="ILGenerator\Emit4Tests.cs" />
     <Compile Include="ILGenerator\EmitWriteLineTests.cs" />
     <Compile Include="ILGenerator\ExceptionEmitTests.cs" />
     <Compile Include="ILGenerator\ILOffsetTests.cs" />
@@ -44,5 +34,4 @@
     <Compile Include="CustomAttributeBuilderTests.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

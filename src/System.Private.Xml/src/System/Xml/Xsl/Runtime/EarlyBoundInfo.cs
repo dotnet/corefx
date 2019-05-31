@@ -38,7 +38,7 @@ namespace System.Xml.Xsl.Runtime
         /// <summary>
         /// Create an instance of the early bound object.
         /// </summary>
-        public object CreateObject() { return _constrInfo.Invoke(new object[] { }); }
+        public object CreateObject() { return _constrInfo.Invoke(Array.Empty<object>()); }
 
         /// <summary>
         /// Override Equals method so that EarlyBoundInfo to implement value comparison.
@@ -53,7 +53,7 @@ namespace System.Xml.Xsl.Runtime
         }
 
         /// <summary>
-        /// Override GetHashCode since Equals is overriden.
+        /// Override GetHashCode since Equals is overridden.
         /// </summary>
         public override int GetHashCode()
         {

@@ -73,6 +73,17 @@ namespace System.Collections.Tests
 
         protected virtual bool IList_NonGeneric_RemoveNonExistent_Throws => false;
 
+        /// <summary>
+        /// When calling Current of the enumerator after the end of the list and list is extended by new items.
+        /// Tests are included to cover two behavioral scenarios:
+        ///   - Throwing an InvalidOperationException
+        ///   - Returning an undefined value.
+        /// 
+        /// If this property is set to true, the tests ensure that the exception is thrown. The default value is
+        /// the same as Enumerator_Current_UndefinedOperation_Throws.
+        /// </summary>
+        protected virtual bool IList_CurrentAfterAdd_Throws => Enumerator_Current_UndefinedOperation_Throws;
+
         #endregion
 
         #region ICollection Helper Methods
@@ -84,9 +95,9 @@ namespace System.Collections.Tests
         /// <summary>
         /// Returns a set of ModifyEnumerable delegates that modify the enumerable passed to them.
         /// </summary>
-        protected override IEnumerable<ModifyEnumerable> ModifyEnumerables
+        protected override IEnumerable<ModifyEnumerable> GetModifyEnumerables(ModifyOperation operations)
         {
-            get
+            if ((operations & ModifyOperation.Add) == ModifyOperation.Add)
             {
                 yield return (IEnumerable enumerable) =>
                 {
@@ -98,6 +109,9 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
+            }
+            if ((operations & ModifyOperation.Insert) == ModifyOperation.Insert)
+            {
                 yield return (IEnumerable enumerable) =>
                 {
                     IList casted = ((IList)enumerable);
@@ -108,6 +122,7 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
+
                 yield return (IEnumerable enumerable) =>
                 {
                     IList casted = ((IList)enumerable);
@@ -118,7 +133,9 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
-
+            }
+            if ((operations & ModifyOperation.Remove) == ModifyOperation.Remove)
+            {
                 yield return (IEnumerable enumerable) =>
                 {
                     IList casted = ((IList)enumerable);
@@ -139,6 +156,9 @@ namespace System.Collections.Tests
                     }
                     return false;
                 };
+            }
+            if ((operations & ModifyOperation.Clear) == ModifyOperation.Clear)
+            {
                 yield return (IEnumerable enumerable) =>
                 {
                     IList casted = ((IList)enumerable);
@@ -1045,6 +1065,48 @@ namespace System.Collections.Tests
                     list.RemoveAt(0);
                     Assert.Equal(count - index - 1, list.Count);
                 });
+            }
+        }
+
+        #endregion
+
+        #region Enumerator.Current
+
+        // Test Enumerator.Current at end after new elements was added
+        [Theory]
+        [MemberData(nameof(ValidCollectionSizes))]
+        public void IList_NonGeneric_CurrentAtEnd_AfterAdd(int count)
+        {
+            if (!IsReadOnly && !ExpectedFixedSize)
+            {
+                IList collection = NonGenericIListFactory(count);
+                IEnumerator enumerator = collection.GetEnumerator();
+                while (enumerator.MoveNext()) ; // Go to end of enumerator
+
+                if (Enumerator_Current_UndefinedOperation_Throws)
+                {
+                    Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+                }
+                else
+                {
+                    var current = enumerator.Current; // Enumerator.Current should not fail
+                }
+
+                // Test after add
+                int seed = 523561;
+                for (int i = 0; i < 3; i++)
+                {
+                    collection.Add(CreateT(seed++));
+
+                    if (IList_CurrentAfterAdd_Throws)
+                    {
+                        Assert.Throws<InvalidOperationException>(() => enumerator.Current); // Enumerator.Current should fail
+                    }
+                    else
+                    {
+                        var current = enumerator.Current; // Enumerator.Current should not fail
+                    }
+                }
             }
         }
 

@@ -17,7 +17,7 @@ namespace System.Xml
     [DebuggerDisplay("{debuggerDisplayProxy}")]
     public abstract partial class XmlReader : IDisposable
     {
-        static private uint s_isTextualNodeBitmap = 0x6018; // 00 0110 0000 0001 1000
+        private static uint s_isTextualNodeBitmap = 0x6018; // 00 0110 0000 0001 1000
         // 0 None, 
         // 0 Element,
         // 0 Attribute,
@@ -37,7 +37,7 @@ namespace System.Xml
         // 0 EndEntity,
         // 0 XmlDeclaration
 
-        static private uint s_canReadContentAsBitmap = 0x1E1BC; // 01 1110 0001 1011 1100
+        private static uint s_canReadContentAsBitmap = 0x1E1BC; // 01 1110 0001 1011 1100
         // 0 None, 
         // 0 Element,
         // 1 Attribute,
@@ -57,7 +57,7 @@ namespace System.Xml
         // 1 EndEntity,
         // 0 XmlDeclaration
 
-        static private uint s_hasValueBitmap = 0x2659C; // 10 0110 0101 1001 1100
+        private static uint s_hasValueBitmap = 0x2659C; // 10 0110 0101 1001 1100
         // 0 None, 
         // 0 Element,
         // 1 Attribute,
@@ -1428,7 +1428,7 @@ namespace System.Xml
             }
         }
 
-        static internal bool IsTextualNode(XmlNodeType nodeType)
+        internal static bool IsTextualNode(XmlNodeType nodeType)
         {
 #if DEBUG
             // This code verifies IsTextualNodeBitmap mapping of XmlNodeType to a bool specifying
@@ -1455,7 +1455,7 @@ namespace System.Xml
             return 0 != (s_isTextualNodeBitmap & (1 << (int)nodeType));
         }
 
-        static internal bool CanReadContentAs(XmlNodeType nodeType)
+        internal static bool CanReadContentAs(XmlNodeType nodeType)
         {
 #if DEBUG
             // This code verifies IsTextualNodeBitmap mapping of XmlNodeType to a bool specifying
@@ -1482,7 +1482,7 @@ namespace System.Xml
             return 0 != (s_canReadContentAsBitmap & (1 << (int)nodeType));
         }
 
-        static internal bool HasValueInternal(XmlNodeType nodeType)
+        internal static bool HasValueInternal(XmlNodeType nodeType)
         {
 #if DEBUG
             // This code verifies HasValueBitmap mapping of XmlNodeType to a bool specifying
@@ -1572,14 +1572,14 @@ namespace System.Xml
             return CanReadContentAs(this.NodeType);
         }
 
-        static internal Exception CreateReadContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
+        internal static Exception CreateReadContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
         {
-            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadContentAs, new string[] { methodName, nodeType.ToString() }), lineInfo));
+            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadContentAs, methodName, nodeType), lineInfo));
         }
 
-        static internal Exception CreateReadElementContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
+        internal static Exception CreateReadElementContentAsException(string methodName, XmlNodeType nodeType, IXmlLineInfo lineInfo)
         {
-            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadElementContentAs, new string[] { methodName, nodeType.ToString() }), lineInfo));
+            return new InvalidOperationException(AddLineInfo(SR.Format(SR.Xml_InvalidReadElementContentAs, methodName, nodeType), lineInfo));
         }
 
         private static string AddLineInfo(string message, IXmlLineInfo lineInfo)
@@ -1709,12 +1709,6 @@ namespace System.Xml
             }
         }
 
-        internal static Encoding GetEncoding(XmlReader reader)
-        {
-            XmlTextReaderImpl tri = GetXmlTextReaderImpl(reader);
-            return tri != null ? tri.Encoding : null;
-        }
-
         internal static ConformanceLevel GetV1ConformanceLevel(XmlReader reader)
         {
             XmlTextReaderImpl tri = GetXmlTextReaderImpl(reader);
@@ -1768,7 +1762,7 @@ namespace System.Xml
         }
 
         // Creates an XmlReader according to the settings and parser context for parsing XML from the given Uri.
-        public static XmlReader Create(String inputUri, XmlReaderSettings settings, XmlParserContext inputContext)
+        public static XmlReader Create(string inputUri, XmlReaderSettings settings, XmlParserContext inputContext)
         {
             if (settings == null)
             {
@@ -1790,7 +1784,7 @@ namespace System.Xml
         }
 
         // Creates an XmlReader according to the settings and base Uri for parsing XML from the given stream.
-        public static XmlReader Create(Stream input, XmlReaderSettings settings, String baseUri)
+        public static XmlReader Create(Stream input, XmlReaderSettings settings, string baseUri)
         {
             if (settings == null)
             {
@@ -1822,7 +1816,7 @@ namespace System.Xml
         }
 
         // Creates an XmlReader according to the settings and baseUri for parsing XML from the given TextReader.
-        public static XmlReader Create(TextReader input, XmlReaderSettings settings, String baseUri)
+        public static XmlReader Create(TextReader input, XmlReaderSettings settings, string baseUri)
         {
             if (settings == null)
             {
@@ -1851,12 +1845,15 @@ namespace System.Xml
             return settings.CreateReader(reader);
         }
 
-		// TODO: Validate if this comment is still valid
         // !!!!!!
         // NOTE: This method is called via reflection from System.Data.dll and from Analysis Services in Yukon. 
         // Do not change its signature without notifying the appropriate teams!
         // !!!!!!
+#if UAPAOT
+        public static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
+#else
         internal static XmlReader CreateSqlReader(Stream input, XmlReaderSettings settings, XmlParserContext inputContext)
+#endif
         {
             if (input == null)
             {
@@ -1878,7 +1875,7 @@ namespace System.Xml
             {
                 read = input.Read(bytes, byteCount, bytes.Length - byteCount);
                 byteCount += read;
-            } while (read > 0 && byteCount < 2);
+            } while (read > 0 && byteCount< 2);
 
             // create text or binary XML reader depenting on the stream first 2 bytes
             if (byteCount >= 2 && (bytes[0] == 0xdf && bytes[1] == 0xff))

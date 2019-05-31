@@ -24,7 +24,7 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q1 = from x1 in new[] { "AAA", String.Empty, "q", "C", "#", "!@#$%^", "0987654321", "Calling Twice" }
+            var q1 = from x1 in new[] { "AAA", string.Empty, "q", "C", "#", "!@#$%^", "0987654321", "Calling Twice" }
                      select x1;
             var q2 = from x2 in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS" }
                      select x2;
@@ -78,6 +78,15 @@ namespace System.Linq.Tests
             Assert.True(FlipIsCollection(first).SequenceEqual(second, new AnagramEqualityComparer()));
             Assert.True(first.SequenceEqual(FlipIsCollection(second), new AnagramEqualityComparer()));
             Assert.True(FlipIsCollection(first).SequenceEqual(FlipIsCollection(second), new AnagramEqualityComparer()));
+        }
+
+        [Fact]
+        public void RunOnce()
+        {
+            string[] first = { "Bob", "Tim", "Chris" };
+            string[] second = { "Bbo", "mTi", "rishC" };
+
+            Assert.True(first.RunOnce().SequenceEqual(second.RunOnce(), new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -195,7 +204,7 @@ namespace System.Linq.Tests
             int[] first = null;
             int[] second = { };
             
-            Assert.Throws<ArgumentNullException>("first", () => first.SequenceEqual(second));
+            AssertExtensions.Throws<ArgumentNullException>("first", () => first.SequenceEqual(second));
         }
 
         [Fact]
@@ -204,7 +213,7 @@ namespace System.Linq.Tests
             int[] first = { };
             int[] second = null;
             
-            Assert.Throws<ArgumentNullException>("second", () => first.SequenceEqual(second));
+            AssertExtensions.Throws<ArgumentNullException>("second", () => first.SequenceEqual(second));
         }
     }
 }

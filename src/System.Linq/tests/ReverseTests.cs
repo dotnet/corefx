@@ -12,12 +12,12 @@ namespace System.Linq.Tests
         [Fact]
         public void InvalidArguments()
         {
-            Assert.Throws<ArgumentNullException>("source", () => Enumerable.Reverse<string>(null));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => Enumerable.Reverse<string>(null));
         }
-        
+
         [Theory]
         [MemberData(nameof(ReverseData))]
-        public void Reverse<T>(IEnumerable<T> source, T dummy)
+        public void Reverse<T>(IEnumerable<T> source)
         {
             T[] expected = source.ToArray();
             Array.Reverse(expected);
@@ -35,7 +35,7 @@ namespace System.Linq.Tests
             for (int i = 0; i < expected.Length; i++)
             {
                 Assert.Equal(expected[i], actual.ElementAt(i));
-                
+
                 Assert.Equal(expected.Skip(i), actual.Skip(i));
                 Assert.Equal(expected.Take(i), actual.Take(i));
             }
@@ -49,6 +49,17 @@ namespace System.Linq.Tests
             Assert.Equal(actual, actual); // Repeat the enumeration against itself.
         }
 
+        [Theory, MemberData(nameof(ReverseData))]
+        public void RunOnce<T>(IEnumerable<T> source)
+        {
+            T[] expected = source.ToArray();
+            Array.Reverse(expected);
+
+            IEnumerable<T> actual = source.RunOnce().Reverse();
+
+            Assert.Equal(expected, actual);
+        }
+
         public static IEnumerable<object[]> ReverseData()
         {
             var integers = new[]
@@ -59,11 +70,10 @@ namespace System.Linq.Tests
                 new[] { -10, 0, 5, 0, 9, 100, 9 }, // Some repeating elements.
             };
             
-            // TODO: Remove workarounds when xUnit is updated to include xunit/xunit#965.
             return integers
-                .Select(collection => new object[] { collection, 0 })
+                .Select(collection => new object[] { collection })
                 .Concat(
-                    integers.Select(c => new object[] { c.Select(i => i.ToString()), string.Empty })
+                    integers.Select(c => new object[] { c.Select(i => i.ToString()) })
                 );
         }
 

@@ -4,13 +4,17 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRLIST : EXPR
+    internal sealed class ExprList : Expr
     {
-        public EXPR OptionalElement;
-        public EXPR GetOptionalElement() { return OptionalElement; }
-        public void SetOptionalElement(EXPR value) { OptionalElement = value; }
-        public EXPR OptionalNextListNode;
-        public EXPR GetOptionalNextListNode() { return OptionalNextListNode; }
-        public void SetOptionalNextListNode(EXPR value) { OptionalNextListNode = value; }
+        public ExprList(Expr optionalElement, Expr optionalNextListNode)
+            : base(ExpressionKind.List)
+        {
+            OptionalElement = optionalElement;
+            OptionalNextListNode = optionalNextListNode;
+        }
+
+        public Expr OptionalElement { get; set; }
+
+        public Expr OptionalNextListNode { get; set; }
     }
 }

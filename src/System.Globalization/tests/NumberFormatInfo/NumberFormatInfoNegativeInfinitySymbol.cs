@@ -12,13 +12,13 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> NegativeInfinitySymbol_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat };
-            yield return new object[] { new CultureInfo("fr-FR").NumberFormat };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat };
+            yield return new object[] { CultureInfo.GetCultureInfo("fr-FR").NumberFormat };
         }
 
         [Theory]
         [MemberData(nameof(NegativeInfinitySymbol_TestData))]
-        public void NegativeInfinitySymbol_Get(NumberFormatInfo format)
+        public void NegativeInfinitySymbol_Get_ReturnsExpected(NumberFormatInfo format)
         {
             Assert.Equal(float.NegativeInfinity.ToString(format), format.NegativeInfinitySymbol);
         }
@@ -27,7 +27,7 @@ namespace System.Globalization.Tests
         [InlineData("string")]
         [InlineData("   ")]
         [InlineData("")]
-        public void NegativeInfinitySymbol_Set(string newNegativeInfinitySymbol)
+        public void NegativeInfinitySymbol_Set_GetReturnsExpected(string newNegativeInfinitySymbol)
         {
             NumberFormatInfo format = new NumberFormatInfo();
             format.NegativeInfinitySymbol = newNegativeInfinitySymbol;
@@ -35,9 +35,15 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
-        public void NegativeInfinitySymbol_Set_Invalid()
+        public void NegativeInfinitySymbol_SetNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("NegativeInfinitySymbol", () => new NumberFormatInfo().NegativeInfinitySymbol = null);
+            var format = new NumberFormatInfo();
+            AssertExtensions.Throws<ArgumentNullException>("value", "NegativeInfinitySymbol", () => format.NegativeInfinitySymbol = null);
+        }
+
+        [Fact]
+        public void NegativeInfinitySymbol_SetReadOnly_ThrowsInvalidOperationException()
+        {
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.NegativeInfinitySymbol = "");
         }
     }

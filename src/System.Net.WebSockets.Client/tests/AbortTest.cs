@@ -18,7 +18,7 @@ namespace System.Net.WebSockets.Client.Tests
 
         [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(nameof(WebSocketsSupported)), MemberData(nameof(EchoServers))]
-        public void Abort_ConnectAndAbort_ThrowsWebSocketExceptionWithmessage(Uri server)
+        public async Task Abort_ConnectAndAbort_ThrowsWebSocketExceptionWithmessage(Uri server)
         {
             using (var cws = new ClientWebSocket())
             {
@@ -29,11 +29,14 @@ namespace System.Net.WebSockets.Client.Tests
 
                 Task t = cws.ConnectAsync(ub.Uri, cts.Token);
                 cws.Abort();
-                WebSocketException ex = Assert.Throws<WebSocketException>(() => t.GetAwaiter().GetResult());
+                WebSocketException ex = await Assert.ThrowsAsync<WebSocketException>(() => t);
 
                 Assert.Equal(ResourceHelper.GetExceptionMessage("net_webstatus_ConnectFailure"), ex.Message);
 
-                Assert.Equal(WebSocketError.Success, ex.WebSocketErrorCode);
+                if (PlatformDetection.IsNetCore) // bug fix in netcoreapp: https://github.com/dotnet/corefx/pull/35960
+                {
+                    Assert.Equal(WebSocketError.Faulted, ex.WebSocketErrorCode);
+                }
                 Assert.Equal(WebSocketState.Closed, cws.State);
             }
         }

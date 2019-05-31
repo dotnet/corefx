@@ -1,4 +1,4 @@
-// Licensed to the .NET Foundation under one or more agreements.
+﻿// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -74,10 +74,10 @@ namespace System.Net.Primitives.Unit.Tests
         }
 
         [Fact]
-        public void GetCookies_NonExistant_NoResults()
+        public void GetCookies_NonExistent_NoResults()
         {
             CookieContainer cc = CreateCount11Container();
-            Assert.Equal(0, cc.GetCookies(new Uri("http://non.existant.uri.com")).Count);
+            Assert.Equal(0, cc.GetCookies(new Uri("http://non.existent.uri.com")).Count);
         }
 
         public static IEnumerable<object[]> GetCookieHeaderData()
@@ -143,7 +143,9 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // RFC 2965
 
-            yield return new object[] { u,
+            yield return new object[]
+            {
+                u,
                 "name98=value98; port=\"80, 90\", name99=value99",
                 new Cookie[]
                 {
@@ -152,7 +154,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // RFC 2965 (no path)
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 uSecure,
                 "name98=value98; name98=value98; comment=comment; comment=comment2; commentURL=http://url.com; commentURL=commentURL2; discard; discard; domain=.uri.com; domain=domain2; max-age=400; max-age=400; path=/; path=path; port=\"80, 90, 443\"; port=port2; path=path; expires=Wed, 09 Jun 2021 10:18:14 GMT; expires=expires2; secure; secure; httponly; httponly; Version=100; Version=100, name99=value99",
                 new Cookie[]
@@ -162,7 +165,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Double entries
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u,
                 "name98=value98; commentURL=invalidurl",
                 new Cookie[]
@@ -171,7 +175,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore invalid comment url
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=value98; unknown1; unknown2=unknown",
                 new Cookie[]
@@ -180,7 +185,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore unknown tokens
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=value98; =; token=",
                 new Cookie[]
@@ -189,7 +195,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Ignore invalid tokens
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=\"value; domain=\".domain\"; max-age=\"400\"",
                 new Cookie[]
@@ -198,7 +205,8 @@ namespace System.Net.Primitives.Unit.Tests
                 }
             }; // Use escaped values (1)
 
-            yield return new object[] {
+            yield return new object[]
+            {
                 u6,
                 "name98=\"\"",
                 new Cookie[]
@@ -206,6 +214,136 @@ namespace System.Net.Primitives.Unit.Tests
                     new Cookie("name98", "\"\"")
                 }
             }; // Use escaped values (2)
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Normal case
+            
+            yield return new object[]
+            {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Normal case with secure URI
+            
+            yield return new object[]
+            {
+                u,
+                ",locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header at the beginning
+            
+            yield return new object[]
+            {
+                uSecure,
+                "          ,locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed of spaces at the beginning
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en,, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header in the middle
+            
+            yield return new object[]
+            {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46,       , country=US, _m_ask_fm_session=session1",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed of spaces in the middle
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header at the end
+            
+            yield return new object[]
+            {
+                u,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header composed of spaces at the end
+            
+            yield return new object[]
+            {
+                uSecure,
+                "locale=en, uuid=4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46, country=US, _m_ask_fm_session=session1,   ,",
+                new Cookie[]
+                {
+                    new Cookie("locale", "en"),
+                    new Cookie("uuid", "4b8b2dd7-d91a-49ee-80c6-8cb7df1fae46"),
+                    new Cookie("country", "US"),
+                    new Cookie("_m_ask_fm_session", "session1")
+                }
+            }; // Empty header followed by another empty header at the end
+
+            if (!PlatformDetection.IsFullFramework)
+            {
+                yield return new object[]
+                {
+                    uSecure,
+                    "hello world=value",
+                    new Cookie[]
+                    {
+                        new Cookie("hello world", "value"),
+                    }
+                }; // Name with space in it
+            }
         }
 
         [Theory]
@@ -251,7 +389,7 @@ namespace System.Net.Primitives.Unit.Tests
             container.Add(uri, cookie1);
             container.Add(uri, cookie2);
 
-            var cookies = container.GetCookies(uri);
+            CookieCollection cookies = container.GetCookies(uri);
             Assert.Equal(2, cookies.Count);
             Assert.Equal(OriginalDomain, cookies[CookieName1].Domain);
             Assert.Equal(OriginalDomain, cookies[CookieName2].Domain);
@@ -284,7 +422,7 @@ namespace System.Net.Primitives.Unit.Tests
             container.Add(new Uri(SchemePrefix + OriginalDomain), cookie1);
 
             var uri = new Uri(SchemePrefix + OriginalDomain);
-            var cookies = container.GetCookies(uri);
+            CookieCollection cookies = container.GetCookies(uri);
             Assert.Equal(1, cookies.Count);
             Assert.Equal(OriginalDomain, cookies[CookieName1].Domain);
 
@@ -317,7 +455,7 @@ namespace System.Net.Primitives.Unit.Tests
             container.Add(new Uri(SchemePrefix + OriginalDomain), cookie1);
 
             var uri = new Uri(SchemePrefix + OriginalDomain);
-            var cookies = container.GetCookies(uri);
+            CookieCollection cookies = container.GetCookies(uri);
             Assert.Equal(1, cookies.Count);
             Assert.Equal(OriginalDomainWithLeadingDot, cookies[CookieName1].Domain);
 
@@ -348,7 +486,7 @@ namespace System.Net.Primitives.Unit.Tests
         [Fact]
         public void Ctor_Capacity_Invalid()
         {
-            Assert.Throws<ArgumentException>(() => new CookieContainer(0)); // Capacity <= 0
+            AssertExtensions.Throws<ArgumentException>("Capacity", () => new CookieContainer(0)); // Capacity <= 0
         }
 
         [Fact]
@@ -406,7 +544,7 @@ namespace System.Net.Primitives.Unit.Tests
         }
 
         [Fact]
-        public async void Add_ReachedMaxCountWithExpiredCookies_Added()
+        public async Task Add_ReachedMaxCountWithExpiredCookies_Added()
         {
             Cookie c1 = new Cookie("name1", "value", "", ".domain1.com");
             Cookie c2 = new Cookie("name2", "value", "", ".domain2.com");
@@ -457,7 +595,7 @@ namespace System.Net.Primitives.Unit.Tests
         {
             CookieContainer cc = new CookieContainer();
             Assert.Throws<ArgumentNullException>(() => cc.Add((Cookie)null)); // Null cookie
-            Assert.Throws<ArgumentException>(() => cc.Add(new Cookie("name", "value", "", ""))); // Empty domain
+            AssertExtensions.Throws<ArgumentException>("cookie.Domain", () => cc.Add(new Cookie("name", "value", "", ""))); // Empty domain
 
             cc.MaxCookieSize = 1;
             Assert.Throws<CookieException>(() => cc.Add(new Cookie("name", "long-text", "", "contoso.com"))); // Value.Length > MaxCookieSize
@@ -487,11 +625,11 @@ namespace System.Net.Primitives.Unit.Tests
         [Fact]
         public void Ctor_CapacityPerDomainCapacityMaxCookieSize_Invalid()
         {
-            Assert.Throws<ArgumentException>(() => new CookieContainer(0, 10, 5)); // Capacity <= 0
+            AssertExtensions.Throws<ArgumentException>("Capacity", () => new CookieContainer(0, 10, 5)); // Capacity <= 0
             Assert.Throws<ArgumentOutOfRangeException>(() => new CookieContainer(5, 0, 5)); // Per domain capacity <= 0
             Assert.Throws<ArgumentOutOfRangeException>(() => new CookieContainer(5, 10, 5)); // Per domain capacity > Capacity
 
-            Assert.Throws<ArgumentException>(() => new CookieContainer(15, 10, 0)); // Max cookie size <= 0
+            AssertExtensions.Throws<ArgumentException>("MaxCookieSize", () => new CookieContainer(15, 10, 0)); // Max cookie size <= 0
         }
 
         [Fact]
@@ -518,7 +656,30 @@ namespace System.Net.Primitives.Unit.Tests
         }
 
         [Fact]
-        public async void GetCookies_RemovesExpired_Cookies()
+        public void GetCookies_DifferentPaths_ReturnsConsistentResults()
+        {
+            Cookie c1 = new Cookie("name1", "value", "/base", ".url.com");
+            Cookie c2 = new Cookie("name2", "value", "/base/url1", ".url.com");
+            Cookie c3 = new Cookie("name3", "value", "/base/url2", ".url.com");
+
+            CookieContainer cc1 = new CookieContainer();
+            cc1.Add(c1);
+            cc1.Add(c2);
+            cc1.Add(c3);
+
+            CookieCollection cc2 = cc1.GetCookies(new Uri("http://url.com/base/url1"));
+            Assert.Equal(2, cc2.Count);
+            Assert.Equal(c2, cc2[0]);
+            Assert.Equal(c1, cc2[1]);
+
+            CookieCollection cc3 = cc1.GetCookies(new Uri("http://url.com/base/url2"));
+            Assert.Equal(2, cc3.Count);
+            Assert.Equal(c3, cc3[0]);
+            Assert.Equal(c1, cc3[1]);
+        }
+
+        [Fact]
+        public async Task GetCookies_RemovesExpired_Cookies()
         {
             Cookie c1 = new Cookie("name1", "value", "", ".url1.com");
             Cookie c2 = new Cookie("name2", "value", "", ".url2.com");

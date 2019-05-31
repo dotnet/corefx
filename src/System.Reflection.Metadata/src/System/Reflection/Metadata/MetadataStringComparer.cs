@@ -21,7 +21,7 @@ namespace System.Reflection.Metadata
     /// A default-initialized instance is useless and behaves as a null reference.
     ///
     /// The code is optimized such that there is no additional overhead in
-    /// re-obtaining a a comparer over hoisting it in to a local.
+    /// re-obtaining a comparer over hoisting it in to a local.
     /// 
     /// That is to say that a construct like:
     ///
@@ -46,7 +46,7 @@ namespace System.Reflection.Metadata
     ///
     /// The choice between them is therefore one of style and not performance.
     /// </remarks>
-    public struct MetadataStringComparer
+    public readonly struct MetadataStringComparer
     {
         private readonly MetadataReader _reader;
 

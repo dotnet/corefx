@@ -48,19 +48,9 @@ namespace Internal.Cryptography.Pal
                 throw new CryptographicException(SR.Arg_EmptyOrNullString);
             }
 
-            string directoryName = GetDirectoryName(storeName);
+            Debug.Assert(!X509Store.DisallowedStoreName.Equals(storeName, StringComparison.OrdinalIgnoreCase));
 
-            if (s_userStoreRoot == null)
-            {
-                // Do this here instead of a static field initializer so that
-                // the static initializer isn't capable of throwing the "home directory not found"
-                // exception.
-                s_userStoreRoot = PersistedFiles.GetUserFeatureDirectory(
-                    X509Persistence.CryptographyFeatureName,
-                    X509Persistence.X509StoresSubFeatureName);
-            }
-
-            _storePath = Path.Combine(s_userStoreRoot, directoryName);
+            _storePath = GetStorePath(storeName);
 
             if (0 != (openFlags & OpenFlags.OpenExistingOnly))
             {
@@ -126,6 +116,22 @@ namespace Internal.Cryptography.Pal
                 throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
             }
 
+            try
+            {
+                AddCertToStore(certPal);
+            }
+            catch (CryptographicException)
+            {
+                throw;
+            }
+            catch (Exception e)
+            {
+                throw new CryptographicException(SR.Cryptography_X509_StoreAddFailure, e);
+            }
+        }
+
+        private void AddCertToStore(ICertificatePal certPal)
+        {
             // This may well be the first time that we've added something to this store.
             Directory.CreateDirectory(_storePath);
 
@@ -195,6 +201,9 @@ namespace Internal.Cryptography.Pal
 
         public void Remove(ICertificatePal certPal)
         {
+            if (!Directory.Exists(_storePath))
+                return;
+
             OpenSslX509CertificateReader cert = (OpenSslX509CertificateReader)certPal;
 
             using (X509Certificate2 copy = new X509Certificate2(cert.DuplicateHandles()))
@@ -281,6 +290,23 @@ namespace Internal.Cryptography.Pal
             }
 
             throw new CryptographicException(SR.Cryptography_X509_StoreNoFileAvailable);
+        }
+
+        internal static string GetStorePath(string storeName)
+        {
+            string directoryName = GetDirectoryName(storeName);
+
+            if (s_userStoreRoot == null)
+            {
+                // Do this here instead of a static field initializer so that
+                // the static initializer isn't capable of throwing the "home directory not found"
+                // exception.
+                s_userStoreRoot = PersistedFiles.GetUserFeatureDirectory(
+                    X509Persistence.CryptographyFeatureName,
+                    X509Persistence.X509StoresSubFeatureName);
+            }
+
+            return Path.Combine(s_userStoreRoot, directoryName);
         }
 
         private static string GetDirectoryName(string storeName)
@@ -379,10 +405,87 @@ namespace Internal.Cryptography.Pal
                         new IOException(error.GetErrorMessage(), error.RawErrno));
                 }
 
-                Debug.Assert(Interop.Sys.FStat(stream.SafeFileHandle, out stat) == 0);
-                Debug.Assert((stat.Mode & (int)requiredPermissions) == (int)requiredPermissions);
-                Debug.Assert((stat.Mode & (int)forbiddenPermissions) == 0);
+                // Verify the chmod applied.
+                if (Interop.Sys.FStat(stream.SafeFileHandle, out stat) != 0)
+                {
+                    Interop.ErrorInfo error = Interop.Sys.GetLastErrorInfo();
+                    throw new CryptographicException(
+                        SR.Cryptography_FileStatusError,
+                        new IOException(error.GetErrorMessage(), error.RawErrno));
+                }
+
+                if ((stat.Mode & (int)requiredPermissions) != (int)requiredPermissions ||
+                    (stat.Mode & (int)forbiddenPermissions) != 0)
+                {
+                    throw new CryptographicException(SR.Format(SR.Cryptography_InvalidFilePermissions, stream.Name));
+                }
             }
+        }
+
+        internal sealed class UnsupportedDisallowedStore : IStorePal
+        {
+            private readonly bool _readOnly;
+
+            internal UnsupportedDisallowedStore(OpenFlags openFlags)
+            {
+                // ReadOnly is 0x00, so it is implicit unless either ReadWrite or MaxAllowed
+                // was requested.
+                OpenFlags writeFlags = openFlags & (OpenFlags.ReadWrite | OpenFlags.MaxAllowed);
+
+                if (writeFlags == OpenFlags.ReadOnly)
+                {
+                    _readOnly = true;
+                }
+
+                string storePath = GetStorePath(X509Store.DisallowedStoreName);
+
+                try
+                {
+                    if (Directory.Exists(storePath))
+                    {
+                        // If it has no files, leave it alone.
+                        foreach (string filePath in Directory.EnumerateFiles(storePath))
+                        {
+                            string msg = SR.Format(SR.Cryptography_Unix_X509_DisallowedStoreNotEmpty, storePath);
+                            throw new CryptographicException(msg, new PlatformNotSupportedException(msg));
+                        }
+                    }
+                }
+                catch (IOException)
+                {
+                    // Suppress the exception, treat the store as empty.
+                }
+            }
+
+            public void Dispose()
+            {
+                // Nothing to do.
+            }
+
+            public void CloneTo(X509Certificate2Collection collection)
+            {
+                // Never show any data.
+            }
+
+            public void Add(ICertificatePal cert)
+            {
+                if (_readOnly)
+                {
+                    throw new CryptographicException(SR.Cryptography_X509_StoreReadOnly);
+                }
+
+                throw new CryptographicException(
+                    SR.Cryptography_Unix_X509_NoDisallowedStore,
+                    new PlatformNotSupportedException(SR.Cryptography_Unix_X509_NoDisallowedStore));
+            }
+
+            public void Remove(ICertificatePal cert)
+            {
+                // Remove never throws if it does no measurable work.
+                // Since CloneTo always says the store is empty, no measurable work is ever done.
+            }
+
+            SafeHandle IStorePal.SafeHandle { get; } = null;
         }
     }
 }

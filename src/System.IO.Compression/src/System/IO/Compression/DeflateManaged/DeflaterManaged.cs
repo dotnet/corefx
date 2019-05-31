@@ -2,50 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-//
-//  zlib.h -- interface of the 'zlib' general purpose compression library
-//  version 1.2.1, November 17th, 2003
-//
-//  Copyright (C) 1995-2003 Jean-loup Gailly and Mark Adler
-//
-//  This software is provided 'as-is', without any express or implied
-//  warranty.  In no event will the authors be held liable for any damages
-//  arising from the use of this software.
-//
-//  Permission is granted to anyone to use this software for any purpose,
-//  including commercial applications, and to alter it and redistribute it
-//  freely, subject to the following restrictions:
-//
-//  1. The origin of this software must not be misrepresented; you must not
-//     claim that you wrote the original software. If you use this software
-//     in a product, an acknowledgment in the product documentation would be
-//     appreciated but is not required.
-//  2. Altered source versions must be plainly marked as such, and must not be
-//     misrepresented as being the original software.
-//  3. This notice may not be removed or altered from any source distribution.
-//
-//
-
 // Compression engine
 
-using System;
 using System.Diagnostics;
 
 namespace System.IO.Compression
 {
-    internal class DeflaterManaged : IDisposable
+    internal sealed class DeflaterManaged : IDisposable
     {
         private const int MinBlockSize = 256;
         private const int MaxHeaderFooterGoo = 120;
         private const int CleanCopySize = DeflateManagedStream.DefaultBufferSize - MaxHeaderFooterGoo;
         private const double BadCompressionThreshold = 1.0;
 
-        private FastEncoder _deflateEncoder;
-        private CopyEncoder _copyEncoder;
+        private readonly FastEncoder _deflateEncoder;
+        private readonly CopyEncoder _copyEncoder;
 
-        private DeflateInput _input;
-        private OutputBuffer _output;
+        private readonly DeflateInput _input;
+        private readonly OutputBuffer _output;
         private DeflaterState _processingState;
         private DeflateInput _inputFromHistory;
 
@@ -59,13 +33,12 @@ namespace System.IO.Compression
             _processingState = DeflaterState.NotStarted;
         }
 
-        internal bool NeedsInput()
-        {
-            return _input.Count == 0 && _deflateEncoder.BytesInHistory == 0;
-        }
+        internal bool NeedsInput() => _input.Count == 0 && _deflateEncoder.BytesInHistory == 0;
 
-        // Sets the input to compress. The only buffer copy occurs when the input is copied
-        // to the FastEncoderWindow
+        /// <summary>
+        /// Sets the input to compress. The only buffer copy occurs when the input is copied
+        /// to the FastEncoderWindow.
+        /// </summary>
         internal void SetInput(byte[] inputBuffer, int startIndex, int count)
         {
             Debug.Assert(_input.Count == 0, "We have something left in previous input!");
@@ -77,7 +50,7 @@ namespace System.IO.Compression
             if (count > 0 && count < MinBlockSize)
             {
                 // user is writing small buffers. If buffer size is below MinBlockSize, we
-                // need to switch to a small data mode, to avoid block headers and footers 
+                // need to switch to a small data mode, to avoid block headers and footers
                 // dominating the output.
                 switch (_processingState)
                 {
@@ -86,6 +59,7 @@ namespace System.IO.Compression
                         // clean states, needs a block header first
                         _processingState = DeflaterState.StartingSmallData;
                         break;
+
                     case DeflaterState.CompressThenCheck:
                         // already has correct block header
                         _processingState = DeflaterState.HandlingSmallData;
@@ -105,7 +79,7 @@ namespace System.IO.Compression
             {
                 case DeflaterState.NotStarted:
                     {
-                        // first call. Try to compress but if we get bad compression ratio, switch to uncompressed blocks. 
+                        // first call. Try to compress but if we get bad compression ratio, switch to uncompressed blocks.
                         Debug.Assert(_deflateEncoder.BytesInHistory == 0, "have leftover bytes in window");
 
                         // save these in case we need to switch to uncompressed format
@@ -120,7 +94,7 @@ namespace System.IO.Compression
                             // we're expanding; restore state and switch to uncompressed
                             _input.RestoreState(initialInputState);
                             _output.RestoreState(initialOutputState);
-                            _copyEncoder.GetBlock(_input, _output, false);
+                            _copyEncoder.GetBlock(_input, _output, isFinal: false);
                             FlushInputWindows();
                             _processingState = DeflaterState.CheckingForIncompressible;
                         }
@@ -134,7 +108,7 @@ namespace System.IO.Compression
                 case DeflaterState.CompressThenCheck:
                     {
                         // continue assuming data is compressible. If we reach data that indicates otherwise
-                        // finish off remaining data in history and decide whether to compress on a 
+                        // finish off remaining data in history and decide whether to compress on a
                         // block-by-block basis
                         _deflateEncoder.GetCompressedData(_input, _output);
 
@@ -159,7 +133,7 @@ namespace System.IO.Compression
                         // clear out data from history, but add them as uncompressed blocks
                         if (_inputFromHistory.Count > 0)
                         {
-                            _copyEncoder.GetBlock(_inputFromHistory, _output, false);
+                            _copyEncoder.GetBlock(_inputFromHistory, _output, isFinal: false);
                         }
 
                         if (_inputFromHistory.Count == 0)
@@ -188,7 +162,7 @@ namespace System.IO.Compression
                             // we're expanding; restore state and switch to uncompressed
                             _input.RestoreState(initialInputState);
                             _output.RestoreState(initialOutputState);
-                            _copyEncoder.GetBlock(_input, _output, false);
+                            _copyEncoder.GetBlock(_input, _output, isFinal: false);
                             FlushInputWindows();
                         }
 
@@ -197,8 +171,8 @@ namespace System.IO.Compression
 
                 case DeflaterState.StartingSmallData:
                     {
-                        // add compressed header and data, but not footer. Subsequent calls will keep 
-                        // adding compressed data (no header and no footer). We're doing this to 
+                        // add compressed header and data, but not footer. Subsequent calls will keep
+                        // adding compressed data (no header and no footer). We're doing this to
                         // avoid overhead of header and footer size relative to compressed payload.
                         _deflateEncoder.GetBlockHeader(_output);
 
@@ -220,12 +194,13 @@ namespace System.IO.Compression
         internal bool Finish(byte[] outputBuffer, out int bytesRead)
         {
             Debug.Assert(outputBuffer != null, "Can't pass in a null output buffer!");
-            Debug.Assert(_processingState == DeflaterState.NotStarted ||
-                            _processingState == DeflaterState.CheckingForIncompressible ||
-                            _processingState == DeflaterState.HandlingSmallData ||
-                            _processingState == DeflaterState.CompressThenCheck ||
-                            _processingState == DeflaterState.SlowDownForIncompressible1,
-                            "got unexpected processing state = " + _processingState);
+            Debug.Assert(
+                _processingState == DeflaterState.NotStarted ||
+                _processingState == DeflaterState.CheckingForIncompressible ||
+                _processingState == DeflaterState.HandlingSmallData ||
+                _processingState == DeflaterState.CompressThenCheck ||
+                _processingState == DeflaterState.SlowDownForIncompressible1,
+                $"Got unexpected processing state = {_processingState}");
 
             Debug.Assert(NeedsInput());
 
@@ -239,8 +214,8 @@ namespace System.IO.Compression
             _output.UpdateBuffer(outputBuffer);
 
             if (_processingState == DeflaterState.CompressThenCheck ||
-                        _processingState == DeflaterState.HandlingSmallData ||
-                        _processingState == DeflaterState.SlowDownForIncompressible1)
+                _processingState == DeflaterState.HandlingSmallData ||
+                _processingState == DeflaterState.SlowDownForIncompressible1)
             {
                 // need to finish off block
                 _deflateEncoder.GetBlockFooter(_output);
@@ -252,32 +227,22 @@ namespace System.IO.Compression
             return true;
         }
 
-        // Is compression ratio under threshold?
-        private bool UseCompressed(double ratio)
-        {
-            return (ratio <= BadCompressionThreshold);
-        }
+        private bool UseCompressed(double ratio) => ratio <= BadCompressionThreshold;
 
-        private void FlushInputWindows()
-        {
-            _deflateEncoder.FlushInput();
-        }
+        private void FlushInputWindows() => _deflateEncoder.FlushInput();
 
-        private void WriteFinal()
-        {
-            _copyEncoder.GetBlock(null, _output, true);
-        }
+        private void WriteFinal() => _copyEncoder.GetBlock(input: null, output: _output, isFinal: true);
 
         // These states allow us to assume that data is compressible and keep compression ratios at least
         // as good as historical values, but switch to different handling if that approach may increase the
         // data. If we detect we're getting a bad compression ratio, we switch to CheckingForIncompressible
-        // state and decide to compress on a block by block basis. 
+        // state and decide to compress on a block by block basis.
         //
-        // If we're getting small data buffers, we want to avoid overhead of excessive header and footer 
+        // If we're getting small data buffers, we want to avoid overhead of excessive header and footer
         // info, so we add one header and keep adding blocks as compressed. This means that if the user uses
         // small buffers, they won't get the "don't increase size" improvements.
         //
-        // An earlier iteration of this fix handled that data separately by buffering this data until it 
+        // An earlier iteration of this fix handled that data separately by buffering this data until it
         // reached a reasonable size, but given that Flush is not implemented on DeflateManagedStream, this meant
         // data could be flushed only on Dispose. In the future, it would be reasonable to revisit this, in
         // case this isn't breaking.
@@ -297,7 +262,7 @@ namespace System.IO.Compression
             SlowDownForIncompressible2,
             StartingSmallData,
 
-            // stable state: may transition to CheckingForIncompressible (via transient states) if it 
+            // stable state: may transition to CheckingForIncompressible (via transient states) if it
             // appears we're expanding data
             CompressThenCheck,
 
@@ -306,8 +271,6 @@ namespace System.IO.Compression
             HandlingSmallData
         }
 
-        internal void Dispose() { }
-        internal void Dispose(bool disposing) { }
-        void IDisposable.Dispose() { }
-    }  // internal class DeflaterManaged
-}  // namespace System.IO.Compression
+        public void Dispose() { }
+    }
+}

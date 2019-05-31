@@ -109,7 +109,7 @@ namespace System.Security.Cryptography.X509Certificates
         {
             lock (_syncRoot)
             {
-                if (certificate == null)
+                if (certificate == null || certificate.Pal == null)
                     throw new ArgumentException(SR.Cryptography_InvalidContextHandle, nameof(certificate));
 
                 Reset();
@@ -118,9 +118,9 @@ namespace System.Security.Cryptography.X509Certificates
                 _pal = ChainPal.BuildChain(
                     _useMachineContext,
                     certificate.Pal,
-                    chainPolicy.ExtraStore,
-                    chainPolicy.ApplicationPolicy,
-                    chainPolicy.CertificatePolicy,
+                    chainPolicy._extraStore,
+                    chainPolicy._applicationPolicy,
+                    chainPolicy._certificatePolicy,
                     chainPolicy.RevocationMode,
                     chainPolicy.RevocationFlag,
                     chainPolicy.VerificationTime,

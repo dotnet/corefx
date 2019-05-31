@@ -56,7 +56,7 @@ namespace System.Net.Http.Headers
             {
                 return ((int)_delta.Value.TotalSeconds).ToString(NumberFormatInfo.InvariantInfo);
             }
-            return HttpRuleParser.DateToString(_date.Value);
+            return HttpDateParser.DateToString(_date.Value);
         }
 
         public override bool Equals(object obj)
@@ -148,14 +148,14 @@ namespace System.Net.Http.Headers
                     return 0;
                 }
 
-                if (!HeaderUtilities.TryParseInt32(input.Substring(deltaStartIndex, deltaLength), out deltaSeconds))
+                if (!HeaderUtilities.TryParseInt32(input, deltaStartIndex, deltaLength, out deltaSeconds))
                 {
                     return 0; // int.TryParse() may return 'false' if the value has 10 digits and is > Int32.MaxValue.
                 }
             }
             else
             {
-                if (!HttpRuleParser.TryStringToDate(input.Substring(current), out date))
+                if (!HttpDateParser.TryStringToDate(input.AsSpan(current), out date))
                 {
                     return 0;
                 }

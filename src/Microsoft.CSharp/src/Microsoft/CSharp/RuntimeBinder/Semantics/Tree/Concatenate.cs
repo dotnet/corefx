@@ -2,15 +2,37 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using Microsoft.CSharp.RuntimeBinder.Syntax;
+
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRCONCAT : EXPR
+    internal sealed class ExprConcat : ExprWithType
     {
-        public EXPR FirstArgument;
-        public EXPR GetFirstArgument() { return FirstArgument; }
-        public void SetFirstArgument(EXPR value) { FirstArgument = value; }
-        public EXPR SecondArgument;
-        public EXPR GetSecondArgument() { return SecondArgument; }
-        public void SetSecondArgument(EXPR value) { SecondArgument = value; }
+        public ExprConcat(Expr first, Expr second)
+            : base(ExpressionKind.Concat, TypeFromOperands(first, second))
+        {
+            Debug.Assert(first?.Type != null);
+            Debug.Assert(second?.Type != null);
+            Debug.Assert(first.Type.IsPredefType(PredefinedType.PT_STRING) || second.Type.IsPredefType(PredefinedType.PT_STRING));
+            FirstArgument = first;
+            SecondArgument = second;
+        }
+
+        private static CType TypeFromOperands(Expr first, Expr second)
+        {
+            CType type = first.Type;
+            if (type.IsPredefType(PredefinedType.PT_STRING))
+            {
+                return type;
+            }
+
+            Debug.Assert(second.Type.IsPredefType(PredefinedType.PT_STRING));
+            return second.Type;
+        }
+
+        public Expr FirstArgument { get; set; }
+
+        public Expr SecondArgument { get; set; }
     }
 }

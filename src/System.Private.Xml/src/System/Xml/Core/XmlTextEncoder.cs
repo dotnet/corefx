@@ -93,7 +93,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    return String.Empty;
+                    return string.Empty;
                 }
             }
         }
@@ -110,7 +110,6 @@ namespace System.Xml
             _textWriter.Write(lowChar);
         }
 
-        [System.Security.SecurityCritical]
         internal void Write(char[] array, int offset, int count)
         {
             if (null == array)
@@ -254,7 +253,6 @@ namespace System.Xml
             _textWriter.Write(';');
         }
 
-        [System.Security.SecurityCritical]
         internal void Write(string text)
         {
             if (text == null)
@@ -272,7 +270,7 @@ namespace System.Xml
             int i = 0;
             int startPos = 0;
             char ch = (char)0;
-            for (; ;)
+            for (;;)
             {
                 unsafe
                 {
@@ -308,7 +306,7 @@ namespace System.Xml
             }
 
             char[] helperBuffer = new char[256];
-            for (; ;)
+            for (;;)
             {
                 if (startPos < i)
                 {
@@ -399,7 +397,6 @@ namespace System.Xml
             }
         }
 
-        [System.Security.SecurityCritical]
         internal void WriteRawWithSurrogateChecking(string text)
         {
             if (text == null)
@@ -415,7 +412,7 @@ namespace System.Xml
             int i = 0;
             char ch = (char)0;
 
-            for (; ;)
+            for (;;)
             {
                 unsafe
                 {
@@ -457,15 +454,6 @@ namespace System.Xml
 
             _textWriter.Write(text);
             return;
-        }
-
-        internal void WriteRaw(string value)
-        {
-            if (_cacheAttrValue)
-            {
-                _attrValue.Append(value);
-            }
-            _textWriter.Write(value);
         }
 
         internal void WriteRaw(char[] array, int offset, int count)
@@ -525,10 +513,6 @@ namespace System.Xml
                 _attrValue.Append(';');
             }
             WriteEntityRefImpl(name);
-        }
-
-        internal void Flush()
-        {
         }
 
         //

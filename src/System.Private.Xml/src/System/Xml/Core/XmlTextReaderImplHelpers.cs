@@ -166,7 +166,6 @@ namespace System.Xml
         //
         internal partial class DtdParserProxy : IDtdParserAdapterV1
         {
-
             // Fields
             private XmlTextReaderImpl _reader;
 
@@ -696,7 +695,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    Debug.Assert(false, "We should never get to this point.");
+                    Debug.Fail("We should never get to this point.");
                     // 'other' is null, 'this' is not null. Always return 1, like "".CompareTo(null).
                     return 1;
                 }

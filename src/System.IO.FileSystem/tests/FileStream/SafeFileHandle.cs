@@ -59,10 +59,19 @@ namespace System.IO.Tests
             }
         }
 
-        [Theory]
-        [InlineData(true)]
-        [InlineData(false)]
-        public async Task ThrowWhenHandlePositionIsChanged(bool useAsync)
+        [Fact]
+        public async Task ThrowWhenHandlePositionIsChanged_sync()
+        {
+            await ThrowWhenHandlePositionIsChanged(useAsync: false);
+        }
+
+        [Fact]
+        public async Task ThrowWhenHandlePositionIsChanged_async()
+        {
+            await ThrowWhenHandlePositionIsChanged(useAsync: true);
+        }
+
+        private async Task ThrowWhenHandlePositionIsChanged(bool useAsync)
         {
             string fileName = GetTestFilePath();
 

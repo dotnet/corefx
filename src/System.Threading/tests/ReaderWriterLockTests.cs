@@ -16,7 +16,6 @@ namespace System.Threading.Tests
         private const int InvalidLockCookieExceptionHResult = unchecked((int)0x80070057); // E_INVALIDARG
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // desktop framework treats the timeout as an unsigned value
         public static void InvalidTimeoutTest_ChangedInDotNetCore()
         {
             var rwl = new ReaderWriterLock();
@@ -436,7 +435,6 @@ namespace System.Threading.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void DowngradeQuirks_ChangedInDotNetCore()
         {
             var trwl = new TestReaderWriterLock();
@@ -743,6 +741,31 @@ namespace System.Threading.Tests
 
             trwl.Dispose();
         }
+
+        [Fact]
+        public static void OverflowOnExcessiveNestedReaderLock()
+        {
+            ReaderWriterLock rwl = new ReaderWriterLock();
+            for (int i = 0; i != ushort.MaxValue; ++i)
+            {
+                rwl.AcquireReaderLock(0);
+            }
+
+            Assert.Throws<OverflowException>(() => rwl.AcquireReaderLock(0));
+        }
+
+        [Fact]
+        public static void OverflowOnExcessiveNestedWriterLock()
+        {
+            ReaderWriterLock rwl = new ReaderWriterLock();
+            for (int i = 0; i != ushort.MaxValue; ++i)
+            {
+                rwl.AcquireWriterLock(0);
+            }
+
+            Assert.Throws<OverflowException>(() => rwl.AcquireWriterLock(0));
+        }
+
 
         private class TestReaderWriterLock : IDisposable
         {

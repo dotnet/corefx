@@ -142,7 +142,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
             
-            Assert.Throws<ArgumentNullException>("outer", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("outer", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -156,7 +156,7 @@ namespace System.Linq.Tests
             };
             AnagramRec[] inner = null;
             
-            Assert.Throws<ArgumentNullException>("inner", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("inner", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -174,7 +174,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
             
-            Assert.Throws<ArgumentNullException>("outerKeySelector", () => outer.GroupJoin(inner, null, e => e.name, createJoinRec, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("outerKeySelector", () => outer.GroupJoin(inner, null, e => e.name, createJoinRec, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -192,7 +192,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
             
-            Assert.Throws<ArgumentNullException>("innerKeySelector", () => outer.GroupJoin(inner, e => e.name, null, createJoinRec, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("innerKeySelector", () => outer.GroupJoin(inner, e => e.name, null, createJoinRec, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -210,7 +210,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
             
-            Assert.Throws<ArgumentNullException>("resultSelector", () => outer.GroupJoin(inner, e => e.name, e => e.name, (Func<CustomerRec, IEnumerable<AnagramRec>, JoinRec>)null, new AnagramEqualityComparer()));
+            AssertExtensions.Throws<ArgumentNullException>("resultSelector", () => outer.GroupJoin(inner, e => e.name, e => e.name, (Func<CustomerRec, IEnumerable<AnagramRec>, JoinRec>)null, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -223,7 +223,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
 
-            Assert.Throws<ArgumentNullException>("outer", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec));
+            AssertExtensions.Throws<ArgumentNullException>("outer", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec));
         }
 
         [Fact]
@@ -237,7 +237,7 @@ namespace System.Linq.Tests
             };
             AnagramRec[] inner = null;
 
-            Assert.Throws<ArgumentNullException>("inner", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec));
+            AssertExtensions.Throws<ArgumentNullException>("inner", () => outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec));
         }
 
         [Fact]
@@ -255,7 +255,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
 
-            Assert.Throws<ArgumentNullException>("outerKeySelector", () => outer.GroupJoin(inner, null, e => e.name, createJoinRec));
+            AssertExtensions.Throws<ArgumentNullException>("outerKeySelector", () => outer.GroupJoin(inner, null, e => e.name, createJoinRec));
         }
 
         [Fact]
@@ -273,7 +273,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
 
-            Assert.Throws<ArgumentNullException>("innerKeySelector", () => outer.GroupJoin(inner, e => e.name, null, createJoinRec));
+            AssertExtensions.Throws<ArgumentNullException>("innerKeySelector", () => outer.GroupJoin(inner, e => e.name, null, createJoinRec));
         }
 
         [Fact]
@@ -291,7 +291,7 @@ namespace System.Linq.Tests
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
 
-            Assert.Throws<ArgumentNullException>("resultSelector", () => outer.GroupJoin(inner, e => e.name, e => e.name, (Func<CustomerRec, IEnumerable<AnagramRec>, JoinRec>)null));
+            AssertExtensions.Throws<ArgumentNullException>("resultSelector", () => outer.GroupJoin(inner, e => e.name, e => e.name, (Func<CustomerRec, IEnumerable<AnagramRec>, JoinRec>)null));
         }
 
         [Fact]
@@ -367,24 +367,47 @@ namespace System.Linq.Tests
         [Fact]
         public void InnerSameKeyMoreThanOneElementAndMatches()
         {
-            CustomerRec[] outer = new []
+            CustomerRec[] outer = new[]
             {
                 new CustomerRec{ name = "Tim", custID = 1234 },
                 new CustomerRec{ name = "Bob", custID = 9865 }
             };
-            OrderRec[] inner = new []
+            OrderRec[] inner = new[]
             {
                 new OrderRec{ orderID = 97865, custID = 1234, total = 25 },
                 new OrderRec{ orderID = 34390, custID = 1234, total = 19 },
                 new OrderRec{ orderID = 34390, custID = 9865, total = 19 }
             };
-            JoinRec[] expected = new []
+            JoinRec[] expected = new[]
             {
                 new JoinRec { name = "Tim", orderID = new int?[]{ 97865, 34390 }, total = new int?[] { 25, 19 } },
                 new JoinRec { name = "Bob", orderID = new int?[]{ 34390 }, total = new int?[]{ 19 } }
             };
 
             Assert.Equal(expected, outer.GroupJoin(inner, e => e.custID, e => e.custID, createJoinRec));
+        }
+
+        [Fact]
+        public void InnerSameKeyMoreThanOneElementAndMatchesRunOnce()
+        {
+            CustomerRec[] outer = new[]
+            {
+                new CustomerRec{ name = "Tim", custID = 1234 },
+                new CustomerRec{ name = "Bob", custID = 9865 }
+            };
+            OrderRec[] inner = new[]
+            {
+                new OrderRec{ orderID = 97865, custID = 1234, total = 25 },
+                new OrderRec{ orderID = 34390, custID = 1234, total = 19 },
+                new OrderRec{ orderID = 34390, custID = 9865, total = 19 }
+            };
+            JoinRec[] expected = new[]
+            {
+                new JoinRec { name = "Tim", orderID = new int?[]{ 97865, 34390 }, total = new int?[] { 25, 19 } },
+                new JoinRec { name = "Bob", orderID = new int?[]{ 34390 }, total = new int?[]{ 19 } }
+            };
+
+            Assert.Equal(expected, outer.RunOnce().GroupJoin(inner.RunOnce(), e => e.custID, e => e.custID, createJoinRec));
         }
 
         [Fact]
@@ -438,18 +461,18 @@ namespace System.Linq.Tests
         [Fact]
         public void NullComparer()
         {
-            CustomerRec[] outer = new []
+            CustomerRec[] outer = new[]
             {
                 new CustomerRec{ name = "Tim", custID = 1234 },
                 new CustomerRec{ name = "Bob", custID = 9865 },
                 new CustomerRec{ name = "Robert", custID = 9895 }
             };
-            AnagramRec[] inner = new []
+            AnagramRec[] inner = new[]
             {
                 new AnagramRec{ name = "Robert", orderID = 93483, total = 19 },
                 new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
             };
-            JoinRec[] expected = new []
+            JoinRec[] expected = new[]
             {
                 new JoinRec{ name = "Tim", orderID = new int?[]{ }, total = new int?[]{ } },
                 new JoinRec{ name = "Bob", orderID = new int?[]{ }, total = new int?[]{ } },
@@ -457,6 +480,30 @@ namespace System.Linq.Tests
             };
 
             Assert.Equal(expected, outer.GroupJoin(inner, e => e.name, e => e.name, createJoinRec, null));
+        }
+
+        [Fact]
+        public void NullComparerRunOnce()
+        {
+            CustomerRec[] outer = new[]
+            {
+                new CustomerRec{ name = "Tim", custID = 1234 },
+                new CustomerRec{ name = "Bob", custID = 9865 },
+                new CustomerRec{ name = "Robert", custID = 9895 }
+            };
+            AnagramRec[] inner = new[]
+            {
+                new AnagramRec{ name = "Robert", orderID = 93483, total = 19 },
+                new AnagramRec{ name = "miT", orderID = 93489, total = 45 }
+            };
+            JoinRec[] expected = new[]
+            {
+                new JoinRec{ name = "Tim", orderID = new int?[]{ }, total = new int?[]{ } },
+                new JoinRec{ name = "Bob", orderID = new int?[]{ }, total = new int?[]{ } },
+                new JoinRec{ name = "Robert", orderID = new int?[]{ 93483 }, total = new int?[]{ 19 } }
+            };
+
+            Assert.Equal(expected, outer.RunOnce().GroupJoin(inner.RunOnce(), e => e.name, e => e.name, createJoinRec, null));
         }
 
         [Fact]

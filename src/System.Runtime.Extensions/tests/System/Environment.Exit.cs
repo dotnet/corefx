@@ -4,12 +4,12 @@
 
 using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
 {
-    public class Environment_Exit : RemoteExecutorTestBase
+    public class Environment_Exit
     {
         public static object[][] ExitCodeValues = new object[][]
         {
@@ -25,21 +25,9 @@ namespace System.Tests
         [MemberData(nameof(ExitCodeValues))]
         public static void CheckExitCode(int expectedExitCode)
         {
-            using (Process p = RemoteInvoke(s => int.Parse(s), expectedExitCode.ToString()).Process)
-            {
-                Assert.True(p.WaitForExit(30 * 1000));
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                {
-                    Assert.Equal(expectedExitCode, p.ExitCode);
-                }
-                else
-                {
-                    Assert.Equal((sbyte)expectedExitCode, (sbyte)p.ExitCode);
-                }
-            }
+            RemoteExecutor.Invoke(s => int.Parse(s), expectedExitCode.ToString(), new RemoteInvokeOptions { ExpectedExitCode = expectedExitCode }).Dispose();
         }
 
-#if netstandard17
         [Theory]
         [MemberData(nameof(ExitCodeValues))]
         public static void ExitCode_Roundtrips(int exitCode)
@@ -49,29 +37,19 @@ namespace System.Tests
 
             Environment.ExitCode = 0; // in case the test host has a void returning Main
         }
-#endif //netstandard17
 
-        [ActiveIssue("https://github.com/dotnet/coreclr/issues/6206")]
         [Theory]
         [InlineData(1)] // setting ExitCode and exiting Main
         [InlineData(2)] // setting ExitCode both from Main and from an Unloading event handler.
         [InlineData(3)] // using Exit(exitCode)
+        [ActiveIssue("https://github.com/dotnet/corefx/issues/21415", TargetFrameworkMonikers.Uap)]
         public static void ExitCode_VoidMainAppReturnsSetValue(int mode)
         {
             int expectedExitCode = 123;
-
             const string AppName = "VoidMainWithExitCodeApp.exe";
             var psi = new ProcessStartInfo();
-            if (File.Exists(HostRunner))
-            {
-                psi.FileName = HostRunner;
-                psi.Arguments = $"{AppName} {expectedExitCode} {mode}";
-            }
-            else
-            {
-                psi.FileName = AppName;
-                psi.Arguments = $"{expectedExitCode} {mode}";
-            }
+            psi.FileName = RemoteExecutor.HostRunner;
+            psi.Arguments = $"{AppName} {expectedExitCode} {mode}";
 
             using (Process p = Process.Start(psi))
             {

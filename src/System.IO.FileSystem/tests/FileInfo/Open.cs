@@ -12,6 +12,38 @@ namespace System.IO.Tests
         {
             return new FileInfo(path).Open(mode);
         }
+
+        [Theory, MemberData(nameof(StreamSpecifiers))]
+        public override void FileModeAppend(string streamSpecifier)
+        {
+            using (FileStream fs = CreateFileStream(GetTestFilePath() + streamSpecifier, FileMode.Append))
+            {
+                Assert.Equal(false, fs.CanRead);
+                Assert.Equal(true, fs.CanWrite);
+            }
+        }
+
+        [Theory, MemberData(nameof(StreamSpecifiers))]
+        public override void FileModeAppendExisting(string streamSpecifier)
+        {
+            string fileName = GetTestFilePath() + streamSpecifier;
+            using (FileStream fs = CreateFileStream(fileName, FileMode.Create))
+            {
+                fs.WriteByte(0);
+            }
+
+            using (FileStream fs = CreateFileStream(fileName, FileMode.Append))
+            {
+                // Ensure that the file was re-opened and position set to end
+                Assert.Equal(1L, fs.Length);
+                Assert.Equal(1L, fs.Position);
+                Assert.False(fs.CanRead);
+                Assert.True(fs.CanSeek);
+                Assert.True(fs.CanWrite);
+                Assert.Throws<IOException>(() => fs.Seek(-1, SeekOrigin.Current));
+                Assert.Throws<NotSupportedException>(() => fs.ReadByte());
+            }
+        }
     }
 
     public class FileInfo_Open_fm_fa : FileStream_ctor_str_fm_fa
@@ -31,12 +63,12 @@ namespace System.IO.Tests
     {
         protected override FileStream CreateFileStream(string path, FileMode mode)
         {
-            return new FileInfo(path).Open(mode, mode == FileMode.Append ? FileAccess.Write : FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete | FileShare.Inheritable);
+            return new FileInfo(path).Open(mode, mode == FileMode.Append ? FileAccess.Write : FileAccess.ReadWrite, FileShare.ReadWrite | FileShare.Delete);
         }
 
         protected override FileStream CreateFileStream(string path, FileMode mode, FileAccess access)
         {
-            return new FileInfo(path).Open(mode, access, FileShare.ReadWrite | FileShare.Delete | FileShare.Inheritable);
+            return new FileInfo(path).Open(mode, access, FileShare.ReadWrite | FileShare.Delete);
         }
 
         protected override FileStream CreateFileStream(string path, FileMode mode, FileAccess access, FileShare share)

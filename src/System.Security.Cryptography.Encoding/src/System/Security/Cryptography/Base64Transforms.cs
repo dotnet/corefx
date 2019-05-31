@@ -9,7 +9,6 @@ using System.Text;
 
 namespace System.Security.Cryptography
 {
-    [Serializable]
     public enum FromBase64TransformMode
     {
         IgnoreWhiteSpaces = 0,
@@ -201,7 +200,8 @@ namespace System.Security.Cryptography
             }
 
             // If there's nothing to do, leave early
-            if (iCount == 0 && inputOffset == 0)
+            if (iCount == 0 && inputOffset == 0 &&
+                inputCount == inputBuffer.Length)
             {
                 return inputBuffer;
             }

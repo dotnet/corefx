@@ -9,13 +9,13 @@ namespace System.Numerics
 {
     internal static partial class BigIntegerCalculator
     {
-        /// <summary>
-        /// If we need to reduce by a certain modulus again and again, it's much
-        /// more efficient to do this with multiplication operations. This is
-        /// possible, if we do some pre-computations first...
-        /// see https://en.wikipedia.org/wiki/Barrett_reduction
-        /// </summary>
-        internal struct FastReducer
+        // If we need to reduce by a certain modulus again and again, it's much
+        // more efficient to do this with multiplication operations. This is
+        // possible, if we do some pre-computations first...
+
+        // see https://en.wikipedia.org/wiki/Barrett_reduction
+
+        internal readonly struct FastReducer
         {
             private readonly uint[] _modulus;
             private readonly uint[] _mu;
@@ -66,8 +66,7 @@ namespace System.Numerics
                               _modulus, _modulus.Length + 1);
             }
 
-            [SecuritySafeCritical]
-            private unsafe static int DivMul(uint[] left, int leftLength,
+            private static unsafe int DivMul(uint[] left, int leftLength,
                                              uint[] right, int rightLength,
                                              uint[] bits, int k)
             {
@@ -111,8 +110,7 @@ namespace System.Numerics
                 return 0;
             }
 
-            [SecuritySafeCritical]
-            private unsafe static int SubMod(uint[] left, int leftLength,
+            private static unsafe int SubMod(uint[] left, int leftLength,
                                              uint[] right, int rightLength,
                                              uint[] modulus, int k)
             {

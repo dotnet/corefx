@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Globalization;
 
 namespace System.Net
 {
@@ -20,7 +19,7 @@ namespace System.Net
         {
             if ((kind & ThreadKinds.SourceMask) != ThreadKinds.Unknown)
             {
-                throw new InternalException();
+                throw new InternalException(kind);
             }
 
             // Ignore during shutdown.
@@ -80,7 +79,7 @@ namespace System.Net
 
                 if (_frameNumber != ThreadKindStack.Count)
                 {
-                    throw new InternalException();
+                    throw new InternalException(_frameNumber);
                 }
 
                 ThreadKinds previous = ThreadKindStack.Pop();
@@ -123,32 +122,6 @@ namespace System.Net
                     NetEventSource.Fail(null, $"Thread source changed.|Was:({last}) Now:({source})");
                 }
                 ThreadKindStack.Push(source);
-            }
-        }
-
-        internal static void ThreadContract(ThreadKinds kind, string errorMsg)
-        {
-            ThreadContract(kind, ThreadKinds.SafeSources, errorMsg);
-        }
-
-        internal static void ThreadContract(ThreadKinds kind, ThreadKinds allowedSources, string errorMsg)
-        {
-            if ((kind & ThreadKinds.SourceMask) != ThreadKinds.Unknown || (allowedSources & ThreadKinds.SourceMask) != allowedSources)
-            {
-                throw new InternalException();
-            }
-
-            if (NetEventSource.IsEnabled)
-            {
-                ThreadKinds threadKind = CurrentThreadKind;
-                if ((threadKind & allowedSources) != 0)
-                {
-                    NetEventSource.Fail(null, $"Thread Contract Violation.|Expected source:({allowedSources}) Actual source:({threadKind & ThreadKinds.SourceMask})");
-                }
-                if ((threadKind & kind) == kind)
-                {
-                    NetEventSource.Fail(null, $"Thread Contract Violation.|Expected kind:({kind}) Actual kind:({threadKind & ~ThreadKinds.SourceMask})");
-                }
             }
         }
     }

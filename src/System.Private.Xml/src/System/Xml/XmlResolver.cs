@@ -24,7 +24,7 @@ namespace System.Xml
         ///       URI to an Object containing the actual resource.</para>
         /// </devdoc>
 
-        public abstract Object GetEntity(Uri absoluteUri,
+        public abstract object GetEntity(Uri absoluteUri,
                                          string role,
                                          Type ofObjectToReturn);
 
@@ -40,7 +40,7 @@ namespace System.Xml
                 Uri uri = new Uri(relativeUri, UriKind.RelativeOrAbsolute);
                 if (!uri.IsAbsoluteUri && uri.OriginalString.Length > 0)
                 {
-                    uri = new Uri(Uri.UriSchemeFile + Uri.SchemeDelimiter + Path.GetFullPath(relativeUri));
+                    uri = new Uri(Path.GetFullPath(relativeUri));
                 }
                 return uri;
             }
@@ -53,24 +53,7 @@ namespace System.Xml
                 // relative base Uri
                 if (!baseUri.IsAbsoluteUri)
                 {
-					// TODO: should this be SILVERLIGHT or desktop behavior?
-#if SILVERLIGHT
-                    // create temporary base for the relative URIs
-                    Uri tmpBaseUri = new Uri("tmp:///");
-
-                    // create absolute base URI with the temporary base
-                    Uri absBaseUri = new Uri(tmpBaseUri, baseUri.OriginalString);
-
-                    // resolve the relative Uri into a new absolute URI
-                    Uri resolvedAbsUri = new Uri(absBaseUri, relativeUri);
-
-                    // make it relative by removing temporary base
-                    Uri resolvedRelUri = tmpBaseUri.MakeRelativeUri(resolvedAbsUri);
-
-                    return resolvedRelUri;
-#else
                     throw new NotSupportedException(SR.Xml_RelativeUriNotSupported);
-#endif
                 }
                 return new Uri(baseUri, relativeUri);
             }

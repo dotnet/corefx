@@ -11,7 +11,6 @@ namespace System.IO.IsolatedStorage
     {
         object Normalize();
     }
-
     public abstract partial class IsolatedStorage : System.MarshalByRefObject
     {
         protected IsolatedStorage() { }
@@ -31,21 +30,17 @@ namespace System.IO.IsolatedStorage
         protected virtual char SeparatorInternal { get { throw null; } }
         public virtual long UsedSize { get { throw null; } }
         public virtual bool IncreaseQuotaTo(long newQuotaSize) { throw null; }
-        
         protected void InitStore(System.IO.IsolatedStorage.IsolatedStorageScope scope, System.Type appEvidenceType) { }
-        
         protected void InitStore(System.IO.IsolatedStorage.IsolatedStorageScope scope, System.Type domainEvidenceType, System.Type assemblyEvidenceType) { }
         public abstract void Remove();
     }
-
     public partial class IsolatedStorageException : System.Exception
     {
         public IsolatedStorageException() { }
+        protected IsolatedStorageException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public IsolatedStorageException(string message) { }
         public IsolatedStorageException(string message, System.Exception inner) { }
-        protected IsolatedStorageException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
     }
-
     public sealed partial class IsolatedStorageFile : System.IO.IsolatedStorage.IsolatedStorage, System.IDisposable
     {
         internal IsolatedStorageFile() { }
@@ -98,56 +93,58 @@ namespace System.IO.IsolatedStorage
         public override void Remove() { }
         public static void Remove(System.IO.IsolatedStorage.IsolatedStorageScope scope) { }
     }
-
     public partial class IsolatedStorageFileStream : System.IO.FileStream
     {
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode) : base(default(string), default(System.IO.FileMode)) { }
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access) : base(default(string), default(System.IO.FileMode)) { }
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share) : base(default(string), default(System.IO.FileMode)) { }
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, int bufferSize) : base(default(string), default(System.IO.FileMode)) { }
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, int bufferSize, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base(default(string), default(System.IO.FileMode)) { }
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base(default(string), default(System.IO.FileMode)) { }
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base(default(string), default(System.IO.FileMode)) { }
-        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base(default(string), default(System.IO.FileMode)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, int bufferSize) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, int bufferSize, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.FileShare share, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.FileAccess access, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
+        public IsolatedStorageFileStream(string path, System.IO.FileMode mode, System.IO.IsolatedStorage.IsolatedStorageFile isf) : base (default(Microsoft.Win32.SafeHandles.SafeFileHandle), default(System.IO.FileAccess)) { }
         public override bool CanRead { get { throw null; } }
         public override bool CanSeek { get { throw null; } }
         public override bool CanWrite { get { throw null; } }
-        [System.ObsoleteAttribute("This property has been deprecated.  Please use IsolatedStorageFileStream's SafeFileHandle property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [System.ObsoleteAttribute("This property has been deprecated.  Please use IsolatedStorageFileStream's SafeFileHandle property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public override System.IntPtr Handle { get { throw null; } }
         public override bool IsAsync { get { throw null; } }
         public override long Length { get { throw null; } }
         public override long Position { get { throw null; } set { } }
         public override Microsoft.Win32.SafeHandles.SafeFileHandle SafeFileHandle { get { throw null; } }
-
         public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int numBytes, System.AsyncCallback userCallback, object stateObject) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int numBytes, System.AsyncCallback userCallback, object stateObject) { throw null; }
-
         protected override void Dispose(bool disposing) { }
+        public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
         public override void EndWrite(System.IAsyncResult asyncResult) { }
         public override void Flush() { }
         public override void Flush(bool flushToDisk) { }
+        public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override void Lock(long position, long length) { }
         public override int Read(byte[] buffer, int offset, int count) { throw null; }
+        public override int Read(System.Span<byte> buffer) { throw null; }
+        public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override int ReadByte() { throw null; }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw null; }
         public override void SetLength(long value) { }
         public override void Unlock(long position, long length) { }
         public override void Write(byte[] buffer, int offset, int count) { }
+        public override void Write(System.ReadOnlySpan<byte> buffer) { }
+        public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteByte(byte value) { }
     }
-
     [System.FlagsAttribute]
     public enum IsolatedStorageScope
     {
-        Application = 32,
-        Assembly = 4,
-        Domain = 2,
-        Machine = 16,
         None = 0,
-        Roaming = 8,
         User = 1,
+        Domain = 2,
+        Assembly = 4,
+        Roaming = 8,
+        Machine = 16,
+        Application = 32,
     }
 }
-
-

@@ -9,10 +9,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class WeakRefTest
     {
-        private const string COMMAND_TEXT_1 = "SELECT au_id, au_lname, au_fname, phone, address, city, state, zip, contract from authors";
-        private const string COMMAND_TEXT_2 = "SELECT au_lname from authors";
-        private const string COLUMN_NAME_2 = "au_lname";
-        private const string DATABASE_NAME = "Northwind";
+        private const string COMMAND_TEXT_1 = "SELECT EmployeeID, LastName, FirstName, Title, Address, City, Region, PostalCode, Country from Employees";
+        private const string COMMAND_TEXT_2 = "SELECT LastName from Employees";
+        private const string COLUMN_NAME_2 = "LastName";
+        private const string CHANGE_DATABASE_NAME = "master";
 
         private enum ReaderTestType
         {
@@ -40,7 +40,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             TransactionGCConnectionClose,
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestReaderNonMars()
         {
             string connString =
@@ -69,7 +69,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             TestReaderNonMarsCase("Case 15: ExecuteReader, GC, Connection Close, BeginTransaction.", connString, ReaderTestType.ReaderGCConnectionClose, ReaderVerificationType.BeginTransaction);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestTransactionSingle()
         {
             string connString =
@@ -147,8 +147,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             break;
 
                         case ReaderVerificationType.ChangeDatabase:
-                            con.ChangeDatabase(DATABASE_NAME);
-                            Assert.Equal(con.Database, DATABASE_NAME);
+                            con.ChangeDatabase(CHANGE_DATABASE_NAME);
+                            Assert.Equal(con.Database, CHANGE_DATABASE_NAME);
                             break;
 
                         case ReaderVerificationType.BeginTransaction:

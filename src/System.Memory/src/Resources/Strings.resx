@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -117,13 +116,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ArrayTypeMustBeExactMatch" xml:space="preserve">
-    <value>The array type must be exactly {0}.</value>
-  </data>
-  <data name="CannotCallEqualsOnSpan" xml:space="preserve">
+  <data name="NotSupported_CannotCallEqualsOnSpan" xml:space="preserve">
     <value>Equals() on Span and ReadOnlySpan is not supported. Use operator== instead.</value>
   </data>
-  <data name="CannotCallGetHashCodeOnSpan" xml:space="preserve">
+  <data name="NotSupported_CannotCallGetHashCodeOnSpan" xml:space="preserve">
     <value>GetHashCode() on Span and ReadOnlySpan is not supported.</value>
   </data>
   <data name="Argument_InvalidTypeWithPointersNotSupported" xml:space="preserve">
@@ -131,5 +127,23 @@
   </data>
   <data name="Argument_DestinationTooShort" xml:space="preserve">
     <value>Destination is too short.</value>
+  </data>
+  <data name="OutstandingReferences" xml:space="preserve">
+    <value>Release all references before disposing this instance.</value>
+  </data>
+  <data name="Argument_BadFormatSpecifier" xml:space="preserve">
+    <value>Format specifier was invalid.</value>
+  </data>
+  <data name="Argument_OverlapAlignmentMismatch" xml:space="preserve">
+    <value>Overlapping spans have mismatching alignment.</value>
+  </data>
+  <data name="EndPositionNotReached" xml:space="preserve">
+    <value>End position was not reached during enumeration.</value>
+  </data>
+  <data name="UnexpectedSegmentType" xml:space="preserve">
+    <value>Unexpected segment type.</value>
+  </data>
+  <data name="BufferWriterAdvancedTooFar" xml:space="preserve">
+    <value>Cannot advance past the end of the buffer, which has a size of {0}.</value>
   </data>
 </root>

@@ -15,12 +15,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             get
             {
-#if NETNATIVE
-                yield break;
-#else
                 yield return new object[] { TestData.ECDsabrainpoolP160r1_Pfx };
                 yield return new object[] { TestData.ECDsabrainpoolP160r1_Explicit_Pfx };
-#endif
             }
         }
 
@@ -38,8 +34,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(expectedThumbprint, thumbPrint);
             }
         }
-
-#if netcoreapp11
+        
         [Theory]
         [MemberData(nameof(StorageFlags))]
         public static void TestConstructor_SecureString(X509KeyStorageFlags keyStorageFlags)
@@ -55,7 +50,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Equal(expectedThumbprint, thumbPrint);
             }
         }
-#endif
 
         [Theory]
         [MemberData(nameof(StorageFlags))]
@@ -119,12 +113,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
-
-#if netcoreapp11
+        
         [Fact]
         public static void TestPrivateKeyProperty()
         {
-            using (var c = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.EphemeralKeySet))
+            using (var c = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
             {
                 bool hasPrivateKey = c.HasPrivateKey;
                 Assert.True(hasPrivateKey);
@@ -140,7 +133,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Throws<PlatformNotSupportedException>(() => c.PrivateKey = alg);
             }
         }
-#endif
 
         private static void VerifyPrivateKey(RSA rsa)
         {
@@ -179,22 +171,50 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
-
-#if netcoreapp11
+        
         [Fact]
         public static void ECDsaPrivateKeyProperty_WindowsPfx()
         {
-            using (var cert = new X509Certificate2(TestData.ECDsaP256_DigitalSignature_Pfx_Windows, "Test", X509KeyStorageFlags.EphemeralKeySet))
+            using (var cert = new X509Certificate2(TestData.ECDsaP256_DigitalSignature_Pfx_Windows, "Test", Cert.EphemeralIfPossible))
+            using (var pubOnly = new X509Certificate2(cert.RawData))
+            {
+                Assert.True(cert.HasPrivateKey, "cert.HasPrivateKey");
+                Assert.Throws<NotSupportedException>(() => cert.PrivateKey);
+
+                Assert.False(pubOnly.HasPrivateKey, "pubOnly.HasPrivateKey");
+                Assert.Null(pubOnly.PrivateKey);
+
+                // Currently unable to set PrivateKey
+                Assert.Throws<PlatformNotSupportedException>(() => cert.PrivateKey = null);
+
+                using (var privKey = cert.GetECDsaPrivateKey())
+                {
+                    Assert.ThrowsAny<NotSupportedException>(() => cert.PrivateKey = privKey);
+                    Assert.ThrowsAny<NotSupportedException>(() => pubOnly.PrivateKey = privKey);
+                }
+            }
+        }
+
+#if !NO_DSA_AVAILABLE
+        [Fact]
+        public static void DsaPrivateKeyProperty()
+        {
+            using (var cert = new X509Certificate2(TestData.Dsa1024Pfx, TestData.Dsa1024PfxPassword, Cert.EphemeralIfPossible))
             {
                 AsymmetricAlgorithm alg = cert.PrivateKey;
                 Assert.NotNull(alg);
                 Assert.Same(alg, cert.PrivateKey);
-                Assert.IsAssignableFrom(typeof(ECDsa), alg);
-                Verify_ECDsaPrivateKey_WindowsPfx((ECDsa)alg);
+                Assert.IsAssignableFrom<DSA>(alg);
 
-                // Currently unable to set PrivateKey
-                Assert.Throws<PlatformNotSupportedException>(() => cert.PrivateKey = null);
-                Assert.Throws<PlatformNotSupportedException>(() => cert.PrivateKey = alg);
+                DSA dsa = (DSA)alg;
+                byte[] data = { 1, 2, 3, 4, 5 };
+                byte[] sig = dsa.SignData(data, HashAlgorithmName.SHA1);
+
+                Assert.True(dsa.VerifyData(data, sig, HashAlgorithmName.SHA1), "Key verifies signature");
+
+                data[0] ^= 0xFF;
+
+                Assert.False(dsa.VerifyData(data, sig, HashAlgorithmName.SHA1), "Key verifies tampered data signature");
             }
         }
 #endif
@@ -229,13 +249,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
             catch (CryptographicException)
             {
-                // Windows 7, Windows 8, Ubuntu 14, CentOS can fail. Verify known good platforms don't fail.
-                Assert.False(PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10);
-                Assert.False(PlatformDetection.IsUbuntu1604);
-                Assert.False(PlatformDetection.IsUbuntu1610);
-                Assert.False(PlatformDetection.IsOSX);
-
-                return;
+                // Windows 7, Windows 8, Ubuntu 14, CentOS, macOS can fail. Verify known good platforms don't fail.
+                Assert.False(PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10, "Is Windows 10");
+                Assert.False(PlatformDetection.IsUbuntu && !PlatformDetection.IsUbuntu1404, "Is Ubuntu 16.04 or up");
             }
         }
 
@@ -266,9 +282,33 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-#if netcoreapp11
+#if !NO_DSA_AVAILABLE
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        public static void ReadDSAPrivateKey()
+        {
+            byte[] data = { 1, 2, 3, 4, 5 };
+
+            using (var cert = new X509Certificate2(TestData.Dsa1024Pfx, TestData.Dsa1024PfxPassword, Cert.EphemeralIfPossible))
+            using (DSA privKey = cert.GetDSAPrivateKey())
+            using (DSA pubKey = cert.GetDSAPublicKey())
+            {
+                // Stick to FIPS 186-2 (DSS-SHA1)
+                byte[] signature = privKey.SignData(data, HashAlgorithmName.SHA1);
+
+                Assert.True(pubKey.VerifyData(data, signature, HashAlgorithmName.SHA1), "pubKey verifies signed data");
+
+                data[0] ^= 0xFF;
+                Assert.False(pubKey.VerifyData(data, signature, HashAlgorithmName.SHA1), "pubKey verifies tampered data");
+
+                // And verify that the public key isn't accidentally a private key.
+                Assert.ThrowsAny<CryptographicException>(() => pubKey.SignData(data, HashAlgorithmName.SHA1));
+            }
+        }
+#endif
+
+#if !NO_EPHEMERALKEYSET_AVAILABLE
+        [Fact]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
         public static void EphemeralImport_HasNoKeyName()
         {
             using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.EphemeralKeySet))
@@ -290,7 +330,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
         public static void CollectionEphemeralImport_HasNoKeyName()
         {
             using (var importedCollection = Cert.Import(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.EphemeralKeySet))
@@ -314,10 +354,9 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 }
             }
         }
-#endif
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
         public static void PerphemeralImport_HasKeyName()
         {
             using (var cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.DefaultKeySet))
@@ -337,9 +376,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.NotNull(key.KeyName);
             }
         }
+#endif
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Uses P/Invokes
         public static void CollectionPerphemeralImport_HasKeyName()
         {
             using (var importedCollection = Cert.Import(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.DefaultKeySet))
@@ -376,17 +416,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        public static IEnumerable<object[]> StorageFlags
-        {
-            get
-            {
-                yield return new object[] { X509KeyStorageFlags.DefaultKeySet };
-
-#if netcoreapp11
-                yield return new object[] { X509KeyStorageFlags.EphemeralKeySet };
-#endif
-            }
-        }
+        public static IEnumerable<object[]> StorageFlags => CollectionImportTests.StorageFlags;
 
         private static X509Certificate2 Rewrap(this X509Certificate2 c)
         {

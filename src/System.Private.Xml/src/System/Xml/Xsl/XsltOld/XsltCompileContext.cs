@@ -47,7 +47,7 @@ namespace System.Xml.Xsl.XsltOld
 
         public override int CompareDocument(string baseUri, string nextbaseUri)
         {
-            return String.Compare(baseUri, nextbaseUri, StringComparison.Ordinal);
+            return string.Compare(baseUri, nextbaseUri, StringComparison.Ordinal);
         }
 
         // Namespace support
@@ -78,7 +78,7 @@ namespace System.Xml.Xsl.XsltOld
 
         internal object EvaluateVariable(VariableAction variable)
         {
-            Object result = _processor.GetVariableValue(variable);
+            object result = _processor.GetVariableValue(variable);
             if (result == null && !variable.IsGlobal)
             {
                 // This was uninitialized local variable. May be we have sutable global var too?
@@ -115,7 +115,7 @@ namespace System.Xml.Xsl.XsltOld
             // restrict search to methods with the same name and requiested protection attribute
             for (int i = 0; i < length; i++)
             {
-                if (string.Compare(name, methods[i].Name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal) == 0)
+                if (string.Equals(name, methods[i].Name, ignoreCase ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal))
                 {
                     if (!publicOnly || methods[i].GetBaseDefinition().IsPublic)
                     {
@@ -146,7 +146,7 @@ namespace System.Xml.Xsl.XsltOld
             length = free;
             if (length <= 1)
             {
-                // 0 -- not method found. We have to return non-null and let it fail with corect exception on call.
+                // 0 -- not method found. We have to return non-null and let it fail with correct exception on call.
                 // 1 -- no reason to continue search anyway.
                 return methods[0];
             }
@@ -315,7 +315,7 @@ namespace System.Xml.Xsl.XsltOld
             return keyTable;
         }
 
-        private static void AddKeyValue(Hashtable keyTable, String key, XPathNavigator value, bool checkDuplicates)
+        private static void AddKeyValue(Hashtable keyTable, string key, XPathNavigator value, bool checkDuplicates)
         {
             ArrayList list = (ArrayList)keyTable[key];
             if (list == null)
@@ -375,7 +375,7 @@ namespace System.Xml.Xsl.XsltOld
             }
             else
             {
-                String key = XmlConvert.ToXPathString(result);
+                string key = XmlConvert.ToXPathString(result);
                 AddKeyValue(keyTable, key, /*value:*/node, /*checkDuplicates:*/ false);
             }
         }
@@ -498,9 +498,9 @@ namespace System.Xml.Xsl.XsltOld
             return XPathEmptyIterator.Instance;
         }
 
-        private String SystemProperty(string qname)
+        private string SystemProperty(string qname)
         {
-            String result = string.Empty;
+            string result = string.Empty;
 
             string prefix;
             string local;
@@ -540,31 +540,29 @@ namespace System.Xml.Xsl.XsltOld
 
         public static XPathResultType GetXPathType(Type type)
         {
-            if (type == typeof(String))
-                return XPathResultType.String;
-            if (type == typeof(Boolean))
-                return XPathResultType.Boolean;
-            if (type == typeof(Object))
+            switch (Type.GetTypeCode(type))
             {
-                if (
-                    typeof(XPathNavigator).IsAssignableFrom(type) ||
-                    typeof(IXPathNavigable).IsAssignableFrom(type)
-                )
-                {
-                    return XPathResultType.Navigator;
-                }
-                if (typeof(XPathNodeIterator).IsAssignableFrom(type))
-                {
-                    return XPathResultType.NodeSet;
-                }
-                // sdub: It be better to check that type is realy object and otherwise return XPathResultType.Error
-                return XPathResultType.Any;
-            }
-            if (type == typeof(DateTime))
-                return XPathResultType.Error;
+                case TypeCode.String:
+                    return XPathResultType.String;
+                case TypeCode.Boolean:
+                    return XPathResultType.Boolean;
+                case TypeCode.Object:
+                    if (typeof(XPathNavigator).IsAssignableFrom(type) || typeof(IXPathNavigable).IsAssignableFrom(type))
+                    {
+                        return XPathResultType.Navigator;
+                    }
+                    if (typeof(XPathNodeIterator).IsAssignableFrom(type))
+                    {
+                        return XPathResultType.NodeSet;
+                    }
+                    // sdub: It be better to check that type is realy object and otherwise return XPathResultType.Error
+                    return XPathResultType.Any;
+                case TypeCode.DateTime:
+                    return XPathResultType.Error;
 
-            /* all numeric types */
-            return XPathResultType.Number;
+                default: /* all numeric types */
+                    return XPathResultType.Number;
+            }
         }
 
         // ---------------- Xslt Function Implementations -------------------
@@ -712,7 +710,7 @@ namespace System.Xml.Xsl.XsltOld
                     case XPathResultType.String:
                         // Unfortunetely XPathResultType.String == XPathResultType.Navigator (This is wrong but cant be changed in Everett)
                         // Fortunetely we have typeCode hare so let's discriminate by typeCode
-                        if (type == typeof(String))
+                        if (type == typeof(string))
                         {
                             return ToString(val);
                         }
@@ -728,7 +726,7 @@ namespace System.Xml.Xsl.XsltOld
                     case XPathResultType.Error:
                         return val;
                     default:
-                        Debug.Assert(false, "unexpected XPath type");
+                        Debug.Fail("unexpected XPath type");
                         return val;
                 }
             }
@@ -736,7 +734,7 @@ namespace System.Xml.Xsl.XsltOld
 
         private class FuncCurrent : XsltFunctionImpl
         {
-            public FuncCurrent() : base(0, 0, XPathResultType.NodeSet, new XPathResultType[] { }) { }
+            public FuncCurrent() : base(0, 0, XPathResultType.NodeSet, Array.Empty<XPathResultType>()) { }
             public override object Invoke(XsltContext xsltContext, object[] args, XPathNavigator docContext)
             {
                 return ((XsltCompileContext)xsltContext).Current();

@@ -65,11 +65,11 @@ namespace System.Numerics.Tests
 
                 snnum1 = snCalc.Pop();
                 snnum2 = snCalc.Pop();
-                snCalc.Push(DoBinaryOperatorSN(snnum1, snnum2, op));
+                snCalc.Push(DoBinaryOperatorSN(snnum1, snnum2, op, out _snOut));
 
                 mynum1 = myCalc.Pop();
                 mynum2 = myCalc.Pop();
-                myCalc.Push(MyBigIntImp.DoBinaryOperatorMine(mynum1, mynum2, op));
+                myCalc.Push(MyBigIntImp.DoBinaryOperatorMine(mynum1, mynum2, op, out _myOut));
 
                 ret = true;
             }
@@ -132,7 +132,7 @@ namespace System.Numerics.Tests
             BigInteger ret = new BigInteger(0);
             string op = operators.Dequeue();
 
-            while (String.CompareOrdinal(op, "endmake") != 0)
+            while (string.CompareOrdinal(op, "endmake") != 0)
             {
                 bytes.Add(byte.Parse(op));
                 op = operators.Dequeue();
@@ -170,12 +170,20 @@ namespace System.Numerics.Tests
                 case "u*":
                     return num1 * num1;
                 default:
-                    throw new ArgumentException(String.Format("Invalid operation found: {0}", op));
+                    throw new ArgumentException(string.Format("Invalid operation found: {0}", op));
             }
         }
 
         private BigInteger DoBinaryOperatorSN(BigInteger num1, BigInteger num2, string op)
         {
+            BigInteger num3;
+
+            return DoBinaryOperatorSN(num1, num2, op, out num3);
+        }
+
+        private BigInteger DoBinaryOperatorSN(BigInteger num1, BigInteger num2, string op, out BigInteger num3)
+        {
+            num3 = 0;
             switch (op)
             {
                 case "bMin":
@@ -210,10 +218,7 @@ namespace System.Numerics.Tests
                     int arg2 = (int)num2;
                     return BigInteger.Pow(num1, arg2);
                 case "bDivRem":
-                    BigInteger num3;
-                    BigInteger ret = BigInteger.DivRem(num1, num2, out num3);
-                    SetSNOutCheck(num3);
-                    return ret;
+                    return BigInteger.DivRem(num1, num2, out num3);
                 case "bRemainder":
                     return BigInteger.Remainder(num1, num2);
                 case "bDivide":
@@ -225,7 +230,7 @@ namespace System.Numerics.Tests
                 case "bAdd":
                     return BigInteger.Add(num1, num2);
                 default:
-                    throw new ArgumentException(String.Format("Invalid operation found: {0}", op));
+                    throw new ArgumentException(string.Format("Invalid operation found: {0}", op));
             }
         }
 
@@ -236,24 +241,19 @@ namespace System.Numerics.Tests
                 case "tModPow":
                     return BigInteger.ModPow(num1, num2, num3);
                 default:
-                    throw new ArgumentException(String.Format("Invalid operation found: {0}", op));
+                    throw new ArgumentException(string.Format("Invalid operation found: {0}", op));
             }
-        }
-        
-        private void SetSNOutCheck(BigInteger value)
-        {
-            _snOut = value;
         }
 
         public void VerifyOutParameter()
         {
-            Assert.Equal(_snOut, MyBigIntImp.outParam);
+            Assert.Equal(_snOut, _myOut);
 
             _snOut = 0;
-            MyBigIntImp.outParam = 0;
+            _myOut = 0;
         }
 
-        private static String Print(byte[] bytes)
+        private static string Print(byte[] bytes)
         {
            return MyBigIntImp.PrintFormatX(bytes);
         }

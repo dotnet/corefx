@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -154,7 +153,7 @@
     <value>Stream does not support writing.</value>
   </data>
   <data name="ObjectDisposed_StreamClosed" xml:space="preserve">
-    <value>Can not access a closed Stream.</value>
+    <value>Cannot access a closed stream.</value>
   </data>
   <data name="UnknownBlockType" xml:space="preserve">
     <value>Unknown block type. Stream might be corrupted.</value>
@@ -179,18 +178,6 @@
   </data>
   <data name="ZLibErrorUnexpected" xml:space="preserve">
     <value>The underlying compression routine returned an unexpected error code.</value>
-  </data>
-  <data name="CorruptedGZipHeader" xml:space="preserve">
-    <value>The magic number in GZip header is not correct. Make sure you are passing in a GZip stream.</value>
-  </data>
-  <data name="UnknownCompressionMode" xml:space="preserve">
-    <value>The compression mode specified in GZip header is unknown.</value>
-  </data>
-  <data name="InvalidCRC" xml:space="preserve">
-    <value>The CRC in GZip footer does not match the CRC calculated from the decompressed data.</value>
-  </data>
-  <data name="InvalidStreamSize" xml:space="preserve">
-    <value>The stream size in GZip footer does not match the real stream size.</value>
   </data>
   <data name="ArgumentNeedNonNegative" xml:space="preserve">
     <value>The argument must be non-negative.</value>
@@ -320,11 +307,5 @@
   </data>
   <data name="Zip64EOCDNotWhereExpected" xml:space="preserve">
     <value>Zip 64 End of Central Directory Record not where indicated.</value>
-  </data>
-  <data name="Argument_InvalidPathChars" xml:space="preserve">
-    <value>Illegal characters in path.</value>
-  </data>
-  <data name="FileNameContainsInvalidCharacters" xml:space="preserve">
-    <value>An entry in the ZipArchive has a path that contains invalid characters.</value>
   </data>
 </root>

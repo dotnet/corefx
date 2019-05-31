@@ -22,7 +22,7 @@ namespace System.Diagnostics
         }
 
         /// <summary>Gets the time the associated process was started.</summary>
-        public DateTime StartTime
+        internal DateTime StartTimeCore
         {
             get { throw new PlatformNotSupportedException(); }
         }
@@ -45,6 +45,10 @@ namespace System.Diagnostics
         {
             get { throw new PlatformNotSupportedException(); }
         }
+
+        /// <summary>Gets parent process ID</summary>
+        private int GetParentProcessId =>
+            throw new PlatformNotSupportedException();
 
         /// <summary>
         /// Gets or sets which processors the threads in this process can be scheduled to run on.
@@ -77,5 +81,12 @@ namespace System.Diagnostics
         {
             throw new PlatformNotSupportedException();
         }
+
+        /// <summary>Gets execution path</summary>
+        private string GetPathToOpenFile()
+        {
+            throw new PlatformNotSupportedException();
+        }
+
     }
 }

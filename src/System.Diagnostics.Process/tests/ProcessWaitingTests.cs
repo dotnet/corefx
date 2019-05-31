@@ -2,8 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Diagnostics.Tests
@@ -11,6 +14,7 @@ namespace System.Diagnostics.Tests
     public class ProcessWaitingTests : ProcessTestBase
     {
         [Fact]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void MultipleProcesses_StartAllKillAllWaitAll()
         {
             const int Iters = 10;
@@ -22,6 +26,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void MultipleProcesses_SerialStartKillWait()
         {
             const int Iters = 10;
@@ -35,6 +40,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void MultipleProcesses_ParallelStartKillWait()
         {
             const int Tasks = 4, ItersPerTask = 10;
@@ -60,6 +66,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void SingleProcess_TryWaitMultipleTimesBeforeCompleting()
         {
             Process p = CreateProcessLong();
@@ -82,6 +89,7 @@ namespace System.Diagnostics.Tests
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public async Task SingleProcess_WaitAfterExited(bool addHandlerBeforeStart)
         {
             Process p = CreateProcessLong();
@@ -110,11 +118,12 @@ namespace System.Diagnostics.Tests
         [InlineData(127)]
         public async Task SingleProcess_EnableRaisingEvents_CorrectExitCode(int exitCode)
         {
-            using (Process p = RemoteInvoke(exitCodeStr => int.Parse(exitCodeStr), exitCode.ToString(), new RemoteInvokeOptions { Start = false }).Process)
+            using (Process p = CreateProcessPortable(RemotelyInvokable.ExitWithCode, exitCode.ToString()))
             {
                 var tcs = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
                 p.EnableRaisingEvents = true;
-                p.Exited += delegate { tcs.SetResult(true); };
+                p.Exited += delegate
+                { tcs.SetResult(true); };
                 p.Start();
                 Assert.True(await tcs.Task);
                 Assert.Equal(exitCode, p.ExitCode);
@@ -122,6 +131,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [ActiveIssue(31908, TargetFrameworkMonikers.Uap)]
         public void SingleProcess_CopiesShareExitInformation()
         {
             Process p = CreateProcessLong();
@@ -140,6 +150,7 @@ namespace System.Diagnostics.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Getting handle of child process running on UAP is not possible")]
         public void WaitForPeerProcess()
         {
             Process child1 = CreateProcessLong();
@@ -150,20 +161,69 @@ namespace System.Diagnostics.Tests
                 Process peer = Process.GetProcessById(int.Parse(peerId));
                 Console.WriteLine("Signal");
                 Assert.True(peer.WaitForExit(WaitInMS));
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, child1.Id.ToString());
             child2.StartInfo.RedirectStandardOutput = true;
             child2.Start();
-            Assert.Equal("Signal", child2.StandardOutput.ReadLine()); // wait for the signal before killing the peer
+            char[] output = new char[6];
+            child2.StandardOutput.Read(output, 0, output.Length);
+            Assert.Equal("Signal", new string(output)); // wait for the signal before killing the peer
 
             child1.Kill();
             Assert.True(child1.WaitForExit(WaitInMS));
             Assert.True(child2.WaitForExit(WaitInMS));
 
-            Assert.Equal(SuccessExitCode, child2.ExitCode);
+            Assert.Equal(RemoteExecutor.SuccessExitCode, child2.ExitCode);
         }
 
         [Fact]
+        public void WaitForSignal()
+        {
+            const string expectedSignal = "Signal";
+            const string successResponse = "Success";
+            const int timeout = 30 * 1000; // 30 seconds, to allow for very slow machines
+
+            Process p = CreateProcessPortable(RemotelyInvokable.WriteLineReadLine);
+            p.StartInfo.RedirectStandardInput = true;
+            p.StartInfo.RedirectStandardOutput = true;
+            var mre = new ManualResetEventSlim(false);
+
+            int linesReceived = 0;
+            p.OutputDataReceived += (s, e) =>
+            {
+                if (e.Data != null)
+                {
+                    linesReceived++;
+
+                    if (e.Data == expectedSignal)
+                    {
+                        mre.Set();
+                    }
+                }
+            };
+
+            p.Start();
+            p.BeginOutputReadLine();
+
+            Assert.True(mre.Wait(timeout));
+            Assert.Equal(1, linesReceived);
+
+            // Wait a little bit to make sure process didn't exit on itself
+            Thread.Sleep(100);
+            Assert.False(p.HasExited, "Process has prematurely exited");
+
+            using (StreamWriter writer = p.StandardInput)
+            {
+                writer.WriteLine(successResponse);
+            }
+
+            Assert.True(p.WaitForExit(timeout), "Process has not exited");
+            Assert.Equal(RemotelyInvokable.SuccessExitCode, p.ExitCode);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Not applicable on uap - RemoteInvoke does not give back process handle")]
+        [ActiveIssue(15844, TestPlatforms.AnyUnix)]
         public void WaitChain()
         {
             Process root = CreateProcess(() =>
@@ -172,7 +232,7 @@ namespace System.Diagnostics.Tests
                 {
                     Process child2 = CreateProcess(() =>
                     {
-                        Process child3 = CreateProcess(() => SuccessExitCode);
+                        Process child3 = CreateProcess(() => RemoteExecutor.SuccessExitCode);
                         child3.Start();
                         Assert.True(child3.WaitForExit(WaitInMS));
                         return child3.ExitCode;
@@ -187,20 +247,30 @@ namespace System.Diagnostics.Tests
             });
             root.Start();
             Assert.True(root.WaitForExit(WaitInMS));
-            Assert.Equal(SuccessExitCode, root.ExitCode);
+            Assert.Equal(RemoteExecutor.SuccessExitCode, root.ExitCode);
         }
 
         [Fact]
         public void WaitForSelfTerminatingChild()
         {
-            Process child = CreateProcess(() =>
-            {
-                Process.GetCurrentProcess().Kill();
-                throw new ShouldNotBeInvokedException();
-            });
+            Process child = CreateProcessPortable(RemotelyInvokable.SelfTerminate);
             child.Start();
             Assert.True(child.WaitForExit(WaitInMS));
-            Assert.NotEqual(SuccessExitCode, child.ExitCode);
+            Assert.NotEqual(RemoteExecutor.SuccessExitCode, child.ExitCode);
+        }
+
+        [Fact]
+        public void WaitForInputIdle_NotDirected_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.WaitForInputIdle());
+        }
+
+        [Fact]
+        public void WaitForExit_NotDirected_ThrowsInvalidOperationException()
+        {
+            var process = new Process();
+            Assert.Throws<InvalidOperationException>(() => process.WaitForExit());
         }
     }
 }

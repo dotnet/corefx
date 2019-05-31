@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#if FEATURE_INTERPRET
+// FEATURE_COMPILE is not directly required, 
+// but this functionality relies on private reflection and that would not work with AOT
+#if FEATURE_INTERPRET && FEATURE_COMPILE
 
 using System.Linq.Expressions.Interpreter;
 using System.Reflection;
@@ -17,7 +19,8 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void VerifyInstructions_Simple()
         {
-            Expression<Func<string, bool>> f = s => s != null && s.Substring(1).Length * 2 > 0;
+            // Using an unchecked multiplication to ensure that a mul instruction is emitted (and not mul.ovf)
+            Expression<Func<string, bool>> f = s => s != null && unchecked(s.Substring(1).Length * 2) > 0;
 
             f.VerifyInstructions(
                 @"object lambda_method(object[])

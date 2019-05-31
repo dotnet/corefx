@@ -16,7 +16,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // private.
     // ----------------------------------------------------------------------------
 
-    internal class EventSymbol : Symbol
+    internal sealed class EventSymbol : Symbol
     {
         public EventInfo AssociatedEventInfo;
 
@@ -31,17 +31,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         public MethodSymbol methAdd;            // Adder method (always has same parent)
         public MethodSymbol methRemove;         // Remover method (always has same parent)
 
-        public AggregateDeclaration declaration;       // containing declaration
-
         public bool IsWindowsRuntimeEvent { get; set; }
-
-        // ----------------------------------------------------------------------------
-        // EventSymbol
-        // ----------------------------------------------------------------------------
-
-        public AggregateDeclaration containingDeclaration()
-        {
-            return declaration;
-        }
     }
 }

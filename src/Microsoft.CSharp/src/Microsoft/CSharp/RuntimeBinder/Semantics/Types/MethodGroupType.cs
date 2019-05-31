@@ -9,6 +9,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // group expression.  There is exactly one of these.
     // ----------------------------------------------------------------------------
 
-    internal class MethodGroupType : CType
-    { };
+    internal sealed class MethodGroupType : CType
+    {
+        public static readonly MethodGroupType Instance = new MethodGroupType();
+
+        private MethodGroupType()
+            : base(TypeKind.TK_MethodGroupType)
+        {
+        }
+    }
 }

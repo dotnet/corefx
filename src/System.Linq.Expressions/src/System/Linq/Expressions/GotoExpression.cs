@@ -347,15 +347,6 @@ namespace System.Linq.Expressions
                 if (type != null)
                 {
                     TypeUtils.ValidateType(type, nameof(type));
-                    if (type.IsByRef)
-                    {
-                        throw Error.TypeMustNotBeByRef(nameof(type));
-                    }
-
-                    if (type.IsPointer)
-                    {
-                        throw Error.TypeMustNotBePointer(nameof(type));
-                    }
                 }
             }
             else
@@ -367,7 +358,7 @@ namespace System.Linq.Expressions
         // Standard argument validation, taken from ValidateArgumentTypes
         private static void ValidateGotoType(Type expectedType, ref Expression value, string paramName)
         {
-            RequiresCanRead(value, paramName);
+            ExpressionUtils.RequiresCanRead(value, paramName);
             if (expectedType != typeof(void))
             {
                 if (!TypeUtils.AreReferenceAssignable(expectedType, value.Type))

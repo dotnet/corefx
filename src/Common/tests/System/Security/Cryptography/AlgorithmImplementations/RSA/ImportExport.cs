@@ -10,6 +10,8 @@ namespace System.Security.Cryptography.Rsa.Tests
 {
     public partial class ImportExport
     {
+        public static bool Supports16384 { get; } = TestRsa16384();
+
         [Fact]
         public static void ExportAutoKey()
         {
@@ -64,7 +66,7 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             // DP is the most likely to fail, the rest just otherwise ensure that Export
             // isn't losing data.
-            AssertKeyEquals(ref diminishedDPParameters, ref exported);
+            AssertKeyEquals(diminishedDPParameters, exported);
         }
 
         [Fact]
@@ -92,7 +94,7 @@ namespace System.Security.Cryptography.Rsa.Tests
 
                 exported = rsa.ExportParameters(true);
 
-                AssertKeyEquals(ref imported, ref exported);
+                AssertKeyEquals(imported, exported);
             }
         }
 
@@ -117,7 +119,28 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             // Exponent is the most likely to fail, the rest just otherwise ensure that Export
             // isn't losing data.
-            AssertKeyEquals(ref unusualExponentParameters, ref exported);
+            AssertKeyEquals(unusualExponentParameters, exported);
+        }
+
+        [Fact]
+        public static void ImportExport1032()
+        {
+            RSAParameters imported = TestData.RSA1032Parameters;
+            RSAParameters exported;
+            RSAParameters exportedPublic;
+
+            using (RSA rsa = RSAFactory.Create())
+            {
+                rsa.ImportParameters(imported);
+                exported = rsa.ExportParameters(true);
+                exportedPublic = rsa.ExportParameters(false);
+            }
+
+            AssertKeyEquals(imported, exported);
+
+            Assert.Equal(exportedPublic.Modulus, imported.Modulus);
+            Assert.Equal(exportedPublic.Exponent, imported.Exponent);
+            Assert.Null(exportedPublic.D);
         }
 
         [Fact]
@@ -146,7 +169,25 @@ namespace System.Security.Cryptography.Rsa.Tests
                 Assert.Equal(imported.Modulus.Length * 8, rsa.KeySize);
 
                 exported = rsa.ExportParameters(true);
-                AssertKeyEquals(ref imported, ref exported);
+                AssertKeyEquals(imported, exported);
+            }
+        }
+
+        [Fact]
+        public static void ImportPrivateExportPublic()
+        {
+            RSAParameters imported = TestData.RSA1024Params;
+
+            using (RSA rsa = RSAFactory.Create())
+            {
+                rsa.ImportParameters(imported);
+
+                RSAParameters exportedPublic = rsa.ExportParameters(false);
+
+                Assert.Equal(imported.Modulus, exportedPublic.Modulus);
+                Assert.Equal(imported.Exponent, exportedPublic.Exponent);
+                Assert.Null(exportedPublic.D);
+                ValidateParameters(ref exportedPublic);
             }
         }
 
@@ -166,18 +207,18 @@ namespace System.Security.Cryptography.Rsa.Tests
                 RSAParameters exportedPrivate3 = rsa.ExportParameters(true);
                 RSAParameters exportedPublic3 = rsa.ExportParameters(false);
 
-                AssertKeyEquals(ref imported, ref exportedPrivate);
+                AssertKeyEquals(imported, exportedPrivate);
 
                 Assert.Equal(imported.Modulus, exportedPublic.Modulus);
                 Assert.Equal(imported.Exponent, exportedPublic.Exponent);
                 Assert.Null(exportedPublic.D);
                 ValidateParameters(ref exportedPublic);
 
-                AssertKeyEquals(ref exportedPrivate, ref exportedPrivate2);
-                AssertKeyEquals(ref exportedPrivate, ref exportedPrivate3);
+                AssertKeyEquals(exportedPrivate, exportedPrivate2);
+                AssertKeyEquals(exportedPrivate, exportedPrivate3);
 
-                AssertKeyEquals(ref exportedPublic, ref exportedPublic2);
-                AssertKeyEquals(ref exportedPublic, ref exportedPublic3);
+                AssertKeyEquals(exportedPublic, exportedPublic2);
+                AssertKeyEquals(exportedPublic, exportedPublic3);
             }
         }
 
@@ -207,7 +248,10 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
+                if (rsa is RSACng && PlatformDetection.IsFullFramework)
+                    AssertExtensions.Throws<ArgumentException>(null, () => rsa.ImportParameters(imported));
+                else
+                    Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
             }
         }
 
@@ -221,11 +265,17 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             using (RSA rsa = RSAFactory.Create())
             {
-                Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
+                if (rsa is RSACng && PlatformDetection.IsFullFramework)
+                    AssertExtensions.Throws<ArgumentException>(null, () => rsa.ImportParameters(imported));
+                else
+                    Assert.ThrowsAny<CryptographicException>(() => rsa.ImportParameters(imported));
             }
         }
 
         [Fact]
+#if TESTING_CNG_IMPLEMENTATION
+        [ActiveIssue(18882, TargetFrameworkMonikers.NetFramework)]
+#endif
         public static void ImportNoDP()
         {
             // Because RSAParameters is a struct, this is a copy,
@@ -239,7 +289,7 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        internal static void AssertKeyEquals(ref RSAParameters expected, ref RSAParameters actual)
+        internal static void AssertKeyEquals(in RSAParameters expected, in RSAParameters actual)
         {
             Assert.Equal(expected.Modulus, actual.Modulus);
             Assert.Equal(expected.Exponent, actual.Exponent);
@@ -262,7 +312,7 @@ namespace System.Security.Cryptography.Rsa.Tests
                 // If it didn't, we'll test that the value is at least legal.
                 if (!expected.D.SequenceEqual(actual.D))
                 {
-                    VerifyDValue(ref actual);
+                    VerifyDValue(actual);
                 }
             }
         }
@@ -296,7 +346,16 @@ namespace System.Security.Cryptography.Rsa.Tests
             }
         }
 
-        private static void VerifyDValue(ref RSAParameters rsaParams)
+        internal static RSAParameters MakePublic(in RSAParameters rsaParams)
+        {
+            return new RSAParameters
+            {
+                Modulus = rsaParams.Modulus,
+                Exponent = rsaParams.Exponent,
+            };
+        }
+
+        private static void VerifyDValue(in RSAParameters rsaParams)
         {
             if (rsaParams.P == null)
             {
@@ -344,6 +403,24 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             Array.Reverse(littleEndianBytes);
             return new BigInteger(littleEndianBytes);
+        }
+
+        private static bool TestRsa16384()
+        {
+            try
+            {
+                using (RSA rsa = RSAFactory.Create())
+                {
+                    rsa.ImportParameters(TestData.RSA16384Params);
+                }
+
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                // The key is too big for this platform.
+                return false;
+            }
         }
     }
 }

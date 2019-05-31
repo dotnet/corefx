@@ -55,7 +55,7 @@ namespace System.Xml
                 case State.InReadElementContent:
                     throw new InvalidOperationException(SR.Xml_MixingBinaryContentMethods);
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 
@@ -111,7 +111,7 @@ namespace System.Xml
                 case State.InReadElementContent:
                     throw new InvalidOperationException(SR.Xml_MixingBinaryContentMethods);
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 
@@ -167,7 +167,7 @@ namespace System.Xml
                     }
                     break;
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 
@@ -223,7 +223,7 @@ namespace System.Xml
                     }
                     break;
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected state {_state}");
                     return 0;
             }
 
@@ -308,12 +308,12 @@ namespace System.Xml
             }
             _decoder.SetNextOutputBuffer(buffer, index, count);
 
-            for (; ;)
+            for (;;)
             {
                 // use streaming ReadValueChunk if the reader supports it
                 if (_canReadValueChunk)
                 {
-                    for (; ;)
+                    for (;;)
                     {
                         if (_valueOffset < _valueChunkLength)
                         {

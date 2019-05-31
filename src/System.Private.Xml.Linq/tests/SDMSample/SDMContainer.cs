@@ -25,7 +25,7 @@ namespace XDocumentTests.SDMSample
             element.Add(null);
             Assert.Empty(element.Nodes());
 
-            // Add node, attrbute, string, some other value, and an IEnumerable.
+            // Add node, attribute, string, some other value, and an IEnumerable.
             XComment comment = new XComment("this is a comment");
             XComment comment2 = new XComment("this is a comment 2");
             XComment comment3 = new XComment("this is a comment 3");
@@ -60,7 +60,7 @@ namespace XDocumentTests.SDMSample
 
             // Not allowed to add a document as a child.
             XDocument document = new XDocument();
-            Assert.Throws<ArgumentException>(() => element.Add(document));
+            AssertExtensions.Throws<ArgumentException>(null, () => element.Add(document));
         }
 
         /// <summary>
@@ -72,7 +72,7 @@ namespace XDocumentTests.SDMSample
             // Not allowed to add attributes in the general case.
             // The only general case of a container is a document.
             XDocument document = new XDocument();
-            Assert.Throws<ArgumentException>(() => document.Add(new XAttribute("foo", "bar")));
+            AssertExtensions.Throws<ArgumentException>(null, () => document.Add(new XAttribute("foo", "bar")));
 
             // Can add to elements, but no duplicates allowed.
             XElement e = new XElement("element");
@@ -103,7 +103,7 @@ namespace XDocumentTests.SDMSample
             element.AddFirst(null);
             Assert.Empty(element.Nodes());
 
-            // Add a sentinal value.
+            // Add a sentinel value.
             XText text = new XText("abcd");
             element.AddFirst(text);
 
@@ -127,7 +127,7 @@ namespace XDocumentTests.SDMSample
 
             // Can't use to add attributes.
             XAttribute a = new XAttribute("foo", "bar");
-            Assert.Throws<ArgumentException>(() => element.AddFirst(a));
+            AssertExtensions.Throws<ArgumentException>(null, () => element.AddFirst(a));
         }
 
         /// <summary>

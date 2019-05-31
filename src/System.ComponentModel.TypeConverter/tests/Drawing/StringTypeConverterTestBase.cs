@@ -80,7 +80,7 @@ namespace System.ComponentModel.TypeConverterTests
 
         protected void ConvertFromThrowsArgumentExceptionForString(string value)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
             });
@@ -88,7 +88,7 @@ namespace System.ComponentModel.TypeConverterTests
 
         protected void ConvertFromThrowsFormatInnerExceptionForString(string value)
         {
-            var ex = Assert.Throws<Exception>(() =>
+            var ex = AssertExtensions.Throws<ArgumentException, Exception>(() =>
             {
                 Converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
             });
@@ -137,7 +137,7 @@ namespace System.ComponentModel.TypeConverterTests
 
         protected void ConvertFromInvariantStringThrowsArgumentException(string str)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Converter.ConvertFromInvariantString(str);
             });
@@ -145,7 +145,7 @@ namespace System.ComponentModel.TypeConverterTests
 
         protected void ConvertFromInvariantStringThrowsFormatInnerException(string str)
         {
-            var ex = Assert.Throws<Exception>(() =>
+            var ex = AssertExtensions.Throws<ArgumentException, Exception>(() =>
             {
                 Converter.ConvertFromInvariantString(str);
             });
@@ -155,7 +155,7 @@ namespace System.ComponentModel.TypeConverterTests
 
         protected void ConvertFromStringThrowsArgumentException(string str)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Converter.ConvertFromString(str);
             });
@@ -163,7 +163,7 @@ namespace System.ComponentModel.TypeConverterTests
 
         protected void ConvertFromStringThrowsFormatInnerException(string str)
         {
-            var ex = Assert.Throws<Exception>(() =>
+            var ex = AssertExtensions.Throws<ArgumentException, Exception>(() =>
             {
                 Converter.ConvertFromString(str);
             });

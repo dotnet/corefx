@@ -55,6 +55,9 @@ namespace Internal.Cryptography.Pal
             if (typeof(T) == typeof(ECDsa))
                 return (T)(object)certificate.Pal.GetECDsaPrivateKey();
 
+            if (typeof(T) == typeof(DSA))
+                return (T)(object)certificate.Pal.GetDSAPrivateKey();
+
             Debug.Fail("Expected GetExpectedOidValue() to have thrown before we got here.");
             throw new NotSupportedException(SR.NotSupported_KeyAlgorithm);
         }
@@ -62,9 +65,11 @@ namespace Internal.Cryptography.Pal
         private static string GetExpectedOidValue<T>() where T : AsymmetricAlgorithm
         {
             if (typeof(T) == typeof(RSA))
-                return Oids.RsaRsa;
+                return Oids.Rsa;
             if (typeof(T) == typeof(ECDsa))
-                return Oids.Ecc;
+                return Oids.EcPublicKey;
+            if (typeof(T) == typeof(DSA))
+                return Oids.Dsa;
             throw new NotSupportedException(SR.NotSupported_KeyAlgorithm);
         }
     }

@@ -9,6 +9,13 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // There is exactly one of these.
     // ----------------------------------------------------------------------------
 
-    internal class ArgumentListType : CType
-    { };
+    internal sealed class ArgumentListType : CType
+    {
+        public static readonly ArgumentListType Instance = new ArgumentListType();
+
+        private ArgumentListType()
+            : base(TypeKind.TK_ArgumentListType)
+        {
+        }
+    }
 }

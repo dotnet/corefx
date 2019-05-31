@@ -21,15 +21,10 @@ namespace System.IO.Tests
         {
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
             {
-                Assert.Throws<ArgumentNullException>("destination", () => { fs.CopyToAsync(null); });
-                Assert.Throws<ArgumentOutOfRangeException>("bufferSize", () => { fs.CopyToAsync(new MemoryStream(), 0); });
+                AssertExtensions.Throws<ArgumentNullException>("destination", () => { fs.CopyToAsync(null); });
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("bufferSize", () => { fs.CopyToAsync(new MemoryStream(), 0); });
                 Assert.Throws<NotSupportedException>(() => { fs.CopyToAsync(new MemoryStream(new byte[1], writable: false)); });
                 fs.Dispose();
-                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
-            }
-            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
-            {
-                fs.SafeFileHandle.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
             }
             using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.Write))
@@ -41,6 +36,25 @@ namespace System.IO.Tests
             {
                 dst.Dispose();
                 Assert.Throws<ObjectDisposedException>(() => { src.CopyToAsync(dst); });
+            }
+        }
+
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void DisposeHandleThenUseFileStream_CopyToAsync(bool useAsync)
+        {
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.SafeFileHandle.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()); });
+            }
+
+            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite, FileShare.None, 0x100, useAsync))
+            {
+                fs.Write(TestBuffer, 0, TestBuffer.Length);
+                fs.SafeFileHandle.Dispose();
+                Assert.Throws<ObjectDisposedException>(() => { fs.CopyToAsync(new MemoryStream()).Wait(); });
             }
         }
 
@@ -148,7 +162,7 @@ namespace System.IO.Tests
                                 default: createDestinationStream = s => File.Create(s); break;
                             }
 
-                            // Various exposeHandle (whether the SafeFileHandle was publically accessed), 
+                            // Various exposeHandle (whether the SafeFileHandle was publicly accessed), 
                             // preWrite, bufferSize, writeSize, and numWrites combinations
                             yield return new object[] { createDestinationStream, useAsync, preRead, false, false, cancelable, 0x1000, 0x100, 100 };
                             yield return new object[] { createDestinationStream, useAsync, preRead, false, false, cancelable, 0x1, 0x1, 1000 };
@@ -200,6 +214,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(false, 10, 1024)]
         [InlineData(true, 10, 1024)]
+        [ActiveIssue(22271, TargetFrameworkMonikers.Uap)]
         public async Task NamedPipeViaFileStream_AllDataCopied(bool useAsync, int writeSize, int numWrites)
         {
             long totalLength = writeSize * numWrites;
@@ -209,7 +224,7 @@ namespace System.IO.Tests
             var results = new MemoryStream();
             var pipeOptions = useAsync ? PipeOptions.Asynchronous : PipeOptions.None;
 
-            string name = Guid.NewGuid().ToString("N");
+            string name = GetNamedPipeServerStreamName();
             using (var server = new NamedPipeServerStream(name, PipeDirection.Out, 1, PipeTransmissionMode.Byte, pipeOptions))
             {
                 Task serverTask = Task.Run(async () =>

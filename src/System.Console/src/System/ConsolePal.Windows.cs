@@ -2,21 +2,25 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading;
 
 namespace System
 {
     // Provides Windows-based support for System.Console.
     internal static class ConsolePal
     {
-        private const int DefaultConsoleBufferSize = 256; // default size of buffer used in stream readers/writers
+        private static IntPtr InvalidHandleValue => new IntPtr(-1);
 
-        private static IntPtr s_InvalidHandleValue = new IntPtr(-1);
+        private static bool IsWindows7()
+        {
+            // Version lies for all apps from the OS kick in starting with Windows 8 (6.2). They can
+            // also be added via appcompat (by the OS or the users) so this can only be used as a hint.
+            Version version = Environment.OSVersion.Version;
+            return version.Major == 6 && version.Minor == 1;
+        }
 
         public static Stream OpenStandardInput()
         {
@@ -56,7 +60,7 @@ namespace System
             // stderr, & stdin could independently be set to INVALID_HANDLE_VALUE.
             // Additionally they might use 0 as an invalid handle.  We also need to
             // ensure that if the handle is meant to be writable it actually is.
-            if (handle == IntPtr.Zero || handle == s_InvalidHandleValue ||
+            if (handle == IntPtr.Zero || handle == InvalidHandleValue ||
                 (access != FileAccess.Read && !ConsoleHandleIsWritable(handle)))
             {
                 return Stream.Null;
@@ -97,7 +101,7 @@ namespace System
             if (enc.CodePage != Encoding.Unicode.CodePage)
             {
                 if (!Interop.Kernel32.SetConsoleCP(enc.CodePage))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
         }
 
@@ -111,7 +115,7 @@ namespace System
             if (enc.CodePage != Encoding.Unicode.CodePage)
             {
                 if (!Interop.Kernel32.SetConsoleOutputCP(enc.CodePage))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
         }
 
@@ -130,7 +134,7 @@ namespace System
 
                 default:
                     // This can never happen.
-                    Debug.Assert(false, "Unexpected handleType value (" + handleType + ")");
+                    Debug.Fail("Unexpected handleType value (" + handleType + ")");
                     return true;
             }
         }
@@ -173,20 +177,19 @@ namespace System
                     stream: inputStream,
                     encoding: new ConsoleEncoding(Console.InputEncoding),
                     detectEncodingFromByteOrderMarks: false,
-                    bufferSize: DefaultConsoleBufferSize,
+                    bufferSize: Console.ReadBufferSize,
                     leaveOpen: true));
         }
 
         // Use this for blocking in Console.ReadKey, which needs to protect itself in case multiple threads call it simultaneously.
         // Use a ReadKey-specific lock though, to allow other fields to be initialized on this type.
-        private static readonly Object s_readKeySyncObject = new object();
+        private static readonly object s_readKeySyncObject = new object();
 
         // ReadLine & Read can't use this because they need to use ReadFile
         // to be able to handle redirected input.  We have to accept that
         // we will lose repeated keystrokes when someone switches from
         // calling ReadKey to calling Read or ReadLine.  Those methods should 
         // ideally flush this cache as well.
-        [System.Security.SecurityCritical] // auto-generated
         private static Interop.InputRecord _cachedInputRecord;
 
         // Skip non key events. Generally we want to surface only KeyDown event 
@@ -194,13 +197,11 @@ namespace System
         // where the assumption of KeyDown-KeyUp pairing for a given key press 
         // is invalid. For example in IME Unicode keyboard input, we often see
         // only KeyUp until the key is released.  
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsKeyDownEvent(Interop.InputRecord ir)
         {
-            return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown);
+            return (ir.eventType == Interop.KEY_EVENT && ir.keyEvent.keyDown != Interop.BOOL.FALSE);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsModKey(Interop.InputRecord ir)
         {
             // We should also skip over Shift, Control, and Alt, as well as caps lock.
@@ -230,7 +231,6 @@ namespace System
         // desired effect is to translate the sequence into one Unicode KeyPress. 
         // We need to keep track of the Alt+NumPad sequence and surface the final
         // unicode char alone when the Alt key is released. 
-        [System.Security.SecurityCritical]  // auto-generated
         private static bool IsAltKeyDown(Interop.InputRecord ir)
         {
             return (((ControlKeyState)ir.keyEvent.controlKeyState)
@@ -420,19 +420,19 @@ namespace System
             get
             {
                 IntPtr handle = InputHandle;
-                if (handle == s_InvalidHandleValue)
+                if (handle == InvalidHandleValue)
                     throw new IOException(SR.IO_NoConsole);
 
                 int mode = 0;
                 if (!Interop.Kernel32.GetConsoleMode(handle, out mode))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
 
                 return (mode & Interop.Kernel32.ENABLE_PROCESSED_INPUT) == 0;
             }
             set
             {
                 IntPtr handle = InputHandle;
-                if (handle == s_InvalidHandleValue)
+                if (handle == InvalidHandleValue)
                     throw new IOException(SR.IO_NoConsole);
 
                 int mode = 0;
@@ -448,7 +448,7 @@ namespace System
                 }
 
                 if (!Interop.Kernel32.SetConsoleMode(handle, mode))
-                    Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
+                    throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
         }
 
@@ -554,7 +554,6 @@ namespace System
                 // Value should be a percentage from [1, 100].
                 if (value < 1 || value > 100)
                     throw new ArgumentOutOfRangeException(nameof(value), value, SR.ArgumentOutOfRange_CursorSize);
-                Contract.EndContractBlock();
 
                 Interop.Kernel32.CONSOLE_CURSOR_INFO cci;
                 if (!Interop.Kernel32.GetConsoleCursorInfo(OutputHandle, out cci))
@@ -606,69 +605,89 @@ namespace System
             }
         }
 
-        // Although msdn states that the max allowed limit is 65K,
-        // desktop limits this to 24500 as buffer sizes greater than it
-        // throw.
-        private const int MaxConsoleTitleLength = 24500;
-
-        public static string Title
+        public unsafe static string Title
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
-                string title = null;
-                int titleLength = -1;
-                int r = Interop.Kernel32.GetConsoleTitle(out title, out titleLength);
+                Span<char> initialBuffer = stackalloc char[256];
+                ValueStringBuilder builder = new ValueStringBuilder(initialBuffer);
 
-                if (0 != r)
+                while (true)
                 {
-                    throw Win32Marshal.GetExceptionForWin32Error(r, string.Empty);
+                    uint result = Interop.Errors.ERROR_SUCCESS;
+
+                    fixed (char* c = &builder.GetPinnableReference())
+                    {
+                        result = Interop.Kernel32.GetConsoleTitleW(c, (uint)builder.Capacity);
+                    }
+
+                    // The documentation asserts that the console's title is stored in a shared 64KB buffer.
+                    // The magic number that used to exist here (24500) is likely related to that.
+                    // A full UNICODE_STRING is 32K chars...
+                    Debug.Assert(result <= short.MaxValue, "shouldn't be possible to grow beyond UNICODE_STRING size");
+
+                    if (result == 0)
+                    {
+                        int error = Marshal.GetLastWin32Error();
+                        switch (error)
+                        {
+                            case Interop.Errors.ERROR_INSUFFICIENT_BUFFER:
+                                // Typically this API truncates but there was a bug in RS2 so we'll make an attempt to handle
+                                builder.EnsureCapacity(builder.Capacity * 2);
+                                continue;
+                            case Interop.Errors.ERROR_SUCCESS:
+                                // The title is empty.
+                                break;
+                            default:
+                                throw Win32Marshal.GetExceptionForWin32Error(error, string.Empty);
+                        }
+                    }
+                    else if (result >= builder.Capacity - 1 || (IsWindows7() && result >= builder.Capacity / sizeof(char) - 1))
+                    {
+                        // Our buffer was full. As this API truncates we need to increase our size and reattempt.
+                        // Note that Windows 7 copies count of bytes into the output buffer but returns count of chars
+                        // and as such our buffer is only "half" its actual size.
+                        //
+                        // (If we're Windows 10 with a version lie to 7 this will be inefficient so we'll want to remove
+                        //  this workaround when we no longer support Windows 7)
+                        builder.EnsureCapacity(builder.Capacity * 2);
+                        continue;
+                    }
+
+                    builder.Length = (int)result;
+                    break;
                 }
 
-                if (titleLength > MaxConsoleTitleLength)
-                    throw new InvalidOperationException(SR.ArgumentOutOfRange_ConsoleTitleTooLong);
-
-                Debug.Assert(title.Length == titleLength);
-                return title;
+                return builder.ToString();
             }
-
-            [System.Security.SecuritySafeCritical]  // auto-generated
             set
             {
-                if (value == null)
-                    throw new ArgumentNullException(nameof(value));
-                if (value.Length > MaxConsoleTitleLength)
-                    throw new ArgumentOutOfRangeException(nameof(value), SR.ArgumentOutOfRange_ConsoleTitleTooLong);
-                Contract.EndContractBlock();
-
                 if (!Interop.Kernel32.SetConsoleTitle(value))
                     throw Win32Marshal.GetExceptionForWin32Error(Marshal.GetLastWin32Error());
             }
         }
 
-        private const int BeepFrequencyInHz = 800;
-        private const int BeepDurationInMs = 200;
-
         public static void Beep()
         {
+            const int BeepFrequencyInHz = 800;
+            const int BeepDurationInMs = 200;
             Interop.Kernel32.Beep(BeepFrequencyInHz, BeepDurationInMs);
         }
 
-        private const int MinBeepFrequency = 37;
-        private const int MaxBeepFrequency = 32767;
-
         public static void Beep(int frequency, int duration)
         {
+            const int MinBeepFrequency = 37;
+            const int MaxBeepFrequency = 32767;
+
             if (frequency < MinBeepFrequency || frequency > MaxBeepFrequency)
                 throw new ArgumentOutOfRangeException(nameof(frequency), frequency, SR.Format(SR.ArgumentOutOfRange_BeepFrequency, MinBeepFrequency, MaxBeepFrequency));
             if (duration <= 0)
                 throw new ArgumentOutOfRangeException(nameof(duration), duration, SR.ArgumentOutOfRange_NeedPosNum);
 
-            Contract.EndContractBlock();
             Interop.Kernel32.Beep(frequency, duration);
         }
 
-        public unsafe static void MoveBufferArea(int sourceLeft, int sourceTop,
+        public static unsafe void MoveBufferArea(int sourceLeft, int sourceTop,
             int sourceWidth, int sourceHeight, int targetLeft, int targetTop,
             char sourceChar, ConsoleColor sourceForeColor,
             ConsoleColor sourceBackColor)
@@ -677,7 +696,6 @@ namespace System
                 throw new ArgumentException(SR.Arg_InvalidConsoleColor, nameof(sourceForeColor));
             if (sourceBackColor < ConsoleColor.Black || sourceBackColor > ConsoleColor.White)
                 throw new ArgumentException(SR.Arg_InvalidConsoleColor, nameof(sourceBackColor));
-            Contract.EndContractBlock();
 
             Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
             Interop.Kernel32.COORD bufferSize = csbi.dwSize;
@@ -762,7 +780,7 @@ namespace System
             int conSize;
 
             IntPtr hConsole = OutputHandle;
-            if (hConsole == s_InvalidHandleValue)
+            if (hConsole == InvalidHandleValue)
                 throw new IOException(SR.IO_NoConsole);
 
             // get the number of character cells in the current buffer
@@ -796,15 +814,6 @@ namespace System
 
         public static void SetCursorPosition(int left, int top)
         {
-            // Note on argument checking - the upper bounds are NOT correct 
-            // here!  But it looks slightly expensive to compute them.  Let
-            // Windows calculate them, then we'll give a nice error message.
-            if (left < 0 || left >= short.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(left), left, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
-            if (top < 0 || top >= short.MaxValue)
-                throw new ArgumentOutOfRangeException(nameof(top), top, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
-            Contract.EndContractBlock();
-
             IntPtr hConsole = OutputHandle;
             Interop.Kernel32.COORD coords = new Interop.Kernel32.COORD();
             coords.X = (short)left;
@@ -814,9 +823,9 @@ namespace System
                 // Give a nice error message for out of range sizes
                 int errorCode = Marshal.GetLastWin32Error();
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
-                if (left < 0 || left >= csbi.dwSize.X)
+                if (left >= csbi.dwSize.X)
                     throw new ArgumentOutOfRangeException(nameof(left), left, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
-                if (top < 0 || top >= csbi.dwSize.Y)
+                if (top >= csbi.dwSize.Y)
                     throw new ArgumentOutOfRangeException(nameof(top), top, SR.ArgumentOutOfRange_ConsoleBufferBoundaries);
 
                 throw Win32Marshal.GetExceptionForWin32Error(errorCode);
@@ -825,7 +834,6 @@ namespace System
 
         public static int BufferWidth
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
@@ -839,7 +847,6 @@ namespace System
 
         public static int BufferHeight
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 Interop.Kernel32.CONSOLE_SCREEN_BUFFER_INFO csbi = GetBufferInfo();
@@ -851,7 +858,6 @@ namespace System
             }
         }
 
-        [System.Security.SecuritySafeCritical]  // auto-generated
         public static void SetBufferSize(int width, int height)
         {
             // Ensure the new size is not smaller than the console window
@@ -873,7 +879,6 @@ namespace System
 
         public static int LargestWindowWidth
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 // Note this varies based on current screen resolution and 
@@ -885,7 +890,6 @@ namespace System
 
         public static int LargestWindowHeight
         {
-            [System.Security.SecuritySafeCritical]  // auto-generated
             get
             {
                 // Note this varies based on current screen resolution and 
@@ -993,14 +997,14 @@ namespace System
             if (csbi.dwSize.X < csbi.srWindow.Left + width)
             {
                 if (csbi.srWindow.Left >= short.MaxValue - width)
-                    throw new ArgumentOutOfRangeException(nameof(width), SR.ArgumentOutOfRange_ConsoleWindowBufferSize);
+                    throw new ArgumentOutOfRangeException(nameof(width), SR.Format(SR.ArgumentOutOfRange_ConsoleWindowBufferSize, short.MaxValue - width));
                 size.X = (short)(csbi.srWindow.Left + width);
                 resizeBuffer = true;
             }
             if (csbi.dwSize.Y < csbi.srWindow.Top + height)
             {
                 if (csbi.srWindow.Top >= short.MaxValue - height)
-                    throw new ArgumentOutOfRangeException(nameof(height), SR.ArgumentOutOfRange_ConsoleWindowBufferSize);
+                    throw new ArgumentOutOfRangeException(nameof(height), SR.Format(SR.ArgumentOutOfRange_ConsoleWindowBufferSize, short.MaxValue - height));
                 size.Y = (short)(csbi.srWindow.Top + height);
                 resizeBuffer = true;
             }
@@ -1041,7 +1045,6 @@ namespace System
         {
             if ((((int)color) & ~0xf) != 0)
                 throw new ArgumentException(SR.Arg_InvalidConsoleColor);
-            Contract.EndContractBlock();
 
             Interop.Kernel32.Color c = (Interop.Kernel32.Color)color;
 
@@ -1075,7 +1078,7 @@ namespace System
             succeeded = false;
 
             IntPtr outputHandle = OutputHandle;
-            if (outputHandle == s_InvalidHandleValue)
+            if (outputHandle == InvalidHandleValue)
             {
                 if (throwOnNoConsole)
                 {
@@ -1122,7 +1125,7 @@ namespace System
             internal WindowsConsoleStream(IntPtr handle, FileAccess access, bool useFileAPIs)
                 : base(access)
             {
-                Debug.Assert(handle != IntPtr.Zero && handle != s_InvalidHandleValue, "ConsoleStream expects a valid handle!");
+                Debug.Assert(handle != IntPtr.Zero && handle != InvalidHandleValue, "ConsoleStream expects a valid handle!");
                 _handle = handle;
                 _isPipe = Interop.Kernel32.GetFileType(handle) == Interop.Kernel32.FileTypes.FILE_TYPE_PIPE;
                 _useFileAPIs = useFileAPIs;
@@ -1170,7 +1173,7 @@ namespace System
             // world working set and to avoid requiring a reference to the
             // System.IO.FileSystem contract.
 
-            private unsafe static int ReadFileNative(IntPtr hFile, byte[] bytes, int offset, int count, bool isPipe, out int bytesRead, bool useFileAPIs)
+            private static unsafe int ReadFileNative(IntPtr hFile, byte[] bytes, int offset, int count, bool isPipe, out int bytesRead, bool useFileAPIs)
             {
                 Debug.Assert(offset >= 0, "offset >= 0");
                 Debug.Assert(count >= 0, "count >= 0");
@@ -1179,7 +1182,6 @@ namespace System
                 // to this stream simultaneously.
                 if (bytes.Length - offset < count)
                     throw new IndexOutOfRangeException(SR.IndexOutOfRange_IORaceCondition);
-                Contract.EndContractBlock();
 
                 // You can't use the fixed statement on an array of length 0.
                 if (bytes.Length == 0)
@@ -1189,7 +1191,7 @@ namespace System
                 }
 
                 bool readSuccess;
-                fixed (byte* p = bytes)
+                fixed (byte* p = &bytes[0])
                 {
                     if (useFileAPIs)
                     {
@@ -1227,20 +1229,21 @@ namespace System
                     return Interop.Errors.ERROR_SUCCESS;
 
                 bool writeSuccess;
-                fixed (byte* p = bytes)
+                fixed (byte* p = &bytes[0])
                 {
                     if (useFileAPIs)
                     {
                         int numBytesWritten;
                         writeSuccess = (0 != Interop.Kernel32.WriteFile(hFile, p + offset, count, out numBytesWritten, IntPtr.Zero));
-                        Debug.Assert(!writeSuccess || count == numBytesWritten);
+                        // In some cases we have seen numBytesWritten returned that is twice count;
+                        // so we aren't asserting the value of it. See corefx #24508
                     }
                     else
                     {
 
                         // If the code page could be Unicode, we should use ReadConsole instead, e.g.
                         // Note that WriteConsoleW has a max limit on num of chars to write (64K)
-                        // [http://msdn.microsoft.com/en-us/library/ms687401.aspx]
+                        // [https://docs.microsoft.com/en-us/windows/console/writeconsole]
                         // However, we do not need to worry about that because the StreamWriter in Console has
                         // a much shorter buffer size anyway.
                         int charsWritten;
@@ -1253,7 +1256,7 @@ namespace System
 
                 // For pipes that are closing or broken, just stop.
                 // (E.g. ERROR_NO_DATA ("pipe is being closed") is returned when we write to a console that is closing;
-                // ERROR_BROKEN_PIPE ("pipe was closed") is returned when stdin was closed, which is mot an error, but EOF.)
+                // ERROR_BROKEN_PIPE ("pipe was closed") is returned when stdin was closed, which is not an error, but EOF.)
                 int errorCode = Marshal.GetLastWin32Error();
                 if (errorCode == Interop.Errors.ERROR_NO_DATA || errorCode == Interop.Errors.ERROR_BROKEN_PIPE)
                     return Interop.Errors.ERROR_SUCCESS;

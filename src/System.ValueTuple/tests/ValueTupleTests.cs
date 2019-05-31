@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using Xunit;
+#if netcoreapp
+using System.Runtime.CompilerServices;
+#endif
 
 namespace System.Tests
 {
@@ -279,241 +280,239 @@ namespace System.Tests
             internal void TestCompareToThrows()
             {
                 ValueTuple<int> ValueTupleB = new ValueTuple<int>((int)10000);
-                Assert.Throws<ArgumentException>(() => ((IComparable)valueTuple).CompareTo(ValueTupleB));
+                AssertExtensions.Throws<ArgumentException>("other", () => ((IComparable)valueTuple).CompareTo(ValueTupleB));
             }
         }
 
         [Fact]
         public static void TestConstructor()
         {
-            ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA;
+            ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA;
             //ValueTuple-0
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>();
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>();
             ValueTupleDriverA.TestConstructor();
 
             //ValueTuple-1
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
             ValueTupleDriverA.TestConstructor(short.MaxValue);
 
             //ValueTuple-2
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
             ValueTupleDriverA.TestConstructor(short.MinValue, int.MaxValue);
 
             //ValueTuple-3
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
             ValueTupleDriverA.TestConstructor((short)0, (int)0, long.MaxValue);
 
             //ValueTuple-4
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
             ValueTupleDriverA.TestConstructor((short)1, (int)1, long.MinValue, "This");
 
             //ValueTuple-5
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
             ValueTupleDriverA.TestConstructor((short)(-1), (int)(-1), (long)0, "is", 'A');
 
             //ValueTuple-6
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MaxValue);
-            ValueTupleDriverA.TestConstructor((short)10, (int)100, (long)1, "testing", 'Z', Single.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MaxValue);
+            ValueTupleDriverA.TestConstructor((short)10, (int)100, (long)1, "testing", 'Z', float.MaxValue);
 
             //ValueTuple-7
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue);
-            ValueTupleDriverA.TestConstructor((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue);
+            ValueTupleDriverA.TestConstructor((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue);
 
             object myObj = new object();
             //ValueTuple-10
             DateTime now = DateTime.Now;
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (Single)0.0001, (Double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
-            ValueTupleDriverA.TestConstructor((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (Single)0.0001, (Double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (float)0.0001, (double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
+            ValueTupleDriverA.TestConstructor((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (float)0.0001, (double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
         }
 
         [Fact]
         public static void TestToString()
         {
-            ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA;
+            ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA;
             //ValueTuple-0
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>();
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>();
             ValueTupleDriverA.TestToString("()");
 
             //ValueTuple-1
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
             ValueTupleDriverA.TestToString("(" + short.MaxValue + ")");
 
             //ValueTuple-2
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
             ValueTupleDriverA.TestToString("(" + short.MinValue + ", " + int.MaxValue + ")");
 
             //ValueTuple-3
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
             ValueTupleDriverA.TestToString("(" + ((short)0) + ", " + ((int)0) + ", " + long.MaxValue + ")");
 
             //ValueTuple-4
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
             ValueTupleDriverA.TestConstructor((short)1, (int)1, long.MinValue, "This");
             ValueTupleDriverA.TestToString("(" + ((short)1) + ", " + ((int)1) + ", " + long.MinValue + ", This)");
 
             //ValueTuple-5
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
             ValueTupleDriverA.TestToString("(" + ((short)(-1)) + ", " + ((int)(-1)) + ", " + ((long)0) + ", is, A)");
 
             //ValueTuple-6
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MaxValue);
-            ValueTupleDriverA.TestToString("(" + ((short)10) + ", " + ((int)100) + ", " + ((long)1) + ", testing, Z, " + Single.MaxValue + ")");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MaxValue);
+            ValueTupleDriverA.TestToString("(" + ((short)10) + ", " + ((int)100) + ", " + ((long)1) + ", testing, Z, " + float.MaxValue + ")");
 
             //ValueTuple-7
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue);
-            ValueTupleDriverA.TestToString("(" + ((short)(-100)) + ", " + ((int)(-1000)) + ", " + ((long)(-1)) + ", ValueTuples,  , " + Single.MinValue + ", " + Double.MaxValue + ")");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue);
+            ValueTupleDriverA.TestToString("(" + ((short)(-100)) + ", " + ((int)(-1000)) + ", " + ((long)(-1)) + ", ValueTuples,  , " + float.MinValue + ", " + double.MaxValue + ")");
 
             object myObj = new object();
             //ValueTuple-10
             DateTime now = DateTime.Now;
 
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (Single)0.0001, (Double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (float)0.0001, (double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
             // .NET Native bug 438149 - object.ToString in incorrect
-            ValueTupleDriverA.TestToString("(" + ((short)10000) + ", " + ((int)1000000) + ", " + ((long)10000000) + ", 2008?7?2?, 0, " + ((Single)0.0001) + ", " + ((Double)0.0000001) + ", " + now + ", (False, System.Object), " + TimeSpan.Zero + ")");
+            ValueTupleDriverA.TestToString("(" + ((short)10000) + ", " + ((int)1000000) + ", " + ((long)10000000) + ", 2008?7?2?, 0, " + ((float)0.0001) + ", " + ((double)0.0000001) + ", " + now + ", (False, System.Object), " + TimeSpan.Zero + ")");
         }
 
-        [ActiveIssue(10207, TestPlatforms.AnyUnix)]
         [Fact]
         public static void TestEquals_GetHashCode()
         {
-            ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA, ValueTupleDriverB, ValueTupleDriverC, ValueTupleDriverD;
+            ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA, ValueTupleDriverB, ValueTupleDriverC, ValueTupleDriverD;
             //ValueTuple-0
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>();
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>();
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue, int.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>();
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>();
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue, int.MaxValue);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-1
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue);
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue, int.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue);
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue, int.MaxValue);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-2
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MinValue);
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), long.MinValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MinValue);
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), long.MinValue);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-3
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), long.MinValue);
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "this");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), long.MinValue);
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "this");
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-4
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "this");
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, (long)1, "IS", 'a');
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "this");
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, (long)1, "IS", 'a');
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-5
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, (long)1, "IS", 'a');
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MinValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, (long)1, "IS", 'a');
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MinValue);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-6
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MinValue);
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', Single.MinValue, (Double)0.0);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MinValue);
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', float.MinValue, (double)0.0);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-7
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', Single.MinValue, (Double)0.0);
-            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10001, (int)1000001, (long)10000001, "2008?7?3?", '1', (Single)0.0002, (Double)0.0000002, DateTime.Now.AddMilliseconds(1));
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', float.MinValue, (double)0.0);
+            ValueTupleDriverD = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10001, (int)1000001, (long)10000001, "2008?7?3?", '1', (float)0.0002, (double)0.0000002, DateTime.Now.AddMilliseconds(1));
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverD, false, false);
 
             //ValueTuple-8
             DateTime now = DateTime.Now;
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue, now);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue, now);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', Single.MinValue, (Double)0.0, now.AddMilliseconds(1));
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue, now);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue, now);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', float.MinValue, (double)0.0, now.AddMilliseconds(1));
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
 
             object myObj = new object();
             //ValueTuple-10
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (Single)0.0001, (Double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (Single)0.0001, (Double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10001, (int)1000001, (long)10000001, "2008?7?3?", '1', (Single)0.0002, (Double)0.0000002, now.AddMilliseconds(1), ValueTuple.Create(true, myObj), TimeSpan.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (float)0.0001, (double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (float)0.0001, (double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10001, (int)1000001, (long)10000001, "2008?7?3?", '1', (float)0.0002, (double)0.0000002, now.AddMilliseconds(1), ValueTuple.Create(true, myObj), TimeSpan.MaxValue);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverB, true, true);
             ValueTupleDriverA.TestEquals_GetHashCode(ValueTupleDriverC, false, false);
         }
 
-        [ActiveIssue(10207, TestPlatforms.AnyUnix)]
         [Fact]
         public static void TestCompareTo()
         {
-            ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA, ValueTupleDriverB, ValueTupleDriverC;
+            ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan> ValueTupleDriverA, ValueTupleDriverB, ValueTupleDriverC;
             //ValueTuple-0
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>();
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>();
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>();
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>();
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 0);
 
             //ValueTuple-1
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, 65535, 5);
             //ValueTuple-2
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MinValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>(short.MinValue, int.MinValue);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, 1, 5);
             //ValueTuple-3
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), long.MinValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, long.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), long.MinValue);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, 1, 5);
             //ValueTuple-4
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "this");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "This");
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)1, (int)1, long.MinValue, "this");
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, 1, 5);
             //ValueTuple-5
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, (long)1, "IS", 'a');
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-1), (int)(-1), (long)0, "is", 'A');
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)0, (int)0, (long)1, "IS", 'a');
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, -1, 5);
             //ValueTuple-6
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', Single.MinValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10, (int)100, (long)1, "testing", 'Z', float.MinValue);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, 1, 5);
             //ValueTuple-7
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', Single.MinValue, Double.MaxValue);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', Single.MinValue, (Double)0.0);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-100), (int)(-1000), (long)(-1), "ValueTuples", ' ', float.MinValue, double.MaxValue);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)(-101), (int)(-1001), (long)(-2), "ValueTuples", ' ', float.MinValue, (double)0.0);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, 1, 5);
 
@@ -521,9 +520,9 @@ namespace System.Tests
             //ValueTuple-10
             DateTime now = DateTime.Now;
 
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (Single)0.0001, (Double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
-            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (Single)0.0001, (Double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
-            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10001, (int)1000001, (long)10000001, "2008?7?3?", '1', (Single)0.0002, (Double)0.0000002, now.AddMilliseconds(1), ValueTuple.Create(true, myObj), TimeSpan.MaxValue);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (float)0.0001, (double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
+            ValueTupleDriverB = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', (float)0.0001, (double)0.0000001, now, ValueTuple.Create(false, myObj), TimeSpan.Zero);
+            ValueTupleDriverC = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, ValueTuple<bool, object>, TimeSpan>((short)10001, (int)1000001, (long)10000001, "2008?7?3?", '1', (float)0.0002, (double)0.0000002, now.AddMilliseconds(1), ValueTuple.Create(true, myObj), TimeSpan.MaxValue);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverB, 0, 5);
             ValueTupleDriverA.TestCompareTo(ValueTupleDriverC, -1, 5);
         }
@@ -531,42 +530,42 @@ namespace System.Tests
         [Fact]
         public static void TestNotEqual()
         {
-            ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan> ValueTupleDriverA;
+            ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan> ValueTupleDriverA;
             //ValueTuple-0
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>();
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>();
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-1
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000);
             ValueTupleDriverA.TestNotEqual();
 
             // This is for code coverage purposes
             //ValueTuple-2
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000);
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-3
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000);
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-4
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?");
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-5
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0');
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0');
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-6
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', Single.NaN);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', float.NaN);
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-7
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', Single.NaN, Double.NegativeInfinity);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', float.NaN, double.NegativeInfinity);
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-8, extended ValueTuple
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', Single.NaN, Double.NegativeInfinity, DateTime.Now);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', float.NaN, double.NegativeInfinity, DateTime.Now);
             ValueTupleDriverA.TestNotEqual();
 
             //ValueTuple-9 and ValueTuple-10 are not necessary because they use the same code path as ValueTuple-8
@@ -575,43 +574,43 @@ namespace System.Tests
         [Fact]
         public static void IncomparableTypes()
         {
-            ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan> ValueTupleDriverA;
+            ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan> ValueTupleDriverA;
 
             //ValueTuple-0
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>();
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>();
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-1
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000);
             ValueTupleDriverA.TestCompareToThrows();
 
             // This is for code coverage purposes
             //ValueTuple-2
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000);
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-3
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000);
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-4
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?");
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?");
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-5
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0');
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0');
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-6
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', Single.NaN);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', float.NaN);
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-7
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', Single.NaN, Double.NegativeInfinity);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', float.NaN, double.NegativeInfinity);
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-8, extended ValueTuple
-            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, Char, Single, Double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', Single.NaN, Double.NegativeInfinity, DateTime.Now);
+            ValueTupleDriverA = new ValueTupleTestDriver<short, int, long, string, char, float, double, DateTime, bool, TimeSpan>((short)10000, (int)1000000, (long)10000000, "2008?7?2?", '0', float.NaN, double.NegativeInfinity, DateTime.Now);
             ValueTupleDriverA.TestCompareToThrows();
 
             //ValueTuple-9 and ValueTuple-10 are not necessary because they use the same code path as ValueTuple-8
@@ -620,8 +619,8 @@ namespace System.Tests
         [Fact]
         public static void FloatingPointNaNCases()
         {
-            var a = ValueTuple.Create(Double.MinValue, Double.NaN, Single.MinValue, Single.NaN);
-            var b = ValueTuple.Create(Double.MinValue, Double.NaN, Single.MinValue, Single.NaN);
+            var a = ValueTuple.Create(double.MinValue, double.NaN, float.MinValue, float.NaN);
+            var b = ValueTuple.Create(double.MinValue, double.NaN, float.MinValue, float.NaN);
 
             Assert.True(a.Equals(b));
             Assert.Equal(0, ((IComparable)a).CompareTo(b));
@@ -753,7 +752,7 @@ namespace System.Tests
             var b = ValueTuple.Create(testClassB);
 
             Assert.True(a.Equals(b));
-            Assert.Throws<ArgumentException>(() => ((IComparable)a).CompareTo(b));
+            AssertExtensions.Throws<ArgumentException>(null, () => ((IComparable)a).CompareTo(b));
             Assert.Equal(a.GetHashCode(), b.GetHashCode());
             Assert.True(((IStructuralEquatable)a).Equals(b, TestEqualityComparer.Instance));
             Assert.Equal(5, ((IStructuralComparable)a).CompareTo(b, DummyTestComparer.Instance));
@@ -771,9 +770,15 @@ namespace System.Tests
             Assert.Equal(0, a.CompareTo(new ValueTuple()));
 
             Assert.Equal(1, ((IStructuralComparable)a).CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)a).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)a).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal("(1, 2, 3, 4, 5, 6, 7, )", CreateLong(1, 2, 3, 4, 5, 6, 7, new ValueTuple()).ToString());
+#if netcoreapp
+            ITuple it = ValueTuple.Create();
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Throws<IndexOutOfRangeException>(() => it[0].ToString());
+            Assert.Throws<IndexOutOfRangeException>(() => it[1].ToString());
+#endif
         }
 
         [Fact]
@@ -786,7 +791,7 @@ namespace System.Tests
             IStructuralComparable sc = (IStructuralComparable)c;
 
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(3), TestComparer.Instance));
 
@@ -798,6 +803,13 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string>(null);
             Assert.Equal("()", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = ValueTuple.Create(1);
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[1].ToString());
+#endif
         }
 
         [Fact]
@@ -811,7 +823,7 @@ namespace System.Tests
             IStructuralComparable sc = (IStructuralComparable)c;
 
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(1, 3), TestComparer.Instance));
 
@@ -823,6 +835,14 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string, string>(null, null);
             Assert.Equal("(, )", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = ValueTuple.Create(1, 2);
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(2, it[1]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[2].ToString());
+#endif
         }
 
         [Fact]
@@ -837,7 +857,7 @@ namespace System.Tests
             IStructuralComparable sc = (IStructuralComparable)c;
 
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(1, 3, 1), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(1, 1, 3), TestComparer.Instance));
@@ -850,6 +870,15 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string, string, string>(null, null, null);
             Assert.Equal("(, , )", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = ValueTuple.Create(1, 2, 3);
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(2, it[1]);
+            Assert.Equal(3, it[2]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[3].ToString());
+#endif
         }
 
         [Fact]
@@ -865,7 +894,7 @@ namespace System.Tests
             IStructuralComparable sc = (IStructuralComparable)c;
 
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(3, 1, 1, 1), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(1, 3, 1, 1), TestComparer.Instance));
@@ -880,6 +909,16 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string, string, string, string>(null, null, null, null);
             Assert.Equal("(, , , )", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = ValueTuple.Create(1, 2, 3, 4);
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(2, it[1]);
+            Assert.Equal(3, it[2]);
+            Assert.Equal(4, it[3]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[4].ToString());
+#endif
         }
 
         [Fact]
@@ -896,7 +935,7 @@ namespace System.Tests
             IStructuralComparable sc = (IStructuralComparable)c;
 
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(3, 1, 1, 1, 1), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(1, 3, 1, 1, 1), TestComparer.Instance));
@@ -912,6 +951,17 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string, string, string, string, string>(null, null, null, null, null);
             Assert.Equal("(, , , , )", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = ValueTuple.Create(1, 2, 3, 4, 5);
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(2, it[1]);
+            Assert.Equal(3, it[2]);
+            Assert.Equal(4, it[3]);
+            Assert.Equal(5, it[4]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[5].ToString());
+#endif
         }
 
         [Fact]
@@ -929,7 +979,7 @@ namespace System.Tests
             IStructuralComparable sc = (IStructuralComparable)c;
 
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(3, 1, 1, 1, 1, 1), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(1, 3, 1, 1, 1, 1), TestComparer.Instance));
@@ -946,6 +996,18 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string, string, string, string, string, string>(null, null, null, null, null, null);
             Assert.Equal("(, , , , , )", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = ValueTuple.Create(1, 2, 3, 4, 5, 6);
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(2, it[1]);
+            Assert.Equal(3, it[2]);
+            Assert.Equal(4, it[3]);
+            Assert.Equal(5, it[4]);
+            Assert.Equal(6, it[5]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[6].ToString());
+#endif
         }
 
         [Fact]
@@ -964,7 +1026,7 @@ namespace System.Tests
             IStructuralComparable sc = (IStructuralComparable)c;
 
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => ((IStructuralComparable)sc).CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(3, 1, 1, 1, 1, 1, 1), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(ValueTuple.Create(1, 3, 1, 1, 1, 1, 1), TestComparer.Instance));
@@ -982,6 +1044,19 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string, string, string, string, string, string, string>(null, null, null, null, null, null, null);
             Assert.Equal("(, , , , , , )", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = ValueTuple.Create(1, 2, 3, 4, 5, 6, 7);
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(2, it[1]);
+            Assert.Equal(3, it[2]);
+            Assert.Equal(4, it[3]);
+            Assert.Equal(5, it[4]);
+            Assert.Equal(6, it[5]);
+            Assert.Equal(7, it[6]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[7].ToString());
+#endif
         }
 
         public static ValueTuple<T1, T2, T3, T4, T5, T6, T7, TRest> CreateLong<T1, T2, T3, T4, T5, T6, T7, TRest>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, TRest rest) where TRest : struct
@@ -1019,7 +1094,7 @@ namespace System.Tests
 
             IStructuralComparable sc = t;
             Assert.Equal(1, sc.CompareTo(null, DummyTestComparer.Instance));
-            Assert.Throws<ArgumentException>(() => sc.CompareTo("string", DummyTestComparer.Instance));
+            AssertExtensions.Throws<ArgumentException>("other", () => sc.CompareTo("string", DummyTestComparer.Instance));
 
             Assert.Equal(1, sc.CompareTo(CreateLong(3, 1, 1, 1, 1, 1, 1, ValueTuple.Create(1)), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(CreateLong(1, 3, 1, 1, 1, 1, 1, ValueTuple.Create(1)), TestComparer.Instance));
@@ -1029,28 +1104,6 @@ namespace System.Tests
             Assert.Equal(1, sc.CompareTo(CreateLong(1, 1, 1, 1, 1, 3, 1, ValueTuple.Create(1)), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(CreateLong(1, 1, 1, 1, 1, 1, 3, ValueTuple.Create(1)), TestComparer.Instance));
             Assert.Equal(1, sc.CompareTo(CreateLong(1, 1, 1, 1, 1, 1, 1, ValueTuple.Create(3)), TestComparer.Instance));
-
-            Assert.Equal(2138941962, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create()).GetHashCode());
-            Assert.Equal(2138941954, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8)).GetHashCode());
-            Assert.Equal(-1746596640, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9)).GetHashCode());
-            Assert.Equal(121964360, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10)).GetHashCode());
-            Assert.Equal(4363008, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11)).GetHashCode());
-            Assert.Equal(9413384, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12)).GetHashCode());
-            Assert.Equal(305131744, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13)).GetHashCode());
-            Assert.Equal(1479338186, CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13, 14)).GetHashCode());
-            Assert.Equal(1573514559, CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create())).GetHashCode());
-            Assert.Equal(1573514711, CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create(15))).GetHashCode());
-
-            Assert.Equal(2138941962, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create())).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(2138941954, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(-1746596640, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(121964360, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(4363008, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(9413384, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(305131744, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(1479338186, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8, 9, 10, 11, 12, 13, 14))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(1573514559, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create()))).GetHashCode(TestEqualityComparer.Instance));
-            Assert.Equal(1573514711, ((IStructuralEquatable)CreateLong(1, 2, 3, 4, 5, 6, 7, CreateLong(8, 9, 10, 11, 12, 13, 14, ValueTuple.Create(15)))).GetHashCode(TestEqualityComparer.Instance));
 
             Assert.False(se.Equals(t, DummyTestEqualityComparer.Instance));
 
@@ -1063,6 +1116,20 @@ namespace System.Tests
             var tupleWithNull = new Tuple<string, string, string, string, string, string, string, Tuple<string>>(null, null, null, null, null, null, null, new Tuple<string>(null));
             Assert.Equal("(, , , , , , , )", vtWithNull.ToString());
             Assert.Equal(tupleWithNull.ToString(), vtWithNull.ToString());
+
+#if netcoreapp
+            ITuple it = CreateLong(1, 2, 3, 4, 5, 6, 7, ValueTuple.Create(8));
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(2, it[1]);
+            Assert.Equal(3, it[2]);
+            Assert.Equal(4, it[3]);
+            Assert.Equal(5, it[4]);
+            Assert.Equal(6, it[5]);
+            Assert.Equal(7, it[6]);
+            Assert.Equal(8, it[7]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[8].ToString());
+#endif
         }
 
         [Fact]
@@ -1128,24 +1195,30 @@ namespace System.Tests
         [Fact]
         public static void EightTuplesWithBadRest()
         {
-            // Change as necessary if in the future
-            // the hash algorithm is modified again.
-            const int ExpectedHash = 1291467969;
-
             var d = default(ValueTuple<int, int, int, int, int, int, int, int>);
             d.Item1 = 1;
             d.Rest = 42;
-            Assert.Equal(ExpectedHash, d.GetHashCode());
-            Assert.Equal(ExpectedHash, ((IStructuralEquatable)d).GetHashCode());
             Assert.Equal("(1, 0, 0, 0, 0, 0, 0, 42)", d.ToString());
-
-            Assert.Equal(ExpectedHash, CreateLong(1, 2, 3, 4, 5, 6, 7, d).GetHashCode());
 
             // GetHashCode only tries to hash the first 7 elements when rest is not ITupleInternal
             Assert.Equal(ValueTuple.Create(1, 0, 0, 0, 0, 0, 0).GetHashCode(), d.GetHashCode());
             Assert.Equal(((IStructuralEquatable)ValueTuple.Create(1, 0, 0, 0, 0, 0, 0)).GetHashCode(TestEqualityComparer.Instance), ((IStructuralEquatable)d).GetHashCode(TestEqualityComparer.Instance));
 
             Assert.Equal("(1, 2, 3, 4, 5, 6, 7, 1, 0, 0, 0, 0, 0, 0, 42)", CreateLong(1, 2, 3, 4, 5, 6, 7, d).ToString());
+
+#if netcoreapp
+            ITuple it = d;
+            Assert.Throws<IndexOutOfRangeException>(() => it[-1].ToString());
+            Assert.Equal(1, it[0]);
+            Assert.Equal(0, it[1]);
+            Assert.Equal(0, it[2]);
+            Assert.Equal(0, it[3]);
+            Assert.Equal(0, it[4]);
+            Assert.Equal(0, it[5]);
+            Assert.Equal(0, it[6]);
+            Assert.Equal(42, it[7]);
+            Assert.Throws<IndexOutOfRangeException>(() => it[8].ToString());
+#endif
         }
 
         private class TestClass : IComparable

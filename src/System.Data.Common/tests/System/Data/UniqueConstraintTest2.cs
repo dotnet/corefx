@@ -154,7 +154,7 @@ namespace System.Data.Tests
             // DataColumn.Unique - with constraint
             Assert.Equal(false, dtParent.Columns[0].Unique);
 
-            // Ctor - add exisiting column
+            // Ctor - add existing column
             dtParent.Rows.Add(new object[] { 99, "str1", "str2" });
             dtParent.Constraints.Add(uc);
             Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(new object[] { 99, "str1", "str2" }));
@@ -164,7 +164,7 @@ namespace System.Data.Tests
 
             //Column[1] is not unique, will throw exception
             // ArgumentException 
-            Assert.Throws<ArgumentException>(() => dtChild.Constraints.Add(uc));
+            AssertExtensions.Throws<ArgumentException>(null, () => dtChild.Constraints.Add(uc));
 
             //reset the table
             dtParent = DataProvider.CreateParentDataTable();
@@ -178,7 +178,7 @@ namespace System.Data.Tests
             Assert.Equal(typeof(UniqueConstraint).FullName, dtParent.Constraints[0].GetType().FullName);
 
             // add UniqueConstarint that don't belong to the table
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 dtParent.Constraints.Add(uc);
             });
@@ -219,7 +219,7 @@ namespace System.Data.Tests
             // Ctor - parent
             Assert.Equal(false, uc == null);
 
-            // Ctor - add exisiting column
+            // Ctor - add existing column
             dtParent.Rows.Add(new object[] { 99, "str1", "str2" });
             dtParent.Constraints.Add(uc);
             Assert.Throws<ConstraintException>(() => dtParent.Rows.Add(new object[] { 99, "str1", "str2" }));
@@ -236,7 +236,7 @@ namespace System.Data.Tests
 
             //target columnn are not unnique, will throw an exception
             // ArgumentException - child
-            Assert.Throws<ArgumentException>(() => dtChild.Constraints.Add(uc));
+            AssertExtensions.Throws<ArgumentException>(null, () => dtChild.Constraints.Add(uc));
         }
 
         [Fact]

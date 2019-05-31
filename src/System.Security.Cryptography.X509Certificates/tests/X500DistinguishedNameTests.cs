@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Runtime.InteropServices;
 using Test.Cryptography;
 using Xunit;
 
@@ -21,7 +22,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(3892, TestPlatforms.AnyUnix)]
         public static void PrintMultiComponentRdn()
         {
             byte[] encoded = (
@@ -126,6 +126,16 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
             Assert.Equal(notQuoted, dn.Decode(X500DistinguishedNameFlags.DoNotUseQuotes));
         }
+        
+        [Theory]
+        [MemberData(nameof(T61Cases))]
+        public static void T61Strings(string expected, string hexEncoded)
+        {
+            byte[] encoded = hexEncoded.HexToByteArray();
+            X500DistinguishedName dn = new X500DistinguishedName(encoded);
+
+            Assert.Equal(expected, dn.Name);
+        }
 
         [Fact]
         public static void PrintComplexReversed()
@@ -156,6 +166,39 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 "STREET=1 Microsoft Way, O=Microsoft Corporation, OU=MSCOM, CN=www.microsoft.com";
 
             Assert.EndsWith(expected, dn.Decode(X500DistinguishedNameFlags.None), StringComparison.Ordinal);
+        }
+
+        [Fact]
+        public static void EdgeCaseEmptyFormat()
+        {
+            X500DistinguishedName dn = new X500DistinguishedName("");
+            Assert.Equal(string.Empty, dn.Format(true));
+            Assert.Equal(string.Empty, dn.Format(false));
+        }
+
+        [Fact]
+        public static void EdgeCaseUseCommaAndNewLines()
+        {
+            const string rname = "C=US, O=\"RSA Data Security, Inc.\", OU=Secure Server Certification Authority";
+            X500DistinguishedName dn = new X500DistinguishedName(rname, X500DistinguishedNameFlags.None);
+            Assert.Equal(rname, dn.Decode(X500DistinguishedNameFlags.UseCommas | X500DistinguishedNameFlags.UseNewLines));
+        }
+
+        [Fact]
+        public static void TpmIdentifiers()
+        {
+            // On Windows the X.500 name pretty printer is in crypt32, so it doesn't use our OidLookup.
+            // Windows 7 doesn't have the TPM OIDs mapped, so they come back as (e.g.) OID.2.23.133.2.3 still.
+            //
+            // Just skip this test there.
+            if (PlatformDetection.IsWindows7)
+            {
+                return;
+            }
+
+            X500DistinguishedName dn = new X500DistinguishedName("OID.2.23.133.2.3=id:0020065,OID.2.23.133.2.2=,OID.2.23.133.2.1=id:564D5700");
+            X500DistinguishedName dn2 = new X500DistinguishedName(dn.RawData);
+            Assert.Equal("TPMManufacturer=id:564D5700, TPMModel=\"\", TPMVersion=id:0020065", dn2.Decode(X500DistinguishedNameFlags.None));
         }
 
         public static readonly object[][] WhitespaceBeforeCases =
@@ -383,6 +426,49 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 "CN=Common Name\"", // Not-Quoted
                 "30233121301F06035504031E180043006F006D006D006F006E0020004E006100" +
                 "6D00650022"
+            },
+        };
+
+        public static readonly object[][] T61Cases =
+        {
+            // https://github.com/dotnet/corefx/issues/27466
+            new object[]
+            {
+                "CN=GrapeCity inc., OU=Tools Development, O=GrapeCity inc., " +
+                "L=Sendai Izumi-ku, S=Miyagi, C=JP",
+                "308186310b3009060355040613024a50310f300d060355040813064d69796167" +
+                "69311830160603550407130f53656e64616920497a756d692d6b753117301506" +
+                "0355040a140e47726170654369747920696e632e311a3018060355040b141154" +
+                "6f6f6c7320446576656c6f706d656e74311730150603550403140e4772617065" +
+                "4369747920696e632e"
+            },
+
+            // Mono test case taken from old bug report
+            new object[]
+            {
+                "SERIALNUMBER=CVR:13471967-UID:121212121212, E=vhm@use.test.dk, " +
+                "CN=Hedeby's M\u00f8belhandel - Salgsafdelingen, " + 
+                "O=Hedeby's M\u00f8belhandel // CVR:13471967, C=DK",
+                "3081B5310B300906035504061302444B312D302B060355040A14244865646562" +
+                "792773204DF862656C68616E64656C202F2F204356523A313334373139363731" +
+                "2F302D060355040314264865646562792773204DF862656C68616E64656C202D" +
+                "2053616C6773616664656C696E67656E311E301C06092A864886F70D01090116" +
+                "0F76686D407573652E746573742E646B312630240603550405131D4356523A31" +
+                "333437313936372D5549443A313231323132313231323132"
+            },
+
+            // Valid UTF-8 string is interpreted as UTF-8
+            new object[]
+            {
+                "C=\u00a2",
+                "300D310B300906035504061402C2A2"
+            },
+
+            // Invalid UTF-8 string with valid UTF-8 sequence is interpreted as ISO 8859-1
+            new object[]
+            {
+                "L=\u00c2\u00a2\u00f8",
+                "300E310C300A06035504071403C2A2F8"
             },
         };
 

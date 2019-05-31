@@ -37,13 +37,13 @@ namespace System.IO.Tests
             Assert.Equal(path, info.ToString());
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void DriveOnlyReturnsPeriod_Windows()
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer
+        [PlatformSpecific(TestPlatforms.Windows)]  // Drive letter only
+        public void DriveOnlyReturnsDrive_Windows()
         {
             string path = @"C:";
             var info = new DirectoryInfo(path);
-            Assert.Equal(".", info.ToString());
+            Assert.Equal(path, info.ToString());
         }
     }
 }

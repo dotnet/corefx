@@ -4,9 +4,9 @@
 
 using System.Collections.Generic;
 using System.Composition.Hosting.Util;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
-using Microsoft.Internal;
 
 namespace System.Composition.Hosting.Core
 {
@@ -40,9 +40,20 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Satisfied(CompositionContract contract, ExportDescriptorPromise target, bool isPrerequisite, object site)
         {
-            Requires.NotNull(target, nameof(target));
-            Requires.NotNull(site, nameof(site));
-            Requires.NotNull(contract, nameof(contract));
+            if (contract == null)
+            {
+                throw new ArgumentNullException(nameof(contract));
+            }
+
+            if (target == null)
+            {
+                throw new ArgumentNullException(nameof(target));
+            }
+
+            if (site == null)
+            {
+                throw new ArgumentNullException(nameof(site));
+            }
 
             return new CompositionDependency(contract, target, isPrerequisite, site);
         }
@@ -56,8 +67,15 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Missing(CompositionContract contract, object site)
         {
-            Requires.NotNull(contract, nameof(contract));
-            Requires.NotNull(site, nameof(site));
+            if (contract == null)
+            {
+                throw new ArgumentNullException(nameof(contract));
+            }
+
+            if (site == null)
+            {
+                throw new ArgumentNullException(nameof(site));
+            }
 
             return new CompositionDependency(contract, site);
         }
@@ -72,9 +90,20 @@ namespace System.Composition.Hosting.Core
         /// <param name="contract">The contract required by the dependency.</param>
         public static CompositionDependency Oversupplied(CompositionContract contract, IEnumerable<ExportDescriptorPromise> targets, object site)
         {
-            Requires.NotNull(targets, nameof(targets));
-            Requires.NotNull(site, nameof(site));
-            Requires.NotNull(contract, nameof(contract));
+            if (contract == null)
+            {
+                throw new ArgumentNullException(nameof(contract));
+            }
+
+            if (targets == null)
+            {
+                throw new ArgumentNullException(nameof(targets));
+            }
+
+            if (site == null)
+            {
+                throw new ArgumentNullException(nameof(site));
+            }
 
             return new CompositionDependency(contract, targets, site);
         }
@@ -133,23 +162,23 @@ namespace System.Composition.Hosting.Core
             if (IsError)
                 return Site.ToString();
 
-            return string.Format(Properties.Resources.Dependency_ToStringFormat, Site, Target.Contract, Target.Origin);
+            return SR.Format(SR.Dependency_ToStringFormat, Site, Target.Contract, Target.Origin);
         }
 
         internal bool IsError { get { return _target == null; } }
 
         internal void DescribeError(StringBuilder message)
         {
-            Assumes.IsTrue(IsError, "Dependency is not in an error state.");
+            Debug.Assert(IsError, "Should be in error state.");
 
             if (_oversuppliedTargets != null)
             {
-                var list = Formatters.ReadableList(_oversuppliedTargets.Select(t => string.Format(Properties.Resources.Dependency_QuoteParameter, t.Origin)));
-                message.AppendFormat(Properties.Resources.Dependency_TooManyExports, Contract, list);
+                var list = Formatters.ReadableList(_oversuppliedTargets.Select(t => SR.Format(SR.Dependency_QuoteParameter, t.Origin)));
+                message.AppendFormat(SR.Dependency_TooManyExports, Contract, list);
             }
             else
             {
-                message.AppendFormat(Properties.Resources.Dependency_ExportNotFound, Contract);
+                message.AppendFormat(SR.Dependency_ExportNotFound, Contract);
             }
         }
     }

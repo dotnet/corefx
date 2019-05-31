@@ -72,20 +72,7 @@ namespace System.Linq.Expressions.Compiler
             {
                 EmitExpression(node.Left);
                 EmitExpression(node.Right);
-                Type rightType = node.Right.Type;
-                if (rightType.IsNullableType())
-                {
-                    LocalBuilder loc = GetLocal(rightType);
-                    _ilg.Emit(OpCodes.Stloc, loc);
-                    _ilg.Emit(OpCodes.Ldloca, loc);
-                    _ilg.EmitGetValue(rightType);
-                    FreeLocal(loc);
-                }
-                Type indexType = rightType.GetNonNullableType();
-                if (indexType != typeof(int))
-                {
-                    _ilg.EmitConvertToType(indexType, typeof(int), isChecked: true);
-                }
+                Debug.Assert(node.Right.Type == typeof(int));
                 _ilg.Emit(OpCodes.Ldelema, node.Type);
             }
             else
@@ -222,7 +209,7 @@ namespace System.Linq.Expressions.Compiler
         private void AddressOf(UnaryExpression node, Type type)
         {
             Debug.Assert(node.NodeType == ExpressionType.Unbox);
-            Debug.Assert(type.GetTypeInfo().IsValueType);
+            Debug.Assert(type.IsValueType);
 
             // Unbox leaves a pointer to the boxed value on the stack
             EmitExpression(node.Operand);
@@ -391,7 +378,7 @@ namespace System.Linq.Expressions.Compiler
 
         private LocalBuilder GetInstanceLocal(Type type)
         {
-            Type instanceLocalType = type.GetTypeInfo().IsValueType ? type.MakeByRefType() : type;
+            Type instanceLocalType = type.IsValueType ? type.MakeByRefType() : type;
             return GetLocal(instanceLocalType);
         }
     }

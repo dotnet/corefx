@@ -4,19 +4,23 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRARRINIT : EXPR
+    internal sealed class ExprArrayInit : ExprWithType
     {
-        private EXPR _OptionalArguments;
-        public EXPR GetOptionalArguments() { return _OptionalArguments; }
-        public void SetOptionalArguments(EXPR value) { _OptionalArguments = value; }
+        public ExprArrayInit(CType type, Expr arguments, Expr argumentDimensions, int[] dimensionSizes)
+            : base(ExpressionKind.ArrayInit, type)
+        {
+            OptionalArguments = arguments;
+            OptionalArgumentDimensions = argumentDimensions;
+            DimensionSizes = dimensionSizes;
+        }
 
-        private EXPR _OptionalArgumentDimensions;
-        public EXPR GetOptionalArgumentDimensions() { return _OptionalArgumentDimensions; }
-        public void SetOptionalArgumentDimensions(EXPR value) { _OptionalArgumentDimensions = value; }
+        public Expr OptionalArguments { get; set; }
 
-        // The EXPRs bound as the size of the array.
-        public int[] dimSizes;
-        public int dimSize;
-        public bool GeneratedForParamArray;
+        public Expr OptionalArgumentDimensions { get; set; }
+
+        // The Exprs bound as the size of the array.
+        public int[] DimensionSizes { get; }
+
+        public bool GeneratedForParamArray { get; set; }
     }
 }

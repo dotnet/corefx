@@ -10,7 +10,7 @@ using Xunit;
 
 namespace System.Reflection.Tests
 {
-    public class FieldInfoTests
+    public partial class FieldInfoTests
     {
         [Theory]
         [InlineData(nameof(FieldInfoTests.ConstIntField), 222)]
@@ -47,7 +47,7 @@ namespace System.Reflection.Tests
         [InlineData(typeof(EnumAttr), "[System.Reflection.Tests.EnumAttr((System.Reflection.Tests.PublicEnum)1, name = \"EnumAttrSimple\")]")]
         [InlineData(typeof(TypeAttr), "[System.Reflection.Tests.TypeAttr(typeof(System.Object), name = \"TypeAttrSimple\")]")]
         [InlineData(typeof(Attr), "[System.Reflection.Tests.Attr((Int32)77, name = \"AttrSimple\")]")]
-        private static void CustomAttributes(Type type, string expectedToString)
+        public static void CustomAttributes(Type type, string expectedToString)
         {
             FieldInfo fieldInfo = GetField(typeof(FieldInfoTests), "fieldWithAttributes");
             CustomAttributeData attributeData = fieldInfo.CustomAttributes.First(attribute => attribute.AttributeType.Equals(type));
@@ -314,9 +314,9 @@ namespace System.Reflection.Tests
             object obj = Activator.CreateInstance(type);
             FieldInfo fieldInfo = GetField(type, "bArray");
 
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, ATypeWithMixedAB));
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, ATypeWithAllA));
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, ATypeWithAllB));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, ATypeWithMixedAB));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, ATypeWithAllA));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, ATypeWithAllB));
 
             fieldInfo.SetValue(obj, BTypeWithAllB);
             Assert.Equal(BTypeWithAllB, fieldInfo.GetValue(obj));
@@ -348,7 +348,7 @@ namespace System.Reflection.Tests
             fieldInfo.SetValue(obj, intArray);
             Assert.Equal(intArray, fieldInfo.GetValue(obj));
 
-            Assert.Throws<ArgumentException>(() => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
         }
 
         [Fact]
@@ -366,8 +366,8 @@ namespace System.Reflection.Tests
             fieldInfo.SetValue(obj, BTypeWithAllB_Contra);
             Assert.Equal(BTypeWithAllB_Contra, fieldInfo.GetValue(obj));
 
-            Assert.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new int[] { 1, -1, 2, -2 }));
-            Assert.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new int[] { 1, -1, 2, -2 }));
+            AssertExtensions.Throws<ArgumentException>(null, () => fieldInfo.SetValue(obj, new byte[] { 2, 3, 4 }));
         }
 
         public static IEnumerable<object[]> FieldInfoRTGenericTests_TestData()
@@ -422,6 +422,16 @@ namespace System.Reflection.Tests
             fi.SetValue(obj, null);
             Assert.Equal(initialValue, fi.GetValue(obj));
         }
+
+        [Fact]
+        public void SecurityAttributes()
+        {
+            FieldInfo info = GetField(typeof(FieldInfoTests), nameof(FieldInfoTests.s_intField));
+
+            Assert.True(info.IsSecurityCritical);
+            Assert.False(info.IsSecuritySafeCritical);
+            Assert.False(info.IsSecurityTransparent);
+        }        
 
         private static FieldInfo GetField(Type type, string name)
         {
@@ -521,6 +531,39 @@ namespace System.Reflection.Tests
             public static FI_GenericClass<T> dependField;
             public static FI_GenericClass<T>[] arrayField;
             public static FI_StaticGenericField<T> selfField;
+        }
+
+        struct FieldData
+        {
+            public Inner inner;
+        }
+
+        struct Inner
+        {
+            public object field;
+        }
+
+        [Theory]
+        [InlineData(222)]
+        [InlineData("new value")]
+        [InlineData('A')]
+        [InlineData(false)]
+        [InlineData(4.56f)]
+        [InlineData(double.MaxValue)]
+        [InlineData(long.MaxValue)]
+        [InlineData(byte.MaxValue)]
+        [InlineData(null)]
+        public static void SetValueDirect_GetValueDirectRoundDataTest(object value)
+        {
+            FieldData testField = new FieldData { inner = new Inner() { field = -1 } };
+            FieldInfo innerFieldInfo = typeof(FieldData).GetField(nameof(FieldData.inner));
+            FieldInfo[] fields = { innerFieldInfo };
+            FieldInfo fieldFieldInfo = typeof(Inner).GetField(nameof(Inner.field));
+            TypedReference reference = TypedReference.MakeTypedReference(testField, fields);
+            fieldFieldInfo.SetValueDirect(reference, value);
+            object result = fieldFieldInfo.GetValueDirect(reference);
+
+            Assert.Equal(value, result);
         }
     }
 }

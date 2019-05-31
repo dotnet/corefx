@@ -2,21 +2,19 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Cryptography;
+
 namespace System.Security.Cryptography
 {
     public abstract class KeyedHashAlgorithm : HashAlgorithm
     {
         protected KeyedHashAlgorithm() { }
 
-        public static new KeyedHashAlgorithm Create()
-        {
-            return Create("System.Security.Cryptography.KeyedHashAlgorithm");
-        }
+        public static new KeyedHashAlgorithm Create() =>
+            throw new PlatformNotSupportedException(SR.Cryptography_DefaultAlgorithm_NotSupported);
 
-        public static new KeyedHashAlgorithm Create(string algName)
-        {
-            throw new PlatformNotSupportedException();
-        }
+        public static new KeyedHashAlgorithm Create(string algName) =>
+            (KeyedHashAlgorithm)CryptoConfigForwarder.CreateFromName(algName);
 
         public virtual byte[] Key
         {

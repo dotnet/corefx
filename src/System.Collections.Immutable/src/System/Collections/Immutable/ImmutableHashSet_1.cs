@@ -15,7 +15,7 @@ namespace System.Collections.Immutable
     /// </summary>
     /// <typeparam name="T">The type of elements in the set.</typeparam>
     [DebuggerDisplay("Count = {Count}")]
-    [DebuggerTypeProxy(typeof(ImmutableHashSetDebuggerProxy<>))]
+    [DebuggerTypeProxy(typeof(ImmutableEnumerableDebuggerProxy<>))]
     public sealed partial class ImmutableHashSet<T> : IImmutableSet<T>, IHashKeyCollection<T>, IReadOnlyCollection<T>, ICollection<T>, ISet<T>, ICollection, IStrongEnumerable<T, ImmutableHashSet<T>.Enumerator>
     {
         /// <summary>
@@ -45,6 +45,11 @@ namespace System.Collections.Immutable
         private readonly SortedInt32KeyNode<HashBucket> _root;
 
         /// <summary>
+        /// The equality comparer to use when balancing the tree of hash buckets.
+        /// </summary>
+        private readonly IEqualityComparer<HashBucket> _hashBucketEqualityComparer;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ImmutableHashSet{T}"/> class.
         /// </summary>
         /// <param name="equalityComparer">The equality comparer.</param>
@@ -68,6 +73,7 @@ namespace System.Collections.Immutable
             _root = root;
             _count = count;
             _equalityComparer = equalityComparer;
+            _hashBucketEqualityComparer = GetHashBucketEqualityComparer(equalityComparer);
         }
 
         /// <summary>
@@ -75,8 +81,6 @@ namespace System.Collections.Immutable
         /// </summary>
         public ImmutableHashSet<T> Clear()
         {
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>().IsEmpty);
             return this.IsEmpty ? this : ImmutableHashSet<T>.Empty.WithComparer(_equalityComparer);
         }
 
@@ -189,9 +193,6 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableHashSet<T> Add(T item)
         {
-            Requires.NotNullAllowStructs(item, nameof(item));
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
-
             var result = Add(item, this.Origin);
             return result.Finalize(this);
         }
@@ -201,9 +202,6 @@ namespace System.Collections.Immutable
         /// </summary>
         public ImmutableHashSet<T> Remove(T item)
         {
-            Requires.NotNullAllowStructs(item, nameof(item));
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
-
             var result = Remove(item, this.Origin);
             return result.Finalize(this);
         }
@@ -215,7 +213,7 @@ namespace System.Collections.Immutable
         /// <param name="actualValue">The value from the set that the search found, or the original value if the search yielded no match.</param>
         /// <returns>A value indicating whether the search was successful.</returns>
         /// <remarks>
-        /// This can be useful when you want to reuse a previously stored reference instead of 
+        /// This can be useful when you want to reuse a previously stored reference instead of
         /// a newly constructed one (so that more sharing of references can occur) or to look up
         /// a value that has more complete data than the value you currently have, although their
         /// comparer functions indicate they are equal.
@@ -223,8 +221,6 @@ namespace System.Collections.Immutable
         [Pure]
         public bool TryGetValue(T equalValue, out T actualValue)
         {
-            Requires.NotNullAllowStructs(equalValue, nameof(equalValue));
-
             int hashCode = _equalityComparer.GetHashCode(equalValue);
             HashBucket bucket;
             if (_root.TryGetValue(hashCode, out bucket))
@@ -243,7 +239,6 @@ namespace System.Collections.Immutable
         public ImmutableHashSet<T> Union(IEnumerable<T> other)
         {
             Requires.NotNull(other, nameof(other));
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
 
             return this.Union(other, avoidWithComparer: false);
         }
@@ -255,7 +250,6 @@ namespace System.Collections.Immutable
         public ImmutableHashSet<T> Intersect(IEnumerable<T> other)
         {
             Requires.NotNull(other, nameof(other));
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
 
             var result = Intersect(other, this.Origin);
             return result.Finalize(this);
@@ -268,7 +262,7 @@ namespace System.Collections.Immutable
         {
             Requires.NotNull(other, nameof(other));
 
-            var result = Except(other, _equalityComparer, _root);
+            var result = Except(other, _equalityComparer, _hashBucketEqualityComparer, _root);
             return result.Finalize(this);
         }
 
@@ -281,7 +275,6 @@ namespace System.Collections.Immutable
         public ImmutableHashSet<T> SymmetricExcept(IEnumerable<T> other)
         {
             Requires.NotNull(other, nameof(other));
-            Contract.Ensures(Contract.Result<IImmutableSet<T>>() != null);
 
             var result = SymmetricExcept(other, this.Origin);
             return result.Finalize(this);
@@ -435,7 +428,6 @@ namespace System.Collections.Immutable
         /// </summary>
         public bool Contains(T item)
         {
-            Requires.NotNullAllowStructs(item, nameof(item));
             return Contains(item, this.Origin);
         }
 
@@ -445,7 +437,6 @@ namespace System.Collections.Immutable
         [Pure]
         public ImmutableHashSet<T> WithComparer(IEqualityComparer<T> equalityComparer)
         {
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
             if (equalityComparer == null)
             {
                 equalityComparer = EqualityComparer<T>.Default;
@@ -459,6 +450,7 @@ namespace System.Collections.Immutable
             {
                 var result = new ImmutableHashSet<T>(equalityComparer);
                 result = result.Union(this, avoidWithComparer: true);
+                Debug.Assert(result != null);
                 return result;
             }
         }
@@ -599,7 +591,9 @@ namespace System.Collections.Immutable
         /// </summary>
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return this.GetEnumerator();
+            return this.IsEmpty ?
+                Enumerable.Empty<T>().GetEnumerator() :
+                this.GetEnumerator();
         }
 
         #endregion
@@ -644,8 +638,6 @@ namespace System.Collections.Immutable
         /// </summary>
         private static MutationResult Add(T item, MutationInput origin)
         {
-            Requires.NotNullAllowStructs(item, nameof(item));
-
             OperationResult result;
             int hashCode = origin.EqualityComparer.GetHashCode(item);
             HashBucket bucket = origin.Root.GetValueOrDefault(hashCode);
@@ -655,7 +647,7 @@ namespace System.Collections.Immutable
                 return new MutationResult(origin.Root, 0);
             }
 
-            var newRoot = UpdateRoot(origin.Root, hashCode, newBucket);
+            var newRoot = UpdateRoot(origin.Root, hashCode, origin.HashBucketEqualityComparer, newBucket);
             Debug.Assert(result == OperationResult.SizeChanged);
             return new MutationResult(newRoot, 1 /*result == OperationResult.SizeChanged ? 1 : 0*/);
         }
@@ -665,8 +657,6 @@ namespace System.Collections.Immutable
         /// </summary>
         private static MutationResult Remove(T item, MutationInput origin)
         {
-            Requires.NotNullAllowStructs(item, nameof(item));
-
             var result = OperationResult.NoChangeRequired;
             int hashCode = origin.EqualityComparer.GetHashCode(item);
             HashBucket bucket;
@@ -679,7 +669,7 @@ namespace System.Collections.Immutable
                     return new MutationResult(origin.Root, 0);
                 }
 
-                newRoot = UpdateRoot(origin.Root, hashCode, newBucket);
+                newRoot = UpdateRoot(origin.Root, hashCode, origin.HashBucketEqualityComparer, newBucket);
             }
 
             return new MutationResult(newRoot, result == OperationResult.SizeChanged ? -1 : 0);
@@ -717,7 +707,7 @@ namespace System.Collections.Immutable
                 var newBucket = bucket.Add(item, origin.EqualityComparer, out result);
                 if (result == OperationResult.SizeChanged)
                 {
-                    newRoot = UpdateRoot(newRoot, hashCode, newBucket);
+                    newRoot = UpdateRoot(newRoot, hashCode, origin.HashBucketEqualityComparer, newBucket);
                     count++;
                 }
             }
@@ -778,7 +768,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Performs the set operation on a given data structure.
         /// </summary>
-        private static SortedInt32KeyNode<HashBucket> UpdateRoot(SortedInt32KeyNode<HashBucket> root, int hashCode, HashBucket newBucket)
+        private static SortedInt32KeyNode<HashBucket> UpdateRoot(SortedInt32KeyNode<HashBucket> root, int hashCode, IEqualityComparer<HashBucket> hashBucketEqualityComparer, HashBucket newBucket)
         {
             bool mutated;
             if (newBucket.IsEmpty)
@@ -787,8 +777,7 @@ namespace System.Collections.Immutable
             }
             else
             {
-                bool replacedExistingValue;
-                return root.SetItem(hashCode, newBucket, EqualityComparer<HashBucket>.Default, out replacedExistingValue, out mutated);
+                return root.SetItem(hashCode, newBucket, hashBucketEqualityComparer, out bool replacedExistingValue, out mutated);
             }
         }
 
@@ -805,7 +794,7 @@ namespace System.Collections.Immutable
             {
                 if (Contains(item, origin))
                 {
-                    var result = Add(item, new MutationInput(newSet, origin.EqualityComparer, count));
+                    var result = Add(item, new MutationInput(newSet, origin.EqualityComparer, origin.HashBucketEqualityComparer, count));
                     newSet = result.Root;
                     count += result.Count;
                 }
@@ -817,7 +806,7 @@ namespace System.Collections.Immutable
         /// <summary>
         /// Performs the set operation on a given data structure.
         /// </summary>
-        private static MutationResult Except(IEnumerable<T> other, IEqualityComparer<T> equalityComparer, SortedInt32KeyNode<HashBucket> root)
+        private static MutationResult Except(IEnumerable<T> other, IEqualityComparer<T> equalityComparer, IEqualityComparer<HashBucket> hashBucketEqualityComparer, SortedInt32KeyNode<HashBucket> root)
         {
             Requires.NotNull(other, nameof(other));
             Requires.NotNull(equalityComparer, nameof(equalityComparer));
@@ -836,7 +825,7 @@ namespace System.Collections.Immutable
                     if (result == OperationResult.SizeChanged)
                     {
                         count--;
-                        newRoot = UpdateRoot(newRoot, hashCode, newBucket);
+                        newRoot = UpdateRoot(newRoot, hashCode, hashBucketEqualityComparer, newBucket);
                     }
                 }
             }
@@ -860,7 +849,7 @@ namespace System.Collections.Immutable
             {
                 if (!otherAsSet.Contains(item))
                 {
-                    var mutationResult = Add(item, new MutationInput(result, origin.EqualityComparer, count));
+                    var mutationResult = Add(item, new MutationInput(result, origin.EqualityComparer, origin.HashBucketEqualityComparer, count));
                     result = mutationResult.Root;
                     count += mutationResult.Count;
                 }
@@ -870,7 +859,7 @@ namespace System.Collections.Immutable
             {
                 if (!Contains(item, origin))
                 {
-                    var mutationResult = Add(item, new MutationInput(result, origin.EqualityComparer, count));
+                    var mutationResult = Add(item, new MutationInput(result, origin.EqualityComparer, origin.HashBucketEqualityComparer, count));
                     result = mutationResult.Root;
                     count += mutationResult.Count;
                 }
@@ -1003,6 +992,27 @@ namespace System.Collections.Immutable
         }
 
         /// <summary>
+        /// Gets the <see cref="IEqualityComparer{HashBucket}"/> to use.
+        /// </summary>
+        /// <param name="valueComparer">The value comparer for T.</param>
+        /// <returns>The equality comparer to use.</returns>
+        private static IEqualityComparer<HashBucket> GetHashBucketEqualityComparer(IEqualityComparer<T> valueComparer)
+        {
+            if (!ImmutableExtensions.IsValueType<T>())
+            {
+                return HashBucketByRefEqualityComparer.DefaultInstance;
+            }
+            else if (valueComparer == EqualityComparer<T>.Default)
+            {
+                return HashBucketByValueEqualityComparer.DefaultInstance;
+            }
+            else
+            {
+                return new HashBucketByValueEqualityComparer(valueComparer);
+            }
+        }
+
+        /// <summary>
         /// Wraps the specified data structure with an immutable collection wrapper.
         /// </summary>
         /// <param name="root">The root of the data structure.</param>
@@ -1022,7 +1032,6 @@ namespace System.Collections.Immutable
         private ImmutableHashSet<T> Union(IEnumerable<T> items, bool avoidWithComparer)
         {
             Requires.NotNull(items, nameof(items));
-            Contract.Ensures(Contract.Result<ImmutableHashSet<T>>() != null);
 
             // Some optimizations may apply if we're an empty set.
             if (this.IsEmpty && !avoidWithComparer)

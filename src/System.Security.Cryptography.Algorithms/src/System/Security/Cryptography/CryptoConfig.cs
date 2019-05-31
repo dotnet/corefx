@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace System.Security.Cryptography
 {
@@ -29,13 +30,20 @@ namespace System.Security.Cryptography
         private const string OID_OIWSEC_SHA512 = "2.16.840.1.101.3.4.2.3";
         private const string OID_OIWSEC_RIPEMD160 = "1.3.36.3.2.1";
 
+        private const string ECDsaIdentifier = "ECDsa";
+
         private static volatile Dictionary<string, string> s_defaultOidHT = null;
         private static volatile Dictionary<string, object> s_defaultNameHT = null;
+        private static volatile Dictionary<string, Type> appNameHT = new Dictionary<string, Type>(StringComparer.OrdinalIgnoreCase);
+        private static volatile Dictionary<string, string> appOidHT = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         private static readonly char[] SepArray = { '.' }; // valid ASN.1 separators
 
         // CoreFx does not support AllowOnlyFipsAlgorithms
         public static bool AllowOnlyFipsAlgorithms => false;
+
+        // Private object for locking instead of locking on a public type for SQL reliability work.
+        private static object s_InternalSyncObject = new object();
 
         private static Dictionary<string, string> DefaultOidHT
         {
@@ -179,7 +187,12 @@ namespace System.Security.Cryptography
                 ht.Add("DSA", DSACryptoServiceProviderType);
                 ht.Add("System.Security.Cryptography.DSA", DSACryptoServiceProviderType);
 
-                ht.Add("ECDsa", ECDsaCngType);
+                // Windows will register the public ECDsaCng type.  Non-Windows gets a special handler.
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                {
+                    ht.Add(ECDsaIdentifier, ECDsaCngType);
+                }
+
                 ht.Add("ECDsaCng", ECDsaCngType);
                 ht.Add("System.Security.Cryptography.ECDsaCng", ECDsaCngType);
 
@@ -277,36 +290,39 @@ namespace System.Security.Cryptography
                 // string SHA384CryptoSerivceProviderType = "System.Security.Cryptography.SHA384CryptoServiceProvider, " + AssemblyName_Csp;
                 // string SHA512CryptoServiceProviderType = "System.Security.Cryptography.SHA512CryptoServiceProvider, " + AssemblyName_Csp;
                 // string DpapiDataProtectorType = "System.Security.Cryptography.DpapiDataProtector, " + AssemblyRef.SystemSecurity;
-                // Xml Dsig Transforms
-                // First arg must match the constants defined in System.Security.Cryptography.Xml.SignedXml
-                // ht.Add("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", "System.Security.Cryptography.Xml.XmlDsigC14NTransform, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/TR/2001/REC-xml-c14n-20010315#WithComments", "System.Security.Cryptography.Xml.XmlDsigC14NWithCommentsTransform, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2001/10/xml-exc-c14n#", "System.Security.Cryptography.Xml.XmlDsigExcC14NTransform, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2001/10/xml-exc-c14n#WithComments", "System.Security.Cryptography.Xml.XmlDsigExcC14NWithCommentsTransform, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2000/09/xmldsig#base64", "System.Security.Cryptography.Xml.XmlDsigBase64Transform, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/TR/1999/REC-xpath-19991116", "System.Security.Cryptography.Xml.XmlDsigXPathTransform, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/TR/1999/REC-xslt-19991116", "System.Security.Cryptography.Xml.XmlDsigXsltTransform, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2000/09/xmldsig#enveloped-signature", "System.Security.Cryptography.Xml.XmlDsigEnvelopedSignatureTransform, " + AssemblyRef.SystemSecurity);
-                // the decryption transform
-                // ht.Add("http://www.w3.org/2002/07/decrypt#XML", "System.Security.Cryptography.Xml.XmlDecryptionTransform, " + AssemblyRef.SystemSecurity);
-                // Xml licence transform.
-                // ht.Add("urn:mpeg:mpeg21:2003:01-REL-R-NS:licenseTransform", "System.Security.Cryptography.Xml.XmlLicenseTransform, " + AssemblyRef.SystemSecurity);
-                // Xml Dsig KeyInfo
-                // First arg (the key) is formed as elem.NamespaceURI + " " + elem.LocalName
-                // ht.Add("http://www.w3.org/2000/09/xmldsig# X509Data", "System.Security.Cryptography.Xml.KeyInfoX509Data, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2000/09/xmldsig# KeyName", "System.Security.Cryptography.Xml.KeyInfoName, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2000/09/xmldsig# KeyValue/DSAKeyValue", "System.Security.Cryptography.Xml.DSAKeyValue, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2000/09/xmldsig# KeyValue/RSAKeyValue", "System.Security.Cryptography.Xml.RSAKeyValue, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2000/09/xmldsig# RetrievalMethod", "System.Security.Cryptography.Xml.KeyInfoRetrievalMethod, " + AssemblyRef.SystemSecurity);
-                // Xml EncryptedKey
-                // ht.Add("http://www.w3.org/2001/04/xmlenc# EncryptedKey", "System.Security.Cryptography.Xml.KeyInfoEncryptedKey, " + AssemblyRef.SystemSecurity);
-                // ht.Add("http://www.w3.org/2001/04/xmldsig-more#hmac-ripemd160", HMACRIPEMD160Type);
             }
         }
 
         public static void AddAlgorithm(Type algorithm, params string[] names)
         {
-            throw new PlatformNotSupportedException();
+            if (algorithm == null)
+                throw new ArgumentNullException(nameof(algorithm));
+            if (!algorithm.IsVisible)
+                throw new ArgumentException(SR.Cryptography_AlgorithmTypesMustBeVisible, nameof(algorithm));
+            if (names == null)
+                throw new ArgumentNullException(nameof(names));
+ 
+            string[] algorithmNames = new string[names.Length];
+            Array.Copy(names, 0, algorithmNames, 0, algorithmNames.Length);
+ 
+            // Pre-check the algorithm names for validity so that we don't add a few of the names and then
+            // throw an exception if we find an invalid name partway through the list.
+            foreach (string name in algorithmNames)
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException(SR.Cryptography_AddNullOrEmptyName);
+                }
+            }
+ 
+            // Everything looks valid, so we're safe to take the table lock and add the name mappings.
+            lock (s_InternalSyncObject)
+            {
+                foreach (string name in algorithmNames)
+                {
+                    appNameHT[name] = algorithm;
+                }
+            }
         }
 
         public static object CreateFromName(string name, params object[] args)
@@ -315,12 +331,21 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(name));
 
             Type retvalType = null;
+            
+            // Check to see if we have an application defined mapping
+            lock (s_InternalSyncObject)
+            {
+                if (!appNameHT.TryGetValue(name, out retvalType))
+                {
+                    retvalType = null;
+                }
+            }
 
             // We allow the default table to Types and Strings
             // Types get used for types in .Algorithms assembly.
             // strings get used for delay-loaded stuff in other assemblies such as .Csp.
             object retvalObj;
-            if (DefaultNameHT.TryGetValue(name, out retvalObj))
+            if (retvalType == null && DefaultNameHT.TryGetValue(name, out retvalObj))
             {
                 if (retvalObj is Type)
                 {
@@ -338,6 +363,15 @@ namespace System.Security.Cryptography
                 {
                     Debug.Fail("Unsupported Dictionary value:" + retvalObj.ToString());
                 }
+            }
+
+            // Special case asking for "ECDsa" since the default map from .NET Framework uses
+            // a Windows-only type.
+            if (retvalType == null &&
+                (args == null || args.Length == 1) &&
+                name == ECDsaIdentifier)
+            {
+                return ECDsa.Create();
             }
 
             // Maybe they gave us a classname.
@@ -365,7 +399,7 @@ namespace System.Security.Cryptography
 
             if (args == null)
             {
-                args = new object[] { };
+                args = Array.Empty<object>();
             }
 
             List<MethodBase> candidates = new List<MethodBase>();
@@ -396,7 +430,7 @@ namespace System.Security.Cryptography
                 null,
                 out state) as ConstructorInfo;
 
-            // Check for ctor we don't like (non-existant, delegate or decorated with declarative linktime demand).
+            // Check for ctor we don't like (non-existent, delegate or decorated with declarative linktime demand).
             if (rci == null || typeof(Delegate).IsAssignableFrom(rci.DeclaringType))
             {
                 return null;
@@ -421,7 +455,32 @@ namespace System.Security.Cryptography
 
         public static void AddOID(string oid, params string[] names)
         {
-            throw new PlatformNotSupportedException();
+            if (oid == null)
+                throw new ArgumentNullException(nameof(oid));
+            if (names == null)
+                throw new ArgumentNullException(nameof(names));
+ 
+            string[] oidNames = new string[names.Length];
+            Array.Copy(names, 0, oidNames, 0, oidNames.Length);
+ 
+            // Pre-check the input names for validity, so that we don't add a few of the names and throw an
+            // exception if an invalid name is found further down the array. 
+            foreach (string name in oidNames)
+            {
+                if (string.IsNullOrEmpty(name))
+                {
+                    throw new ArgumentException(SR.Cryptography_AddNullOrEmptyName);
+                }
+            }
+ 
+            // Everything is valid, so we're good to lock the hash table and add the application mappings
+            lock (s_InternalSyncObject)
+            {
+                foreach (string name in oidNames)
+                {
+                    appOidHT[name] = oid;
+                }
+            }
         }
 
         public static string MapNameToOID(string name)
@@ -430,7 +489,17 @@ namespace System.Security.Cryptography
                 throw new ArgumentNullException(nameof(name));
 
             string oidName;
-            if (!DefaultOidHT.TryGetValue(name, out oidName))
+            
+            // Check to see if we have an application defined mapping
+            lock (s_InternalSyncObject)
+            {
+                if (!appOidHT.TryGetValue(name, out oidName))
+                {
+                    oidName = null;
+                }
+            }
+
+            if (string.IsNullOrEmpty(oidName) && !DefaultOidHT.TryGetValue(name, out oidName))
             {
                 try
                 {
@@ -452,14 +521,14 @@ namespace System.Security.Cryptography
             uint[] oidNums = new uint[oidString.Length];
             for (int i = 0; i < oidString.Length; i++)
             {
-                oidNums[i] = (uint)int.Parse(oidString[i], CultureInfo.InvariantCulture);
+                oidNums[i] = unchecked((uint)int.Parse(oidString[i], CultureInfo.InvariantCulture));
             }
 
             // Handle the first two oidNums special
             if (oidNums.Length < 2)
                 throw new CryptographicUnexpectedOperationException(SR.Cryptography_InvalidOID);
 
-            uint firstTwoOidNums = (oidNums[0] * 40) + oidNums[1];
+            uint firstTwoOidNums = unchecked((oidNums[0] * 40) + oidNums[1]);
 
             // Determine length of output array
             int encodedOidNumsLength = 2; // Reserve first two bytes for later
@@ -500,7 +569,7 @@ namespace System.Security.Cryptography
             {
                 if (destination != null)
                 {
-                    destination[index++] = (byte)value;
+                    destination[index++] = unchecked((byte)value);
                 }
                 else
                 {
@@ -523,9 +592,12 @@ namespace System.Security.Cryptography
             {
                 if (destination != null)
                 {
-                    destination[index++] = (byte)((value >> 14) | 0x80);
-                    destination[index++] = (byte)((value >> 7) | 0x80);
-                    destination[index++] = (byte)(value & 0x7f);
+                    unchecked
+                    {
+                        destination[index++] = (byte)((value >> 14) | 0x80);
+                        destination[index++] = (byte)((value >> 7) | 0x80);
+                        destination[index++] = (byte)(value & 0x7f);
+                    }
                 }
                 else
                 {
@@ -536,10 +608,13 @@ namespace System.Security.Cryptography
             {
                 if (destination != null)
                 {
-                    destination[index++] = (byte)((value >> 21) | 0x80);
-                    destination[index++] = (byte)((value >> 14) | 0x80);
-                    destination[index++] = (byte)((value >> 7) | 0x80);
-                    destination[index++] = (byte)(value & 0x7f);
+                    unchecked
+                    {
+                        destination[index++] = (byte)((value >> 21) | 0x80);
+                        destination[index++] = (byte)((value >> 14) | 0x80);
+                        destination[index++] = (byte)((value >> 7) | 0x80);
+                        destination[index++] = (byte)(value & 0x7f);
+                    }
                 }
                 else
                 {
@@ -550,11 +625,14 @@ namespace System.Security.Cryptography
             {
                 if (destination != null)
                 {
-                    destination[index++] = (byte)((value >> 28) | 0x80);
-                    destination[index++] = (byte)((value >> 21) | 0x80);
-                    destination[index++] = (byte)((value >> 14) | 0x80);
-                    destination[index++] = (byte)((value >> 7) | 0x80);
-                    destination[index++] = (byte)(value & 0x7f);
+                    unchecked
+                    {
+                        destination[index++] = (byte)((value >> 28) | 0x80);
+                        destination[index++] = (byte)((value >> 21) | 0x80);
+                        destination[index++] = (byte)((value >> 14) | 0x80);
+                        destination[index++] = (byte)((value >> 7) | 0x80);
+                        destination[index++] = (byte)(value & 0x7f);
+                    }
                 }
                 else
                 {

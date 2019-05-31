@@ -28,6 +28,7 @@ namespace System.Data
     [DefaultEvent(nameof(RowChanging))]
     [XmlSchemaProvider(nameof(GetDataTableSchema))]
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DataTable : MarshalByValueComponent, IListSource, ISupportInitializeNotification, ISerializable, IXmlSerializable
     {
         private DataSet _dataSet;
@@ -178,7 +179,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Intitalizes a new instance of the <see cref='System.Data.DataTable'/> class with the specified table
+        /// Initializes a new instance of the <see cref='System.Data.DataTable'/> class with the specified table
         ///    name.
         /// </summary>
         public DataTable(string tableName) : this()
@@ -371,8 +372,7 @@ namespace System.Data
                 info.AddValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.DefaultValue", i), Columns[i].DefaultValue);
                 info.AddValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.ReadOnly", i), Columns[i].ReadOnly);
                 info.AddValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.MaxLength", i), Columns[i].MaxLength);
-                info.AddValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.DataType", i), Columns[i].DataType);
-
+                info.AddValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.DataType_AssemblyQualifiedName", i), Columns[i].DataType.AssemblyQualifiedName);
                 info.AddValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.XmlDataType", i), Columns[i].XmlDataType);
                 info.AddValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.SimpleType", i), Columns[i].SimpleType);
 
@@ -441,7 +441,8 @@ namespace System.Data
                 dc._columnUri = info.GetString(string.Format(formatProvider, "DataTable.DataColumn_{0}.Namespace", i));
                 dc.Prefix = info.GetString(string.Format(formatProvider, "DataTable.DataColumn_{0}.Prefix", i));
 
-                dc.DataType = (Type)info.GetValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.DataType", i), typeof(Type));
+                string typeName = (string)info.GetValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.DataType_AssemblyQualifiedName", i), typeof(string));
+                dc.DataType = Type.GetType(typeName, throwOnError: true);
                 dc.XmlDataType = (string)info.GetValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.XmlDataType", i), typeof(string));
                 dc.SimpleType = (SimpleType)info.GetValue(string.Format(formatProvider, "DataTable.DataColumn_{0}.SimpleType", i), typeof(SimpleType));
 
@@ -1224,7 +1225,6 @@ namespace System.Data
                         view.SetIndex2("", DataViewRowState.CurrentRows, null, true);
                     }
 
-                    // avoid HostProtectionAttribute(Synchronization=true) by not calling virtual methods from inside a lock
                     view = Interlocked.CompareExchange<DataView>(ref _defaultView, view, null);
                     if (null == view)
                     {
@@ -1328,7 +1328,7 @@ namespace System.Data
             get
             {
                 // used for Formating/Parsing
-                // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpref/html/frlrfsystemglobalizationcultureinfoclassisneutralculturetopic.asp
+                // https://docs.microsoft.com/en-us/dotnet/api/system.globalization.cultureinfo.isneutralculture
                 if (null == _formatProvider)
                 {
                     CultureInfo culture = Locale;
@@ -1822,7 +1822,7 @@ namespace System.Data
         }
         private string GetInheritedNamespace(List<DataTable> visitedTables)
         {
-            // if there is nested relation: ie: this table is nested child of a another table and
+            // if there is nested relation: ie: this table is nested child of another table and
             // if it is not self nested, return parent tables NS: Meanwhile make sure
             DataRelation[] nestedRelations = NestedParentRelations;
             if (nestedRelations.Length > 0)
@@ -4214,7 +4214,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// Returns an array of all <see cref='System.Data.DataRow'/> objects that match the filter criteria, in the the
+        /// Returns an array of all <see cref='System.Data.DataRow'/> objects that match the filter criteria, in the
         /// specified sort order.
         /// </summary>
         public DataRow[] Select(string filterExpression, string sort)
@@ -4360,7 +4360,7 @@ namespace System.Data
                 && (-1 != proposedRecord)
                 && (-1 != row._newRecord))
             {
-                // DataRow will believe multiple edits occured and
+                // DataRow will believe multiple edits occurred and
                 // DataView.ListChanged event w/ ListChangedType.ItemChanged will raise DataRowView.PropertyChanged event and
                 // PropertyChangedEventArgs.PropertyName will now be empty string so
                 // WPF will refresh the entire row
@@ -4829,7 +4829,7 @@ namespace System.Data
             if (_colUnique != null)
                 return _colUnique;
 
-            // check to see if we can use already existant PrimaryKey
+            // check to see if we can use already existent PrimaryKey
             DataColumn[] pkey = PrimaryKey;
             if (pkey.Length == 1)
             {
@@ -5150,7 +5150,7 @@ namespace System.Data
                             }
                             break;
                         case DataRowState.Deleted:
-                            Debug.Assert(false, "LoadOption.Upsert with deleted row, should not be here");
+                            Debug.Fail("LoadOption.Upsert with deleted row, should not be here");
                             break;
                         default:
                             action = DataRowAction.Change;
@@ -6265,7 +6265,7 @@ namespace System.Data
             reader.Read();
             if (reader.NodeType == XmlNodeType.Whitespace)
             {
-                MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespaces.
+                MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespace.
             }
 
             newDt._fInLoadDiffgram = true;
@@ -6476,7 +6476,7 @@ namespace System.Data
 
                         if (DataSet == null && _tableNamespace == null)
                         {
-                            // for standalone table, clone wont get these correctly, since they may come with inheritance
+                            // for standalone table, clone won't get these correctly, since they may come with inheritance
                             _tableNamespace = tempTable.Namespace;
                         }
                     }
@@ -6699,7 +6699,7 @@ namespace System.Data
             // 
             // do not allocate TLS data in RETAIL bits!
             [ThreadStatic]
-            internal static List<DataTable> s_usedTables;
+            internal static List<DataTable> t_usedTables;
 #endif //DEBUG
 
             private DataTable _targetTable;
@@ -6710,14 +6710,14 @@ namespace System.Data
                 Debug.Assert(table != null);
                 Debug.Assert(table._rowDiffId == null, "rowDiffId wasn't previously cleared");
 #if DEBUG
-                Debug.Assert(s_usedTables == null || !s_usedTables.Contains(table),
+                Debug.Assert(t_usedTables == null || !t_usedTables.Contains(table),
                     "Nested call with same table can cause data corruption!");
 #endif
 
 #if DEBUG
-                if (s_usedTables == null)
-                    s_usedTables = new List<DataTable>();
-                s_usedTables.Add(table);
+                if (t_usedTables == null)
+                    t_usedTables = new List<DataTable>();
+                t_usedTables.Add(table);
 #endif
                 _targetTable = table;
                 table._rowDiffId = null;
@@ -6730,12 +6730,12 @@ namespace System.Data
                 if (_targetTable != null)
                 {
 #if DEBUG
-                    Debug.Assert(s_usedTables != null && s_usedTables.Contains(_targetTable), "missing Prepare before Cleanup");
-                    if (s_usedTables != null)
+                    Debug.Assert(t_usedTables != null && t_usedTables.Contains(_targetTable), "missing Prepare before Cleanup");
+                    if (t_usedTables != null)
                     {
-                        s_usedTables.Remove(_targetTable);
-                        if (s_usedTables.Count == 0)
-                            s_usedTables = null;
+                        t_usedTables.Remove(_targetTable);
+                        if (t_usedTables.Count == 0)
+                            t_usedTables = null;
                     }
 #endif
                     _targetTable._rowDiffId = null;
@@ -6747,8 +6747,8 @@ namespace System.Data
             {
 #if DEBUG
                 // this code asserts scope was created, but it does not assert that the table was included in it
-                // note that in case of DataSet, new tables might be added to the list in which case they won't appear in s_usedTables.
-                Debug.Assert(s_usedTables != null, message);
+                // note that in case of DataSet, new tables might be added to the list in which case they won't appear in t_usedTables.
+                Debug.Assert(t_usedTables != null, message);
 #endif
             }
         }
@@ -6766,15 +6766,15 @@ namespace System.Data
 #if DEBUG
                 // initialize list of tables out of current tables
                 // note: it might remain empty (still initialization is needed for assert to operate)
-                if (RowDiffIdUsageSection.s_usedTables == null)
-                    RowDiffIdUsageSection.s_usedTables = new List<DataTable>();
+                if (RowDiffIdUsageSection.t_usedTables == null)
+                    RowDiffIdUsageSection.t_usedTables = new List<DataTable>();
 #endif 
                 for (int tableIndex = 0; tableIndex < ds.Tables.Count; ++tableIndex)
                 {
                     DataTable table = ds.Tables[tableIndex];
 #if DEBUG
-                    Debug.Assert(!RowDiffIdUsageSection.s_usedTables.Contains(table), "Nested call with same table can cause data corruption!");
-                    RowDiffIdUsageSection.s_usedTables.Add(table);
+                    Debug.Assert(!RowDiffIdUsageSection.t_usedTables.Contains(table), "Nested call with same table can cause data corruption!");
+                    RowDiffIdUsageSection.t_usedTables.Add(table);
 #endif
                     Debug.Assert(table._rowDiffId == null, "rowDiffId wasn't previously cleared");
                     table._rowDiffId = null;
@@ -6788,7 +6788,7 @@ namespace System.Data
                 if (_targetDS != null)
                 {
 #if DEBUG
-                    Debug.Assert(RowDiffIdUsageSection.s_usedTables != null, "missing Prepare before Cleanup");
+                    Debug.Assert(RowDiffIdUsageSection.t_usedTables != null, "missing Prepare before Cleanup");
 #endif
 
                     for (int tableIndex = 0; tableIndex < _targetDS.Tables.Count; ++tableIndex)
@@ -6797,14 +6797,14 @@ namespace System.Data
 #if DEBUG
                         // cannot assert that table exists in the usedTables - new tables might be 
                         // created during diffgram processing in DataSet.ReadXml.
-                        if (RowDiffIdUsageSection.s_usedTables != null)
-                            RowDiffIdUsageSection.s_usedTables.Remove(table);
+                        if (RowDiffIdUsageSection.t_usedTables != null)
+                            RowDiffIdUsageSection.t_usedTables.Remove(table);
 #endif
                         table._rowDiffId = null;
                     }
 #if DEBUG
-                    if (RowDiffIdUsageSection.s_usedTables != null && RowDiffIdUsageSection.s_usedTables.Count == 0)
-                        RowDiffIdUsageSection.s_usedTables = null; // out-of-scope
+                    if (RowDiffIdUsageSection.t_usedTables != null && RowDiffIdUsageSection.t_usedTables.Count == 0)
+                        RowDiffIdUsageSection.t_usedTables = null; // out-of-scope
 #endif
                 }
             }

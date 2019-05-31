@@ -34,7 +34,6 @@
 
 using System.Globalization;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Text;
 using System.Runtime.InteropServices;
 using System;
@@ -49,7 +48,6 @@ namespace System.Text
     **
     ==============================================================================*/
 
-    [Serializable]
     internal class ISO2022Encoding : DBCSCodePageEncoding
     {
         private const byte SHIFT_OUT = (byte)0x0E;
@@ -59,7 +57,6 @@ namespace System.Text
 
         // We have to load the 936 code page tables, so impersonate 936 as our base
         // This pretends to be other code pages as far as memory sections are concerned.
-        [System.Security.SecurityCritical]  // auto-generated
         internal ISO2022Encoding(int codePage) : base(codePage, s_tableBaseCodePages[codePage % 10])
         {
         }
@@ -224,7 +221,6 @@ namespace System.Text
         }
 
         // GetByteCount
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetByteCount(char* chars, int count, EncoderNLS baseEncoder)
         {
             // Just need to ASSERT, this is called by something else internal that checked parameters already
@@ -235,7 +231,6 @@ namespace System.Text
             return GetBytes(chars, count, null, 0, baseEncoder);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetBytes(char* chars, int charCount,
                                                 byte* bytes, int byteCount, EncoderNLS baseEncoder)
         {
@@ -277,7 +272,6 @@ namespace System.Text
         }
 
         // This is internal and called by something else,
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetCharCount(byte* bytes, int count, DecoderNLS baseDecoder)
         {
             // Just assert, we're called internally so these should be safe, checked already
@@ -288,7 +282,6 @@ namespace System.Text
             return GetChars(bytes, count, null, 0, baseDecoder);
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         public override unsafe int GetChars(byte* bytes, int byteCount,
                                                 char* chars, int charCount, DecoderNLS baseDecoder)
         {
@@ -360,7 +353,6 @@ namespace System.Text
         // undefined, so we maintain that behavior when decoding.  We will never generate characters using
         // that technique, but the decoder will process them.
         //
-        [System.Security.SecurityCritical]  // auto-generated
         private unsafe int GetBytesCP5022xJP(char* chars, int charCount,
                                                   byte* bytes, int byteCount, ISO2022Encoder encoder)
         {
@@ -382,7 +374,7 @@ namespace System.Text
                 // We may have a left over character from last time, try and process it.
                 if (charLeftOver > 0)
                 {
-                    Debug.Assert(Char.IsHighSurrogate(charLeftOver), "[ISO2022Encoding.GetBytesCP5022xJP]leftover character should be high surrogate");
+                    Debug.Assert(char.IsHighSurrogate(charLeftOver), "[ISO2022Encoding.GetBytesCP5022xJP]leftover character should be high surrogate");
 
                     // It has to be a high surrogate, which we don't support, so it has to be a fallback
                     buffer.Fallback(charLeftOver);
@@ -479,7 +471,7 @@ namespace System.Text
                     }
 
                     // Make sure we're in the right mode (JIS 0208 or JIS 0212)
-                    // Note: Right now we don't use JIS 0212.  Also this table'd be wrong
+                    // Note: Right now we don't use JIS 0212.  Also this table would be wrong
 
                     // Its JIS extension 0208
                     if (currentMode != ISO2022Modes.ModeJIS0208)
@@ -602,7 +594,6 @@ namespace System.Text
         // Also Mlang always assumed KR mode, even if the designator wasn't found yet, so we do that as
         // well.  So basically we just ignore <ESC>$)C when decoding.
         //
-        [System.Security.SecurityCritical]  // auto-generated
         private unsafe int GetBytesCP50225KR(char* chars, int charCount,
                                                     byte* bytes, int byteCount, ISO2022Encoder encoder)
         {
@@ -624,7 +615,7 @@ namespace System.Text
                 // We may have a l left over character from last time, try and process it.
                 if (charLeftOver > 0)
                 {
-                    Debug.Assert(Char.IsHighSurrogate(charLeftOver), "[ISO2022Encoding.GetBytesCP50225KR]leftover character should be high surrogate");
+                    Debug.Assert(char.IsHighSurrogate(charLeftOver), "[ISO2022Encoding.GetBytesCP50225KR]leftover character should be high surrogate");
 
                     // It has to be a high surrogate, which we don't support, so it has to be a fallback
                     buffer.Fallback(charLeftOver);
@@ -752,7 +743,6 @@ namespace System.Text
         //
         // This encoding is designed for transmission by e-mail and news.  No bytes should have high bit set.
         // (all bytes <= 0x7f)
-        [System.Security.SecurityCritical]  // auto-generated
         private unsafe int GetBytesCP52936(char* chars, int charCount,
                                            byte* bytes, int byteCount, ISO2022Encoder encoder)
         {
@@ -771,7 +761,7 @@ namespace System.Text
                 // We may have a left over character from last time, try and process it.
                 if (charLeftOver > 0)
                 {
-                    Debug.Assert(Char.IsHighSurrogate(charLeftOver), "[ISO2022Encoding.GetBytesCP52936]leftover character should be high surrogate");
+                    Debug.Assert(char.IsHighSurrogate(charLeftOver), "[ISO2022Encoding.GetBytesCP52936]leftover character should be high surrogate");
 
                     // It has to be a high surrogate, which we don't support, so it has to be a fallback
                     buffer.Fallback(charLeftOver);
@@ -886,7 +876,6 @@ namespace System.Text
             return buffer.Count;
         }
 
-        [System.Security.SecurityCritical]  // auto-generated
         private unsafe int GetCharsCP5022xJP(byte* bytes, int byteCount,
                                                   char* chars, int charCount, ISO2022Decoder decoder)
         {
@@ -1212,7 +1201,6 @@ namespace System.Text
 
         // Note that in DBCS mode mlang passed through ' ', '\t' and '\n' as SBCS characters
         // probably to allow mailer formatting without too much extra work.
-        [System.Security.SecurityCritical]  // auto-generated
         private unsafe int GetCharsCP50225KR(byte* bytes, int byteCount,
                                                    char* chars, int charCount, ISO2022Decoder decoder)
         {
@@ -1450,7 +1438,6 @@ namespace System.Text
         //
         // This encoding is designed for transmission by e-mail and news.  No bytes should have high bit set.
         // (all bytes <= 0x7f)
-        [System.Security.SecurityCritical]  // auto-generated
         private unsafe int GetCharsCP52936(byte* bytes, int byteCount,
                                                 char* chars, int charCount, ISO2022Decoder decoder)
         {
@@ -1656,14 +1643,14 @@ namespace System.Text
                 }
 
             // Just ASCII
-            // We allow some chars > 7f because everett did, so we have to look them up.
+            // We allow some chars > 7f because Everett did, so we have to look them up.
             STOREASCII:
                 char c = mapBytesToUnicode[ch];
 
                 // Check if it was unknown
                 if ((c == UNKNOWN_CHAR_FLAG || c == 0) && (ch != 0))
                 {
-                    // fallback the unkown bytes
+                    // fallback the unknown bytes
                     if (!buffer.Fallback((byte)ch))
                         break;
                     continue;
@@ -1708,7 +1695,6 @@ namespace System.Text
         {
             if (charCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(charCount), SR.ArgumentOutOfRange_NeedNonNegNum);
-            Contract.EndContractBlock();
 
             // Characters would be # of characters + 1 in case high surrogate is ? * max fallback
             long byteCount = (long)charCount + 1;
@@ -1762,7 +1748,6 @@ namespace System.Text
         {
             if (byteCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(byteCount), SR.ArgumentOutOfRange_NeedNonNegNum);
-            Contract.EndContractBlock();
 
             int perChar = 1;
             int extraDecoder = 1;
@@ -1805,7 +1790,6 @@ namespace System.Text
             return new ISO2022Decoder(this);
         }
 
-        [Serializable]
         internal class ISO2022Encoder : System.Text.EncoderNLS
         {
             internal ISO2022Modes currentMode;
@@ -1838,7 +1822,6 @@ namespace System.Text
             }
         }
 
-        [Serializable]
         internal class ISO2022Decoder : System.Text.DecoderNLS
         {
             internal byte[] bytesLeftOver;

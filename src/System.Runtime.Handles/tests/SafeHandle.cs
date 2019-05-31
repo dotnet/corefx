@@ -61,4 +61,60 @@ public partial class SafeHandle_4000_Tests
         Assert.False(mch.IsInvalid);
         Assert.True(mch.IsReleased);
     }
+
+    [Fact]
+    public static void SafeHandle_invalid_close()
+    {
+        MySafeHandle mch = new MySafeHandle();
+        mch.Close();
+        Assert.True(mch.IsClosed);
+        Assert.True(mch.IsInvalid);
+        Assert.False(mch.IsReleased);
+    }
+
+    [Fact]
+    public static void SafeHandle_valid_close()
+    {
+        MySafeHandle mch = new MySafeHandle(new IntPtr(1));
+        mch.Close();
+        Assert.True(mch.IsClosed);
+        Assert.False(mch.IsInvalid);
+        Assert.True(mch.IsReleased);
+    }
+
+    [DllImport("Kernel32", SetLastError = true)]
+    private extern static void SetLastError(int error);
+
+    private class LastErrorSafeHandle : SafeHandle
+    {
+        internal LastErrorSafeHandle(IntPtr h)
+            : base(h, true)
+        {
+        }
+
+        public override bool IsInvalid => handle == IntPtr.Zero;
+
+        protected override bool ReleaseHandle()
+        {
+            SetLastError(-1);
+            return true;
+        }
+    }
+
+    [Fact]
+    [PlatformSpecific(TestPlatforms.Windows)]
+    public static void SafeHandle_DangerousReleasePreservesLastError()
+    {
+        LastErrorSafeHandle handle = new LastErrorSafeHandle((IntPtr)1);
+
+        bool success = false;
+        handle.DangerousAddRef(ref success);
+        handle.Dispose();
+
+        SetLastError(42);
+        handle.DangerousRelease();
+
+        int error = Marshal.GetLastWin32Error();
+        Assert.Equal(42, error);
+    }
 }

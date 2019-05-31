@@ -305,7 +305,7 @@ namespace System.Xml
                 }
                 else
                 {
-                    Debug.Assert(false, "Expected currentState <= State.Error ");
+                    Debug.Fail("Expected currentState <= State.Error ");
                     return WriteState.Error;
                 }
             }
@@ -494,7 +494,7 @@ namespace System.Xml
                 if (top == _elemScopeStack.Length)
                 {
                     ElementScope[] newStack = new ElementScope[top * 2];
-                    Array.Copy(_elemScopeStack, newStack, top);
+                    Array.Copy(_elemScopeStack, 0, newStack, 0, top);
                     _elemScopeStack = newStack;
                 }
                 _elemScopeStack[top].Set(prefix, localName, ns, _nsTop);
@@ -672,7 +672,7 @@ namespace System.Xml
                         {
                             throw new ArgumentException(SR.Xml_XmlnsPrefix);
                         }
-                        _curDeclPrefix = String.Empty;
+                        _curDeclPrefix = string.Empty;
                         SetSpecialAttribute(SpecialAttribute.DefaultXmlns);
                         goto SkipPushAndWrite;
                     }
@@ -991,7 +991,7 @@ namespace System.Xml
         {
             try
             {
-                if (Char.IsSurrogate(ch))
+                if (char.IsSurrogate(ch))
                 {
                     throw new ArgumentException(SR.Xml_InvalidSurrogateMissingLowChar);
                 }
@@ -1017,7 +1017,7 @@ namespace System.Xml
         {
             try
             {
-                if (!Char.IsSurrogatePair(highChar, lowChar))
+                if (!char.IsSurrogatePair(highChar, lowChar))
                 {
                     throw XmlConvert.CreateInvalidSurrogatePairException(lowChar, highChar);
                 }
@@ -1364,7 +1364,7 @@ namespace System.Xml
                 CheckNCName(localName);
 
                 AdvanceState(Token.Text);
-                string prefix = String.Empty;
+                string prefix = string.Empty;
                 if (ns != null && ns.Length != 0)
                 {
                     prefix = LookupPrefix(ns);
@@ -1579,17 +1579,6 @@ namespace System.Xml
             }
         }
 
-        //
-        // Internal methods
-        //
-        internal XmlWriter InnerWriter
-        {
-            get
-            {
-                return _writer;
-            }
-        }
-
         internal XmlRawWriter RawWriter
         {
             get
@@ -1625,7 +1614,7 @@ namespace System.Xml
             else if (State.RootLevelAttr == _currentState)
                 _currentState = State.RootLevelSpecAttr;
             else
-                Debug.Assert(false, "State.Attribute == currentState || State.RootLevelAttr == currentState");
+                Debug.Fail("State.Attribute == currentState || State.RootLevelAttr == currentState");
 
             if (_attrValueCache == null)
             {
@@ -1846,7 +1835,7 @@ namespace System.Xml
             if (top == _nsStack.Length)
             {
                 Namespace[] newStack = new Namespace[top * 2];
-                Array.Copy(_nsStack, newStack, top);
+                Array.Copy(_nsStack, 0, newStack, 0, top);
                 _nsStack = newStack;
             }
             _nsStack[top].Set(prefix, ns, kind);
@@ -1920,7 +1909,7 @@ namespace System.Xml
             }
         }
 
-        static private XmlException DupAttrException(string prefix, string localName)
+        private static XmlException DupAttrException(string prefix, string localName)
         {
             StringBuilder sb = new StringBuilder();
             if (prefix.Length > 0)
@@ -2052,7 +2041,7 @@ namespace System.Xml
                         break;
 
                     default:
-                        Debug.Assert(false, "We should not get to this point.");
+                        Debug.Fail("We should not get to this point.");
                         break;
                 }
             }
@@ -2082,7 +2071,7 @@ namespace System.Xml
         {
             if (state >= State.Error)
             {
-                Debug.Assert(false, "We should never get to this point. State = " + state);
+                Debug.Fail("We should never get to this point. State = " + state);
                 return "Error";
             }
             else
@@ -2133,7 +2122,6 @@ namespace System.Xml
             return s;
         }
 
-        [System.Security.SecuritySafeCritical]
         private unsafe void CheckNCName(string ncname)
         {
             Debug.Assert(ncname != null && ncname.Length > 0);
@@ -2218,7 +2206,7 @@ namespace System.Xml
             if (top == _attrStack.Length)
             {
                 AttrName[] newStack = new AttrName[top * 2];
-                Array.Copy(_attrStack, newStack, top);
+                Array.Copy(_attrStack, 0, newStack, 0, top);
                 _attrStack = newStack;
             }
             _attrStack[top].Set(prefix, localName, namespaceName);

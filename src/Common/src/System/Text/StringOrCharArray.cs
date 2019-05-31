@@ -12,7 +12,7 @@ namespace System.Text
     /// allocate/copy the chars into a new string.  This comes at the expense of an extra
     /// reference field + two Int32s per key in the size of the dictionary's Entry array.
     /// </summary>
-    internal struct StringOrCharArray : IEquatable<StringOrCharArray>
+    internal readonly struct StringOrCharArray : IEquatable<StringOrCharArray>
     {
         public readonly string String;
 
@@ -151,16 +151,16 @@ namespace System.Text
             for (int i = 0; i < count; ++i)
             {
                 int c = *s++;
-                hash1 = ((hash1 << 5) + hash1) ^ c;
+                hash1 = unchecked((hash1 << 5) + hash1) ^ c;
 
                 if (++i >= count)
                     break;
 
                 c = *s++;
-                hash2 = ((hash2 << 5) + hash2) ^ c;
+                hash2 = unchecked((hash2 << 5) + hash2) ^ c;
             }
 
-            return hash1 + (hash2 * 1566083941);
+            return unchecked(hash1 + (hash2 * 1566083941));
         }
 
         [Conditional("DEBUG")]

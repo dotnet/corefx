@@ -25,7 +25,7 @@ public class TermInfo
     private const string TerminfoLocationsField = "_terminfoLocations";
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests TermInfo
     public void VerifyInstalledTermInfosParse()
     {
         bool foundAtLeastOne = false;
@@ -58,8 +58,17 @@ public class TermInfo
         Assert.True(foundAtLeastOne, "Didn't find any terminfo files");
     }
 
+    [Fact]
+    [PlatformSpecific(TestPlatforms.AnyUnix)] // Tests TermInfo
+    public void VerifyTermInfoSupportsNewAndLegacyNcurses()
+    {
+        MethodInfo readDbMethod = typeof(Console).GetTypeInfo().Assembly.GetType(TerminfoDatabaseType).GetTypeInfo().GetDeclaredMethods(ReadDatabaseMethod).Where(m => m.GetParameters().Count() == 2).Single();
+        readDbMethod.Invoke(null, new object[] { "xterm", "ncursesFormats" }); // This will throw InvalidOperationException in case we don't support the legacy format
+        readDbMethod.Invoke(null, new object[] { "screen-256color", "ncursesFormats" }); // This will throw InvalidOperationException if we can't parse the new format
+    }
+
     [Theory]
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests TermInfo
     [InlineData("xterm-256color", "\u001B\u005B\u00330m", "\u001B\u005B\u00340m", 0)]
     [InlineData("xterm-256color", "\u001B\u005B\u00331m", "\u001B\u005B\u00341m", 1)]
     [InlineData("xterm-256color", "\u001B\u005B90m", "\u001B\u005B100m", 8)]
@@ -83,11 +92,12 @@ public class TermInfo
             object info = CreateTermColorInfo(db);
             Assert.Equal(expectedForeground, EvaluateParameterizedStrings(GetForegroundFormat(info), colorValue));
             Assert.Equal(expectedBackground, EvaluateParameterizedStrings(GetBackgroundFormat(info), colorValue));
+            Assert.InRange(GetMaxColors(info), 1, int.MaxValue);
         }
     }
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.OSX)]
+    [PlatformSpecific(TestPlatforms.OSX)]  // The file being tested is available by default only on OSX
     public void EmuTermInfoDoesntBreakParser()
     {
         // This file (available by default on OS X) is called out specifically since it contains a format where it has %i
@@ -96,7 +106,7 @@ public class TermInfo
     }
 
     [Fact]
-    [PlatformSpecific(TestPlatforms.AnyUnix)]
+    [PlatformSpecific(TestPlatforms.AnyUnix)]  // Tests TermInfo
     public void TryingToLoadTermThatDoesNotExistDoesNotThrow()
     {
         const string NonexistentTerm = "foobar____";

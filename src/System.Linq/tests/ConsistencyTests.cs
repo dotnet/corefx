@@ -16,24 +16,7 @@ namespace System.Linq.Tests
         [Fact]
         public static void MatchSequencePattern()
         {
-            // If a change to Enumerable has required a change to the exception list in this test
-            // make the same change at src/System.Linq.Queryable/tests/Queryable.cs.
-            MethodInfo enumerableNotInQueryable = GetMissingExtensionMethod(
-                typeof(Enumerable),
-                typeof(Queryable),
-                 new[] {
-                     "ToLookup",
-                     "ToDictionary",
-                     "ToArray",
-                     "AsEnumerable",
-                     "ToList",
-                     "Fold",
-                     "LeftJoin",
-                     "Append",
-                     "Prepend",
-                     "ToHashSet"
-                 }
-                );
+            MethodInfo enumerableNotInQueryable = GetMissingExtensionMethod(typeof(Enumerable), typeof(Queryable), GetExcludedMethods());
 
             Assert.True(enumerableNotInQueryable == null, string.Format("Enumerable method {0} not defined by Queryable", enumerableNotInQueryable));
 
@@ -41,11 +24,30 @@ namespace System.Linq.Tests
                 typeof(Queryable),
                 typeof(Enumerable),
                  new[] {
-                     "AsQueryable"
+                     nameof(Queryable.AsQueryable)
                  }
                 );
 
             Assert.True(queryableNotInEnumerable == null, string.Format("Queryable method {0} not defined by Enumerable", queryableNotInEnumerable));
+        }
+
+        // If a change to Enumerable has required a change to the exception list in this test
+        // make the same change at src/System.Linq.Queryable/tests/Queryable.cs.
+        private static IEnumerable<string> GetExcludedMethods()
+        {
+            IEnumerable<string> result = new[]
+            {
+                nameof(Enumerable.ToLookup),
+                nameof(Enumerable.ToDictionary),
+                nameof(Enumerable.ToArray),
+                nameof(Enumerable.AsEnumerable),
+                nameof(Enumerable.ToList),
+                "Fold",
+                "LeftJoin",
+                "ToHashSet"
+            };
+
+            return result;
         }
 
         private static MethodInfo GetMissingExtensionMethod(Type a, Type b, IEnumerable<string> excludedMethods)

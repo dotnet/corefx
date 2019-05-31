@@ -22,15 +22,12 @@ project_root="$1"/../../..
 if which "clang-$2.$3" > /dev/null 2>&1
     then
         export CC="$(which clang-$2.$3)"
-        export CXX="$(which clang++-$2.$3)"
 elif which "clang$2$3" > /dev/null 2>&1
     then
         export CC="$(which clang$2$3)"
-        export CXX="$(which clang++$2$3)"
 elif which clang > /dev/null 2>&1
     then
         export CC="$(which clang)"
-        export CXX="$(which clang++)"
 else
     echo "Unable to find Clang Compiler"
     exit 1
@@ -48,25 +45,19 @@ else
 fi
 
 cmake_extra_defines="-DCMAKE_BUILD_TYPE=$buildtype"
-
-if [[ -n "$LLDB_LIB_DIR" ]]; then
-    cmake_extra_defines="$cmake_extra_defines -DWITH_LLDB_LIBS=$LLDB_LIB_DIR"
-fi
-if [[ -n "$LLDB_INCLUDE_DIR" ]]; then
-    cmake_extra_defines="$cmake_extra_defines -DWITH_LLDB_INCLUDES=$LLDB_INCLUDE_DIR"
-fi
 if [[ -n "$CROSSCOMPILE" ]]; then
     if ! [[ -n "$ROOTFS_DIR" ]]; then
         echo "ROOTFS_DIR not set for crosscompile"
         exit 1
     fi
     if [[ -z "$CONFIG_DIR" ]]; then
-      CONFIG_DIR="$project_root/cross/$build_arch"
+        CONFIG_DIR="$project_root/cross"
     fi
+    export TARGET_BUILD_ARCH=$build_arch
     cmake_extra_defines="$cmake_extra_defines -C $CONFIG_DIR/tryrun.cmake"
     cmake_extra_defines="$cmake_extra_defines -DCMAKE_TOOLCHAIN_FILE=$CONFIG_DIR/toolchain.cmake"
 fi
-if [ "$build_arch" == "arm-softfp" ]; then
+if [ "$build_arch" == "armel" ]; then
     cmake_extra_defines="$cmake_extra_defines -DARM_SOFTFP=1"
 fi
 

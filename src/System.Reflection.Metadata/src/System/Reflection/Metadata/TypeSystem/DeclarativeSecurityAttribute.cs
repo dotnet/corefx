@@ -7,7 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct DeclarativeSecurityAttribute
+    public readonly struct DeclarativeSecurityAttribute
     {
         private readonly MetadataReader _reader;
 
@@ -21,11 +21,6 @@ namespace System.Reflection.Metadata
 
             _reader = reader;
             _rowId = rowId;
-        }
-
-        private DeclarativeSecurityAttributeHandle Handle
-        {
-            get { return DeclarativeSecurityAttributeHandle.FromRowId(_rowId); }
         }
 
         public DeclarativeSecurityAction Action

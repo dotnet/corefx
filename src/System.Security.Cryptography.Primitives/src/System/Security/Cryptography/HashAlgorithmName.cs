@@ -10,6 +10,7 @@ namespace System.Security.Cryptography
     /// <summary>
     /// Specifies the name of a cryptographic hash algorithm.
     /// </summary>
+    /// <remarks>
     /// Asymmetric Algorithms implemented using Microsoft's CNG (Cryptography Next Generation) API
     /// will interpret the underlying string value as a CNG algorithm identifier: 
     ///   * https://msdn.microsoft.com/en-us/library/windows/desktop/aa375534(v=vs.85).aspx
@@ -20,7 +21,7 @@ namespace System.Security.Cryptography
     ///    * Must recognize at least "MD5", "SHA1", "SHA256", "SHA384", and "SHA512".
     ///    * Should recognize additional CNG IDs for any other hash algorithms that they also support.
     /// </remarks>
-    public struct HashAlgorithmName : IEquatable<HashAlgorithmName>
+    public readonly struct HashAlgorithmName : IEquatable<HashAlgorithmName>
     {
         // Returning a new instance every time is free here since HashAlgorithmName is a struct with
         // a single string field. The optimized codegen should be equivalent to return "MD5".
@@ -75,7 +76,7 @@ namespace System.Security.Cryptography
 
         public override string ToString()
         {
-            return _name ?? String.Empty;
+            return _name ?? string.Empty;
         }
 
         public override bool Equals(object obj)

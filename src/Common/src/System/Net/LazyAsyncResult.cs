@@ -2,9 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Threading;
 using System.Diagnostics;
-using System.Collections;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace System.Net
@@ -18,17 +17,17 @@ namespace System.Net
 
         // This is to avoid user mistakes when they queue another async op from a callback the completes sync.
         [ThreadStatic]
-        private static ThreadContext s_threadContext;
+        private static ThreadContext t_threadContext;
 
         private static ThreadContext CurrentThreadContext
         {
             get
             {
-                ThreadContext threadContext = s_threadContext;
+                ThreadContext threadContext = t_threadContext;
                 if (threadContext == null)
                 {
                     threadContext = new ThreadContext();
-                    s_threadContext = threadContext;
+                    t_threadContext = threadContext;
                 }
 
                 return threadContext;
@@ -65,34 +64,6 @@ namespace System.Net
             _asyncCallback = myCallBack;
             _result = DBNull.Value;
             if (NetEventSource.IsEnabled) NetEventSource.Info(this);
-        }
-
-        // Allows creating a pre-completed result with less interlockeds.  Beware!  Constructor calls the callback.
-        // If a derived class ever uses this and overloads Cleanup, this may need to change.
-        internal LazyAsyncResult(object myObject, object myState, AsyncCallback myCallBack, object result)
-        {
-            if (result == DBNull.Value)
-            {
-                NetEventSource.Fail(this, "Result can't be set to DBNull - it's a special internal value.");
-            }
-
-            _asyncObject = myObject;
-            _asyncState = myState;
-            _asyncCallback = myCallBack;
-            _result = result;
-            _intCompleted = 1;
-
-            if (_asyncCallback != null)
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "Invoking callback");
-                _asyncCallback(this);
-            }
-            else
-            {
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, "No callback to invoke");
-            }
-
-            if (NetEventSource.IsEnabled) NetEventSource.Info(this, "(pre-completed)");
         }
 
         // Interface method to return the original async object.
@@ -203,10 +174,7 @@ namespace System.Net
             {
                 // This should be very rare, but doing this will reduce the chance of deadlock.
                 _event = null;
-                if (waitHandle != null)
-                {
-                    waitHandle.Dispose();
-                }
+                waitHandle?.Dispose();
 
                 throw;
             }

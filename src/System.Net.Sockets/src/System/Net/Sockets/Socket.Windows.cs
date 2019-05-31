@@ -4,14 +4,18 @@
 
 using Microsoft.Win32.SafeHandles;
 using System.Collections;
+using System.Diagnostics;
 using System.IO;
-using System.Runtime.InteropServices;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace System.Net.Sockets
 {
     public partial class Socket
     {
         private DynamicWinsockMethods _dynamicWinsockMethods;
+
+        internal void ReplaceHandleIfNecessaryAfterFailedConnect() { /* nop on Windows */ }
 
         private void EnsureDynamicWinsockMethods()
         {
@@ -21,14 +25,14 @@ namespace System.Net.Sockets
             }
         }
 
-        internal bool AcceptEx(SafeCloseSocket listenSocketHandle,
-            SafeCloseSocket acceptSocketHandle,
+        internal unsafe bool AcceptEx(SafeSocketHandle listenSocketHandle,
+            SafeSocketHandle acceptSocketHandle,
             IntPtr buffer,
             int len,
             int localAddressLength,
             int remoteAddressLength,
             out int bytesReceived,
-            SafeHandle overlapped)
+            NativeOverlapped* overlapped)
         {
             EnsureDynamicWinsockMethods();
             AcceptExDelegate acceptEx = _dynamicWinsockMethods.GetDelegate<AcceptExDelegate>(listenSocketHandle);
@@ -65,7 +69,7 @@ namespace System.Net.Sockets
                 out remoteSocketAddressLength);
         }
 
-        internal bool DisconnectEx(SafeCloseSocket socketHandle, SafeHandle overlapped, int flags, int reserved)
+        internal unsafe bool DisconnectEx(SafeSocketHandle socketHandle, NativeOverlapped* overlapped, int flags, int reserved)
         {
             EnsureDynamicWinsockMethods();
             DisconnectExDelegate disconnectEx = _dynamicWinsockMethods.GetDelegate<DisconnectExDelegate>(socketHandle);
@@ -73,7 +77,7 @@ namespace System.Net.Sockets
             return disconnectEx(socketHandle, overlapped, flags, reserved);
         }
 
-        internal bool DisconnectExBlocking(SafeCloseSocket socketHandle, IntPtr overlapped, int flags, int reserved)
+        internal bool DisconnectExBlocking(SafeSocketHandle socketHandle, IntPtr overlapped, int flags, int reserved)
         {
             EnsureDynamicWinsockMethods();
             DisconnectExDelegateBlocking disconnectEx_Blocking = _dynamicWinsockMethods.GetDelegate<DisconnectExDelegateBlocking>(socketHandle);
@@ -81,13 +85,13 @@ namespace System.Net.Sockets
             return disconnectEx_Blocking(socketHandle, overlapped, flags, reserved);
         }
 
-        internal bool ConnectEx(SafeCloseSocket socketHandle,
+        internal unsafe bool ConnectEx(SafeSocketHandle socketHandle,
             IntPtr socketAddress,
             int socketAddressSize,
             IntPtr buffer,
             int dataLength,
             out int bytesSent,
-            SafeHandle overlapped)
+            NativeOverlapped* overlapped)
         {
             EnsureDynamicWinsockMethods();
             ConnectExDelegate connectEx = _dynamicWinsockMethods.GetDelegate<ConnectExDelegate>(socketHandle);
@@ -95,7 +99,7 @@ namespace System.Net.Sockets
             return connectEx(socketHandle, socketAddress, socketAddressSize, buffer, dataLength, out bytesSent, overlapped);
         }
 
-        internal SocketError WSARecvMsg(SafeCloseSocket socketHandle, IntPtr msg, out int bytesTransferred, SafeHandle overlapped, IntPtr completionRoutine)
+        internal unsafe SocketError WSARecvMsg(SafeSocketHandle socketHandle, IntPtr msg, out int bytesTransferred, NativeOverlapped* overlapped, IntPtr completionRoutine)
         {
             EnsureDynamicWinsockMethods();
             WSARecvMsgDelegate recvMsg = _dynamicWinsockMethods.GetDelegate<WSARecvMsgDelegate>(socketHandle);
@@ -111,7 +115,7 @@ namespace System.Net.Sockets
             return recvMsg_Blocking(socketHandle, msg, out bytesTransferred, overlapped, completionRoutine);
         }
 
-        internal bool TransmitPackets(SafeCloseSocket socketHandle, IntPtr packetArray, int elementCount, int sendSize, SafeNativeOverlapped overlapped, TransmitFileOptions flags)
+        internal unsafe bool TransmitPackets(SafeSocketHandle socketHandle, IntPtr packetArray, int elementCount, int sendSize, NativeOverlapped* overlapped, TransmitFileOptions flags)
         {
             EnsureDynamicWinsockMethods();
             TransmitPacketsDelegate transmitPackets = _dynamicWinsockMethods.GetDelegate<TransmitPacketsDelegate>(socketHandle);
@@ -119,16 +123,18 @@ namespace System.Net.Sockets
             return transmitPackets(socketHandle, packetArray, elementCount, sendSize, overlapped, flags);
         }
 
-        internal static IntPtr[] SocketListToFileDescriptorSet(IList socketList)
+        internal static void SocketListToFileDescriptorSet(IList socketList, Span<IntPtr> fileDescriptorSet)
         {
-            if (socketList == null || socketList.Count == 0)
+            int count;
+            if (socketList == null || (count = socketList.Count) == 0)
             {
-                return null;
+                return;
             }
 
-            IntPtr[] fileDescriptorSet = new IntPtr[socketList.Count + 1];
-            fileDescriptorSet[0] = (IntPtr)socketList.Count;
-            for (int current = 0; current < socketList.Count; current++)
+            Debug.Assert(fileDescriptorSet.Length >= count + 1);
+
+            fileDescriptorSet[0] = (IntPtr)count;
+            for (int current = 0; current < count; current++)
             {
                 if (!(socketList[current] is Socket))
                 {
@@ -137,24 +143,27 @@ namespace System.Net.Sockets
 
                 fileDescriptorSet[current + 1] = ((Socket)socketList[current])._handle.DangerousGetHandle();
             }
-            return fileDescriptorSet;
         }
 
         // Transform the list socketList such that the only sockets left are those
         // with a file descriptor contained in the array "fileDescriptorArray".
-        internal static void SelectFileDescriptor(IList socketList, IntPtr[] fileDescriptorSet)
+        internal static void SelectFileDescriptor(IList socketList, Span<IntPtr> fileDescriptorSet)
         {
             // Walk the list in order.
             //
             // Note that the counter is not necessarily incremented at each step;
             // when the socket is removed, advancing occurs automatically as the
             // other elements are shifted down.
-            if (socketList == null || socketList.Count == 0)
+            int count;
+            if (socketList == null || (count = socketList.Count) == 0)
             {
                 return;
             }
 
-            if ((int)fileDescriptorSet[0] == 0)
+            Debug.Assert(fileDescriptorSet.Length >= count + 1);
+
+            int returnedCount = (int)fileDescriptorSet[0];
+            if (returnedCount == 0)
             {
                 // No socket present, will never find any socket, remove them all.
                 socketList.Clear();
@@ -163,13 +172,13 @@ namespace System.Net.Sockets
 
             lock (socketList)
             {
-                for (int currentSocket = 0; currentSocket < socketList.Count; currentSocket++)
+                for (int currentSocket = 0; currentSocket < count; currentSocket++)
                 {
                     Socket socket = socketList[currentSocket] as Socket;
 
                     // Look for the file descriptor in the array.
                     int currentFileDescriptor;
-                    for (currentFileDescriptor = 0; currentFileDescriptor < (int)fileDescriptorSet[0]; currentFileDescriptor++)
+                    for (currentFileDescriptor = 0; currentFileDescriptor < returnedCount; currentFileDescriptor++)
                     {
                         if (fileDescriptorSet[currentFileDescriptor + 1] == socket._handle.DangerousGetHandle())
                         {
@@ -177,28 +186,26 @@ namespace System.Net.Sockets
                         }
                     }
 
-                    if (currentFileDescriptor == (int)fileDescriptorSet[0])
+                    if (currentFileDescriptor == returnedCount)
                     {
                         // Descriptor not found: remove the current socket and start again.
                         socketList.RemoveAt(currentSocket--);
+                        count--;
                     }
                 }
             }
         }
 
-        private Socket GetOrCreateAcceptSocket(Socket acceptSocket, bool checkDisconnected, string propertyName, out SafeCloseSocket handle)
+        private Socket GetOrCreateAcceptSocket(Socket acceptSocket, bool checkDisconnected, string propertyName, out SafeSocketHandle handle)
         {
             // If an acceptSocket isn't specified, then we need to create one.
             if (acceptSocket == null)
             {
                 acceptSocket = new Socket(_addressFamily, _socketType, _protocolType);
             }
-            else
+            else if (acceptSocket._rightEndPoint != null && (!checkDisconnected || !acceptSocket._isDisconnected))
             {
-                if (acceptSocket._rightEndPoint != null && (!checkDisconnected || !acceptSocket._isDisconnected))
-                {
-                    throw new InvalidOperationException(SR.Format(SR.net_sockets_namedmustnotbebound, propertyName));
-                }
+                throw new InvalidOperationException(SR.Format(SR.net_sockets_namedmustnotbebound, propertyName));
             }
 
             handle = acceptSocket._handle;
@@ -221,10 +228,7 @@ namespace System.Net.Sockets
 
             if (errorCode != SocketError.Success)
             {
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException(errorCode);
             }
 
             // If the user passed the Disconnect and/or ReuseSocket flags, then TransmitFile disconnected the socket.
@@ -246,12 +250,9 @@ namespace System.Net.Sockets
             SocketError errorCode = SocketPal.SendFileAsync(_handle, fileStream, preBuffer, postBuffer, flags, asyncResult);
 
             // Check for synchronous exception
-            if (errorCode != SocketError.Success)
+            if (!CheckErrorAndUpdateStatus(errorCode))
             {
-                SocketException socketException = new SocketException((int)errorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                throw new SocketException((int)errorCode);
             }
 
             asyncResult.FinishPostingAsyncOp(ref Caches.SendClosureCache);
@@ -285,12 +286,22 @@ namespace System.Net.Sockets
 
             if ((SocketError)castedAsyncResult.ErrorCode != SocketError.Success)
             {
-                SocketException socketException = new SocketException(castedAsyncResult.ErrorCode);
-                UpdateStatusAfterSocketError(socketException);
-                if (NetEventSource.IsEnabled) NetEventSource.Error(this, socketException);
-                throw socketException;
+                UpdateStatusAfterSocketErrorAndThrowException((SocketError)castedAsyncResult.ErrorCode);
             }
 
+        }
+
+        internal ThreadPoolBoundHandle GetOrAllocateThreadPoolBoundHandle() =>
+            _handle.GetThreadPoolBoundHandle() ??
+            GetOrAllocateThreadPoolBoundHandleSlow();
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        internal ThreadPoolBoundHandle GetOrAllocateThreadPoolBoundHandleSlow()
+        {
+            // There is a known bug that exists through Windows 7 with UDP and SetFileCompletionNotificationModes.
+            // So, don't try to enable skipping the completion port on success in this case.
+            bool trySkipCompletionPortOnSuccess = !(CompletionPortHelper.PlatformHasUdpIssue && _protocolType == ProtocolType.Udp);
+            return _handle.GetOrAllocateThreadPoolBoundHandle(trySkipCompletionPortOnSuccess);
         }
     }
 }

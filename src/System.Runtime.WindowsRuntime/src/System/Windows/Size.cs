@@ -35,7 +35,7 @@ namespace Windows.Foundation
         private float _width;
         private float _height;
 
-        private readonly static Size s_empty = CreateEmptySize();
+        private static readonly Size s_empty = CreateEmptySize();
 
         public Size(double width, double height)
         {
@@ -82,13 +82,13 @@ namespace Windows.Foundation
             get { return Width < 0; }
         }
 
-        static private Size CreateEmptySize()
+        private static Size CreateEmptySize()
         {
             Size size = new Size();
             // We can't set these via the property setters because negatives widths
             // are rejected in those APIs.
-            size._width = Single.NegativeInfinity;
-            size._height = Single.NegativeInfinity;
+            size._width = float.NegativeInfinity;
+            size._height = float.NegativeInfinity;
             return size;
         }
 
@@ -147,7 +147,7 @@ namespace Windows.Foundation
                 return "Empty";
             }
 
-            return String.Format("{0},{1}", _width, _height);
+            return string.Format("{0},{1}", _width, _height);
         }
     }
 }

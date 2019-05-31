@@ -6,7 +6,6 @@ using System.Collections;
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeNamespaceCollection : CollectionBase
     {
         public CodeNamespaceCollection() { }
@@ -23,8 +22,8 @@ namespace System.CodeDom
 
         public CodeNamespace this[int index]
         {
-            get { return (CodeNamespace)List[index]; }
-            set { List[index] = value; }
+            get => (CodeNamespace)List[index];
+            set => List[index] = value;
         }
 
         public int Add(CodeNamespace value) => List.Add(value);

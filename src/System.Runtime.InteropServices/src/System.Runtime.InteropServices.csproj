@@ -1,71 +1,77 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{EC6AA4D9-B3E8-4CCA-8AB1-8BBFD89266AE}</ProjectGuid>
     <AssemblyName>System.Runtime.InteropServices</AssemblyName>
     <OutputType>Library</OutputType>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
-    <GenFacadesArgs Condition="'$(TargetGroup)' == 'uap101aot'">$(GenFacadesArgs) -ignoreMissingTypes</GenFacadesArgs>
-    <!-- Force string resources to be excluded for full facades. -->
-    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' != ''">None</ResourcesSourceOutputDirectory>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
-    <PackageTargetFramework Condition="'$(TargetGroup)' == ''">netstandard1.7;uap10.1</PackageTargetFramework>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetsAOT)' == 'true'">true</GenFacadesIgnoreMissingTypes>
+    <NoWarn Condition="'$(TargetsAOT)' == 'true'">$(NoWarn);0436;3001</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <Nullable>enable</Nullable>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release;uapaot-Windows_NT-Debug;uapaot-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'net463_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_uap101aot_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_uap101aot_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
-    <ContractProject Include="..\ref\System.Runtime.InteropServices.csproj">
-      <TargetGroup>netstandard1.7</TargetGroup>
-    </ContractProject>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == ''">
-    <Compile Include="System\Runtime\InteropServices\ComAwareEventInfo.cs" />
-    <Compile Include="System\Runtime\InteropServices\HandleCollector.CoreCLR.cs" />
-    <Compile Include="System\Runtime\InteropServices\DefaultParameterValueAttribute.cs" />
-    <Compile Include="System\Runtime\InteropServices\HandleCollector.cs" />
-    <Compile Include="System\Runtime\InteropServices\RuntimeEnvironment.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\advf.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\datadir.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\dvaspect.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\formatetc.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\IAdviseSink.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\IEnumFormatETC.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\statdata.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\stgmedium.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\tymed.cs" />
+  <ItemGroup>
+    <Compile Include="$(CommonPath)\CoreLib\System\HResults.cs">
+      <Link>Common\CoreLib\System\HResults.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
+      <Link>Common\Interop\Interop.Libraries.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs">
+      <Link>Common\Interop\Windows\Ole32\Interop.CoGetStandardMarshal.cs</Link>
+    </Compile>
+    <Compile Include="System\Runtime\CompilerServices\IDispatchConstantAttribute.cs" />
+    <Compile Include="System\Runtime\CompilerServices\IUnknownConstantAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\ADVF.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\DATADIR.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\DVASPECT.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\FORMATETC.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\IAdviseSink.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\IDataObject.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\IEnumFormatETC.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\IEnumSTATDATA.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\STATDATA.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\STGMEDIUM.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\ComTypes\TYMED.cs" Condition="'$(TargetsAOT)' != 'true'" />
     <Compile Include="System\Runtime\InteropServices\AssemblyRegistrationFlags.cs" />
+    <Compile Include="System\Runtime\InteropServices\AutomationProxyAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComAliasNameAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComAwareEventInfo.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComCompatibleVersionAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComConversionLossAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComRegisterFunctionAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\ComUnregisterFunctionAttribute.cs" />
     <Compile Include="System\Runtime\InteropServices\ExporterEventKind.cs" />
+    <Compile Include="System\Runtime\InteropServices\HandleCollector.cs" Condition="'$(TargetsAOT)' != 'true'" />
+    <Compile Include="System\Runtime\InteropServices\IDispatchImplAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\IDispatchImplType.cs" />
+    <Compile Include="System\Runtime\InteropServices\IMarshal.cs" />
+    <Compile Include="System\Runtime\InteropServices\ImportedFromTypeLibAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\ManagedToNativeComInteropStubAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\PrimaryInteropAssemblyAttribute.cs" />
     <Compile Include="System\Runtime\InteropServices\RegistrationClassContext.cs" />
     <Compile Include="System\Runtime\InteropServices\RegistrationConnectionType.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'!='uap101aot'">
+    <Compile Include="System\Runtime\InteropServices\RuntimeEnvironment.cs" />
+    <Compile Include="System\Runtime\InteropServices\StandardOleMarshalObject.cs" />
+    <Compile Include="System\Runtime\InteropServices\SetWin32ContextInIDispatchAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibFuncAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibFuncFlags.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibImportClassAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibTypeAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibTypeFlags.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibVarAttribute.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibVarFlags.cs" />
+    <Compile Include="System\Runtime\InteropServices\TypeLibVersionAttribute.cs" />
     <Compile Include="System\Security\SecureStringMarshal.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
-    <Compile Include="System\Runtime\CompilerServices\Attributes.cs" />
-    <Compile Include="System\Runtime\InteropServices\Attributes.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\IDataObject.cs" />
-    <Compile Include="System\Runtime\InteropServices\ComTypes\IEnumSTATDATA.cs" />
-    <Compile Include="System\Runtime\InteropServices\ICustomFactory.cs" />
-    <Compile Include="System\Runtime\InteropServices\ICustomMarshaler.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System.Core" />
-    <TargetingPackReference Include="System" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
-    <TargetingPackReference Include="System.Private.CoreLib" />
-    <TargetingPackReference Include="System.Private.Interop" Condition="'$(TargetGroup)' == 'uap101aot'" />
-  </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <ReferenceFromRuntime Include="System.Private.CoreLib" />
+    <ProjectReference Include="..\..\System.Runtime.Extensions\src\System.Runtime.Extensions.csproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup Condition="'$(TargetsAOT)' == 'true'">
+    <ReferenceFromRuntime Include="System.Private.Interop" />
+    <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj">
+      <TargetGroup>$(TargetGroup)</TargetGroup>
+    </ProjectReference>
+  </ItemGroup>
 </Project>

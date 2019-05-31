@@ -8,6 +8,7 @@ using System.Dynamic;
 using System.Dynamic.Utils;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using static System.Linq.Expressions.CachedReflectionInfo;
 
 namespace System.Runtime.CompilerServices
@@ -86,31 +87,27 @@ namespace System.Runtime.CompilerServices
             if (!delegateType.IsSubclassOf(typeof(MulticastDelegate))) throw System.Linq.Expressions.Error.TypeMustBeDerivedFromSystemDelegate();
 
             CacheDict<Type, Func<CallSiteBinder, CallSite>> ctors = s_siteCtors;
-            if (ctors == null) {
+            if (ctors == null)
+            {
                 // It's okay to just set this, worst case we're just throwing away some data
                 s_siteCtors = ctors = new CacheDict<Type, Func<CallSiteBinder, CallSite>>(100);
             }
 
-            Func<CallSiteBinder, CallSite> ctor;
-            MethodInfo method = null;
-            if (!ctors.TryGetValue(delegateType, out ctor))
+            if (!ctors.TryGetValue(delegateType, out Func<CallSiteBinder, CallSite> ctor))
             {
-                method = typeof(CallSite<>).MakeGenericType(delegateType).GetMethod(nameof(Create));
+                MethodInfo method = typeof(CallSite<>).MakeGenericType(delegateType).GetMethod(nameof(Create));
 
-                if (delegateType.CanCache())
+                if (delegateType.IsCollectible)
                 {
-                    ctor = (Func<CallSiteBinder, CallSite>)method.CreateDelegate(typeof(Func<CallSiteBinder, CallSite>));
-                    ctors.Add(delegateType, ctor);
+                    // slow path
+                    return (CallSite)method.Invoke(null, new object[] { binder });
                 }
+
+                ctor = (Func<CallSiteBinder, CallSite>)method.CreateDelegate(typeof(Func<CallSiteBinder, CallSite>));
+                ctors.Add(delegateType, ctor);
             }
 
-            if (ctor != null)
-            {
-                return ctor(binder);
-            }
-
-            // slow path
-            return (CallSite)method.Invoke(null, new object[] { binder });
+            return ctor(binder);
         }
     }
 
@@ -118,7 +115,7 @@ namespace System.Runtime.CompilerServices
     /// Dynamic site type.
     /// </summary>
     /// <typeparam name="T">The delegate type.</typeparam>
-    public partial class CallSite<T> : CallSite where T : class
+    public class CallSite<T> : CallSite where T : class
     {
         /// <summary>
         /// The update delegate. Called when the dynamic site experiences cache miss.
@@ -153,6 +150,11 @@ namespace System.Runtime.CompilerServices
         /// </summary>
         internal T[] Rules;
 
+        /// <summary>
+        /// an instance of matchmaker site to opportunistically reuse when site is polymorphic
+        /// </summary>
+        internal CallSite _cachedMatchmaker;
+
         // Cached update delegate for all sites with a given T
         private static T s_cachedUpdate;
 
@@ -176,6 +178,30 @@ namespace System.Runtime.CompilerServices
             return new CallSite<T>();
         }
 
+        internal CallSite GetMatchmaker()
+        {
+            // check if we have a cached matchmaker and attempt to atomically grab it.
+            var matchmaker = _cachedMatchmaker;
+            if (matchmaker != null)
+            {
+                matchmaker = Interlocked.Exchange(ref _cachedMatchmaker, null);
+                Debug.Assert(matchmaker?._match != false, "cached site should be set up for matchmaking");
+            }
+
+            return matchmaker ?? new CallSite<T>() { _match = true };
+        }
+
+        internal void ReleaseMatchmaker(CallSite matchMaker)
+        {
+            // If "Rules" has not been created, this is the first (and likely the only) Update of the site.
+            // 90% sites stay monomorphic and will never need a matchmaker again.
+            // Otherwise store the matchmaker for the future use.
+            if (Rules != null)
+            {
+                _cachedMatchmaker = matchMaker;
+            }
+        }
+
         /// <summary>
         /// Creates an instance of the dynamic call site, initialized with the binder responsible for the
         /// runtime binding of the dynamic operations at this call site.
@@ -186,6 +212,7 @@ namespace System.Runtime.CompilerServices
         public static CallSite<T> Create(CallSiteBinder binder)
         {
             if (!typeof(T).IsSubclassOf(typeof(MulticastDelegate))) throw System.Linq.Expressions.Error.TypeMustBeDerivedFromSystemDelegate();
+            ContractUtils.RequiresNotNull(binder, nameof(binder));
             return new CallSite<T>(binder);
         }
 
@@ -272,16 +299,16 @@ namespace System.Runtime.CompilerServices
         {
 #if !FEATURE_COMPILE
             Type target = typeof(T);
-            MethodInfo invoke = target.GetMethod("Invoke");
+            MethodInfo invoke = target.GetInvokeMethod();
 
             s_cachedNoMatch = CreateCustomNoMatchDelegate(invoke);
             return CreateCustomUpdateDelegate(invoke);
 #else
             Type target = typeof(T);
             Type[] args;
-            MethodInfo invoke = target.GetMethod("Invoke");
+            MethodInfo invoke = target.GetInvokeMethod();
 
-            if (target.GetTypeInfo().IsGenericType && IsSimpleSignature(invoke, out args))
+            if (target.IsGenericType && IsSimpleSignature(invoke, out args))
             {
                 MethodInfo method = null;
                 MethodInfo noMatchMethod = null;
@@ -304,8 +331,8 @@ namespace System.Runtime.CompilerServices
                 }
                 if (method != null)
                 {
-                    s_cachedNoMatch = (T)(object)CreateDelegateHelper(target, noMatchMethod.MakeGenericMethod(args));
-                    return (T)(object)CreateDelegateHelper(target, method.MakeGenericMethod(args));
+                    s_cachedNoMatch = (T)(object)noMatchMethod.MakeGenericMethod(args).CreateDelegate(target);
+                    return (T)(object)method.MakeGenericMethod(args).CreateDelegate(target);
                 }
             }
 
@@ -315,26 +342,6 @@ namespace System.Runtime.CompilerServices
         }
 
 #if FEATURE_COMPILE
-        // This needs to be SafeCritical to allow access to
-        // internal types from user code as generic parameters.
-        //
-        // It's safe for a few reasons:
-        //   1. The internal types are coming from a lower trust level (app code)
-        //   2. We got the internal types from our own generic parameter: T
-        //   3. The UpdateAndExecute methods don't do anything with the types,
-        //      we just want the CallSite args to be strongly typed to avoid
-        //      casting.
-        //   4. Works on desktop CLR with AppDomain that has only Execute
-        //      permission. In theory it might require RestrictedMemberAccess,
-        //      but it's unclear because we have tests passing without RMA.
-        //
-        // When Silverlight gets RMA we may be able to remove this.
-        [System.Security.SecuritySafeCritical]
-        private static Delegate CreateDelegateHelper(Type delegateType, MethodInfo method)
-        {
-            return method.CreateDelegate(delegateType);
-        }
-
         private static bool IsSimpleSignature(MethodInfo invoke, out Type[] sig)
         {
             ParameterInfo[] pis = invoke.GetParametersCached();

@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.IO
 {
     public partial class ErrorEventArgs : System.EventArgs
@@ -29,15 +28,21 @@ namespace System.IO
         public FileSystemWatcher(string path, string filter) { }
         public bool EnableRaisingEvents { get { throw null; } set { } }
         public string Filter { get { throw null; } set { } }
+        public System.Collections.ObjectModel.Collection<string> Filters { get { throw null; } }
         public bool IncludeSubdirectories { get { throw null; } set { } }
         public int InternalBufferSize { get { throw null; } set { } }
         public System.IO.NotifyFilters NotifyFilter { get { throw null; } set { } }
         public string Path { get { throw null; } set { } }
+        public override System.ComponentModel.ISite Site { get { throw null; } set { } }
+        public System.ComponentModel.ISynchronizeInvoke SynchronizingObject { get { throw null; } set { } }
         public event System.IO.FileSystemEventHandler Changed { add { } remove { } }
         public event System.IO.FileSystemEventHandler Created { add { } remove { } }
         public event System.IO.FileSystemEventHandler Deleted { add { } remove { } }
         public event System.IO.ErrorEventHandler Error { add { } remove { } }
         public event System.IO.RenamedEventHandler Renamed { add { } remove { } }
+        public void BeginInit() { }
+        protected override void Dispose(bool disposing) { }
+        public void EndInit() { }
         protected void OnChanged(System.IO.FileSystemEventArgs e) { }
         protected void OnCreated(System.IO.FileSystemEventArgs e) { }
         protected void OnDeleted(System.IO.FileSystemEventArgs e) { }
@@ -45,41 +50,36 @@ namespace System.IO
         protected void OnRenamed(System.IO.RenamedEventArgs e) { }
         public System.IO.WaitForChangedResult WaitForChanged(System.IO.WatcherChangeTypes changeType) { throw null; }
         public System.IO.WaitForChangedResult WaitForChanged(System.IO.WatcherChangeTypes changeType, int timeout) { throw null; }
-        public override System.ComponentModel.ISite Site { get { throw null; } set { } }
-        public System.ComponentModel.ISynchronizeInvoke SynchronizingObject { get { throw null; } set { } }
-        public void BeginInit() { }
-        protected override void Dispose(bool disposing) { }
-        public void EndInit() { }
     }
-    [Serializable]
     public partial class InternalBufferOverflowException : System.SystemException
     {
         public InternalBufferOverflowException() { }
+        protected InternalBufferOverflowException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public InternalBufferOverflowException(string message) { }
         public InternalBufferOverflowException(string message, System.Exception inner) { }
-        protected InternalBufferOverflowException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     [System.FlagsAttribute]
     public enum NotifyFilters
     {
-        Attributes = 4,
-        CreationTime = 64,
-        DirectoryName = 2,
         FileName = 1,
-        LastAccess = 32,
-        LastWrite = 16,
-        Security = 256,
+        DirectoryName = 2,
+        Attributes = 4,
         Size = 8,
+        LastWrite = 16,
+        LastAccess = 32,
+        CreationTime = 64,
+        Security = 256,
     }
     public partial class RenamedEventArgs : System.IO.FileSystemEventArgs
     {
-        public RenamedEventArgs(System.IO.WatcherChangeTypes changeType, string directory, string name, string oldName) : base(default(System.IO.WatcherChangeTypes), default(string), default(string)) { }
+        public RenamedEventArgs(System.IO.WatcherChangeTypes changeType, string directory, string name, string oldName) : base (default(System.IO.WatcherChangeTypes), default(string), default(string)) { }
         public string OldFullPath { get { throw null; } }
         public string OldName { get { throw null; } }
     }
     public delegate void RenamedEventHandler(object sender, System.IO.RenamedEventArgs e);
-    public struct WaitForChangedResult
+    public partial struct WaitForChangedResult
     {
+        private object _dummy;
         public System.IO.WatcherChangeTypes ChangeType { get { throw null; } set { } }
         public string Name { get { throw null; } set { } }
         public string OldName { get { throw null; } set { } }
@@ -88,10 +88,10 @@ namespace System.IO
     [System.FlagsAttribute]
     public enum WatcherChangeTypes
     {
-        All = 15,
-        Changed = 4,
         Created = 1,
         Deleted = 2,
+        Changed = 4,
         Renamed = 8,
+        All = 15,
     }
 }

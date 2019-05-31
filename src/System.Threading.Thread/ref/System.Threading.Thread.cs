@@ -9,7 +9,7 @@ namespace System
 {
     public sealed partial class LocalDataStoreSlot
     {
-        private LocalDataStoreSlot() { }
+        internal LocalDataStoreSlot() { }
         ~LocalDataStoreSlot() { }
     }
 }
@@ -17,22 +17,20 @@ namespace System.Threading
 {
     public enum ApartmentState
     {
-        MTA = 1,
         STA = 0,
+        MTA = 1,
         Unknown = 2,
     }
     public sealed partial class CompressedStack : System.Runtime.Serialization.ISerializable
     {
-        private CompressedStack() { }
+        internal CompressedStack() { }
         public static System.Threading.CompressedStack Capture() { throw null; }
         public System.Threading.CompressedStack CreateCopy() { throw null; }
         public static System.Threading.CompressedStack GetCompressedStack() { throw null; }
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public static void Run(System.Threading.CompressedStack compressedStack, System.Threading.ContextCallback callback, object state) { }
     }
-    [System.Runtime.InteropServices.ComVisibleAttribute(false)]
     public delegate void ParameterizedThreadStart(object obj);
-    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public sealed partial class Thread : System.Runtime.ConstrainedExecution.CriticalFinalizerObject
     {
         public Thread(System.Threading.ParameterizedThreadStart start) { }
@@ -67,6 +65,7 @@ namespace System.Threading
         public System.Threading.ApartmentState GetApartmentState() { throw null; }
         [System.ObsoleteAttribute("Thread.GetCompressedStack is no longer supported. Please use the System.Threading.CompressedStack class")]
         public System.Threading.CompressedStack GetCompressedStack() { throw null; }
+        public static int GetCurrentProcessorId() { throw null; }
         public static object GetData(System.LocalDataStoreSlot slot) { throw null; }
         public static System.AppDomain GetDomain() { throw null; }
         public static int GetDomainID() { throw null; }
@@ -78,7 +77,7 @@ namespace System.Threading
         public bool Join(System.TimeSpan timeout) { throw null; }
         public static void MemoryBarrier() { }
         public static void ResetAbort() { }
-        [System.ObsoleteAttribute("Thread.Resume has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
+        [System.ObsoleteAttribute("Thread.Resume has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public void Resume() { }
         public void SetApartmentState(System.Threading.ApartmentState state) { }
         [System.ObsoleteAttribute("Thread.SetCompressedStack is no longer supported. Please use the System.Threading.CompressedStack class")]
@@ -89,7 +88,7 @@ namespace System.Threading
         public static void SpinWait(int iterations) { }
         public void Start() { }
         public void Start(object parameter) { }
-        [System.ObsoleteAttribute("Thread.Suspend has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  http://go.microsoft.com/fwlink/?linkid=14202", false)]
+        [System.ObsoleteAttribute("Thread.Suspend has been deprecated.  Please use other classes in System.Threading, such as Monitor, Mutex, Event, and Semaphore, to synchronize Threads or protect resources.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public void Suspend() { }
         public bool TrySetApartmentState(System.Threading.ApartmentState state) { throw null; }
         public static byte VolatileRead(ref byte address) { throw null; }
@@ -132,7 +131,7 @@ namespace System.Threading
     }
     public sealed partial class ThreadAbortException : System.SystemException
     {
-        private ThreadAbortException() { }
+        internal ThreadAbortException() { }
         public object ExceptionState { get { throw null; } }
     }
     public partial class ThreadExceptionEventArgs : System.EventArgs
@@ -144,45 +143,42 @@ namespace System.Threading
     public partial class ThreadInterruptedException : System.SystemException
     {
         public ThreadInterruptedException() { }
+        protected ThreadInterruptedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public ThreadInterruptedException(string message) { }
         public ThreadInterruptedException(string message, System.Exception innerException) { }
-        protected ThreadInterruptedException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public enum ThreadPriority
     {
-        AboveNormal = 3,
-        BelowNormal = 1,
-        Highest = 4,
         Lowest = 0,
+        BelowNormal = 1,
         Normal = 2,
+        AboveNormal = 3,
+        Highest = 4,
     }
-    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public delegate void ThreadStart();
     public sealed partial class ThreadStartException : System.SystemException
     {
         internal ThreadStartException() { }
     }
     [System.FlagsAttribute]
-    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public enum ThreadState
     {
-        Aborted = 256,
-        AbortRequested = 128,
-        Background = 4,
         Running = 0,
-        Stopped = 16,
         StopRequested = 1,
-        Suspended = 64,
         SuspendRequested = 2,
+        Background = 4,
         Unstarted = 8,
+        Stopped = 16,
         WaitSleepJoin = 32,
+        Suspended = 64,
+        AbortRequested = 128,
+        Aborted = 256,
     }
-    [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public partial class ThreadStateException : System.SystemException
     {
         public ThreadStateException() { }
+        protected ThreadStateException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public ThreadStateException(string message) { }
         public ThreadStateException(string message, System.Exception innerException) { }
-        protected ThreadStateException(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
 }

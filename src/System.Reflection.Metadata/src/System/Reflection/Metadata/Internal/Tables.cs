@@ -7,7 +7,7 @@ using System.Reflection.Internal;
 
 namespace System.Reflection.Metadata.Ecma335
 {
-    internal struct ModuleTableReader
+    internal readonly struct ModuleTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsStringHeapRefSizeSmall;
@@ -71,7 +71,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct TypeRefTableReader
+    internal readonly struct TypeRefTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsResolutionScopeRefSizeSmall;
@@ -284,7 +284,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct FieldPtrTableReader
+    internal readonly struct FieldPtrTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsFieldTableRowRefSizeSmall;
@@ -318,7 +318,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct FieldTableReader
+    internal readonly struct FieldTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsStringHeapRefSizeSmall;
@@ -366,7 +366,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct MethodPtrTableReader
+    internal readonly struct MethodPtrTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsMethodTableRowRefSizeSmall;
@@ -401,7 +401,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct MethodTableReader
+    internal readonly struct MethodTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsParamRefSizeSmall;
@@ -476,7 +476,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct ParamPtrTableReader
+    internal readonly struct ParamPtrTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsParamTableRowRefSizeSmall;
@@ -505,7 +505,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct ParamTableReader
+    internal readonly struct ParamTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsStringHeapRefSizeSmall;
@@ -550,7 +550,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct InterfaceImplTableReader
+    internal readonly struct InterfaceImplTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsTypeDefTableRowRefSizeSmall;
@@ -675,7 +675,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct ConstantTableReader
+    internal readonly struct ConstantTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsHasConstantRefSizeSmall;
@@ -699,7 +699,7 @@ namespace System.Reflection.Metadata.Ecma335
             _IsHasConstantRefSizeSmall = hasConstantRefSize == 2;
             _IsBlobHeapRefSizeSmall = blobHeapRefSize == 2;
             _TypeOffset = 0;
-            _ParentOffset = _TypeOffset + sizeof(Byte) + 1; // Alignment here (+1)...
+            _ParentOffset = _TypeOffset + sizeof(byte) + 1; // Alignment here (+1)...
             _ValueOffset = _ParentOffset + hasConstantRefSize;
             this.RowSize = _ValueOffset + blobHeapRefSize;
             this.Block = containingBlock.GetMemoryBlockAt(containingBlockOffset, this.RowSize * numberOfRows);
@@ -747,7 +747,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct CustomAttributeTableReader
+    internal readonly struct CustomAttributeTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsHasCustomAttributeRefSizeSmall;
@@ -811,11 +811,6 @@ namespace System.Reflection.Metadata.Ecma335
             return BlobHandle.FromOffset(this.Block.PeekHeapReference(rowOffset + _ValueOffset, _IsBlobHeapRefSizeSmall));
         }
 
-        private uint GetParentTag(int index)
-        {
-            return this.Block.PeekTaggedReference(index * this.RowSize + _ParentOffset, _IsHasCustomAttributeRefSizeSmall);
-        }
-
         internal void GetAttributeRange(EntityHandle parentHandle, out int firstImplRowId, out int lastImplRowId)
         {
             int startRowNumber, endRowNumber;
@@ -863,7 +858,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct FieldMarshalTableReader
+    internal readonly struct FieldMarshalTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsHasFieldMarshalRefSizeSmall;
@@ -927,7 +922,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct DeclSecurityTableReader
+    internal readonly struct DeclSecurityTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsHasDeclSecurityRefSizeSmall;
@@ -1077,7 +1072,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct FieldLayoutTableReader
+    internal readonly struct FieldLayoutTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsFieldTableRowRefSizeSmall;
@@ -1140,7 +1135,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct StandAloneSigTableReader
+    internal readonly struct StandAloneSigTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsBlobHeapRefSizeSmall;
@@ -1168,7 +1163,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct EventMapTableReader
+    internal readonly struct EventMapTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsTypeDefTableRowRefSizeSmall;
@@ -1221,7 +1216,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct EventPtrTableReader
+    internal readonly struct EventPtrTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsEventTableRowRefSizeSmall;
@@ -1296,7 +1291,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct PropertyMapTableReader
+    internal readonly struct PropertyMapTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsTypeDefTableRowRefSizeSmall;
@@ -1351,7 +1346,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct PropertyPtrTableReader
+    internal readonly struct PropertyPtrTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsPropertyTableRowRefSizeSmall;
@@ -1383,7 +1378,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct PropertyTableReader
+    internal readonly struct PropertyTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsStringHeapRefSizeSmall;
@@ -1430,7 +1425,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct MethodSemanticsTableReader
+    internal readonly struct MethodSemanticsTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsMethodTableRowRefSizeSmall;
@@ -1526,7 +1521,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct MethodImplTableReader
+    internal readonly struct MethodImplTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsTypeDefTableRowRefSizeSmall;
@@ -1612,7 +1607,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct ModuleRefTableReader
+    internal readonly struct ModuleRefTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsStringHeapRefSizeSmall;
@@ -1641,7 +1636,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct TypeSpecTableReader
+    internal readonly struct TypeSpecTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsBlobHeapRefSizeSmall;
@@ -1670,7 +1665,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct ImplMapTableReader
+    internal readonly struct ImplMapTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsModuleRefTableRowRefSizeSmall;
@@ -1750,7 +1745,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct FieldRVATableReader
+    internal readonly struct FieldRVATableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsFieldTableRowRefSizeSmall;
@@ -1803,7 +1798,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct EnCLogTableReader
+    internal readonly struct EnCLogTableReader
     {
         internal readonly int NumberOfRows;
         private readonly int _TokenOffset;
@@ -1841,7 +1836,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct EnCMapTableReader
+    internal readonly struct EnCMapTableReader
     {
         internal readonly int NumberOfRows;
         private readonly int _TokenOffset;
@@ -1866,7 +1861,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct AssemblyTableReader
+    internal readonly struct AssemblyTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsStringHeapRefSizeSmall;
@@ -1951,7 +1946,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct AssemblyProcessorTableReader
+    internal readonly struct AssemblyProcessorTableReader
     {
         internal readonly int NumberOfRows;
         private readonly int _ProcessorOffset;
@@ -1971,7 +1966,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct AssemblyOSTableReader
+    internal readonly struct AssemblyOSTableReader
     {
         internal readonly int NumberOfRows;
         private readonly int _OSPlatformIdOffset;
@@ -1995,7 +1990,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct AssemblyRefTableReader
+    internal readonly struct AssemblyRefTableReader
     {
         /// <summary>
         /// In CLI metadata equal to the actual number of entries in AssemblyRef table.
@@ -2085,7 +2080,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct AssemblyRefProcessorTableReader
+    internal readonly struct AssemblyRefProcessorTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsAssemblyRefTableRowSizeSmall;
@@ -2110,7 +2105,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct AssemblyRefOSTableReader
+    internal readonly struct AssemblyRefOSTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsAssemblyRefTableRowRefSizeSmall;
@@ -2138,7 +2133,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct FileTableReader
+    internal readonly struct FileTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsStringHeapRefSizeSmall;
@@ -2185,7 +2180,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct ExportedTypeTableReader
+    internal readonly struct ExportedTypeTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsImplementationRefSizeSmall;
@@ -2261,7 +2256,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct ManifestResourceTableReader
+    internal readonly struct ManifestResourceTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsImplementationRefSizeSmall;
@@ -2317,7 +2312,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct NestedClassTableReader
+    internal readonly struct NestedClassTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsTypeDefTableRowRefSizeSmall;
@@ -2383,7 +2378,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct GenericParamTableReader
+    internal readonly struct GenericParamTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsTypeOrMethodDefRefSizeSmall;
@@ -2489,7 +2484,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct MethodSpecTableReader
+    internal readonly struct MethodSpecTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsMethodDefOrRefRefSizeSmall;
@@ -2528,7 +2523,7 @@ namespace System.Reflection.Metadata.Ecma335
         }
     }
 
-    internal struct GenericParamConstraintTableReader
+    internal readonly struct GenericParamConstraintTableReader
     {
         internal readonly int NumberOfRows;
         private readonly bool _IsGenericParamTableRowRefSizeSmall;

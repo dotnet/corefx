@@ -4,11 +4,9 @@
 
 using System.IO;
 using System.Diagnostics;
-using Microsoft.Win32;
 using System.Globalization;
 using System.Security;
 using System.Xml.Schema;
-using System.Runtime.Versioning;
 
 namespace System.Xml
 {
@@ -58,6 +56,12 @@ namespace System.Xml
 
         // read-only flag
         private bool _isReadOnly;
+
+        // Creation of validating readers is hidden behind a delegate which is only initialized if the ValidationType
+        // property is set. This is for AOT builds where the tree shaker can reduce the validating readers away
+        // if nobody calls the ValidationType setter. Might also help with non-AOT build when ILLinker is used.
+        delegate XmlReader AddValidationFunc(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper);
+        private AddValidationFunc _addValidationFunc;
 
         //
         // Constructor
@@ -125,7 +129,7 @@ namespace System.Xml
         //notice we must keep GetXmlResolver() to avoid dead lock when init System.Config.ConfigurationManager
         internal XmlResolver GetXmlResolver_CheckConfig()
         {
-            if (!IsXmlResolverSet)
+            if (!LocalAppContextSwitches.AllowDefaultResolver && !IsXmlResolverSet)
                 return null;
             else
                 return _xmlResolver;
@@ -319,6 +323,12 @@ namespace System.Xml
             {
                 CheckReadOnly("ValidationType");
 
+                // This introduces a dependency on the validation readers and along with that
+                // on XmlSchema and so on. For AOT builds this brings in a LOT of code
+                // which we would like to avoid unless it's needed. So the first approximation
+                // is to only reference this method when somebody explicitly sets the ValidationType.
+                _addValidationFunc = AddValidationInternal;
+
                 if ((uint)value > (uint)ValidationType.Schema)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
@@ -402,7 +412,7 @@ namespace System.Xml
             return _valEventHandler;
         }
 
-        internal XmlReader CreateReader(String inputUri, XmlParserContext inputContext)
+        internal XmlReader CreateReader(string inputUri, XmlParserContext inputContext)
         {
             if (inputUri == null)
             {
@@ -540,18 +550,11 @@ namespace System.Xml
         private void Initialize(XmlResolver resolver)
         {
             _nameTable = null;
-            if (!EnableLegacyXmlSettings())
-            {
-                _xmlResolver = resolver;
-                // limit the entity resolving to 10 million character. the caller can still
-                // override it to any other value or set it to zero for unlimiting it
-                _maxCharactersFromEntities = (long)1e7;
-            }
-            else
-            {
-                _xmlResolver = (resolver == null ? CreateDefaultResolver() : resolver);
-                _maxCharactersFromEntities = 0;
-            }
+            _xmlResolver = resolver;
+            // limit the entity resolving to 10 million character. the caller can still
+            // override it to any other value or set it to zero for unlimiting it
+            _maxCharactersFromEntities = (long)1e7;
+
             _lineNumberOffset = 0;
             _linePositionOffset = 0;
             _checkCharacters = true;
@@ -578,40 +581,73 @@ namespace System.Xml
 
         private static XmlResolver CreateDefaultResolver()
         {
-            return new XmlSystemPathResolver();
+            return new XmlUrlResolver();
         }
 
         internal XmlReader AddValidation(XmlReader reader)
         {
+            XmlResolver resolver = null;
             if (_validationType == ValidationType.Schema)
             {
-                XmlResolver resolver = GetXmlResolver_CheckConfig();
+                resolver = GetXmlResolver_CheckConfig();
 
                 if (resolver == null &&
-                    !this.IsXmlResolverSet &&
-                    !EnableLegacyXmlSettings())
+                    !this.IsXmlResolverSet)
                 {
                     resolver = new XmlUrlResolver();
                 }
-                reader = new XsdValidatingReader(reader, resolver, this);
             }
-            else if (_validationType == ValidationType.DTD)
-            {
-                reader = CreateDtdValidatingReader(reader);
-            }
-            return reader;
+
+            return  AddValidationAndConformanceInternal(reader, resolver, addConformanceWrapper: false);
         }
 
         private XmlReader AddValidationAndConformanceWrapper(XmlReader reader)
+        {
+            XmlResolver resolver = null;
+            if (_validationType == ValidationType.Schema)
+            {
+                resolver = GetXmlResolver_CheckConfig();
+            }
+
+            return  AddValidationAndConformanceInternal(reader, resolver, addConformanceWrapper: true);
+        }
+
+        private XmlReader AddValidationAndConformanceInternal(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper)
+        {
+            // We have to avoid calling the _addValidationFunc delegate if there's no validation to setup
+            // since it would not be initialized (to allow AOT compilers to reduce it away).
+            // So if that's the case and we still need conformance wrapper add it here directly.
+            // This is a slight code duplication, but it's necessary due to ordering constrains
+            // of the reader wrapping as described in AddValidationInternal.
+            if (_validationType == ValidationType.None)
+            {
+                if (addConformanceWrapper)
+                {
+                    reader = AddConformanceWrapper(reader);
+                }
+            }
+            else
+            {
+                reader = _addValidationFunc(reader, resolver, addConformanceWrapper);
+            }
+
+            return reader;
+        }
+
+        private XmlReader AddValidationInternal(XmlReader reader, XmlResolver resolver, bool addConformanceWrapper)
         {
             // wrap with DTD validating reader
             if (_validationType == ValidationType.DTD)
             {
                 reader = CreateDtdValidatingReader(reader);
             }
-            // add conformance checking (must go after DTD validation because XmlValidatingReader works only on XmlTextReader),
-            // but before XSD validation because of typed value access
-            reader = AddConformanceWrapper(reader);
+
+            if (addConformanceWrapper)
+            {
+                // add conformance checking (must go after DTD validation because XmlValidatingReader works only on XmlTextReader),
+                // but before XSD validation because of typed value access
+                reader = AddConformanceWrapper(reader);
+            }
 
             if (_validationType == ValidationType.Schema)
             {
@@ -660,7 +696,7 @@ namespace System.Xml
                 if (_ignoreWhitespace)
                 {
                     WhitespaceHandling wh = WhitespaceHandling.All;
-                    // special-case our V1 readers to see if whey already filter whitespaces
+                    // special-case our V1 readers to see if whey already filter whitespace
                     if (v1XmlTextReader != null)
                     {
                         wh = v1XmlTextReader.WhitespaceHandling;
@@ -747,57 +783,6 @@ namespace System.Xml
             {
                 return baseReader;
             }
-        }
-
-        private static bool? s_enableLegacyXmlSettings = null;
-
-        static internal bool EnableLegacyXmlSettings()
-        {
-            if (s_enableLegacyXmlSettings.HasValue)
-            {
-                return s_enableLegacyXmlSettings.Value;
-            }
-
-            if (!System.Xml.BinaryCompatibility.TargetsAtLeast_Desktop_V4_5_2)
-            {
-                s_enableLegacyXmlSettings = true;
-                return s_enableLegacyXmlSettings.Value;
-            }
-
-            bool enableSettings = false; // default value
-            if (!ReadSettingsFromRegistry(Registry.LocalMachine, ref enableSettings))
-            {
-                // still ok if this call return false too as we'll use the default value which is false
-                ReadSettingsFromRegistry(Registry.CurrentUser, ref enableSettings);
-            }
-
-            s_enableLegacyXmlSettings = enableSettings;
-            return s_enableLegacyXmlSettings.Value;
-        }
-
-        [SecuritySafeCritical]
-        private static bool ReadSettingsFromRegistry(RegistryKey hive, ref bool value)
-        {
-            const string regValueName = "EnableLegacyXmlSettings";
-            const string regValuePath = @"SOFTWARE\Microsoft\.NETFramework\XML";
-
-            try
-            {
-                using (RegistryKey xmlRegKey = hive.OpenSubKey(regValuePath, false))
-                {
-                    if (xmlRegKey != null)
-                    {
-                        if (xmlRegKey.GetValueKind(regValueName) == RegistryValueKind.DWord)
-                        {
-                            value = ((int)xmlRegKey.GetValue(regValueName)) == 1;
-                            return true;
-                        }
-                    }
-                }
-            }
-            catch { /* use the default if we couldn't read the key */ }
-
-            return false;
         }
     }
 }

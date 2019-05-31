@@ -1,0 +1,17 @@
+﻿<Project DefaultTargets="Build">
+  <PropertyGroup>
+    <PackageConfigurations>
+      netstandard;
+      net461-Windows_NT;
+      netcoreapp-Windows_NT;
+      netcoreapp;
+      net462-Windows_NT;
+      net47-Windows_NT;
+    </PackageConfigurations>
+    <BuildConfigurations>
+      $(PackageConfigurations)
+      netfx-Windows_NT;
+      uap-Windows_NT;
+    </BuildConfigurations>
+  </PropertyGroup>
+</Project>

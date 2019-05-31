@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.ComponentModel.Tests
@@ -36,12 +37,17 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void ConvertTo_WithContext()
         {
-            ConvertTo_WithContext(new object[2, 3]
-                {
-                    { typeof(char), "System.Char", null },   // the base class is not verifying if this type is not in the list
-                    { null, "(none)", CultureInfo.InvariantCulture }
-                },
-                TypeListConverterTests.s_converter);
+            RemoteExecutor.Invoke(() =>
+            {
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
+                ConvertTo_WithContext(new object[2, 3]
+                    {
+                        { typeof(char), "System.Char", null },   // the base class is not verifying if this type is not in the list
+                        { null, "(none)", CultureInfo.InvariantCulture }
+                    },
+                    TypeListConverterTests.s_converter);
+            }).Dispose();
         }
 
         [Fact]

@@ -14,6 +14,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public static class FindTests
     {
+        private const string LeftToRightMark = "\u200E";
+
         private static void RunTest(Action<X509Certificate2Collection> test)
         {
             RunTest((msCer, pfxCer, col1) => test(col1));
@@ -177,6 +179,20 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
+        [Fact]
+        public static void FindByThumbprint_WithLrm()
+        {
+            RunTest(
+                (msCer, pfxCer, col1) =>
+                {
+                    EvaluateSingleMatch(
+                        pfxCer,
+                        col1,
+                        X509FindType.FindByThumbprint,
+                        LeftToRightMark + pfxCer.Thumbprint);
+                });
+        }
+
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
@@ -235,36 +251,54 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                     foreach (X509Certificate2 cert in storeCerts)
                     {
-                        if (cert.NotBefore < notBefore && cert.NotAfter > notAfter)
+                        if (cert.NotBefore >= notBefore || cert.NotAfter <= notAfter)
                         {
-                            X509KeyUsageExtension keyUsageExtension = null;
+                            // Not (safely) valid, skip.
+                            continue;
+                        }
 
-                            foreach (X509Extension extension in cert.Extensions)
+                        X509KeyUsageExtension keyUsageExtension = null;
+
+                        foreach (X509Extension extension in cert.Extensions)
+                        {
+                            keyUsageExtension = extension as X509KeyUsageExtension;
+
+                            if (keyUsageExtension != null)
                             {
-                                keyUsageExtension = extension as X509KeyUsageExtension;
-
-                                if (keyUsageExtension != null)
-                                {
-                                    break;
-                                }
-                            }
-
-                            // Some tool is putting the com.apple.systemdefault utility cert in the
-                            // LM\Root store on OSX machines; but it gets rejected by OpenSSL as an
-                            // invalid root for not having the Certificate Signing key usage value.
-                            //
-                            // While the real problem seems to be with whatever tool is putting it
-                            // in the bundle; we can work around it here.
-                            const X509KeyUsageFlags RequiredFlags = X509KeyUsageFlags.KeyCertSign;
-
-                            // No key usage extension means "good for all usages"
-                            if (keyUsageExtension == null ||
-                                (keyUsageExtension.KeyUsages & RequiredFlags) == RequiredFlags)
-                            {
-                                rootCert = cert;
                                 break;
                             }
                         }
+
+                        // Some tool is putting the com.apple.systemdefault utility cert in the
+                        // LM\Root store on OSX machines; but it gets rejected by OpenSSL as an
+                        // invalid root for not having the Certificate Signing key usage value.
+                        //
+                        // While the real problem seems to be with whatever tool is putting it
+                        // in the bundle; we can work around it here.
+                        const X509KeyUsageFlags RequiredFlags = X509KeyUsageFlags.KeyCertSign;
+
+                        // No key usage extension means "good for all usages"
+                        if (keyUsageExtension != null &&
+                            (keyUsageExtension.KeyUsages & RequiredFlags) != RequiredFlags)
+                        {
+                            // Not a valid KeyUsage, skip.
+                            continue;
+                        }
+
+                        using (ChainHolder chainHolder = new ChainHolder())
+                        {
+                            chainHolder.Chain.ChainPolicy.RevocationMode = X509RevocationMode.NoCheck;
+
+                            if (!chainHolder.Chain.Build(cert))
+                            {
+                                // Despite being not expired and having a valid KeyUsage, it's
+                                // not considered a valid root/chain.
+                                continue;
+                            }
+                        }
+
+                        rootCert = cert;
+                        break;
                     }
 
                     // Just in case someone has a system with no valid trusted root certs whatsoever.
@@ -639,6 +673,24 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        public static void TestBySerialNumber_WithSpaces()
+        {
+            // Hex string is also an allowed input format and case-blind
+            RunSingleMatchTest_PfxCer(
+                X509FindType.FindBySerialNumber,
+                "d5 b5 bc 1c 45 8a 55 88 45 bf f5 1c b4 df f3 1c");
+        }
+
+        [Fact]
+        public static void TestBySerialNumber_WithLRM()
+        {
+            // Hex string is also an allowed input format and case-blind
+            RunSingleMatchTest_PfxCer(
+                X509FindType.FindBySerialNumber,
+                LeftToRightMark + "d5 b5 bc 1c 45 8a 55 88 45 bf f5 1c b4 df f3 1c");
+        }
+
+        [Fact]
         public static void TestBySerialNumber_NoMatch()
         {
             RunZeroMatchTest(
@@ -713,6 +765,18 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         // Non-symmetric whitespace is allowed
         [InlineData("    5971A65   A334DDA980780FF84  1EBE87F97           23241F   2")]
         public static void TestBySubjectKeyIdentifier_ExtensionPresent(string subjectKeyIdentifier)
+        {
+            RunSingleMatchTest_MsCer(X509FindType.FindBySubjectKeyIdentifier, subjectKeyIdentifier);
+        }
+
+        // Should ignore Left-to-right mark \u200E
+        [Theory]
+        [InlineData(LeftToRightMark + "59 71 A6 5A 33 4D DA 98 07 80 FF 84 1E BE 87 F9 72 32 41 F2")]
+        // Compat: Lone trailing nybbles are ignored
+        [InlineData(LeftToRightMark + "59 71 A6 5A 33 4D DA 98 07 80 FF 84 1E BE 87 F9 72 32 41 F2 3")]
+        // Compat: Lone trailing nybbles are ignored, even if not hex
+        [InlineData(LeftToRightMark + "59 71 A6 5A 33 4D DA 98 07 80 FF 84 1E BE 87 F9 72 32 41 F2 p")]
+        public static void TestBySubjectKeyIdentifier_ExtensionPresentWithLTM(string subjectKeyIdentifier)
         {
             RunSingleMatchTest_MsCer(X509FindType.FindBySubjectKeyIdentifier, subjectKeyIdentifier);
         }

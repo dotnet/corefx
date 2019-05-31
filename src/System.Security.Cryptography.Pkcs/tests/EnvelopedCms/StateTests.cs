@@ -21,6 +21,8 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class StateTests
     {
+        public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
+
         //
         // Exercises various edge cases when EnvelopedCms methods and properties are called out of the "expected" order.
         //
@@ -178,12 +180,29 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             Assert.Equal<byte>(expectedContentInfo.Content, actualContentInfo.Content);
         }
 
+        [Fact]
+        [OuterLoop(/* Leaks key on disk if interrupted */)]
+        public static void PostEncrypt_Certs()
+        {
+            ContentInfo expectedContentInfo = new ContentInfo(new byte[] { 1, 2, 3 });
+            EnvelopedCms ecms = new EnvelopedCms(expectedContentInfo);
+            ecms.Certificates.Add(Certificates.RSAKeyTransfer2.GetCertificate());
+            ecms.Certificates.Add(Certificates.RSAKeyTransfer3.GetCertificate());
+
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                ecms.Encrypt(new CmsRecipient(cert));
+            }
+
+            Assert.Equal(Certificates.RSAKeyTransfer2.GetCertificate(), ecms.Certificates[0]);
+            Assert.Equal(Certificates.RSAKeyTransfer3.GetCertificate(), ecms.Certificates[1]);
+        }
+
         //
         // State 3: Called Decode()
         //
 
-        [Fact]
-        public static void PostDecode_Encode()
+        public static void PostDecode_Encode(bool isRunningOnDesktop)
         {
             byte[] encodedMessage =
                 ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -197,13 +216,27 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ecms.Decode(encodedMessage);
 
             // This should really have thrown an InvalidOperationException. Instead, you get... something back.
-            byte[] expectedGarbage = "35edc437e31d0b70".HexToByteArray();
+            string expectedString = isRunningOnDesktop ? "35edc437e31d0b70000000000000" : "35edc437e31d0b70";
+            byte[] expectedGarbage = expectedString.HexToByteArray();
             byte[] garbage = ecms.Encode();
-            AssertEncryptedContentEqual(expectedGarbage, garbage);
+            Assert.Equal(expectedGarbage, garbage);
         }
 
         [Fact]
-        public static void PostDecode_ContentInfo()
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void PostDecode_Encode_net46()
+        {
+            PostDecode_Encode(isRunningOnDesktop: true);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void PostDecode_Encode_netcore()
+        {
+            PostDecode_Encode(isRunningOnDesktop: false);
+        }
+
+        public static void PostDecode_ContentInfo(bool isRunningOnDesktop)
         {
             byte[] encodedMessage =
                 ("3082010c06092a864886f70d010703a081fe3081fb0201003181c83081c5020100302e301a311830160603550403130f5253"
@@ -219,19 +252,37 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             // This gets you the encrypted inner content.
             ContentInfo contentInfo = ecms.ContentInfo;
             Assert.Equal(Oids.Pkcs7Data, contentInfo.ContentType.Value);
-            byte[] expectedGarbage = "35edc437e31d0b70".HexToByteArray();
-            AssertEncryptedContentEqual(expectedGarbage, contentInfo.Content);
+            string expectedString = isRunningOnDesktop ? "35edc437e31d0b70000000000000" : "35edc437e31d0b70";
+            byte[] expectedGarbage = expectedString.HexToByteArray();
+            Assert.Equal(expectedGarbage, contentInfo.Content);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
+        public static void PostDecode_ContentInfo_net46()
+        {
+            PostDecode_ContentInfo(isRunningOnDesktop: true);
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void PostDecode_ContentInfo_netcore()
+        {
+            PostDecode_ContentInfo(isRunningOnDesktop: false);
         }
 
         //
         // State 4: Called Decode() + Decrypt()
         //
-        [Fact]
+        [ConditionalTheory(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void PostDecrypt_Encode()
+        [InlineData(false)]
+#if netcoreapp // API not supported on netfx
+        [InlineData(true)]
+#endif
+        public static void PostDecrypt_Encode(bool useExplicitPrivateKey)
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
-
             EnvelopedCms ecms = new EnvelopedCms(new ContentInfo(expectedContent));
             ecms.Encrypt(new CmsRecipient(Certificates.RSAKeyTransfer1.GetCertificate()));
             byte[] encodedMessage =
@@ -247,9 +298,22 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             {
                 if (cer == null)
                     return; // Sorry - CertLoader is not configured to load certs with private keys - we've tested as much as we can.
-                X509Certificate2Collection extraStore = new X509Certificate2Collection(cer);
+
                 RecipientInfoCollection r = ecms.RecipientInfos;
-                ecms.Decrypt(r[0], extraStore);
+
+                if (useExplicitPrivateKey)
+                {
+#if netcoreapp
+                    ecms.Decrypt(r[0], cer.GetRSAPrivateKey());
+#else
+                    Assert.True(false, "Should not run on this platform");
+#endif
+                }
+                else
+                {
+                    X509Certificate2Collection extraStore = new X509Certificate2Collection(cer);
+                    ecms.Decrypt(r[0], extraStore);
+                }
 
                 // Desktop compat: Calling Encode() at this point should have thrown an InvalidOperationException. Instead, it returns
                 // the decrypted inner content (same as ecms.ContentInfo.Content). This is easy for someone to take a reliance on
@@ -259,7 +323,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void PostDecrypt_RecipientInfos()
         {
@@ -298,9 +362,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [ConditionalTheory(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
-        public static void PostDecrypt_Decrypt()
+        [InlineData(false)]
+#if netcoreapp // API not supported on netfx
+        [InlineData(true)]
+#endif
+        public static void PostDecrypt_Decrypt(bool useExplicitPrivateKey)
         {
             byte[] expectedContent = { 6, 3, 128, 33, 44 };
 
@@ -334,14 +402,55 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 extraStore.Add(cert2);
                 extraStore.Add(cert3);
                 RecipientInfoCollection r = ecms.RecipientInfos;
-                ecms.Decrypt(r[0], extraStore);
+
+                Action decrypt = () =>
+                {
+                    if (useExplicitPrivateKey)
+                    {
+#if netcoreapp
+                        ecms.Decrypt(r[0], cert1.GetRSAPrivateKey());
+#else
+                        Assert.True(false, "Should not run on this platform");
+#endif
+                    }
+                    else
+                    {
+                        ecms.Decrypt(r[0], extraStore);
+                    }
+                };
+
+                decrypt();
+
                 ContentInfo contentInfo = ecms.ContentInfo;
                 Assert.Equal<byte>(expectedContent, contentInfo.Content);
 
                 // Though this doesn't seem like a terribly unreasonable thing to attempt, attempting to call Decrypt() again
                 // after a successful Decrypt() throws a CryptographicException saying "Already decrypted."
-                Assert.ThrowsAny<CryptographicException>(() => ecms.Decrypt(r[1], extraStore));
+                Assert.ThrowsAny<CryptographicException>(() => decrypt());
             }
+        }
+
+        [Fact]
+        public static void PostEncode_DifferentData()
+        {
+            // This ensures that the decoding and encoding output different values to make sure Encrypt changes the state of the data.
+            byte[] encoded =
+                ("3082010206092A864886F70D010703A081F43081F10201003181C83081C5020100302E301A311830160603550403130F"
+                + "5253414B65795472616E7366657231021031D935FB63E8CFAB48A0BF7B397B67C0300D06092A864886F70D0101010500"
+                + "04818009C16B674495C2C3D4763189C3274CF7A9142FBEEC8902ABDC9CE29910D541DF910E029A31443DC9A9F3B05F02"
+                + "DA1C38478C400261C734D6789C4197C20143C4312CEAA99ECB1849718326D4FC3B7FBB2D1D23281E31584A63E99F2C17"
+                + "132BCD8EDDB632967125CD0A4BAA1EFA8CE4C855F7C093339211BDF990CEF5CCE6CD74302106092A864886F70D010701"
+                + "301406082A864886F70D03070408779B3DE045826B18").HexToByteArray();
+            EnvelopedCms ecms = new EnvelopedCms();
+            ecms.Decode(encoded);
+            using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
+            {
+                ecms.Encrypt(new CmsRecipient(cert));
+            }
+
+            byte[] encrypted = ecms.Encode();
+
+            Assert.NotEqual<byte>(encoded, encrypted);
         }
 
         private static void AssertEncryptedContentEqual(byte[] expected, byte[] actual)

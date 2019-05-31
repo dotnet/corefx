@@ -1,46 +1,54 @@
-
-project(System.Security.Cryptography.Native)
+project(System.Security.Cryptography.Native C)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # These are happening inside of OpenSSL-defined macros out of our control
 add_compile_options(-Wno-cast-align)
+add_compile_options(-Wno-reserved-id-macro)
+add_compile_options(-Wno-documentation)
+add_compile_options(-Wno-used-but-marked-unused)
 
-add_definitions(-DPIC=1)
+add_definitions(-DPIC=1 -DOPENSSL_API_COMPAT=0x10100000L)
 
 if(CMAKE_STATIC_LIB_LINK)
    set(CMAKE_FIND_LIBRARY_SUFFIXES .a)
 endif(CMAKE_STATIC_LIB_LINK)
 
-find_package(OpenSSL REQUIRED)
-include_directories(SYSTEM ${OPENSSL_INCLUDE_DIR})
+find_package(OpenSSL)
+if(NOT OPENSSL_FOUND)
+    message(FATAL_ERROR "!!! Cannot find libssl and System.Security.Cryptography.Native cannot build without it. Try installing libssl-dev (or the appropriate package for your platform) !!!")
+endif(NOT OPENSSL_FOUND)
+
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 set(NATIVECRYPTO_SOURCES
-    openssl.cpp
-    pal_asn1.cpp
-    pal_asn1_print.cpp
-    pal_bignum.cpp
-    pal_bio.cpp
-    pal_dsa.cpp
-    pal_ecdsa.cpp
-    pal_ecc_import_export.cpp
-    pal_eckey.cpp
-    pal_err.cpp
-    pal_evp.cpp
-    pal_evp_pkey.cpp
-    pal_evp_pkey_dsa.cpp
-    pal_evp_pkey_eckey.cpp
-    pal_evp_pkey_rsa.cpp
-    pal_evp_cipher.cpp
-    pal_hmac.cpp
-    pal_pkcs12.cpp
-    pal_pkcs7.cpp
-    pal_rsa.cpp
-    pal_ssl.cpp
-    pal_x509.cpp
-    pal_x509_name.cpp
-    pal_x509_root.cpp
-    pal_x509ext.cpp
+    apibridge.c
+    openssl.c
+    pal_asn1.c
+    pal_bignum.c
+    pal_bio.c
+    pal_dsa.c
+    pal_ecdsa.c
+    pal_ecc_import_export.c
+    pal_eckey.c
+    pal_err.c
+    pal_evp.c
+    pal_evp_pkey.c
+    pal_evp_pkey_dsa.c
+    pal_evp_pkey_ecdh.c
+    pal_evp_pkey_eckey.c
+    pal_evp_pkey_rsa.c
+    pal_evp_cipher.c
+    pal_hmac.c
+    pal_ocsp.c
+    pal_pkcs12.c
+    pal_pkcs7.c
+    pal_rsa.c
+    pal_ssl.c
+    pal_x509.c
+    pal_x509_name.c
+    pal_x509_root.c
+    pal_x509ext.c
 )
 
 if (FEATURE_DISTRO_AGNOSTIC_SSL)
@@ -49,26 +57,29 @@ if (FEATURE_DISTRO_AGNOSTIC_SSL)
     endif()
 
     list(APPEND NATIVECRYPTO_SOURCES
-        opensslshim.cpp
+        opensslshim.c
     )
     add_definitions(-DFEATURE_DISTRO_AGNOSTIC_SSL)
 endif()
 
 add_library(objlib OBJECT ${NATIVECRYPTO_SOURCES} ${VERSION_FILE_PATH})
 
-add_library(System.Security.Cryptography.Native
-    SHARED
-    $<TARGET_OBJECTS:objlib>
-)
-
 add_library(System.Security.Cryptography.Native.OpenSsl
     SHARED
     $<TARGET_OBJECTS:objlib>
 )
 
+add_library(System.Security.Cryptography.Native.OpenSsl-Static
+    STATIC
+    $<TARGET_OBJECTS:objlib>
+)
+
 # Disable the "lib" prefix.
-set_target_properties(System.Security.Cryptography.Native PROPERTIES PREFIX "")
 set_target_properties(System.Security.Cryptography.Native.OpenSsl PROPERTIES PREFIX "")
+
+# Disable the "lib" prefix and override default name
+set_target_properties(System.Security.Cryptography.Native.OpenSsl-Static PROPERTIES PREFIX "")
+set_target_properties(System.Security.Cryptography.Native.OpenSsl-Static PROPERTIES OUTPUT_NAME System.Security.Cryptography.Native.OpenSsl CLEAN_DIRECT_OUTPUT 1)
 
 if (FEATURE_DISTRO_AGNOSTIC_SSL)
     add_custom_command(TARGET System.Security.Cryptography.Native.OpenSsl POST_BUILD
@@ -80,19 +91,10 @@ if (FEATURE_DISTRO_AGNOSTIC_SSL)
     )
 
     # Link with libdl.so to get the dlopen / dlsym / dlclose
-    target_link_libraries(System.Security.Cryptography.Native
-      dl
-    )
-
     target_link_libraries(System.Security.Cryptography.Native.OpenSsl
       dl
     )
 else()
-    target_link_libraries(System.Security.Cryptography.Native
-      ${OPENSSL_CRYPTO_LIBRARY}
-      ${OPENSSL_SSL_LIBRARY}
-    )
-  
     target_link_libraries(System.Security.Cryptography.Native.OpenSsl
       ${OPENSSL_CRYPTO_LIBRARY}
       ${OPENSSL_SSL_LIBRARY}
@@ -107,12 +109,6 @@ else()
     #
     # So, after compiling, rewrite the references to libcrypto to be more flexible.
     if (APPLE)
-        add_custom_command(TARGET System.Security.Cryptography.Native POST_BUILD
-            COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib @rpath/libcrypto.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
-            COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libssl.1.0.0.dylib @rpath/libssl.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native>
-            COMMAND ${CMAKE_INSTALL_NAME_TOOL} -add_rpath @loader_path $<TARGET_FILE:System.Security.Cryptography.Native>
-            )
-    
         add_custom_command(TARGET System.Security.Cryptography.Native.OpenSsl POST_BUILD
             COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libcrypto.1.0.0.dylib @rpath/libcrypto.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
             COMMAND ${CMAKE_INSTALL_NAME_TOOL} -change /usr/local/opt/openssl/lib/libssl.1.0.0.dylib @rpath/libssl.1.0.0.dylib $<TARGET_FILE:System.Security.Cryptography.Native.OpenSsl>
@@ -123,5 +119,5 @@ endif()
 
 include(configure.cmake)
 
-install_library_and_symbols (System.Security.Cryptography.Native)
 install_library_and_symbols (System.Security.Cryptography.Native.OpenSsl)
+install (TARGETS System.Security.Cryptography.Native.OpenSsl-Static DESTINATION .)

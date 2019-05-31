@@ -92,7 +92,34 @@ namespace System.Diagnostics.TextWriterTraceListenerTests
             var target = new DelimitedListTraceListener(FileStream.Null);
             Assert.Equal(DefaultDelimiter, target.Delimiter);
             Assert.Throws<ArgumentNullException>(() => target.Delimiter = null);
-            Assert.Throws<ArgumentException>(() => target.Delimiter = string.Empty);
+            AssertExtensions.Throws<ArgumentException>(null, () => target.Delimiter = string.Empty);
+        }
+
+        [Fact]
+        public void TestConstructorWithEmptyFileName()
+        {
+            string expectedName = string.Empty;
+            var target = new DelimitedListTraceListener(string.Empty);
+            Assert.Throws<ArgumentException>(() => target.Writer);
+            Assert.Equal(expectedName, target.Name);
+        }
+
+        [Fact]
+        public void TestConstructorWithFileName()
+        {
+            string expectedName = string.Empty;
+            var target = new DelimitedListTraceListener(Path.GetTempFileName());
+            Assert.NotNull(target.Writer);
+            Assert.Equal(expectedName, target.Name);
+        }
+
+        [Theory]
+        [MemberData(nameof(TestNames))]
+        public void TestConstructorWithFileNameAndName(string testName)
+        {
+            var target = new DelimitedListTraceListener(Path.GetTempFileName(), testName);
+            Assert.NotNull(target.Writer);
+            Assert.Equal(testName, target.Name);
         }
     }
 }

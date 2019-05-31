@@ -325,13 +325,10 @@ namespace System.Xml
                     break;
 
                 default:
-                    throw new InvalidOperationException(SR.Format(SR.Xml_UnexpectedNodeType, new string[] { _currentNode.NodeType.ToString() }));
+                    throw new InvalidOperationException(SR.Format(SR.Xml_UnexpectedNodeType, _currentNode.NodeType));
             }
         }
 
-        // SxS: This function calls ValidateElement on XmlSchemaValidator which is annotated with ResourceExposure attribute.
-        // Since the resource names passed to ValidateElement method are null and the function does not expose any resources 
-        // it is fine to suppress the SxS warning.
         private void ValidateElement()
         {
             _nsManager.PushScope();
@@ -500,7 +497,7 @@ namespace System.Xml
         private XmlSchemaObject FindSchemaInfo(XmlElement elementToValidate)
         {
             _isPartialTreeValid = true;
-            Debug.Assert(elementToValidate.ParentNode.NodeType != XmlNodeType.Document); //Handle if it is the documentElement seperately            
+            Debug.Assert(elementToValidate.ParentNode.NodeType != XmlNodeType.Document); //Handle if it is the documentElement separately            
 
             //Create nodelist to navigate down again
             XmlNode currentNode = elementToValidate;
@@ -684,9 +681,6 @@ namespace System.Xml
             return complexType;
         }
 
-        // SxS: This function calls ValidateElement on XmlSchemaValidator which is annotated with ResourceExposure attribute.
-        // Since the resource names passed to ValidateElement method are null and the function does not expose any resources 
-        // it is fine to supress the warning.
         private void ValidateSingleElement(XmlElement elementNode, bool skipToEnd, XmlSchemaInfo newSchemaInfo)
         {
             _nsManager.PushScope();
@@ -768,7 +762,7 @@ namespace System.Xml
                         break;
 
                     default:
-                        throw new InvalidOperationException(SR.Format(SR.Xml_UnexpectedNodeType, new string[] { _currentNode.NodeType.ToString() }));
+                        throw new InvalidOperationException(SR.Format(SR.Xml_UnexpectedNodeType, _currentNode.NodeType));
                 }
             }
             Debug.Assert(child == childToStopAt);

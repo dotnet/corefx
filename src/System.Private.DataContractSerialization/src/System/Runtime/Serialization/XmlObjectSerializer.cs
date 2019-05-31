@@ -359,7 +359,7 @@ namespace System.Runtime.Serialization
         internal static string TryAddLineInfo(XmlReaderDelegator reader, string errorMessage)
         {
             if (reader.HasLineInfo())
-                return String.Format(CultureInfo.InvariantCulture, "{0} {1}", SR.Format(SR.ErrorInLine, reader.LineNumber, reader.LinePosition), errorMessage);
+                return string.Format(CultureInfo.InvariantCulture, "{0} {1}", SR.Format(SR.ErrorInLine, reader.LineNumber, reader.LinePosition), errorMessage);
             return errorMessage;
         }
 
@@ -368,13 +368,13 @@ namespace System.Runtime.Serialization
             return XmlObjectSerializer.CreateSerializationException(TryAddLineInfo(reader, SR.Format(SR.EncounteredWithNameNamespace, errorMessage, reader.NodeType, reader.LocalName, reader.NamespaceURI)));
         }
 
-        static internal SerializationException CreateSerializationException(string errorMessage)
+        internal static SerializationException CreateSerializationException(string errorMessage)
         {
             return XmlObjectSerializer.CreateSerializationException(errorMessage, null);
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
-        static internal SerializationException CreateSerializationException(string errorMessage, Exception innerException)
+        internal static SerializationException CreateSerializationException(string errorMessage, Exception innerException)
         {
             return new SerializationException(errorMessage, innerException);
         }

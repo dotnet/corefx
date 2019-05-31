@@ -91,7 +91,7 @@ namespace System.Tests
         [Fact]
         public static void GetUnderlyingType_NullType_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("nullableType", () => Nullable.GetUnderlyingType((Type)null));
+            AssertExtensions.Throws<ArgumentNullException>("nullableType", () => Nullable.GetUnderlyingType((Type)null));
         }
 
         public static IEnumerable<object[]> Compare_Equals_TestData()
@@ -113,6 +113,47 @@ namespace System.Tests
             Assert.Equal(expected, Nullable.Compare(n1, n2));
         }
 
-        private class G<T> { }
+        [Fact]
+        public static void MutatingMethods_MutationsAffectOriginal()
+        {
+            MutatingStruct? ms = new MutatingStruct() { Value = 1 };
+
+            for (int i = 1; i <= 2; i++)
+            {
+                Assert.Equal(i.ToString(), ms.Value.ToString());
+                Assert.Equal(i, ms.Value.Value);
+
+                Assert.Equal(i.ToString(), ms.ToString());
+                Assert.Equal(i + 1, ms.Value.Value);
+            }
+
+            for (int i = 3; i <= 4; i++)
+            {
+                Assert.Equal(i, ms.Value.GetHashCode());
+                Assert.Equal(i, ms.Value.Value);
+
+                Assert.Equal(i, ms.GetHashCode());
+                Assert.Equal(i + 1, ms.Value.Value);
+            }
+
+            for (int i = 5; i <= 6; i++)
+            {
+                ms.Value.Equals(new object());
+                Assert.Equal(i, ms.Value.Value);
+
+                ms.Equals(new object());
+                Assert.Equal(i + 1, ms.Value.Value);
+            }
+        }
+
+        private struct MutatingStruct
+        {
+            public int Value;
+            public override string ToString() => Value++.ToString();
+            public override bool Equals(object obj) => Value++.Equals(null);
+            public override int GetHashCode() => Value++.GetHashCode();
+        }
+
+        public class G<T> { }
     }
 }

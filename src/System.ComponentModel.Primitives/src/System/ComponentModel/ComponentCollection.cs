@@ -2,30 +2,17 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-// Placeholder stub without functionality, here only to support existence of 
-//  TypeConverter.
-// Dependency chain: TypeConverter -> ITypeDescriptorContext -> IContainer -> ComponentCollection
-
 using System.Collections;
  
 namespace System.ComponentModel
 {
     public class ComponentCollection : ReadOnlyCollectionBase
     {
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
-        public ComponentCollection(IComponent[] components)
-        {
-            InnerList.AddRange(components);
-        }
+        public ComponentCollection(IComponent[] components) => InnerList.AddRange(components);
 
-        /** The component in the container identified by name. */
         /// <summary>
-        ///    <para>
-        ///       Gets a specific <see cref='System.ComponentModel.Component'/> in the <see cref='System.ComponentModel.Container'/>
-        ///       .
-        ///    </para>
+        /// Gets a specific <see cref='System.ComponentModel.Component'/> in the
+        /// <see cref='System.ComponentModel.IContainer'/>.
         /// </summary>
         public virtual IComponent this[string name]
         {
@@ -46,28 +33,12 @@ namespace System.ComponentModel
             }
         }
 
-        /** The component in the container identified by index. */
         /// <summary>
-        ///    <para>
-        ///       Gets a specific <see cref='System.ComponentModel.Component'/> in the <see cref='System.ComponentModel.Container'/>
-        ///       .
-        ///    </para>
+        /// Gets a specific <see cref='System.ComponentModel.Component'/> in the
+        /// <see cref='System.ComponentModel.IContainer'/>.
         /// </summary>
-        public virtual IComponent this[int index]
-        {
-            get
-            {
-                return (IComponent)InnerList[index];
-            }
-        }
+        public virtual IComponent this[int index] => (IComponent)InnerList[index];
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
-        public void CopyTo(IComponent[] array, int index)
-        {
-            InnerList.CopyTo(array, index);
-        }
+        public void CopyTo(IComponent[] array, int index) => InnerList.CopyTo(array, index);
     }
 }
-

@@ -2,21 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if USE_MDT_EVENTSOURCE
+using Microsoft.Diagnostics.Tracing;
+#else
 using System.Diagnostics.Tracing;
+#endif
 using Xunit;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
-using System.Threading;
 
 namespace BasicEventSourceTests
 {
     /// <summary>
     /// Tests the user experience for common user errors.  
     /// </summary>
-
-    public class TestsUserErrors
+    public partial class TestsUserErrors
     {
         /// <summary>
         /// Try to pass a user defined class (even with EventData)
@@ -47,6 +49,7 @@ namespace BasicEventSourceTests
                     Assert.Equal(events.Count, 1);
                     Event _event = events[0];
                     Assert.Equal("EventSourceMessage", _event.EventName);
+
                     string message = _event.PayloadString(0, "message");
                     // expected message: "ERROR: Exception in Command Processing for EventSource BadEventSource_Bad_Type_ByteArray: Unsupported type Byte[] in event source. "
                     Assert.True(Regex.IsMatch(message, "Unsupported type"));
@@ -61,38 +64,27 @@ namespace BasicEventSourceTests
         /// <summary>
         /// Test the 
         /// </summary>
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: https://github.com/dotnet/corefx/issues/29754
         public void Test_BadEventSource_MismatchedIds()
         {
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
-            // We expect only one session to be on when running the test but if a ETW session was left
-            // hanging, it will confuse the EventListener tests.   
-            EtwListener.EnsureStopped();
-#endif // USE_ETW
-
             TestUtilities.CheckNoEventSourcesRunning("Start");
             var onStartups = new bool[] { false, true };
-            
-                    var listenerGenerators = new Func<Listener>[]
-                    {
-                        () => new EventListenerListener(),
-#if USE_ETW // TODO: Enable when TraceEvent is available on CoreCLR. GitHub issue #4864.
-                        () => new EtwListener()
-#endif // USE_ETW
-                    };
 
-                    var settings = new EventSourceSettings[] { EventSourceSettings.Default, EventSourceSettings.EtwSelfDescribingEventFormat };
+            var listenerGenerators = new List<Func<Listener>>();
+            listenerGenerators.Add(() => new EventListenerListener());
 
-                    // For every interesting combination, run the test and see that we get a nice failure message.  
-                    foreach (bool onStartup in onStartups)
+            var settings = new EventSourceSettings[] { EventSourceSettings.Default, EventSourceSettings.EtwSelfDescribingEventFormat };
+
+            // For every interesting combination, run the test and see that we get a nice failure message.  
+            foreach (bool onStartup in onStartups)
+            {
+                foreach (Func<Listener> listenerGenerator in listenerGenerators)
+                {
+                    foreach (EventSourceSettings setting in settings)
                     {
-                        foreach (Func<Listener> listenerGenerator in listenerGenerators)
-                        {
-                            foreach (EventSourceSettings setting in settings)
-                            {
-                                Test_Bad_EventSource_Startup(onStartup, listenerGenerator(), setting);
-                            }
-                        }
+                        Test_Bad_EventSource_Startup(onStartup, listenerGenerator(), setting);
+                    }
+                }
             }
 
             TestUtilities.CheckNoEventSourcesRunning("Stop");
@@ -131,9 +123,10 @@ namespace BasicEventSourceTests
             Event _event = events[0];
             Assert.Equal("EventSourceMessage", _event.EventName);
             string message = _event.PayloadString(0, "message");
-            Debug.WriteLine(String.Format("Message=\"{0}\"", message));
-            // expected message: "ERROR: Exception in Command Processing for EventSource BadEventSource_MismatchedIds: Event Event2 is given event ID 2 but 1 was passed to WriteEvent. "
-            Assert.True(Regex.IsMatch(message, "Event Event2 is givien event ID 2 but 1 was passed to WriteEvent"));
+            Debug.WriteLine(string.Format("Message=\"{0}\"", message));
+            // expected message: "ERROR: Exception in Command Processing for EventSource BadEventSource_MismatchedIds: Event Event2 was assigned event ID 2 but 1 was passed to WriteEvent. "
+            if (!PlatformDetection.IsFullFramework) // Full framework has typo
+                Assert.True(Regex.IsMatch(message, "Event Event2 was assigned event ID 2 but 1 was passed to WriteEvent"));
         }
 
         [Fact]

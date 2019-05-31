@@ -33,37 +33,30 @@ namespace System.IO.Tests
             Assert.False(Exists(string.Empty));
         }
 
-        [Fact]
-        public void NonExistentValidPath_ReturnsFalse()
+        [Theory,
+            MemberData(nameof(ValidPathComponentNames))]
+        public void NonExistentValidPath_ReturnsFalse(string path)
         {
-            Assert.All((IOInputs.GetValidPathComponentNames()), (path) =>
-            {
-                Assert.False(Exists(path), path);
-            });
+            Assert.False(Exists(path), path);
         }
 
-        [Fact]
-        public void ValidPathExists_ReturnsTrue()
+        [Theory,
+            MemberData(nameof(ValidPathComponentNames))]
+        public void ValidPathExists_ReturnsTrue(string component)
         {
-            Assert.All((IOInputs.GetValidPathComponentNames()), (component) =>
-            {
-                string path = Path.Combine(TestDirectory, component);
-                DirectoryInfo testDir = Directory.CreateDirectory(path);
-                Assert.True(Exists(path));
-            });
+            string path = Path.Combine(TestDirectory, component);
+            DirectoryInfo testDir = Directory.CreateDirectory(path);
+            Assert.True(Exists(path));
         }
 
-        [Fact]
-        public void PathWithInvalidCharactersAsPath_ReturnsFalse()
+        [Theory, MemberData(nameof(PathsWithInvalidCharacters))]
+        public void PathWithInvalidCharactersAsPath_ReturnsFalse(string invalidPath)
         {
             // Checks that errors aren't thrown when calling Exists() on paths with impossible to create characters
             char[] trimmed = { (char)0x9, (char)0xA, (char)0xB, (char)0xC, (char)0xD, (char)0x20, (char)0x85, (char)0xA0 };
-            Assert.All((IOInputs.GetPathsWithInvalidCharacters()), (component) =>
-            {
-                Assert.False(Exists(component));
-                if (!trimmed.Contains(component.ToCharArray()[0]))
-                    Assert.False(Exists(TestDirectory + Path.DirectorySeparatorChar + component));
-            });
+            Assert.False(Exists(invalidPath));
+            if (!trimmed.Contains(invalidPath.ToCharArray()[0]))
+                Assert.False(Exists(TestDirectory + Path.DirectorySeparatorChar + invalidPath));
         }
 
         [Fact]
@@ -179,20 +172,18 @@ namespace System.IO.Tests
 
         #region PlatformSpecific
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
-        public void ValidExtendedPathExists_ReturnsTrue()
+        [ConditionalTheory(nameof(UsingNewNormalization)),
+            MemberData(nameof(ValidPathComponentNames))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Extended path exists
+        public void ValidExtendedPathExists_ReturnsTrue(string component)
         {
-            Assert.All((IOInputs.GetValidPathComponentNames()), (component) =>
-            {
-                string path = IOInputs.ExtendedPrefix + Path.Combine(TestDirectory, "extended", component);
-                DirectoryInfo testDir = Directory.CreateDirectory(path);
-                Assert.True(Exists(path));
-            });
+            string path = IOInputs.ExtendedPrefix + Path.Combine(TestDirectory, "extended", component);
+            DirectoryInfo testDir = Directory.CreateDirectory(path);
+            Assert.True(Exists(path));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(UsingNewNormalization))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Extended path already exists as file
         public void ExtendedPathAlreadyExistsAsFile()
         {
             string path = IOInputs.ExtendedPrefix + GetTestFilePath();
@@ -203,8 +194,8 @@ namespace System.IO.Tests
             Assert.False(Exists(IOServices.RemoveTrailingSlash(IOServices.AddTrailingSlashIfNeeded(path))));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(UsingNewNormalization))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Extended path already exists as directory
         public void ExtendedPathAlreadyExistsAsDirectory()
         {
             string path = IOInputs.ExtendedPrefix + GetTestFilePath();
@@ -215,8 +206,8 @@ namespace System.IO.Tests
             Assert.True(Exists(IOServices.RemoveTrailingSlash(IOServices.AddTrailingSlashIfNeeded(path))));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [ConditionalFact(nameof(AreAllLongPathsAvailable))]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Long directory path doesn't throw on Exists
         public void DirectoryLongerThanMaxDirectoryAsPath_DoesntThrow()
         {
             Assert.All((IOInputs.GetPathsLongerThanMaxDirectory(GetTestFilePath())), (path) =>
@@ -225,15 +216,14 @@ namespace System.IO.Tests
             });
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)] // Unix equivalent tested already in CreateDirectory
-        public void WindowsWhiteSpaceAsPath_ReturnsFalse()
+        public void WindowsWhiteSpaceAsPath_ReturnsFalse(string component)
         {
             // Checks that errors aren't thrown when calling Exists() on impossible paths
-            Assert.All(IOInputs.GetWhiteSpace(), (component) =>
-            {
-                Assert.False(Exists(component));
-            });
+            Assert.False(Exists(component));
+
         }
 
         [Fact]
@@ -256,56 +246,67 @@ namespace System.IO.Tests
             Assert.False(Exists(testDir.FullName.ToLowerInvariant()));
         }
 
-        [Fact]
+        [ConditionalTheory(nameof(UsingNewNormalization)),
+            MemberData(nameof(SimpleWhiteSpace))]
         [PlatformSpecific(TestPlatforms.Windows)] // In Windows, trailing whitespace in a path is trimmed appropriately
-        public void TrailingWhitespaceExistence()
+        public void TrailingWhitespaceExistence_SimpleWhiteSpace(string component)
         {
+            // This test relies on \\?\ support
+
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            Assert.All(IOInputs.GetWhiteSpace(), (component) =>
-            {
-                string path = testDir.FullName + component;
-                Assert.True(Exists(path), path); // string concat in case Path.Combine() trims whitespace before Exists gets to it
-                Assert.False(Exists(IOInputs.ExtendedPrefix + path), path);
-            });
 
-            Assert.All(IOInputs.GetSimpleWhiteSpace(), (component) =>
-            {
-                string path = GetTestFilePath(memberName: "Extended") + component;
-                testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + path);
-                Assert.False(Exists(path), path);
-                Assert.True(Exists(testDir.FullName));
-            });
+            string path = GetTestFilePath(memberName: "Extended") + component;
+            testDir = Directory.CreateDirectory(IOInputs.ExtendedPrefix + path);
+            Assert.False(Exists(path), path);
+            Assert.True(Exists(testDir.FullName));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // alternate data stream
-        public void PathWithAlternateDataStreams_ReturnsFalse()
+        [Theory,
+            MemberData(nameof(NonControlWhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void NonControlWhiteSpaceExists(string component)
         {
-            Assert.All(IOInputs.GetWhiteSpace(), (component) =>
-            {
-                Assert.False(Exists(component));
-            });
+            DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath() + component);
+
+            string path = testDir.FullName;
+            Assert.True(Exists(path), "directory with non control whitespace should exist");
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(SimpleWhiteSpace))] // *Just spaces*
+        [PlatformSpecific(TestPlatforms.Windows)]
+        public void TrailingSpaceExists(string component)
+        {
+            // Windows trims spaces
+            string path = GetTestFilePath();
+            DirectoryInfo testDir = Directory.CreateDirectory(path + component);
+            Assert.True(Exists(path), "can find without space");
+            Assert.True(Exists(path + component), "can find with space");
+        }
+
+        [Theory,
+            MemberData(nameof(WhiteSpace))]
+        [PlatformSpecific(TestPlatforms.Windows)] // alternate data stream
+        public void PathWithAlternateDataStreams_ReturnsFalse(string component)
+        {
+            Assert.False(Exists(component));
+
+        }
+
+        [Theory,
+            MemberData(nameof(PathsWithReservedDeviceNames))]
         [OuterLoop]
         [PlatformSpecific(TestPlatforms.Windows)] // device names
-        public void PathWithReservedDeviceNameAsPath_ReturnsFalse()
+        public void PathWithReservedDeviceNameAsPath_ReturnsFalse(string component)
         {
-            Assert.All((IOInputs.GetPathsWithReservedDeviceNames()), (component) =>
-            {
-                Assert.False(Exists(component));
-            });
+            Assert.False(Exists(component));
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)] // UNC paths
-        public void UncPathWithoutShareNameAsPath_ReturnsFalse()
+        [Theory,
+            MemberData(nameof(UncPathsWithoutShareName))]
+        public void UncPathWithoutShareNameAsPath_ReturnsFalse(string component)
         {
-            Assert.All((IOInputs.GetUncPathsWithoutShareName()), (component) =>
-            {
-                Assert.False(Exists(component));
-            });
+            Assert.False(Exists(component));
         }
 
         [Fact]
@@ -314,19 +315,17 @@ namespace System.IO.Tests
         {
             // Creates directories up to the maximum directory length all at once
             DirectoryInfo testDir = Directory.CreateDirectory(GetTestFilePath());
-            PathInfo path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory, maxComponent: 10);
-            Directory.CreateDirectory(path.FullPath);
-            Assert.True(Exists(path.FullPath));
+            string path = IOServices.GetPath(testDir.FullName, IOInputs.MaxDirectory);
+            Directory.CreateDirectory(path);
+            Assert.True(Exists(path));
         }
 
-        [Fact]
+        [Theory,
+            MemberData(nameof(PathsWithComponentLongerThanMaxComponent))]
         [PlatformSpecific(TestPlatforms.Windows)] // max directory length not fixed on Unix
-        public void DirectoryWithComponentLongerThanMaxComponentAsPath_ReturnsFalse()
+        public void DirectoryWithComponentLongerThanMaxComponentAsPath_ReturnsFalse(string component)
         {
-            Assert.All((IOInputs.GetPathsWithComponentLongerThanMaxComponent()), (component) =>
-            {
-                Assert.False(Exists(component));
-            });
+            Assert.False(Exists(component));
         }
 
         [Fact]
@@ -363,11 +362,26 @@ namespace System.IO.Tests
             Assert.False(result);
         }
 
-        [Fact]
+        // Not all drives may be accessible (locked, no rights, etc.), and as such would return false.
+        // eg. Create a new volume, bitlocker it, and lock it. This new volume is no longer accessible
+        // and any attempt to access this drive will return false.
+        // We just care that we can access an accessible drive directly, we don't care which one.
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotInAppContainer))] // Can't read root in appcontainer 
         [PlatformSpecific(TestPlatforms.Windows)] // drive labels
-        public void NonExistentDriveAsPath_ReturnsFalse()
+        public void DriveAsPath()
         {
             Assert.False(Exists(IOServices.GetNonExistentDrive()));
+            Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(drive));
+        }
+
+        [ConditionalFact(nameof(UsingNewNormalization))]
+        [PlatformSpecific(TestPlatforms.Windows)] // drive labels
+        public void ExtendedDriveAsPath()
+        {
+            Assert.False(Exists(IOInputs.ExtendedPrefix + IOServices.GetNonExistentDrive()));
+
+            if (PlatformDetection.IsNotInAppContainer)
+                Assert.Contains(IOServices.GetReadyDrives(), drive => Exists(IOInputs.ExtendedPrefix + drive));
         }
 
         [Fact]
@@ -378,7 +392,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Makes call to native code (libc)
         public void FalseForNonRegularFile()
         {
             string fileName = GetTestFilePath();

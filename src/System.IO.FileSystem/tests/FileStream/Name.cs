@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Globalization;
 using System.IO;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.IO.Tests
@@ -39,11 +41,16 @@ namespace System.IO.Tests
         [Fact]
         public void NameReturnsUnknownForHandle()
         {
-            using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite))
-            using (FileStream fsh = new FileStream(fs.SafeFileHandle, FileAccess.ReadWrite))
+            RemoteExecutor.Invoke(() =>
             {
-                Assert.Equal("[Unknown]", fsh.Name);
-            }
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
+
+                using (FileStream fs = new FileStream(GetTestFilePath(), FileMode.Create, FileAccess.ReadWrite))
+                using (FileStream fsh = new FileStream(fs.SafeFileHandle, FileAccess.ReadWrite))
+                {
+                    Assert.Equal("[Unknown]", fsh.Name);
+                }
+            }).Dispose();
         }
     }
 }

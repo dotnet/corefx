@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
-using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -69,7 +68,22 @@ namespace System.ComponentModel.DataAnnotations
         ///     Gets the type of the <see cref="Minimum" /> and <see cref="Maximum" /> values (e.g. Int32, Double, or some custom
         ///     type)
         /// </summary>
-        public Type OperandType { get; private set; }
+        public Type OperandType { get; }
+
+        /// <summary>
+        /// Determines whether string values for <see cref="Minimum"/> and <see cref="Maximum"/> are parsed in the invariant
+        /// culture rather than the current culture in effect at the time of the validation.
+        /// </summary>
+        public bool ParseLimitsInInvariantCulture { get; set; }
+
+        /// <summary>
+        /// Determines whether any conversions necessary from the value being validated to <see cref="OperandType"/> as set
+        /// by the <c>type</c> parameter of the <see cref="RangeAttribute(Type, string, string)"/> constructor are carried
+        /// out in the invariant culture rather than the current culture in effect at the time of the validation.
+        /// </summary>
+        /// <remarks>This property has no effects with the constructors with <see cref="int"/> or <see cref="double"/>
+        /// parameters, for which the invariant culture is always used for any conversions of the validated value.</remarks>
+        public bool ConvertValueInInvariantCulture { get; set; }
 
         private Func<object, object> Conversion { get; set; }
 
@@ -77,15 +91,13 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (minimum.CompareTo(maximum) > 0)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    SR.RangeAttribute_MinGreaterThanMax, maximum, minimum));
+                throw new InvalidOperationException(SR.Format(SR.RangeAttribute_MinGreaterThanMax, maximum, minimum));
             }
 
             Minimum = minimum;
             Maximum = maximum;
             Conversion = conversion;
         }
-
 
         /// <summary>
         ///     Returns true if the value falls between min and max, inclusive.
@@ -99,17 +111,12 @@ namespace System.ComponentModel.DataAnnotations
             SetupConversion();
 
             // Automatically pass if value is null or empty. RequiredAttribute should be used to assert a value is not empty.
-            if (value == null)
-            {
-                return true;
-            }
-            var s = value as string;
-            if (s != null && string.IsNullOrEmpty(s))
+            if (value == null || (value as string)?.Length == 0)
             {
                 return true;
             }
 
-            object convertedValue = null;
+            object convertedValue;
 
             try
             {
@@ -183,27 +190,36 @@ namespace System.ComponentModel.DataAnnotations
                     Type type = OperandType;
                     if (type == null)
                     {
-                        throw new InvalidOperationException(
-                            SR.RangeAttribute_Must_Set_Operand_Type);
+                        throw new InvalidOperationException(SR.RangeAttribute_Must_Set_Operand_Type);
                     }
                     Type comparableType = typeof(IComparable);
-                    if (!comparableType.GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+                    if (!comparableType.IsAssignableFrom(type))
                     {
-                        throw new InvalidOperationException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                SR.RangeAttribute_ArbitraryTypeNotIComparable,
-                                type.FullName,
-                                comparableType.FullName));
+                        throw new InvalidOperationException(SR.Format(SR.RangeAttribute_ArbitraryTypeNotIComparable,
+                                                            type.FullName,
+                                                            comparableType.FullName));
                     }
 
-                    Func<object, object> conversion =
-                        value =>
-                            (value != null && value.GetType() == type)
-                                ? value
-                                : Convert.ChangeType(value, type, CultureInfo.CurrentCulture);
-                    var min = (IComparable)conversion(minimum);
-                    var max = (IComparable)conversion(maximum);
+                    TypeConverter converter = TypeDescriptor.GetConverter(type);
+                    IComparable min = (IComparable)(ParseLimitsInInvariantCulture
+                        ? converter.ConvertFromInvariantString((string)minimum)
+                        : converter.ConvertFromString((string)minimum));
+                    IComparable max = (IComparable)(ParseLimitsInInvariantCulture
+                        ? converter.ConvertFromInvariantString((string)maximum)
+                        : converter.ConvertFromString((string)maximum));
+
+                    Func<object, object> conversion;
+                    if (ConvertValueInInvariantCulture)
+                    {
+                        conversion = value => value.GetType() == type
+                            ? value
+                            : converter.ConvertFrom(null, CultureInfo.InvariantCulture, value);
+                    }
+                    else
+                    {
+                        conversion = value => value.GetType() == type ? value : converter.ConvertFrom(value);
+                    }
+
                     Initialize(min, max, conversion);
                 }
             }

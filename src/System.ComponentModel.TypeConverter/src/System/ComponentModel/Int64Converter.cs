@@ -7,54 +7,35 @@ using System.Globalization;
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>Provides a type converter to convert 64-bit signed integer objects to and
-    ///       from various other representations.</para>
+    /// Provides a type converter to convert 64-bit signed integer objects to and
+    /// from various other representations.
     /// </summary>
     public class Int64Converter : BaseNumberConverter
     {
         /// <summary>
         /// The Type this converter is targeting (e.g. Int16, UInt32, etc.)
         /// </summary>
-        internal override Type TargetType
-        {
-            get
-            {
-                return typeof(Int64);
-            }
-        }
+        internal override Type TargetType => typeof(long);
 
         /// <summary>
         /// Convert the given value to a string using the given radix
         /// </summary>
-        internal override object FromString(string value, int radix)
-        {
-            return Convert.ToInt64(value, radix);
-        }
+        internal override object FromString(string value, int radix) => Convert.ToInt64(value, radix);
 
         /// <summary>
         /// Convert the given value to a string using the given formatInfo
         /// </summary>
         internal override object FromString(string value, NumberFormatInfo formatInfo)
         {
-            return Int64.Parse(value, NumberStyles.Integer, formatInfo);
+            return long.Parse(value, NumberStyles.Integer, formatInfo);
         }
-
-
-        /// <summary>
-        /// Convert the given value to a string using the given CultureInfo
-        /// </summary>
-        internal override object FromString(string value, CultureInfo culture)
-        {
-            return Int64.Parse(value, culture);
-        }
-
+        
         /// <summary>
         /// Convert the given value from a string using the given formatInfo
         /// </summary>
         internal override string ToString(object value, NumberFormatInfo formatInfo)
         {
-            return ((Int64)value).ToString("G", formatInfo);
+            return ((long)value).ToString("G", formatInfo);
         }
     }
 }
-

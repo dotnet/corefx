@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Text;
 using System.Diagnostics;
 
@@ -11,8 +12,27 @@ namespace System.Security.Cryptography
 {
     public class Rfc2898DeriveBytes : DeriveBytes
     {
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "HMACSHA1 is needed for compat. (https://github.com/dotnet/corefx/issues/9438)")]
+        private const int MinimumSaltSize = 8;
+        
+        private readonly byte[] _password;
+        private byte[] _salt;
+        private uint _iterations;
+        private HMAC _hmac;
+        private int _blockSize;
+
+        private byte[] _buffer;
+        private uint _block;
+        private int _startIndex;
+        private int _endIndex;
+
+        public HashAlgorithmName HashAlgorithm { get; }
+
         public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations)
+            : this(password, salt, iterations, HashAlgorithmName.SHA1)
+        {
+        }
+
+        public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations, HashAlgorithmName hashAlgorithm)
         {
             if (salt == null)
                 throw new ArgumentNullException(nameof(salt));
@@ -23,10 +43,14 @@ namespace System.Security.Cryptography
             if (password == null)
                 throw new NullReferenceException();  // This "should" be ArgumentNullException but for compat, we throw NullReferenceException.
 
-            _salt = salt.CloneByteArray();
+            _salt = new byte[salt.Length + sizeof(uint)];
+            salt.AsSpan().CopyTo(_salt);
             _iterations = (uint)iterations;
             _password = password.CloneByteArray();
-            _hmacSha1 = new HMACSHA1(_password);
+            HashAlgorithm = hashAlgorithm;
+            _hmac = OpenHmac();
+            // _blockSize is in bytes, HashSize is in bits.
+            _blockSize = _hmac.HashSize >> 3;
 
             Initialize();
         }
@@ -37,7 +61,12 @@ namespace System.Security.Cryptography
         }
 
         public Rfc2898DeriveBytes(string password, byte[] salt, int iterations)
-            : this(Encoding.UTF8.GetBytes(password), salt, iterations)
+            : this(password, salt, iterations, HashAlgorithmName.SHA1)
+        {
+        }
+
+        public Rfc2898DeriveBytes(string password, byte[] salt, int iterations, HashAlgorithmName hashAlgorithm)
+            : this(Encoding.UTF8.GetBytes(password), salt, iterations, hashAlgorithm)
         {
         }
 
@@ -46,8 +75,12 @@ namespace System.Security.Cryptography
         {
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "HMACSHA1 is needed for compat. (https://github.com/dotnet/corefx/issues/9438)")]
         public Rfc2898DeriveBytes(string password, int saltSize, int iterations)
+            : this(password, saltSize, iterations, HashAlgorithmName.SHA1)
+        {
+        }
+
+        public Rfc2898DeriveBytes(string password, int saltSize, int iterations, HashAlgorithmName hashAlgorithm)
         {
             if (saltSize < 0)
                 throw new ArgumentOutOfRangeException(nameof(saltSize), SR.ArgumentOutOfRange_NeedNonNegNum);
@@ -56,10 +89,15 @@ namespace System.Security.Cryptography
             if (iterations <= 0)
                 throw new ArgumentOutOfRangeException(nameof(iterations), SR.ArgumentOutOfRange_NeedPosNum);
 
-            _salt = Helpers.GenerateRandom(saltSize);
+            _salt = new byte[saltSize + sizeof(uint)];
+            RandomNumberGenerator.Fill(_salt.AsSpan(0, saltSize));
+
             _iterations = (uint)iterations;
             _password = Encoding.UTF8.GetBytes(password);
-            _hmacSha1 = new HMACSHA1(_password);
+            HashAlgorithm = hashAlgorithm;
+            _hmac = OpenHmac();
+            // _blockSize is in bytes, HashSize is in bits.
+            _blockSize = _hmac.HashSize >> 3;
 
             Initialize();
         }
@@ -84,7 +122,7 @@ namespace System.Security.Cryptography
         {
             get
             {
-                return _salt.CloneByteArray();
+                return _salt.AsSpan(0, _salt.Length - sizeof(uint)).ToArray();
             }
 
             set
@@ -93,7 +131,9 @@ namespace System.Security.Cryptography
                     throw new ArgumentNullException(nameof(value));
                 if (value.Length < MinimumSaltSize)
                     throw new ArgumentException(SR.Cryptography_PasswordDerivedBytes_FewBytesSalt);
-                _salt = value.CloneByteArray();
+
+                _salt = new byte[value.Length + sizeof(uint)];
+                value.AsSpan().CopyTo(_salt);
                 Initialize();
             }
         }
@@ -102,9 +142,12 @@ namespace System.Security.Cryptography
         {
             if (disposing)
             {
-                if (_hmacSha1 != null)
-                    _hmacSha1.Dispose();
-                _hmacSha1 = null;
+                if (_hmac != null)
+                {
+                    _hmac.Dispose();
+                    _hmac = null;
+                }
+
                 if (_buffer != null)
                     Array.Clear(_buffer, 0, _buffer.Length);
                 if (_password != null)
@@ -117,6 +160,8 @@ namespace System.Security.Cryptography
 
         public override byte[] GetBytes(int cb)
         {
+            Debug.Assert(_blockSize > 0);
+
             if (cb <= 0)
                 throw new ArgumentOutOfRangeException(nameof(cb), SR.ArgumentOutOfRange_NeedPosNum);
             byte[] password = new byte[cb];
@@ -143,19 +188,18 @@ namespace System.Security.Cryptography
 
             while (offset < cb)
             {
-                byte[] T_block = Func();
+                Func();
                 int remainder = cb - offset;
-                if (remainder > BlockSize)
+                if (remainder >= _blockSize)
                 {
-                    Buffer.BlockCopy(T_block, 0, password, offset, BlockSize);
-                    offset += BlockSize;
+                    Buffer.BlockCopy(_buffer, 0, password, offset, _blockSize);
+                    offset += _blockSize;
                 }
                 else
                 {
-                    Buffer.BlockCopy(T_block, 0, password, offset, remainder);
-                    offset += remainder;
-                    Buffer.BlockCopy(T_block, remainder, _buffer, _startIndex, BlockSize - remainder);
-                    _endIndex += (BlockSize - remainder);
+                    Buffer.BlockCopy(_buffer, 0, password, offset, remainder);
+                    _startIndex = remainder;
+                    _endIndex = _buffer.Length;
                     return password;
                 }
             }
@@ -178,53 +222,74 @@ namespace System.Security.Cryptography
             Initialize();
         }
 
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA5350", Justification = "HMACSHA1 is needed for compat. (https://github.com/dotnet/corefx/issues/9438)")]
+        private HMAC OpenHmac()
+        {
+            Debug.Assert(_password != null);
+
+            HashAlgorithmName hashAlgorithm = HashAlgorithm;
+
+            if (string.IsNullOrEmpty(hashAlgorithm.Name))
+                throw new CryptographicException(SR.Cryptography_HashAlgorithmNameNullOrEmpty);
+
+            if (hashAlgorithm == HashAlgorithmName.SHA1)
+                return new HMACSHA1(_password);
+            if (hashAlgorithm == HashAlgorithmName.SHA256)
+                return new HMACSHA256(_password);
+            if (hashAlgorithm == HashAlgorithmName.SHA384)
+                return new HMACSHA384(_password);
+            if (hashAlgorithm == HashAlgorithmName.SHA512)
+                return new HMACSHA512(_password);
+
+            throw new CryptographicException(SR.Format(SR.Cryptography_UnknownHashAlgorithm, hashAlgorithm.Name));
+        }
+
         private void Initialize()
         {
             if (_buffer != null)
                 Array.Clear(_buffer, 0, _buffer.Length);
-            _buffer = new byte[BlockSize];
+            _buffer = new byte[_blockSize];
             _block = 1;
             _startIndex = _endIndex = 0;
         }
 
         // This function is defined as follows:
-        // Func (S, i) = HMAC(S || i) | HMAC2(S || i) | ... | HMAC(iterations) (S || i) 
+        // Func (S, i) = HMAC(S || i) ^ HMAC2(S || i) ^ ... ^ HMAC(iterations) (S || i) 
         // where i is the block number.
-        private byte[] Func()
+        private void Func()
         {
-            byte[] temp = new byte[_salt.Length + sizeof(uint)];
-            Buffer.BlockCopy(_salt, 0, temp, 0, _salt.Length);
-            Helpers.WriteInt(_block, temp, _salt.Length);
+            Helpers.WriteInt(_block, _salt, _salt.Length - sizeof(uint));
+            Debug.Assert(_blockSize == _buffer.Length);
 
-            temp = _hmacSha1.ComputeHash(temp);
-            
-            byte[] ret = temp;
+            // The biggest _blockSize we have is from SHA512, which is 64 bytes.
+            // Since we have a closed set of supported hash algorithms (OpenHmac())
+            // we can know this always fits.
+            // 
+            Span<byte> uiSpan = stackalloc byte[64];
+            uiSpan = uiSpan.Slice(0, _blockSize);
+
+            if (!_hmac.TryComputeHash(_salt, uiSpan, out int bytesWritten) || bytesWritten != _blockSize)
+            {
+                throw new CryptographicException();
+            }
+
+            uiSpan.CopyTo(_buffer);
+
             for (int i = 2; i <= _iterations; i++)
             {
-                temp = _hmacSha1.ComputeHash(temp);
-
-                for (int j = 0; j < BlockSize; j++)
+                if (!_hmac.TryComputeHash(uiSpan, uiSpan, out bytesWritten) || bytesWritten != _blockSize)
                 {
-                    ret[j] ^= temp[j];
+                    throw new CryptographicException();
+                }
+
+                for (int j = _buffer.Length - 1; j >= 0; j--)
+                {
+                    _buffer[j] ^= uiSpan[j];
                 }
             }
 
             // increment the block count.
             _block++;
-            return ret;
         }
-
-        private readonly byte[] _password;
-        private byte[] _salt;
-        private uint _iterations;
-        private HMACSHA1 _hmacSha1;
-
-        private byte[] _buffer;
-        private uint _block;
-        private int _startIndex;
-        private int _endIndex;
-
-        private const int BlockSize = 20;
-        private const int MinimumSaltSize = 8;
     }
 }

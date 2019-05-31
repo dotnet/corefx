@@ -13,12 +13,19 @@ namespace System.Data.SqlClient
 {
     internal sealed class TdsParserStaticMethods
     {
-        // Encrypt password to be sent to SQL Server
+        // Obfuscate password to be sent to SQL Server
+        // Blurb from the TDS spec at https://msdn.microsoft.com/en-us/library/dd304523.aspx
+        // "Before submitting a password from the client to the server, for every byte in the password buffer 
+        // starting with the position pointed to by IbPassword, the client SHOULD first swap the four high bits 
+        // with the four low bits and then do a bit-XOR with 0xA5 (10100101). After reading a submitted password, 
+        // for every byte in the password buffer starting with the position pointed to by IbPassword, the server SHOULD 
+        // first do a bit-XOR with 0xA5 (10100101) and then swap the four high bits with the four low bits."
+        // The password exchange during Login phase happens over a secure channel i.e. SSL/TLS 
         // Note: The same logic is used in SNIPacketSetData (SniManagedWrapper) to encrypt passwords stored in SecureString
         //       If this logic changed, SNIPacketSetData needs to be changed as well
-        static internal Byte[] EncryptPassword(string password)
+        internal static byte[] ObfuscatePassword(string password)
         {
-            Byte[] bEnc = new Byte[password.Length << 1];
+            byte[] bObfuscated = new byte[password.Length << 1];
             int s;
             byte bLo;
             byte bHi;
@@ -28,37 +35,53 @@ namespace System.Data.SqlClient
                 s = (int)password[i];
                 bLo = (byte)(s & 0xff);
                 bHi = (byte)((s >> 8) & 0xff);
-                bEnc[i << 1] = (Byte)((((bLo & 0x0f) << 4) | (bLo >> 4)) ^ 0xa5);
-                bEnc[(i << 1) + 1] = (Byte)((((bHi & 0x0f) << 4) | (bHi >> 4)) ^ 0xa5);
+                bObfuscated[i << 1] = (byte)((((bLo & 0x0f) << 4) | (bLo >> 4)) ^ 0xa5);
+                bObfuscated[(i << 1) + 1] = (byte)((((bHi & 0x0f) << 4) | (bHi >> 4)) ^ 0xa5);
             }
-            return bEnc;
+            return bObfuscated;
+        }
+
+        internal static byte[] ObfuscatePassword(byte[] password)
+        {
+            byte bLo;
+            byte bHi;
+
+            for (int i = 0; i < password.Length; i++)
+            {
+                bLo = (byte)(password[i] & 0x0f);
+                bHi = (byte)(password[i] & 0xf0);
+                password[i] = (byte)(((bHi >> 4) | (bLo << 4)) ^ 0xa5);
+            }
+            return password;
         }
 
         private const int NoProcessId = -1;
         private static int s_currentProcessId = NoProcessId;
-        static internal int GetCurrentProcessIdForTdsLoginOnly()
+        internal static int GetCurrentProcessIdForTdsLoginOnly()
         {
             if (s_currentProcessId == NoProcessId)
             {
-                // In ProjectK\CoreCLR we don't want to take a dependency on an assembly
-                // just to grab the real Process Id that the server doesn't really use
-                // So, instead, pick a random number and use that for all connections
-                Random rand = new Random();
-                int processId = rand.Next();
-                Threading.Interlocked.CompareExchange(ref s_currentProcessId, processId, NoProcessId);
+                // Pick up the process Id from the current process instead of randomly generating it.
+                // This would be helpful while tracing application related issues.
+                int processId;
+                using (System.Diagnostics.Process p = System.Diagnostics.Process.GetCurrentProcess())
+                {
+                    processId = p.Id;
+                }
+                System.Threading.Volatile.Write(ref s_currentProcessId, processId);
             }
             return s_currentProcessId;
         }
 
 
-        static internal Int32 GetCurrentThreadIdForTdsLoginOnly()
+        internal static int GetCurrentThreadIdForTdsLoginOnly()
         {
             return Environment.CurrentManagedThreadId;
         }
 
 
         private static byte[] s_nicAddress = null;
-        static internal byte[] GetNetworkPhysicalAddressForTdsLoginOnly()
+        internal static byte[] GetNetworkPhysicalAddressForTdsLoginOnly()
         {
             // For ProjectK\CoreCLR we don't want to take a dependency on the registry to try to read a value
             // that isn't usually set, so we'll just use a random value each time instead
@@ -74,7 +97,7 @@ namespace System.Data.SqlClient
         }
 
         // translates remaining time in stateObj (from user specified timeout) to timeout value for SNI
-        static internal Int32 GetTimeoutMilliseconds(long timeoutTime)
+        internal static int GetTimeoutMilliseconds(long timeoutTime)
         {
             // User provided timeout t | timeout value for SNI | meaning
             // ------------------------+-----------------------+------------------------------
@@ -82,7 +105,7 @@ namespace System.Data.SqlClient
             //   t>0 && t<int.MaxValue |                     t |
             //          t>int.MaxValue |          int.MaxValue | must not exceed int.MaxValue
 
-            if (Int64.MaxValue == timeoutTime)
+            if (long.MaxValue == timeoutTime)
             {
                 return -1;  // infinite timeout
             }
@@ -93,20 +116,20 @@ namespace System.Data.SqlClient
             {
                 return 0;
             }
-            if (msecRemaining > (long)Int32.MaxValue)
+            if (msecRemaining > (long)int.MaxValue)
             {
-                return Int32.MaxValue;
+                return int.MaxValue;
             }
-            return (Int32)msecRemaining;
+            return (int)msecRemaining;
         }
 
 
-        static internal long GetTimeout(long timeoutMilliseconds)
+        internal static long GetTimeout(long timeoutMilliseconds)
         {
             long result;
             if (timeoutMilliseconds <= 0)
             {
-                result = Int64.MaxValue; // no timeout...
+                result = long.MaxValue; // no timeout...
             }
             else
             {
@@ -117,24 +140,24 @@ namespace System.Data.SqlClient
                 catch (OverflowException)
                 {
                     // In case of overflow, set to 'infinite' timeout
-                    result = Int64.MaxValue;
+                    result = long.MaxValue;
                 }
             }
             return result;
         }
 
-        static internal bool TimeoutHasExpired(long timeoutTime)
+        internal static bool TimeoutHasExpired(long timeoutTime)
         {
             bool result = false;
 
-            if (0 != timeoutTime && Int64.MaxValue != timeoutTime)
+            if (0 != timeoutTime && long.MaxValue != timeoutTime)
             {
                 result = ADP.TimerHasExpired(timeoutTime);
             }
             return result;
         }
 
-        static internal int NullAwareStringLength(string str)
+        internal static int NullAwareStringLength(string str)
         {
             if (str == null)
             {
@@ -146,7 +169,7 @@ namespace System.Data.SqlClient
             }
         }
 
-        static internal int GetRemainingTimeout(int timeout, long start)
+        internal static int GetRemainingTimeout(int timeout, long start)
         {
             if (timeout <= 0)
             {

@@ -9,47 +9,22 @@ namespace System.Tests
 {
     public class EnvironmentProcessorCount
     {
-        [PlatformSpecific(TestPlatforms.Windows)]
         [Fact]
-        public void Windows_ProcessorCountTest()
+        public void ProcessorCount_IsPositive()
         {
-            //arrange
-            SYSTEM_INFO sysInfo = new SYSTEM_INFO();
-            GetSystemInfo(ref sysInfo);
-            int expected = sysInfo.dwNumberOfProcessors;
-
-            //act
-            int actual = Environment.ProcessorCount;
-
-            //assert
-            Assert.True(actual > 0);
-            Assert.Equal(expected, actual);
+            Assert.InRange(Environment.ProcessorCount, 1, int.MaxValue);
+        }
+        
+        [PlatformSpecific(TestPlatforms.Windows)] // Uses P/Invokes to get processor information
+        [Fact]
+        public void ProcessorCount_Windows_MatchesGetSystemInfo()
+        {
+            GetSystemInfo(out SYSTEM_INFO sysInfo);
+            Assert.Equal(sysInfo.dwNumberOfProcessors, Environment.ProcessorCount);
         }
 
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [Fact]
-        public void Unix_ProcessorCountTest()
-        {
-            //arrange
-            int _SC_NPROCESSORS_ONLN =
-                RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? 84 :
-                RuntimeInformation.IsOSPlatform(OSPlatform.Create("NETBSD")) ? 1002 :
-                58;
-            int expected = (int)sysconf(_SC_NPROCESSORS_ONLN);
-
-            //act
-            int actual = Environment.ProcessorCount;
-
-            //assert
-            Assert.True(actual > 0);
-            Assert.Equal(expected, actual);
-        }
-
-        [DllImport("libc")]
-        private static extern long sysconf(int name);
-
-        [DllImport("api-ms-win-core-sysinfo-l1-1-0.dll", SetLastError = true)]
-        internal static extern void GetSystemInfo(ref SYSTEM_INFO lpSystemInfo);
+        [DllImport("kernel32.dll", SetLastError = true)]
+        internal static extern void GetSystemInfo(out SYSTEM_INFO lpSystemInfo);
 
         [StructLayout(LayoutKind.Sequential)]
         internal struct SYSTEM_INFO

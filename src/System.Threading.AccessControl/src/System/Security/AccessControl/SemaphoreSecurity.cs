@@ -12,20 +12,20 @@
 
 using System;
 using System.Collections;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
+using System.Threading;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
-using System.Runtime.InteropServices;
-using System.Threading;
 
 namespace System.Security.AccessControl
 {
     // Derive this list of values from winnt.h and MSDN docs:
-    // http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dllproc/base/synchronization_object_security_and_access_rights.asp
+    // https://docs.microsoft.com/en-us/windows/desktop/sync/synchronization-object-security-and-access-rights
 
     // Win32's interesting values are SEMAPHORE_MODIFY_STATE (0x2) and
     // SEMAPHORE_ALL_ACCESS (0x1F0003).  I don't know what 0x1 is.
-    [Flags, ComVisible(false)]
+    [Flags]
     public enum SemaphoreRights
     {
         Modify = 0x000002,
@@ -46,7 +46,7 @@ namespace System.Security.AccessControl
         {
         }
 
-        public SemaphoreAccessRule(String identity, SemaphoreRights eventRights, AccessControlType type)
+        public SemaphoreAccessRule(string identity, SemaphoreRights eventRights, AccessControlType type)
             : this(new NTAccount(identity), (int)eventRights, false, InheritanceFlags.None, PropagationFlags.None, type)
         {
         }
@@ -85,13 +85,6 @@ namespace System.Security.AccessControl
         {
         }
 
-        /*  // Not in the spec
-        public SemaphoreAuditRule(string identity, SemaphoreRights eventRights, AuditFlags flags)
-            : this(new NTAccount(identity), (int) eventRights, false, InheritanceFlags.None, PropagationFlags.None, flags)
-        {
-        }
-        */
-
         internal SemaphoreAuditRule(IdentityReference identity, int accessMask, bool isInherited, InheritanceFlags inheritanceFlags, PropagationFlags propagationFlags, AuditFlags flags)
             : base(identity, accessMask, isInherited, inheritanceFlags, propagationFlags, flags)
         {
@@ -110,19 +103,19 @@ namespace System.Security.AccessControl
         {
         }
 
-        public SemaphoreSecurity(String name, AccessControlSections includeSections)
-            : base(true, ResourceType.KernelObject, name, includeSections, _HandleErrorCode, null)
+        public SemaphoreSecurity(string name, AccessControlSections includeSections)
+            : base(true, ResourceType.KernelObject, name, includeSections, HandleErrorCode, null)
         {
             // Let the underlying ACL API's demand unmanaged code permission.
         }
 
         internal SemaphoreSecurity(SafeWaitHandle handle, AccessControlSections includeSections)
-            : base(true, ResourceType.KernelObject, handle, includeSections, _HandleErrorCode, null)
+            : base(true, ResourceType.KernelObject, handle, includeSections, HandleErrorCode, null)
         {
             // Let the underlying ACL API's demand unmanaged code permission.
         }
 
-        private static Exception _HandleErrorCode(int errorCode, string name, SafeHandle handle, object context)
+        private static Exception HandleErrorCode(int errorCode, string name, SafeHandle handle, object context)
         {
             System.Exception exception = null;
 
@@ -135,9 +128,6 @@ namespace System.Security.AccessControl
                         exception = new WaitHandleCannotBeOpenedException(SR.Format(SR.WaitHandleCannotBeOpenedException_InvalidHandle, name));
                     else
                         exception = new WaitHandleCannotBeOpenedException();
-                    break;
-
-                default:
                     break;
             }
 
@@ -158,7 +148,7 @@ namespace System.Security.AccessControl
         {
             AccessControlSections persistRules = AccessControlSections.None;
             if (AccessRulesModified)
-                persistRules = AccessControlSections.Access;
+                persistRules |= AccessControlSections.Access;
             if (AuditRulesModified)
                 persistRules |= AccessControlSections.Audit;
             if (OwnerModified)

@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeMethodInvokeExpression : CodeExpression
     {
         private CodeMethodReferenceExpression _method;
@@ -25,8 +24,8 @@ namespace System.CodeDom
 
         public CodeMethodReferenceExpression Method
         {
-            get { return _method ?? (_method = new CodeMethodReferenceExpression()); }
-            set { _method = value; }
+            get => _method ?? (_method = new CodeMethodReferenceExpression());
+            set => _method = value;
         }
 
         public CodeExpressionCollection Parameters { get; } = new CodeExpressionCollection();

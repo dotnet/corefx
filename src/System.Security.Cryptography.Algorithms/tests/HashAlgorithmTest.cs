@@ -9,7 +9,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.Hashing.Algorithms.Tests
 {
-    public abstract class HashAlgorithmTest
+    public abstract partial class HashAlgorithmTest
     {
         protected abstract HashAlgorithm Create();
 
@@ -32,7 +32,6 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             Assert.Equal(expected, actual);
         }
 
-#if netstandard17
         private void VerifyICryptoTransformStream(Stream input, string output)
         {
             byte[] expected = ByteUtils.HexToByteArray(output);
@@ -53,11 +52,9 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
 
             Assert.Equal(expected, actual);
         }
-#endif
 
         protected void VerifyMultiBlock(string block1, string block2, string expectedHash, string emptyHash)
         {
-#if netstandard17
             byte[] block1_bytes = ByteUtils.AsciiBytes(block1);
             byte[] block2_bytes = ByteUtils.AsciiBytes(block2);
             byte[] expected_bytes = ByteUtils.HexToByteArray(expectedHash);
@@ -66,10 +63,8 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
             VerifyTransformBlockOutput(block1_bytes, block2_bytes);
             VerifyTransformBlockHash(block1_bytes, block2_bytes, expected_bytes, emptyHash_bytes);
             VerifyTransformBlockComputeHashInteraction(block1_bytes, block2_bytes, expected_bytes, emptyHash_bytes);
-#endif
         }
 
-#if netstandard17
         private void VerifyTransformBlockOutput(byte[] block1, byte[] block2)
         {
             using (HashAlgorithm hash = Create())
@@ -92,6 +87,7 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                 hash.TransformBlock(Array.Empty<byte>(), 0, 0, null, 0);
                 hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
                 Assert.Equal(hash.Hash, expectedEmpty);
+
                 hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
                 Assert.Equal(hash.Hash, expectedEmpty);
 
@@ -166,8 +162,8 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash((byte[])null));
-                Assert.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash(null, 0, 0));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash((byte[])null));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash(null, 0, 0));
             }
         }
 
@@ -176,10 +172,10 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentNullException>("inputBuffer", () => hash.TransformBlock(null, 0, 0, null, 0));
-                Assert.Throws<ArgumentOutOfRangeException>("inputOffset", () => hash.TransformBlock(Array.Empty<byte>(), -1, 0, null, 0));
-                Assert.Throws<ArgumentException>(null, () => hash.TransformBlock(Array.Empty<byte>(), 0, 1, null, 0));
-                Assert.Throws<ArgumentException>(null, () => hash.TransformBlock(Array.Empty<byte>(), 1, 0, null, 0));
+                AssertExtensions.Throws<ArgumentNullException>("inputBuffer", () => hash.TransformBlock(null, 0, 0, null, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("inputOffset", () => hash.TransformBlock(Array.Empty<byte>(), -1, 0, null, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.TransformBlock(Array.Empty<byte>(), 0, 1, null, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.TransformBlock(Array.Empty<byte>(), 1, 0, null, 0));
             }
         }
 
@@ -188,16 +184,21 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentNullException>("inputBuffer", () => hash.TransformFinalBlock(null, 0, 0));
-                Assert.Throws<ArgumentOutOfRangeException>("inputOffset", () => hash.TransformFinalBlock(Array.Empty<byte>(), -1, 0));
-                Assert.Throws<ArgumentException>(null, () => hash.TransformFinalBlock(Array.Empty<byte>(), 1, 0));
-                Assert.Throws<ArgumentException>(null, () => hash.TransformFinalBlock(Array.Empty<byte>(), 0, -1));
-                Assert.Throws<ArgumentException>(null, () => hash.TransformFinalBlock(Array.Empty<byte>(), 0, 1));
+                AssertExtensions.Throws<ArgumentNullException>("inputBuffer", () => hash.TransformFinalBlock(null, 0, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("inputOffset", () => hash.TransformFinalBlock(Array.Empty<byte>(), -1, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.TransformFinalBlock(Array.Empty<byte>(), 1, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.TransformFinalBlock(Array.Empty<byte>(), 0, -1));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.TransformFinalBlock(Array.Empty<byte>(), 0, 1));
             }
         }
-#endif
 
         protected void Verify(byte[] input, string output)
+        {
+            Verify_Array(input, output);
+            Verify_Span(input, output);
+        }
+
+        private void Verify_Array(byte[] input, string output)
         {
             byte[] expected = ByteUtils.HexToByteArray(output);
             byte[] actual;
@@ -209,12 +210,12 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
 
                 Assert.Equal(expected, actual);
 
-#if netstandard17
                 actual = hash.Hash;
                 Assert.Equal(expected, actual);
-#endif
             }
         }
+
+        partial void Verify_Span(byte[] input, string output);
 
         protected void VerifyRepeating(string input, int repeatCount, string output)
         {
@@ -223,12 +224,10 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
                 VerifyComputeHashStream(stream, output);
             }
 
-#if netstandard17
             using (Stream stream = new DataRepeatingStream(input, repeatCount))
             {
                 VerifyICryptoTransformStream(stream, output);
             }
-#endif
         }
 
         [Fact]
@@ -236,8 +235,8 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash((byte[])null));
-                Assert.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash(null, 0, 0));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash((byte[])null));
+                AssertExtensions.Throws<ArgumentNullException>("buffer", () => hash.ComputeHash(null, 0, 0));
                 Assert.Throws<NullReferenceException>(() => hash.ComputeHash((Stream)null));
             }
         }
@@ -247,7 +246,7 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentOutOfRangeException>("offset", () => hash.ComputeHash(Array.Empty<byte>(), -1, 0));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => hash.ComputeHash(Array.Empty<byte>(), -1, 0));
             }
         }
 
@@ -256,7 +255,7 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentException>(null, () => hash.ComputeHash(Array.Empty<byte>(), 0, -1));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.ComputeHash(Array.Empty<byte>(), 0, -1));
             }
         }
 
@@ -265,7 +264,7 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
         {
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentException>(null, () => hash.ComputeHash(Array.Empty<byte>(), 1, 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.ComputeHash(Array.Empty<byte>(), 1, 0));
             }
         }
 
@@ -276,10 +275,10 @@ namespace System.Security.Cryptography.Hashing.Algorithms.Tests
 
             using (HashAlgorithm hash = Create())
             {
-                Assert.Throws<ArgumentException>(null, () => hash.ComputeHash(nonEmpty, 0, nonEmpty.Length + 1));
-                Assert.Throws<ArgumentException>(null, () => hash.ComputeHash(nonEmpty, 1, nonEmpty.Length));
-                Assert.Throws<ArgumentException>(null, () => hash.ComputeHash(nonEmpty, 2, nonEmpty.Length - 1));
-                Assert.Throws<ArgumentException>(null, () => hash.ComputeHash(Array.Empty<byte>(), 0, 1));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.ComputeHash(nonEmpty, 0, nonEmpty.Length + 1));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.ComputeHash(nonEmpty, 1, nonEmpty.Length));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.ComputeHash(nonEmpty, 2, nonEmpty.Length - 1));
+                AssertExtensions.Throws<ArgumentException>(null, () => hash.ComputeHash(Array.Empty<byte>(), 0, 1));
             }
         }
 

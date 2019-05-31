@@ -31,7 +31,7 @@ namespace System.Reflection.Internal
         /// Does not check bounds.
         /// 
         /// Only creates a copy of the data if they are not represented by a managed byte array, 
-        /// or if the specified range doens't span the entire block.
+        /// or if the specified range doesn't span the entire block.
         /// </remarks>
         public unsafe virtual ImmutableArray<byte> GetContentUnchecked(int start, int length)
         {
@@ -44,18 +44,11 @@ namespace System.Reflection.Internal
         /// Disposes the block. 
         /// </summary>
         /// <remarks>
-        /// The operation is idempotent, but must not be called concurrently with any other operations on the block
-        /// or with another call to Dispose.
+        /// The operation is idempotent, but must not be called concurrently with any other operations on the block.
         /// 
         /// Using the block after dispose is an error in our code and therefore no effort is made to throw a tidy 
         /// ObjectDisposedException and null ref or AV is possible.
         /// </remarks>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        protected abstract void Dispose(bool disposing);
+        public abstract void Dispose();
     }
 }

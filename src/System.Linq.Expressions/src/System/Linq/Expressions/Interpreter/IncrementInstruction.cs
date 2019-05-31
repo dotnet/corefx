@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -18,23 +17,6 @@ namespace System.Linq.Expressions.Interpreter
 
         private IncrementInstruction() { }
 
-        private sealed class IncrementInt32 : IncrementInstruction
-        {
-            public override int Run(InterpretedFrame frame)
-            {
-                object obj = frame.Pop();
-                if (obj == null)
-                {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(unchecked(1 + (int)obj));
-                }
-                return 1;
-            }
-        }
-
         private sealed class IncrementInt16 : IncrementInstruction
         {
             public override int Run(InterpretedFrame frame)
@@ -47,6 +29,23 @@ namespace System.Linq.Expressions.Interpreter
                 else
                 {
                     frame.Push(unchecked((short)(1 + (short)obj)));
+                }
+                return 1;
+            }
+        }
+
+        private sealed class IncrementInt32 : IncrementInstruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object obj = frame.Pop();
+                if (obj == null)
+                {
+                    frame.Push(null);
+                }
+                else
+                {
+                    frame.Push(unchecked(1 + (int)obj));
                 }
                 return 1;
             }
@@ -156,7 +155,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public static Instruction Create(Type type)
         {
-            Debug.Assert(!type.GetTypeInfo().IsEnum);
+            Debug.Assert(!type.IsEnum);
             switch (type.GetNonNullableType().GetTypeCode())
             {
                 case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new IncrementInt16());
@@ -167,9 +166,8 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.UInt64: return s_UInt64 ?? (s_UInt64 = new IncrementUInt64());
                 case TypeCode.Single: return s_Single ?? (s_Single = new IncrementSingle());
                 case TypeCode.Double: return s_Double ?? (s_Double = new IncrementDouble());
-
                 default:
-                    throw Error.ExpressionNotSupportedForType("Increment", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }

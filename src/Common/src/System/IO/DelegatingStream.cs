@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -16,11 +15,6 @@ namespace System.Net.Http
         private readonly Stream _innerStream;
 
         #region Properties
-
-        protected Stream BaseStream
-        {
-            get { return _innerStream; }
-        }
 
         public override bool CanRead
         {
@@ -82,6 +76,11 @@ namespace System.Net.Http
             base.Dispose(disposing);
         }
 
+        public override ValueTask DisposeAsync()
+        {
+            return _innerStream.DisposeAsync();
+        }
+
         #region Read
 
         public override long Seek(long offset, SeekOrigin origin)
@@ -94,6 +93,11 @@ namespace System.Net.Http
             return _innerStream.Read(buffer, offset, count);
         }
 
+        public override int Read(Span<byte> buffer)
+        {
+            return _innerStream.Read(buffer);
+        }
+
         public override int ReadByte()
         {
             return _innerStream.ReadByte();
@@ -103,6 +107,22 @@ namespace System.Net.Http
         {
             return _innerStream.ReadAsync(buffer, offset, count, cancellationToken);
         }
+
+        public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            return _innerStream.ReadAsync(buffer, cancellationToken);
+        }
+
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        {
+            return _innerStream.BeginRead(buffer, offset, count, callback, state);
+        }
+
+        public override int EndRead(IAsyncResult asyncResult)
+        {
+            return _innerStream.EndRead(asyncResult);
+        }
+
         #endregion Read
 
         #region Write
@@ -127,6 +147,11 @@ namespace System.Net.Http
             _innerStream.Write(buffer, offset, count);
         }
 
+        public override void Write(ReadOnlySpan<byte> buffer)
+        {
+            _innerStream.Write(buffer);
+        }
+
         public override void WriteByte(byte value)
         {
             _innerStream.WriteByte(value);
@@ -135,6 +160,21 @@ namespace System.Net.Http
         public override Task WriteAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             return _innerStream.WriteAsync(buffer, offset, count, cancellationToken);
+        }
+
+        public override ValueTask WriteAsync(ReadOnlyMemory<byte> buffer, CancellationToken cancellationToken = default)
+        {
+            return _innerStream.WriteAsync(buffer, cancellationToken);
+        }
+
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        {
+            return _innerStream.BeginWrite(buffer, offset, count, callback, state);
+        }
+
+        public override void EndWrite(IAsyncResult asyncResult)
+        {
+            _innerStream.EndWrite(asyncResult);
         }
 
         public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken)

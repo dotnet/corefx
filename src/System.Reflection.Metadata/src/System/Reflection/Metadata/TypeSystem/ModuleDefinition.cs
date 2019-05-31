@@ -6,7 +6,7 @@ using System.Diagnostics;
 
 namespace System.Reflection.Metadata
 {
-    public struct ModuleDefinition
+    public readonly struct ModuleDefinition
     {
         private readonly MetadataReader _reader;
 
@@ -54,6 +54,11 @@ namespace System.Reflection.Metadata
             {
                 return _reader.ModuleTable.GetEncBaseId();
             }
+        }
+
+        public CustomAttributeHandleCollection GetCustomAttributes()
+        {
+            return new CustomAttributeHandleCollection(_reader, EntityHandle.ModuleDefinition);
         }
     }
 }

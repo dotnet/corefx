@@ -4,16 +4,18 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Collections.Tests
 {
-    public static class SortedListTests
+    public class SortedListTests
     {
         [Fact]
-        public static void Ctor_Empty()
+        public void Ctor_Empty()
         {
             var sortList = new SortedList();
             Assert.Equal(0, sortList.Count);
@@ -29,7 +31,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void Ctor_Int(int initialCapacity)
+        public void Ctor_Int(int initialCapacity)
         {
             var sortList = new SortedList(initialCapacity);
             Assert.Equal(0, sortList.Count);
@@ -41,9 +43,9 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Ctor_Int_NegativeInitialCapacity_ThrowsArgumentOutOfRangeException()
+        public void Ctor_Int_NegativeInitialCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("initialCapacity", () => new SortedList(-1)); // InitialCapacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("initialCapacity", () => new SortedList(-1)); // InitialCapacity < 0
         }
 
         [Theory]
@@ -51,7 +53,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void Ctor_IComparer_Int(int initialCapacity)
+        public void Ctor_IComparer_Int(int initialCapacity)
         {
             var sortList = new SortedList(new CustomComparer(), initialCapacity);
             Assert.Equal(0, sortList.Count);
@@ -63,13 +65,13 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Ctor_IComparer_Int_NegativeInitialCapacity_ThrowsArgumentOutOfRangeException()
+        public void Ctor_IComparer_Int_NegativeInitialCapacity_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => new SortedList(new CustomComparer(), -1)); // InitialCapacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => new SortedList(new CustomComparer(), -1)); // InitialCapacity < 0
         }
 
         [Fact]
-        public static void Ctor_IComparer()
+        public void Ctor_IComparer()
         {
             var sortList = new SortedList(new CustomComparer());
             Assert.Equal(0, sortList.Count);
@@ -80,7 +82,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Ctor_IComparer_Null()
+        public void Ctor_IComparer_Null()
         {
             var sortList = new SortedList((IComparer)null);
             Assert.Equal(0, sortList.Count);
@@ -99,7 +101,7 @@ namespace System.Collections.Tests
         [InlineData(1, false)]
         [InlineData(10, false)]
         [InlineData(100, false)]
-        public static void Ctor_IDictionary(int count, bool sorted)
+        public void Ctor_IDictionary(int count, bool sorted)
         {
             var hashtable = new Hashtable();
             if (sorted)
@@ -139,9 +141,9 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Ctor_IDictionary_NullDictionary_ThrowsArgumentNullException()
+        public void Ctor_IDictionary_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new SortedList((IDictionary)null)); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new SortedList((IDictionary)null)); // Dictionary is null
         }
 
         [Theory]
@@ -153,7 +155,7 @@ namespace System.Collections.Tests
         [InlineData(1, false)]
         [InlineData(10, false)]
         [InlineData(100, false)]
-        public static void Ctor_IDictionary_IComparer(int count, bool sorted)
+        public void Ctor_IDictionary_IComparer(int count, bool sorted)
         {
             var hashtable = new Hashtable();
             if (sorted)
@@ -194,7 +196,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Ctor_IDictionary_IComparer_Null()
+        public void Ctor_IDictionary_IComparer_Null()
         {
             var sortList = new SortedList(new Hashtable(), null);
             Assert.Equal(0, sortList.Count);
@@ -205,21 +207,40 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Ctor_IDictionary_IComparer_NullDictionary_ThrowsArgumentNullException()
+        public void Ctor_IDictionary_IComparer_NullDictionary_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("d", () => new SortedList(null, new CustomComparer())); // Dictionary is null
+            AssertExtensions.Throws<ArgumentNullException>("d", () => new SortedList(null, new CustomComparer())); // Dictionary is null
         }
 
         [Fact]
-        public static void DebuggerAttribute()
+        public void DebuggerAttribute_Empty()
+        {
+            Assert.Equal("Count = 0", DebuggerAttributes.ValidateDebuggerDisplayReferences(new SortedList()));
+        }
+
+        [Fact]
+        public void DebuggerAttribute_NormalList()
         {
             var list = new SortedList() { { "a", 1 }, { "b", 2 } };
+            DebuggerAttributeInfo debuggerAttribute = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(list);
+            PropertyInfo infoProperty = debuggerAttribute.Properties.Single(property => property.Name == "Items");
+            object[] items = (object[])infoProperty.GetValue(debuggerAttribute.Instance);
+            Assert.Equal(list.Count, items.Length);
+        }
 
-            DebuggerAttributes.ValidateDebuggerDisplayReferences(new SortedList());
+        [Fact]
+        public void DebuggerAttribute_SynchronizedList()
+        {
+            var list = SortedList.Synchronized(new SortedList() { { "a", 1 }, { "b", 2 } });
+            DebuggerAttributeInfo debuggerAttribute = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(SortedList), list);
+            PropertyInfo infoProperty = debuggerAttribute.Properties.Single(property => property.Name == "Items");
+            object[] items = (object[])infoProperty.GetValue(debuggerAttribute.Instance);
+            Assert.Equal(list.Count, items.Length);
+        }
 
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(list);
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(typeof(SortedList), SortedList.Synchronized(list));
-
+        [Fact]
+        public void DebuggerAttribute_NullSortedList_ThrowsArgumentNullException()
+        {
             bool threwNull = false;
             try
             {
@@ -234,7 +255,25 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Add()
+        public void EnsureCapacity_NewCapacityLessThanMin_CapsToMaxArrayLength()
+        {
+            // A situation like this occurs for very large lengths of SortedList.
+            // To avoid allocating several GBs of memory and making this test run for a very
+            // long time, we can use reflection to invoke SortedList's growth method manually.
+            // This is relatively brittle, as it relies on accessing a private method via reflection
+            // that isn't guaranteed to be stable.
+            const int InitialCapacity = 10;
+            const int MinCapacity = InitialCapacity * 2 + 1;
+            var sortedList = new SortedList(InitialCapacity);
+
+            MethodInfo ensureCapacity = sortedList.GetType().GetMethod("EnsureCapacity", BindingFlags.NonPublic | BindingFlags.Instance);
+            ensureCapacity.Invoke(sortedList, new object[] { MinCapacity });
+
+            Assert.Equal(MinCapacity, sortedList.Capacity);
+        }
+
+        [Fact]
+        public void Add()
         {
             var sortList1 = new SortedList();
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -257,14 +296,14 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Add_Invalid()
+        public void Add_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.Add(null, 101)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Add(null, 101)); // Key is null
 
-                Assert.Throws<ArgumentException>(null, () => sortList2.Add(1, 101)); // Key already exists
+                AssertExtensions.Throws<ArgumentException>(null, () => sortList2.Add(1, 101)); // Key already exists
             });
         }
 
@@ -273,7 +312,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void Clear(int count)
+        public void Clear(int count)
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -291,7 +330,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void Clone(int count)
+        public void Clone(int count)
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -310,7 +349,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Clone_IsShallowCopy()
+        public void Clone_IsShallowCopy()
         {
             var sortList = new SortedList();
             for (int i = 0; i < 10; i++)
@@ -345,7 +384,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void ContainsKey()
+        public void ContainsKey()
         {
             var sortList1 = new SortedList();
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -371,18 +410,18 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void ContainsKey_NullKey_ThrowsArgumentNullException()
+        public void ContainsKey_NullKey_ThrowsArgumentNullException()
         {
             var sortList1 = new SortedList();
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.Contains(null)); // Key is null
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.ContainsKey(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Contains(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.ContainsKey(null)); // Key is null
             });
         }
 
         [Fact]
-        public static void ContainsValue()
+        public void ContainsValue()
         {
             var sortList1 = new SortedList();
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -411,7 +450,7 @@ namespace System.Collections.Tests
         [InlineData(1, 50)]
         [InlineData(10, 50)]
         [InlineData(100, 50)]
-        public static void CopyTo(int count, int index)
+        public void CopyTo(int count, int index)
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -434,21 +473,21 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void CopyTo_Invalid()
+        public void CopyTo_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("array", () => sortList2.CopyTo(null, 0)); // Array is null
-                Assert.Throws<ArgumentException>(() => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
+                AssertExtensions.Throws<ArgumentNullException>("array", () => sortList2.CopyTo(null, 0)); // Array is null
+                AssertExtensions.Throws<ArgumentException>("array", null, () => sortList2.CopyTo(new object[10, 10], 0)); // Array is multidimensional
 
-                Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => sortList2.CopyTo(new object[100], -1)); // Index < 0
-                Assert.Throws<ArgumentException>(null, () => sortList2.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => sortList2.CopyTo(new object[100], -1)); // Index < 0
+                AssertExtensions.Throws<ArgumentException>(null, () => sortList2.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
             });
         }
 
         [Fact]
-        public static void GetByIndex()
+        public void GetByIndex()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -466,13 +505,13 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeException()
+        public void GetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(-1)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(sortList2.Count)); // Index >= list.Count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(-1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetByIndex(sortList2.Count)); // Index >= list.Count
             });
         }
 
@@ -481,7 +520,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void GetEnumerator_IDictionaryEnumerator(int count)
+        public void GetEnumerator_IDictionaryEnumerator(int count)
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -509,7 +548,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetEnumerator_IDictionaryEnumerator_Invalid()
+        public void GetEnumerator_IDictionaryEnumerator_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -559,7 +598,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void GetEnumerator_IEnumerator(int count)
+        public void GetEnumerator_IEnumerator(int count)
         {
             SortedList sortList = Helpers.CreateIntSortedList(count);
             Assert.NotSame(sortList.GetEnumerator(), sortList.GetEnumerator());
@@ -582,7 +621,68 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetEnumerator_IEnumerator_Invalid()
+        public void GetEnumerator_StartOfEnumeration_Clone()
+        {
+            SortedList sortedList = Helpers.CreateIntSortedList(10);
+
+            IDictionaryEnumerator enumerator = sortedList.GetEnumerator();
+            ICloneable cloneableEnumerator = (ICloneable)enumerator;
+
+            IDictionaryEnumerator clonedEnumerator = (IDictionaryEnumerator)cloneableEnumerator.Clone();
+            Assert.NotSame(enumerator, clonedEnumerator);
+
+            // Cloned and original enumerators should enumerate separately.
+            Assert.True(enumerator.MoveNext());
+            Assert.Equal(sortedList[0], enumerator.Value);
+            Assert.Throws<InvalidOperationException>(() => clonedEnumerator.Value);
+
+            Assert.True(clonedEnumerator.MoveNext());
+            Assert.Equal(sortedList[0], enumerator.Value);
+            Assert.Equal(sortedList[0], clonedEnumerator.Value);
+
+            // Cloned and original enumerators should enumerate in the same sequence.
+            for (int i = 1; i < sortedList.Count; i++)
+            {
+                Assert.True(enumerator.MoveNext());
+                Assert.NotEqual(enumerator.Current, clonedEnumerator.Current);
+
+                Assert.True(clonedEnumerator.MoveNext());
+                Assert.Equal(enumerator.Current, clonedEnumerator.Current);
+            }
+
+            Assert.False(enumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Value);
+            Assert.Equal(sortedList[sortedList.Count - 1], clonedEnumerator.Value);
+
+            Assert.False(clonedEnumerator.MoveNext());
+            Assert.Throws<InvalidOperationException>(() => enumerator.Value);
+            Assert.Throws<InvalidOperationException>(() => clonedEnumerator.Value);
+        }
+
+        [Fact]
+        public void GetEnumerator_InMiddleOfEnumeration_Clone()
+        {
+            SortedList sortedList = Helpers.CreateIntSortedList(10);
+
+            IEnumerator enumerator = sortedList.GetEnumerator();
+            enumerator.MoveNext();
+            ICloneable cloneableEnumerator = (ICloneable)enumerator;
+
+            // Cloned and original enumerators should start at the same spot, even
+            // if the original is in the middle of enumeration.
+            IEnumerator clonedEnumerator = (IEnumerator)cloneableEnumerator.Clone();
+            Assert.Equal(enumerator.Current, clonedEnumerator.Current);
+
+            for (int i = 0; i < sortedList.Count - 1; i++)
+            {
+                Assert.True(clonedEnumerator.MoveNext());
+            }
+
+            Assert.False(clonedEnumerator.MoveNext());
+        }
+
+        [Fact]
+        public void GetEnumerator_IEnumerator_Invalid()
         {
             SortedList sortList = Helpers.CreateIntSortedList(100);
 
@@ -617,7 +717,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void GetKeyList(int count)
+        public void GetKeyList(int count)
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -641,14 +741,14 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_IsSameAsKeysProperty()
+        public void GetKeyList_IsSameAsKeysProperty()
         {
             var sortList = Helpers.CreateIntSortedList(10);
             Assert.Same(sortList.GetKeyList(), sortList.Keys);
         }
 
         [Fact]
-        public static void GetKeyList_IListProperties()
+        public void GetKeyList_IListProperties()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -663,7 +763,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_Contains()
+        public void GetKeyList_Contains()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -681,7 +781,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_Contains_InvalidValueType_ThrowsInvalidOperationException()
+        public void GetKeyList_Contains_InvalidValueType_ThrowsInvalidOperationException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -693,7 +793,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_IndexOf()
+        public void GetKeyList_IndexOf()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -711,13 +811,13 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_IndexOf_Invalid()
+        public void GetKeyList_IndexOf_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
                 IList keys = sortList2.GetKeyList();
-                Assert.Throws<ArgumentNullException>("key", () => keys.IndexOf(null)); // Value is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => keys.IndexOf(null)); // Value is null
                 Assert.Throws<InvalidOperationException>(() => keys.IndexOf("hello")); // Value is a different object type
             });
         }
@@ -731,7 +831,7 @@ namespace System.Collections.Tests
         [InlineData(1, 50)]
         [InlineData(10, 50)]
         [InlineData(100, 50)]
-        public static void GetKeyList_CopyTo(int count, int index)
+        public void GetKeyList_CopyTo(int count, int index)
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -749,17 +849,19 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_CopyTo_Invalid()
+        public void GetKeyList_CopyTo_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
                 IList keys = sortList2.GetKeyList();
-                Assert.Throws<ArgumentNullException>("dest", () => keys.CopyTo(null, 0)); // Array is null
-                Assert.Throws<ArgumentException>(() => keys.CopyTo(new object[10, 10], 0)); // Array is multidimensional
+                AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => keys.CopyTo(null, 0)); // Array is null
+                AssertExtensions.Throws<ArgumentException>("array", null, () => keys.CopyTo(new object[10, 10], 0)); // Array is multidimensional -- in netfx ParamName is null
 
-                Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => keys.CopyTo(new object[100], -1)); // Index < 0
-                Assert.Throws<ArgumentException>(string.Empty, () => keys.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
+                // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => keys.CopyTo(new object[100], -1));
+                // Index + list.Count > array.Count
+                AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => keys.CopyTo(new object[150], 51));
             });
         }
 
@@ -768,7 +870,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void GetKeyList_GetEnumerator(int count)
+        public void GetKeyList_GetEnumerator(int count)
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -795,7 +897,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_GetEnumerator_Invalid()
+        public void GetKeyList_GetEnumerator_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -830,7 +932,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKeyList_TryingToModifyCollection_ThrowsNotSupportedException()
+        public void GetKeyList_TryingToModifyCollection_ThrowsNotSupportedException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -849,7 +951,7 @@ namespace System.Collections.Tests
         [Theory]
         [InlineData(0)]
         [InlineData(100)]
-        public static void GetKey(int count)
+        public void GetKey(int count)
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -863,13 +965,13 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetKey_InvalidIndex_ThrowsArgumentOutOfRangeException()
+        public void GetKey_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(-1)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(sortList2.Count)); // Index >= count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(-1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.GetKey(sortList2.Count)); // Index >= count
             });
         }
 
@@ -878,7 +980,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void GetValueList(int count)
+        public void GetValueList(int count)
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -902,14 +1004,14 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetValueList_IsSameAsValuesProperty()
+        public void GetValueList_IsSameAsValuesProperty()
         {
             var sortList = Helpers.CreateIntSortedList(10);
             Assert.Same(sortList.GetValueList(), sortList.Values);
         }
 
         [Fact]
-        public static void GetValueList_IListProperties()
+        public void GetValueList_IListProperties()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -924,7 +1026,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetValueList_Contains()
+        public void GetValueList_Contains()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -945,7 +1047,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetValueList_IndexOf()
+        public void GetValueList_IndexOf()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -971,7 +1073,7 @@ namespace System.Collections.Tests
         [InlineData(1, 50)]
         [InlineData(10, 50)]
         [InlineData(100, 50)]
-        public static void GetValueList_CopyTo(int count, int index)
+        public void GetValueList_CopyTo(int count, int index)
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -989,17 +1091,17 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetValueList_CopyTo_Invalid()
+        public void GetValueList_CopyTo_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
                 IList values = sortList2.GetValueList();
-                Assert.Throws<ArgumentNullException>("dest", () => values.CopyTo(null, 0)); // Array is null
-                Assert.Throws<ArgumentException>(() => values.CopyTo(new object[10, 10], 0)); // Array is multidimensional
+                AssertExtensions.Throws<ArgumentNullException>("destinationArray", "dest", () => values.CopyTo(null, 0)); // Array is null
+                AssertExtensions.Throws<ArgumentException>("array", null, () => values.CopyTo(new object[10, 10], 0)); // Array is multidimensional -- in netfx ParamName is null
 
-                Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => values.CopyTo(new object[100], -1)); // Index < 0
-                Assert.Throws<ArgumentException>(string.Empty, () => values.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => values.CopyTo(new object[100], -1)); // Index < 0
+                AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => values.CopyTo(new object[150], 51)); // Index + list.Count > array.Count
             });
         }
 
@@ -1008,7 +1110,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(10)]
         [InlineData(100)]
-        public static void GetValueList_GetEnumerator(int count)
+        public void GetValueList_GetEnumerator(int count)
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1035,7 +1137,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void ValueList_GetEnumerator_Invalid()
+        public void ValueList_GetEnumerator_Invalid()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1070,7 +1172,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void GetValueList_TryingToModifyCollection_ThrowsNotSupportedException()
+        public void GetValueList_TryingToModifyCollection_ThrowsNotSupportedException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1087,7 +1189,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void IndexOfKey()
+        public void IndexOfKey()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1111,17 +1213,17 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void IndexOfKey_NullKey_ThrowsArgumentNullException()
+        public void IndexOfKey_NullKey_ThrowsArgumentNullException()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.IndexOfKey(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.IndexOfKey(null)); // Key is null
             });
         }
 
         [Fact]
-        public static void IndexOfValue()
+        public void IndexOfValue()
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1149,7 +1251,7 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void IndexOfValue_SameValue()
+        public void IndexOfValue_SameValue()
         {
             var sortList1 = new SortedList();
             sortList1.Add("Key_0", "Value_0");
@@ -1166,7 +1268,7 @@ namespace System.Collections.Tests
         [InlineData(1)]
         [InlineData(4)]
         [InlineData(5000)]
-        public static void Capacity_Get_Set(int capacity)
+        public void Capacity_Get_Set(int capacity)
         {
             var sortList = new SortedList();
             sortList.Capacity = capacity;
@@ -1178,22 +1280,31 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Capacity_Set_ShrinkingCapacity_ThrowsArgumentOutOfRangeException()
+        public void Capacity_Set_ShrinkingCapacity_ThrowsArgumentOutOfRangeException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = sortList2.Count - 1); // Capacity < count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = sortList2.Count - 1); // Capacity < count
             });
         }
 
         [Fact]
-        public static void Capacity_Set_Invalid()
+        public void Capacity_Set_Invalid()
         {
             var sortList1 = new SortedList();
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = -1); // Capacity < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => sortList2.Capacity = -1); // Capacity < 0
+            });
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotIntMaxValueArrayIndexSupported))]
+        public void Capacity_Excessive()
+        {
+            var sortList1 = new SortedList();
+            Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
+            {
                 Assert.Throws<OutOfMemoryException>(() => sortList2.Capacity = int.MaxValue); // Capacity is too large
             });
         }
@@ -1202,7 +1313,7 @@ namespace System.Collections.Tests
         [InlineData(0)]
         [InlineData(1)]
         [InlineData(10)]
-        public static void Item_Get(int count)
+        public void Item_Get(int count)
         {
             SortedList sortList1 = Helpers.CreateStringSortedList(count);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1222,21 +1333,21 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Item_Get_DifferentCulture()
+        public void Item_Get_DifferentCulture()
         {
-            var sortList = new SortedList();
-
-            CultureInfo currentCulture = CultureInfo.CurrentCulture;
-            try
+            RemoteExecutor.Invoke(() =>
             {
-                    CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                var sortList = new SortedList();
+
+                try
+                {
                     var cultureNames = new string[]
                     {
-                        "cs-CZ","da-DK","de-DE","el-GR","en-US",
-                        "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
-                        "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
-                        "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
-                        "zh-CN","zh-HK","zh-TW"
+                    "cs-CZ","da-DK","de-DE","el-GR","en-US",
+                    "es-ES","fi-FI","fr-FR","hu-HU","it-IT",
+                    "ja-JP","ko-KR","nb-NO","nl-NL","pl-PL",
+                    "pt-BR","pt-PT","ru-RU","sv-SE","tr-TR",
+                    "zh-CN","zh-HK","zh-TW"
                     };
 
                     var installedCultures = new CultureInfo[cultureNames.Length];
@@ -1265,14 +1376,13 @@ namespace System.Collections.Tests
                 catch (CultureNotFoundException)
                 {
                 }
-                finally
-                {
-                    CultureInfo.CurrentCulture = currentCulture;
-                }
-            }
+
+                return RemoteExecutor.SuccessExitCode;
+            }).Dispose();
+        }
 
         [Fact]
-        public static void Item_Set()
+        public void Item_Set()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1298,17 +1408,17 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Item_Set_NullKey_ThrowsArgumentNullException()
+        public void Item_Set_NullKey_ThrowsArgumentNullException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2[null] = 101); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2[null] = 101); // Key is null
             });
         }
 
         [Fact]
-        public static void RemoveAt()
+        public void RemoveAt()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1325,18 +1435,18 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void RemoveAt_InvalidIndex_ThrowsArgumentOutOfRangeException()
+        public void RemoveAt_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(-1)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(sortList2.Count)); // Index >= count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(-1)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.RemoveAt(sortList2.Count)); // Index >= count
             });
         }
 
         [Fact]
-        public static void Remove()
+        public void Remove()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1355,17 +1465,17 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void Remove_NullKey_ThrowsArgumentNullException()
+        public void Remove_NullKey_ThrowsArgumentNullException()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentNullException>("key", () => sortList2.Remove(null)); // Key is null
+                AssertExtensions.Throws<ArgumentNullException>("key", () => sortList2.Remove(null)); // Key is null
             });
         }
 
         [Fact]
-        public static void SetByIndex()
+        public void SetByIndex()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1379,31 +1489,31 @@ namespace System.Collections.Tests
         }
 
         [Fact]
-        public static void SetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeExeption()
+        public void SetByIndex_InvalidIndex_ThrowsArgumentOutOfRangeExeption()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
             {
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(-1, 101)); // Index < 0
-                Assert.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(sortList2.Count, 101)); // Index >= list.Count
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(-1, 101)); // Index < 0
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => sortList2.SetByIndex(sortList2.Count, 101)); // Index >= list.Count
             });
         }
         
         [Fact]
-        public static void Synchronized_IsSynchronized()
+        public void Synchronized_IsSynchronized()
         {
             SortedList sortList = SortedList.Synchronized(new SortedList());
             Assert.True(sortList.IsSynchronized);
         }
 
         [Fact]
-        public static void Synchronized_NullList_ThrowsArgumentNullException()
+        public void Synchronized_NullList_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("list", () => SortedList.Synchronized(null)); // List is null
+            AssertExtensions.Throws<ArgumentNullException>("list", () => SortedList.Synchronized(null)); // List is null
         }
 
         [Fact]
-        public static void TrimToSize()
+        public void TrimToSize()
         {
             SortedList sortList1 = Helpers.CreateIntSortedList(100);
             Helpers.PerformActionOnAllSortedListWrappers(sortList1, sortList2 =>
@@ -1456,7 +1566,7 @@ namespace System.Collections.Tests
                 sortListMother.Add("Key_" + i, "Value_" + i);
             }
 
-            Assert.Equal(sortListMother.SyncRoot.GetType(), typeof(object));
+            Assert.Equal(sortListMother.SyncRoot.GetType(), typeof(SortedList));
 
             SortedList sortListSon = SortedList.Synchronized(sortListMother);
             _sortListGrandDaughter = SortedList.Synchronized(sortListSon);

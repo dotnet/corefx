@@ -12,14 +12,11 @@ namespace System.Xml
     /// <devdoc>
     ///    <para>[To be supplied.]</para>
     /// </devdoc>
-    [Serializable]
     public class XmlQualifiedName
     {
         private string _name;
         private string _ns;
-
-        [NonSerialized]
-        private Int32 _hash;
+        private int _hash;
 
         /// <devdoc>
         ///    <para>[To be supplied.]</para>
@@ -138,7 +135,7 @@ namespace System.Xml
         {
             return ns == null || ns.Length == 0 ? name : ns + ":" + name;
         }
-		
+
         // --------- Some useful internal stuff -----------------
         internal void Init(string name, string ns)
         {

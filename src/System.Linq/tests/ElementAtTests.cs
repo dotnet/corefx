@@ -46,16 +46,23 @@ namespace System.Linq.Tests
             Assert.Equal(expected, source.ElementAt(index));
         }
 
+        [Theory]
+        [MemberData(nameof(TestData))]
+        public void ElementAtRunOnce(IEnumerable<int> source, int index, int expected)
+        {
+            Assert.Equal(expected, source.RunOnce().ElementAt(index));
+        }
+
         [Fact]
         public void InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => new int?[] { 9, 8 }.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => new int[] { 1, 2, 3, 4 }.ElementAt(4));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => new int[0].ElementAt(0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => new int?[] { 9, 8 }.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => new int[] { 1, 2, 3, 4 }.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => new int[0].ElementAt(0));
 
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => NumberRangeGuaranteedNotCollectionType(-4, 5).ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => NumberRangeGuaranteedNotCollectionType(5, 5).ElementAt(5));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => NumberRangeGuaranteedNotCollectionType(0, 0).ElementAt(0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => NumberRangeGuaranteedNotCollectionType(-4, 5).ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => NumberRangeGuaranteedNotCollectionType(5, 5).ElementAt(5));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => NumberRangeGuaranteedNotCollectionType(0, 0).ElementAt(0));
 
         }
 
@@ -71,7 +78,7 @@ namespace System.Linq.Tests
         [Fact]
         public void NullSource_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).ElementAt(2));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).ElementAt(2));
         }
     }
 }

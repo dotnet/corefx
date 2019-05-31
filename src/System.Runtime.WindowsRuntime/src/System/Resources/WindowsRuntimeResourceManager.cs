@@ -2,6 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#if FEATURE_APPX
+using Internal.Resources;
+#endif
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,11 +21,14 @@ using Windows.Storage;
 namespace System.Resources
 {
 #if FEATURE_APPX
-    [FriendAccessAllowed]
     // Please see the comments regarding thread safety preceding the implementations
     // of Initialize() and GetString() below.
     internal sealed class WindowsRuntimeResourceManager : WindowsRuntimeResourceManagerBase
     {
+        // Setting invariant culture to Windows Runtime doesn't work because Windows Runtime expects language name in the form of BCP-47 tags while
+        // invariant name is an empty string. We will use the private invariant culture name x-VL instead.
+        private const string c_InvariantCulturePrivateName = "x-VL";
+
         private ResourceMap _resourceMap;
         private ResourceContext _clonedResourceContext;
         private string _clonedResourceContextFallBackList;
@@ -131,22 +137,23 @@ namespace System.Resources
 
         // Returns the CultureInfo representing the first language in the list that we can construct a CultureInfo for or null if
         // no such culture exists.
-        private static CultureInfo GetBestFitCultureFromLanguageList(List<string> languages)
+        private static unsafe CultureInfo GetBestFitCultureFromLanguageList(List<string> languages)
         {
-            StringBuilder localeNameBuffer = new StringBuilder(Interop.Kernel32.LOCALE_NAME_MAX_LENGTH);
+            char* localeNameBuffer = stackalloc char[Interop.Kernel32.LOCALE_NAME_MAX_LENGTH]; // LOCALE_NAME_MAX_LENGTH includes null terminator
 
             for (int i = 0; i < languages.Count; i++)
             {
-                if (CultureData.GetCultureData(languages[i], true) != null)
+                if (WindowsRuntimeResourceManagerBase.IsValidCulture(languages[i]))
                 {
                     return new CultureInfo(languages[i]);
                 }
 
-                if (Interop.Kernel32.ResolveLocaleName(languages[i], localeNameBuffer, localeNameBuffer.MaxCapacity) != 0)
+                int result = Interop.Kernel32.ResolveLocaleName(languages[i], localeNameBuffer, Interop.Kernel32.LOCALE_NAME_MAX_LENGTH); 
+                if (result != 0)
                 {
-                    string localeName = localeNameBuffer.ToString();
+                    string localeName = new string(localeNameBuffer, 0, result - 1); // result length includes null terminator
 
-                    if (CultureData.GetCultureData(localeName, true) != null)
+                    if (WindowsRuntimeResourceManagerBase.IsValidCulture(localeName))
                     {
                         return new CultureInfo(localeName);
                     }
@@ -227,8 +234,26 @@ namespace System.Resources
             Debug.Assert(s_globalResourceContextFallBackList != null);
             Debug.Assert(s_globalResourceContext != null);
 
-            List<String> languages = new List<string>(s_globalResourceContext.Languages);
+            IReadOnlyList<string> langs;
 
+            try
+            {
+                langs = s_globalResourceContext.Languages;
+            }
+            catch (ArgumentException)
+            {
+                // Sometimes Windows Runtime fails and we get Argument Exception which can fail fast the whole app
+                // to avoid that we ignore the exception.
+                return;
+            }
+
+            List<String> languages = new List<string>(langs);
+            
+            if (languages.Count > 0 && languages[0] == c_InvariantCulturePrivateName)
+            {
+                languages[0] = CultureInfo.InvariantCulture.Name;
+            }
+            
             s_globalResourceContextBestFitCultureInfo = GetBestFitCultureFromLanguageList(languages);
             s_globalResourceContextFallBackList = ReadOnlyListToString(languages);
         }
@@ -345,7 +370,7 @@ namespace System.Resources
                     {
                         if (packageSimpleName.EndsWith(".resources.dll", StringComparison.CurrentCultureIgnoreCase))
                         {
-                            // Pretend we didnt get a package name. When an attempt is made to get resource string, GetString implementation
+                            // Pretend we didn't get a package name. When an attempt is made to get resource string, GetString implementation
                             // will see that we are going to use modern resource manager but we don't have PRI and will thrown an exception indicating
                             // so. This will force the developer to have a valid PRI based resource.
                             packageSimpleName = null;
@@ -372,8 +397,8 @@ namespace System.Resources
                                 if (_resourceMap == null)
                                 {
                                     exceptionInfo = new PRIExceptionInfo();
-                                    exceptionInfo._PackageSimpleName = packageSimpleName;
-                                    exceptionInfo._ResWFile = reswFilename;
+                                    exceptionInfo.PackageSimpleName = packageSimpleName;
+                                    exceptionInfo.ResWFile = reswFilename;
                                 }
                                 else
                                 {
@@ -436,12 +461,19 @@ namespace System.Resources
 
             if (s_globalResourceContextBestFitCultureInfo != null && s_globalResourceContextBestFitCultureInfo.Name.Equals(ci.Name, StringComparison.OrdinalIgnoreCase))
             {
+                if (!ReferenceEquals(s_globalResourceContextBestFitCultureInfo, ci))
+                {
+                    // We have same culture name but different reference, we'll need to update s_globalResourceContextBestFitCultureInfo only as ci can 
+                    // be a customized subclassed culture which setting different values for NFI, DTFI...etc.
+                    s_globalResourceContextBestFitCultureInfo = ci;
+                }
+
                 // the default culture is already set. nothing more need to be done
                 return true;
             }
 
             List<String> languages = new List<String>(s_globalResourceContext.Languages);
-            languages.Insert(0, ci.Name);
+            languages.Insert(0, ci.Name == CultureInfo.InvariantCulture.Name ? c_InvariantCulturePrivateName : ci.Name);
 
             // remove any duplication in the list
             int i = languages.Count - 1;

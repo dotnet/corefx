@@ -2,24 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security.Permissions;
-
 namespace System.ComponentModel.Design.Serialization
 {
     /// <summary>
-    ///     The default serialization provider attribute is placed on a serializer 
-    ///     to indicate the class to use as a default provider of that type of 
-    ///     serializer.  To be a default serialization provider, a class must 
-    ///     implement IDesignerSerilaizationProvider and have an empty 
-    ///     constructor.  The class itself can be internal to the assembly.
+    /// The default serialization provider attribute is placed on a serializer 
+    /// to indicate the class to use as a default provider of that type of 
+    /// serializer. To be a default serialization provider, a class must 
+    /// implement IDesignerSerilaizationProvider and have an empty 
+    /// constructor. The class itself can be internal to the assembly.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public sealed class DefaultSerializationProviderAttribute : Attribute
     {
-        private string _providerTypeName;
-
         /// <summary>
-        ///     Creates a new DefaultSerializationProviderAttribute
+        /// Creates a new DefaultSerializationProviderAttribute
         /// </summary>
         public DefaultSerializationProviderAttribute(Type providerType)
         {
@@ -28,11 +24,11 @@ namespace System.ComponentModel.Design.Serialization
                 throw new ArgumentNullException(nameof(providerType));
             }
 
-            _providerTypeName = providerType.AssemblyQualifiedName;
+            ProviderTypeName = providerType.AssemblyQualifiedName;
         }
 
         /// <summary>
-        ///     Creates a new DefaultSerializationProviderAttribute
+        /// Creates a new DefaultSerializationProviderAttribute
         /// </summary>
         public DefaultSerializationProviderAttribute(string providerTypeName)
         {
@@ -41,19 +37,13 @@ namespace System.ComponentModel.Design.Serialization
                 throw new ArgumentNullException(nameof(providerTypeName));
             }
 
-            _providerTypeName = providerTypeName;
+            ProviderTypeName = providerTypeName;
         }
 
         /// <summary>
-        ///     Returns the type name for the default serialization provider.
+        /// Returns the type name for the default serialization provider.
         /// </summary>
-        public string ProviderTypeName
-        {
-            get
-            {
-                return _providerTypeName;
-            }
-        }
+        public string ProviderTypeName { get; }
     }
 }
 

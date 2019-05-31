@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.Security.Cryptography
 {
     public abstract partial class Aes : System.Security.Cryptography.SymmetricAlgorithm
@@ -14,12 +13,36 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.Aes Create() { throw null; }
         public static new System.Security.Cryptography.Aes Create(string algorithmName) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public sealed partial class AesCcm : System.IDisposable
+    {
+        public AesCcm(byte[] key) { }
+        public AesCcm(System.ReadOnlySpan<byte> key) { }
+        public static System.Security.Cryptography.KeySizes NonceByteSizes { get { throw null; } }
+        public static System.Security.Cryptography.KeySizes TagByteSizes { get { throw null; } }
+        public void Decrypt(byte[] nonce, byte[] ciphertext, byte[] tag, byte[] plaintext, byte[] associatedData = null) { }
+        public void Decrypt(System.ReadOnlySpan<byte> nonce, System.ReadOnlySpan<byte> ciphertext, System.ReadOnlySpan<byte> tag, System.Span<byte> plaintext, System.ReadOnlySpan<byte> associatedData = default(System.ReadOnlySpan<byte>)) { }
+        public void Dispose() { }
+        public void Encrypt(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag, byte[] associatedData = null) { }
+        public void Encrypt(System.ReadOnlySpan<byte> nonce, System.ReadOnlySpan<byte> plaintext, System.Span<byte> ciphertext, System.Span<byte> tag, System.ReadOnlySpan<byte> associatedData = default(System.ReadOnlySpan<byte>)) { }
+    }
+    public sealed partial class AesGcm : System.IDisposable
+    {
+        public AesGcm(byte[] key) { }
+        public AesGcm(System.ReadOnlySpan<byte> key) { }
+        public static System.Security.Cryptography.KeySizes NonceByteSizes { get { throw null; } }
+        public static System.Security.Cryptography.KeySizes TagByteSizes { get { throw null; } }
+        public void Decrypt(byte[] nonce, byte[] ciphertext, byte[] tag, byte[] plaintext, byte[] associatedData = null) { }
+        public void Decrypt(System.ReadOnlySpan<byte> nonce, System.ReadOnlySpan<byte> ciphertext, System.ReadOnlySpan<byte> tag, System.Span<byte> plaintext, System.ReadOnlySpan<byte> associatedData = default(System.ReadOnlySpan<byte>)) { }
+        public void Dispose() { }
+        public void Encrypt(byte[] nonce, byte[] plaintext, byte[] ciphertext, byte[] tag, byte[] associatedData = null) { }
+        public void Encrypt(System.ReadOnlySpan<byte> nonce, System.ReadOnlySpan<byte> plaintext, System.Span<byte> ciphertext, System.Span<byte> tag, System.ReadOnlySpan<byte> associatedData = default(System.ReadOnlySpan<byte>)) { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class AesManaged : System.Security.Cryptography.Aes
     {
         public AesManaged() { }
-        public override int FeedbackSize { get { throw null; } set { } }
         public override int BlockSize { get { throw null; } set { } }
+        public override int FeedbackSize { get { throw null; } set { } }
         public override byte[] IV { get { throw null; } set { } }
         public override byte[] Key { get { throw null; } set { } }
         public override int KeySize { get { throw null; } set { } }
@@ -66,14 +89,6 @@ namespace System.Security.Cryptography
         public abstract void SetHashAlgorithm(string strName);
         public abstract void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key);
     }
-    public abstract partial class DeriveBytes : System.IDisposable
-    {
-        protected DeriveBytes() { }
-        public void Dispose() { }
-        protected virtual void Dispose(bool disposing) { }
-        public abstract byte[] GetBytes(int cb);
-        public abstract void Reset();
-    }
     public partial class CryptoConfig
     {
         public CryptoConfig() { }
@@ -85,7 +100,15 @@ namespace System.Security.Cryptography
         public static byte[] EncodeOID(string str) { throw null; }
         public static string MapNameToOID(string name) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public abstract partial class DeriveBytes : System.IDisposable
+    {
+        protected DeriveBytes() { }
+        public void Dispose() { }
+        protected virtual void Dispose(bool disposing) { }
+        public abstract byte[] GetBytes(int cb);
+        public abstract void Reset();
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public abstract partial class DES : System.Security.Cryptography.SymmetricAlgorithm
     {
         protected DES() { }
@@ -99,6 +122,8 @@ namespace System.Security.Cryptography
     {
         protected DSA() { }
         public static new System.Security.Cryptography.DSA Create() { throw null; }
+        public static System.Security.Cryptography.DSA Create(int keySizeInBits) { throw null; }
+        public static System.Security.Cryptography.DSA Create(System.Security.Cryptography.DSAParameters parameters) { throw null; }
         public static new System.Security.Cryptography.DSA Create(string algName) { throw null; }
         public abstract byte[] CreateSignature(byte[] rgbHash);
         public abstract System.Security.Cryptography.DSAParameters ExportParameters(bool includePrivateParameters);
@@ -110,12 +135,16 @@ namespace System.Security.Cryptography
         public byte[] SignData(byte[] data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public virtual byte[] SignData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public override string ToXmlString(bool includePrivateParameters) { throw null; }
+        public virtual bool TryCreateSignature(System.ReadOnlySpan<byte> hash, System.Span<byte> destination, out int bytesWritten) { throw null; }
+        protected virtual bool TryHashData(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, out int bytesWritten) { throw null; }
+        public virtual bool TrySignData(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, out int bytesWritten) { throw null; }
         public bool VerifyData(byte[] data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public virtual bool VerifyData(System.IO.Stream data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
+        public virtual bool VerifyData(System.ReadOnlySpan<byte> data, System.ReadOnlySpan<byte> signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public abstract bool VerifySignature(byte[] rgbHash, byte[] rgbSignature);
+        public virtual bool VerifySignature(System.ReadOnlySpan<byte> hash, System.ReadOnlySpan<byte> signature) { throw null; }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct DSAParameters
     {
         public int Counter;
@@ -143,15 +172,15 @@ namespace System.Security.Cryptography
         public override void SetHashAlgorithm(string strName) { }
         public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ECCurve
     {
+        private object _dummy;
         public byte[] A;
         public byte[] B;
         public byte[] Cofactor;
         public System.Security.Cryptography.ECCurve.ECCurveType CurveType;
         public System.Security.Cryptography.ECPoint G;
-        public System.Nullable<System.Security.Cryptography.HashAlgorithmName> Hash;
+        public System.Security.Cryptography.HashAlgorithmName? Hash;
         public byte[] Order;
         public byte[] Polynomial;
         public byte[] Prime;
@@ -167,12 +196,12 @@ namespace System.Security.Cryptography
         public void Validate() { }
         public enum ECCurveType
         {
-            Characteristic2 = 4,
             Implicit = 0,
-            Named = 5,
-            PrimeMontgomery = 3,
             PrimeShortWeierstrass = 1,
             PrimeTwistedEdwards = 2,
+            PrimeMontgomery = 3,
+            Characteristic2 = 4,
+            Named = 5,
         }
         public static partial class NamedCurves
         {
@@ -195,11 +224,40 @@ namespace System.Security.Cryptography
             public static System.Security.Cryptography.ECCurve nistP521 { get { throw null; } }
         }
     }
+    public abstract partial class ECDiffieHellman : System.Security.Cryptography.AsymmetricAlgorithm
+    {
+        protected ECDiffieHellman() { }
+        public override string KeyExchangeAlgorithm { get { throw null; } }
+        public abstract System.Security.Cryptography.ECDiffieHellmanPublicKey PublicKey { get; }
+        public override string SignatureAlgorithm { get { throw null; } }
+        public static new System.Security.Cryptography.ECDiffieHellman Create() { throw null; }
+        public static System.Security.Cryptography.ECDiffieHellman Create(System.Security.Cryptography.ECCurve curve) { throw null; }
+        public static System.Security.Cryptography.ECDiffieHellman Create(System.Security.Cryptography.ECParameters parameters) { throw null; }
+        public static new System.Security.Cryptography.ECDiffieHellman Create(string algorithm) { throw null; }
+        public byte[] DeriveKeyFromHash(System.Security.Cryptography.ECDiffieHellmanPublicKey otherPartyPublicKey, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
+        public virtual byte[] DeriveKeyFromHash(System.Security.Cryptography.ECDiffieHellmanPublicKey otherPartyPublicKey, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, byte[] secretPrepend, byte[] secretAppend) { throw null; }
+        public byte[] DeriveKeyFromHmac(System.Security.Cryptography.ECDiffieHellmanPublicKey otherPartyPublicKey, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, byte[] hmacKey) { throw null; }
+        public virtual byte[] DeriveKeyFromHmac(System.Security.Cryptography.ECDiffieHellmanPublicKey otherPartyPublicKey, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, byte[] hmacKey, byte[] secretPrepend, byte[] secretAppend) { throw null; }
+        public virtual byte[] DeriveKeyMaterial(System.Security.Cryptography.ECDiffieHellmanPublicKey otherPartyPublicKey) { throw null; }
+        public virtual byte[] DeriveKeyTls(System.Security.Cryptography.ECDiffieHellmanPublicKey otherPartyPublicKey, byte[] prfLabel, byte[] prfSeed) { throw null; }
+        public virtual byte[] ExportECPrivateKey() { throw null; }
+        public virtual System.Security.Cryptography.ECParameters ExportExplicitParameters(bool includePrivateParameters) { throw null; }
+        public virtual System.Security.Cryptography.ECParameters ExportParameters(bool includePrivateParameters) { throw null; }
+        public override void FromXmlString(string xmlString) { }
+        public virtual void GenerateKey(System.Security.Cryptography.ECCurve curve) { }
+        public virtual void ImportECPrivateKey(System.ReadOnlySpan<byte> source, out int bytesRead) { throw null; }
+        public virtual void ImportParameters(System.Security.Cryptography.ECParameters parameters) { }
+        public override string ToXmlString(bool includePrivateParameters) { throw null; }
+        public virtual bool TryExportECPrivateKey(System.Span<byte> destination, out int bytesWritten) { throw null; }
+    }
     public abstract partial class ECDiffieHellmanPublicKey : System.IDisposable
     {
+        protected ECDiffieHellmanPublicKey() { }
         protected ECDiffieHellmanPublicKey(byte[] keyBlob) { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        public virtual System.Security.Cryptography.ECParameters ExportExplicitParameters() { throw null; }
+        public virtual System.Security.Cryptography.ECParameters ExportParameters() { throw null; }
         public virtual byte[] ToByteArray() { throw null; }
         public virtual string ToXmlString() { throw null; }
     }
@@ -212,24 +270,31 @@ namespace System.Security.Cryptography
         public static System.Security.Cryptography.ECDsa Create(System.Security.Cryptography.ECCurve curve) { throw null; }
         public static System.Security.Cryptography.ECDsa Create(System.Security.Cryptography.ECParameters parameters) { throw null; }
         public static new System.Security.Cryptography.ECDsa Create(string algorithm) { throw null; }
+        public virtual byte[] ExportECPrivateKey() { throw null; }
         public virtual System.Security.Cryptography.ECParameters ExportExplicitParameters(bool includePrivateParameters) { throw null; }
         public virtual System.Security.Cryptography.ECParameters ExportParameters(bool includePrivateParameters) { throw null; }
         public override void FromXmlString(string xmlString) { }
         public virtual void GenerateKey(System.Security.Cryptography.ECCurve curve) { }
         protected virtual byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected virtual byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
+        public virtual void ImportECPrivateKey(System.ReadOnlySpan<byte> source, out int bytesRead) { throw null; }
         public virtual void ImportParameters(System.Security.Cryptography.ECParameters parameters) { }
         public virtual byte[] SignData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public virtual byte[] SignData(byte[] data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public virtual byte[] SignData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public abstract byte[] SignHash(byte[] hash);
         public override string ToXmlString(bool includePrivateParameters) { throw null; }
+        public virtual bool TryExportECPrivateKey(System.Span<byte> destination, out int bytesWritten) { throw null; }
+        protected virtual bool TryHashData(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, out int bytesWritten) { throw null; }
+        public virtual bool TrySignData(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, out int bytesWritten) { throw null; }
+        public virtual bool TrySignHash(System.ReadOnlySpan<byte> hash, System.Span<byte> destination, out int bytesWritten) { throw null; }
         public bool VerifyData(byte[] data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public bool VerifyData(System.IO.Stream data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
+        public virtual bool VerifyData(System.ReadOnlySpan<byte> data, System.ReadOnlySpan<byte> signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public abstract bool VerifyHash(byte[] hash, byte[] signature);
+        public virtual bool VerifyHash(System.ReadOnlySpan<byte> hash, System.ReadOnlySpan<byte> signature) { throw null; }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ECParameters
     {
         public System.Security.Cryptography.ECCurve Curve;
@@ -237,7 +302,6 @@ namespace System.Security.Cryptography
         public System.Security.Cryptography.ECPoint Q;
         public void Validate() { }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct ECPoint
     {
         public byte[] X;
@@ -250,20 +314,24 @@ namespace System.Security.Cryptography
         public override byte[] Key { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected override void HashCore(byte[] rgb, int ib, int cb) { }
+        protected override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected override byte[] HashFinal() { throw null; }
         public override void Initialize() { }
+        protected override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public partial class HMACSHA1 : System.Security.Cryptography.HMAC
     {
         public HMACSHA1() { }
         public HMACSHA1(byte[] key) { }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public HMACSHA1(byte[] key, bool useManagedSha1) { }
         public override byte[] Key { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected override void HashCore(byte[] rgb, int ib, int cb) { }
+        protected override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected override byte[] HashFinal() { throw null; }
         public override void Initialize() { }
+        protected override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public partial class HMACSHA256 : System.Security.Cryptography.HMAC
     {
@@ -272,30 +340,36 @@ namespace System.Security.Cryptography
         public override byte[] Key { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected override void HashCore(byte[] rgb, int ib, int cb) { }
+        protected override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected override byte[] HashFinal() { throw null; }
         public override void Initialize() { }
+        protected override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public partial class HMACSHA384 : System.Security.Cryptography.HMAC
     {
         public HMACSHA384() { }
         public HMACSHA384(byte[] key) { }
-        public bool ProduceLegacyHmacValues { get; set; }
         public override byte[] Key { get { throw null; } set { } }
+        public bool ProduceLegacyHmacValues { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected override void HashCore(byte[] rgb, int ib, int cb) { }
+        protected override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected override byte[] HashFinal() { throw null; }
         public override void Initialize() { }
+        protected override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public partial class HMACSHA512 : System.Security.Cryptography.HMAC
     {
         public HMACSHA512() { }
         public HMACSHA512(byte[] key) { }
-        public bool ProduceLegacyHmacValues { get; set; }
         public override byte[] Key { get { throw null; } set { } }
+        public bool ProduceLegacyHmacValues { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected override void HashCore(byte[] rgb, int ib, int cb) { }
+        protected override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected override byte[] HashFinal() { throw null; }
         public override void Initialize() { }
+        protected override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public sealed partial class IncrementalHash : System.IDisposable
     {
@@ -303,10 +377,17 @@ namespace System.Security.Cryptography
         public System.Security.Cryptography.HashAlgorithmName AlgorithmName { get { throw null; } }
         public void AppendData(byte[] data) { }
         public void AppendData(byte[] data, int offset, int count) { }
+        public void AppendData(System.ReadOnlySpan<byte> data) { }
         public static System.Security.Cryptography.IncrementalHash CreateHash(System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         public static System.Security.Cryptography.IncrementalHash CreateHMAC(System.Security.Cryptography.HashAlgorithmName hashAlgorithm, byte[] key) { throw null; }
         public void Dispose() { }
         public byte[] GetHashAndReset() { throw null; }
+        public bool TryGetHashAndReset(System.Span<byte> destination, out int bytesWritten) { throw null; }
+    }
+    public abstract partial class MaskGenerationMethod
+    {
+        protected MaskGenerationMethod() { }
+        public abstract byte[] GenerateMask(byte[] rgbSeed, int cbReturn);
     }
     public abstract partial class MD5 : System.Security.Cryptography.HashAlgorithm
     {
@@ -314,11 +395,7 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.MD5 Create() { throw null; }
         public static new System.Security.Cryptography.MD5 Create(string algName) { throw null; }
     }
-    public abstract class MaskGenerationMethod
-    {
-        public abstract byte[] GenerateMask(byte[] rgbSeed, int cbReturn);
-    }
-    public class PKCS1MaskGenerationMethod : MaskGenerationMethod
+    public partial class PKCS1MaskGenerationMethod : System.Security.Cryptography.MaskGenerationMethod
     {
         public PKCS1MaskGenerationMethod() { }
         public string HashName { get { throw null; } set { } }
@@ -331,11 +408,16 @@ namespace System.Security.Cryptography
         public static System.Security.Cryptography.RandomNumberGenerator Create(string rngName) { throw null; }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
+        public static void Fill(System.Span<byte> data) { }
         public abstract void GetBytes(byte[] data);
         public virtual void GetBytes(byte[] data, int offset, int count) { }
+        public virtual void GetBytes(System.Span<byte> data) { }
+        public static int GetInt32(int toExclusive) { throw null; }
+        public static int GetInt32(int fromInclusive, int toExclusive) { throw null; }
         public virtual void GetNonZeroBytes(byte[] data) { }
+        public virtual void GetNonZeroBytes(System.Span<byte> data) { }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public abstract partial class RC2 : System.Security.Cryptography.SymmetricAlgorithm
     {
         protected int EffectiveKeySizeValue;
@@ -345,14 +427,32 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.RC2 Create() { throw null; }
         public static new System.Security.Cryptography.RC2 Create(string AlgName) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    public partial class Rfc2898DeriveBytes : System.Security.Cryptography.DeriveBytes
+    {
+        public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations) { }
+        public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { }
+        public Rfc2898DeriveBytes(string password, byte[] salt) { }
+        public Rfc2898DeriveBytes(string password, byte[] salt, int iterations) { }
+        public Rfc2898DeriveBytes(string password, byte[] salt, int iterations, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { }
+        public Rfc2898DeriveBytes(string password, int saltSize) { }
+        public Rfc2898DeriveBytes(string password, int saltSize, int iterations) { }
+        public Rfc2898DeriveBytes(string password, int saltSize, int iterations, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { }
+        public System.Security.Cryptography.HashAlgorithmName HashAlgorithm { get { throw null; } }
+        public int IterationCount { get { throw null; } set { } }
+        public byte[] Salt { get { throw null; } set { } }
+        public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV) { throw null; }
+        protected override void Dispose(bool disposing) { }
+        public override byte[] GetBytes(int cb) { throw null; }
+        public override void Reset() { }
+    }
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public abstract partial class Rijndael : System.Security.Cryptography.SymmetricAlgorithm
     {
         protected Rijndael() { }
         public static new System.Security.Cryptography.Rijndael Create() { throw null; }
         public static new System.Security.Cryptography.Rijndael Create(string algName) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class RijndaelManaged : System.Security.Cryptography.Rijndael
     {
         public RijndaelManaged() { }
@@ -371,45 +471,46 @@ namespace System.Security.Cryptography
         public override void GenerateIV() { }
         public override void GenerateKey() { }
     }
-    public partial class Rfc2898DeriveBytes : System.Security.Cryptography.DeriveBytes
-    {
-        public Rfc2898DeriveBytes(byte[] password, byte[] salt, int iterations) { }
-        public Rfc2898DeriveBytes(string password, byte[] salt) { }
-        public Rfc2898DeriveBytes(string password, byte[] salt, int iterations) { }
-        public Rfc2898DeriveBytes(string password, int saltSize) { }
-        public Rfc2898DeriveBytes(string password, int saltSize, int iterations) { }
-        public int IterationCount { get { throw null; } set { } }
-        public byte[] Salt { get { throw null; } set { } }
-        public byte[] CryptDeriveKey(string algname, string alghashname, int keySize, byte[] rgbIV) { throw null; }
-        protected override void Dispose(bool disposing) { }
-        public override byte[] GetBytes(int cb) { throw null; }
-        public override void Reset() { }
-    }
     public abstract partial class RSA : System.Security.Cryptography.AsymmetricAlgorithm
     {
         protected RSA() { }
         public override string KeyExchangeAlgorithm { get { throw null; } }
         public override string SignatureAlgorithm { get { throw null; } }
         public static new System.Security.Cryptography.RSA Create() { throw null; }
+        public static System.Security.Cryptography.RSA Create(int keySizeInBits) { throw null; }
+        public static System.Security.Cryptography.RSA Create(System.Security.Cryptography.RSAParameters parameters) { throw null; }
         public static new System.Security.Cryptography.RSA Create(string algName) { throw null; }
         public virtual byte[] Decrypt(byte[] data, System.Security.Cryptography.RSAEncryptionPadding padding) { throw null; }
         public virtual byte[] DecryptValue(byte[] rgb) { throw null; }
         public virtual byte[] Encrypt(byte[] data, System.Security.Cryptography.RSAEncryptionPadding padding) { throw null; }
         public virtual byte[] EncryptValue(byte[] rgb) { throw null; }
         public abstract System.Security.Cryptography.RSAParameters ExportParameters(bool includePrivateParameters);
+        public virtual byte[] ExportRSAPrivateKey() { throw null; }
+        public virtual byte[] ExportRSAPublicKey() { throw null; }
+        public override void FromXmlString(string xmlString) { }
         protected virtual byte[] HashData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
         protected virtual byte[] HashData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm) { throw null; }
-        public override void FromXmlString(string xmlString) { }
         public abstract void ImportParameters(System.Security.Cryptography.RSAParameters parameters);
+        public virtual void ImportRSAPrivateKey(System.ReadOnlySpan<byte> source, out int bytesRead) { throw null; }
+        public virtual void ImportRSAPublicKey(System.ReadOnlySpan<byte> source, out int bytesRead) { throw null; }
         public virtual byte[] SignData(byte[] data, int offset, int count, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
         public byte[] SignData(byte[] data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
         public virtual byte[] SignData(System.IO.Stream data, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
         public virtual byte[] SignHash(byte[] hash, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
         public override string ToXmlString(bool includePrivateParameters) { throw null; }
+        public virtual bool TryDecrypt(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.RSAEncryptionPadding padding, out int bytesWritten) { throw null; }
+        public virtual bool TryEncrypt(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.RSAEncryptionPadding padding, out int bytesWritten) { throw null; }
+        public virtual bool TryExportRSAPrivateKey(System.Span<byte> destination, out int bytesWritten) { throw null; }
+        public virtual bool TryExportRSAPublicKey(System.Span<byte> destination, out int bytesWritten) { throw null; }
+        protected virtual bool TryHashData(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, out int bytesWritten) { throw null; }
+        public virtual bool TrySignData(System.ReadOnlySpan<byte> data, System.Span<byte> destination, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding, out int bytesWritten) { throw null; }
+        public virtual bool TrySignHash(System.ReadOnlySpan<byte> hash, System.Span<byte> destination, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding, out int bytesWritten) { throw null; }
         public bool VerifyData(byte[] data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
         public virtual bool VerifyData(byte[] data, int offset, int count, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
         public bool VerifyData(System.IO.Stream data, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
+        public virtual bool VerifyData(System.ReadOnlySpan<byte> data, System.ReadOnlySpan<byte> signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
         public virtual bool VerifyHash(byte[] hash, byte[] signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
+        public virtual bool VerifyHash(System.ReadOnlySpan<byte> hash, System.ReadOnlySpan<byte> signature, System.Security.Cryptography.HashAlgorithmName hashAlgorithm, System.Security.Cryptography.RSASignaturePadding padding) { throw null; }
     }
     public sealed partial class RSAEncryptionPadding : System.IEquatable<System.Security.Cryptography.RSAEncryptionPadding>
     {
@@ -431,8 +532,8 @@ namespace System.Security.Cryptography
     }
     public enum RSAEncryptionPaddingMode
     {
-        Oaep = 1,
         Pkcs1 = 0,
+        Oaep = 1,
     }
     public partial class RSAOAEPKeyExchangeDeformatter : System.Security.Cryptography.AsymmetricKeyExchangeDeformatter
     {
@@ -448,12 +549,11 @@ namespace System.Security.Cryptography
         public RSAOAEPKeyExchangeFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
         public byte[] Parameter { get { throw null; } set { } }
         public override string Parameters { get { throw null; } }
-        public RandomNumberGenerator Rng { get { throw null; } set { } }
+        public System.Security.Cryptography.RandomNumberGenerator Rng { get { throw null; } set { } }
         public override byte[] CreateKeyExchange(byte[] rgbData) { throw null; }
         public override byte[] CreateKeyExchange(byte[] rgbData, System.Type symAlgType) { throw null; }
         public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
     }
-    [System.Runtime.InteropServices.StructLayoutAttribute(System.Runtime.InteropServices.LayoutKind.Sequential)]
     public partial struct RSAParameters
     {
         public byte[] D;
@@ -469,8 +569,8 @@ namespace System.Security.Cryptography
     {
         public RSAPKCS1KeyExchangeDeformatter() { }
         public RSAPKCS1KeyExchangeDeformatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
-        public RandomNumberGenerator RNG { get { throw null; } set { } }
         public override string Parameters { get { throw null; } set { } }
+        public System.Security.Cryptography.RandomNumberGenerator RNG { get { throw null; } set { } }
         public override byte[] DecryptKeyExchange(byte[] rgbIn) { throw null; }
         public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
     }
@@ -479,7 +579,7 @@ namespace System.Security.Cryptography
         public RSAPKCS1KeyExchangeFormatter() { }
         public RSAPKCS1KeyExchangeFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { }
         public override string Parameters { get { throw null; } }
-        public RandomNumberGenerator Rng { get { throw null; } set { } }
+        public System.Security.Cryptography.RandomNumberGenerator Rng { get { throw null; } set { } }
         public override byte[] CreateKeyExchange(byte[] rgbData) { throw null; }
         public override byte[] CreateKeyExchange(byte[] rgbData, System.Type symAlgType) { throw null; }
         public override void SetKey(System.Security.Cryptography.AsymmetricAlgorithm key) { }
@@ -524,14 +624,16 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA1 Create() { throw null; }
         public static new System.Security.Cryptography.SHA1 Create(string hashName) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class SHA1Managed : System.Security.Cryptography.SHA1
     {
         public SHA1Managed() { }
         protected sealed override void Dispose(bool disposing) { }
         protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected sealed override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected sealed override byte[] HashFinal() { throw null; }
         public sealed override void Initialize() { }
+        protected sealed override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public abstract partial class SHA256 : System.Security.Cryptography.HashAlgorithm
     {
@@ -539,14 +641,16 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA256 Create() { throw null; }
         public static new System.Security.Cryptography.SHA256 Create(string hashName) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class SHA256Managed : System.Security.Cryptography.SHA256
     {
         public SHA256Managed() { }
         protected sealed override void Dispose(bool disposing) { }
         protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected sealed override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected sealed override byte[] HashFinal() { throw null; }
         public sealed override void Initialize() { }
+        protected sealed override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public abstract partial class SHA384 : System.Security.Cryptography.HashAlgorithm
     {
@@ -554,14 +658,16 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA384 Create() { throw null; }
         public static new System.Security.Cryptography.SHA384 Create(string hashName) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class SHA384Managed : System.Security.Cryptography.SHA384
     {
         public SHA384Managed() { }
         protected sealed override void Dispose(bool disposing) { }
         protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected sealed override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected sealed override byte[] HashFinal() { throw null; }
         public sealed override void Initialize() { }
+        protected sealed override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
     public abstract partial class SHA512 : System.Security.Cryptography.HashAlgorithm
     {
@@ -569,22 +675,25 @@ namespace System.Security.Cryptography
         public static new System.Security.Cryptography.SHA512 Create() { throw null; }
         public static new System.Security.Cryptography.SHA512 Create(string hashName) { throw null; }
     }
-    [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+    [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
     public sealed partial class SHA512Managed : System.Security.Cryptography.SHA512
     {
         public SHA512Managed() { }
         protected sealed override void Dispose(bool disposing) { }
         protected sealed override void HashCore(byte[] array, int ibStart, int cbSize) { }
+        protected sealed override void HashCore(System.ReadOnlySpan<byte> source) { }
         protected sealed override byte[] HashFinal() { throw null; }
         public sealed override void Initialize() { }
+        protected sealed override bool TryHashFinal(System.Span<byte> destination, out int bytesWritten) { throw null; }
     }
-    public partial class SignatureDescription {
+    public partial class SignatureDescription
+    {
         public SignatureDescription() { }
         public SignatureDescription(System.Security.SecurityElement el) { }
         public string DeformatterAlgorithm { get { throw null; } set { } }
-        public string DigestAlgorithm { get { throw null;} set { } }
-        public string FormatterAlgorithm { get { throw null;} set { } }
-        public string KeyAlgorithm { get { throw null;} set { } }
+        public string DigestAlgorithm { get { throw null; } set { } }
+        public string FormatterAlgorithm { get { throw null; } set { } }
+        public string KeyAlgorithm { get { throw null; } set { } }
         public virtual System.Security.Cryptography.AsymmetricSignatureDeformatter CreateDeformatter(System.Security.Cryptography.AsymmetricAlgorithm key) { throw null; }
         public virtual System.Security.Cryptography.HashAlgorithm CreateDigest() { throw null; }
         public virtual System.Security.Cryptography.AsymmetricSignatureFormatter CreateFormatter(System.Security.Cryptography.AsymmetricAlgorithm key) { throw null; }
@@ -593,8 +702,6 @@ namespace System.Security.Cryptography
     {
         protected TripleDES() { }
         public override byte[] Key { get { throw null; } set { } }
-        public override System.Security.Cryptography.KeySizes[] LegalBlockSizes { get { throw null; } }
-        public override System.Security.Cryptography.KeySizes[] LegalKeySizes { get { throw null; } }
         public static new System.Security.Cryptography.TripleDES Create() { throw null; }
         public static new System.Security.Cryptography.TripleDES Create(string str) { throw null; }
         public static bool IsWeakKey(byte[] rgbKey) { throw null; }

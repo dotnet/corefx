@@ -6,6 +6,7 @@ using System;
 using System.IO;
 using System.Text;
 using Xunit;
+using System.Tests;
 
 namespace System.IO.Tests
 {
@@ -33,27 +34,6 @@ namespace System.IO.Tests
             var innerException = new Exception("Inner exception");
             var exception = new PathTooLongException(message, innerException);
             ExceptionUtility.ValidateExceptionProperties(exception, hResult: HResults.COR_E_PATHTOOLONG, innerException: innerException, message: message);
-        }
-
-        [Fact]
-        public static void OverlyLongPath_ThrowsPathTooLongException()
-        {
-            // This test case ensures that the PathTooLongException defined in System.IO.Primitives is the same that
-            // is thrown by Path.  The S.IO.FS.P implementation forwards to the core assembly to ensure this is true.
-
-            // Build up a path until GetFullPath throws, and verify that the right exception type
-            // emerges from it and related APIs.
-            var builder = new StringBuilder("directoryNameHere" + Path.DirectorySeparatorChar);
-            string path = null;
-            Assert.Throws<PathTooLongException>(new Action(() =>
-            {
-                while (true)
-                {
-                    path = builder.ToString();
-                    Path.GetFullPath(path); // will eventually throw when path is too long
-                builder.Append(path); // double the number of directories for the next time
-            }
-            }));
         }
     }
 }

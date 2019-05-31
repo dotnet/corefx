@@ -50,7 +50,7 @@ namespace MS.Internal.Xml.XPath
 
         private void BuildResultsList()
         {
-            Int32 numSorts = _comparer.NumSorts;
+            int numSorts = _comparer.NumSorts;
 
             Debug.Assert(numSorts > 0, "Why was the sort query created?");
 
@@ -59,7 +59,7 @@ namespace MS.Internal.Xml.XPath
             {
                 SortKey key = new SortKey(numSorts, /*originalPosition:*/_results.Count, eNext.Clone());
 
-                for (Int32 j = 0; j < numSorts; j++)
+                for (int j = 0; j < numSorts; j++)
                 {
                     key[j] = _comparer.Expression(j).Evaluate(_qyInput);
                 }
@@ -112,19 +112,11 @@ namespace MS.Internal.Xml.XPath
         public override int CurrentPosition { get { return count; } }
         public override int Count { get { return _results.Count; } }
         public override QueryProps Properties { get { return QueryProps.Cached | QueryProps.Position | QueryProps.Count; } }
-
-        public override void PrintQuery(XmlWriter w)
-        {
-            w.WriteStartElement(this.GetType().Name);
-            _qyInput.PrintQuery(w);
-            w.WriteElementString("XPathSortComparer", "... PrintTree() not implemented ...");
-            w.WriteEndElement();
-        }
     } // class SortQuery
 
     internal sealed class SortKey
     {
-        private Int32 _numKeys;
+        private int _numKeys;
         private object[] _keys;
         private int _originalPosition;
         private XPathNavigator _node;

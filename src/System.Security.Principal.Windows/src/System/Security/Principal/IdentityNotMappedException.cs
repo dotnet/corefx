@@ -7,6 +7,7 @@ using System.Runtime.Serialization;
 namespace System.Security.Principal
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class IdentityNotMappedException : SystemException
     {
         private IdentityReferenceCollection _unmappedIdentities;
@@ -21,7 +22,7 @@ namespace System.Security.Principal
         {
         }
 
-        public IdentityNotMappedException(String message, Exception inner)
+        public IdentityNotMappedException(string message, Exception inner)
             : base(message, inner)
         {
         }
@@ -33,7 +34,7 @@ namespace System.Security.Principal
         }
 
         private IdentityNotMappedException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
+        {            
         }
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)

@@ -10,6 +10,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -166,6 +167,7 @@ namespace System.Linq.Parallel
         // Returns the results as an array.
         //
 
+        [ExcludeFromCodeCoverage]
         public TOutput[] GetResultsAsArray()
         {
             Debug.Fail("An ordered pipelining merge is not intended to be used this way.");
@@ -489,7 +491,7 @@ namespace System.Linq.Parallel
     /// <summary>
     /// A structure to represent a producer in the producer heap.
     /// </summary>
-    internal struct Producer<TKey>
+    internal readonly struct Producer<TKey>
     {
         internal readonly TKey MaxKey; // Order index of the next element from this producer
         internal readonly int ProducerIndex; // Index of the producer, [0..DOP)

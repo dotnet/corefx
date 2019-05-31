@@ -11,8 +11,6 @@ namespace System.Xml
 {
     public class XmlNamespaceManager : IXmlNamespaceResolver, IEnumerable
     {
-        private static volatile IXmlNamespaceResolver s_EmptyResolver;
-
         private struct NamespaceDeclaration
         {
             public string prefix;
@@ -51,19 +49,6 @@ namespace System.Xml
 
         // Constants
         private const int MinDeclsCountForHashtable = 16;
-
-        internal static IXmlNamespaceResolver EmptyResolver
-        {
-            get
-            {
-                if (s_EmptyResolver == null)
-                {
-                    // no locking; the empty resolver is immutable so it's not a problem that it may get initialized more than once
-                    s_EmptyResolver = new XmlNamespaceManager(new NameTable());
-                }
-                return s_EmptyResolver;
-            }
-        }
 
         internal XmlNamespaceManager()
         {
@@ -179,7 +164,7 @@ namespace System.Xml
             {
                 _hashTable[prefix] = _lastDecl;
             }
-            // or create a new hashTable if the threashold has been reached
+            // or create a new hashTable if the threshold has been reached
             else if (_lastDecl >= MinDeclsCountForHashtable)
             {
                 // add all to hash table
@@ -207,7 +192,7 @@ namespace System.Xml
             int declIndex = LookupNamespaceDecl(prefix);
             while (declIndex != -1)
             {
-                if (String.Equals(_nsdecls[declIndex].uri, uri) && _nsdecls[declIndex].scopeId == _scopeId)
+                if (string.Equals(_nsdecls[declIndex].uri, uri) && _nsdecls[declIndex].scopeId == _scopeId)
                 {
                     _nsdecls[declIndex].uri = null;
                 }
@@ -311,7 +296,7 @@ namespace System.Xml
                 // Non-atomized lookup
                 for (int thisDecl = _lastDecl; thisDecl >= 0; thisDecl--)
                 {
-                    if (String.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
+                    if (string.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
                     {
                         return thisDecl;
                     }
@@ -325,10 +310,10 @@ namespace System.Xml
             // Don't assume that prefix is atomized
             for (int thisDecl = _lastDecl; thisDecl >= 0; thisDecl--)
             {
-                if (String.Equals(_nsdecls[thisDecl].uri, uri))
+                if (string.Equals(_nsdecls[thisDecl].uri, uri))
                 {
                     string prefix = _nsdecls[thisDecl].prefix;
-                    if (String.Equals(LookupNamespace(prefix), uri))
+                    if (string.Equals(LookupNamespace(prefix), uri))
                     {
                         return prefix;
                     }
@@ -342,7 +327,7 @@ namespace System.Xml
             // Don't assume that prefix is atomized
             for (int thisDecl = _lastDecl; _nsdecls[thisDecl].scopeId == _scopeId; thisDecl--)
             {
-                if (String.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
+                if (string.Equals(_nsdecls[thisDecl].prefix, prefix) && _nsdecls[thisDecl].uri != null)
                 {
                     if (prefix.Length > 0 || _nsdecls[thisDecl].uri.Length > 0)
                     {

@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using Internal.Runtime.InteropServices.WindowsRuntime;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading;
@@ -86,8 +86,6 @@ namespace System
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            Contract.EndContractBlock();
-
             // If source is actually a NetFx-to-WinRT adapter, unwrap it instead of creating a new Task:
             var wrapper = source as TaskToAsyncActionAdapter;
             if (wrapper != null && !wrapper.CompletedSynchronously)
@@ -113,7 +111,7 @@ namespace System
                     return Task.CompletedTask;
 
                 case AsyncStatus.Error:
-                    return Task.FromException(RestrictedErrorInfoHelper.AttachRestrictedErrorInfo(source.ErrorCode));
+                    return Task.FromException(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
@@ -162,8 +160,6 @@ namespace System
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            Contract.EndContractBlock();
-
             // If source is actually a NetFx-to-WinRT adapter, unwrap it instead of creating a new Task:
             var wrapper = source as TaskToAsyncOperationAdapter<TResult>;
             if (wrapper != null && !wrapper.CompletedSynchronously)
@@ -189,7 +185,7 @@ namespace System
                     return Task.FromResult(source.GetResults());
 
                 case AsyncStatus.Error:
-                    return Task.FromException<TResult>(RestrictedErrorInfoHelper.AttachRestrictedErrorInfo(source.ErrorCode));
+                    return Task.FromException<TResult>(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled<TResult>(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
@@ -261,8 +257,6 @@ namespace System
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            Contract.EndContractBlock();
-
             // If source is actually a NetFx-to-WinRT adapter, unwrap it instead of creating a new Task:
             var wrapper = source as TaskToAsyncActionWithProgressAdapter<TProgress>;
             if (wrapper != null && !wrapper.CompletedSynchronously)
@@ -292,7 +286,7 @@ namespace System
                     return Task.CompletedTask;
 
                 case AsyncStatus.Error:
-                    return Task.FromException(RestrictedErrorInfoHelper.AttachRestrictedErrorInfo(source.ErrorCode));
+                    return Task.FromException(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
@@ -370,8 +364,6 @@ namespace System
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            Contract.EndContractBlock();
-
             // If source is actually a NetFx-to-WinRT adapter, unwrap it instead of creating a new Task:
             var wrapper = source as TaskToAsyncOperationWithProgressAdapter<TResult, TProgress>;
             if (wrapper != null && !wrapper.CompletedSynchronously)
@@ -401,7 +393,7 @@ namespace System
                     return Task.FromResult(source.GetResults());
 
                 case AsyncStatus.Error:
-                    return Task.FromException<TResult>(RestrictedErrorInfoHelper.AttachRestrictedErrorInfo(source.ErrorCode));
+                    return Task.FromException<TResult>(ExceptionSupport.AttachRestrictedErrorInfo(source.ErrorCode));
 
                 case AsyncStatus.Canceled:
                     return Task.FromCanceled<TResult>(cancellationToken.IsCancellationRequested ? cancellationToken : new CancellationToken(true));
@@ -435,8 +427,6 @@ namespace System
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
 
-            Contract.EndContractBlock();
-
             return new TaskToAsyncActionAdapter(source, underlyingCancelTokenSource: null);
         }
 
@@ -445,8 +435,6 @@ namespace System
         {
             if (source == null)
                 throw new ArgumentNullException(nameof(source));
-
-            Contract.EndContractBlock();
 
             return new TaskToAsyncOperationAdapter<TResult>(source, underlyingCancelTokenSource: null);
         }

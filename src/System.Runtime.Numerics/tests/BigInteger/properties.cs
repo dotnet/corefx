@@ -12,7 +12,7 @@ namespace System.Numerics.Tests
         private static int s_samples = 10;
         private static Random s_random = new Random(100);
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public static void RunZeroTests()
         {
             BigInteger bigInteger;
@@ -20,8 +20,8 @@ namespace System.Numerics.Tests
 
             // BigInteger.Zero == 0
             Assert.Equal("0", BigInteger.Zero.ToString());
-            Assert.Equal(new BigInteger((Int64)(0)), BigInteger.Zero);
-            Assert.Equal(new BigInteger((Double)(0)), BigInteger.Zero);
+            Assert.Equal(new BigInteger((long)(0)), BigInteger.Zero);
+            Assert.Equal(new BigInteger((double)(0)), BigInteger.Zero);
             Assert.Equal(new BigInteger(new byte[] { 0, 0, 0, 0 }), BigInteger.Zero);
             Assert.Equal(BigInteger.One + BigInteger.MinusOne, BigInteger.Zero);
             Assert.Equal(BigInteger.One - BigInteger.One, BigInteger.Zero);
@@ -59,8 +59,8 @@ namespace System.Numerics.Tests
 
             // BigInteger.One == 1
             Assert.Equal("1", BigInteger.One.ToString());
-            Assert.Equal(new BigInteger((Int64)(1)), BigInteger.One);
-            Assert.Equal(new BigInteger((Double)(1)), BigInteger.One);
+            Assert.Equal(new BigInteger((long)(1)), BigInteger.One);
+            Assert.Equal(new BigInteger((double)(1)), BigInteger.One);
             Assert.Equal(new BigInteger(new byte[] { 1, 0, 0, 0 }), BigInteger.One);
             Assert.Equal(BigInteger.Zero - BigInteger.MinusOne, BigInteger.One);
             Assert.Equal((BigInteger)671832 / (BigInteger)671832, BigInteger.One);
@@ -88,8 +88,8 @@ namespace System.Numerics.Tests
                 CultureInfo.CurrentCulture.NumberFormat.NegativeSign + "1",
                 BigInteger.MinusOne.ToString()
             );
-            Assert.Equal(new BigInteger((Int64)(-1)), BigInteger.MinusOne);
-            Assert.Equal(new BigInteger((Double)(-1)), BigInteger.MinusOne);
+            Assert.Equal(new BigInteger((long)(-1)), BigInteger.MinusOne);
+            Assert.Equal(new BigInteger((double)(-1)), BigInteger.MinusOne);
             Assert.Equal(new BigInteger(new byte[] { 0xff, 0xff, 0xff, 0xff }), BigInteger.MinusOne);
             Assert.Equal(BigInteger.Zero - BigInteger.One, BigInteger.MinusOne);
             Assert.Equal((BigInteger)671832 / (BigInteger)(-671832), BigInteger.MinusOne);

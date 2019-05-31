@@ -12,7 +12,6 @@ using System.Text;
 
 namespace System.Security.Cryptography.X509Certificates
 {
-    [Serializable]
     public class X509Certificate : IDisposable, IDeserializationCallback, ISerializable
     {
         private volatile byte[] _lazyCertHash;
@@ -37,10 +36,12 @@ namespace System.Security.Cryptography.X509Certificates
             _lazyNotBefore = DateTime.MinValue;
             _lazyNotAfter = DateTime.MinValue;
 
-            ICertificatePal pal = Pal;
-            Pal = null;
+            ICertificatePalCore pal = Pal;
             if (pal != null)
+            {
+                Pal = null;
                 pal.Dispose();
+            }
         }
 
         public X509Certificate()
@@ -102,7 +103,7 @@ namespace System.Security.Cryptography.X509Certificates
             Pal = CertificatePal.FromHandle(handle);
         }
 
-        internal X509Certificate(ICertificatePal pal)
+        internal X509Certificate(ICertificatePalCore pal)
         {
             Debug.Assert(pal != null);
             Pal = pal;
@@ -165,14 +166,7 @@ namespace System.Security.Cryptography.X509Certificates
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2229", Justification = "Public API has already shipped.")]
         public X509Certificate(SerializationInfo info, StreamingContext context) : this()
         {
-            byte[] rawData = (byte[])info.GetValue("RawData", typeof(byte[]));
-            if (rawData != null)
-            {
-                using (var safePasswordHandle = new SafePasswordHandle((string)null))
-                {
-                    Pal = CertificatePal.FromBlob(rawData, safePasswordHandle, X509KeyStorageFlags.DefaultKeySet);
-                }
-            }
+            throw new PlatformNotSupportedException();
         }
 
         public static X509Certificate CreateFromCertFile(string filename)
@@ -187,10 +181,13 @@ namespace System.Security.Cryptography.X509Certificates
 
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("RawData", Pal?.RawData);
+            throw new PlatformNotSupportedException();
         }
 
-        void IDeserializationCallback.OnDeserialization(object sender) { }
+        void IDeserializationCallback.OnDeserialization(object sender)
+        {
+            throw new PlatformNotSupportedException();
+        }
 
         public IntPtr Handle
         {
@@ -288,9 +285,8 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new CryptographicException(ErrorCode.E_POINTER);  // Not the greatest error, but needed for backward compat.
 
             using (var safePasswordHandle = new SafePasswordHandle(password))
-            using (IExportPal storePal = StorePal.FromCertificate(Pal))
             {
-                return storePal.Export(contentType, safePasswordHandle);
+                return Pal.Export(contentType, safePasswordHandle);
             }
         }
 
@@ -303,9 +299,8 @@ namespace System.Security.Cryptography.X509Certificates
                 throw new CryptographicException(ErrorCode.E_POINTER);  // Not the greatest error, but needed for backward compat.
 
             using (var safePasswordHandle = new SafePasswordHandle(password))
-            using (IExportPal storePal = StorePal.FromCertificate(Pal))
             {
-                return storePal.Export(contentType, safePasswordHandle);
+                return Pal.Export(contentType, safePasswordHandle);
             }
         }
 
@@ -321,10 +316,42 @@ namespace System.Security.Cryptography.X509Certificates
             return GetRawCertHash().CloneByteArray();
         }
 
+        public virtual byte[] GetCertHash(HashAlgorithmName hashAlgorithm)
+        {
+            ThrowIfInvalid();
+
+            using (IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithm))
+            {
+                hasher.AppendData(Pal.RawData);
+                return hasher.GetHashAndReset();
+            }
+        }
+
+        public virtual bool TryGetCertHash(
+            HashAlgorithmName hashAlgorithm,
+            Span<byte> destination,
+            out int bytesWritten)
+        {
+            ThrowIfInvalid();
+
+            using (IncrementalHash hasher = IncrementalHash.CreateHash(hashAlgorithm))
+            {
+                hasher.AppendData(Pal.RawData);
+                return hasher.TryGetHashAndReset(destination, out bytesWritten);
+            }
+        }
+
         public virtual string GetCertHashString()
         {
             ThrowIfInvalid();
             return GetRawCertHash().ToHexStringUpper();
+        }
+
+        public virtual string GetCertHashString(HashAlgorithmName hashAlgorithm)
+        {
+            ThrowIfInvalid();
+
+            return GetCertHash(hashAlgorithm).ToHexStringUpper();
         }
 
         // Only use for internal purposes when the returned byte[] will not be mutated
@@ -415,14 +442,16 @@ namespace System.Security.Cryptography.X509Certificates
         public virtual byte[] GetSerialNumber()
         {
             ThrowIfInvalid();
-
-            return GetRawSerialNumber().CloneByteArray();
+            byte[] serialNumber = GetRawSerialNumber().CloneByteArray();
+            // PAL always returns big-endian, GetSerialNumber returns little-endian
+            Array.Reverse(serialNumber);
+            return serialNumber;
         }
 
         public virtual string GetSerialNumberString()
         {
             ThrowIfInvalid();
-
+            // PAL always returns big-endian, GetSerialNumberString returns big-endian too
             return GetRawSerialNumber().ToHexStringUpper();
         }
 
@@ -432,16 +461,18 @@ namespace System.Security.Cryptography.X509Certificates
             return _lazySerialNumber ?? (_lazySerialNumber = Pal.SerialNumber);
         }
 
-        [Obsolete("This method has been deprecated.  Please use the Subject property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated.  Please use the Subject property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual string GetName()
         {
-            return Subject;
+            ThrowIfInvalid();
+            return Pal.LegacySubject;
         }
 
-        [Obsolete("This method has been deprecated.  Please use the Issuer property instead.  http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated.  Please use the Issuer property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual string GetIssuerName()
         {
-            return Issuer;
+            ThrowIfInvalid();
+            return Pal.LegacyIssuer;
         }
 
         public override string ToString()
@@ -500,37 +531,37 @@ namespace System.Security.Cryptography.X509Certificates
 
         public virtual void Import(byte[] rawData)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.NotSupported_ImmutableX509Certificate);
         }
 
         public virtual void Import(byte[] rawData, string password, X509KeyStorageFlags keyStorageFlags)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.NotSupported_ImmutableX509Certificate);
         }
 
         [System.CLSCompliantAttribute(false)]
         public virtual void Import(byte[] rawData, SecureString password, X509KeyStorageFlags keyStorageFlags)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.NotSupported_ImmutableX509Certificate);
         }
 
         public virtual void Import(string fileName)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.NotSupported_ImmutableX509Certificate);
         }
 
         public virtual void Import(string fileName, string password, X509KeyStorageFlags keyStorageFlags)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.NotSupported_ImmutableX509Certificate);
         }
 
         [System.CLSCompliantAttribute(false)]
         public virtual void Import(string fileName, SecureString password, X509KeyStorageFlags keyStorageFlags)
         {
-            throw new PlatformNotSupportedException();
+            throw new PlatformNotSupportedException(SR.NotSupported_ImmutableX509Certificate);
         }
 
-        internal ICertificatePal Pal { get; private set; }
+        internal ICertificatePalCore Pal { get; private set; }
 
         internal DateTime GetNotAfter()
         {

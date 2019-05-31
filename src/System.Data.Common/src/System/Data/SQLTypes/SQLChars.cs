@@ -13,7 +13,7 @@ using System.Runtime.CompilerServices;
 
 namespace System.Data.SqlTypes
 {
-    [Serializable, XmlSchemaProvider("GetXsdType")]
+    [XmlSchemaProvider("GetXsdType")]
     public sealed class SqlChars : INullable, IXmlSerializable, ISerializable
     {
         // --------------------------------------------------------------
@@ -43,7 +43,7 @@ namespace System.Data.SqlTypes
         private char[] _rgchWorkBuf;   // A 1-char work buffer.
 
         // The max data length that we support at this time.
-        private const long x_lMaxLen = System.Int32.MaxValue;
+        private const long x_lMaxLen = int.MaxValue;
 
         private const long x_lNull = -1L;
 
@@ -92,28 +92,6 @@ namespace System.Data.SqlTypes
             _state = (s == null) ? SqlBytesCharsState.Null : SqlBytesCharsState.Stream;
 
             _rgchWorkBuf = null;
-
-            AssertValid();
-        }
-
-        // Constructor required for serialization. Deserializes as a Buffer. If the bits have been tampered with
-        // then this will throw a SerializationException or a InvalidCastException.
-        private SqlChars(SerializationInfo info, StreamingContext context)
-        {
-            _stream = null;
-            _rgchWorkBuf = null;
-
-            if (info.GetBoolean("IsNull"))
-            {
-                _state = SqlBytesCharsState.Null;
-                _rgchBuf = null;
-            }
-            else
-            {
-                _state = SqlBytesCharsState.Buffer;
-                _rgchBuf = (char[])info.GetValue("data", typeof(char[]));
-                _lCurLen = _rgchBuf.Length;
-            }
 
             AssertValid();
         }
@@ -575,25 +553,7 @@ namespace System.Data.SqlTypes
         // array is serialized, except for Null, in which case this state is kept.
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            switch (_state)
-            {
-                case SqlBytesCharsState.Null:
-                    info.AddValue("IsNull", true);
-                    break;
-
-                case SqlBytesCharsState.Buffer:
-                    info.AddValue("IsNull", false);
-                    info.AddValue("data", _rgchBuf);
-                    break;
-
-                case SqlBytesCharsState.Stream:
-                    CopyStreamToBuffer();
-                    goto case SqlBytesCharsState.Buffer;
-
-                default:
-                    Debug.Assert(false);
-                    goto case SqlBytesCharsState.Null;
-            }
+            throw new PlatformNotSupportedException();
         }
 
         // --------------------------------------------------------------
@@ -644,33 +604,7 @@ namespace System.Data.SqlTypes
                 return _sqlchars == null || _sqlchars.IsNull;
             }
         }
-
-        // Always can read/write/seek, unless sb is null, 
-        // which means the stream has been closed.
-        public override bool CanRead
-        {
-            get
-            {
-                return _sqlchars != null && !_sqlchars.IsNull;
-            }
-        }
-
-        public override bool CanSeek
-        {
-            get
-            {
-                return _sqlchars != null;
-            }
-        }
-
-        public override bool CanWrite
-        {
-            get
-            {
-                return _sqlchars != null && (!_sqlchars.IsNull || _sqlchars._rgchBuf != null);
-            }
-        }
-
+        
         public override long Length
         {
             get
@@ -769,29 +703,6 @@ namespace System.Data.SqlTypes
             _lPosition += count;
         }
 
-        public override int ReadChar()
-        {
-            CheckIfStreamClosed();
-
-            // If at the end of stream, return -1, rather than call SqlChars.Readchar,
-            // which will throw exception. This is the behavior for Stream.
-            //
-            if (_lPosition >= _sqlchars.Length)
-                return -1;
-
-            int ret = _sqlchars[_lPosition];
-            _lPosition++;
-            return ret;
-        }
-
-        public override void WriteChar(char value)
-        {
-            CheckIfStreamClosed();
-
-            _sqlchars[_lPosition] = value;
-            _lPosition++;
-        }
-
         public override void SetLength(long value)
         {
             CheckIfStreamClosed();
@@ -799,13 +710,6 @@ namespace System.Data.SqlTypes
             _sqlchars.SetLength(value);
             if (_lPosition > value)
                 _lPosition = value;
-        }
-
-        // Flush is a no-op if underlying SqlChars is not a stream on SqlChars
-        public override void Flush()
-        {
-            if (_sqlchars.FStream())
-                _sqlchars._stream.Flush();
         }
 
         protected override void Dispose(bool disposing)

@@ -15,19 +15,14 @@ namespace Internal.Cryptography
     //
     internal struct CngAlgorithmCore
     {
+        public CngAlgorithm DefaultKeyType;
+        private CngKey _lazyKey;
+
         public static CngKey Duplicate(CngKey key)
         {
             using (SafeNCryptKeyHandle keyHandle = key.Handle)
             {
                 return CngKey.Open(keyHandle, key.IsEphemeral ? CngKeyHandleOpenOptions.EphemeralKey : CngKeyHandleOpenOptions.None);
-            }
-        }
-
-        public bool IsKeyGenerated
-        {
-            get
-            {
-                return (_lazyKey != null);
             }
         }
 
@@ -71,7 +66,6 @@ namespace Internal.Cryptography
             return _lazyKey;
         }
 
-#if !NETNATIVE
         public CngKey GetOrGenerateKey(ECCurve? curve)
         {
             if (_lazyKey != null)
@@ -103,12 +97,12 @@ namespace Internal.Cryptography
             }
             else
             {
-                throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, curve.Value.CurveType.ToString()));
+                throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, curve.Value.CurveType.ToString()));
             }
 
             try
             {
-                _lazyKey = CngKey.Create(CngAlgorithm.ECDsa, null, creationParameters);
+                _lazyKey = CngKey.Create(DefaultKeyType ?? CngAlgorithm.ECDsa, null, creationParameters);
             }
             catch (CryptographicException e)
             {
@@ -118,14 +112,13 @@ namespace Internal.Cryptography
                 if (curve.Value.IsNamed &&
                     errorCode == ErrorCode.NTE_INVALID_PARAMETER || errorCode == ErrorCode.NTE_NOT_SUPPORTED)
                 {
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, curve.Value.Oid.FriendlyName), e);
+                    throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, curve.Value.Oid.FriendlyName), e);
                 }
                 throw;
             }
 
             return _lazyKey;
         }
-#endif //!NETNATIVE
 
         public void SetKey(CngKey key)
         {
@@ -141,7 +134,5 @@ namespace Internal.Cryptography
         {
             DisposeKey();
         }
-
-        private CngKey _lazyKey;
     }
 }

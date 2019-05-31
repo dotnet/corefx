@@ -24,9 +24,9 @@ namespace System.Linq
     {
         public SystemCore_EnumerableDebugView(IEnumerable<T> enumerable)
         {
-            if (enumerable == null)
+            if (enumerable is null)
             {
-                throw new ArgumentNullException(nameof(enumerable));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.enumerable);
             }
 
             _enumerable = enumerable;
@@ -53,22 +53,16 @@ namespace System.Linq
 
     internal sealed class SystemCore_EnumerableDebugViewEmptyException : Exception
     {
-        public string Empty
-        {
-            get
-            {
-                return SR.EmptyEnumerable;
-            }
-        }
+        public string Empty => SR.EmptyEnumerable;
     }
 
     internal sealed class SystemCore_EnumerableDebugView
     {
         public SystemCore_EnumerableDebugView(IEnumerable enumerable)
         {
-            if (enumerable == null)
+            if (enumerable is null)
             {
-                throw new ArgumentNullException(nameof(enumerable));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.enumerable);
             }
 
             _enumerable = enumerable;
@@ -96,5 +90,36 @@ namespace System.Linq
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private IEnumerable _enumerable;
+    }
+
+    internal sealed class SystemLinq_GroupingDebugView<TKey, TElement>
+    {
+        private readonly Grouping<TKey, TElement> _grouping;
+        private TElement[] _cachedValues;
+
+        public SystemLinq_GroupingDebugView(Grouping<TKey, TElement> grouping)
+        {
+            _grouping = grouping;
+        }
+
+        public TKey Key => _grouping.Key;
+
+        // The name of this property must alphabetically follow `Key` so the elements appear last in the display.
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public TElement[] Values => _cachedValues ?? (_cachedValues = _grouping.ToArray());
+    }
+
+    internal sealed class SystemLinq_LookupDebugView<TKey, TElement>
+    {
+        private readonly Lookup<TKey, TElement> _lookup;
+        private IGrouping<TKey, TElement>[] _cachedGroupings;
+
+        public SystemLinq_LookupDebugView(Lookup<TKey, TElement> lookup)
+        {
+            _lookup = lookup;
+        }
+
+        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+        public IGrouping<TKey, TElement>[] Groupings => _cachedGroupings ?? (_cachedGroupings = _lookup.ToArray());
     }
 }

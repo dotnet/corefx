@@ -47,7 +47,9 @@ namespace System.Linq.Expressions.Compiler
                 // the compiler when emitting an inlined lambda invoke, to
                 // handle ByRef parameters. BlockExpression prevents this
                 // from being exposed to user created trees.
-                _local = compiler.GetNamedLocal(variable.IsByRef ? variable.Type.MakeByRefType() : variable.Type, variable);
+
+                // Set name if DebugInfoGenerator support is brought back.
+                _local = compiler.GetLocal(variable.IsByRef ? variable.Type.MakeByRefType() : variable.Type);
             }
 
             internal override void EmitLoad()
@@ -63,6 +65,11 @@ namespace System.Linq.Expressions.Compiler
             internal override void EmitAddress()
             {
                 Compiler.IL.Emit(OpCodes.Ldloca, _local);
+            }
+
+            internal override void FreeLocal()
+            {
+                Compiler.FreeLocal(_local);
             }
         }
 
@@ -140,7 +147,7 @@ namespace System.Linq.Expressions.Compiler
             internal void EmitLoadBox()
             {
                 _array.EmitLoad();
-                Compiler.IL.EmitInt(_index);
+                Compiler.IL.EmitPrimitive(_index);
                 Compiler.IL.Emit(OpCodes.Ldelem_Ref);
                 Compiler.IL.Emit(OpCodes.Castclass, _boxType);
             }
@@ -156,7 +163,9 @@ namespace System.Linq.Expressions.Compiler
             {
                 Type boxType = typeof(StrongBox<>).MakeGenericType(variable.Type);
                 _boxValueField = boxType.GetField("Value");
-                _boxLocal = compiler.GetNamedLocal(boxType, variable);
+
+                // Set name if DebugInfoGenerator support is brought back.
+                _boxLocal = compiler.GetLocal(boxType);
             }
 
             internal override void EmitLoad()
@@ -191,6 +200,11 @@ namespace System.Linq.Expressions.Compiler
             internal void EmitStoreBox()
             {
                 Compiler.IL.Emit(OpCodes.Stloc, _boxLocal);
+            }
+
+            internal override void FreeLocal()
+            {
+                Compiler.FreeLocal(_boxLocal);
             }
         }
     }

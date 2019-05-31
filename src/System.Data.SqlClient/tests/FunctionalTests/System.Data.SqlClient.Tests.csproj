@@ -1,31 +1,41 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{F3E72F35-0351-4D67-9388-725BCAD807BA}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <RootNamespace>System.Data.SqlClient.Tests</RootNamespace>
-    <AssemblyName>System.Data.SqlClient.Tests</AssemblyName>
-    <NugetTargetMoniker>.NETStandard,Version=v1.7</NugetTargetMoniker>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Unix_Release|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_Release|AnyCPU'" />
-  <ItemGroup Condition=" '$(EnableManualTests)' == 'true' ">
-    <Compile Include="DiagnosticTest.cs" />
-  </ItemGroup>
   <ItemGroup>
+    <Compile Include="AADAccessTokenTest.cs" />
+    <Compile Include="CloneTests.cs" />
+    <Compile Include="BaseProviderAsyncTest\BaseProviderAsyncTest.cs" />
+    <Compile Include="BaseProviderAsyncTest\MockCommand.cs" />
+    <Compile Include="BaseProviderAsyncTest\MockConnection.cs" />
+    <Compile Include="BaseProviderAsyncTest\MockDataReader.cs" />
+    <Compile Include="SqlCredentialTest.cs" />
+    <Compile Include="DiagnosticTest.cs" />
+    <Compile Include="AmbientTransactionFailureTest.cs" />
     <Compile Include="ExceptionTest.cs" />
     <Compile Include="FakeDiagnosticListenerObserver.cs" />
     <Compile Include="SqlBulkCopyColumnMappingCollectionTest.cs" />
+    <Compile Include="SqlDataRecordTest.cs" />
+    <Compile Include="SqlMetaDataTest.cs" />
+    <Compile Include="SqlParameterTest.cs" />
+    <Compile Include="SqlClientFactoryTest.cs" />
     <Compile Include="SqlConnectionTest.RetrieveStatistics.cs" />
     <Compile Include="SqlErrorCollectionTest.cs" />
     <Compile Include="TcpDefaultForAzureTest.cs" />
-    <Compile Include="SqlConnectionTest.cs" />
+    <Compile Include="SqlConnectionBasicTests.cs" />
+    <Compile Include="TestTdsServer.cs" />
+    <Compile Include="..\ManualTests\DataCommon\DataTestUtility.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
+    <Compile Include="SqlFacetAttributeTest.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\pkg\System.Data.SqlClient.pkgproj" />
+    <ProjectReference Include="..\ManualTests\SQL\UdtTest\UDTs\Address\Address.csproj">
+      <Project>{d1392b54-998a-4f27-bc17-4ce149117bcc}</Project>
+      <Name>Address</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Tools\TDS\TDS.Servers\TDS.Servers.csproj">
       <Name>TDS.Servers</Name>
     </ProjectReference>
@@ -36,5 +46,4 @@
       <Name>TDS</Name>
     </ProjectReference>
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

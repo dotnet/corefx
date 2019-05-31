@@ -25,7 +25,7 @@ namespace System.Threading.Tasks.Tests
 
         private IList<int> _collection = null;  // the collection used in Foreach
 
-        private readonly double[] _results;  // global place to store the workload result for verication
+        private readonly double[] _results;  // global place to store the workload result for verification
 
         // data structure used with ParallelLoopState<TLocal>
         // each row is the sequence of loop "index" finished in the same thread 
@@ -774,7 +774,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         /// <summary>
-        /// Each Parallel.For loop stores the result of its compuatation in the 'result' array.
+        /// Each Parallel.For loop stores the result of its computation in the 'result' array.
         /// This function checks if result[i] for each i from 0 to _parameters.Count is correct
         /// A result[i] == double[i] means that the body for index i was run more than once
         /// </summary>
@@ -790,10 +790,10 @@ namespace System.Threading.Tasks.Tests
 
             if (_results[i] < minLimit || _results[i] > maxLimit)
             {
-                Assert.False(double.MinValue == _results[i], String.Format("results[{0}] has been revisisted", i));
+                Assert.False(double.MinValue == _results[i], string.Format("results[{0}] has been revisited", i));
                 
                 Assert.True(_parameters.StateOption == ActionWithState.Stop && 0 == _results[i],
-                    String.Format("Incorrect results[{0}]. Expected result to lie between {1} and {2} but got {3})", i, minLimit, maxLimit, _results[i]));
+                    string.Format("Incorrect results[{0}]. Expected result to lie between {1} and {2} but got {3})", i, minLimit, maxLimit, _results[i]));
             }
         }
 
@@ -835,7 +835,7 @@ namespace System.Threading.Tasks.Tests
             if (api == API.For64)
             {
                 // StartIndexBase.Int64 was set to -1 since Enum can't take a Int64.MaxValue. Fixing this below.
-                long indexBase64 = (startIndexBase == StartIndexBase.Int64) ? Int64.MaxValue : (long)startIndexBase;
+                long indexBase64 = (startIndexBase == StartIndexBase.Int64) ? long.MaxValue : (long)startIndexBase;
                 StartIndex64 = indexBase64 + StartIndexOffset;
             }
             else
@@ -917,7 +917,7 @@ namespace System.Threading.Tasks.Tests
     }
 
     /// <summary>
-    /// Partitioner types used for ParallelForeach with partioners
+    /// Partitioner types used for ParallelForeach with partitioners
     /// </summary>
     [Flags]
     public enum PartitionerType
@@ -967,8 +967,8 @@ namespace System.Threading.Tasks.Tests
     public enum StartIndexBase
     {
         Zero = 0,
-        Int16 = System.Int16.MaxValue,
-        Int32 = System.Int32.MaxValue,
+        Int16 = short.MaxValue,
+        Int32 = int.MaxValue,
         Int64 = -1,     // Enum can't take a Int64.MaxValue
     }
 

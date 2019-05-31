@@ -21,7 +21,7 @@ namespace System.Net.Http.Headers
         {
             Debug.Assert(value is DateTimeOffset);
 
-            return HttpRuleParser.DateToString((DateTimeOffset)value);
+            return HttpDateParser.DateToString((DateTimeOffset)value);
         }
 
         public override bool TryParseValue(string value, object storeValue, ref int index, out object parsedValue)
@@ -34,14 +34,14 @@ namespace System.Net.Http.Headers
                 return false;
             }
 
-            string dateString = value;
+            ReadOnlySpan<char> dateString = value;
             if (index > 0)
             {
-                dateString = value.Substring(index);
+                dateString = value.AsSpan(index);
             }
 
             DateTimeOffset date;
-            if (!HttpRuleParser.TryStringToDate(dateString, out date))
+            if (!HttpDateParser.TryStringToDate(dateString, out date))
             {
                 return false;
             }

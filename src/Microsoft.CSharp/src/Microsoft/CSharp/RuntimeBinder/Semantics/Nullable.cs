@@ -3,157 +3,71 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using Microsoft.CSharp.RuntimeBinder.Errors;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class CNullable
+    internal readonly partial struct ExpressionBinder
     {
-        private readonly SymbolLoader _pSymbolLoader;
-        private readonly ExprFactory _exprFactory;
-        private readonly ErrorHandling _pErrorContext;
-
-        private SymbolLoader GetSymbolLoader()
-        {
-            return _pSymbolLoader;
-        }
-        private ExprFactory GetExprFactory()
-        {
-            return _exprFactory;
-        }
-        private ErrorHandling GetErrorContext()
-        {
-            return _pErrorContext;
-        }
-        public static bool IsNullableConstructor(EXPR expr)
+        private static bool IsNullableConstructor(Expr expr, out ExprCall call)
         {
             Debug.Assert(expr != null);
 
-            if (!expr.isCALL())
+            if (expr is ExprCall pCall && pCall.MemberGroup.OptionalObject == null
+                && (pCall.MethWithInst?.Meth().IsNullableConstructor() ?? false))
             {
-                return false;
+                call = pCall;
+                return true;
             }
 
-            EXPRCALL pCall = expr.asCALL();
-            if (pCall.GetMemberGroup().GetOptionalObject() != null)
-            {
-                return false;
-            }
-
-            MethodSymbol meth = pCall.mwi.Meth();
-            if (meth == null)
-            {
-                return false;
-            }
-            return meth.IsNullableConstructor();
+            call = null;
+            return false;
         }
-        public static EXPR StripNullableConstructor(EXPR pExpr)
+
+        private static Expr StripNullableConstructor(Expr pExpr)
         {
-            while (IsNullableConstructor(pExpr))
+            while (IsNullableConstructor(pExpr, out ExprCall call))
             {
-                Debug.Assert(pExpr.isCALL());
-                pExpr = pExpr.asCALL().GetOptionalArguments();
-                Debug.Assert(pExpr != null && !pExpr.isLIST());
+                pExpr = call.OptionalArguments;
+                Debug.Assert(pExpr != null && !(pExpr is ExprList));
             }
+
             return pExpr;
         }
 
-        // Value
-        public EXPR BindValue(EXPR exprSrc)
+        // Create an expr for exprSrc.Value where exprSrc.type is a NullableType.
+        private static Expr BindNubValue(Expr exprSrc)
         {
-            Debug.Assert(exprSrc != null && exprSrc.type.IsNullableType());
+            Debug.Assert(exprSrc != null && exprSrc.Type is NullableType);
 
             // For new T?(x), the answer is x.
-            if (IsNullableConstructor(exprSrc))
+            if (IsNullableConstructor(exprSrc, out ExprCall call))
             {
-                Debug.Assert(exprSrc.asCALL().GetOptionalArguments() != null && !exprSrc.asCALL().GetOptionalArguments().isLIST());
-                return exprSrc.asCALL().GetOptionalArguments();
+                Expr args = call.OptionalArguments;
+                Debug.Assert(args != null && !(args is ExprList));
+                return args;
             }
 
-            CType typeBase = exprSrc.type.AsNullableType().GetUnderlyingType();
-            AggregateType ats = exprSrc.type.AsNullableType().GetAts(GetErrorContext());
-            if (ats == null)
-            {
-                EXPRPROP rval = GetExprFactory().CreateProperty(typeBase, exprSrc);
-                rval.SetError();
-                return rval;
-            }
-
-            PropertySymbol prop = GetSymbolLoader().getBSymmgr().propNubValue;
-            if (prop == null)
-            {
-                prop = GetSymbolLoader().getPredefinedMembers().GetProperty(PREDEFPROP.PP_G_OPTIONAL_VALUE);
-                GetSymbolLoader().getBSymmgr().propNubValue = prop;
-            }
-
+            NullableType nubSrc = (NullableType)exprSrc.Type;
+            CType typeBase = nubSrc.UnderlyingType;
+            AggregateType ats = nubSrc.GetAts();
+            PropertySymbol prop = PredefinedMembers.GetProperty(PREDEFPROP.PP_G_OPTIONAL_VALUE);
             PropWithType pwt = new PropWithType(prop, ats);
-            MethWithType mwt = new MethWithType(prop != null ? prop.methGet : null, ats);
             MethPropWithInst mpwi = new MethPropWithInst(prop, ats);
-            EXPRMEMGRP pMemGroup = GetExprFactory().CreateMemGroup(exprSrc, mpwi);
-            EXPRPROP exprRes = GetExprFactory().CreateProperty(typeBase, null, null, pMemGroup, pwt, mwt, null);
-
-            if (prop == null)
-            {
-                exprRes.SetError();
-            }
-
-            return exprRes;
-        }
-
-        public EXPRCALL BindNew(EXPR pExprSrc)
-        {
-            Debug.Assert(pExprSrc != null);
-
-            NullableType pNubSourceType = GetSymbolLoader().GetTypeManager().GetNullable(pExprSrc.type);
-
-            AggregateType pSourceType = pNubSourceType.GetAts(GetErrorContext());
-            if (pSourceType == null)
-            {
-                MethWithInst mwi = new MethWithInst(null, null);
-                EXPRMEMGRP pMemGroup = GetExprFactory().CreateMemGroup(pExprSrc, mwi);
-                EXPRCALL rval = GetExprFactory().CreateCall(0, pNubSourceType, null, pMemGroup, null);
-                rval.SetError();
-                return rval;
-            }
-
-            MethodSymbol meth = GetSymbolLoader().getBSymmgr().methNubCtor;
-            if (meth == null)
-            {
-                meth = GetSymbolLoader().getPredefinedMembers().GetMethod(PREDEFMETH.PM_G_OPTIONAL_CTOR);
-                GetSymbolLoader().getBSymmgr().methNubCtor = meth;
-            }
-
-            MethWithInst methwithinst = new MethWithInst(meth, pSourceType, BSYMMGR.EmptyTypeArray());
-            EXPRMEMGRP memgroup = GetExprFactory().CreateMemGroup(null, methwithinst);
-            EXPRCALL pExprRes = GetExprFactory().CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, pNubSourceType, pExprSrc, memgroup, methwithinst);
-
-            if (meth == null)
-            {
-                pExprRes.SetError();
-            }
-
-            return pExprRes;
-        }
-        public CNullable(SymbolLoader symbolLoader, ErrorHandling errorContext, ExprFactory exprFactory)
-        {
-            _pSymbolLoader = symbolLoader;
-            _pErrorContext = errorContext;
-            _exprFactory = exprFactory;
-        }
-    }
-
-    internal partial class ExpressionBinder
-    {
-        // Create an expr for exprSrc.Value where exprSrc.type is a NullableType.
-        internal EXPR BindNubValue(EXPR exprSrc)
-        {
-            return m_nullable.BindValue(exprSrc);
+            ExprMemberGroup pMemGroup = ExprFactory.CreateMemGroup(exprSrc, mpwi);
+            return ExprFactory.CreateProperty(typeBase, null, null, pMemGroup, pwt, null);
         }
 
         // Create an expr for new T?(exprSrc) where T is exprSrc.type.
-        private EXPRCALL BindNubNew(EXPR exprSrc)
+        private static ExprCall BindNubNew(Expr exprSrc)
         {
-            return m_nullable.BindNew(exprSrc);
+            Debug.Assert(exprSrc != null);
+
+            NullableType pNubSourceType = TypeManager.GetNullable(exprSrc.Type);
+            AggregateType pSourceType = pNubSourceType.GetAts();
+            MethodSymbol meth = PredefinedMembers.GetMethod(PREDEFMETH.PM_G_OPTIONAL_CTOR);
+            MethWithInst methwithinst = new MethWithInst(meth, pSourceType, TypeArray.Empty);
+            ExprMemberGroup memgroup = ExprFactory.CreateMemGroup(null, methwithinst);
+            return ExprFactory.CreateCall(EXPRFLAG.EXF_NEWOBJCALL | EXPRFLAG.EXF_CANTBENULL, pNubSourceType, exprSrc, memgroup, methwithinst);
         }
     }
 }

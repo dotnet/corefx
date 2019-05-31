@@ -2,14 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Unicode;
 using Xunit;
 
@@ -17,6 +15,9 @@ namespace Microsoft.Framework.WebEncoders
 {
     public unsafe class UnicodeHelpersTests
     {
+        // If updating the version of UnicodeData.txt, update the below string with the new file name.
+        private const string UnicodeDataFileName = "UnicodeData.12.1.txt";
+
         private const int UnicodeReplacementChar = '\uFFFD';
 
         private static readonly UTF8Encoding _utf8EncodingThrowOnInvalidBytes = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
@@ -88,20 +89,20 @@ namespace Microsoft.Framework.WebEncoders
         {
             for (int i = 0; i <= 0x10FFFF; i++)
             {
-                if (i <= 0xFFFF && Char.IsSurrogate((char)i))
+                if (i <= 0xFFFF && char.IsSurrogate((char)i))
                 {
                     continue; // no surrogates
                 }
 
                 // Arrange
-                byte[] expectedUtf8Bytes = _utf8EncodingThrowOnInvalidBytes.GetBytes(Char.ConvertFromUtf32(i));
+                byte[] expectedUtf8Bytes = _utf8EncodingThrowOnInvalidBytes.GetBytes(char.ConvertFromUtf32(i));
 
                 // Act
                 List<byte> actualUtf8Bytes = new List<byte>(4);
-                uint asUtf8 = (uint)UnicodeHelpers.GetUtf8RepresentationForScalarValue((uint)i);
+                uint asUtf8 = unchecked((uint)UnicodeHelpers.GetUtf8RepresentationForScalarValue((uint)i));
                 do
                 {
-                    actualUtf8Bytes.Add((byte)asUtf8);
+                    actualUtf8Bytes.Add(unchecked((byte)asUtf8));
                 } while ((asUtf8 >>= 8) != 0);
 
                 // Assert
@@ -161,13 +162,13 @@ namespace Microsoft.Framework.WebEncoders
             HashSet<string> seenCategories = new HashSet<string>();
 
             bool[] retVal = new bool[0x10000];
-            string[] allLines = new StreamReader(typeof(UnicodeHelpersTests).GetTypeInfo().Assembly.GetManifestResourceStream("UnicodeData.8.0.txt")).ReadAllLines();
+            string[] allLines = new StreamReader(typeof(UnicodeHelpersTests).GetTypeInfo().Assembly.GetManifestResourceStream(UnicodeDataFileName)).ReadAllLines();
 
             uint startSpanCodepoint = 0;
             foreach (string line in allLines)
             {
                 string[] splitLine = line.Split(';');
-                uint codePoint = UInt32.Parse(splitLine[0], NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
+                uint codePoint = uint.Parse(splitLine[0], NumberStyles.AllowHexSpecifier, CultureInfo.InvariantCulture);
                 if (codePoint >= retVal.Length)
                 {
                     continue; // don't care about supplementary chars

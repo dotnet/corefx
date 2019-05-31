@@ -8,7 +8,6 @@ using System.Globalization;
 
 namespace System.Net
 {
-    [Serializable]
     public class FileWebResponse : WebResponse, ISerializable
     {
         private const int DefaultFileStreamBufferSize = 8192;
@@ -47,27 +46,20 @@ namespace System.Net
             }
         }
 
-        [Obsolete("Serialization is obsoleted for this type. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("Serialization is obsoleted for this type. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected FileWebResponse(SerializationInfo serializationInfo, StreamingContext streamingContext) : base(serializationInfo, streamingContext)
         {
-            _headers = (WebHeaderCollection)serializationInfo.GetValue("headers", typeof(WebHeaderCollection));
-            _uri = (Uri)serializationInfo.GetValue("uri", typeof(Uri));
-            _contentLength = serializationInfo.GetInt64("contentLength");
-            _fileAccess = (FileAccess)serializationInfo.GetInt32("fileAccess");
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         protected override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            serializationInfo.AddValue("headers", _headers, typeof(WebHeaderCollection));
-            serializationInfo.AddValue("uri", _uri, typeof(Uri));
-            serializationInfo.AddValue("contentLength", _contentLength);
-            serializationInfo.AddValue("fileAccess", _fileAccess);
-            base.GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         public override long ContentLength

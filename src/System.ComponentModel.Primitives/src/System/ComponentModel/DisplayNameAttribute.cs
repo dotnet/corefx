@@ -5,26 +5,24 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>Specifies the display name for a property or event.  The default is the name of the property or event.</para>
+    /// Specifies the display name for a property or event.
+    /// The default is the name of the property or event.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Event | AttributeTargets.Class | AttributeTargets.Method)]
     public class DisplayNameAttribute : Attribute
     {
         /// <summary>
-        /// <para>Specifies the default value for the <see cref='System.ComponentModel.DisplayNameAttribute'/> , which is an
-        ///    empty string (""). This <see langword='static'/> field is read-only.</para>
+        /// Specifies the default value for the <see cref='System.ComponentModel.DisplayNameAttribute'/>,
+        /// which is an empty string (""). This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DisplayNameAttribute Default = new DisplayNameAttribute();
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         public DisplayNameAttribute() : this(string.Empty)
         {
         }
 
         /// <summary>
-        ///    <para>Initializes a new instance of the <see cref='System.ComponentModel.DisplayNameAttribute'/> class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.DisplayNameAttribute'/> class.
         /// </summary>
         public DisplayNameAttribute(string displayName)
         {
@@ -32,14 +30,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>Gets the description stored in this attribute.</para>
+        /// Gets the description stored in this attribute.
         /// </summary>
         public virtual string DisplayName => DisplayNameValue;
 
         /// <summary>
-        ///     Read/Write property that directly modifies the string stored
-        ///     in the description attribute. The default implementation
-        ///     of the Description property simply returns this value.
+        /// Gets or sets the display name.
         /// </summary>
         protected string DisplayNameValue { get; set; }
 
@@ -51,18 +47,11 @@ namespace System.ComponentModel
             }
 
             DisplayNameAttribute other = obj as DisplayNameAttribute;
-
-            return (other != null) && other.DisplayName == DisplayName;
+            return other != null && other.DisplayName == DisplayName;
         }
 
-        public override int GetHashCode()
-        {
-            return DisplayName.GetHashCode();
-        }
+        public override int GetHashCode() => DisplayName.GetHashCode();
 
-        public override bool IsDefaultAttribute()
-        {
-            return Equals(DisplayNameAttribute.Default);
-        }
+        public override bool IsDefaultAttribute() => Equals(Default);
     }
 }

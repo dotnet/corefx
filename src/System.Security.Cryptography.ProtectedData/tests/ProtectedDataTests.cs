@@ -12,6 +12,7 @@ using Xunit;
 
 namespace System.Security.Cryptography.ProtectedDataTests
 {
+    [PlatformSpecific(TestPlatforms.Windows)]
     public static class ProtectedDataTests
     {
         [Fact]
@@ -31,6 +32,24 @@ namespace System.Security.Cryptography.ProtectedDataTests
                 byte[] recovered = ProtectedData.Unprotect(encrypted, entropy, scope);
                 Assert.Equal<byte>(plain, recovered);
             }
+        }
+
+        [Theory]
+        [InlineData(DataProtectionScope.CurrentUser, false)]
+        [InlineData(DataProtectionScope.CurrentUser, true)]
+        [InlineData(DataProtectionScope.LocalMachine, false)]
+        [InlineData(DataProtectionScope.LocalMachine, true)]
+        public static void ProtectEmptyData(DataProtectionScope scope, bool useEntropy)
+        {
+            // Use new byte[0] instead of Array.Empty<byte> to prove the implementation
+            // isn't using reference equality
+            byte[] data = new byte[0];
+            byte[] entropy = useEntropy ? new byte[] { 68, 65, 72, 72, 75 } : null;
+            byte[] encrypted = ProtectedData.Protect(data, entropy, scope);
+
+            Assert.NotEqual(data, encrypted);
+            byte[] recovered = ProtectedData.Unprotect(encrypted, entropy, scope);
+            Assert.Equal(data, recovered);
         }
 
         [Fact]

@@ -9,7 +9,7 @@ using System.Text;
 
 namespace System.IO.Tests
 {
-    public class BinaryWriter_WriteByteCharTests
+    public partial class BinaryWriter_WriteByteCharTests
     {
         protected virtual Stream CreateStream()
         {
@@ -86,14 +86,14 @@ namespace System.IO.Tests
             for (int i = 0; i < randomNumbers.Length; i++)
             {
                 ch = (char)randomNumbers[i];
-                Assert.Throws<ArgumentException>(() => writer.Write(ch));
+                AssertExtensions.Throws<ArgumentException>(null, () => writer.Write(ch));
             }
             // between 56320 <= x < 57343
             randomNumbers = new int[] { 56320, 57342, 56431, 57001, 56453, 57245, 57111 };
             for (int i = 0; i < randomNumbers.Length; i++)
             {
                 ch = (char)randomNumbers[i];
-                Assert.Throws<ArgumentException>(() => writer.Write(ch));
+                AssertExtensions.Throws<ArgumentException>(null, () => writer.Write(ch));
             }
 
             writer.Dispose();
@@ -113,7 +113,7 @@ namespace System.IO.Tests
 
             Stream stream = CreateStream();
             // string name = iso-2022-jp, codepage = 50220 (original test used a code page number).
-            // taken from http://msdn.microsoft.com/en-us/library/windows/desktop/dd317756(v=vs.85).aspx
+            // taken from https://docs.microsoft.com/en-us/windows/desktop/Intl/code-page-identifiers
             string codepageName = "iso-2022-jp";
             BinaryWriter writer = new BinaryWriter(stream, Encoding.GetEncoding(codepageName));
 
@@ -305,9 +305,9 @@ namespace System.IO.Tests
             for (int iLoop = 0; iLoop < iArrLargeValues.Length; iLoop++)
             {
                 // [] Offset out of range
-                Assert.Throws<ArgumentException>(() => dw2.Write(bArr, iArrLargeValues[iLoop], 0));
+                AssertExtensions.Throws<ArgumentException>(null, () => dw2.Write(bArr, iArrLargeValues[iLoop], 0));
                 // [] Invalid count value
-                Assert.Throws<ArgumentException>(() => dw2.Write(bArr, 0, iArrLargeValues[iLoop]));
+                AssertExtensions.Throws<ArgumentException>(null, () => dw2.Write(bArr, 0, iArrLargeValues[iLoop]));
             }
             dw2.Dispose();
             mstr.Dispose();

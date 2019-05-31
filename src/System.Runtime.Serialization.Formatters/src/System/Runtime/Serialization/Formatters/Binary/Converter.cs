@@ -30,8 +30,16 @@ namespace System.Runtime.Serialization.Formatters.Binary
         internal static readonly Type s_typeofUInt64 = typeof(ulong);
         internal static readonly Type s_typeofObject = typeof(object);
         internal static readonly Type s_typeofSystemVoid = typeof(void);
-        internal static readonly Assembly s_urtAssembly = s_typeofString.Assembly;
+
+        // In netfx the default assembly is mscorlib.dll --> typeof(string).Assembly.
+        // In Core type string lives in System.Private.Corelib.dll which doesn't 
+        // contain all the types which are living in mscorlib in netfx. Therefore we
+        // use our mscorlib facade which also contains manual type forwards for deserialization.
+        internal static readonly Assembly s_urtAssembly = Assembly.Load("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089");
         internal static readonly string s_urtAssemblyString = s_urtAssembly.FullName;
+
+        internal static readonly Assembly s_urtAlternativeAssembly = s_typeofString.Assembly;
+        internal static readonly string s_urtAlternativeAssemblyString = s_urtAlternativeAssembly.FullName;
 
         // Arrays
         internal static readonly Type s_typeofTypeArray = typeof(Type[]);
@@ -348,7 +356,7 @@ namespace System.Runtime.Serialization.Formatters.Binary
             var codeATemp = new InternalPrimitiveTypeE[19];
             codeATemp[(int)TypeCode.Empty] = InternalPrimitiveTypeE.Invalid;
             codeATemp[(int)TypeCode.Object] = InternalPrimitiveTypeE.Invalid;
-            codeATemp[2] = InternalPrimitiveTypeE.Invalid; // TODO: Change 2 to (int)TypeCode.DBNull when it's available
+            codeATemp[(int)TypeCode.DBNull] = InternalPrimitiveTypeE.Invalid;
             codeATemp[(int)TypeCode.Boolean] = InternalPrimitiveTypeE.Boolean;
             codeATemp[(int)TypeCode.Char] = InternalPrimitiveTypeE.Char;
             codeATemp[(int)TypeCode.SByte] = InternalPrimitiveTypeE.SByte;

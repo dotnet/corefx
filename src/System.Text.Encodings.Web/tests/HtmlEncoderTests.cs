@@ -76,11 +76,11 @@ namespace Microsoft.Framework.WebEncoders
             HtmlEncoder testEncoder = HtmlEncoder.Default;
 
             // Act & assert
-            for (int i = 0; i <= Char.MaxValue; i++)
+            for (int i = 0; i <= char.MaxValue; i++)
             {
                 if (!IsSurrogateCodePoint(i))
                 {
-                    string input = new String((char)i, 1);
+                    string input = new string((char)i, 1);
                     Assert.Equal(controlEncoder.HtmlEncode(input), testEncoder.HtmlEncode(input));
                 }
             }
@@ -114,7 +114,7 @@ namespace Microsoft.Framework.WebEncoders
             // Act & assert - BMP chars
             for (int i = 0; i <= 0xFFFF; i++)
             {
-                string input = new String((char)i, 1);
+                string input = new string((char)i, 1);
                 string expected;
                 if (IsSurrogateCodePoint(i))
                 {
@@ -144,7 +144,7 @@ namespace Microsoft.Framework.WebEncoders
 
                         if (mustEncode)
                         {
-                            expected = String.Format(CultureInfo.InvariantCulture, "&#x{0:X};", i);
+                            expected = string.Format(CultureInfo.InvariantCulture, "&#x{0:X};", i);
                         }
                         else
                         {
@@ -160,8 +160,8 @@ namespace Microsoft.Framework.WebEncoders
             // Act & assert - astral chars
             for (int i = 0x10000; i <= 0x10FFFF; i++)
             {
-                string input = Char.ConvertFromUtf32(i);
-                string expected = String.Format(CultureInfo.InvariantCulture, "&#x{0:X};", i);
+                string input = char.ConvertFromUtf32(i);
+                string expected = string.Format(CultureInfo.InvariantCulture, "&#x{0:X};", i);
                 string retVal = encoder.HtmlEncode(input);
                 Assert.Equal(expected, retVal);
             }
@@ -263,6 +263,19 @@ namespace Microsoft.Framework.WebEncoders
 
             // Assert
             Assert.Equal("lo&#x2B;wo", output.ToString());
+        }
+
+        [Fact]
+        public void HtmlEncode_AstralWithTextWriter()
+        {
+            byte[] buffer = new byte[10];
+            MemoryStream ms = new MemoryStream(buffer);
+            using (StreamWriter sw = new StreamWriter(ms))
+            {
+                string input = "\U0010FFFF";
+                System.Text.Encodings.Web.HtmlEncoder.Default.Encode(sw, input);
+            }
+            Assert.Equal("&#x10FFFF;", System.Text.Encoding.UTF8.GetString(buffer));
         }
 
         private static bool IsSurrogateCodePoint(int codePoint)

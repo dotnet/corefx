@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -131,14 +131,14 @@ namespace System.Data.SqlClient.Tests
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
             string key = s_retrieveStatisticsKeys[0];
-            Assert.Throws<ArgumentException>(null, () => d.Add(key, 100L));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.Add(key, 100L));
         }
 
         [Fact]
         public void RetrieveStatistics_Add_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d.Add(null, 100L));
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d.Add(null, 100L));
         }
 
         [Theory]
@@ -169,7 +169,7 @@ namespace System.Data.SqlClient.Tests
         public void RetrieveStatistics_Setter_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d[null] = 100L);
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d[null] = 100L);
         }
 
         [Fact]
@@ -237,14 +237,14 @@ namespace System.Data.SqlClient.Tests
         public void RetrieveStatistics_Remove_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d.Remove(null));
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d.Remove(null));
         }
 
         [Fact]
         public void RetrieveStatistics_Contains_NullKey_Throws()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
-            Assert.Throws<ArgumentNullException>("key", () => d.Contains(null));
+            AssertExtensions.Throws<ArgumentNullException>("key", () => d.Contains(null));
         }
 
         [Fact]
@@ -268,17 +268,17 @@ namespace System.Data.SqlClient.Tests
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
 
-            Assert.Throws<ArgumentNullException>("array", () => d.CopyTo(null, 0));
-            Assert.Throws<ArgumentNullException>("array", () => d.CopyTo(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => d.CopyTo(new DictionaryEntry[20], -1));
-            Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 18));
-            Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 1000));
-            Assert.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[4, 3], 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => d.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => d.CopyTo(null, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => d.CopyTo(new DictionaryEntry[20], -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 18));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[20], 1000));
+            AssertExtensions.Throws<ArgumentException>(null, () => d.CopyTo(new DictionaryEntry[4, 3], 0));
             Assert.Throws<InvalidCastException>(() => d.CopyTo(new string[20], 0));
         }
 
         [Fact]
-        public void RetrieveStatistics_GetEnumerator_Success()
+        public void RetrieveStatistics_IDictionary_GetEnumerator_Success()
         {
             IDictionary d = new SqlConnection().RetrieveStatistics();
 
@@ -296,12 +296,63 @@ namespace System.Data.SqlClient.Tests
                     Assert.True(e.MoveNext());
 
                     Assert.NotNull(e.Current);
+                    Assert.IsType<DictionaryEntry>(e.Current);
+
                     Assert.NotNull(e.Entry.Key);
+                    Assert.IsType<string>(e.Entry.Key);
                     Assert.NotNull(e.Entry.Value);
+                    Assert.IsType<long>(e.Entry.Value);
 
                     Assert.Equal(e.Current, e.Entry);
                     Assert.Same(e.Key, e.Entry.Key);
                     Assert.Same(e.Value, e.Entry.Value);
+
+                    Assert.True(s_retrieveStatisticsKeys.Contains(e.Entry.Key));
+                }
+
+                Assert.False(e.MoveNext());
+                Assert.False(e.MoveNext());
+                Assert.False(e.MoveNext());
+
+                Assert.Throws<InvalidOperationException>(() => e.Current);
+
+                e.Reset();
+            }
+        }
+
+        [Fact]
+        public void RetrieveStatistics_IEnumerable_GetEnumerator_Success()
+        {
+            // Treat the result as IEnumerable instead of IDictionary.
+            IEnumerable d = new SqlConnection().RetrieveStatistics();
+
+            IEnumerator e = d.GetEnumerator();
+
+            Assert.NotNull(e);
+            Assert.NotSame(e, d.GetEnumerator());
+
+            for (int i = 0; i < 2; i++)
+            {
+                Assert.Throws<InvalidOperationException>(() => e.Current);
+
+                foreach (string ignored in s_retrieveStatisticsKeys)
+                {
+                    Assert.True(e.MoveNext());
+
+                    Assert.NotNull(e.Current);
+
+                    // Verify the IEnumerable.GetEnumerator enumerator is yielding DictionaryEntry entries,
+                    // not KeyValuePair entries.
+                    Assert.IsType<DictionaryEntry>(e.Current);
+
+                    DictionaryEntry entry = (DictionaryEntry)e.Current;
+
+                    Assert.NotNull(entry.Key);
+                    Assert.IsType<string>(entry.Key);
+                    Assert.NotNull(entry.Value);
+                    Assert.IsType<long>(entry.Value);
+
+                    Assert.True(s_retrieveStatisticsKeys.Contains(entry.Key));
                 }
 
                 Assert.False(e.MoveNext());
@@ -382,12 +433,12 @@ namespace System.Data.SqlClient.Tests
             IDictionary d = new SqlConnection().RetrieveStatistics();
             ICollection c = d.Keys;
 
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new string[20], -1));
-            Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 18));
-            Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 1000));
-            Assert.Throws<ArgumentException>(null, () => c.CopyTo(new string[4, 3], 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new string[20], -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 18));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new string[20], 1000));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new string[4, 3], 0));
             Assert.Throws<InvalidCastException>(() => c.CopyTo(new Version[20], 0));
         }
 
@@ -492,12 +543,12 @@ namespace System.Data.SqlClient.Tests
             IDictionary d = new SqlConnection().RetrieveStatistics();
             ICollection c = d.Values;
 
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
-            Assert.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
-            Assert.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new long[20], -1));
-            Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 18));
-            Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 1000));
-            Assert.Throws<ArgumentException>(null, () => c.CopyTo(new long[4, 3], 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, 0));
+            AssertExtensions.Throws<ArgumentNullException>("array", () => c.CopyTo(null, -1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("arrayIndex", () => c.CopyTo(new long[20], -1));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 18));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new long[20], 1000));
+            AssertExtensions.Throws<ArgumentException>(null, () => c.CopyTo(new long[4, 3], 0));
             Assert.Throws<InvalidCastException>(() => c.CopyTo(new Version[20], 0));
         }
 

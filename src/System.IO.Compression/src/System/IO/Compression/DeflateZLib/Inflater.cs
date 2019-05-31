@@ -9,7 +9,7 @@ using System.Security;
 namespace System.IO.Compression
 {
     /// <summary>
-    /// Provides a wrapper around the ZLib decompression API
+    /// Provides a wrapper around the ZLib decompression API.
     /// </summary>
     internal sealed class Inflater : IDisposable
     {
@@ -18,12 +18,11 @@ namespace System.IO.Compression
 
         private bool _finished;                             // Whether the end of the stream has been reached
         private bool _isDisposed;                           // Prevents multiple disposals
+        private int _windowBits;                            // The WindowBits parameter passed to Inflater construction
         private ZLibNative.ZLibStreamHandle _zlibStream;    // The handle to the primary underlying zlib stream
         private GCHandle _inputBufferHandle;                // The handle to the buffer that provides input to _zlibStream
 
-        private object SyncLock => this;                   // Used to make writing to unmanaged structures atomic 
-
-        #region Exposed Members
+        private object SyncLock => this;                    // Used to make writing to unmanaged structures atomic
 
         /// <summary>
         /// Initialized the Inflater with the given windowBits size
@@ -33,24 +32,16 @@ namespace System.IO.Compression
             Debug.Assert(windowBits >= MinWindowBits && windowBits <= MaxWindowBits);
             _finished = false;
             _isDisposed = false;
+            _windowBits = windowBits;
             InflateInit(windowBits);
         }
 
-        public int AvailableOutput
-        {
-            get
-            {
-                return (int)_zlibStream.AvailOut;
-            }
-        }
+        public int AvailableOutput => (int)_zlibStream.AvailOut;
 
         /// <summary>
         /// Returns true if the end of the stream has been reached.
         /// </summary>
-        public bool Finished()
-        {
-            return _finished && _zlibStream.AvailIn == 0 && _zlibStream.AvailOut == 0;
-        }
+        public bool Finished() => _finished;
 
         public unsafe bool Inflate(out byte b)
         {
@@ -75,6 +66,18 @@ namespace System.IO.Compression
             }
         }
 
+        public unsafe int Inflate(Span<byte> destination)
+        {
+            // If Inflate is called on an invalid or unready inflater, return 0 to indicate no bytes have been read.
+            if (destination.Length == 0)
+                return 0;
+
+            fixed (byte* bufPtr = &MemoryMarshal.GetReference(destination))
+            {
+                return InflateVerified(bufPtr, destination.Length);
+            }
+        }
+
         public unsafe int InflateVerified(byte* bufPtr, int length)
         {
             // State is valid; attempt inflation
@@ -83,7 +86,14 @@ namespace System.IO.Compression
                 int bytesRead;
                 if (ReadInflateOutput(bufPtr, length, ZLibNative.FlushCode.NoFlush, out bytesRead) == ZLibNative.ErrorCode.StreamEnd)
                 {
-                    _finished = true;
+                    if (!NeedsInput() && IsGzipStream() && _inputBufferHandle.IsAllocated)
+                    {
+                        _finished = ResetStreamForLeftoverInput();
+                    }
+                    else
+                    {
+                        _finished = true;
+                    }
                 }
                 return bytesRead;
             }
@@ -97,10 +107,48 @@ namespace System.IO.Compression
             }
         }
 
-        public bool NeedsInput()
+        /// <summary>
+        /// If this stream has some input leftover that hasn't been processed then we should
+        /// check if it is another GZip file concatenated with this one.
+        /// 
+        /// Returns false if the leftover input is another GZip data stream.
+        /// </summary>
+        private unsafe bool ResetStreamForLeftoverInput()
         {
-            return _zlibStream.AvailIn == 0;
+            Debug.Assert(!NeedsInput());
+            Debug.Assert(IsGzipStream());
+            Debug.Assert(_inputBufferHandle.IsAllocated);
+
+            lock (SyncLock)
+            {
+                IntPtr nextInPtr = _zlibStream.NextIn;
+                byte* nextInPointer = (byte*)nextInPtr.ToPointer();
+                uint nextAvailIn = _zlibStream.AvailIn;
+
+                // Check the leftover bytes to see if they start with he gzip header ID bytes
+                if (*nextInPointer != ZLibNative.GZip_Header_ID1 || (nextAvailIn > 1 && *(nextInPointer + 1) != ZLibNative.GZip_Header_ID2))
+                {
+                    return true;
+                }
+
+                // Trash our existing zstream.
+                _zlibStream.Dispose();
+
+                // Create a new zstream
+                InflateInit(_windowBits);
+
+                // SetInput on the new stream to the bits remaining from the last stream
+                _zlibStream.NextIn = nextInPtr;
+                _zlibStream.AvailIn = nextAvailIn;
+                _finished = false;
+            }
+
+            return false;
         }
+
+        internal bool IsGzipStream() => _windowBits >= 24 && _windowBits <= 31;
+
+        public bool NeedsInput() => _zlibStream.AvailIn == 0;
 
         public void SetInput(byte[] inputBuffer, int startIndex, int count)
         {
@@ -121,7 +169,6 @@ namespace System.IO.Compression
             }
         }
 
-        [SecuritySafeCritical]
         private void Dispose(bool disposing)
         {
             if (!_isDisposed)
@@ -147,14 +194,9 @@ namespace System.IO.Compression
             Dispose(false);
         }
 
-        #endregion
-
-        #region Helper Methods
-
         /// <summary>
-        /// Creates the ZStream that will handle inflation
+        /// Creates the ZStream that will handle inflation.
         /// </summary>
-        [SecuritySafeCritical]
         private void InflateInit(int windowBits)
         {
             ZLibNative.ErrorCode error;
@@ -206,7 +248,6 @@ namespace System.IO.Compression
         /// <summary>
         /// Wrapper around the ZLib inflate function
         /// </summary>
-        [SecuritySafeCritical]
         private ZLibNative.ErrorCode Inflate(ZLibNative.FlushCode flushCode)
         {
             ZLibNative.ErrorCode errC;
@@ -255,7 +296,5 @@ namespace System.IO.Compression
                 _inputBufferHandle.Free();
             }
         }
-
-        #endregion
     }
 }

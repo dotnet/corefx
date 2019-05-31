@@ -10,7 +10,6 @@ using System.Text.RegularExpressions;
 
 namespace System.Net
 {
-    [Serializable]
     public class WebProxy : IWebProxy, ISerializable
     {
         private ArrayList _bypassList;
@@ -97,7 +96,7 @@ namespace System.Net
 
         private static Uri CreateProxyUri(string address) =>
             address == null ? null :
-            address.IndexOf("://") == -1 ? new Uri("http://" + address) :
+            address.IndexOf("://", StringComparison.Ordinal) == -1 ? new Uri("http://" + address) :
             new Uri(address);
 
         private void UpdateRegExList(bool canThrow)
@@ -153,6 +152,11 @@ namespace System.Net
 
         private bool IsLocal(Uri host)
         {
+            if (host.IsLoopback)
+            {
+                return true;
+            }
+
             string hostString = host.Host;
 
             IPAddress hostAddress;
@@ -180,7 +184,7 @@ namespace System.Net
             // Perf note: The .NET Framework caches this and then uses network change notifications to track
             // whether the set should be recomputed.  We could consider doing the same if this is observed as
             // a bottleneck, but that tracking has its own costs.
-            IPAddress[] localAddresses = Dns.GetHostEntryAsync(Dns.GetHostName()).GetAwaiter().GetResult().AddressList; // TODO: Use synchronous GetHostEntry when available
+            IPAddress[] localAddresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
             for (int i = 0; i < localAddresses.Length; i++)
             {
                 if (ipAddress.Equals(localAddresses[i]))
@@ -201,33 +205,26 @@ namespace System.Net
 
             return
                 Address == null ||
-                host.IsLoopback ||
                 (BypassProxyOnLocal && IsLocal(host)) ||
                 IsMatchInBypassList(host);
         }
 
         protected WebProxy(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            BypassProxyOnLocal = serializationInfo.GetBoolean("_BypassOnLocal");
-            Address = (Uri)serializationInfo.GetValue("_ProxyAddress", typeof(Uri));
-            _bypassList = (ArrayList)serializationInfo.GetValue("_BypassList", typeof(ArrayList));
-            UseDefaultCredentials = serializationInfo.GetBoolean("_UseDefaultCredentials");
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         protected virtual void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            serializationInfo.AddValue("_BypassOnLocal", BypassProxyOnLocal);
-            serializationInfo.AddValue("_ProxyAddress", Address);
-            serializationInfo.AddValue("_BypassList", _bypassList);
-            serializationInfo.AddValue("_UseDefaultCredentials", UseDefaultCredentials);
+            throw new PlatformNotSupportedException();
         }
 
-        [Obsolete("This method has been deprecated. Please use the proxy selected for you by default. http://go.microsoft.com/fwlink/?linkid=14202")]
+        [Obsolete("This method has been deprecated. Please use the proxy selected for you by default. https://go.microsoft.com/fwlink/?linkid=14202")]
         public static WebProxy GetDefaultProxy()
         {
             // The .NET Framework here returns a proxy that fetches IE settings and

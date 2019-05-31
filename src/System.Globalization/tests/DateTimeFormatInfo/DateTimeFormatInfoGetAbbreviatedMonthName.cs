@@ -19,8 +19,7 @@ namespace System.Globalization.Tests
             yield return new object[] { new CultureInfo("en-US").DateTimeFormat, englishAbbreviatedMonthNames };
             yield return new object[] { new DateTimeFormatInfo(), englishAbbreviatedMonthNames };
 
-            // ActiveIssue(2103)
-            if (!PlatformDetection.IsUbuntu1510 && !PlatformDetection.IsUbuntu1604 && !PlatformDetection.IsUbuntu1610 && !PlatformDetection.IsFedora23)
+            if (!PlatformDetection.IsUbuntu || PlatformDetection.IsUbuntu1404)
             {
                 yield return new object[] { new CultureInfo("fr-FR").DateTimeFormat, new string[] { "", "janv.", "f\u00E9vr.", "mars", "avr.", "mai", "juin", "juil.", "ao\u00FBt", "sept.", "oct.", "nov.", "d\u00E9c.", "" } };
             }
@@ -28,7 +27,7 @@ namespace System.Globalization.Tests
 
         [Theory]
         [MemberData(nameof(GetAbbreviatedMonthName_TestData))]
-        public void GetAbbreviatedMonthName(DateTimeFormatInfo info, string[] expected)
+        public void GetAbbreviatedMonthName_Invoke_ReturnsExpected(DateTimeFormatInfo info, string[] expected)
         {
             for (int i = MinMonth; i <= MaxMonth; ++i)
             {
@@ -36,11 +35,13 @@ namespace System.Globalization.Tests
             }
         }
 
-        [Fact]
-        public void GetAbbreviatedMonthName_Invalid()
+        [Theory]
+        [InlineData(MinMonth - 1)]
+        [InlineData(MaxMonth + 1)]
+        public void GetAbbreviatedMonthName_InvalidMonth_ThrowsArgumentOutOfRangeException(int month)
         {
-            Assert.Throws<ArgumentOutOfRangeException>("month", () => new DateTimeFormatInfo().GetAbbreviatedMonthName(MinMonth - 1)); // Month is invalid
-            Assert.Throws<ArgumentOutOfRangeException>("month", (() => new DateTimeFormatInfo().GetAbbreviatedMonthName(MaxMonth + 1))); // Month is invalid
+            var format = new DateTimeFormatInfo();
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("month", () => format.GetAbbreviatedMonthName(month));
         }
     }
 }

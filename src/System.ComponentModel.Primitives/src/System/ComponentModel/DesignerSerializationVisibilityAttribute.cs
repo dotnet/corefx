@@ -5,79 +5,53 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>
-    ///         Specifies the visibility of this property or method as seen
-    ///         by the designer serializer.
-    ///    </para>
+    ///  Specifies the visibility of this property or method as seen by the designer
+    /// serializer.
     /// </summary>
     [AttributeUsage(AttributeTargets.Property | AttributeTargets.Method | AttributeTargets.Field | AttributeTargets.Event)]
     public sealed class DesignerSerializationVisibilityAttribute : Attribute
     {
         /// <summary>
-        ///    <para>
-        ///       Specifies that a visual designer should serialize the contents of this property,
-        ///       rather than the property itself.
-        ///       This <see langword='static '/>field is read-only.
-        ///    </para>
+        /// Specifies that a visual designer should serialize the contents of this property,
+        /// rather than the property itself.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Content = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Content);
 
         /// <summary>
-        ///    <para>
-        ///       Specifies that a
-        ///       visual designer will not serialize the value of this property.
-        ///       This <see langword='static '/>field is read-only.
-        ///    </para>
+        /// Specifies that a visual designer will not serialize the value of this property.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Hidden = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Hidden);
 
         /// <summary>
-        ///    <para>
-        ///       Specifies that a
-        ///       visual designer may use default rules when serializing the value of a property.
-        ///       This <see langword='static '/>field is read-only.
-        ///    </para>
+        /// Specifies that a visual designer may use default rules when serializing the
+        /// value of a property.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Visible = new DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility.Visible);
 
         /// <summary>
-        ///    <para>
-        ///       Specifies the default value, which is <see cref='System.ComponentModel.DesignerSerializationVisibilityAttribute.Visible'/>, that is, a visual designer 
-        ///       uses default rules to generate the value of a property. This
-        ///    <see langword='static '/>field is read-only. 
-        ///    </para>
+        /// Specifies the default value, which is <see cref='System.ComponentModel.DesignerSerializationVisibilityAttribute.Visible'/>,
+        /// that is, a visual designer  uses default rules to generate the value of a property.
+        /// This <see langword='static'/> field is read-only. 
         /// </summary>
         public static readonly DesignerSerializationVisibilityAttribute Default = Visible;
 
-        private readonly DesignerSerializationVisibility _visibility;
-
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the System.ComponentModel.PersistContentsAttribute class.
-        ///    </para>
+        /// Initializes a new instance of the System.ComponentModel.PersistContentsAttribute class.
         /// </summary>
         public DesignerSerializationVisibilityAttribute(DesignerSerializationVisibility visibility)
         {
-            _visibility = visibility;
+            Visibility = visibility;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets a value indicating whether a
-        ///       visual designer must generate special code to persist the value of a property.
-        ///    </para>
+        /// Gets a value indicating whether a visual designer must generate special code
+        /// to persist the value of a property.
         /// </summary>
-        public DesignerSerializationVisibility Visibility
-        {
-            get
-            {
-                return _visibility;
-            }
-        }
+        public DesignerSerializationVisibility Visibility { get; }
 
-        /// <internalonly/>
-        /// <summary>
-        /// </summary>
         public override bool Equals(object obj)
         {
             if (obj == this)
@@ -86,22 +60,11 @@ namespace System.ComponentModel
             }
 
             DesignerSerializationVisibilityAttribute other = obj as DesignerSerializationVisibilityAttribute;
-            return other != null && other.Visibility == _visibility;
+            return other?.Visibility == Visibility;
         }
 
-        /// <summary>
-        ///    <para>
-        ///       Returns the hashcode for this object.
-        ///    </para>
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
 
-        public override bool IsDefaultAttribute()
-        {
-            return Equals(DesignerSerializationVisibilityAttribute.Default);
-        }        
+        public override bool IsDefaultAttribute() => Equals(Default);
     }
 }

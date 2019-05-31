@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -118,7 +117,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="Arg_MustBeDriveLetterOrRootDir" xml:space="preserve">
-    <value>Drive name must be a root directory ('C:\\') or a drive letter ('C').</value>
+    <value>Drive name must be a root directory (i.e. 'C:\') or a drive letter ('C').</value>
   </data>
   <data name="Arg_MustBeNonEmptyDriveName" xml:space="preserve">
     <value>Drive name must not be empty.</value>
@@ -127,7 +126,7 @@
     <value>Illegal characters in drive name '{0}'.</value>
   </data>
   <data name="Argument_InvalidPathChars" xml:space="preserve">
-    <value>Illegal characters in path.</value>
+    <value>Illegal characters in path '{0}'.</value>
   </data>
   <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
     <value>Specified file length was too large for the file system.</value>
@@ -174,7 +173,7 @@
   <data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
     <value>Access to the path '{0}' is denied.</value>
   </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error '{0}'.</value>
+  <data name="IO_PathTooLong_Path" xml:space="preserve">
+    <value>The path '{0}' is too long, or a component of the specified path is too long.</value>
   </data>
 </root>

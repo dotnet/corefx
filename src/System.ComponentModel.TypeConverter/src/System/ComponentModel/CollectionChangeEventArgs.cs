@@ -5,42 +5,27 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    /// <para>Provides data for the <see langword='CollectionChange '/> event.</para>
+    /// Provides data for the <see langword='CollectionChange '/> event.
     /// </summary>
     public class CollectionChangeEventArgs : EventArgs
     {
-        private readonly CollectionChangeAction _action;
-        private readonly object _element;
-
         /// <summary>
-        /// <para>Initializes a new instance of the <see cref='System.ComponentModel.CollectionChangeEventArgs'/> class.</para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.CollectionChangeEventArgs'/> class.
         /// </summary>
         public CollectionChangeEventArgs(CollectionChangeAction action, object element)
         {
-            _action = action;
-            _element = element;
+            Action = action;
+            Element = element;
         }
 
         /// <summary>
-        ///    <para>Gets an action that specifies how the collection changed.</para>
+        /// Gets an action that specifies how the collection changed.
         /// </summary>
-        public virtual CollectionChangeAction Action
-        {
-            get
-            {
-                return _action;
-            }
-        }
+        public virtual CollectionChangeAction Action { get; }
 
         /// <summary>
-        ///    <para>Gets the instance of the collection with the change. </para>
+        /// Gets the instance of the collection with the change.
         /// </summary>
-        public virtual object Element
-        {
-            get
-            {
-                return _element;
-            }
-        }
+        public virtual object Element { get; }
     }
 }

@@ -70,7 +70,7 @@ UWP was the first application model that was supported by .NET Native. We now al
 
 Pretty much at the same time the .NET Framework was released, Microsoft also published Rotor, which is the source code for an implementation of ECMA 335 (Common Language Infrastructure), which is the specification behind .NET.
 
-While parts of the source were identical with the .NET Framework, many pieces had prototypic implementations instead: the purpose of Rotor wasn't to provide a production ready .NET implementation but to provide a platform for research, academia, and validation that the ECMA 335 specification itself can be implemented.
+While parts of the source were identical with the .NET Framework, many pieces had prototypical implementations instead: the purpose of Rotor wasn't to provide a production ready .NET implementation but to provide a platform for research, academia, and validation that the ECMA 335 specification itself can be implemented.
 
 It's also worth pointing out that the source code of Rotor was not released under an open source license (i.e. not approved by OSI) and has not been officially updated since .NET Framework 2.0.
 
@@ -95,7 +95,7 @@ Xamarin is a commercial offering for building mobile applications targeting Andr
 
 **Also referred to as**: LINQ
 
-Introduced in .NET Framework 3.5, Language-Integrated Query's (LINQ) goal to make data processing easier. LINQ is primarily a collection of methods that extend `IEnumerable` and `IEnumerable<T>`. LINQ is intended to be used with extension methods and Lambda functions (added in C# 3.0 and VB 9.0 at the same time as .NET Framework 3.5 was released) allowing for a function style of programing.
+Introduced in .NET Framework 3.5, Language-Integrated Query's (LINQ) goal to make data processing easier. LINQ is primarily a collection of methods that extend `IEnumerable` and `IEnumerable<T>`. LINQ is intended to be used with extension methods and Lambda functions (added in C# 3.0 and VB 9.0 at the same time as .NET Framework 3.5 was released) allowing for a function style of programming.
 
 A simple example of LINQ is
 
@@ -103,13 +103,13 @@ A simple example of LINQ is
 var odds = source.Where(obj => obj.Id == 1).ToArray();
 ```
 
-####IQueryable&lt;T&gt; and Expressions
+#### IQueryable&lt;T&gt; and Expressions
 
 One of the big advantages of using LINQ over more common data processing patterns is that the function given to the LINQ function can be converted to an expression and then executed in some other form, like SQL or on another machine across the network. An expression is a in-memory representation of some logic to follow.
 
-For example, in the above sample `source` could actually be a database connection and the function call `Where(obj => obj.Id == 1)` would be conveted to a SQL WHERE clause: `WHERE ID = 1`, and then executed on the SQL server.
+For example, in the above sample `source` could actually be a database connection and the function call `Where(obj => obj.Id == 1)` would be converted to a SQL WHERE clause: `WHERE ID = 1`, and then executed on the SQL server.
 
-####Parallel LINQ
+#### Parallel LINQ
 
 **Also referred to as**: PLINQ
 
@@ -139,3 +139,7 @@ The .NET platform currently doesn't contain a cross-platform XAML-based UI stack
 * [WPFLight](https://github.com/ronnycsharp/WPFLight): An OSS project to create WPF on top of XNA/MonoGame.
 * [Perspex](https://github.com/Perspex/Perspex): A cross-platform UI framework based on WPF.
 * [Granular](https://github.com/yuvaltz/Granular): A OSS project to allow WPF applications to run in the browser.
+
+## Engineering system
+
+* **Helix**. It's a massively-parallel, general-purpose job processing and result aggregation system running in the cloud. The work items that corefx sends to Helix are [xunit](https://github.com/xunit) tests. Test results are shown through the *Mission Control* reporting site, https://mc.dot.net/; to go to the test results in a PR from Azure DevOps, you can click on the *Send to Helix* step in the build, and the logs will have the URL.

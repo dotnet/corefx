@@ -830,6 +830,13 @@ namespace System.Linq
              (s_Where_Index_TSource_2 = new Func<IQueryable<object>, Expression<Func<object, int, bool>>, IQueryable<object>>(Queryable.Where).GetMethodInfo().GetGenericMethodDefinition()))
               .MakeGenericMethod(TSource);
 
+        private static MethodInfo s_Zip_TFirst_TSecond_2;
+
+        public static MethodInfo Zip_TFirst_TSecond_2(Type TFirst, Type TSecond) =>
+            (s_Zip_TFirst_TSecond_2 ??
+            (s_Zip_TFirst_TSecond_2 = new Func<IQueryable<object>, IEnumerable<object>, IQueryable<ValueTuple<object, object>>>(Queryable.Zip).GetMethodInfo().GetGenericMethodDefinition()))
+            .MakeGenericMethod(TFirst, TSecond);
+
         private static MethodInfo s_Zip_TFirst_TSecond_TResult_3;
 
         public static MethodInfo Zip_TFirst_TSecond_TResult_3(Type TFirst, Type TSecond, Type TResult) =>
@@ -837,5 +844,33 @@ namespace System.Linq
              (s_Zip_TFirst_TSecond_TResult_3 = new Func<IQueryable<object>, IEnumerable<object>, Expression<Func<object, object, object>>, IQueryable<object>>(Queryable.Zip).GetMethodInfo().GetGenericMethodDefinition()))
               .MakeGenericMethod(TFirst, TSecond, TResult);
 
+
+        private static MethodInfo s_SkipLast_TSource_2;
+
+        public static MethodInfo SkipLast_TSource_2(Type TSource) =>
+             (s_SkipLast_TSource_2 ??
+             (s_SkipLast_TSource_2 = new Func<IQueryable<object>, int, IQueryable<object>>(Queryable.SkipLast).GetMethodInfo().GetGenericMethodDefinition()))
+              .MakeGenericMethod(TSource);
+
+        private static MethodInfo s_TakeLast_TSource_2;
+
+        public static MethodInfo TakeLast_TSource_2(Type TSource) =>
+             (s_TakeLast_TSource_2 ??
+             (s_TakeLast_TSource_2 = new Func<IQueryable<object>, int, IQueryable<object>>(Queryable.TakeLast).GetMethodInfo().GetGenericMethodDefinition()))
+              .MakeGenericMethod(TSource);
+
+        private static MethodInfo s_Append_TSource_2;
+
+        public static MethodInfo Append_TSource_2(Type TSource) =>
+             (s_Append_TSource_2 ??
+             (s_Append_TSource_2 = new Func<IQueryable<object>, object, IQueryable<object>>(Queryable.Append).GetMethodInfo().GetGenericMethodDefinition()))
+              .MakeGenericMethod(TSource);
+
+        private static MethodInfo s_Prepend_TSource_2;
+
+        public static MethodInfo Prepend_TSource_2(Type TSource) =>
+             (s_Prepend_TSource_2 ??
+             (s_Prepend_TSource_2 = new Func<IQueryable<object>, object, IQueryable<object>>(Queryable.Prepend).GetMethodInfo().GetGenericMethodDefinition()))
+              .MakeGenericMethod(TSource);
     }
 }

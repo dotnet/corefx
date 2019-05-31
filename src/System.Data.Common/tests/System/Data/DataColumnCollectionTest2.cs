@@ -231,7 +231,7 @@ namespace System.Data.Tests
         [Fact]
         public void TestCanRemove_ForigenConstraint()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
 
             Assert.Equal(false, ds.Tables["child"].Columns.CanRemove(ds.Tables["child"].Columns["parentId"]));
             Assert.Equal(false, ds.Tables["parent"].Columns.CanRemove(ds.Tables["child"].Columns["parentId"]));
@@ -450,7 +450,7 @@ namespace System.Data.Tests
             //------Check Remove column exception---------
             dt = dtSource.Clone();
             dt.ImportRow(dtSource.Rows[0]);
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 DataColumn dc = new DataColumn();
                 dt.Columns.Remove(dc);
@@ -474,7 +474,7 @@ namespace System.Data.Tests
             DataTable dt = new DataTable();
             DataColumn col = new DataColumn("col1", Type.GetType("System.String"));
             dt.Columns.Add(col);
-            Assert.Throws<ArgumentException>(() => dt.Columns.Add(col));
+            AssertExtensions.Throws<ArgumentException>(null, () => dt.Columns.Add(col));
         }
 
         [Fact]
@@ -570,8 +570,8 @@ namespace System.Data.Tests
         [Fact]
         public void Clear2()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
-            Assert.Throws<ArgumentException>(() =>
+            DataSet ds = DataProvider.CreateForeignConstraint();
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 ds.Tables[0].Columns.Clear();
             });
@@ -580,7 +580,7 @@ namespace System.Data.Tests
         [Fact]
         public void Clear3()
         {
-            DataSet ds = DataProvider.CreateForigenConstraint();
+            DataSet ds = DataProvider.CreateForeignConstraint();
             ds.Tables[1].Constraints.RemoveAt(0);
             ds.Tables[0].Constraints.RemoveAt(0);
             ds.Tables[0].Columns.Clear();
@@ -767,20 +767,20 @@ namespace System.Data.Tests
             dt = dtSource.Clone();
             dt.ImportRow(dtSource.Rows[0]);
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 dt.Columns.Remove("NotExist");
             });
 
             dt.Columns.Clear();
 
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 dt.Columns.Remove("Col_0");
             });
         }
 
-        private bool _eventOccured = false;
+        private bool _eventOccurred = false;
 
         [Fact]
         public void RemoveAt_Integer()
@@ -790,7 +790,7 @@ namespace System.Data.Tests
             int originalColumnCount = dt.Columns.Count;
             dt.Columns.RemoveAt(0);
             Assert.Equal(originalColumnCount - 1, dt.Columns.Count);
-            Assert.Equal(true, _eventOccured);
+            Assert.Equal(true, _eventOccurred);
 
             Assert.Throws<IndexOutOfRangeException>(() =>
             {
@@ -836,7 +836,7 @@ namespace System.Data.Tests
 
         private void Columns_CollectionChanged1(object sender, CollectionChangeEventArgs e)
         {
-            _eventOccured = true;
+            _eventOccurred = true;
         }
     }
 }

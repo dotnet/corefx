@@ -10,7 +10,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct ImportDefinitionCollection : IEnumerable<ImportDefinition>
+    public readonly struct ImportDefinitionCollection : IEnumerable<ImportDefinition>
     {
         private readonly MemoryBlock _block;
 
@@ -121,7 +121,7 @@ namespace System.Reflection.Metadata
                         break;
 
                     default:
-                        throw new BadImageFormatException(string.Format(SR.InvalidImportDefinitionKind, kind));
+                        throw new BadImageFormatException(SR.Format(SR.InvalidImportDefinitionKind, kind));
                 }
 
                 return true;

@@ -177,9 +177,9 @@ namespace System.Net
             }
         }
 
-        ///     Pipelined command resoluton.
+        ///     Pipelined command resolution.
         ///     How this works:
-        ///     A list of commands that need to be sent to the FTP server are spliced together into a array,
+        ///     A list of commands that need to be sent to the FTP server are spliced together into an array,
         ///     each command such STOR, PORT, etc, is sent to the server, then the response is parsed into a string,
         ///     with the response, the delegate is called, which returns an instruction (either continue, stop, or read additional
         ///     responses from server).
@@ -207,7 +207,7 @@ namespace System.Net
                         {
                             int index = sendCommand.IndexOf(' ');
                             if (index != -1)
-                                sendCommand = sendCommand.Substring(0, index) + " ********";
+                                sendCommand = string.Concat(sendCommand.AsSpan(0, index), " ********");
                         }
                         if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"Sending command {sendCommand}");
                     }

@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel;
 using System.IO;
 using System.IO.Pipes;
 using System.Net.Security;
-using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -22,9 +22,7 @@ namespace System.Data.SqlClient.SNI
 
         private readonly string _targetServer;
         private readonly object _callbackObject;
-        private readonly TaskScheduler _writeScheduler;
-        private readonly TaskFactory _writeTaskFactory;
-
+        
         private Stream _stream;
         private NamedPipeClientStream _pipeStream;
         private SslOverTdsStream _sslOverTdsStream;
@@ -41,12 +39,14 @@ namespace System.Data.SqlClient.SNI
         {
             _targetServer = serverName;
             _callbackObject = callbackObject;
-            _writeScheduler = new ConcurrentExclusiveSchedulerPair().ExclusiveScheduler;
-            _writeTaskFactory = new TaskFactory(_writeScheduler);
 
             try
             {
-                _pipeStream = new NamedPipeClientStream(serverName, pipeName, PipeDirection.InOut, PipeOptions.WriteThrough, Security.Principal.TokenImpersonationLevel.None);
+                _pipeStream = new NamedPipeClientStream(
+                    serverName,
+                    pipeName,
+                    PipeDirection.InOut,
+                    PipeOptions.Asynchronous | PipeOptions.WriteThrough);
 
                 bool isInfiniteTimeOut = long.MaxValue == timerExpire;
                 if (isInfiniteTimeOut)
@@ -63,8 +63,8 @@ namespace System.Data.SqlClient.SNI
             }
             catch(TimeoutException te)
             {
-                SNICommon.ReportSNIError(SNIProviders.NP_PROV, SNICommon.ConnTimeoutError, te);
-                _status = TdsEnums.SNI_WAIT_TIMEOUT;
+                SNICommon.ReportSNIError(SNIProviders.NP_PROV, SNICommon.ConnOpenFailedError, te);
+                _status = TdsEnums.SNI_ERROR;
                 return;
             }
             catch(IOException ioe)
@@ -137,6 +137,9 @@ namespace System.Data.SqlClient.SNI
                     _pipeStream.Dispose();
                     _pipeStream = null;
                 }
+
+                //Release any references held by _stream.
+                _stream = null;
             }
         }
 
@@ -147,13 +150,13 @@ namespace System.Data.SqlClient.SNI
                 packet = null;
                 try
                 {
-                    packet = new SNIPacket(null);
-                    packet.Allocate(_bufferSize);
+                    packet = new SNIPacket(_bufferSize);
                     packet.ReadFromStream(_stream);
 
                     if (packet.Length == 0)
                     {
-                        return ReportErrorAndReleasePacket(packet, 0, SNICommon.ConnTerminatedError, string.Empty);
+                        var e = new Win32Exception();
+                        return ReportErrorAndReleasePacket(packet, (uint)e.NativeErrorCode, 0, e.Message);
                     }
                 }
                 catch (ObjectDisposedException ode)
@@ -171,24 +174,20 @@ namespace System.Data.SqlClient.SNI
 
         public override uint ReceiveAsync(ref SNIPacket packet)
         {
-            lock (this)
+            packet = new SNIPacket(_bufferSize);
+            
+            try
             {
-                packet = new SNIPacket(null);
-                packet.Allocate(_bufferSize);
-
-                try
-                {
-                    packet.ReadFromStreamAsync(_stream, _receiveCallback);
-                    return TdsEnums.SNI_SUCCESS_IO_PENDING;
-                }
-                catch (ObjectDisposedException ode)
-                {
-                    return ReportErrorAndReleasePacket(packet, ode);
-                }
-                catch (IOException ioe)
-                {
-                    return ReportErrorAndReleasePacket(packet, ioe);
-                }
+                packet.ReadFromStreamAsync(_stream, _receiveCallback);
+                return TdsEnums.SNI_SUCCESS_IO_PENDING;
+            }
+            catch (ObjectDisposedException ode)
+            {
+                return ReportErrorAndReleasePacket(packet, ode);
+            }
+            catch (IOException ioe)
+            {
+                return ReportErrorAndReleasePacket(packet, ioe);
             }
         }
 
@@ -212,45 +211,10 @@ namespace System.Data.SqlClient.SNI
             }
         }
 
-        public override uint SendAsync(SNIPacket packet, SNIAsyncCallback callback = null)
+        public override uint SendAsync(SNIPacket packet, bool disposePacketAfterSendAsync, SNIAsyncCallback callback = null)
         {
-            SNIPacket newPacket = packet;
-
-            _writeTaskFactory.StartNew(() =>
-            {
-                try
-                {
-                    lock (this)
-                    {
-                        packet.WriteToStream(_stream);
-                    }
-                }
-                catch (Exception e)
-                {
-                    SNICommon.ReportSNIError(SNIProviders.NP_PROV, SNICommon.InternalExceptionError, e);
-
-                    if (callback != null)
-                    {
-                        callback(packet, TdsEnums.SNI_ERROR);
-                    }
-                    else
-                    {
-                        _sendCallback(packet, TdsEnums.SNI_ERROR);
-                    }
-
-                    return;
-                }
-
-                if (callback != null)
-                {
-                    callback(packet, TdsEnums.SNI_SUCCESS);
-                }
-                else
-                {
-                    _sendCallback(packet, TdsEnums.SNI_SUCCESS);
-                }
-            });
-
+            SNIAsyncCallback cb = callback ?? _sendCallback;
+            packet.WriteToStreamAsync(_stream, cb, SNIProviders.NP_PROV, disposePacketAfterSendAsync);
             return TdsEnums.SNI_SUCCESS_IO_PENDING;
         }
 

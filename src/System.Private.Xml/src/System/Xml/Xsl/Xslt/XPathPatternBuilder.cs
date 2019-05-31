@@ -42,7 +42,7 @@ namespace System.Xml.Xsl.Xslt
 
         public virtual void StartBuild()
         {
-            Debug.Assert(!_inTheBuild, "XPathBuilder is buisy!");
+            Debug.Assert(!_inTheBuild, "XPathBuilder is busy!");
             _inTheBuild = true;
             return;
         }
@@ -225,7 +225,7 @@ namespace System.Xml.Xsl.Xslt
 
         QilNode IXPathBuilder<QilNode>.Predicate(QilNode node, QilNode condition, bool isReverseStep)
         {
-            Debug.Assert(false, "Should not call to this function.");
+            Debug.Fail("Should not call to this function.");
             return null;
         }
 
@@ -280,7 +280,7 @@ namespace System.Xml.Xsl.Xslt
                 QilIterator matchNodeIter = _f.For(matchingSet);
                 QilNode filterCurrent = _f.Filter(matchNodeIter, _f.Is(matchNodeIter, current));
                 nodeFilter.Body = _f.Not(_f.IsEmpty(filterCurrent));
-                //for passing type check, explict say the result is target type
+                //for passing type check, explicit say the result is target type
                 nodeFilter.Body = _f.And(_f.IsType(current, nodeFilter.XmlType), nodeFilter.Body);
             }
 
@@ -321,14 +321,15 @@ namespace System.Xml.Xsl.Xslt
         }
 
         public QilNode String(string value) { return _f.String(value); }     // As argument of id() or key() function
-        public QilNode Number(double value) { return UnexpectedToken("Literal number"); }
-        public QilNode Variable(string prefix, string name) { return UnexpectedToken("Variable"); }
-
-        private QilNode UnexpectedToken(string tokenName)
+        public QilNode Number(double value)
         {
-            string prompt = string.Format(CultureInfo.InvariantCulture, "Internal Error: {0} is not allowed in XSLT pattern outside of predicate.", tokenName);
-            Debug.Assert(false, prompt);
-            throw new Exception(prompt);
+            //Internal Error: Literal number is not allowed in XSLT pattern outside of predicate.
+            throw new XmlException(SR.Xml_InternalError);
+        }
+        public QilNode Variable(string prefix, string name)
+        {
+            //Internal Error: Variable is not allowed in XSLT pattern outside of predicate.
+            throw new XmlException(SR.Xml_InternalError);
         }
 
         // -------------------------------------- Priority / Parent ---------------------------------------

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -52,6 +53,22 @@ namespace System.Linq.Tests
             };
             string[] expected = { "Prakash", "Bob", "Chris", null, "Prakash" };
             Assert.Equal(expected, source.Select(e => e.name));
+        }
+
+        [Fact]
+        public void RunOnce()
+        {
+            var source = new[]{
+                new { name="Prakash", custID=98088 },
+                new { name="Bob", custID=29099 },
+                new { name="Chris", custID=39033 },
+                new { name=(string)null, custID=30349 },
+                new { name="Prakash", custID=39030 }
+            };
+            string[] expected = { "Prakash", "Bob", "Chris", null, "Prakash" };
+            Assert.Equal(expected, source.RunOnce().Select(e => e.name));
+            Assert.Equal(expected, source.ToArray().RunOnce().Select(e => e.name));
+            Assert.Equal(expected, source.ToList().RunOnce().Select(e => e.name));
         }
 
         [Fact]
@@ -123,8 +140,7 @@ namespace System.Linq.Tests
             Assert.Equal(expected, source.Select((e, i) => i == 5 ? e.name : null));
         }
 
-        [Fact]
-        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
+        [Fact(Skip = "Valid test but too intensive to enable even in OuterLoop")]
         public void Overflow()
         {
             var selected = new FastInfiniteEnumerator<int>().Select((e, i) => e);
@@ -144,7 +160,7 @@ namespace System.Linq.Tests
             IEnumerable<int> source = null;
             Func<int, int> selector = i => i + 1;
 
-            Assert.Throws<ArgumentNullException>("source", () => source.Select(selector));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Select(selector));
         }
 
         [Fact]
@@ -153,7 +169,7 @@ namespace System.Linq.Tests
             IEnumerable<int> source = Enumerable.Range(1, 10);
             Func<int, int, int> selector = null;
 
-            Assert.Throws<ArgumentNullException>("selector", () => source.Select(selector));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => source.Select(selector));
         }
 
         [Fact]
@@ -162,7 +178,7 @@ namespace System.Linq.Tests
             IEnumerable<int> source = null;
             Func<int, int, int> selector = (e, i) => i + 1;
 
-            Assert.Throws<ArgumentNullException>("source", () => source.Select(selector));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Select(selector));
         }
 
         [Fact]
@@ -171,7 +187,7 @@ namespace System.Linq.Tests
             IEnumerable<int> source = Enumerable.Range(1, 10);
             Func<int, int> selector = null;
 
-            Assert.Throws<ArgumentNullException>("selector", () => source.Select(selector));
+            AssertExtensions.Throws<ArgumentNullException>("selector", () => source.Select(selector));
         }
         [Fact]
         public void Select_SourceIsAnArray_ExecutionIsDeferred()
@@ -224,7 +240,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void SelectSelect_SourceIsAnArray_ExecutionIsDefered()
+        public void SelectSelect_SourceIsAnArray_ExecutionIsDeferred()
         {
             bool funcCalled = false;
             Func<int>[] source = new Func<int>[] { () => { funcCalled = true; return 1; } };
@@ -234,7 +250,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void SelectSelect_SourceIsAList_ExecutionIsDefered()
+        public void SelectSelect_SourceIsAList_ExecutionIsDeferred()
         {
             bool funcCalled = false;
             List<Func<int>> source = new List<Func<int>>() { () => { funcCalled = true; return 1; } };
@@ -264,7 +280,7 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void SelectSelect_SourceIsIEnumerable_ExecutionIsDefered()
+        public void SelectSelect_SourceIsIEnumerable_ExecutionIsDeferred()
         {
             bool funcCalled = false;
             IEnumerable<Func<int>> source = Enumerable.Repeat((Func<int>)(() => { funcCalled = true; return 1; }), 1);
@@ -715,14 +731,16 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void Select_ResetCalledOnEnumerator_ExceptionThrown()
+        public void Select_ResetCalledOnEnumerator_ThrowsException()
         {
             int[] source = new[] { 1, 2, 3, 4, 5 };
             Func<int, int> selector = i => i + 1;
 
-            var result = source.Select(selector);
-            var enumerator = result.GetEnumerator();
+            IEnumerable<int> result = source.Select(selector);
+            IEnumerator<int> enumerator = result.GetEnumerator();
 
+            // The.NET full framework throws a NotImplementedException.
+            // See https://github.com/dotnet/corefx/pull/2959.
             Assert.Throws<NotSupportedException>(() => enumerator.Reset());
         }
 
@@ -884,12 +902,12 @@ namespace System.Linq.Tests
             var source = new[] { 1, 2, 3, 4 }.Select(i => i * 2);
             for (int i = 0; i != 4; ++i)
                 Assert.Equal(i * 2 + 2, source.ElementAt(i));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(40));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(40));
 
             Assert.Equal(6, source.Skip(1).ElementAt(1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.Skip(2).ElementAt(9));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.Skip(2).ElementAt(9));
         }
 
         [Fact]
@@ -898,12 +916,12 @@ namespace System.Linq.Tests
             var source = new List<int> { 1, 2, 3, 4 }.Select(i => i * 2);
             for (int i = 0; i != 4; ++i)
                 Assert.Equal(i * 2 + 2, source.ElementAt(i));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(40));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(40));
 
             Assert.Equal(6, source.Skip(1).ElementAt(1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.Skip(2).ElementAt(9));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.Skip(2).ElementAt(9));
         }
 
         [Fact]
@@ -912,12 +930,12 @@ namespace System.Linq.Tests
             var source = new List<int> { 1, 2, 3, 4 }.AsReadOnly().Select(i => i * 2);
             for (int i = 0; i != 4; ++i)
                 Assert.Equal(i * 2 + 2, source.ElementAt(i));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(40));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(4));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.ElementAt(40));
 
             Assert.Equal(6, source.Skip(1).ElementAt(1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => source.Skip(2).ElementAt(9));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => source.Skip(2).ElementAt(9));
         }
 
         [Fact]
@@ -1151,6 +1169,66 @@ namespace System.Linq.Tests
             yield return new object[] { Array.Empty<int>() };
             yield return new object[] { new int[1] };
             yield return new object[] { Enumerable.Range(1, 30) };
+        }
+
+        [Theory]
+        [MemberData(nameof(RunSelectorDuringCountData))]
+        public void RunSelectorDuringCount(IEnumerable<int> source)
+        {
+            int timesRun = 0;
+            var selected = source.Select(i => timesRun++);
+            selected.Count();
+
+            Assert.Equal(source.Count(), timesRun);
+        }
+
+        // [Theory]
+        [MemberData(nameof(RunSelectorDuringCountData))]
+        public void RunSelectorDuringPartitionCount(IEnumerable<int> source)
+        {
+            int timesRun = 0;
+
+            var selected = source.Select(i => timesRun++);
+
+            if (source.Any())
+            {
+                selected.Skip(1).Count();
+                Assert.Equal(source.Count() - 1, timesRun);
+
+                selected.Take(source.Count() - 1).Count();
+                Assert.Equal(source.Count() * 2 - 2, timesRun);
+            }
+        }
+
+        public static IEnumerable<object[]> RunSelectorDuringCountData()
+        {
+            var transforms = new Func<IEnumerable<int>, IEnumerable<int>>[]
+            {
+                e => e,
+                e => ForceNotCollection(e),
+                e => ForceNotCollection(e).Skip(1),
+                e => ForceNotCollection(e).Where(i => true), 
+                e => e.ToArray().Where(i => true),
+                e => e.ToList().Where(i => true),
+                e => new LinkedList<int>(e).Where(i => true),
+                e => e.Select(i => i),
+                e => e.Take(e.Count()),
+                e => e.ToArray(),
+                e => e.ToList(),
+                e => new LinkedList<int>(e) // Implements IList<T>.
+            };
+
+            var r = new Random(unchecked((int)0x984bf1a3));
+
+            for (int i = 0; i <= 5; i++)
+            {
+                var enumerable = Enumerable.Range(1, i).Select(_ => r.Next());
+
+                foreach (var transform in transforms)
+                {
+                    yield return new object[] { transform(enumerable) };
+                }
+            }
         }
     }
 }

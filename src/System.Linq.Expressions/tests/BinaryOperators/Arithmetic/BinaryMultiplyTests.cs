@@ -214,7 +214,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<ushort> f = e.Compile(useInterpreter);
 
-            Assert.Equal((ushort)(a * b), f());
+            Assert.Equal(unchecked((ushort)(a * b)), f());
         }
 
         private static void VerifyUShortMultiplyOvf(ushort a, ushort b, bool useInterpreter)
@@ -251,7 +251,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<short> f = e.Compile(useInterpreter);
 
-            Assert.Equal((short)(a * b), f());
+            Assert.Equal(unchecked((short)(a * b)), f());
         }
 
         private static void VerifyShortMultiplyOvf(short a, short b, bool useInterpreter)
@@ -289,7 +289,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<uint> f = e.Compile(useInterpreter);
 
-            Assert.Equal(a * b, f());
+            Assert.Equal(unchecked(a * b), f());
         }
 
         private static void VerifyUIntMultiplyOvf(uint a, uint b, bool useInterpreter)
@@ -327,7 +327,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<int> f = e.Compile(useInterpreter);
 
-            Assert.Equal(a * b, f());
+            Assert.Equal(unchecked(a * b), f());
         }
 
         private static void VerifyIntMultiplyOvf(int a, int b, bool useInterpreter)
@@ -365,7 +365,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<ulong> f = e.Compile(useInterpreter);
 
-            Assert.Equal(a * b, f());
+            Assert.Equal(unchecked(a * b), f());
         }
 
         private static void VerifyULongMultiplyOvf(ulong a, ulong b, bool useInterpreter)
@@ -403,7 +403,7 @@ namespace System.Linq.Expressions.Tests
                     Enumerable.Empty<ParameterExpression>());
             Func<long> f = e.Compile(useInterpreter);
 
-            Assert.Equal(a * b, f());
+            Assert.Equal(unchecked(a * b), f());
         }
 
         private static void VerifyLongMultiplyOvf(long a, long b, bool useInterpreter)
@@ -495,7 +495,7 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.Multiply(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
@@ -504,31 +504,31 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.MultiplyChecked(Expression.Constant(0), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public static void ThrowsOnLeftNull()
         {
-            Assert.Throws<ArgumentNullException>("left", () => Expression.Multiply(null, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.Multiply(null, Expression.Constant("")));
         }
 
         [Fact]
         public static void ThrowsOnRightNull()
         {
-            Assert.Throws<ArgumentNullException>("right", () => Expression.Multiply(Expression.Constant(""), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.Multiply(Expression.Constant(""), null));
         }
 
         [Fact]
         public static void CheckedThrowsOnLeftNull()
         {
-            Assert.Throws<ArgumentNullException>("left", () => Expression.MultiplyChecked(null, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.MultiplyChecked(null, Expression.Constant("")));
         }
 
         [Fact]
         public static void CheckedThrowsOnRightNull()
         {
-            Assert.Throws<ArgumentNullException>("right", () => Expression.MultiplyChecked(Expression.Constant(""), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.MultiplyChecked(Expression.Constant(""), null));
         }
 
         private static class Unreadable<T>
@@ -543,28 +543,28 @@ namespace System.Linq.Expressions.Tests
         public static void ThrowsOnLeftUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("left", () => Expression.Multiply(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.Multiply(value, Expression.Constant(1)));
         }
 
         [Fact]
         public static void ThrowsOnRightUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("right", () => Expression.Multiply(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.Multiply(Expression.Constant(1), value));
         }
 
         [Fact]
         public static void CheckedThrowsOnLeftUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("left", () => Expression.MultiplyChecked(value, Expression.Constant(1)));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.MultiplyChecked(value, Expression.Constant(1)));
         }
 
         [Fact]
         public static void CheckedThrowsOnRightUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<int>), "WriteOnly");
-            Assert.Throws<ArgumentException>("right", () => Expression.MultiplyChecked(Expression.Constant(1), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.MultiplyChecked(Expression.Constant(1), value));
         }
 
         [Fact]
@@ -575,6 +575,88 @@ namespace System.Linq.Expressions.Tests
 
             BinaryExpression e2 = Expression.MultiplyChecked(Expression.Parameter(typeof(int), "a"), Expression.Parameter(typeof(int), "b"));
             Assert.Equal("(a * b)", e2.ToString());
+        }
+
+        // Simulate VB-style overloading of exponentiation operation
+        public struct VBStyleExponentiation
+        {
+            public VBStyleExponentiation(double value) => Value = value;
+
+            public double Value { get; }
+
+            public static implicit operator VBStyleExponentiation(double value) => new VBStyleExponentiation(value);
+
+            public static VBStyleExponentiation op_Exponent(VBStyleExponentiation x, VBStyleExponentiation y) => Math.Pow(x.Value, y.Value);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void VBStyleOperatorOverloading(bool useInterpreter)
+        {
+            var b = Expression.Parameter(typeof(VBStyleExponentiation));
+            var e = Expression.Parameter(typeof(VBStyleExponentiation));
+            var func = Expression.Lambda<Func<VBStyleExponentiation, VBStyleExponentiation, VBStyleExponentiation>>(
+                    Expression.Power(b, e), b, e).Compile(useInterpreter);
+            Assert.Equal(8.0, func(2.0, 3.0).Value);
+            Assert.Equal(10000.0, func(10.0, 4.0).Value);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void VBStyleOperatorOverloadingLifted(bool useInterpreter)
+        {
+            var b = Expression.Parameter(typeof(VBStyleExponentiation?));
+            var e = Expression.Parameter(typeof(VBStyleExponentiation?));
+            var func = Expression.Lambda<Func<VBStyleExponentiation?, VBStyleExponentiation?, VBStyleExponentiation?>>(
+                Expression.Power(b, e), b, e).Compile(useInterpreter);
+            Assert.Equal(8.0, func(2.0, 3.0).Value.Value);
+            Assert.Equal(10000.0, func(10.0, 4.0).Value.Value);
+            Assert.Null(func(2.0, null));
+            Assert.Null(func(null, 2.0));
+            Assert.Null(func(null, null));
+        }
+
+        // Simulate F#-style overloading of exponentiation operation
+        public struct FSStyleExponentiation
+        {
+            public FSStyleExponentiation(double value) => Value = value;
+
+            public static implicit operator FSStyleExponentiation(double value) => new FSStyleExponentiation(value);
+
+            public double Value { get; }
+
+            public static FSStyleExponentiation op_Exponentiation(FSStyleExponentiation x, FSStyleExponentiation y)
+                => new FSStyleExponentiation(Math.Pow(x.Value, y.Value));
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void FSStyleOperatorOverloading(bool useInterpreter)
+        {
+            var b = Expression.Parameter(typeof(FSStyleExponentiation));
+            var e = Expression.Parameter(typeof(FSStyleExponentiation));
+            var func = Expression.Lambda<Func<FSStyleExponentiation, FSStyleExponentiation, FSStyleExponentiation>>(
+                Expression.Power(b, e), b, e).Compile(useInterpreter);
+            Assert.Equal(8.0, func(2.0, 3.0).Value);
+            Assert.Equal(10000.0, func(10.0, 4.0).Value);
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void FSStyleOperatorOverloadingLifted(bool useInterpreter)
+        {
+            var b = Expression.Parameter(typeof(FSStyleExponentiation?));
+            var e = Expression.Parameter(typeof(FSStyleExponentiation?));
+            var func = Expression.Lambda<Func<FSStyleExponentiation?, FSStyleExponentiation?, FSStyleExponentiation?>>(
+                Expression.Power(b, e), b, e).Compile(useInterpreter);
+            Assert.Equal(8.0, func(2.0, 3.0).Value.Value);
+            Assert.Equal(10000.0, func(10.0, 4.0).Value.Value);
+            Assert.Null(func(2.0, null));
+            Assert.Null(func(null, 2.0));
+            Assert.Null(func(null, null));
+        }
+
+        [Fact]
+        public static void ExponentiationNotSupported()
+        {
+            ConstantExpression arg = Expression.Constant("");
+            Assert.Throws<InvalidOperationException>(() => Expression.Power(arg, arg));
         }
     }
 }

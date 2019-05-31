@@ -55,7 +55,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         public void RemoveStoreWithContent(PresetScopes scope)
         {
             TestHelper.WipeStores();

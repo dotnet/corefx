@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -13,10 +13,10 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentNullException>("sourceFileName", () => isf.CopyFile(null, "bar"));
-                Assert.Throws<ArgumentNullException>("sourceFileName", () => isf.CopyFile(null, "bar", true));
-                Assert.Throws<ArgumentNullException>("destinationFileName", () => isf.CopyFile("foo", null));
-                Assert.Throws<ArgumentNullException>("destinationFileName", () => isf.CopyFile("foo", null, true));
+                AssertExtensions.Throws<ArgumentNullException>("sourceFileName", () => isf.CopyFile(null, "bar"));
+                AssertExtensions.Throws<ArgumentNullException>("sourceFileName", () => isf.CopyFile(null, "bar", true));
+                AssertExtensions.Throws<ArgumentNullException>("destinationFileName", () => isf.CopyFile("foo", null));
+                AssertExtensions.Throws<ArgumentNullException>("destinationFileName", () => isf.CopyFile("foo", null, true));
             }
         }
 
@@ -25,10 +25,10 @@ namespace System.IO.IsolatedStorage
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>("sourceFileName", () => isf.CopyFile(string.Empty, "bar"));
-                Assert.Throws<ArgumentException>("sourceFileName", () => isf.CopyFile(string.Empty, "bar", true));
-                Assert.Throws<ArgumentException>("destinationFileName", () => isf.CopyFile("foo", string.Empty));
-                Assert.Throws<ArgumentException>("destinationFileName", () => isf.CopyFile("foo", string.Empty, true));
+                AssertExtensions.Throws<ArgumentException>("sourceFileName", () => isf.CopyFile(string.Empty, "bar"));
+                AssertExtensions.Throws<ArgumentException>("sourceFileName", () => isf.CopyFile(string.Empty, "bar", true));
+                AssertExtensions.Throws<ArgumentException>("destinationFileName", () => isf.CopyFile("foo", string.Empty));
+                AssertExtensions.Throws<ArgumentException>("destinationFileName", () => isf.CopyFile("foo", string.Empty, true));
             }
         }
 
@@ -44,17 +44,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CopyFile_ThrowsIsolatedStorageException()
+        public void CopyDeletedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("foo", "bar"));
+                Assert.Throws<InvalidOperationException>(() => isf.CopyFile("foo", "bar"));
             }
         }
 
         [Fact]
-        public void CopyFile_ThrowsInvalidOperationException()
+        public void CopyClosedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -64,12 +64,12 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CopyFile_RaisesInvalidPath()
+        public void CopyFile_RaisesIsolatedStorageException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.CopyFile("\0bad", "bar"));
-                Assert.Throws<ArgumentException>(() => isf.CopyFile("foo", "\0bad"));
+                Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("\0bad", "bar"));
+                Assert.Throws<IsolatedStorageException>(() => isf.CopyFile("foo", "\0bad"));
             }
         }
 
@@ -82,7 +82,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         public void CopyFile_CopyOver(PresetScopes scope)
         {
             TestHelper.WipeStores();
@@ -98,7 +98,7 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         public void CopyFile_CopiesFile(PresetScopes scope)
         {
             TestHelper.WipeStores();

@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using Internal.Cryptography;
 using Microsoft.Win32.SafeHandles;
-using System.Diagnostics;
 using static Interop.BCrypt;
 using static Interop.NCrypt;
 
@@ -16,59 +16,100 @@ namespace System.Security.Cryptography
 #endif
         public sealed partial class DSACng : DSA
         {
+            // As of FIPS 186-4 the maximum Q size is 32 bytes.
+            //
+            // See also: cbGroupSize at
+            // https://docs.microsoft.com/en-us/windows/desktop/api/bcrypt/ns-bcrypt-_bcrypt_dsa_key_blob_v2
+            private const int WindowsMaxQSize = 32;
+
             public override byte[] CreateSignature(byte[] rgbHash)
             {
                 if (rgbHash == null)
+                {
                     throw new ArgumentNullException(nameof(rgbHash));
+                }
 
-                rgbHash = AdjustHashSizeIfNecessary(rgbHash);
+                Span<byte> stackBuf = stackalloc byte[WindowsMaxQSize];
+                ReadOnlySpan<byte> source = AdjustHashSizeIfNecessary(rgbHash, stackBuf);
+
                 using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
                 {
                     unsafe
                     {
-                        byte[] signature = CngCommon.SignHash(keyHandle, rgbHash, AsymmetricPaddingMode.None, null, rgbHash.Length * 2);
-                        return signature;
+                        return CngCommon.SignHash(keyHandle, source, AsymmetricPaddingMode.None, null, source.Length * 2);
                     }
+                }
+            }
+
+            public override unsafe bool TryCreateSignature(ReadOnlySpan<byte> hash, Span<byte> destination, out int bytesWritten)
+            {
+                Span<byte> stackBuf = stackalloc byte[WindowsMaxQSize];
+                ReadOnlySpan<byte> source = AdjustHashSizeIfNecessary(hash, stackBuf);
+
+                using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
+                {
+                    return CngCommon.TrySignHash(keyHandle, source, destination, AsymmetricPaddingMode.None, null, out bytesWritten);
                 }
             }
 
             public override bool VerifySignature(byte[] rgbHash, byte[] rgbSignature)
             {
                 if (rgbHash == null)
+                {
                     throw new ArgumentNullException(nameof(rgbHash));
-
+                }
                 if (rgbSignature == null)
+                {
                     throw new ArgumentNullException(nameof(rgbSignature));
+                }
 
-                rgbHash = AdjustHashSizeIfNecessary(rgbHash);
+                return VerifySignature((ReadOnlySpan<byte>)rgbHash, (ReadOnlySpan<byte>)rgbSignature);
+            }
+
+            public override bool VerifySignature(ReadOnlySpan<byte> hash, ReadOnlySpan<byte> signature)
+            {
+                Span<byte> stackBuf = stackalloc byte[WindowsMaxQSize];
+                ReadOnlySpan<byte> source = AdjustHashSizeIfNecessary(hash, stackBuf);
 
                 using (SafeNCryptKeyHandle keyHandle = GetDuplicatedKeyHandle())
                 {
                     unsafe
                     {
-                        bool verified = CngCommon.VerifyHash(keyHandle, rgbHash, rgbSignature, AsymmetricPaddingMode.None, null);
-                        return verified;
+                        return CngCommon.VerifyHash(keyHandle, source, signature, AsymmetricPaddingMode.None, null);
                     }
                 }
             }
 
-            private byte[] AdjustHashSizeIfNecessary(byte[] hash)
+            private ReadOnlySpan<byte> AdjustHashSizeIfNecessary(ReadOnlySpan<byte> hash, Span<byte> stackBuf)
             {
-                Debug.Assert(hash != null);
+                Debug.Assert(stackBuf.Length == WindowsMaxQSize);
+                
+                // Windows CNG requires that the hash output and q match sizes, but we can better
+                // interoperate with other FIPS 186-3 implementations if we perform truncation
+                // here, before sending it to CNG. Since this is a scenario presented in the
+                // CAVP reference test suite, we can confirm our implementation.
+                //
+                // If, on the other hand, Q is too big, we need to left-pad the hash with zeroes
+                // (since it gets treated as a big-endian number). Since this is also a scenario
+                // presented in the CAVP reference test suite, we can confirm our implementation.
 
                 int qLength = ComputeQLength();
+                Debug.Assert(qLength <= WindowsMaxQSize);
 
-                // Note to review (from steve harter) -- code commented out because SHA1 encodes in 20 bytes
-                //  but default for v2 struct is 32 (SHA256) bytes so qLength (32) can be > hash.Length (20) 
-                //  so v2 would not support SHA1. Also remove this code in .net desktop?
-                // Sample code that will fail in .net desktop:
-                //  new DSACng(2048).SignData(new ASCIIEncoding().GetBytes("Hello"), new HashAlgorithmName("SHA1"));
+                if (qLength == hash.Length)
+                {
+                    return hash;
+                }
 
-                //if (qLength > hash.Length)
-                //    throw new PlatformNotSupportedException("todo:SR.Cryptography_DSA_HashTooShort");
+                if (qLength < hash.Length)
+                {
+                    return hash.Slice(0, qLength);
+                }
 
-                Array.Resize(ref hash, qLength);
-                return hash;
+                int zeroByteCount = qLength - hash.Length;
+                stackBuf.Slice(0, zeroByteCount).Clear();
+                hash.CopyTo(stackBuf.Slice(zeroByteCount));
+                return stackBuf.Slice(0, qLength);
             }
 
             private int ComputeQLength()

@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+using Internal.NativeCrypto;
 using static Interop.Crypt32;
 
 namespace System.Security.Cryptography
@@ -45,6 +47,40 @@ namespace System.Security.Cryptography
             }
 
             return new HashAlgorithmName(oid.Name);
+        }
+
+        /// <summary>
+        /// Is the curve named, or once of the special nist curves
+        /// </summary>
+        internal static bool IsECNamedCurve(string algorithm)
+        {
+            return (algorithm == BCryptNative.AlgorithmName.ECDH ||
+                    algorithm == BCryptNative.AlgorithmName.ECDsa);
+        }
+
+        /// <summary>
+        /// Maps algorithm to curve name accounting for the special nist curves
+        /// </summary>
+        internal static string SpecialNistAlgorithmToCurveName(string algorithm, out string oidValue)
+        {
+            switch (algorithm)
+            {
+                case BCryptNative.AlgorithmName.ECDHP256:
+                case BCryptNative.AlgorithmName.ECDsaP256:
+                    oidValue = Oids.secp256r1;
+                    return "nistP256";
+                case BCryptNative.AlgorithmName.ECDHP384:
+                case BCryptNative.AlgorithmName.ECDsaP384:
+                    oidValue = Oids.secp384r1;
+                    return "nistP384";
+                case BCryptNative.AlgorithmName.ECDHP521:
+                case BCryptNative.AlgorithmName.ECDsaP521:
+                    oidValue = Oids.secp521r1;
+                    return "nistP521";
+            }
+            
+            Debug.Fail($"Unknown curve {algorithm}");
+            throw new PlatformNotSupportedException(SR.Format(SR.Cryptography_CurveNotSupported, algorithm));
         }
     }
 }

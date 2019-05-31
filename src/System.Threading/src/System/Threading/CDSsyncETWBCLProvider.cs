@@ -49,34 +49,6 @@ namespace System.Threading
         private const int SPINWAIT_NEXTSPINWILLYIELD_ID = 2;
         private const int BARRIER_PHASEFINISHED_ID = 3;
 
-        /////////////////////////////////////////////////////////////////////////////////////
-        //
-        // SpinLock Events
-        //
-
-        [Event(SPINLOCK_FASTPATHFAILED_ID, Level = EventLevel.Warning)]
-        public void SpinLock_FastPathFailed(int ownerID)
-        {
-            if (IsEnabled(EventLevel.Warning, ALL_KEYWORDS))
-            {
-                WriteEvent(SPINLOCK_FASTPATHFAILED_ID, ownerID);
-            }
-        }
-
-        /////////////////////////////////////////////////////////////////////////////////////
-        //
-        // SpinWait Events
-        //
-
-        [Event(SPINWAIT_NEXTSPINWILLYIELD_ID, Level = EventLevel.Informational)]
-        public void SpinWait_NextSpinWillYield()
-        {
-            if (IsEnabled(EventLevel.Informational, ALL_KEYWORDS))
-            {
-                WriteEvent(SPINWAIT_NEXTSPINWILLYIELD_ID);
-            }
-        }
-
 
         //
         // Events below this point are used by the CDS types in System.dll
@@ -87,7 +59,6 @@ namespace System.Threading
         // Barrier Events
         //
 
-        [SecuritySafeCritical]
         [Event(BARRIER_PHASEFINISHED_ID, Level = EventLevel.Verbose, Version = 1)]
         public void Barrier_PhaseFinished(bool currentSense, long phaseNum)
         {
@@ -104,11 +75,17 @@ namespace System.Threading
                 {
                     EventData* eventPayload = stackalloc EventData[2];
 
-                    Int32 senseAsInt32 = currentSense ? 1 : 0; // write out Boolean as Int32
-                    eventPayload[0].Size = sizeof(int);
-                    eventPayload[0].DataPointer = ((IntPtr)(&senseAsInt32));
-                    eventPayload[1].Size = sizeof(long);
-                    eventPayload[1].DataPointer = ((IntPtr)(&phaseNum));
+                    int senseAsInt32 = currentSense ? 1 : 0; // write out Boolean as Int32
+                    eventPayload[0] = new EventData
+                    {
+                        Size = sizeof(int),
+                        DataPointer = ((IntPtr)(&senseAsInt32))
+                    };
+                    eventPayload[1] = new EventData
+                    {
+                        Size = sizeof(long),
+                        DataPointer = ((IntPtr)(&phaseNum))
+                    };
 
                     WriteEventCore(BARRIER_PHASEFINISHED_ID, 2, eventPayload);
                 }

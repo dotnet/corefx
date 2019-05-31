@@ -3,23 +3,31 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Runtime.CompilerServices;
 
 namespace System.Runtime.Serialization
 {
-    public partial class InvalidDataContractException : Exception
+    [Serializable]
+    [TypeForwardedFrom("System.Runtime.Serialization, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
+    public class InvalidDataContractException : Exception
     {
         public InvalidDataContractException()
             : base()
         {
         }
 
-        public InvalidDataContractException(String message)
+        public InvalidDataContractException(string message)
             : base(message)
         {
         }
 
-        public InvalidDataContractException(String message, Exception innerException)
+        public InvalidDataContractException(string message, Exception innerException)
             : base(message, innerException)
+        {
+        }
+
+        protected InvalidDataContractException(SerializationInfo info, StreamingContext context)
+            : base(info, context)
         {
         }
     }

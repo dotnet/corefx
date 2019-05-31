@@ -4,6 +4,8 @@
 
 namespace System.Xml.Serialization
 {
+    using System.Xml;
+    using System;
     using System.Collections;
     using System.Collections.Generic;
 

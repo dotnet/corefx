@@ -283,7 +283,14 @@ namespace System.IO.Packaging
         /// <exception cref="ArgumentException">If partUri parameter does not conform to the valid partUri syntax</exception>
         public virtual bool PartExists(Uri partUri)
         {
-            return (GetPartHelper(partUri) != null);
+            ThrowIfObjectDisposed();
+
+            if (partUri == null)
+                throw new ArgumentNullException(nameof(partUri));
+
+            PackUriHelper.ValidatedPartUri validatePartUri = PackUriHelper.ValidatePartUri(partUri);
+
+            return _partList.ContainsKey(validatePartUri);
         }
 
 
@@ -563,7 +570,7 @@ namespace System.IO.Packaging
         /// <exception cref="ArgumentException">If relationship is being targeted to a relationship part</exception>
         /// <exception cref="System.Xml.XmlException">If parameter "id" is not a valid Xsd Id</exception>
         /// <exception cref="System.Xml.XmlException">If an id is provided in the method, and its not unique</exception>
-        public PackageRelationship CreateRelationship(Uri targetUri, TargetMode targetMode, string relationshipType, String id)
+        public PackageRelationship CreateRelationship(Uri targetUri, TargetMode targetMode, string relationshipType, string id)
         {
             ThrowIfObjectDisposed();
             ThrowIfReadOnly();
@@ -582,7 +589,7 @@ namespace System.IO.Packaging
         /// <exception cref="IOException">If the package is readonly, it cannot be modified</exception>
         /// <exception cref="ArgumentNullException">If parameter "id" is null</exception>
         /// <exception cref="System.Xml.XmlException">If parameter "id" is not a valid Xsd Id</exception>
-        public void DeleteRelationship(String id)
+        public void DeleteRelationship(string id)
         {
             ThrowIfObjectDisposed();
             ThrowIfReadOnly();
@@ -1048,7 +1055,7 @@ namespace System.IO.Packaging
                 //
                 //     _partList.Keys.CopyTo(keys, 0);
 
-                for (int i = 0; i < _partList.Keys.Count; i++)
+                for (int i = 0; i < partKeys.Length; i++)
                 {
                     // Some of these may disappear during above close because the list contains "relationship parts"
                     // and these are removed if their parts' relationship collection is empty
@@ -1128,7 +1135,23 @@ namespace System.IO.Packaging
             if (_partList.ContainsKey(validatePartUri))
                 return _partList[validatePartUri];
             else
-                return null;
+            {
+                //Ideally we should decide whether we should query the underlying layer for the part based on the
+                //FileShare enum. But since we do not have that information, currently the design is to always
+                //ask the underlying layer, this allows for incremental access to the package.
+                //Note:
+                //Currently this incremental behavior for GetPart is not consistent with the GetParts method
+                //which just queries the underlying layer once.
+                PackagePart returnedPart = GetPartCore(validatePartUri);
+
+                if (returnedPart != null)
+                {
+                    // Add the part to the _partList if there is no prefix collision
+                    AddIfNoPrefixCollisionDetected(validatePartUri, returnedPart);
+                }
+
+                return returnedPart;
+            }
         }
 
         /// <summary>

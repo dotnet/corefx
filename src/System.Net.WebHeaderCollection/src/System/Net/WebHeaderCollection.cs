@@ -27,7 +27,6 @@ namespace System.Net
         FileWebResponse,
     }
 
-    [Serializable]
     public class WebHeaderCollection : NameValueCollection, ISerializable
     {
         private const int ApproxAveHeaderLineSize = 30;
@@ -39,14 +38,7 @@ namespace System.Net
 
         protected WebHeaderCollection(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            int count = serializationInfo.GetInt32("Count");
-            for (int i = 0; i < count; i++)
-            {
-                string headerName = serializationInfo.GetString(i.ToString(NumberFormatInfo.InvariantInfo));
-                string headerValue = serializationInfo.GetString((i + count).ToString(NumberFormatInfo.InvariantInfo));
-                if (NetEventSource.IsEnabled) NetEventSource.Info(this, $"calling InnerCollection.Add() key:[{headerName}], value:[{headerValue}]");
-                InnerCollection.Add(headerName, headerValue);
-            }
+            throw new PlatformNotSupportedException();
         }
 
         private bool AllowHttpRequestHeader
@@ -154,7 +146,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, string.Format(CultureInfo.InvariantCulture,SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(CultureInfo.InvariantCulture,SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             InvalidateCachedArrays();
@@ -180,7 +172,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             this.Set(header.GetName(), value);
@@ -188,20 +180,12 @@ namespace System.Net
 
         public override void GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            //
-            // for now disregard streamingContext.
-            //
-            serializationInfo.AddValue("Count", Count);
-            for (int i = 0; i < Count; i++)
-            {
-                serializationInfo.AddValue(i.ToString(NumberFormatInfo.InvariantInfo), GetKey(i));
-                serializationInfo.AddValue((i + Count).ToString(NumberFormatInfo.InvariantInfo), Get(i));
-            }
+            throw new PlatformNotSupportedException();
         }
 
         void ISerializable.GetObjectData(SerializationInfo serializationInfo, StreamingContext streamingContext)
         {
-            GetObjectData(serializationInfo, streamingContext);
+            throw new PlatformNotSupportedException();
         }
 
         public void Remove(HttpRequestHeader header)
@@ -243,9 +227,71 @@ namespace System.Net
             return InnerCollection.GetValues(index);
         }
 
+        // GetValues
+        // Routine Description:
+        //     This method takes a header name and returns a string array representing
+        //     the individual values for that headers. For example, if the headers
+        //     contained the line Accept: text/plain, text/html then
+        //     GetValues("Accept") would return an array of two strings: "text/plain"
+        //     and "text/html".
+        // Arguments:
+        //     header      - Name of the header.
+        // Return Value:
+        //     string[] - array of parsed string objects
         public override string[] GetValues(string header)
         {
-            return InnerCollection.GetValues(header);
+            // First get the information about the header and the values for
+            // the header.
+            HeaderInfo info = HeaderInfo[header];
+            string[] values = InnerCollection.GetValues(header);
+            // If we have no information about the header or it doesn't allow
+            // multiple values, just return the values.
+            if (info == null || values == null || !info.AllowMultiValues)
+            {
+                return values;
+            }
+            // Here we have a multi value header. We need to go through
+            // each entry in the multi values array, and if an entry itself
+            // has multiple values we'll need to combine those in.
+            //
+            // We do some optimazation here, where we try not to copy the
+            // values unless there really is one that have multiple values.
+            string[] tempValues;
+            List<string> valueList = null;
+            for (int i = 0; i < values.Length; i++)
+            {
+                // Parse this value header.
+                tempValues = info.Parser(values[i]);
+                // If we don't have an array list yet, see if this
+                // value has multiple values.
+                if (valueList == null)
+                {
+                    // If it's not empty, replace valueList.
+                    // Because for invalid WebRequest headers, we will return empty
+                    // valueList instead of the default NameValueCollection.GetValues().
+                    if (tempValues != null)
+                    {
+                        // It does, so we need to create an array list that
+                        // represents the Values, then trim out this one and
+                        // the ones after it that haven't been parsed yet.
+                        valueList = new List<string>(values);
+                        valueList.RemoveRange(i, values.Length - i);
+                        valueList.AddRange(tempValues);
+                    }
+                }
+                else
+                {
+                    // We already have an List, so just add the values.
+                    valueList.AddRange(tempValues);
+                }
+            }
+            // See if we have an List. If we don't, just return the values.
+            // Otherwise convert the List to a string array and return that.
+            if (valueList != null)
+            {
+                return valueList.ToArray();
+            }
+            return values;
         }
 
         public override string GetKey(int index)
@@ -299,7 +345,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             this.Add(header.GetName(), value);
@@ -307,7 +353,7 @@ namespace System.Net
 
         public void Add(string header)
         {
-            if (string.IsNullOrWhiteSpace(header))
+            if (string.IsNullOrEmpty(header))
             {
                 throw new ArgumentNullException(nameof(header));
             }
@@ -327,7 +373,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value, SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             InvalidateCachedArrays();
@@ -336,6 +382,15 @@ namespace System.Net
 
         public override void Add(string name, string value)
         {
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+            if (name.Length == 0)
+            {
+                throw new ArgumentException(SR.Format(SR.net_emptyStringCall, nameof(name)), nameof(name));
+            }
+
             name = HttpValidationHelpers.CheckBadHeaderNameChars(name);
             ThrowOnRestrictedHeader(name);
             value = HttpValidationHelpers.CheckBadHeaderValueChars(value);
@@ -344,7 +399,7 @@ namespace System.Net
             {
                 if (value != null && value.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(value), value,string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(value), value,SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             InvalidateCachedArrays();
@@ -360,7 +415,7 @@ namespace System.Net
             {
                 if (headerValue != null && headerValue.Length > ushort.MaxValue)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(headerValue), headerValue, string.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
+                    throw new ArgumentOutOfRangeException(nameof(headerValue), headerValue, SR.Format(CultureInfo.InvariantCulture, SR.net_headers_toolong, ushort.MaxValue));
                 }
             }
             InvalidateCachedArrays();
@@ -373,14 +428,14 @@ namespace System.Net
             {
                 if (HeaderInfo[headerName].IsRequestRestricted)
                 {
-                    throw new ArgumentException(string.Format(SR.net_headerrestrict, headerName), nameof(headerName));
+                    throw new ArgumentException(SR.Format(SR.net_headerrestrict, headerName), nameof(headerName));
                 }
             }
             else if (_type == WebHeaderCollectionType.HttpListenerResponse)
             {
                 if (HeaderInfo[headerName].IsResponseRestricted)
                 {
-                    throw new ArgumentException(string.Format(SR.net_headerrestrict, headerName), nameof(headerName));
+                    throw new ArgumentException(SR.Format(SR.net_headerrestrict, headerName), nameof(headerName));
                 }
             }
         }
@@ -400,7 +455,7 @@ namespace System.Net
         /// </devdoc>
         public override void Remove(string name)
         {
-            if (string.IsNullOrWhiteSpace(name))
+            if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException(nameof(name));
             }

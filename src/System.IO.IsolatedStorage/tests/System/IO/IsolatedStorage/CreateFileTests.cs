@@ -18,12 +18,12 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateFile_ThrowsIsolatedStorageException()
+        public void CreateRemovedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.CreateFile("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.CreateFile("foo"));
             }
         }
 
@@ -39,7 +39,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateFile_ThrowsInvalidOperationException()
+        public void CreateClosedFile_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -49,15 +49,15 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateFile_RaisesArgumentException()
+        public void CreateFile_IsolatedStorageException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.CreateFile("\0bad"));
+                Assert.Throws<IsolatedStorageException>(() => isf.CreateFile("\0bad"));
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         public void CreateFile_Existence(PresetScopes scope)
         {
             using (var isf = GetPresetScope(scope))

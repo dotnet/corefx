@@ -4,7 +4,7 @@
 
 namespace System.Net
 {
-    internal struct SecurityStatusPal
+    internal readonly struct SecurityStatusPal
     {
         public readonly SecurityStatusPalErrorCode ErrorCode;
         public readonly Exception Exception;
@@ -62,10 +62,13 @@ namespace System.Net
         IllegalMessage,
         CertUnknown,
         CertExpired,
+        DecryptFailure,
         AlgorithmMismatch,
         SecurityQosFailed,
         SmartcardLogonRequired,
         UnsupportedPreauth,
-        BadBinding
+        BadBinding,
+        DowngradeDetected,
+        ApplicationProtocolMismatch
     }
 }

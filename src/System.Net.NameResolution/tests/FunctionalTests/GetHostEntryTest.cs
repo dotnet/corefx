@@ -17,27 +17,30 @@ namespace System.Net.NameResolution.Tests
         {
             IPAddress localIPAddress = await TestSettings.GetLocalIPAddress();
 
-            TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(localIPAddress));
+            await TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(localIPAddress));
         }
+
+        [ActiveIssue(37362, TestPlatforms.OSX)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(32797)]
+        [InlineData("")]
+        [InlineData(TestSettings.LocalHost)]
+        public Task Dns_GetHostEntry_HostString_Ok(string hostName) => TestGetHostEntryAsync(() => Task.FromResult(Dns.GetHostEntry(hostName)));
+
+        [ActiveIssue(37362, TestPlatforms.OSX)]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(32797)]
+        [InlineData("")]
+        [InlineData(TestSettings.LocalHost)]
+        public Task Dns_GetHostEntryAsync_HostString_Ok(string hostName) => TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(hostName));
 
         [Fact]
-        public void Dns_GetHostEntryAsync_HostString_Ok()
-        {
-            TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(TestSettings.LocalHost));
-        }
+        public Task Dns_GetHostEntryAsync_IPString_Ok() => TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(TestSettings.LocalIPString));
 
-        [Fact]
-        public void Dns_GetHostEntryAsync_IPString_Ok()
-        {
-            TestGetHostEntryAsync(() => Dns.GetHostEntryAsync(TestSettings.LocalIPString));
-        }
-
-        private static void TestGetHostEntryAsync(Func<Task<IPHostEntry>> getHostEntryFunc)
+        private static async Task TestGetHostEntryAsync(Func<Task<IPHostEntry>> getHostEntryFunc)
         {
             Task<IPHostEntry> hostEntryTask1 = getHostEntryFunc();
             Task<IPHostEntry> hostEntryTask2 = getHostEntryFunc();
 
-            Task.WaitAll(hostEntryTask1, hostEntryTask2);
+            await TestSettings.WhenAllOrAnyFailedWithTimeout(hostEntryTask1, hostEntryTask2);
 
             IPAddress[] list1 = hostEntryTask1.Result.AddressList;
             IPAddress[] list2 = hostEntryTask2.Result.AddressList;
@@ -53,16 +56,10 @@ namespace System.Net.NameResolution.Tests
         }
 
         [Fact]
-        public async Task Dns_GetHostEntryAsync_NullStringHost_Fail()
-        {
-            await Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((string)null));
-        }
+        public Task Dns_GetHostEntryAsync_NullStringHost_Fail() => Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((string)null));
 
         [Fact]
-        public async Task Dns_GetHostEntryAsync_NullIPAddressHost_Fail()
-        {
-            await Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((IPAddress)null));
-        }
+        public Task Dns_GetHostEntryAsync_NullIPAddressHost_Fail() => Assert.ThrowsAsync<ArgumentNullException>(() => Dns.GetHostEntryAsync((IPAddress)null));
 
         public static IEnumerable<object[]> GetInvalidAddresses()
         {
@@ -79,22 +76,6 @@ namespace System.Net.NameResolution.Tests
 
             await Assert.ThrowsAsync<ArgumentException>(() => Dns.GetHostEntryAsync(address));
             await Assert.ThrowsAsync<ArgumentException>(() => Dns.GetHostEntryAsync(addressString));
-        }
-
-        public static IEnumerable<object[]> GetNoneAddresses()
-        {
-            yield return new object[] { IPAddress.None };
-        }
-
-        [ActiveIssue(10345, TestPlatforms.AnyUnix)]
-        [Theory]
-        [MemberData(nameof(GetNoneAddresses))]
-        public async Task Dns_GetHostEntryAsync_NoneIPAddress_Fail(IPAddress address)
-        {
-            string addressString = address.ToString();
-
-            await Assert.ThrowsAsync<SocketException>(() => Dns.GetHostEntryAsync(address));
-            await Assert.ThrowsAsync<SocketException>(() => Dns.GetHostEntryAsync(addressString));
         }
 
         [Fact]

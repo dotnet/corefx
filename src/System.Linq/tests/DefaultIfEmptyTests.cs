@@ -63,6 +63,17 @@ namespace System.Linq.Tests
             Assert.Equal(expected, result.ToArray());
         }
 
+        [Theory, MemberData(nameof(TestData))]
+        public static void DefaultIfEmptyRunOnce(IEnumerable<int> source, int defaultValue, int[] expected)
+        {
+            if (defaultValue == 0)
+            {
+                Assert.Equal(expected, source.RunOnce().DefaultIfEmpty());
+            }
+
+            Assert.Equal(expected, source.RunOnce().DefaultIfEmpty(defaultValue));
+        }
+
         [Fact]
         public void NullableArray_Empty_WithoutDefaultValue()
         {
@@ -83,8 +94,8 @@ namespace System.Linq.Tests
         {
             IEnumerable<int> source = null;
 
-            Assert.Throws<ArgumentNullException>("source", () => source.DefaultIfEmpty());
-            Assert.Throws<ArgumentNullException>("source", () => source.DefaultIfEmpty(42));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.DefaultIfEmpty());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.DefaultIfEmpty(42));
         }
 
         [Fact]

@@ -17,7 +17,7 @@ namespace System.IO.IsolatedStorage
             s_verifyScopeMethod = typeof(IsolatedStorage).GetMethod("VerifyScope", BindingFlags.NonPublic | BindingFlags.Static);
         }
 
-        [Theory
+        [Theory,
             MemberData(nameof(ValidScopes))
             ]
         public void InitStore_ValidScopes(IsolatedStorageScope scope)
@@ -25,9 +25,9 @@ namespace System.IO.IsolatedStorage
             s_verifyScopeMethod.Invoke(null, new object[] { scope });
         }
 
-        [Theory
-            InlineData(IsolatedStorageScope.None)
-            InlineData(IsolatedStorageScope.Machine | IsolatedStorageScope.Roaming)
+        [Theory,
+            InlineData(IsolatedStorageScope.None),
+            InlineData(IsolatedStorageScope.Machine | IsolatedStorageScope.Roaming),
             InlineData(IsolatedStorageScope.Machine | IsolatedStorageScope.User)
             ]
         public void InitStore_InvalidScopes(IsolatedStorageScope scope)
@@ -52,6 +52,11 @@ namespace System.IO.IsolatedStorage
         public void GetUserStoreForApplication()
         {
             var isf = IsolatedStorageFile.GetUserStoreForApplication();
+            VerifyApplicationStore(isf);
+        }
+
+        private void VerifyApplicationStore(IsolatedStorageFile isf)
+        {
             string root = isf.GetUserRootDirectory();
             Assert.EndsWith(@"AppFiles" + Path.DirectorySeparatorChar, root);
             Assert.True(Directory.Exists(root), "store root folder should exist");
@@ -76,13 +81,21 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetStore_ThrowsPlatformNotSupported()
         {
             Assert.Throws<PlatformNotSupportedException>(() => IsolatedStorageFile.GetStore(IsolatedStorageScope.User, typeof(object)));
             Assert.Throws<PlatformNotSupportedException>(() => IsolatedStorageFile.GetStore(IsolatedStorageScope.User, typeof(object), typeof(object)));
             Assert.Throws<PlatformNotSupportedException>(() => IsolatedStorageFile.GetStore(IsolatedStorageScope.User, new object()));
             Assert.Throws<PlatformNotSupportedException>(() => IsolatedStorageFile.GetStore(IsolatedStorageScope.User, new object(), new object()));
+        }
+
+        [Fact]
+        public void GetStore_NullParamsAllowed()
+        {
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (Type)null));
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (Type)null, (Type)null));
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (object)null));
+            VerifyApplicationStore(IsolatedStorageFile.GetStore(IsolatedStorageScope.User | IsolatedStorageScope.Application, (object)null, (object)null));
         }
 
         [Fact]

@@ -84,6 +84,17 @@ namespace System.Globalization.Tests
             Assert.Equal(expected, new IdnMapping().GetAscii(unicode, index, count));
         }
 
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, "Optimization in .NET Core")]
+        [Theory]
+        [InlineData("www.microsoft.com")]
+        [InlineData("bing.com")]
+        public void GetAscii_NoTranslationNeeded_ResultIsSameObjectAsInput(string input)
+        {
+            Assert.Same(input, new IdnMapping().GetAscii(input));
+            Assert.NotSame(input, new IdnMapping().GetAscii(input.Substring(1)));
+            Assert.NotSame(input, new IdnMapping().GetAscii(input.Substring(0, input.Length - 1)));
+        }
+
         [Fact]
         public void TestGetAsciiWithDot()
         {
@@ -168,6 +179,15 @@ namespace System.Globalization.Tests
                 Assert.Throws(exceptionType, () => idnMapping.GetAscii(unicode, index));
             }
             Assert.Throws(exceptionType, () => idnMapping.GetAscii(unicode, index, count));
+        }
+
+        [Fact]
+        public void TestStringWithHyphenIn3rdAnd4thPlace()
+        {
+            string unicode = "r6---sn-uxanug5-hxay.gvt1.com";
+
+            // Ensure we are not throwing on Linux because of the 3rd and 4th hyphens in the string.
+            Assert.Equal(unicode, new IdnMapping().GetAscii(unicode));
         }
     }
 }

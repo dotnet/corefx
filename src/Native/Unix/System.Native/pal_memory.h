@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include "pal_compiler.h"
 #include "pal_types.h"
 
 /**
@@ -11,4 +12,4 @@
  *
  * Returns a pointer to the memory.
  */
-extern "C" void* SystemNative_MemSet(void *s, int c, uintptr_t n);
+DLLEXPORT void* SystemNative_MemSet(void *s, int c, uintptr_t n);

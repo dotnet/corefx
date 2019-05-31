@@ -5,9 +5,8 @@
 namespace System 
 {
 
-    public delegate void ConsoleCancelEventHandler(Object sender, ConsoleCancelEventArgs e);
+    public delegate void ConsoleCancelEventHandler(object sender, ConsoleCancelEventArgs e);
 
-    [Serializable]
     public sealed class ConsoleCancelEventArgs : EventArgs
     {
         private readonly ConsoleSpecialKey _type;

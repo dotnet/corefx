@@ -4,7 +4,6 @@
 
 using System.Diagnostics;
 using System.Dynamic.Utils;
-using System.Reflection;
 
 namespace System.Linq.Expressions.Interpreter
 {
@@ -18,23 +17,6 @@ namespace System.Linq.Expressions.Interpreter
 
         private NegateInstruction() { }
 
-        private sealed class NegateInt32 : NegateInstruction
-        {
-            public override int Run(InterpretedFrame frame)
-            {
-                object obj = frame.Pop();
-                if (obj == null)
-                {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(unchecked(-(int)obj));
-                }
-                return 1;
-            }
-        }
-
         private sealed class NegateInt16 : NegateInstruction
         {
             public override int Run(InterpretedFrame frame)
@@ -47,6 +29,23 @@ namespace System.Linq.Expressions.Interpreter
                 else
                 {
                     frame.Push(unchecked((short)(-(short)obj)));
+                }
+                return 1;
+            }
+        }
+
+        private sealed class NegateInt32 : NegateInstruction
+        {
+            public override int Run(InterpretedFrame frame)
+            {
+                object obj = frame.Pop();
+                if (obj == null)
+                {
+                    frame.Push(null);
+                }
+                else
+                {
+                    frame.Push(unchecked(-(int)obj));
                 }
                 return 1;
             }
@@ -80,7 +79,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked(-(float)obj));
+                    frame.Push(-(float)obj);
                 }
                 return 1;
             }
@@ -97,7 +96,7 @@ namespace System.Linq.Expressions.Interpreter
                 }
                 else
                 {
-                    frame.Push(unchecked(-(double)obj));
+                    frame.Push(-(double)obj);
                 }
                 return 1;
             }
@@ -105,7 +104,7 @@ namespace System.Linq.Expressions.Interpreter
 
         public static Instruction Create(Type type)
         {
-            Debug.Assert(!type.GetTypeInfo().IsEnum);
+            Debug.Assert(!type.IsEnum);
             switch (type.GetNonNullableType().GetTypeCode())
             {
                 case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new NegateInt16());
@@ -113,16 +112,15 @@ namespace System.Linq.Expressions.Interpreter
                 case TypeCode.Int64: return s_Int64 ?? (s_Int64 = new NegateInt64());
                 case TypeCode.Single: return s_Single ?? (s_Single = new NegateSingle());
                 case TypeCode.Double: return s_Double ?? (s_Double = new NegateDouble());
-
                 default:
-                    throw Error.ExpressionNotSupportedForType("Negate", type);
+                    throw ContractUtils.Unreachable;
             }
         }
     }
 
     internal abstract class NegateCheckedInstruction : Instruction
     {
-        private static Instruction s_Int16, s_Int32, s_Int64, s_Single, s_Double;
+        private static Instruction s_Int16, s_Int32, s_Int64;
 
         public override int ConsumedStack => 1;
         public override int ProducedStack => 1;
@@ -180,52 +178,17 @@ namespace System.Linq.Expressions.Interpreter
                 return 1;
             }
         }
-        private sealed class NegateCheckedSingle : NegateCheckedInstruction
-        {
-            public override int Run(InterpretedFrame frame)
-            {
-                object obj = frame.Pop();
-                if (obj == null)
-                {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(checked(-(float)obj));
-                }
-                return 1;
-            }
-        }
-
-        private sealed class NegateCheckedDouble : NegateCheckedInstruction
-        {
-            public override int Run(InterpretedFrame frame)
-            {
-                object obj = frame.Pop();
-                if (obj == null)
-                {
-                    frame.Push(null);
-                }
-                else
-                {
-                    frame.Push(checked(-(double)obj));
-                }
-                return 1;
-            }
-        }
 
         public static Instruction Create(Type type)
         {
-            Debug.Assert(!type.GetTypeInfo().IsEnum);
+            Debug.Assert(!type.IsEnum);
             switch (type.GetNonNullableType().GetTypeCode())
             {
                 case TypeCode.Int16: return s_Int16 ?? (s_Int16 = new NegateCheckedInt16());
                 case TypeCode.Int32: return s_Int32 ?? (s_Int32 = new NegateCheckedInt32());
                 case TypeCode.Int64: return s_Int64 ?? (s_Int64 = new NegateCheckedInt64());
-                case TypeCode.Single: return s_Single ?? (s_Single = new NegateCheckedSingle());
-                case TypeCode.Double: return s_Double ?? (s_Double = new NegateCheckedDouble());
                 default:
-                    throw Error.ExpressionNotSupportedForType("NegateChecked", type);
+                    return NegateInstruction.Create(type);
             }
         }
     }

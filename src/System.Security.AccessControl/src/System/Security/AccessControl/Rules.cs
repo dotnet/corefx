@@ -6,7 +6,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Principal;
-using System.Diagnostics.Contracts;
 
 namespace System.Security.AccessControl
 {
@@ -32,7 +31,7 @@ namespace System.Security.AccessControl
 
         #region Constructors
 
-        internal protected AuthorizationRule(
+        protected internal AuthorizationRule(
             IdentityReference identity,
             int accessMask,
             bool isInherited,
@@ -64,7 +63,6 @@ nameof(inheritanceFlags),
 nameof(propagationFlags),
                     SR.Format(SR.Argument_InvalidEnumValue, inheritanceFlags, "PropagationFlags"));
             }
-            Contract.EndContractBlock();
 
             if (identity.IsValidTargetType(typeof(SecurityIdentifier)) == false)
             {
@@ -97,7 +95,7 @@ nameof(identity));
             get { return _identity; }
         }
 
-        internal protected int AccessMask
+        protected internal int AccessMask
         {
             get { return _accessMask; }
         }
@@ -161,7 +159,6 @@ nameof(inheritanceFlags),
 nameof(propagationFlags),
                     SR.Format(SR.Argument_InvalidEnumValue, inheritanceFlags, "PropagationFlags"));
             }
-            Contract.EndContractBlock();
 
             _type = type;
         }
@@ -347,56 +344,8 @@ nameof(auditFlags),
     }
 
 
-    public sealed class AuthorizationRuleCollection : ICollection, IEnumerable // TODO: Is this right? Was previously ReadOnlyCollectionBase
+    public sealed class AuthorizationRuleCollection : ReadOnlyCollectionBase
     {
-        #region ReadOnlyCollectionBase APIs
-        // Goo to translate this from ReadOnlyCollectionBase to ICollection
-        Object _syncRoot;
-        List<AuthorizationRule> list;
-
-        List<AuthorizationRule> InnerList
-        {
-            get
-            {
-                if (list == null)
-                    list = new List<AuthorizationRule>();
-                return list;
-            }
-        }
-
-        public int Count
-        {
-            get { return InnerList.Count; }
-        }
-
-        bool ICollection.IsSynchronized
-        {
-            get { return false; }
-        }
-
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                if (_syncRoot == null)
-                {
-                    System.Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
-                }
-                return _syncRoot;
-            }
-        }
-
-        void ICollection.CopyTo(Array array, int index)
-        {
-            InnerList.CopyTo((AuthorizationRule[])array, index);
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return InnerList.GetEnumerator();
-        }
-        #endregion
-
         #region Constructors
 
         public AuthorizationRuleCollection()

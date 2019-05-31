@@ -14,6 +14,7 @@ namespace System.Diagnostics.Tests
         private const int s_ConsoleEncoding = 437;
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Get/SetConsoleOutputCP not supported yet https://github.com/dotnet/corefx/issues/21483")]
         public void TestChangesInConsoleEncoding()
         {
             Action<int> run = expectedCodePage =>
@@ -43,21 +44,11 @@ namespace System.Diagnostics.Tests
 
             try
             {
-                {
-                    Interop.SetConsoleCP(s_ConsoleEncoding);
-                    Interop.SetConsoleOutputCP(s_ConsoleEncoding);
-
-                    run(Encoding.UTF8.CodePage);
-                }
-
                 // Don't test this on Windows Nano, Windows Nano only supports UTF8.
                 if (File.Exists(Path.Combine(Environment.GetEnvironmentVariable("windir"), "regedit.exe")))
                 {
                     Interop.SetConsoleCP(s_ConsoleEncoding);
                     Interop.SetConsoleOutputCP(s_ConsoleEncoding);
-
-                    // Register the codeprovider which will ensure 437 is enabled.
-                    Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
                     run(s_ConsoleEncoding);
                 }

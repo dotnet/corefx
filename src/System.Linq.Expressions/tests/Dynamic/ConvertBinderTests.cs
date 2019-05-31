@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -31,13 +31,12 @@ namespace System.Dynamic.Tests
 
         private static Type[] SomeTypes = { typeof(ConvertBinderTests), typeof(ConvertBinder), typeof(string), typeof(int), typeof(void) };
 
-        private static IEnumerable<object[]> Int32Args() => SomeInt32.Select(i => new object[] {i});
+        public static IEnumerable<object[]> Int32Args() => SomeInt32.Select(i => new object[] {i});
 
-        private static IEnumerable<object[]> Int64Arges() => SomeInt64.Select(i => new object[] {i});
+        public static IEnumerable<object[]> Int64Arges() => SomeInt64.Select(i => new object[] {i});
 
-        private static IEnumerable<object[]> TypesAndBools() =>
+        public static IEnumerable<object[]> TypesAndBools() =>
             SomeTypes.SelectMany(t => new[] {false, true}, (t, b) => new object[] {t, b});
-
 
         [Theory, MemberData(nameof(Int32Args))]
         public void ConvertImplicit(int x)
@@ -51,8 +50,8 @@ namespace System.Dynamic.Tests
         public void ConvertExplicit(long x)
         {
             dynamic d = x;
-            int xi = (int)d;
-            Assert.Equal((int)x, xi);
+            int xi = unchecked((int)d);
+            Assert.Equal(unchecked((int)x), xi);
         }
 
         [Theory, MemberData(nameof(Int64Arges))]
@@ -79,8 +78,8 @@ namespace System.Dynamic.Tests
         [Fact]
         public void NullType()
         {
-            Assert.Throws<ArgumentNullException>("type", () => new MinimumOverrideConvertBinder(null, true));
-            Assert.Throws<ArgumentNullException>("type", () => new MinimumOverrideConvertBinder(null, false));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => new MinimumOverrideConvertBinder(null, true));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => new MinimumOverrideConvertBinder(null, false));
         }
 
         [Theory, MemberData(nameof(TypesAndBools))]
@@ -96,7 +95,7 @@ namespace System.Dynamic.Tests
         public void NullTarget()
         {
             var binder = new MinimumOverrideConvertBinder(typeof(int), false);
-            Assert.Throws<ArgumentNullException>("target", () => binder.Bind(null, null));
+            AssertExtensions.Throws<ArgumentNullException>("target", () => binder.Bind(null, null));
         }
 
         [Fact]
@@ -105,7 +104,7 @@ namespace System.Dynamic.Tests
             var target = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var arg = new DynamicMetaObject(Expression.Parameter(typeof(object), null), BindingRestrictions.Empty);
             var binder = new MinimumOverrideConvertBinder(typeof(int), false);
-            Assert.Throws<ArgumentException>("args", () => binder.Bind(target, new[] { arg }));
+            AssertExtensions.Throws<ArgumentException>("args", () => binder.Bind(target, new[] { arg }));
         }
     }
 }

@@ -17,8 +17,7 @@ namespace System.IO.MemoryMappedFiles
         private const int MaxFlushWaits = 15;  // must be <=30
         private const int MaxFlushRetriesPerWait = 20;
 
-        [SecurityCritical]
-        public unsafe static MemoryMappedView CreateView(SafeMemoryMappedFileHandle memMappedFileHandle,
+        public static unsafe MemoryMappedView CreateView(SafeMemoryMappedFileHandle memMappedFileHandle,
                                             MemoryMappedFileAccess access, long offset, long size)
         {
             // MapViewOfFile can only create views that start at a multiple of the system memory allocation 
@@ -30,7 +29,7 @@ namespace System.IO.MemoryMappedFiles
             ulong nativeSize;
             long extraMemNeeded, newOffset;
             ValidateSizeAndOffset(
-                size, offset, GetSystemPageAllocationGranularity(), 
+                size, offset, GetSystemPageAllocationGranularity(),
                 out nativeSize, out extraMemNeeded, out newOffset);
 
             // if request is >= than total virtual, then MapViewOfFile will fail with meaningless error message 
@@ -60,7 +59,7 @@ namespace System.IO.MemoryMappedFiles
             // but more pages may need to be committed in the region.
             // This is because, VirtualQuery function(that internally invokes VirtualQueryEx function) returns the attributes 
             // and size of the region of pages with matching attributes starting from base address.
-            // VirtualQueryEx: http://msdn.microsoft.com/en-us/library/windows/desktop/aa366907(v=vs.85).aspx
+            // VirtualQueryEx: https://msdn.microsoft.com/en-us/library/windows/desktop/aa366907(v=vs.85).aspx
             if (((viewInfo.State & Interop.Kernel32.MemOptions.MEM_RESERVE) != 0) || ((ulong)viewSize < (ulong)nativeSize))
             {
                 IntPtr tempHandle = Interop.VirtualAlloc(
@@ -97,7 +96,6 @@ namespace System.IO.MemoryMappedFiles
         // flush to the disk.
         // NOTE: This will flush all bytes before and after the view up until an offset that is a multiple
         //       of SystemPageSize.
-        [SecurityCritical]
         public void Flush(UIntPtr capacity)
         {
             unsafe
@@ -107,9 +105,8 @@ namespace System.IO.MemoryMappedFiles
                 {
                     _viewHandle.AcquirePointer(ref firstPagePtr);
 
-                    bool success = Interop.Kernel32.FlushViewOfFile((IntPtr)firstPagePtr, capacity) != 0;
-                    if (success)
-                        return; // This will visit the finally block.
+                    if (Interop.Kernel32.FlushViewOfFile((IntPtr)firstPagePtr, capacity))
+                        return;
 
                     // It is a known issue within the NTFS transaction log system that
                     // causes FlushViewOfFile to intermittently fail with ERROR_LOCK_VIOLATION
@@ -119,24 +116,25 @@ namespace System.IO.MemoryMappedFiles
                     // this strategy successfully flushed the view after no more than 3 retries.
 
                     int error = Marshal.GetLastWin32Error();
-                    bool canRetry = (!success && error == Interop.Errors.ERROR_LOCK_VIOLATION);
+                    if (error != Interop.Errors.ERROR_LOCK_VIOLATION)
+                        throw Win32Marshal.GetExceptionForWin32Error(error);
 
                     SpinWait spinWait = new SpinWait();
-                    for (int w = 0; canRetry && w < MaxFlushWaits; w++)
+                    for (int w = 0; w < MaxFlushWaits; w++)
                     {
                         int pause = (1 << w);  // MaxFlushRetries should never be over 30
-                        MemoryMappedFile.ThreadSleep(pause);
+                        Thread.Sleep(pause);
 
-                        for (int r = 0; canRetry && r < MaxFlushRetriesPerWait; r++)
+                        for (int r = 0; r < MaxFlushRetriesPerWait; r++)
                         {
-                            success = Interop.Kernel32.FlushViewOfFile((IntPtr)firstPagePtr, capacity) != 0;
-                            if (success)
-                                return; // This will visit the finally block.
-
-                            spinWait.SpinOnce();
+                            if (Interop.Kernel32.FlushViewOfFile((IntPtr)firstPagePtr, capacity))
+                                return;
 
                             error = Marshal.GetLastWin32Error();
-                            canRetry = (error == Interop.Errors.ERROR_LOCK_VIOLATION);
+                            if (error != Interop.Errors.ERROR_LOCK_VIOLATION)
+                                throw Win32Marshal.GetExceptionForWin32Error(error);
+
+                            spinWait.SpinOnce();
                         }
                     }
 
@@ -157,7 +155,6 @@ namespace System.IO.MemoryMappedFiles
         // ---- PAL layer ends here ----
         // -----------------------------
 
-        [SecurityCritical]
         private static int GetSystemPageAllocationGranularity()
         {
             Interop.Kernel32.SYSTEM_INFO info;

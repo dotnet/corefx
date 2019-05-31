@@ -2,73 +2,51 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace System.ComponentModel
 {
-    /// <internalonly/>
     /// <summary>
-    ///    <para>
-    ///       ExtenderProvidedPropertyAttribute is an attribute that marks that a property
-    ///       was actually offered up by and extender provider.
-    ///    </para>
+    /// ExtenderProvidedPropertyAttribute is an attribute that marks that a property
+    /// was actually offered up by and extender provider.
     /// </summary>
     [AttributeUsage(AttributeTargets.All)]
     public sealed class ExtenderProvidedPropertyAttribute : Attribute
     {
-        private PropertyDescriptor _extenderProperty;
-        private IExtenderProvider _provider;
-        private Type _receiverType;
-
         /// <summary>
-        ///     Creates a new ExtenderProvidedPropertyAttribute.
+        /// Creates a new ExtenderProvidedPropertyAttribute.
         /// </summary>
         internal static ExtenderProvidedPropertyAttribute Create(PropertyDescriptor extenderProperty, Type receiverType, IExtenderProvider provider)
         {
-            ExtenderProvidedPropertyAttribute e = new ExtenderProvidedPropertyAttribute();
-            e._extenderProperty = extenderProperty;
-            e._receiverType = receiverType;
-            e._provider = provider;
-            return e;
+            return new ExtenderProvidedPropertyAttribute
+            {
+                ExtenderProperty = extenderProperty,
+                ReceiverType = receiverType,
+                Provider = provider
+            };
         }
 
         /// <summary>
-        ///     Creates an empty ExtenderProvidedPropertyAttribute.
+        /// Creates an empty ExtenderProvidedPropertyAttribute.
         /// </summary>
         public ExtenderProvidedPropertyAttribute()
         {
         }
 
         /// <summary>
-        ///     PropertyDescriptor of the property that is being provided.
+        /// PropertyDescriptor of the property that is being provided.
         /// </summary>
-        public PropertyDescriptor ExtenderProperty
-        {
-            get
-            {
-                return _extenderProperty;
-            }
-        }
+        public PropertyDescriptor ExtenderProperty { get; private set; }
 
         /// <summary>
-        ///     Extender provider that is providing the property.
+        /// Extender provider that is providing the property.
         /// </summary>
-        public IExtenderProvider Provider
-        {
-            get
-            {
-                return _provider;
-            }
-        }
+        public IExtenderProvider Provider { get; private set; }
 
         /// <summary>
-        ///     The type of object that can receive these properties.
+        /// The type of object that can receive these properties.
         /// </summary>
-        public Type ReceiverType
-        {
-            get
-            {
-                return _receiverType;
-            }
-        }
+        public Type ReceiverType { get; private set; }
 
         public override bool Equals(object obj)
         {
@@ -76,20 +54,33 @@ namespace System.ComponentModel
             {
                 return true;
             }
+            if (!(obj is ExtenderProvidedPropertyAttribute other))
+            {
+                return false;
+            }
 
-            ExtenderProvidedPropertyAttribute other = obj as ExtenderProvidedPropertyAttribute;
+            // ExtenderProperty is null if the attribute is created with
+            // the default constructor. In this case, all the properties
+            // are null (and are immutable), so we only need to check the
+            // nullability of one property to know about the nullability
+            // of the rest.
+            if (other.ExtenderProperty == null)
+            {
+                Debug.Assert(other.Provider == null);
+                Debug.Assert(other.ReceiverType == null);
+                Debug.Assert(Provider == null);
+                Debug.Assert(ReceiverType == null);
 
-            return (other != null) && other._extenderProperty.Equals(_extenderProperty) && other._provider.Equals(_provider) && other._receiverType.Equals(_receiverType);
+                return ExtenderProperty == null;
+            }
+
+            return other.ExtenderProperty.Equals(ExtenderProperty)
+                && other.Provider.Equals(Provider)
+                && other.ReceiverType.Equals(ReceiverType);
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
 
-        public override bool IsDefaultAttribute()
-        {
-            return _receiverType == null;
-        }
+        public override bool IsDefaultAttribute() => ReceiverType == null;
     }
 }

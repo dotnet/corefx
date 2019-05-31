@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -117,41 +116,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="ArgumentOutOfRange_NeedNonNegNum" xml:space="preserve">
-    <value>Non-negative number required.</value>
-  </data>
-  <data name="ArgumentOutOfRange_Index" xml:space="preserve">
-    <value>Index was out of range. Must be non-negative and less than the size of the collection.</value>
-  </data>
-  <data name="ArgumentOutOfRange_IndexCountBuffer" xml:space="preserve">
-    <value>Index and count must refer to a location within the buffer.</value>
-  </data>
   <data name="Argument_AddingDuplicate" xml:space="preserve">
     <value>An item with the same key has already been added. Key: {0}</value>
-  </data>
-  <data name="Argument_IdnBadLabelSize" xml:space="preserve">
-    <value>IDN labels must be between 1 and 63 characters long.</value>
-  </data>
-  <data name="Argument_IdnBadPunycode" xml:space="preserve">
-    <value>Invalid IDN encoded string.</value>
-  </data>
-  <data name="Argument_IdnIllegalName" xml:space="preserve">
-    <value>Decoded string is not a valid IDN name.</value>
-  </data>
-  <data name="Argument_InvalidCharSequence" xml:space="preserve">
-    <value>Invalid Unicode code point found at index {0}.</value>
-  </data>
-  <data name="Argument_InvalidCharSequenceNoIndex" xml:space="preserve">
-    <value>String contains invalid Unicode code points.</value>
-  </data>
-  <data name="Argument_InvalidNormalizationForm" xml:space="preserve">
-    <value>Invalid normalization form.</value>
-  </data>
-  <data name="Arg_OutOfMemoryException" xml:space="preserve">
-    <value>Insufficient memory to continue the execution of the program.</value>
-  </data>
-  <data name="UnknownError_Num" xml:space="preserve">
-    <value>Unknown error '{0}'.</value>
   </data>
   <data name="net_uri_BadAuthority" xml:space="preserve">
     <value>Invalid URI: The Authority/Host could not be parsed.</value>
@@ -216,58 +182,13 @@
   <data name="net_uri_BadUnicodeHostForIdn" xml:space="preserve">
     <value>An invalid Unicode character by IDN standards was specified in the host.</value>
   </data>
-  <data name="AssertionFailed" xml:space="preserve">
-    <value>Assertion failed.</value>
-  </data>
-  <data name="Debug_Fail" xml:space="preserve">
-    <value>Fail: {0}</value>
-  </data>
-  <data name="DebugAssertBanner" xml:space="preserve">
-    <value>---- DEBUG ASSERTION FAILED ----</value>
-  </data>
-  <data name="DebugAssertLongMessage" xml:space="preserve">
-    <value>---- Assert Long Message ----</value>
-  </data>
-  <data name="DebugAssertShortMessage" xml:space="preserve">
-    <value>---- Assert Short Message ----</value>
-  </data>
-  <data name="IO_FileNotFound" xml:space="preserve">
-    <value>Unable to find the specified file.</value>
-  </data>
-  <data name="IO_FileNotFound_FileName" xml:space="preserve">
-    <value>Could not find file '{0}'.</value>
-  </data>
-  <data name="IO_PathNotFound_NoPathName" xml:space="preserve">
-    <value>Could not find a part of the path.</value>
-  </data>
-  <data name="IO_PathNotFound_Path" xml:space="preserve">
-    <value>Could not find a part of the path '{0}'.</value>
-  </data>
-  <data name="IO_SharingViolation_File" xml:space="preserve">
-    <value>The process cannot access the file '{0}' because it is being used by another process.</value>
-  </data>
-  <data name="IO_SharingViolation_NoFileName" xml:space="preserve">
-    <value>The process cannot access the file because it is being used by another process.</value>
-  </data>
-  <data name="UnauthorizedAccess_IODenied_NoPathName" xml:space="preserve">
-    <value>Access to the path is denied.</value>
-  </data>
-  <data name="UnauthorizedAccess_IODenied_Path" xml:space="preserve">
-    <value>Access to the path '{0}' is denied.</value>
-  </data>
-  <data name="ArgumentOutOfRange_FileLengthTooBig" xml:space="preserve">
-    <value>Specified file length was too large for the file system.</value>
-  </data>
-  <data name="IO_FileExists_Name" xml:space="preserve">
-    <value>The file '{0}' already exists.</value>
-  </data>
-  <data name="IO_PathTooLong" xml:space="preserve">
-    <value>The specified file name or path is too long, or a component of the specified path is too long.</value>
-  </data>
   <data name="Argument_ExtraNotValid" xml:space="preserve">
     <value>Extra portion of URI not valid.</value>
   </data>
   <data name="Argument_InvalidUriSubcomponent" xml:space="preserve">
     <value>The subcomponent, {0}, of this uri is not valid.</value>
+  </data>
+  <data name="Arg_KeyNotFoundWithKey" xml:space="preserve">
+    <value>The given key '{0}' was not present in the dictionary.</value>
   </data>
 </root>

@@ -23,10 +23,10 @@ namespace System.Threading.Tasks.Dataflow.Internal
     /// <summary>Provides a simple, immutable array.</summary>
     /// <typeparam name="T">Specifies the type of the data stored in the array.</typeparam>
     [DebuggerDisplay("Count={Count}")]
-    internal struct ImmutableArray<T>
+    internal readonly struct ImmutableArray<T>
     {
         /// <summary>An empty array.</summary>
-        private readonly static ImmutableArray<T> s_empty = new ImmutableArray<T>(new T[0]);
+        private static readonly ImmutableArray<T> s_empty = new ImmutableArray<T>(new T[0]);
         /// <summary>The immutable data in this array instance.</summary>
         private readonly T[] _array;
 

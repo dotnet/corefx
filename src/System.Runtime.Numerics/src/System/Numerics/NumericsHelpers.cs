@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Runtime.InteropServices;
 
 namespace System.Numerics
@@ -23,8 +22,6 @@ namespace System.Numerics
 
         public static void GetDoubleParts(double dbl, out int sign, out int exp, out ulong man, out bool fFinite)
         {
-            Contract.Ensures(Contract.ValueAtReturn(out sign) == +1 || Contract.ValueAtReturn(out sign) == -1);
-
             DoubleUlong du;
             du.uu = 0;
             du.dbl = dbl;
@@ -114,13 +111,13 @@ namespace System.Numerics
         {
             if (d != null && d.Length > 0)
             {
-                d[0] = ~d[0] + 1;
+                d[0] = unchecked(~d[0] + 1);
 
                 int i = 1;
                 // first do complement and +1 as long as carry is needed
                 for (; d[i - 1] == 0 && i < d.Length; i++)
                 {
-                    d[i] = ~d[i] + 1;
+                    d[i] = unchecked(~d[i] + 1);
                 }
                 // now ones complement is sufficient
                 for (; i < d.Length; i++)
@@ -137,8 +134,11 @@ namespace System.Numerics
 
         public static uint Abs(int a)
         {
-            uint mask = (uint)(a >> 31);
-            return ((uint)a ^ mask) - mask;
+            unchecked
+            {
+                uint mask = (uint)(a >> 31);
+                return ((uint)a ^ mask) - mask;
+            }
         }
 
         public static uint CombineHash(uint u1, uint u2)
@@ -148,7 +148,7 @@ namespace System.Numerics
 
         public static int CombineHash(int n1, int n2)
         {
-            return (int)CombineHash((uint)n1, (uint)n2);
+            return unchecked((int)CombineHash((uint)n1, (uint)n2));
         }
 
         public static int CbitHighZero(uint u)

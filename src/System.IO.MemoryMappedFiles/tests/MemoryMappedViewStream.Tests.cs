@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.IO.MemoryMappedFiles.Tests
@@ -25,16 +27,16 @@ namespace System.IO.MemoryMappedFiles.Tests
                 using (mmf)
                 {
                     // Offset
-                    Assert.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength));
-                    Assert.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength, MemoryMappedFileAccess.ReadWrite));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("offset", () => mmf.CreateViewStream(-1, mapLength, MemoryMappedFileAccess.ReadWrite));
 
                     // Size
-                    Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1));
-                    Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1, MemoryMappedFileAccess.ReadWrite));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, -1, MemoryMappedFileAccess.ReadWrite));
                     if (IntPtr.Size == 4)
                     {
-                        Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue));
-                        Assert.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
+                        AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue));
+                        AssertExtensions.Throws<ArgumentOutOfRangeException>("size", () => mmf.CreateViewStream(0, 1 + (long)uint.MaxValue, MemoryMappedFileAccess.ReadWrite));
                     }
                     else
                     {
@@ -49,13 +51,13 @@ namespace System.IO.MemoryMappedFiles.Tests
                     Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewStream(mapLength, 1, MemoryMappedFileAccess.ReadWrite));
 
                     // Access
-                    Assert.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(-1)));
-                    Assert.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(42)));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(-1)));
+                    AssertExtensions.Throws<ArgumentOutOfRangeException>("access", () => mmf.CreateViewStream(0, mapLength, (MemoryMappedFileAccess)(42)));
                 }
             }
         }
 
-        [Theory]
+        [ConditionalTheory]
         [InlineData(MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileAccess.Read)]
         [InlineData(MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.ReadWriteExecute, MemoryMappedFileAccess.ReadWrite)]
@@ -76,33 +78,75 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void ValidAccessLevelCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
-            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
-            using (MemoryMappedViewStream s = mmf.CreateViewStream(0, Capacity, viewAccess))
+            AssertExtensions.ThrowsIf<IOException>(PlatformDetection.IsUap && mapAccess == MemoryMappedFileAccess.ReadWriteExecute && viewAccess == MemoryMappedFileAccess.ReadWriteExecute,
+            () =>
             {
-                ValidateMemoryMappedViewStream(s, Capacity, viewAccess);
-            }
+                try
+                {
+                    using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+                    using (MemoryMappedViewStream s = mmf.CreateViewStream(0, Capacity, viewAccess))
+                    {
+                        ValidateMemoryMappedViewStream(s, Capacity, viewAccess);
+                    }
+                }
+                catch (UnauthorizedAccessException)
+                {
+                    if (PlatformDetection.IsInContainer && (viewAccess == MemoryMappedFileAccess.ReadExecute || viewAccess == MemoryMappedFileAccess.ReadWriteExecute))
+                    {
+                        throw new SkipTestException("Execute permission failing in container.");
+                    }
+
+                    throw;
+                }
+            });
         }
 
         [Theory]
         [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWrite)]
-        [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWriteExecute)]
         [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWrite)]
         [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadExecute)]
-        [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWriteExecute)]
         [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadExecute)]
-        [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadWriteExecute)]
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.Write)]
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWrite)]
         [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadExecute)]
-        [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWriteExecute)]
         public void InvalidAccessLevelsCombinations(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
         {
             const int Capacity = 4096;
             using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
             {
                 Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewStream(0, Capacity, viewAccess));
+            }
+        }
+
+        [Theory]
+        [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWriteExecute)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Windows API returns IO exception error code when viewAccess is ReadWriteExecute")]
+        public void InvalidAccessLevels_ReadWriteExecute_NonUwp(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
+        {
+            const int Capacity = 4096;
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+            {
+                Assert.Throws<UnauthorizedAccessException>(() => mmf.CreateViewStream(0, Capacity, viewAccess));
+            }
+        }
+
+        [Theory]
+        [InlineData(MemoryMappedFileAccess.Read, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.ReadWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.CopyOnWrite, MemoryMappedFileAccess.ReadWriteExecute)]
+        [InlineData(MemoryMappedFileAccess.ReadExecute, MemoryMappedFileAccess.ReadWriteExecute)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Uap, "Windows API returns IO exception error code when viewAccess is ReadWriteExecute")]
+        public void InvalidAccessLevels_ReadWriteExecute_Uwp(MemoryMappedFileAccess mapAccess, MemoryMappedFileAccess viewAccess)
+        {
+            const int Capacity = 4096;
+            using (MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, Capacity, mapAccess))
+            {
+                Assert.Throws<IOException>(() => mmf.CreateViewStream(0, Capacity, viewAccess));
             }
         }
 
@@ -387,22 +431,30 @@ namespace System.IO.MemoryMappedFiles.Tests
         public void AllowFinalization()
         {
             // Explicitly do not dispose, to allow finalization to happen, just to try to verify
-            // that nothing fails when it does.
-            MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, 4096);
-            MemoryMappedViewStream s = mmf.CreateViewStream();
-
-            var mmfWeak = new WeakReference<MemoryMappedFile>(mmf);
-            var sWeak = new WeakReference<MemoryMappedViewStream>(s);
-
-            mmf = null;
-            s = null;
+            // that nothing fails/throws when it does.
+            WeakReference<MemoryMappedFile> mmfWeak;
+            WeakReference<MemoryMappedViewStream> mmvsWeak;
+            CreateWeakMmfAndMmvs(out mmfWeak, out mmvsWeak);
 
             GC.Collect();
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
+            MemoryMappedFile mmf;
             Assert.False(mmfWeak.TryGetTarget(out mmf));
-            Assert.False(sWeak.TryGetTarget(out s));
+
+            MemoryMappedViewStream s;
+            Assert.False(mmvsWeak.TryGetTarget(out s));
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void CreateWeakMmfAndMmvs(out WeakReference<MemoryMappedFile> mmfWeak, out WeakReference<MemoryMappedViewStream> mmvsWeak)
+        {
+            MemoryMappedFile mmf = MemoryMappedFile.CreateNew(null, 4096);
+            MemoryMappedViewStream s = mmf.CreateViewStream();
+
+            mmfWeak = new WeakReference<MemoryMappedFile>(mmf);
+            mmvsWeak = new WeakReference<MemoryMappedViewStream>(s);
         }
 
     }

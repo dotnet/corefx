@@ -15,12 +15,13 @@ namespace System.Security.Cryptography.X509Certificates.Tests
     [Collection("X509Filesystem")]
     public static class X509FilesystemTests
     {
-        // #9293: Our Fedora23 and Ubuntu1610 CI machines use NTFS for "tmphome", which causes our filesystem permissions checks to fail.
-        private static bool IsReliableInCI { get; } = !PlatformDetection.IsFedora23 && !PlatformDetection.IsUbuntu1610;
+        private static bool RunManualTests { get; } = TestEnvironmentConfiguration.RunManualTests;
 
-        [ActiveIssue(12833, TestPlatforms.AnyUnix)]
-        [Fact]
         [OuterLoop]
+        // This test is a bit too flaky to be on in the normal run, even for OuterLoop.
+        // It can fail due to networking problems, and due to the filesystem interactions it doesn't
+        // have strong isolation from other tests (even in different processes).
+        [ConditionalFact(nameof(RunManualTests))]
         public static void VerifyCrlCache()
         {
             string crlDirectory = PersistedFiles.GetUserFeatureDirectory("cryptography", "crls");
@@ -124,7 +125,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddOne()
         {
@@ -155,7 +156,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddOneAfterUpgrade()
         {
@@ -195,7 +196,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_DowngradePermissions()
         {
@@ -218,7 +219,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddAfterDispose()
         {
@@ -241,7 +242,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddAndClear()
         {
@@ -265,7 +266,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddDuplicate()
         {
@@ -287,7 +288,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddTwo()
         {
@@ -318,7 +319,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddTwo_UpgradePrivateKey()
         {
@@ -380,7 +381,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_AddTwo_UpgradePrivateKey_NoDowngrade()
         {
@@ -440,7 +441,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_DistinctCollections()
         {
@@ -481,7 +482,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop(/* Alters user/machine state */)]
         private static void X509Store_Add4_Remove1()
         {
@@ -530,7 +531,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalTheory(nameof(IsReliableInCI))]
+        [Theory]
         [OuterLoop(/* Alters user/machine state */)]
         [InlineData(false)]
         [InlineData(true)]
@@ -577,7 +578,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 });
         }
 
-        [ConditionalFact(nameof(IsReliableInCI))]
+        [Fact]
         [OuterLoop( /* Alters user/machine state */)]
         private static void X509Store_FiltersDuplicateOnLoad()
         {

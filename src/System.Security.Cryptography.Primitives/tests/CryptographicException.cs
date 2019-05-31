@@ -18,6 +18,7 @@ namespace System.Security.Cryptography.Encryption.Tests.Asymmetric
             Assert.Equal(message, new CryptographicException(message).Message);
             Assert.Equal(message + " 12345", new CryptographicException(message + " {0}", "12345").Message);
             Assert.Equal(5, new CryptographicException(5).HResult);
+
             Assert.Same(inner, new CryptographicException(message, inner).InnerException);
             Assert.Equal(message, new CryptographicException(message, inner).Message);
         }

@@ -24,7 +24,7 @@ namespace System.Linq.Parallel.Tests
             }
         }
 
-        private static IEnumerable<object[]> UnionUnorderedData(int[] counts)
+        public static IEnumerable<object[]> UnionUnorderedData(int[] counts)
         {
             foreach (object[] parms in UnorderedSources.BinaryRanges(counts, (l, r) => l, counts))
             {
@@ -431,11 +431,11 @@ namespace System.Linq.Parallel.Tests
         [Fact]
         public static void Union_ArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1)));
-            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Union(null));
+            AssertExtensions.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1)));
+            AssertExtensions.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Union(null));
 
-            Assert.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
-            Assert.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Union(null, EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("first", () => ((ParallelQuery<int>)null).Union(ParallelEnumerable.Range(0, 1), EqualityComparer<int>.Default));
+            AssertExtensions.Throws<ArgumentNullException>("second", () => ParallelEnumerable.Range(0, 1).Union(null, EqualityComparer<int>.Default));
         }
     }
 }

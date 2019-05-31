@@ -48,16 +48,16 @@ namespace System.Text.Encodings.Web
     internal sealed class DefaultHtmlEncoder : HtmlEncoder
     {
         private AllowedCharactersBitmap _allowedCharacters;
-        internal readonly static DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
+        internal static readonly DefaultHtmlEncoder Singleton = new DefaultHtmlEncoder(new TextEncoderSettings(UnicodeRanges.BasicLatin));
 
-        public DefaultHtmlEncoder(TextEncoderSettings filter)
+        public DefaultHtmlEncoder(TextEncoderSettings settings)
         {
-            if (filter == null)
+            if (settings == null)
             {
-                throw new ArgumentNullException(nameof(filter));
+                throw new ArgumentNullException(nameof(settings));
             }
 
-            _allowedCharacters = filter.GetAllowedCharacters();
+            _allowedCharacters = settings.GetAllowedCharacters();
 
             // Forbid codepoints which aren't mapped to characters or which are otherwise always disallowed
             // (includes categories Cc, Cs, Co, Cn, Zs [except U+0020 SPACE], Zl, Zp)
@@ -94,7 +94,7 @@ namespace System.Text.Encodings.Web
 
         public override int MaxOutputCharactersPerInputCharacter
         {
-            get { return 9; } // "&#xFFFFF;" is the longest encoded form
+            get { return 10; } // "&#x10FFFF;" is the longest encoded form
         }
 
         static readonly char[] s_quote = "&quot;".ToCharArray();
@@ -117,7 +117,7 @@ namespace System.Text.Encodings.Web
             else { return TryWriteEncodedScalarAsNumericEntity(unicodeScalar, buffer, bufferLength, out numberOfCharactersWritten); }
         }
 
-        private unsafe static bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
+        private static unsafe bool TryWriteEncodedScalarAsNumericEntity(int unicodeScalar, char* buffer, int bufferLength, out int numberOfCharactersWritten)
         {
             Debug.Assert(buffer != null && bufferLength >= 0);
 

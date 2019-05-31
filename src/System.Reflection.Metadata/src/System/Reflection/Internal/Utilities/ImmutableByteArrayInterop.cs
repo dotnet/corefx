@@ -37,7 +37,7 @@ namespace System.Reflection.Internal
     /// characteristics and therefore something we (Microsoft) are comfortable defining as a contract that 
     /// can be depended upon as below.
     /// </remarks>
-    internal unsafe static class ImmutableByteArrayInterop
+    internal static unsafe class ImmutableByteArrayInterop
     {
         /// <summary>
         /// Creates a new instance of <see cref="ImmutableArray{Byte}"/> using a given mutable array as the backing
@@ -94,7 +94,7 @@ namespace System.Reflection.Internal
             internal byte[] UnderlyingArray;
 
             [FieldOffset(0)]
-            internal ImmutableArray<Byte> ImmutableArray;
+            internal ImmutableArray<byte> ImmutableArray;
         }
     }
 }

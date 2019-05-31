@@ -2,48 +2,26 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
+using Xunit;
 
 namespace System.IO.Tests
 {
-    public class StringWriterTests
+    public partial class StringWriterTests
     {
         static int[] iArrInvalidValues = new int[] { -1, -2, -100, -1000, -10000, -100000, -1000000, -10000000, -100000000, -1000000000, int.MinValue, short.MinValue };
         static int[] iArrLargeValues = new int[] { int.MaxValue, int.MaxValue - 1, int.MaxValue / 2, int.MaxValue / 10, int.MaxValue / 100 };
         static int[] iArrValidValues = new int[] { 10000, 100000, int.MaxValue / 2000, int.MaxValue / 5000, short.MaxValue };
 
-        private static char[] getCharArray()
-        {
-            return new char[]{
-            char.MinValue
-            ,char.MaxValue
-            ,'\t'
-            ,' '
-            ,'$'
-            ,'@'
-            ,'#'
-            ,'\0'
-            ,'\v'
-            ,'\''
-            ,'\u3190'
-            ,'\uC3A0'
-            ,'A'
-            ,'5'
-            ,'\uFE70' 
-            ,'-'
-            ,';'
-            ,'\u00E6'
-        };
-        }
-
         private static StringBuilder getSb()
         {
-            var chArr = getCharArray();
+            var chArr = TestDataProvider.CharData;
             var sb = new StringBuilder(40);
             for (int i = 0; i < chArr.Length; i++)
                 sb.Append(chArr[i]);
@@ -88,7 +66,7 @@ namespace System.IO.Tests
         [Fact]
         public static void WriteArray()
         {
-            var chArr = getCharArray();
+            var chArr = TestDataProvider.CharData;
             StringBuilder sb = getSb();
             StringWriter sw = new StringWriter(sb);
 
@@ -125,22 +103,22 @@ namespace System.IO.Tests
         [Fact]
         public static void CantWriteIndexLargeValues()
         {
-            var chArr = getCharArray();
+            var chArr = TestDataProvider.CharData;
             for (int i = 0; i < iArrLargeValues.Length; i++)
             {
                 StringWriter sw = new StringWriter();
-                Assert.Throws<ArgumentException>(() => sw.Write(chArr, iArrLargeValues[i], chArr.Length));
+                AssertExtensions.Throws<ArgumentException>(null, () => sw.Write(chArr, iArrLargeValues[i], chArr.Length));
             }
         }
 
         [Fact]
         public static void CantWriteCountLargeValues()
         {
-            var chArr = getCharArray();
+            var chArr = TestDataProvider.CharData;
             for (int i = 0; i < iArrLargeValues.Length; i++)
             {
                 StringWriter sw = new StringWriter();
-                Assert.Throws<ArgumentException>(() => sw.Write(chArr, 0, iArrLargeValues[i]));
+                AssertExtensions.Throws<ArgumentException>(null, () => sw.Write(chArr, 0, iArrLargeValues[i]));
             }
         }
 
@@ -150,7 +128,7 @@ namespace System.IO.Tests
             StringWriter sw = new StringWriter();
             StringReader sr;
 
-            var chArr = getCharArray();
+            var chArr = TestDataProvider.CharData;
 
             sw.Write(chArr, 2, 5);
 
@@ -235,7 +213,6 @@ namespace System.IO.Tests
             Assert.Equal(sb.ToString(), sw.GetStringBuilder().ToString());
         }
 
-#if netstandard17
         [Fact]
         public static void Closed_DisposedExceptions()
         {
@@ -243,7 +220,6 @@ namespace System.IO.Tests
             sw.Close();
             ValidateDisposedExceptions(sw);
         }
-#endif //netstandard17
 
         [Fact]
         public static void Disposed_DisposedExceptions()
@@ -311,16 +287,16 @@ namespace System.IO.Tests
         public static void GetEncoding()
         {
             var sw = new StringWriter();
+            Assert.Equal(new UnicodeEncoding(false, false), sw.Encoding);
             Assert.Equal(Encoding.Unicode.WebName, sw.Encoding.WebName);
         }
 
         [Fact]
         public static void TestWriteMisc()
         {
-            CultureInfo old = CultureInfo.CurrentCulture;
-            CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
-            try
+            RemoteExecutor.Invoke(() => 
             {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
 
                 sw.Write(true);
@@ -334,28 +310,23 @@ namespace System.IO.Tests
                 sw.Write((ulong)ulong.MaxValue);
 
                 Assert.Equal("Truea1234.013452342.0123456-92233720368547758081234.5429496729518446744073709551615", sw.ToString());
-            }
-            finally
-            {
-                CultureInfo.CurrentCulture = old;
-            }
+            }).Dispose();
         }
 
         [Fact]
         public static void TestWriteObject()
         {
             var sw = new StringWriter();
-            sw.Write(new Object());
+            sw.Write(new object());
             Assert.Equal("System.Object", sw.ToString());
         }
 
         [Fact]
         public static void TestWriteLineMisc()
         {
-            CultureInfo old = CultureInfo.CurrentCulture;
-            CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
-            try
+            RemoteExecutor.Invoke(() =>
             {
+                CultureInfo.CurrentCulture = new CultureInfo("en-US"); // floating-point formatting comparison depends on culture
                 var sw = new StringWriter();
                 sw.WriteLine((bool)false);
                 sw.WriteLine((char)'B');
@@ -368,18 +339,14 @@ namespace System.IO.Tests
                 Assert.Equal(
                     string.Format("False{0}B{0}987{0}875634{0}1.23457{0}45634563{0}18446744073709551615{0}", Environment.NewLine),
                     sw.ToString());
-            }
-            finally
-            {
-                CultureInfo.CurrentCulture = old;
-            }
+            }).Dispose();
         }
 
         [Fact]
         public static void TestWriteLineObject()
         {
             var sw = new StringWriter();
-            sw.WriteLine(new Object());
+            sw.WriteLine(new object());
             Assert.Equal("System.Object" + Environment.NewLine, sw.ToString());
         }
     
@@ -390,6 +357,26 @@ namespace System.IO.Tests
             sw.WriteLineAsync(new char[] { 'H', 'e', 'l', 'l', 'o' });
 
             Assert.Equal("Hello" + Environment.NewLine, sw.ToString());
+        }
+
+        [Fact]
+        public async Task NullNewLineAsync()
+        {
+            using (MemoryStream ms = new MemoryStream())
+            {
+                string newLine;
+                using (StreamWriter sw = new StreamWriter(ms, Encoding.UTF8, 16, true))
+                {
+                    newLine = sw.NewLine;
+                    await sw.WriteLineAsync(default(string));
+                    await sw.WriteLineAsync(default(string));
+                }
+                ms.Seek(0, SeekOrigin.Begin);
+                using (StreamReader sr = new StreamReader(ms))
+                {
+                    Assert.Equal(newLine + newLine, await sr.ReadToEndAsync());
+                }
+            }
         }
     }
 }

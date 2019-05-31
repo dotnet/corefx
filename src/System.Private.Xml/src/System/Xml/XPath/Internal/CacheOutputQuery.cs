@@ -44,7 +44,7 @@ namespace MS.Internal.Xml.XPath
             outputBuffer.Clear();
             count = 0;
             return input.Evaluate(context);// This is trick. IDQuery needs this value. Otherwise we would return this.
-                                           // All subclasses should and would anyway override thismethod and return this.
+                                           // All subclasses should and would anyway override this method and return this.
         }
 
         public override XPathNavigator Advance()
@@ -74,12 +74,5 @@ namespace MS.Internal.Xml.XPath
         public override int CurrentPosition { get { return count; } }
         public override int Count { get { return outputBuffer.Count; } }
         public override QueryProps Properties { get { return QueryProps.Merge | QueryProps.Cached | QueryProps.Position | QueryProps.Count; } }
-
-        public override void PrintQuery(XmlWriter w)
-        {
-            w.WriteStartElement(this.GetType().Name);
-            input.PrintQuery(w);
-            w.WriteEndElement();
-        }
     }
 }

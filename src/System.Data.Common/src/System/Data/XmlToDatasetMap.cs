@@ -9,7 +9,7 @@ using System.Diagnostics;
 namespace System.Data
 {
     // This is an internal helper class used during Xml load to DataSet/DataDocument.
-    // XmlToDatasetMap class provides functionality for binding elemants/atributes
+    // XmlToDatasetMap class provides functionality for binding elemants/attributes
     // to DataTable / DataColumn 
     internal sealed class XmlToDatasetMap
     {
@@ -36,7 +36,7 @@ namespace System.Data
             }
         }
 
-        // This class exist to avoid alocatin of XmlNodeIdentety to every acces to the hash table.
+        // This class exist to avoid alocatin of XmlNodeIdentety to every access to the hash table.
         // Unfortunetely XmlNode doesn't export single identety object.
         internal sealed class XmlNodeIdHashtable : Hashtable
         {
@@ -535,7 +535,7 @@ namespace System.Data
                 tempColumnName = "_x0058_"; // upper case Xml... -> _x0058_ml...
             }
 
-            tempColumnName += col.ColumnName.Substring(1);
+            tempColumnName = string.Concat(tempColumnName, col.ColumnName.AsSpan(1));
 
             if (nameTable.Get(tempColumnName) == null)
             {

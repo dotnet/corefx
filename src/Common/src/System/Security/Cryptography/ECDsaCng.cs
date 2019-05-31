@@ -13,7 +13,6 @@ namespace System.Security.Cryptography
 #endif
         public sealed partial class ECDsaCng : ECDsa
         {
-#if !NETNATIVE
             /// <summary>
             /// Create an ECDsaCng algorithm with a named curve.
             /// </summary>
@@ -22,14 +21,9 @@ namespace System.Security.Cryptography
             /// <exception cref="PlatformNotSupportedException">if <paramref name="curve" /> does not contain an Oid with a FriendlyName.</exception>
             public ECDsaCng(ECCurve curve)
             {
-                // FriendlyName is required; an attempt was already made to default it in ECCurve
-                if (string.IsNullOrEmpty(curve.Oid.FriendlyName))
-                    throw new PlatformNotSupportedException(string.Format(SR.Cryptography_InvalidCurveOid, curve.Oid.Value.ToString()));
-
-                // Named curves generate the key immediately
+                // Specified curves generate the key immediately
                 GenerateKey(curve);
             }
-#endif
 
             /// <summary>
             ///     Create an ECDsaCng algorithm with a random 521 bit key pair.
@@ -94,42 +88,6 @@ namespace System.Security.Cryptography
                         new KeySizes(minSize: 521, maxSize: 521, skipSize: 0),
                     };
                 }
-            }
-
-            /// <summary>
-            /// Is the curve named, or once of the special nist curves
-            /// </summary>
-            internal static bool IsECNamedCurve(string algorithm)
-            {
-                return (algorithm == AlgorithmName.ECDH ||
-                    algorithm == AlgorithmName.ECDsa);
-            }
-
-            /// <summary>
-            /// Maps algorithm to curve name accounting for the special nist curves
-            /// </summary>
-            internal static string SpecialNistAlgorithmToCurveName(string algorithm)
-            {
-                if (algorithm == AlgorithmName.ECDHP256 ||
-                    algorithm == AlgorithmName.ECDsaP256)
-                {
-                    return "nistP256";
-                }
-
-                if (algorithm == AlgorithmName.ECDHP384 ||
-                    algorithm == AlgorithmName.ECDsaP384)
-                {
-                    return "nistP384";
-                }
-
-                if (algorithm == AlgorithmName.ECDHP521 ||
-                    algorithm == AlgorithmName.ECDsaP521)
-                {
-                    return "nistP521";
-                }
-
-                Debug.Fail(string.Format("Unknown curve {0}", algorithm));
-                throw new PlatformNotSupportedException(string.Format(SR.Cryptography_CurveNotSupported, algorithm));
             }
         }
 #if INTERNAL_ASYMMETRIC_IMPLEMENTATIONS

@@ -5,6 +5,7 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace System.Diagnostics
@@ -14,7 +15,7 @@ namespace System.Diagnostics
         /// <summary>Gets the IDs of all processes on the current machine.</summary>
         public static int[] GetProcessIds()
         {
-            return EnumerableHelpers.ToArray(EnumerateProcessIds());
+            return EnumerateProcessIds().ToArray();
         }
 
         /// <summary>Gets process infos for each process on the specified machine.</summary>
@@ -73,10 +74,26 @@ namespace System.Diagnostics
                     {
                         FileName = entry.FileName,
                         ModuleName = Path.GetFileName(entry.FileName),
-                        BaseAddress = new IntPtr((void*)entry.AddressRange.Key),
+                        BaseAddress = new IntPtr(unchecked((void*)entry.AddressRange.Key)),
                         ModuleMemorySize = sizeOfImage,
                         EntryPointAddress = IntPtr.Zero // unknown
                     });
+                }
+            }
+
+            // Move the main executable module to be the first in the list if it's not already
+            string exePath = Process.GetExePath(processId);
+            for (int i = 0; i < modules.Count; i++)
+            {
+                ProcessModule module = modules[i];
+                if (module.FileName == exePath)
+                {
+                    if (i > 0)
+                    {
+                        modules.RemoveAt(i);
+                        modules.Insert(0, module);
+                    }
+                    break;
                 }
             }
 
@@ -100,21 +117,21 @@ namespace System.Diagnostics
 
             Interop.procfs.ParsedStat stat;
             return Interop.procfs.TryReadStatFile(pid, out stat, reusableReader) ?
-                CreateProcessInfo(stat, reusableReader) :
+                CreateProcessInfo(ref stat, reusableReader) :
                 null;
         }
 
         /// <summary>
         /// Creates a ProcessInfo from the data parsed from a /proc/pid/stat file and the associated tasks directory.
         /// </summary>
-        internal static ProcessInfo CreateProcessInfo(Interop.procfs.ParsedStat procFsStat, ReusableTextReader reusableReader)
+        internal static ProcessInfo CreateProcessInfo(ref Interop.procfs.ParsedStat procFsStat, ReusableTextReader reusableReader, string processName = null)
         {
             int pid = procFsStat.pid;
 
             var pi = new ProcessInfo()
             {
                 ProcessId = pid,
-                ProcessName = procFsStat.comm,
+                ProcessName = processName ?? Process.GetUntruncatedProcessName(ref procFsStat) ?? string.Empty,
                 BasePriority = (int)procFsStat.nice,
                 VirtualBytes = (long)procFsStat.vsize,
                 WorkingSet = procFsStat.rss * Environment.SystemPageSize,
@@ -191,20 +208,34 @@ namespace System.Diagnostics
         /// <returns></returns>
         private static ThreadState ProcFsStateToThreadState(char c)
         {
+            // Information on these in fs/proc/array.c
+            // `man proc` does not document them all
             switch (c)
             {
-                case 'R':
+                case 'R': // Running
                     return ThreadState.Running;
-                case 'S':
-                case 'D':
-                case 'T':
+
+                case 'D': // Waiting on disk
+                case 'P': // Parked
+                case 'S': // Sleeping in a wait
+                case 't': // Tracing/debugging
+                case 'T': // Stopped on a signal
                     return ThreadState.Wait;
-                case 'Z':
+
+                case 'x': // dead
+                case 'X': // Dead
+                case 'Z': // Zombie
                     return ThreadState.Terminated;
-                case 'W':
+
+                case 'W': // Paging or waking
+                case 'K': // Wakekill
                     return ThreadState.Transition;
+
+                case 'I': // Idle
+                    return ThreadState.Ready;
+
                 default:
-                    Debug.Fail("Unexpected status character");
+                    Debug.Fail($"Unexpected status character: {c}");
                     return ThreadState.Unknown;
             }
         }

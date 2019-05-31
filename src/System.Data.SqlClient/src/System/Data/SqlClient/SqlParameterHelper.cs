@@ -13,31 +13,17 @@ namespace System.Data.SqlClient
     public sealed partial class SqlParameter : DbParameter
     {
         private object _value;
-
         private object _parent;
-
         private ParameterDirection _direction;
         private int _size;
-
         private int _offset;
         private string _sourceColumn;
-        private bool _sourceColumnNullMapping;
-
-        private bool _isNullable;
-
         private object _coercedValue;
-
 
         private object CoercedValue
         {
-            get
-            {
-                return _coercedValue;
-            }
-            set
-            {
-                _coercedValue = value;
-            }
+            get => _coercedValue;
+            set => _coercedValue = value;
         }
 
         override public ParameterDirection Direction
@@ -69,16 +55,9 @@ namespace System.Data.SqlClient
 
         override public bool IsNullable
         {
-            get
-            {
-                return _isNullable;
-            }
-            set
-            {
-                _isNullable = value;
-            }
+            get => _flags.HasFlag(SqlParameterFlags.IsNullable);
+            set => Set(SqlParameterFlags.IsNullable, value);
         }
-
 
         public int Offset
         {
@@ -121,7 +100,6 @@ namespace System.Data.SqlClient
             }
         }
 
-
         private bool ShouldSerializeSize()
         {
             return (0 != _size);
@@ -129,29 +107,15 @@ namespace System.Data.SqlClient
 
         override public string SourceColumn
         {
-            get
-            {
-                string sourceColumn = _sourceColumn;
-                return ((null != sourceColumn) ? sourceColumn : ADP.StrEmpty);
-            }
-            set
-            {
-                _sourceColumn = value;
-            }
+            get => (_sourceColumn ?? ADP.StrEmpty);
+            set => _sourceColumn = value;
         }
 
         public override bool SourceColumnNullMapping
         {
-            get
-            {
-                return _sourceColumnNullMapping;
-            }
-            set
-            {
-                _sourceColumnNullMapping = value;
-            }
+            get => _flags.HasFlag(SqlParameterFlags.SourceColumnNullMapping);
+            set => Set(SqlParameterFlags.SourceColumnNullMapping, value);
         }
-
 
         internal object CompareExchangeParent(object value, object comparand)
         {
@@ -175,7 +139,7 @@ namespace System.Data.SqlClient
 
         private byte ValuePrecisionCore(object value)
         {
-            if (value is Decimal)
+            if (value is decimal)
             {
                 return ((System.Data.SqlTypes.SqlDecimal)(Decimal)value).Precision;
             }
@@ -184,9 +148,9 @@ namespace System.Data.SqlClient
 
         private byte ValueScaleCore(object value)
         {
-            if (value is Decimal)
+            if (value is decimal)
             {
-                return (byte)((Decimal.GetBits((Decimal)value)[3] & 0x00ff0000) >> 0x10);
+                return (byte)((decimal.GetBits((decimal)value)[3] & 0x00ff0000) >> 0x10);
             }
             return 0;
         }
@@ -216,6 +180,24 @@ namespace System.Data.SqlClient
                 }
             }
             return 0;
+        }
+
+        internal void CopyTo(SqlParameter destination)
+        {
+            ADP.CheckArgumentNull(destination, nameof(destination));
+
+            // NOTE: _parent is not cloned
+            destination._value = _value;
+            destination._direction = _direction;
+            destination._size = _size;
+            destination._offset = _offset;
+            destination._sourceColumn = _sourceColumn;
+            destination._sourceVersion = _sourceVersion;
+            destination._parameterName = _parameterName;
+
+            SqlParameterFlags setFlags = SqlParameterFlags.SourceColumnNullMapping | SqlParameterFlags.IsNullable | SqlParameterFlags.IsNull;
+            destination._flags = (destination._flags & ~setFlags) | (_flags & setFlags);
+            
         }
     }
 }

@@ -1,26 +1,30 @@
-project(System.Native)
+project(System.Native C)
 
 set(NATIVE_SOURCES
-    pal_console.cpp
-    pal_errno.cpp
-    pal_interfaceaddresses.cpp
-    pal_io.cpp
-    pal_maphardwaretype.cpp
-    pal_memory.cpp
-    pal_mount.cpp
-    pal_networking.cpp
-    pal_networkstatistics.cpp
-    pal_process.cpp
-    pal_runtimeinformation.cpp
-    pal_runtimeextensions.cpp
-    pal_string.cpp
-    pal_tcpstate.cpp
-    pal_time.cpp
-    pal_uid.cpp
+    pal_console.c
+    pal_errno.c
+    pal_interfaceaddresses.c
+    pal_io.c
+    pal_maphardwaretype.c
+    pal_memory.c
+    pal_mount.c
+    pal_networking.c
+    pal_networkstatistics.c
+    pal_process.c
+    pal_random.c
+    pal_runtimeinformation.c
+    pal_runtimeextensions.c
+    pal_signal.c
+    pal_string.c
+    pal_tcpstate.c
+    pal_time.c
+    pal_uid.c
+    pal_datetime.c
+    pal_sysctl.c
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
-    set(NATIVE_SOURCES ${NATIVE_SOURCES} pal_networkchange.cpp)
+    set(NATIVE_SOURCES ${NATIVE_SOURCES} pal_networkchange.c)
 
     if (!HAVE_LINUX_RTNETLINK_H)
         message(FATAL_ERROR "Could not find linux/rtnetlink.h")
@@ -39,11 +43,17 @@ add_library(System.Native-Static
     ${NATIVE_SOURCES}
     ${VERSION_FILE_PATH}
 )
-SET_TARGET_PROPERTIES(System.Native-Static PROPERTIES PREFIX "")
-SET_TARGET_PROPERTIES(System.Native-Static PROPERTIES OUTPUT_NAME System.Native CLEAN_DIRECT_OUTPUT 1)
 
-if (CMAKE_SYSTEM_NAME STREQUAL Linux)
+# Disable the "lib" prefix and override default name
+set_target_properties(System.Native-Static PROPERTIES PREFIX "")
+set_target_properties(System.Native-Static PROPERTIES OUTPUT_NAME System.Native CLEAN_DIRECT_OUTPUT 1)
+
+if (CMAKE_SYSTEM_NAME STREQUAL Linux AND NOT CLR_CMAKE_PLATFORM_ANDROID)
     target_link_libraries(System.Native rt)
+endif ()
+
+if (CMAKE_SYSTEM_NAME STREQUAL FreeBSD)
+    target_link_libraries(System.Native pthread)
 endif ()
 
 install_library_and_symbols (System.Native)

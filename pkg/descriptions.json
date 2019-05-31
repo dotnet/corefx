@@ -1,5 +1,10 @@
 [
   {
+    "Name": "CoreFx.Private.TestUtilities",
+    "Description": "Private package, which provides testing utility classes. The package is meant to be used when running CoreFX tests on a runtime.",
+    "CommonTypes": []
+  },
+  {
     "Name": "RuntimePackage",
     "Description": "Internal implementation package not meant for direct consumption.  Please do not reference directly.",
     "CommonTypes": []
@@ -26,6 +31,26 @@
     ]
   },
   {
+    "Name": "Microsoft.Bcl.HashCode",
+    "Description": "Provides the HashCode type for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
+    "CommonTypes": [
+      "System.HashCode"
+    ]
+  },
+  {
+    "Name": "Microsoft.Diagnostics.Tracing.EventSource.Redist",
+    "Description": "This package includes the class Microsoft.Diagnostics.Tracing.EventSource which enables firing ETW events from managed code. This is the \"runtime\" or \"redist\" EventSource package and should be referenced directly only by other NuGet packages that need the EventSource functionality. Application developers that need this functionality should instead reference the Microsoft.Diagnostics.Tracing.EventSource NuGet package which provides an enhanced developer experience.
+
+      This package enables defining a strongly typed specification of an ETW provider that can be called by managed code. The EventSource class is also included in the .NET Framework, .NET Core, and netstandard2.0 in the System.Diagnostics.Tracing namespace. This package contains the latest version of EventSource and is meant to be used as a stop gap for .NET Framework developers until features and fixes are ported to System.Diagnostics.Tracing.EventSource in the .NET Framework.
+
+      For more details, have a look at http://msdn.microsoft.com/en-us/library/system.diagnostics.tracing.eventsource.aspx.
+
+",
+    "CommonTypes": [
+      "Microsoft.Diagnostics.Tracing.EventSource"
+    ]
+  },
+  {
     "Name": "Microsoft.NETCore",
     "Description": "Provides a set of packages that can be used when building portable libraries on .NETCore based platforms.",
     "CommonTypes": []
@@ -46,8 +71,23 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.NETCore.Platforms.Future",
+    "Description": "Provides runtime information required to resolve target framework, platform, and runtime specific implementations of .NETCore packages.  This package represents future platforms not yet supported in .NETCore stable release and is subject to change.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.NETCore.Portable.Compatibility",
     "Description": "Enables compatibility with portable libraries targeting previous .NET releases like .NET Framework 4.0 and Silverlight.\nThis package supports retargeting references to classic reference assemblies (mscorlib.dll, system.dll, etc) to new contract assemblies (System.Runtime.dll, System.IO, etc).  It does this in a pay-for-play way to prevent consuming assemblies from having to reference all of the contracts that happen to overlap with mscorlib.  As such, when using this package you may encounter errors like\n\terror CS0012: The type 'WebRequest' is defined in an assembly that is not referenced. You must add a reference to assembly 'System.Net.Requests, Version=0.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a'.\nTo resolve these errors install the package with the same name as the missing assembly.",
+    "CommonTypes": []
+  },
+  {
+    "Name": "Microsoft.Windows.Compatibility",
+    "Description": "This Windows Compatibility Pack provides access to APIs that were previously available only for .NET Framework. It can be used from both .NET Core as well as .NET Standard.",
+    "CommonTypes": []
+  },
+  {
+    "Name": "Microsoft.Windows.Compatibility.Shims",
+    "Description": "This package provides infrastructure services and shouldn't be referenced directly from your code. It provides facade assemblies in order to make the Microsoft.Windows.Compatibility package work across all .NET implementations.",
     "CommonTypes": []
   },
   {
@@ -116,6 +156,16 @@
     "CommonTypes": []
   },
   {
+    "Name": "Microsoft.Private.CoreFx.OOB",
+    "Description": "Package used to represent out-of-band packages that are not included in NetCoreApp.",
+    "CommonTypes": []
+  },
+  {
+    "Name": "Microsoft.Private.CoreFx.UAP",
+    "Description": "Package used to represent the portions of UAP that come from CoreFx.",
+    "CommonTypes": []
+  },
+  {
     "Name": "Microsoft.TargetingPack.NETFramework.v4.6",
     "Description": "Contains the .NET Framework v4.6 targeting pack.",
     "CommonTypes": []
@@ -131,7 +181,7 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.VisualBasic",
+    "Name": "Microsoft.VisualBasic.Core",
     "Description": "Provides types that support the Visual Basic runtime",
     "CommonTypes": [
       "Microsoft.VisualBasic.Strings",
@@ -139,14 +189,18 @@
     ]
   },
   {
-    "Name": "NETStandard.Library",
-    "Description": "A set of standard .NET APIs that are prescribed to be used and supported together. This includes all of the APIs in the NETStandard.Platform package plus additional libraries that are core to .NET but built on top of NETStandard.Platform.",
-    "CommonTypes": [
-    ]
+    "Name": "Microsoft.XmlSerializer.Generator",
+    "Description": "Like the Xml Serializer Generator (sgen.exe) on desktop, Microsoft.XmlSerializer.Generator NuGet package is the solution for .NET Core and .NET Standard Libraries. It creates an Xml serialization assembly for types contained in an assembly in order to improve the startup performance of Xml serialization when serializing or de-serializing objects of those types using XmlSerializer.",
+    "CommonTypes": []
   },
   {
-    "Name": "NETStandard.Platform",
-    "Description": "A set of low level APIs that all .NET platforms must support.",
+    "Name": "System.ServiceModel.Syndication",
+    "Description": "Provides classes related to service model syndication.",
+    "CommonTypes": []
+  },
+  {
+    "Name": "NETStandard.Library.NETFramework",
+    "Description": "Adds NETStandard2.0 support to .NET Framework.",
     "CommonTypes": [
     ]
   },
@@ -166,6 +220,13 @@
       "Microsoft.Win32.RegistryValueKind",
       "Microsoft.Win32.RegistryHive",
       "Microsoft.Win32.RegistryView"
+    ]
+  },
+  {
+    "Name": "Microsoft.Win32.SystemEvents",
+    "Description": "Provides access to Windows system event notifications.",
+    "CommonTypes": [
+      "Microsoft.Win32.SystemEvents"
     ]
   },
   {
@@ -308,6 +369,39 @@
     ]
   },
   {
+    "Name": "System.ComponentModel.Composition",
+    "Description": "This namespace provides classes that constitute the core of the Managed Extensibility Framework, or MEF.",
+    "CommonTypes": [
+      "System.ComponentModel.Composition.ChangeRejectedException",
+      "System.ComponentModel.Composition.CompositionContractMismatchException",
+      "System.ComponentModel.Composition.CompositionError",
+      "System.ComponentModel.Composition.CompositionException",
+      "System.ComponentModel.Composition.ExportAttribute",
+      "System.ComponentModel.Composition.ImportAttribute",
+      "System.ComponentModel.Composition.ImportCardinalityMismatchException",
+      "System.ComponentModel.Composition.Hosting.AggregateCatalog",
+      "System.ComponentModel.Composition.Hosting.ApplicationCatalog",
+      "System.ComponentModel.Composition.Hosting.AssemblyCatalog",
+      "System.ComponentModel.Composition.Hosting.CompositionContainer",
+      "System.ComponentModel.Composition.Primitives.ComposablePartException",
+      "System.ComponentModel.Composition.Primitives.ExportDefinition",
+      "System.ComponentModel.Composition.Primitives.ImportDefinition",
+      "System.ComponentModel.Composition.ReflectionModel.ReflectionModelServices"
+    ]
+  },
+  {
+    "Name": "System.ComponentModel.Composition.Registration",
+    "Description": "This namespace provides classes that constitute the core of the Managed Extensibility Framework, or MEF.",
+    "CommonTypes": [
+      "System.ComponentModel.Composition.Registration.RegistrationBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder",
+      "System.ComponentModel.Composition.Registration.PartBuilder<T>",
+      "System.ComponentModel.Composition.Registration.ParameterImportBuilder",
+      "System.ComponentModel.Composition.Registration.ImportBuilder",
+      "System.ComponentModel.Composition.Registration.ExportBuilder"
+    ]
+  },
+  {
     "Name": "System.ComponentModel.EventBasedAsync",
     "Description": "Provides support classes and delegates for the event-based asynchronous pattern. Developers should prefer the classes in the System.Threading.Tasks package.",
     "CommonTypes": [
@@ -400,6 +494,14 @@
     ]
   },
   {
+    "Name": "System.Configuration.ConfigurationManager",
+    "Description": "Provides types that support using configuration files.",
+    "CommonTypes": [
+      "System.Configuration.Configuration",
+      "System.Configuration.ConfigurationManager"
+    ]
+  },
+  {
     "Name": "System.Console",
     "Description": "Provides the System.Console class, which represents the standard input, output and error streams for console applications.",
     "CommonTypes": [
@@ -421,6 +523,47 @@
       "System.Data.Common.DbTransaction",
       "System.Data.Common.DbParameterCollection",
       "System.Data.Common.DbProviderFactory"
+    ]
+  },
+  {
+    "Name": "System.Data.DataSetExtensions",
+    "Description": "Provides extensions to form LINQ expressions and method queries against DataTable objects.",
+    "CommonTypes": [
+        "System.Data.DataRowComparer",
+        "System.Data.DataRowExtensions",
+        "System.Data.DataTableExtensions",
+        "System.Data.EnumerableRowCollection",
+        "System.Data.EnumerableRowCollectionExtensions",
+        "System.Data.OrderedEnumerableRowCollection",
+        "System.Data.TypedTableBase",
+        "System.Data.TypedTableBaseExtensions"
+    ]
+  },
+  {
+    "Name": "System.Data.Odbc",
+    "Description": "Provides a collection of classes used to access an ODBC data source in the managed space",
+    "CommonTypes": [
+        "System.Data.Odbc.OdbcCommand",
+        "System.Data.Odbc.OdbcConnection",
+        "System.Data.Odbc.OdbcDataReader",
+        "System.Data.Odbc.OdbcDataAdapter",
+        "System.Data.Odbc.OdbcParameter",
+        "System.Data.Odbc.OdbcParameterCollection",
+        "System.Data.Odbc.OdbcTransaction"
+    ]
+  },
+  {
+    "Name": "System.Data.OleDb",
+    "Description": "Provides a collection of classes for OLEDB.",
+    "CommonTypes": [
+        "System.Data.OleDb.OleDbCommand",
+        "System.Data.OleDb.OleDbCommandBuilder",
+        "System.Data.OleDb.OleDbConnection",
+        "System.Data.OleDb.OleDbDataAdapter",
+        "System.Data.OleDb.OleDbDataReader",
+        "System.Data.OleDb.OleDbParameter",
+        "System.Data.OleDb.OleDbParameterCollection",
+        "System.Data.OleDb.OleDbTransaction"
     ]
   },
   {
@@ -497,6 +640,20 @@
     ]
   },
   {
+    "Name": "System.Diagnostics.EventLog",
+    "Description": "Provides the System.Diagnostics.EventLog class, which allows the applications to use the windows event log service.",
+    "CommonTypes": [
+      "System.Diagnostics.EventLog"
+    ]
+  },
+  {
+    "Name": "System.Diagnostics.PerformanceCounter",
+    "Description": "Provides the System.Diagnostics.PerformanceCounter class, which allows access to Windows performance counters.",
+    "CommonTypes": [
+      "System.Diagnostics.PerformanceCounter"
+    ]
+  },
+  {
     "Name": "System.Diagnostics.Process",
     "Description": "Provides the System.Diagnostics.Process class, which allows interaction with local and remote processes.",
     "CommonTypes": [
@@ -557,6 +714,32 @@
     ]
   },
   {
+    "Name": "System.DirectoryServices",
+    "Description": "Provides easy access to Active Directory Domain Services.",
+    "CommonTypes": [
+      "System.DirectoryServices.DirectoryEntry",
+      "System.DirectoryServices.DirectorySearcher",
+      "System.DirectoryServices.ActiveDirectory.ActiveDirectorySite",
+      "System.DirectoryServices.ActiveDirectory.ApplicationPartition",
+      "System.DirectoryServices.ActiveDirectory.DirectoryContext",
+      "System.DirectoryServices.ActiveDirectory.DirectoryServer",
+      "System.DirectoryServices.ActiveDirectory.Domain",
+      "System.DirectoryServices.ActiveDirectory.DomainController"
+    ]
+  },
+  {
+    "Name": "System.DirectoryServices.AccountManagement",
+    "Description": "Provides uniform access and manipulation of user, computer, and group security principals across the multiple principal stores: Active Directory Domain Services (AD DS), Active Directory Lightweight Directory Services (AD LDS), and Machine SAM (MSAM).",
+    "CommonTypes": [
+    ]
+  },
+  {
+    "Name": "System.DirectoryServices.Protocols",
+    "Description": "Provides the methods defined in the Lightweight Directory Access Protocol (LDAP) version 3 (V3) and Directory Services Markup Language (DSML) version 2.0 (V2) standards.",
+    "CommonTypes": [
+    ]
+  },
+  {
     "Name": "System.Drawing.Primitives",
     "Description": "Provides basic drawing primitive structures, that exposes the corresponding System.Drawing.dll types in .NET Core.",
     "CommonTypes": [
@@ -567,6 +750,18 @@
       "System.Drawing.SizeF",
       "System.Drawing.Rectangle",
       "System.Drawing.RectangleF"
+    ]
+  },
+  {
+    "Name": "System.Drawing.Common",
+    "Description": "Provides access to GDI+ graphics functionality.",
+    "CommonTypes": [
+      "System.Drawing.Bitmap",
+      "System.Drawing.BitmapData",
+      "System.Drawing.Brush",
+      "System.Drawing.Font",
+      "System.Drawing.Graphics",
+      "System.Drawing.Icon"
     ]
   },
   {
@@ -753,6 +948,15 @@
     "CommonTypes": []
   },
   {
+    "Name": "System.IO.Pipelines",
+    "Description": "Single producer single consumer byte buffer management.",
+    "CommonTypes": [
+      "System.IO.Pipelines.Pipe",
+      "System.IO.Pipelines.PipeWriter",
+      "System.IO.Pipelines.PipeReader"
+    ]
+  },
+  {
     "Name": "System.IO.Pipes",
     "Description": "Provides a means for interprocess communication through anonymous and/or named pipes.",
     "CommonTypes": [
@@ -773,6 +977,13 @@
       "System.IO.Pipes.PipeAuditRule",
       "System.IO.Pipes.PipeAccessRights"
     ]
+  },
+  {
+    "Name": "System.IO.Ports",
+    "Description": "Provides classes for controlling serial ports.",
+    "CommonTypes": [
+      "System.IO.Ports.SerialPort"
+     ]
   },
   {
     "Name": "System.IO.UnmanagedMemoryStream",
@@ -834,10 +1045,36 @@
     ]
   },
   {
-    "Name": "System.Memory",
-    "Description": "Provides types for efficient low-allocation access to memory.",
+    "Name": "System.Management",
+    "Description": "Provides access to a rich set of management information and management events about the system, devices, and applications instrumented to the Windows Management Instrumentation (WMI) infrastructure.",
     "CommonTypes": [
-      "System.Span",
+      "System.Management.ManagementClass",
+      "System.Management.ManagementObject",
+      "System.Management.SelectQuery"
+    ]
+  },
+  {
+    "Name": "System.Memory",
+    "Description": "Provides types for efficient representation and pooling of managed, stack, and native memory segments and sequences of such segments, along with primitives to parse and format UTF-8 encoded text stored in those memory segments.",
+    "CommonTypes": [
+        "System.Span",
+        "System.ReadOnlySpan",
+        "System.Memory",
+        "System.ReadOnlyMemory",
+        "System.Buffers.MemoryPool",
+        "System.Buffers.ReadOnlySequence",
+        "System.Buffers.SequenceReader",
+        "System.Buffers.Text.Utf8Parser",
+        "System.Buffers.Text.Utf8Formatter"
+    ]
+  },
+  {
+    "Name": "Microsoft.Bcl.AsyncInterfaces",
+    "Description": "Provides the IAsyncEnumerable<T> and IAsyncDisposable interfaces and helper types for .NET Standard 2.0. This package is not required starting with .NET Standard 2.1 and .NET Core 3.0.",
+    "CommonTypes": [
+      "System.IAsyncDisposable",
+      "System.Collections.Generic.IAsyncEnumerable",
+      "System.Collections.Generic.IAsyncEnumerator"
     ]
   },
   {
@@ -881,6 +1118,13 @@
       "System.Net.WebExceptionStatus",
       "System.Net.WebRequest",
       "System.Net.WebResponse"
+    ]
+  },
+  {
+    "Name": "System.Net.WebSockets.WebSocketProtocol",
+    "Description": "Provides the WebSocketProtocol class, which allows creating a websocket from a connected stream using WebSocketsProtocol.CreateFromConnectedStream.",
+    "CommonTypes": [
+      "System.Net.WebSockets.WebSocketProtocol"
     ]
   },
   {
@@ -1027,18 +1271,13 @@
     ]
   },
   {
-    "Name": "System.Numerics.Vectors",
-    "Description": "Provides hardware-accelerated numeric types, suitable for high-performance processing and graphics applications.",
+    "Name": "System.Numerics.Tensors",
+    "Description": "Tensor class which represents and extends multi-dimensional arrays.",
     "CommonTypes": [
-      "System.Numerics.Matrix3x2",
-      "System.Numerics.Matrix4x4",
-      "System.Numerics.Plane",
-      "System.Numerics.Quaternion",
-      "System.Numerics.Vector2",
-      "System.Numerics.Vector3",
-      "System.Numerics.Vector4",
-      "System.Numerics.Vector",
-      "System.Numerics.Vector<T>"
+      "System.Numerics.Tensors.Tensor<T>",
+      "System.Numerics.Tensors.CompressedSparseTensor<T>",
+      "System.Numerics.Tensors.DenseTensor<T>",
+      "System.Numerics.Tensors.SparseTensor<T>"
     ]
   },
   {
@@ -1169,6 +1408,14 @@
     ]
   },
   {
+    "Name": "System.Reflection.MetadataLoadContext",
+    "Description": "Provides read-only reflection on assemblies in an isolated context with support for assemblies that have different architectures and runtimes.",
+    "CommonTypes": [
+        "System.Reflection.MetadataLoadContext",
+        "System.Reflection.MetadataAssemblyResolver"
+    ]
+  },
+  {
     "Name": "System.Reflection.Primitives",
     "Description": "Provides common enumerations for reflection-based libraries.",
     "CommonTypes": [
@@ -1200,6 +1447,14 @@
       "System.Resources.NeutralResourcesLanguageAttribute",
       "System.Resources.SatelliteContractVersionAttribute",
       "System.Resources.MissingManifestResourceException"
+    ]
+  }, 
+  {
+    "Name": "System.Resources.Extensions",
+    "Description": "Provides classes which read and write resources in a format that supports non-primitive objects.",
+    "CommonTypes": [
+        "System.Resources.Extensions.DeserializingResourceReader",
+        "System.Resources.Extensions.PreserializedResourceWriter"
     ]
   },
   {
@@ -1243,6 +1498,22 @@
     ]
   },
   {
+    "Name": "System.Runtime.Caching",
+    "Description": "Provides classes to use caching facilities.",
+    "CommonTypes": [
+      "System.Runtime.Caching.CacheEntryChangeMonitor",
+      "System.Runtime.Caching.CacheEntryRemovedArguments",
+      "System.Runtime.Caching.CacheEntryUpdateArguments",
+      "System.Runtime.Caching.CacheItem",
+      "System.Runtime.Caching.CacheItemPolicy",
+      "System.Runtime.Caching.ChangeMonitor",
+      "System.Runtime.Caching.FileChangeMonitor",
+      "System.Runtime.Caching.HostFileChangeMonitor",
+      "System.Runtime.Caching.MemoryCache",
+      "System.Runtime.Caching.ObjectCache"
+    ]
+  },
+  {
     "Name": "System.Runtime.CompilerServices.Unsafe",
     "Description": "Provides the System.Runtime.CompilerServices.Unsafe class, which provides generic, low-level functionality for manipulating pointers.",
     "CommonTypes": [
@@ -1279,6 +1550,13 @@
       "System.Runtime.Versioning.FrameworkName",
       "System.StringComparer",
       "System.IO.Path"
+    ]
+  },
+  {
+    "Name": "System.Runtime.Intrinsics.Experimental",
+    "Description": "Provides APIs for accessing processor specific instructions.",
+    "CommonTypes": [
+        "System.Runtime.Intrinsics.Arm.Arm64"
     ]
   },
   {
@@ -1518,6 +1796,51 @@
     ]
   },
   {
+    "Name": "System.Security.Cryptography.Xml",
+    "Description": "Provides classes to support the creation and validation of XML digital signatures. The classes in this namespace implement the World Wide Web Consortium Recommendation, \"XML-Signature Syntax and Processing\", described at http://www.w3.org/TR/xmldsig-core/.",
+    "CommonTypes": [
+      "System.Security.Cryptography.Xml.CipherData",
+      "System.Security.Cryptography.Xml.CipherReference",
+      "System.Security.Cryptography.Xml.DataObject",
+      "System.Security.Cryptography.Xml.DataReference",
+      "System.Security.Cryptography.Xml.DSAKeyValue",
+      "System.Security.Cryptography.Xml.EncryptedData",
+      "System.Security.Cryptography.Xml.EncryptedKey",
+      "System.Security.Cryptography.Xml.EncryptedReference",
+      "System.Security.Cryptography.Xml.EncryptedType",
+      "System.Security.Cryptography.Xml.EncryptedXml",
+      "System.Security.Cryptography.Xml.EncryptionMethod",
+      "System.Security.Cryptography.Xml.EncryptionProperty",
+      "System.Security.Cryptography.Xml.EncryptionPropertyCollection",
+      "System.Security.Cryptography.Xml.KeyInfo",
+      "System.Security.Cryptography.Xml.KeyInfoClause",
+      "System.Security.Cryptography.Xml.KeyInfoEncryptedKey",
+      "System.Security.Cryptography.Xml.KeyInfoName",
+      "System.Security.Cryptography.Xml.KeyInfoNode",
+      "System.Security.Cryptography.Xml.KeyInfoRetrievalMethod",
+      "System.Security.Cryptography.Xml.KeyInfoX509Data",
+      "System.Security.Cryptography.Xml.KeyReference",
+      "System.Security.Cryptography.Xml.Reference",
+      "System.Security.Cryptography.Xml.ReferenceList",
+      "System.Security.Cryptography.Xml.RSAKeyValue",
+      "System.Security.Cryptography.Xml.Signature",
+      "System.Security.Cryptography.Xml.SignedInfo",
+      "System.Security.Cryptography.Xml.SignedXml",
+      "System.Security.Cryptography.Xml.Transform",
+      "System.Security.Cryptography.Xml.TransformChain",
+      "System.Security.Cryptography.Xml.XmlDecryptionTransform",
+      "System.Security.Cryptography.Xml.XmlDsigBase64Transform",
+      "System.Security.Cryptography.Xml.XmlDsigC14NTransform",
+      "System.Security.Cryptography.Xml.XmlDsigC14NWithCommentsTransform",
+      "System.Security.Cryptography.Xml.XmlDsigEnvelopedSignatureTransform",
+      "System.Security.Cryptography.Xml.XmlDsigExcC14NTransform",
+      "System.Security.Cryptography.Xml.XmlDsigExcC14NWithCommentsTransform",
+      "System.Security.Cryptography.Xml.XmlDsigXPathTransform",
+      "System.Security.Cryptography.Xml.XmlDsigXsltTransform",
+      "System.Security.Cryptography.Xml.XmlLicenseTransform"
+    ]
+  },
+  {
     "Name": "System.Security.Cryptography.X509Certificates",
     "Description": "Provides types for reading, exporting and verifying Authenticode X.509 v3 certificates. These certificates are signed with a private key that uniquely and positively identifies the holder of the certificate.",
     "CommonTypes": [
@@ -1681,6 +2004,24 @@
     ]
   },
   {
+    "Name": "System.Text.Json",
+    "Description": "Provides a fast, non-cached, forward-only way to read UTF-8 encoded JavaScript Object Notation (JSON) text.",
+    "CommonTypes": [
+      "System.Text.Json.Utf8JsonReader",
+      "System.Text.Json.Utf8JsonWriter",
+      "System.Text.Json.JsonDocument"
+    ]
+  },
+  {
+    "Name": "Microsoft.Bcl.Json.Sources",
+    "Description": "Provides the source code implementation of System.Text.Json as internal types. This package is only required for projects targeting .NET Framework 4.6.1+ or .NET Core 2.x; and is not for projects that can target .NET Core 3.0 and higher. For guidance on consuming the source pacakge, visit: https://aka.ms/json-source-package-guide.",
+    "CommonTypes": [
+      "System.Text.Json.Utf8JsonReader",
+      "System.Text.Json.Utf8JsonWriter",
+      "System.Text.Json.JsonDocument"
+    ]
+  },
+  {
     "Name": "System.Text.RegularExpressions",
     "Description": "Provides the System.Text.RegularExpressions.Regex class, an implementation of a regular expression engine.",
     "CommonTypes": [
@@ -1718,6 +2059,14 @@
       "System.Security.AccessControl.SemaphoreAccessRule",
       "System.Security.AccessControl.SemaphoreAuditRule",
       "System.Security.AccessControl.SemaphoreSecurity"
+    ]
+  },
+  {
+    "Name": "System.Threading.Channels",
+    "Description": "Provides types for passing data between producers and consumers.",
+    "CommonTypes": [
+      "System.Threading.Channel",
+      "System.Threading.Channel<T>"
     ]
   },
   {
@@ -1810,11 +2159,19 @@
     ]
   },
   {
-    "Name": "System.Transactions",
+    "Name": "System.Transactions.Local",
     "Description": "Provides classes that allow you to write your own transactional application and resource manager.",
     "CommonTypes": [
       "System.Transactions.Transaction",
       "System.Transactions.TransactionScope"
+    ]
+  },
+  {
+    "Name": "System.Utf8String.Experimental",
+    "Description": "Provides types for representation of UTF-8 string data.",
+    "CommonTypes": [
+        "System.Char8",
+        "System.Utf8String"
     ]
   },
   {
@@ -1837,6 +2194,14 @@
     "Description": "Provides the System.Web.HttpUtility class for encoding and decoding various web formats.",
     "CommonTypes": [
       "System.Web.HttpUtility"
+    ]
+  },
+  {
+    "Name": "System.Windows.Extensions",
+    "Description": "Provides miscellaneous Windows-specific types",
+    "CommonTypes":[
+      "System.Security.Cryptography.X509Certificates.X509Certificate2UI",
+      "System.Security.Cryptography.X509Certificates.X509SelectionFlag"
     ]
   },
   {
@@ -1963,5 +2328,10 @@
     "CommonTypes": [
       "System.Xml.XPath.XmlDocumentExtensions"
     ]
+  },
+  {
+    "Name": "Microsoft.IO.Redist",
+    "Description": "Downlevel support package for System.IO classes.",
+    "CommonTypes": []
   }
 ]

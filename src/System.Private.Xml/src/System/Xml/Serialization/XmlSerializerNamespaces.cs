@@ -11,6 +11,7 @@ namespace System.Xml.Serialization
     using System;
     using System.Collections.Generic;
     using System.Xml.Extensions;
+    using System.Xml;
 
     /// <devdoc>
     ///    <para>[To be supplied.]</para>

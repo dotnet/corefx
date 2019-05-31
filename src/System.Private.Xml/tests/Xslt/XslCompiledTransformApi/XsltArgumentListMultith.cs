@@ -4,9 +4,7 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
-using System.Xml;
 using System.Xml.XPath;
 using System.Xml.Xsl;
 using XmlCoreTest.Common;
@@ -28,10 +26,10 @@ namespace System.Xml.Tests
             Init(null);
         }
 
-        public /*override*/ new void Init(object objParam)
+        public new void Init(object objParam)
         {
             // Get parameter info
-            _strPath = Path.Combine(@"TestFiles\", FilePathUtil.GetTestDataPath(), @"XsltApiV2\");
+            _strPath = Path.Combine("TestFiles", FilePathUtil.GetTestDataPath(), "XsltApiV2");
             xsltArg1 = new XsltArgumentList();
 
             MyObject obj1 = new MyObject(1, _output);
@@ -71,7 +69,7 @@ namespace System.Xml.Tests
         ////////////////////////////////////////////////////////////////
         public int GetParam1(object args)
         {
-            Object retObj;
+            object retObj;
 
             for (int i = 1; i <= 100; i++)
             {
@@ -88,7 +86,7 @@ namespace System.Xml.Tests
 
         public int GetParam2(object args)
         {
-            Object retObj;
+            object retObj;
 
             for (int i = 1; i <= 100; i++)
             {
@@ -110,11 +108,11 @@ namespace System.Xml.Tests
         public void proc1()
         {
             CThreads rThreads = new CThreads(_output);
-            rThreads.Add(new ThreadFunc(GetParam1), new Object[] { 1, "myArg1" });
-            rThreads.Add(new ThreadFunc(GetParam1), new Object[] { 2, "myArg1" });
-            rThreads.Add(new ThreadFunc(GetParam1), new Object[] { 3, "myArg1" });
-            rThreads.Add(new ThreadFunc(GetParam1), new Object[] { 4, "myArg1" });
-            rThreads.Add(new ThreadFunc(GetParam1), new Object[] { 5, "myArg1" });
+            rThreads.Add(new ThreadFunc(GetParam1), new object[] { 1, "myArg1" });
+            rThreads.Add(new ThreadFunc(GetParam1), new object[] { 2, "myArg1" });
+            rThreads.Add(new ThreadFunc(GetParam1), new object[] { 3, "myArg1" });
+            rThreads.Add(new ThreadFunc(GetParam1), new object[] { 4, "myArg1" });
+            rThreads.Add(new ThreadFunc(GetParam1), new object[] { 5, "myArg1" });
 
             //Wait until they are complete
             rThreads.Start();
@@ -129,11 +127,11 @@ namespace System.Xml.Tests
         public void proc2()
         {
             CThreads rThreads = new CThreads(_output);
-            rThreads.Add(new ThreadFunc(GetParam2), new Object[] { 1, "myArg1" });
-            rThreads.Add(new ThreadFunc(GetParam2), new Object[] { 2, "myArg2" });
-            rThreads.Add(new ThreadFunc(GetParam2), new Object[] { 3, "myArg3" });
-            rThreads.Add(new ThreadFunc(GetParam2), new Object[] { 4, "myArg4" });
-            rThreads.Add(new ThreadFunc(GetParam2), new Object[] { 5, "myArg5" });
+            rThreads.Add(new ThreadFunc(GetParam2), new object[] { 1, "myArg1" });
+            rThreads.Add(new ThreadFunc(GetParam2), new object[] { 2, "myArg2" });
+            rThreads.Add(new ThreadFunc(GetParam2), new object[] { 3, "myArg3" });
+            rThreads.Add(new ThreadFunc(GetParam2), new object[] { 4, "myArg4" });
+            rThreads.Add(new ThreadFunc(GetParam2), new object[] { 5, "myArg5" });
 
             //Wait until they are complete
             rThreads.Start();
@@ -158,7 +156,7 @@ namespace System.Xml.Tests
         ////////////////////////////////////////////////////////////////
         public int GetExtnObject1(object args)
         {
-            Object retObj;
+            object retObj;
 
             for (int i = 1; i <= 100; i++)
             {
@@ -175,7 +173,7 @@ namespace System.Xml.Tests
 
         public int GetExtnObject2(object args)
         {
-            Object retObj;
+            object retObj;
 
             for (int i = 1; i <= 100; i++)
             {
@@ -196,11 +194,11 @@ namespace System.Xml.Tests
         public void proc1()
         {
             CThreads rThreads = new CThreads(_output);
-            rThreads.Add(new ThreadFunc(GetExtnObject1), new Object[] { 1, "urn:my-obj1" });
-            rThreads.Add(new ThreadFunc(GetExtnObject1), new Object[] { 2, "urn:my-obj1" });
-            rThreads.Add(new ThreadFunc(GetExtnObject1), new Object[] { 3, "urn:my-obj1" });
-            rThreads.Add(new ThreadFunc(GetExtnObject1), new Object[] { 4, "urn:my-obj1" });
-            rThreads.Add(new ThreadFunc(GetExtnObject1), new Object[] { 5, "urn:my-obj1" });
+            rThreads.Add(new ThreadFunc(GetExtnObject1), new object[] { 1, "urn:my-obj1" });
+            rThreads.Add(new ThreadFunc(GetExtnObject1), new object[] { 2, "urn:my-obj1" });
+            rThreads.Add(new ThreadFunc(GetExtnObject1), new object[] { 3, "urn:my-obj1" });
+            rThreads.Add(new ThreadFunc(GetExtnObject1), new object[] { 4, "urn:my-obj1" });
+            rThreads.Add(new ThreadFunc(GetExtnObject1), new object[] { 5, "urn:my-obj1" });
 
             //Wait until they are complete
             rThreads.Start();
@@ -215,11 +213,11 @@ namespace System.Xml.Tests
         public void proc2()
         {
             CThreads rThreads = new CThreads(_output);
-            rThreads.Add(new ThreadFunc(GetExtnObject2), new Object[] { 1, "urn:my-obj1" });
-            rThreads.Add(new ThreadFunc(GetExtnObject2), new Object[] { 2, "urn:my-obj2" });
-            rThreads.Add(new ThreadFunc(GetExtnObject2), new Object[] { 3, "urn:my-obj3" });
-            rThreads.Add(new ThreadFunc(GetExtnObject2), new Object[] { 4, "urn:my-obj4" });
-            rThreads.Add(new ThreadFunc(GetExtnObject2), new Object[] { 5, "urn:my-obj5" });
+            rThreads.Add(new ThreadFunc(GetExtnObject2), new object[] { 1, "urn:my-obj1" });
+            rThreads.Add(new ThreadFunc(GetExtnObject2), new object[] { 2, "urn:my-obj2" });
+            rThreads.Add(new ThreadFunc(GetExtnObject2), new object[] { 3, "urn:my-obj3" });
+            rThreads.Add(new ThreadFunc(GetExtnObject2), new object[] { 4, "urn:my-obj4" });
+            rThreads.Add(new ThreadFunc(GetExtnObject2), new object[] { 5, "urn:my-obj5" });
 
             //Wait until they are complete
             rThreads.Start();
@@ -248,9 +246,9 @@ namespace System.Xml.Tests
             string _strXmlFile = ((object[])args)[2].ToString();
 
             if (_strXslFile.Substring(0, 5) != "http:")
-                _strXslFile = _strPath + _strXslFile;
+                _strXslFile = Path.Combine(_strPath, _strXslFile);
             if (_strXmlFile.Substring(0, 5) != "http:")
-                _strXmlFile = _strPath + _strXmlFile;
+                _strXmlFile = Path.Combine(_strPath, _strXmlFile);
 
             XmlReader xrData = XmlReader.Create(_strXmlFile);
             XPathDocument xd = new XPathDocument(xrData, XmlSpace.Preserve);

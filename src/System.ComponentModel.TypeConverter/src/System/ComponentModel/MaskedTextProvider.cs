@@ -2,45 +2,44 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Collections.Generic;
+using System.Collections.Specialized;
+using System.Diagnostics;
+using System.Globalization;
+using System.Text;
+
 namespace System.ComponentModel
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Collections.Specialized;
-    using System.Diagnostics;
-    using System.Globalization;
-    using System.Security.Permissions;
-    using System.Text;
-
     /// <summary>
-    ///     Provides functionality for formatting a test string against a mask string.
-    ///     MaskedTextProvider is stateful, it keeps information about the input characters so
-    ///     multiple call to Add/Remove will work in the same buffer.
-    ///     Most of the operations are performed on a virtual string containing the input characters as opposed 
-    ///     to the test string itself, since mask literals cannot be modified (i.e: replacing on a literal position
-    ///     will actually replace on the nearest edit position forward).
+    /// Provides functionality for formatting a test string against a mask string.
+    /// MaskedTextProvider is stateful, it keeps information about the input characters so
+    /// multiple call to Add/Remove will work in the same buffer.
+    /// Most of the operations are performed on a virtual string containing the input characters as opposed 
+    /// to the test string itself, since mask literals cannot be modified (i.e: replacing on a literal position
+    /// will actually replace on the nearest edit position forward).
     /// </summary>
     public class MaskedTextProvider : ICloneable
     {
         ///
-        ///  Some concept definitions:
-        ///  
-        ///  'mask'             : A string representing the mask associated with an instance of this class.
-        ///  'test string'      : A string representing the user's text formatted as specified by the mask.
-        ///  'virtual text'     : The characters entered by the user to be converted into the 'test string'.
-        ///                       no buffer exists to hold them since they're stored in the test string but
-        ///                       we keep an array with their position in the test string for fast access.
-        ///  'text indexer'     : An array which values point to 'edit char' positions in the test string and 
-        ///                       indexes correspond to the position in the user's text.
-        ///  'char descriptor'  : A structure describing a char constraints as specified in the mask plus some
-        ///                       other info.
-        ///  'string descriptor': An array of char descriptor objects describing the chars in the 'test string',
-        ///                       the indexes of this array represent the position of the chars in the string.
+        /// Some concept definitions:
+        /// 
+        /// 'mask'             : A string representing the mask associated with an instance of this class.
+        /// 'test string'      : A string representing the user's text formatted as specified by the mask.
+        /// 'virtual text'     : The characters entered by the user to be converted into the 'test string'.
+        ///              no buffer exists to hold them since they're stored in the test string but
+        ///              we keep an array with their position in the test string for fast access.
+        /// 'text indexer'     : An array which values point to 'edit char' positions in the test string and 
+        ///              indexes correspond to the position in the user's text.
+        /// 'char descriptor'  : A structure describing a char constraints as specified in the mask plus some
+        ///              other info.
+        /// 'string descriptor': An array of char descriptor objects describing the chars in the 'test string',
+        ///              the indexes of this array represent the position of the chars in the string.
 
 
         /// <summary>
-        ///     Char case conversion type used when '>' (subsequent chars to upper case) or '<' (subsequent chars to lower case)
-        ///     are specified in the mask.
+        /// Char case conversion type used when '&gt;' (subsequent chars to upper case) or '&lt;' (subsequent chars to lower case)
+        /// are specified in the mask.
         /// </summary>
         private enum CaseConversion
         {
@@ -49,9 +48,8 @@ namespace System.ComponentModel
             ToUpper
         }
 
-
         /// <summary>
-        ///     Type of the characters in the test string according to the mask language.
+        /// Type of the characters in the test string according to the mask language.
         /// </summary>
         [Flags]
         private enum CharType
@@ -64,22 +62,22 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    This structure describes some constraints and properties of a character in the test string, as specified 
-        ///    in the mask.
+        /// This structure describes some constraints and properties of a character in the test string, as specified 
+        /// in the mask.
         /// </summary>
         private class CharDescriptor
         {
             // The position the character holds in the mask string. Required for testing the character against the mask.
             public int MaskPosition;
 
-            // The char case conversion specified in the mask.  Required for formatting the string when requested.
+            // The char case conversion specified in the mask. Required for formatting the string when requested.
             public CaseConversion CaseConversion;
 
             // The char type according to the mask language indentifiers. (Separator, Editable char...).
             // Required for validating the input char.
             public CharType CharType;
 
-            // Specifies whether the editable char has been assigned a value.  Meaningful to edit chars only.
+            // Specifies whether the editable char has been assigned a value. Meaningful to edit chars only.
             public bool IsAssigned;
 
             // constructors.
@@ -91,7 +89,7 @@ namespace System.ComponentModel
 
             public override string ToString()
             {
-                return String.Format(
+                return string.Format(
                                         CultureInfo.InvariantCulture,
                                         "MaskPosition[{0}] <CaseConversion.{1}><CharType.{2}><IsAssigned: {3}",
                                         MaskPosition,
@@ -104,16 +102,16 @@ namespace System.ComponentModel
 
         //// class data.
 
-        private const char spaceChar = ' ';
-        private const char defaultPromptChar = '_';
-        private const char nullPasswordChar = '\0';
-        private const bool defaultAllowPrompt = true;
-        private const int invalidIndex = -1;
-        private const byte editAny = 0;
-        private const byte editUnassigned = 1;
-        private const byte editAssigned = 2;
-        private const bool forward = true;
-        private const bool backward = false;
+        private const char SPACE_CHAR = ' ';
+        private const char DEFAULT_PROMPT_CHAR = '_';
+        private const char NULL_PASSWORD_CHAR = '\0';
+        private const bool DEFAULT_ALLOW_PROMPT = true;
+        private const int  INVALID_INDEX = -1;
+        private const byte EDIT_ANY = 0;
+        private const byte EDIT_UNASSIGNED = 1;
+        private const byte EDIT_ASSIGNED = 2;
+        private const bool FORWARD = true;
+        private const bool BACKWARD = false;
 
         // Bit masks for bool properties.
         private static int s_ASCII_ONLY = BitVector32.CreateMask();
@@ -133,13 +131,11 @@ namespace System.ComponentModel
         private BitVector32 _flagState;
 
         // Used to obtained localized placeholder chars (date separator for instance).
-        private CultureInfo _culture;
 
         // the formatted string.
         private StringBuilder _testString;
 
         // the number of assigned edit chars.
-        private int _assignedCharCount;
 
         // the number of assigned required edit chars.
         private int _requiredCharCount;
@@ -151,89 +147,88 @@ namespace System.ComponentModel
         private int _optionalEditChars;
 
         // Properties backend fields (see corresponding property for info).
-        private string _mask;
         private char _passwordChar;
         private char _promptChar;
 
         // We maintain an array (string descriptor table) of CharDescriptor elements describing the characters in the
-        // test string, as specified in the mask.  It allows us to access character information in constant time since
+        // test string, as specified in the mask. It allows us to access character information in constant time since
         // we don't have to traverse the mask or test string whenever we need that information.
         private List<CharDescriptor> _stringDescriptor;
 
         ////// Construction API
 
         /// <summary>
-        ///     Creates a MaskedTextProvider object from the specified mask.
+        /// Creates a MaskedTextProvider object from the specified mask.
         /// </summary>
         public MaskedTextProvider(string mask)
-            : this(mask, null, defaultAllowPrompt, defaultPromptChar, nullPasswordChar, false)
+            : this(mask, null, DEFAULT_ALLOW_PROMPT, DEFAULT_PROMPT_CHAR, NULL_PASSWORD_CHAR, false)
         {
         }
 
         /// <summary>
-        ///     Creates a MaskedTextProvider object from the specified mask.
-        ///     'restrictToAscii' specifies whether the input characters should be restricted to ASCII characters only.
+        /// Creates a MaskedTextProvider object from the specified mask.
+        /// 'restrictToAscii' specifies whether the input characters should be restricted to ASCII characters only.
         /// </summary>
         public MaskedTextProvider(string mask, bool restrictToAscii)
-            : this(mask, null, defaultAllowPrompt, defaultPromptChar, nullPasswordChar, restrictToAscii)
+            : this(mask, null, DEFAULT_ALLOW_PROMPT, DEFAULT_PROMPT_CHAR, NULL_PASSWORD_CHAR, restrictToAscii)
         {
         }
 
         /// <summary>
-        ///     Creates a MaskedTextProvider object from the specified mask.
-        ///     'culture' is used to set the separator characters to the correspondig locale character; if null, the current
-        ///               culture is used.
+        /// Creates a MaskedTextProvider object from the specified mask.
+        /// 'culture' is used to set the separator characters to the corresponding locale character; if null, the current
+        ///      culture is used.
         /// </summary>
         public MaskedTextProvider(string mask, CultureInfo culture)
-            : this(mask, culture, defaultAllowPrompt, defaultPromptChar, nullPasswordChar, false)
+            : this(mask, culture, DEFAULT_ALLOW_PROMPT, DEFAULT_PROMPT_CHAR, NULL_PASSWORD_CHAR, false)
         {
         }
 
         /// <summary>
-        ///     Creates a MaskedTextProvider object from the specified mask.
-        ///     'culture' is used to set the separator characters to the correspondig locale character; if null, the current
-        ///               culture is used.
-        ///     'restrictToAscii' specifies whether the input characters should be restricted to ASCII characters only.
+        /// Creates a MaskedTextProvider object from the specified mask.
+        /// 'culture' is used to set the separator characters to the corresponding locale character; if null, the current
+        ///      culture is used.
+        /// 'restrictToAscii' specifies whether the input characters should be restricted to ASCII characters only.
         /// </summary>
         public MaskedTextProvider(string mask, CultureInfo culture, bool restrictToAscii)
-            : this(mask, culture, defaultAllowPrompt, defaultPromptChar, nullPasswordChar, restrictToAscii)
+            : this(mask, culture, DEFAULT_ALLOW_PROMPT, DEFAULT_PROMPT_CHAR, NULL_PASSWORD_CHAR, restrictToAscii)
         {
         }
 
         /// <summary>
-        ///     Creates a MaskedTextProvider object from the specified mask .  
-        ///     'passwordChar' specifies the character to be used in the password string.
-        ///     'allowPromptAsInput' specifies whether the prompt character should be accepted as a valid input or not.
+        /// Creates a MaskedTextProvider object from the specified mask . 
+        /// 'passwordChar' specifies the character to be used in the password string.
+        /// 'allowPromptAsInput' specifies whether the prompt character should be accepted as a valid input or not.
         /// </summary>
         public MaskedTextProvider(string mask, char passwordChar, bool allowPromptAsInput)
-            : this(mask, null, allowPromptAsInput, defaultPromptChar, passwordChar, false)
+            : this(mask, null, allowPromptAsInput, DEFAULT_PROMPT_CHAR, passwordChar, false)
         {
         }
 
         /// <summary>
-        ///     Creates a MaskedTextProvider object from the specified mask .  
-        ///     'passwordChar' specifies the character to be used in the password string.
-        ///     'allowPromptAsInput' specifies whether the prompt character should be accepted as a valid input or not.
+        /// Creates a MaskedTextProvider object from the specified mask . 
+        /// 'passwordChar' specifies the character to be used in the password string.
+        /// 'allowPromptAsInput' specifies whether the prompt character should be accepted as a valid input or not.
         /// </summary>
         public MaskedTextProvider(string mask, CultureInfo culture, char passwordChar, bool allowPromptAsInput)
-            : this(mask, culture, allowPromptAsInput, defaultPromptChar, passwordChar, false)
+            : this(mask, culture, allowPromptAsInput, DEFAULT_PROMPT_CHAR, passwordChar, false)
         {
         }
 
         /// <summary>
-        ///     Creates a MaskedTextProvider object from the specified mask.
-        ///     'culture' is used to set the separator characters to the correspondig locale character; if null, the current
-        ///               culture is used.
-        ///     'allowPromptAsInput' specifies whether the prompt character should be accepted as a valid input or not.
-        ///     'promptChar' specifies the character to be used for the prompt.
-        ///     'passwordChar' specifies the character to be used in the password string.
-        ///     'restrictToAscii' specifies whether the input characters should be restricted to ASCII characters only.
+        /// Creates a MaskedTextProvider object from the specified mask.
+        /// 'culture' is used to set the separator characters to the corresponding locale character; if null, the current
+        ///      culture is used.
+        /// 'allowPromptAsInput' specifies whether the prompt character should be accepted as a valid input or not.
+        /// 'promptChar' specifies the character to be used for the prompt.
+        /// 'passwordChar' specifies the character to be used in the password string.
+        /// 'restrictToAscii' specifies whether the input characters should be restricted to ASCII characters only.
         /// </summary>
         public MaskedTextProvider(string mask, CultureInfo culture, bool allowPromptAsInput, char promptChar, char passwordChar, bool restrictToAscii)
         {
             if (string.IsNullOrEmpty(mask))
             {
-                throw new ArgumentException(SR.Format(SR.MaskedTextProviderMaskNullOrEmpty), nameof(mask));
+                throw new ArgumentException(SR.MaskedTextProviderMaskNullOrEmpty, nameof(mask));
             }
 
             foreach (char c in mask)
@@ -253,7 +248,7 @@ namespace System.ComponentModel
 
             // read only property-backend fields.
 
-            _mask = mask;
+            Mask = mask;
             _promptChar = promptChar;
             _passwordChar = passwordChar;
 
@@ -265,25 +260,25 @@ namespace System.ComponentModel
                 {
                     if (culture.Equals(tempCulture.Parent))
                     {
-                        _culture = tempCulture;
+                        Culture = tempCulture;
                         break;
                     }
                 }
 
                 // Last resort use invariant culture.
-                if (_culture == null)
+                if (Culture == null)
                 {
-                    _culture = CultureInfo.InvariantCulture;
+                    Culture = CultureInfo.InvariantCulture;
                 }
             }
             else
             {
-                _culture = culture;
+                Culture = culture;
             }
 
-            if (!_culture.IsReadOnly)
+            if (!Culture.IsReadOnly)
             {
-                _culture = CultureInfo.ReadOnly(_culture);
+                Culture = CultureInfo.ReadOnly(Culture);
             }
 
             _flagState[s_ALLOW_PROMPT_AS_INPUT] = allowPromptAsInput;
@@ -301,8 +296,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Initializes the test string according to the mask and populates the character descirptor table
-        ///     (stringDescriptor).
+        /// Initializes the test string according to the mask and populates the character descriptor table
+        /// (stringDescriptor).
         /// </summary>
         private void Initialize()
         {
@@ -322,9 +317,9 @@ namespace System.ComponentModel
             // Traverse the mask to generate the test string and the string descriptor table so we don't have
             // to traverse those strings anymore.
             //
-            for (int maskPos = 0; maskPos < _mask.Length; maskPos++)
+            for (int maskPos = 0; maskPos < Mask.Length; maskPos++)
             {
-                ch = _mask[maskPos];
+                ch = Mask[maskPos];
                 if (!escapedChar)   // if false treat the char as literal.
                 {
                     switch (ch)
@@ -334,27 +329,27 @@ namespace System.ComponentModel
                         // set the corresponding localized char to be added to the test string.
                         //
                         case '.':   // decimal separator.
-                            locSymbol = _culture.NumberFormat.NumberDecimalSeparator;
+                            locSymbol = Culture.NumberFormat.NumberDecimalSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case ',':   // thousands separator.
-                            locSymbol = _culture.NumberFormat.NumberGroupSeparator;
+                            locSymbol = Culture.NumberFormat.NumberGroupSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case ':':   // time separator.
-                            locSymbol = _culture.DateTimeFormat.TimeSeparator;
+                            locSymbol = Culture.DateTimeFormat.TimeSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case '/':   // date separator.
-                            locSymbol = _culture.DateTimeFormat.DateSeparator;
+                            locSymbol = Culture.DateTimeFormat.DateSeparator;
                             charType = CharType.Separator;
                             break;
 
                         case '$':   // currency symbol.
-                            locSymbol = _culture.NumberFormat.CurrencySymbol;
+                            locSymbol = Culture.NumberFormat.CurrencySymbol;
                             charType = CharType.Separator;
                             break;
 
@@ -453,43 +448,25 @@ namespace System.ComponentModel
 
 
         /// <summary>
-        ///     Specifies whether the prompt character should be treated as a valid input character or not.
+        /// Specifies whether the prompt character should be treated as a valid input character or not.
         /// </summary>
-        public bool AllowPromptAsInput
-        {
-            get
-            {
-                return _flagState[s_ALLOW_PROMPT_AS_INPUT];
-            }
-        }
+        public bool AllowPromptAsInput => _flagState[s_ALLOW_PROMPT_AS_INPUT];
 
         /// <summary>
-        ///     Retreives the number of editable characters that have been set.
+        /// Retrieves the number of editable characters that have been set.
         /// </summary>
-        public int AssignedEditPositionCount
-        {
-            get
-            {
-                return _assignedCharCount;
-            }
-        }
+        public int AssignedEditPositionCount { get; private set; }
 
         /// <summary>
-        ///     Retreives the number of editable characters that have been set.
+        /// Retrieves the number of editable characters that have been set.
         /// </summary>
-        public int AvailableEditPositionCount
-        {
-            get
-            {
-                return EditPositionCount - _assignedCharCount;
-            }
-        }
+        public int AvailableEditPositionCount => EditPositionCount - AssignedEditPositionCount;
 
         /// <summary>
-        ///     Creates a 'clean' (no text assigned) MaskedTextProvider instance with the same property values as the 
-        ///     current instance.
-        ///     Derived classes can override this method and call base.Clone to get proper cloning semantics but must
-        ///     implement the full-paramter contructor (passing parameters to the base constructor as well).
+        /// Creates a 'clean' (no text assigned) MaskedTextProvider instance with the same property values as the 
+        /// current instance.
+        /// Derived classes can override this method and call base.Clone to get proper cloning semantics but must
+        /// implement the full-parameter constructor (passing parameters to the base constructor as well).
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2113:SecureLateBindingMethods")]
         public object Clone()
@@ -519,7 +496,7 @@ namespace System.ComponentModel
                     AsciiOnly
                 };
 
-                clonedProvider = SecurityUtils.SecureCreateInstance(providerType, parameters) as MaskedTextProvider;
+                clonedProvider = Activator.CreateInstance(providerType, parameters) as MaskedTextProvider;
             }
 
             clonedProvider.ResetOnPrompt = false;
@@ -546,42 +523,26 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     The culture that determines the value of the localizable mask language separators and placeholders.
+        /// The culture that determines the value of the localizable mask language separators and placeholders.
         /// </summary>
-        public CultureInfo Culture
-        {
-            get
-            {
-                return _culture;
-            }
-        }
+        public CultureInfo Culture { get; }
 
         /// <summary>
-        ///       The system password char.
+        /// The system password char.
         /// </summary>
-        public static char DefaultPasswordChar
-        {
-            get
-            {
-                // ComCtl32.dll V6 (WindowsXP) provides a nice black circle but we don't want to attempt to simulate it 
-                // here to avoid hard coding values.  MaskedTextBox picks up the right value at run time from comctl32.
-                return '*';
-            }
-        }
+        /// <remarks> 
+        /// ComCtl32.dll V6 (WindowsXP) provides a nice black circle but we don't want to attempt to simulate it 
+        /// here to avoid hard coding values. MaskedTextBox picks up the right value at run time from comctl32.
+        /// </remarks>
+        public static char DefaultPasswordChar => '*';
 
         /// <summary>
-        ///       The number of editable positions in the test string.
+        /// The number of editable positions in the test string.
         /// </summary>
-        public int EditPositionCount
-        {
-            get
-            {
-                return _optionalEditChars + _requiredEditChars;
-            }
-        }
+        public int EditPositionCount => _optionalEditChars + _requiredEditChars;
 
         /// <summary>
-        ///       Returns a new IEnumerator object containing the editable positions in the test string.
+        /// Returns a new IEnumerator object containing the editable positions in the test string.
         /// </summary>
         public System.Collections.IEnumerator EditPositions
         {
@@ -605,7 +566,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Specifies whether the formatted string should include literals.
+        /// Specifies whether the formatted string should include literals.
         /// </summary>
         public bool IncludeLiterals
         {
@@ -620,8 +581,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Specifies whether or not the prompt character should be included in the formatted text when there are
-        ///     character slots available in the mask.
+        /// Specifies whether or not the prompt character should be included in the formatted text when there are
+        /// character slots available in the mask.
         /// </summary>
         public bool IncludePrompt
         {
@@ -636,18 +597,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Specifies whether only ASCII characters are accepted as valid input.
+        /// Specifies whether only ASCII characters are accepted as valid input.
         /// </summary>
-        public bool AsciiOnly
-        {
-            get
-            {
-                return _flagState[s_ASCII_ONLY];
-            }
-        }
+        public bool AsciiOnly => _flagState[s_ASCII_ONLY];
 
         /// <summary>
-        ///     Specifies whether the user text is to be rendered as password characters.
+        /// Specifies whether the user text is to be rendered as password characters.
         /// </summary>
         public bool IsPassword
         {
@@ -660,83 +615,59 @@ namespace System.ComponentModel
             {
                 if (IsPassword != value)
                 {
-                    _passwordChar = value ? DefaultPasswordChar : nullPasswordChar;
+                    _passwordChar = value ? DefaultPasswordChar : NULL_PASSWORD_CHAR;
                 }
             }
         }
 
         /// <summary>
-        ///     A negative value representing an index outside the test string.
+        /// A negative value representing an index outside the test string.
         /// </summary>
-        public static int InvalidIndex
-        {
-            get
-            {
-                return invalidIndex;
-            }
-        }
+        public static int InvalidIndex => INVALID_INDEX;
 
         /// <summary>
-        ///     The last edit position (relative to the origin not to time) in the test string where 
-        ///     an input character has been placed.  If no position has been assigned, InvalidIndex is returned.
+        /// The last edit position (relative to the origin not to time) in the test string where 
+        /// an input character has been placed. If no position has been assigned, InvalidIndex is returned.
         /// </summary>
-        public int LastAssignedPosition
-        {
-            get
-            {
-                return FindAssignedEditPositionFrom(_testString.Length - 1, backward);
-            }
-        }
+        public int LastAssignedPosition => FindAssignedEditPositionFrom(_testString.Length - 1, BACKWARD);
 
         /// <summary>
-        ///     Specifies the length of the test string.
+        /// Specifies the length of the test string.
         /// </summary>
-        public int Length
-        {
-            get
-            {
-                return _testString.Length;
-            }
-        }
+        public int Length => _testString.Length;
 
         /// <summary>
-        ///     The mask to be applied to the test string.
+        /// The mask to be applied to the test string.
         /// </summary>
-        public string Mask
-        {
-            get
-            {
-                return _mask;
-            }
-        }
+        public string Mask { get; }
 
         /// <summary>
-        ///     Specifies whether all required inputs have been provided into the mask successfully.
+        /// Specifies whether all required inputs have been provided into the mask successfully.
         /// </summary>
         public bool MaskCompleted
         {
             get
             {
-                Debug.Assert(_assignedCharCount >= 0, "Invalid count of assigned chars.");
+                Debug.Assert(AssignedEditPositionCount >= 0, "Invalid count of assigned chars.");
                 return _requiredCharCount == _requiredEditChars;
             }
         }
 
         /// <summary>
-        ///     Specifies whether all inputs (required and optional) have been provided into the mask successfully.
+        /// Specifies whether all inputs (required and optional) have been provided into the mask successfully.
         /// </summary>
         public bool MaskFull
         {
             get
             {
-                Debug.Assert(_assignedCharCount >= 0, "Invalid count of assigned chars.");
-                return _assignedCharCount == EditPositionCount;
+                Debug.Assert(AssignedEditPositionCount >= 0, "Invalid count of assigned chars.");
+                return AssignedEditPositionCount == EditPositionCount;
             }
         }
 
         /// <summary>
-        ///     Specifies the character to be used in the formatted string in place of editable characters.
-        ///     Use the null character '\0' to reset this property.
+        /// Specifies the character to be used in the formatted string in place of editable characters.
+        /// Use the null character '\0' to reset this property.
         /// </summary>
         public char PasswordChar
         {
@@ -753,7 +684,7 @@ namespace System.ComponentModel
                     throw new InvalidOperationException(SR.MaskedTextProviderPasswordAndPromptCharError);
                 }
 
-                if (!IsValidPasswordChar(value) && (value != nullPasswordChar))
+                if (!IsValidPasswordChar(value) && (value != NULL_PASSWORD_CHAR))
                 {
                     // Same message as in SR.MaskedTextBoxInvalidCharError.
                     throw new ArgumentException(SR.MaskedTextProviderInvalidCharError);
@@ -767,7 +698,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Specifies the prompt character to be used in the formatted string for unsupplied characters.
+        /// Specifies the prompt character to be used in the formatted string for unsupplied characters.
         /// </summary>
         public char PromptChar
         {
@@ -810,11 +741,11 @@ namespace System.ComponentModel
 
 
         /// <summary>
-        ///     Specifies whether to reset and skip the current position if editable, when the input character has 
-        ///     the same value as the prompt.
-        ///     
-        ///     This is useful when assigning text that was saved including the prompt; in this case
-        ///     we don't want to take the prompt character as valid input but don't want to fail the test either. 
+        /// Specifies whether to reset and skip the current position if editable, when the input character has 
+        /// the same value as the prompt.
+        /// 
+        /// This is useful when assigning text that was saved including the prompt; in this case
+        /// we don't want to take the prompt character as valid input but don't want to fail the test either. 
         /// </summary>
         public bool ResetOnPrompt
         {
@@ -829,11 +760,11 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Specifies whether to reset and skip the current position if editable, when the input is the space character.
+        /// Specifies whether to reset and skip the current position if editable, when the input is the space character.
         ///
-        ///     This is useful when assigning text that was saved excluding the prompt (prompt replaced with spaces); 
-        ///     in this case we don't want to take the space but instead, reset the postion (or just skip it) so the 
-        ///     next input character gets positioned correctly.
+        /// This is useful when assigning text that was saved excluding the prompt (prompt replaced with spaces); 
+        /// in this case we don't want to take the space but instead, reset the position (or just skip it) so the 
+        /// next input character gets positioned correctly.
         /// </summary>
         public bool ResetOnSpace
         {
@@ -849,11 +780,11 @@ namespace System.ComponentModel
 
 
         /// <summary>
-        ///     Specifies whether to skip the current position if non-editable and the input character has the same 
-        ///     value as the literal at that position.
+        /// Specifies whether to skip the current position if non-editable and the input character has the same 
+        /// value as the literal at that position.
         /// 
-        ///     This is useful for round-tripping the text when saved with literals; when assigned back we don't want
-        ///     to treat literals as input.
+        /// This is useful for round-tripping the text when saved with literals; when assigned back we don't want
+        /// to treat literals as input.
         /// </summary>
         public bool SkipLiterals
         {
@@ -868,7 +799,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Indexer.
+        /// Indexer.
         /// </summary>
         public char this[int index]
         {
@@ -886,9 +817,9 @@ namespace System.ComponentModel
         ////// Methods
 
         /// <summary>
-        ///     Attempts to add the specified charactert to the last unoccupied positions in the test string (append text to 
-        ///     the virtual string).
-        ///     Returns true on success, false otherwise.
+        /// Attempts to add the specified charactert to the last unoccupied positions in the test string (append text to 
+        /// the virtual string).
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Add(char input)
         {
@@ -898,12 +829,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to add the specified charactert to the last unoccupied positions in the test string (append text to 
-        ///     the virtual string).
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful,
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives a hint about the operation result reason.
-        ///     Returns true on success, false otherwise.
+        /// Attempts to add the specified charactert to the last unoccupied positions in the test string (append text to 
+        /// the virtual string).
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful,
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives a hint about the operation result reason.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Add(char input, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -918,9 +849,9 @@ namespace System.ComponentModel
 
             // Get position after last assigned position.
             testPosition = lastAssignedPos + 1;
-            testPosition = FindEditPositionFrom(testPosition, forward);
+            testPosition = FindEditPositionFrom(testPosition, FORWARD);
 
-            if (testPosition == invalidIndex)
+            if (testPosition == INVALID_INDEX)
             {
                 resultHint = MaskedTextResultHint.UnavailableEditPosition;
                 testPosition = _testString.Length;
@@ -936,9 +867,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to add the characters in the specified string to the last unoccupied positions in the test string
-        ///     (append text to the virtual string).
-        ///     Returns true on success, false otherwise.
+        /// Attempts to add the characters in the specified string to the last unoccupied positions in the test string
+        /// (append text to the virtual string).
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Add(string input)
         {
@@ -948,12 +879,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to add the characters in the specified string to the last unoccupied positions in the test string
-        ///     (append text to the virtual string).
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives a hint about the operation result reason.
-        ///     Returns true on success, false otherwise.
+        /// Attempts to add the characters in the specified string to the last unoccupied positions in the test string
+        /// (append text to the virtual string).
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives a hint about the operation result reason.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Add(string input, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -975,7 +906,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Resets the state of the test string edit chars. (Remove all characters from the virtual string).
+        /// Resets the state of the test string edit chars. (Remove all characters from the virtual string).
         /// </summary>
         public void Clear()
         {
@@ -984,12 +915,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Resets the state of the test string edit chars. (Remove all characters from the virtual string).
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
+        /// Resets the state of the test string edit chars. (Remove all characters from the virtual string).
+        /// The MaskedTextResultHint out param gives more information about the operation result.
         /// </summary>
         public void Clear(out MaskedTextResultHint resultHint)
         {
-            if (_assignedCharCount == 0)
+            if (AssignedEditPositionCount == 0)
             {
                 resultHint = MaskedTextResultHint.NoEffect;
                 return;
@@ -1004,21 +935,21 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Gets the position of the first edit char in the test string, the search starts from the specified 
-        ///     position included.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first edit char in the test string, the search starts from the specified 
+        /// position included.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         public int FindAssignedEditPositionFrom(int position, bool direction)
         {
-            if (_assignedCharCount == 0)
+            if (AssignedEditPositionCount == 0)
             {
-                return invalidIndex;
+                return INVALID_INDEX;
             }
 
             int startPosition;
             int endPosition;
 
-            if (direction == forward)
+            if (direction == FORWARD)
             {
                 startPosition = position;
                 endPosition = _testString.Length - 1;
@@ -1033,32 +964,32 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Gets the position of the first edit char in the test string in the specified range, the search starts from 
-        ///     the specified  position included.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first edit char in the test string in the specified range, the search starts from 
+        /// the specified  position included.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         public int FindAssignedEditPositionInRange(int startPosition, int endPosition, bool direction)
         {
-            if (_assignedCharCount == 0)
+            if (AssignedEditPositionCount == 0)
             {
-                return invalidIndex;
+                return INVALID_INDEX;
             }
 
-            return FindEditPositionInRange(startPosition, endPosition, direction, editAssigned);
+            return FindEditPositionInRange(startPosition, endPosition, direction, EDIT_ASSIGNED);
         }
 
         /// <summary>
-        ///     Gets the position of the first assigned edit char in the test string, the search starts from the specified
-        ///     position included and in the direction specified (true == forward).  The positions are relative to the test
-        ///     string.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first assigned edit char in the test string, the search starts from the specified
+        /// position included and in the direction specified (true == forward). The positions are relative to the test
+        /// string.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         public int FindEditPositionFrom(int position, bool direction)
         {
             int startPosition;
             int endPosition;
 
-            if (direction == forward)
+            if (direction == FORWARD)
             {
                 startPosition = position;
                 endPosition = _testString.Length - 1;
@@ -1073,10 +1004,10 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Gets the position of the first assigned edit char in the test string; the search is performed in the specified
-        ///     positions range and in the specified direction.
-        ///     The positions are relative to the test string.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first assigned edit char in the test string; the search is performed in the specified
+        /// positions range and in the specified direction.
+        /// The positions are relative to the test string.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         public int FindEditPositionInRange(int startPosition, int endPosition, bool direction)
         {
@@ -1085,10 +1016,10 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Gets the position of the first edit char in the test string in the specified range, according to the 
-        ///     assignedRequired parameter; if true, it gets the first assigned position otherwise the first unassigned one.
-        ///     The search starts from the specified position included.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first edit char in the test string in the specified range, according to the 
+        /// assignedRequired parameter; if true, it gets the first assigned position otherwise the first unassigned one.
+        /// The search starts from the specified position included.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         private int FindEditPositionInRange(int startPosition, int endPosition, bool direction, byte assignedStatus)
         {
@@ -1099,7 +1030,7 @@ namespace System.ComponentModel
             {
                 testPosition = FindEditPositionInRange(startPosition, endPosition, direction);
 
-                if (testPosition == invalidIndex)  // didn't find any.
+                if (testPosition == INVALID_INDEX)  // didn't find any.
                 {
                     break;
                 }
@@ -1108,14 +1039,14 @@ namespace System.ComponentModel
 
                 switch (assignedStatus)
                 {
-                    case editUnassigned:
+                    case EDIT_UNASSIGNED:
                         if (!chDex.IsAssigned)
                         {
                             return testPosition;
                         }
                         break;
 
-                    case editAssigned:
+                    case EDIT_ASSIGNED:
                         if (chDex.IsAssigned)
                         {
                             return testPosition;
@@ -1126,7 +1057,7 @@ namespace System.ComponentModel
                         return testPosition;
                 }
 
-                if (direction == forward)
+                if (direction == FORWARD)
                 {
                     startPosition++;
                 }
@@ -1137,21 +1068,21 @@ namespace System.ComponentModel
             }
             while (startPosition <= endPosition);
 
-            return invalidIndex;
+            return INVALID_INDEX;
         }
 
         /// <summary>
-        ///     Gets the position of the first non edit position in the test string; the search is performed from the specified
-        ///     position and in the specified direction.
-        ///     The positions are relative to the test string.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first non edit position in the test string; the search is performed from the specified
+        /// position and in the specified direction.
+        /// The positions are relative to the test string.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         public int FindNonEditPositionFrom(int position, bool direction)
         {
             int startPosition;
             int endPosition;
 
-            if (direction == forward)
+            if (direction == FORWARD)
             {
                 startPosition = position;
                 endPosition = _testString.Length - 1;
@@ -1166,10 +1097,10 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Gets the position of the first non edit position in the test string; the search is performed in the specified
-        ///     positions range and in the specified direction.
-        ///     The positions are relative to the test string.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first non edit position in the test string; the search is performed in the specified
+        /// positions range and in the specified direction.
+        /// The positions are relative to the test string.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         public int FindNonEditPositionInRange(int startPosition, int endPosition, bool direction)
         {
@@ -1178,9 +1109,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Finds a position in the test string according to the needed position type (needEditPos).
-        ///     The positions are relative to the test string.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Finds a position in the test string according to the needed position type (needEditPos).
+        /// The positions are relative to the test string.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         private int FindPositionInRange(int startPosition, int endPosition, bool direction, CharType charTypeFlags)
         {
@@ -1196,7 +1127,7 @@ namespace System.ComponentModel
 
             if (startPosition > endPosition)
             {
-                return invalidIndex;
+                return INVALID_INDEX;
             }
 
             // Iterate through the test string until we find an edit char position.
@@ -1204,7 +1135,7 @@ namespace System.ComponentModel
 
             while (startPosition <= endPosition)
             {
-                testPosition = (direction == forward) ? startPosition++ : endPosition--;
+                testPosition = (direction == FORWARD) ? startPosition++ : endPosition--;
 
                 CharDescriptor chDex = _stringDescriptor[testPosition];
 
@@ -1214,20 +1145,20 @@ namespace System.ComponentModel
                 }
             }
 
-            return invalidIndex;
+            return INVALID_INDEX;
         }
 
         /// <summary>
-        ///     Gets the position of the first edit char in the test string, the search starts from the specified 
-        ///     position included.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first edit char in the test string, the search starts from the specified 
+        /// position included.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         public int FindUnassignedEditPositionFrom(int position, bool direction)
         {
             int startPosition;
             int endPosition;
 
-            if (direction == forward)
+            if (direction == FORWARD)
             {
                 startPosition = position;
                 endPosition = _testString.Length - 1;
@@ -1238,13 +1169,13 @@ namespace System.ComponentModel
                 endPosition = position;
             }
 
-            return FindEditPositionInRange(startPosition, endPosition, direction, editUnassigned);
+            return FindEditPositionInRange(startPosition, endPosition, direction, EDIT_UNASSIGNED);
         }
 
         /// <summary>
-        ///     Gets the position of the first edit char in the test string in the specified range; the search starts
-        ///     from the specified position included.
-        ///     Returns InvalidIndex if it doesn't find one.
+        /// Gets the position of the first edit char in the test string in the specified range; the search starts
+        /// from the specified position included.
+        /// Returns InvalidIndex if it doesn't find one.
         /// </summary>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2233:OperationsShouldNotOverflow")]
         public int FindUnassignedEditPositionInRange(int startPosition, int endPosition, bool direction)
@@ -1253,11 +1184,11 @@ namespace System.ComponentModel
 
             while (true)
             {
-                position = FindEditPositionInRange(startPosition, endPosition, direction, editAny);
+                position = FindEditPositionInRange(startPosition, endPosition, direction, EDIT_ANY);
 
-                if (position == invalidIndex)
+                if (position == INVALID_INDEX)
                 {
-                    return invalidIndex;
+                    return INVALID_INDEX;
                 }
 
                 CharDescriptor chDex = _stringDescriptor[position];
@@ -1267,7 +1198,7 @@ namespace System.ComponentModel
                     return position;
                 }
 
-                if (direction == forward)
+                if (direction == FORWARD)
                 {
                     startPosition++;
                 }
@@ -1279,7 +1210,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Specifies whether the specified MaskedTextResultHint denotes success or not.
+        /// Specifies whether the specified MaskedTextResultHint denotes success or not.
         /// </summary>
         public static bool GetOperationResultFromHint(MaskedTextResultHint hint)
         {
@@ -1287,9 +1218,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to insert the specified character at the specified position in the test string. 
-        ///     (Insert character in the virtual string).
-        ///     Returns true on success, false otherwise.
+        /// Attempts to insert the specified character at the specified position in the test string. 
+        /// (Insert character in the virtual string).
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool InsertAt(char input, int position)
         {
@@ -1303,12 +1234,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to insert the specified character at the specified position in the test string, shifting characters
-        ///     at upper positions (if any) to make room for the input.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Attempts to insert the specified character at the specified position in the test string, shifting characters
+        /// at upper positions (if any) to make room for the input.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool InsertAt(char input, int position, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -1316,9 +1247,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to insert the characters in the specified string in at the specified position in the test string.
-        ///     (Insert characters in the virtual string).
-        ///     Returns true on success, false otherwise.
+        /// Attempts to insert the characters in the specified string in at the specified position in the test string.
+        /// (Insert characters in the virtual string).
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool InsertAt(string input, int position)
         {
@@ -1328,12 +1259,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to insert the characters in the specified string in at the specified position in the test string,
-        ///     shifting characters at upper positions (if any) to make room for the input.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Attempts to insert the characters in the specified string in at the specified position in the test string,
+        /// shifting characters at upper positions (if any) to make room for the input.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool InsertAt(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -1354,13 +1285,13 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Attempts to insert the characters in the specified string in at the specified position in the test string,
-        ///     shifting characters at upper positions (if any) to make room for the input.
-        ///     It performs the insertion if the testOnly parameter is false and the test passes.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Attempts to insert the characters in the specified string in at the specified position in the test string,
+        /// shifting characters at upper positions (if any) to make room for the input.
+        /// It performs the insertion if the testOnly parameter is false and the test passes.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private bool InsertAtInt(string input, int position, out int testPosition, out MaskedTextResultHint resultHint, bool testOnly)
         {
@@ -1373,7 +1304,7 @@ namespace System.ComponentModel
                 return true;
             }
 
-            // Test input string first.  testPosition will containt the position of the last inserting character from the input.
+            // Test input string first. testPosition will containt the position of the last inserting character from the input.
             if (!TestString(input, position, out testPosition, out resultHint))
             {
                 return false;
@@ -1381,8 +1312,8 @@ namespace System.ComponentModel
 
             // Now check if we need to open room for the input characters (shift characters right) and if so test the shifting characters.
 
-            int srcPos = FindEditPositionFrom(position, forward);               // source position.
-            bool shiftNeeded = FindAssignedEditPositionInRange(srcPos, testPosition, forward) != invalidIndex;
+            int srcPos = FindEditPositionFrom(position, FORWARD);               // source position.
+            bool shiftNeeded = FindAssignedEditPositionInRange(srcPos, testPosition, FORWARD) != INVALID_INDEX;
             int lastAssignedPos = LastAssignedPosition;
 
             if (shiftNeeded && (testPosition == _testString.Length - 1)) // no room for shifting.
@@ -1392,7 +1323,7 @@ namespace System.ComponentModel
                 return false;
             }
 
-            int dstPos = FindEditPositionFrom(testPosition + 1, forward);  // destination position.
+            int dstPos = FindEditPositionFrom(testPosition + 1, FORWARD);  // destination position.
 
             if (shiftNeeded)
             {
@@ -1402,7 +1333,7 @@ namespace System.ComponentModel
                 // Test shifting characters.
                 while (true)
                 {
-                    if (dstPos == invalidIndex)
+                    if (dstPos == INVALID_INDEX)
                     {
                         resultHint = MaskedTextResultHint.UnavailableEditPosition;
                         testPosition = _testString.Length;
@@ -1426,8 +1357,8 @@ namespace System.ComponentModel
                         break;
                     }
 
-                    srcPos = FindEditPositionFrom(srcPos + 1, forward);
-                    dstPos = FindEditPositionFrom(dstPos + 1, forward);
+                    srcPos = FindEditPositionFrom(srcPos + 1, FORWARD);
+                    dstPos = FindEditPositionFrom(dstPos + 1, FORWARD);
                 }
 
                 if (tempHint > resultHint)
@@ -1458,8 +1389,8 @@ namespace System.ComponentModel
                         ResetChar(dstPos);
                     }
 
-                    dstPos = FindEditPositionFrom(dstPos - 1, backward);
-                    srcPos = FindEditPositionFrom(srcPos - 1, backward);
+                    dstPos = FindEditPositionFrom(dstPos - 1, BACKWARD);
+                    srcPos = FindEditPositionFrom(srcPos - 1, BACKWARD);
                 }
             }
 
@@ -1470,7 +1401,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Helper function for testing char in ascii mode.
+        /// Helper function for testing char in ascii mode.
         /// </summary>
         private static bool IsAscii(char c)
         {
@@ -1479,7 +1410,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Helper function for alphanumeric char in ascii mode.
+        /// Helper function for alphanumeric char in ascii mode.
         /// </summary>
         private static bool IsAciiAlphanumeric(char c)
         {
@@ -1487,7 +1418,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Helper function for testing mask language alphanumeric identifiers.
+        /// Helper function for testing mask language alphanumeric identifiers.
         /// </summary>
         private static bool IsAlphanumeric(char c)
         {
@@ -1495,7 +1426,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Helper function for testing letter char in ascii mode.
+        /// Helper function for testing letter char in ascii mode.
         /// </summary>
         private static bool IsAsciiLetter(char c)
         {
@@ -1503,8 +1434,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Checks wheteher the specified position is available for assignment.  Returns false if it is assigned
-        ///     or it is not editable, true otherwise.
+        /// Checks whether the specified position is available for assignment. Returns false if it is assigned
+        /// or it is not editable, true otherwise.
         /// </summary>
         public bool IsAvailablePosition(int position)
         {
@@ -1519,7 +1450,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Checks wheteher the specified position in the test string is editable.
+        /// Checks whether the specified position in the test string is editable.
         /// </summary>
         public bool IsEditPosition(int position)
         {
@@ -1539,7 +1470,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Checks wheteher the character in the specified position is a literal and the same as the specified character.
+        /// Checks whether the character in the specified position is a literal and the same as the specified character.
         /// </summary>
         private static bool IsLiteralPosition(CharDescriptor charDescriptor)
         {
@@ -1547,15 +1478,15 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Checks wheteher the specified character is valid as part of a mask or an input string.  
+        /// Checks whether the specified character is valid as part of a mask or an input string. 
         /// </summary>
         private static bool IsPrintableChar(char c)
         {
-            return char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c) || (c == spaceChar);
+            return char.IsLetterOrDigit(c) || char.IsPunctuation(c) || char.IsSymbol(c) || (c == SPACE_CHAR);
         }
 
         /// <summary>
-        ///     Checks wheteher the specified character is a valid input char.  
+        /// Checks whether the specified character is a valid input char. 
         /// </summary>
         public static bool IsValidInputChar(char c)
         {
@@ -1563,7 +1494,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Checks wheteher the specified character is a valid input char.  
+        /// Checks whether the specified character is a valid input char. 
         /// </summary>
         public static bool IsValidMaskChar(char c)
         {
@@ -1571,7 +1502,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Checks wheteher the specified character is a valid password char.
+        /// Checks whether the specified character is a valid password char.
         /// </summary>
         public static bool IsValidPasswordChar(char c)
         {
@@ -1579,7 +1510,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Removes the last character from the formatted string. (Remove last character in virtual string).
+        /// Removes the last character from the formatted string. (Remove last character in virtual string).
         /// </summary>
         public bool Remove()
         {
@@ -1589,17 +1520,17 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Removes the last character from the formatted string. (Remove last character in virtual string).
-        ///     On exit the out param contains the position where the operation was actually performed.
-        ///     This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Removes the last character from the formatted string. (Remove last character in virtual string).
+        /// On exit the out param contains the position where the operation was actually performed.
+        /// This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Remove(out int testPosition, out MaskedTextResultHint resultHint)
         {
             int lastAssignedPos = LastAssignedPosition;
 
-            if (lastAssignedPos == invalidIndex)
+            if (lastAssignedPos == INVALID_INDEX)
             {
                 testPosition = 0;
                 resultHint = MaskedTextResultHint.NoEffect;
@@ -1615,9 +1546,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Removes the character from the formatted string at the specified position and shifts characters
-        ///     left.
-        ///     True if character shifting is successful.  
+        /// Removes the character from the formatted string at the specified position and shifts characters
+        /// left.
+        /// True if character shifting is successful. 
         /// </summary>
         public bool RemoveAt(int position)
         {
@@ -1625,9 +1556,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Removes all characters in edit position from in the test string at the specified start and end positions 
-        ///     and shifts any remaining characters left.  (Remove characters from the virtual string).
-        ///     Returns true on success, false otherwise.
+        /// Removes all characters in edit position from in the test string at the specified start and end positions 
+        /// and shifts any remaining characters left. (Remove characters from the virtual string).
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool RemoveAt(int startPosition, int endPosition)
         {
@@ -1637,12 +1568,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Removes all characters in edit position from in the test string at the specified start and end positions 
-        ///     and shifts any remaining characters left.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Removes all characters in edit position from in the test string at the specified start and end positions 
+        /// and shifts any remaining characters left.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool RemoveAt(int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -1666,13 +1597,13 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Removes all characters in edit position from in the test string at the specified start and end positions 
-        ///     and shifts any remaining characters left.
-        ///     If testOnly parameter is set to false and the test passes it performs the operations on the characters.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Removes all characters in edit position from in the test string at the specified start and end positions 
+        /// and shifts any remaining characters left.
+        /// If testOnly parameter is set to false and the test passes it performs the operations on the characters.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private bool RemoveAtInt(int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint, bool testOnly)
         {
@@ -1680,11 +1611,11 @@ namespace System.ComponentModel
 
             // Check if we need to shift characters left to occupied the positions left by the characters being removed.
             int lastAssignedPos = LastAssignedPosition;
-            int dstPos = FindEditPositionInRange(startPosition, endPosition, forward); // first edit position in range.
+            int dstPos = FindEditPositionInRange(startPosition, endPosition, FORWARD); // first edit position in range.
 
             resultHint = MaskedTextResultHint.NoEffect;
 
-            if (dstPos == invalidIndex || dstPos > lastAssignedPos) // nothing to remove.
+            if (dstPos == INVALID_INDEX || dstPos > lastAssignedPos) // nothing to remove.
             {
                 testPosition = startPosition;
                 return true;
@@ -1696,7 +1627,7 @@ namespace System.ComponentModel
 
             // if there are assigned characters to be removed (could be that the range doesn't have one, in such case we may be just 
             // be shifting chars), the result hint is success, let's check.
-            if (FindAssignedEditPositionInRange(startPosition, endPosition, forward) != invalidIndex)
+            if (FindAssignedEditPositionInRange(startPosition, endPosition, FORWARD) != INVALID_INDEX)
             {
                 resultHint = MaskedTextResultHint.Success;
             }
@@ -1705,7 +1636,7 @@ namespace System.ComponentModel
             {
                 // Test shifting characters.
 
-                int srcPos = FindEditPositionFrom(endPosition + 1, forward);  // first position to shift left.
+                int srcPos = FindEditPositionFrom(endPosition + 1, FORWARD);  // first position to shift left.
                 int shiftStart = srcPos; // cache it here so we don't have to search for it later if needed.
                 MaskedTextResultHint testHint;
 
@@ -1732,8 +1663,8 @@ namespace System.ComponentModel
                         break;
                     }
 
-                    srcPos = FindEditPositionFrom(srcPos + 1, forward);
-                    dstPos = FindEditPositionFrom(dstPos + 1, forward);
+                    srcPos = FindEditPositionFrom(srcPos + 1, FORWARD);
+                    dstPos = FindEditPositionFrom(dstPos + 1, FORWARD);
                 }
 
                 // shifting characters is a resultHint == sideEffect, update hint if no characters removed (which would be hint == success).
@@ -1772,8 +1703,8 @@ namespace System.ComponentModel
                         break;
                     }
 
-                    srcPos = FindEditPositionFrom(srcPos + 1, forward);
-                    dstPos = FindEditPositionFrom(dstPos + 1, forward);
+                    srcPos = FindEditPositionFrom(srcPos + 1, FORWARD);
+                    dstPos = FindEditPositionFrom(dstPos + 1, FORWARD);
                 }
 
                 // If shifting character are less than characters to remove in the range, we need to remove the remaining ones in the range; 
@@ -1790,10 +1721,10 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Replaces the first editable character in the test string from the specified position, with the specified 
-        ///     character (Replace is performed in the virtual string), unless the character at the specified position 
-        ///     is to be escaped.
-        ///     Returns true on success, false otherwise.
+        /// Replaces the first editable character in the test string from the specified position, with the specified 
+        /// character (Replace is performed in the virtual string), unless the character at the specified position 
+        /// is to be escaped.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Replace(char input, int position)
         {
@@ -1803,12 +1734,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Replaces the first editable character in the test string from the specified position, with the specified 
-        ///     character, unless the character at the specified position is to be escaped.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Replaces the first editable character in the test string from the specified position, with the specified 
+        /// character, unless the character at the specified position is to be escaped.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Replace(char input, int position, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -1825,10 +1756,10 @@ namespace System.ComponentModel
             // If character is not to be escaped, we need to find the first edit position to test it in.
             if (!TestEscapeChar(input, testPosition))
             {
-                testPosition = FindEditPositionFrom(testPosition, forward);
+                testPosition = FindEditPositionFrom(testPosition, FORWARD);
             }
 
-            if (testPosition == invalidIndex)
+            if (testPosition == INVALID_INDEX)
             {
                 resultHint = MaskedTextResultHint.UnavailableEditPosition;
                 testPosition = position;
@@ -1845,15 +1776,15 @@ namespace System.ComponentModel
 
 
         /// <summary>
-        ///     Replaces the first editable character in the test string from the specified position, with the specified 
-        ///     character and removes any remaining characters in the range unless the character at the specified position 
-        ///     is to be escaped.
-        ///     If specified range covers more than one assigned edit character, shift-left is performed after replacing
-        ///     the first character.  This is useful when in a edit box the user selects text and types a character to replace it.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Replaces the first editable character in the test string from the specified position, with the specified 
+        /// character and removes any remaining characters in the range unless the character at the specified position 
+        /// is to be escaped.
+        /// If specified range covers more than one assigned edit character, shift-left is performed after replacing
+        /// the first character. This is useful when in an edit box the user selects text and types a character to replace it.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Replace(char input, int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -1883,10 +1814,10 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Replaces the character at the first edit position from the one specified with the first character in the input;
-        ///     the rest of the characters in the input will be placed in the test string according to the InsertMode (insert/replace).
-        ///     (Replace is performed in the virtual text).
-        ///     Returns true on success, false otherwise.
+        /// Replaces the character at the first edit position from the one specified with the first character in the input;
+        /// the rest of the characters in the input will be placed in the test string according to the InsertMode (insert/replace).
+        /// (Replace is performed in the virtual text).
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Replace(string input, int position)
         {
@@ -1896,13 +1827,13 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Replaces the character at the first edit position from the one specified with the first character in the input;
-        ///     the rest of the characters in the input will be placed in the test string according to the InsertMode (insert/replace),
-        ///     shifting characters at upper positions (if any) to make room for the entire input.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Replaces the character at the first edit position from the one specified with the first character in the input;
+        /// the rest of the characters in the input will be placed in the test string according to the InsertMode (insert/replace),
+        /// shifting characters at upper positions (if any) to make room for the entire input.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Replace(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -1935,13 +1866,13 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Replaces the characters in the specified range with the characters in the input string and shifts 
-        ///     characters appropriately (removing or inserting characters according to whether the input string is
-        ///     shorter or larger than the specified range.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Replaces the characters in the specified range with the characters in the input string and shifts 
+        /// characters appropriately (removing or inserting characters according to whether the input string is
+        /// shorter or larger than the specified range.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool Replace(string input, int startPosition, int endPosition, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -1985,7 +1916,7 @@ namespace System.ComponentModel
                 return false;
             }
 
-            if (_assignedCharCount > 0)
+            if (AssignedEditPositionCount > 0)
             {
                 // cache out params to preserve the ones from the primary operation (in case of success).
                 int tempPos;
@@ -2016,10 +1947,10 @@ namespace System.ComponentModel
 
                     while (true)
                     {
-                        srcPos = FindEditPositionFrom(srcPos, forward);
-                        dstPos = FindEditPositionFrom(dstPos, forward);
+                        srcPos = FindEditPositionFrom(srcPos, FORWARD);
+                        dstPos = FindEditPositionFrom(dstPos, FORWARD);
 
-                        if (dstPos == invalidIndex)
+                        if (dstPos == INVALID_INDEX)
                         {
                             testPosition = _testString.Length;
                             resultHint = MaskedTextResultHint.UnavailableEditPosition;
@@ -2054,8 +1985,8 @@ namespace System.ComponentModel
                     {
                         SetChar(_testString[srcPos], dstPos);
 
-                        srcPos = FindEditPositionFrom(srcPos - 1, backward);
-                        dstPos = FindEditPositionFrom(dstPos - 1, backward);
+                        srcPos = FindEditPositionFrom(srcPos - 1, BACKWARD);
+                        dstPos = FindEditPositionFrom(dstPos - 1, BACKWARD);
                     }
                 }
                 // else endPosition == testPosition, this means replacing the entire text which is the same as Set().
@@ -2067,7 +1998,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Resets the test string character at the specified position.
+        /// Resets the test string character at the specified position.
         /// </summary>
         private void ResetChar(int testPosition)
         {
@@ -2077,34 +2008,34 @@ namespace System.ComponentModel
             {
                 chDex.IsAssigned = false;
                 _testString[testPosition] = _promptChar;
-                _assignedCharCount--;
+                AssignedEditPositionCount--;
 
                 if (chDex.CharType == CharType.EditRequired)
                 {
                     _requiredCharCount--;
                 }
 
-                Debug.Assert(_assignedCharCount >= 0, "Invalid count of assigned chars.");
+                Debug.Assert(AssignedEditPositionCount >= 0, "Invalid count of assigned chars.");
             }
         }
 
         /// <summary>
-        ///     Resets characters in the test string in the range defined by the specified positions.
-        ///     Position is relative to the test string and count is the number of edit characters to reset.
+        /// Resets characters in the test string in the range defined by the specified positions.
+        /// Position is relative to the test string and count is the number of edit characters to reset.
         /// </summary>
         private void ResetString(int startPosition, int endPosition)
         {
             Debug.Assert(startPosition >= 0 && endPosition >= 0 && endPosition >= startPosition && endPosition < _testString.Length, "position out of range.");
 
-            startPosition = FindAssignedEditPositionFrom(startPosition, forward);
+            startPosition = FindAssignedEditPositionFrom(startPosition, FORWARD);
 
-            if (startPosition != invalidIndex)
+            if (startPosition != INVALID_INDEX)
             {
-                endPosition = FindAssignedEditPositionFrom(endPosition, backward);
+                endPosition = FindAssignedEditPositionFrom(endPosition, BACKWARD);
 
                 while (startPosition <= endPosition)
                 {
-                    startPosition = FindAssignedEditPositionFrom(startPosition, forward);
+                    startPosition = FindAssignedEditPositionFrom(startPosition, FORWARD);
                     ResetChar(startPosition);
                     startPosition++;
                 }
@@ -2112,9 +2043,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Sets the edit characters in the test string to the ones specified in the input string if all characters
-        ///     are valid.
-        ///     If passwordChar is assigned, it is rendered in the output string instead of the user-supplied values.
+        /// Sets the edit characters in the test string to the ones specified in the input string if all characters
+        /// are valid.
+        /// If passwordChar is assigned, it is rendered in the output string instead of the user-supplied values.
         /// </summary>
         public bool Set(string input)
         {
@@ -2125,12 +2056,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Sets the edit characters in the test string to the ones specified in the input string if all characters
-        ///     are valid.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     If passwordChar is assigned, it is rendered in the output string instead of the user-supplied values.
+        /// Sets the edit characters in the test string to the ones specified in the input string if all characters
+        /// are valid.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// If passwordChar is assigned, it is rendered in the output string instead of the user-supplied values.
         /// </summary>
         public bool Set(string input, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -2154,9 +2085,9 @@ namespace System.ComponentModel
             }
 
             // Reset remaining characters (if any).
-            int resetPos = FindAssignedEditPositionFrom(testPosition + 1, forward);
+            int resetPos = FindAssignedEditPositionFrom(testPosition + 1, FORWARD);
 
-            if (resetPos != invalidIndex)
+            if (resetPos != INVALID_INDEX)
             {
                 ResetString(resetPos, _testString.Length - 1);
             }
@@ -2165,8 +2096,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Sets the character at the specified position in the test string to the specified value.
-        ///     Returns true on success, false otherwise.
+        /// Sets the character at the specified position in the test string to the specified value.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private void SetChar(char input, int position)
         {
@@ -2177,8 +2108,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Sets the character at the specified position in the test string to the specified value.
-        ///     SetChar increments the number of assigned characters in the test string.
+        /// Sets the character at the specified position in the test string to the specified value.
+        /// SetChar increments the number of assigned characters in the test string.
         /// </summary>
         private void SetChar(char input, int position, CharDescriptor charDescriptor)
         {
@@ -2198,20 +2129,20 @@ namespace System.ComponentModel
 
             Debug.Assert(!IsLiteralPosition(charDex), "Setting char in literal position.");
 
-            if (Char.IsLetter(input))
+            if (char.IsLetter(input))
             {
-                if (Char.IsUpper(input))
+                if (char.IsUpper(input))
                 {
                     if (charDescriptor.CaseConversion == CaseConversion.ToLower)
                     {
-                        input = _culture.TextInfo.ToLower(input);
+                        input = Culture.TextInfo.ToLower(input);
                     }
                 }
                 else // Char.IsLower( input )
                 {
                     if (charDescriptor.CaseConversion == CaseConversion.ToUpper)
                     {
-                        input = _culture.TextInfo.ToUpper(input);
+                        input = Culture.TextInfo.ToUpper(input);
                     }
                 }
             }
@@ -2221,7 +2152,7 @@ namespace System.ComponentModel
             if (!charDescriptor.IsAssigned) // if position not counted for already (replace case) we do it (add case).
             {
                 charDescriptor.IsAssigned = true;
-                _assignedCharCount++;
+                AssignedEditPositionCount++;
 
                 if (charDescriptor.CharType == CharType.EditRequired)
                 {
@@ -2229,14 +2160,14 @@ namespace System.ComponentModel
                 }
             }
 
-            Debug.Assert(_assignedCharCount <= EditPositionCount, "Invalid count of assigned chars.");
+            Debug.Assert(AssignedEditPositionCount <= EditPositionCount, "Invalid count of assigned chars.");
         }
 
         /// <summary>
-        ///     Sets the characters in the test string starting from the specified position, to the ones in the input 
-        ///     string. It assumes there's enough edit positions to hold the characters in the input string (so call
-        ///     TestString before calling SetString).
-        ///     The position is relative to the test string.
+        /// Sets the characters in the test string starting from the specified position, to the ones in the input 
+        /// string. It assumes there's enough edit positions to hold the characters in the input string (so call
+        /// TestString before calling SetString).
+        /// The position is relative to the test string.
         /// </summary>
         private void SetString(string input, int testPosition)
         {
@@ -2245,7 +2176,7 @@ namespace System.ComponentModel
                 // If character is not to be escaped, we need to find the first edit position to test it in.
                 if (!TestEscapeChar(ch, testPosition))
                 {
-                    testPosition = FindEditPositionFrom(testPosition, forward);
+                    testPosition = FindEditPositionFrom(testPosition, FORWARD);
                 }
 
                 SetChar(ch, testPosition);
@@ -2258,10 +2189,10 @@ namespace System.ComponentModel
         // VSW#482024 (Consider adding a method to synchroniza input processing options with output formatting options to guarantee text round-tripping.
 
         /// <summary>
-        ///     Upadate the input processing options according to the output formatting options to guarantee
-        ///     text round-tripping, this is: the Text property does not change when setting it to the value 
-        ///     obtain from it; for a control: when copying the text to the clipboard and then pasting it back 
-        ///     while selecting the entire text.
+        /// Upadate the input processing options according to the output formatting options to guarantee
+        /// text round-tripping, this is: the Text property does not change when setting it to the value 
+        /// obtain from it; for a control: when copying the text to the clipboard and then pasting it back 
+        /// while selecting the entire text.
         /// </summary>
         private void SynchronizeInputOptions(MaskedTextProvider mtp, bool includePrompt, bool includeLiterals)
         {
@@ -2277,7 +2208,7 @@ namespace System.ComponentModel
             // If it is an input character, it would be processed as such (no scaping).
             // If it is a literal, it would be processed first since literals are processed first.
             // If it is the same as the prompt, the value of IncludePrompt does not matter because the output
-            // will be the same; this case should be treated as if IncludePrompt was true.  Observe that 
+            // will be the same; this case should be treated as if IncludePrompt was true. Observe that 
             // AllowPromptAsInput would not be affected because ResetOnPrompt has higher precedence.
             if (mtp.PromptChar == ' ')
             {
@@ -2285,24 +2216,24 @@ namespace System.ComponentModel
             }
 
             // If prompts are not present in the output, spaces will replace the prompts and will be process
-            // by ResetOnSpace.  Literals characters same as the prompt will be processed as literals first.
+            // by ResetOnSpace. Literals characters same as the prompt will be processed as literals first.
             // If prompts present positions will be rest.
             // Exception: PromptChar == space.
             mtp.ResetOnPrompt = includePrompt;
 
             // If no prompts in the output, the input may contain spaces replacing the prompt, reset on space 
-            // should be enabled.  If prompts included in the output, spaces will be processed as literals.
+            // should be enabled. If prompts included in the output, spaces will be processed as literals.
             // Exception: PromptChar == space.
             mtp.ResetOnSpace = !includePrompt;
         }
 #endif
 
         /// <summary>
-        ///     Tests whether the character at the specified position in the test string can be set to the specified
-        ///     value.
-        ///     The position specified is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Tests whether the character at the specified position in the test string can be set to the specified
+        /// value.
+        /// The position specified is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private bool TestChar(char input, int position, out MaskedTextResultHint resultHint)
         {
@@ -2319,7 +2250,7 @@ namespace System.ComponentModel
             CharDescriptor charDex = _stringDescriptor[position];
 
             // Test if character should be escaped.
-            // Test literals first - See VSW#454461.  See commented-out method SynchronizeInputOptions()
+            // Test literals first - See VSW#454461. See commented-out method SynchronizeInputOptions()
 
             if (IsLiteralPosition(charDex))
             {
@@ -2356,7 +2287,7 @@ namespace System.ComponentModel
                 }
             }
 
-            if (input == spaceChar && ResetOnSpace)
+            if (input == SPACE_CHAR && ResetOnSpace)
             {
                 if (IsEditPosition(charDex) && charDex.IsAssigned) // Position would be reset.
                 {
@@ -2372,12 +2303,12 @@ namespace System.ComponentModel
 
             // Character was not escaped, now test it against the mask.
 
-            // Test the character against the mask constraints.  The switch tests false conditions.
+            // Test the character against the mask constraints. The switch tests false conditions.
             // Space char succeeds the test if the char type is optional.
-            switch (_mask[charDex.MaskPosition])
+            switch (Mask[charDex.MaskPosition])
             {
                 case '#':   // digit or plus/minus sign optional.
-                    if (!Char.IsDigit(input) && (input != '-') && (input != '+') && input != spaceChar)
+                    if (!char.IsDigit(input) && (input != '-') && (input != '+') && input != SPACE_CHAR)
                     {
                         resultHint = MaskedTextResultHint.DigitExpected;
                         return false;
@@ -2385,7 +2316,7 @@ namespace System.ComponentModel
                     break;
 
                 case '0':   // digit required.
-                    if (!Char.IsDigit(input))
+                    if (!char.IsDigit(input))
                     {
                         resultHint = MaskedTextResultHint.DigitExpected;
                         return false;
@@ -2393,7 +2324,7 @@ namespace System.ComponentModel
                     break;
 
                 case '9':   // digit optional.
-                    if (!Char.IsDigit(input) && input != spaceChar)
+                    if (!char.IsDigit(input) && input != SPACE_CHAR)
                     {
                         resultHint = MaskedTextResultHint.DigitExpected;
                         return false;
@@ -2401,7 +2332,7 @@ namespace System.ComponentModel
                     break;
 
                 case 'L':   // letter required.
-                    if (!Char.IsLetter(input))
+                    if (!char.IsLetter(input))
                     {
                         resultHint = MaskedTextResultHint.LetterExpected;
                         return false;
@@ -2414,7 +2345,7 @@ namespace System.ComponentModel
                     break;
 
                 case '?':   // letter optional.
-                    if (!Char.IsLetter(input) && input != spaceChar)
+                    if (!char.IsLetter(input) && input != SPACE_CHAR)
                     {
                         resultHint = MaskedTextResultHint.LetterExpected;
                         return false;
@@ -2435,7 +2366,7 @@ namespace System.ComponentModel
                     break;
 
                 case 'C':   // any character optional.
-                    if ((!IsAscii(input) && AsciiOnly) && input != spaceChar)
+                    if ((!IsAscii(input) && AsciiOnly) && input != SPACE_CHAR)
                     {
                         resultHint = MaskedTextResultHint.AsciiCharacterExpected;
                         return false;
@@ -2456,7 +2387,7 @@ namespace System.ComponentModel
                     break;
 
                 case 'a':   // Alphanumeric optional.
-                    if (!IsAlphanumeric(input) && input != spaceChar)
+                    if (!IsAlphanumeric(input) && input != SPACE_CHAR)
                     {
                         resultHint = MaskedTextResultHint.AlphanumericCharacterExpected;
                         return false;
@@ -2488,8 +2419,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Tests if the character at the specified position in the test string is to be escaped.
-        ///     Returns true on success, false otherwise.
+        /// Tests if the character at the specified position in the test string is to be escaped.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private bool TestEscapeChar(char input, int position)
         {
@@ -2498,7 +2429,7 @@ namespace System.ComponentModel
         }
         private bool TestEscapeChar(char input, int position, CharDescriptor charDex)
         {
-            // Test literals first.  See VSW#454461.
+            // Test literals first. See VSW#454461.
             // If the position holds a literal, it is escaped only if the input is the same as the literal independently on
             // the input value (space, prompt,...).
             if (IsLiteralPosition(charDex))
@@ -2506,7 +2437,7 @@ namespace System.ComponentModel
                 return SkipLiterals && input == _testString[position];
             }
 
-            if ((ResetOnPrompt && (input == _promptChar)) || (ResetOnSpace && (input == spaceChar)))
+            if ((ResetOnPrompt && (input == _promptChar)) || (ResetOnSpace && (input == SPACE_CHAR)))
             {
                 return true;
             }
@@ -2515,11 +2446,11 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Tests if the character at the specified position in the test string can be set to the value specified,
-        ///     and sets the character to that value if the test is successful.
-        ///     The position specified is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Tests if the character at the specified position in the test string can be set to the value specified,
+        /// and sets the character to that value if the test is successful.
+        /// The position specified is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private bool TestSetChar(char input, int position, out MaskedTextResultHint resultHint)
         {
@@ -2537,12 +2468,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Test the characters in the specified string agaist the test string, starting from the specified position.
-        ///     If the test is successful, the characters in the test string are set appropriately.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Test the characters in the specified string against the test string, starting from the specified position.
+        /// If the test is successful, the characters in the test string are set appropriately.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private bool TestSetString(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -2556,12 +2487,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Test the characters in the specified string agaist the test string, starting from the specified position.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The successCount out param contains the number of characters that would be actually set (not escaped).
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Test the characters in the specified string against the test string, starting from the specified position.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The successCount out param contains the number of characters that would be actually set (not escaped).
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         private bool TestString(string input, int position, out int testPosition, out MaskedTextResultHint resultHint)
         {
@@ -2591,9 +2522,9 @@ namespace System.ComponentModel
                 // If character is not to be escaped, we need to find an edit position to test it in.
                 if (!TestEscapeChar(ch, testPosition))
                 {
-                    testPosition = FindEditPositionFrom(testPosition, forward);
+                    testPosition = FindEditPositionFrom(testPosition, FORWARD);
 
-                    if (testPosition == invalidIndex)
+                    if (testPosition == INVALID_INDEX)
                     {
                         testPosition = _testString.Length;
                         resultHint = MaskedTextResultHint.UnavailableEditPosition;
@@ -2623,12 +2554,12 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string based on the mask, honoring only the PasswordChar property.  prompt character 
-        ///     and literals are always included.  This is the text to be shown in a control when it has the focus.
+        /// Returns a formatted string based on the mask, honoring only the PasswordChar property. prompt character 
+        /// and literals are always included. This is the text to be shown in a control when it has the focus.
         /// </summary>
         public string ToDisplayString()
         {
-            if (!IsPassword || _assignedCharCount == 0) // just return the testString since it contains the formatted text.
+            if (!IsPassword || AssignedEditPositionCount == 0) // just return the testString since it contains the formatted text.
             {
                 return _testString.ToString();
             }
@@ -2646,8 +2577,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string based on the mask, honoring  IncludePrompt and IncludeLiterals but ignoring
-        ///     PasswordChar.
+        /// Returns a formatted string based on the mask, honoring  IncludePrompt and IncludeLiterals but ignoring
+        /// PasswordChar.
         /// </summary>
         public override string ToString()
         {
@@ -2655,8 +2586,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string based on the mask, honoring the IncludePrompt and IncludeLiterals properties,
-        ///     and PasswordChar depending on the value of the 'ignorePasswordChar' parameter.
+        /// Returns a formatted string based on the mask, honoring the IncludePrompt and IncludeLiterals properties,
+        /// and PasswordChar depending on the value of the 'ignorePasswordChar' parameter.
         /// </summary>
         public string ToString(bool ignorePasswordChar)
         {
@@ -2664,9 +2595,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string starting at the specified position and for the specified number of character,
-        ///     based on the mask, honoring IncludePrompt and IncludeLiterals but ignoring PasswordChar.
-        ///     Parameters are relative to the test string.
+        /// Returns a formatted string starting at the specified position and for the specified number of character,
+        /// based on the mask, honoring IncludePrompt and IncludeLiterals but ignoring PasswordChar.
+        /// Parameters are relative to the test string.
         /// </summary>
         public string ToString(int startPosition, int length)
         {
@@ -2674,10 +2605,10 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string starting at the specified position and for the specified number of character,
-        ///     based on the mask, honoring the IncludePrompt, IncludeLiterals properties and PasswordChar depending on
-        ///     the 'ignorePasswordChar' parameter.
-        ///     Parameters are relative to the test string.
+        /// Returns a formatted string starting at the specified position and for the specified number of character,
+        /// based on the mask, honoring the IncludePrompt, IncludeLiterals properties and PasswordChar depending on
+        /// the 'ignorePasswordChar' parameter.
+        /// Parameters are relative to the test string.
         /// </summary>
         public string ToString(bool ignorePasswordChar, int startPosition, int length)
         {
@@ -2685,8 +2616,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string based on the mask, ignoring the PasswordChar and according to the includePrompt 
-        ///     and includeLiterals parameters.
+        /// Returns a formatted string based on the mask, ignoring the PasswordChar and according to the includePrompt 
+        /// and includeLiterals parameters.
         /// </summary>
         public string ToString(bool includePrompt, bool includeLiterals)
         {
@@ -2694,9 +2625,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string starting at the specified position and for the specified number of character,
-        ///     based on the mask, according to the ignorePasswordChar, includePrompt and includeLiterals parameters.
-        ///     Parameters are relative to the test string.
+        /// Returns a formatted string starting at the specified position and for the specified number of character,
+        /// based on the mask, according to the ignorePasswordChar, includePrompt and includeLiterals parameters.
+        /// Parameters are relative to the test string.
         /// </summary>
         public string ToString(bool includePrompt, bool includeLiterals, int startPosition, int length)
         {
@@ -2704,9 +2635,9 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns a formatted string starting at the specified position and for the specified number of character,
-        ///     based on the mask, according to the ignorePasswordChar, includePrompt and includeLiterals parameters.
-        ///     Parameters are relative to the test string.
+        /// Returns a formatted string starting at the specified position and for the specified number of character,
+        /// based on the mask, according to the ignorePasswordChar, includePrompt and includeLiterals parameters.
+        /// Parameters are relative to the test string.
         /// </summary>
         public string ToString(bool ignorePasswordChar, bool includePrompt, bool includeLiterals, int startPosition, int length)
         {
@@ -2750,15 +2681,15 @@ namespace System.ComponentModel
 
             if (!includePrompt)
             {
-                // If prompt is not to be included we need to replace it with a space, but only for unassigned postions below
+                // If prompt is not to be included we need to replace it with a space, but only for unassigned positions below
                 // the last assigned position or last literal position if including literals, whichever is higher; upper unassigned
                 // positions are not included in the resulting string.
 
-                int lastLiteralPos = includeLiterals ? FindNonEditPositionInRange(startPosition, lastPosition, backward) : InvalidIndex;
-                int lastAssignedPos = FindAssignedEditPositionInRange(lastLiteralPos == InvalidIndex ? startPosition : lastLiteralPos, lastPosition, backward);
+                int lastLiteralPos = includeLiterals ? FindNonEditPositionInRange(startPosition, lastPosition, BACKWARD) : InvalidIndex;
+                int lastAssignedPos = FindAssignedEditPositionInRange(lastLiteralPos == InvalidIndex ? startPosition : lastLiteralPos, lastPosition, BACKWARD);
 
                 // If lastLiteralPos is in the range and lastAssignedPos is not InvalidIndex, the lastAssignedPos is the upper limit
-                // we are looking for since it is searched in the range from lastLiteralPos and lastPosition.  In any other case
+                // we are looking for since it is searched in the range from lastLiteralPos and lastPosition. In any other case
                 // lastLiteral would contain the upper position we are looking for or InvalidIndex, meaning all characters in the
                 // range are to be ignored, in this case a null string should be returned.
 
@@ -2791,7 +2722,7 @@ namespace System.ComponentModel
                         {
                             if (!includePrompt)
                             {
-                                st.Append(spaceChar); // replace prompt with space.
+                                st.Append(SPACE_CHAR); // replace prompt with space.
                                 break;
                             }
                         }
@@ -2816,7 +2747,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Tests whether the specified character would be set successfully at the specified position.
+        /// Tests whether the specified character would be set successfully at the specified position.
         /// </summary>
         public bool VerifyChar(char input, int position, out MaskedTextResultHint hint)
         {
@@ -2832,7 +2763,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Tests whether the specified character would be escaped at the specified position.
+        /// Tests whether the specified character would be escaped at the specified position.
         /// </summary>
         public bool VerifyEscapeChar(char input, int position)
         {
@@ -2845,7 +2776,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Verifies the test string against the mask.
+        /// Verifies the test string against the mask.
         /// </summary>
         public bool VerifyString(string input)
         {
@@ -2855,11 +2786,11 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Verifies the test string against the mask.
-        ///     On exit the testPosition contains last position where the primary operation was actually performed if successful, 
-        ///     otherwise the first position that made the test fail. This position is relative to the test string.
-        ///     The MaskedTextResultHint out param gives more information about the operation result.
-        ///     Returns true on success, false otherwise.
+        /// Verifies the test string against the mask.
+        /// On exit the testPosition contains last position where the primary operation was actually performed if successful, 
+        /// otherwise the first position that made the test fail. This position is relative to the test string.
+        /// The MaskedTextResultHint out param gives more information about the operation result.
+        /// Returns true on success, false otherwise.
         /// </summary>
         public bool VerifyString(string input, out int testPosition, out MaskedTextResultHint resultHint)
         {

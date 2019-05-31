@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
@@ -29,47 +30,20 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
     // parent is the containing namespace.
     // ----------------------------------------------------------------------------
 
-    internal class NamespaceSymbol : NamespaceOrAggregateSymbol
+    internal sealed class NamespaceSymbol : NamespaceOrAggregateSymbol
     {
-        // Which assemblies and extern aliases contain this namespace.
-        private HashSet<KAID> _bsetFilter;
+        /// <summary>The "root" (unnamed) namespace.</summary>
+        public static readonly NamespaceSymbol Root = GetRootNamespaceSymbol();
 
-        public NamespaceSymbol()
+        private static NamespaceSymbol GetRootNamespaceSymbol()
         {
-            _bsetFilter = new HashSet<KAID>();
-        }
-
-        public bool InAlias(KAID aid)
-        {
-            Debug.Assert(0 <= aid);
-            return _bsetFilter.Contains(aid);
-        }
-
-        public void DeclAdded(NamespaceDeclaration decl)
-        {
-            Debug.Assert(decl.Bag() == this);
-            //Debug.Assert(this.pdeclAttach == &decl.declNext);
-
-            InputFile infile = decl.getInputFile();
-
-            if (infile.isSource)
+            NamespaceSymbol root = new NamespaceSymbol
             {
-                _bsetFilter.Add(KAID.kaidGlobal);
-                _bsetFilter.Add(KAID.kaidThisAssembly);
-            }
-            else
-            {
-                infile.UnionAliasFilter(ref _bsetFilter);
-            }
-        }
+                name = NameManager.GetPredefinedName(PredefinedName.PN_VOID)
+            };
 
-        public void AddAid(KAID aid)
-        {
-            if (aid == KAID.kaidThisAssembly)
-            {
-                _bsetFilter.Add(KAID.kaidGlobal);
-            }
-            _bsetFilter.Add(aid);
+            root.setKind(SYMKIND.SK_NamespaceSymbol);
+            return root;
         }
     }
 }

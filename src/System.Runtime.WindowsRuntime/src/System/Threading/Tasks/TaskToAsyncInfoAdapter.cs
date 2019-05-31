@@ -9,7 +9,6 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Windows.Foundation;
-using System.Runtime.WindowsRuntime.Internal;
 
 namespace System.Threading.Tasks
 {
@@ -22,10 +21,6 @@ namespace System.Threading.Tasks
                                                                                 where TCompletedHandler : class
                                                                                 where TProgressHandler : class
     {
-        // This class uses interlocked operations on volatile fields, and this pragma suppresses the compiler's complaint
-        // that passing a volatile by ref to a function removes the volatility. That's not necessary for interlocked.
-#pragma warning disable 0420
-
         #region Private Types, Statics and Constants
 
         // ! THIS DIAGRAM ILLUSTRATES THE CONSTANTS BELOW. UPDATE THIS IF UPDATING THE CONSTANTS BELOW!:
@@ -49,27 +44,27 @@ namespace System.Threading.Tasks
 
         // These STATE_XXXX constants describe the async state of this object.
         // Objects of this type are in exactly in one of these states at any given time:
-        private const Int32 STATE_NOT_INITIALIZED = 0;   // 0x00
-        private const Int32 STATE_STARTED = 1;   // 0x01
-        private const Int32 STATE_RUN_TO_COMPLETION = 2;   // 0x02
-        private const Int32 STATE_CANCELLATION_REQUESTED = 4;   // 0x04
-        private const Int32 STATE_CANCELLATION_COMPLETED = 8;   // 0x08
-        private const Int32 STATE_ERROR = 16;  // 0x10
-        private const Int32 STATE_CLOSED = 32;  // 0x20
+        private const int STATE_NOT_INITIALIZED = 0;   // 0x00
+        private const int STATE_STARTED = 1;   // 0x01
+        private const int STATE_RUN_TO_COMPLETION = 2;   // 0x02
+        private const int STATE_CANCELLATION_REQUESTED = 4;   // 0x04
+        private const int STATE_CANCELLATION_COMPLETED = 8;   // 0x08
+        private const int STATE_ERROR = 16;  // 0x10
+        private const int STATE_CLOSED = 32;  // 0x20
 
         // The STATEFLAG_XXXX constants can be bitmasked with the states to describe additional
         // state info that cannot be easily inferred from the async state:
-        private const Int32 STATEFLAG_COMPLETED_SYNCHRONOUSLY = 0x20000000;
-        private const Int32 STATEFLAG_MUST_RUN_COMPLETION_HNDL_WHEN_SET = 0x10000000;
-        private const Int32 STATEFLAG_COMPLETION_HNDL_NOT_YET_INVOKED = 0x8000000;
+        private const int STATEFLAG_COMPLETED_SYNCHRONOUSLY = 0x20000000;
+        private const int STATEFLAG_MUST_RUN_COMPLETION_HNDL_WHEN_SET = 0x10000000;
+        private const int STATEFLAG_COMPLETION_HNDL_NOT_YET_INVOKED = 0x8000000;
 
         // These two masks are used to select any STATE_XXXX bits and clear all other (i.e. STATEFLAG_XXXX) bits.
         // It is set to (next power of 2 after the largest STATE_XXXX value) - 1.
         // !!! Make sure to update this if a new STATE_XXXX value is added above !!
-        private const Int32 STATEMASK_SELECT_ANY_ASYNC_STATE = (64 - 1);
+        private const int STATEMASK_SELECT_ANY_ASYNC_STATE = (64 - 1);
 
         // These two masks are used to clear all STATE_XXXX bits and leave any STATEFLAG_XXXX bits.
-        private const Int32 STATEMASK_CLEAR_ALL_ASYNC_STATES = ~STATEMASK_SELECT_ANY_ASYNC_STATE;
+        private const int STATEMASK_CLEAR_ALL_ASYNC_STATES = ~STATEMASK_SELECT_ANY_ASYNC_STATE;
 
 
         private static InvalidOperationException CreateCannotGetResultsFromIncompleteOperationException(Exception cause)
@@ -77,7 +72,7 @@ namespace System.Threading.Tasks
             InvalidOperationException ex = (cause == null)
                             ? new InvalidOperationException(SR.InvalidOperation_CannotGetResultsFromIncompleteOperation)
                             : new InvalidOperationException(SR.InvalidOperation_CannotGetResultsFromIncompleteOperation, cause);
-            ex.SetErrorCode(HResults.E_ILLEGAL_METHOD_CALL);
+            ex.SetErrorCode(__HResults.E_ILLEGAL_METHOD_CALL);
             return ex;
         }
 
@@ -90,23 +85,23 @@ namespace System.Threading.Tasks
         private CancellationTokenSource _cancelTokenSource = null;
 
         /// <summary>The async info's ID. InvalidAsyncId stands for not yet been initialised.</summary>
-        private UInt32 _id = AsyncInfoIdGenerator.InvalidId;
+        private uint _id = AsyncInfoIdGenerator.InvalidId;
 
-        /// <summary>The cached error code used to avoid creatung several exception objects if the <code>ErrorCode</code>
+        /// <summary>The cached error code used to avoid creating several exception objects if the <code>ErrorCode</code>
         /// property is accessed several times. <code>null</code> indicates either no error or that <code>ErrorCode</code>
         /// has not yet been called.</summary>
         private Exception _error = null;
 
         /// <summary>The state of the async info. Interlocked operations are used to manipulate this field.</summary>
-        private volatile Int32 _state = STATE_NOT_INITIALIZED;
+        private volatile int _state = STATE_NOT_INITIALIZED;
 
-        /// <summary>For IAsyncInfo intances that completed synchronously (at creation time) this field holds the result;
+        /// <summary>For IAsyncInfo instances that completed synchronously (at creation time) this field holds the result;
         /// for instances backed by an actual Task, this field holds a reference to the task generated by the task generator.
         /// Since we always know which of the above is the case, we can always cast this field to TResult in the former case
         /// or to one of Task or Task{TResult} in the latter case. This approach allows us to save a field on all IAsyncInfos.
         /// Notably, this makes us pay the added cost of boxing for synchronously completing IAsyncInfos where TResult is a
         /// value type, however, this is expected to occur rather rare compared to non-synchronously completed user-IAsyncInfos.</summary>
-        private Object _dataContainer;
+        private object _dataContainer;
 
         /// <summary>Registered completed handler.</summary>
         private TCompletedHandler _completedHandler;
@@ -114,7 +109,7 @@ namespace System.Threading.Tasks
         /// <summary>Registered progress handler.</summary>
         private TProgressHandler _progressHandler;
 
-        /// <summary>The synchronization context on which this instance was created/started. Used to callback invokations.</summary>
+        /// <summary>The synchronization context on which this instance was created/started. Used to callback invocations.</summary>
         private SynchronizationContext _startingContext;
 
         #endregion Instance variables
@@ -132,10 +127,6 @@ namespace System.Threading.Tasks
                             || (null != (taskProvider as Func<CancellationToken, Task>))
                             || (null != (taskProvider as Func<IProgress<TProgressInfo>, Task>))
                             || (null != (taskProvider as Func<CancellationToken, IProgress<TProgressInfo>, Task>)));
-
-            Contract.Ensures(!this.CompletedSynchronously);
-
-            Contract.EndContractBlock();
 
             // The IAsyncInfo is reasonably expected to be created/started by the same code that wires up the Completed and Progress handlers.
             // Record the current SynchronizationContext so that we can invoke completion and progress callbacks in it later.
@@ -180,10 +171,6 @@ namespace System.Threading.Tasks
             if (underlyingTask.Status == TaskStatus.Created)
                 throw new InvalidOperationException(SR.InvalidOperation_UnstartedTaskSpecified);
 
-            Contract.Ensures(!this.CompletedSynchronously);
-
-            Contract.EndContractBlock();
-
             // The IAsyncInfo is reasonably expected to be created/started by the same code that wires up the Completed and Progress handlers.
             // Record the current SynchronizationContext so that we can invoke completion and progress callbacks in it later.
             _startingContext = GetStartingContext();
@@ -214,9 +201,6 @@ namespace System.Threading.Tasks
         /// <param name="synchronousResult">The result of this synchronously completed IAsyncInfo.</param>
         internal TaskToAsyncInfoAdapter(TResult synchronousResult)
         {
-            Contract.Ensures(this.CompletedSynchronously);
-            Contract.Ensures(this.IsInRunToCompletionState);
-
             // We already completed. There will be no progress callback invokations and a potential completed handler invokation will be synchronous.
             // We do not need the starting SynchronizationContext:
             _startingContext = null;
@@ -344,11 +328,11 @@ namespace System.Threading.Tasks
         }
 
         [Pure]
-        private bool CheckUniqueAsyncState(Int32 state)
+        private bool CheckUniqueAsyncState(int state)
         {
             unchecked
             {
-                UInt32 asyncState = (UInt32)state;
+                uint asyncState = (uint)state;
                 return (asyncState & (~asyncState + 1)) == asyncState; // This checks if asyncState is 0 or a power of 2.
             }
         }
@@ -373,8 +357,6 @@ namespace System.Threading.Tasks
             get
             {
                 EnsureNotClosed();
-                Contract.Ensures(CompletedSynchronously || Contract.Result<Task>() != null);
-                Contract.EndContractBlock();
 
                 if (CompletedSynchronously)
                     return null;
@@ -397,21 +379,21 @@ namespace System.Threading.Tasks
                 return;
 
             ObjectDisposedException ex = new ObjectDisposedException(SR.ObjectDisposed_AsyncInfoIsClosed);
-            ex.SetErrorCode(HResults.E_ILLEGAL_METHOD_CALL);
+            ex.SetErrorCode(__HResults.E_ILLEGAL_METHOD_CALL);
             throw ex;
         }
 
 
         internal virtual void OnCompleted(TCompletedHandler userCompletionHandler, AsyncStatus asyncStatus)
         {
-            Debug.Assert(false, "This (sub-)type of IAsyncInfo does not support completion notifications "
+            Debug.Fail("This (sub-)type of IAsyncInfo does not support completion notifications "
                                  + " (" + this.GetType().ToString() + ")");
         }
 
 
         internal virtual void OnProgress(TProgressHandler userProgressHandler, TProgressInfo progressInfo)
         {
-            Debug.Assert(false, "This (sub-)type of IAsyncInfo does not support progress notifications "
+            Debug.Fail("This (sub-)type of IAsyncInfo does not support progress notifications "
                                  + " (" + this.GetType().ToString() + ")");
         }
 
@@ -497,7 +479,7 @@ namespace System.Threading.Tasks
         }
 
 
-        private void OnReportChainedProgress(Object sender, TProgressInfo progressInfo)
+        private void OnReportChainedProgress(object sender, TProgressInfo progressInfo)
         {
             ((IProgress<TProgressInfo>)this).Report(progressInfo);
         }
@@ -521,12 +503,12 @@ namespace System.Threading.Tasks
         ///                               may be set and then immediately changed by another thread. The true meaning of this parameter is whether or not
         ///                               the specified condition did hold before trying to change the state.</param>
         /// <returns>The value at which the current invocation of this method left <code>m_state</code>.</returns>
-        private Int32 SetAsyncState(Int32 newAsyncState, Int32 conditionBitMask, bool useCondition, out bool conditionFailed)
+        private int SetAsyncState(int newAsyncState, int conditionBitMask, bool useCondition, out bool conditionFailed)
         {
             Debug.Assert(CheckUniqueAsyncState(newAsyncState & STATEMASK_SELECT_ANY_ASYNC_STATE));
             Debug.Assert(CheckUniqueAsyncState(_state & STATEMASK_SELECT_ANY_ASYNC_STATE));
 
-            Int32 resultState = SetState(newAsyncState, STATEMASK_CLEAR_ALL_ASYNC_STATES, conditionBitMask, useCondition, out conditionFailed);
+            int resultState = SetState(newAsyncState, STATEMASK_CLEAR_ALL_ASYNC_STATES, conditionBitMask, useCondition, out conditionFailed);
             Debug.Assert(CheckUniqueAsyncState(resultState & STATEMASK_SELECT_ANY_ASYNC_STATE));
 
             return resultState;
@@ -553,9 +535,9 @@ namespace System.Threading.Tasks
         ///                               may be set and then immediately changed by another thread. The true meaning of this parameter is whether or not
         ///                               the specified condition did hold before trying to change the state.</param>
         /// <returns>The value at which the current invocation of this method left <code>m_state</code>.</returns>
-        private Int32 SetState(Int32 newStateSetMask, Int32 newStateIgnoreMask, Int32 conditionBitMask, bool useCondition, out bool conditionFailed)
+        private int SetState(int newStateSetMask, int newStateIgnoreMask, int conditionBitMask, bool useCondition, out bool conditionFailed)
         {
-            Int32 origState = _state;
+            int origState = _state;
 
             if (useCondition && 0 == (origState & conditionBitMask))
             {
@@ -563,8 +545,8 @@ namespace System.Threading.Tasks
                 return origState;
             }
 
-            Int32 newState = (origState & newStateIgnoreMask) | newStateSetMask;
-            Int32 prevState = Interlocked.CompareExchange(ref _state, newState, origState);
+            int newState = (origState & newStateIgnoreMask) | newStateSetMask;
+            int prevState = Interlocked.CompareExchange(ref _state, newState, origState);
 
             // If m_state changed concurrently, we want to make sure that the change being made is based on a bitmask that is up to date:
             // (this relies of the fact that all state machines that save their state in m_state have no cycles)
@@ -590,7 +572,7 @@ namespace System.Threading.Tasks
         }
 
 
-        private Int32 TransitionToTerminalState()
+        private int TransitionToTerminalState()
         {
             Debug.Assert(IsInRunningState);
             Debug.Assert(!CompletedSynchronously);
@@ -609,7 +591,7 @@ namespace System.Threading.Tasks
             // the state will remain CANCELED.
 
             // If the switch below defaults, we have an erroneous implementation.
-            Int32 terminalAsyncState = STATE_ERROR;
+            int terminalAsyncState = STATE_ERROR;
 
             switch (task.Status)
             {
@@ -626,12 +608,12 @@ namespace System.Threading.Tasks
                     break;
 
                 default:
-                    Debug.Assert(false, "Unexpected task.Status: It should be terminal if TaskCompleted() is called.");
+                    Debug.Fail("Unexpected task.Status: It should be terminal if TaskCompleted() is called.");
                     break;
             }
 
             bool ignore;
-            Int32 newState = SetAsyncState(terminalAsyncState,
+            int newState = SetAsyncState(terminalAsyncState,
                                            conditionBitMask: STATEMASK_SELECT_ANY_ASYNC_STATE, useCondition: true, conditionFailed: out ignore);
 
             Debug.Assert((newState & STATEMASK_SELECT_ANY_ASYNC_STATE) == terminalAsyncState);
@@ -644,7 +626,7 @@ namespace System.Threading.Tasks
 
         private void TaskCompleted()
         {
-            Int32 terminalState = TransitionToTerminalState();
+            int terminalState = TransitionToTerminalState();
             Debug.Assert(IsInTerminalState);
 
             // We transitioned into a terminal state, so it became legal to close us concurrently.
@@ -682,15 +664,15 @@ namespace System.Threading.Tasks
         }
 
 
-        private AsyncStatus GetStatus(Int32 state)
+        private AsyncStatus GetStatus(int state)
         {
-            Int32 asyncState = state & STATEMASK_SELECT_ANY_ASYNC_STATE;
+            int asyncState = state & STATEMASK_SELECT_ANY_ASYNC_STATE;
             Debug.Assert(CheckUniqueAsyncState(asyncState));
 
             switch (asyncState)
             {
                 case STATE_NOT_INITIALIZED:
-                    Debug.Assert(false, "STATE_NOT_INITIALIZED should only occur when this object was not"
+                    Debug.Fail("STATE_NOT_INITIALIZED should only occur when this object was not"
                                          + " fully constructed, in which case we should never get here");
                     return AsyncStatus.Error;
 
@@ -708,11 +690,11 @@ namespace System.Threading.Tasks
                     return AsyncStatus.Error;
 
                 case STATE_CLOSED:
-                    Debug.Assert(false, "This method should never be called is this IAsyncInfo is CLOSED");
+                    Debug.Fail("This method should never be called is this IAsyncInfo is CLOSED");
                     return AsyncStatus.Error;
             }
 
-            Debug.Assert(false, "The switch above is missing a case");
+            Debug.Fail("The switch above is missing a case");
             return AsyncStatus.Error;
         }
 
@@ -766,8 +748,6 @@ namespace System.Threading.Tasks
 
         private Task InvokeTaskProvider(Delegate taskProvider)
         {
-            Contract.EndContractBlock();
-
             var funcVoidTask = taskProvider as Func<Task>;
             if (funcVoidTask != null)
             {
@@ -794,7 +774,7 @@ namespace System.Threading.Tasks
                 return funcCTokIPrgrTask(_cancelTokenSource.Token, this);
             }
 
-            Debug.Assert(false, "We should never get here!"
+            Debug.Fail("We should never get here!"
                                  + " Public methods creating instances of this class must be typesafe to ensure that taskProvider"
                                  + " can always be cast to one of the above Func types."
                                  + " The taskProvider is " + (taskProvider == null
@@ -857,7 +837,7 @@ namespace System.Threading.Tasks
                 if (handlerBefore != null)
                 {
                     InvalidOperationException ex = new InvalidOperationException(SR.InvalidOperation_CannotSetCompletionHanlderMoreThanOnce);
-                    ex.SetErrorCode(HResults.E_ILLEGAL_DELEGATE_ASSIGNMENT);
+                    ex.SetErrorCode(__HResults.E_ILLEGAL_DELEGATE_ASSIGNMENT);
                     throw ex;
                 }
 
@@ -900,7 +880,7 @@ namespace System.Threading.Tasks
 
                 Interlocked.Exchange(ref _progressHandler, value);
 
-                // We we transitioned into CLOSED after the above check, we will need to null out m_progressHandler:
+                // We transitioned into CLOSED after the above check, we will need to null out m_progressHandler:
                 if (IsInClosedState)
                     Interlocked.Exchange(ref _progressHandler, null);
             }
@@ -940,7 +920,7 @@ namespace System.Threading.Tasks
                 if (0 != (_state & STATEMASK_SELECT_ANY_ASYNC_STATE))
                 {
                     InvalidOperationException ex = new InvalidOperationException(SR.InvalidOperation_IllegalStateChange);
-                    ex.SetErrorCode(HResults.E_ILLEGAL_STATE_CHANGE);
+                    ex.SetErrorCode(__HResults.E_ILLEGAL_STATE_CHANGE);
                     throw ex;
                 }
             }
@@ -981,7 +961,7 @@ namespace System.Threading.Tasks
                 if (aggregateException == null)
                 {
                     error = new Exception(SR.WinRtCOM_Error);
-                    error.SetErrorCode(HResults.E_FAIL);
+                    error.SetErrorCode(__HResults.E_FAIL);
                 }
                 else
                 {
@@ -1000,7 +980,7 @@ namespace System.Threading.Tasks
         }
 
 
-        public virtual UInt32 Id
+        public virtual uint Id
         {
             get
             {
@@ -1024,9 +1004,6 @@ namespace System.Threading.Tasks
             }
         }
         #endregion Implementation of IAsyncInfo
-
-#pragma warning restore 0420
-
     }  // class TaskToAsyncInfoAdapter<TCompletedHandler, TProgressHandler, TResult, TProgressInfo>
 }  // namespace
 

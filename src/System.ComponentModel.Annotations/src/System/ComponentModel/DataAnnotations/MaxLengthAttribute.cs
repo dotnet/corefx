@@ -3,7 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Diagnostics;
 using System.Globalization;
+using System.Reflection;
 
 namespace System.ComponentModel.DataAnnotations
 {
@@ -42,12 +44,9 @@ namespace System.ComponentModel.DataAnnotations
         /// <summary>
         ///     Gets the maximum allowable length of the collection/string data.
         /// </summary>
-        public int Length { get; private set; }
+        public int Length { get; }
 
-        private static string DefaultErrorMessageString
-        {
-            get { return SR.MaxLengthAttribute_ValidationError; }
-        }
+        private static string DefaultErrorMessageString => SR.MaxLengthAttribute_ValidationError;
 
         /// <summary>
         ///     Determines whether a specified object is valid. (Overrides <see cref="ValidationAttribute.IsValid(object)" />)
@@ -66,31 +65,23 @@ namespace System.ComponentModel.DataAnnotations
             // Check the lengths for legality
             EnsureLegalLengths();
 
-            var length = 0;
+            int length;
             // Automatically pass if value is null. RequiredAttribute should be used to assert a value is not null.
             if (value == null)
             {
                 return true;
             }
-            var str = value as string;
-            if (str != null)
+            if (value is string str)
             {
                 length = str.Length;
             }
+            else if (CountPropertyHelper.TryGetCount(value, out var count))
+            {
+                length = count;
+            }
             else
             {
-                ICollection collection = value as ICollection;
-
-                if (collection != null)
-                {
-                    length = collection.Count;
-                }
-                else
-                {
-                    // A cast exception previously occurred if a non-{string|array} property was passed
-                    // in so preserve this behavior if the value does not implement ICollection
-                    length = ((Array)value).Length;
-                }
+                throw new InvalidCastException(SR.Format(SR.LengthAttribute_InvalidValueType, value.GetType()));
             }
 
             return MaxAllowableLength == Length || length <= Length;
@@ -101,11 +92,9 @@ namespace System.ComponentModel.DataAnnotations
         /// </summary>
         /// <param name="name">The name to include in the formatted string.</param>
         /// <returns>A localized string to describe the maximum acceptable length.</returns>
-        public override string FormatErrorMessage(string name)
-        {
+        public override string FormatErrorMessage(string name) =>
             // An error occurred, so we know the value is greater than the maximum if it was specified
-            return string.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, Length);
-        }
+            string.Format(CultureInfo.CurrentCulture, ErrorMessageString, name, Length);
 
         /// <summary>
         ///     Checks that Length has a legal value.
@@ -115,9 +104,32 @@ namespace System.ComponentModel.DataAnnotations
         {
             if (Length == 0 || Length < -1)
             {
-                throw new InvalidOperationException(string.Format(CultureInfo.CurrentCulture,
-                    SR.MaxLengthAttribute_InvalidMaxLength));
+                throw new InvalidOperationException(SR.MaxLengthAttribute_InvalidMaxLength);
             }
+        }
+    }
+
+    internal static class CountPropertyHelper
+    {
+        public static bool TryGetCount(object value, out int count)
+        {
+            Debug.Assert(value != null);
+
+            if (value is ICollection collection)
+            {
+                count = collection.Count;
+                return true;
+            }
+
+            PropertyInfo property = value.GetType().GetRuntimeProperty("Count");
+            if (property != null && property.CanRead && property.PropertyType == typeof(int))
+            {
+                count = (int)property.GetValue(value);
+                return true;
+            }
+
+            count = -1;
+            return false;
         }
     }
 }

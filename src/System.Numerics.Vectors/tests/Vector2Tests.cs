@@ -27,8 +27,8 @@ namespace System.Numerics.Tests
 
             Assert.Throws<NullReferenceException>(() => v1.CopyTo(null, 0));
             Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, -1));
-            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));
-            Assert.Throws<ArgumentException>(() => v1.CopyTo(a, 2));
+            Assert.Throws<ArgumentOutOfRangeException>(() => v1.CopyTo(a, a.Length));            
+            AssertExtensions.Throws<ArgumentException>(null, () => v1.CopyTo(a, 2));
 
             v1.CopyTo(a, 1);
             v1.CopyTo(b);
@@ -317,20 +317,20 @@ namespace System.Numerics.Tests
 
             // Case W1: specified value is in the range.
             a = new Vector2(0.5f, 0.3f);
-            expected = min;
+            expected = max;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
 
             // Normal case.
             // Case W2: specified value is bigger than max and min value.
             a = new Vector2(2.0f, 3.0f);
-            expected = min;
+            expected = max;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
 
             // Case W3: specified value is smaller than min and max value.
             a = new Vector2(-1.0f, -2.0f);
-            expected = min;
+            expected = max;
             actual = Vector2.Clamp(a, min, max);
             Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Clamp did not return the expected value.");
         }
@@ -488,7 +488,7 @@ namespace System.Numerics.Tests
             Vector2 actual;
 
             actual = Vector2.TransformNormal(v, m);
-            Assert.Equal(expected, actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Tranform did not return the expected value.");
         }
 
         // A test for TransformNormal (Vector2f, Matrix3x2)
@@ -504,7 +504,7 @@ namespace System.Numerics.Tests
             Vector2 actual;
 
             actual = Vector2.TransformNormal(v, m);
-            Assert.Equal(expected, actual);
+            Assert.True(MathHelper.Equal(expected, actual), "Vector2f.Transform did not return the expected value.");
         }
 
         // A test for Transform (Vector2f, Quaternion)
@@ -1108,12 +1108,12 @@ namespace System.Numerics.Tests
         public void Vector2AbsTest()
         {
             Vector2 v1 = new Vector2(-2.5f, 2.0f);
-            Vector2 v3 = Vector2.Abs(new Vector2(0.0f, Single.NegativeInfinity));
+            Vector2 v3 = Vector2.Abs(new Vector2(0.0f, float.NegativeInfinity));
             Vector2 v = Vector2.Abs(v1);
             Assert.Equal(2.5f, v.X);
             Assert.Equal(2.0f, v.Y);
             Assert.Equal(0.0f, v3.X);
-            Assert.Equal(Single.PositiveInfinity, v3.Y);
+            Assert.Equal(float.PositiveInfinity, v3.Y);
         }
 
         [Fact]
@@ -1123,7 +1123,7 @@ namespace System.Numerics.Tests
             Vector2 v2 = new Vector2(5.5f, 4.5f);
             Assert.Equal(2, (int)Vector2.SquareRoot(v2).X);
             Assert.Equal(2, (int)Vector2.SquareRoot(v2).Y);
-            Assert.Equal(Single.NaN, Vector2.SquareRoot(v1).X);
+            Assert.Equal(float.NaN, Vector2.SquareRoot(v1).X);
         }
 
         // A test to make sure these types are blittable directly into GPU buffer memory layouts

@@ -10,16 +10,14 @@ using System.Runtime.InteropServices;
 
 internal static class IOInputs
 {
-    // see: http://msdn.microsoft.com/en-us/library/aa365247.aspx
-    private static readonly char[] s_invalidFileNameChars = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ?
-        new char[] { '\"', '<', '>', '|', '\0', (Char)1, (Char)2, (Char)3, (Char)4, (Char)5, (Char)6, (Char)7, (Char)8, (Char)9, (Char)10, (Char)11, (Char)12, (Char)13, (Char)14, (Char)15, (Char)16, (Char)17, (Char)18, (Char)19, (Char)20, (Char)21, (Char)22, (Char)23, (Char)24, (Char)25, (Char)26, (Char)27, (Char)28, (Char)29, (Char)30, (Char)31, '*', '?' } :
-        new char[] { '\0' };
-
     public static bool SupportsSettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows); } }
     public static bool SupportsGettingCreationTime { get { return RuntimeInformation.IsOSPlatform(OSPlatform.Windows) | RuntimeInformation.IsOSPlatform(OSPlatform.OSX); } }
 
     // Max path length (minus trailing \0). Unix values vary system to system; just using really long values here likely to be more than on the average system.
     public static readonly int MaxPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? 259 : 10000;
+
+    // Windows specific, this is the maximum length that can be passed using extended syntax. Does not include the trailing \0.
+    public static readonly int MaxExtendedPath = short.MaxValue - 1;
 
     // Same as MaxPath on Unix
     public static readonly int MaxLongPath = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? MaxExtendedPath : MaxPath;
@@ -28,11 +26,7 @@ internal static class IOInputs
     // Does not include the trailing \0.
     // We now do the appropriate wrapping to allow creating longer directories. Like MaxPath, this is a legacy restriction.
     public static readonly int MaxDirectory = 247;
-
-    // Windows specific, this is the maximum length that can be passed using extended syntax. Does not include the trailing \0.
-    public static readonly int MaxExtendedPath = short.MaxValue - 1;
-
-
+    
     public const int MaxComponent = 255;
 
     public const string ExtendedPrefix = @"\\?\";
@@ -57,6 +51,17 @@ internal static class IOInputs
         yield return "V1.0.0.0000";
     }
 
+    // These are the WhiteSpace characters we used to trim for paths:
+    //
+    //  (char)0x9,          // Horizontal tab     '\t'
+    //  (char)0xA,          // Line feed          '\n'
+    //  (char)0xB,          // Vertical tab       '\v'
+    //  (char)0xC,          // Form feed          '\f'
+    //  (char)0xD,          // Carriage return    '\r'
+    //  (char)0x20,         // Space              ' '
+    //  (char)0x85,         // Next line          '\u0085'
+    //  (char)0xA0          // Non breaking space '\u00A0'
+
     public static IEnumerable<string> GetControlWhiteSpace()
     {
         yield return "\t";
@@ -69,6 +74,8 @@ internal static class IOInputs
         yield return "\t\n\t\n";
         yield return "\n\t\n";
         yield return "\n\t\n\t";
+        // Add other control chars
+        yield return "\v\f\r";
     }
 
     public static IEnumerable<string> GetSimpleWhiteSpace()
@@ -80,6 +87,32 @@ internal static class IOInputs
         yield return "     ";
     }
 
+    /// <summary>
+    /// Whitespace characters that arent in the traditional control set (e.g. less than 0x20)
+    /// and aren't space (e.g. 0x20).
+    /// </summary>
+    public static IEnumerable<string> GetNonControlWhiteSpace()
+    {
+        yield return "\u0085"; // Next Line (.NET used to trim)
+        yield return "\u00A0"; // Non breaking space (.NET used to trim)
+        yield return "\u2028"; // Line separator
+        yield return "\u2029"; // Paragraph separator
+        yield return "\u2003"; // EM space
+        yield return "\u2008"; // Punctuation space
+    }
+
+    /// <summary>
+    /// Whitespace characters other than space (includes some Unicode whitespace characters we
+    /// did not traditionally trim.
+    /// </summary>
+    public static IEnumerable<string> GetNonSpaceWhiteSpace()
+    {
+        return GetControlWhiteSpace().Concat(GetNonControlWhiteSpace());
+    }
+
+    /// <summary>
+    /// This is the Whitespace we used to trim from paths
+    /// </summary>
     public static IEnumerable<string> GetWhiteSpace()
     {
         return GetControlWhiteSpace().Concat(GetSimpleWhiteSpace());
@@ -89,6 +122,10 @@ internal static class IOInputs
     {
         foreach (char slash in new[] { Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar })
         {
+            if (!PlatformDetection.IsWindows && slash == '/') // Unc paths must start with '\' on Unix
+            {
+                continue;
+            }
             string slashes = new string(slash, 2);
             yield return slashes;
             yield return slashes + " ";
@@ -115,7 +152,7 @@ internal static class IOInputs
         }
     }
 
-    public static IEnumerable<string> GetPathsWithAlternativeDataStreams()
+    public static IEnumerable<string> GetPathsWithColons()
     {
         yield return @"AA:";
         yield return @"AAA:";
@@ -143,60 +180,6 @@ internal static class IOInputs
         yield return @"ftp://fileName:FileName.txt:AAA";
     }
 
-    public static IEnumerable<string> GetPathsWithInvalidColons()
-    {
-        // Windows specific. We document that these return NotSupportedException.
-        yield return @":";
-        yield return @" :";
-        yield return @"  :";
-        yield return @"C::";
-        yield return @"C::FileName";
-        yield return @"C::FileName.txt";
-        yield return @"C::FileName.txt:";
-        yield return @"C::FileName.txt::";
-        yield return @":f";
-        yield return @":filename";
-        yield return @"file:";
-        yield return @"file:file";
-        yield return @"http:";
-        yield return @"http:/";
-        yield return @"http://";
-        yield return @"http://www";
-        yield return @"http://www.microsoft.com";
-        yield return @"http://www.microsoft.com/index.html";
-        yield return @"http://server";
-        yield return @"http://server/";
-        yield return @"http://server/home";
-        yield return @"file://";
-        yield return @"file:///C|/My Documents/ALetter.html";
-    }
-
-    public static IEnumerable<string> GetPathsWithInvalidCharacters()
-    {
-        // NOTE: That I/O treats "file"/http" specially and throws ArgumentException.
-        // Otherwise, it treats all other urls as alternative data streams
-        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // alternate data streams, drive labels, etc.
-        {
-            yield return "\0";
-            yield return "middle\0path";
-            yield return "trailing\0";
-            yield return @"\\?\";
-            yield return @"\\?\UNC\";
-            yield return @"\\?\UNC\LOCALHOST";
-        }
-        else
-        {
-            yield return "\0";
-            yield return "middle\0path";
-            yield return "trailing\0";
-        }
-
-        foreach (char c in s_invalidFileNameChars)
-        {
-            yield return c.ToString();
-        }
-    }
-
     public static IEnumerable<string> GetPathsWithComponentLongerThanMaxComponent()
     {
         // While paths themselves can be up to and including 32,000 characters, most volumes
@@ -204,13 +187,13 @@ internal static class IOInputs
 
         string component = new string('s', MaxComponent + 1);
 
-        yield return String.Format(@"C:\{0}", component);
-        yield return String.Format(@"C:\{0}\Filename.txt", component);
-        yield return String.Format(@"C:\{0}\Filename.txt\", component);
-        yield return String.Format(@"\\{0}\Share", component);
-        yield return String.Format(@"\\LOCALHOST\{0}", component);
-        yield return String.Format(@"\\LOCALHOST\{0}\FileName.txt", component);
-        yield return String.Format(@"\\LOCALHOST\Share\{0}", component);
+        yield return string.Format(@"C:\{0}", component);
+        yield return string.Format(@"C:\{0}\Filename.txt", component);
+        yield return string.Format(@"C:\{0}\Filename.txt\", component);
+        yield return string.Format(@"\\{0}\Share", component);
+        yield return string.Format(@"\\LOCALHOST\{0}", component);
+        yield return string.Format(@"\\LOCALHOST\{0}\FileName.txt", component);
+        yield return string.Format(@"\\LOCALHOST\Share\{0}", component);
     }
 
     public static IEnumerable<string> GetPathsLongerThanMaxDirectory(string rootPath)
@@ -235,11 +218,11 @@ internal static class IOInputs
 
     private static string GetLongPath(string rootPath, int characterCount, bool extended = false)
     {
-        return IOServices.GetPath(rootPath, characterCount, extended).FullPath;
+        return IOServices.GetPath(rootPath, characterCount, extended);
     }
 
     public static IEnumerable<string> GetReservedDeviceNames()
-    {   // See: http://msdn.microsoft.com/en-us/library/aa365247.aspx
+    {   // See: https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file
         yield return "CON";
         yield return "AUX";
         yield return "NUL";

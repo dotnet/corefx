@@ -1,12 +1,11 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  
+﻿<Project DefaultTargets="Build">
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
     <PackageVersion>$(PlatformPackageVersion)</PackageVersion>
     <SkipValidatePackage>true</SkipValidatePackage>
+    <!-- We don't need to harvest the stable packages to build this -->
+    <HarvestStablePackage>false</HarvestStablePackage>
   </PropertyGroup>
-  
   <ItemGroup>
     <File Include="runtime.json" />
     <!-- make this package installable and noop in a packages.config-based project -->
@@ -14,6 +13,6 @@
       <TargetPath>lib/netstandard1.0</TargetPath>
     </File>
   </ItemGroup>
-
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <Import Project="runtimeGroups.props" />
+  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.targets))\Directory.Build.targets" />
 </Project>

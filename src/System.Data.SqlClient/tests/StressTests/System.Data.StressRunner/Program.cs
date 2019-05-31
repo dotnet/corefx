@@ -60,11 +60,11 @@ namespace DPStressHarness
                         break;
 
                     case "-duration":
-                        TestMetrics.StressDuration = Int32.Parse(args[++i]);
+                        TestMetrics.StressDuration = int.Parse(args[++i]);
                         break;
 
                     case "-threads":
-                        TestMetrics.StressThreads = Int32.Parse(args[++i]);
+                        TestMetrics.StressThreads = int.Parse(args[++i]);
                         break;
 
                     case "-verify":
@@ -84,7 +84,7 @@ namespace DPStressHarness
                         break;
 
                     case "-exceptionThreshold":
-                        TestMetrics.ExceptionThreshold = Int32.Parse(args[++i]);
+                        TestMetrics.ExceptionThreshold = int.Parse(args[++i]);
                         break;
 
                     case "-monitorenabled":
@@ -92,7 +92,7 @@ namespace DPStressHarness
                         break;
 
                     case "-randomSeed":
-                        TestMetrics.RandomSeed = Int32.Parse(args[++i]);
+                        TestMetrics.RandomSeed = int.Parse(args[++i]);
                         break;
 
                     case "-filter":
@@ -217,7 +217,7 @@ namespace DPStressHarness
             }
         }
 
-        static private void PrintHelp()
+        private static void PrintHelp()
         {
             Console.WriteLine("stresstest.exe [-a <module name>] <arguments>");
             Console.WriteLine();
@@ -256,18 +256,18 @@ namespace DPStressHarness
             Console.WriteLine();
         }
 
-        static private int ExitWithError()
+        private static int ExitWithError()
         {
             Environment.FailFast("Exit with error(s).");
             return 1;
         }
 
-        static private int RunVerify()
+        private static int RunVerify()
         {
             throw new NotImplementedException();
         }
 
-        static private int RunStress()
+        private static int RunStress()
         {
             return s_eng.Run();
         }

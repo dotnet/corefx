@@ -4,15 +4,13 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
-using System.Xml;
 using System.Xml.Schema;
 
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_GlobalElements", Desc = "")]
-    public class TC_SchemaSet_GlobalElements
+    public class TC_SchemaSet_GlobalElements : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 
@@ -24,8 +22,8 @@ namespace System.Xml.Tests
 
         public XmlSchema GetSchema(string ns, string e1, string e2)
         {
-            string xsd = String.Empty;
-            if (ns.Equals(String.Empty))
+            string xsd = string.Empty;
+            if (ns.Equals(string.Empty))
                 xsd = "<schema xmlns='http://www.w3.org/2001/XMLSchema'><element name='" + e1 + "'/><element name='" + e2 + "'/></schema>";
             else
                 xsd = "<schema xmlns='http://www.w3.org/2001/XMLSchema' targetNamespace='" + ns + "'><element name='" + e1 + "'/><element name='" + e2 + "'/></schema>";

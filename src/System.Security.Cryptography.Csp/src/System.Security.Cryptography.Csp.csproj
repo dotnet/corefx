@@ -1,45 +1,60 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <OSGroup Condition="'$(OSGroup)' == ''">Windows_NT</OSGroup>
-  </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Windows_NT_Debug</Configuration>
     <ProjectGuid>{3B7F91D7-0677-40CA-B4E7-D4E09D89A74E}</ProjectGuid>
     <AssemblyName>System.Security.Cryptography.Csp</AssemblyName>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <IsPartialFacadeAssembly Condition="'$(TargetGroup)' == 'net463'">true</IsPartialFacadeAssembly>
-    <ResourcesSourceOutputDirectory Condition="'$(TargetGroup)' == 'net463'">None</ResourcesSourceOutputDirectory>
-    <NoWarn Condition="'$(TargetsUnix)' == 'true'">CS0809</NoWarn>
-    <GeneratePlatformNotSupportedAssembly Condition="'$(TargetsUnix)' == 'true'">true</GeneratePlatformNotSupportedAssembly>
-    <NuGetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NuGetTargetMoniker>
+    <NoWarn Condition="'$(TargetsUnix)' == 'true'">$(NoWarn);CS0809</NoWarn>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_NT_Debug|AnyCPU'" />
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Windows_NT_Release|AnyCPU'" />
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463' AND '$(TargetsWindows)' == 'true'">
+  <ItemGroup>
     <Compile Include="System\Security\Cryptography\AesCryptoServiceProvider.cs" />
-    <Compile Include="System\Security\Cryptography\CapiHelper.cs" />
-    <Compile Include="System\Security\Cryptography\CapiHelper.DSA.cs" />
-    <Compile Include="System\Security\Cryptography\CapiHelper.SymmetricKey.cs" />
-    <Compile Include="System\Security\Cryptography\CspKeyContainerInfo.cs" />
+    <Compile Include="System\Security\Cryptography\CapiHelper.DSA.Shared.cs" />
+    <Compile Include="System\Security\Cryptography\CapiHelper.Shared.cs" />
     <Compile Include="System\Security\Cryptography\CspParameters.cs" />
     <Compile Include="System\Security\Cryptography\CspProviderFlags.cs" />
-    <Compile Include="System\Security\Cryptography\DESCryptoServiceProvider.cs" />
-    <Compile Include="System\Security\Cryptography\DSACryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\ICspAsymmetricAlgorithm.cs" />
     <Compile Include="System\Security\Cryptography\KeyNumber.cs" />
     <Compile Include="System\Security\Cryptography\MD5CryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\PasswordDeriveBytes.cs" />
-    <Compile Include="System\Security\Cryptography\RC2CryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\RNGCryptoServiceProvider.cs" />
-    <Compile Include="System\Security\Cryptography\RSACryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\SHA1CryptoServiceProvider.cs" />
-    <Compile Include="System\Security\Cryptography\SafeCryptoHandles.cs" />
+    <Compile Include="System\Security\Cryptography\SHA256CryptoServiceProvider.cs" />
+    <Compile Include="System\Security\Cryptography\SHA384CryptoServiceProvider.cs" />
+    <Compile Include="System\Security\Cryptography\SHA512CryptoServiceProvider.cs" />
     <Compile Include="System\Security\Cryptography\TripleDESCryptoServiceProvider.cs" />
+    <Compile Include="Internal\Cryptography\Helpers.cs" />
+    <Compile Include="$(CommonPath)\Internal\Cryptography\Helpers.cs">
+      <Link>Internal\Cryptography\Helpers.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\KeySizeHelpers.cs">
+      <Link>Common\System\Security\Cryptography\KeySizeHelpers.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Compile Include="System\Security\Cryptography\CapiHelper.Unix.cs" />
+    <Compile Include="System\Security\Cryptography\CspKeyContainerInfo.Unix.cs" />
+    <Compile Include="System\Security\Cryptography\DESCryptoServiceProvider.Unix.cs" />
+    <Compile Include="System\Security\Cryptography\DSACryptoServiceProvider.Unix.cs" />
+    <Compile Include="System\Security\Cryptography\PasswordDeriveBytes.Unix.cs" />
+    <Compile Include="System\Security\Cryptography\RC2CryptoServiceProvider.Unix.cs" />
+    <Compile Include="System\Security\Cryptography\RSACryptoServiceProvider.Unix.cs" />
+    <Compile Include="Internal\Cryptography\Unix\HashAlgorithmNames.cs" />
+    <Compile Include="$(CommonPath)\Internal\Cryptography\AsymmetricAlgorithmHelpers.Hash.cs">
+      <Link>Common\Internal\Cryptography\AsymmetricAlgorithmHelpers.Hash.cs</Link>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="System\Security\Cryptography\CspKeyContainerInfo.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\DESCryptoServiceProvider.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\DSACryptoServiceProvider.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\PasswordDeriveBytes.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\RC2CryptoServiceProvider.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\RSACryptoServiceProvider.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\CapiHelper.DSA.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\CapiHelper.Windows.cs" />
+    <Compile Include="System\Security\Cryptography\CapiHelper.SymmetricKey.cs" />
     <Compile Include="System\Security\Cryptography\Utils.cs" />
     <Compile Include="Internal\Cryptography\BasicSymmetricCipherCsp.cs" />
-    <Compile Include="Internal\Cryptography\Helpers.cs" />
     <Compile Include="$(CommonPath)\Internal\Cryptography\BasicSymmetricCipher.cs">
       <Link>Internal\Cryptography\BasicSymmetricCipher.cs</Link>
     </Compile>
@@ -55,10 +70,76 @@
     <Compile Include="$(CommonPath)\Internal\Cryptography\Windows\CryptoThrowHelper.cs">
       <Link>Internal\Cryptography\Windows\CryptoThrowHelper.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptAcquireContext.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptAcquireContext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptCreateHash.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptCreateHash.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptDecrypt.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptDecrypt.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptDeriveKey.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptDeriveKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptDestroyHash.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptDestroyHash.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptDestroyKey.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptDestroyKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptEncrypt.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptEncrypt.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptExportKey.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptExportKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptGenKey.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptGenKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptGetDefaultProvider.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptGetDefaultProvider.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptGetHashParam.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptGetHashParam.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptGetKeyParam.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptGetKeyParam.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptGetProvParam.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptGetProvParam.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptGetUserKey.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptGetUserKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptHashData.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptHashData.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptImportKey.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptImportKey.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptReleaseContext.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptReleaseContext.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptSetKeyParam.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptSetKeyParam.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.CryptSignHash.cs">
+      <Link>Common\Interop\Windows\Advapi32\Interop.CryptSignHash.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\SafeHashHandle.cs">
+      <Link>Common\Interop\Windows\Advapi32\SafeHashHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\SafeKeyHandle.cs">
+      <Link>Common\Interop\Windows\Advapi32\SafeKeyHandle.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\SafeProvHandle.cs">
+      <Link>Common\Interop\Windows\Advapi32\SafeProvHandle.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Crypt32\Interop.FindOidInfo.cs">
       <Link>Common\Interop\Windows\Crypt32\Interop.FindOidInfo.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\kernel32\Interop.FormatMessage.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FormatMessage.cs">
       <Link>Common\Interop\Windows\kernel32\Interop.FormatMessage.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
@@ -68,24 +149,20 @@
       <Link>Common\Microsoft\Win32\SafeHandles\SafeHandleCache.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'net463'">
-    <ProjectReference Include="../../System.Security.Cryptography.Primitives/src/System.Security.Cryptography.Primitives.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'net463'">
-    <TargetingPackReference Include="mscorlib" />
-    <TargetingPackReference Include="System.Core" />
-  </ItemGroup>
   <ItemGroup>
-    <None Include="project.json" />
+    <Reference Include="System.Buffers" />
+    <Reference Include="System.Diagnostics.Debug" />
+    <Reference Include="System.Diagnostics.Tools" />
+    <Reference Include="System.Memory" />
+    <Reference Include="System.Resources.ResourceManager" />
+    <Reference Include="System.Runtime" />
+    <Reference Include="System.Runtime.Extensions" />
+    <Reference Include="System.Runtime.InteropServices" />
+    <Reference Include="System.Security.Cryptography.Algorithms" />
+    <Reference Include="System.Security.Cryptography.Encoding" />
+    <Reference Include="System.Security.Cryptography.Primitives" />
+    <Reference Include="System.Text.Encoding.Extensions" />
+    <Reference Include="System.Threading" />
+    <Reference Include="System.Threading.Thread" />
   </ItemGroup>
-  <ItemGroup>
-    <!-- ToDo: Remove once prerelease gets updated again -->
-    <ProjectReference Include="..\..\System.Security.Cryptography.Algorithms\pkg\System.Security.Cryptography.Algorithms.pkgproj">
-      <Name>System.Security.Cryptography.Algorithms</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\System.Security.Cryptography.Primitives\pkg\System.Security.Cryptography.Primitives.pkgproj">
-      <Name>System.Security.Cryptography.Primitives</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

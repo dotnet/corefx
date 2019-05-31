@@ -33,7 +33,7 @@ namespace System.Numerics.Tests
             }
         }
 
-        [ConditionalFact(nameof(PlatformDetection) + "." + nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // https://github.com/Microsoft/BashOnWindows/issues/513
+        [Fact]
         public static void ModPowNegative()
         {
             byte[] tempByteArray1;
@@ -357,7 +357,7 @@ namespace System.Numerics.Tests
             return value;
         }
         
-        private static String Print(byte[] bytes)
+        private static string Print(byte[] bytes)
         {
             return MyBigIntImp.Print(bytes);
         }

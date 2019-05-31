@@ -3,23 +3,42 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace System.Net.Test.Common
 {
     public class VirtualNetwork
     {
+        public class VirtualNetworkConnectionBroken : Exception
+        {
+            public VirtualNetworkConnectionBroken() : base("Connection broken") { }
+        }
+
         private readonly int WaitForReadDataTimeoutMilliseconds = 30 * 1000;
-        
+
         private readonly ConcurrentQueue<byte[]> _clientWriteQueue = new ConcurrentQueue<byte[]>();
         private readonly ConcurrentQueue<byte[]> _serverWriteQueue = new ConcurrentQueue<byte[]>();
 
         private readonly SemaphoreSlim _clientDataAvailable = new SemaphoreSlim(0);
         private readonly SemaphoreSlim _serverDataAvailable = new SemaphoreSlim(0);
 
-        public void ReadFrame(bool server, out byte[] buffer)
+        public bool DisableConnectionBreaking { get; set; } = false;
+        private bool _connectionBroken = false;
+
+        public byte[] ReadFrame(bool server) =>
+            ReadFrameCoreAsync(server, sync: true, cancellationToken: default).GetAwaiter().GetResult();
+
+        public Task<byte[]> ReadFrameAsync(bool server, CancellationToken cancellationToken) =>
+            ReadFrameCoreAsync(server, sync: false, cancellationToken);
+
+        private async Task<byte[]> ReadFrameCoreAsync(bool server, bool sync, CancellationToken cancellationToken)
         {
+            if (_connectionBroken)
+            {
+                throw new VirtualNetworkConnectionBroken();
+            }
+
             SemaphoreSlim semaphore;
             ConcurrentQueue<byte[]> packetQueue;
 
@@ -34,34 +53,52 @@ namespace System.Net.Test.Common
                 packetQueue = _serverWriteQueue;
             }
 
-            if (!semaphore.Wait(WaitForReadDataTimeoutMilliseconds))
+            bool successfulWait = sync ?
+                semaphore.Wait(WaitForReadDataTimeoutMilliseconds, cancellationToken) :
+                await semaphore.WaitAsync(WaitForReadDataTimeoutMilliseconds, cancellationToken).ConfigureAwait(false);
+            if (!successfulWait)
             {
                 throw new TimeoutException("VirtualNetwork: Timeout reading the next frame.");
             }
 
-            bool dequeueSucceeded = false;
+            if (_connectionBroken)
+            {
+                throw new VirtualNetworkConnectionBroken();
+            }
+
             int remainingTries = 3;
             int backOffDelayMilliseconds = 2;
 
             do
             {
-                dequeueSucceeded = packetQueue.TryDequeue(out buffer);
-                if (dequeueSucceeded)
+                if (packetQueue.TryDequeue(out byte[] buffer))
                 {
-                    break;
+                    return buffer;
                 }
 
                 remainingTries--;
                 backOffDelayMilliseconds *= backOffDelayMilliseconds;
-                Thread.Sleep(backOffDelayMilliseconds);
+                if (sync)
+                {
+                    Thread.Sleep(backOffDelayMilliseconds);
+                }
+                else
+                {
+                    await Task.Delay(backOffDelayMilliseconds, cancellationToken).ConfigureAwait(false);
+                }
             }
-            while (!dequeueSucceeded && (remainingTries > 0));
+            while (remainingTries > 0);
 
-            Debug.Assert(dequeueSucceeded, "Packet queue: TryDequeue failed.");
+            throw new InvalidOperationException("Packet queue: TryDequeue failed.");
         }
 
         public void WriteFrame(bool server, byte[] buffer)
         {
+            if (_connectionBroken)
+            {
+                throw new VirtualNetworkConnectionBroken();
+            }
+
             SemaphoreSlim semaphore;
             ConcurrentQueue<byte[]> packetQueue;
 
@@ -76,11 +113,18 @@ namespace System.Net.Test.Common
                 packetQueue = _clientWriteQueue;
             }
 
-            byte[] innerBuffer = new byte[buffer.Length];
-            buffer.CopyTo(innerBuffer, 0);
-
-            packetQueue.Enqueue(innerBuffer);
+            packetQueue.Enqueue(buffer.AsSpan().ToArray());
             semaphore.Release();
+        }
+
+        public void BreakConnection()
+        {
+            if (!DisableConnectionBreaking)
+            {
+                _connectionBroken = true;
+                _serverDataAvailable.Release(1_000_000);
+                _clientDataAvailable.Release(1_000_000);
+            }
         }
     }
 }

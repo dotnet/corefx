@@ -4,7 +4,6 @@
 
 using Xunit;
 using Xunit.Abstractions;
-using System;
 using System.IO;
 using System.Collections;
 using System.Xml.Schema;
@@ -12,7 +11,7 @@ using System.Xml.Schema;
 namespace System.Xml.Tests
 {
     //[TestCase(Name = "TC_SchemaSet_RemoveRecursive", Desc = "")]
-    public class TC_SchemaSet_RemoveRecursive
+    public class TC_SchemaSet_RemoveRecursive : TC_SchemaSetBase
     {
         private ITestOutputHelper _output;
 
@@ -204,14 +203,14 @@ namespace System.Xml.Tests
                 sc.RemoveRecursive(Schema1);
                 CError.Compare(sc.Count, 2, "Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), true, "Contains");
+                CError.Compare(sc.Contains(string.Empty), true, "Contains");
                 CError.Compare(sc.Contains("ns-a"), true, "Contains");
 
                 sc.RemoveRecursive(Schema2);
                 ICollection Col = sc.Schemas();
                 CError.Compare(Col.Count, 0, "ICollection.Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), false, "Contains");
+                CError.Compare(sc.Contains(string.Empty), false, "Contains");
                 CError.Compare(sc.Contains("ns-a"), false, "Contains");
 
                 //before compile
@@ -220,13 +219,13 @@ namespace System.Xml.Tests
                 sc.RemoveRecursive(Schema1);
                 CError.Compare(sc.Count, 2, "Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), true, "Contains");
+                CError.Compare(sc.Contains(string.Empty), true, "Contains");
                 CError.Compare(sc.Contains("ns-a"), true, "Contains");
                 sc.RemoveRecursive(Schema2);
                 Col = sc.Schemas();
                 CError.Compare(Col.Count, 0, "ICollection.Count");
                 CError.Compare(sc.Contains("ns-b"), false, "Contains");
-                CError.Compare(sc.Contains(String.Empty), false, "Contains");
+                CError.Compare(sc.Contains(string.Empty), false, "Contains");
                 CError.Compare(sc.Contains("ns-a"), false, "Contains");
             }
             catch (Exception e)

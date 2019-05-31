@@ -12,12 +12,12 @@ namespace System.Globalization.Tests
         public static IEnumerable<object[]> PercentSymbol_TestData()
         {
             yield return new object[] { NumberFormatInfo.InvariantInfo, "%" };
-            yield return new object[] { new CultureInfo("en-US").NumberFormat, "%" };
+            yield return new object[] { CultureInfo.GetCultureInfo("en-US").NumberFormat, "%" };
         }
 
         [Theory]
         [MemberData(nameof(PercentSymbol_TestData))]
-        public void PercentSymbol_Get(NumberFormatInfo format, string expected)
+        public void PercentSymbol_Get_ReturnsExpected(NumberFormatInfo format, string expected)
         {
             Assert.Equal(expected, format.PercentSymbol);
         }
@@ -26,7 +26,7 @@ namespace System.Globalization.Tests
         [InlineData("string")]
         [InlineData("   ")]
         [InlineData("")]
-        public void PercentSymbol_Set(string newPercentSymbol)
+        public void PercentSymbol_Set_GetReturnsExpected(string newPercentSymbol)
         {
             NumberFormatInfo format = new NumberFormatInfo();
             format.PercentSymbol = newPercentSymbol;
@@ -34,9 +34,15 @@ namespace System.Globalization.Tests
         }
 
         [Fact]
-        public void PercentSymbol_Set_Invalid()
+        public void PercentSymbol_SetNull_ThrowsArgumentNullException()
         {
-            Assert.Throws<ArgumentNullException>("PercentSymbol", () => new NumberFormatInfo().PercentSymbol = null);
+            var format = new NumberFormatInfo();
+            AssertExtensions.Throws<ArgumentNullException>("value", "PercentSymbol", () => format.PercentSymbol = null);
+        }
+
+        [Fact]
+        public void PercentSymbol_SetReadOnly_ThrowsInvalidOperationException()
+        {
             Assert.Throws<InvalidOperationException>(() => NumberFormatInfo.InvariantInfo.PercentSymbol = "");
         }
     }

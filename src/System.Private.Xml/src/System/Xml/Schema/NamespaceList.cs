@@ -110,7 +110,7 @@ namespace System.Xml.Schema
                 case ListType.Set:
                     return _set[ns] != null;
             }
-            Debug.Assert(false);
+            Debug.Fail($"Unexpected type {_type}");
             return false;
         }
 
@@ -155,7 +155,7 @@ namespace System.Xml.Schema
                     }
                     return sb.ToString();
             }
-            Debug.Assert(false);
+            Debug.Fail($"Unexpected type {_type}");
             return string.Empty;
         }
 
@@ -383,11 +383,6 @@ namespace System.Xml.Schema
             {
                 _set.Remove(tns);
             }
-        }
-
-        public bool IsEmpty()
-        {
-            return ((_type == ListType.Set) && ((_set == null) || _set.Count == 0));
         }
     };
 

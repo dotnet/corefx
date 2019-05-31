@@ -12,7 +12,6 @@ namespace System.ComponentModel.DataAnnotations.Schema
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
     public class TableAttribute : Attribute
     {
-        private readonly string _name;
         private string _schema;
 
         /// <summary>
@@ -23,33 +22,30 @@ namespace System.ComponentModel.DataAnnotations.Schema
         {
             if (string.IsNullOrWhiteSpace(name))
             {
-                throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-                    SR.ArgumentIsNullOrWhitespace, nameof(name)));
+                throw new ArgumentException(SR.Format(SR.ArgumentIsNullOrWhitespace, nameof(name)), nameof(name));
             }
-            _name = name;
+
+            Name = name;
         }
 
         /// <summary>
         ///     The name of the table the class is mapped to.
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <summary>
         ///     The schema of the table the class is mapped to.
         /// </summary>
         public string Schema
         {
-            get { return _schema; }
+            get => _schema;
             set
             {
                 if (string.IsNullOrWhiteSpace(value))
                 {
-                    throw new ArgumentException(string.Format(CultureInfo.CurrentCulture,
-                        SR.ArgumentIsNullOrWhitespace, nameof(value)));
+                    throw new ArgumentException(SR.Format(SR.ArgumentIsNullOrWhitespace, nameof(value)), nameof(value));
                 }
+
                 _schema = value;
             }
         }

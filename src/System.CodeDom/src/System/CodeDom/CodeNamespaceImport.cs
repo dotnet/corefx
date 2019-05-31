@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeNamespaceImport : CodeObject
     {
         private string _nameSpace;
@@ -20,8 +19,8 @@ namespace System.CodeDom
 
         public string Namespace
         {
-            get { return _nameSpace ?? string.Empty; }
-            set { _nameSpace = value; }
+            get => _nameSpace ?? string.Empty;
+            set => _nameSpace = value;
         }
     }
 }

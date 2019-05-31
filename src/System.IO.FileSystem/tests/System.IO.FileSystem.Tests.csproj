@@ -1,53 +1,61 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)'==''">Windows_Debug</Configuration>
-  </PropertyGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
-  <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
-    <ProjectGuid>{57E8F8D4-0766-4CC7-B3F9-B243B81DB6A5}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.IO.FileSystem.Tests</AssemblyName>
-    <TestCategories>InnerLoop;OuterLoop</TestCategories>
-    <NugetTargetMoniker Condition="'$(TargetGroup)' == ''">.NETStandard,Version=v1.7</NugetTargetMoniker>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|AnyCPU'">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <ProjectGuid>{F0D49126-6A1C-42D5-9428-4374C868BAF8}</ProjectGuid>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.IO.FileSystem.pkgproj">
-      <Project>{879c23dc-d828-4dfb-8e92-abbc11b71035}</Project>
-      <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
-      <Name>System.IO.FileSystem</Name>
-      <Private>True</Private>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'==''">
-    <Compile Include="FileInfo\Serialization.cs" />
+    <Compile Include="Base\BaseGetSetAttributes.cs" />
+    <Compile Include="Base\BaseGetSetTimes.cs" />
+    <Compile Include="Base\FileGetSetAttributes.cs" />
+    <Compile Include="Base\InfoGetSetAttributes.cs" />
+    <Compile Include="Base\InfoGetSetTimes.cs" />
+    <Compile Include="Base\AllGetSetAttributes.cs" />
+    <Compile Include="Base\StaticGetSetTimes.cs" />
+    <Compile Include="Directory\EnumerableTests.cs" />
+    <Compile Include="FileInfo\GetSetAttributesCommon.cs" />
+    <Compile Include="FileInfo\IsReadOnly.cs" />    
     <Compile Include="FileInfo\Replace.cs" />
     <Compile Include="FileStream\Handle.cs" />
     <Compile Include="Directory\GetLogicalDrives.cs" />
-    <Compile Include="DirectoryInfo\Serialization.cs" />
-    <Compile Include="FileStream\BeginRead.cs" />
     <Compile Include="FileStream\EndRead.cs" />
-    <Compile Include="FileStream\BeginWrite.cs" />
     <Compile Include="FileStream\EndWrite.cs" />
     <Compile Include="FileStream\LockUnlock.cs" />
+    <Compile Include="FileSystemTest.cs" />
     <Compile Include="File\EncryptDecrypt.cs" />
+    <Compile Include="File\GetSetAttributesCommon.cs" />
     <Compile Include="File\Replace.cs" />
-    <Compile Include="File\ReadWriteAllLines.netstandard1.7.cs" />
-    <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
-      <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
-    </Compile>
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsUnix)' == 'true'">
+    <Compile Include="FileSystemTest.Unix.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
+    <Compile Include="FileSystemTest.Windows.cs" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetGroup)' == 'netcoreapp'">
+    <Compile Include="File\AppendAsync.cs" />
+	<Compile Include="File\Move.netcoreapp.cs" />
+    <Compile Include="File\ReadWriteAllLinesAsync.cs" />
+    <Compile Include="File\ReadWriteAllBytesAsync.cs" />
+    <Compile Include="File\ReadWriteAllTextAsync.cs" />
+	<Compile Include="FileInfo\MoveTo.netcoreapp.cs" />
+    <Compile Include="FileStream\DisposeAsync.netcoreapp.cs" />
+    <Compile Include="FileStream\ReadWriteSpan.netcoreapp.cs" />
+    <Compile Include="Enumeration\ConstructionTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\SpecialDirectoryTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\SkipAttributeTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\FileSystemNameTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\MatchCasingTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\TrimmedPaths.netcoreapp.cs" />
+    <Compile Include="Enumeration\ErrorHandlingTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\IncludePredicateTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\PatternTransformTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\RootTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\AttributeTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\MatchTypesTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\ExampleTests.netcoreapp.cs" />
+    <Compile Include="Enumeration\RemovedDirectoryTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- Rewritten -->
@@ -106,9 +114,9 @@
     <Compile Include="File\Move.cs" />
     <Compile Include="File\ReadWriteAllText.cs" />
     <Compile Include="File\ReadWriteAllLines.cs" />
+    <Compile Include="TestData.cs" />
     <Compile Include="UnseekableFileStream.cs" />
     <Compile Include="FSAssert.cs" />
-    <Compile Include="FileSystemTest.cs" />
     <!-- Ported -->
     <Compile Include="PortedCommon\CommonUtilities.cs" />
     <Compile Include="PortedCommon\DllImports.cs" />
@@ -116,9 +124,6 @@
     <Compile Include="PortedCommon\IOServices.cs" />
     <Compile Include="PortedCommon\PathInfo.cs" />
     <Compile Include="PortedCommon\ReparsePointUtilities.cs" />
-    <Compile Include="PortedCommon\TemporaryDirectory.cs" />
-    <Compile Include="PortedCommon\TemporaryFile.cs" />
-    <Compile Include="PortedCommon\TemporaryFileSystemItem.cs" />
     <Compile Include="DirectoryInfo\EnumerableAPIs.cs" />
     <Compile Include="DirectoryInfo\GetDirectories.cs" />
     <Compile Include="DirectoryInfo\GetFiles.cs" />
@@ -161,33 +166,21 @@
     <Compile Include="FileInfo\AppendText.cs" />
     <Compile Include="FileInfo\CopyTo.cs" />
     <!-- Helpers -->
-    <Compile Include="$(CommonTestPath)\System\IO\FileCleanupTestBase.cs">
-      <Link>Common\System\IO\FileCleanupTestBase.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\Buffers\NativeMemoryManager.cs">
+      <Link>Common\System\Buffers\NativeMemoryManager.cs</Link>
     </Compile>
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\PlatformDetection.cs">
-      <Link>Common\System\PlatformDetection.cs</Link>
+    <Compile Include="$(CommonTestPath)\System\IO\PathFeatures.cs">
+      <Link>Common\System\IO\PathFeatures.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorTestBase.cs">
-      <Link>Common\System\Diagnostics\RemoteExecutorTestBase.cs</Link>
-    </Compile>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-      <UndefineProperties>%(ProjectReference.UndefineProperties);TargetGroup</UndefineProperties>
-    </ProjectReference>
-    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
-    <ProjectReference Include="..\..\System.IO\pkg\System.IO.pkgproj" />
-    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
-    <ProjectReference Include="..\..\System.Runtime\pkg\System.Runtime.pkgproj" />
-    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
-    <ProjectReference Include="..\..\System.Runtime.Extensions\pkg\System.Runtime.Extensions.pkgproj" />
-    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
-    <ProjectReference Include="..\..\System.Security.Permissions\pkg\System.Security.Permissions.pkgproj" />
-    <!-- ToDo: Remove this P2P reference once new packages are produced and updated -->
-    <ProjectReference Include="..\..\System.IO.FileSystem.Primitives\pkg\System.IO.FileSystem.Primitives.pkgproj" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
+    <Reference Include="mscorlib" />
+    <Reference Include="Windows" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
+  </ItemGroup>
 </Project>

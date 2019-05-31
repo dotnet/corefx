@@ -20,7 +20,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
 
             Assert.Equal(q.Take(9), q.Take(9));
@@ -39,8 +39,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.Take(7), q.Take(7));
@@ -142,6 +142,15 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void RunOnce()
+        {
+            int[] source = { 2, 5, 9, 1 };
+            int[] expected = { 2, 5, 9 };
+
+            Assert.Equal(expected, source.RunOnce().Take(3));
+        }
+
+        [Fact]
         public void SourceNonEmptyTakeAllButOneNotIList()
         {
             var source = GuaranteeNotIList(new[] { 2, 5, 9, 1 });
@@ -170,7 +179,7 @@ namespace System.Linq.Tests
         public void ThrowsOnNullSource()
         {
             int[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.Take(5));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.Take(5));
         }
 
         [Fact]
@@ -238,8 +247,8 @@ namespace System.Linq.Tests
             var taken = source.Take(3);
             Assert.Equal(1, taken.ElementAt(0));
             Assert.Equal(3, taken.ElementAt(2));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(3));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(3));
         }
 
         [Fact]
@@ -249,8 +258,8 @@ namespace System.Linq.Tests
             var taken = source.Take(3);
             Assert.Equal(1, taken.ElementAt(0));
             Assert.Equal(3, taken.ElementAt(2));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(3));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => taken.ElementAt(3));
         }
 
         [Fact]
@@ -455,6 +464,7 @@ namespace System.Linq.Tests
         [InlineData(1000)]
         [InlineData(1000000)]
         [InlineData(int.MaxValue)]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core optimizes Take(...).Skip(...) on lazy sequences to avoid unecessary allocation. Without this optimization this test takes many minutes. See https://github.com/dotnet/corefx/pull/13628.")]
         public void LazySkipAllTakenForLargeNumbers(int largeNumber)
         {
             Assert.Empty(new FastInfiniteEnumerator<int>().Take(largeNumber).Skip(largeNumber));
@@ -524,6 +534,35 @@ namespace System.Linq.Tests
             {
                 Assert.Equal(expectedValues[i], partition.ElementAtOrDefault(indices[i]));
             }
+        }
+
+        [Theory]
+        [InlineData(0, -1)]
+        [InlineData(0, 0)]
+        [InlineData(1, 0)]
+        [InlineData(2, 1)]
+        [InlineData(2, 2)]
+        [InlineData(2, 3)]
+        public void DisposeSource(int sourceCount, int count)
+        {
+            int state = 0;
+
+            var source = new DelegateIterator<int>(
+                moveNext: () => ++state <= sourceCount,
+                current: () => 0,
+                dispose: () => state = -1);
+
+            IEnumerator<int> iterator = source.Take(count).GetEnumerator();
+            int iteratorCount = Math.Min(sourceCount, Math.Max(0, count));
+            Assert.All(Enumerable.Range(0, iteratorCount), _ => Assert.True(iterator.MoveNext()));
+
+            Assert.False(iterator.MoveNext());
+
+            // Unlike Skip, Take can tell straightaway that it can return a sequence with no elements if count <= 0.
+            // The enumerable it returns is a specialized empty iterator that has no connections to the source. Hence,
+            // after MoveNext returns false under those circumstances, it won't invoke Dispose on our enumerator.
+            int expected = count <= 0 ? 0 : -1;
+            Assert.Equal(expected, state);
         }
     }
 }

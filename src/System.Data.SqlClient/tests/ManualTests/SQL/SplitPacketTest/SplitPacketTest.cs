@@ -27,49 +27,52 @@ namespace System.Data.SqlClient.ManualTesting.Tests
 
             Task.Factory.StartNew(() => { SetupProxy(actualHost, actualPort); });
 
-            Thread.Sleep(2000);
-            Assert.True(Port != -1, "Proxy local port not defined!");
+            for(int i = 0; i < 10 && Port == -1; i++)
+            {
+                Thread.Sleep(500);
+            }
+            if (Port == -1) throw new InvalidOperationException("Proxy local port not defined!");
 
             builder.DataSource = "tcp:127.0.0.1," + Port;
             BaseConnString = builder.ConnectionString;
         } 
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void OneByteSplitTest()
         {
             SplitPacketSize = 1;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void AlmostFullHeaderTest()
         {
             SplitPacketSize = 7;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void FullHeaderTest()
         {
             SplitPacketSize = 8;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void HeaderPlusOneTest()
         {
             SplitPacketSize = 9;
             OpenConnection();
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void MARSSplitTest()
         {
             SplitPacketSize = 1;
             OpenMarsConnection("select * from Orders");
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public void MARSReplicateTest()
         {
             SplitPacketSize = 1;

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Xunit;
 
 namespace System.PrivateUri.Tests
@@ -20,10 +21,10 @@ namespace System.PrivateUri.Tests
 #pragma warning restore 0618
 
             int i;
-            String s;
+            string s;
             bool b;
             UriHostNameType uriHostNameType;
-            String[] ss;
+            string[] ss;
 
             s = uri.ToString();
             Assert.Equal(s, @"http://foo/bar/baz#frag");
@@ -108,10 +109,10 @@ namespace System.PrivateUri.Tests
 #pragma warning restore 0618
 
             int i;
-            String s;
+            string s;
             bool b;
             UriHostNameType uriHostNameType;
-            String[] ss;
+            string[] ss;
 
             s = uri.ToString();
             Assert.Equal(s, @"http://www.contoso.com/catalog/shownew.htm?date=today");
@@ -189,7 +190,7 @@ namespace System.PrivateUri.Tests
             var baseUri = new Uri("http://www.domain.com/");
             var relativeUri = new Uri("/path/", UriKind.Relative);
 #pragma warning disable 0618
-            Assert.Throws<ArgumentNullException>("toUri", () => baseUri.MakeRelative(null)); // Uri is null
+            AssertExtensions.Throws<ArgumentNullException>("toUri", () => baseUri.MakeRelative(null)); // Uri is null
 
             Assert.Throws<InvalidOperationException>(() => relativeUri.MakeRelative(baseUri)); // Base uri is relative
             Assert.Throws<InvalidOperationException>(() => baseUri.MakeRelative(relativeUri)); // Uri is relative
@@ -236,7 +237,7 @@ namespace System.PrivateUri.Tests
         [Fact]
         public static void TestHexMethods_Invalid()
         {
-            Assert.Throws<ArgumentException>(() => Uri.FromHex('?'));
+            AssertExtensions.Throws<ArgumentException>(null, () => Uri.FromHex('?'));
             Assert.Throws<ArgumentOutOfRangeException>(() => Uri.HexEscape('\x100'));
             int index = -1;
             Assert.Throws<ArgumentOutOfRangeException>(() => Uri.HexUnescape("%75", ref index));

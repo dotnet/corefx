@@ -13,7 +13,7 @@ using DataContractDictionary = System.Collections.Generic.Dictionary<System.Xml.
 
 namespace System.Runtime.Serialization.Json
 {
-#if NET_NATIVE
+#if uapaot
     public class XmlObjectSerializerWriteContextComplexJson : XmlObjectSerializerWriteContextComplex
 #else
     internal class XmlObjectSerializerWriteContextComplexJson : XmlObjectSerializerWriteContextComplex
@@ -195,7 +195,7 @@ namespace System.Runtime.Serialization.Json
         {
             DataContract dataContract;
             bool verifyKnownType = false;
-            bool isDeclaredTypeInterface = declaredType.GetTypeInfo().IsInterface;
+            bool isDeclaredTypeInterface = declaredType.IsInterface;
 
             if (isDeclaredTypeInterface && CollectionDataContract.IsCollectionInterface(declaredType))
             {
@@ -260,7 +260,7 @@ namespace System.Runtime.Serialization.Json
         {
             bool verifyKnownType = false;
             Type declaredType = rootTypeDataContract.UnderlyingType;
-            bool isDeclaredTypeInterface = declaredType.GetTypeInfo().IsInterface;
+            bool isDeclaredTypeInterface = declaredType.IsInterface;
 
             if (!(isDeclaredTypeInterface && CollectionDataContract.IsCollectionInterface(declaredType))
                 && !declaredType.IsArray)//Array covariance is not supported in XSD. If declared type is array do not write xsi:type. Instead write xsi:type for each item
@@ -344,35 +344,6 @@ namespace System.Runtime.Serialization.Json
             }
         }
 
-        internal void CheckIfTypeNeedsVerifcation(DataContract declaredContract, DataContract runtimeContract)
-        {
-            if (WriteTypeInfo(null, runtimeContract, declaredContract))
-            {
-                VerifyType(runtimeContract);
-            }
-        }
-
-        internal void VerifyType(DataContract dataContract)
-        {
-            bool knownTypesAddedInCurrentScope = false;
-            if (dataContract.KnownDataContracts != null)
-            {
-                scopedKnownTypes.Push(dataContract.KnownDataContracts);
-                knownTypesAddedInCurrentScope = true;
-            }
-
-            DataContract knownContract = ResolveDataContractFromKnownTypes(dataContract.StableName.Name, dataContract.StableName.Namespace, null /*memberTypeContract*/);
-            if (knownContract == null || knownContract.UnderlyingType != dataContract.UnderlyingType)
-            {
-                throw System.ServiceModel.DiagnosticUtility.ExceptionUtility.ThrowHelperError(XmlObjectSerializer.CreateSerializationException(SR.Format(SR.DcTypeNotFoundOnSerialize, DataContract.GetClrTypeFullName(dataContract.UnderlyingType), dataContract.StableName.Name, dataContract.StableName.Namespace)));
-            }
-
-            if (knownTypesAddedInCurrentScope)
-            {
-                scopedKnownTypes.Pop();
-            }
-        }
-
         internal void WriteJsonISerializable(XmlWriterDelegator xmlWriter, ISerializable obj)
         {
             Type objType = obj.GetType();
@@ -391,7 +362,7 @@ namespace System.Runtime.Serialization.Json
         internal static DataContract GetRevisedItemContract(DataContract oldItemContract)
         {
             if ((oldItemContract != null) &&
-                oldItemContract.UnderlyingType.GetTypeInfo().IsGenericType &&
+                oldItemContract.UnderlyingType.IsGenericType &&
                 (oldItemContract.UnderlyingType.GetGenericTypeDefinition() == Globals.TypeOfKeyValue))
             {
                 return DataContract.GetDataContract(oldItemContract.UnderlyingType);

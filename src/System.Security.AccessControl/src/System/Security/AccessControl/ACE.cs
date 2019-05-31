@@ -11,7 +11,6 @@
 
 using System;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 using System.Security.Principal;
 
@@ -140,7 +139,7 @@ nameof(binaryForm),
                 // Indicates a bug in the implementation, not in user's code.
                 //
 
-                Debug.Assert(false, "Length > ushort.MaxValue");
+                Debug.Fail("Length > ushort.MaxValue");
                 // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                 // but it's the best exception type available to indicate a failure because
                 // of a bug in the ACE itself.
@@ -149,7 +148,7 @@ nameof(binaryForm),
 
             binaryForm[offset + 0] = (byte)AceType;
             binaryForm[offset + 1] = (byte)AceFlags;
-            binaryForm[offset + 2] = (byte)(Length >> 0);
+            binaryForm[offset + 2] = unchecked((byte)(Length >> 0));
             binaryForm[offset + 3] = (byte)(Length >> 8);
         }
 
@@ -691,7 +690,6 @@ nameof(binaryForm));
             {
                 throw new ArgumentNullException(nameof(securityIdentifier));
             }
-            Contract.EndContractBlock();
 
             //
             // The values are set by invoking the properties.
@@ -742,7 +740,6 @@ nameof(binaryForm));
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
-                Contract.EndContractBlock();
 
                 _sid = value;
             }
@@ -791,7 +788,6 @@ nameof(binaryForm));
 nameof(type),
                      SR.ArgumentOutOfRange_InvalidUserDefinedAceType);
             }
-            Contract.EndContractBlock();
 
             SetOpaque(opaque);
         }
@@ -854,13 +850,13 @@ nameof(type),
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLength));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLength));
                 }
                 else if (opaque.Length % 4 != 0)
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
                 }
             }
 
@@ -889,7 +885,7 @@ nameof(opaque),
             {
                 if (OpaqueLength > MaxOpaqueLength)
                 {
-                    Debug.Assert(false, "OpaqueLength somehow managed to exceed MaxOpaqueLength");
+                    Debug.Fail("OpaqueLength somehow managed to exceed MaxOpaqueLength");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.
@@ -987,11 +983,11 @@ nameof(opaque),
             //
 
             accessMask =
-                (int)(
+                unchecked((int)(
                 (((uint)binaryForm[baseOffset + 0]) << 0) +
                 (((uint)binaryForm[baseOffset + 1]) << 8) +
                 (((uint)binaryForm[baseOffset + 2]) << 16) +
-                (((uint)binaryForm[baseOffset + 3]) << 24));
+                (((uint)binaryForm[baseOffset + 3]) << 24)));
 
             offsetLocal += AccessMaskLength;
 
@@ -1067,11 +1063,13 @@ nameof(opaque),
             //
             // Store the access mask in the big-endian format
             //
-
-            binaryForm[baseOffset + 0] = (byte)(AccessMask >> 0);
-            binaryForm[baseOffset + 1] = (byte)(AccessMask >> 8);
-            binaryForm[baseOffset + 2] = (byte)(AccessMask >> 16);
-            binaryForm[baseOffset + 3] = (byte)(AccessMask >> 24);
+            unchecked
+            {
+                binaryForm[baseOffset + 0] = (byte)(AccessMask >> 0);
+                binaryForm[baseOffset + 1] = (byte)(AccessMask >> 8);
+                binaryForm[baseOffset + 2] = (byte)(AccessMask >> 16);
+                binaryForm[baseOffset + 3] = (byte)(AccessMask >> 24);
+            }
 
             offsetLocal += AccessMaskLength;
 
@@ -1204,7 +1202,7 @@ nameof(opaque),
                     // Indicates a bug in the implementation, not in user's code
                     //
 
-                    Debug.Assert(false, "Invalid ACE type");
+                    Debug.Fail("Invalid ACE type");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.
@@ -1305,13 +1303,13 @@ nameof(opaque),
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLengthInternal));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLength, 0, MaxOpaqueLengthInternal));
                 }
                 else if (opaque.Length % 4 != 0)
                 {
                     throw new ArgumentOutOfRangeException(
 nameof(opaque),
-                        string.Format(CultureInfo.CurrentCulture, SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
+                        SR.Format(SR.ArgumentOutOfRange_ArrayLengthMultiple, 4));
                 }
             }
 
@@ -1623,10 +1621,13 @@ nameof(qualifier),
             // Store the access mask in the big-endian format
             //
 
-            binaryForm[baseOffset + 0] = (byte)(AccessMask >> 0);
-            binaryForm[baseOffset + 1] = (byte)(AccessMask >> 8);
-            binaryForm[baseOffset + 2] = (byte)(AccessMask >> 16);
-            binaryForm[baseOffset + 3] = (byte)(AccessMask >> 24);
+            unchecked
+            {
+                binaryForm[baseOffset + 0] = (byte)(AccessMask >> 0);
+                binaryForm[baseOffset + 1] = (byte)(AccessMask >> 8);
+                binaryForm[baseOffset + 2] = (byte)(AccessMask >> 16);
+                binaryForm[baseOffset + 3] = (byte)(AccessMask >> 24);
+            }
 
             offsetLocal += AccessMaskLength;
 
@@ -1645,7 +1646,7 @@ nameof(qualifier),
             {
                 if (OpaqueLength > MaxOpaqueLengthInternal)
                 {
-                    Debug.Assert(false, "OpaqueLength somehow managed to exceed MaxOpaqueLength");
+                    Debug.Fail("OpaqueLength somehow managed to exceed MaxOpaqueLength");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.
@@ -1950,11 +1951,11 @@ nameof(qualifier),
             int offsetLocal = 0;
 
             accessMask =
-                (int)(
+                unchecked((int)(
                 (((uint)binaryForm[baseOffset + 0]) << 0) +
                 (((uint)binaryForm[baseOffset + 1]) << 8) +
                 (((uint)binaryForm[baseOffset + 2]) << 16) +
-                (((uint)binaryForm[baseOffset + 3]) << 24));
+                (((uint)binaryForm[baseOffset + 3]) << 24)));
 
             offsetLocal += AccessMaskLength;
 
@@ -2159,11 +2160,13 @@ nameof(qualifier),
             //
             // Store the access mask in the big-endian format
             //
-
-            binaryForm[baseOffset + 0] = (byte)(AccessMask >> 0);
-            binaryForm[baseOffset + 1] = (byte)(AccessMask >> 8);
-            binaryForm[baseOffset + 2] = (byte)(AccessMask >> 16);
-            binaryForm[baseOffset + 3] = (byte)(AccessMask >> 24);
+            unchecked
+            {
+                binaryForm[baseOffset + 0] = (byte)(AccessMask >> 0);
+                binaryForm[baseOffset + 1] = (byte)(AccessMask >> 8);
+                binaryForm[baseOffset + 2] = (byte)(AccessMask >> 16);
+                binaryForm[baseOffset + 3] = (byte)(AccessMask >> 24);
+            }
 
             offsetLocal += AccessMaskLength;
 
@@ -2209,7 +2212,7 @@ nameof(qualifier),
             {
                 if (OpaqueLength > MaxOpaqueLengthInternal)
                 {
-                    Debug.Assert(false, "OpaqueLength somehow managed to exceed MaxOpaqueLength");
+                    Debug.Fail("OpaqueLength somehow managed to exceed MaxOpaqueLength");
                     // Replacing SystemException with InvalidOperationException. It's not a perfect fit,
                     // but it's the best exception type available to indicate a failure because
                     // of a bug in the ACE itself.

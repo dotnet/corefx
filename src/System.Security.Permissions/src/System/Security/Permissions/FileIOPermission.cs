@@ -4,11 +4,12 @@
 
 namespace System.Security.Permissions
 {
-    [Serializable]
     public sealed partial class FileIOPermission : CodeAccessPermission, IUnrestrictedPermission
     {
         public FileIOPermission(FileIOPermissionAccess access, string path) { }
         public FileIOPermission(FileIOPermissionAccess access, string[] pathList) { }
+        public FileIOPermission(FileIOPermissionAccess access, AccessControl.AccessControlActions actions, string path) { }
+        public FileIOPermission(FileIOPermissionAccess access, AccessControl.AccessControlActions actions, string[] pathList) { }
         public FileIOPermission(PermissionState state) { }
         public FileIOPermissionAccess AllFiles { get; set; }
         public FileIOPermissionAccess AllLocalFiles { get; set; }

@@ -4,6 +4,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 
 namespace System.Net.Http.Headers
 {
@@ -102,7 +104,10 @@ namespace System.Net.Http.Headers
 
         public override string ToString()
         {
-            return _mediaType + NameValueHeaderValue.ToString(_parameters, ';', true);
+            var sb = StringBuilderCache.Acquire();
+            sb.Append(_mediaType);
+            NameValueHeaderValue.ToString(_parameters, ';', true, sb);
+            return StringBuilderCache.GetStringAndRelease(sb);
         }
 
         public override bool Equals(object obj)
@@ -230,19 +235,19 @@ namespace System.Net.Http.Headers
                 return 0;
             }
 
-            // If there are no whitespace between <type> and <subtype> in <type>/<subtype> get the media type using
+            // If there is no whitespace between <type> and <subtype> in <type>/<subtype> get the media type using
             // one Substring call. Otherwise get substrings for <type> and <subtype> and combine them.
-            int mediatTypeLength = current + subtypeLength - startIndex;
-            if (typeLength + subtypeLength + 1 == mediatTypeLength)
+            int mediaTypeLength = current + subtypeLength - startIndex;
+            if (typeLength + subtypeLength + 1 == mediaTypeLength)
             {
-                mediaType = input.Substring(startIndex, mediatTypeLength);
+                mediaType = input.Substring(startIndex, mediaTypeLength);
             }
             else
             {
-                mediaType = input.Substring(startIndex, typeLength) + "/" + input.Substring(current, subtypeLength);
+                mediaType = string.Concat(input.AsSpan(startIndex, typeLength), "/", input.AsSpan(current, subtypeLength));
             }
 
-            return mediatTypeLength;
+            return mediaTypeLength;
         }
 
         private static void CheckMediaTypeFormat(string mediaType, string parameterName)
@@ -258,7 +263,7 @@ namespace System.Net.Http.Headers
             int mediaTypeLength = GetMediaTypeExpressionLength(mediaType, 0, out tempMediaType);
             if ((mediaTypeLength == 0) || (tempMediaType.Length != mediaType.Length))
             {
-                throw new FormatException(string.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_headers_invalid_value, mediaType));
+                throw new FormatException(SR.Format(System.Globalization.CultureInfo.InvariantCulture, SR.net_http_headers_invalid_value, mediaType));
             }
         }
 

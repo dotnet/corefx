@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <ProjectGuid>{057BF9A0-199B-4EB5-85D5-84982259C7BC}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="System\Runtime\CompilerServices\RequiredAttributeAttributeTests.cs" />
+    <Compile Include="System\Runtime\CompilerServices\ScopelessEnumAttributeTests.cs" />
+  </ItemGroup>
+</Project>

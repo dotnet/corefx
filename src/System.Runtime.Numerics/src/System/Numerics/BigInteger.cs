@@ -3,13 +3,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Globalization;
 
 namespace System.Numerics
 {
     [Serializable]
-    public struct BigInteger : IFormattable, IComparable, IComparable<BigInteger>, IEquatable<BigInteger>
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Numerics, Version=4.0.0.0, PublicKeyToken=b77a5c561934e089")]
+    public readonly struct BigInteger : IFormattable, IComparable, IComparable<BigInteger>, IEquatable<BigInteger>
     {
         private const int knMaskHighBit = int.MinValue;
         private const uint kuMaskHighBit = unchecked((uint)int.MinValue);
@@ -20,8 +20,8 @@ namespace System.Numerics
 
         // For values int.MinValue < n <= int.MaxValue, the value is stored in sign
         // and _bits is null. For all other values, sign is +1 or -1 and the bits are in _bits
-        internal readonly int _sign;
-        internal readonly uint[] _bits;
+        internal readonly int _sign; // Do not rename (binary serialization)
+        internal readonly uint[] _bits; // Do not rename (binary serialization)
 
         // We have to make a choice of how to represent int.MinValue. This is the one
         // value that fits in an int, but whose negation does not fit in an int.
@@ -76,7 +76,7 @@ namespace System.Numerics
                 ulong x = 0;
                 if (value < 0)
                 {
-                    x = (ulong)-value;
+                    x = unchecked((ulong)-value);
                     _sign = -1;
                 }
                 else
@@ -93,7 +93,7 @@ namespace System.Numerics
                 else
                 {
                     _bits = new uint[2];
-                    _bits[0] = (uint)x;
+                    _bits[0] = unchecked((uint)x);
                     _bits[1] = (uint)(x >> kcbitUint);
                 }
             }
@@ -119,7 +119,7 @@ namespace System.Numerics
             {
                 _sign = +1;
                 _bits = new uint[2];
-                _bits[0] = (uint)value;
+                _bits[0] = unchecked((uint)value);
                 _bits[1] = (uint)(value >> kcbitUint);
             }
 
@@ -132,11 +132,17 @@ namespace System.Numerics
 
         public BigInteger(double value)
         {
-            if (double.IsInfinity(value))
-                throw new OverflowException(SR.Overflow_BigIntInfinity);
-            if (double.IsNaN(value))
-                throw new OverflowException(SR.Overflow_NotANumber);
-            Contract.EndContractBlock();
+            if (!double.IsFinite(value))
+            {
+                if (double.IsInfinity(value))
+                {
+                    throw new OverflowException(SR.Overflow_BigIntInfinity);
+                }
+                else // NaN
+                {
+                    throw new OverflowException(SR.Overflow_NotANumber);
+                }
+            }
 
             _sign = 0;
             _bits = null;
@@ -189,9 +195,9 @@ namespace System.Numerics
                 // Populate the uints.
                 _bits = new uint[cu + 2];
                 _bits[cu + 1] = (uint)(man >> (cbit + kcbitUint));
-                _bits[cu] = (uint)(man >> cbit);
+                _bits[cu] = unchecked((uint)(man >> cbit));
                 if (cbit > 0)
-                    _bits[cu - 1] = (uint)man << (kcbitUint - cbit);
+                    _bits[cu - 1] = unchecked((uint)man) << (kcbitUint - cbit);
                 _sign = sign;
             }
 
@@ -223,11 +229,16 @@ namespace System.Numerics
             else
             {
                 _bits = new uint[size];
-                _bits[0] = (uint)bits[0];
-                if (size > 1)
-                    _bits[1] = (uint)bits[1];
-                if (size > 2)
-                    _bits[2] = (uint)bits[2];
+
+                unchecked
+                {
+                    _bits[0] = (uint)bits[0];
+                    if (size > 1)
+                        _bits[1] = (uint)bits[1];
+                    if (size > 2)
+                        _bits[2] = (uint)bits[2];
+                }
+
                 _sign = ((bits[3] & DecimalSignMask) != 0) ? -1 : +1;
             }
             AssertValid();
@@ -238,17 +249,53 @@ namespace System.Numerics
         /// </summary>
         /// <param name="value"></param>
         [CLSCompliant(false)]
-        public BigInteger(byte[] value)
+        public BigInteger(byte[] value) :
+            this(new ReadOnlySpan<byte>(value ?? throw new ArgumentNullException(nameof(value))))
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
-            Contract.EndContractBlock();
+        }
 
+        public BigInteger(ReadOnlySpan<byte> value, bool isUnsigned=false, bool isBigEndian=false)
+        {
             int byteCount = value.Length;
-            bool isNegative = byteCount > 0 && ((value[byteCount - 1] & 0x80) == 0x80);
 
-            // Try to conserve space as much as possible by checking for wasted leading byte[] entries 
-            while (byteCount > 0 && value[byteCount - 1] == 0) byteCount--;
+            bool isNegative;
+            if (byteCount > 0)
+            {
+                byte mostSignificantByte = isBigEndian ? value[0] : value[byteCount - 1];
+                isNegative = (mostSignificantByte & 0x80) != 0 && !isUnsigned;
+
+                if (mostSignificantByte == 0)
+                {
+                    // Try to conserve space as much as possible by checking for wasted leading byte[] entries 
+                    if (isBigEndian)
+                    {
+                        int offset = 1;
+
+                        while (offset < byteCount && value[offset] == 0)
+                        {
+                            offset++;
+                        }
+
+                        value = value.Slice(offset);
+                        byteCount = value.Length;
+                    }
+                    else
+                    {
+                        byteCount -= 2;
+
+                        while (byteCount >= 0 && value[byteCount] == 0)
+                        {
+                            byteCount--;
+                        }
+
+                        byteCount++;
+                    }
+                }
+            }
+            else
+            {
+                isNegative = false;
+            }
 
             if (byteCount == 0)
             {
@@ -261,95 +308,140 @@ namespace System.Numerics
 
             if (byteCount <= 4)
             {
-                if (isNegative)
-                    _sign = unchecked((int)0xffffffff);
-                else
-                    _sign = 0;
-                for (int i = byteCount - 1; i >= 0; i--)
-                {
-                    _sign <<= 8;
-                    _sign |= value[i];
-                }
-                _bits = null;
+                _sign = isNegative ? unchecked((int)0xffffffff) : 0;
 
+                if (isBigEndian)
+                {
+                    for (int i = 0; i < byteCount; i++)
+                    {
+                        _sign = (_sign << 8) | value[i];
+                    }
+                }
+                else
+                {
+                    for (int i = byteCount - 1; i >= 0; i--)
+                    {
+                        _sign = (_sign << 8) | value[i];
+                    }
+                }
+
+                _bits = null;
                 if (_sign < 0 && !isNegative)
                 {
                     // Int32 overflow
                     // Example: Int64 value 2362232011 (0xCB, 0xCC, 0xCC, 0x8C, 0x0)
                     // can be naively packed into 4 bytes (due to the leading 0x0)
                     // it overflows into the int32 sign bit
-                    _bits = new uint[1];
-                    _bits[0] = (uint)_sign;
+                    _bits = new uint[1] { unchecked((uint)_sign) };
                     _sign = +1;
                 }
                 if (_sign == int.MinValue)
+                {
                     this = s_bnMinInt;
+                }
             }
             else
             {
                 int unalignedBytes = byteCount % 4;
                 int dwordCount = byteCount / 4 + (unalignedBytes == 0 ? 0 : 1);
-                bool isZero = true;
                 uint[] val = new uint[dwordCount];
+                int byteCountMinus1 = byteCount - 1;
 
-                // Copy all dwords, except but don't do the last one if it's not a full four bytes
-                int curDword, curByte, byteInDword;
-                curByte = 3;
-                for (curDword = 0; curDword < dwordCount - (unalignedBytes == 0 ? 0 : 1); curDword++)
+                // Copy all dwords, except don't do the last one if it's not a full four bytes
+                int curDword, curByte;
+
+                if (isBigEndian)
                 {
-                    byteInDword = 0;
-                    while (byteInDword < 4)
+                    curByte = byteCount - sizeof(int);
+                    for (curDword = 0; curDword < dwordCount - (unalignedBytes == 0 ? 0 : 1); curDword++)
                     {
-                        if (value[curByte] != 0x00) isZero = false;
-                        val[curDword] <<= 8;
-                        val[curDword] |= value[curByte];
-                        curByte--;
-                        byteInDword++;
+                        for (int byteInDword = 0; byteInDword < 4; byteInDword++)
+                        {
+                            byte curByteValue = value[curByte];
+                            val[curDword] = (val[curDword] << 8) | curByteValue;
+                            curByte++;
+                        }
+
+                        curByte -= 8;
                     }
-                    curByte += 8;
+                }
+                else
+                {
+                    curByte = sizeof(int) - 1;
+                    for (curDword = 0; curDword < dwordCount - (unalignedBytes == 0 ? 0 : 1); curDword++)
+                    {
+                        for (int byteInDword = 0; byteInDword < 4; byteInDword++)
+                        {
+                            byte curByteValue = value[curByte];
+                            val[curDword] = (val[curDword] << 8) | curByteValue;
+                            curByte--;
+                        }
+
+                        curByte += 8;
+                    }
                 }
 
                 // Copy the last dword specially if it's not aligned
                 if (unalignedBytes != 0)
                 {
-                    if (isNegative) val[dwordCount - 1] = 0xffffffff;
-                    for (curByte = byteCount - 1; curByte >= byteCount - unalignedBytes; curByte--)
+                    if (isNegative)
                     {
-                        if (value[curByte] != 0x00) isZero = false;
-                        val[curDword] <<= 8;
-                        val[curDword] |= value[curByte];
+                        val[dwordCount - 1] = 0xffffffff;
+                    }
+
+                    if (isBigEndian)
+                    {
+                        for (curByte = 0; curByte < unalignedBytes; curByte++)
+                        {
+                            byte curByteValue = value[curByte];
+                            val[curDword] = (val[curDword] << 8) | curByteValue;
+                        }
+                    }
+                    else
+                    {
+                        for (curByte = byteCountMinus1; curByte >= byteCount - unalignedBytes; curByte--)
+                        {
+                            byte curByteValue = value[curByte];
+                            val[curDword] = (val[curDword] << 8) | curByteValue;
+                        }
                     }
                 }
 
-                if (isZero)
-                {
-                    this = s_bnZeroInt;
-                }
-                else if (isNegative)
+                if (isNegative)
                 {
                     NumericsHelpers.DangerousMakeTwosComplement(val); // Mutates val
 
                     // Pack _bits to remove any wasted space after the twos complement
-                    int len = val.Length;
-                    while (len > 0 && val[len - 1] == 0)
-                        len--;
-                    if (len == 1 && ((int)(val[0])) > 0)
+                    int len = val.Length - 1;
+                    while (len >= 0 && val[len] == 0) len--;
+                    len++;
+
+                    if (len == 1)
                     {
-                        if (val[0] == 1 /* abs(-1) */)
+                        switch (val[0])
                         {
-                            this = s_bnMinusOneInt;
-                        }
-                        else if (val[0] == kuMaskHighBit /* abs(Int32.MinValue) */)
-                        {
-                            this = s_bnMinInt;
-                        }
-                        else
-                        {
-                            _sign = (-1) * ((int)val[0]);
-                            _bits = null;
+                            case 1: // abs(-1)
+                                this = s_bnMinusOneInt;
+                                return;
+
+                            case kuMaskHighBit: // abs(Int32.MinValue)
+                                this = s_bnMinInt;
+                                return;
+
+                            default:
+                                if (unchecked((int)val[0]) > 0)
+                                {
+                                    _sign = (-1) * ((int)val[0]);
+                                    _bits = null;
+                                    AssertValid();
+                                    return;
+                                }
+
+                                break;
                         }
                     }
-                    else if (len != val.Length)
+
+                    if (len != val.Length)
                     {
                         _sign = -1;
                         _bits = new uint[len];
@@ -387,7 +479,6 @@ namespace System.Numerics
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
-            Contract.EndContractBlock();
 
             int len;
 
@@ -441,20 +532,20 @@ namespace System.Numerics
             }
             if (dwordCount == 1)
             {
-                if ((int)value[0] < 0 && !isNegative)
+                if (unchecked((int)value[0]) < 0 && !isNegative)
                 {
                     _bits = new uint[1];
                     _bits[0] = value[0];
                     _sign = +1;
                 }
                 // Handle the special cases where the BigInteger likely fits into _sign
-                else if (int.MinValue == (int)value[0])
+                else if (int.MinValue == unchecked((int)value[0]))
                 {
                     this = s_bnMinInt;
                 }
                 else
                 {
-                    _sign = (int)value[0];
+                    _sign = unchecked((int)value[0]);
                     _bits = null;
                 }
                 AssertValid();
@@ -488,7 +579,7 @@ namespace System.Numerics
             while (len > 0 && value[len - 1] == 0) len--;
 
             // The number is represented by a single dword
-            if (len == 1 && ((int)(value[0])) > 0)
+            if (len == 1 && unchecked((int)(value[0])) > 0)
             {
                 if (value[0] == 1 /* abs(-1) */)
                 {
@@ -588,6 +679,21 @@ namespace System.Numerics
         }
 
         public static bool TryParse(string value, NumberStyles style, IFormatProvider provider, out BigInteger result)
+        {
+            return BigNumber.TryParseBigInteger(value, style, NumberFormatInfo.GetInstance(provider), out result);
+        }
+
+        public static BigInteger Parse(ReadOnlySpan<char> value, NumberStyles style = NumberStyles.Integer, IFormatProvider provider = null)
+        {
+            return BigNumber.ParseBigInteger(value, style, NumberFormatInfo.GetInstance(provider));
+        }
+
+        public static bool TryParse(ReadOnlySpan<char> value, out BigInteger result)
+        {
+            return BigNumber.TryParseBigInteger(value, NumberStyles.Integer, NumberFormatInfo.CurrentInfo, out result);
+        }
+
+        public static bool TryParse(ReadOnlySpan<char> value, NumberStyles style, IFormatProvider provider, out BigInteger result)
         {
             return BigNumber.TryParseBigInteger(value, style, NumberFormatInfo.GetInstance(provider), out result);
         }
@@ -795,7 +901,6 @@ namespace System.Numerics
         {
             if (exponent.Sign < 0)
                 throw new ArgumentOutOfRangeException(nameof(exponent), SR.ArgumentOutOfRange_MustBeNonNeg);
-            Contract.EndContractBlock();
 
             value.AssertValid();
             exponent.AssertValid();
@@ -829,7 +934,6 @@ namespace System.Numerics
         {
             if (exponent < 0)
                 throw new ArgumentOutOfRangeException(nameof(exponent), SR.ArgumentOutOfRange_MustBeNonNeg);
-            Contract.EndContractBlock();
 
             value.AssertValid();
 
@@ -865,7 +969,7 @@ namespace System.Numerics
                 return _sign;
             int hash = _sign;
             for (int iv = _bits.Length; --iv >= 0;)
-                hash = NumericsHelpers.CombineHash(hash, (int)_bits[iv]);
+                hash = NumericsHelpers.CombineHash(hash, unchecked((int)_bits[iv]));
             return hash;
         }
 
@@ -1009,12 +1113,140 @@ namespace System.Numerics
         /// return an array of one byte whose element is 0x00.
         /// </summary>
         /// <returns></returns>
-        public byte[] ToByteArray()
+        public byte[] ToByteArray() => ToByteArray(isUnsigned: false, isBigEndian: false);
+
+        /// <summary>
+        /// Returns the value of this BigInteger as a byte array using the fewest number of bytes possible.
+        /// If the value is zero, returns an array of one byte whose element is 0x00.
+        /// </summary>
+        /// <param name="isUnsigned">Whether or not an unsigned encoding is to be used</param>
+        /// <param name="isBigEndian">Whether or not to write the bytes in a big-endian byte order</param>
+        /// <returns></returns>
+        /// <exception cref="OverflowException">
+        ///   If <paramref name="isUnsigned"/> is <c>true</c> and <see cref="Sign"/> is negative.
+        /// </exception>
+        /// <remarks>
+        /// The integer value <c>33022</c> can be exported as four different arrays.
+        ///
+        /// <list type="bullet">
+        ///   <item>
+        ///     <description>
+        ///       <c>(isUnsigned: false, isBigEndian: false)</c> => <c>new byte[] { 0xFE, 0x80, 0x00 }</c>
+        ///     </description>
+        ///   </item>
+        ///   <item>
+        ///     <description>
+        ///       <c>(isUnsigned: false, isBigEndian: true)</c> => <c>new byte[] { 0x00, 0x80, 0xFE }</c>
+        ///     </description>
+        ///   </item>
+        ///   <item>
+        ///     <description>
+        ///       <c>(isUnsigned: true, isBigEndian: false)</c> => <c>new byte[] { 0xFE, 0x80 }</c>
+        ///     </description>
+        ///   </item>
+        ///   <item>
+        ///     <description>
+        ///       <c>(isUnsigned: true, isBigEndian: true)</c> => <c>new byte[] { 0x80, 0xFE }</c>
+        ///     </description>
+        ///   </item>
+        /// </list>
+        /// </remarks>
+        public byte[] ToByteArray(bool isUnsigned=false, bool isBigEndian=false)
         {
+            int ignored = 0;
+            return TryGetBytes(GetBytesMode.AllocateArray, default, isUnsigned, isBigEndian, ref ignored);
+        }
+
+        /// <summary>
+        /// Copies the value of this BigInteger as little-endian twos-complement
+        /// bytes, using the fewest number of bytes possible. If the value is zero,
+        /// outputs one byte whose element is 0x00.
+        /// </summary>
+        /// <param name="destination">The destination span to which the resulting bytes should be written.</param>
+        /// <param name="bytesWritten">The number of bytes written to <paramref name="destination"/>.</param>
+        /// <param name="isUnsigned">Whether or not an unsigned encoding is to be used</param>
+        /// <param name="isBigEndian">Whether or not to write the bytes in a big-endian byte order</param>
+        /// <returns>true if the bytes fit in <paramref name="destination"/>; false if not all bytes could be written due to lack of space.</returns>
+        /// <exception cref="OverflowException">If <paramref name="isUnsigned"/> is <c>true</c> and <see cref="Sign"/> is negative.</exception>
+        public bool TryWriteBytes(Span<byte> destination, out int bytesWritten, bool isUnsigned=false, bool isBigEndian=false)
+        {
+            bytesWritten = 0;
+            if (TryGetBytes(GetBytesMode.Span, destination, isUnsigned, isBigEndian, ref bytesWritten) == null)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+            return true;
+        }
+
+        internal bool TryWriteOrCountBytes(Span<byte> destination, out int bytesWritten, bool isUnsigned = false, bool isBigEndian = false)
+        {
+            bytesWritten = 0;
+            return TryGetBytes(GetBytesMode.Span, destination, isUnsigned, isBigEndian, ref bytesWritten) != null;
+        }
+
+        /// <summary>Gets the number of bytes that will be output by <see cref="ToByteArray(bool, bool)"/> and <see cref="TryWriteBytes(Span{byte}, out int, bool, bool)"/>.</summary>
+        /// <returns>The number of bytes.</returns>
+        public int GetByteCount(bool isUnsigned=false)
+        {
+            int count = 0;
+            // Big or Little Endian doesn't matter for the byte count.
+            const bool IsBigEndian = false;
+            TryGetBytes(GetBytesMode.Count, default(Span<byte>), isUnsigned, IsBigEndian, ref count);
+            return count;
+        }
+
+        /// <summary>Mode used to enable sharing <see cref="TryGetBytes(GetBytesMode, Span{byte}, bool, bool, ref int)"/> for multiple purposes.</summary>
+        private enum GetBytesMode { AllocateArray, Count, Span }
+
+        /// <summary>Dummy array returned from TryGetBytes to indicate success when in span mode.</summary>
+        private static readonly byte[] s_success = Array.Empty<byte>();
+
+        /// <summary>Shared logic for <see cref="ToByteArray(bool, bool)"/>, <see cref="TryWriteBytes(Span{byte}, out int, bool, bool)"/>, and <see cref="GetByteCount"/>.</summary>
+        /// <param name="mode">Which entry point is being used.</param>
+        /// <param name="destination">The destination span, if mode is <see cref="GetBytesMode.Span"/>.</param>
+        /// <param name="isUnsigned">True to never write a padding byte, false to write it if the high bit is set.</param>
+        /// <param name="isBigEndian">True for big endian byte ordering, false for little endian byte ordering.</param>
+        /// <param name="bytesWritten">
+        /// If <paramref name="mode"/>==<see cref="GetBytesMode.AllocateArray"/>, ignored.
+        /// If <paramref name="mode"/>==<see cref="GetBytesMode.Count"/>, the number of bytes that would be written.
+        /// If <paramref name="mode"/>==<see cref="GetBytesMode.Span"/>, the number of bytes written to the span or that would be written if it were long enough.
+        /// </param>
+        /// <returns>
+        /// If <paramref name="mode"/>==<see cref="GetBytesMode.AllocateArray"/>, the result array.
+        /// If <paramref name="mode"/>==<see cref="GetBytesMode.Count"/>, null.
+        /// If <paramref name="mode"/>==<see cref="GetBytesMode.Span"/>, non-null if the span was long enough, null if there wasn't enough room.
+        /// </returns>
+        /// <exception cref="OverflowException">If <paramref name="isUnsigned"/> is <c>true</c> and <see cref="Sign"/> is negative.</exception>
+        private byte[] TryGetBytes(GetBytesMode mode, Span<byte> destination, bool isUnsigned, bool isBigEndian, ref int bytesWritten)
+        {
+            Debug.Assert(mode == GetBytesMode.AllocateArray || mode == GetBytesMode.Count || mode == GetBytesMode.Span, $"Unexpected mode {mode}.");
+            Debug.Assert(mode == GetBytesMode.Span || destination.IsEmpty, $"If we're not in span mode, we shouldn't have been passed a destination.");
+
             int sign = _sign;
             if (sign == 0)
             {
-                return new byte[] { 0 };
+                switch (mode)
+                {
+                    case GetBytesMode.AllocateArray:
+                        return new byte[] { 0 };
+                    case GetBytesMode.Count:
+                        bytesWritten = 1;
+                        return null;
+                    default: // case GetBytesMode.Span:
+                        bytesWritten = 1;
+                        if (destination.Length != 0)
+                        {
+                            destination[0] = 0;
+                            return s_success;
+                        }
+                        return null;
+                }
+            }
+
+            if (isUnsigned && sign < 0)
+            {
+                throw new OverflowException(SR.Overflow_Negative_Unsigned);
             }
 
             byte highByte;
@@ -1082,21 +1314,41 @@ namespace System.Numerics
             }
 
             // Ensure high bit is 0 if positive, 1 if negative
-            bool needExtraByte = (msb & 0x80) != (highByte & 0x80);
-            byte[] bytes;
-            int curByte = 0;
-            if (bits == null)
+            bool needExtraByte = (msb & 0x80) != (highByte & 0x80) && !isUnsigned;
+            int length = msbIndex + 1 + (needExtraByte ? 1 : 0);
+            if (bits != null)
             {
-                bytes = new byte[msbIndex + 1 + (needExtraByte ? 1 : 0)];
-                Debug.Assert(bytes.Length <= 4);
+                length = checked(4 * (bits.Length - 1) + length);
             }
-            else
-            {
-                bytes = new byte[checked(4 * (bits.Length - 1) + msbIndex + 1 + (needExtraByte ? 1 : 0))];
 
+            byte[] array;
+            switch (mode)
+            {
+                case GetBytesMode.AllocateArray:
+                    destination = array = new byte[length];
+                    break;
+                case GetBytesMode.Count:
+                    bytesWritten = length;
+                    return null;
+                default: // case GetBytesMode.Span:
+                    bytesWritten = length;
+                    if (destination.Length < length)
+                    {
+                        return null;
+                    }
+                    array = s_success;
+                    break;
+            }
+
+            int curByte = isBigEndian ? length - 1 : 0;
+            int increment = isBigEndian ? -1 : 1;
+
+            if (bits != null)
+            {
                 for (int i = 0; i < bits.Length - 1; i++)
                 {
                     uint dword = bits[i];
+
                     if (sign == -1)
                     {
                         dword = ~dword;
@@ -1105,23 +1357,48 @@ namespace System.Numerics
                             dword = unchecked(dword + 1U);
                         }
                     }
-                    for (int j = 0; j < 4; j++)
+
+                    destination[curByte] = unchecked((byte)dword);
+                    curByte += increment;
+                    destination[curByte] = unchecked((byte)(dword >> 8));
+                    curByte += increment;
+                    destination[curByte] = unchecked((byte)(dword >> 16));
+                    curByte += increment;
+                    destination[curByte] = unchecked((byte)(dword >> 24));
+                    curByte += increment;
+                }
+            }
+
+            Debug.Assert(msbIndex >= 0 && msbIndex <= 3);
+            destination[curByte] = unchecked((byte)highDword);
+            if (msbIndex != 0)
+            {
+                curByte += increment;
+                destination[curByte] = unchecked((byte)(highDword >> 8));
+                if (msbIndex != 1)
+                {
+                    curByte += increment;
+                    destination[curByte] = unchecked((byte)(highDword >> 16));
+                    if (msbIndex != 2)
                     {
-                        bytes[curByte++] = unchecked((byte)dword);
-                        dword >>= 8;
+                        curByte += increment;
+                        destination[curByte] = unchecked((byte)(highDword >> 24));
                     }
                 }
             }
-            for (int j = 0; j <= msbIndex; j++)
-            {
-                bytes[curByte++] = unchecked((byte)highDword);
-                highDword >>= 8;
-            }
+
+            // Assert we're big endian, or little endian consistency holds.
+            Debug.Assert(isBigEndian || (!needExtraByte && curByte == length - 1) || (needExtraByte && curByte == length - 2));
+            // Assert we're little endian, or big endian consistency holds.
+            Debug.Assert(!isBigEndian || (!needExtraByte && curByte == 0) || (needExtraByte && curByte == 1));
+
             if (needExtraByte)
             {
-                bytes[bytes.Length - 1] = highByte;
+                curByte += increment;
+                destination[curByte] = highByte;
             }
-            return bytes;
+
+            return array;
         }
 
         /// <summary>
@@ -1140,7 +1417,7 @@ namespace System.Numerics
 
             if (_bits == null)
             {
-                dwords = new uint[] { (uint)_sign };
+                dwords = new uint[] { unchecked((uint)_sign) };
                 highDWord = (_sign < 0) ? uint.MaxValue : 0;
             }
             else if (_sign == -1)
@@ -1189,6 +1466,11 @@ namespace System.Numerics
         public string ToString(string format, IFormatProvider provider)
         {
             return BigNumber.FormatBigInteger(this, format, NumberFormatInfo.GetInstance(provider));
+        }
+
+        public bool TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format = default, IFormatProvider provider = null) // TODO: change format to ReadOnlySpan<char>
+        {
+            return BigNumber.TryFormatBigInteger(this, format, NumberFormatInfo.GetInstance(provider), destination, out charsWritten);
         }
 
         private static BigInteger Add(uint[] leftBits, int leftSign, uint[] rightBits, int rightSign)
@@ -1416,7 +1698,7 @@ namespace System.Numerics
                 uu = value._bits[0];
             }
 
-            long ll = value._sign > 0 ? (long)uu : -(long)uu;
+            long ll = value._sign > 0 ? unchecked((long)uu) : unchecked(-(long)uu);
             if ((ll > 0 && value._sign > 0) || (ll < 0 && value._sign < 0))
             {
                 // Signs match, no overflow
@@ -1499,9 +1781,13 @@ namespace System.Numerics
             if (length > 3) throw new OverflowException(SR.Overflow_Decimal);
 
             int lo = 0, mi = 0, hi = 0;
-            if (length > 2) hi = (int)value._bits[2];
-            if (length > 1) mi = (int)value._bits[1];
-            if (length > 0) lo = (int)value._bits[0];
+
+            unchecked
+            {
+                if (length > 2) hi = (int)value._bits[2];
+                if (length > 1) mi = (int)value._bits[1];
+                if (length > 0) lo = (int)value._bits[0];
+            }
 
             return new decimal(lo, mi, hi, value._sign < 0, 0);
         }
@@ -1511,6 +1797,11 @@ namespace System.Numerics
             if (left.IsZero || right.IsZero)
             {
                 return Zero;
+            }
+
+            if (left._bits == null && right._bits == null)
+            {
+                return left._sign & right._sign;
             }
 
             uint[] x = left.ToUInt32Array();
@@ -1534,6 +1825,11 @@ namespace System.Numerics
                 return right;
             if (right.IsZero)
                 return left;
+            
+            if (left._bits == null && right._bits == null)
+            {
+                return left._sign | right._sign;
+            }
 
             uint[] x = left.ToUInt32Array();
             uint[] y = right.ToUInt32Array();
@@ -1552,6 +1848,11 @@ namespace System.Numerics
 
         public static BigInteger operator ^(BigInteger left, BigInteger right)
         {
+            if (left._bits == null && right._bits == null)
+            {
+                return left._sign ^ right._sign;
+            }
+
             uint[] x = left.ToUInt32Array();
             uint[] y = right.ToUInt32Array();
             uint[] z = new uint[Math.Max(x.Length, y.Length)];
@@ -1983,8 +2284,8 @@ namespace System.Numerics
         /// <param name="xd">
         /// The UInt32 array containing the entire big integer in "large" (denormalized) form.
         /// E.g., the number one (1) and negative one (-1) are both stored as 0x00000001
-        //  BigInteger values Int32.MinValue < x <= Int32.MaxValue are converted to this
-        //  format for convenience.
+        /// BigInteger values Int32.MinValue &lt; x &lt;= Int32.MaxValue are converted to this
+        /// format for convenience.
         /// </param>
         /// <param name="xl">The length of xd.</param>
         /// <returns>True for negative numbers.</returns>

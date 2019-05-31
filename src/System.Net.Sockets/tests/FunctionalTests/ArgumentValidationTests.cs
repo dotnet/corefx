@@ -42,11 +42,11 @@ namespace System.Net.Sockets.Tests
             public void RemoveAt(int index) { }
         }
 
-        private readonly static byte[] s_buffer = new byte[1];
-        private readonly static IList<ArraySegment<byte>> s_buffers = new List<ArraySegment<byte>> { new ArraySegment<byte>(s_buffer) };
-        private readonly static SocketAsyncEventArgs s_eventArgs = new SocketAsyncEventArgs();
-        private readonly static Socket s_ipv4Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-        private readonly static Socket s_ipv6Socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
+        private static readonly byte[] s_buffer = new byte[1];
+        private static readonly IList<ArraySegment<byte>> s_buffers = new List<ArraySegment<byte>> { new ArraySegment<byte>(s_buffer) };
+        private static readonly SocketAsyncEventArgs s_eventArgs = new SocketAsyncEventArgs();
+        private static readonly Socket s_ipv4Socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        private static readonly Socket s_ipv6Socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Stream, ProtocolType.Tcp);
 
         private static void TheAsyncCallback(IAsyncResult ar)
         {
@@ -200,7 +200,7 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void Connect_IPAddresses_EmptyArray_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().Connect(new IPAddress[0], 1));
+            AssertExtensions.Throws<ArgumentException>("addresses", () => GetSocket().Connect(new IPAddress[0], 1));
         }
 
         [Fact]
@@ -254,14 +254,14 @@ namespace System.Net.Sockets.Tests
         public void Send_Buffers_NullBuffers_Throws_ArgumentNull()
         {
             SocketError errorCode;
-            Assert.Throws<ArgumentNullException>(() => GetSocket().Send(null, SocketFlags.None, out errorCode));
+            Assert.Throws<ArgumentNullException>(() => GetSocket().Send((IList<ArraySegment<byte>>)null, SocketFlags.None, out errorCode));
         }
 
         [Fact]
         public void Send_Buffers_EmptyBuffers_Throws_Argument()
         {
             SocketError errorCode;
-            Assert.Throws<ArgumentException>(() => GetSocket().Send(new List<ArraySegment<byte>>(), SocketFlags.None, out errorCode));
+            AssertExtensions.Throws<ArgumentException>("buffers", () => GetSocket().Send(new List<ArraySegment<byte>>(), SocketFlags.None, out errorCode));
         }
 
         [Fact]
@@ -321,14 +321,14 @@ namespace System.Net.Sockets.Tests
         public void Receive_Buffers_NullBuffers_Throws_ArgumentNull()
         {
             SocketError errorCode;
-            Assert.Throws<ArgumentNullException>(() => GetSocket().Receive(null, SocketFlags.None, out errorCode));
+            Assert.Throws<ArgumentNullException>(() => GetSocket().Receive((IList<ArraySegment<byte>>)null, SocketFlags.None, out errorCode));
         }
 
         [Fact]
         public void Receive_Buffers_EmptyBuffers_Throws_Argument()
         {
             SocketError errorCode;
-            Assert.Throws<ArgumentException>(() => GetSocket().Receive(new List<ArraySegment<byte>>(), SocketFlags.None, out errorCode));
+            AssertExtensions.Throws<ArgumentException>("buffers", () => GetSocket().Receive(new List<ArraySegment<byte>>(), SocketFlags.None, out errorCode));
         }
 
         [Fact]
@@ -349,7 +349,7 @@ namespace System.Net.Sockets.Tests
         public void ReceiveFrom_AddressFamily_Throws_Argument()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.IPv6Loopback, 1);
-            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).ReceiveFrom(s_buffer, 0, 0, SocketFlags.None, ref endpoint));
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () => GetSocket(AddressFamily.InterNetwork).ReceiveFrom(s_buffer, 0, 0, SocketFlags.None, ref endpoint));
         }
 
         [Fact]
@@ -403,7 +403,7 @@ namespace System.Net.Sockets.Tests
             EndPoint remote = new IPEndPoint(IPAddress.IPv6Loopback, 1);
             IPPacketInformation packetInfo;
 
-            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).ReceiveMessageFrom(s_buffer, 0, 0, ref flags, ref remote, out packetInfo));
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () => GetSocket(AddressFamily.InterNetwork).ReceiveMessageFrom(s_buffer, 0, 0, ref flags, ref remote, out packetInfo));
         }
 
         [Fact]
@@ -448,34 +448,34 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void SetSocketOption_Linger_NotLingerOption_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new object()));
+            AssertExtensions.Throws<ArgumentException>("optionValue", () => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new object()));
         }
 
         [Fact]
         public void SetSocketOption_Linger_InvalidLingerTime_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new LingerOption(true, -1)));
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new LingerOption(true, (int)ushort.MaxValue + 1)));
+            AssertExtensions.Throws<ArgumentException>("optionValue.LingerTime", () => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new LingerOption(true, -1)));
+            AssertExtensions.Throws<ArgumentException>("optionValue.LingerTime", () => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.Linger, new LingerOption(true, (int)ushort.MaxValue + 1)));
         }
 
         [Fact]
         public void SetSocketOption_IPMulticast_NotIPMulticastOption_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new object()));
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.IP, SocketOptionName.DropMembership, new object()));
+            AssertExtensions.Throws<ArgumentException>("optionValue", () => GetSocket().SetSocketOption(SocketOptionLevel.IP, SocketOptionName.AddMembership, new object()));
+            AssertExtensions.Throws<ArgumentException>("optionValue", () => GetSocket().SetSocketOption(SocketOptionLevel.IP, SocketOptionName.DropMembership, new object()));
         }
 
         [Fact]
         public void SetSocketOption_IPv6Multicast_NotIPMulticastOption_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new object()));
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.DropMembership, new object()));
+            AssertExtensions.Throws<ArgumentException>("optionValue", () => GetSocket().SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.AddMembership, new object()));
+            AssertExtensions.Throws<ArgumentException>("optionValue", () => GetSocket().SetSocketOption(SocketOptionLevel.IPv6, SocketOptionName.DropMembership, new object()));
         }
 
         [Fact]
         public void SetSocketOption_Object_InvalidOptionName_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, new object()));
+            AssertExtensions.Throws<ArgumentException>("optionValue", () => GetSocket().SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.NoDelay, new object()));
         }
 
         [Fact]
@@ -516,7 +516,7 @@ namespace System.Net.Sockets.Tests
                 BufferList = s_buffers
             };
 
-            Assert.Throws<ArgumentException>(() => GetSocket().AcceptAsync(eventArgs));
+            AssertExtensions.Throws<ArgumentException>("BufferList", () => GetSocket().AcceptAsync(eventArgs));
         }
 
         [Fact]
@@ -548,7 +548,7 @@ namespace System.Net.Sockets.Tests
                 BufferList = s_buffers
             };
 
-            Assert.Throws<ArgumentException>(() => GetSocket().ConnectAsync(eventArgs));
+            AssertExtensions.Throws<ArgumentException>("BufferList", () => GetSocket().ConnectAsync(eventArgs));
         }
 
         [Fact]
@@ -598,7 +598,7 @@ namespace System.Net.Sockets.Tests
                 BufferList = s_buffers
             };
 
-            Assert.Throws<ArgumentException>(() => Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, eventArgs));
+            AssertExtensions.Throws<ArgumentException>("BufferList", () => Socket.ConnectAsync(SocketType.Stream, ProtocolType.Tcp, eventArgs));
         }
 
         [Fact]
@@ -632,7 +632,7 @@ namespace System.Net.Sockets.Tests
                 RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, 1)
             };
 
-            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).ReceiveFromAsync(eventArgs));
+            AssertExtensions.Throws<ArgumentException>("RemoteEndPoint", () => GetSocket(AddressFamily.InterNetwork).ReceiveFromAsync(eventArgs));
         }
 
         [Fact]
@@ -654,7 +654,7 @@ namespace System.Net.Sockets.Tests
                 RemoteEndPoint = new IPEndPoint(IPAddress.IPv6Loopback, 1)
             };
 
-            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).ReceiveMessageFromAsync(eventArgs));
+            AssertExtensions.Throws<ArgumentException>("RemoteEndPoint", () => GetSocket(AddressFamily.InterNetwork).ReceiveMessageFromAsync(eventArgs));
         }
 
         [Fact]
@@ -698,11 +698,12 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Socket_Connect_DnsEndPoint_NotSupported()
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // API throws PNSE on Unix
+        public void Socket_Connect_DnsEndPoint_ExposedHandle_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                IntPtr ignored = s.Handle;
                 Assert.Throws<PlatformNotSupportedException>(() => s.Connect(new DnsEndPoint("localhost", 12345)));
             }
         }
@@ -726,11 +727,12 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Socket_Connect_StringHost_NotSupported()
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // API throws PNSE on Unix
+        public void Socket_Connect_StringHost_ExposedHandle_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                IntPtr ignored = s.Handle;
                 Assert.Throws<PlatformNotSupportedException>(() => s.Connect("localhost", 12345));
             }
         }
@@ -772,21 +774,23 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Socket_Connect_MultipleAddresses_NotSupported()
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // API throws PNSE on Unix
+        public void Socket_Connect_MultipleAddresses_ExposedHandle_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                IntPtr ignored = s.Handle;
                 Assert.Throws<PlatformNotSupportedException>(() => s.Connect(new[] { IPAddress.Loopback }, 12345));
             }
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Socket_ConnectAsync_DnsEndPoint_NotSupported()
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // API throws PNSE on Unix
+        public void Socket_ConnectAsync_DnsEndPoint_ExposedHandle_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                IntPtr ignored = s.Handle;
                 Assert.Throws<PlatformNotSupportedException>(() => { s.ConnectAsync(new DnsEndPoint("localhost", 12345)); });
             }
         }
@@ -809,11 +813,12 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Socket_ConnectAsync_StringHost_NotSupported()
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // API throws PNSE on Unix
+        public void Socket_ConnectAsync_StringHost_ExposedHandle_NotSupported()
         {
             using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                IntPtr ignored = s.Handle;
                 Assert.Throws<PlatformNotSupportedException>(() => { s.ConnectAsync("localhost", 12345); });
             }
         }
@@ -852,22 +857,24 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Socket_ConnectAsync_MultipleAddresses_NotSupported()
-        {
-            using (Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
-            {
-                Assert.Throws<PlatformNotSupportedException>(() => { s.ConnectAsync(new[] { IPAddress.Loopback }, 12345); });
-            }
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void Connect_ConnectTwice_NotSupported()
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // API throws PNSE on Unix
+        [InlineData(0)]
+        [InlineData(1)]
+        public void Connect_ConnectTwice_NotSupported(int invalidatingAction)
         {
             using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                switch (invalidatingAction)
+                {
+                    case 0:
+                        IntPtr handle = client.Handle; // exposing the underlying handle
+                        break;
+                    case 1:
+                        client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.Debug, 1); // untracked socket option
+                        break;
+                }
+
                 //
                 // Connect once, to an invalid address, expecting failure
                 //
@@ -881,14 +888,26 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void ConnectAsync_ConnectTwice_NotSupported()
+        [Theory]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // API throws PNSE on Unix
+        [InlineData(0)]
+        [InlineData(1)]
+        public void ConnectAsync_ConnectTwice_NotSupported(int invalidatingAction)
         {
             AutoResetEvent completed = new AutoResetEvent(false);
 
             using (Socket client = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
+                switch (invalidatingAction)
+                {
+                    case 0:
+                        IntPtr handle = client.Handle; // exposing the underlying handle
+                        break;
+                    case 1:
+                        client.SetSocketOption(SocketOptionLevel.IP, SocketOptionName.Debug, 1); // untracked socket option
+                        break;
+                }
+
                 //
                 // Connect once, to an invalid address, expecting failure
                 //
@@ -917,6 +936,7 @@ namespace System.Net.Sockets.Tests
         public void BeginAccept_NotBound_Throws_InvalidOperation()
         {
             Assert.Throws<InvalidOperationException>(() => GetSocket().BeginAccept(TheAsyncCallback, null));
+            Assert.Throws<InvalidOperationException>(() => { GetSocket().AcceptAsync(); });
         }
 
         [Fact]
@@ -927,6 +947,7 @@ namespace System.Net.Sockets.Tests
                 socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
 
                 Assert.Throws<InvalidOperationException>(() => socket.BeginAccept(TheAsyncCallback, null));
+                Assert.Throws<InvalidOperationException>(() => { socket.AcceptAsync(); });
             }
         }
 
@@ -940,6 +961,7 @@ namespace System.Net.Sockets.Tests
         public void BeginConnect_EndPoint_NullEndPoint_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginConnect((EndPoint)null, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ConnectAsync((EndPoint)null); });
         }
 
         [Fact]
@@ -950,31 +972,49 @@ namespace System.Net.Sockets.Tests
                 socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
                 socket.Listen(1);
                 Assert.Throws<InvalidOperationException>(() => socket.BeginConnect(new IPEndPoint(IPAddress.Loopback, 1), TheAsyncCallback, null));
+                Assert.Throws<InvalidOperationException>(() => { socket.ConnectAsync(new IPEndPoint(IPAddress.Loopback, 1)); });
             }
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginConnect_EndPoint_AddressFamily_Throws_NotSupported()
         {
-            Assert.Throws<NotSupportedException>(() => GetSocket(AddressFamily.InterNetwork).BeginConnect(new DnsEndPoint("localhost", 1, AddressFamily.InterNetworkV6), TheAsyncCallback, null));
+            // Unlike other tests that reuse a static Socket instance, this test avoids doing so
+            // to work around a behavior of .NET 4.7.2. See https://github.com/dotnet/corefx/issues/29481
+            // for more details.
+
+            using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<NotSupportedException>(() => s.BeginConnect(
+                    new DnsEndPoint("localhost", 1, AddressFamily.InterNetworkV6),
+                    TheAsyncCallback, null));
+            }
+
+            using (var s = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                Assert.Throws<NotSupportedException>(() => { s.ConnectAsync(
+                    new DnsEndPoint("localhost", 1, AddressFamily.InterNetworkV6));
+                });
+            }
         }
 
         [Fact]
         public void BeginConnect_Host_NullHost_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginConnect((string)null, 1, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ConnectAsync((string)null, 1); });
         }
 
-        [Fact]
-        public void BeginConnect_Host_InvalidPort_Throws_ArgumentOutOfRange()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(65536)]
+        public void BeginConnect_Host_InvalidPort_Throws_ArgumentOutOfRange(int port)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect("localhost", -1, TheAsyncCallback, null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect("localhost", 65536, TheAsyncCallback, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect("localhost", port, TheAsyncCallback, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ConnectAsync("localhost", port); });
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginConnect_Host_ListeningSocket_Throws_InvalidOperation()
         {
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -982,6 +1022,7 @@ namespace System.Net.Sockets.Tests
                 socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
                 socket.Listen(1);
                 Assert.Throws<InvalidOperationException>(() => socket.BeginConnect("localhost", 1, TheAsyncCallback, null));
+                Assert.Throws<InvalidOperationException>(() => { socket.ConnectAsync("localhost", 1); });
             }
         }
 
@@ -989,42 +1030,49 @@ namespace System.Net.Sockets.Tests
         public void BeginConnect_IPAddress_NullIPAddress_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginConnect((IPAddress)null, 1, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ConnectAsync((IPAddress)null, 1); });
         }
 
-        [Fact]
-        public void BeginConnect_IPAddress_InvalidPort_Throws_ArgumentOutOfRange()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(65536)]
+        public void BeginConnect_IPAddress_InvalidPort_Throws_ArgumentOutOfRange(int port)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect(IPAddress.Loopback, -1, TheAsyncCallback, null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect(IPAddress.Loopback, 65536, TheAsyncCallback, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect(IPAddress.Loopback, port, TheAsyncCallback, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ConnectAsync(IPAddress.Loopback, 65536); });
         }
 
         [Fact]
         public void BeginConnect_IPAddress_AddressFamily_Throws_NotSupported()
         {
             Assert.Throws<NotSupportedException>(() => GetSocket(AddressFamily.InterNetwork).BeginConnect(IPAddress.IPv6Loopback, 1, TheAsyncCallback, null));
+            Assert.Throws<NotSupportedException>(() => { GetSocket(AddressFamily.InterNetwork).ConnectAsync(IPAddress.IPv6Loopback, 1); });
         }
 
         [Fact]
         public void BeginConnect_IPAddresses_NullIPAddresses_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginConnect((IPAddress[])null, 1, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ConnectAsync((IPAddress[])null, 1); });
         }
 
         [Fact]
         public void BeginConnect_IPAddresses_EmptyIPAddresses_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().BeginConnect(new IPAddress[0], 1, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("addresses", () => GetSocket().BeginConnect(new IPAddress[0], 1, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("addresses", () => { GetSocket().ConnectAsync(new IPAddress[0], 1); });
         }
 
-        [Fact]
-        public void BeginConnect_IPAddresses_InvalidPort_Throws_ArgumentOutOfRange()
+        [Theory]
+        [InlineData(-1)]
+        [InlineData(65536)]
+        public void BeginConnect_IPAddresses_InvalidPort_Throws_ArgumentOutOfRange(int port)
         {
-            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect(new[] { IPAddress.Loopback }, -1, TheAsyncCallback, null));
-            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect(new[] { IPAddress.Loopback }, 65536, TheAsyncCallback, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginConnect(new[] { IPAddress.Loopback }, port, TheAsyncCallback, null));
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ConnectAsync(new[] { IPAddress.Loopback }, port); });
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
         public void BeginConnect_IPAddresses_ListeningSocket_Throws_InvalidOperation()
         {
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -1032,6 +1080,13 @@ namespace System.Net.Sockets.Tests
                 socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
                 socket.Listen(1);
                 Assert.Throws<InvalidOperationException>(() => socket.BeginConnect(new[] { IPAddress.Loopback }, 1, TheAsyncCallback, null));
+            }
+
+            using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
+            {
+                socket.Bind(new IPEndPoint(IPAddress.Loopback, 0));
+                socket.Listen(1);
+                Assert.Throws<InvalidOperationException>(() => { socket.ConnectAsync(new[] { IPAddress.Loopback }, 1); });
             }
         }
 
@@ -1042,9 +1097,16 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        public void EndConnect_UnrelatedAsyncResult_Throws_Argument()
+        {
+            AssertExtensions.Throws<ArgumentException>("asyncResult", () => GetSocket().EndConnect(Task.CompletedTask));
+        }
+
+        [Fact]
         public void BeginSend_Buffer_NullBuffer_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginSend(null, 0, 0, SocketFlags.None, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().SendAsync(new ArraySegment<byte>(null, 0, 0), SocketFlags.None); });
         }
 
         [Fact]
@@ -1052,6 +1114,9 @@ namespace System.Net.Sockets.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSend(s_buffer, -1, 0, SocketFlags.None, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSend(s_buffer, s_buffer.Length + 1, 0, SocketFlags.None, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().SendAsync(new ArraySegment<byte>(s_buffer, -1, 0), SocketFlags.None); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().SendAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length + 1, 0), SocketFlags.None); });
         }
 
         [Fact]
@@ -1060,18 +1125,24 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSend(s_buffer, 0, -1, SocketFlags.None, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSend(s_buffer, 0, s_buffer.Length + 1, SocketFlags.None, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSend(s_buffer, s_buffer.Length, 1, SocketFlags.None, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().SendAsync(new ArraySegment<byte>(s_buffer, 0, -1), SocketFlags.None); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().SendAsync(new ArraySegment<byte>(s_buffer, 0, s_buffer.Length + 1), SocketFlags.None); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().SendAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length, 1), SocketFlags.None); });
         }
 
         [Fact]
         public void BeginSend_Buffers_NullBuffers_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginSend(null, SocketFlags.None, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().SendAsync((IList<ArraySegment<byte>>)null, SocketFlags.None); });
         }
 
         [Fact]
         public void BeginSend_Buffers_EmptyBuffers_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().BeginSend(new List<ArraySegment<byte>>(), SocketFlags.None, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("buffers", () => GetSocket().BeginSend(new List<ArraySegment<byte>>(), SocketFlags.None, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("buffers", () => { GetSocket().SendAsync(new List<ArraySegment<byte>>(), SocketFlags.None); });
         }
 
         [Fact]
@@ -1081,32 +1152,49 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        public void EndSend_UnrelatedAsyncResult_Throws_Argument()
+        {
+            AssertExtensions.Throws<ArgumentException>("asyncResult", () => GetSocket().EndSend(Task.CompletedTask));
+        }
+
+        [Fact]
         public void BeginSendTo_NullBuffer_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginSendTo(null, 0, 0, SocketFlags.None, new IPEndPoint(IPAddress.Loopback, 1), TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().SendToAsync(new ArraySegment<byte>(null, 0, 0), SocketFlags.None, new IPEndPoint(IPAddress.Loopback, 1)); });
         }
 
         [Fact]
         public void BeginSendTo_NullEndPoint_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginSendTo(s_buffer, 0, 0, SocketFlags.None, null, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().SendToAsync(new ArraySegment<byte>(s_buffer, 0, 0), SocketFlags.None, null); });
         }
 
         [Fact]
         public void BeginSendTo_InvalidOffset_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
+
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSendTo(s_buffer, -1, s_buffer.Length, SocketFlags.None, endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSendTo(s_buffer, s_buffer.Length + 1, s_buffer.Length, SocketFlags.None, endpoint, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().SendToAsync(new ArraySegment<byte>(s_buffer, -1, s_buffer.Length), SocketFlags.None, endpoint); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().SendToAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length + 1, s_buffer.Length), SocketFlags.None, endpoint); });
         }
 
         [Fact]
         public void BeginSendTo_InvalidSize_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
+
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSendTo(s_buffer, 0, -1, SocketFlags.None, endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSendTo(s_buffer, 0, s_buffer.Length + 1, SocketFlags.None, endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginSendTo(s_buffer, s_buffer.Length, 1, SocketFlags.None, endpoint, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().SendToAsync(new ArraySegment<byte>(s_buffer, 0, -1), SocketFlags.None, endpoint); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().SendToAsync(new ArraySegment<byte>(s_buffer, 0, s_buffer.Length + 1), SocketFlags.None, endpoint); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().SendToAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length, 1), SocketFlags.None, endpoint); });
         }
 
         [Fact]
@@ -1116,9 +1204,16 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
+        public void EndSendto_UnrelatedAsyncResult_Throws_Argument()
+        {
+            AssertExtensions.Throws<ArgumentException>("asyncResult", () => GetSocket().EndSendTo(Task.CompletedTask));
+        }
+
+        [Fact]
         public void BeginReceive_Buffer_NullBuffer_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginReceive(null, 0, 0, SocketFlags.None, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ReceiveAsync(new ArraySegment<byte>(null, 0, 0), SocketFlags.None); });
         }
 
         [Fact]
@@ -1126,6 +1221,9 @@ namespace System.Net.Sockets.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceive(s_buffer, -1, 0, SocketFlags.None, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceive(s_buffer, s_buffer.Length + 1, 0, SocketFlags.None, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ReceiveAsync(new ArraySegment<byte>(s_buffer, -1, 0), SocketFlags.None); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length + 1, 0), SocketFlags.None); });
         }
 
         [Fact]
@@ -1134,18 +1232,24 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceive(s_buffer, 0, -1, SocketFlags.None, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceive(s_buffer, 0, s_buffer.Length + 1, SocketFlags.None, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceive(s_buffer, s_buffer.Length, 1, SocketFlags.None, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ReceiveAsync(new ArraySegment<byte>(s_buffer, 0, -1), SocketFlags.None); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveAsync(new ArraySegment<byte>(s_buffer, 0, s_buffer.Length + 1), SocketFlags.None); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length, 1), SocketFlags.None); });
         }
 
         [Fact]
         public void BeginReceive_Buffers_NullBuffers_Throws_ArgumentNull()
         {
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginReceive(null, SocketFlags.None, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ReceiveAsync((IList<ArraySegment<byte>>)null, SocketFlags.None); });
         }
 
         [Fact]
         public void BeginReceive_Buffers_EmptyBuffers_Throws_Argument()
         {
-            Assert.Throws<ArgumentException>(() => GetSocket().BeginReceive(new List<ArraySegment<byte>>(), SocketFlags.None, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("buffers", () => GetSocket().BeginReceive(new List<ArraySegment<byte>>(), SocketFlags.None, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("buffers", () => { GetSocket().ReceiveAsync(new List<ArraySegment<byte>>(), SocketFlags.None); });
         }
 
         [Fact]
@@ -1159,6 +1263,7 @@ namespace System.Net.Sockets.Tests
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginReceiveFrom(null, 0, 0, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(null, 0, 0), SocketFlags.None, endpoint); });
         }
 
         [Fact]
@@ -1166,30 +1271,41 @@ namespace System.Net.Sockets.Tests
         {
             EndPoint endpoint = null;
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginReceiveFrom(s_buffer, 0, 0, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(s_buffer, 0, 0), SocketFlags.None, endpoint); });
         }
 
         [Fact]
         public void BeginReceiveFrom_AddressFamily_Throws_Argument()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.IPv6Loopback, 1);
-            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).BeginReceiveFrom(s_buffer, 0, 0, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () => GetSocket(AddressFamily.InterNetwork).BeginReceiveFrom(s_buffer, 0, 0, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () => { GetSocket(AddressFamily.InterNetwork).ReceiveFromAsync(new ArraySegment<byte>(s_buffer, 0, 0), SocketFlags.None, endpoint); });
         }
 
         [Fact]
         public void BeginReceiveFrom_InvalidOffset_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
+
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveFrom(s_buffer, -1, s_buffer.Length, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveFrom(s_buffer, s_buffer.Length + 1, s_buffer.Length, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(s_buffer, -1, s_buffer.Length), SocketFlags.None, endpoint); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length + 1, s_buffer.Length), SocketFlags.None, endpoint); });
         }
 
         [Fact]
         public void BeginReceiveFrom_InvalidSize_Throws_ArgumentOutOfRange()
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
+
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveFrom(s_buffer, 0, -1, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveFrom(s_buffer, 0, s_buffer.Length + 1, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveFrom(s_buffer, s_buffer.Length, 1, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(s_buffer, 0, -1), SocketFlags.None, endpoint); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(s_buffer, 0, s_buffer.Length + 1), SocketFlags.None, endpoint); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length, 1), SocketFlags.None, endpoint); });
         }
 
         [Fact]
@@ -1197,6 +1313,7 @@ namespace System.Net.Sockets.Tests
         {
             EndPoint endpoint = new IPEndPoint(IPAddress.Loopback, 1);
             Assert.Throws<InvalidOperationException>(() => GetSocket().BeginReceiveFrom(s_buffer, 0, 0, SocketFlags.None, ref endpoint, TheAsyncCallback, null));
+            Assert.Throws<InvalidOperationException>(() => { GetSocket().ReceiveFromAsync(new ArraySegment<byte>(s_buffer, 0, 0), SocketFlags.None, endpoint); });
         }
 
         [Fact]
@@ -1212,6 +1329,7 @@ namespace System.Net.Sockets.Tests
             EndPoint remote = new IPEndPoint(IPAddress.Loopback, 1);
 
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginReceiveMessageFrom(null, 0, 0, SocketFlags.None, ref remote, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(null, 0, 0), SocketFlags.None, remote); });
         }
 
         [Fact]
@@ -1220,6 +1338,7 @@ namespace System.Net.Sockets.Tests
             EndPoint remote = null;
 
             Assert.Throws<ArgumentNullException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, 0, 0, SocketFlags.None, ref remote, TheAsyncCallback, null));
+            Assert.Throws<ArgumentNullException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, 0, 0), SocketFlags.None, remote); });
         }
 
         [Fact]
@@ -1227,7 +1346,8 @@ namespace System.Net.Sockets.Tests
         {
             EndPoint remote = new IPEndPoint(IPAddress.IPv6Loopback, 1);
 
-            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).BeginReceiveMessageFrom(s_buffer, 0, 0, SocketFlags.None, ref remote, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () => GetSocket(AddressFamily.InterNetwork).BeginReceiveMessageFrom(s_buffer, 0, 0, SocketFlags.None, ref remote, TheAsyncCallback, null));
+            AssertExtensions.Throws<ArgumentException>("remoteEP", () => { GetSocket(AddressFamily.InterNetwork).ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, 0, 0), SocketFlags.None, remote); });
         }
 
         [Fact]
@@ -1237,6 +1357,9 @@ namespace System.Net.Sockets.Tests
 
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, -1, s_buffer.Length, SocketFlags.None, ref remote, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, s_buffer.Length + 1, s_buffer.Length, SocketFlags.None, ref remote, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, -1, s_buffer.Length), SocketFlags.None, remote); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length + 1, s_buffer.Length), SocketFlags.None, remote); });
         }
 
         [Fact]
@@ -1247,6 +1370,10 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, 0, -1, SocketFlags.None, ref remote, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, 0, s_buffer.Length + 1, SocketFlags.None, ref remote, TheAsyncCallback, null));
             Assert.Throws<ArgumentOutOfRangeException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, s_buffer.Length, 1, SocketFlags.None, ref remote, TheAsyncCallback, null));
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, 0, -1), SocketFlags.None, remote); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, 0, s_buffer.Length + 1), SocketFlags.None, remote); });
+            Assert.ThrowsAny<ArgumentException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, s_buffer.Length, 1), SocketFlags.None, remote); });
         }
 
         [Fact]
@@ -1255,6 +1382,7 @@ namespace System.Net.Sockets.Tests
             EndPoint remote = new IPEndPoint(IPAddress.Loopback, 1);
 
             Assert.Throws<InvalidOperationException>(() => GetSocket().BeginReceiveMessageFrom(s_buffer, 0, 0, SocketFlags.None, ref remote, TheAsyncCallback, null));
+            Assert.Throws<InvalidOperationException>(() => { GetSocket().ReceiveMessageFromAsync(new ArraySegment<byte>(s_buffer, 0, 0), SocketFlags.None, remote); });
         }
 
         [Fact]
@@ -1274,7 +1402,7 @@ namespace System.Net.Sockets.Tests
             EndPoint remote = new IPEndPoint(IPAddress.IPv6Loopback, 1);
             IPPacketInformation packetInfo;
 
-            Assert.Throws<ArgumentException>(() => GetSocket(AddressFamily.InterNetwork).EndReceiveMessageFrom(null, ref flags, ref remote, out packetInfo));
+            AssertExtensions.Throws<ArgumentException>("endPoint", () => GetSocket(AddressFamily.InterNetwork).EndReceiveMessageFrom(null, ref flags, ref remote, out packetInfo));
         }
 
         [Fact]
@@ -1288,25 +1416,9 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void TcpClient_ConnectAsync_StringHost_NotSupportedAfterClientAccess()
+        public void CancelConnectAsync_NullEventArgs_Throws_ArgumentNull()
         {
-            using (TcpClient client = new TcpClient())
-            {
-                var tmp = client.Client;
-                Assert.Throws<PlatformNotSupportedException>(() => { client.ConnectAsync("localhost", 12345); });
-            }
-        }
-
-        [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
-        public void TcpClient_ConnectAsync_ArrayOfAddresses_NotSupportedAfterClientAccess()
-        {
-            using (TcpClient client = new TcpClient())
-            {
-                var tmp = client.Client;
-                Assert.Throws<PlatformNotSupportedException>(() => { client.ConnectAsync(new[] { IPAddress.Loopback }, 12345); });
-            }
+            Assert.Throws<ArgumentNullException>(() => Socket.CancelConnectAsync(null));
         }
     }
 }

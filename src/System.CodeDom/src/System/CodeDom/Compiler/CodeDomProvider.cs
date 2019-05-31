@@ -11,11 +11,11 @@ using System.Runtime.Serialization;
 
 namespace System.CodeDom.Compiler
 {
-    public abstract class CodeDomProvider // TODO: Inherit Component
+    public abstract class CodeDomProvider : Component
     {
-        private readonly static Dictionary<string, CompilerInfo> s_compilerLanguages = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
-        private readonly static Dictionary<string, CompilerInfo> s_compilerExtensions = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
-        private readonly static List<CompilerInfo> s_allCompilerInfo = new List<CompilerInfo>();
+        private static readonly Dictionary<string, CompilerInfo> s_compilerLanguages = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
+        private static readonly Dictionary<string, CompilerInfo> s_compilerExtensions = new Dictionary<string, CompilerInfo>(StringComparer.OrdinalIgnoreCase);
+        private static readonly List<CompilerInfo> s_allCompilerInfo = new List<CompilerInfo>();
 
         static CodeDomProvider()
         {
@@ -215,7 +215,10 @@ namespace System.CodeDom.Compiler
         private sealed class ConfigurationErrorsException : SystemException
         {
             public ConfigurationErrorsException(string message) : base(message) { }
-            public ConfigurationErrorsException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+            public ConfigurationErrorsException(SerializationInfo info, StreamingContext context) : base(info, context)
+            {
+                throw new PlatformNotSupportedException();
+            }
         }
     }
 }

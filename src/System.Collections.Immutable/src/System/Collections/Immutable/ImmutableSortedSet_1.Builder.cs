@@ -105,8 +105,24 @@ namespace System.Collections.Immutable
             /// </remarks>
             public T this[int index]
             {
+#if !NETSTANDARD10
+                get { return _root.ItemRef(index); }
+#else
                 get { return _root[index]; }
+#endif
             }
+
+#if !NETSTANDARD10
+            /// <summary>
+            /// Gets a read-only reference to the element of the set at the given index.
+            /// </summary>
+            /// <param name="index">The 0-based index of the element in the set to return.</param>
+            /// <returns>A read-only reference to the element at the given position.</returns>
+            public ref readonly T ItemRef(int index)
+            {
+                return ref _root.ItemRef(index);
+            }
+#endif
 
             /// <summary>
             /// Gets the maximum value in the collection, as defined by the comparer.
@@ -476,56 +492,13 @@ namespace System.Collections.Immutable
                 {
                     if (_syncRoot == null)
                     {
-                        Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new Object(), null);
+                        Threading.Interlocked.CompareExchange<Object>(ref _syncRoot, new object(), null);
                     }
 
                     return _syncRoot;
                 }
             }
             #endregion
-        }
-    }
-
-    /// <summary>
-    /// A simple view of the immutable collection that the debugger can show to the developer.
-    /// </summary>
-    internal class ImmutableSortedSetBuilderDebuggerProxy<T>
-    {
-        /// <summary>
-        /// The collection to be enumerated.
-        /// </summary>
-        private readonly ImmutableSortedSet<T>.Builder _set;
-
-        /// <summary>
-        /// The simple view of the collection.
-        /// </summary>
-        private T[] _contents;
-
-        /// <summary>   
-        /// Initializes a new instance of the <see cref="ImmutableSortedSetBuilderDebuggerProxy{T}"/> class.
-        /// </summary>
-        /// <param name="builder">The collection to display in the debugger</param>
-        public ImmutableSortedSetBuilderDebuggerProxy(ImmutableSortedSet<T>.Builder builder)
-        {
-            Requires.NotNull(builder, nameof(builder));
-            _set = builder;
-        }
-
-        /// <summary>
-        /// Gets a simple debugger-viewable collection.
-        /// </summary>
-        [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        public T[] Contents
-        {
-            get
-            {
-                if (_contents == null)
-                {
-                    _contents = _set.ToArray(_set.Count);
-                }
-
-                return _contents;
-            }
         }
     }
 }

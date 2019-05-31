@@ -13,7 +13,6 @@ using System.Runtime.CompilerServices;
 
 namespace System.Data.SqlTypes
 {
-    [Serializable]
     internal enum SqlBytesCharsState
     {
         Null = 0,
@@ -22,7 +21,6 @@ namespace System.Data.SqlTypes
         Stream = 3,
     }
 
-    [Serializable]
     [XmlSchemaProvider("GetXsdType")]
     public sealed class SqlBytes : INullable, IXmlSerializable, ISerializable
     {
@@ -53,7 +51,7 @@ namespace System.Data.SqlTypes
         private byte[] _rgbWorkBuf;    // A 1-byte work buffer.
 
         // The max data length that we support at this time.
-        private const long x_lMaxLen = System.Int32.MaxValue;
+        private const long x_lMaxLen = int.MaxValue;
 
         private const long x_lNull = -1L;
 
@@ -102,28 +100,6 @@ namespace System.Data.SqlTypes
             _state = (s == null) ? SqlBytesCharsState.Null : SqlBytesCharsState.Stream;
 
             _rgbWorkBuf = null;
-
-            AssertValid();
-        }
-
-        // Constructor required for serialization. Deserializes as a Buffer. If the bits have been tampered with
-        // then this will throw a SerializationException or a InvalidCastException.
-        private SqlBytes(SerializationInfo info, StreamingContext context)
-        {
-            _stream = null;
-            _rgbWorkBuf = null;
-
-            if (info.GetBoolean("IsNull"))
-            {
-                _state = SqlBytesCharsState.Null;
-                _rgbBuf = null;
-            }
-            else
-            {
-                _state = SqlBytesCharsState.Buffer;
-                _rgbBuf = (byte[])info.GetValue("data", typeof(byte[]));
-                _lCurLen = _rgbBuf.Length;
-            }
 
             AssertValid();
         }
@@ -592,25 +568,7 @@ namespace System.Data.SqlTypes
         // array is serialized, except for Null, in which case this state is kept.
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            switch (_state)
-            {
-                case SqlBytesCharsState.Null:
-                    info.AddValue("IsNull", true);
-                    break;
-
-                case SqlBytesCharsState.Buffer:
-                    info.AddValue("IsNull", false);
-                    info.AddValue("data", _rgbBuf);
-                    break;
-
-                case SqlBytesCharsState.Stream:
-                    CopyStreamToBuffer();
-                    goto case SqlBytesCharsState.Buffer;
-
-                default:
-                    Debug.Assert(false);
-                    goto case SqlBytesCharsState.Null;
-            }
+            throw new PlatformNotSupportedException();
         }
 
         // --------------------------------------------------------------

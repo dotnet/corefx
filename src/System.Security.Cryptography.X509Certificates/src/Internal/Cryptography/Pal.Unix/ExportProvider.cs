@@ -14,10 +14,10 @@ namespace Internal.Cryptography.Pal
     {
         private static readonly SafeEvpPKeyHandle InvalidPKeyHandle = new SafeEvpPKeyHandle(IntPtr.Zero, false);
 
-        private ICertificatePal _singleCertPal;
+        private ICertificatePalCore _singleCertPal;
         private X509Certificate2Collection _certs;
 
-        internal ExportProvider(ICertificatePal singleCertPal)
+        internal ExportProvider(ICertificatePalCore singleCertPal)
         {
             _singleCertPal = singleCertPal;
         }
@@ -92,6 +92,8 @@ namespace Internal.Cryptography.Pal
                     {
                         PushHandle(certPal.Handle, publicCerts);
                     }
+
+                    GC.KeepAlive(certPal); // ensure reader's safe handle isn't finalized while raw handle is in use
                 }
                 else
                 {
@@ -115,11 +117,15 @@ namespace Internal.Cryptography.Pal
                             }
 
                             privateCert = cert;
+                            var certPal = (OpenSslX509CertificateReader)cert.Pal;
+                            privateCertHandle = certPal.SafeHandle;
+                            privateCertKeyHandle = certPal.PrivateKeyHandle;
                         }
                         else
                         {
                             PushHandle(cert.Handle, publicCerts);
                         }
+
                     }
                 }
 
@@ -134,11 +140,17 @@ namespace Internal.Cryptography.Pal
                         throw Interop.Crypto.CreateOpenSslCryptographicException();
                     }
 
-                    return Interop.Crypto.OpenSslEncode(
+                    byte[] result = Interop.Crypto.OpenSslEncode(
                         Interop.Crypto.GetPkcs12DerSize,
                         Interop.Crypto.EncodePkcs12,
                         pkcs12);
+
+                    // ensure cert handles aren't finalized while the raw handles are in use
+                    GC.KeepAlive(_certs);
+                    return result;
                 }
+
+                
             }
         }
 
@@ -160,27 +172,22 @@ namespace Internal.Cryptography.Pal
         {
             // Pack all of the certificates into a new PKCS7*, export it to a byte[],
             // then free the PKCS7*, since we don't need it any more.
-            using (SafePkcs7Handle pkcs7 = Interop.Crypto.Pkcs7CreateSigned())
+            using (SafeX509StackHandle certs = Interop.Crypto.NewX509Stack())
             {
-                Interop.Crypto.CheckValidOpenSslHandle(pkcs7);
-
                 foreach (X509Certificate2 cert in _certs)
                 {
-                    // Pkcs7AddCertificate => PKCS7_add_certificate increments the
-                    // reference count of the certificate, so passing just the Handle
-                    // value is sufficient.
-                    //
-                    // It gets decremented again when the SafePkcs7Handle is released.
-                    if (!Interop.Crypto.Pkcs7AddCertificate(pkcs7, cert.Handle))
-                    {
-                        throw Interop.Crypto.CreateOpenSslCryptographicException();
-                    }
+                    PushHandle(cert.Handle, certs);
+                    GC.KeepAlive(cert); // ensure cert's safe handle isn't finalized while raw handle is in use
                 }
 
-                return Interop.Crypto.OpenSslEncode(
-                    handle => Interop.Crypto.GetPkcs7DerSize(handle),
-                    (handle, buf) => Interop.Crypto.EncodePkcs7(handle, buf),
-                    pkcs7);
+                using (SafePkcs7Handle pkcs7 = Interop.Crypto.Pkcs7CreateCertificateCollection(certs))
+                {
+                    Interop.Crypto.CheckValidOpenSslHandle(pkcs7);
+                    return Interop.Crypto.OpenSslEncode(
+                        handle => Interop.Crypto.GetPkcs7DerSize(handle),
+                        (handle, buf) => Interop.Crypto.EncodePkcs7(handle, buf),
+                        pkcs7);
+                }
             }
         }
     }

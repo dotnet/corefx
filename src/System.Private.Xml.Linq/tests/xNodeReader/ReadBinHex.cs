@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace CoreXml.Test.XLinq
 {
-    public partial class FunctionalTests : TestModule
+    public partial class XNodeReaderFunctionalTests : TestModule
     {
         public partial class XNodeReaderTests : XLinqTestCase
         {
@@ -288,7 +288,7 @@ namespace CoreXml.Test.XLinq
                     {
                         DataReader.ReadContentAsBinHex(BinHex, i, 2);
                         strActbinhex = (System.BitConverter.ToChar(BinHex, i)).ToString();
-                        TestLog.Compare(String.Compare(strActbinhex, 0, strTextBinHex, i / 2, 1), 0, "Compare All Valid Base64");
+                        TestLog.Compare(string.Compare(strActbinhex, 0, strTextBinHex, i / 2, 1), 0, "Compare All Valid Base64");
                     }
                 }
 
@@ -351,7 +351,7 @@ namespace CoreXml.Test.XLinq
                     TestLog.Compare(nRead, 8, "0");
 
                     DataReader.Read();
-                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Element, "ElemText", String.Empty), "1vn");
+                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.Element, "ElemText", string.Empty), "1vn");
                 }
 
                 //[Variation("Current node on multiple calls")]
@@ -370,10 +370,10 @@ namespace CoreXml.Test.XLinq
 
                     nRead = DataReader.ReadContentAsBinHex(buffer, 0, 19);
                     TestLog.Compare(nRead, 18, "1");
-                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.EndElement, "ElemNum", String.Empty), "1vn");
+                    TestLog.Compare(VerifyNode(DataReader, XmlNodeType.EndElement, "ElemNum", string.Empty), "1vn");
                 }
 
-                //[Variation("ReadBinHex with whitespaces")]
+                //[Variation("ReadBinHex with whitespace")]
                 public void TestTextReadBinHex_21()
                 {
                     byte[] buffer = new byte[1];
@@ -430,7 +430,7 @@ namespace CoreXml.Test.XLinq
                     }
                 }
 
-                //[Variation("WS:WireCompat:hex binary fails to send/return data after 1787 bytes going whIdbey to everett")]
+                //[Variation("WS:WireCompat:hex binary fails to send/return data after 1787 bytes going Whidbey to Everett")]
                 public void TestTextReadBinHex_24()
                 {
                     string filename = Path.Combine("TestData", "XmlReader", "Common", "Bug99148.xml");
@@ -735,7 +735,7 @@ namespace CoreXml.Test.XLinq
                     {
                         DataReader.ReadElementContentAsBinHex(BinHex, i, 2);
                         strActbinhex = (System.BitConverter.ToChar(BinHex, i)).ToString();
-                        TestLog.Compare(String.Compare(strActbinhex, 0, strTextBinHex, i / 2, 1), 0, "Compare All Valid Base64");
+                        TestLog.Compare(string.Compare(strActbinhex, 0, strTextBinHex, i / 2, 1), 0, "Compare All Valid Base64");
                     }
                 }
 
@@ -797,7 +797,7 @@ namespace CoreXml.Test.XLinq
                     TestLog.Compare(DataReader.NodeType, XmlNodeType.Text, "Not on text node");
                 }
 
-                //[Variation("ReadBinHex with whitespaces")]
+                //[Variation("ReadBinHex with whitespace")]
                 public void TestTextReadBinHex_21()
                 {
                     byte[] buffer = new byte[1];
@@ -850,7 +850,7 @@ namespace CoreXml.Test.XLinq
                     }
                 }
 
-                //[Variation("WS:WireCompat:hex binary fails to send/return data after 1787 bytes going whIdbey to everett")]
+                //[Variation("WS:WireCompat:hex binary fails to send/return data after 1787 bytes going Whidbey to Everett")]
                 public void TestTextReadBinHex_24()
                 {
                     string filename = Path.Combine("TestData", "XmlReader", "Common", "Bug99148.xml");

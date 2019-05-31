@@ -2,24 +2,23 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
+
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRFIELDINFO : EXPR
+    internal sealed class ExprFieldInfo : ExprWithType
     {
-        public FieldSymbol Field()
+        public ExprFieldInfo(FieldSymbol field, AggregateType fieldType, CType type)
+            : base(ExpressionKind.FieldInfo, type)
         {
-            return _field;
+            Debug.Assert(field != null);
+            Debug.Assert(fieldType != null);
+            Field = field;
+            FieldType = fieldType;
         }
-        public AggregateType FieldType()
-        {
-            return _fieldType;
-        }
-        public void Init(FieldSymbol f, AggregateType ft)
-        {
-            _field = f;
-            _fieldType = ft;
-        }
-        private FieldSymbol _field;
-        private AggregateType _fieldType;
+
+        public FieldSymbol Field { get; }
+
+        public AggregateType FieldType { get; }
     }
 }

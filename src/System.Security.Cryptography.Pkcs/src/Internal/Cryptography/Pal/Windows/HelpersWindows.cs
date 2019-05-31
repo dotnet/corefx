@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Buffers;
+using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.InteropServices;
@@ -13,6 +15,7 @@ using X509IssuerSerial = System.Security.Cryptography.Xml.X509IssuerSerial;
 
 using Microsoft.Win32.SafeHandles;
 
+using CryptProvParam=Interop.Advapi32.CryptProvParam;
 using static Interop.Crypt32;
 
 namespace Internal.Cryptography.Pal.Windows
@@ -146,7 +149,7 @@ namespace Internal.Cryptography.Pal.Windows
             return hCertContext;
         }
 
-        public unsafe static byte[] GetSubjectKeyIdentifer(this SafeCertContextHandle hCertContext)
+        public static unsafe byte[] GetSubjectKeyIdentifer(this SafeCertContextHandle hCertContext)
         {
             int cbData = 0;
             if (!Interop.Crypt32.CertGetCertificateContextProperty(hCertContext, CertContextPropId.CERT_KEY_IDENTIFIER_PROP_ID, null, ref cbData))
@@ -165,8 +168,32 @@ namespace Internal.Cryptography.Pal.Windows
             {
                 case CertIdChoice.CERT_ID_ISSUER_SERIAL_NUMBER:
                     {
-                        const CertNameStrTypeAndFlags dwStrType = CertNameStrTypeAndFlags.CERT_X500_NAME_STR | CertNameStrTypeAndFlags.CERT_NAME_STR_REVERSE_FLAG;
-                        string issuer = Interop.Crypt32.CertNameToStr(ref certId.u.IssuerSerialNumber.Issuer, dwStrType);
+                        const int dwStrType = (int)(CertNameStrTypeAndFlags.CERT_X500_NAME_STR | CertNameStrTypeAndFlags.CERT_NAME_STR_REVERSE_FLAG);
+
+                        string issuer;
+                        unsafe
+                        {
+                            DATA_BLOB* dataBlobPtr = &certId.u.IssuerSerialNumber.Issuer;
+
+                            int nc = Interop.Crypt32.CertNameToStr((int)MsgEncodingType.All, dataBlobPtr, dwStrType, null, 0);
+                            if (nc <= 1) // The API actually return 1 when it fails; which is not what the documentation says.
+                            {
+                                throw Marshal.GetLastWin32Error().ToCryptographicException();
+                            }
+
+                            Span<char> name = nc <= 128 ? stackalloc char[128] : new char[nc];
+                            fixed (char* namePtr = name)
+                            {
+                                nc = Interop.Crypt32.CertNameToStr((int)MsgEncodingType.All, dataBlobPtr, dwStrType, namePtr, nc);
+                                if (nc <= 1) // The API actually return 1 when it fails; which is not what the documentation says.
+                                {
+                                    throw Marshal.GetLastWin32Error().ToCryptographicException();
+                                }
+
+                                issuer = new string(namePtr);
+                            }
+                        }
+
                         byte[] serial = certId.u.IssuerSerialNumber.SerialNumber.ToByteArray();
                         X509IssuerSerial issuerSerial = new X509IssuerSerial(issuer, serial.ToSerialString());
                         return new SubjectIdentifier(SubjectIdentifierType.IssuerAndSerialNumber, issuerSerial);
@@ -200,7 +227,7 @@ namespace Internal.Cryptography.Pal.Windows
                     return new SubjectIdentifierOrKey(SubjectIdentifierOrKeyType.SubjectKeyIdentifier, subjectIdentifier.Value);
 
                 default:
-                    Debug.Assert(false);  // Only the framework can construct SubjectIdentifier's so if we got a bad value here, that's our fault.
+                    Debug.Fail("Only the framework can construct SubjectIdentifier's so if we got a bad value here, that's our fault.");
                     throw new CryptographicException(SR.Format(SR.Cryptography_Cms_Invalid_Subject_Identifier_Type, subjectIdentifierType));
             }
         }
@@ -300,6 +327,12 @@ namespace Internal.Cryptography.Pal.Windows
             }
 
             AlgorithmIdentifier algorithmIdentifier = new AlgorithmIdentifier(Oid.FromOidValue(oidValue, OidGroup.All), keyLength);
+            switch (oidValue)
+            {
+                case Oids.RsaOaep:
+                    algorithmIdentifier.Parameters = cryptAlgorithmIdentifer.Parameters.ToByteArray();
+                    break;
+            }
             return algorithmIdentifier;
         }
 
@@ -326,6 +359,120 @@ namespace Internal.Cryptography.Pal.Windows
             }
         }
 
+        public static CspParameters GetProvParameters(this SafeProvOrNCryptKeyHandle handle)
+        {
+            // A normal key container name is a GUID (~34 bytes ASCII)
+            // The longest standard provider name is 64 bytes (including the \0),
+            // but we shouldn't have a CAPI call with a software CSP.
+            //
+            // In debug builds use a buffer which will need to be resized, but is big
+            // enough to hold the DWORD "can't fail" values.
+            Span<byte> stackSpan = stackalloc byte[
+#if DEBUG
+                sizeof(int)
+#else
+                64
+#endif
+                ];
+
+            stackSpan.Clear();
+            int size = stackSpan.Length;
+
+            if (!Interop.Advapi32.CryptGetProvParam(handle, CryptProvParam.PP_PROVTYPE, stackSpan, ref size))
+            {
+                throw Marshal.GetLastWin32Error().ToCryptographicException();
+            }
+
+            if (size != sizeof(int))
+            {
+                Debug.Fail("PP_PROVTYPE writes a DWORD - enum misalignment?");
+                throw new CryptographicException();
+            }
+
+            int provType = MemoryMarshal.Read<int>(stackSpan.Slice(0, size));
+
+            size = stackSpan.Length;
+            if (!Interop.Advapi32.CryptGetProvParam(handle, CryptProvParam.PP_KEYSET_TYPE, stackSpan, ref size))
+            {
+                throw Marshal.GetLastWin32Error().ToCryptographicException();
+            }
+
+            if (size != sizeof(int))
+            {
+                Debug.Fail("PP_KEYSET_TYPE writes a DWORD - enum misalignment?");
+                throw new CryptographicException();
+            }
+
+            int keysetType = MemoryMarshal.Read<int>(stackSpan.Slice(0, size));
+
+            // Only CRYPT_MACHINE_KEYSET is described as coming back, but be defensive.
+            CspProviderFlags provFlags =
+                ((CspProviderFlags)keysetType & CspProviderFlags.UseMachineKeyStore) |
+                CspProviderFlags.UseExistingKey;
+
+            byte[] rented = null;
+            Span<byte> asciiStringBuf = stackSpan;
+
+            string provName = GetStringProvParam(handle, CryptProvParam.PP_NAME, ref asciiStringBuf, ref rented, 0);
+            int maxClear = provName.Length;
+            string keyName = GetStringProvParam(handle, CryptProvParam.PP_CONTAINER, ref asciiStringBuf, ref rented, maxClear);
+            maxClear = Math.Max(maxClear, keyName.Length);
+
+            if (rented != null)
+            {
+                CryptoPool.Return(rented, maxClear);
+            }
+
+            return new CspParameters(provType)
+            {
+                Flags = provFlags,
+                KeyContainerName = keyName,
+                ProviderName = provName,
+            };
+        }
+
+        private static string GetStringProvParam(
+            SafeProvOrNCryptKeyHandle handle,
+            CryptProvParam dwParam,
+            ref Span<byte> buf,
+            ref byte[] rented,
+            int clearLen)
+        {
+            int len = buf.Length;
+
+            if (!Interop.Advapi32.CryptGetProvParam(handle, dwParam, buf, ref len))
+            {
+                if (len > buf.Length)
+                {
+                    if (rented != null)
+                    {
+                        CryptoPool.Return(rented, clearLen);
+                    }
+
+                    rented = CryptoPool.Rent(len);
+                    buf = rented;
+                    len = rented.Length;
+                }
+                else
+                {
+                    throw Marshal.GetLastWin32Error().ToCryptographicException();
+                }
+
+                if (!Interop.Advapi32.CryptGetProvParam(handle, dwParam, buf, ref len))
+                {
+                    throw Marshal.GetLastWin32Error().ToCryptographicException();
+                }
+            }
+
+            unsafe
+            {
+                fixed (byte* asciiPtr = &MemoryMarshal.GetReference(buf))
+                {
+                    return Marshal.PtrToStringAnsi((IntPtr)asciiPtr, len);
+                }
+            }
+        }
+
         private static unsafe CryptographicAttributeObjectCollection ToCryptographicAttributeObjectCollection(CRYPT_ATTRIBUTES* pCryptAttributes)
         {
             CryptographicAttributeObjectCollection collection = new CryptographicAttributeObjectCollection();
@@ -341,13 +488,16 @@ namespace Internal.Cryptography.Pal.Windows
         {
             string oidValue = pCryptAttribute->pszObjId.ToStringAnsi();
             Oid oid = new Oid(oidValue);
+            AsnEncodedDataCollection attributeCollection = new AsnEncodedDataCollection();
 
             for (int i = 0; i < pCryptAttribute->cValue; i++)
             {
                 byte[] encodedAttribute = pCryptAttribute->rgValue[i].ToByteArray();
-                AsnEncodedData attributeObject = Helpers.CreateBestPkcs9AttributeObjectAvailable(oid, encodedAttribute);
-                collection.Add(attributeObject);
+                AsnEncodedData attributeObject = PkcsHelpers.CreateBestPkcs9AttributeObjectAvailable(oid, encodedAttribute);
+                attributeCollection.Add(attributeObject);
             }
+
+            collection.Add(new CryptographicAttributeObject(oid, attributeCollection));
         }
     }
 }

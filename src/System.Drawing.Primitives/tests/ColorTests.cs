@@ -5,13 +5,16 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Drawing.Primitives.Tests
 {
     public partial class ColorTests
     {
-        public static IEnumerable<object[]> NamedArgbValues =>
+        public static bool SupportsSystemEvents => PlatformDetection.IsWindows && !PlatformDetection.IsUap && PlatformDetection.IsNotWindowsNanoServer;
+
+        public static readonly IEnumerable<object[]> NamedArgbValues =
             new[]
             {
                 new object[] {"Transparent", 0, 255, 255, 255},
@@ -157,7 +160,10 @@ namespace System.Drawing.Primitives.Tests
                 new object[] {"YellowGreen", 255, 154, 205, 50},
             };
 
-        public static IEnumerable<object[]> ColorNames => Enum.GetNames(typeof(KnownColor)).Select(n => new object[] { n });
+        public static readonly IEnumerable<object[]> ColorNames = typeof(Color).GetProperties()
+                .Where(p => p.PropertyType == typeof(Color))
+                .Select(p => new object[] { p.Name })
+                .ToArray();
 
         private Color? GetColorByProperty(string name)
         {
@@ -188,7 +194,7 @@ namespace System.Drawing.Primitives.Tests
         [InlineData(1, 2, 3, 4)]
         public void FromArgb_Roundtrips(int a, int r, int g, int b)
         {
-            Color c1 = Color.FromArgb((int)unchecked((uint)a << 24 | (uint)r << 16 | (uint)g << 8 | (uint)b));
+            Color c1 = Color.FromArgb(unchecked((int)((uint)a << 24 | (uint)r << 16 | (uint)g << 8 | (uint)b)));
             Assert.Equal(a, c1.A);
             Assert.Equal(r, c1.R);
             Assert.Equal(g, c1.G);
@@ -215,35 +221,11 @@ namespace System.Drawing.Primitives.Tests
         }
 
         [Fact]
-        public void IsKnownColor()
-        {
-            Assert.True(Color.FromKnownColor(KnownColor.AliceBlue).IsKnownColor);
-            Assert.True(Color.FromName("AliceBlue").IsKnownColor);
-
-            Assert.False(Color.FromKnownColor((KnownColor)(-1)).IsKnownColor);
-            Assert.False(Color.FromKnownColor((KnownColor)(12345)).IsKnownColor);
-            Assert.False(Color.FromName("SomethingNotAColor").IsKnownColor);
-            Assert.False(Color.FromArgb(Color.AliceBlue.A, Color.AliceBlue.R, Color.AliceBlue.G, Color.AliceBlue.B).IsKnownColor);
-        }
-
-        [Fact]
         public void IsNamedColor()
         {
             Assert.True(Color.AliceBlue.IsNamedColor);
-            Assert.True(Color.FromKnownColor(KnownColor.AliceBlue).IsNamedColor);
             Assert.True(Color.FromName("AliceBlue").IsNamedColor);
             Assert.False(Color.FromArgb(Color.AliceBlue.A, Color.AliceBlue.R, Color.AliceBlue.G, Color.AliceBlue.B).IsNamedColor);
-        }
-
-        [Fact]
-        public void IsSystemColor()
-        {
-            Color c = Color.FromKnownColor(KnownColor.ActiveBorder);
-            Assert.True(c.IsSystemColor);
-            Assert.True(Color.FromName("ActiveBorder").IsSystemColor);
-            Assert.False(Color.FromArgb(c.A, c.R, c.G, c.B).IsSystemColor);
-            Assert.False(Color.FromKnownColor(KnownColor.AliceBlue).IsSystemColor);
-            Assert.False(Color.FromName("AliceBlue").IsSystemColor);
         }
 
         [Theory]
@@ -285,19 +267,6 @@ namespace System.Drawing.Primitives.Tests
             Assert.Equal(argb, Color.FromArgb(alpha, red, green, blue).ToArgb());
         }
 
-        [Theory]
-        [MemberData(nameof(ColorNames))]
-        public void ToKnownColor(string name)
-        {
-            var knownColor = (KnownColor)Enum.Parse(typeof(KnownColor), name);
-            var colorByProperty = GetColorByProperty(name);
-            if (colorByProperty.HasValue)
-            {
-                Assert.Equal(knownColor, colorByProperty.Value.ToKnownColor());
-            }
-            Assert.Equal(knownColor, Color.FromName(name).ToKnownColor());
-        }
-
         [Fact]
         public void ToStringEmpty()
         {
@@ -333,11 +302,11 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidAlpha(int alpha)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(alpha, Color.Red);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(alpha, 0, 0, 0);
             });
@@ -347,11 +316,11 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidRed(int red)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(red, 0, 0);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, red, 0, 0);
             });
@@ -361,11 +330,11 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidGreen(int green)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, green, 0);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, 0, green, 0);
             });
@@ -375,16 +344,16 @@ namespace System.Drawing.Primitives.Tests
         [MemberData(nameof(InvalidValues))]
         public void FromArgb_InvalidBlue(int blue)
         {
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, 0, blue);
             });
-            Assert.Throws<ArgumentException>(() =>
+            AssertExtensions.Throws<ArgumentException>(null, () =>
             {
                 Color.FromArgb(0, 0, 0, blue);
             });
         }
-        
+
         [Fact]
         public void FromName_Invalid()
         {
@@ -393,7 +362,7 @@ namespace System.Drawing.Primitives.Tests
             Assert.Equal(0, c.ToArgb());
             Assert.Equal("OingoBoingo", c.Name);
         }
-        
+
         private void CheckRed(Color color)
         {
             Assert.Equal(255, color.A);
@@ -402,9 +371,7 @@ namespace System.Drawing.Primitives.Tests
             Assert.Equal(0, color.B);
             Assert.Equal("Red", color.Name);
             Assert.False(color.IsEmpty, "IsEmpty");
-            Assert.True(color.IsKnownColor, "IsKnownColor");
             Assert.True(color.IsNamedColor, "IsNamedColor");
-            Assert.False(color.IsSystemColor, "IsSystemColor");
         }
 
         [Theory]
@@ -465,6 +432,8 @@ namespace System.Drawing.Primitives.Tests
         [InlineData(51, 255, 51, 1f)]
         [InlineData(51, 51, 255, 1f)]
         [InlineData(51, 51, 51, 0f)]
+        [InlineData(204, 51, 51, 0.6f)]
+        [InlineData(221, 221, 204, 0.2f)]
         public void GetSaturation(int r, int g, int b, float expected)
         {
             Assert.Equal(expected, Color.FromArgb(r, g, b).GetSaturation());
@@ -472,9 +441,6 @@ namespace System.Drawing.Primitives.Tests
 
         public static IEnumerable<object[]> Equality_MemberData()
         {
-            yield return new object[] { Color.FromKnownColor(KnownColor.AliceBlue), Color.FromKnownColor(KnownColor.AliceBlue), true };
-            yield return new object[] { Color.FromKnownColor(KnownColor.AliceBlue), Color.FromKnownColor(KnownColor.Aquamarine), false };
-
             yield return new object[] { Color.AliceBlue, Color.AliceBlue, true };
             yield return new object[] { Color.AliceBlue, Color.White, false};
             yield return new object[] { Color.AliceBlue, Color.Black, false };
@@ -497,7 +463,6 @@ namespace System.Drawing.Primitives.Tests
             yield return new object[] {Color.FromName("SomeName"), Color.FromName(someNameConstructed), true};
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // desktop incorrectly does "name.Equals(name)" in Equals
         [Theory]
         [MemberData(nameof(Equality_MemberData))]
         public void Equality(Color left, Color right, bool expected)
@@ -505,11 +470,17 @@ namespace System.Drawing.Primitives.Tests
             Assert.True(left.Equals(left), "left should always Equals itself");
             Assert.True(right.Equals(right), "right should always Equals itself");
 
+            Assert.True(left.Equals((object)left), "left should always Equals itself");
+            Assert.True(right.Equals((object)right), "right should always Equals itself");
+
             Assert.Equal(expected, left == right);
             Assert.Equal(expected, right == left);
 
             Assert.Equal(expected, left.Equals(right));
             Assert.Equal(expected, right.Equals(left));
+
+            Assert.Equal(expected, left.Equals((object)right));
+            Assert.Equal(expected, right.Equals((object)left));
 
             Assert.Equal(!expected, left != right);
             Assert.Equal(!expected, right != left);
@@ -520,6 +491,46 @@ namespace System.Drawing.Primitives.Tests
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.Aquamarine);
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.FromArgb(4, 3, 2, 1));
+        }
+
+        [ConditionalFact(nameof(SupportsSystemEvents))]
+        public void UserPreferenceChangingEventTest()
+        {
+            int element = 12; // Win32SystemColors.AppWorkSpace.
+            Color oldColor = System.Drawing.SystemColors.AppWorkspace;
+
+            // A call to ToArgb is necessary before changing the system colors because it initializes the knownColorTable.
+            int oldColorArgb = oldColor.ToArgb();
+            int oldColorAbgr = GetColorRefValue(oldColor);
+
+            Color newColor = oldColor != Color.Gold ? Color.Gold : Color.Silver;
+            int newColorArgb = newColor.ToArgb();
+            int newColorAbgr = GetColorRefValue(newColor);
+
+            Assert.NotEqual(newColorArgb, oldColorArgb);
+
+            try
+            {
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { newColorAbgr }));
+
+                RetryHelper.Execute(() =>
+                {
+                    Assert.Equal(newColorArgb, oldColor.ToArgb());
+                });
+            }
+            finally
+            {
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { oldColorAbgr }));
+            }
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int SetSysColors(int cElements, int[] lpaElements, int[] lpaRgbValues);
+
+        private static int GetColorRefValue(Color color)
+        {
+            // The COLORREF value has the following hexadecimal form: 0x00bbggrr.
+            return color.B << 16 | color.G << 8 | color.R;
         }
     }
 }

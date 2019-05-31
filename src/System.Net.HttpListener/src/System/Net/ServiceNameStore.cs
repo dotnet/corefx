@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -85,8 +85,8 @@ namespace System.Net
                     port = hostAndPort.Substring(colonIndex + 1); // Excludes colon 
 
                     // Loosely validate the port just to make sure it was a port and not something else
-                    UInt16 portValue;
-                    if (!UInt16.TryParse(port, NumberStyles.Integer, CultureInfo.InvariantCulture, out portValue))
+                    ushort portValue;
+                    if (!ushort.TryParse(port, NumberStyles.Integer, CultureInfo.InvariantCulture, out portValue))
                     {
                         return inputServiceName;
                     }
@@ -147,7 +147,7 @@ namespace System.Net
 
         public bool Add(string uriPrefix)
         {
-            Debug.Assert(!String.IsNullOrEmpty(uriPrefix));
+            Debug.Assert(!string.IsNullOrEmpty(uriPrefix));
 
             string[] newServiceNames = BuildServiceNames(uriPrefix);
 
@@ -237,7 +237,7 @@ namespace System.Net
             }
             else if (allowInvalidUriStrings)
             {
-                int i = uriPrefix.IndexOf("://") + 3;
+                int i = uriPrefix.IndexOf("://", StringComparison.Ordinal) + 3;
                 int j = i;
 
                 bool inSquareBrackets = false;
@@ -284,8 +284,8 @@ namespace System.Net
             string hostname = ExtractHostname(uriPrefix, true);
 
             IPAddress ipAddress = null;
-            if (String.Compare(hostname, "*", StringComparison.InvariantCultureIgnoreCase) == 0 ||
-                String.Compare(hostname, "+", StringComparison.InvariantCultureIgnoreCase) == 0 ||
+            if (string.Equals(hostname, "*", StringComparison.OrdinalIgnoreCase) ||
+                string.Equals(hostname, "+", StringComparison.OrdinalIgnoreCase) ||
                 IPAddress.TryParse(hostname, out ipAddress))
             {
                 // for a wildcard, register the machine name.  If the caller doesn't have DNS permission
@@ -297,14 +297,14 @@ namespace System.Net
                 }
                 catch (System.Net.Sockets.SocketException)
                 {
-                    return new string[0];
+                    return Array.Empty<string>();
                 }
                 catch (System.Security.SecurityException)
                 {
-                    return new string[0];
+                    return Array.Empty<string>();
                 }
             }
-            else if (!hostname.Contains("."))
+            else if (!hostname.Contains('.'))
             {
                 // for a dotless name, try to resolve the FQDN.  If the caller doesn't have DNS permission
                 // or the query fails for some reason, add only the dotless name.

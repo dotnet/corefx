@@ -3,16 +3,16 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2112:SecuredTypesShouldNotExposeFields", Scope = "type", Target = "System.ComponentModel.EventDescriptorCollection")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2112:SecuredTypesShouldNotExposeFields", Scope = "type", Target = "System.ComponentModel.EventDescriptorCollection")]
 
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>
-    ///       Represents a collection of events.
-    ///    </para>
+    /// Represents a collection of events.
     /// </summary>
     public class EventDescriptorCollection : ICollection, IList
     {
@@ -20,9 +20,8 @@ namespace System.ComponentModel
         private string[] _namedSort;
         private readonly IComparer _comparer;
         private bool _eventsOwned;
-        private bool _needSort = false;
-        private int _eventCount;
-        private readonly bool _readOnly = false;
+        private bool _needSort;
+        private readonly bool _readOnly;
 
         /// <summary>
         /// An empty AttributeCollection that can used instead of creating a new one with no items.
@@ -30,28 +29,25 @@ namespace System.ComponentModel
         public static readonly EventDescriptorCollection Empty = new EventDescriptorCollection(null, true);
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.EventDescriptorCollection'/> class.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.EventDescriptorCollection'/> class.
         /// </summary>
         public EventDescriptorCollection(EventDescriptor[] events)
         {
             if (events == null)
             {
                 _events = Array.Empty<EventDescriptor>();
-                _eventCount = 0;
             }
             else
             {
                 _events = events;
-                _eventCount = events.Length;
+                Count = events.Length;
             }
             _eventsOwned = true;
         }
 
         /// <summary>
-        ///     Initializes a new instance of an event descriptor collection, and allows you to mark the
-        ///     collection as read-only so it cannot be modified.
+        /// Initializes a new instance of an event descriptor collection, and allows you to mark the
+        /// collection as read-only so it cannot be modified.
         /// </summary>
         public EventDescriptorCollection(EventDescriptor[] events, bool readOnly) : this(events)
         {
@@ -67,33 +63,23 @@ namespace System.ComponentModel
             }
             _comparer = comparer;
             _events = events;
-            _eventCount = eventCount;
+            Count = eventCount;
             _needSort = true;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the number
-        ///       of event descriptors in the collection.
-        ///    </para>
+        /// Gets the number of event descriptors in the collection.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return _eventCount;
-            }
-        }
+        public int Count { get; private set; }
 
         /// <summary>
-        ///    <para>Gets the event with the specified index 
-        ///       number.</para>
+        /// Gets the event with the specified index number.
         /// </summary>
         public virtual EventDescriptor this[int index]
         {
             get
             {
-                if (index >= _eventCount)
+                if (index >= Count)
                 {
                     throw new IndexOutOfRangeException();
                 }
@@ -103,21 +89,10 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the event with the specified name.
-        ///    </para>
+        /// Gets the event with the specified name.
         /// </summary>
-        public virtual EventDescriptor this[string name]
-        {
-            get
-            {
-                return Find(name, false);
-            }
-        }
+        public virtual EventDescriptor this[string name] => Find(name, false);
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         public int Add(EventDescriptor value)
         {
             if (_readOnly)
@@ -125,14 +100,11 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            EnsureSize(_eventCount + 1);
-            _events[_eventCount++] = value;
-            return _eventCount - 1;
+            EnsureSize(Count + 1);
+            _events[Count++] = value;
+            return Count - 1;
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         public void Clear()
         {
             if (_readOnly)
@@ -140,18 +112,11 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            _eventCount = 0;
+            Count = 0;
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
-        public bool Contains(EventDescriptor value)
-        {
-            return IndexOf(value) >= 0;
-        }
+        public bool Contains(EventDescriptor value) => IndexOf(value) >= 0;
 
-        /// <internalonly/>
         void ICollection.CopyTo(Array array, int index)
         {
             EnsureEventsOwned();
@@ -187,7 +152,7 @@ namespace System.ComponentModel
 
             if (_events.Length == 0)
             {
-                _eventCount = 0;
+                Count = 0;
                 _events = new EventDescriptor[sizeNeeded];
                 return;
             }
@@ -196,16 +161,13 @@ namespace System.ComponentModel
 
             int newSize = Math.Max(sizeNeeded, _events.Length * 2);
             EventDescriptor[] newEvents = new EventDescriptor[newSize];
-            Array.Copy(_events, 0, newEvents, 0, _eventCount);
+            Array.Copy(_events, 0, newEvents, 0, Count);
             _events = newEvents;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets the description of the event with the specified
-        ///       name
-        ///       in the collection.
-        ///    </para>
+        /// Gets the description of the event with the specified
+        /// name in the collection.
         /// </summary>
         public virtual EventDescriptor Find(string name, bool ignoreCase)
         {
@@ -215,7 +177,7 @@ namespace System.ComponentModel
             {
                 for (int i = 0; i < Count; i++)
                 {
-                    if (String.Equals(_events[i].Name, name, StringComparison.OrdinalIgnoreCase))
+                    if (string.Equals(_events[i].Name, name, StringComparison.OrdinalIgnoreCase))
                     {
                         p = _events[i];
                         break;
@@ -226,7 +188,7 @@ namespace System.ComponentModel
             {
                 for (int i = 0; i < Count; i++)
                 {
-                    if (String.Equals(_events[i].Name, name, StringComparison.Ordinal))
+                    if (string.Equals(_events[i].Name, name, StringComparison.Ordinal))
                     {
                         p = _events[i];
                         break;
@@ -237,17 +199,8 @@ namespace System.ComponentModel
             return p;
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
-        public int IndexOf(EventDescriptor value)
-        {
-            return Array.IndexOf(_events, value, 0, _eventCount);
-        }
+        public int IndexOf(EventDescriptor value) => Array.IndexOf(_events, value, 0, Count);
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         public void Insert(int index, EventDescriptor value)
         {
             if (_readOnly)
@@ -255,18 +208,15 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            EnsureSize(_eventCount + 1);
-            if (index < _eventCount)
+            EnsureSize(Count + 1);
+            if (index < Count)
             {
-                Array.Copy(_events, index, _events, index + 1, _eventCount - index);
+                Array.Copy(_events, index, _events, index + 1, Count - index);
             }
             _events[index] = value;
-            _eventCount++;
+            Count++;
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         public void Remove(EventDescriptor value)
         {
             if (_readOnly)
@@ -282,9 +232,6 @@ namespace System.ComponentModel
             }
         }
 
-        /// <summary>
-        ///    <para>[To be supplied.]</para>
-        /// </summary>
         public void RemoveAt(int index)
         {
             if (_readOnly)
@@ -292,82 +239,69 @@ namespace System.ComponentModel
                 throw new NotSupportedException();
             }
 
-            if (index < _eventCount - 1)
+            if (index < Count - 1)
             {
-                Array.Copy(_events, index + 1, _events, index, _eventCount - index - 1);
+                Array.Copy(_events, index + 1, _events, index, Count - index - 1);
             }
-            _events[_eventCount - 1] = null;
-            _eventCount--;
+            _events[Count - 1] = null;
+            Count--;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets an enumerator for this <see cref='System.ComponentModel.EventDescriptorCollection'/>.
-        ///    </para>
+        /// Gets an enumerator for this <see cref='System.ComponentModel.EventDescriptorCollection'/>.
         /// </summary>
         public IEnumerator GetEnumerator()
         {
-            // we can only return an enumerator on the events we actually have...
-            if (_events.Length == _eventCount)
+            // We can only return an enumerator on the events we actually have.
+            if (_events.Length == Count)
             {
                 return _events.GetEnumerator();
             }
             else
             {
-                return new ArraySubsetEnumerator(_events, _eventCount);
+                return new ArraySubsetEnumerator(_events, Count);
             }
         }
 
         /// <summary>
-        ///    <para>
-        ///       Sorts the members of this EventDescriptorCollection, using the default sort for this collection, 
-        ///       which is usually alphabetical.
-        ///    </para>
+        /// Sorts the members of this EventDescriptorCollection, using the default sort for this collection, 
+        /// which is usually alphabetical.
         /// </summary>
         public virtual EventDescriptorCollection Sort()
         {
-            return new EventDescriptorCollection(_events, _eventCount, _namedSort, _comparer);
+            return new EventDescriptorCollection(_events, Count, _namedSort, _comparer);
         }
 
-
         /// <summary>
-        ///    <para>
-        ///       Sorts the members of this EventDescriptorCollection.  Any specified NamedSort arguments will 
-        ///       be applied first, followed by sort using the specified IComparer.
-        ///    </para>
+        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will 
+        /// be applied first, followed by sort using the specified IComparer.
         /// </summary>
         public virtual EventDescriptorCollection Sort(string[] names)
         {
-            return new EventDescriptorCollection(_events, _eventCount, names, _comparer);
+            return new EventDescriptorCollection(_events, Count, names, _comparer);
         }
 
         /// <summary>
-        ///    <para>
-        ///       Sorts the members of this EventDescriptorCollection.  Any specified NamedSort arguments will 
-        ///       be applied first, followed by sort using the specified IComparer.
-        ///    </para>
+        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will 
+        /// be applied first, followed by sort using the specified IComparer.
         /// </summary>
         public virtual EventDescriptorCollection Sort(string[] names, IComparer comparer)
         {
-            return new EventDescriptorCollection(_events, _eventCount, names, comparer);
+            return new EventDescriptorCollection(_events, Count, names, comparer);
         }
 
         /// <summary>
-        ///    <para>
-        ///       Sorts the members of this EventDescriptorCollection, using the specified IComparer to compare, 
-        ///       the EventDescriptors contained in the collection.
-        ///    </para>
+        /// Sorts the members of this EventDescriptorCollection, using the specified IComparer to compare, 
+        /// the EventDescriptors contained in the collection.
         /// </summary>
         public virtual EventDescriptorCollection Sort(IComparer comparer)
         {
-            return new EventDescriptorCollection(_events, _eventCount, _namedSort, comparer);
+            return new EventDescriptorCollection(_events, Count, _namedSort, comparer);
         }
 
         /// <summary>
-        ///    <para>
-        ///       Sorts the members of this EventDescriptorCollection.  Any specified NamedSort arguments will 
-        ///       be applied first, followed by sort using the specified IComparer.
-        ///    </para>
+        /// Sorts the members of this EventDescriptorCollection. Any specified NamedSort arguments will 
+        /// be applied first, followed by sort using the specified IComparer.
         /// </summary>
         protected void InternalSort(string[] names)
         {
@@ -380,7 +314,7 @@ namespace System.ComponentModel
 
             if (names != null && names.Length > 0)
             {
-                ArrayList eventArrayList = new ArrayList(_events);
+                List<EventDescriptor> eventList = new List<EventDescriptor>(_events);
                 int foundCount = 0;
                 int eventCount = _events.Length;
 
@@ -388,30 +322,30 @@ namespace System.ComponentModel
                 {
                     for (int j = 0; j < eventCount; j++)
                     {
-                        EventDescriptor currentEvent = (EventDescriptor)eventArrayList[j];
+                        EventDescriptor currentEvent = eventList[j];
 
-                        // Found a matching event.  Here, we add it to our array.  We also
+                        // Found a matching event. Here, we add it to our array. We also
                         // mark it as null in our array list so we don't add it twice later.
                         //
                         if (currentEvent != null && currentEvent.Name.Equals(names[i]))
                         {
                             _events[foundCount++] = currentEvent;
-                            eventArrayList[j] = null;
+                            eventList[j] = null;
                             break;
                         }
                     }
                 }
 
                 // At this point we have filled in the first "foundCount" number of propeties, one for each
-                // name in our name array.  If a name didn't match, then it is ignored.  Next, we must fill
-                // in the rest of the properties.  We now have a sparse array containing the remainder, so
+                // name in our name array. If a name didn't match, then it is ignored. Next, we must fill
+                // in the rest of the properties. We now have a sparse array containing the remainder, so
                 // it's easy.
                 //
                 for (int i = 0; i < eventCount; i++)
                 {
-                    if (eventArrayList[i] != null)
+                    if (eventList[i] != null)
                     {
-                        _events[foundCount++] = (EventDescriptor)eventArrayList[i];
+                        _events[foundCount++] = eventList[i];
                     }
                 }
 
@@ -420,9 +354,7 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Sorts the members of this EventDescriptorCollection using the specified IComparer.
-        ///    </para>
+        /// Sorts the members of this EventDescriptorCollection using the specified IComparer.
         /// </summary>
         protected void InternalSort(IComparer sorter)
         {
@@ -436,44 +368,17 @@ namespace System.ComponentModel
             }
         }
 
-        /// <internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
-        /// <internalonly/>
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return null;
-            }
-        }
+        object ICollection.SyncRoot => null;
 
-        int ICollection.Count 
-        {
-            get
-            {
-                return Count;
-            }
-        }
+        int ICollection.Count => Count;
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }        
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-        /// <internalonly/>
         object IList.this[int index]
         {
-            get
-            {
-                return this[index];
-            }
+            get => this[index];
             set
             {
                 if (_readOnly)
@@ -481,7 +386,7 @@ namespace System.ComponentModel
                     throw new NotSupportedException();
                 }
 
-                if (index >= _eventCount)
+                if (index >= Count)
                 {
                     throw new IndexOutOfRangeException();
                 }
@@ -490,63 +395,23 @@ namespace System.ComponentModel
             }
         }
 
-        /// <internalonly/>
-        int IList.Add(object value)
-        {
-            return Add((EventDescriptor)value);
-        }
+        int IList.Add(object value) => Add((EventDescriptor)value);
 
-        /// <internalonly/>
-        bool IList.Contains(object value)
-        {
-            return Contains((EventDescriptor)value);
-        }
+        bool IList.Contains(object value) => Contains((EventDescriptor)value);
 
-        void IList.Clear()
-        {
-            Clear();
-        }       
+        void IList.Clear() => Clear();
 
-        /// <internalonly/>
-        int IList.IndexOf(object value)
-        {
-            return IndexOf((EventDescriptor)value);
-        }
+        int IList.IndexOf(object value) => IndexOf((EventDescriptor)value);
 
-        /// <internalonly/>
-        void IList.Insert(int index, object value)
-        {
-            Insert(index, (EventDescriptor)value);
-        }
+        void IList.Insert(int index, object value) => Insert(index, (EventDescriptor)value);
 
-        /// <internalonly/>
-        void IList.Remove(object value)
-        {
-            Remove((EventDescriptor)value);
-        }
+        void IList.Remove(object value) => Remove((EventDescriptor)value);
 
-        void IList.RemoveAt(int index)
-        {
-            RemoveAt(index);
-        }        
+        void IList.RemoveAt(int index) => RemoveAt(index);
 
-        /// <internalonly/>
-        bool IList.IsReadOnly
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IList.IsReadOnly => _readOnly;
 
-        /// <internalonly/>
-        bool IList.IsFixedSize
-        {
-            get
-            {
-                return _readOnly;
-            }
-        }
+        bool IList.IsFixedSize => _readOnly;
 
         private class ArraySubsetEnumerator : IEnumerator
         {
@@ -577,10 +442,7 @@ namespace System.ComponentModel
                 }
             }
 
-            public void Reset()
-            {
-                _current = -1;
-            }
+            public void Reset() => _current = -1;
 
             public object Current
             {
@@ -599,4 +461,3 @@ namespace System.ComponentModel
         }
     }
 }
-

@@ -2,15 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-
-// ReSharper disable CheckNamespace
-
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Diagnostics.Contracts;
 
 namespace System.Linq
-// ReSharper restore CheckNamespace
 {
     /// <summary>
     /// LINQ extension method overrides that offer greater efficiency for <see cref="ImmutableArray{T}"/> than the standard LINQ methods
@@ -608,7 +604,7 @@ namespace System.Linq
         {
             Requires.NotNull(keySelector, nameof(keySelector));
 
-            var result = new Dictionary<TKey, T>(comparer);
+            var result = new Dictionary<TKey, T>(immutableArray.Length, comparer);
             foreach (var v in immutableArray)
             {
                 result.Add(keySelector(v), v);

@@ -18,12 +18,12 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateDirectory_ThrowsIsolatedStorageException()
+        public void CreateRemovedDirectory_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.CreateDirectory("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.CreateDirectory("foo"));
             }
         }
 
@@ -39,7 +39,7 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateDirectory_ThrowsInvalidOperationException()
+        public void CreateClosedDirectory_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -49,15 +49,15 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void CreateDirectory_RaisesArgumentException()
+        public void CreateDirectory_IsolatedStorageException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.CreateDirectory("\0bad"));
+                Assert.Throws<IsolatedStorageException>(() => isf.CreateDirectory("\0bad"));
             }
         }
 
-        [Theory MemberData(nameof(ValidStores))]
+        [Theory, MemberData(nameof(ValidStores))]
         public void CreateDirectory_Existance(PresetScopes scope)
         {
             using (var isf = GetPresetScope(scope))

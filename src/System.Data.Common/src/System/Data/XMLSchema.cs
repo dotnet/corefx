@@ -47,7 +47,7 @@ namespace System.Data
                         object propValue;
                         if (converter.CanConvertFrom(typeof(string)))
                         {
-                            propValue = converter.ConvertFromString(value);
+                            propValue = converter.ConvertFromInvariantString(value);
                         }
                         else if (type == typeof(Type))
                         {
@@ -298,7 +298,7 @@ namespace System.Data
                         object propValue;
                         if (converter.CanConvertFrom(typeof(string)))
                         {
-                            propValue = converter.ConvertFromString(value);
+                            propValue = converter.ConvertFromInvariantString(value);
                         }
                         else if (type == typeof(Type))
                         {
@@ -736,7 +736,7 @@ namespace System.Data
                 }
                 else if (dataSetElementCount > 1)
                 {
-                    throw ExceptionBuilder.TooManyIsDataSetAtributeInSchema();
+                    throw ExceptionBuilder.TooManyIsDataSetAttributesInSchema();
                 }
 
                 XmlSchemaComplexType ct = (XmlSchemaComplexType)FindTypeNode(_dsElement);
@@ -1487,7 +1487,7 @@ namespace System.Data
             }
 
             if (!FromInference || _ds.Tables.GetTable(typeName, _TableUri) == null)
-            { // for inference; special case: add table if doesnot exists in collection
+            { // for inference; special case: add table if does not exists in collection
                 _ds.Tables.Add(table);
                 if (FromInference)
                 {
@@ -2563,7 +2563,7 @@ namespace System.Data
                 }
                 else
                 {
-                    // everett behavior before <... msdata:UseCurrentLocale="true"/>
+                    // Everett behavior before <... msdata:UseCurrentLocale="true"/>
                     _ds.SetLocaleValue(new CultureInfo(0x409), false);
                 }
             }
@@ -2756,7 +2756,7 @@ namespace System.Data
             if ((QualifiedTableName == null) || (QualifiedTableName.Length == 0))
                 throw ExceptionBuilder.InvalidSelector(xpath);
 
-            if (QualifiedTableName.IndexOf(':') != -1)
+            if (QualifiedTableName.Contains(':'))
                 prefix = QualifiedTableName.Substring(0, QualifiedTableName.IndexOf(':'));
             else
                 return GetMsdataAttribute(key, Keywords.MSD_TABLENS);

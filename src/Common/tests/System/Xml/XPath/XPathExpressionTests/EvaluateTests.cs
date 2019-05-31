@@ -3,6 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Collections;
+using System.Linq;
+using System.Xml.Linq;
 using System.Xml.XPath;
 using Xunit;
 using XPathTests.Common;
@@ -99,7 +102,7 @@ namespace XPathTests.XPathExpressionTests
         [Fact]
         public static void Variation_5()
         {
-            EvaluateTestsErrors(String.Empty, "Xp_NodeSetExpected");
+            EvaluateTestsErrors(string.Empty, "Xp_NodeSetExpected");
         }
 
         /// <summary>
@@ -192,7 +195,47 @@ namespace XPathTests.XPathExpressionTests
             var navigator = Utils.CreateNavigator(xml);
 
             navigator.Select("/DocumentElement/child::*");
-            Assert.Throws<XPathException>(() => navigator.Select(String.Empty));
+            Assert.Throws<XPathException>(() => navigator.Select(string.Empty));
+        }
+    }
+
+    public class XPathEvaluateTests
+    {
+        [Fact]
+        public static void EvaluateTextNode_1()
+        {
+            XElement element = XElement.Parse("<element>Text.</element>");
+            IEnumerable result = (IEnumerable)element.XPathEvaluate("/text()");
+            Assert.Equal(1, result.Cast<XText>().Count());
+            Assert.Equal("Text.", result.Cast<XText>().First().ToString());
+        }
+
+        [Fact]
+        public static void EvaluateTextNode_2()
+        {
+            XElement element = XElement.Parse("<root>1<element></element>2</root>");
+            IEnumerable result = (IEnumerable)element.XPathEvaluate("/text()[1]");
+            Assert.Equal(1, result.Cast<XText>().Count());
+            Assert.Equal("1", result.Cast<XText>().First().ToString());
+        }
+
+        [Fact]
+        public static void EvaluateTextNode_3()
+        {
+            XElement element = XElement.Parse("<root>1<element></element>2</root>");
+            IEnumerable result = (IEnumerable)element.XPathEvaluate("/text()[2]");
+            Assert.Equal(1, result.Cast<XText>().Count());
+            Assert.Equal("2", result.Cast<XText>().First().ToString());
+        }
+
+        [Fact]
+        public static void EvaluateTextNode_4()
+        {
+            XElement element = XElement.Parse("<root>1<element>2</element><element>3</element>4</root>");
+            IEnumerable result = (IEnumerable)element.XPathEvaluate("/element/text()[1]");
+            Assert.Equal(2, result.Cast<XText>().Count());
+            Assert.Equal("2", result.Cast<XText>().First().ToString());
+            Assert.Equal("3", result.Cast<XText>().Last().ToString());
         }
     }
 }

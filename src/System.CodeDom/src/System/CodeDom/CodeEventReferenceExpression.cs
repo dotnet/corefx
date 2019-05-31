@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeEventReferenceExpression : CodeExpression
     {
         private string _eventName;
@@ -21,8 +20,8 @@ namespace System.CodeDom
 
         public string EventName
         {
-            get { return _eventName ?? string.Empty; }
-            set { _eventName = value; }
+            get => _eventName ?? string.Empty;
+            set => _eventName = value;
         }
     }
 }

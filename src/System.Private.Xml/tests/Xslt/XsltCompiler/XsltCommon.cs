@@ -1,19 +1,17 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
 using OLEDB.Test.ModuleCore;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Xml;
 using System.Xml.XmlDiff;
-using System.Xml.Xsl;
 
 namespace XmlCoreTest.Common
 {
@@ -58,7 +56,7 @@ namespace XmlCoreTest.Common
             actualStream.Seek(0, SeekOrigin.Begin);
 
             using (var expectedStream = new FileStream(baselineFile, FileMode.Open, FileAccess.Read))
-                return CompareXml(expectedStream, actualStream, String.Empty, null);
+                return CompareXml(expectedStream, actualStream, string.Empty, null);
         }
 
         public static bool CompareXml(Stream expectedStream, Stream actualStream, string xmldiffoptionvalue, DelayedWriteLogger logger)
@@ -74,7 +72,7 @@ namespace XmlCoreTest.Common
             else
             {
                 if (logger != null) logger.LogMessage("Custom XmlDiffOptions used. Value passed is " + xmldiffoptionvalue);
-                diff.Option = (XmlDiffOption)Int32.Parse(xmldiffoptionvalue);
+                diff.Option = (XmlDiffOption)int.Parse(xmldiffoptionvalue);
             }
 
             XmlParserContext context = new XmlParserContext(new NameTable(), null, "", XmlSpace.None);
@@ -134,7 +132,7 @@ namespace XmlCoreTest.Common
         /// <param name="Baseline"></param>
         /// <param name="baselineStartLine">The line to start comparison in the baseline file</param>
         /// <param name="OutFile"></param>
-        /// <param name="outFileStartLine">The line to start comparion in the output file</param>
+        /// <param name="outFileStartLine">The line to start comparison in the output file</param>
         /// <param name="driverVersion"></param>
         /// <param name="logger"></param>
         /// <returns></returns>
@@ -179,13 +177,13 @@ namespace XmlCoreTest.Common
         private static string CalcChecksum(string fileName, int startFromLine, DelayedWriteLogger logger)
         {
             const int BUFFERSIZE = 4096;
-            Decimal dResult = 0;        // Numerical value of the checksum
+            decimal dResult = 0;        // Numerical value of the checksum
             int i = 0;                  // Generic counter
             int cBytesRead = 1;        // # of bytes read at one time
             int cTotalRead = 0;         // Total # of bytes read so far
-            Decimal dEndBuffer = 0;     // Buffer to remove from the end (This is necessary because
+            decimal dEndBuffer = 0;     // Buffer to remove from the end (This is necessary because
             // notepad adds CR/LF onto the end of every file)
-            Char[] rgBuffer = new Char[BUFFERSIZE];
+            char[] rgBuffer = new char[BUFFERSIZE];
 
             string xml = "";
 
@@ -206,12 +204,12 @@ namespace XmlCoreTest.Common
                 while (cBytesRead > 0)
                 {
                     // Keep XML property up to date
-                    xml = String.Concat(xml, new String(rgBuffer, 0, cBytesRead));
+                    xml = string.Concat(xml, new string(rgBuffer, 0, cBytesRead));
 
                     // Calculate the checksum
                     for (i = 0; i < cBytesRead; i++)
                     {
-                        dResult += Math.Round((Decimal)(rgBuffer[i] / (cTotalRead + i + 1.0)), 10);
+                        dResult += Math.Round((decimal)(rgBuffer[i] / (cTotalRead + i + 1.0)), 10);
                     }
 
                     cTotalRead += cBytesRead;
@@ -245,7 +243,7 @@ namespace XmlCoreTest.Common
         public static bool VerifyAssemblyUsingPEVerify(string asmName, bool isValidCase, DelayedWriteLogger logger, ref string output)
         {
             Debug.Assert(asmName != null);
-            Debug.Assert(asmName != String.Empty);
+            Debug.Assert(asmName != string.Empty);
 
             if (!asmName.Contains(".dll") || !asmName.Contains(".DLL"))
                 asmName = asmName + ".dll";
@@ -271,7 +269,7 @@ namespace XmlCoreTest.Common
         public static bool VerifySingleAssemblyUsingPEVerify(string asmName, DelayedWriteLogger logger, ref string output)
         {
             Debug.Assert(asmName != null);
-            Debug.Assert(asmName != String.Empty);
+            Debug.Assert(asmName != string.Empty);
 
             bool result = false;
 
@@ -318,39 +316,48 @@ namespace XmlCoreTest.Common
 
         public static bool VerifyAssemblyUsingPEVerify(string asmName, DelayedWriteLogger logger, ref string output)
         {
-            String scriptAsmNameFormat = Path.ChangeExtension(asmName, null) + "_Script{0}.dll";
+            string scriptAsmNameFormat = Path.ChangeExtension(asmName, null) + "_Script{0}.dll";
             int scriptCounter = 0;
-            String testAsm = asmName;
+            string testAsm = asmName;
             bool result = false;
 
             do
             {
                 result = VerifySingleAssemblyUsingPEVerify(testAsm, logger, ref output);
-                testAsm = String.Format(scriptAsmNameFormat, ++scriptCounter);
+                testAsm = string.Format(scriptAsmNameFormat, ++scriptCounter);
             }
             while (result && File.Exists(testAsm));
 
             return result;
         }
 
-        public static string SearchPath(String fileName)
+        public static string SearchPath(string fileName)
         {
-            const string ToolsDirectorySuffix = @"bin\NETFX 4.5.1 Tools";
+            var locations = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-            var tools64 = new DirectoryInfo(@"C:\program Files (x86)\Microsoft SDKs\Windows");
-            var tools32 = new DirectoryInfo(@"C:\program Files\Microsoft SDKs\Windows");
+            // 32 bit if on 64 bit Windows
+            locations.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86), @"Microsoft SDKs\Windows"));
+            // 32 bit if on 32 bit Windows, otherwise 64 bit
+            locations.Add(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles), @"Microsoft SDKs\Windows"));
+            // 64 bit if in 32 bit process on 64 bit Windows
+            locations.Add(Path.Combine(Environment.GetEnvironmentVariable("ProgramW6432"), @"Microsoft SDKs\Windows"));
 
-            var directories64 = tools64.Exists ? tools64.EnumerateDirectories() : Enumerable.Empty<DirectoryInfo>();
-            var directories32 = tools32.Exists ? tools32.EnumerateDirectories() : Enumerable.Empty<DirectoryInfo>();
+            var files = new List<string>();
 
-            var toolPath = directories64.Concat(directories32)
-                .Select(dir => Path.Combine(dir.FullName, ToolsDirectorySuffix, fileName))
-                .SingleOrDefault(File.Exists);
+            foreach (var location in locations)
+            {
+                if (Directory.Exists(location))
+                    files.AddRange(Directory.GetFiles(location, fileName, SearchOption.AllDirectories));
+            }
 
-            if (toolPath == null)
+            if (files.Count == 0)
                 throw new FileNotFoundException(fileName);
 
-            return toolPath;
+            // Crudely prefer newer versions, eg 4.6.2 over 4.6.1,
+            // but it currently is not important
+            files.Sort(StringComparer.OrdinalIgnoreCase);
+
+            return files[files.Count - 1];
         }
     }
 
@@ -380,7 +387,7 @@ namespace XmlCoreTest.Common
             StreamReader fs = null;
             try
             {
-                Char[] rgBuffer = new Char[4096];
+                char[] rgBuffer = new char[4096];
 
                 fs = new StreamReader(new FileStream(fileName, FileMode.Open, FileAccess.Read));
 
@@ -394,7 +401,7 @@ namespace XmlCoreTest.Common
             finally
             {
                 if (fs != null) fs.Dispose();
-                this.LogMessage(String.Empty);
+                this.LogMessage(string.Empty);
             }
         }
 
@@ -512,7 +519,7 @@ namespace XmlCoreTest.Common
         } // no op, do not call
 
         public XsltRuntimeException(string a, bool d)
-            : this(a, XMLUSEREX, String.Empty, d)
+            : this(a, XMLUSEREX, string.Empty, d)
         {
         }
 
@@ -549,10 +556,10 @@ namespace XmlCoreTest.Common
             Debug.Assert(objectToCompareTo != null);
             Debug.Assert(objectToCompareTo.ExceptionId != null, "ExceptionId must be initialized to a valid fully qualified type name");
             Debug.Assert(objectToCompareTo.ResourceId != null, "ResourceId must be initialized to String.Empty, in which case MessageFragment is used, or a legal resource Id");
-            Debug.Assert(objectToCompareTo.MessageFragment != null, "MessageFragment must be intialized to String.Empty, in which case ResourceId is used, or a string that represents a specific exception message.");
+            Debug.Assert(objectToCompareTo.MessageFragment != null, "MessageFragment must be initialized to String.Empty, in which case ResourceId is used, or a string that represents a specific exception message.");
             Debug.Assert(this.ExceptionId != null, "ExceptionId must be initialized to a valid fully qualified type name");
             Debug.Assert(this.ResourceId != null, "ResourceId must be initialized to String.Empty, in which case MessageFragment is used, or a legal resource Id");
-            Debug.Assert(this.MessageFragment != null, "MessageFragment must be intialized to String.Empty, in which case ResourceId is used, or a string that represents a specific exception message.");
+            Debug.Assert(this.MessageFragment != null, "MessageFragment must be initialized to String.Empty, in which case ResourceId is used, or a string that represents a specific exception message.");
 
             // Inside this block, we have two properly initialized XsltRuntimeExceptions to compare.
 
@@ -582,7 +589,7 @@ namespace XmlCoreTest.Common
             }
             else
             {
-                if (!objectToCompareTo.ResourceId.Equals(String.Empty) && !objectToCompareTo.ResourceId.Equals(XMLUSEREX) &&
+                if (!objectToCompareTo.ResourceId.Equals(string.Empty) && !objectToCompareTo.ResourceId.Equals(XMLUSEREX) &&
                     objectToCompareTo.ResourceId.Equals(this.ResourceId))
                 {
                     //**** The highest degree of certainty we have. ****//
@@ -597,7 +604,7 @@ namespace XmlCoreTest.Common
                     }
                 }
                 // ResourceId is Empty or Xml_UserException, or they dont match
-                else if (!this.MessageFragment.Equals(String.Empty) && _examineMessages)
+                else if (!this.MessageFragment.Equals(string.Empty) && _examineMessages)
                 {
                     if (objectToCompareTo.ResourceId.Equals(this.ResourceId) &&
                         objectToCompareTo.MessageFragment.Contains(this.MessageFragment))

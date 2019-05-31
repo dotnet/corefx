@@ -9,7 +9,6 @@ using System.Diagnostics;
 
 namespace System.Xml.Xsl.XPath
 {
-
     // Extends XPathOperator enumeration
     internal enum LexKind
     {
@@ -205,7 +204,7 @@ namespace System.Xml.Xsl.XPath
 
         private static bool IsAsciiDigit(char ch)
         {
-            return (uint)(ch - '0') <= 9;
+            return unchecked((uint)(ch - '0')) <= 9;
         }
 
         public void NextLex()
@@ -605,7 +604,7 @@ namespace System.Xml.Xsl.XPath
             if (LexKind.LastNonChar < t)
             {
                 Debug.Assert("()[].@,*/$}".IndexOf((char)t) >= 0);
-                return new String((char)t, 1);
+                return char.ToString((char)t);
             }
 
             switch (t)

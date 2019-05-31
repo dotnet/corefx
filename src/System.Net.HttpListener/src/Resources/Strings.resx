@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -117,9 +116,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="net_log_listener_create_valid_identity_failed" xml:space="preserve">
-    <value>Failed to create a valid Identity for an incoming request.</value>
-  </data>
   <data name="net_log_listener_delegate_exception" xml:space="preserve">
     <value>Sending 500 response, AuthenticationSchemeSelectorDelegate threw an exception: {0}.</value>
   </data>
@@ -147,6 +143,9 @@
   <data name="net_listener_host" xml:space="preserve">
     <value>Only Uri prefixes with a valid hostname are supported.</value>
   </data>
+  <data name="net_listener_not_supported" xml:space="preserve">
+    <value>The request is not supported.</value>
+  </data>
   <data name="net_listener_mustcall" xml:space="preserve">
     <value>Please call the {0} method before calling this method.</value>
   </data>
@@ -162,9 +161,6 @@
   <data name="net_log_listener_no_cbt_http" xml:space="preserve">
     <value>No channel binding check for requests without a secure channel.</value>
   </data>
-  <data name="net_log_listener_no_cbt_platform" xml:space="preserve">
-    <value>No channel binding check because the underlying platform does not support extended protection.</value>
-  </data>
   <data name="net_log_listener_no_cbt_trustedproxy" xml:space="preserve">
     <value>No channel binding check for the trusted proxy scenario.</value>
   </data>
@@ -179,9 +175,6 @@
   </data>
   <data name="net_log_listener_no_spn_cbt" xml:space="preserve">
     <value>No service name check because the channel binding was already checked.</value>
-  </data>
-  <data name="net_log_listener_no_spn_platform" xml:space="preserve">
-    <value>No service name check because the underlying platform does not support extended protection.</value>
   </data>
   <data name="net_log_listener_no_spn_whensupported" xml:space="preserve">
     <value>No service name check because the client did not provide a service name and the server was configured for PolicyEnforcement.WhenSupported.</value>
@@ -356,5 +349,44 @@
   </data>
   <data name="net_WebSockets_Argument_InvalidMessageType" xml:space="preserve">
     <value>The message type '{0}' is not allowed for the '{1}' operation. Valid message types are: '{2}, {3}'. To close the WebSocket, use the '{4}' operation instead. </value>
+  </data>
+  <data name="net_securitypackagesupport" xml:space="preserve">
+    <value>The requested security package is not supported.</value>
+  </data>
+  <data name="net_log_operation_failed_with_error" xml:space="preserve">
+    <value>{0} failed with error {1}.</value>
+  </data>
+  <data name="net_MethodNotImplementedException" xml:space="preserve">
+    <value>This method is not implemented by this class.</value>
+  </data>
+  <data name="event_OperationReturnedSomething" xml:space="preserve">
+    <value>{0} returned {1}.</value>
+  </data>
+  <data name="net_invalid_enum" xml:space="preserve">
+    <value>The specified value is not valid in the '{0}' enumeration.</value>
+  </data>
+  <data name="net_auth_message_not_encrypted" xml:space="preserve">
+    <value>Protocol error: A received message contains a valid signature but it was not encrypted as required by the effective Protection Level.</value>
+  </data>
+  <data name="SSPIInvalidHandleType" xml:space="preserve">
+    <value>'{0}' is not a supported handle type.</value>
+  </data>
+  <data name="net_io_operation_aborted" xml:space="preserve">
+    <value>I/O operation aborted: '{0}'.</value>
+  </data>
+  <data name="net_invalid_path" xml:space="preserve">
+    <value>Invalid path.</value>
+  </data>
+  <data name="net_listener_auth_errors" xml:space="preserve">
+    <value>Authentication errors.</value>
+  </data>
+  <data name="net_listener_close" xml:space="preserve">
+    <value>Listener closed.</value>
+  </data>
+  <data name="net_invalid_port" xml:space="preserve">
+    <value>Invalid port in prefix.</value>
+  </data>
+  <data name="net_WebSockets_InvalidState" xml:space="preserve">
+    <value>The WebSocket is in an invalid state ('{0}') for this operation. Valid states are: '{1}'</value>
   </data>
 </root>

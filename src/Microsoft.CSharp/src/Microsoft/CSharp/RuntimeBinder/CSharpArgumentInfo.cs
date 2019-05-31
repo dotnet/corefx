@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.ComponentModel;
+using System.Numerics.Hashing;
 
 namespace Microsoft.CSharp.RuntimeBinder
 {
@@ -43,11 +44,16 @@ namespace Microsoft.CSharp.RuntimeBinder
         }
 
         // Accessor helpers.
-        internal bool UseCompileTimeType { get { return (Flags & CSharpArgumentInfoFlags.UseCompileTimeType) != 0; } }
-        internal bool LiteralConstant { get { return (Flags & CSharpArgumentInfoFlags.Constant) != 0; } }
-        internal bool NamedArgument { get { return (Flags & CSharpArgumentInfoFlags.NamedArgument) != 0; } }
-        internal bool IsByRef { get { return (Flags & CSharpArgumentInfoFlags.IsRef) != 0; } }
-        internal bool IsOut { get { return (Flags & CSharpArgumentInfoFlags.IsOut) != 0; } }
-        internal bool IsStaticType { get { return (Flags & CSharpArgumentInfoFlags.IsStaticType) != 0; } }
+        internal bool UseCompileTimeType => (Flags & CSharpArgumentInfoFlags.UseCompileTimeType) != 0;
+
+        internal bool LiteralConstant => (Flags & CSharpArgumentInfoFlags.Constant) != 0;
+
+        internal bool NamedArgument => (Flags & CSharpArgumentInfoFlags.NamedArgument) != 0;
+
+        internal bool IsByRefOrOut => (Flags & (CSharpArgumentInfoFlags.IsRef | CSharpArgumentInfoFlags.IsOut)) != 0;
+
+        internal bool IsOut => (Flags & CSharpArgumentInfoFlags.IsOut) != 0;
+
+        internal bool IsStaticType => (Flags & CSharpArgumentInfoFlags.IsStaticType) != 0;
     }
 }

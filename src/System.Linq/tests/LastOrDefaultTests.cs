@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                             where x > Int32.MinValue
+                             where x > int.MinValue
                              select x;
 
             Assert.Equal(q.LastOrDefault(), q.LastOrDefault());
@@ -23,8 +23,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                             where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                             where !string.IsNullOrEmpty(x)
                              select x;
 
             Assert.Equal(q.LastOrDefault(), q.LastOrDefault());
@@ -37,7 +37,7 @@ namespace System.Linq.Tests
             
             Assert.IsAssignableFrom<IList<T>>(source);
             
-            Assert.Equal(expected, source.LastOrDefault());
+            Assert.Equal(expected, source.RunOnce().LastOrDefault());
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace System.Linq.Tests
             
             Assert.Null(source as IList<T>);
             
-            Assert.Equal(expected, source.LastOrDefault());
+            Assert.Equal(expected, source.RunOnce().LastOrDefault());
         }
 
         [Fact]
@@ -179,6 +179,16 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void IListPredicateTrueForSomeRunOnce()
+        {
+            int[] source = { 3, 7, 10, 7, 9, 2, 11, 18, 13, 9 };
+            Func<int, bool> predicate = IsEven;
+            int expected = 18;
+
+            Assert.Equal(expected, source.RunOnce().LastOrDefault(predicate));
+        }
+
+        [Fact]
         public void EmptyNotIListSource()
         {
             IEnumerable<int?> source = Enumerable.Repeat((int?)4, 0);
@@ -228,22 +238,32 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void NotIListPredicateTrueForSomeRunOnce()
+        {
+            IEnumerable<int> source = ForceNotCollection(new int[] { 3, 7, 10, 7, 9, 2, 11, 18, 13, 9 });
+            Func<int, bool> predicate = IsEven;
+            int expected = 18;
+
+            Assert.Equal(expected, source.RunOnce().LastOrDefault(predicate));
+        }
+
+        [Fact]
         public void NullSource()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LastOrDefault());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LastOrDefault());
         }
 
         [Fact]
         public void NullSourcePredicateUsed()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LastOrDefault(i => i != 2));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).LastOrDefault(i => i != 2));
         }
 
         [Fact]
         public void NullPredicate()
         {
             Func<int, bool> predicate = null;
-            Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).LastOrDefault(predicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).LastOrDefault(predicate));
         }
     }
 }

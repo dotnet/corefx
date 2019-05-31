@@ -10,11 +10,9 @@ using System.Threading;
 
 namespace System.Net.NetworkInformation
 {
-    public class NetworkChange
+    public partial class NetworkChange
     {
-        //introduced for supporting design-time loading of System.Windows.dll
-        [Obsolete("This API supports the .NET Framework infrastructure and is not intended to be used directly from your code.", true)]
-        public static void RegisterNetworkChange(NetworkChange nc) { }
+        private static readonly object s_globalLock = new object();
 
         public static event NetworkAvailabilityChangedEventHandler NetworkAvailabilityChanged
         {
@@ -40,52 +38,51 @@ namespace System.Net.NetworkInformation
             }
         }
 
-        internal static bool CanListenForNetworkChanges
-        {
-            get
-            {
-                return true;
-            }
-        }
-
         internal static class AvailabilityChangeListener
         {
-            private readonly static object s_syncObject = new object();
-            private readonly static Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> s_availabilityCallerArray =
-                new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>();
-            private readonly static NetworkAddressChangedEventHandler s_addressChange = ChangedAddress;
+            private static readonly NetworkAddressChangedEventHandler s_addressChange = ChangedAddress;
             private static volatile bool s_isAvailable = false;
-            private readonly static ContextCallback s_RunHandlerCallback = new ContextCallback(RunHandlerCallback);
-
-            private static void RunHandlerCallback(object state)
-            {
-                ((NetworkAvailabilityChangedEventHandler)state)(null, new NetworkAvailabilityEventArgs(s_isAvailable));
-            }
 
             private static void ChangedAddress(object sender, EventArgs eventArgs)
             {
-                lock (s_syncObject)
+                Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext> availabilityChangedSubscribers = null;
+
+                lock (s_globalLock)
                 {
                     bool isAvailableNow = SystemNetworkInterface.InternalGetIsNetworkAvailable();
 
+                    // If there is an Availability Change, need to execute user callbacks.
                     if (isAvailableNow != s_isAvailable)
                     {
                         s_isAvailable = isAvailableNow;
 
-                        var s_copy =
-                            new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityCallerArray);
-
-                        foreach (var handler in s_copy.Keys)
+                        if (s_availabilityChangedSubscribers.Count > 0)
                         {
-                            ExecutionContext context = s_copy[handler];
-                            if (context == null)
-                            {
-                                handler(null, new NetworkAvailabilityEventArgs(s_isAvailable));
-                            }
-                            else
-                            {
-                                ExecutionContext.Run(context, s_RunHandlerCallback, handler);
-                            }
+                            availabilityChangedSubscribers = new Dictionary<NetworkAvailabilityChangedEventHandler, ExecutionContext>(s_availabilityChangedSubscribers);
+                        }
+                    }
+                }
+
+                // Executing user callbacks if Availability Change event occured.
+                if (availabilityChangedSubscribers != null)
+                {
+                    bool isAvailable = s_isAvailable;
+                    NetworkAvailabilityEventArgs args = isAvailable ? s_availableEventArgs : s_notAvailableEventArgs;
+                    ContextCallback callbackContext = isAvailable ? s_runHandlerAvailable : s_runHandlerNotAvailable;
+
+                    foreach (KeyValuePair<NetworkAvailabilityChangedEventHandler, ExecutionContext> 
+                        subscriber in availabilityChangedSubscribers)
+                    {
+                        NetworkAvailabilityChangedEventHandler handler = subscriber.Key;
+                        ExecutionContext ec = subscriber.Value;
+
+                        if (ec == null) // Flow supressed
+                        {
+                            handler(null, args);
+                        }
+                        else
+                        {
+                            ExecutionContext.Run(ec, callbackContext, handler);
                         }
                     }
                 }
@@ -93,54 +90,54 @@ namespace System.Net.NetworkInformation
 
             internal static void Start(NetworkAvailabilityChangedEventHandler caller)
             {
-                lock (s_syncObject)
+                if (caller != null)
                 {
-                    if (s_availabilityCallerArray.Count == 0)
+                    lock (s_globalLock)
                     {
-                        s_isAvailable = NetworkInterface.GetIsNetworkAvailable();
-                        AddressChangeListener.UnsafeStart(s_addressChange);
-                    }
+                        if (s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            s_isAvailable = NetworkInterface.GetIsNetworkAvailable();
+                            AddressChangeListener.UnsafeStart(s_addressChange);
+                        }
 
-                    if ((caller != null) && (!s_availabilityCallerArray.ContainsKey(caller)))
-                    {
-                        s_availabilityCallerArray.Add(caller, ExecutionContext.Capture());
+                        s_availabilityChangedSubscribers.TryAdd(caller, ExecutionContext.Capture());
                     }
                 }
             }
 
             internal static void Stop(NetworkAvailabilityChangedEventHandler caller)
             {
-                lock (s_syncObject)
+                if (caller != null)
                 {
-                    s_availabilityCallerArray.Remove(caller);
-                    if (s_availabilityCallerArray.Count == 0)
+                    lock (s_globalLock)
                     {
-                        AddressChangeListener.Stop(s_addressChange);
+                        s_availabilityChangedSubscribers.Remove(caller);
+                        if (s_availabilityChangedSubscribers.Count == 0)
+                        {
+                            AddressChangeListener.Stop(s_addressChange);
+                        }
                     }
                 }
             }
         }
 
         // Helper class for detecting address change events.
-        internal unsafe static class AddressChangeListener
+        internal static unsafe class AddressChangeListener
         {
-            private readonly static Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> s_callerArray =
-                new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>();
-            private readonly static ContextCallback s_runHandlerCallback = new ContextCallback(RunHandlerCallback);
-            private static RegisteredWaitHandle s_registeredWait;
-
             // Need to keep the reference so it isn't GC'd before the native call executes.
             private static bool s_isListening = false;
             private static bool s_isPending = false;
-            private static SafeCloseSocketAndEvent s_ipv4Socket = null;
-            private static SafeCloseSocketAndEvent s_ipv6Socket = null;
+            private static Socket s_ipv4Socket = null;
+            private static Socket s_ipv6Socket = null;
             private static WaitHandle s_ipv4WaitHandle = null;
             private static WaitHandle s_ipv6WaitHandle = null;
 
             // Callback fired when an address change occurs.
             private static void AddressChangedCallback(object stateObject, bool signaled)
             {
-                lock (s_callerArray)
+                Dictionary<NetworkAddressChangedEventHandler, ExecutionContext> addressChangedSubscribers = null;
+
+                lock (s_globalLock)
                 {
                     // The listener was canceled, which would only happen if we aren't listening for more events.
                     s_isPending = false;
@@ -153,7 +150,10 @@ namespace System.Net.NetworkInformation
                     s_isListening = false;
 
                     // Need to copy the array so the callback can call start and stop
-                    var copy = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_callerArray);
+                    if (s_addressChangedSubscribers.Count > 0)
+                    {
+                        addressChangedSubscribers = new Dictionary<NetworkAddressChangedEventHandler, ExecutionContext>(s_addressChangedSubscribers);
+                    }
 
                     try
                     {
@@ -164,25 +164,27 @@ namespace System.Net.NetworkInformation
                     {
                         if (NetEventSource.IsEnabled) NetEventSource.Error(null, nie);
                     }
+                }
 
-                    foreach (var handler in copy.Keys)
+                // Release the lock before calling into user callback.
+                if (addressChangedSubscribers != null)
+                {
+                    foreach (KeyValuePair<NetworkAddressChangedEventHandler, ExecutionContext>
+                        subscriber in addressChangedSubscribers)
                     {
-                        ExecutionContext context = copy[handler];
-                        if (context == null)
+                        NetworkAddressChangedEventHandler handler = subscriber.Key;
+                        ExecutionContext ec = subscriber.Value;
+
+                        if (ec == null) // Flow supressed
                         {
                             handler(null, EventArgs.Empty);
                         }
                         else
                         {
-                            ExecutionContext.Run(context, s_runHandlerCallback, handler);
+                            ExecutionContext.Run(ec, s_runAddressChangedHandler, handler);
                         }
                     }
                 }
-            }
-
-            private static void RunHandlerCallback(object state)
-            {
-                ((NetworkAddressChangedEventHandler)state)(null, EventArgs.Empty);
             }
 
             internal static void Start(NetworkAddressChangedEventHandler caller)
@@ -197,61 +199,52 @@ namespace System.Net.NetworkInformation
 
             private static void StartHelper(NetworkAddressChangedEventHandler caller, bool captureContext, StartIPOptions startIPOptions)
             {
-                lock (s_callerArray)
+                lock (s_globalLock)
                 {
                     // Setup changedEvent and native overlapped struct.
                     if (s_ipv4Socket == null)
                     {
-                        int blocking;
-
                         // Sockets will be initialized by the call to OSSupportsIP*.
                         if (Socket.OSSupportsIPv4)
                         {
-                            blocking = -1;
-                            s_ipv4Socket = SafeCloseSocketAndEvent.CreateWSASocketWithEvent(AddressFamily.InterNetwork, SocketType.Dgram, (ProtocolType)0, true, false);
-                            Interop.Winsock.ioctlsocket(s_ipv4Socket, Interop.Winsock.IoctlSocketConstants.FIONBIO, ref blocking);
-                            s_ipv4WaitHandle = s_ipv4Socket.GetEventHandle();
+                            s_ipv4Socket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, 0) { Blocking = false };
+                            s_ipv4WaitHandle = new AutoResetEvent(false);
                         }
 
                         if (Socket.OSSupportsIPv6)
                         {
-                            blocking = -1;
-                            s_ipv6Socket = SafeCloseSocketAndEvent.CreateWSASocketWithEvent(AddressFamily.InterNetworkV6, SocketType.Dgram, (ProtocolType)0, true, false);
-                            Interop.Winsock.ioctlsocket(s_ipv6Socket, Interop.Winsock.IoctlSocketConstants.FIONBIO, ref blocking);
-                            s_ipv6WaitHandle = s_ipv6Socket.GetEventHandle();
+                            s_ipv6Socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, 0) { Blocking = false };
+                            s_ipv6WaitHandle = new AutoResetEvent(false);
                         }
                     }
 
-                    if ((caller != null) && (!s_callerArray.ContainsKey(caller)))
+                    if (caller != null)
                     {
-                        s_callerArray.Add(caller, captureContext ? ExecutionContext.Capture() : null);
+                        s_addressChangedSubscribers.TryAdd(caller, captureContext ? ExecutionContext.Capture() : null);
                     }
 
-                    if (s_isListening || s_callerArray.Count == 0)
+                    if (s_isListening || s_addressChangedSubscribers.Count == 0)
                     {
                         return;
                     }
 
                     if (!s_isPending)
                     {
-                        int length;
-                        SocketError errorCode;
-
                         if (Socket.OSSupportsIPv4 && (startIPOptions & StartIPOptions.StartIPv4) != 0)
                         {
-                            s_registeredWait = ThreadPool.RegisterWaitForSingleObject(
+                            ThreadPool.RegisterWaitForSingleObject(
                                 s_ipv4WaitHandle,
                                 new WaitOrTimerCallback(AddressChangedCallback),
                                 StartIPOptions.StartIPv4,
                                 -1,
                                 true);
 
-                            errorCode = Interop.Winsock.WSAIoctl_Blocking(
-                                s_ipv4Socket.DangerousGetHandle(),
+                            SocketError errorCode = Interop.Winsock.WSAIoctl_Blocking(
+                                s_ipv4Socket.Handle,
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
-                                out length,
-                                SafeNativeOverlapped.Zero, IntPtr.Zero);
+                                out int length,
+                                IntPtr.Zero, IntPtr.Zero);
 
                             if (errorCode != SocketError.Success)
                             {
@@ -262,12 +255,9 @@ namespace System.Net.NetworkInformation
                                 }
                             }
 
-                            SafeWaitHandle s_ipv4SocketGetEventHandleSafeWaitHandle =
-                                s_ipv4Socket.GetEventHandle().GetSafeWaitHandle();
-
                             errorCode = Interop.Winsock.WSAEventSelect(
-                                s_ipv4Socket,
-                                s_ipv4SocketGetEventHandleSafeWaitHandle,
+                                s_ipv4Socket.SafeHandle,
+                                s_ipv4WaitHandle.GetSafeWaitHandle(),
                                 Interop.Winsock.AsyncEventBits.FdAddressListChange);
 
                             if (errorCode != SocketError.Success)
@@ -278,19 +268,19 @@ namespace System.Net.NetworkInformation
 
                         if (Socket.OSSupportsIPv6 && (startIPOptions & StartIPOptions.StartIPv6) != 0)
                         {
-                            s_registeredWait = ThreadPool.RegisterWaitForSingleObject(
+                            ThreadPool.RegisterWaitForSingleObject(
                                 s_ipv6WaitHandle,
                                 new WaitOrTimerCallback(AddressChangedCallback),
                                 StartIPOptions.StartIPv6,
                                 -1,
                                 true);
 
-                            errorCode = Interop.Winsock.WSAIoctl_Blocking(
-                                s_ipv6Socket.DangerousGetHandle(),
+                            SocketError errorCode = Interop.Winsock.WSAIoctl_Blocking(
+                                s_ipv6Socket.Handle,
                                 (int)IOControlCode.AddressListChange,
                                 null, 0, null, 0,
-                                out length,
-                                SafeNativeOverlapped.Zero, IntPtr.Zero);
+                                out int length,
+                                IntPtr.Zero, IntPtr.Zero);
 
                             if (errorCode != SocketError.Success)
                             {
@@ -301,12 +291,9 @@ namespace System.Net.NetworkInformation
                                 }
                             }
 
-                            SafeWaitHandle s_ipv6SocketGetEventHandleSafeWaitHandle =
-                                s_ipv6Socket.GetEventHandle().GetSafeWaitHandle();
-
                             errorCode = Interop.Winsock.WSAEventSelect(
-                                s_ipv6Socket,
-                                s_ipv6SocketGetEventHandleSafeWaitHandle,
+                                s_ipv6Socket.SafeHandle,
+                                s_ipv6WaitHandle.GetSafeWaitHandle(),
                                 Interop.Winsock.AsyncEventBits.FdAddressListChange);
 
                             if (errorCode != SocketError.Success)
@@ -323,12 +310,15 @@ namespace System.Net.NetworkInformation
 
             internal static void Stop(NetworkAddressChangedEventHandler caller)
             {
-                lock (s_callerArray)
+                if (caller != null)
                 {
-                    s_callerArray.Remove(caller);
-                    if (s_callerArray.Count == 0 && s_isListening)
+                    lock (s_globalLock)
                     {
-                        s_isListening = false;
+                        s_addressChangedSubscribers.Remove(caller);
+                        if (s_addressChangedSubscribers.Count == 0 && s_isListening)
+                        {
+                            s_isListening = false;
+                        }
                     }
                 }
             }

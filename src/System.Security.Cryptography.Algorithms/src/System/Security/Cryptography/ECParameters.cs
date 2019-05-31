@@ -2,6 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.Asn1;
+
 namespace System.Security.Cryptography
 {
     /// <summary>
@@ -40,7 +44,7 @@ namespace System.Security.Cryptography
             {
                 hasErrors = true;
             }
-            
+
             if (!hasErrors)
             {
                 if (Curve.IsExplicit)

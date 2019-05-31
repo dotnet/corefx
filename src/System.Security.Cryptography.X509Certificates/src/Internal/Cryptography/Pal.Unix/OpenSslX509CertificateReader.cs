@@ -23,6 +23,210 @@ namespace Internal.Cryptography.Pal
         private X500DistinguishedName _subjectName;
         private X500DistinguishedName _issuerName;
 
+        public static ICertificatePal FromHandle(IntPtr handle)
+        {
+            if (handle == IntPtr.Zero)
+                throw new ArgumentException(SR.Arg_InvalidHandle, nameof(handle));
+
+            return new OpenSslX509CertificateReader(Interop.Crypto.X509UpRef(handle));
+        }
+
+        public static ICertificatePal FromOtherCert(X509Certificate cert)
+        {
+            Debug.Assert(cert.Pal != null);
+
+            // Ensure private key is copied
+            OpenSslX509CertificateReader certPal = (OpenSslX509CertificateReader)cert.Pal;
+            return certPal.DuplicateHandles();
+        }
+
+        public static ICertificatePal FromBlob(byte[] rawData, SafePasswordHandle password, X509KeyStorageFlags keyStorageFlags)
+        {
+            Debug.Assert(password != null);
+
+            ICertificatePal cert;
+            Exception openSslException;
+
+            if (TryReadX509Der(rawData, out cert) ||
+                TryReadX509Pem(rawData, out cert) ||
+                PkcsFormatReader.TryReadPkcs7Der(rawData, out cert) ||
+                PkcsFormatReader.TryReadPkcs7Pem(rawData, out cert) ||
+                PkcsFormatReader.TryReadPkcs12(rawData, password, out cert, out openSslException))
+            {
+                if (cert == null)
+                {
+                    // Empty collection, most likely.
+                    throw new CryptographicException();
+                }
+
+                return cert;
+            }
+
+            // Unsupported
+            Debug.Assert(openSslException != null);
+            throw openSslException;
+        }
+
+        public static ICertificatePal FromFile(string fileName, SafePasswordHandle password, X509KeyStorageFlags keyStorageFlags)
+        {
+            // If we can't open the file, fail right away.
+            using (SafeBioHandle fileBio = Interop.Crypto.BioNewFile(fileName, "rb"))
+            {
+                Interop.Crypto.CheckValidOpenSslHandle(fileBio);
+
+                return FromBio(fileBio, password);
+            }
+        }
+
+        private static ICertificatePal FromBio(SafeBioHandle bio, SafePasswordHandle password)
+        {
+            int bioPosition = Interop.Crypto.BioTell(bio);
+
+            Debug.Assert(bioPosition >= 0);
+
+            ICertificatePal certPal;
+            if (TryReadX509Pem(bio, out certPal))
+            {
+                return certPal;
+            }
+
+            // Rewind, try again.
+            RewindBio(bio, bioPosition);
+
+            if (TryReadX509Der(bio, out certPal))
+            {
+                return certPal;
+            }
+
+            // Rewind, try again.
+            RewindBio(bio, bioPosition);
+
+            if (PkcsFormatReader.TryReadPkcs7Pem(bio, out certPal))
+            {
+                return certPal;
+            }
+
+            // Rewind, try again.
+            RewindBio(bio, bioPosition);
+
+            if (PkcsFormatReader.TryReadPkcs7Der(bio, out certPal))
+            {
+                return certPal;
+            }
+
+            // Rewind, try again.
+            RewindBio(bio, bioPosition);
+
+            // Capture the exception so in case of failure, the call to BioSeek does not override it.
+            Exception openSslException;
+            if (PkcsFormatReader.TryReadPkcs12(bio, password, out certPal, out openSslException))
+            {
+                return certPal;
+            }
+
+            // Since we aren't going to finish reading, leaving the buffer where it was when we got
+            // it seems better than leaving it in some arbitrary other position.
+            // 
+            // Use BioSeek directly for the last seek attempt, because any failure here should instead
+            // report the already created (but not yet thrown) exception.
+            if (Interop.Crypto.BioSeek(bio, bioPosition) < 0)
+            {
+                Interop.Crypto.ErrClearError();
+            }
+
+            Debug.Assert(openSslException != null);
+            throw openSslException;
+        }
+
+        internal static void RewindBio(SafeBioHandle bio, int bioPosition)
+        {
+            int ret = Interop.Crypto.BioSeek(bio, bioPosition);
+
+            if (ret < 0)
+            {
+                throw Interop.Crypto.CreateOpenSslCryptographicException();
+            }
+        }
+
+        internal static bool TryReadX509Der(byte[] rawData, out ICertificatePal certPal)
+        {
+            SafeX509Handle certHandle = Interop.Crypto.DecodeX509(rawData, rawData.Length);
+
+            if (certHandle.IsInvalid)
+            {
+                certHandle.Dispose();
+                certPal = null;
+                Interop.Crypto.ErrClearError();
+                return false;
+            }
+
+            certPal = new OpenSslX509CertificateReader(certHandle);
+            return true;
+        }
+
+        internal static bool TryReadX509Pem(SafeBioHandle bio, out ICertificatePal certPal)
+        {
+            SafeX509Handle cert = Interop.Crypto.PemReadX509FromBioAux(bio);
+
+            if (cert.IsInvalid)
+            {
+                cert.Dispose();
+                certPal = null;
+                Interop.Crypto.ErrClearError();
+                return false;
+            }
+
+            certPal = new OpenSslX509CertificateReader(cert);
+            return true;
+        }
+
+        internal static bool TryReadX509PemNoAux(SafeBioHandle bio, out ICertificatePal certPal)
+        {
+            SafeX509Handle cert = Interop.Crypto.PemReadX509FromBio(bio);
+
+            if (cert.IsInvalid)
+            {
+                cert.Dispose();
+                certPal = null;
+                Interop.Crypto.ErrClearError();
+                return false;
+            }
+
+            certPal = new OpenSslX509CertificateReader(cert);
+            return true;
+        }
+
+        internal static bool TryReadX509Pem(byte[] rawData, out ICertificatePal certPal)
+        {
+            using (SafeBioHandle bio = Interop.Crypto.CreateMemoryBio())
+            {
+                Interop.Crypto.CheckValidOpenSslHandle(bio);
+
+                if (Interop.Crypto.BioWrite(bio, rawData, rawData.Length) != rawData.Length)
+                {
+                    Interop.Crypto.ErrClearError();
+                }
+
+                return TryReadX509Pem(bio, out certPal);
+            }
+        }
+
+        internal static bool TryReadX509Der(SafeBioHandle bio, out ICertificatePal fromBio)
+        {
+            SafeX509Handle cert = Interop.Crypto.ReadX509AsDerFromBio(bio);
+
+            if (cert.IsInvalid)
+            {
+                cert.Dispose();
+                fromBio = null;
+                Interop.Crypto.ErrClearError();
+                return false;
+            }
+
+            fromBio = new OpenSslX509CertificateReader(cert);
+            return true;
+        }
+
         internal OpenSslX509CertificateReader(SafeX509Handle handle)
         {
             // X509_check_purpose has the effect of populating the sha1_hash value,
@@ -52,15 +256,13 @@ namespace Internal.Cryptography.Pal
             get { return _cert; }
         }
 
-        public string Issuer
-        {
-            get { return IssuerName.Name; }
-        }
+        public string Issuer => IssuerName.Name;
 
-        public string Subject
-        {
-            get { return SubjectName.Name; }
-        }
+        public string Subject => SubjectName.Name;
+
+        public string LegacyIssuer => IssuerName.Decode(X500DistinguishedNameFlags.None);
+
+        public string LegacySubject => SubjectName.Decode(X500DistinguishedNameFlags.None);
 
         public byte[] Thumbprint
         {
@@ -102,12 +304,7 @@ namespace Internal.Cryptography.Pal
             {
                 using (SafeSharedAsn1IntegerHandle serialNumber = Interop.Crypto.X509GetSerialNumber(_cert))
                 {
-                    byte[] serial = Interop.Crypto.GetAsn1IntegerBytes(serialNumber);
-
-                    // Windows returns this in BigInteger Little-Endian,
-                    // OpenSSL returns this in BigInteger Big-Endian.
-                    Array.Reverse(serial);
-                    return serial;
+                    return Interop.Crypto.GetAsn1IntegerBytes(serialNumber);
                 }
             }
         }
@@ -245,6 +442,21 @@ namespace Internal.Cryptography.Pal
             }
         }
 
+        internal static ArraySegment<byte> FindFirstExtension(SafeX509Handle cert, string oidValue)
+        {
+            int nid = Interop.Crypto.ResolveRequiredNid(oidValue);
+
+            using (SafeSharedAsn1OctetStringHandle data = Interop.Crypto.X509FindExtensionData(cert, nid))
+            {
+                if (data.IsInvalid)
+                {
+                    return default;
+                }
+
+                return Interop.Crypto.RentAsn1StringBytes(data.DangerousGetHandle());
+            }
+        }
+
         internal void SetPrivateKey(SafeEvpPKeyHandle privateKey)
         {
             _privateKey = privateKey;
@@ -253,21 +465,6 @@ namespace Internal.Cryptography.Pal
         internal SafeEvpPKeyHandle PrivateKeyHandle
         {
             get { return _privateKey; }
-        }
-
-        public AsymmetricAlgorithm GetPrivateKey()
-        {
-            switch (KeyAlgorithm)
-            {
-                case Oids.RsaRsa:
-                    return GetRSAPrivateKey();
-                case Oids.DsaDsa:
-                    return GetDSAPrivateKey();
-                case Oids.Ecc:
-                    return GetECDsaPrivateKey();
-            }
-
-            throw new NotSupportedException(SR.NotSupported_KeyAlgorithm);
         }
 
         public RSA GetRSAPrivateKey()
@@ -308,6 +505,78 @@ namespace Internal.Cryptography.Pal
             }
 
             return new ECDsaOpenSsl(_privateKey);
+        }
+
+        private ICertificatePal CopyWithPrivateKey(SafeEvpPKeyHandle privateKey)
+        {
+            // This could be X509Duplicate for a full clone, but since OpenSSL certificates
+            // are functionally immutable (unlike Windows ones) an UpRef is sufficient.
+            SafeX509Handle certHandle = Interop.Crypto.X509UpRef(_cert);
+            OpenSslX509CertificateReader duplicate = new OpenSslX509CertificateReader(certHandle);
+
+            duplicate.SetPrivateKey(privateKey);
+            return duplicate;
+        }
+
+        public ICertificatePal CopyWithPrivateKey(DSA privateKey)
+        {
+            DSAOpenSsl typedKey = privateKey as DSAOpenSsl;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+
+            DSAParameters dsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(dsaParameters.X))
+            using (typedKey = new DSAOpenSsl(dsaParameters))
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+        }
+
+        public ICertificatePal CopyWithPrivateKey(ECDsa privateKey)
+        {
+            ECDsaOpenSsl typedKey = privateKey as ECDsaOpenSsl;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+
+            ECParameters ecParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(ecParameters.D))
+            using (typedKey = new ECDsaOpenSsl())
+            {
+                typedKey.ImportParameters(ecParameters);
+
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+        }
+
+        public ICertificatePal CopyWithPrivateKey(RSA privateKey)
+        {
+            RSAOpenSsl typedKey = privateKey as RSAOpenSsl;
+
+            if (typedKey != null)
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
+
+            RSAParameters rsaParameters = privateKey.ExportParameters(true);
+
+            using (PinAndClear.Track(rsaParameters.D))
+            using (PinAndClear.Track(rsaParameters.P))
+            using (PinAndClear.Track(rsaParameters.Q))
+            using (PinAndClear.Track(rsaParameters.DP))
+            using (PinAndClear.Track(rsaParameters.DQ))
+            using (PinAndClear.Track(rsaParameters.InverseQ))
+            using (typedKey = new RSAOpenSsl(rsaParameters))
+            {
+                return CopyWithPrivateKey((SafeEvpPKeyHandle)typedKey.DuplicateKeyHandle());
+            }
         }
 
         public string GetNameInfo(X509NameType nameType, bool forIssuer)
@@ -451,6 +720,14 @@ namespace Internal.Cryptography.Pal
             }
 
             throw new CryptographicException();
+        }
+
+        public byte[] Export(X509ContentType contentType, SafePasswordHandle password)
+        {
+            using (IExportPal storePal = StorePal.FromCertificate(this))
+            {
+                return storePal.Export (contentType, password);
+            }
         }
     }
 }

@@ -38,12 +38,12 @@ namespace Windows.Foundation
         private float _width;
         private float _height;
 
-        private const double EmptyX = Double.PositiveInfinity;
-        private const double EmptyY = Double.PositiveInfinity;
-        private const double EmptyWidth = Double.NegativeInfinity;
-        private const double EmptyHeight = Double.NegativeInfinity;
+        private const double EmptyX = double.PositiveInfinity;
+        private const double EmptyY = double.PositiveInfinity;
+        private const double EmptyWidth = double.NegativeInfinity;
+        private const double EmptyHeight = double.NegativeInfinity;
 
-        private readonly static Rect s_empty = CreateEmptyRect();
+        private static readonly Rect s_empty = CreateEmptyRect();
 
         public Rect(double x,
                     double y,
@@ -85,22 +85,6 @@ namespace Windows.Foundation
                 _height = (float)size.Height;
             }
         }
-
-        internal static Rect Create(double x,
-                                    double y,
-                                    double width,
-                                    double height)
-        {
-            if (x == EmptyX && y == EmptyY && width == EmptyWidth && height == EmptyHeight)
-            {
-                return Rect.Empty;
-            }
-            else
-            {
-                return new Rect(x, y, width, height);
-            }
-        }
-
 
         public double X
         {
@@ -154,7 +138,7 @@ namespace Windows.Foundation
             {
                 if (IsEmpty)
                 {
-                    return Double.NegativeInfinity;
+                    return double.NegativeInfinity;
                 }
 
                 return _x + _width;
@@ -167,7 +151,7 @@ namespace Windows.Foundation
             {
                 if (IsEmpty)
                 {
-                    return Double.NegativeInfinity;
+                    return double.NegativeInfinity;
                 }
 
                 return _y + _height;
@@ -222,9 +206,9 @@ namespace Windows.Foundation
 
 
                 // We need this check so that the math does not result in NaN
-                if ((rect.Width == Double.PositiveInfinity) || (Width == Double.PositiveInfinity))
+                if ((rect.Width == double.PositiveInfinity) || (Width == double.PositiveInfinity))
                 {
-                    Width = Double.PositiveInfinity;
+                    Width = double.PositiveInfinity;
                 }
                 else
                 {
@@ -234,9 +218,9 @@ namespace Windows.Foundation
                 }
 
                 // We need this check so that the math does not result in NaN
-                if ((rect.Height == Double.PositiveInfinity) || (Height == Double.PositiveInfinity))
+                if ((rect.Height == double.PositiveInfinity) || (Height == double.PositiveInfinity))
                 {
-                    Height = Double.PositiveInfinity;
+                    Height = double.PositiveInfinity;
                 }
                 else
                 {
@@ -313,12 +297,12 @@ namespace Windows.Foundation
         {
             if (IsEmpty)
             {
-                return global::System.SR.DirectUI_Empty;
+                return SR.DirectUI_Empty;
             }
 
             // Helper to get the numeric list separator for a given culture.
             char separator = TokenizerHelper.GetNumericListSeparator(provider);
-            return String.Format(provider,
+            return string.Format(provider,
                                  "{1:" + format + "}{0}{2:" + format + "}{0}{3:" + format + "}{0}{4:" + format + "}",
                                  separator,
                                  _x,

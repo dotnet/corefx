@@ -206,9 +206,9 @@ namespace System.Xml
                 // Emit BOM
                 if (emitBOM)
                 {
-                    byte[] bom = _encoding.GetPreamble();
+                    ReadOnlySpan<byte> bom = _encoding.Preamble;
                     if (bom.Length > 0)
-                        _stream.Write(bom, 0, bom.Length);
+                        _stream.Write(bom);
                 }
             }
         }
@@ -446,7 +446,7 @@ namespace System.Xml
                 if (key[i] == buffer[offset + i])
                     continue;
 
-                if (key[i] != Char.ToLowerInvariant((char)buffer[offset + i]))
+                if (key[i] != char.ToLowerInvariant((char)buffer[offset + i]))
                     return false;
             }
             return true;
@@ -596,7 +596,11 @@ namespace System.Xml
 
         protected override void Dispose(bool disposing)
         {
-            Flush();
+            if (_stream.CanWrite)
+            {
+                Flush();
+            }
+
             _stream.Dispose();
             base.Dispose(disposing);
         }

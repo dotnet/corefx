@@ -115,13 +115,14 @@ namespace System.Xml
         // Forward call to WriteString(string).
         public override Task WriteCharEntityAsync(char ch)
         {
-            return WriteStringAsync(new string(new char[] { ch }));
+            return WriteStringAsync(char.ToString(ch));
         }
 
         // Forward call to WriteString(string).
         public override Task WriteSurrogateCharEntityAsync(char lowChar, char highChar)
         {
-            return WriteStringAsync(new string(new char[] { lowChar, highChar }));
+            ReadOnlySpan<char> entity = stackalloc char[] { lowChar, highChar };
+            return WriteStringAsync(new string(entity));
         }
 
         // Forward call to WriteString(string).
@@ -176,14 +177,6 @@ namespace System.Xml
         internal virtual Task WriteXmlDeclarationAsync(string xmldecl)
         {
             return Task.CompletedTask;
-        }
-
-        // Called after an element's attributes have been enumerated, but before any children have been
-        // enumerated.  This method must always be called, even for empty elements.
-
-        internal virtual Task StartElementContentAsync()
-        {
-            throw new NotImplementedException();
         }
 
         // WriteEndElement() and WriteFullEndElement() overloads, in which caller gives the full name of the

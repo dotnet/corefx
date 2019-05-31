@@ -22,14 +22,15 @@ namespace System.Net.Internals
 #endif
     class SocketAddress
     {
-        internal readonly static int IPv6AddressSize = SocketAddressPal.IPv6AddressSize;
-        internal readonly static int IPv4AddressSize = SocketAddressPal.IPv4AddressSize;
+        internal static readonly int IPv6AddressSize = SocketAddressPal.IPv6AddressSize;
+        internal static readonly int IPv4AddressSize = SocketAddressPal.IPv4AddressSize;
 
         internal int InternalSize;
         internal byte[] Buffer;
 
         private const int MinSize = 2;
         private const int MaxSize = 32; // IrDA requires 32 bytes
+        private const int DataOffset = 2;
         private bool _changed = true;
         private int _hash;
 
@@ -103,19 +104,17 @@ namespace System.Net.Internals
 
             if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
             {
-                SocketAddressPal.SetIPv6Address(Buffer, ipAddress.GetAddressBytes(), (uint)ipAddress.ScopeId);
+                Span<byte> addressBytes = stackalloc byte[IPAddressParserStatics.IPv6AddressBytes];
+                ipAddress.TryWriteBytes(addressBytes, out int bytesWritten);
+                Debug.Assert(bytesWritten == IPAddressParserStatics.IPv6AddressBytes);
+
+                SocketAddressPal.SetIPv6Address(Buffer, addressBytes, (uint)ipAddress.ScopeId);
             }
             else
             {
-#if SYSTEM_NET_PRIMITIVES_DLL
-#pragma warning disable 618
+#pragma warning disable CS0618 // using Obsolete Address API because it's the more efficient option in this case
                 uint address = unchecked((uint)ipAddress.Address);
-#pragma warning restore 618
-#else
-                byte[] ipAddressBytes = ipAddress.GetAddressBytes();
-                Debug.Assert(ipAddressBytes.Length == 4);
-                uint address = ipAddressBytes.NetworkBytesToNetworkUInt32(0);
-#endif
+#pragma warning restore CS0618
 
                 Debug.Assert(ipAddress.AddressFamily == AddressFamily.InterNetwork);
                 SocketAddressPal.SetIPv4Address(Buffer, address);
@@ -134,7 +133,7 @@ namespace System.Net.Internals
             {
                 Debug.Assert(Size >= IPv6AddressSize);
 
-                byte[] address = new byte[IPAddressParserStatics.IPv6AddressBytes];
+                Span<byte> address = stackalloc byte[IPAddressParserStatics.IPv6AddressBytes];
                 uint scope;
                 SocketAddressPal.GetIPv6Address(Buffer, address, out scope);
 
@@ -230,16 +229,50 @@ namespace System.Net.Internals
 
         public override string ToString()
         {
-            StringBuilder bytes = new StringBuilder();
-            for (int i = SocketAddressPal.DataOffset; i < this.Size; i++)
+            // Get the address family string.  In almost all cases, this should be a cached string
+            // from the enum and won't actually allocate.
+            string familyString = Family.ToString();
+
+            // Determine the maximum length needed to format.
+            int maxLength =
+                familyString.Length + // AddressFamily
+                1 + // :
+                10 + // Size (max length for a positive Int32)
+                2 + // :{
+                (Size - DataOffset) * 4 + // at most ','+3digits per byte
+                1; // }
+
+            Span<char> result = maxLength <= 256 ? // arbitrary limit that should be large enough for the vast majority of cases
+                stackalloc char[256] :
+                new char[maxLength];
+
+            familyString.AsSpan().CopyTo(result);
+            int length = familyString.Length;
+
+            result[length++] = ':';
+
+            bool formatted = Size.TryFormat(result.Slice(length), out int charsWritten);
+            Debug.Assert(formatted);
+            length += charsWritten;
+
+            result[length++] = ':';
+            result[length++] = '{';
+
+            byte[] buffer = Buffer;
+            for (int i = DataOffset; i < Size; i++)
             {
-                if (i > SocketAddressPal.DataOffset)
+                if (i > DataOffset)
                 {
-                    bytes.Append(",");
+                    result[length++] = ',';
                 }
-                bytes.Append(this[i].ToString(NumberFormatInfo.InvariantInfo));
+
+                formatted = buffer[i].TryFormat(result.Slice(length), out charsWritten);
+                Debug.Assert(formatted);
+                length += charsWritten;
             }
-            return Family.ToString() + ":" + Size.ToString(NumberFormatInfo.InvariantInfo) + ":{" + bytes.ToString() + "}";
+
+            result[length++] = '}';
+            return result.Slice(0, length).ToString();
         }
     }
 }

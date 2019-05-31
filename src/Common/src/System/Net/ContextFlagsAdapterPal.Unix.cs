@@ -8,7 +8,7 @@ namespace System.Net
 {
     internal static class ContextFlagsAdapterPal
     {
-        private struct ContextFlagMapping
+        private readonly struct ContextFlagMapping
         {
             public readonly Interop.NetSecurityNative.GssFlags GssFlags;
             public readonly ContextFlagsPal ContextFlag;
@@ -26,7 +26,8 @@ namespace System.Net
             new ContextFlagMapping(Interop.NetSecurityNative.GssFlags.GSS_C_IDENTIFY_FLAG, ContextFlagsPal.InitIdentify),
             new ContextFlagMapping(Interop.NetSecurityNative.GssFlags.GSS_C_MUTUAL_FLAG, ContextFlagsPal.MutualAuth),
             new ContextFlagMapping(Interop.NetSecurityNative.GssFlags.GSS_C_REPLAY_FLAG, ContextFlagsPal.ReplayDetect),
-            new ContextFlagMapping(Interop.NetSecurityNative.GssFlags.GSS_C_SEQUENCE_FLAG, ContextFlagsPal.SequenceDetect)
+            new ContextFlagMapping(Interop.NetSecurityNative.GssFlags.GSS_C_SEQUENCE_FLAG, ContextFlagsPal.SequenceDetect),
+            new ContextFlagMapping(Interop.NetSecurityNative.GssFlags.GSS_C_DELEG_FLAG, ContextFlagsPal.Delegate)
         };
 
 

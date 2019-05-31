@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
@@ -12,25 +13,105 @@ namespace System.Data.SqlClient.ManualTesting.Tests
         // Shrink the packet size - this should make timeouts more likely
         private static readonly string s_connStr = (new SqlConnectionStringBuilder(DataTestUtility.TcpConnStr) { PacketSize = 512 }).ConnectionString;
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void PlainCancelTest()
+        {
+            PlainCancel(s_connStr);
+        }
+
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void PlainMARSCancelTest()
+        {
+            PlainCancel((new SqlConnectionStringBuilder(s_connStr) { MultipleActiveResultSets = true }).ConnectionString);
+        }
+
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void PlainCancelTestAsync()
+        {
+            PlainCancelAsync(s_connStr);
+        }
+
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void PlainMARSCancelTestAsync()
+        {
+            PlainCancelAsync((new SqlConnectionStringBuilder(s_connStr) { MultipleActiveResultSets = true }).ConnectionString);
+        }
+
+        private static void PlainCancel(string connString)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            using (SqlCommand cmd = new SqlCommand("select * from dbo.Orders; waitfor delay '00:00:10'; select * from dbo.Orders", conn))
+            {
+                conn.Open();
+                using (SqlDataReader reader = cmd.ExecuteReader())
+                {
+                    cmd.Cancel();
+                    DataTestUtility.AssertThrowsWrapper<SqlException>(
+                        () =>
+                        {
+                            do
+                            {
+                                while (reader.Read())
+                                {
+                                }
+                            }
+                            while (reader.NextResult());
+                        },
+                        "A severe error occurred on the current command.  The results, if any, should be discarded.");
+                }
+            }
+        }
+
+        private static void PlainCancelAsync(string connString)
+        {
+            using (SqlConnection conn = new SqlConnection(connString))
+            using (SqlCommand cmd = new SqlCommand("select * from dbo.Orders; waitfor delay '00:00:10'; select * from dbo.Orders", conn))
+            {
+                conn.Open();
+                Task<SqlDataReader> readerTask = cmd.ExecuteReaderAsync();
+                DataTestUtility.AssertThrowsWrapper<SqlException>(
+                    () =>
+                    {
+                        readerTask.Wait(2000);
+                        SqlDataReader reader = readerTask.Result;
+                        cmd.Cancel();
+                        do
+                        {
+                            while (reader.Read())
+                            {
+                            }
+                        }
+                        while (reader.NextResult());
+                    },
+                    "A severe error occurred on the current command.  The results, if any, should be discarded.");
+            }
+        }
+
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void MultiThreadedCancel_NonAsync()
         {
             MultiThreadedCancel(s_connStr, false);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
+        public static void MultiThreadedCancel_Async()
+        {
+            MultiThreadedCancel(s_connStr, true);
+        }
+
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TimeoutCancel()
         {
             TimeoutCancel(s_connStr);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void CancelAndDisposePreparedCommand()
         {
             CancelAndDisposePreparedCommand(s_connStr);
         }
 
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TimeOutDuringRead()
         {
             TimeOutDuringRead(s_connStr);
@@ -44,16 +125,17 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 var command = con.CreateCommand();
                 command.CommandText = "select * from orders; waitfor delay '00:00:08'; select * from customers";
 
-                Thread rThread1 = new Thread(ExecuteCommandCancelExpected);
-                Thread rThread2 = new Thread(CancelSharedCommand);
                 Barrier threadsReady = new Barrier(2);
                 object state = new Tuple<bool, SqlCommand, Barrier>(async, command, threadsReady);
 
-                rThread1.Start(state);
-                rThread2.Start(state);
-                rThread1.Join();
-                rThread2.Join();
+                Task[] tasks = new Task[2];
+                tasks[0] = new Task(ExecuteCommandCancelExpected, state);
+                tasks[1] = new Task(CancelSharedCommand, state);
+                tasks[0].Start();
+                tasks[1].Start();
 
+                Task.WaitAll(tasks, 15 * 1000);
+                
                 CommandCancelTest.VerifyConnection(command);
             }
         }
@@ -68,13 +150,13 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 cmd.CommandText = "WAITFOR DELAY '00:00:30';select * from Customers";
 
                 string errorMessage = SystemDataResourceManager.Instance.SQL_Timeout;
-                DataTestUtility.ExpectFailure<SqlException>(() => cmd.ExecuteReader(), errorMessage);
+                DataTestUtility.ExpectFailure<SqlException>(() => cmd.ExecuteReader(), new string[] { errorMessage });
 
                 VerifyConnection(cmd);
             }
         }
 
-        //InvalidOperationException from conenction.Dispose if that connection has prepared command cancelled during reading of data
+        //InvalidOperationException from connection.Dispose if that connection has prepared command cancelled during reading of data
         private static void CancelAndDisposePreparedCommand(string constr)
         {
             int expectedValue = 1;
@@ -83,8 +165,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                 try
                 {
                     // Generate a query with a large number of results.
-                    using (var command = new SqlCommand("select @P from sysobjects a cross join sysobjects b cross join sysobjects c cross join sysobjects d cross join sysobjects e cross join sysobjects f"
-                        , connection))
+                    using (var command = new SqlCommand("select @P from sysobjects a cross join sysobjects b cross join sysobjects c cross join sysobjects d cross join sysobjects e cross join sysobjects f", connection))
                     {
                         command.Parameters.Add(new SqlParameter("@P", SqlDbType.Int) { Value = expectedValue });
                         connection.Open();
@@ -111,7 +192,6 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             }
         }
 
-
         private static void VerifyConnection(SqlCommand cmd)
         {
             Assert.True(cmd.Connection.State == ConnectionState.Open, "FAILURE: - unexpected non-open state after Execute!");
@@ -129,6 +209,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
             Barrier threadsReady = stateTuple.Item3;
 
             string errorMessage = SystemDataResourceManager.Instance.SQL_OperationCancelled;
+            string errorMessageSevereFailure = SystemDataResourceManager.Instance.SQL_SevereError;
+
             DataTestUtility.ExpectFailure<SqlException>(() =>
             {
                 threadsReady.SignalAndWait();
@@ -141,7 +223,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         }
                     } while (r.NextResult());
                 }
-            }, errorMessage);
+            }, new string[] { errorMessage, errorMessageSevereFailure });
+            
         }
 
         private static void CancelSharedCommand(object state)

@@ -2,14 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.IO;
-using System.Linq;
-using System.Globalization;
-using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Security.Cryptography.Pkcs;
 using System.Security.Cryptography.Xml;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
@@ -21,7 +13,11 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 {
     public static partial class EdgeCasesTests
     {
-        [Fact]
+        public static bool SupportsRc4 { get; } = ContentEncryptionAlgorithmTests.SupportsRc4;
+
+        public static bool SupportsCngCertificates { get; } = (!PlatformDetection.IsFullFramework || PlatformDetection.IsNetfx462OrNewer);
+
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ImportEdgeCase()
         {
@@ -54,7 +50,7 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ImportEdgeCaseSki()
         {
@@ -91,7 +87,36 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        public static void ZeroLengthContextUntagged_FixedValue()
+        {
+            // This test ensures that we can handle when the enveloped message has no content inside. This test differs
+            // from "ZeroLengthContent_FixedValue" in that it doesn't have a context specific [0] in the EncryptedContentInfo
+            // section of the DER encoding of the message.
+            // EncryptedContentInfo ::= SEQUENCE {
+            //      contentType ContentType,
+            //      contentEncryptionAlgorithm ContentEncryptionAlgorithmIdentifier,
+            //      encryptedContent[0] IMPLICIT EncryptedContent OPTIONAL }
+            // The input was created with ASN1 editor and verified with .NET framework. It's an enveloped message, version 0,
+            // with one Key Transport recipient and holds data encrypted with 3DES. 
+            byte[] content =
+                 ("3082010206092A864886F70D010703A081F43081F10201003181C83081C5020100302E301A311830160603550403130F"
+                 + "5253414B65795472616E7366657231021031D935FB63E8CFAB48A0BF7B397B67C0300D06092A864886F70D0101010500"
+                 + "04818009C16B674495C2C3D4763189C3274CF7A9142FBEEC8902ABDC9CE29910D541DF910E029A31443DC9A9F3B05F02"
+                 + "DA1C38478C400261C734D6789C4197C20143C4312CEAA99ECB1849718326D4FC3B7FBB2D1D23281E31584A63E99F2C17"
+                 + "132BCD8EDDB632967125CD0A4BAA1EFA8CE4C855F7C093339211BDF990CEF5CCE6CD74302106092A864886F70D010701"
+                 + "301406082A864886F70D03070408779B3DE045826B18").HexToByteArray();
+
+            EnvelopedCms ecms = new EnvelopedCms();
+            ecms.Decode(content);
+
+            int expected = PlatformDetection.IsFullFramework ? 6 : 0; // Desktop bug gives 6
+            Assert.Equal(expected, ecms.ContentInfo.Content.Length);
+            Assert.Equal(Oids.Pkcs7Data, ecms.ContentInfo.ContentType.Value);
+        }
+
+        [Fact]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Desktop rejects zero length content: corefx#18724")]
         public static void ZeroLengthContent_RoundTrip()
         {
             ContentInfo contentInfo = new ContentInfo(Array.Empty<byte>());
@@ -99,20 +124,13 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             using (X509Certificate2 cert = Certificates.RSAKeyTransfer1.GetCertificate())
             {
                 CmsRecipient cmsRecipient = new CmsRecipient(cert);
-                try
-                {
-                    ecms.Encrypt(cmsRecipient);
-                }
-                catch (CryptographicException e)
-                {
-                    throw new Exception("ecms.Encrypt() threw " + e.Message + ".\nIf you're running on the desktop CLR, this is actually an expected result.");
-                }
+                ecms.Encrypt(cmsRecipient);
             }
             byte[] encodedMessage = ecms.Encode();
             ValidateZeroLengthContent(encodedMessage);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsCngCertificates))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
         public static void ZeroLengthContent_FixedValue()
         {
@@ -126,8 +144,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
             ValidateZeroLengthContent(encodedMessage);
         }
 
-        [Fact]
+        [ConditionalFact(nameof(SupportsRc4))]
         [OuterLoop(/* Leaks key on disk if interrupted */)]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "RC4 isn't available via CNG, and CNG is the only library available to UWP")]
         public static void Rc4AndCngWrappersDontMixTest()
         {
             //
@@ -175,10 +194,9 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
                 ecms.Decrypt(extraStore);
                 ContentInfo contentInfo = ecms.ContentInfo;
                 byte[] content = contentInfo.Content;
-                if (content.Length == 6)
-                    throw new Exception("ContentInfo expected to be 0 but was actually 6. If you're running on the desktop CLR, this is actually a known bug.");
 
-                Assert.Equal(0, content.Length);
+                int expected = PlatformDetection.IsFullFramework ? 6 : 0; // Desktop bug gives 6
+                Assert.Equal(expected, content.Length);
             }
         }
 
@@ -279,9 +297,10 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        // On the desktop, this throws up a UI for the user to select a recipient. We don't support that.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void EnvelopedCmsEncryptWithZeroRecipients()
         {
-            // On the desktop, this throws up a UI for the user to select a recipient. We don't support that.
             EnvelopedCms ecms = new EnvelopedCms(new ContentInfo(new byte[3]));
             Assert.Throws<PlatformNotSupportedException>(() => ecms.Encrypt(new CmsRecipientCollection()));
         }
@@ -462,6 +481,14 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
         }
 
         [Fact]
+        public static void ContentInfoGetContentTypeUnknown()
+        {
+            byte[] encodedMessage =
+                 ("301A06092A864886F70D010700A00D040B48656C6C6F202E4E455421").HexToByteArray();
+            Assert.ThrowsAny<CryptographicException>(() => ContentInfo.GetContentType(encodedMessage));
+        }
+
+        [Fact]
         public static void CryptographicAttributeObjectOidCtor()
         {
             Oid oid = new Oid(Oids.DocumentDescription);
@@ -491,6 +518,38 @@ namespace System.Security.Cryptography.Pkcs.EnvelopedCmsTests.Tests
 
             object ignore;
             Assert.Throws<InvalidOperationException>(() => ignore = new CryptographicAttributeObject(wrongOid, col));
+        }
+
+        [Fact]
+        public static void EncryptEnvelopedOctetStringWithIncompleteContent()
+        {
+            byte[] content = "04040203".HexToByteArray();
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+
+            using (X509Certificate2 certificate = Certificates.RSAKeyTransferCapi1.GetCertificate())
+            {
+                string certSubjectName = certificate.Subject;
+                AlgorithmIdentifier alg = new AlgorithmIdentifier(new Oid(Oids.Aes256));
+                EnvelopedCms ecms = new EnvelopedCms(contentInfo, alg);
+                CmsRecipient cmsRecipient = new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, certificate);
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Encrypt(cmsRecipient));
+            }
+        }
+
+        [Fact]
+        public static void EncryptEnvelopedOneByteArray()
+        {
+            byte[] content = "04".HexToByteArray();
+            ContentInfo contentInfo = new ContentInfo(new Oid(Oids.Pkcs7Enveloped), content);
+
+            using (X509Certificate2 certificate = Certificates.RSAKeyTransferCapi1.GetCertificate())
+            {
+                string certSubjectName = certificate.Subject;
+                AlgorithmIdentifier alg = new AlgorithmIdentifier(new Oid(Oids.Aes256));
+                EnvelopedCms ecms = new EnvelopedCms(contentInfo, alg);
+                CmsRecipient cmsRecipient = new CmsRecipient(SubjectIdentifierType.IssuerAndSerialNumber, certificate);
+                Assert.ThrowsAny<CryptographicException>(() => ecms.Encrypt(cmsRecipient));
+            }
         }
     }
 }

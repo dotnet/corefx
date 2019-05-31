@@ -19,7 +19,6 @@ using System.Runtime.Versioning;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     [EditorBrowsable(EditorBrowsableState.Never)]
     public static class XsltFunctions
     {
@@ -71,7 +70,7 @@ namespace System.Xml.Xsl.Runtime
             }
             else
             {
-                Debug.Assert(value.Length < startIndex || Double.IsNaN(startIndex));
+                Debug.Assert(value.Length < startIndex || double.IsNaN(startIndex));
                 return string.Empty;
             }
         }
@@ -98,7 +97,7 @@ namespace System.Xml.Xsl.Runtime
             }
             else
             {
-                Debug.Assert(endIndex <= startIndex || Double.IsNaN(endIndex));
+                Debug.Assert(endIndex <= startIndex || double.IsNaN(endIndex));
                 return string.Empty;
             }
         }
@@ -231,7 +230,7 @@ namespace System.Xml.Xsl.Runtime
             else if (name.Namespace == XmlReservedNs.NsMsxsl && name.Name == "version")
             {
                 // msxsl:version
-                return new XmlAtomicValue(XmlSchemaType.GetBuiltInSimpleType(XmlTypeCode.String), typeof(XsltLibrary).GetTypeInfo().Assembly.ImageRuntimeVersion);
+                return new XmlAtomicValue(XmlSchemaType.GetBuiltInSimpleType(XmlTypeCode.String), typeof(XsltLibrary).Assembly.ImageRuntimeVersion);
             }
             // If the property name is not recognized, return the empty string
             return new XmlAtomicValue(XmlSchemaType.GetBuiltInSimpleType(XmlTypeCode.String), string.Empty);
@@ -319,7 +318,7 @@ namespace System.Xml.Xsl.Runtime
             XsltLibrary.CheckXsltValue(value);
             if (value.Count == 0)
             {
-                return Double.NaN;
+                return double.NaN;
             }
             XPathItem item = value[0];
 
@@ -482,7 +481,7 @@ namespace System.Xml.Xsl.Runtime
                     ShortToCharArray(text, 5, dt.Month);
                     break;
             }
-            return new String(text);
+            return new string(text);
         }
 
         public static string MSLocalName(string name)

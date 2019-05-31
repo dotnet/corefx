@@ -7,7 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 
 namespace System.Reflection.Metadata
 {
-    public struct CustomAttribute
+    public readonly struct CustomAttribute
     {
         private readonly MetadataReader _reader;
 
@@ -139,7 +139,7 @@ namespace System.Reflection.Metadata
                     break;
 
                 default:
-                    Debug.Assert(false);
+                    Debug.Assert(false, $"Unexpected treatment {treatment}");
                     return default(BlobHandle);
             }
 

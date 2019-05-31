@@ -80,7 +80,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(""NotANumber""))";
-            var expected = Double.NaN;
+            var expected = double.NaN;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
@@ -685,7 +685,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Checks for preceding and trailing whitespaces
+        /// Checks for preceding and trailing whitespace
         /// normalize-space('   abc   ')
         /// </summary>
         [Fact]
@@ -699,7 +699,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Checks for preceding and trailing whitespaces (characters other than space)
+        /// Checks for preceding and trailing whitespace (characters other than space)
         /// normalize-space('   abc   ')
         /// </summary>
         [Fact]
@@ -713,7 +713,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Checks for a sequence of whitespaces between characters
+        /// Checks for a sequence of whitespace between characters
         /// normalize-space('a     bc')
         /// </summary>
         [Fact]
@@ -727,7 +727,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         }
 
         /// <summary>
-        /// Checks for a sequence of whitespaces between characters (characters other than space)
+        /// Checks for a sequence of whitespace between characters (characters other than space)
         /// normalize-space('a   bc')
         /// </summary>
         [Fact]
@@ -892,7 +892,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(0 div 0))";
-            var expected = Double.NaN;
+            var expected = double.NaN;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
@@ -918,7 +918,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(1 div 0))";
-            var expected = Double.PositiveInfinity;
+            var expected = double.PositiveInfinity;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }
@@ -931,7 +931,7 @@ namespace XPathTests.FunctionalTests.CoreFunctionLibrary
         {
             var xml = "dummy.xml";
             var testExpression = @"string(number(-1 div 0))";
-            var expected = Double.NegativeInfinity;
+            var expected = double.NegativeInfinity;
 
             Utils.XPathNumberTest(xml, testExpression, expected);
         }

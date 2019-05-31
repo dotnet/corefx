@@ -5,11 +5,12 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Net.Security.Tests
 {
-    public class LoggingTest : RemoteExecutorTestBase
+    public class LoggingTest
     {
         [Fact]
         public void EventSource_ExistsWithCorrectId()
@@ -23,11 +24,10 @@ namespace System.Net.Security.Tests
             Assert.NotEmpty(EventSource.GenerateManifest(esType, esType.Assembly.Location));
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void EventSource_EventsRaisedAsExpected()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var listener = new TestEventListener("Microsoft-System-Net-Security", EventLevel.Verbose))
                 {
@@ -36,13 +36,13 @@ namespace System.Net.Security.Tests
                     {
                         // Invoke tests that'll cause some events to be generated
                         var test = new SslStreamStreamToStreamTest_Async();
-                        test.SslStream_StreamToStream_Authentication_Success();
-                        test.SslStream_StreamToStream_Successive_ClientWrite_Sync_Success();
+                        test.SslStream_StreamToStream_Authentication_Success().GetAwaiter().GetResult();
+                        test.SslStream_StreamToStream_Successive_ClientWrite_Success().GetAwaiter().GetResult();
                     });
                     Assert.DoesNotContain(events, ev => ev.EventId == 0); // errors from the EventSource itself
                     Assert.InRange(events.Count, 1, int.MaxValue);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
     }

@@ -7,11 +7,12 @@ using System.Runtime.Serialization;
 namespace System.Security.Policy
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public partial class PolicyException : System.SystemException
     {
         public PolicyException() { }
-        protected PolicyException(SerializationInfo info, StreamingContext context) { }
-        public PolicyException(string message) { }
-        public PolicyException(string message, Exception exception) { }
+        protected PolicyException(SerializationInfo info, StreamingContext context) : base(info, context) { }
+        public PolicyException(string message) : base(message) { }
+        public PolicyException(string message, Exception exception) : base(message, exception) { }
     }
 }

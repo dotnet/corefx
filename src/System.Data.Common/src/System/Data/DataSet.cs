@@ -27,6 +27,7 @@ namespace System.Data
     [Serializable]
     [XmlSchemaProvider(nameof(GetDataSetSchema))]
     [XmlRoot(nameof(DataSet))]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class DataSet : MarshalByValueComponent, IListSource, IXmlSerializable, ISupportInitializeNotification, ISerializable
     {
         private const string KEY_XMLSCHEMA = "XmlSchema";
@@ -2102,7 +2103,7 @@ namespace System.Data
                             else
                             {
                                 // We have found data IFF the reader.NodeType == Element and reader.depth == currentDepth-1
-                                // if reader.NodeType == whitespace, skip all white spaces.
+                                // if reader.NodeType == whitespace, skip all whitespace.
                                 // skip processing i.e. continue if the first non-whitespace node is not of type element.
                                 while (!reader.EOF && reader.NodeType == XmlNodeType.Whitespace)
                                     reader.Read();
@@ -2143,7 +2144,7 @@ namespace System.Data
                         //While inference we ignore root elements text content
                         if (!fSchemaFound && Tables.Count == 0 && !topNode.HasChildNodes)
                         {
-                            //We shoule not come add SC of root elemnt to topNode if we are not infering
+                            //We shoule not come add SC of root elemnt to topNode if we are not inferring
                             _fTopLevelTable = true;
                             isfTopLevelTableSet = true;
                             if ((rootNodeSimpleContent != null && rootNodeSimpleContent.Length > 0))
@@ -2367,7 +2368,7 @@ namespace System.Data
                 reader.Read();
                 if (reader.NodeType == XmlNodeType.Whitespace)
                 {
-                    MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespaces.
+                    MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespace.
                 }
 
                 newDs._fInLoadDiffgram = true;
@@ -2382,7 +2383,7 @@ namespace System.Data
                         reader.Read();
                         if (reader.NodeType == XmlNodeType.Whitespace)
                         {
-                            MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespaces.
+                            MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespace.
                         }
                         if (reader.Depth - 1 > d)
                         {
@@ -2393,7 +2394,7 @@ namespace System.Data
                         ReadEndElement(reader);
                         if (reader.NodeType == XmlNodeType.Whitespace)
                         {
-                            MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespaces.
+                            MoveToElement(reader, reader.Depth - 1 /*iCurrentDepth*/); // skip over whitespace.
                         }
                     }
                     Debug.Assert(reader.NodeType != XmlNodeType.Whitespace, "Should not be on Whitespace node");
@@ -3062,7 +3063,7 @@ namespace System.Data
         private void OnInitialized() => Initialized?.Invoke(this, EventArgs.Empty);
 
         /// <summary>
-        /// This method should be overriden by subclasses to restrict tables being removed.
+        /// This method should be overridden by subclasses to restrict tables being removed.
         /// </summary>
         protected internal virtual void OnRemoveTable(DataTable table) { }
 
@@ -3076,7 +3077,7 @@ namespace System.Data
         }
 
         /// <summary>
-        /// This method should be overriden by subclasses to restrict tables being removed.
+        /// This method should be overridden by subclasses to restrict tables being removed.
         /// </summary>
         protected virtual void OnRemoveRelation(DataRelation relation) { }
 

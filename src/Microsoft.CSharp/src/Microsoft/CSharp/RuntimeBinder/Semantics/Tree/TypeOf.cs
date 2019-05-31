@@ -4,10 +4,17 @@
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal class EXPRTYPEOF : EXPR
+    internal sealed class ExprTypeOf : ExprWithType
     {
-        public EXPRTYPEORNAMESPACE SourceType;
-        public EXPRTYPEORNAMESPACE GetSourceType() { return SourceType; }
-        public void SetSourceType(EXPRTYPEORNAMESPACE value) { SourceType = value; }
+        public ExprTypeOf(CType type, CType sourceType)
+            : base(ExpressionKind.TypeOf, type)
+        {
+            Flags = EXPRFLAG.EXF_CANTBENULL;
+            SourceType = sourceType;
+        }
+
+        public CType SourceType { get; }
+
+        public override object Object => SourceType.AssociatedSystemType;
     }
 }

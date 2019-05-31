@@ -227,11 +227,6 @@ namespace System.Xml.Xsl.XsltOld
             get { return GetAttribute(i); }
         }
 
-        public override string this[string name]
-        {
-            get { return GetAttribute(name); }
-        }
-
         public override string this[string name, string namespaceURI]
         {
             get { return GetAttribute(name, namespaceURI); }
@@ -343,7 +338,7 @@ namespace System.Xml.Xsl.XsltOld
                 if (_haveRecord)
                 {
                     CheckCurrentInfo();
-                    // check text nodes on whitespaces;
+                    // check text nodes on whitespace;
                     switch (this.NodeType)
                     {
                         case XmlNodeType.Text:
@@ -469,7 +464,7 @@ namespace System.Xml.Xsl.XsltOld
                 }
                 else if (NodeType == XmlNodeType.Attribute)
                 {
-                    return _encoder.AtributeInnerXml(Value);
+                    return _encoder.AttributeInnerXml(Value);
                 }
                 else
                 {
@@ -511,7 +506,7 @@ namespace System.Xml.Xsl.XsltOld
                 }
                 else if (NodeType == XmlNodeType.Attribute)
                 {
-                    return _encoder.AtributeOuterXml(Name, Value);
+                    return _encoder.AttributeOuterXml(Name, Value);
                 }
                 else
                 {
@@ -634,7 +629,7 @@ namespace System.Xml.Xsl.XsltOld
             return (BuilderInfo)_attributeList[attrib];
         }
 
-        private bool FindAttribute(String localName, String namespaceURI, out int attrIndex)
+        private bool FindAttribute(string localName, string namespaceURI, out int attrIndex)
         {
             if (namespaceURI == null)
             {
@@ -661,7 +656,7 @@ namespace System.Xml.Xsl.XsltOld
             return false;
         }
 
-        private bool FindAttribute(String name, out int attrIndex)
+        private bool FindAttribute(string name, out int attrIndex)
         {
             if (name == null)
             {
@@ -712,7 +707,7 @@ namespace System.Xml.Xsl.XsltOld
                 _encoder = new XmlTextEncoder(new StringWriter(_buffer, CultureInfo.InvariantCulture));
             }
 
-            public string AtributeInnerXml(string value)
+            public string AttributeInnerXml(string value)
             {
                 if (_encoder == null) Init();
                 _buffer.Length = 0;       // clean buffer
@@ -722,7 +717,7 @@ namespace System.Xml.Xsl.XsltOld
                 return _buffer.ToString();
             }
 
-            public string AtributeOuterXml(string name, string value)
+            public string AttributeOuterXml(string name, string value)
             {
                 if (_encoder == null) Init();
                 _buffer.Length = 0;       // clean buffer

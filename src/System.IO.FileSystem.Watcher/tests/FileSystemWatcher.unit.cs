@@ -2,12 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Collections.Generic;
-using System.IO;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.IO.Tests
@@ -67,8 +66,8 @@ namespace System.IO.Tests
         [Fact]
         public void FileSystemWatcher_ctor()
         {
-            string path = String.Empty;
-            string pattern = "*.*";
+            string path = string.Empty;
+            string pattern = "*";
             using (FileSystemWatcher watcher = new FileSystemWatcher())
                 ValidateDefaults(watcher, path, pattern);
         }
@@ -77,7 +76,7 @@ namespace System.IO.Tests
         public void FileSystemWatcher_ctor_path()
         {
             string path = @".";
-            string pattern = "*.*";
+            string pattern = "*";
             using (FileSystemWatcher watcher = new FileSystemWatcher(path))
                 ValidateDefaults(watcher, path, pattern);
         }
@@ -92,7 +91,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        public void FileSystemWatcher_ctor_InvalidStrings()
+        public void FileSystemWatcher_ctor_NullStrings()
         {
             using (var testDirectory = new TempDirectory(GetTestFilePath()))
             {
@@ -100,16 +99,24 @@ namespace System.IO.Tests
                 Assert.Throws<ArgumentNullException>("filter", () => new FileSystemWatcher(testDirectory.Path, null));
 
                 // Null path
+                Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null, null));
                 Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null));
                 Assert.Throws<ArgumentNullException>("path", () => new FileSystemWatcher(null, "*"));
+            }
+        }
 
+        [Fact]
+        public void FileSystemWatcher_ctor_InvalidStrings()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            {
                 // Empty path
-                Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty));
-                Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty, "*"));
+                AssertExtensions.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty));
+                AssertExtensions.Throws<ArgumentException>("path", () => new FileSystemWatcher(string.Empty, "*"));
 
                 // Invalid directory
-                Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(GetTestFilePath()));
-                Assert.Throws<ArgumentException>("path", () => new FileSystemWatcher(GetTestFilePath(), "*"));
+                AssertExtensions.Throws<ArgumentException>("path", () => new FileSystemWatcher(GetTestFilePath()));
+                AssertExtensions.Throws<ArgumentException>("path", () => new FileSystemWatcher(GetTestFilePath(), "*"));
             }
         }
 
@@ -208,14 +215,14 @@ namespace System.IO.Tests
         {
             FileSystemWatcher watcher = new FileSystemWatcher();
 
-            Assert.Equal("*.*", watcher.Filter);
+            Assert.Equal("*", watcher.Filter);
 
-            // Null and empty should be mapped to "*.*"
+            // Null and empty should be mapped to "*"
             watcher.Filter = null;
-            Assert.Equal("*.*", watcher.Filter);
+            Assert.Equal("*", watcher.Filter);
 
-            watcher.Filter = String.Empty;
-            Assert.Equal("*.*", watcher.Filter);
+            watcher.Filter = string.Empty;
+            Assert.Equal("*", watcher.Filter);
 
             watcher.Filter = " ";
             Assert.Equal(" ", watcher.Filter);
@@ -229,13 +236,10 @@ namespace System.IO.Tests
             watcher.Filter = "abc.dll";
             Assert.Equal("abc.dll", watcher.Filter);
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || // expect no change for OrdinalIgnoreCase-equal strings
-                RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            if (!(PlatformDetection.IsOSX))
             {
-                // expect no change for OrdinalIgnoreCase-equal strings
-                // it's unclear why desktop does this but preserve it for compat        
                 watcher.Filter = "ABC.DLL";
-                Assert.Equal("abc.dll", watcher.Filter);
+                Assert.Equal("ABC.DLL", watcher.Filter);
             }
 
             // We can make this setting by first changing to another value then back.
@@ -305,13 +309,13 @@ namespace System.IO.Tests
             Assert.Equal((NotifyFilters)0, watcher.NotifyFilter);
 
             // These throw InvalidEnumException on desktop, but ArgumentException on K
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)(-1));
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MinValue);
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MaxValue);
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = allFilters + 1);
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)(-1));
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MinValue);
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = (NotifyFilters)int.MaxValue);
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = allFilters + 1);
 
             // Simulate a bit added to the flags
-            Assert.Throws<ArgumentException>(() => watcher.NotifyFilter = allFilters | (NotifyFilters)((int)notifyFilters.Max() << 1));
+            Assert.ThrowsAny<ArgumentException>(() => watcher.NotifyFilter = allFilters | (NotifyFilters)((int)notifyFilters.Max() << 1));
         }
 
         [Fact]
@@ -361,7 +365,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.OSX | TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.OSX | TestPlatforms.Windows)]  // Casing matters on Linux
         public void FileSystemWatcher_OnCreatedWithMismatchedCasingGivesExpectedFullPath()
         {
             using (var dir = new TempDirectory(GetTestFilePath()))
@@ -461,14 +465,14 @@ namespace System.IO.Tests
             using (var file = new TempFile(Path.Combine(dir.Path, "file")))
             using (var fsw = new FileSystemWatcher(dir.Path))
             {
-                AutoResetEvent eventOccurred = WatchRenamed(fsw);
+                AutoResetEvent eventOccurred = WatchRenamed(fsw).EventOccured;
 
                 string newPath = Path.Combine(dir.Path, "newPath");
 
                 fsw.Renamed += (o, e) =>
                 {
-                    Assert.Equal(e.OldFullPath, file.Path);
-                    Assert.Equal(e.FullPath, newPath);
+                    Assert.Equal(file.Path, e.OldFullPath);
+                    Assert.Equal(newPath, e.FullPath);
                 };
 
                 fsw.EnableRaisingEvents = true;
@@ -481,16 +485,19 @@ namespace System.IO.Tests
         public void FileSystemWatcher_Path()
         {
             FileSystemWatcher watcher = new FileSystemWatcher();
-            Assert.Equal(String.Empty, watcher.Path);
+            Assert.Equal(string.Empty, watcher.Path);
 
             watcher.Path = null;
-            Assert.Equal(String.Empty, watcher.Path);
+            Assert.Equal(string.Empty, watcher.Path);
 
             watcher.Path = ".";
             Assert.Equal(".", watcher.Path);
 
-            watcher.Path = "..";
-            Assert.Equal("..", watcher.Path);
+            if (!PlatformDetection.IsInAppContainer)
+            {
+                watcher.Path = "..";
+                Assert.Equal("..", watcher.Path);
+            }
 
             string currentDir = Path.GetFullPath(".").TrimEnd('.', Path.DirectorySeparatorChar);
             watcher.Path = currentDir;
@@ -516,8 +523,8 @@ namespace System.IO.Tests
             Assert.Equal(currentDirRelative, watcher.Path);
 
             // FSW starts with String.Empty and will ignore setting this if it is already set,
-            // but if you set it after some other valid string has been set it will throw.
-            Assert.Throws<ArgumentException>(() => watcher.Path = String.Empty);
+            // but if you set it after some other valid string has been set it will throw.            
+            Assert.Throws<ArgumentException>(() => watcher.Path = string.Empty);
             // Non-existent path
             Assert.Throws<ArgumentException>(() => watcher.Path = GetTestFilePath());
             // Web path
@@ -543,7 +550,7 @@ namespace System.IO.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Linux)]
+        [PlatformSpecific(TestPlatforms.Linux)]  // Reads MaxUsersWatches from Linux OS files
         [OuterLoop("This test has high system resource demands and may cause failures in other concurrent tests")]
         public void FileSystemWatcher_CreateManyConcurrentWatches()
         {
@@ -584,32 +591,21 @@ namespace System.IO.Tests
             // a FSW event callback and make sure we don't Thread.Join to deadlock
             using (var dir = new TempDirectory(GetTestFilePath()))
             {
-                FileSystemWatcher watcher = new FileSystemWatcher();
+                string filePath = Path.Combine(dir.Path, "testfile.txt");
+                File.Create(filePath).Dispose();
                 AutoResetEvent are = new AutoResetEvent(false);
-
+                FileSystemWatcher watcher = new FileSystemWatcher(Path.GetFullPath(dir.Path), "*");
                 FileSystemEventHandler callback = (sender, arg) =>
                 {
                     watcher.Dispose();
                     are.Set();
                 };
-
-                // Attach the FSW to the existing structure
-                watcher.Path = Path.GetFullPath(dir.Path);
-                watcher.Filter = "*";
-                watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.Size;
+                watcher.NotifyFilter = NotifyFilters.FileName | NotifyFilters.LastWrite;
                 watcher.Changed += callback;
-
-                using (var file = File.Create(Path.Combine(dir.Path, "testfile.txt")))
-                {
-                    watcher.EnableRaisingEvents = true;
-
-                    // Change the nested file and verify we get the changed event
-                    byte[] bt = new byte[4096];
-                    file.Write(bt, 0, bt.Length);
-                    file.Flush();
-                }
-
-                ExpectEvent(are, "deleted");
+                watcher.EnableRaisingEvents = true;
+                File.SetLastWriteTime(filePath, File.GetLastWriteTime(filePath).AddDays(1));
+                Assert.True(are.WaitOne(10000));
+                Assert.Throws<ObjectDisposedException>(() => watcher.EnableRaisingEvents = true);
             }
         }
 
@@ -620,7 +616,7 @@ namespace System.IO.Tests
             using (var dir = new TempDirectory(Path.Combine(testDirectory.Path, "dir")))
             using (var fsw = new FileSystemWatcher(dir.Path))
             {
-                AutoResetEvent are = WatchCreated(fsw);
+                AutoResetEvent are = WatchCreated(fsw).EventOccured;
 
                 fsw.Filter = "*";
                 fsw.EnableRaisingEvents = true;
@@ -629,6 +625,495 @@ namespace System.IO.Tests
                 {
                     ExpectEvent(are, "created");
                 }
+            }
+        }
+
+        [Fact]
+        public void DefaultFiltersValue()
+        {
+            var watcher = new FileSystemWatcher();
+            Assert.Equal(0, watcher.Filters.Count);
+            Assert.Empty(watcher.Filters);
+            Assert.NotNull(watcher.Filters);
+            Assert.Equal(new string[] { }, watcher.Filters);
+        }
+
+        [Fact]
+        public void AddFilterToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            Assert.Equal(2, watcher.Filters.Count);
+            Assert.Equal(new string[] { "*.pdb", "*.dll" }, watcher.Filters);
+
+            string[] copied = new string[2];
+            watcher.Filters.CopyTo(copied, 0);
+            Assert.Equal(new string[] { "*.pdb", "*.dll" }, copied);
+        }
+
+        [Fact]
+        public void FiltersCaseSensitive()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("foo");
+            Assert.Equal("foo", watcher.Filters[0]);
+            watcher.Filters[0] = "Foo";
+            Assert.Equal("Foo", watcher.Filters[0]);
+        }
+
+        [Fact]
+        public void RemoveFilterFromFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            watcher.Filters.Remove("*.pdb");
+            Assert.DoesNotContain(watcher.Filters, t => t == "*.pdb");
+            Assert.Equal(new string[] { "*.dll" }, watcher.Filters);
+
+            // No Exception is thrown while removing an item which is not present in the list.
+            watcher.Filters.Remove("*.pdb");
+        }
+
+        [Fact]
+        public void AddEmptyStringToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            watcher.Filters.Add(string.Empty);
+            Assert.Equal(3, watcher.Filters.Count);
+            Assert.Equal(new string[] { "*.pdb", "*.dll", "*" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void AddNullToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            watcher.Filters.Add(null);
+            Assert.Equal(3, watcher.Filters.Count);
+            Assert.Equal(new string[] { "*.pdb", "*.dll", "*" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void SetEmptyStringToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            watcher.Filters[0] = string.Empty;
+            Assert.Equal(2, watcher.Filters.Count);
+            Assert.Equal("*", watcher.Filters[0]);
+            Assert.Equal(new string[] { "*", "*.dll"}, watcher.Filters);
+        }
+
+        [Fact]
+        public void RemoveEmptyStringToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(string.Empty);
+
+            Assert.Equal(3, watcher.Filters.Count);
+            watcher.Filters.Remove(string.Empty);
+            Assert.Equal(3, watcher.Filters.Count);
+            Assert.Equal(new string[] { "*.pdb", "*.dll", "*" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void RemoveAtFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            
+            watcher.Filters.RemoveAt(0);
+            Assert.Equal(1, watcher.Filters.Count);
+            Assert.Equal("*.dll", watcher.Filter);
+            Assert.Equal(new string[] {"*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void RemoveAtEmptyFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+
+            watcher.Filters.RemoveAt(0);
+            Assert.Equal(0, watcher.Filters.Count);
+            Assert.Equal("*", watcher.Filter);
+            Assert.Equal(new string[] { }, watcher.Filters);
+        }
+
+        [Fact]
+        public void SetNullToFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            watcher.Filters[0] = null;
+            Assert.Equal(2, watcher.Filters.Count);
+            Assert.Equal("*", watcher.Filters[0]);
+            Assert.Equal(new string[] { "*", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void ContainsEmptyStringFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(string.Empty);
+
+            Assert.False(watcher.Filters.Contains(string.Empty));
+            Assert.True(watcher.Filters.Contains("*"));
+        }
+
+        [Fact]
+        public void ContainsNullFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(null);
+
+            Assert.False(watcher.Filters.Contains(null));
+            Assert.True(watcher.Filters.Contains("*"));
+        }
+
+        [Fact]
+        public void ContainsFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            
+            Assert.True(watcher.Filters.Contains("*.pdb"));
+        }
+
+        [Fact]
+        public void InsertEmptyStringFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(1, string.Empty);
+
+            Assert.Equal("*", watcher.Filters[1]);
+            Assert.Equal(3, watcher.Filters.Count);
+            Assert.Equal(new string[] { "*.pdb", "*", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void InsertNullFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(1, null);
+
+            Assert.Equal("*", watcher.Filters[1]);
+            Assert.Equal(3, watcher.Filters.Count);
+            Assert.Equal(new string[] { "*.pdb", "*", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void InsertFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(1, "foo");
+
+            Assert.Equal("foo", watcher.Filters[1]);
+            Assert.Equal(3, watcher.Filters.Count);
+            Assert.Equal(new string[] { "*.pdb", "foo", "*.dll" }, watcher.Filters);
+        }
+
+        [Fact]
+        public void InsertAtZero()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Insert(0, "foo");
+
+            Assert.Equal("foo", watcher.Filters[0]);
+            Assert.Equal("foo", watcher.Filter);
+            Assert.Equal(3, watcher.Filters.Count);
+            Assert.Equal(new string[] { "foo", "*.pdb", "*.dll" }, watcher.Filters);
+        }
+        [Fact]
+        public void IndexOfEmptyStringFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(string.Empty);
+
+            Assert.Equal(-1, watcher.Filters.IndexOf(string.Empty));
+        }
+
+        [Fact]
+        public void IndexOfNullFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            watcher.Filters.Add(null);
+
+            Assert.Equal(-1, watcher.Filters.IndexOf(null));
+        }
+
+        [Fact]
+        public void IndexOfFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+            
+            Assert.Equal(-1, watcher.Filters.IndexOf("foo"));
+            Assert.Equal(0, watcher.Filters.IndexOf("*.pdb"));
+        }
+
+        [Fact]
+        public void GetTypeFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            Assert.IsAssignableFrom<Collection<string>>(watcher.Filters);
+        }
+
+        [Fact]
+        public void ClearFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            watcher.Filters.Clear();
+            Assert.Equal(0, watcher.Filters.Count);
+            Assert.Equal(new string[] { }, watcher.Filters) ;
+        }
+
+        [Fact]
+        public void GetFilterAfterFiltersClear()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            {
+                var watcher = new FileSystemWatcher(testDirectory.Path);
+                watcher.Filters.Add("*.pdb");
+                watcher.Filters.Add("*.dll");
+
+                watcher.Filters.Clear();
+                Assert.Equal("*", watcher.Filter);
+                Assert.Equal(new string[] { }, watcher.Filters);
+            }
+        }
+
+        [Fact]
+        public void GetFiltersAfterFiltersClear()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            {
+                var watcher = new FileSystemWatcher(testDirectory.Path);
+                watcher.Filters.Add("*.pdb");
+                watcher.Filters.Add("*.dll");
+
+                watcher.Filters.Clear();
+                Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters[0]);
+                Assert.Equal(0, watcher.Filters.Count);
+                Assert.Empty(watcher.Filters);
+                Assert.NotNull(watcher.Filters);
+            }
+        }
+
+        [Fact]
+        public void InvalidOperationsOnFilters()
+        {
+            var watcher = new FileSystemWatcher();
+            watcher.Filters.Add("*.pdb");
+            watcher.Filters.Add("*.dll");
+
+            Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters.Insert(4, "*"));            
+            watcher.Filters.Clear();
+            Assert.Throws<ArgumentOutOfRangeException>(() => watcher.Filters[0]);
+        }
+
+        [Fact]
+        public void SetAndGetFilterProperty()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            {
+                var watcher = new FileSystemWatcher(testDirectory.Path, "*.pdb");
+                watcher.Filters.Add("foo");
+                Assert.Equal(2, watcher.Filters.Count);
+                Assert.Equal(new string[] { "*.pdb", "foo" }, watcher.Filters);
+
+                watcher.Filter = "*.doc";
+                Assert.Equal(1, watcher.Filters.Count);
+                Assert.Equal("*.doc", watcher.Filter);
+                Assert.Equal("*.doc", watcher.Filters[0]);
+                Assert.Equal(new string[] { "*.doc" }, watcher.Filters);
+
+                watcher.Filters.Clear();
+                Assert.Equal("*", watcher.Filter);
+            }
+        }
+
+        [Fact]
+        public void SetAndGetFiltersProperty()
+        {
+            using (var testDirectory = new TempDirectory(GetTestFilePath()))
+            {
+                var watcher = new FileSystemWatcher(testDirectory.Path, "*.pdb");
+                watcher.Filters.Add("foo");
+                Assert.Equal(new string[] { "*.pdb", "foo" }, watcher.Filters);
+            }
+        }
+
+        [Fact]
+        public void FileSystemWatcher_File_Delete_MultipleFilters()
+        {
+            // Check delete events against multiple filters
+
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            FileInfo fileOne = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileTwo = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileThree = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            fileOne.Create().Dispose();
+            fileTwo.Create().Dispose();
+            fileThree.Create().Dispose();
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
+            {
+                watcher.Filters.Add(fileOne.Name);
+                watcher.Filters.Add(fileTwo.Name);
+
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => fileOne.Delete(), cleanup: null, expectedPath : fileOne.FullName);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => fileTwo.Delete(), cleanup: null, expectedPath: fileTwo.FullName );
+                ExpectNoEvent(watcher, WatcherChangeTypes.Deleted, () => fileThree.Delete(), cleanup: null, expectedPath: fileThree.FullName);
+            }
+        }
+
+        [Fact]
+        public void FileSystemWatcher_Directory_Create_MultipleFilters()
+        {
+            // Check create events against multiple filters
+
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            string directoryOne = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryTwo = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryThree = Path.Combine(directory.FullName, GetTestFileName());
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
+            {
+                watcher.Filters.Add(Path.GetFileName(directoryOne));
+                watcher.Filters.Add(Path.GetFileName(directoryTwo));
+
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryOne), cleanup: null, expectedPath: directoryOne);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryTwo), cleanup: null, expectedPath: directoryTwo);
+                ExpectNoEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryThree), cleanup: null, expectedPath: directoryThree);
+            }
+        }
+
+        [Fact]
+        public void FileSystemWatcher_Directory_Create_Filter_Ctor()
+        {
+            // Check create events against multiple filters
+
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            string directoryOne = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryTwo = Path.Combine(directory.FullName, GetTestFileName());
+            string directoryThree = Path.Combine(directory.FullName, GetTestFileName());
+
+            using (var watcher = new FileSystemWatcher(directory.FullName, Path.GetFileName(directoryOne)))
+            {
+                watcher.Filters.Add(Path.GetFileName(directoryTwo));
+
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryOne), cleanup: null, expectedPath: directoryOne);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryTwo), cleanup: null, expectedPath: directoryTwo);
+                ExpectNoEvent(watcher, WatcherChangeTypes.Created, () => Directory.CreateDirectory(directoryThree), cleanup: null, expectedPath: directoryThree);
+            }
+        }
+
+        [Fact]
+        public void FileSystemWatcher_Directory_Delete_MultipleFilters()
+        {
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            DirectoryInfo directoryOne = Directory.CreateDirectory(Path.Combine(directory.FullName, GetTestFileName()));
+            DirectoryInfo directoryTwo = Directory.CreateDirectory(Path.Combine(directory.FullName, GetTestFileName()));
+            DirectoryInfo directoryThree = Directory.CreateDirectory(Path.Combine(directory.FullName, GetTestFileName()));
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
+            {
+                watcher.Filters.Add(Path.GetFileName(directoryOne.FullName));
+                watcher.Filters.Add(Path.GetFileName(directoryTwo.FullName));
+
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => directoryOne.Delete(), cleanup: null, expectedPath: directoryOne.FullName);
+                ExpectEvent(watcher, WatcherChangeTypes.Deleted, () => directoryTwo.Delete(), cleanup: null, expectedPath: directoryTwo.FullName);
+                ExpectNoEvent(watcher, WatcherChangeTypes.Deleted, () => directoryThree.Delete(), cleanup: null, expectedPath: directoryThree.FullName);
+            }
+        }
+
+        [Fact]
+        public void FileSystemWatcher_File_Create_MultipleFilters()
+        {
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            FileInfo fileOne = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileTwo = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileThree = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
+            {
+                watcher.Filters.Add(fileOne.Name);
+                watcher.Filters.Add(fileTwo.Name);
+
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileOne.Create().Dispose(), cleanup: null, expectedPath: fileOne.FullName);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileTwo.Create().Dispose(), cleanup: null, expectedPath: fileTwo.FullName);
+                ExpectNoEvent(watcher, WatcherChangeTypes.Created, () => fileThree.Create().Dispose(), cleanup: null, expectedPath: fileThree.FullName);
+            }
+        }
+
+        [Fact]
+        public void FileSystemWatcher_ModifyFiltersConcurrentWithEvents()
+        {
+            DirectoryInfo directory = Directory.CreateDirectory(GetTestFilePath());
+            FileInfo fileOne = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileTwo = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+            FileInfo fileThree = new FileInfo(Path.Combine(directory.FullName, GetTestFileName()));
+
+            using (var watcher = new FileSystemWatcher(directory.FullName))
+            {
+                watcher.Filters.Add(fileOne.Name);
+                watcher.Filters.Add(fileTwo.Name);
+
+                var cts = new CancellationTokenSource();
+                Task modifier = Task.Run(() =>
+                {
+                    string otherFilter = Guid.NewGuid().ToString("N");
+                    while (!cts.IsCancellationRequested)
+                    {
+                        watcher.Filters.Add(otherFilter);
+                        watcher.Filters.RemoveAt(2);
+                    }
+                });
+
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileOne.Create().Dispose(), cleanup: null, expectedPath: fileOne.FullName);
+                ExpectEvent(watcher, WatcherChangeTypes.Created, () => fileTwo.Create().Dispose(), cleanup: null, expectedPath: fileTwo.FullName);
+                ExpectNoEvent(watcher, WatcherChangeTypes.Created, () => fileThree.Create().Dispose(), cleanup: null, expectedPath: fileThree.FullName);
+
+                cts.Cancel();
+                modifier.Wait();
             }
         }
     }

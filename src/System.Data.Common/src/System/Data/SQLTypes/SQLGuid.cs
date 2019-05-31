@@ -15,6 +15,7 @@ namespace System.Data.SqlTypes
     /// </summary>
     [Serializable]
     [XmlSchemaProvider("GetXsdType")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlGuid : INullable, IComparable, IXmlSerializable
     {
         private static readonly int s_sizeOfGuid = 16;
@@ -24,40 +25,40 @@ namespace System.Data.SqlTypes
         {10, 11, 12, 13, 14, 15, 8, 9, 6, 7, 4, 5, 0, 1, 2, 3};
 
         // NOTE: If any instance fields change, update SqlTypeWorkarounds type in System.Data.SqlClient.
-        private byte[] _value; // the SqlGuid is null if m_value is null
+        private byte[] m_value; // the SqlGuid is null if m_value is null
 
         // constructor
         // construct a SqlGuid.Null
         private SqlGuid(bool fNull)
         {
-            _value = null;
+            m_value = null;
         }
 
         public SqlGuid(byte[] value)
         {
             if (value == null || value.Length != s_sizeOfGuid)
-                throw new ArgumentException(SQLResource.s_invalidArraySizeMessage);
+                throw new ArgumentException(SQLResource.InvalidArraySizeMessage);
 
-            _value = new byte[s_sizeOfGuid];
-            value.CopyTo(_value, 0);
+            m_value = new byte[s_sizeOfGuid];
+            value.CopyTo(m_value, 0);
         }
 
         internal SqlGuid(byte[] value, bool ignored)
         {
             if (value == null || value.Length != s_sizeOfGuid)
-                throw new ArgumentException(SQLResource.s_invalidArraySizeMessage);
+                throw new ArgumentException(SQLResource.InvalidArraySizeMessage);
 
-            _value = value;
+            m_value = value;
         }
 
         public SqlGuid(string s)
         {
-            _value = (new Guid(s)).ToByteArray();
+            m_value = (new Guid(s)).ToByteArray();
         }
 
         public SqlGuid(Guid g)
         {
-            _value = g.ToByteArray();
+            m_value = g.ToByteArray();
         }
 
         public SqlGuid(int a, short b, short c, byte d, byte e, byte f, byte g, byte h, byte i, byte j, byte k)
@@ -69,7 +70,7 @@ namespace System.Data.SqlTypes
         // INullable
         public bool IsNull
         {
-            get { return (_value == null); }
+            get { return (m_value == null); }
         }
 
         // property: Value
@@ -80,7 +81,7 @@ namespace System.Data.SqlTypes
                 if (IsNull)
                     throw new SqlNullValueException();
                 else
-                    return new Guid(_value);
+                    return new Guid(m_value);
             }
         }
 
@@ -99,22 +100,22 @@ namespace System.Data.SqlTypes
         public byte[] ToByteArray()
         {
             byte[] ret = new byte[s_sizeOfGuid];
-            _value.CopyTo(ret, 0);
+            m_value.CopyTo(ret, 0);
             return ret;
         }
 
         public override string ToString()
         {
             if (IsNull)
-                return SQLResource.s_nullString;
+                return SQLResource.NullString;
 
-            Guid g = new Guid(_value);
+            Guid g = new Guid(m_value);
             return g.ToString();
         }
 
         public static SqlGuid Parse(string s)
         {
-            if (s == SQLResource.s_nullString)
+            if (s == SQLResource.NullString)
                 return SqlGuid.Null;
             else
                 return new SqlGuid(s);
@@ -129,8 +130,8 @@ namespace System.Data.SqlTypes
             {
                 byte b1, b2;
 
-                b1 = x._value[s_rgiGuidOrder[i]];
-                b2 = y._value[s_rgiGuidOrder[i]];
+                b1 = x.m_value[s_rgiGuidOrder[i]];
+                b2 = y.m_value[s_rgiGuidOrder[i]];
                 if (b1 != b2)
                     return (b1 < b2) ? EComparison.LT : EComparison.GT;
             }
@@ -310,11 +311,11 @@ namespace System.Data.SqlTypes
             {
                 // Read the next value.
                 reader.ReadElementString();
-                _value = null;
+                m_value = null;
             }
             else
             {
-                _value = new Guid(reader.ReadElementString()).ToByteArray();
+                m_value = new Guid(reader.ReadElementString()).ToByteArray();
             }
         }
 
@@ -326,7 +327,7 @@ namespace System.Data.SqlTypes
             }
             else
             {
-                writer.WriteString(XmlConvert.ToString(new Guid(_value)));
+                writer.WriteString(XmlConvert.ToString(new Guid(m_value)));
             }
         }
 

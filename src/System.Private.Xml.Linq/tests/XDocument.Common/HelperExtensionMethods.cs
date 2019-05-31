@@ -12,8 +12,6 @@ using System.Xml.Linq;
 
 using Microsoft.Test.ModuleCore;
 
-[assembly: System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
-
 namespace CoreXml.Test.XLinq
 {
     public static class Helpers
@@ -157,7 +155,7 @@ namespace CoreXml.Test.XLinq
                         {
                             // special treatment for XText
                             if (e1.Current.Data is XText && !(e1.Current.Data is XCData))
-                                if (!Object.ReferenceEquals(e1.Current.originalReference, e2.Current))
+                                if (!object.ReferenceEquals(e1.Current.originalReference, e2.Current))
                                 {
                                     TestLog.WriteLine("XText reference comparison: ");
                                     return false;
@@ -184,7 +182,7 @@ namespace CoreXml.Test.XLinq
                     }
                     else
                     {
-                        TestLog.WriteLine("No mach in actual values");
+                        TestLog.WriteLine("No match in actual values");
                         return false;
                     }
                 }
@@ -199,29 +197,29 @@ namespace CoreXml.Test.XLinq
 
         private static int compare1<T1>(T1 a, T1 b) where T1 : ExpectedValue
         {
-            String namea = (a.Data as XAttribute).Name.LocalName;
-            String nameb = (b.Data as XAttribute).Name.LocalName;
+            string namea = (a.Data as XAttribute).Name.LocalName;
+            string nameb = (b.Data as XAttribute).Name.LocalName;
             return namea.CompareTo(nameb);
         }
 
         private static int compare1N<T1>(T1 a, T1 b) where T1 : ExpectedValue
         {
-            String namea = (a.Data as XAttribute).Name.Namespace.NamespaceName;
-            String nameb = (b.Data as XAttribute).Name.Namespace.NamespaceName;
+            string namea = (a.Data as XAttribute).Name.Namespace.NamespaceName;
+            string nameb = (b.Data as XAttribute).Name.Namespace.NamespaceName;
             return namea.CompareTo(nameb);
         }
 
         private static int compare2<T2>(T2 a, T2 b) where T2 : XAttribute
         {
-            String namea = a.Name.LocalName;
-            String nameb = b.Name.LocalName;
+            string namea = a.Name.LocalName;
+            string nameb = b.Name.LocalName;
             return namea.CompareTo(nameb);
         }
 
         private static int compare2N<T2>(T2 a, T2 b) where T2 : XAttribute
         {
-            String namea = a.Name.Namespace.NamespaceName;
-            String nameb = b.Name.Namespace.NamespaceName;
+            string namea = a.Name.Namespace.NamespaceName;
+            string nameb = b.Name.Namespace.NamespaceName;
             return namea.CompareTo(nameb);
         }
 

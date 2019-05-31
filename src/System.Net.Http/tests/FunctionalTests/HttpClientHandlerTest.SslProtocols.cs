@@ -2,26 +2,30 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Security;
-using System.Net.Sockets;
 using System.Net.Test.Common;
 using System.Runtime.InteropServices;
 using System.Security.Authentication;
-using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     using Configuration = System.Net.Test.Common.Configuration;
 
-    public class HttpClientHandler_SslProtocols_Test
+    [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SslProtocols not supported on UAP")]
+    public abstract partial class HttpClientHandler_SslProtocols_Test : HttpClientHandlerTestBase
     {
+        public HttpClientHandler_SslProtocols_Test(ITestOutputHelper output) : base(output) { }
+
         [Fact]
         public void DefaultProtocols_MatchesExpected()
         {
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 Assert.Equal(SslProtocols.None, handler.SslProtocols);
             }
@@ -36,62 +40,95 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(SslProtocols.Tls11 | SslProtocols.Tls12)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls12)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12)]
+        [InlineData(SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls11 | SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls12 | SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls | SslProtocols.Tls13)]
+        [InlineData(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13)]
         public void SetGetProtocols_Roundtrips(SslProtocols protocols)
         {
-            using (var handler = new HttpClientHandler())
+            using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 handler.SslProtocols = protocols;
                 Assert.Equal(protocols, handler.SslProtocols);
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(nameof(BackendSupportsSslConfiguration))]
+        [Fact]
         public async Task SetProtocols_AfterRequest_ThrowsException()
         {
-            using (var handler = new HttpClientHandler() { ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates })
-            using (var client = new HttpClient(handler))
+            if (!BackendSupportsSslConfiguration)
             {
+                return;
+            }
+
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            using (HttpClient client = CreateHttpClient(handler))
+            {
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server),
+                        server.AcceptConnectionSendResponseAndCloseAsync(),
                         client.GetAsync(url));
                 });
                 Assert.Throws<InvalidOperationException>(() => handler.SslProtocols = SslProtocols.Tls12);
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [Theory]
-        [InlineData(~SslProtocols.None)]
-#pragma warning disable 0618 // obsolete warning
-        [InlineData(SslProtocols.Ssl2)]
-        [InlineData(SslProtocols.Ssl3)]
-        [InlineData(SslProtocols.Ssl2 | SslProtocols.Ssl3)]
-        [InlineData(SslProtocols.Ssl2 | SslProtocols.Ssl3 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12)]
-#pragma warning restore 0618
-        public void DisabledProtocols_SetSslProtocols_ThrowsException(SslProtocols disabledProtocols)
+
+        public static IEnumerable<object[]> GetAsync_AllowedSSLVersion_Succeeds_MemberData()
         {
-            using (var handler = new HttpClientHandler())
+            // These protocols are all enabled by default, so we can connect with them both when
+            // explicitly specifying it in the client and when not.
+            foreach (SslProtocols protocol in new[] { SslProtocols.Tls, SslProtocols.Tls11, SslProtocols.Tls12 })
             {
-                Assert.Throws<NotSupportedException>(() => handler.SslProtocols = disabledProtocols);
+                yield return new object[] { protocol, false };
+                yield return new object[] { protocol, true };
+            }
+
+            // These protocols are disabled by default, so we can only connect with them explicitly.
+            // On certain platforms these are completely disabled and cannot be used at all.
+#pragma warning disable 0618
+            if (PlatformDetection.SupportsSsl3)
+            {
+                yield return new object[] { SslProtocols.Ssl3, true };
+            }
+            if (PlatformDetection.IsWindows && !PlatformDetection.IsWindows10Version1607OrGreater)
+            {
+                yield return new object[] { SslProtocols.Ssl2, true };
+            }
+#pragma warning restore 0618
+            // These protocols are new, and might not be enabled everywhere yet
+            if (PlatformDetection.IsUbuntu1810OrHigher)
+            {
+                yield return new object[] { SslProtocols.Tls13, false };
+                yield return new object[] { SslProtocols.Tls13, true };
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(nameof(BackendSupportsSslConfiguration))]
-        [InlineData(SslProtocols.Tls, false)]
-        [InlineData(SslProtocols.Tls, true)]
-        [InlineData(SslProtocols.Tls11, false)]
-        [InlineData(SslProtocols.Tls11, true)]
-        [InlineData(SslProtocols.Tls12, false)]
-        [InlineData(SslProtocols.Tls12, true)]
+        [ConditionalTheory]
+        [MemberData(nameof(GetAsync_AllowedSSLVersion_Succeeds_MemberData))]
         public async Task GetAsync_AllowedSSLVersion_Succeeds(SslProtocols acceptedProtocol, bool requestOnlyThisProtocol)
         {
-            using (var handler = new HttpClientHandler() { ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates })
-            using (var client = new HttpClient(handler))
+            if (!BackendSupportsSslConfiguration)
             {
+                return;
+            }
+
+#pragma warning disable 0618
+            if (IsCurlHandler && PlatformDetection.IsRedHatFamily6 && acceptedProtocol == SslProtocols.Ssl3)
+            {
+                // Issue: #28790: SSLv3 is supported on RHEL 6, but it fails with curl.
+                throw new SkipTestException("CurlHandler (libCurl) has problems with SSL3 on RH6");
+            }
+#pragma warning restore 0618
+
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            using (HttpClient client = CreateHttpClient(handler))
+            {
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+
                 if (requestOnlyThisProtocol)
                 {
                     handler.SslProtocols = acceptedProtocol;
@@ -100,152 +137,171 @@ namespace System.Net.Http.Functional.Tests
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
-                        LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
+                        server.AcceptConnectionSendResponseAndCloseAsync(),
                         client.GetAsync(url));
                 }, options);
             }
         }
 
-        public readonly static object [][] SupportedSSLVersionServers =
+        public static IEnumerable<object[]> SupportedSSLVersionServers()
         {
-            new object[] {"TLSv1.0", Configuration.Http.TLSv10RemoteServer},
-            new object[] {"TLSv1.1", Configuration.Http.TLSv11RemoteServer},
-            new object[] {"TLSv1.2", Configuration.Http.TLSv12RemoteServer},
-        };
+#pragma warning disable 0618 // SSL2/3 are deprecated
+            if (PlatformDetection.IsWindows ||
+                PlatformDetection.IsOSX ||
+                (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && PlatformDetection.OpenSslVersion < new Version(1, 0, 2) && !PlatformDetection.IsDebian))
+            {
+                yield return new object[] { SslProtocols.Ssl3, Configuration.Http.SSLv3RemoteServer };
+            }
+#pragma warning restore 0618
+            yield return new object[] { SslProtocols.Tls, Configuration.Http.TLSv10RemoteServer };
+            yield return new object[] { SslProtocols.Tls11, Configuration.Http.TLSv11RemoteServer };
+            yield return new object[] { SslProtocols.Tls12, Configuration.Http.TLSv12RemoteServer };
+        }
 
-        // This test is logically the same as the above test, albeit using remote servers
-        // instead of local ones.  We're keeping it for now (as outerloop) because it helps
-        // to validate against another SSL implementation that what we mean by a particular
-        // TLS version matches that other implementation.
+        // We have tests that validate with SslStream, but that's limited by what the current OS supports.
+        // This tests provides additional validation against an external server.
+        [ActiveIssue(26186)]
         [OuterLoop("Avoid www.ssllabs.com dependency in innerloop.")]
         [Theory]
         [MemberData(nameof(SupportedSSLVersionServers))]
-        public async Task GetAsync_SupportedSSLVersion_Succeeds(string name, string url)
+        public async Task GetAsync_SupportedSSLVersion_Succeeds(SslProtocols sslProtocols, string url)
         {
-            using (var client = new HttpClient())
+            if (UseSocketsHttpHandler)
             {
-                (await client.GetAsync(url)).Dispose();
+                // TODO #26186: SocketsHttpHandler is failing on some OSes.
+                return;
+            }
+
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            {
+                handler.SslProtocols = sslProtocols;
+                using (HttpClient client = CreateHttpClient(handler))
+                {
+                    (await RemoteServerQuery.Run(() => client.GetAsync(url), remoteServerExceptionWrapper, url)).Dispose();
+                }
             }
         }
 
-        public readonly static object[][] NotSupportedSSLVersionServers =
+        public Func<Exception, bool> remoteServerExceptionWrapper = (exception) =>
         {
-            new object[] {"SSLv2", Configuration.Http.SSLv2RemoteServer},
-            new object[] {"SSLv3", Configuration.Http.SSLv3RemoteServer},
+            Type exceptionType = exception.GetType();
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+            {
+                // On linux, taskcanceledexception is thrown.
+                return exceptionType.Equals(typeof(TaskCanceledException));
+            }
+            else
+            {
+                // The internal exceptions return operation timed out.
+                return exceptionType.Equals(typeof(HttpRequestException)) && exception.InnerException.Message.Contains("timed out");
+            }
         };
 
-        // It would be easy to remove the dependency on these remote servers if we didn't
-        // explicitly disallow creating SslStream with SSLv2/3.  Since we explicitly throw
-        // when trying to use such an SslStream, we can't stand up a localhost server that
-        // only speaks those protocols.
-        [OuterLoop("Avoid www.ssllabs.com dependency in innerloop.")]
-        [ConditionalTheory(nameof(SSLv3DisabledByDefault))]
-        [MemberData(nameof(NotSupportedSSLVersionServers))]
-        public async Task GetAsync_UnsupportedSSLVersion_Throws(string name, string url)
+        public static IEnumerable<object[]> NotSupportedSSLVersionServers()
         {
-            using (var client = new HttpClient())
+#pragma warning disable 0618
+            if (PlatformDetection.IsWindows10Version1607OrGreater)
             {
-                await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
+                yield return new object[] { SslProtocols.Ssl2, Configuration.Http.SSLv2RemoteServer };
+            }
+#pragma warning restore 0618
+        }
+
+        // We have tests that validate with SslStream, but that's limited by what the current OS supports.
+        // This tests provides additional validation against an external server.
+        [OuterLoop("Avoid www.ssllabs.com dependency in innerloop.")]
+        [Theory]
+        [MemberData(nameof(NotSupportedSSLVersionServers))]
+        public async Task GetAsync_UnsupportedSSLVersion_Throws(SslProtocols sslProtocols, string url)
+        {
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            using (HttpClient client = CreateHttpClient(handler))
+            {
+                handler.SslProtocols = sslProtocols;
+                await Assert.ThrowsAsync<HttpRequestException>(() => RemoteServerQuery.Run(() => client.GetAsync(url), remoteServerExceptionWrapper, url));
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(nameof(BackendSupportsSslConfiguration), nameof(SslDefaultsToTls12))]
+        [Fact]
         public async Task GetAsync_NoSpecifiedProtocol_DefaultsToTls12()
         {
-            using (var handler = new HttpClientHandler() { ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates })
-            using (var client = new HttpClient(handler))
+            if (!BackendSupportsSslConfiguration)
             {
-                var options = new LoopbackServer.Options { UseSsl = true };
+                return;
+            }
+
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            using (HttpClient client = CreateHttpClient(handler))
+            {
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+
+                var options = new LoopbackServer.Options { UseSsl = true, SslProtocols = SslProtocols.Tls12 };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
                     await TestHelper.WhenAllCompletedOrAnyFailed(
                         client.GetAsync(url),
-                        LoopbackServer.AcceptSocketAsync(server, async (s, stream, reader, writer) =>
+                        server.AcceptConnectionAsync(async connection =>
                         {
-                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(stream).SslProtocol);
-                            await LoopbackServer.ReadWriteAcceptedAsync(s, reader, writer);
-                            return null;
-                        }, options));
+                            Assert.Equal(SslProtocols.Tls12, Assert.IsType<SslStream>(connection.Stream).SslProtocol);
+                            await connection.ReadRequestHeaderAndSendResponseAsync();
+                        }));
                 }, options);
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalTheory(nameof(BackendSupportsSslConfiguration))]
-        [InlineData(SslProtocols.Tls11, SslProtocols.Tls, typeof(IOException))]
-        [InlineData(SslProtocols.Tls12, SslProtocols.Tls11, typeof(IOException))]
-        [InlineData(SslProtocols.Tls, SslProtocols.Tls12, typeof(AuthenticationException))]
-        public async Task GetAsync_AllowedSSLVersionDiffersFromServer_ThrowsException(
-            SslProtocols allowedProtocol, SslProtocols acceptedProtocol, Type exceptedServerException)
+        [Theory]
+#pragma warning disable 0618 // SSL2/3 are deprecated
+        [InlineData(SslProtocols.Ssl2, SslProtocols.Tls12)]
+        [InlineData(SslProtocols.Ssl3, SslProtocols.Tls12)]
+#pragma warning restore 0618
+        [InlineData(SslProtocols.Tls11, SslProtocols.Tls)]
+        [InlineData(SslProtocols.Tls11 | SslProtocols.Tls12, SslProtocols.Tls)] // Skip this on WinHttpHandler.
+        [InlineData(SslProtocols.Tls12, SslProtocols.Tls11)]
+        [InlineData(SslProtocols.Tls, SslProtocols.Tls12)]
+        public async Task GetAsync_AllowedClientSslVersionDiffersFromServer_ThrowsException(
+            SslProtocols allowedClientProtocols, SslProtocols acceptedServerProtocols)
         {
-            using (var handler = new HttpClientHandler() { SslProtocols = allowedProtocol, ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates })
-            using (var client = new HttpClient(handler))
+            if (!BackendSupportsSslConfiguration)
             {
-                var options = new LoopbackServer.Options { UseSsl = true, SslProtocols = acceptedProtocol };
+                return;
+            }
+
+            if (IsWinHttpHandler && 
+                allowedClientProtocols == (SslProtocols.Tls11 | SslProtocols.Tls12) &&
+                acceptedServerProtocols == SslProtocols.Tls)
+            {
+                // Native WinHTTP sometimes uses multiple TCP connections to try other TLS protocols when
+                // getting TLS protocol failures as part of its TLS fallback algorithm. The loopback server
+                // doesn't expect this and stops listening for more connections. This causes unexpected test
+                // failures. See dotnet/corefx #8538.
+                return;
+            }
+
+            using (HttpClientHandler handler = CreateHttpClientHandler())
+            using (HttpClient client = CreateHttpClient(handler))
+            {
+                handler.SslProtocols = allowedClientProtocols;
+                handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
+
+                var options = new LoopbackServer.Options { UseSsl = true, SslProtocols = acceptedServerProtocols };
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
-                    await TestHelper.WhenAllCompletedOrAnyFailed(
-                        Assert.ThrowsAsync(exceptedServerException, () => LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options)),
-                        Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
+                    Task serverTask = server.AcceptConnectionSendResponseAndCloseAsync();
+                    await Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url));
+                    try
+                    {
+                        await serverTask;
+                    }
+                    catch (Exception e) when (e is IOException || e is AuthenticationException)
+                    {
+                        // Some SSL implementations simply close or reset connection after protocol mismatch.
+                        // Newer OpenSSL sends Fatal Alert message before closing.
+                        return;
+                    }
+                    // We expect negotiation to fail so one or the other expected exception should be thrown.
+                    Assert.True(false, "Expected exception did not happen.");
                 }, options);
             }
         }
-
-        [OuterLoop] // TODO: Issue #11345
-        [ActiveIssue(8538, TestPlatforms.Windows)]
-        [Fact]
-        public async Task GetAsync_DisallowTls10_AllowTls11_AllowTls12()
-        {
-            using (var handler = new HttpClientHandler() { SslProtocols = SslProtocols.Tls11 | SslProtocols.Tls12, ServerCertificateCustomValidationCallback = LoopbackServer.AllowAllCertificates })
-            using (var client = new HttpClient(handler))
-            {
-                if (BackendSupportsSslConfiguration)
-                {
-                    LoopbackServer.Options options = new LoopbackServer.Options { UseSsl = true };
-
-                    options.SslProtocols = SslProtocols.Tls;
-                    await LoopbackServer.CreateServerAsync(async (server, url) =>
-                    {
-                        await TestHelper.WhenAllCompletedOrAnyFailed(
-                            Assert.ThrowsAsync<IOException>(() => LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options)),
-                            Assert.ThrowsAsync<HttpRequestException>(() => client.GetAsync(url)));
-                    }, options);
-
-                    foreach (var prot in new[] { SslProtocols.Tls11, SslProtocols.Tls12 })
-                    {
-                        options.SslProtocols = prot;
-                        await LoopbackServer.CreateServerAsync(async (server, url) =>
-                        {
-                            await TestHelper.WhenAllCompletedOrAnyFailed(
-                                LoopbackServer.ReadRequestAndSendResponseAsync(server, options: options),
-                                client.GetAsync(url));
-                        }, options);
-                    }
-                }
-                else
-                {
-                    await Assert.ThrowsAnyAsync<NotSupportedException>(() => client.GetAsync($"http://{Guid.NewGuid().ToString()}/"));
-                }
-            }
-        }
-
-        private static bool SslDefaultsToTls12 => !PlatformDetection.IsWindows7;
-        // TLS 1.2 may not be enabled on Win7
-        // https://technet.microsoft.com/en-us/library/dn786418.aspx#BKMK_SchannelTR_TLS12
-
-        private static bool BackendSupportsSslConfiguration =>
-            RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
-            (CurlSslVersionDescription()?.StartsWith("OpenSSL") ?? false);
-
-        private static bool SSLv3DisabledByDefault =>
-            BackendSupportsSslConfiguration ||
-            Version.Parse(CurlVersionDescription()) >= new Version(7, 39); // libcurl disables SSLv3 by default starting in v7.39
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetVersionDescription")]
-        private static extern string CurlVersionDescription();
-
-        [DllImport("System.Net.Http.Native", EntryPoint = "HttpNative_GetSslVersionDescription")]
-        private static extern string CurlSslVersionDescription();
     }
 }

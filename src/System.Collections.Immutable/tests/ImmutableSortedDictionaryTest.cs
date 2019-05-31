@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using Xunit;
 
 namespace System.Collections.Immutable.Tests
 {
-    public class ImmutableSortedDictionaryTest : ImmutableDictionaryTestBase
+    public partial class ImmutableSortedDictionaryTest : ImmutableDictionaryTestBase
     {
         private enum Operation
         {
@@ -27,7 +29,7 @@ namespace System.Collections.Immutable.Tests
             var expected = new SortedDictionary<int, bool>();
             var actual = ImmutableSortedDictionary<int, bool>.Empty;
 
-            int seed = (int)DateTime.Now.Ticks;
+            int seed = unchecked((int)DateTime.Now.Ticks);
             Debug.WriteLine("Using random seed {0}", seed);
             var random = new Random(seed);
 
@@ -169,7 +171,7 @@ namespace System.Collections.Immutable.Tests
             };
 
             var map = Empty<string, string>(StringComparer.Ordinal, StringComparer.Ordinal);
-            Assert.Throws<ArgumentException>(null, () => map.AddRange(uniqueEntries));
+            AssertExtensions.Throws<ArgumentException>(null, () => map.AddRange(uniqueEntries));
         }
 
         [Fact]
@@ -294,7 +296,7 @@ namespace System.Collections.Immutable.Tests
             // Now check where collisions have conflicting values.
             map = ImmutableSortedDictionary.Create<string, string>()
               .Add("a", "1").Add("A", "2").Add("b", "3");
-            Assert.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
+            AssertExtensions.Throws<ArgumentException>(null, () => map.WithComparers(StringComparer.OrdinalIgnoreCase));
 
             // Force all values to be considered equal.
             map = map.WithComparers(StringComparer.OrdinalIgnoreCase, EverythingEqual<string>.Default);
@@ -310,7 +312,7 @@ namespace System.Collections.Immutable.Tests
         {
             var map = ImmutableSortedDictionary.Create<string, string>()
                 .Add("firstKey", "1").Add("secondKey", "2");
-            var exception = Assert.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
+            var exception = AssertExtensions.Throws<ArgumentException>(null, () => map.Add("firstKey", "3"));
             Assert.Contains("firstKey", exception.Message);
         }
 
@@ -350,15 +352,77 @@ namespace System.Collections.Immutable.Tests
             Assert.Throws<InvalidOperationException>(() => enumerator.Current);
             enumerator.Dispose();
         }
-        
+
+        [Fact]
+        public void Remove_KeyExists_RemovesKeyValuePair()
+        {
+            ImmutableSortedDictionary<int, string>  dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(0, dictionary.Remove(1).Count);
+        }
+
+        [Fact]
+        public void Remove_FirstKey_RemovesKeyValuePair()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" },
+                { 2, "b" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(1, dictionary.Remove(1).Count);
+        }
+
+        [Fact]
+        public void Remove_SecondKey_RemovesKeyValuePair()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" },
+                { 2, "b" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(1, dictionary.Remove(2).Count);
+        }
+
+        [Fact]
+        public void Remove_KeyDoesntExist_DoesNothing()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = new Dictionary<int, string>
+            {
+                { 1, "a" }
+            }.ToImmutableSortedDictionary();
+            Assert.Equal(1, dictionary.Remove(2).Count);
+            Assert.Equal(1, dictionary.Remove(-1).Count);
+        }
+
+        [Fact]
+        public void Remove_EmptyDictionary_DoesNothing()
+        {
+            ImmutableSortedDictionary<int, string> dictionary = ImmutableSortedDictionary<int, string>.Empty;
+            Assert.Equal(0, dictionary.Remove(2).Count);
+        }
+
         [Fact]
         public void DebuggerAttributesValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(ImmutableSortedDictionary.Create<string, int>());
-            DebuggerAttributes.ValidateDebuggerTypeProxyProperties(ImmutableSortedDictionary.Create<int, int>());
+            ImmutableSortedDictionary<int, int> dict = ImmutableSortedDictionary.Create<int, int>().Add(1, 2).Add(2, 3).Add(3, 4);
+            var info = DebuggerAttributes.ValidateDebuggerTypeProxyProperties(dict);
 
             object rootNode = DebuggerAttributes.GetFieldValue(ImmutableSortedDictionary.Create<string, string>(), "_root");
             DebuggerAttributes.ValidateDebuggerDisplayReferences(rootNode);
+            PropertyInfo itemProperty = info.Properties.Single(pr => pr.GetCustomAttribute<DebuggerBrowsableAttribute>().State == DebuggerBrowsableState.RootHidden);
+            KeyValuePair<int, int>[] items = itemProperty.GetValue(info.Instance) as KeyValuePair<int, int>[];
+            Assert.Equal(dict, items);
+        }
+
+        [Fact]
+        public static void TestDebuggerAttributes_Null()
+        {
+            Type proxyType = DebuggerAttributes.GetProxyType(ImmutableSortedDictionary.Create<int, int>());
+            TargetInvocationException tie = Assert.Throws<TargetInvocationException>(() => Activator.CreateInstance(proxyType, (object)null));
+            Assert.IsType<ArgumentNullException>(tie.InnerException);
         }
 
         ////[Fact] // not really a functional test -- but very useful to enable when collecting perf traces.
@@ -411,6 +475,37 @@ namespace System.Collections.Immutable.Tests
             Debug.WriteLine("Timing_Empty:{0}{1}", Environment.NewLine, timingText);
         }
 
+        [Fact]
+        public void ValueRef()
+        {
+            var dictionary = new Dictionary<string, int>()
+            {
+                { "a", 1 },
+                { "b", 2 }
+            }.ToImmutableSortedDictionary();
+
+            ref readonly var safeRef = ref dictionary.ValueRef("a");
+            ref var unsafeRef = ref Unsafe.AsRef(safeRef);
+
+            Assert.Equal(1, dictionary.ValueRef("a"));
+
+            unsafeRef = 5;
+
+            Assert.Equal(5, dictionary.ValueRef("a"));
+        }
+
+        [Fact]
+        public void ValueRef_NonExistentKey()
+        {
+            var dictionary = new Dictionary<string, int>()
+            {
+                { "a", 1 },
+                { "b", 2 }
+            }.ToImmutableSortedDictionary();
+
+            Assert.Throws<KeyNotFoundException>(() => dictionary.ValueRef("c"));
+        }
+
         protected override IImmutableDictionary<TKey, TValue> Empty<TKey, TValue>()
         {
             return ImmutableSortedDictionaryTest.Empty<TKey, TValue>();
@@ -424,11 +519,6 @@ namespace System.Collections.Immutable.Tests
         protected override IEqualityComparer<TValue> GetValueComparer<TKey, TValue>(IImmutableDictionary<TKey, TValue> dictionary)
         {
             return ((ImmutableSortedDictionary<TKey, TValue>)dictionary).ValueComparer;
-        }
-
-        internal override IBinaryTree GetRootNode<TKey, TValue>(IImmutableDictionary<TKey, TValue> dictionary)
-        {
-            return ((ImmutableSortedDictionary<TKey, TValue>)dictionary).Root;
         }
 
         protected void ContainsValueTestHelper<TKey, TValue>(ImmutableSortedDictionary<TKey, TValue> map, TKey key, TValue value)

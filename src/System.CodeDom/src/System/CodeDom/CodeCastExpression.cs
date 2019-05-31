@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeCastExpression : CodeExpression
     {
         private CodeTypeReference _targetType;
@@ -31,8 +30,8 @@ namespace System.CodeDom
 
         public CodeTypeReference TargetType
         {
-            get { return _targetType ?? (_targetType = new CodeTypeReference("")); }
-            set { _targetType = value; }
+            get => _targetType ?? (_targetType = new CodeTypeReference(""));
+            set => _targetType = value;
         }
 
         public CodeExpression Expression { get; set; }

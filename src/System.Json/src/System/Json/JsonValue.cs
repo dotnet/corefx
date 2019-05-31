@@ -15,6 +15,8 @@ namespace System.Json
 {
     public abstract class JsonValue : IEnumerable
     {
+        private static readonly UTF8Encoding s_encoding = new UTF8Encoding(false, true);
+
         public static JsonValue Load(Stream stream)
         {
             if (stream == null)
@@ -122,7 +124,10 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(stream));
             }
 
-            Save(new StreamWriter(stream));
+            using (StreamWriter writer = new StreamWriter(stream, s_encoding, 1024, true))
+            {
+                Save(writer);
+            }
         }
 
         public virtual void Save(TextWriter textWriter)
@@ -345,7 +350,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToBoolean(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToBoolean(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator byte (JsonValue value)
@@ -355,7 +360,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToByte(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToByte(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator char (JsonValue value)
@@ -365,7 +370,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToChar(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToChar(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator decimal (JsonValue value)
@@ -375,14 +380,14 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToDecimal(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToDecimal(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator double (JsonValue value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
-            return Convert.ToDouble(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToDouble(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator float (JsonValue value)
@@ -392,7 +397,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToSingle(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToSingle(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator int (JsonValue value)
@@ -402,7 +407,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToInt32(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToInt32(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator long (JsonValue value)
@@ -412,7 +417,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToInt64(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToInt64(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         [CLSCompliant(false)]
@@ -423,7 +428,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToSByte(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToSByte(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator short (JsonValue value)
@@ -433,7 +438,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToInt16(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToInt16(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator string (JsonValue value)
@@ -451,7 +456,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToUInt32(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToUInt32(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         [CLSCompliant(false)]
@@ -462,7 +467,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToUInt64(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToUInt64(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         [CLSCompliant(false)]
@@ -473,7 +478,7 @@ namespace System.Json
                 throw new ArgumentNullException(nameof(value));
             }
 
-            return Convert.ToUInt16(((JsonPrimitive)value).Value, NumberFormatInfo.InvariantInfo);
+            return Convert.ToUInt16(((JsonPrimitive)value).Value, CultureInfo.InvariantCulture);
         }
 
         public static implicit operator DateTime(JsonValue value)

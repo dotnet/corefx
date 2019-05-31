@@ -5,43 +5,37 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>Specifies that
-    ///       this property can be combined with properties belonging to
-    ///       other objects in a properties window.</para>
+    /// Specifies that this property can be combined with properties belonging to
+    /// other objects in a properties window.
     /// </summary>
     [AttributeUsage(AttributeTargets.All)]
     public sealed class MergablePropertyAttribute : Attribute
     {
         /// <summary>
-        ///    <para>
-        ///       Specifies that a property can be combined with properties belonging to other
-        ///       objects in a properties window. This <see langword='static '/>field is read-only.
-        ///    </para>
+        /// Specifies that a property can be combined with properties belonging to other
+        /// objects in a properties window.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly MergablePropertyAttribute Yes = new MergablePropertyAttribute(true);
 
         /// <summary>
-        ///    <para>
-        ///       Specifies that a property cannot be combined with properties belonging to
-        ///       other objects in a properties window. This <see langword='static '/>field is
-        ///       read-only.
-        ///    </para>
+        /// Specifies that a property cannot be combined with properties belonging to
+        /// other objects in a properties window.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly MergablePropertyAttribute No = new MergablePropertyAttribute(false);
 
         /// <summary>
-        ///    <para>
-        ///       Specifies the default value, which is <see cref='System.ComponentModel.MergablePropertyAttribute.Yes'/>, that is a property can be combined with
-        ///       properties belonging to other objects in a properties window. This <see langword='static '/>field is read-only.
-        ///    </para>
+        /// Specifies the default value, which is <see cref='System.ComponentModel.MergablePropertyAttribute.Yes'/>,
+        /// that is a property can be combined with properties belonging to other objects
+        /// in a properties window.
+        /// This <see langword='static'/> field is read-only.
         /// </summary>
         public static readonly MergablePropertyAttribute Default = Yes;
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.MergablePropertyAttribute'/>
-        ///       class.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.MergablePropertyAttribute'/>
+        /// class.
         /// </summary>
         public MergablePropertyAttribute(bool allowMerge)
         {
@@ -49,17 +43,11 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets a value indicating whether this
-        ///       property can be combined with properties belonging to other objects in a
-        ///       properties window.
-        ///    </para>
+        /// Gets a value indicating whether this property can be combined with properties
+        /// belonging to other objects in a properties window.
         /// </summary>
         public bool AllowMerge { get; }
 
-        /// <internalonly/>
-        /// <summary>
-        /// </summary>
         public override bool Equals(object obj)
         {
             if (obj == this)
@@ -68,22 +56,11 @@ namespace System.ComponentModel
             }
 
             MergablePropertyAttribute other = obj as MergablePropertyAttribute;
-            return other != null && other.AllowMerge == AllowMerge;
+            return other?.AllowMerge == AllowMerge;
         }
 
-        /// <summary>
-        ///    <para>
-        ///       Returns the hashcode for this object.
-        ///    </para>
-        /// </summary>
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
+        public override int GetHashCode() => base.GetHashCode();
 
-        public override bool IsDefaultAttribute()
-        {
-            return Equals(MergablePropertyAttribute.Default);
-        }
+        public override bool IsDefaultAttribute() => Equals(Default);
     }
 }

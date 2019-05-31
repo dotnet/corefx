@@ -11,7 +11,7 @@ using System.Collections.Generic;
 
 namespace System.Xml
 {
-    [Obsolete("Use XmlReader created by XmlReader.Create() method using appropriate XmlReaderSettings instead. http://go.microsoft.com/fwlink/?linkid=14202")]
+    [Obsolete("Use XmlReader created by XmlReader.Create() method using appropriate XmlReaderSettings instead. https://go.microsoft.com/fwlink/?linkid=14202")]
     public class XmlValidatingReader : XmlReader, IXmlLineInfo, IXmlNamespaceResolver
     {
         //
@@ -199,7 +199,7 @@ namespace System.Xml
             get { return _impl.NameTable; }
         }
 
-        public override String LookupNamespace(String prefix)
+        public override string LookupNamespace(string prefix)
         {
             string ns = _impl.LookupNamespace(prefix);
             if (ns != null && ns.Length == 0)

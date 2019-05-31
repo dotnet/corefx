@@ -29,17 +29,17 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void DirectoryExists_ThrowsIsolatedStorageException()
+        public void DirectoryExists_Removed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
                 isf.Remove();
-                Assert.Throws<IsolatedStorageException>(() => isf.DirectoryExists("foo"));
+                Assert.Throws<InvalidOperationException>(() => isf.DirectoryExists("foo"));
             }
         }
 
         [Fact]
-        public void DirectoryExists_ThrowsInvalidOperationException()
+        public void DirectoryExists_Closed_ThrowsInvalidOperationException()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
@@ -49,11 +49,11 @@ namespace System.IO.IsolatedStorage
         }
 
         [Fact]
-        public void DirectoryExists_RaisesArgumentException()
+        public void DirectoryExists_False()
         {
             using (IsolatedStorageFile isf = IsolatedStorageFile.GetUserStoreForAssembly())
             {
-                Assert.Throws<ArgumentException>(() => isf.DirectoryExists("\0bad"));
+                Assert.False(isf.DirectoryExists("\0bad"));
             }
         }
 
@@ -70,7 +70,8 @@ namespace System.IO.IsolatedStorage
             }
         }
 
-        [Theory MemberData("ValidStores")]
+        [Theory]
+        [MemberData(nameof(ValidStores))]
         public void DirectoryExists_Existance(PresetScopes scope)
         {
             using (var isf = GetPresetScope(scope))

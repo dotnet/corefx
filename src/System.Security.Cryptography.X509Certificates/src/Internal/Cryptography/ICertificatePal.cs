@@ -10,32 +10,22 @@ using System.Text;
 
 namespace Internal.Cryptography
 {
-    internal interface ICertificatePal : IDisposable
+    /// <summary>Provides specific implementation for X509Certificate2.</summary>
+    internal interface ICertificatePal : ICertificatePalCore
     {
-        bool HasPrivateKey { get; }
-        IntPtr Handle { get; }
-        string Issuer { get; }
-        string Subject { get; }
-        byte[] Thumbprint { get; }
-        string KeyAlgorithm { get; }
-        byte[] KeyAlgorithmParameters { get; }
-        byte[] PublicKeyValue { get; }
-        byte[] SerialNumber { get; }
-        string SignatureAlgorithm { get; }
-        DateTime NotAfter { get; }
-        DateTime NotBefore { get; }
-        byte[] RawData { get; }
         int Version { get; }
         bool Archived { get; set; }
         string FriendlyName { get; set; }
         X500DistinguishedName SubjectName { get; }
         X500DistinguishedName IssuerName { get; }
         IEnumerable<X509Extension> Extensions { get; }
-        AsymmetricAlgorithm GetPrivateKey();
         RSA GetRSAPrivateKey();
         DSA GetDSAPrivateKey();
         ECDsa GetECDsaPrivateKey();
         string GetNameInfo(X509NameType nameType, bool forIssuer);
         void AppendPrivateKeyInfo(StringBuilder sb);
+        ICertificatePal CopyWithPrivateKey(DSA privateKey);
+        ICertificatePal CopyWithPrivateKey(ECDsa privateKey);
+        ICertificatePal CopyWithPrivateKey(RSA privateKey);
     }
 }

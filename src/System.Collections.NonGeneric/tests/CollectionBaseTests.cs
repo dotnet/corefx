@@ -39,8 +39,14 @@ namespace System.Collections.Tests
         [Fact]
         public static void CtorCapacity_Invalid()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("capacity", () => new MyCollection(-1)); // Capacity < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("capacity", () => new MyCollection(-1)); // Capacity < 0
+        }
+
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotIntMaxValueArrayIndexSupported))]
+        public static void Capacity_Excessive ()
+        {
             Assert.Throws<OutOfMemoryException>(() => new MyCollection(int.MaxValue)); // Capacity is too large
+            Assert.Throws<OutOfMemoryException>(() => CreateCollection (100).Capacity = int.MaxValue); // Capacity is very large
         }
 
         private static Foo CreateValue(int i) => new Foo(i, i.ToString());
@@ -90,7 +96,7 @@ namespace System.Collections.Tests
         public static void Remove_Invalid()
         {
             MyCollection collBase = CreateCollection(100);
-            Assert.Throws<ArgumentException>(null, () => collBase.Remove(new Foo())); // Non existent object
+            AssertExtensions.Throws<ArgumentException>(null, () => collBase.Remove(new Foo())); // Non existent object
             Assert.Equal(100, collBase.Count);
         }
 
@@ -116,8 +122,8 @@ namespace System.Collections.Tests
         public static void Insert_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             MyCollection collBase = CreateCollection(100);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase.Insert(-1, new Foo())); // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase.Insert(collBase.Count + 1, new Foo())); // Index > collBase.Count
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase.Insert(-1, new Foo())); // Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase.Insert(collBase.Count + 1, new Foo())); // Index > collBase.Count
 
             Assert.Equal(100, collBase.Count);
         }
@@ -137,8 +143,8 @@ namespace System.Collections.Tests
         public static void RemoveAt_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             MyCollection collBase = CreateCollection(100);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase.RemoveAt(-1)); // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase.RemoveAt(collBase.Count)); // Index > collBase.Count
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase.RemoveAt(-1)); // Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase.RemoveAt(collBase.Count)); // Index > collBase.Count
             Assert.Equal(100, collBase.Count);
         }
 
@@ -186,8 +192,8 @@ namespace System.Collections.Tests
         public static void Item_Get_InvalidIndex_ThrowsArgumentOutOfRangeException()
         {
             MyCollection collBase = CreateCollection(100);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase[-1]); // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase[collBase.Count]); // Index >= InnerList.Count
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase[-1]); // Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase[collBase.Count]); // Index >= InnerList.Count
         }
 
         [Fact]
@@ -206,10 +212,10 @@ namespace System.Collections.Tests
         public static void Item_Set_Invalid()
         {
             MyCollection collBase = CreateCollection(100);
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase[-1] = new Foo()); // Index < 0
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => collBase[collBase.Count] = new Foo()); // Index >= InnerList.Count
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase[-1] = new Foo()); // Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => collBase[collBase.Count] = new Foo()); // Index >= InnerList.Count
 
-            Assert.Throws<ArgumentNullException>("value", () => collBase[0] = null); // Object is null
+            AssertExtensions.Throws<ArgumentNullException>("value", () => collBase[0] = null); // Object is null
         }
 
         [Fact]
@@ -242,8 +248,10 @@ namespace System.Collections.Tests
         {
             MyCollection collBase = CreateCollection(100);
             var fooArr = new Foo[100];
-            Assert.Throws<ArgumentOutOfRangeException>("dstIndex", () => collBase.CopyTo(fooArr, -1)); // Index < 0
-            Assert.Throws<ArgumentException>(string.Empty, () => collBase.CopyTo(fooArr, 50)); // Index + fooArray.Length > collBase.Count
+            // Index < 0
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("destinationIndex", "dstIndex", () => collBase.CopyTo(fooArr, -1));
+            // Index + fooArray.Length > collBase.Count
+            AssertExtensions.Throws<ArgumentException>("destinationArray", string.Empty, () => collBase.CopyTo(fooArr, 50));
         }
 
         [Fact]
@@ -291,8 +299,8 @@ namespace System.Collections.Tests
             // SyncRoot should be the reference to the underlying collection, not to MyCollection
             var collBase = new MyCollection();
             object syncRoot = collBase.SyncRoot;
-            Assert.NotEqual(syncRoot, collBase);
-            Assert.Equal(collBase.SyncRoot, collBase.SyncRoot);
+            Assert.NotNull(syncRoot);
+            Assert.Same(collBase.SyncRoot, collBase.SyncRoot);
         }
 
         [Fact]
@@ -327,10 +335,9 @@ namespace System.Collections.Tests
         public static void Capacity_Set_Invalid()
         {
             var collBase = new MyCollection(new string[10]);
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => collBase.Capacity = -1); // Capacity < 0
-            Assert.Throws<OutOfMemoryException>(() => collBase.Capacity = int.MaxValue); // Capacity is very large
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => collBase.Capacity = -1); // Capacity < 0
 
-            Assert.Throws<ArgumentOutOfRangeException>("value", () => collBase.Capacity = collBase.Count - 1); // Capacity < list.Count
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => collBase.Capacity = collBase.Count - 1); // Capacity < list.Count
         }
         [Fact]
         public static void Add_Called()

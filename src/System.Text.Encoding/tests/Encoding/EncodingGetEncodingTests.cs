@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Globalization;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Text.Tests
@@ -12,19 +14,19 @@ namespace System.Text.Tests
         [Fact]
         public void GetEncoding_String_Invalid()
         {
-            Assert.Throws<ArgumentNullException>("name", () => Encoding.GetEncoding(null));
-            Assert.Throws<ArgumentException>("name", () => Encoding.GetEncoding("no-such-encoding-name"));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => Encoding.GetEncoding(null));
+            AssertExtensions.Throws<ArgumentException>("name", () => Encoding.GetEncoding("no-such-encoding-name"));
         }
 
         [Fact]
         public void GetEncoding_Int_Invalid()
         {
             // Codepage is out of range
-            Assert.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(-1));
-            Assert.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(65536));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(-1));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("codepage", () => Encoding.GetEncoding(65536));
 
             // Codepage doesn't exist
-            Assert.Throws<ArgumentException>("codepage", () => Encoding.GetEncoding(42));
+            AssertExtensions.Throws<ArgumentException>("codepage", () => Encoding.GetEncoding(42));
             Assert.Throws<NotSupportedException>(() => Encoding.GetEncoding(54321));
         }
 
@@ -99,10 +101,10 @@ namespace System.Text.Tests
         [Fact]
         public void GetEncoding_EncodingName()
         {
-            CultureInfo originalUICulture = CultureInfo.CurrentUICulture;
-            try
+            // Workaround issue: UWP culture is process wide
+            RemoteExecutor.Invoke(() =>
             {
-                CultureInfo.CurrentCulture = new CultureInfo("en-US");
+                CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 
                 foreach (var map in s_mapping)
                 {
@@ -115,11 +117,7 @@ namespace System.Text.Tests
 
                     Assert.All(name, ch => Assert.InRange(ch, 0, 127));
                 }
-            }
-            finally
-            {
-                CultureInfo.CurrentUICulture = originalUICulture;
-            }
+            }).Dispose();
         }
 
         [Fact]

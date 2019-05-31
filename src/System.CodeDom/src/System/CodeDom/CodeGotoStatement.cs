@@ -4,7 +4,6 @@
 
 namespace System.CodeDom
 {
-    [Serializable]
     public class CodeGotoStatement : CodeStatement
     {
         private string _label;
@@ -18,7 +17,7 @@ namespace System.CodeDom
 
         public string Label
         {
-            get { return _label; }
+            get => _label;
             set
             {
                 if (string.IsNullOrEmpty(value))

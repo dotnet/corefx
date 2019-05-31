@@ -10,7 +10,7 @@ namespace System
     {
         internal static bool EqualsOrdinal(string left, char[] right, int rightStartIndex, int rightLength)
         {
-            Debug.Assert(left != null);
+            Debug.Assert(left != null, "Expected non-null string");
             DebugAssertArrayInputs(right, rightStartIndex, rightLength);
 
             if (left.Length != rightLength)
@@ -31,7 +31,7 @@ namespace System
 
         internal static bool EqualsOrdinalAsciiIgnoreCase(string left, char[] right, int rightStartIndex, int rightLength)
         {
-            Debug.Assert(left != null);
+            Debug.Assert(left != null, "Expected non-null string");
             DebugAssertArrayInputs(right, rightStartIndex, rightLength);
 
             if (left.Length != rightLength)
@@ -44,9 +44,12 @@ namespace System
                 uint charA = left[i];
                 uint charB = right[rightStartIndex + i];
 
-                // We're only interested in ASCII characters here.
-                if ((charA - 'a') <= ('z' - 'a')) charA -= ('a' - 'A');
-                if ((charB - 'a') <= ('z' - 'a')) charB -= ('a' - 'A');
+                unchecked
+                {
+                    // We're only interested in ASCII characters here.
+                    if ((charA - 'a') <= ('z' - 'a')) charA -= ('a' - 'A');
+                    if ((charB - 'a') <= ('z' - 'a')) charB -= ('a' - 'A');
+                }
 
                 if (charA != charB)
                 {
@@ -80,10 +83,10 @@ namespace System
         [Conditional("DEBUG")]
         internal static void DebugAssertArrayInputs(char[] array, int startIndex, int length)
         {
-            Debug.Assert(array != null);
-            Debug.Assert(startIndex >= 0);
-            Debug.Assert(length >= 0);
-            Debug.Assert(startIndex <= array.Length - length);
+            Debug.Assert(array != null, "Null array");
+            Debug.Assert(startIndex >= 0, $"Expected {nameof(startIndex)} to be >= 0, got {startIndex}");
+            Debug.Assert(length >= 0, $"Expected {nameof(length)} to be >= 0, got {length}");
+            Debug.Assert(startIndex <= array.Length - length, $"Expected {startIndex} to be <= {array.Length} - {length}, got {startIndex}");
         }
     }
 }

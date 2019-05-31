@@ -13,7 +13,6 @@ using Microsoft.Win32;
 using System;
 using System.Collections;
 using System.Diagnostics;
-using System.Diagnostics.Contracts;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -49,14 +48,14 @@ namespace System.Security.AccessControl
         
         // only these SACL control flags will be automatically carry forward
         // when update with new security descriptor.
-        static private readonly ControlFlags SACL_CONTROL_FLAGS = 
+        private static readonly ControlFlags SACL_CONTROL_FLAGS = 
             ControlFlags.SystemAclPresent | 
             ControlFlags.SystemAclAutoInherited |
             ControlFlags.SystemAclProtected;
 
         // only these DACL control flags will be automatically carry forward
         // when update with new security descriptor
-        static private readonly ControlFlags DACL_CONTROL_FLAGS = 
+        private static readonly ControlFlags DACL_CONTROL_FLAGS = 
             ControlFlags.DiscretionaryAclPresent | 
             ControlFlags.DiscretionaryAclAutoInherited |
             ControlFlags.DiscretionaryAclProtected;
@@ -84,7 +83,6 @@ namespace System.Security.AccessControl
             {
                 throw new ArgumentNullException( nameof(securityDescriptor));
             }
-            Contract.EndContractBlock();
 
              _securityDescriptor = securityDescriptor;
         }
@@ -369,7 +367,6 @@ namespace System.Security.AccessControl
             {
                 throw new ArgumentNullException( nameof(identity));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 
@@ -413,7 +410,6 @@ namespace System.Security.AccessControl
             {
                 throw new ArgumentNullException( nameof(identity));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 
@@ -434,7 +430,6 @@ namespace System.Security.AccessControl
             {
                 throw new ArgumentNullException( nameof(identity));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 
@@ -455,7 +450,6 @@ namespace System.Security.AccessControl
             {
                 throw new ArgumentNullException( nameof(identity));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 
@@ -605,7 +599,6 @@ namespace System.Security.AccessControl
                     SR.Arg_EnumAtLeastOneFlag,
 nameof(includeSections));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 
@@ -655,7 +648,6 @@ nameof(includeSections));
                     SR.Arg_EnumAtLeastOneFlag,
 nameof(includeSections));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 
@@ -689,7 +681,6 @@ nameof(includeSections));
                     SR.AccessControl_InvalidAccessRuleType, 
 nameof(rule));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 
@@ -716,7 +707,6 @@ nameof(rule));
                     SR.AccessControl_InvalidAuditRuleType, 
 nameof(rule));
             }
-            Contract.EndContractBlock();
 
             WriteLock();
 

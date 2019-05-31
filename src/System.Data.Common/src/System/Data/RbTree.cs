@@ -53,7 +53,7 @@ namespace System.Data
     // a tree has an PageTableBitmap to indicate which allocated pages have free nodes
     // a page has a SlotBitmap to indicate which slots are free
 
-    // intial page allocation (assuming no deletes)
+    // initial page allocation (assuming no deletes)
     //          #page  * #slot =     #total, #cumulative
     // (            4) *    32 =        128,           127 (subtract 1 for NIL node)
     // (   32 -     4) *   256 =       7168,         7,295
@@ -872,7 +872,7 @@ namespace System.Data
             if (Next(z_id) != NIL)
                 return RBDeleteX(Next(z_id), Next(z_id), z_id); // delete root of satelite tree.
 
-            // if we we reach here, we are guaranteed z_id.next is NIL.
+            // if we reach here, we are guaranteed z_id.next is NIL.
             bool isCase3 = false;
             int mNode = ((_accessMethod == TreeAccessMethod.KEY_SEARCH_AND_INDEX) ? mainTreeNodeID : z_id);
 
@@ -1190,26 +1190,13 @@ namespace System.Data
                             w_id = (x_id == NIL) ? Left(px_id) : Left(Parent(x_id));
                         }
 
-                        if (x_id != NIL)
-                        {
-                            SetColor(w_id, color(px_id));
-                            SetColor(px_id, NodeColor.black);
-                            SetColor(Left(w_id), NodeColor.black);
-                            root_id = RightRotate(root_id, px_id, mainTreeNodeID);
+                        SetColor(w_id, color(px_id));
+                        SetColor(px_id, NodeColor.black);
+                        SetColor(Left(w_id), NodeColor.black);
+                        root_id = RightRotate(root_id, px_id, mainTreeNodeID);
 
-                            x_id = (root_id == NIL) ? root : root_id;
-                            px_id = Parent(x_id);
-                        }
-                        else
-                        {
-                            SetColor(w_id, color(px_id));
-                            SetColor(px_id, NodeColor.black);
-                            SetColor(Left(w_id), NodeColor.black);
-                            root_id = RightRotate(root_id, px_id, mainTreeNodeID);
-
-                            x_id = (root_id == NIL) ? root : root_id;
-                            px_id = Parent(x_id);
-                        }
+                        x_id = (root_id == NIL) ? root : root_id;
+                        px_id = Parent(x_id);
                     }
                 }
             }
@@ -1893,7 +1880,7 @@ namespace System.Data
 
 
         /// <summary>Represents the node in the tree and the satellite branch it took to get there.</summary>
-        private struct NodePath
+        private readonly struct NodePath
         {
             /// <summary>Represents the node in the tree</summary>
             internal readonly int _nodeID;
@@ -1991,10 +1978,10 @@ namespace System.Data
                     segmentPos = _nextFreeSlotLine;
                     while (segmentPos < _slotMap.Length)
                     {
-                        if (((uint)_slotMap[segmentPos]) < 0xFFFFFFFF)
+                        if (unchecked((uint)_slotMap[segmentPos]) < 0xFFFFFFFF)
                         {
                             freeSlotId = 0;
-                            freeSlot = (~(_slotMap[segmentPos])) & (_slotMap[segmentPos] + 1);
+                            freeSlot = (~(_slotMap[segmentPos])) & unchecked(_slotMap[segmentPos] + 1);
 
                             // avoid string concat to allow debug code to run faster
                             Debug.Assert((_slotMap[segmentPos] & freeSlot) == 0, "Slot position segment[segmentPos ]: [freeSlot] is in use. Expected to be empty");
@@ -2006,7 +1993,7 @@ namespace System.Data
                             tree._inUseNodeCount++;
 
                             // convert freeSlotPos to int value giving number of 0's to its right i.e. freeSlotId
-                            freeSlotId = GetIntValueFromBitMap((uint)freeSlot);
+                            freeSlotId = GetIntValueFromBitMap(unchecked((uint)freeSlot));
 
                             _nextFreeSlotLine = segmentPos;
                             freeSlotId = (segmentPos * TreePage.slotLineSize) + freeSlotId;

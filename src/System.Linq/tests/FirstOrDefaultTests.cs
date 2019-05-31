@@ -23,8 +23,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.FirstOrDefault(), q.FirstOrDefault());
@@ -37,7 +37,7 @@ namespace System.Linq.Tests
             
             Assert.IsAssignableFrom<IList<T>>(source);
             
-            Assert.Equal(expected, source.FirstOrDefault());
+            Assert.Equal(expected, source.RunOnce().FirstOrDefault());
         }
 
         [Fact]
@@ -94,7 +94,7 @@ namespace System.Linq.Tests
             
             Assert.Null(source as IList<T>);
             
-            Assert.Equal(expected, source.FirstOrDefault());
+            Assert.Equal(expected, source.RunOnce().FirstOrDefault());
         }
 
         [Fact]
@@ -178,22 +178,32 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void PredicateTrueForSomeRunOnce()
+        {
+            int[] source = { 3, 7, 10, 7, 9, 2, 11, 17, 13, 8 };
+            Func<int, bool> predicate = IsEven;
+            int expected = 10;
+
+            Assert.Equal(expected, source.RunOnce().FirstOrDefault(predicate));
+        }
+
+        [Fact]
         public void NullSource()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).FirstOrDefault());
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).FirstOrDefault());
         }
 
         [Fact]
         public void NullSourcePredicateUsed()
         {
-            Assert.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).FirstOrDefault(i => i != 2));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => ((IEnumerable<int>)null).FirstOrDefault(i => i != 2));
         }
 
         [Fact]
         public void NullPredicate()
         {
             Func<int, bool> predicate = null;
-            Assert.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).FirstOrDefault(predicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => Enumerable.Range(0, 3).FirstOrDefault(predicate));
         }
     }
 }

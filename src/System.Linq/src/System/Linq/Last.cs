@@ -10,12 +10,10 @@ namespace System.Linq
     {
         public static TSource Last<TSource>(this IEnumerable<TSource> source)
         {
-            bool found;
-            TSource last = source.TryGetLast(out found);
-            
+            TSource last = source.TryGetLast(out bool found);
             if (!found)
             {
-                throw Error.NoElements();
+                ThrowHelper.ThrowNoElementsException();
             }
 
             return last;
@@ -23,44 +21,34 @@ namespace System.Linq
 
         public static TSource Last<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            bool found;
-            TSource last = source.TryGetLast(predicate, out found);
-
+            TSource last = source.TryGetLast(predicate, out bool found);
             if (!found)
             {
-                throw Error.NoMatch();
+                ThrowHelper.ThrowNoMatchException();
             }
 
             return last;
         }
 
-        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source)
-        {
-            bool found;
-            return source.TryGetLast(out found);
-        }
+        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source) =>
+            source.TryGetLast(out bool _);
 
-        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-        {
-            bool found;
-            return source.TryGetLast(predicate, out found);
-        }
+        public static TSource LastOrDefault<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate) =>
+            source.TryGetLast(predicate, out bool _);
 
-        internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
+        private static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, out bool found)
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
-            IPartition<TSource> partition = source as IPartition<TSource>;
-            if (partition != null)
+            if (source is IPartition<TSource> partition)
             {
                 return partition.TryGetLast(out found);
             }
-            
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+
+            if (source is IList<TSource> list)
             {
                 int count = list.Count;
                 if (count > 0)
@@ -87,31 +75,29 @@ namespace System.Linq
                     }
                 }
             }
-            
+
             found = false;
             return default(TSource);
         }
 
-        internal static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
+        private static TSource TryGetLast<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate, out bool found)
         {
             if (source == null)
             {
-                throw Error.ArgumentNull(nameof(source));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.source);
             }
 
             if (predicate == null)
             {
-                throw Error.ArgumentNull(nameof(predicate));
+                ThrowHelper.ThrowArgumentNullException(ExceptionArgument.predicate);
             }
 
-            OrderedEnumerable<TSource> ordered = source as OrderedEnumerable<TSource>;
-            if (ordered != null)
+            if (source is OrderedEnumerable<TSource> ordered)
             {
                 return ordered.TryGetLast(predicate, out found);
             }
 
-            IList<TSource> list = source as IList<TSource>;
-            if (list != null)
+            if (source is IList<TSource> list)
             {
                 for (int i = list.Count - 1; i >= 0; --i)
                 {

@@ -16,14 +16,10 @@ namespace System.Xml.Schema
     using System.Xml.Serialization;
     using System.Reflection;
 
-    /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety"]/*' />
     public enum XmlSchemaDatatypeVariety
     {
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.Atomic"]/*' />
         Atomic,
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.List"]/*' />
         List,
-        /// <include file='doc\DatatypeImplementation.uex' path='docs/doc[@for="XmlSchemaDatatypeVariety.Union"]/*' />
         Union
     }
 
@@ -142,8 +138,6 @@ namespace System.Xml.Schema
         // Additional built-in XQuery simple types
         internal static XmlSchemaSimpleType AnyAtomicType { get { return s__anyAtomicType; } }
         internal static XmlSchemaSimpleType UntypedAtomicType { get { return s__untypedAtomicType; } }
-        internal static XmlSchemaSimpleType YearMonthDurationType { get { return s_yearMonthDurationType; } }
-        internal static XmlSchemaSimpleType DayTimeDurationType { get { return s_dayTimeDurationType; } }
 
         internal new static DatatypeImplementation FromXmlTokenizedType(XmlTokenizedType token)
         {
@@ -432,7 +426,7 @@ namespace System.Xml.Schema
             { //Both are built-in types
                 Type derivedType = this.GetType();
                 Type baseType = datatype.GetType();
-                return baseType == derivedType || derivedType.GetTypeInfo().IsSubclassOf(baseType);
+                return baseType == derivedType || derivedType.IsSubclassOf(baseType);
             }
             else if (datatype.Variety == XmlSchemaDatatypeVariety.Union && !datatype.HasLexicalFacets && !datatype.HasValueFacets && _variety != XmlSchemaDatatypeVariety.Union)
             { //base type is union (not a restriction of union) and derived type is not union
@@ -447,7 +441,6 @@ namespace System.Xml.Schema
 
         internal override bool IsEqual(object o1, object o2)
         {
-            //Debug.WriteLineIf(DiagnosticsSwitches.XmlSchema.TraceVerbose, string.Format("\t\tSchemaDatatype.IsEqual({0}, {1})", o1, o2));
             return Compare(o1, o2) == 0;
         }
 
@@ -539,11 +532,6 @@ namespace System.Xml.Schema
 
         internal override XmlSchemaWhiteSpace BuiltInWhitespaceFacet { get { return XmlSchemaWhiteSpace.Preserve; } }
 
-        internal override object ParseValue(string s, Type typDest, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr)
-        {
-            return ValueConverter.ChangeType(ParseValue(s, nameTable, nsmgr), typDest, nsmgr);
-        }
-
         public override object ParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr)
         {
             object typedValue;
@@ -600,7 +588,7 @@ namespace System.Xml.Schema
                 }
                 if (this.HasLexicalFacets)
                 {
-                    string s1 = (string)this.ValueConverter.ChangeType(value, typeof(System.String), namespaceResolver); //Using value here to avoid info loss
+                    string s1 = (string)this.ValueConverter.ChangeType(value, typeof(string), namespaceResolver); //Using value here to avoid info loss
                     exception = this.FacetsChecker.CheckLexicalFacets(ref s1, this);
                     if (exception != null) goto Error;
                 }
@@ -649,72 +637,72 @@ namespace System.Xml.Schema
         }
 
         // XSD types
-        static private readonly DatatypeImplementation s_anySimpleType = new Datatype_anySimpleType();
-        static private readonly DatatypeImplementation s_anyURI = new Datatype_anyURI();
-        static private readonly DatatypeImplementation s_base64Binary = new Datatype_base64Binary();
-        static private readonly DatatypeImplementation s_boolean = new Datatype_boolean();
-        static private readonly DatatypeImplementation s_byte = new Datatype_byte();
-        static private readonly DatatypeImplementation s_char = new Datatype_char(); // XDR
-        static private readonly DatatypeImplementation s_date = new Datatype_date();
-        static private readonly DatatypeImplementation s_dateTime = new Datatype_dateTime();
-        static private readonly DatatypeImplementation s_dateTimeNoTz = new Datatype_dateTimeNoTimeZone(); // XDR
-        static private readonly DatatypeImplementation s_dateTimeTz = new Datatype_dateTimeTimeZone(); // XDR
-        static private readonly DatatypeImplementation s_day = new Datatype_day();
-        static private readonly DatatypeImplementation s_decimal = new Datatype_decimal();
-        static private readonly DatatypeImplementation s_double = new Datatype_double();
-        static private readonly DatatypeImplementation s_doubleXdr = new Datatype_doubleXdr();     // XDR
-        static private readonly DatatypeImplementation s_duration = new Datatype_duration();
-        static private readonly DatatypeImplementation s_ENTITY = new Datatype_ENTITY();
-        static private readonly DatatypeImplementation s_ENTITIES = (DatatypeImplementation)s_ENTITY.DeriveByList(1, null);
-        static private readonly DatatypeImplementation s_ENUMERATION = new Datatype_ENUMERATION(); // XDR
-        static private readonly DatatypeImplementation s_fixed = new Datatype_fixed();
-        static private readonly DatatypeImplementation s_float = new Datatype_float();
-        static private readonly DatatypeImplementation s_floatXdr = new Datatype_floatXdr(); // XDR
-        static private readonly DatatypeImplementation s_hexBinary = new Datatype_hexBinary();
-        static private readonly DatatypeImplementation s_ID = new Datatype_ID();
-        static private readonly DatatypeImplementation s_IDREF = new Datatype_IDREF();
-        static private readonly DatatypeImplementation s_IDREFS = (DatatypeImplementation)s_IDREF.DeriveByList(1, null);
-        static private readonly DatatypeImplementation s_int = new Datatype_int();
-        static private readonly DatatypeImplementation s_integer = new Datatype_integer();
-        static private readonly DatatypeImplementation s_language = new Datatype_language();
-        static private readonly DatatypeImplementation s_long = new Datatype_long();
-        static private readonly DatatypeImplementation s_month = new Datatype_month();
-        static private readonly DatatypeImplementation s_monthDay = new Datatype_monthDay();
-        static private readonly DatatypeImplementation s_name = new Datatype_Name();
-        static private readonly DatatypeImplementation s_NCName = new Datatype_NCName();
-        static private readonly DatatypeImplementation s_negativeInteger = new Datatype_negativeInteger();
-        static private readonly DatatypeImplementation s_NMTOKEN = new Datatype_NMTOKEN();
-        static private readonly DatatypeImplementation s_NMTOKENS = (DatatypeImplementation)s_NMTOKEN.DeriveByList(1, null);
-        static private readonly DatatypeImplementation s_nonNegativeInteger = new Datatype_nonNegativeInteger();
-        static private readonly DatatypeImplementation s_nonPositiveInteger = new Datatype_nonPositiveInteger();
-        static private readonly DatatypeImplementation s_normalizedString = new Datatype_normalizedString();
-        static private readonly DatatypeImplementation s_NOTATION = new Datatype_NOTATION();
-        static private readonly DatatypeImplementation s_positiveInteger = new Datatype_positiveInteger();
-        static private readonly DatatypeImplementation s_QName = new Datatype_QName();
-        static private readonly DatatypeImplementation s_QNameXdr = new Datatype_QNameXdr(); //XDR
-        static private readonly DatatypeImplementation s_short = new Datatype_short();
-        static private readonly DatatypeImplementation s_string = new Datatype_string();
-        static private readonly DatatypeImplementation s_time = new Datatype_time();
-        static private readonly DatatypeImplementation s_timeNoTz = new Datatype_timeNoTimeZone(); // XDR
-        static private readonly DatatypeImplementation s_timeTz = new Datatype_timeTimeZone(); // XDR
-        static private readonly DatatypeImplementation s_token = new Datatype_token();
-        static private readonly DatatypeImplementation s_unsignedByte = new Datatype_unsignedByte();
-        static private readonly DatatypeImplementation s_unsignedInt = new Datatype_unsignedInt();
-        static private readonly DatatypeImplementation s_unsignedLong = new Datatype_unsignedLong();
-        static private readonly DatatypeImplementation s_unsignedShort = new Datatype_unsignedShort();
-        static private readonly DatatypeImplementation s_uuid = new Datatype_uuid(); // XDR
-        static private readonly DatatypeImplementation s_year = new Datatype_year();
-        static private readonly DatatypeImplementation s_yearMonth = new Datatype_yearMonth();
+        private static readonly DatatypeImplementation s_anySimpleType = new Datatype_anySimpleType();
+        private static readonly DatatypeImplementation s_anyURI = new Datatype_anyURI();
+        private static readonly DatatypeImplementation s_base64Binary = new Datatype_base64Binary();
+        private static readonly DatatypeImplementation s_boolean = new Datatype_boolean();
+        private static readonly DatatypeImplementation s_byte = new Datatype_byte();
+        private static readonly DatatypeImplementation s_char = new Datatype_char(); // XDR
+        private static readonly DatatypeImplementation s_date = new Datatype_date();
+        private static readonly DatatypeImplementation s_dateTime = new Datatype_dateTime();
+        private static readonly DatatypeImplementation s_dateTimeNoTz = new Datatype_dateTimeNoTimeZone(); // XDR
+        private static readonly DatatypeImplementation s_dateTimeTz = new Datatype_dateTimeTimeZone(); // XDR
+        private static readonly DatatypeImplementation s_day = new Datatype_day();
+        private static readonly DatatypeImplementation s_decimal = new Datatype_decimal();
+        private static readonly DatatypeImplementation s_double = new Datatype_double();
+        private static readonly DatatypeImplementation s_doubleXdr = new Datatype_doubleXdr();     // XDR
+        private static readonly DatatypeImplementation s_duration = new Datatype_duration();
+        private static readonly DatatypeImplementation s_ENTITY = new Datatype_ENTITY();
+        private static readonly DatatypeImplementation s_ENTITIES = (DatatypeImplementation)s_ENTITY.DeriveByList(1, null);
+        private static readonly DatatypeImplementation s_ENUMERATION = new Datatype_ENUMERATION(); // XDR
+        private static readonly DatatypeImplementation s_fixed = new Datatype_fixed();
+        private static readonly DatatypeImplementation s_float = new Datatype_float();
+        private static readonly DatatypeImplementation s_floatXdr = new Datatype_floatXdr(); // XDR
+        private static readonly DatatypeImplementation s_hexBinary = new Datatype_hexBinary();
+        private static readonly DatatypeImplementation s_ID = new Datatype_ID();
+        private static readonly DatatypeImplementation s_IDREF = new Datatype_IDREF();
+        private static readonly DatatypeImplementation s_IDREFS = (DatatypeImplementation)s_IDREF.DeriveByList(1, null);
+        private static readonly DatatypeImplementation s_int = new Datatype_int();
+        private static readonly DatatypeImplementation s_integer = new Datatype_integer();
+        private static readonly DatatypeImplementation s_language = new Datatype_language();
+        private static readonly DatatypeImplementation s_long = new Datatype_long();
+        private static readonly DatatypeImplementation s_month = new Datatype_month();
+        private static readonly DatatypeImplementation s_monthDay = new Datatype_monthDay();
+        private static readonly DatatypeImplementation s_name = new Datatype_Name();
+        private static readonly DatatypeImplementation s_NCName = new Datatype_NCName();
+        private static readonly DatatypeImplementation s_negativeInteger = new Datatype_negativeInteger();
+        private static readonly DatatypeImplementation s_NMTOKEN = new Datatype_NMTOKEN();
+        private static readonly DatatypeImplementation s_NMTOKENS = (DatatypeImplementation)s_NMTOKEN.DeriveByList(1, null);
+        private static readonly DatatypeImplementation s_nonNegativeInteger = new Datatype_nonNegativeInteger();
+        private static readonly DatatypeImplementation s_nonPositiveInteger = new Datatype_nonPositiveInteger();
+        private static readonly DatatypeImplementation s_normalizedString = new Datatype_normalizedString();
+        private static readonly DatatypeImplementation s_NOTATION = new Datatype_NOTATION();
+        private static readonly DatatypeImplementation s_positiveInteger = new Datatype_positiveInteger();
+        private static readonly DatatypeImplementation s_QName = new Datatype_QName();
+        private static readonly DatatypeImplementation s_QNameXdr = new Datatype_QNameXdr(); //XDR
+        private static readonly DatatypeImplementation s_short = new Datatype_short();
+        private static readonly DatatypeImplementation s_string = new Datatype_string();
+        private static readonly DatatypeImplementation s_time = new Datatype_time();
+        private static readonly DatatypeImplementation s_timeNoTz = new Datatype_timeNoTimeZone(); // XDR
+        private static readonly DatatypeImplementation s_timeTz = new Datatype_timeTimeZone(); // XDR
+        private static readonly DatatypeImplementation s_token = new Datatype_token();
+        private static readonly DatatypeImplementation s_unsignedByte = new Datatype_unsignedByte();
+        private static readonly DatatypeImplementation s_unsignedInt = new Datatype_unsignedInt();
+        private static readonly DatatypeImplementation s_unsignedLong = new Datatype_unsignedLong();
+        private static readonly DatatypeImplementation s_unsignedShort = new Datatype_unsignedShort();
+        private static readonly DatatypeImplementation s_uuid = new Datatype_uuid(); // XDR
+        private static readonly DatatypeImplementation s_year = new Datatype_year();
+        private static readonly DatatypeImplementation s_yearMonth = new Datatype_yearMonth();
 
         //V1 compat types
-        static internal readonly DatatypeImplementation c_normalizedStringV1Compat = new Datatype_normalizedStringV1Compat();
-        static internal readonly DatatypeImplementation c_tokenV1Compat = new Datatype_tokenV1Compat();
+        internal static readonly DatatypeImplementation c_normalizedStringV1Compat = new Datatype_normalizedStringV1Compat();
+        internal static readonly DatatypeImplementation c_tokenV1Compat = new Datatype_tokenV1Compat();
 
         // XQuery types
-        static private readonly DatatypeImplementation s_anyAtomicType = new Datatype_anyAtomicType();
-        static private readonly DatatypeImplementation s_dayTimeDuration = new Datatype_dayTimeDuration();
-        static private readonly DatatypeImplementation s_untypedAtomicType = new Datatype_untypedAtomicType();
-        static private readonly DatatypeImplementation s_yearMonthDuration = new Datatype_yearMonthDuration();
+        private static readonly DatatypeImplementation s_anyAtomicType = new Datatype_anyAtomicType();
+        private static readonly DatatypeImplementation s_dayTimeDuration = new Datatype_dayTimeDuration();
+        private static readonly DatatypeImplementation s_untypedAtomicType = new Datatype_untypedAtomicType();
+        private static readonly DatatypeImplementation s_yearMonthDuration = new Datatype_yearMonthDuration();
 
 
         private class SchemaDatatypeMap : IComparable
@@ -969,10 +957,6 @@ namespace System.Xml.Schema
 
             return XmlListConverter.Create(listItemType.ValueConverter);
         }
-
-        internal Datatype_List(DatatypeImplementation type) : this(type, 0)
-        {
-        }
         internal Datatype_List(DatatypeImplementation type, int minListSize)
         {
             _itemType = type;
@@ -1075,7 +1059,7 @@ namespace System.Xml.Schema
                     item = valuesToCheck.GetValue(i);
                     if (checkItemLexical)
                     {
-                        string s1 = (string)itemValueConverter.ChangeType(item, typeof(System.String), namespaceResolver);
+                        string s1 = (string)itemValueConverter.ChangeType(item, typeof(string), namespaceResolver);
                         exception = itemFacetsChecker.CheckLexicalFacets(ref s1, _itemType);
                         if (exception != null) goto Error;
                     }
@@ -1089,7 +1073,7 @@ namespace System.Xml.Schema
                 //Check facets on the list itself
                 if (this.HasLexicalFacets)
                 {
-                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(System.String), namespaceResolver);
+                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(string), namespaceResolver);
                     exception = listFacetsChecker.CheckLexicalFacets(ref s1, this);
                     if (exception != null) goto Error;
                 }
@@ -1333,7 +1317,7 @@ namespace System.Xml.Schema
             {
                 if (this.HasLexicalFacets)
                 {
-                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(System.String), nsmgr); //Using value here to avoid info loss
+                    string s1 = (string)this.ValueConverter.ChangeType(valueToCheck, typeof(string), nsmgr); //Using value here to avoid info loss
                     exception = unionFacetsChecker.CheckLexicalFacets(ref s1, this);
                     if (exception != null) goto Error;
                 }
@@ -1396,7 +1380,7 @@ namespace System.Xml.Schema
         internal override int Compare(object value1, object value2)
         {
             //Changed StringComparison.CurrentCulture to StringComparison.Ordinal to handle zero-weight code points like the cyrillic E
-            return String.Compare(value1.ToString(), value2.ToString(), StringComparison.Ordinal);
+            return string.Compare(value1.ToString(), value2.ToString(), StringComparison.Ordinal);
         }
 
         internal override Exception TryParseValue(string s, XmlNameTable nameTable, IXmlNamespaceResolver nsmgr, out object typedValue)
@@ -2032,10 +2016,6 @@ namespace System.Xml.Schema
         internal override FacetsChecker FacetsChecker { get { return dateTimeFacetsChecker; } }
 
         public override XmlTypeCode TypeCode { get { return XmlTypeCode.DateTime; } }
-
-        internal Datatype_dateTimeBase()
-        {
-        }
 
         internal Datatype_dateTimeBase(XsdDateTimeFlags dateTimeFlags)
         {
@@ -3772,7 +3752,8 @@ namespace System.Xml.Schema
             {
                 throw new XmlSchemaException(SR.Format(SR.Sch_InvalidValue, s), e);
             }
-            if (double.IsInfinity(value) || double.IsNaN(value))
+
+            if (!double.IsFinite(value))
             {
                 throw new XmlSchemaException(SR.Sch_InvalidValue, s);
             }
@@ -3793,7 +3774,8 @@ namespace System.Xml.Schema
             {
                 throw new XmlSchemaException(SR.Format(SR.Sch_InvalidValue, s), e);
             }
-            if (float.IsInfinity(value) || float.IsNaN(value))
+
+            if (!float.IsFinite(value))
             {
                 throw new XmlSchemaException(SR.Sch_InvalidValue, s);
             }

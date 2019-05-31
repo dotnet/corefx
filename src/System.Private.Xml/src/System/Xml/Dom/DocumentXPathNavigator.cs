@@ -474,7 +474,7 @@ namespace System.Xml
                 return false;
             }
             XmlAttributeCollection attributes;
-            int index = Int32.MaxValue;
+            int index = int.MaxValue;
             switch (scope)
             {
                 case XPathNamespaceScope.Local:
@@ -525,7 +525,7 @@ namespace System.Xml
                     _namespaceParent = element;
                     break;
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected scope {scope}");
                     return false;
             }
             return true;
@@ -639,7 +639,7 @@ namespace System.Xml
                     _attributeIndex = index;
                     break;
                 default:
-                    Debug.Assert(false);
+                    Debug.Fail($"Unexpected scope {scope}");
                     return false;
             }
             return true;
@@ -2197,7 +2197,7 @@ namespace System.Xml
         public override int Count { get { return 0; } }
     }
 
-    // An iterator that can match any child elements that match the Match condition (overrided in the derived class)
+    // An iterator that can match any child elements that match the Match condition (overridden in the derived class)
     internal abstract class DocumentXPathNodeIterator_ElemDescendants : XPathNodeIterator
     {
         private DocumentXPathNavigator _nav;

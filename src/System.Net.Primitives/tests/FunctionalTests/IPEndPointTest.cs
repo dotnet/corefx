@@ -76,10 +76,10 @@ namespace System.Net.Primitives.Functional.Tests
         public static void ToString_Compare_Success()
         {
             IPEndPoint ep = new IPEndPoint(testIpV61, 500);
-            Assert.Equal(ep.ToString(), String.Format("[{0}]:500", ep.Address.ToString()));
+            Assert.Equal(ep.ToString(), string.Format("[{0}]:500", ep.Address.ToString()));
 
             ep = new IPEndPoint(testIpV42, 500);
-            Assert.Equal(ep.ToString(), String.Format("{0}:500", ep.Address.ToString()));
+            Assert.Equal(ep.ToString(), string.Format("{0}:500", ep.Address.ToString()));
         }
 
         [Fact]
@@ -98,8 +98,8 @@ namespace System.Net.Primitives.Functional.Tests
         public static void Create_Set_Invalid()
         {
             IPEndPoint ep = new IPEndPoint(testIpV41, 500);
-            Assert.Throws<ArgumentException>(() => ep.Create(new SocketAddress(Sockets.AddressFamily.InterNetworkV6))); //Different address families
-            Assert.Throws<ArgumentException>(() => ep.Create(new SocketAddress(Sockets.AddressFamily.InterNetwork, 7))); //
+            AssertExtensions.Throws<ArgumentException>("socketAddress", () => ep.Create(new SocketAddress(Sockets.AddressFamily.InterNetworkV6))); //Different address families
+            AssertExtensions.Throws<ArgumentException>("socketAddress", () => ep.Create(new SocketAddress(Sockets.AddressFamily.InterNetwork, 7))); //
         }
 
         [Fact]

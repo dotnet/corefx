@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.IO;
 
 namespace System.Security.Cryptography
@@ -15,15 +16,11 @@ namespace System.Security.Cryptography
 
         protected HashAlgorithm() { }
 
-        public static HashAlgorithm Create()
-        {
-            return Create("System.Security.Cryptography.HashAlgorithm");
-        }
+        public static HashAlgorithm Create() =>
+            CryptoConfigForwarder.CreateDefaultHashAlgorithm();
 
-        public static HashAlgorithm Create(string hashName)
-        {
-            throw new PlatformNotSupportedException();
-        }
+        public static HashAlgorithm Create(string hashName) =>
+            (HashAlgorithm)CryptoConfigForwarder.CreateFromName(hashName);
 
         public virtual int HashSize => HashSizeValue;
 
@@ -36,7 +33,7 @@ namespace System.Security.Cryptography
                 if (State != 0)
                     throw new CryptographicUnexpectedOperationException(SR.Cryptography_HashNotYetFinalized);
 
-                return (byte[])HashValue.Clone();
+                return (byte[])HashValue?.Clone();
             }
         }
 
@@ -49,6 +46,32 @@ namespace System.Security.Cryptography
 
             HashCore(buffer, 0, buffer.Length);
             return CaptureHashCodeAndReinitialize();
+        }
+
+        public bool TryComputeHash(ReadOnlySpan<byte> source, Span<byte> destination, out int bytesWritten)
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(null);
+            }
+
+            if (destination.Length < HashSizeValue/8)
+            {
+                bytesWritten = 0;
+                return false;
+            }
+
+            HashCore(source);
+            if (!TryHashFinal(destination, out bytesWritten))
+            {
+                // The only reason for failure should be that the destination isn't long enough,
+                // but we checked the size earlier.
+                throw new InvalidOperationException(SR.InvalidOperation_IncorrectImplementation);
+            }
+            HashValue = null;
+
+            Initialize();
+            return true;
         }
 
         public byte[] ComputeHash(byte[] buffer, int offset, int count)
@@ -74,13 +97,16 @@ namespace System.Security.Cryptography
             if (_disposed)
                 throw new ObjectDisposedException(null);
 
-            // Default the buffer size to 4K.
-            byte[] buffer = new byte[4096];
+            // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
+            byte[] buffer = ArrayPool<byte>.Shared.Rent(4096);
+
             int bytesRead;
             while ((bytesRead = inputStream.Read(buffer, 0, buffer.Length)) > 0)
             {
                 HashCore(buffer, 0, bytesRead);
             }
+
+            ArrayPool<byte>.Shared.Return(buffer, clearArray: true);
             return CaptureHashCodeAndReinitialize();
         }
 
@@ -121,25 +147,10 @@ namespace System.Security.Cryptography
         // ICryptoTransform methods
 
         // We assume any HashAlgorithm can take input a byte at a time
-        public virtual int InputBlockSize
-        {
-            get { return (1); }
-        }
-
-        public virtual int OutputBlockSize
-        {
-            get { return (1); }
-        }
-
-        public virtual bool CanTransformMultipleBlocks
-        {
-            get { return true; }
-        }
-
-        public virtual bool CanReuseTransform
-        {
-            get { return true; }
-        }
+        public virtual int InputBlockSize => 1;
+        public virtual int OutputBlockSize => 1;
+        public virtual bool CanTransformMultipleBlocks => true;
+        public virtual bool CanReuseTransform => true;
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
@@ -198,5 +209,36 @@ namespace System.Security.Cryptography
         protected abstract void HashCore(byte[] array, int ibStart, int cbSize);
         protected abstract byte[] HashFinal();
         public abstract void Initialize();
+
+        protected virtual void HashCore(ReadOnlySpan<byte> source)
+        {
+            // Use ArrayPool.Shared instead of CryptoPool because the array is passed out.
+            byte[] array = ArrayPool<byte>.Shared.Rent(source.Length);
+            source.CopyTo(array);
+            HashCore(array, 0, source.Length);
+            Array.Clear(array, 0, source.Length);
+            ArrayPool<byte>.Shared.Return(array);
+        }
+
+        protected virtual bool TryHashFinal(Span<byte> destination, out int bytesWritten)
+        {
+            int hashSizeInBytes = HashSizeValue / 8;
+
+            if (destination.Length >= hashSizeInBytes)
+            {
+                byte[] final = HashFinal();
+                if (final.Length == hashSizeInBytes)
+                {
+                    new ReadOnlySpan<byte>(final).CopyTo(destination);
+                    bytesWritten = final.Length;
+                    return true;
+                }
+
+                throw new InvalidOperationException(SR.InvalidOperation_IncorrectImplementation);
+            }
+
+            bytesWritten = 0;
+            return false;
+        }
     }
 }

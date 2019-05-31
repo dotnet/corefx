@@ -13,7 +13,6 @@ using System.ComponentModel;
 
 namespace System.Xml.Xsl.Runtime
 {
-
     // List of all XPath/XSLT runtime methods
     internal static class XsltMethods
     {
@@ -253,11 +252,11 @@ namespace System.Xml.Xsl.Runtime
                     {
                         if (errorHelper != null)
                         {
-                            errorHelper.ReportError(SR.Xslt_InvalidAttrValue, "lang", lang);
+                            errorHelper.ReportError(SR.Xslt_InvalidAttrValue, nameof(lang), lang);
                         }
                         else
                         {
-                            throw new XslTransformException(SR.Xslt_InvalidAttrValue, "lang", lang);
+                            throw new XslTransformException(SR.Xslt_InvalidAttrValue, nameof(lang), lang);
                         }
                     }
                 }

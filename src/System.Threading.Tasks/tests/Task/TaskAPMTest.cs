@@ -18,7 +18,7 @@ using System.Diagnostics;
 namespace System.Threading.Tasks.Tests
 {
     /// <summary>
-    /// A class that implements the APM pattern to ensure that TPL can support APM patttern
+    /// A class that implements the APM pattern to ensure that TPL can support APM pattern
     /// </summary>
     public sealed class TaskAPMTests : IDisposable
     {
@@ -28,7 +28,7 @@ namespace System.Threading.Tasks.Tests
         private bool _hasReturnType;
 
         /// <summary>
-        /// Used to synchornize between Main thread and async thread, by blocking the main thread until
+        /// Used to synchronize between Main thread and async thread, by blocking the main thread until
         /// the thread that invokes the TaskCompleted method via AsyncCallback finishes
         /// </summary>
         private ManualResetEvent _mre = new ManualResetEvent(false);
@@ -180,9 +180,9 @@ namespace System.Threading.Tasks.Tests
     public class LongTask
     {
         // Amount of time to SpinWait, in milliseconds.
-        protected readonly Int32 _msWaitDuration;
+        protected readonly int _msWaitDuration;
 
-        public LongTask(Int32 milliseconds)
+        public LongTask(int milliseconds)
         {
             _msWaitDuration = milliseconds;
         }
@@ -195,7 +195,7 @@ namespace System.Threading.Tasks.Tests
         }
 
         // Asynchronous version of time-consuming method (Begin part)
-        public IAsyncResult BeginDoTask(AsyncCallback callback, Object state)
+        public IAsyncResult BeginDoTask(AsyncCallback callback, object state)
         {
             // Create IAsyncResult object identifying the asynchronous operation
             Task task = Task.Factory.StartNew(
@@ -231,7 +231,7 @@ namespace System.Threading.Tasks.Tests
     /// </summary>
     public sealed class LongTask<T> : LongTask
     {
-        public LongTask(Int32 milliseconds)
+        public LongTask(int milliseconds)
             : base(milliseconds)
         {
         }
@@ -243,7 +243,7 @@ namespace System.Threading.Tasks.Tests
             return input; // Return some result, for now, just return the input
         }
 
-        public IAsyncResult BeginDoTask(T input, AsyncCallback callback, Object state)
+        public IAsyncResult BeginDoTask(T input, AsyncCallback callback, object state)
         {
             // Create IAsyncResult object identifying the asynchronous operation
             Task<T> task = Task<T>.Factory.StartNew(

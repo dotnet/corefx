@@ -3,12 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Diagnostics;
 
-namespace Test
+namespace System.Threading.Tasks.Tests
 {
     public class TaskContinueWith_ContFuncAndActionWithArgsTests
     {
@@ -202,7 +199,7 @@ namespace Test
             // Pre-increment the dontCounts for pre-canceled continuations to make final check easier
             // (i.e., all counts should be 1 at end).
             int[] doneCount = { 0, 0, 1, 0, 1, 0 };
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
 
             Task t1 = new Task(delegate { doneCount[0]++; });
             Task c1 = t1.ContinueWith((_, obj) => { doneCount[1]++; }, stateParam);
@@ -271,10 +268,10 @@ namespace Test
             int x = 0;
             int y = 0;
 
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
             Task t1 = new Task(delegate { x = 1; });
-            Task t2 = t1.ContinueWith(delegate (Task t, Object obj) { y = 1; }, stateParam);
-            Task<int> t3 = t2.ContinueWith(delegate (Task t, Object obj) { return 5; }, stateParam);
+            Task t2 = t1.ContinueWith(delegate (Task t, object obj) { y = 1; }, stateParam);
+            Task<int> t3 = t2.ContinueWith(delegate (Task t, object obj) { return 5; }, stateParam);
             Task<int> t4 = t3.ContinueWith(delegate (Task<int> t, Object obj) { return Task<int>.Factory.StartNew(delegate { return 10; }); }, stateParam).Unwrap();
             Task<string> t5 = t4.ContinueWith(delegate (Task<int> t, Object obj) { return Task<string>.Factory.StartNew(delegate { for (int i = 0; i < 400; i++) ; return "worked"; }); }, stateParam).Unwrap();
 
@@ -317,7 +314,7 @@ namespace Test
 
             try
             {
-                string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+                string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
                 Task t2 = t1.ContinueWith((completedTask, obj) => { }, stateParam);
             }
             catch
@@ -329,7 +326,7 @@ namespace Test
         [Fact]
         public static void RunContinueWithParamsTest_State_Cancellation()
         {
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
 
             //
             // Test whether parentage/cancellation is working correctly
@@ -380,7 +377,7 @@ namespace Test
         public static void RunContinueWithParamsTest_State_IllegalParameters()
         {
             Task t1 = new Task(delegate { });
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
 
             try
             {
@@ -421,7 +418,7 @@ namespace Test
         {
             bool ran = false;
 
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
 
             if (runNegativeCases)
             {
@@ -455,7 +452,7 @@ namespace Test
             bool ran = false;
 
             Debug.WriteLine("* RunContinueWithTaskFuture_StateA(Object, options={0})", options);
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
 
             if (runNegativeCases)
             {
@@ -489,7 +486,7 @@ namespace Test
             bool ran = false;
 
             Debug.WriteLine("* RunContinueWithFutureTask_State(Object, options={0})", options);
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
 
             if (runNegativeCases)
             {
@@ -523,14 +520,14 @@ namespace Test
             bool ran = false;
 
             Debug.WriteLine("* RunContinueWithFutureFuture_StateA(Object, options={0})", options);
-            string stateParam = "test"; //used as a state parametr for the continuation if the useStateParam is true
+            string stateParam = "test"; //used as a state parameter for the continuation if the useStateParam is true
             if (runNegativeCases)
             {
                 RunContinueWithBase_ExceptionCases(options,
                     delegate { ran = false; },
                     delegate (Task t)
                     {
-                        return t.ContinueWith<int>(delegate (Task f, Object obj) { ran = true; return 5; }, stateParam, options);
+                        return t.ContinueWith<int>(delegate (Task f, object obj) { ran = true; return 5; }, stateParam, options);
                     },
                     delegate { return ran; },
                     true
@@ -542,7 +539,7 @@ namespace Test
                     delegate { ran = false; },
                     delegate (Task t)
                     {
-                        return t.ContinueWith<int>(delegate (Task f, Object obj) { ran = true; return 5; }, stateParam, options);
+                        return t.ContinueWith<int>(delegate (Task f, object obj) { ran = true; return 5; }, stateParam, options);
                     },
                     delegate { return ran; },
                     true

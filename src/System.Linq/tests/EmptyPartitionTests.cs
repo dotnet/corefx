@@ -25,27 +25,31 @@ namespace System.Linq.Tests
         [Fact]
         public void SingleInstance()
         {
-            Assert.Same(GetEmptyPartition<int>(), GetEmptyPartition<int>());
+            // .NET Core returns the instance as an optimization.
+            // see https://github.com/dotnet/corefx/pull/2401.
+            Assert.Equal(true, ReferenceEquals(GetEmptyPartition<int>(), GetEmptyPartition<int>()));
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core returns the instance as an optimization")]
         public void SkipSame()
         {
-            var empty = GetEmptyPartition<int>();
+            IEnumerable<int> empty = GetEmptyPartition<int>();
             Assert.Same(empty, empty.Skip(2));
         }
 
         [Fact]
+        [SkipOnTargetFramework(~TargetFrameworkMonikers.Netcoreapp, ".NET Core returns the instance as an optimization")]
         public void TakeSame()
         {
-            var empty = GetEmptyPartition<int>();
+            IEnumerable<int> empty = GetEmptyPartition<int>();
             Assert.Same(empty, empty.Take(2));
         }
 
         [Fact]
         public void ElementAtThrows()
         {
-            Assert.Throws<ArgumentOutOfRangeException>("index", () => GetEmptyPartition<int>().ElementAt(0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("index", () => GetEmptyPartition<int>().ElementAt(0));
         }
 
         [Fact]
@@ -94,10 +98,12 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        public void CantResetEnumerator()
+        public void ResetIsNop()
         {
             IEnumerator<int> en = GetEmptyPartition<int>().GetEnumerator();
-            Assert.Throws<NotSupportedException>(() => en.Reset());
+            en.Reset();
+            en.Reset();
+            en.Reset();
         }
     }
 }

@@ -106,8 +106,8 @@ namespace System.Runtime.Serialization.Json
                 if (this.knownDataContracts == null && this.knownTypeList != null)
                 {
                     // This assignment may be performed concurrently and thus is a race condition.
-                    // It's safe, however, because at worse a new (and identical) dictionary of 
-                    // data contracts will be created and re-assigned to this field.  Introduction 
+                    // It's safe, however, because at worse a new (and identical) dictionary of
+                    // data contracts will be created and re-assigned to this field.  Introduction
                     // of a lock here could lead to deadlocks.
                     this.knownDataContracts = XmlObjectSerializerContext.GetDataContractsForKnownTypes(this.knownTypeList);
                 }
@@ -118,13 +118,6 @@ namespace System.Runtime.Serialization.Json
         public int MaxItemsInObjectGraph
         {
             get { return _maxItemsInObjectGraph; }
-        }
-        internal bool AlwaysEmitTypeInformation
-        {
-            get
-            {
-                return _emitTypeInformation == EmitTypeInformation.Always;
-            }
         }
 
         public DateTimeFormat DateTimeFormat
@@ -247,7 +240,7 @@ namespace System.Runtime.Serialization.Json
             return knownTypesList;
         }
 
-        static internal void InvokeOnSerializing(Object value, DataContract contract, XmlObjectSerializerWriteContextComplexJson context)
+        internal static void InvokeOnSerializing(object value, DataContract contract, XmlObjectSerializerWriteContextComplexJson context)
         {
             if (contract is ClassDataContract)
             {
@@ -285,7 +278,7 @@ namespace System.Runtime.Serialization.Json
             }
         }
 
-        static internal void InvokeOnSerialized(Object value, DataContract contract, XmlObjectSerializerWriteContextComplexJson context)
+        internal static void InvokeOnSerialized(object value, DataContract contract, XmlObjectSerializerWriteContextComplexJson context)
         {
             if (contract is ClassDataContract)
             {
@@ -323,7 +316,7 @@ namespace System.Runtime.Serialization.Json
             }
         }
 
-        static internal void InvokeOnDeserializing(Object value, DataContract contract, XmlObjectSerializerReadContextComplexJson context)
+        internal static void InvokeOnDeserializing(object value, DataContract contract, XmlObjectSerializerReadContextComplexJson context)
         {
             if (contract is ClassDataContract)
             {
@@ -361,7 +354,7 @@ namespace System.Runtime.Serialization.Json
             }
         }
 
-        static internal void InvokeOnDeserialized(object value, DataContract contract, XmlObjectSerializerReadContextComplexJson context)
+        internal static void InvokeOnDeserialized(object value, DataContract contract, XmlObjectSerializerReadContextComplexJson context)
         {
             if (contract is ClassDataContract)
             {
@@ -527,7 +520,7 @@ namespace System.Runtime.Serialization.Json
         {
         }
 
-        internal DataContractJsonSerializerImpl(Type type, 
+        internal DataContractJsonSerializerImpl(Type type,
             XmlDictionaryString rootName,
             IEnumerable<Type> knownTypes,
             int maxItemsInObjectGraph,
@@ -576,8 +569,8 @@ namespace System.Runtime.Serialization.Json
                 if (this.knownDataContracts == null && this.knownTypeList != null)
                 {
                     // This assignment may be performed concurrently and thus is a race condition.
-                    // It's safe, however, because at worse a new (and identical) dictionary of 
-                    // data contracts will be created and re-assigned to this field.  Introduction 
+                    // It's safe, however, because at worse a new (and identical) dictionary of
+                    // data contracts will be created and re-assigned to this field.  Introduction
                     // of a lock here could lead to deadlocks.
                     this.knownDataContracts = XmlObjectSerializerContext.GetDataContractsForKnownTypes(this.knownTypeList);
                 }
@@ -705,7 +698,7 @@ namespace System.Runtime.Serialization.Json
         public override void WriteObject(Stream stream, object graph)
         {
             CheckNull(stream, nameof(stream));
-            XmlDictionaryWriter jsonWriter = JsonReaderWriterFactory.CreateJsonWriter(stream, Encoding.UTF8, false); //  ownsStream 
+            XmlDictionaryWriter jsonWriter = JsonReaderWriterFactory.CreateJsonWriter(stream, Encoding.UTF8, false); //  ownsStream
             WriteObject(jsonWriter, graph);
             jsonWriter.Flush();
         }
@@ -804,7 +797,7 @@ namespace System.Runtime.Serialization.Json
 
         internal static void WriteJsonNull(XmlWriterDelegator writer)
         {
-            writer.WriteAttributeString(null, JsonGlobals.typeString, null, JsonGlobals.nullString); //  prefix //  namespace 
+            writer.WriteAttributeString(null, JsonGlobals.typeString, null, JsonGlobals.nullString); //  prefix //  namespace
         }
 
         internal static void WriteJsonValue(JsonDataContract contract, XmlWriterDelegator writer, object graph, XmlObjectSerializerWriteContextComplexJson context, RuntimeTypeHandle declaredTypeHandle)
@@ -900,12 +893,12 @@ namespace System.Runtime.Serialization.Json
                     if (contract.CanContainReferences)
                     {
                         XmlObjectSerializerWriteContextComplexJson context = XmlObjectSerializerWriteContextComplexJson.CreateContext(this, contract);
-                        context.OnHandleReference(writer, graph, true); //  canContainReferences 
+                        context.OnHandleReference(writer, graph, true); //  canContainReferences
                         context.SerializeWithoutXsiType(contract, writer, graph, declaredType.TypeHandle);
                     }
                     else
                     {
-                        DataContractJsonSerializerImpl.WriteJsonValue(JsonDataContract.GetJsonDataContract(contract), writer, graph, null, declaredType.TypeHandle); //  XmlObjectSerializerWriteContextComplexJson 
+                        DataContractJsonSerializerImpl.WriteJsonValue(JsonDataContract.GetJsonDataContract(contract), writer, graph, null, declaredType.TypeHandle); //  XmlObjectSerializerWriteContextComplexJson
                     }
                 }
                 else
@@ -914,7 +907,7 @@ namespace System.Runtime.Serialization.Json
                     contract = DataContractJsonSerializerImpl.GetDataContract(contract, declaredType, graphType);
                     if (contract.CanContainReferences)
                     {
-                        context.OnHandleReference(writer, graph, true); //  canContainCyclicReference 
+                        context.OnHandleReference(writer, graph, true); //  canContainCyclicReference
                         context.SerializeWithXsiTypeAtTopLevel(contract, writer, graph, declaredType.TypeHandle, graphType);
                     }
                     else
@@ -944,9 +937,9 @@ namespace System.Runtime.Serialization.Json
             Type typeToCheck = knownType;
             while (CollectionDataContract.IsCollection(typeToCheck, out itemType))
             {
-                if (itemType.GetTypeInfo().IsGenericType && (itemType.GetGenericTypeDefinition() == Globals.TypeOfKeyValue))
+                if (itemType.IsGenericType && (itemType.GetGenericTypeDefinition() == Globals.TypeOfKeyValue))
                 {
-                    itemType = Globals.TypeOfKeyValuePair.MakeGenericType(itemType.GetTypeInfo().GenericTypeArguments);
+                    itemType = Globals.TypeOfKeyValuePair.MakeGenericType(itemType.GenericTypeArguments);
                 }
                 this.knownTypeList.Add(itemType);
                 typeToCheck = itemType;

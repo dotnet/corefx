@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using Xunit;
 
 namespace System.Diagnostics.TraceSourceTests
@@ -14,7 +15,7 @@ namespace System.Diagnostics.TraceSourceTests
         public void ConstrutorExceptionTest()
         {
             Assert.Throws<ArgumentNullException>(() => new TraceSource(null));
-            Assert.Throws<ArgumentException>(() => new TraceSource(""));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new TraceSource(""));
         }
 
         [Fact]
@@ -57,18 +58,22 @@ namespace System.Diagnostics.TraceSourceTests
             var listener = new TestTraceListener();
             trace.Listeners.Add(listener);
             trace.Close();
-            // NOTE: this assertion fails on .net 4.5
-            // where TraceSource.Close calls TraceListener.Close, not Dispose.
-            Assert.Equal(1, listener.GetCallCount(Method.Dispose));
+            Assert.Equal(1, listener.GetCallCount(Method.Close));
             // Assert that writing to a closed TraceSource is not an error.
             trace.TraceEvent(TraceEventType.Critical, 0);
+        }
+
+        [System.Runtime.CompilerServices.MethodImplAttribute(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+        static WeakReference PruneMakeRef()
+        {
+            return new WeakReference(new TraceSource("TestTraceSource"));
         }
 
         [Fact]
         public void PruneTest()
         {
             var strongTrace = new TraceSource("TestTraceSource");
-            var traceRef = new WeakReference(new TraceSource("TestTraceSource"));
+            var traceRef = PruneMakeRef();
             Assert.True(traceRef.IsAlive);
             GC.Collect(2);
             Trace.Refresh();
@@ -120,15 +125,15 @@ namespace System.Diagnostics.TraceSourceTests
         [Fact]
         public void NullSourceName()
         {
-            Assert.Throws<ArgumentNullException>("name", () => new TraceSource(null));
-            Assert.Throws<ArgumentNullException>("name", () => new TraceSource(null, SourceLevels.All));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => new TraceSource(null));
+            AssertExtensions.Throws<ArgumentNullException>("name", () => new TraceSource(null, SourceLevels.All));
         }
 
         [Fact]
         public void EmptySourceName()
         {
-            Assert.Throws<ArgumentException>("name", () => new TraceSource(string.Empty));
-            Assert.Throws<ArgumentException>("name", () => new TraceSource(string.Empty, SourceLevels.All));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new TraceSource(string.Empty));
+            AssertExtensions.Throws<ArgumentException>("name", null, () => new TraceSource(string.Empty, SourceLevels.All));
         }
     }
 
@@ -278,7 +283,7 @@ namespace System.Diagnostics.TraceSourceTests
             var trace = new TraceSource("TestTraceSource", SourceLevels.All);
             var listener = GetTraceListener();
             trace.Listeners.Add(listener);
-            trace.TraceData(TraceEventType.Verbose, 0, new Object());
+            trace.TraceData(TraceEventType.Verbose, 0, new object());
             Assert.Equal(1, listener.GetCallCount(Method.TraceData));
             var flushExpected = AutoFlush ? 1 : 0;
             Assert.Equal(flushExpected, listener.GetCallCount(Method.Flush));
@@ -290,7 +295,7 @@ namespace System.Diagnostics.TraceSourceTests
             var trace = new TraceSource("TestTraceSource", SourceLevels.All);
             var listener = GetTraceListener();
             trace.Listeners.Add(listener);
-            trace.TraceData(TraceEventType.Verbose, 0, new Object[0]);
+            trace.TraceData(TraceEventType.Verbose, 0, new object[0]);
             Assert.Equal(1, listener.GetCallCount(Method.TraceData));
             var flushExpected = AutoFlush ? 1 : 0;
             Assert.Equal(flushExpected, listener.GetCallCount(Method.Flush));

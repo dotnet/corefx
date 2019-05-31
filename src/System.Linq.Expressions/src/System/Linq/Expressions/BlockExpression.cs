@@ -67,12 +67,50 @@ namespace System.Linq.Expressions
         /// <returns>This expression if no children changed, or an expression with the updated children.</returns>
         public BlockExpression Update(IEnumerable<ParameterExpression> variables, IEnumerable<Expression> expressions)
         {
-            if (variables == Variables && expressions == Expressions)
+            if (expressions != null)
             {
-                return this;
+                // Ensure variables is safe to enumerate twice.
+                // (If this means a second call to ToReadOnly it will return quickly).
+                ICollection<ParameterExpression> vars;
+                if (variables == null)
+                {
+                    vars = null;
+                }
+                else
+                {
+                    vars = variables as ICollection<ParameterExpression>;
+                    if (vars == null)
+                    {
+                        variables = vars = variables.ToReadOnly();
+                    }
+                }
+
+                if (SameVariables(vars))
+                {
+                    // Ensure expressions is safe to enumerate twice.
+                    // (If this means a second call to ToReadOnly it will return quickly).
+                    ICollection<Expression> exps = expressions as ICollection<Expression>;
+                    if (exps == null)
+                    {
+                        expressions = exps = expressions.ToReadOnly();
+                    }
+                    if (SameExpressions(exps))
+                    {
+                        return this;
+                    }
+                }
             }
 
-            return Expression.Block(Type, variables, expressions);
+            return Block(Type, variables, expressions);
+        }
+
+        internal virtual bool SameVariables(ICollection<ParameterExpression> variables) =>
+            variables == null || variables.Count == 0;
+
+        [ExcludeFromCodeCoverage] // Unreachable
+        internal virtual bool SameExpressions(ICollection<Expression> expressions)
+        {
+            throw ContractUtils.Unreachable;
         }
 
         [ExcludeFromCodeCoverage] // Unreachable
@@ -165,10 +203,35 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 default: throw Error.ArgumentOutOfRange(nameof(index));
             }
+        }
+
+        internal override bool SameExpressions(ICollection<Expression> expressions)
+        {
+            Debug.Assert(expressions != null);
+            if (expressions.Count == 2)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(expressions, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = expressions.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        return en.Current == _arg1;
+                    }
+                }
+            }
+
+            return false;
         }
 
         internal override int ExpressionCount => 2;
@@ -200,11 +263,40 @@ namespace System.Linq.Expressions
             _arg2 = arg2;
         }
 
+        internal override bool SameExpressions(ICollection<Expression> expressions)
+        {
+            Debug.Assert(expressions != null);
+            if (expressions.Count == 3)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(expressions, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = expressions.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            return en.Current == _arg2;
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override Expression GetExpression(int index)
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 default: throw Error.ArgumentOutOfRange(nameof(index));
@@ -241,11 +333,44 @@ namespace System.Linq.Expressions
             _arg3 = arg3;
         }
 
+        internal override bool SameExpressions(ICollection<Expression> expressions)
+        {
+            Debug.Assert(expressions != null);
+            if (expressions.Count == 4)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(expressions, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = expressions.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            if (en.Current == _arg2)
+                            {
+                                en.MoveNext();
+                                return en.Current == _arg3;
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
+        }
+
         internal override Expression GetExpression(int index)
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 case 3: return _arg3;
@@ -288,13 +413,50 @@ namespace System.Linq.Expressions
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_arg0);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_arg0);
                 case 1: return _arg1;
                 case 2: return _arg2;
                 case 3: return _arg3;
                 case 4: return _arg4;
                 default: throw Error.ArgumentOutOfRange(nameof(index));
             }
+        }
+
+        internal override bool SameExpressions(ICollection<Expression> expressions)
+        {
+            Debug.Assert(expressions != null);
+            if (expressions.Count == 5)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _arg0 as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(expressions, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = expressions.GetEnumerator())
+                {
+                    en.MoveNext();
+                    if (en.Current == _arg0)
+                    {
+                        en.MoveNext();
+                        if (en.Current == _arg1)
+                        {
+                            en.MoveNext();
+                            if (en.Current == _arg2)
+                            {
+                                en.MoveNext();
+                                if (en.Current == _arg3)
+                                {
+                                    en.MoveNext();
+                                    return en.Current == _arg4;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         internal override int ExpressionCount => 5;
@@ -325,6 +487,9 @@ namespace System.Linq.Expressions
             _expressions = expressions;
         }
 
+        internal override bool SameExpressions(ICollection<Expression> expressions) =>
+            ExpressionUtils.SameElements(expressions, _expressions);
+
         internal override Expression GetExpression(int index)
         {
             Debug.Assert(index >= 0 && index < _expressions.Count);
@@ -336,7 +501,7 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
-            return ReturnReadOnly(ref _expressions);
+            return ExpressionUtils.ReturnReadOnly(ref _expressions);
         }
 
         internal override BlockExpression Rewrite(ReadOnlyCollection<ParameterExpression> variables, Expression[] args)
@@ -357,9 +522,12 @@ namespace System.Linq.Expressions
             _variables = variables;
         }
 
+        internal override bool SameVariables(ICollection<ParameterExpression> variables) =>
+            ExpressionUtils.SameElements(variables, _variables);
+
         internal override ReadOnlyCollection<ParameterExpression> GetOrMakeVariables()
         {
-            return ReturnReadOnly(ref _variables);
+            return ExpressionUtils.ReturnReadOnly(ref _variables);
         }
 
         protected IReadOnlyList<ParameterExpression> VariablesList => _variables;
@@ -395,11 +563,32 @@ namespace System.Linq.Expressions
             _body = body;
         }
 
+        internal override bool SameExpressions(ICollection<Expression> expressions)
+        {
+            Debug.Assert(expressions != null);
+            if (expressions.Count == 1)
+            {
+                ReadOnlyCollection<Expression> alreadyCollection = _body as ReadOnlyCollection<Expression>;
+                if (alreadyCollection != null)
+                {
+                    return ExpressionUtils.SameElements(expressions, alreadyCollection);
+                }
+
+                using (IEnumerator<Expression> en = expressions.GetEnumerator())
+                {
+                    en.MoveNext();
+                    return ExpressionUtils.ReturnObject<Expression>(_body) == en.Current;
+                }
+            }
+
+            return false;
+        }
+
         internal override Expression GetExpression(int index)
         {
             switch (index)
             {
-                case 0: return ReturnObject<Expression>(_body);
+                case 0: return ExpressionUtils.ReturnObject<Expression>(_body);
                 default: throw Error.ArgumentOutOfRange(nameof(index));
             }
         }
@@ -436,6 +625,9 @@ namespace System.Linq.Expressions
             _body = body;
         }
 
+        internal override bool SameExpressions(ICollection<Expression> expressions) =>
+            ExpressionUtils.SameElements(expressions, _body);
+
         protected IReadOnlyList<Expression> Body => _body;
 
         internal override Expression GetExpression(int index) => _body[index];
@@ -444,7 +636,7 @@ namespace System.Linq.Expressions
 
         internal override ReadOnlyCollection<Expression> GetOrMakeExpressions()
         {
-            return ReturnReadOnly(ref _body);
+            return ExpressionUtils.ReturnReadOnly(ref _body);
         }
 
         internal override BlockExpression Rewrite(ReadOnlyCollection<ParameterExpression> variables, Expression[] args)
@@ -583,12 +775,25 @@ namespace System.Linq.Expressions
             return IndexOf(item) != -1;
         }
 
-        public void CopyTo(Expression[] array, int arrayIndex)
+        public void CopyTo(Expression[] array, int index)
         {
-            array[arrayIndex++] = _arg0;
-            for (int i = 1; i < _block.ExpressionCount; i++)
+            ContractUtils.RequiresNotNull(array, nameof(array));
+            if (index < 0)
             {
-                array[arrayIndex++] = _block.GetExpression(i);
+                throw Error.ArgumentOutOfRange(nameof(index));
+            }
+
+            int n = _block.ExpressionCount;
+            Debug.Assert(n > 0);
+            if (index + n > array.Length)
+            {
+                throw new ArgumentException();
+            }
+
+            array[index++] = _arg0;
+            for (int i = 1; i < n; i++)
+            {
+                array[index++] = _block.GetExpression(i);
             }
         }
 
@@ -647,8 +852,8 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
 
             return new Block2(arg0, arg1);
         }
@@ -662,9 +867,9 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1, Expression arg2)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
-            RequiresCanRead(arg2, nameof(arg2));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg2, nameof(arg2));
             return new Block3(arg0, arg1, arg2);
         }
 
@@ -678,10 +883,10 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1, Expression arg2, Expression arg3)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
-            RequiresCanRead(arg2, nameof(arg2));
-            RequiresCanRead(arg3, nameof(arg3));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg2, nameof(arg2));
+            ExpressionUtils.RequiresCanRead(arg3, nameof(arg3));
             return new Block4(arg0, arg1, arg2, arg3);
         }
 
@@ -696,11 +901,11 @@ namespace System.Linq.Expressions
         /// <returns>The created <see cref="BlockExpression"/>.</returns>
         public static BlockExpression Block(Expression arg0, Expression arg1, Expression arg2, Expression arg3, Expression arg4)
         {
-            RequiresCanRead(arg0, nameof(arg0));
-            RequiresCanRead(arg1, nameof(arg1));
-            RequiresCanRead(arg2, nameof(arg2));
-            RequiresCanRead(arg3, nameof(arg3));
-            RequiresCanRead(arg4, nameof(arg4));
+            ExpressionUtils.RequiresCanRead(arg0, nameof(arg0));
+            ExpressionUtils.RequiresCanRead(arg1, nameof(arg1));
+            ExpressionUtils.RequiresCanRead(arg2, nameof(arg2));
+            ExpressionUtils.RequiresCanRead(arg3, nameof(arg3));
+            ExpressionUtils.RequiresCanRead(arg4, nameof(arg4));
 
             return new Block5(arg0, arg1, arg2, arg3, arg4);
         }

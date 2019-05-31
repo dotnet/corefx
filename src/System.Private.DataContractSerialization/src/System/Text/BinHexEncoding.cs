@@ -9,7 +9,7 @@ namespace System.Text
 {
     internal class BinHexEncoding : Encoding
     {
-        private static byte[] s_char2val = new byte[128]
+        private static readonly byte[] s_char2val = new byte[128]
         {
             /*    0-15 */
                               0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -29,14 +29,14 @@ namespace System.Text
                               0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
         };
 
-        private static string s_val2char = "0123456789ABCDEF";
+        private const string Val2Char = "0123456789ABCDEF";
 
         public override int GetMaxByteCount(int charCount)
         {
             if (charCount < 0)
                 throw new ArgumentOutOfRangeException(nameof(charCount), SR.ValueMustBeNonNegative);
             if ((charCount % 2) != 0)
-                throw new FormatException(SR.Format(SR.XmlInvalidBinHexLength, charCount.ToString(NumberFormatInfo.CurrentInfo)));
+                throw new FormatException(SR.Format(SR.XmlInvalidBinHexLength, charCount.ToString()));
             return charCount / 2;
         }
 
@@ -45,7 +45,7 @@ namespace System.Text
             return GetMaxByteCount(count);
         }
 
-        unsafe public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
+        public unsafe override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
         {
             if (chars == null)
                 throw new ArgumentNullException(nameof(chars));
@@ -68,7 +68,7 @@ namespace System.Text
                 throw new ArgumentException(SR.XmlArrayTooSmall, nameof(bytes));
             if (charCount > 0)
             {
-                fixed (byte* _char2val = s_char2val)
+                fixed (byte* _char2val = &s_char2val[0])
                 {
                     fixed (byte* _bytes = &bytes[byteIndex])
                     {
@@ -115,7 +115,7 @@ namespace System.Text
             return GetMaxCharCount(count);
         }
 
-        unsafe public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
+        public unsafe override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
         {
             if (bytes == null)
                 throw new ArgumentNullException(nameof(bytes));
@@ -138,7 +138,7 @@ namespace System.Text
                 throw new ArgumentException(SR.XmlArrayTooSmall, nameof(chars));
             if (byteCount > 0)
             {
-                fixed (char* _val2char = s_val2char)
+                fixed (char* _val2char = Val2Char)
                 {
                     fixed (byte* _bytes = &bytes[byteIndex])
                     {

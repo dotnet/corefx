@@ -18,42 +18,12 @@ namespace System.Xml.Serialization
     using System.Diagnostics;
 #endif
 
-    /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter"]/*' />
-    ///<internalonly/>
-    /// <devdoc>
-    ///    <para>[To be supplied.]</para>
-    /// </devdoc>
     public class XmlSchemaImporter : SchemaImporter
     {
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlSchemaImporter(XmlSchemas schemas) : base(schemas, CodeGenerationOptions.GenerateProperties, new ImportContext()) { }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlSchemaImporter(XmlSchemas schemas, CodeIdentifiers typeIdentifiers) : base(schemas, CodeGenerationOptions.GenerateProperties, new ImportContext(typeIdentifiers, false)) { }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public XmlSchemaImporter(XmlSchemas schemas, CodeIdentifiers typeIdentifiers, CodeGenerationOptions options) : base(schemas, options, new ImportContext(typeIdentifiers, false)) { }
-
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.XmlSchemaImporter3"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
-        public XmlSchemaImporter(XmlSchemas schemas, CodeGenerationOptions options, ImportContext context) : base(schemas, options, context) { }
-
-
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportDerivedTypeMapping"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportDerivedTypeMapping(XmlQualifiedName name, Type baseType)
         {
             return ImportDerivedTypeMapping(name, baseType, false);
@@ -73,10 +43,6 @@ namespace System.Xml.Serialization
             return mapping;
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportDerivedTypeMapping1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportDerivedTypeMapping(XmlQualifiedName name, Type baseType, bool baseTypeCanBeIndirect)
         {
             ElementAccessor element = ImportElement(name, typeof(TypeMapping), baseType);
@@ -102,29 +68,16 @@ namespace System.Xml.Serialization
             return new XmlTypeMapping(Scope, element);
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportSchemaType"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportSchemaType(XmlQualifiedName typeName)
         {
             return ImportSchemaType(typeName, null, false);
         }
 
-
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportSchemaType1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportSchemaType(XmlQualifiedName typeName, Type baseType)
         {
             return ImportSchemaType(typeName, baseType, false);
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportSchemaType2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportSchemaType(XmlQualifiedName typeName, Type baseType, bool baseTypeCanBeIndirect)
         {
             TypeMapping typeMapping = ImportType(typeName, typeof(TypeMapping), baseType, TypeFlags.CanBeElementValue, true);
@@ -162,25 +115,16 @@ namespace System.Xml.Serialization
             return new XmlTypeMapping(Scope, accessor);
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportTypeMapping"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlTypeMapping ImportTypeMapping(XmlQualifiedName name)
         {
             return ImportDerivedTypeMapping(name, null);
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportMembersMapping"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlMembersMapping ImportMembersMapping(XmlQualifiedName name)
         {
             return new XmlMembersMapping(Scope, ImportElement(name, typeof(MembersMapping), null), XmlMappingAccess.Read | XmlMappingAccess.Write);
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportAnyType"]/*' />
         public XmlMembersMapping ImportAnyType(XmlQualifiedName typeName, string elementName)
         {
             TypeMapping typeMapping = ImportType(typeName, typeof(MembersMapping), null, TypeFlags.CanBeElementValue, true);
@@ -220,19 +164,11 @@ namespace System.Xml.Serialization
             return members;
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportMembersMapping1"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlMembersMapping ImportMembersMapping(XmlQualifiedName[] names)
         {
             return ImportMembersMapping(names, null, false);
         }
 
-        /// <include file='doc\XmlSchemaImporter.uex' path='docs/doc[@for="XmlSchemaImporter.ImportMembersMapping2"]/*' />
-        /// <devdoc>
-        ///    <para>[To be supplied.]</para>
-        /// </devdoc>
         public XmlMembersMapping ImportMembersMapping(XmlQualifiedName[] names, Type baseType, bool baseTypeCanBeIndirect)
         {
             CodeIdentifiers memberScope = new CodeIdentifiers();
@@ -1166,7 +1102,7 @@ namespace System.Xml.Serialization
             accessor.Mapping = mapping;
 
             MemberMapping member = new MemberMapping();
-            member.Elements = new ElementAccessor[0];
+            member.Elements = Array.Empty<ElementAccessor>();
             member.Text = accessor;
             if (isMixed)
             {
@@ -1499,7 +1435,7 @@ namespace System.Xml.Serialization
             AttributeAccessor accessor = ImportAttribute(attribute, identifier, ns, attribute);
             if (accessor == null) return;
             MemberMapping member = new MemberMapping();
-            member.Elements = new ElementAccessor[0];
+            member.Elements = Array.Empty<ElementAccessor>();
             member.Attribute = accessor;
             member.Name = CodeIdentifier.MakeValid(Accessor.UnescapeName(accessor.Name));
             member.Name = membersScope.AddUnique(member.Name, member);
@@ -1529,7 +1465,7 @@ namespace System.Xml.Serialization
             accessor.Mapping = mapping;
 
             MemberMapping member = new MemberMapping();
-            member.Elements = new ElementAccessor[0];
+            member.Elements = Array.Empty<ElementAccessor>();
             member.Attribute = accessor;
             member.Name = membersScope.MakeRightCase("AnyAttr");
             member.Name = membersScope.AddUnique(member.Name, member);
@@ -1579,12 +1515,12 @@ namespace System.Xml.Serialization
             string xmlnsMemberName;
             if (!KeepXmlnsDeclarations(type, out xmlnsMemberName))
                 return;
-            TypeDesc xmlnsTypeDesc = Scope.GetTypeDesc(typeof(XmlSerializerNamespaces));
+            TypeDesc xmlnsTypeDesc = Scope.GetTypeDesc(typeof(System.Xml.Serialization.XmlSerializerNamespaces));
             StructMapping xmlnsMapping = new StructMapping();
 
             xmlnsMapping.TypeDesc = xmlnsTypeDesc;
             xmlnsMapping.TypeName = xmlnsMapping.TypeDesc.Name;
-            xmlnsMapping.Members = new MemberMapping[0];
+            xmlnsMapping.Members = Array.Empty<MemberMapping>();
             xmlnsMapping.IncludeInSchema = false;
             xmlnsMapping.ReferencedByTopLevelElement = true;
 
@@ -1820,7 +1756,7 @@ namespace System.Xml.Serialization
             {
                 ElementAccessor e1 = (ElementAccessor)o1;
                 ElementAccessor e2 = (ElementAccessor)o2;
-                return String.Compare(e1.ToString(string.Empty), e2.ToString(string.Empty), StringComparison.Ordinal);
+                return string.Compare(e1.ToString(string.Empty), e2.ToString(string.Empty), StringComparison.Ordinal);
             }
         }
 
@@ -1956,11 +1892,11 @@ namespace System.Xml.Serialization
             {
                 if (name.Name == Soap.Array && name.Namespace == Soap.Encoding)
                 {
-                    throw new InvalidOperationException(SR.Format(SR.XmlInvalidEncoding, name.ToString()));
+                    throw new InvalidOperationException(SR.Format(SR.XmlInvalidEncoding, name));
                 }
                 else
                 {
-                    throw new InvalidOperationException(SR.Format(SR.XmlMissingDataType, name.ToString()));
+                    throw new InvalidOperationException(SR.Format(SR.XmlMissingDataType, name));
                 }
             }
         }
@@ -1983,7 +1919,7 @@ namespace System.Xml.Serialization
         {
             XmlSchemaElement element = (XmlSchemaElement)Schemas.Find(name, typeof(XmlSchemaElement));
             if (element == null)
-                throw new InvalidOperationException(SR.Format(SR.XmlMissingElement, name.ToString()));
+                throw new InvalidOperationException(SR.Format(SR.XmlMissingElement, name));
             return element;
         }
 

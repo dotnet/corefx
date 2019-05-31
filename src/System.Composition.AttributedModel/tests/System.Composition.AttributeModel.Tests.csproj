@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <ProjectGuid>{853BB14F-8A5B-42B4-A053-21DE1AEBB335}</ProjectGuid>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release</Configurations>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="SharingBoundaryAttributeTests.cs" />
+    <Compile Include="SharedAttributeTests.cs" />
+    <Compile Include="PartNotDiscoverableAttributeTests.cs" />
+    <Compile Include="PartMetadataAttributeTests.cs" />
+    <Compile Include="MetadataAttributeAttributeTests.cs" />
+    <Compile Include="ImportMetadataConstraintAttributeTests.cs" />
+    <Compile Include="ImportManyAttributeTests.cs" />
+    <Compile Include="ImportingConstructorAttributeTests.cs" />
+    <Compile Include="ImportAttributeTests.cs" />
+    <Compile Include="ExportMetadataAttributeTests.cs" />
+    <Compile Include="ExportAttributeTests.cs" />
+  </ItemGroup>
+</Project>

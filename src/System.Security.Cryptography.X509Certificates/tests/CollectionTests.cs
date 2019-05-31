@@ -228,7 +228,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Throws<ArgumentNullException>(() => ilist.Remove(null));
             }
 
-            Assert.Throws<ArgumentNullException>(() => new X509CertificateCollection.X509CertificateEnumerator(null));
+            AssertExtensions.Throws<ArgumentNullException, NullReferenceException>(
+                () => new X509CertificateCollection.X509CertificateEnumerator(null));
         }
 
         [Fact]
@@ -458,7 +459,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Fact]
         // On Desktop, list is untyped so it allows arbitrary types in it
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void X509CertificateCollectionAsIListBogusEntry()
         {
             using (X509Certificate2 c = new X509Certificate2())
@@ -468,10 +468,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 string bogus = "Bogus";
 
-                Assert.Throws<ArgumentException>(() => il[0] = bogus);
-                Assert.Throws<ArgumentException>(() => il.Add(bogus));
-                Assert.Throws<ArgumentException>(() => il.Remove(bogus));
-                Assert.Throws<ArgumentException>(() => il.Insert(0, bogus));
+                AssertExtensions.Throws<ArgumentException>("value", () => il[0] = bogus);
+                AssertExtensions.Throws<ArgumentException>("value", () => il.Add(bogus));
+                AssertExtensions.Throws<ArgumentException>("value", () => il.Remove(bogus));
+                AssertExtensions.Throws<ArgumentException>("value", () => il.Insert(0, bogus));
             }
         }
 
@@ -511,7 +511,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // StoreSavedAsSerializedCerData not supported on Unix
         public static void ImportStoreSavedAsSerializedCerData_Windows()
         {
             using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
@@ -535,7 +535,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // StoreSavedAsSerializedCerData not supported on Unix
         public static void ImportStoreSavedAsSerializedCerData_Unix()
         {
             X509Certificate2Collection cc2 = new X509Certificate2Collection();
@@ -545,7 +545,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [Theory]
         [MemberData(nameof(StorageFlags))]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // StoreSavedAsSerializedStoreData not supported on Unix
         public static void ImportStoreSavedAsSerializedStoreData_Windows(X509KeyStorageFlags keyStorageFlags)
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
@@ -570,7 +570,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // StoreSavedAsSerializedStoreData not supported on Unix
         public static void ImportStoreSavedAsSerializedStoreData_Unix()
         {
             X509Certificate2Collection cc2 = new X509Certificate2Collection();
@@ -653,24 +653,22 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         {
             TestExportSingleCert(X509ContentType.Cert);
         }
-
-#if netcoreapp11
+        
         [Fact]
         public static void ExportCert_SecureString()
         {
             TestExportSingleCert_SecureStringPassword(X509ContentType.Cert);
         }
-#endif
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // SerializedCert not supported on Unix
         public static void ExportSerializedCert_Windows()
         {
             TestExportSingleCert(X509ContentType.SerializedCert);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // SerializedCert not supported on Unix
         public static void ExportSerializedCert_Unix()
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
@@ -682,14 +680,14 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // SerializedStore not supported on Unix
         public static void ExportSerializedStore_Windows()
         {
             TestExportStore(X509ContentType.SerializedStore);
         }
 
         [Fact]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // SerializedStore not supported on Unix
         public static void ExportSerializedStore_Unix()
         {
             using (var msCer = new X509Certificate2(TestData.MsCertificate))
@@ -735,6 +733,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [ActiveIssue(16705, TestPlatforms.OSX)]
         public static void ExportUnrelatedPfx()
         {
             // Export multiple certificates which are not part of any kind of certificate chain.
@@ -800,7 +799,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
-        [ActiveIssue(2743, TestPlatforms.AnyUnix)]
+        [ActiveIssue(2743, TestPlatforms.AnyUnix & ~TestPlatforms.OSX)]
         public static void ExportMultiplePrivateKeys()
         {
             var collection = new X509Certificate2Collection();
@@ -817,6 +816,10 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Export, re-import.
                 byte[] exported;
 
+                bool expectSuccess =
+                    RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ||
+                    RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
                 try
                 {
                     exported = collection.Export(X509ContentType.Pkcs12);
@@ -829,7 +832,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     //
                     // If Windows gets here, or any exception other than PlatformNotSupportedException is raised,
                     // let that fail the test.
-                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    if (expectSuccess)
                     {
                         throw;
                     }
@@ -839,7 +842,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
                 // As the other half of issue 2743, if we make it this far we better be Windows (or remove the catch
                 // above)
-                Assert.True(RuntimeInformation.IsOSPlatform(OSPlatform.Windows), "RuntimeInformation.IsOSPlatform(OSPlatform.Windows)");
+                Assert.True(expectSuccess, "Test is expected to fail on this platform");
 
                 using (ImportedCollection ic = Cert.Import(exported))
                 {
@@ -856,6 +859,33 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 foreach (X509Certificate2 cert in collection)
                 {
                     cert.Dispose();
+                }
+            }
+        }
+
+        [Fact]
+        [ActiveIssue(26397, TestPlatforms.OSX)]
+        public static void CanAddMultipleCertsWithSinglePrivateKey()
+        {
+            using (var oneWithKey = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, X509KeyStorageFlags.Exportable | Cert.EphemeralIfPossible))
+            using (var twoWithoutKey = new X509Certificate2(TestData.ComplexNameInfoCert))
+            {
+                Assert.True(oneWithKey.HasPrivateKey);
+
+                var col = new X509Certificate2Collection
+                {
+                    oneWithKey,
+                    twoWithoutKey,
+                };
+
+                Assert.Equal(1, col.Cast<X509Certificate2>().Count(x => x.HasPrivateKey));
+                Assert.Equal(2, col.Count);
+
+                byte[] buffer = col.Export(X509ContentType.Pfx);
+
+                using (ImportedCollection newCollection = Cert.Import(buffer))
+                {
+                    Assert.Equal(2, newCollection.Collection.Count);
                 }
             }
         }
@@ -907,6 +937,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         }
 
         [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Arrays with non-zero lower bounds are not supported.")]
         public static void X509ExtensionCollection_CopyTo_NonZeroLowerBound_ThrowsIndexOutOfRangeException()
         {
             using (X509Certificate2 cert = new X509Certificate2(TestData.PfxData, TestData.PfxDataPassword, Cert.EphemeralIfPossible))
@@ -948,7 +979,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 cc.Remove(c2);
                 Assert.Equal(0, cc.Count);
 
-                Assert.Throws<ArgumentException>(() => cc.Remove(c2));
+                AssertExtensions.Throws<ArgumentException>(null, () => cc.Remove(c2));
 
                 IList il = new X509CertificateCollection(new X509Certificate[] { c1, c2 });
 
@@ -959,7 +990,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 il.Remove(c2);
                 Assert.Equal(0, il.Count);
 
-                Assert.Throws<ArgumentException>(() => il.Remove(c2));
+                AssertExtensions.Throws<ArgumentException>(null, () => il.Remove(c2));
             }
         }
 
@@ -1040,7 +1071,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 // Add c1Clone back
                 // End state: { c1, c2 } => { c2, c1Clone }
                 cc = new X509Certificate2Collection(array);
-                Assert.Throws<ArgumentException>(() => cc.RemoveRange(new X509Certificate2[] { c1Clone, c1, c2 }));
+                AssertExtensions.Throws<ArgumentException>(null, () => cc.RemoveRange(new X509Certificate2[] { c1Clone, c1, c2 }));
                 Assert.Equal(2, cc.Count);
                 Assert.Same(c2, cc[0]);
                 Assert.Same(c1Clone, cc[1]);
@@ -1101,7 +1132,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                     c1,
                     c2,
                 };
-                Assert.Throws<ArgumentException>(() => cc.RemoveRange(collection));
+                AssertExtensions.Throws<ArgumentException>(null, () => cc.RemoveRange(collection));
                 Assert.Equal(2, cc.Count);
                 Assert.Same(c2, cc[0]);
                 Assert.Same(c1Clone, cc[1]);
@@ -1400,8 +1431,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 Assert.Null(byFriendlyName);
             }
         }
-
-#if netcoreapp11
+        
         private static void TestExportSingleCert_SecureStringPassword(X509ContentType ct)
         {
             using (var pfxCer = new X509Certificate2(TestData.PfxData, TestData.CreatePfxDataPasswordSecureString(), Cert.EphemeralIfPossible))
@@ -1409,7 +1439,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
                 TestExportSingleCert(ct, pfxCer);
             }
         }
-#endif
 
         private static void TestExportSingleCert(X509ContentType ct)
         {
@@ -1480,17 +1509,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        public static IEnumerable<object[]> StorageFlags
-        {
-            get
-            {
-                yield return new object[] { X509KeyStorageFlags.DefaultKeySet };
-
-#if netcoreapp11
-                yield return new object[] { X509KeyStorageFlags.EphemeralKeySet };
-#endif
-            }
-        }
+        public static IEnumerable<object[]> StorageFlags => CollectionImportTests.StorageFlags;
 
         private static X509Certificate2[] ToArray(this X509Certificate2Collection col)
         {

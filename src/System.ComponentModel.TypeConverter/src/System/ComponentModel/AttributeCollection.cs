@@ -4,20 +4,22 @@
 
 using System.Reflection;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Security", "CA2112:SecuredTypesShouldNotExposeFields", Scope = "type", Target = "System.ComponentModel.AttributeCollection")]
+[assembly: SuppressMessage("Microsoft.Security", "CA2112:SecuredTypesShouldNotExposeFields", Scope = "type", Target = "System.ComponentModel.AttributeCollection")]
 
 namespace System.ComponentModel
 {
     /// <summary>
-    ///     Represents a collection of attributes.
+    /// Represents a collection of attributes.
     /// </summary>
     public class AttributeCollection : ICollection, IEnumerable
     {
         /// <summary>
-        ///     An empty AttributeCollection that can used instead of creating a new one.
+        /// An empty AttributeCollection that can used instead of creating a new one.
         /// </summary>
         public static readonly AttributeCollection Empty = new AttributeCollection(null);
+
         private static Hashtable s_defaultAttributes;
 
         private readonly Attribute[] _attributes;
@@ -30,14 +32,14 @@ namespace System.ComponentModel
             public int index;
         }
 
-        private const int FOUND_TYPES_LIMIT = 5;
+        private const int FoundTypesLimit = 5;
 
         private AttributeEntry[] _foundAttributeTypes;
 
-        private int _index = 0;
+        private int _index;
 
         /// <summary>
-        ///     Creates a new AttributeCollection.
+        /// Creates a new AttributeCollection.
         /// </summary>
         public AttributeCollection(params Attribute[] attributes)
         {
@@ -52,18 +54,15 @@ namespace System.ComponentModel
             }
         }
 
-        protected AttributeCollection()
+        protected AttributeCollection() : this(Array.Empty<Attribute>())
         {
         }
 
         /// <summary>
-        ///     Creates a new AttributeCollection from an existing AttributeCollection
+        /// Creates a new AttributeCollection from an existing AttributeCollection
         /// </summary>
         public static AttributeCollection FromExisting(AttributeCollection existing, params Attribute[] newAttributes)
         {
-            // VSWhidbey #75418
-            // This method should be a constructor, but making it one introduces a breaking change.
-            // 
             if (existing == null)
             {
                 throw new ArgumentNullException(nameof(existing));
@@ -86,7 +85,7 @@ namespace System.ComponentModel
                 }
 
                 // We must see if this attribute is already in the existing
-                // array.  If it is, we replace it.
+                // array. If it is, we replace it.
                 bool match = false;
                 for (int existingIdx = 0; existingIdx < existing.Count; existingIdx++)
                 {
@@ -105,9 +104,7 @@ namespace System.ComponentModel
             }
 
             // Now, if we collapsed some attributes, create a new array.
-            //
-
-            Attribute[] attributes = null;
+            Attribute[] attributes;
             if (actualCount < newArray.Length)
             {
                 attributes = new Attribute[actualCount];
@@ -122,41 +119,23 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Gets the attributes collection.
+        /// Gets the attributes collection.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Matches constructor input type")]
-        protected virtual Attribute[] Attributes
-        {
-            get
-            {
-                return _attributes;
-            }
-        }
+        [SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Matches constructor input type")]
+        protected virtual Attribute[] Attributes => _attributes;
 
         /// <summary>
-        ///     Gets the number of attributes.
+        /// Gets the number of attributes.
         /// </summary>
-        public int Count
-        {
-            get
-            {
-                return Attributes.Length;
-            }
-        }
+        public int Count => Attributes.Length;
 
         /// <summary>
-        ///     Gets the attribute with the specified index number.
+        /// Gets the attribute with the specified index number.
         /// </summary>
-        public virtual Attribute this[int index]
-        {
-            get
-            {
-                return Attributes[index];
-            }
-        }
+        public virtual Attribute this[int index] => Attributes[index];
 
         /// <summary>
-        ///    Gets the attribute with the specified type.
+        /// Gets the attribute with the specified type.
         /// </summary>
         public virtual Attribute this[Type attributeType]
         {
@@ -164,21 +143,20 @@ namespace System.ComponentModel
             {
                 lock (s_internalSyncObject)
                 {
-                    // 2 passes here for perf.  Really!  first pass, we just 
+                    // 2 passes here for perf. Really!  first pass, we just
                     // check equality, and if we don't find it, then we
-                    // do the IsAssignableFrom dance.   Turns out that's
+                    // do the IsAssignableFrom dance. Turns out that's
                     // a relatively expensive call and we try to avoid it
                     // since we rarely encounter derived attribute types
-                    // and this list is usually short. 
-                    //
+                    // and this list is usually short.
                     if (_foundAttributeTypes == null)
                     {
-                        _foundAttributeTypes = new AttributeEntry[FOUND_TYPES_LIMIT];
+                        _foundAttributeTypes = new AttributeEntry[FoundTypesLimit];
                     }
 
                     int ind = 0;
 
-                    for (; ind < FOUND_TYPES_LIMIT; ind++)
+                    for (; ind < FoundTypesLimit; ind++)
                     {
                         if (_foundAttributeTypes[ind].type == attributeType)
                         {
@@ -198,7 +176,7 @@ namespace System.ComponentModel
 
                     ind = _index++;
 
-                    if (_index >= FOUND_TYPES_LIMIT)
+                    if (_index >= FoundTypesLimit)
                     {
                         _index = 0;
                     }
@@ -206,8 +184,6 @@ namespace System.ComponentModel
                     _foundAttributeTypes[ind].type = attributeType;
 
                     int count = Attributes.Length;
-
-
                     for (int i = 0; i < count; i++)
                     {
                         Attribute attribute = Attributes[i];
@@ -219,12 +195,11 @@ namespace System.ComponentModel
                         }
                     }
 
-                    // now check the hierarchies.
+                    // Now check the hierarchies.
                     for (int i = 0; i < count; i++)
                     {
                         Attribute attribute = Attributes[i];
-                        Type aType = attribute.GetType();
-                        if (attributeType.GetTypeInfo().IsAssignableFrom(aType.GetTypeInfo()))
+                        if (attributeType.IsInstanceOfType(attribute))
                         {
                             _foundAttributeTypes[ind].index = i;
                             return attribute;
@@ -238,18 +213,17 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Determines if this collection of attributes has the specified attribute.
+        /// Determines if this collection of attributes has the specified attribute.
         /// </summary>
         public bool Contains(Attribute attribute)
         {
             Attribute attr = this[attribute.GetType()];
-
             return attr != null && attr.Equals(attribute);
         }
 
         /// <summary>
-        ///     Determines if this attribute collection contains the all
-        ///     the specified attributes in the attribute array.
+        /// Determines if this attribute collection contains the all
+        /// the specified attributes in the attribute array.
         /// </summary>
         public bool Contains(Attribute[] attributes)
         {
@@ -270,8 +244,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Returns the default value for an attribute.  This uses the following heuristic:
-        ///     1.  It looks for a public static field named "Default".
+        /// Returns the default value for an attribute. This uses the following heuristic:
+        /// 1. It looks for a public static field named "Default".
         /// </summary>
         protected Attribute GetDefaultAttribute(Type attributeType)
         {
@@ -292,7 +266,7 @@ namespace System.ComponentModel
 
                 // Not in the table, so do the legwork to discover the default value.
                 Type reflect = TypeDescriptor.GetReflectionType(attributeType);
-                FieldInfo field = reflect.GetTypeInfo().GetField("Default", BindingFlags.Public | BindingFlags.Static | BindingFlags.GetField);
+                FieldInfo field = reflect.GetField("Default", BindingFlags.Public | BindingFlags.Static | BindingFlags.GetField);
 
                 if (field != null && field.IsStatic)
                 {
@@ -300,13 +274,13 @@ namespace System.ComponentModel
                 }
                 else
                 {
-                    ConstructorInfo ci = reflect.GetTypeInfo().UnderlyingSystemType.GetTypeInfo().GetConstructor(Array.Empty<Type>());
+                    ConstructorInfo ci = reflect.UnderlyingSystemType.GetConstructor(Array.Empty<Type>());
                     if (ci != null)
                     {
                         attr = (Attribute)ci.Invoke(Array.Empty<object>());
 
                         // If we successfully created, verify that it is the
-                        // default.  Attributes don't have to abide by this rule.
+                        // default. Attributes don't have to abide by this rule.
                         if (!attr.IsDefaultAttribute())
                         {
                             attr = null;
@@ -320,16 +294,13 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Gets an enumerator for this collection.
+        /// Gets an enumerator for this collection.
         /// </summary>
-        public IEnumerator GetEnumerator()
-        {
-            return Attributes.GetEnumerator();
-        }
+        public IEnumerator GetEnumerator() => Attributes.GetEnumerator();
 
         /// <summary>
-        ///     Determines if a specified attribute is the same as an attribute
-        ///     in the collection.
+        /// Determines if a specified attribute is the same as an attribute
+        /// in the collection.
         /// </summary>
         public bool Matches(Attribute attribute)
         {
@@ -344,8 +315,8 @@ namespace System.ComponentModel
         }
 
         /// <summary>
-        ///     Determines if the attributes in the specified array are
-        ///     the same as the attributes in the collection.
+        /// Determines if the attributes in the specified array are
+        /// the same as the attributes in the collection.
         /// </summary>
         public bool Matches(Attribute[] attributes)
         {
@@ -360,43 +331,17 @@ namespace System.ComponentModel
             return true;
         }
 
-        /// <internalonly/>
-        bool ICollection.IsSynchronized
-        {
-            get
-            {
-                return false;
-            }
-        }
+        bool ICollection.IsSynchronized => false;
 
-        /// <internalonly/>
-        object ICollection.SyncRoot
-        {
-            get
-            {
-                return null;
-            }
-        }
+        object ICollection.SyncRoot => null;
 
-        int ICollection.Count 
-        { 
-            get
-            {
-                return Count;
-            }
-        }
+        int ICollection.Count => Count;
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         /// <summary>
-        ///     Copies this collection to an array.
+        /// Copies this collection to an array.
         /// </summary>
-        public void CopyTo(Array array, int index)
-        {
-            Array.Copy(Attributes, 0, array, index, Attributes.Length);
-        }
+        public void CopyTo(Array array, int index) => Array.Copy(Attributes, 0, array, index, Attributes.Length);
     }
 }

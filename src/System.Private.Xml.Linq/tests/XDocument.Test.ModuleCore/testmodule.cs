@@ -59,7 +59,7 @@ namespace Microsoft.Test.ModuleCore
             }
             catch (Exception e)
             {
-                //Don't completley block construction, otherwise it won't be able to be loaded from COM
+                //Don't completely block construction, otherwise it won't be able to be loaded from COM
                 TestLog.HandleException(e);
             }
         }
@@ -181,7 +181,7 @@ namespace Microsoft.Test.ModuleCore
                 {
                     //Add the Variation Scope, if no scope was specified
                     if (xpath[0] != '/')
-                        xpath = String.Format(varfilter, xpath);
+                        xpath = string.Format(varfilter, xpath);
                 }
             }
 

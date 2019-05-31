@@ -2,25 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Diagnostics.Contracts;
-using System.Security.Claims;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace System.Security.Principal
 {
-    [System.Runtime.InteropServices.ComVisible(true)]
-    [Serializable]
     public class GenericIdentity : ClaimsIdentity
     {
-        private string m_name;
-        private string m_type;
+        private readonly string m_name;
+        private readonly string m_type;
 
         public GenericIdentity(string name)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
-            Contract.EndContractBlock();
 
             m_name = name;
             m_type = "";
@@ -34,7 +29,6 @@ namespace System.Security.Principal
                 throw new ArgumentNullException(nameof(name));
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
-            Contract.EndContractBlock();
 
             m_name = name;
             m_type = type;
@@ -70,7 +64,6 @@ namespace System.Security.Principal
             }
         }
 
-
         public override string Name
         {
             get
@@ -94,7 +87,6 @@ namespace System.Security.Principal
                 return !m_name.Equals("");
             }
         }
-
 
         private void AddNameClaim()
         {

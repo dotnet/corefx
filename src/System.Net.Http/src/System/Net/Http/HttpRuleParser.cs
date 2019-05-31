@@ -12,27 +12,7 @@ namespace System.Net.Http
     internal static class HttpRuleParser
     {
         private static readonly bool[] s_tokenChars = CreateTokenChars();
-        private const int maxNestedCount = 5;
-        private static readonly string[] s_dateFormats = new string[] {
-            // "r", // RFC 1123, required output format but too strict for input
-            "ddd, d MMM yyyy H:m:s 'GMT'", // RFC 1123 (r, except it allows both 1 and 01 for date and time)
-            "ddd, d MMM yyyy H:m:s", // RFC 1123, no zone - assume GMT
-            "d MMM yyyy H:m:s 'GMT'", // RFC 1123, no day-of-week
-            "d MMM yyyy H:m:s", // RFC 1123, no day-of-week, no zone
-            "ddd, d MMM yy H:m:s 'GMT'", // RFC 1123, short year
-            "ddd, d MMM yy H:m:s", // RFC 1123, short year, no zone
-            "d MMM yy H:m:s 'GMT'", // RFC 1123, no day-of-week, short year
-            "d MMM yy H:m:s", // RFC 1123, no day-of-week, short year, no zone
-
-            "dddd, d'-'MMM'-'yy H:m:s 'GMT'", // RFC 850
-            "dddd, d'-'MMM'-'yy H:m:s", // RFC 850 no zone
-            "ddd MMM d H:m:s yyyy", // ANSI C's asctime() format
-
-            "ddd, d MMM yyyy H:m:s zzz", // RFC 5322
-            "ddd, d MMM yyyy H:m:s", // RFC 5322 no zone
-            "d MMM yyyy H:m:s zzz", // RFC 5322 no day-of-week
-            "d MMM yyyy H:m:s", // RFC 5322 no day-of-week, no zone
-        };
+        private const int MaxNestedCount = 5;
 
         internal const char CR = (char)13;
         internal const char LF = (char)10;
@@ -40,7 +20,7 @@ namespace System.Net.Http
         internal const int MaxInt32Digits = 10;
 
         // iso-8859-1, Western European (ISO)
-#if PHONE || NETNative
+#if uap
         internal static readonly Encoding DefaultHttpEncoding = Encoding.GetEncoding("iso-8859-1");
 #else
         internal static readonly Encoding DefaultHttpEncoding = Encoding.GetEncoding(28591);
@@ -95,7 +75,6 @@ namespace System.Net.Http
         internal static int GetTokenLength(string input, int startIndex)
         {
             Debug.Assert(input != null);
-            Contract.Ensures((Contract.Result<int>() >= 0) && (Contract.Result<int>() <= (input.Length - startIndex)));
 
             if (startIndex >= input.Length)
             {
@@ -115,10 +94,44 @@ namespace System.Net.Http
             return input.Length - startIndex;
         }
 
+        [Pure]
+        internal static bool IsToken(string input)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (!IsTokenChar(input[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        [Pure]
+        internal static bool IsToken(ReadOnlySpan<byte> input)
+        {
+            for (int i = 0; i < input.Length; i++)
+            {
+                if (!IsTokenChar((char) input[i]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        internal static string GetTokenString(ReadOnlySpan<byte> input)
+        {
+            Debug.Assert(IsToken(input));
+
+            return Encoding.ASCII.GetString(input);
+        }
+
         internal static int GetWhitespaceLength(string input, int startIndex)
         {
             Debug.Assert(input != null);
-            Contract.Ensures((Contract.Result<int>() >= 0) && (Contract.Result<int>() <= (input.Length - startIndex)));
 
             if (startIndex >= input.Length)
             {
@@ -201,7 +214,6 @@ namespace System.Net.Http
         {
             Debug.Assert(input != null);
             Debug.Assert((startIndex >= 0) && (startIndex < input.Length));
-            Contract.Ensures((Contract.Result<int>() >= 0) && (Contract.Result<int>() <= (input.Length - startIndex)));
 
             int current = startIndex;
             char c;
@@ -246,7 +258,6 @@ namespace System.Net.Http
         {
             Debug.Assert(input != null);
             Debug.Assert(startIndex >= 0);
-            Contract.Ensures((Contract.Result<int>() >= 0) && (Contract.Result<int>() <= (input.Length - startIndex)));
 
             host = null;
             if (startIndex >= input.Length)
@@ -295,14 +306,12 @@ namespace System.Net.Http
 
         internal static HttpParseResult GetCommentLength(string input, int startIndex, out int length)
         {
-            int nestedCount = 0;
-            return GetExpressionLength(input, startIndex, '(', ')', true, ref nestedCount, out length);
+            return GetExpressionLength(input, startIndex, '(', ')', true, 1, out length);
         }
 
         internal static HttpParseResult GetQuotedStringLength(string input, int startIndex, out int length)
         {
-            int nestedCount = 0;
-            return GetExpressionLength(input, startIndex, '"', '"', false, ref nestedCount, out length);
+            return GetExpressionLength(input, startIndex, '"', '"', false, 1, out length);
         }
 
         // quoted-pair = "\" CHAR
@@ -311,8 +320,6 @@ namespace System.Net.Http
         {
             Debug.Assert(input != null);
             Debug.Assert((startIndex >= 0) && (startIndex < input.Length));
-            Contract.Ensures((Contract.ValueAtReturn(out length) >= 0) &&
-                (Contract.ValueAtReturn(out length) <= (input.Length - startIndex)));
 
             length = 0;
 
@@ -333,25 +340,6 @@ namespace System.Net.Http
             return HttpParseResult.Parsed;
         }
 
-        internal static string DateToString(DateTimeOffset dateTime)
-        {
-            // Format according to RFC1123; 'r' uses invariant info (DateTimeFormatInfo.InvariantInfo).
-            return dateTime.ToUniversalTime().ToString("r", CultureInfo.InvariantCulture);
-        }
-
-        internal static bool TryStringToDate(string input, out DateTimeOffset result)
-        {
-            // Try the various date formats in the order listed above. 
-            // We should accept a wide variety of common formats, but only output RFC 1123 style dates.
-            if (DateTimeOffset.TryParseExact(input, s_dateFormats, DateTimeFormatInfo.InvariantInfo,
-                DateTimeStyles.AllowWhiteSpaces | DateTimeStyles.AssumeUniversal, out result))
-            {
-                return true;
-            }
-
-            return false;
-        }
-
         // TEXT = <any OCTET except CTLs, but including LWS>
         // LWS = [CRLF] 1*( SP | HT )
         // CTL = <any US-ASCII control character (octets 0 - 31) and DEL (127)>
@@ -364,12 +352,10 @@ namespace System.Net.Http
         // comments, resulting in a stack overflow exception. In addition having more than 1 nested comment (if any)
         // is unusual.
         private static HttpParseResult GetExpressionLength(string input, int startIndex, char openChar,
-            char closeChar, bool supportsNesting, ref int nestedCount, out int length)
+            char closeChar, bool supportsNesting, int nestedCount, out int length)
         {
             Debug.Assert(input != null);
             Debug.Assert((startIndex >= 0) && (startIndex < input.Length));
-            Contract.Ensures((Contract.Result<HttpParseResult>() != HttpParseResult.Parsed) ||
-                (Contract.ValueAtReturn<int>(out length) > 0));
 
             length = 0;
 
@@ -397,44 +383,39 @@ namespace System.Net.Http
                 // If we support nested expressions and we find an open-char, then parse the nested expressions.
                 if (supportsNesting && (input[current] == openChar))
                 {
-                    nestedCount++;
-                    try
+                    // Check if we exceeded the number of nested calls.
+                    if (nestedCount > MaxNestedCount)
                     {
-                        // Check if we exceeded the number of nested calls.
-                        if (nestedCount > maxNestedCount)
-                        {
+                        return HttpParseResult.InvalidFormat;
+                    }
+
+                    int nestedLength = 0;
+                    HttpParseResult nestedResult = GetExpressionLength(input, current, openChar, closeChar,
+                        supportsNesting, nestedCount + 1, out nestedLength);
+
+                    switch (nestedResult)
+                    {
+                        case HttpParseResult.Parsed:
+                            current += nestedLength; // Add the length of the nested expression and continue.
+                            break;
+
+                        case HttpParseResult.NotParsed:
+                            Debug.Fail("'NotParsed' is unexpected: We started nested expression " +
+                                "parsing, because we found the open-char. So either it's a valid nested " +
+                                "expression or it has invalid format.");
+                            break;
+
+                        case HttpParseResult.InvalidFormat:
+                            // If the nested expression is invalid, we can't continue, so we fail with invalid format.
                             return HttpParseResult.InvalidFormat;
-                        }
 
-                        int nestedLength = 0;
-                        HttpParseResult nestedResult = GetExpressionLength(input, current, openChar, closeChar,
-                            supportsNesting, ref nestedCount, out nestedLength);
-
-                        switch (nestedResult)
-                        {
-                            case HttpParseResult.Parsed:
-                                current += nestedLength; // Add the length of the nested expression and continue.
-                                break;
-
-                            case HttpParseResult.NotParsed:
-                                Debug.Assert(false, "'NotParsed' is unexpected: We started nested expression " +
-                                    "parsing, because we found the open-char. So either it's a valid nested " +
-                                    "expression or it has invalid format.");
-                                break;
-
-                            case HttpParseResult.InvalidFormat:
-                                // If the nested expression is invalid, we can't continue, so we fail with invalid format.
-                                return HttpParseResult.InvalidFormat;
-
-                            default:
-                                Debug.Assert(false, "Unknown enum result: " + nestedResult);
-                                break;
-                        }
+                        default:
+                            Debug.Fail("Unknown enum result: " + nestedResult);
+                            break;
                     }
-                    finally
-                    {
-                        nestedCount--;
-                    }
+
+                    // after nested call we continue with parsing
+                    continue;
                 }
 
                 if (input[current] == closeChar)

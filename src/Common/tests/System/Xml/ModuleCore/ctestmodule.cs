@@ -226,7 +226,7 @@ namespace OLEDB.Test.ModuleCore
                 {
                     //Add the Variation Scope, if no scope was specified
                     if (xpath[0] != '/')
-                        xpath = String.Format(varfilter, xpath);
+                        xpath = string.Format(varfilter, xpath);
                 }
             }
 
@@ -235,9 +235,9 @@ namespace OLEDB.Test.ModuleCore
 
         public CTestCase CurTestCase
         {
-            //Return the current testcase:
+            //Return the current test case:
             //Note: We do this so that within global functions (i.e.: at the module level) the user can 
-            //have know which testcase/variation were in, without having to pass this state from
+            //have know which test case/variation were in, without having to pass this state from
             //execute around
             get { return _curtestcase; }
             set { _curtestcase = value; }
@@ -265,6 +265,29 @@ namespace OLEDB.Test.ModuleCore
             }
             Console.WriteLine("Pass:{0}, Fail:{1}, Skip:{2}", PassCount, FailCount, SkipCount);
             return tagVARIATION_STATUS.eVariationStatusPassed;
+        }
+
+        public override IEnumerable<XunitTestCase> TestCases()
+        {
+            List<object> children = Children;
+            if (children != null && children.Count > 0)
+            {
+                foreach (object child in children)
+                {
+                    CTestCase tc = child as CTestCase;
+                    if (tc != null)
+                    {
+                        if (CModInfo.IsTestCaseSelected(tc.Name))
+                        {
+                            tc.Init();
+                            foreach (XunitTestCase testCase in tc.TestCases())
+                            {
+                                yield return testCase;
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

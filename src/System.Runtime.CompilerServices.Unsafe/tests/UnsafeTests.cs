@@ -129,29 +129,22 @@ namespace System.Runtime.CompilerServices
             Assert.Equal(10, value);
         }
 
-        [Theory]
-        [MemberData(nameof(SizeOfData))]
-        public static unsafe void SizeOf<T>(int expected, T valueUnused)
+        [Fact]
+        public static unsafe void SizeOf()
         {
-            // valueUnused is only present to enable Xunit to call the correct generic overload.
-            Assert.Equal(expected, Unsafe.SizeOf<T>());
-        }
-
-        public static IEnumerable<object[]> SizeOfData()
-        {
-            yield return new object[] { 1, new sbyte() };
-            yield return new object[] { 1, new byte() };
-            yield return new object[] { 2, new short() };
-            yield return new object[] { 2, new ushort() };
-            yield return new object[] { 4, new int() };
-            yield return new object[] { 4, new uint() };
-            yield return new object[] { 8, new long() };
-            yield return new object[] { 8, new ulong() };
-            yield return new object[] { 4, new float() };
-            yield return new object[] { 8, new double() };
-            yield return new object[] { 4, new Byte4() };
-            yield return new object[] { 8, new Byte4Short2() };
-            yield return new object[] { 512, new Byte512() };
+            Assert.Equal(1, Unsafe.SizeOf<sbyte>());
+            Assert.Equal(1, Unsafe.SizeOf<byte>());
+            Assert.Equal(2, Unsafe.SizeOf<short>());
+            Assert.Equal(2, Unsafe.SizeOf<ushort>());
+            Assert.Equal(4, Unsafe.SizeOf<int>());
+            Assert.Equal(4, Unsafe.SizeOf<uint>());
+            Assert.Equal(8, Unsafe.SizeOf<long>());
+            Assert.Equal(8, Unsafe.SizeOf<ulong>());
+            Assert.Equal(4, Unsafe.SizeOf<float>());
+            Assert.Equal(8, Unsafe.SizeOf<double>());
+            Assert.Equal(4, Unsafe.SizeOf<Byte4>());
+            Assert.Equal(8, Unsafe.SizeOf<Byte4Short2>());
+            Assert.Equal(512, Unsafe.SizeOf<Byte512>());
         }
 
         [Theory]
@@ -181,10 +174,10 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(InitBlockData))]
-        public static unsafe void InitBlockUIntPtrStack(int numBytes, byte value)
+        public static unsafe void InitBlockRefStack(int numBytes, byte value)
         {
             byte* stackPtr = stackalloc byte[numBytes];
-            Unsafe.InitBlock(stackPtr, value, (UIntPtr)numBytes);
+            Unsafe.InitBlock(ref *stackPtr, value, (uint)numBytes);
             for (int i = 0; i < numBytes; i++)
             {
                 Assert.Equal(stackPtr[i], value);
@@ -193,11 +186,11 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(InitBlockData))]
-        public static unsafe void InitBlockUIntPtrUnmanaged(int numBytes, byte value)
+        public static unsafe void InitBlockRefUnmanaged(int numBytes, byte value)
         {
             IntPtr allocatedMemory = Marshal.AllocCoTaskMem(numBytes);
             byte* bytePtr = (byte*)allocatedMemory.ToPointer();
-            Unsafe.InitBlock(bytePtr, value, (UIntPtr)numBytes);
+            Unsafe.InitBlock(ref *bytePtr, value, (uint)numBytes);
             for (int i = 0; i < numBytes; i++)
             {
                 Assert.Equal(bytePtr[i], value);
@@ -232,11 +225,11 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(InitBlockData))]
-        public static unsafe void InitBlockUnalignedUIntPtrStack(int numBytes, byte value)
+        public static unsafe void InitBlockUnalignedRefStack(int numBytes, byte value)
         {
             byte* stackPtr = stackalloc byte[numBytes + 1];
             stackPtr += 1; // +1 = make unaligned
-            Unsafe.InitBlockUnaligned(stackPtr, value, (UIntPtr)numBytes);
+            Unsafe.InitBlockUnaligned(ref *stackPtr, value, (uint)numBytes);
             for (int i = 0; i < numBytes; i++)
             {
                 Assert.Equal(stackPtr[i], value);
@@ -245,11 +238,11 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(InitBlockData))]
-        public static unsafe void InitBlockUnalignedUIntPtrUnmanaged(int numBytes, byte value)
+        public static unsafe void InitBlockUnalignedRefUnmanaged(int numBytes, byte value)
         {
             IntPtr allocatedMemory = Marshal.AllocCoTaskMem(numBytes + 1);
             byte* bytePtr = (byte*)allocatedMemory.ToPointer() + 1; // +1 = make unaligned
-            Unsafe.InitBlockUnaligned(bytePtr, value, (UIntPtr)numBytes);
+            Unsafe.InitBlockUnaligned(ref *bytePtr, value, (uint)numBytes);
             for (int i = 0; i < numBytes; i++)
             {
                 Assert.Equal(bytePtr[i], value);
@@ -291,7 +284,7 @@ namespace System.Runtime.CompilerServices
 
         [Theory]
         [MemberData(nameof(CopyBlockData))]
-        public static unsafe void CopyBlockUIntPtr(int numBytes)
+        public static unsafe void CopyBlockRef(int numBytes)
         {
             byte* source = stackalloc byte[numBytes];
             byte* destination = stackalloc byte[numBytes];
@@ -302,7 +295,7 @@ namespace System.Runtime.CompilerServices
                 source[i] = value;
             }
 
-            Unsafe.CopyBlock(destination, source, (UIntPtr)numBytes);
+            Unsafe.CopyBlock(ref destination[0], ref source[0], (uint)numBytes);
 
             for (int i = 0; i < numBytes; i++)
             {
@@ -337,10 +330,9 @@ namespace System.Runtime.CompilerServices
             }
         }
 
-
         [Theory]
         [MemberData(nameof(CopyBlockData))]
-        public static unsafe void CopyBlockUnalignedUIntPtr(int numBytes)
+        public static unsafe void CopyBlockUnalignedRef(int numBytes)
         {
             byte* source = stackalloc byte[numBytes + 1];
             byte* destination = stackalloc byte[numBytes + 1];
@@ -353,7 +345,7 @@ namespace System.Runtime.CompilerServices
                 source[i] = value;
             }
 
-            Unsafe.CopyBlockUnaligned(destination, source, (UIntPtr)numBytes);
+            Unsafe.CopyBlockUnaligned(ref destination[0], ref source[0], (uint)numBytes);
 
             for (int i = 0; i < numBytes; i++)
             {
@@ -383,8 +375,8 @@ namespace System.Runtime.CompilerServices
         public static void DangerousAs()
         {
             // Verify that As does not perform type checks
-            object o = new Object();
-            Assert.IsType(typeof(Object), Unsafe.As<string>(o));
+            object o = new object();
+            Assert.IsType(typeof(object), Unsafe.As<string>(o));
         }
 
         [Fact]
@@ -419,7 +411,7 @@ namespace System.Runtime.CompilerServices
         }
 
         [Fact]
-        public unsafe static void AsRef()
+        public static unsafe void AsRef()
         {
             byte[] b = new byte[4] { 0x42, 0x42, 0x42, 0x42 };
             fixed (byte * p = b)
@@ -430,6 +422,18 @@ namespace System.Runtime.CompilerServices
                 r = 0x0EF00EF0;
                 Assert.Equal(0xFE, b[0] | b[1] | b[2] | b[3]);
             }
+        }
+
+        [Fact]
+        public static void InAsRef()
+        {
+            int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
+
+            ref int r = ref Unsafe.AsRef<int>(a[0]);
+            Assert.Equal(0x123, r);
+
+            r = 0x42;
+            Assert.Equal(0x42, a[0]);
         }
 
         [Fact]
@@ -457,6 +461,33 @@ namespace System.Runtime.CompilerServices
 
             ref int r3 = ref Unsafe.Add(ref r2, -3);
             Assert.Equal(0x123, r3);
+        }
+
+        [Fact]
+        public static unsafe void VoidPointerAdd()
+        {
+            int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
+
+            fixed (void* ptr = a)
+            {
+                void* r1 = Unsafe.Add<int>(ptr, 1);
+                Assert.Equal(0x234, *(int*)r1);
+
+                void* r2 = Unsafe.Add<int>(r1, 2);
+                Assert.Equal(0x456, *(int*)r2);
+
+                void* r3 = Unsafe.Add<int>(r2, -3);
+                Assert.Equal(0x123, *(int*)r3);
+            }
+
+            fixed (void* ptr = &a[1])
+            {
+                void* r0 = Unsafe.Add<int>(ptr, -1);
+                Assert.Equal(0x123, *(int*)r0);
+
+                void* r3 = Unsafe.Add<int>(ptr, 2);
+                Assert.Equal(0x456, *(int*)r3);
+            }
         }
 
         [Fact]
@@ -503,6 +534,33 @@ namespace System.Runtime.CompilerServices
             ref string r3 = ref Unsafe.Subtract(ref r2, 3);
             Assert.Equal("abc", r3);
         }
+        
+        [Fact]
+        public static unsafe void VoidPointerSubtract()
+        {
+            int[] a = new int[] { 0x123, 0x234, 0x345, 0x456 };
+
+            fixed (void* ptr = a)
+            {
+                void* r1 = Unsafe.Subtract<int>(ptr, -2);
+                Assert.Equal(0x345, *(int*)r1);
+
+                void* r2 = Unsafe.Subtract<int>(r1, -1);
+                Assert.Equal(0x456, *(int*)r2);
+
+                void* r3 = Unsafe.Subtract<int>(r2, 3);
+                Assert.Equal(0x123, *(int*)r3);
+            }
+
+            fixed (void* ptr = &a[1])
+            {
+                void* r0 = Unsafe.Subtract<int>(ptr, 1);
+                Assert.Equal(0x123, *(int*)r0);
+
+                void* r3 = Unsafe.Subtract<int>(ptr, -2);
+                Assert.Equal(0x456, *(int*)r3);
+            }
+        }
 
         [Fact]
         public static void RefSubtractIntPtr()
@@ -542,6 +600,228 @@ namespace System.Runtime.CompilerServices
             Assert.True(Unsafe.AreSame(ref a[0], ref a[0]));
             Assert.False(Unsafe.AreSame(ref a[0], ref a[1]));
         }
+
+        [Fact]
+        public static unsafe void RefIsAddressGreaterThan()
+        {
+            int[] a = new int[2];
+
+            Assert.False(Unsafe.IsAddressGreaterThan(ref a[0], ref a[0]));
+            Assert.False(Unsafe.IsAddressGreaterThan(ref a[0], ref a[1]));
+            Assert.True(Unsafe.IsAddressGreaterThan(ref a[1], ref a[0]));
+            Assert.False(Unsafe.IsAddressGreaterThan(ref a[1], ref a[1]));
+
+            // The following tests ensure that we're using unsigned comparison logic
+
+            Assert.False(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(1)), ref Unsafe.AsRef<byte>((void*)(-1))));
+            Assert.True(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(-1)), ref Unsafe.AsRef<byte>((void*)(1))));
+            Assert.True(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(int.MinValue)), ref Unsafe.AsRef<byte>((void*)(int.MaxValue))));
+            Assert.False(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>((void*)(int.MaxValue)), ref Unsafe.AsRef<byte>((void*)(int.MinValue))));
+            Assert.False(Unsafe.IsAddressGreaterThan(ref Unsafe.AsRef<byte>(null), ref Unsafe.AsRef<byte>(null)));
+        }
+
+        [Fact]
+        public static unsafe void RefIsAddressLessThan()
+        {
+            int[] a = new int[2];
+
+            Assert.False(Unsafe.IsAddressLessThan(ref a[0], ref a[0]));
+            Assert.True(Unsafe.IsAddressLessThan(ref a[0], ref a[1]));
+            Assert.False(Unsafe.IsAddressLessThan(ref a[1], ref a[0]));
+            Assert.False(Unsafe.IsAddressLessThan(ref a[1], ref a[1]));
+
+            // The following tests ensure that we're using unsigned comparison logic
+
+            Assert.True(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(1)), ref Unsafe.AsRef<byte>((void*)(-1))));
+            Assert.False(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(-1)), ref Unsafe.AsRef<byte>((void*)(1))));
+            Assert.False(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(int.MinValue)), ref Unsafe.AsRef<byte>((void*)(int.MaxValue))));
+            Assert.True(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>((void*)(int.MaxValue)), ref Unsafe.AsRef<byte>((void*)(int.MinValue))));
+            Assert.False(Unsafe.IsAddressLessThan(ref Unsafe.AsRef<byte>(null), ref Unsafe.AsRef<byte>(null)));
+        }
+
+        [Fact]
+        public static unsafe void ReadUnaligned_ByRef_Int32()
+        {
+            byte[] unaligned = Int32Double.Unaligned(123456789, 3.42);
+
+            int actual = Unsafe.ReadUnaligned<int>(ref unaligned[1]);
+
+            Assert.Equal(123456789, actual);
+        }
+
+        [Fact]
+        public static unsafe void ReadUnaligned_ByRef_Double()
+        {
+            byte[] unaligned = Int32Double.Unaligned(123456789, 3.42);
+
+            double actual = Unsafe.ReadUnaligned<double>(ref unaligned[9]);
+
+            Assert.Equal(3.42, actual);
+        }
+
+        [Fact]
+        public static unsafe void ReadUnaligned_ByRef_Struct()
+        {
+            byte[] unaligned = Int32Double.Unaligned(123456789, 3.42);
+
+            Int32Double actual = Unsafe.ReadUnaligned<Int32Double>(ref unaligned[1]);
+
+            Assert.Equal(123456789, actual.Int32);
+            Assert.Equal(3.42, actual.Double);
+        }
+
+        [Fact]
+        public static unsafe void ReadUnaligned_Ptr_Int32()
+        {
+            byte[] unaligned = Int32Double.Unaligned(123456789, 3.42);
+
+            fixed (byte* p = unaligned)
+            {
+                int actual = Unsafe.ReadUnaligned<int>(p + 1);
+
+                Assert.Equal(123456789, actual);
+            }
+        }
+
+        [Fact]
+        public static unsafe void ReadUnaligned_Ptr_Double()
+        {
+            byte[] unaligned = Int32Double.Unaligned(123456789, 3.42);
+
+            fixed (byte* p = unaligned)
+            {
+                double actual = Unsafe.ReadUnaligned<double>(p + 9);
+
+                Assert.Equal(3.42, actual);
+            }
+        }
+
+        [Fact]
+        public static unsafe void ReadUnaligned_Ptr_Struct()
+        {
+            byte[] unaligned = Int32Double.Unaligned(123456789, 3.42);
+
+            fixed (byte* p = unaligned)
+            {
+                Int32Double actual = Unsafe.ReadUnaligned<Int32Double>(p + 1);
+
+                Assert.Equal(123456789, actual.Int32);
+                Assert.Equal(3.42, actual.Double);
+            }
+        }
+
+        [Fact]
+        public static unsafe void WriteUnaligned_ByRef_Int32()
+        {
+            byte[] unaligned = new byte[sizeof(Int32Double) + 1];
+
+            Unsafe.WriteUnaligned(ref unaligned[1], 123456789);
+
+            int actual = Int32Double.Aligned(unaligned).Int32;
+            Assert.Equal(123456789, actual);
+        }
+
+        [Fact]
+        public static unsafe void WriteUnaligned_ByRef_Double()
+        {
+            byte[] unaligned = new byte[sizeof(Int32Double) + 1];
+
+            Unsafe.WriteUnaligned(ref unaligned[9], 3.42);
+
+            double actual = Int32Double.Aligned(unaligned).Double;
+            Assert.Equal(3.42, actual);
+        }
+
+        [Fact]
+        public static unsafe void WriteUnaligned_ByRef_Struct()
+        {
+            byte[] unaligned = new byte[sizeof(Int32Double) + 1];
+
+            Unsafe.WriteUnaligned(ref unaligned[1], new Int32Double { Int32 = 123456789, Double = 3.42 });
+
+            Int32Double actual = Int32Double.Aligned(unaligned);
+            Assert.Equal(123456789, actual.Int32);
+            Assert.Equal(3.42, actual.Double);
+        }
+
+        [Fact]
+        public static unsafe void WriteUnaligned_Ptr_Int32()
+        {
+            byte[] unaligned = new byte[sizeof(Int32Double) + 1];
+
+            fixed (byte* p = unaligned)
+            {
+                Unsafe.WriteUnaligned(p + 1, 123456789);
+            }
+
+            int actual = Int32Double.Aligned(unaligned).Int32;
+            Assert.Equal(123456789, actual);
+        }
+
+        [Fact]
+        public static unsafe void WriteUnaligned_Ptr_Double()
+        {
+            byte[] unaligned = new byte[sizeof(Int32Double) + 1];
+
+            fixed (byte* p = unaligned)
+            {
+                Unsafe.WriteUnaligned(p + 9, 3.42);
+            }
+
+            double actual = Int32Double.Aligned(unaligned).Double;
+            Assert.Equal(3.42, actual);
+        }
+
+        [Fact]
+        public static unsafe void WriteUnaligned_Ptr_Struct()
+        {
+            byte[] unaligned = new byte[sizeof(Int32Double) + 1];
+
+            fixed (byte* p = unaligned)
+            {
+                Unsafe.WriteUnaligned(p + 1, new Int32Double { Int32 = 123456789, Double = 3.42 });
+            }
+
+            Int32Double actual = Int32Double.Aligned(unaligned);
+            Assert.Equal(123456789, actual.Int32);
+            Assert.Equal(3.42, actual.Double);
+        }
+
+        [Fact]
+        public static void Unbox_Int32()
+        {
+            object box = 42;
+
+            Assert.True(Unsafe.AreSame(ref Unsafe.Unbox<int>(box), ref Unsafe.Unbox<int>(box)));
+
+            Assert.Equal(42, (int)box);
+            Assert.Equal(42, Unsafe.Unbox<int>(box));
+
+            ref int value = ref Unsafe.Unbox<int>(box);
+            value = 84;
+            Assert.Equal(84, (int)box);
+            Assert.Equal(84, Unsafe.Unbox<int>(box));
+
+            Assert.Throws<InvalidCastException>(() => Unsafe.Unbox<Byte4>(box));
+        }
+
+        [Fact]
+        public static void Unbox_CustomValueType()
+        {
+            object box = new Int32Double();
+
+            Assert.Equal(0, ((Int32Double)box).Double);
+            Assert.Equal(0, ((Int32Double)box).Int32);
+
+            ref Int32Double value = ref Unsafe.Unbox<Int32Double>(box);
+            value.Double = 42;
+            value.Int32 = 84;
+
+            Assert.Equal(42, ((Int32Double)box).Double);
+            Assert.Equal(84, ((Int32Double)box).Int32);
+
+            Assert.Throws<InvalidCastException>(() => Unsafe.Unbox<bool>(box));
+        }
     }
 
     [StructLayout(LayoutKind.Explicit)]
@@ -577,5 +857,39 @@ namespace System.Runtime.CompilerServices
     public unsafe struct Byte512
     {
         public fixed byte Bytes[512];
+    }
+
+    [StructLayout(LayoutKind.Explicit, Size=16)]
+    public unsafe struct Int32Double
+    {
+        [FieldOffset(0)]
+        public int Int32;
+        [FieldOffset(8)]
+        public double Double;
+
+        public static unsafe byte[] Unaligned(int i, double d)
+        {
+            var aligned = new Int32Double { Int32 = i, Double = d };
+            var unaligned = new byte[sizeof(Int32Double) + 1];
+
+            fixed (byte* p = unaligned)
+            {
+                Buffer.MemoryCopy(&aligned, p + 1, sizeof(Int32Double), sizeof(Int32Double));
+            }
+
+            return unaligned;
+        }
+
+        public static unsafe Int32Double Aligned(byte[] unaligned)
+        {
+            var aligned = new Int32Double();
+
+            fixed (byte* p = unaligned)
+            {
+                Buffer.MemoryCopy(p + 1, &aligned, sizeof(Int32Double), sizeof(Int32Double));
+            }
+
+            return aligned;
+        }
     }
 }

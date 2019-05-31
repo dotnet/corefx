@@ -18,34 +18,37 @@ namespace System.Data.SqlTypes
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
     [XmlSchemaProvider("GetXsdType")]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public struct SqlDouble : INullable, IComparable, IXmlSerializable
     {
-        private bool _fNotNull; // false if null
-        private double _value;
+        private bool m_fNotNull; // false if null. Do not rename (binary serialization)
+        private double m_value; // Do not rename (binary serialization)
 
         // constructor
         // construct a Null
         private SqlDouble(bool fNull)
         {
-            _fNotNull = false;
-            _value = 0.0;
+            m_fNotNull = false;
+            m_value = 0.0;
         }
 
         public SqlDouble(double value)
         {
-            if (double.IsInfinity(value) || double.IsNaN(value))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+            if (!double.IsFinite(value))
+            {
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
+            }
             else
             {
-                _value = value;
-                _fNotNull = true;
+                m_value = value;
+                m_fNotNull = true;
             }
         }
 
         // INullable
         public bool IsNull
         {
-            get { return !_fNotNull; }
+            get { return !m_fNotNull; }
         }
 
         // property: Value
@@ -53,8 +56,8 @@ namespace System.Data.SqlTypes
         {
             get
             {
-                if (_fNotNull)
-                    return _value;
+                if (m_fNotNull)
+                    return m_value;
                 else
                     throw new SqlNullValueException();
             }
@@ -74,12 +77,12 @@ namespace System.Data.SqlTypes
 
         public override string ToString()
         {
-            return IsNull ? SQLResource.s_nullString : _value.ToString((IFormatProvider)null);
+            return IsNull ? SQLResource.NullString : m_value.ToString((IFormatProvider)null);
         }
 
         public static SqlDouble Parse(string s)
         {
-            if (s == SQLResource.s_nullString)
+            if (s == SQLResource.NullString)
                 return SqlDouble.Null;
             else
                 return new SqlDouble(double.Parse(s, CultureInfo.InvariantCulture));
@@ -89,7 +92,7 @@ namespace System.Data.SqlTypes
         // Unary operators
         public static SqlDouble operator -(SqlDouble x)
         {
-            return x.IsNull ? Null : new SqlDouble(-x._value);
+            return x.IsNull ? Null : new SqlDouble(-x.m_value);
         }
 
 
@@ -101,10 +104,10 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            double value = x._value + y._value;
+            double value = x.m_value + y.m_value;
 
             if (double.IsInfinity(value))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return new SqlDouble(value);
         }
@@ -114,10 +117,10 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            double value = x._value - y._value;
+            double value = x.m_value - y.m_value;
 
             if (double.IsInfinity(value))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return new SqlDouble(value);
         }
@@ -127,10 +130,10 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            double value = x._value * y._value;
+            double value = x.m_value * y.m_value;
 
             if (double.IsInfinity(value))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return new SqlDouble(value);
         }
@@ -140,18 +143,16 @@ namespace System.Data.SqlTypes
             if (x.IsNull || y.IsNull)
                 return Null;
 
-            if (y._value == 0.0)
-                throw new DivideByZeroException(SQLResource.s_divideByZeroMessage);
+            if (y.m_value == 0.0)
+                throw new DivideByZeroException(SQLResource.DivideByZeroMessage);
 
-            double value = x._value / y._value;
+            double value = x.m_value / y.m_value;
 
             if (double.IsInfinity(value))
-                throw new OverflowException(SQLResource.s_arithOverflowMessage);
+                throw new OverflowException(SQLResource.ArithOverflowMessage);
 
             return new SqlDouble(value);
         }
-
-
 
         // Implicit conversions
 
@@ -203,10 +204,7 @@ namespace System.Data.SqlTypes
             return x.IsNull ? Null : new SqlDouble(x.ToDouble());
         }
 
-
         // Explicit conversions
-
-
 
         // Explicit conversion from SqlString to SqlDouble
         // Throws FormatException or OverflowException if necessary.
@@ -221,7 +219,7 @@ namespace System.Data.SqlTypes
         // Overloading comparison operators
         public static SqlBoolean operator ==(SqlDouble x, SqlDouble y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value == y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value == y.m_value);
         }
 
         public static SqlBoolean operator !=(SqlDouble x, SqlDouble y)
@@ -231,22 +229,22 @@ namespace System.Data.SqlTypes
 
         public static SqlBoolean operator <(SqlDouble x, SqlDouble y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value < y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value < y.m_value);
         }
 
         public static SqlBoolean operator >(SqlDouble x, SqlDouble y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value > y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value > y.m_value);
         }
 
         public static SqlBoolean operator <=(SqlDouble x, SqlDouble y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value <= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value <= y.m_value);
         }
 
         public static SqlBoolean operator >=(SqlDouble x, SqlDouble y)
         {
-            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x._value >= y._value);
+            return (x.IsNull || y.IsNull) ? SqlBoolean.Null : new SqlBoolean(x.m_value >= y.m_value);
         }
 
         //--------------------------------------------------
@@ -359,8 +357,6 @@ namespace System.Data.SqlTypes
             return (SqlString)this;
         }
 
-
-
         // IComparable
         // Compares this object to another object, returning an integer that
         // indicates the relationship.
@@ -424,12 +420,12 @@ namespace System.Data.SqlTypes
             {
                 // Read the next value.
                 reader.ReadElementString();
-                _fNotNull = false;
+                m_fNotNull = false;
             }
             else
             {
-                _value = XmlConvert.ToDouble(reader.ReadElementString());
-                _fNotNull = true;
+                m_value = XmlConvert.ToDouble(reader.ReadElementString());
+                m_fNotNull = true;
             }
         }
 
@@ -441,7 +437,7 @@ namespace System.Data.SqlTypes
             }
             else
             {
-                writer.WriteString(XmlConvert.ToString(_value));
+                writer.WriteString(XmlConvert.ToString(m_value));
             }
         }
 

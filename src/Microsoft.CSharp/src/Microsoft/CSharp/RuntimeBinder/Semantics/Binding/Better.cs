@@ -9,7 +9,7 @@ using Microsoft.CSharp.RuntimeBinder.Syntax;
 
 namespace Microsoft.CSharp.RuntimeBinder.Semantics
 {
-    internal partial class ExpressionBinder
+    internal readonly partial struct ExpressionBinder
     {
         ////////////////////////////////////////////////////////////////////////////////
         // This table is used to implement the last set of 'better' conversion rules
@@ -17,28 +17,28 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // Use all the simple types plus 1 more for Object
         // See CLR section 7.4.1.3
 
-        static private readonly byte[][] s_betterConversionTable =
+        private static readonly byte[][] s_betterConversionTable =
         {
             //          BYTE    SHORT   INT     LONG    FLOAT   DOUBLE  DECIMAL CHAR    BOOL    SBYTE   USHORT  UINT    ULONG   IPTR     UIPTR    OBJECT
-            new byte[] /* BYTE*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* SHORT*/  {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      1,      0,       0,       0},
-            new byte[] /* INT*/    {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      0,       0,       0},
-            new byte[] /* LONG*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      0,       0,       0},
-            new byte[] /* FLOAT*/  {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* DOUBLE*/ {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* DECIMAL*/{0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* CHAR*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* BOOL*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* SBYTE*/  {1,     0,      0,      0,      0,      0,      0,      0,      0,      0,      1,      1,      1,      0,       0,       0},
-            new byte[] /* USHORT*/ {0,     2,      0,      0,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* UINT*/   {0,     2,      2,      0,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* ULONG*/  {0,     2,      2,      2,      0,      0,      0,      0,      0,      2,      0,      0,      0,      0,       0,       0},
-            new byte[] /* IPTR*/   {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* UIPTR*/  {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0},
-            new byte[] /* OBJECT*/ {0,     0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,      0,       0,       0}
+            new byte[] /* BYTE*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* SHORT*/  {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      1,      1,      3,       3,       3},
+            new byte[] /* INT*/    {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      1,      3,       3,       3},
+            new byte[] /* LONG*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      3,       3,       3},
+            new byte[] /* FLOAT*/  {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* DOUBLE*/ {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* DECIMAL*/{3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* CHAR*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* BOOL*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* SBYTE*/  {1,     3,      3,      3,      3,      3,      3,      3,      3,      3,      1,      1,      1,      3,       3,       3},
+            new byte[] /* USHORT*/ {3,     2,      3,      3,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* UINT*/   {3,     2,      2,      3,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* ULONG*/  {3,     2,      2,      2,      3,      3,      3,      3,      3,      2,      3,      3,      3,      3,       3,       3},
+            new byte[] /* IPTR*/   {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* UIPTR*/  {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3},
+            new byte[] /* OBJECT*/ {3,     3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,      3,       3,       3}
         };
 
-        protected BetterType WhichMethodIsBetterTieBreaker(
+        private static BetterType WhichMethodIsBetterTieBreaker(
             CandidateFunctionMember node1,
             CandidateFunctionMember node2,
             CType pTypeThrough,
@@ -57,14 +57,14 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // Non-generic wins.
-            if (mpwi1.TypeArgs.size != 0)
+            if (mpwi1.TypeArgs.Count != 0)
             {
-                if (mpwi2.TypeArgs.size == 0)
+                if (mpwi2.TypeArgs.Count == 0)
                 {
                     return BetterType.Right;
                 }
             }
-            else if (mpwi2.TypeArgs.size != 0)
+            else if (mpwi2.TypeArgs.Count != 0)
             {
                 return BetterType.Left;
             }
@@ -83,7 +83,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             }
 
             // See if one's parameter types (un-instantiated) are more specific.
-            BetterType nT = GetGlobalSymbols().CompareTypes(
+            BetterType nT = CompareTypes(
                RearrangeNamedArguments(mpwi1.MethProp().Params, mpwi1, pTypeThrough, args),
                RearrangeNamedArguments(mpwi2.MethProp().Params, mpwi2, pTypeThrough, args));
             if (nT == BetterType.Left || nT == BetterType.Right)
@@ -101,6 +101,79 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             return BetterType.Neither;
         }
 
+        private static BetterType CompareTypes(TypeArray ta1, TypeArray ta2)
+        {
+            if (ta1 == ta2)
+            {
+                return BetterType.Same;
+            }
+
+            if (ta1.Count != ta2.Count)
+            {
+                // The one with more parameters is more specific.
+                return ta1.Count > ta2.Count ? BetterType.Left : BetterType.Right;
+            }
+
+            BetterType nTot = BetterType.Neither;
+
+            for (int i = 0; i < ta1.Count; i++)
+            {
+                CType type1 = ta1[i];
+                CType type2 = ta2[i];
+                BetterType nParam = BetterType.Neither;
+
+LAgain:
+                if (type1.TypeKind != type2.TypeKind)
+                {
+                    if (type1 is TypeParameterType)
+                    {
+                        nParam = BetterType.Right;
+                    }
+                    else if (type2 is TypeParameterType)
+                    {
+                        nParam = BetterType.Left;
+                    }
+                }
+                else
+                {
+                    switch (type1.TypeKind)
+                    {
+                        default:
+                            Debug.Fail("Bad kind in CompareTypes");
+                            break;
+                        case TypeKind.TK_TypeParameterType:
+                            break;
+
+                        case TypeKind.TK_PointerType:
+                        case TypeKind.TK_ParameterModifierType:
+                        case TypeKind.TK_ArrayType:
+                        case TypeKind.TK_NullableType:
+                            type1 = type1.BaseOrParameterOrElementType;
+                            type2 = type2.BaseOrParameterOrElementType;
+                            goto LAgain;
+
+                        case TypeKind.TK_AggregateType:
+                            nParam = CompareTypes(((AggregateType)type1).TypeArgsAll, ((AggregateType)type2).TypeArgsAll);
+                            break;
+                    }
+                }
+
+                if (nParam == BetterType.Right || nParam == BetterType.Left)
+                {
+                    if (nTot == BetterType.Same || nTot == BetterType.Neither)
+                    {
+                        nTot = nParam;
+                    }
+                    else if (nParam != nTot)
+                    {
+                        return BetterType.Neither;
+                    }
+                }
+            }
+
+            return nTot;
+        }
+
         ////////////////////////////////////////////////////////////////////////////////
 
         // Find the index of a name on a list.
@@ -115,7 +188,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         }
 
         ////////////////////////////////////////////////////////////////////////////////
-        // We need to rearange the method parameters so that the type of any specified named argument
+        // We need to rearrange the method parameters so that the type of any specified named argument
         // appears in the same place as the named argument. Consider the example below:
         //    Foo(int x = 4, string y = "", long l = 4)
         //    Foo(string y = "", string x="", long l = 5)
@@ -126,42 +199,43 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         // By rearranging the arguments as such we make sure that any specified named arguments appear in the same position for both
         // methods and we also maintain the relative order of the other parameters (the type long appears after int in the above example)
 
-        private TypeArray RearrangeNamedArguments(TypeArray pta, MethPropWithInst mpwi,
-            CType pTypeThrough, ArgInfos args)
+        private static TypeArray RearrangeNamedArguments(TypeArray pta, MethPropWithInst mpwi, CType pTypeThrough, ArgInfos args)
         {
-            if (!args.fHasExprs)
+#if DEBUG
+            // We never have a named argument that is in a position in the argument
+            // list past the end of what would be the formal parameter list.
+            for (int i = pta.Count; i < args.carg; i++)
+            {
+                Debug.Assert(!(args.prgexpr[i] is ExprNamedArgumentSpecification));
+            }
+#endif
+            // If we've no args we can skip. If the last argument isn't named then either we
+            // have no named arguments, and we can skip, or we have non-trailing named arguments
+            // and we MUST skip!
+            if (args.carg == 0 || !(args.prgexpr[args.carg - 1] is ExprNamedArgumentSpecification))
             {
                 return pta;
             }
 
-#if DEBUG
-            // We never have a named argument that is in a position in the argument
-            // list past the end of what would be the formal parameter list.
-            for (int i = pta.size; i < args.carg; i++)
-            {
-                Debug.Assert(!args.prgexpr[i].isNamedArgumentSpecification());
-            }
-#endif
-
             CType type = pTypeThrough != null ? pTypeThrough : mpwi.GetType();
-            CType[] typeList = new CType[pta.size];
-            MethodOrPropertySymbol methProp = GroupToArgsBinder.FindMostDerivedMethod(GetSymbolLoader(), mpwi.MethProp(), type);
+            CType[] typeList = new CType[pta.Count];
+            MethodOrPropertySymbol methProp = GroupToArgsBinder.FindMostDerivedMethod(mpwi.MethProp(), type);
 
             // We initialize the new type array with the parameters for the method. 
-            for (int iParam = 0; iParam < pta.size; iParam++)
+            for (int iParam = 0; iParam < pta.Count; iParam++)
             {
-                typeList[iParam] = pta.Item(iParam);
+                typeList[iParam] = pta[iParam];
             }
 
+            var prgexpr = args.prgexpr;
             // We then go over the specified arguments and put the type for any named argument in the right position in the array.
             for (int iParam = 0; iParam < args.carg; iParam++)
             {
-                EXPR arg = args.prgexpr[iParam];
-                if (arg.isNamedArgumentSpecification())
+                if (prgexpr[iParam] is ExprNamedArgumentSpecification named)
                 {
                     // We find the index of the type of the argument in the method parameter list and store that in a temp
-                    int index = FindName(methProp.ParameterNames, arg.asNamedArgumentSpecification().Name);
-                    CType tempType = pta.Item(index);
+                    int index = FindName(methProp.ParameterNames, named.Name);
+                    CType tempType = pta[index];
 
                     // Starting from the current position in the type list up until the location of the type of the optional argument
                     //  We shift types by one:
@@ -177,7 +251,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 }
             }
 
-            return GetSymbolLoader().getBSymmgr().AllocParams(pta.size, typeList);
+            return TypeArray.Allocate(typeList);
         }
 
         ////////////////////////////////////////////////////////////////////////////////
@@ -203,7 +277,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         //
         // Returns Left if m1 is better, Right if m2 is better, or Neither/Same
 
-        protected BetterType WhichMethodIsBetter(
+        private BetterType WhichMethodIsBetter(
             CandidateFunctionMember node1,
             CandidateFunctionMember node2,
             CType pTypeThrough,
@@ -235,19 +309,12 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //   conversion from Ex to Qx.
 
             BetterType betterMethod = BetterType.Neither;
-            CType type1 = pTypeThrough != null ? pTypeThrough : mpwi1.GetType();
-            CType type2 = pTypeThrough != null ? pTypeThrough : mpwi2.GetType();
-            MethodOrPropertySymbol methProp1 = GroupToArgsBinder.FindMostDerivedMethod(GetSymbolLoader(), mpwi1.MethProp(), type1);
-            MethodOrPropertySymbol methProp2 = GroupToArgsBinder.FindMostDerivedMethod(GetSymbolLoader(), mpwi2.MethProp(), type2);
-            List<Name> names1 = methProp1.ParameterNames;
-            List<Name> names2 = methProp2.ParameterNames;
-
-            for (int i = 0; i < args.carg; i++)
+            int carg = args.carg;
+            for (int i = 0; i < carg; i++)
             {
-                EXPR arg = args.fHasExprs ? args.prgexpr[i] : null;
-                CType argType = args.types.Item(i);
-                CType p1 = pta1.Item(i);
-                CType p2 = pta2.Item(i);
+                Expr arg = args.prgexpr[i];
+                CType p1 = pta1[i];
+                CType p2 = pta2[i];
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // RUNTIME BINDER ONLY CHANGE
@@ -256,29 +323,33 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // We need to consider conversions from the actual runtime type
                 // since we could have private interfaces that we are converting
 
-                if (arg.RuntimeObjectActualType != null)
-                {
-                    argType = arg.RuntimeObjectActualType;
-                }
+                CType argType = arg?.RuntimeObjectActualType ?? args.types[i];
 
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 // END RUNTIME BINDER ONLY CHANGE
                 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-                BetterType betterConversion = WhichConversionIsBetter(arg, argType, p1, p2);
+                BetterType betterConversion = WhichConversionIsBetter(argType, p1, p2);
 
-                if (betterMethod == BetterType.Right && betterConversion == BetterType.Left)
+                if (betterMethod == BetterType.Right)
                 {
-                    betterMethod = BetterType.Neither;
-                    break;
+                    if (betterConversion == BetterType.Left)
+                    {
+                        betterMethod = BetterType.Neither;
+                        break;
+                    }
                 }
-                else if (betterMethod == BetterType.Left && betterConversion == BetterType.Right)
+                else if (betterMethod == BetterType.Left)
                 {
-                    betterMethod = BetterType.Neither;
-                    break;
+                    if (betterConversion == BetterType.Right)
+                    {
+                        betterMethod = BetterType.Neither;
+                        break;
+                    }
                 }
-                else if (betterMethod == BetterType.Neither)
+                else
                 {
+                    Debug.Assert(betterMethod == BetterType.Neither);
                     if (betterConversion == BetterType.Right || betterConversion == BetterType.Left)
                     {
                         betterMethod = betterConversion;
@@ -289,13 +360,16 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             // We may have different sizes if we had optional parameters. If thats the case,
             // the one with fewer parameters wins (ie less optional parameters) unless it is
             // expanded. If so, the one with more parameters wins (ie option beats expanded).
-            if (pta1.size != pta2.size && betterMethod == BetterType.Neither)
+            if (pta1.Count != pta2.Count && betterMethod == BetterType.Neither)
             {
-                if (node1.fExpanded && !node2.fExpanded)
+                if (node1.fExpanded)
                 {
-                    return BetterType.Right;
+                    if (!node2.fExpanded)
+                    {
+                        return BetterType.Right;
+                    }
                 }
-                else if (node2.fExpanded && !node1.fExpanded)
+                else if (node2.fExpanded)
                 {
                     return BetterType.Left;
                 }
@@ -304,22 +378,23 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 // then we are ambiguous. Otherwise, take the one that didn't need any 
                 // optionals.
 
-                if (pta1.size == args.carg)
+                if (pta1.Count == carg)
                 {
                     return BetterType.Left;
                 }
-                else if (pta2.size == args.carg)
+
+                if (pta2.Count == carg)
                 {
                     return BetterType.Right;
                 }
+
                 return BetterType.Neither;
             }
 
             return betterMethod;
         }
 
-        protected BetterType WhichConversionIsBetter(EXPR arg, CType argType,
-            CType p1, CType p2)
+        private BetterType WhichConversionIsBetter(CType argType, CType p1, CType p2)
         {
             Debug.Assert(argType != null);
             Debug.Assert(p1 != null);
@@ -349,12 +424,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             {
                 return BetterType.Same;
             }
-            return WhichConversionIsBetter(argType, p1, p2);
-        }
 
-        public BetterType WhichConversionIsBetter(CType argType,
-            CType p1, CType p2)
-        {
             // 7.4.2.4 Better conversion from type
             //
             // Given a conversion C1 that converts from a type S to a type T1 and a conversion C2
@@ -370,11 +440,6 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             //
             // [Otherwise, see table above for better integral type conversions.]
 
-            if (p1 == p2)
-            {
-                return BetterType.Same;
-            }
-
             if (argType == p1)
             {
                 return BetterType.Left;
@@ -388,28 +453,21 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
             bool a2b = canConvert(p1, p2);
             bool b2a = canConvert(p2, p1);
 
-            if (a2b && !b2a)
+            if (a2b != b2a)
             {
-                return BetterType.Left;
-            }
-            if (b2a && !a2b)
-            {
-                return BetterType.Right;
+                return a2b ? BetterType.Left : BetterType.Right;
             }
 
-            Debug.Assert(b2a == a2b);
-
-            if (p1.isPredefined() && p2.isPredefined() &&
-                p1.getPredefType() <= PredefinedType.PT_OBJECT && p2.getPredefType() <= PredefinedType.PT_OBJECT)
+            if (p1.IsPredefined && p2.IsPredefined)
             {
-                int c = s_betterConversionTable[(int)p1.getPredefType()][(int)p2.getPredefType()];
-                if (c == 1)
+                PredefinedType pt1 = p1.PredefinedType;
+                if (pt1 <= PredefinedType.PT_OBJECT)
                 {
-                    return BetterType.Left;
-                }
-                else if (c == 2)
-                {
-                    return BetterType.Right;
+                    PredefinedType pt2 = p2.PredefinedType;
+                    if (pt2 <= PredefinedType.PT_OBJECT)
+                    {
+                        return (BetterType)s_betterConversionTable[(int)pt1][(int)pt2];
+                    }
                 }
             }
 
@@ -419,8 +477,7 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
         ////////////////////////////////////////////////////////////////////////////////
         // Determine best method for overload resolution. Returns null if no best 
         // method, in which case two tying methods are returned for error reporting.
-
-        protected CandidateFunctionMember FindBestMethod(
+        private CandidateFunctionMember FindBestMethod(
             List<CandidateFunctionMember> list,
             CType pTypeThrough,
             ArgInfos args,
@@ -456,64 +513,69 @@ namespace Microsoft.CSharp.RuntimeBinder.Semantics
                 CandidateFunctionMember contender = list[i];
                 Debug.Assert(candidate != contender);
 
-                BetterType result = WhichMethodIsBetter(candidate, contender, pTypeThrough, args);
-                if (result == BetterType.Left)
+                switch (WhichMethodIsBetter(candidate, contender, pTypeThrough, args))
                 {
-                    ambiguous = false;
-                    continue;  // (meaning m1 is better...)
-                }
-                else if (result == BetterType.Right)
-                {
-                    ambiguous = false;
-                    candidate = contender;
-                }
-                else
-                {
-                    // in case of tie we don't want to bother with the contender who tied...
-                    ambig1 = candidate;
-                    ambig2 = contender;
+                    case BetterType.Left:
+                        ambiguous = false;  // (meaning m1 is better...)
+                        break;
 
-                    i++;
-                    if (i < list.Count)
-                    {
-                        contender = list[i];
+                    case BetterType.Right:
+                        ambiguous = false;
                         candidate = contender;
-                    }
-                    else
-                    {
-                        ambiguous = true;
-                    }
+                        break;
+
+                    default:
+
+                        // in case of tie we don't want to bother with the contender who tied...
+                        ambig1 = candidate;
+                        ambig2 = contender;
+
+                        i++;
+                        if (i < list.Count)
+                        {
+                            contender = list[i];
+                            candidate = contender;
+                        }
+                        else
+                        {
+                            ambiguous = true;
+                        }
+                        break;
                 }
             }
-            if (ambiguous)
-                goto AMBIG;
 
-            // Now, compare the candidate with items previous to it...
-            foreach (CandidateFunctionMember contender in list)
+            if (!ambiguous)
             {
-                if (contender == candidate)
+                // Now, compare the candidate with items previous to it...
+                foreach (CandidateFunctionMember contender in list)
                 {
-                    // We hit our winner, so its good enough...
-                    methAmbig1 = null;
-                    methAmbig2 = null;
-                    return candidate;
+                    if (contender == candidate)
+                    {
+                        // We hit our winner, so its good enough...
+                        methAmbig1 = null;
+                        methAmbig2 = null;
+                        return candidate;
+                    }
+
+                    switch (WhichMethodIsBetter(contender, candidate, pTypeThrough, args))
+                    {
+                        case BetterType.Right:
+
+                            // meaning m2 is better
+                            continue;
+                        case BetterType.Same:
+                        case BetterType.Neither:
+                            ambig1 = candidate;
+                            ambig2 = contender;
+                            break;
+                    }
+
+                    break;
                 }
-                BetterType result = WhichMethodIsBetter(contender, candidate, pTypeThrough, args);
-                if (result == BetterType.Right)
-                { // meaning m2 is better
-                    continue;
-                }
-                else if (result == BetterType.Same || result == BetterType.Neither)
-                {
-                    ambig1 = candidate;
-                    ambig2 = contender;
-                }
-                break;
             }
 
-        AMBIG:
-            // an ambig call. Return two of the ambiguous set.
-            if (ambig1 != null && ambig2 != null)
+            // an ambiguous call. Return two of the ambiguous set.
+            if (ambig1 != null & ambig2 != null)
             {
                 methAmbig1 = ambig1;
                 methAmbig2 = ambig2;

@@ -15,14 +15,14 @@ namespace System.Xml.Tests
     [InheritRequired()]
     public abstract partial class TCReadValue : TCXMLReaderBaseGeneral
     {
-        public const String ST_TEST_NAME = "CHARS1";
-        public const String ST_GEN_ENT_NAME = "e1";
-        public const String ST_GEN_ENT_VALUE = "e1foo";
+        public const string ST_TEST_NAME = "CHARS1";
+        public const string ST_GEN_ENT_NAME = "e1";
+        public const string ST_GEN_ENT_VALUE = "e1foo";
 
         private bool VerifyInvalidReadValue(int iBufferSize, int iIndex, int iCount, Type exceptionType)
         {
             bool bPassed = false;
-            Char[] buffer = new Char[iBufferSize];
+            char[] buffer = new char[iBufferSize];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -109,7 +109,7 @@ namespace System.Xml.Tests
                 return TEST_PASS;
             }
 
-            throw new CTestFailedException("ReadValue didnt throw expected exception");
+            throw new CTestFailedException("ReadValue didn't throw expected exception");
         }
 
         [Variation("ReadValue on Attribute", Pri = 0)]
@@ -132,7 +132,7 @@ namespace System.Xml.Tests
                     return TEST_PASS;
                 }
             }
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didn't read 5 chars");
             CError.Compare("value", new string(buffer), "Strings don't match");
             CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 0, "Did read 5 chars");
 
@@ -159,14 +159,14 @@ namespace System.Xml.Tests
                     return TEST_PASS;
                 }
             }
-            CError.Compare(DataReader.ReadAttributeValue(), true, "Didnt read attribute value");
-            CError.Compare(DataReader.Value, "value", "Didnt read correct attribute value");
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars");
+            CError.Compare(DataReader.ReadAttributeValue(), true, "Didn't read attribute value");
+            CError.Compare(DataReader.Value, "value", "Didn't read correct attribute value");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didn't read 5 chars");
             CError.Compare("value", new string(buffer), "Strings don't match");
             CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 0, "Did read 5 chars");
             CError.WriteLineIgnore(DataReader.MoveToElement() + "");
             DataReader.Read();
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars on text node");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didn't read 5 chars on text node");
             CError.Compare("value", new string(buffer), "Strings don't match");
             CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 0, "Did read 5 chars on text node");
 
@@ -203,7 +203,7 @@ namespace System.Xml.Tests
                 return TEST_PASS;
             }
 
-            throw new CTestFailedException("ReadValue didnt throw expected exception");
+            throw new CTestFailedException("ReadValue didn't throw expected exception");
         }
 
         [Variation("ReadValue on negative count", Pri = 0)]
@@ -235,7 +235,7 @@ namespace System.Xml.Tests
                 return TEST_PASS;
             }
 
-            throw new CTestFailedException("ReadValue didnt throw expected exception");
+            throw new CTestFailedException("ReadValue didn't throw expected exception");
         }
 
         [Variation("ReadValue on negative offset", Pri = 0)]
@@ -266,13 +266,13 @@ namespace System.Xml.Tests
                 return TEST_PASS;
             }
 
-            throw new CTestFailedException("ReadValue didnt throw expected exception");
+            throw new CTestFailedException("ReadValue didn't throw expected exception");
         }
 
         [Variation("ReadValue with buffer = element content / 2", Pri = 0)]
         public int TestReadValue1()
         {
-            Char[] buffer = new Char[5];
+            char[] buffer = new char[5];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -291,10 +291,10 @@ namespace System.Xml.Tests
                 }
             }
 
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read first 5");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didn't read first 5");
             CError.Compare("01234", new string(buffer), "First strings don't match");
 
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read second 5 chars");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didn't read second 5 chars");
             CError.Compare("56789", new string(buffer), "Second strings don't match");
 
             return TEST_PASS;
@@ -303,7 +303,7 @@ namespace System.Xml.Tests
         [Variation("ReadValue entire value in one call", Pri = 0)]
         public int TestReadValue2()
         {
-            Char[] buffer = new Char[10];
+            char[] buffer = new char[10];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -321,7 +321,7 @@ namespace System.Xml.Tests
                 }
             }
 
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 10), 10, "Didnt read 10");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 10), 10, "Didn't read 10");
             CError.Compare("0123456789", new string(buffer), "Strings don't match");
 
             return TEST_PASS;
@@ -330,7 +330,7 @@ namespace System.Xml.Tests
         [Variation("ReadValue bit by bit", Pri = 0)]
         public int TestReadValue3()
         {
-            Char[] buffer = new Char[10];
+            char[] buffer = new char[10];
 
             ReloadSource();
             DataReader.PositionOnElement(ST_TEST_NAME);
@@ -363,7 +363,7 @@ namespace System.Xml.Tests
         public int TestReadValue4()
         {
             int size = 8192;
-            Char[] buffer = new Char[size];
+            char[] buffer = new char[size];
 
             string val = new string('x', size);
 
@@ -397,7 +397,7 @@ namespace System.Xml.Tests
         public int TestReadValue5()
         {
             int size = 8192;
-            Char[] buffer = new Char[size];
+            char[] buffer = new char[size];
 
             string val = new string('x', size);
 
@@ -614,7 +614,7 @@ namespace System.Xml.Tests
                 return TEST_PASS;
             }
 
-            CError.WriteLine("Couldnt read after ArgumentException");
+            CError.WriteLine("Couldn't read after ArgumentException");
             return TEST_FAIL;
         }
 
@@ -645,7 +645,7 @@ namespace System.Xml.Tests
 
             DataReader.Read();
 
-            CError.Compare(DataReader.VerifyNode(XmlNodeType.EndElement, "ROOT", String.Empty), "1vn");
+            CError.Compare(DataReader.VerifyNode(XmlNodeType.EndElement, "ROOT", string.Empty), "1vn");
 
             return TEST_PASS;
         }
@@ -655,7 +655,7 @@ namespace System.Xml.Tests
         {
             if (IsRoundTrippedReader() || IsSubtreeReader()) return TEST_SKIPPED;
 
-            Char[] buffer = new Char[9];
+            char[] buffer = new char[9];
 
             ReloadSource(new StringReader("<root>somevalue</root></root>"));
             DataReader.PositionOnElement("root");
@@ -705,7 +705,7 @@ namespace System.Xml.Tests
             int size = (int)CurVariation.Params[1];
 
             string somechar = new string('x', size);
-            string strxml = String.Format("<ROOT>a" + somechar + "{0}c</ROOT>", Convert.ToChar(0));
+            string strxml = string.Format("<ROOT>a" + somechar + "{0}c</ROOT>", Convert.ToChar(0));
             ReloadSourceStr(strxml);
             DataReader.PositionOnElement("ROOT");
             char[] buffer = new char[1];
@@ -735,7 +735,7 @@ namespace System.Xml.Tests
             return TEST_FAIL;
         }
 
-        [Variation("ReadValue with whitespaces")]
+        [Variation("ReadValue with whitespace")]
         public int TestTextReadValue25()
         {
             string strExpected = "somevalue";
@@ -796,7 +796,7 @@ namespace System.Xml.Tests
                 }
             }
 
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didnt read 5 chars");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 5), 5, "Didn't read 5 chars");
             CError.Compare("value", new string(buffer), "Strings don't match");
 
             try
@@ -900,7 +900,7 @@ namespace System.Xml.Tests
             return TEST_PASS;
         }
 
-        [Variation("Testing a usecase pattern with large file")]
+        [Variation("Testing a use case pattern with large file")]
         public int TestReadValueOnBig()
         {
             ReloadSource();
@@ -984,12 +984,12 @@ namespace System.Xml.Tests
             DataReader.PositionOnElement("root");
             DataReader.Read(); //This takes to text node.
 
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 3), 3, "Didnt read 3 chars");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 3), 3, "Didn't read 3 chars");
             CError.Compare("val", new string(buffer), "Strings don't match");
 
             buffer = new char[2];
             DataReader.Read(); //This takes to text node.
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 2), 2, "Didnt read 2 chars");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 2), 2, "Didn't read 2 chars");
             CError.Compare("ue", new string(buffer), "Strings don't match");
 
             while (DataReader.Read()) ;
@@ -1021,12 +1021,12 @@ namespace System.Xml.Tests
             DataReader.PositionOnElement("root");
             DataReader.Read(); //This takes to text node.
 
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 3), 3, "Didnt read 3 chars");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 3), 3, "Didn't read 3 chars");
             CError.Compare("val", new string(buffer), "Strings don't match");
 
             buffer = new char[2];
             DataReader.Read(); //This takes to text node.
-            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 2), 2, "Didnt read 2 chars");
+            CError.Compare(DataReader.ReadValueChunk(buffer, 0, 2), 2, "Didn't read 2 chars");
             CError.Compare("ue", new string(buffer), "Strings don't match");
 
             while (DataReader.Read()) ;
@@ -1063,7 +1063,7 @@ namespace System.Xml.Tests
 
             string xml = @"<root a1='12345' a2='value'/>";
             ReloadSource(new StringReader(xml));
-            Char[] buffer = new Char[10];
+            char[] buffer = new char[10];
 
             CError.Compare(DataReader.Read(), "Read");
             CError.Compare(DataReader.MoveToNextAttribute(), "MoveToNextAttribute");
@@ -1091,7 +1091,7 @@ namespace System.Xml.Tests
                 return TEST_SKIPPED;
             string xml = @"<?xml version='1.0'?><root/>";
             ReloadSource(new StringReader(xml));
-            Char[] buffer = new Char[10];
+            char[] buffer = new char[10];
 
             CError.Compare(DataReader.Read(), "Read");
             CError.Compare(DataReader.MoveToFirstAttribute(), "MoveToFirstAttribute");

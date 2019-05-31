@@ -34,7 +34,7 @@ namespace System.Data.SqlClient.SNI
     /// <summary>
     /// SMUX packet header
     /// </summary>
-    internal class SNISMUXHeader
+    internal sealed class SNISMUXHeader
     {
         public const int HEADER_LENGTH = 16;
 
@@ -44,6 +44,46 @@ namespace System.Data.SqlClient.SNI
         public uint length;
         public uint sequenceNumber;
         public uint highwater;
+
+        public void Read(byte[] bytes)
+        {
+            SMID = bytes[0];
+            flags = bytes[1];
+            sessionId = BitConverter.ToUInt16(bytes, 2);
+            length = BitConverter.ToUInt32(bytes, 4) - SNISMUXHeader.HEADER_LENGTH;
+            sequenceNumber = BitConverter.ToUInt32(bytes, 8);
+            highwater = BitConverter.ToUInt32(bytes, 12);
+        }
+
+        public void Write(Span<byte> bytes)
+        {
+            uint value = highwater;
+            // access the highest element first to cause the largest range check in the jit, then fill in the rest of the value and carry on as normal
+            bytes[15] = (byte)((value >> 24) & 0xff);
+            bytes[12] = (byte)(value & 0xff); // BitConverter.GetBytes(_currentHeader.highwater).CopyTo(headerBytes, 12);
+            bytes[13] = (byte)((value >> 8) & 0xff);
+            bytes[14] = (byte)((value >> 16) & 0xff);
+
+            bytes[0] = SMID; // BitConverter.GetBytes(_currentHeader.SMID).CopyTo(headerBytes, 0);
+            bytes[1] = flags; // BitConverter.GetBytes(_currentHeader.flags).CopyTo(headerBytes, 1);
+
+            value = sessionId;
+            bytes[2] = (byte)(value & 0xff); // BitConverter.GetBytes(_currentHeader.sessionId).CopyTo(headerBytes, 2);
+            bytes[3] = (byte)((value >> 8) & 0xff);
+
+            value = length;
+            bytes[4] = (byte)(value & 0xff); // BitConverter.GetBytes(_currentHeader.length).CopyTo(headerBytes, 4);
+            bytes[5] = (byte)((value >> 8) & 0xff);
+            bytes[6] = (byte)((value >> 16) & 0xff);
+            bytes[7] = (byte)((value >> 24) & 0xff);
+
+            value = sequenceNumber;
+            bytes[8] = (byte)(value & 0xff); // BitConverter.GetBytes(_currentHeader.sequenceNumber).CopyTo(headerBytes, 8);
+            bytes[9] = (byte)((value >> 8) & 0xff);
+            bytes[10] = (byte)((value >> 16) & 0xff);
+            bytes[11] = (byte)((value >> 24) & 0xff);
+
+        }
     }
 
     /// <summary>
@@ -70,11 +110,19 @@ namespace System.Data.SqlClient.SNI
         internal const int HandshakeFailureError = 31;
         internal const int InternalExceptionError = 35;
         internal const int ConnOpenFailedError = 40;
+        internal const int ErrorSpnLookup = 44;
         internal const int LocalDBErrorCode = 50;
         internal const int MultiSubnetFailoverWithMoreThan64IPs = 47;
         internal const int MultiSubnetFailoverWithInstanceSpecified = 48;
         internal const int MultiSubnetFailoverWithNonTcpProtocol = 49;
         internal const int MaxErrorValue = 50157;
+        internal const int LocalDBNoInstanceName = 51;
+        internal const int LocalDBNoInstallation = 52;
+        internal const int LocalDBInvalidConfig = 53;
+        internal const int LocalDBNoSqlUserInstanceDllPath = 54;
+        internal const int LocalDBInvalidSqlUserInstanceDllPath = 55;
+        internal const int LocalDBFailedToLoadDll = 56;
+        internal const int LocalDBBadRuntime = 57;
 
         /// <summary>
         /// Validate server certificate callback for SSL

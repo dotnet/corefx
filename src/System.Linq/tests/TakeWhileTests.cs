@@ -14,7 +14,7 @@ namespace System.Linq.Tests
         public void SameResultsRepeatCallsIntQuery()
         {
             var q = from x in new[] { 9999, 0, 888, -1, 66, -777, 1, 2, -12345 }
-                    where x > Int32.MinValue
+                    where x > int.MinValue
                     select x;
                     
             Assert.Equal(q.TakeWhile(x => true), q.TakeWhile(x => true));
@@ -23,8 +23,8 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", String.Empty }
-                    where !String.IsNullOrEmpty(x)
+            var q = from x in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS", string.Empty }
+                    where !string.IsNullOrEmpty(x)
                     select x;
 
             Assert.Equal(q.TakeWhile(x => true), q.TakeWhile(x => true));
@@ -107,7 +107,17 @@ namespace System.Linq.Tests
         }
 
         [Fact]
-        [ActiveIssue("Valid test but too intensive to enable even in OuterLoop")]
+        public void RunOnce()
+        {
+            int[] source = {8, 3, 12, 4, 6, 10};
+            int[] expected = {8};
+            Assert.Equal(expected, source.RunOnce().TakeWhile(x => x % 2 == 0));
+            source = new[] {6, 2, 5, 3, 8};
+            expected = new[] {6, 2, 5, 3};
+            Assert.Equal(expected, source.RunOnce().TakeWhile((element, index) => index < source.Length - 1));
+        }
+
+        [Fact(Skip = "Valid test but too intensive to enable even in OuterLoop")]
         public void IndexTakeWhileOverflowBeyondIntMaxValueElements()
         {
             var taken = new FastInfiniteEnumerator<int>().TakeWhile((e, i) => true);
@@ -125,7 +135,7 @@ namespace System.Linq.Tests
         public void ThrowsOnNullSource()
         {
             int[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.TakeWhile(x => true));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.TakeWhile(x => true));
         }
 
         [Fact]
@@ -134,14 +144,14 @@ namespace System.Linq.Tests
             int[] source = { 1, 2, 3 };
             Func<int, bool> nullPredicate = null;
 
-            Assert.Throws<ArgumentNullException>("predicate", () => source.TakeWhile(nullPredicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => source.TakeWhile(nullPredicate));
         }
 
         [Fact]
         public void ThrowsOnNullSourceIndexed()
         {
             int[] source = null;
-            Assert.Throws<ArgumentNullException>("source", () => source.TakeWhile((x, i) => true));
+            AssertExtensions.Throws<ArgumentNullException>("source", () => source.TakeWhile((x, i) => true));
         }
 
         [Fact]
@@ -150,7 +160,7 @@ namespace System.Linq.Tests
             int[] source = { 1, 2, 3 };
             Func<int, int, bool> nullPredicate = null;
 
-            Assert.Throws<ArgumentNullException>("predicate", () => source.TakeWhile(nullPredicate));
+            AssertExtensions.Throws<ArgumentNullException>("predicate", () => source.TakeWhile(nullPredicate));
         }
 
         [Fact]

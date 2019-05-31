@@ -1,0 +1,12 @@
+﻿<Project>
+  <PropertyGroup>
+    <BuildConfigurations>
+      netcoreapp-FreeBSD;
+      netcoreapp-Linux;
+      netcoreapp-OSX;
+      netcoreapp-Windows_NT;
+      uap-Windows_NT;
+      uapaot-Windows_NT;
+    </BuildConfigurations>
+  </PropertyGroup>
+</Project>

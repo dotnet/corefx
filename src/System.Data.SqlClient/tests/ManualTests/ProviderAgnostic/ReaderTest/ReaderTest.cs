@@ -5,13 +5,14 @@
 using System.Data.Common;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Data.SqlClient.ManualTesting.Tests
 {
     public static class ReaderTest
     {
-        [CheckConnStrSetupFact]
+        [ConditionalFact(typeof(DataTestUtility),nameof(DataTestUtility.AreConnStringsSetup))]
         public static void TestMain()
         {
             string connectionString = DataTestUtility.TcpConnStr;
@@ -33,10 +34,7 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         DbTransaction tx;
 
                         #region <<Create temp table>>
-                        cmd.CommandText = "SELECT au_id, au_lname, au_fname, phone, address, city, state, zip, contract into " + tempTable + " from authors where au_id='UNKNOWN-ID'";
-                        cmd.ExecuteNonQuery();
-
-                        cmd.CommandText = "alter table " + tempTable + " add constraint " + tempKey + " primary key (au_id)";
+                        cmd.CommandText = "SELECT LastName, FirstName, Title, Address, City, Region, PostalCode, Country into " + tempTable + " from Employees where EmployeeID=0";
                         cmd.ExecuteNonQuery();
 
                         #endregion
@@ -44,9 +42,9 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         tx = con.BeginTransaction();
                         cmd.Transaction = tx;
 
-                        cmd.CommandText = "insert into " + tempTable + "(au_id, au_lname, au_fname, phone, address, city, state, zip, contract) values ('876-54-3210', 'Doe', 'Jane' , '882-8080', 'One Microsoft Way', 'Redmond', 'WA', '98052', 0)";
+                        cmd.CommandText = "insert into " + tempTable + "(LastName, FirstName, Title, Address, City, Region, PostalCode, Country) values ('Doe', 'Jane' , 'Ms.', 'One Microsoft Way', 'Redmond', 'WA', '98052', 'USA')";
                         cmd.ExecuteNonQuery();
-                        cmd.CommandText = "insert into " + tempTable + "(au_id, au_lname, au_fname, phone, address, city, state, zip, contract) values ('876-54-3211', 'Doe', 'John' , '882-8181', NULL, NULL, NULL, NULL, 0)";
+                        cmd.CommandText = "insert into " + tempTable + "(LastName, FirstName, Title, Address, City, Region, PostalCode, Country) values ('Doe', 'John' , 'Mr.', NULL, NULL, NULL, NULL, NULL)";
                         cmd.ExecuteNonQuery();
 
                         tx.Commit();
@@ -55,10 +53,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                         string parameterName = "@p1";
                         DbParameter p1 = cmd.CreateParameter();
                         p1.ParameterName = parameterName;
-                        p1.Value = "876-54-3210";
+                        p1.Value = "Doe";
                         cmd.Parameters.Add(p1);
 
-                        cmd.CommandText = "select * from " + tempTable + " where au_id >= " + parameterName;
+                        cmd.CommandText = "select * from " + tempTable + " where LastName = " + parameterName;
 
                         // Test GetValue + IsDBNull
                         using (DbDataReader rdr = cmd.ExecuteReader())
@@ -67,8 +65,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             int currentValue = 0;
                             string[] expectedValues =
                             {
-                                "876-54-3210,Doe,Jane,882-8080    ,One Microsoft Way,Redmond,WA,98052,False",
-                                "876-54-3211,Doe,John,882-8181    ,(NULL),(NULL),(NULL),(NULL),False"
+                                "Doe,Jane,Ms.,One Microsoft Way,Redmond,WA,98052,USA",
+                                "Doe,John,Mr.,(NULL),(NULL),(NULL),(NULL),(NULL)"
                             };
 
                             while (rdr.Read())
@@ -103,8 +101,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             int currentValue = 0;
                             string[] expectedValues =
                             {
-                                "876-54-3210,Doe,Jane,882-8080    ,One Microsoft Way,Redmond,WA,98052,False",
-                                "876-54-3211,Doe,John,882-8181    ,(NULL),(NULL),(NULL),(NULL),False"
+                                "Doe,Jane,Ms.,One Microsoft Way,Redmond,WA,98052,USA",
+                                "Doe,John,Mr.,(NULL),(NULL),(NULL),(NULL),(NULL)"
                             };
 
                             while (rdr.Read())
@@ -131,6 +129,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                                         {
                                             actualResult.Append(rdr.GetFieldValue<decimal>(i));
                                         }
+                                        else if (rdr.GetFieldType(i) == typeof(int))
+                                        {
+                                            actualResult.Append(rdr.GetFieldValue<int>(i));
+                                        }
                                         else
                                         {
                                             actualResult.Append(rdr.GetFieldValue<string>(i));
@@ -150,8 +152,8 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                             int currentValue = 0;
                             string[] expectedValues =
                             {
-                                "876-54-3210,Doe,Jane,882-8080    ,One Microsoft Way,Redmond,WA,98052,False",
-                                "876-54-3211,Doe,John,882-8181    ,(NULL),(NULL),(NULL),(NULL),False"
+                                "Doe,Jane,Ms.,One Microsoft Way,Redmond,WA,98052,USA",
+                                "Doe,John,Mr.,(NULL),(NULL),(NULL),(NULL),(NULL)"
                             };
 
                             while (rdr.ReadAsync().Result)
@@ -177,6 +179,10 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                                         else if (rdr.GetFieldType(i) == typeof(decimal))
                                         {
                                             actualResult.Append(rdr.GetFieldValueAsync<decimal>(i).Result);
+                                        }
+                                        else if (rdr.GetFieldType(i) == typeof(int))
+                                        {
+                                            actualResult.Append(rdr.GetFieldValue<int>(i));
                                         }
                                         else
                                         {
@@ -260,6 +266,40 @@ namespace System.Data.SqlClient.ManualTesting.Tests
                     }
                 }
             }
+        }
+
+        [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        public static async Task TestConcurrentLoadSync()
+        {
+            ConcurrentLoadContext context = new ConcurrentLoadContext(
+                providerFactory: SqlClientFactory.Instance,
+                connectionString: DataTestUtility.TcpConnStr,
+                mode: ConcurrentLoadContext.Mode.Sync,
+                warmupSeconds: 1,
+                executionSeconds: 60,
+                threadCount: Environment.ProcessorCount * 4
+            );
+            var (transactionPerSecond, average, stdDeviation) = await context.Run();
+            Assert.InRange(transactionPerSecond, 1, int.MaxValue);
+            Assert.True(average > 0);
+            Assert.True(stdDeviation != 0);
+        }
+
+        [ConditionalFact(typeof(DataTestUtility), nameof(DataTestUtility.AreConnStringsSetup))]
+        public static async Task TestConcurrentLoadAsync()
+        {
+            ConcurrentLoadContext context = new ConcurrentLoadContext(
+                providerFactory: SqlClientFactory.Instance,
+                connectionString: DataTestUtility.TcpConnStr,
+                mode: ConcurrentLoadContext.Mode.Async,
+                warmupSeconds: 1,
+                executionSeconds: 60,
+                threadCount: Environment.ProcessorCount * 4
+            );
+            var (transactionPerSecond, average, stdDeviation) = await context.Run();
+            Assert.InRange(transactionPerSecond, 1, int.MaxValue);
+            Assert.True(average > 0);
+            Assert.True(stdDeviation != 0);
         }
     }
 }

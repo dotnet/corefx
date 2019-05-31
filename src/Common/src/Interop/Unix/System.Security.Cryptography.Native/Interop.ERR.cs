@@ -12,25 +12,31 @@ internal static partial class Interop
 {
     internal static partial class Crypto
     {
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrClearError")]
+        internal static extern ulong ErrClearError();
+
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrGetError")]
         internal static extern ulong ErrGetError();
+
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrGetErrorAlloc")]
+        private static extern ulong ErrGetErrorAlloc([MarshalAs(UnmanagedType.Bool)] out bool isAllocFailure);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrPeekError")]
         internal static extern ulong ErrPeekError();
 
-        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrGetErrorAlloc")]
-        private static extern ulong ErrGetErrorAlloc([MarshalAs(UnmanagedType.Bool)] out bool isAllocFailure);
+        [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrPeekLastError")]
+        internal static extern ulong ErrPeekLastError();
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrReasonErrorString")]
         internal static extern IntPtr ErrReasonErrorString(ulong error);
 
         [DllImport(Libraries.CryptoNative, EntryPoint = "CryptoNative_ErrErrorStringN")]
-        private static unsafe extern void ErrErrorStringN(ulong e, byte* buf, int len);
+        private static extern unsafe void ErrErrorStringN(ulong e, byte* buf, int len);
 
         private static unsafe string ErrErrorStringN(ulong error)
         {
             var buffer = new byte[1024];
-            fixed (byte* buf = buffer)
+            fixed (byte* buf = &buffer[0])
             {
                 ErrErrorStringN(error, buf, buffer.Length);
                 return Marshal.PtrToStringAnsi((IntPtr)buf);

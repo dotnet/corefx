@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.ComponentModel.Design.Serialization;
 using System.Globalization;
+using System.Linq;
 using Xunit;
 
 namespace System.ComponentModel.Tests
@@ -26,9 +28,10 @@ namespace System.ComponentModel.Tests
         [Fact]
         public static void CanConvertTo_WithContext()
         {
-            CanConvertTo_WithContext(new object[1, 2]
+            CanConvertTo_WithContext(new object[2, 2]
                 {
-                    { typeof(Enum[]), true }
+                    { typeof(Enum[]), true },
+                    { typeof(InstanceDescriptor), true },
                 },
                 new EnumConverter(typeof(Enum)));
         }
@@ -69,6 +72,13 @@ namespace System.ComponentModel.Tests
 
             object actual = EnumConverterTests.s_someEnumConverter.ConvertTo(TypeConverterTests.s_context, CultureInfo.InvariantCulture, SomeEnum.Sub, typeof(Enum[]));
             VerifyArraysEqual<SomeEnum>(new SomeEnum[1] { SomeEnum.Sub }, actual);
+
+            var actualInstanceDescriptor = (InstanceDescriptor)EnumConverterTests.s_someEnumConverter.ConvertTo(SomeEnum.Add, typeof(InstanceDescriptor));
+            var expectedMemberInfo = typeof(SomeEnum).GetField(nameof(SomeEnum.Add));
+            Assert.Equal(expectedMemberInfo, actualInstanceDescriptor.MemberInfo);
+            Assert.Empty(actualInstanceDescriptor.Arguments);
+            Assert.True(actualInstanceDescriptor.IsComplete);
+            Assert.Equal(SomeEnum.Add, actualInstanceDescriptor.Invoke());
         }
 
         [Fact]
@@ -85,16 +95,84 @@ namespace System.ComponentModel.Tests
 
             actual = EnumConverterTests.s_someFlagsEnumConverter.ConvertTo(TypeConverterTests.s_context, null, SomeFlagsEnum.Option3, typeof(Enum[]));
             VerifyArraysEqual<SomeFlagsEnum>(new SomeFlagsEnum[1] { SomeFlagsEnum.Option3 }, actual);
+
+
+            var actualInstanceDescriptor = (InstanceDescriptor)EnumConverterTests.s_someFlagsEnumConverter.ConvertTo(SomeFlagsEnum.Option1 | SomeFlagsEnum.Option2, typeof(InstanceDescriptor));
+            var expectedMemberInfo = typeof(Enum).GetMethod("ToObject", new Type[] { typeof(Type), typeof(int) });
+            Assert.Equal(expectedMemberInfo, actualInstanceDescriptor.MemberInfo);
+            Assert.Equal(new object[] { typeof(SomeFlagsEnum), (int)(SomeFlagsEnum.Option1 | SomeFlagsEnum.Option2) }, actualInstanceDescriptor.Arguments);
+            Assert.True(actualInstanceDescriptor.IsComplete);
+            Assert.Equal(SomeFlagsEnum.Option1 | SomeFlagsEnum.Option2, actualInstanceDescriptor.Invoke());
         }
 
         [Fact]
         public static void ConvertTo_WithContext_Negative()
         {
-            Assert.Throws<ArgumentException>(
-                () => EnumConverterTests.s_someEnumConverter.ConvertTo(TypeConverterTests.s_context, null, 3, typeof(string)));
+            AssertExtensions.Throws<ArgumentException>(null, () => EnumConverterTests.s_someEnumConverter.ConvertTo(TypeConverterTests.s_context, null, 3, typeof(string)));
+            AssertExtensions.Throws<ArgumentException>(null, "enumType", () => new EnumConverter(typeof(Enum)).ConvertTo(TypeConverterTests.s_context, null, SomeFlagsEnum.Option1, typeof(string)));
+        }
 
-            Assert.Throws<ArgumentException>(
-                () => new EnumConverter(typeof(Enum)).ConvertTo(TypeConverterTests.s_context, null, SomeFlagsEnum.Option1, typeof(string)));
+        [Fact]
+        public static void GetStandardValues_Succeeds()
+        {
+            var converter = new EnumConverter(typeof(SomeEnum));
+            SomeEnum[] standardValues = converter.GetStandardValues().Cast<SomeEnum>().ToArray();
+            Assert.Equal(Enum.GetNames(typeof(SomeEnum)).Length, standardValues.Length);
+            Assert.All(Enum.GetValues(typeof(SomeEnum)).Cast<SomeEnum>(), value => Assert.Contains(value, standardValues));
+        }
+
+        [Fact]
+        public static void ConvertFrom_ULongFlagsEnum_String()
+        {
+            EnumConverter converter = new EnumConverter(typeof(ULongFlagsEnum));
+            string str = $"{ULongFlagsEnum.Bit62}, {ULongFlagsEnum.Bit63}";
+            ULongFlagsEnum result = (ULongFlagsEnum)converter.ConvertFrom(null, null, str);
+            Assert.Equal(ULongFlagsEnum.Bit62 | ULongFlagsEnum.Bit63, result);
+        }
+
+        [Fact]
+        public static void ConvertFrom_ULongFlagsEnum_EnumArray()
+        {
+            EnumConverter converter = new EnumConverter(typeof(ULongFlagsEnum));
+            Enum[] arr = new Enum[] { ULongFlagsEnum.Bit62, ULongFlagsEnum.Bit63 };
+            ULongFlagsEnum result = (ULongFlagsEnum)converter.ConvertFrom(null, null, arr);
+            Assert.Equal(ULongFlagsEnum.Bit62 | ULongFlagsEnum.Bit63, result);
+        }
+
+        [Fact]
+        public static void ConvertTo_ULongFlagsEnum_EnumArray()
+        {
+            EnumConverter converter = new EnumConverter(typeof(ULongFlagsEnum));
+            ULongFlagsEnum value = ULongFlagsEnum.Bit62 | ULongFlagsEnum.Bit63;
+            Enum[] result = (Enum[])converter.ConvertTo(null, null, value, typeof(Enum[]));
+            Assert.Equal(new Enum[] { ULongFlagsEnum.Bit62, ULongFlagsEnum.Bit63 }, result);
+        }
+
+        [Fact]
+        public static void ConvertFrom_LongFlagsEnum_String()
+        {
+            EnumConverter converter = new EnumConverter(typeof(LongFlagsEnum));
+            string str = $"{LongFlagsEnum.Bit62}, {LongFlagsEnum.Bit63}";
+            LongFlagsEnum result = (LongFlagsEnum)converter.ConvertFrom(null, null, str);
+            Assert.Equal(LongFlagsEnum.Bit62 | LongFlagsEnum.Bit63, result);
+        }
+
+        [Fact]
+        public static void ConvertFrom_LongFlagsEnum_EnumArray()
+        {
+            EnumConverter converter = new EnumConverter(typeof(LongFlagsEnum));
+            Enum[] arr = new Enum[] { LongFlagsEnum.Bit62, LongFlagsEnum.Bit63 };
+            LongFlagsEnum result = (LongFlagsEnum)converter.ConvertFrom(null, null, arr);
+            Assert.Equal(LongFlagsEnum.Bit62 | LongFlagsEnum.Bit63, result);
+        }
+
+        [Fact]
+        public static void ConvertTo_LongFlagsEnum_EnumArray()
+        {
+            EnumConverter converter = new EnumConverter(typeof(LongFlagsEnum));
+            LongFlagsEnum value = LongFlagsEnum.Bit62 | LongFlagsEnum.Bit63;
+            Enum[] result = (Enum[])converter.ConvertTo(null, null, value, typeof(Enum[]));
+            Assert.Equal(new Enum[] { LongFlagsEnum.Bit62, LongFlagsEnum.Bit63 }, result);
         }
 
         private static void VerifyArraysEqual<T>(T[] expected, object actual)

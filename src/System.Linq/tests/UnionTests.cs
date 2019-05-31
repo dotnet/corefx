@@ -50,7 +50,7 @@ namespace System.Linq.Tests
         [Fact]
         public void SameResultsRepeatCallsStringQuery()
         {
-            var q1 = from x1 in new[] { "AAA", String.Empty, "q", "C", "#", "!@#$%^", "0987654321", "Calling Twice" }
+            var q1 = from x1 in new[] { "AAA", string.Empty, "q", "C", "#", "!@#$%^", "0987654321", "Calling Twice" }
                      select x1;
             var q2 = from x2 in new[] { "!@#$%^", "C", "AAA", "", "Calling Twice", "SoS" }
                      select x2;
@@ -102,12 +102,23 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void RunOnce()
+        {
+            string[] first = { "Bob", "Robert", "Tim", "Matt", "miT" };
+            string[] second = { "ttaM", "Charlie", "Bbo" };
+            string[] expected = { "Bob", "Robert", "Tim", "Matt", "Charlie" };
+
+            var comparer = new AnagramEqualityComparer();
+            Assert.Equal(expected, first.RunOnce().Union(second.RunOnce(), comparer), comparer);
+        }
+
+        [Fact]
         public void FirstNullCustomComparer()
         {
             string[] first = null;
             string[] second = { "ttaM", "Charlie", "Bbo" };
 
-            var ane = Assert.Throws<ArgumentNullException>("first", () => first.Union(second, new AnagramEqualityComparer()));
+            var ane = AssertExtensions.Throws<ArgumentNullException>("first", () => first.Union(second, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -116,7 +127,7 @@ namespace System.Linq.Tests
             string[] first = { "Bob", "Robert", "Tim", "Matt", "miT" };
             string[] second = null;
 
-            var ane = Assert.Throws<ArgumentNullException>("second", () => first.Union(second, new AnagramEqualityComparer()));
+            var ane = AssertExtensions.Throws<ArgumentNullException>("second", () => first.Union(second, new AnagramEqualityComparer()));
         }
 
         [Fact]
@@ -125,7 +136,7 @@ namespace System.Linq.Tests
             string[] first = null;
             string[] second = { "ttaM", "Charlie", "Bbo" };
 
-            var ane = Assert.Throws<ArgumentNullException>("first", () => first.Union(second));
+            var ane = AssertExtensions.Throws<ArgumentNullException>("first", () => first.Union(second));
         }
 
         [Fact]
@@ -134,7 +145,7 @@ namespace System.Linq.Tests
             string[] first = { "Bob", "Robert", "Tim", "Matt", "miT" };
             string[] second = null;
 
-            var ane = Assert.Throws<ArgumentNullException>("second", () => first.Union(second));
+            var ane = AssertExtensions.Throws<ArgumentNullException>("second", () => first.Union(second));
         }
 
         [Fact]
@@ -384,6 +395,23 @@ namespace System.Linq.Tests
             var result = first.Union(second).Union(third);
 
             Assert.Equal(result, result);
+        }
+
+        [Fact]
+        public void HashSetWithBuiltInComparer_HashSetContainsNotUsed()
+        {
+            IEnumerable<string> input1 = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "a" };
+            IEnumerable<string> input2 = new[] { "A" };
+
+            Assert.Equal(new[] { "a", "A" }, input1.Union(input2));
+            Assert.Equal(new[] { "a", "A" }, input1.Union(input2, null));
+            Assert.Equal(new[] { "a", "A" }, input1.Union(input2, EqualityComparer<string>.Default));
+            Assert.Equal(new[] { "a" }, input1.Union(input2, StringComparer.OrdinalIgnoreCase));
+
+            Assert.Equal(new[] { "A", "a" }, input2.Union(input1));
+            Assert.Equal(new[] { "A", "a" }, input2.Union(input1, null));
+            Assert.Equal(new[] { "A", "a" }, input2.Union(input1, EqualityComparer<string>.Default));
+            Assert.Equal(new[] { "A" }, input2.Union(input1, StringComparer.OrdinalIgnoreCase));
         }
     }
 }

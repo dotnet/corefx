@@ -56,37 +56,33 @@ namespace Internal.Cryptography
             Debug.Assert(outputOffset >= 0);
             Debug.Assert(output.Length - outputOffset >= count);
 
-            unsafe
+            int numBytesWritten;
+            ErrorCode errorCode;
+            using (SafeNCryptKeyHandle keyHandle = _cngKey.Handle)
             {
-                fixed (byte *pInput = input, pOutput = output)
+                var inputSpan = new ReadOnlySpan<byte>(input, inputOffset, count);
+                var outputSpan = new Span<byte>(output, outputOffset, count);
+                unsafe
                 {
-                    int numBytesWritten;
-                    ErrorCode errorCode;
-                    using (SafeNCryptKeyHandle keyHandle = _cngKey.Handle)
-                    {
-                        if (_encrypting)
-                        {
-                            errorCode = Interop.NCrypt.NCryptEncrypt(keyHandle, pInput + inputOffset, count, null, pOutput + outputOffset, count, out numBytesWritten, AsymmetricPaddingMode.None);
-                        }
-                        else
-                        {
-                            errorCode = Interop.NCrypt.NCryptDecrypt(keyHandle, pInput + inputOffset, count, null, pOutput + outputOffset, count, out numBytesWritten, AsymmetricPaddingMode.None);
-                        }
-                    }
-                    if (errorCode != ErrorCode.ERROR_SUCCESS)
-                        throw errorCode.ToCryptographicException();
-
-                    if (numBytesWritten != count)
-                    {
-                        // CNG gives us no way to tell NCryptDecrypt() that we're decrypting the final block, nor is it performing any padding/depadding for us.
-                        // So there's no excuse for a provider to hold back output for "future calls." Though this isn't technically our problem to detect, we might as well
-                        // detect it now for easier diagnosis.
-                        throw new CryptographicException(SR.Cryptography_UnexpectedTransformTruncation);
-                    }
-
-                    return numBytesWritten;
+                    errorCode = _encrypting ?
+                        Interop.NCrypt.NCryptEncrypt(keyHandle, inputSpan, inputSpan.Length, null, outputSpan, outputSpan.Length, out numBytesWritten, AsymmetricPaddingMode.None) :
+                        Interop.NCrypt.NCryptDecrypt(keyHandle, inputSpan, inputSpan.Length, null, outputSpan, outputSpan.Length, out numBytesWritten, AsymmetricPaddingMode.None);
                 }
             }
+            if (errorCode != ErrorCode.ERROR_SUCCESS)
+            {
+                throw errorCode.ToCryptographicException();
+            }
+
+            if (numBytesWritten != count)
+            {
+                // CNG gives us no way to tell NCryptDecrypt() that we're decrypting the final block, nor is it performing any padding/depadding for us.
+                // So there's no excuse for a provider to hold back output for "future calls." Though this isn't technically our problem to detect, we might as well
+                // detect it now for easier diagnosis.
+                throw new CryptographicException(SR.Cryptography_UnexpectedTransformTruncation);
+            }
+
+            return numBytesWritten;
         }
 
         public sealed override byte[] TransformFinal(byte[] input, int inputOffset, int count)
@@ -140,7 +136,7 @@ namespace Internal.Cryptography
         private CngKey _cngKey;
         private readonly bool _encrypting;
 
-        private readonly static CngProperty s_ECBMode = CreateCngPropertyForCipherMode(Interop.BCrypt.BCRYPT_CHAIN_MODE_ECB);
-        private readonly static CngProperty s_CBCMode = CreateCngPropertyForCipherMode(Interop.BCrypt.BCRYPT_CHAIN_MODE_CBC);
+        private static readonly CngProperty s_ECBMode = CreateCngPropertyForCipherMode(Interop.BCrypt.BCRYPT_CHAIN_MODE_ECB);
+        private static readonly CngProperty s_CBCMode = CreateCngPropertyForCipherMode(Interop.BCrypt.BCRYPT_CHAIN_MODE_CBC);
     }
 }

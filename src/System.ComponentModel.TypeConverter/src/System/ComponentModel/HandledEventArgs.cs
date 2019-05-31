@@ -5,39 +5,30 @@
 namespace System.ComponentModel
 {
     /// <summary>
-    ///    <para>
-    ///       Provides data for the <see cref='System.ComponentModel.HandledEventArgs.Handled'/>
-    ///       event.
-    ///    </para>
+    /// Provides data for the <see cref='System.ComponentModel.HandledEventArgs.Handled'/>
+    /// event.
     /// </summary>
     public class HandledEventArgs : EventArgs
     {
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.HandledEventArgs'/> class with
-        ///       handled set to <see langword='false'/>.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.HandledEventArgs'/> class with
+        /// handled set to <see langword='false'/>.
         /// </summary>
         public HandledEventArgs() : this(false)
         {
         }
 
         /// <summary>
-        ///    <para>
-        ///       Initializes a new instance of the <see cref='System.ComponentModel.HandledEventArgs'/> class with
-        ///       handled set to the given value.
-        ///    </para>
+        /// Initializes a new instance of the <see cref='System.ComponentModel.HandledEventArgs'/> class with
+        /// handled set to the given value.
         /// </summary>
         public HandledEventArgs(bool defaultHandledValue)
-        : base()
         {
             Handled = defaultHandledValue;
         }
 
         /// <summary>
-        ///    <para>
-        ///       Gets or sets a value indicating whether the event was handled in the application's event handler.
-        ///    </para>
+        /// Gets or sets a value indicating whether the event was handled in the application's event handler.
         /// </summary>
         public bool Handled { get; set; }
     }

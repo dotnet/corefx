@@ -160,17 +160,6 @@ namespace System.Xml.Xsl
         }
 
         /// <summary>
-        /// Compute a sequence with cardinality *= c.
-        /// </summary>
-        /// <param name="t">the type to sequence</param>
-        /// <param name="c">the cardinality multiplier</param>
-        /// <returns>the sequence of t with cardinality *= c</returns>
-        public static XmlQueryType Product(XmlQueryType t, XmlQueryCardinality c)
-        {
-            return PrimeProduct(t, t.Cardinality * c);
-        }
-
-        /// <summary>
         /// Compute a sequence of zero to some max cardinality.
         /// </summary>
         /// <param name="t">the type to sequence</param>
@@ -359,7 +348,7 @@ namespace System.Xml.Xsl
             {
 #if DEBUG
                 Array arrEnum = Enum.GetValues(typeof(XmlTypeCode));
-                Debug.Assert((XmlTypeCode) arrEnum.GetValue(arrEnum.Length - 1) == XmlTypeCode.DayTimeDuration,
+                Debug.Assert((XmlTypeCode)arrEnum.GetValue(arrEnum.Length - 1) == XmlTypeCode.DayTimeDuration,
                              "DayTimeDuration is no longer the last item in XmlTypeCode.  This code expects it to be.");
 #endif
 
@@ -580,7 +569,7 @@ namespace System.Xml.Xsl
             }
 
             //-----------------------------------------------
-            // ItemType, OccurenceIndicator Properties
+            // ItemType, OccurrenceIndicator Properties
             //-----------------------------------------------
 
             /// <summary>
@@ -860,7 +849,7 @@ namespace System.Xml.Xsl
             }
 
             //-----------------------------------------------
-            // ItemType, OccurenceIndicator Properties
+            // ItemType, OccurrenceIndicator Properties
             //-----------------------------------------------
 
             /// <summary>
@@ -1074,7 +1063,7 @@ namespace System.Xml.Xsl
             }
 
             //-----------------------------------------------
-            // ItemType, OccurenceIndicator Properties
+            // ItemType, OccurrenceIndicator Properties
             //-----------------------------------------------
 
             /// <summary>
@@ -1197,7 +1186,7 @@ namespace System.Xml.Xsl
         /// <summary>
         /// Create a Node XmlQueryType having an XSD content type.
         /// </summary>
-        /// <param name="code">unless kind is Root, Element, or Attribute, "contentType" is ignored</param>
+        /// <param name="kind">unless kind is Root, Element, or Attribute, "contentType" is ignored</param>
         /// <param name="contentType">content type of the node</param>
         /// <returns>the node type</returns>
         public static XmlQueryType Type(XPathNodeType kind, XmlQualifiedNameTest nameTest, XmlSchemaType contentType, bool isNillable)
@@ -1357,7 +1346,7 @@ namespace System.Xml.Xsl
         }
 
         /// <summary>
-        /// Converts type of sequence of items to type of sequnce of atomic value
+        /// Converts type of sequence of items to type of sequence of atomic value
         //  See http://www.w3.org/TR/2004/xquery-semantics/#jd_data for the detailed description
         /// </summary>
         /// <param name="source">source type</param>
@@ -1540,7 +1529,7 @@ namespace System.Xml.Xsl
                 case XmlTypeCode.Element:
                     XmlSchemaType sourceSchemaType = sourceItem.SchemaType;
                     if (sourceSchemaType == XmlSchemaComplexType.UntypedAnyType) {
-                        // attfibutes of of xdt:untypedAny are attribute(*, xdt:untypedAtomic)*
+                        // attributes of xdt:untypedAny are attribute(*, xdt:untypedAtomic)*
                         card |= AddFilteredPrime(list, UntypedAttribute, filter) * XmlQueryCardinality.ZeroOrOne;
                     }
                     else {
@@ -1928,7 +1917,7 @@ namespace System.Xml.Xsl
                 return XmlQueryCardinality.ZeroOrMore;
 
             default:
-                Debug.Assert(false);
+                Debug.Fail($"Unexpected type code {typeCode}");
                 return XmlQueryCardinality.None;
             }
         }
@@ -1976,7 +1965,7 @@ namespace System.Xml.Xsl
         }
 
         /// <summary>
-        /// Convert particle occurrance range into cardinality
+        /// Convert particle occurrence range into cardinality
         /// </summary>
         private XmlQueryCardinality CardinalityOfParticle(XmlSchemaParticle particle) {
             if (particle.MinOccurs == decimal.Zero) {

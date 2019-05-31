@@ -4,7 +4,6 @@
 
 namespace System.Security.Permissions
 {
-    [Serializable]
     [AttributeUsage((AttributeTargets)(109), AllowMultiple = true, Inherited = false)]
     public sealed partial class SecurityPermissionAttribute : CodeAccessSecurityAttribute
     {
@@ -24,6 +23,6 @@ namespace System.Security.Permissions
         public bool SerializationFormatter { get; set; }
         public bool SkipVerification { get; set; }
         public bool UnmanagedCode { get; set; }
-        public override IPermission CreatePermission() { return default(IPermission); }
+        public override IPermission? CreatePermission() { return null; }
     }
 }

@@ -40,23 +40,23 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public void ParameterCannotBeTypeVoid()
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(void)));
-            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(void), "var"));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(void)));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(void), "var"));
         }
 
         [Theory]
         [ClassData(typeof(InvalidTypesData))]
         public void OpenGenericType_ThrowsArgumentException(Type type)
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(type));
-            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(type, "name"));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Parameter(type));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Parameter(type, "name"));
         }
 
         [Fact]
         public void NullType()
         {
-            Assert.Throws<ArgumentNullException>("type", () => Expression.Parameter(null));
-            Assert.Throws<ArgumentNullException>("type", () => Expression.Parameter(null, "var"));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Expression.Parameter(null));
+            AssertExtensions.Throws<ArgumentNullException>("type", () => Expression.Parameter(null, "var"));
         }
 
         [Theory]
@@ -299,14 +299,14 @@ namespace System.Linq.Expressions.Tests
             ParameterExpression param = Expression.Parameter(typeof(int));
             Assert.False(param.CanReduce);
             Assert.Same(param, param.Reduce());
-            Assert.Throws<ArgumentException>(null, () => param.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => param.ReduceAndCheck());
         }
 
         [Fact]
         public void CannotBePointerType()
         {
-            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(int*)));
-            Assert.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(int*), "pointer"));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(int*)));
+            AssertExtensions.Throws<ArgumentException>("type", () => Expression.Parameter(typeof(int*), "pointer"));
         }
 
         [Theory]

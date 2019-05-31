@@ -17,6 +17,8 @@ namespace System.IO.Tests
             return result;
         }
 
+        public override bool IsDirectoryCreate => false;
+
         #endregion
 
         [Fact]
@@ -42,7 +44,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".")]
         [InlineData("............")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Windows-invalid extensions are removed
         public void WindowsInvalidExtensionsAreRemoved(string extension)
         {
             string testDir = GetTestFilePath();
@@ -53,7 +55,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".s", ".")]
         [InlineData(".s", ".s....")]
-        [PlatformSpecific(TestPlatforms.Windows)]
+        [PlatformSpecific(TestPlatforms.Windows)]  // Trailing dots in extension are removed
         public void WindowsCurtailTrailingDots(string extension, string trailing)
         {
             string testDir = GetTestFilePath();
@@ -65,7 +67,7 @@ namespace System.IO.Tests
         [Theory]
         [InlineData(".s", ".")]
         [InlineData(".s.s....", ".ls")]
-        [PlatformSpecific(TestPlatforms.AnyUnix)]
+        [PlatformSpecific(TestPlatforms.AnyUnix)]  // Last dot is extension
         public void UnixLastDotIsExtension(string extension, string trailing)
         {
             string testDir = GetTestFilePath();

@@ -8,7 +8,7 @@ using Xunit;
 
 namespace System.Collections.Tests
 {
-    public static class BitArray_OperatorsTests
+    public static partial class BitArray_OperatorsTests
     {
         private const int BitsPerByte = 8;
         private const int BitsPerInt32 = 32;
@@ -156,10 +156,10 @@ namespace System.Collections.Tests
             BitArray bitArray2 = new BitArray(6, false);
 
             // Different lengths
-            Assert.Throws<ArgumentException>(null, () => bitArray1.And(bitArray2));
-            Assert.Throws<ArgumentException>(null, () => bitArray2.And(bitArray1));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray1.And(bitArray2));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray2.And(bitArray1));
 
-            Assert.Throws<ArgumentNullException>("value", () => bitArray1.And(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => bitArray1.And(null));
         }
 
         [Fact]
@@ -169,10 +169,10 @@ namespace System.Collections.Tests
             BitArray bitArray2 = new BitArray(6, false);
 
             // Different lengths
-            Assert.Throws<ArgumentException>(null, () => bitArray1.Or(bitArray2));
-            Assert.Throws<ArgumentException>(null, () => bitArray2.Or(bitArray1));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray1.Or(bitArray2));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray2.Or(bitArray1));
 
-            Assert.Throws<ArgumentNullException>("value", () => bitArray1.Or(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => bitArray1.Or(null));
         }
 
         [Fact]
@@ -182,10 +182,65 @@ namespace System.Collections.Tests
             BitArray bitArray2 = new BitArray(6, false);
 
             // Different lengths
-            Assert.Throws<ArgumentException>(null, () => bitArray1.Xor(bitArray2));
-            Assert.Throws<ArgumentException>(null, () => bitArray2.Xor(bitArray1));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray1.Xor(bitArray2));
+            AssertExtensions.Throws<ArgumentException>(null, () => bitArray2.Xor(bitArray1));
 
-            Assert.Throws<ArgumentNullException>("value", () => bitArray1.Xor(null));
+            AssertExtensions.Throws<ArgumentNullException>("value", () => bitArray1.Xor(null));
+        }
+
+        public static IEnumerable<object[]> Resize_TestData()
+        {
+            yield return new object[] { new BitArray(32), new BitArray(64), 32, 32 };
+            yield return new object[] { new BitArray(32), new BitArray(64), 64, 64 };
+            yield return new object[] { new BitArray(64), new BitArray(32), 32, 32 };
+            yield return new object[] { new BitArray(64), new BitArray(32), 64, 64 };
+            yield return new object[] { new BitArray(288), new BitArray(32), 288, 288 };
+            yield return new object[] { new BitArray(288), new BitArray(32), 32, 32 };
+            yield return new object[] { new BitArray(32), new BitArray(288), 288, 288 };
+            yield return new object[] { new BitArray(32), new BitArray(288), 32, 32 };
+            yield return new object[] { new BitArray(1), new BitArray(9), 9, 9 };
+            yield return new object[] { new BitArray(1), new BitArray(9), 1, 1 };
+            yield return new object[] { new BitArray(9), new BitArray(1), 9, 9 };
+            yield return new object[] { new BitArray(9), new BitArray(1), 1, 1 };
+            yield return new object[] { new BitArray(287), new BitArray(32), 32, 32 };
+            yield return new object[] { new BitArray(287), new BitArray(32), 287, 287 };
+            yield return new object[] { new BitArray(32), new BitArray(287), 32, 32 };
+            yield return new object[] { new BitArray(32), new BitArray(287), 287, 287 };
+            yield return new object[] { new BitArray(289), new BitArray(32), 289, 289 };
+            yield return new object[] { new BitArray(289), new BitArray(32), 32, 32 };
+            yield return new object[] { new BitArray(32), new BitArray(289), 289, 289 };
+            yield return new object[] { new BitArray(32), new BitArray(289), 32, 32 };
+        }
+
+        [Theory]
+        [MemberData(nameof(Resize_TestData))]
+        public static void And_With_Resize(BitArray left, BitArray right, int newLeftLength, int newRightLength)
+        {
+            left.Length = newLeftLength;
+            right.Length = newRightLength;
+
+            left.And(right);
+        }
+
+        [Theory]
+        [MemberData(nameof(Resize_TestData))]
+        public static void Or_With_Resize(BitArray left, BitArray right, int newLeftLength, int newRightLength)
+        {
+            left.Length = newLeftLength;
+            right.Length = newRightLength;
+
+            left.Or(right);
+        }
+
+        [Theory]
+        [MemberData(nameof(Resize_TestData))]
+        public static void Xor_With_Resize(BitArray left, BitArray right, int newLeftLength, int newRightLength)
+        {
+            left.Length = newLeftLength;
+            right.Length = newRightLength;
+
+            left.Xor(right);
         }
     }
 }
+

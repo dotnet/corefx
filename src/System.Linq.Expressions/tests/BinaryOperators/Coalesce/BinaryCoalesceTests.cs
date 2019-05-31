@@ -318,19 +318,19 @@ namespace System.Linq.Expressions.Tests
             Expression exp = Expression.Coalesce(Expression.Constant(0, typeof(int?)), Expression.Constant(0));
             Assert.False(exp.CanReduce);
             Assert.Same(exp, exp.Reduce());
-            Assert.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
+            AssertExtensions.Throws<ArgumentException>(null, () => exp.ReduceAndCheck());
         }
 
         [Fact]
         public static void ThrowsOnLeftNull()
         {
-            Assert.Throws<ArgumentNullException>("left", () => Expression.Coalesce(null, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentNullException>("left", () => Expression.Coalesce(null, Expression.Constant("")));
         }
 
         [Fact]
         public static void ThrowsOnRightNull()
         {
-            Assert.Throws<ArgumentNullException>("right", () => Expression.Coalesce(Expression.Constant(""), null));
+            AssertExtensions.Throws<ArgumentNullException>("right", () => Expression.Coalesce(Expression.Constant(""), null));
         }
 
         private static class Unreadable<T>
@@ -345,14 +345,14 @@ namespace System.Linq.Expressions.Tests
         public static void ThrowsOnLeftUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<string>), "WriteOnly");
-            Assert.Throws<ArgumentException>("left", () => Expression.Coalesce(value, Expression.Constant("")));
+            AssertExtensions.Throws<ArgumentException>("left", () => Expression.Coalesce(value, Expression.Constant("")));
         }
 
         [Fact]
         public static void ThrowsOnRightUnreadable()
         {
             Expression value = Expression.Property(null, typeof(Unreadable<string>), "WriteOnly");
-            Assert.Throws<ArgumentException>("right", () => Expression.Coalesce(Expression.Constant(""), value));
+            AssertExtensions.Throws<ArgumentException>("right", () => Expression.Coalesce(Expression.Constant(""), value));
         }
 
         [Theory]
@@ -393,7 +393,7 @@ namespace System.Linq.Expressions.Tests
         [Fact]
         public static void RightLeft_NonEquivilentTypes_ThrowsArgumentException()
         {
-            Assert.Throws<ArgumentException>(null, () => Expression.Coalesce(Expression.Constant("abc"), Expression.Constant(5)));
+            AssertExtensions.Throws<ArgumentException>(null, () => Expression.Coalesce(Expression.Constant("abc"), Expression.Constant(5)));
         }
 
         public delegate void VoidDelegate();
@@ -403,7 +403,7 @@ namespace System.Linq.Expressions.Tests
         {
             LambdaExpression conversion = Expression.Lambda(typeof(VoidDelegate), Expression.Constant(""));
 
-            Assert.Throws<ArgumentException>("conversion", () => Expression.Coalesce(Expression.Constant(""), Expression.Constant(""), conversion));
+            AssertExtensions.Throws<ArgumentException>("conversion", () => Expression.Coalesce(Expression.Constant(""), Expression.Constant(""), conversion));
         }
 
         [Fact]
@@ -412,8 +412,8 @@ namespace System.Linq.Expressions.Tests
             Expression<Func<int, int, int>> moreThanOne = (x, y) => x * 2;
             Expression<Func<int>> lessThanOne = () => 2;
 
-            Assert.Throws<ArgumentException>("conversion", () => Expression.Coalesce(Expression.Constant(""), Expression.Constant(""), moreThanOne));
-            Assert.Throws<ArgumentException>("conversion", () => Expression.Coalesce(Expression.Constant(""), Expression.Constant(""), lessThanOne));
+            AssertExtensions.Throws<ArgumentException>("conversion", () => Expression.Coalesce(Expression.Constant(""), Expression.Constant(""), moreThanOne));
+            AssertExtensions.Throws<ArgumentException>("conversion", () => Expression.Coalesce(Expression.Constant(""), Expression.Constant(""), lessThanOne));
         }
 
         [Fact]
@@ -439,6 +439,134 @@ namespace System.Linq.Expressions.Tests
         {
             BinaryExpression e = Expression.Coalesce(Expression.Parameter(typeof(string), "a"), Expression.Parameter(typeof(string), "b"));
             Assert.Equal("(a ?? b)", e.ToString());
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CoalesceToWiderReference(bool useInterpreter)
+        {
+            Func<object> func = Expression.Lambda<Func<object>>(
+                Expression.Coalesce(
+                    Expression.Constant("abc"),
+                    Expression.Constant("def", typeof(object))
+                    )).Compile(useInterpreter);
+            Assert.Equal("abc", func());
+
+            func = Expression.Lambda<Func<object>>(
+                Expression.Coalesce(
+                    Expression.Constant(null, typeof(string)),
+                    Expression.Constant("def", typeof(object))
+                )).Compile(useInterpreter);
+            Assert.Equal("def", func());
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CoalesceToNarrowerReference(bool useInterpreter)
+        {
+            Func<object> func = Expression.Lambda<Func<object>>(
+                Expression.Coalesce(
+                    Expression.Constant("abc", typeof(object)),
+                    Expression.Constant("def")
+                )).Compile(useInterpreter);
+            Assert.Equal("abc", func());
+
+            func = Expression.Lambda<Func<object>>(
+                Expression.Coalesce(
+                    Expression.Constant(null),
+                    Expression.Constant("def")
+                )).Compile(useInterpreter);
+            Assert.Equal("def", func());
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CoalesceReferenceToValueType(bool useInterpreter)
+        {
+            Func<object> func = Expression.Lambda<Func<object>>(
+                Expression.Coalesce(
+                    Expression.Constant(2, typeof(object)),
+                    Expression.Constant(1)
+                )).Compile(useInterpreter);
+            Assert.Equal(2, func());
+
+            func = Expression.Lambda<Func<object>>(
+                Expression.Coalesce(
+                    Expression.Constant(null),
+                    Expression.Constant(1)
+                )).Compile(useInterpreter);
+            Assert.Equal(1, func());
+        }
+
+#if FEATURE_COMPILE
+        [Fact]
+        public static void VerifyIL_NullableIntCoalesceToNullableInt()
+        {
+            ParameterExpression x = Expression.Parameter(typeof(int?));
+            ParameterExpression y = Expression.Parameter(typeof(int?));
+            Expression<Func<int?, int?, int?>> f =
+                Expression.Lambda<Func<int?, int?, int?>>(Expression.Coalesce(x, y), x, y);
+
+            f.VerifyIL(
+                @".method valuetype [System.Private.CoreLib]System.Nullable`1<int32> ::lambda_method(class [System.Linq.Expressions]System.Runtime.CompilerServices.Closure,valuetype [System.Private.CoreLib]System.Nullable`1<int32>,valuetype [System.Private.CoreLib]System.Nullable`1<int32>)
+                {
+                    .maxstack 2
+                    .locals init (
+                        [0] valuetype [System.Private.CoreLib]System.Nullable`1<int32>
+                    )
+
+                    IL_0000: ldarg.1
+                    IL_0001: stloc.0
+                    IL_0002: ldloca.s   V_0
+                    IL_0004: call       instance bool valuetype [System.Private.CoreLib]System.Nullable`1<int32>::get_HasValue()
+                    IL_0009: brfalse    IL_0014
+                    IL_000e: ldloc.0
+                    IL_000f: br         IL_0015
+                    IL_0014: ldarg.2
+                    IL_0015: ret
+                }");
+        }
+#endif
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CoalesceWideningLeft(bool useInterpreter)
+        {
+            ParameterExpression x = Expression.Parameter(typeof(int?));
+            ParameterExpression y = Expression.Parameter(typeof(long));
+            Func<int?, long, long> func = Expression.Lambda<Func<int?, long, long>>(Expression.Coalesce(x, y), x, y).Compile(useInterpreter);
+            Assert.Equal(2, func(null, 2));
+            Assert.Equal(2, func(2, 1));
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CoalesceWideningLeftNullableRight(bool useInterpreter)
+        {
+            ParameterExpression x = Expression.Parameter(typeof(int?));
+            ParameterExpression y = Expression.Parameter(typeof(long?));
+            Func<int?, long?, long?> func = Expression.Lambda<Func<int?, long?, long?>>(Expression.Coalesce(x, y), x, y).Compile(useInterpreter);
+            Assert.Equal(2, func(null, 2));
+            Assert.Equal(2, func(2, 1));
+            Assert.Equal(2, func(2, null));
+            Assert.Null(func(null, null));
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CoalesceWideningRight(bool useInterpreter)
+        {
+            ParameterExpression x = Expression.Parameter(typeof(long?));
+            ParameterExpression y = Expression.Parameter(typeof(int));
+            Func<long?, int, long> func = Expression.Lambda<Func<long?, int, long>>(Expression.Coalesce(x, y), x, y).Compile(useInterpreter);
+            Assert.Equal(2, func(null, 2));
+            Assert.Equal(2, func(2, 1));
+        }
+
+        [Theory, ClassData(typeof(CompilationTypes))]
+        public static void CoalesceWideningRightNullable(bool useInterpreter)
+        {
+            ParameterExpression x = Expression.Parameter(typeof(long?));
+            ParameterExpression y = Expression.Parameter(typeof(int?));
+            Func<long?, int?, long?> func = Expression.Lambda<Func<long?, int?, long?>>(Expression.Coalesce(x, y), x, y).Compile(useInterpreter);
+            Assert.Equal(2, func(null, 2));
+            Assert.Equal(2, func(2, 1));
+            Assert.Equal(2, func(2, null));
+            Assert.Null(func(null, null));
         }
     }
 }

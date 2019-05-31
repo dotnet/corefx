@@ -24,7 +24,7 @@ namespace System.Xml.Xsl.Qil
         }
 
         /// <summary>
-        /// Add a substituion pair
+        /// Add a substitution pair
         /// </summary>
         /// <param name="find">a node to be replaced</param>
         /// <param name="replace">its replacement</param>
@@ -35,24 +35,11 @@ namespace System.Xml.Xsl.Qil
         }
 
         /// <summary>
-        /// Remove the last a substituion pair
+        /// Remove the last a substitution pair
         /// </summary>
         public void RemoveLastSubstitutionPair()
         {
             _s.RemoveRange(_s.Count - 2, 2);
-        }
-
-        /// <summary>
-        /// Remove the last N substitution pairs
-        /// </summary>
-        public void RemoveLastNSubstitutionPairs(int n)
-        {
-            Debug.Assert(n >= 0, "n must be nonnegative");
-            if (n > 0)
-            {
-                n *= 2;
-                _s.RemoveRange(_s.Count - n, n);
-            }
         }
 
         /// <summary>

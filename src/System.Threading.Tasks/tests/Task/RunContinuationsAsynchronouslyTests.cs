@@ -62,6 +62,5 @@ namespace System.Threading.Tasks.Tests
             ((IAsyncResult)t).AsyncWaitHandle.WaitOne(); // ensure we don't inline as part of waiting
             t.GetAwaiter().GetResult(); // propagate any errors
         }
-
     }
 }

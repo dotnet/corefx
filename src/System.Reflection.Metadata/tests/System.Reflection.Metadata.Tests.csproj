@@ -1,55 +1,25 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition="'$(Configuration)' == ''">Debug</Configuration>
-    <Platform Condition="'$(Platform)' == ''">AnyCPU</Platform>
     <ProjectGuid>{7061832A-E8CF-4AB6-A8DC-44D2F5A43A13}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.Reflection.Metadata.Tests</AssemblyName>
-    <RootNamespace>System.Reflection.Metadata.Tests</RootNamespace>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <FileAlignment>512</FileAlignment>
     <ExternallyShipping>false</ExternallyShipping>
-    <NuGetPackageImportStamp>83230753</NuGetPackageImportStamp>
-    <NugetTargetMoniker>.NETStandard,Version=v1.5</NugetTargetMoniker>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release</Configurations>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Optimize>false</Optimize>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\pkg\System.Reflection.Metadata.pkgproj">
-      <Project>{f3e433c8-352f-4944-bf7f-765ce435370d}</Project>
-      <Name>System.Reflection.Metadata</Name>
-    </ProjectReference>
-  </ItemGroup>
   <ItemGroup>
     <Compile Include="..\..\Common\src\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\src\Interop\Windows\kernel32\Interop.FreeLibrary.cs">
+    <Compile Include="..\..\Common\src\Interop\Windows\Kernel32\Interop.FreeLibrary.cs">
       <Link>Common\Interop\Windows\Interop.FreeLibrary.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\src\Interop\Windows\kernel32\Interop.GetModuleHandle.cs">
+    <Compile Include="..\..\Common\src\Interop\Windows\Kernel32\Interop.GetModuleHandle.cs">
       <Link>Common\Interop\Windows\Interop.GetModuleHandle.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\src\Interop\Windows\kernel32\Interop.LoadLibraryEx.cs">
+    <Compile Include="..\..\Common\src\Interop\Windows\Kernel32\Interop.LoadLibraryEx.cs">
       <Link>Common\Interop\Windows\Interop.LoadLibraryEx.cs</Link>
     </Compile>
-    <Compile Include="..\..\Common\src\Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs">
-      <Link>Common\Microsoft\Win32\Handles\SafeHandleZeroOrMinusOneIsInvalid.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Common\src\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
-      <Link>Common\Microsoft\Win32\Handles\SafeLibraryHandle.cs</Link>
+    <Compile Include="..\..\Common\src\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs">
+      <Link>Common\src\CoreLib\Microsoft\Win32\SafeHandles\SafeLibraryHandle.cs</Link>
     </Compile>
     <Compile Include="..\..\Common\tests\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
@@ -64,6 +34,8 @@
     <Compile Include="Metadata\Ecma335\MetadataRootBuilderTests.cs" />
     <Compile Include="Metadata\Ecma335\PortablePdbBuilderTests.cs" />
     <Compile Include="Metadata\LargeTablesAndHeapsTests.cs" />
+    <Compile Include="Metadata\TypeSystem\AssemblyDefinitionTests.cs" />
+    <Compile Include="Metadata\TypeSystem\AssemblyReferenceTests.cs" />
     <Compile Include="Metadata\TypeSystem\ClassLayoutRow.cs" />
     <Compile Include="Metadata\Decoding\CustomAttributeDecoderTests.cs" />
     <Compile Include="Metadata\Decoding\DisassemblingTypeProvider.cs" />
@@ -84,6 +56,7 @@
     <Compile Include="Metadata\PortablePdb\StandalonePortablePdbStreamTests.cs" />
     <Compile Include="Metadata\TagToTokenTests.cs" />
     <Compile Include="Metadata\PortablePdb\DocumentNameTests.cs" />
+    <Compile Include="Metadata\TypeSystem\TypeDefinitionTests.cs" />
     <Compile Include="PortableExecutable\DebugDirectoryBuilderTests.cs" />
     <Compile Include="PortableExecutable\PEHeaderBuilderTests.cs" />
     <Compile Include="PortableExecutable\PEMemoryBlockTests.cs" />
@@ -102,6 +75,7 @@
     <Compile Include="PortableExecutable\PEHeadersTests.cs" />
     <Compile Include="PortableExecutable\PEReaderTests.cs" />
     <Compile Include="PortableExecutable\SectionHeaderTests.cs" />
+    <Compile Include="Utilities\HashTests.cs" />
     <Compile Include="Utilities\StreamExtensionsTests.cs" />
     <Compile Include="Metadata\MetadataReaderProviderTests.cs" />
     <Compile Include="Resources\TestResources.cs" />
@@ -115,6 +89,7 @@
     <Compile Include="Utilities\CompressedIntegerTests.cs" />
     <Compile Include="Utilities\ImmutableByteArrayInteropTest.cs" />
     <Compile Include="Utilities\MemoryBlockTests.cs" />
+    <Compile Include="Utilities\OrderByTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\Namespace\NamespaceForwardedCS.cs" />
@@ -124,7 +99,9 @@
     <None Include="Resources\Interop\Interop.Mock01.cs" />
     <None Include="Resources\Interop\Interop.Mock01.Impl.cs" />
     <None Include="Resources\Interop\IndexerWithByRefParam.il" />
+    <None Include="Resources\Interop\OtherAccessors.il" />
     <EmbeddedResource Include="Resources\Interop\IndexerWithByRefParam.dll" />
+    <EmbeddedResource Include="Resources\Interop\OtherAccessors.dll" />
     <EmbeddedResource Include="Resources\Interop\Interop.Mock01.dll" />
     <EmbeddedResource Include="Resources\Interop\Interop.Mock01.Impl.dll" />
     <None Include="Resources\Misc\CPPClassLibrary2.h" />
@@ -153,12 +130,15 @@
     <EmbeddedResource Include="Resources\PortablePdbs\Documents.Embedded.dll" />
     <None Include="Resources\PortablePdbs\Documents.cmd" />
     <None Include="Resources\PortablePdbs\Documents.cs" />
+    <None Include="Resources\Misc\SatelliteAssembly.resources.cs" />
+    <EmbeddedResource Include="Resources\Misc\SatelliteAssembly.resources.dll" />
     <None Include="Resources\Misc\Signed.cmd" />
     <None Include="Resources\Misc\Signed.cs" />
     <EmbeddedResource Include="Resources\Misc\Signed.exe" />
   </ItemGroup>
   <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
+    <!-- Some internal types are needed, so we reference the implementation assembly, rather than the reference assembly. -->
+    <DefaultReferenceExclusions Include="System.Reflection.Metadata" />
+    <ReferenceFromRuntime Include="System.Reflection.Metadata" />
   </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

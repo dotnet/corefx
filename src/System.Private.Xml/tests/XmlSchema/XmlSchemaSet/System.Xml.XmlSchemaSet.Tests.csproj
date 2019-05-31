@@ -1,19 +1,7 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.props))\dir.props" />
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{9EDAADA8-B658-430F-97EE-CCA494883D86}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AssemblyName>System.Xml.XmlSchemaSet.Tests</AssemblyName>
-    <NuGetTargetMoniker>.NETStandard,Version=v1.7</NuGetTargetMoniker>
-    <RootNamespace>System.Xml.Tests</RootNamespace>
-  </PropertyGroup>
-  <!-- Default configurations to help VS understand the configurations -->
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="CError.cs" />
@@ -23,6 +11,7 @@
     <Compile Include="TC_SchemaSet_Add_SchemaSet.cs" />
     <Compile Include="TC_SchemaSet_Add_URL.cs" />
     <Compile Include="TC_SchemaSet_AllowXmlAttributes.cs" />
+    <Compile Include="TC_SchemaSet_AnyAttribute.cs" />
     <Compile Include="TC_SchemaSet_Compile.cs" />
     <Compile Include="TC_SchemaSet_Constructors.cs" />
     <Compile Include="TC_SchemaSet_Contains_ns.cs" />
@@ -46,17 +35,12 @@
     <Compile Include="TC_SchemaSet_ValidationEventHandler.cs" />
     <Compile Include="TC_SchemaSet_XmlNameTable.cs" />
     <Compile Include="TC_SchemaSet_XmlResolver.cs" />
-    <Compile Include="XmlSystemPathResolverTests.cs" />
+    <Compile Include="$(CommonTestPath)\System\IO\TempDirectory.cs">
+      <Link>Common\System\IO\TempDirectory.cs</Link>
+    </Compile>
     <SupplementalTestData Include="..\TestFiles\**\*.*">
       <Link>TestFiles\%(RecursiveDir)%(Filename)%(Extension)</Link>
       <DestinationDir>TestFiles\%(RecursiveDir)</DestinationDir>
     </SupplementalTestData>
   </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\..\..\..\System.Private.Xml\pkg\System.Private.Xml.pkgproj" />
-  </ItemGroup>
-  <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), dir.targets))\dir.targets" />
 </Project>

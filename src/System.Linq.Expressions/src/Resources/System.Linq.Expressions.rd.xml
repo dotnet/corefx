@@ -2,6 +2,10 @@
 <Directives xmlns="http://schemas.microsoft.com/netfx/2013/01/metadata">
   <Library Name="*System.Linq.Expressions*">
     <Assembly Name="System.Linq.Expressions">
+      <TypeInstantiation Name="System.Linq.Expressions.ExpressionCreator" Arguments="System.Func{System.Boolean}" Dynamic="Required All" />
+      <TypeInstantiation Name="System.Runtime.CompilerServices.CallSite" Arguments="System.Func{System.Runtime.CompilerServices.CallSite, System.Object, System.Int32}" Dynamic="Required All" /> 
+      <Type Name="System.Runtime.CompilerServices.CallSiteOps" Dynamic="Required All" />
+      <Type Name="System.Runtime.CompilerServices.RuntimeOps" Dynamic="Required All" />
       <Namespace Name="System.Linq.Expressions">
         <Type Name="Expression&lt;TDelegate&gt;">
           <GenericParameter Name="TDelegate" Dynamic="Public"/>
@@ -114,6 +118,8 @@
       <Type Name="System.Linq.Expressions.ExpressionType" Serialize="Public"/>
       <!-- Every Expression<T> type must be visible to reflection -->
       <Type Name="System.Linq.Expressions.Expression&lt;&gt;" Activate="Public"/>
+      <!-- CachedReflectionInfo.cs obtains MemberInfo's for many DynamicObject members -->
+      <Type Name="System.Dynamic.DynamicObject" Dynamic="Required Public" />
     </Assembly>
     <Assembly Name="System.Private.CoreLib">
       <Namespace Name="System">
@@ -135,6 +141,25 @@
           <Method Name="op_UnaryPlus" Dynamic="Required"/>
           <Method Name="op_Implicit" Dynamic="Required"/>
           <Method Name="op_Explicit" Dynamic="Required"/>
+        </Type>
+        <Type Name="IDisposable">
+          <Method Name="Dispose" Dynamic="Required"/>
+        </Type>
+        <Type Name="Math">
+          <Method Name="Pow" Dynamic="Required"/>
+        </Type>
+      </Namespace>
+      <Namespace Name="System.Collections">
+        <Type Name="IEnumerator">
+           <Method Name="MoveNext" Dynamic="Required"/>
+        </Type>
+      </Namespace>
+      <Namespace Name="System.Collections.Generic">
+        <Type Name="IEnumerable&lt;&gt;">
+           <Method Name="GetEnumerator" Dynamic="Required"/>
+        </Type>
+        <Type Name="IEnumerator&lt;&gt;">
+           <Property Name="Current" Dynamic="Required"/>
         </Type>
       </Namespace>
     </Assembly>

@@ -282,7 +282,7 @@ nameof(handle));
 
                 if (name != null)
                 {
-                    errorCode = (int)Interop.Advapi32.SetSecurityInfoByName(name, (uint)type, (uint)securityInformation, OwnerBinary, GroupBinary, DaclBinary, SaclBinary);
+                    errorCode = (int)Interop.Advapi32.SetSecurityInfoByName(name, (uint)type, unchecked((uint)securityInformation), OwnerBinary, GroupBinary, DaclBinary, SaclBinary);
                 }
                 else if (handle != null)
                 {
@@ -300,7 +300,7 @@ nameof(handle));
                 else
                 {
                     // both are null, shouldn't happen
-                    Debug.Assert(false, "Internal error: both name and handle are null");
+                    Debug.Fail("Internal error: both name and handle are null");
                     throw new ArgumentException();
                 }
 

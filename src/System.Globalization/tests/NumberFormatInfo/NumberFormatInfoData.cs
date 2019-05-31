@@ -8,14 +8,13 @@ namespace System.Globalization.Tests
     {
         public static int[] UrINNumberGroupSizes()
         {
-            if ((PlatformDetection.IsWindows && PlatformDetection.WindowsVersion >= 10)
-                ||
-                (PlatformDetection.IsOSX && PlatformDetection.OSXKernelVersion >= new Version(15, 0)))
+            if (PlatformDetection.WindowsVersion >= 10 || PlatformDetection.ICUVersion.Major >= 55)
             {
                 return new int[] { 3 };
             }
             else
             {
+                // Fedora, Ubuntu 14.04, <= Windows 8
                 return new int[] { 3, 2 };
             }
         }
@@ -39,6 +38,14 @@ namespace System.Globalization.Tests
                     if (PlatformDetection.IsWindows)
                     {
                         return (PlatformDetection.WindowsVersion < 10) ? new int[] { 3 } : new int[] { 6, 3 };
+                    }
+                    if (PlatformDetection.ICUVersion.Major == 59 || PlatformDetection.ICUVersion.Major == 58)
+                    {
+                        return new int[] { 8 };
+                    }
+                    else if (PlatformDetection.ICUVersion.Major > 59)
+                    {
+                        return new int[] { 1 };
                     }
                     else
                     {
@@ -65,7 +72,7 @@ namespace System.Globalization.Tests
                     return PlatformDetection.IsWindows ? new int[] { 15 } : new int[] { 8, 15 };
             }
 
-            throw DateTimeFormatInfoData.GetCultureNotSupportedException(new CultureInfo(localeName));
+            throw DateTimeFormatInfoData.GetCultureNotSupportedException(CultureInfo.GetCultureInfo(localeName));
         }
     }
 }

@@ -136,8 +136,19 @@ namespace System.Net.Http.Headers
                 return 0;
             }
 
-            AuthenticationHeaderValue result = new AuthenticationHeaderValue();
-            result._scheme = input.Substring(startIndex, schemeLength);
+            var result = new AuthenticationHeaderValue();
+            string targetScheme = null;
+            switch (schemeLength)
+            {
+                // Avoid allocating a scheme string for the most common cases.
+                case 5: targetScheme = "Basic"; break;
+                case 6: targetScheme = "Digest"; break;
+                case 4: targetScheme = "NTLM"; break;
+                case 9: targetScheme = "Negotiate"; break;
+            }
+            result._scheme = targetScheme != null && string.CompareOrdinal(input, startIndex, targetScheme, 0, schemeLength) == 0 ?
+                targetScheme :
+                input.Substring(startIndex, schemeLength);
 
             int current = startIndex + schemeLength;
             int whitespaceLength = HttpRuleParser.GetWhitespaceLength(input, current);
@@ -150,7 +161,7 @@ namespace System.Net.Http.Headers
                 return current - startIndex;
             }
 
-            // We need at least one space between the scheme and parameters. If there are no whitespace, then we must
+            // We need at least one space between the scheme and parameters. If there is no whitespace, then we must
             // have reached the end of the string (i.e. scheme-only string).
             if (whitespaceLength == 0)
             {

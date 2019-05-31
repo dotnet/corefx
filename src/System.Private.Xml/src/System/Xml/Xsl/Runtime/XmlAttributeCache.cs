@@ -167,7 +167,7 @@ namespace System.Xml.Xsl.Runtime
         }
 
         /// <summary>
-        /// Send cached, non-overriden attributes to the specified writer.  Calling this method has
+        /// Send cached, non-overridden attributes to the specified writer.  Calling this method has
         /// the side effect of clearing the attribute cache.
         /// </summary>
         internal override void StartElementContent()
@@ -180,23 +180,23 @@ namespace System.Xml.Xsl.Runtime
 
         public override void WriteStartElement(string prefix, string localName, string ns)
         {
-            Debug.Assert(false, "Should never be called on XmlAttributeCache.");
+            Debug.Fail("Should never be called on XmlAttributeCache.");
         }
         internal override void WriteEndElement(string prefix, string localName, string ns)
         {
-            Debug.Assert(false, "Should never be called on XmlAttributeCache.");
+            Debug.Fail("Should never be called on XmlAttributeCache.");
         }
         public override void WriteComment(string text)
         {
-            Debug.Assert(false, "Should never be called on XmlAttributeCache.");
+            Debug.Fail("Should never be called on XmlAttributeCache.");
         }
         public override void WriteProcessingInstruction(string name, string text)
         {
-            Debug.Assert(false, "Should never be called on XmlAttributeCache.");
+            Debug.Fail("Should never be called on XmlAttributeCache.");
         }
         public override void WriteEntityRef(string name)
         {
-            Debug.Assert(false, "Should never be called on XmlAttributeCache.");
+            Debug.Fail("Should never be called on XmlAttributeCache.");
         }
 
         /// <summary>
@@ -363,7 +363,7 @@ namespace System.Xml.Xsl.Runtime
                 // Resize caching array
                 Debug.Assert(_numEntries == _arrAttrs.Length);
                 AttrNameVal[] arrNew = new AttrNameVal[_numEntries * 2];
-                Array.Copy(_arrAttrs, arrNew, _numEntries);
+                Array.Copy(_arrAttrs, 0, arrNew, 0, _numEntries);
                 _arrAttrs = arrNew;
             }
         }

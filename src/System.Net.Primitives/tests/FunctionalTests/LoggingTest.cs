@@ -5,11 +5,12 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Net.Primitives.Functional.Tests
 {
-    public class LoggingTest : RemoteExecutorTestBase
+    public class LoggingTest
     {
         [Fact]
         public void EventSource_ExistsWithCorrectId()
@@ -26,7 +27,7 @@ namespace System.Net.Primitives.Functional.Tests
         [Fact]
         public void EventSource_EventsRaisedAsExpected()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var listener = new TestEventListener("Microsoft-System-Net-Primitives", EventLevel.Verbose))
                 {
@@ -39,7 +40,7 @@ namespace System.Net.Primitives.Functional.Tests
                     Assert.DoesNotContain(events, ev => ev.EventId == 0); // errors from the EventSource itself
                     Assert.InRange(events.Count, 1, int.MaxValue);
                 }
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
     }
