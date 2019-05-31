@@ -20,11 +20,11 @@ In this document, the following terms are used:
 
 * **CLR**. Common language runtime. The exact meaning depends on context, but it usually refers to the runtime of the .NET Framework and includes several components. The CLR is a virtual machine, i.e. it includes the facilities to generate and compile code on-the-fly using a JIT compiler. The existing Microsoft CLR implementation is Windows only.
 
-* **CoreCLR**. Core common language runtime. It's built from the same code base as the CLR. Originally, CoreCLR was the runtime of Silverlight and was designed to run on multiple platforms, specifically Windows and OS X. CoreCLR is now part of .NET Core and represents a simplified version of the CLR. It's still a [cross platform](https://github.com/dotnet/coreclr#build-status) runtime. CoreCLR is also a virtual machine with a JIT.
+* **CoreCLR**. Core common language runtime. It's built from the same code base as the CLR. Originally, CoreCLR was the runtime of Silverlight and was designed to run on multiple platforms, specifically Windows and OS X. CoreCLR is now part of .NET Core and represents a simplified version of the CLR. It's still a [cross platform][core-build-status] runtime. CoreCLR is also a virtual machine with a JIT.
 
 * **CoreRT**. Core runtime. In contrast to the CLR/CoreCLR, CoreRT is not a virtual machine, i.e. it doesn't include the facilities to generate and run code on-the-fly because it doesn't include a JIT. It does, however, include the GC and the ability for runtime type identification (RTTI) as well as reflection. However, its type system is designed so that metadata for reflection can be omitted. This enables having an AOT tool chain that can link away superfluous metadata and (more importantly) identify code that the application doesn't use.
 
-* **CoreFX**. Core framework. Conceptually a set of `System.*` (and to a limited extent `Microsoft.*`) libraries that make up the lower layer of the .NET library stack. It's what most people would think of as the Base Class Library (BCL). The BCL is a general purpose, lower level set of functionality that higher-level frameworks, such as WCF and ASP.NET, build on. The source code of the .NET Core library stack is contained in the [CoreFX repo](http://github.com/dotnet/corefx). However, the majority of the .NET Core APIs are also available in the .NET Framework, so you can think of CoreFX as a fork of the .NET Framework library stack.
+* **CoreFX**. Core framework. Conceptually a set of `System.*` (and to a limited extent `Microsoft.*`) libraries that make up the lower layer of the .NET library stack. It's what most people would think of as the Base Class Library (BCL). The BCL is a general purpose, lower level set of functionality that higher-level frameworks, such as WCF and ASP.NET, build on. The source code of the .NET Core library stack is contained in the [CoreFX repo][corefx]. However, the majority of the .NET Core APIs are also available in the .NET Framework, so you can think of CoreFX as a fork of the .NET Framework library stack.
 
 ## Platforms
 
@@ -40,7 +40,7 @@ The .NET Framework was designed to run on Windows only. Some versions of the .NE
 
 **Also referred to as**: UWP, ~~Store~~
 
-Originally, .NET Core was the identifier we used to describe the .NET APIs Windows 8 store applications could use. When we designed the API set, we wanted to create a foundation for .NET where portability is a first class concern for the layering and componentization. For more details, read [this blog post](http://blogs.msdn.com/b/dotnet/archive/2014/12/04/introducing-net-core.aspx).
+Originally, .NET Core was the identifier we used to describe the .NET APIs Windows 8 store applications could use. When we designed the API set, we wanted to create a foundation for .NET where portability is a first class concern for the layering and componentization. For more details, read [this blog post][introducing-net-core].
 
 Today, .NET Core is no longer just for store applications. .NET Core is the name for the open source, cross-platform stack that ASP.NET Core and UWP applications are built on. The stack includes a set of framework libraries (CoreFX), a JIT based runtime (CoreCLR), an AOT based runtime (CoreRT), and a set of tooling (such as the dotnet CLI).
 
@@ -78,9 +78,9 @@ It's also worth pointing out that the source code of Rotor was not released unde
 
 Mono is an open source alternative to the .NET Framework. Mono started around the same time the .NET Framework was first released. Since Microsoft didn't release Rotor as open source, Mono was forced to start from scratch and is thus a complete re-implementation of the .NET Framework with no shared code.
 
-When .NET Core was released under the MIT license, Microsoft also released large chunks of the .NET Framework under the MIT license as well, which can be found [here](https://github.com/microsoft/referencesource). This enabled the Mono community to use the same code the .NET Framework uses in order to close gaps and avoid behavioral differences.
+When .NET Core was released under the MIT license, Microsoft also released large chunks of the .NET Framework under the MIT license as well, which can be found [here][referencesource]. This enabled the Mono community to use the same code the .NET Framework uses in order to close gaps and avoid behavioral differences.
 
-Mono is primarily used to run .NET applications on Linux and Mac OS X (though to get into the Mac App Store you need Xamarin, see below). There are ports of Mono to other platforms, see [Mono's Supported Platforms](http://www.mono-project.com/docs/about-mono/supported-platforms/)
+Mono is primarily used to run .NET applications on Linux and Mac OS X (though to get into the Mac App Store you need Xamarin, see below). There are ports of Mono to other platforms, see [Mono's Supported Platforms][mono-supported-platforms]
 
 Mono has implementations (though not necessarily complete) of WinForms, ASP.NET, and System.Drawing.
 
@@ -117,13 +117,13 @@ Also introduced in .NET Framework 3.5 Parallel LINQ. Parallel LINQ has a subset 
 
 ### JSON.NET
 
-Released in June 2006 by [James Newton-King](https://twitter.com/JamesNK), JSON.NET has become the defacto standard for JSON serialization and deserialization in .NET. It is [open source](https://github.com/JamesNK/Newtonsoft.Json) and support almost every platform .NET code can run on (.NET Framework 2.0, 3.0, 3.5, 4.0, and 4.5; Mono; MonoTouch/Xamarin.iOS; MonoDroid/Xamarin.Android; Silverlight 3, 4, and 5; Windows Phone 8, 8, and 8.1; Windows 8 Store; .NET Core).  
+Released in June 2006 by [James Newton-King][JamesNK], JSON.NET has become the defacto standard for JSON serialization and deserialization in .NET. It is [open source][Newtonsoft.Json] and support almost every platform .NET code can run on (.NET Framework 2.0, 3.0, 3.5, 4.0, and 4.5; Mono; MonoTouch/Xamarin.iOS; MonoDroid/Xamarin.Android; Silverlight 3, 4, and 5; Windows Phone 8, 8, and 8.1; Windows 8 Store; .NET Core).  
 
 ### Windows Forms
 
 **Also referred to as**: WinForms
 
-Windows Forms is an API provided by the .NET Framework (mostly in the `System.Windows.Forms` namespace) for creating desktop applications. Windows Forms provides an event-driven model for application development on top of the native loop-driven Win32 model. Mono [has an implementation](http://www.mono-project.com/docs/gui/winforms/) of Windows Forms, though it is not complete, since some parts of Windows Forms are tied to the Windows platform.
+Windows Forms is an API provided by the .NET Framework (mostly in the `System.Windows.Forms` namespace) for creating desktop applications. Windows Forms provides an event-driven model for application development on top of the native loop-driven Win32 model. Mono [has an implementation][mono-winforms] of Windows Forms, though it is not complete, since some parts of Windows Forms are tied to the Windows platform.
 
 Windows Forms is in maintenance mode now. That means new features will generally not be added.
 
@@ -135,11 +135,27 @@ Introduced in .NET Framework 3.0, Windows Presentation Foundation (WPF) was a ne
 
 The .NET platform currently doesn't contain a cross-platform XAML-based UI stack. There are, however, various community projects in that space:
 
-* [CSHTML5](http://www.cshtml5.com/): A product to compile WPF/.NET Framework applications into HTML5/CSS3/ECMAScript5 applications.
-* [WPFLight](https://github.com/ronnycsharp/WPFLight): An OSS project to create WPF on top of XNA/MonoGame.
-* [Perspex](https://github.com/Perspex/Perspex): A cross-platform UI framework based on WPF.
-* [Granular](https://github.com/yuvaltz/Granular): A OSS project to allow WPF applications to run in the browser.
+* [CSHTML5][CSHTML5]: A product to compile WPF/.NET Framework applications into HTML5/CSS3/ECMAScript5 applications.
+* [WPFLight][WPFLight]: An OSS project to create WPF on top of XNA/MonoGame.
+* [Perspex][Perspex]: A cross-platform UI framework based on WPF.
+* [Granular][Granular]: A OSS project to allow WPF applications to run in the browser.
 
 ## Engineering system
 
-* **Helix**. It's a massively-parallel, general-purpose job processing and result aggregation system running in the cloud. The work items that corefx sends to Helix are [xunit](https://github.com/xunit) tests. Test results are shown through the *Mission Control* reporting site, https://mc.dot.net/; to go to the test results in a PR from Azure DevOps, you can click on the *Send to Helix* step in the build, and the logs will have the URL.
+* **Helix**. It's a massively-parallel, general-purpose job processing and result aggregation system running in the cloud. The work items that corefx sends to Helix are [xunit][xunit] tests. Test results are shown through the [*Mission Control* reporting site][mc.dot.net]; to go to the test results in a PR from Azure DevOps, you can click on the *Send to Helix* step in the build, and the logs will have the URL.
+
+
+[introducing-net-core]: http://blogs.msdn.com/b/dotnet/archive/2014/12/04/introducing-net-core.aspx
+[core-build-status]: https://github.com/dotnet/coreclr#build-status
+[corefx]: http://github.com/dotnet/corefx
+[referencesource]: https://github.com/microsoft/referencesource
+[mono-supported-platforms]: http://www.mono-project.com/docs/about-mono/supported-platforms/
+[JamesNK]: https://twitter.com/JamesNK
+[Newtonsoft.Json]: https://github.com/JamesNK/Newtonsoft.Json
+[mono-winforms]: http://www.mono-project.com/docs/gui/winforms/
+[CSHTML5]: http://www.cshtml5.com/
+[WPFLight]: https://github.com/ronnycsharp/WPFLight
+[Perspex]: https://github.com/Perspex/Perspex
+[Granular]: https://github.com/yuvaltz/Granular
+[xunit]: https://github.com/xunit
+[mc.dot.net]: https://mc.dot.net/
