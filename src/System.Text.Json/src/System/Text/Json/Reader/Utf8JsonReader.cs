@@ -29,6 +29,8 @@ namespace System.Text.Json
 
         private long _lineNumber;
         private long _bytePositionInLine;
+
+        // bytes consumed in the current segment (not token)
         private int _consumed;
         private bool _inObject;
         private bool _isNotPrimitive;
@@ -2349,12 +2351,12 @@ namespace System.Text.Json
             int totalIdx = 0;
             while (true)
             {
-                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.MaybeDangerousLineSeparator);
+                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.StartingByteOfNonStandardLineSeparator);
 
                 if (idx == -1)
                     return -1;
 
-                if (localBuffer[idx] != JsonConstants.MaybeDangerousLineSeparator)
+                if (localBuffer[idx] != JsonConstants.StartingByteOfNonStandardLineSeparator)
                     return totalIdx + idx;
 
                 int p = idx + 1;

@@ -31,7 +31,7 @@ namespace System.Text.Json
 
         // \u2028 and \u2029 are considered respectively line and paragraph separators
         // UTF-8 representation for them is E2, 80, A8/A9
-        public const byte MaybeDangerousLineSeparator = 0xE2;
+        public const byte StartingByteOfNonStandardLineSeparator = 0xE2;
 
         public static ReadOnlySpan<byte> Utf8Bom => new byte[] { 0xEF, 0xBB, 0xBF };
         public static ReadOnlySpan<byte> TrueValue => new byte[] { (byte)'t', (byte)'r', (byte)'u', (byte)'e' };

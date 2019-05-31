@@ -2702,24 +2702,56 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [InlineData("//asd\r", "asd", 6)]
+        [InlineData("//asd\r\n", "asd", 7)]
+        [InlineData("//asd\n", "asd", 6)]
+        public static void JsonWithASingleCommentEndingWithLineEndingSingleSegment(string jsonString, string expectedComment, int expectedBytesConsumed)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            Assert.True(json.Read());
+            Assert.Equal(expectedComment, json.GetComment());
+            Assert.False(json.Read());
+            Assert.Equal(expectedBytesConsumed, json.BytesConsumed);
+        }
+
+        [Theory]
         [InlineData("//\u2028")]
         [InlineData("//\u2029")]
         [InlineData("// \u2028")]
         [InlineData("//   \u2028")]
         [InlineData("//  \u2029 ")]
         [InlineData("//  \u2029  ")]
+        [InlineData("//\u2028\n")]
+        [InlineData("//\u2028 \n")]
+        [InlineData("// \u2028\n")]
+        [InlineData("// \u2028 \n")]
+        [InlineData("//\u2028\r\n")]
+        [InlineData("//\u2028 \r\n")]
+        [InlineData("// \u2028\r\n")]
+        [InlineData("// \u2028 \r\n")]
+        [InlineData("//\u2028\r")]
+        [InlineData("//\u2028 \r")]
+        [InlineData("// \u2028\r")]
+        [InlineData("// \u2028 \r")]
         public static void JsonWithSingleLineCommentEndingWithNonStandardLineEnding(string jsonString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
-            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
 
-            try
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
             {
-                json.Read();
-                Assert.True(false, "Expected JsonException was not thrown.");
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                try
+                {
+                    json.Read();
+                    Assert.True(false, $"Expected JsonException was not thrown. CommentHandling = {commentHandling}");
+                }
+                catch (JsonException) { }
             }
-            catch (JsonException) { }
         }
 
         [Theory]
