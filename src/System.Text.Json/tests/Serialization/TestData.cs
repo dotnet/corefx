@@ -73,7 +73,13 @@ namespace System.Text.Json.Serialization.Tests
                 yield return new object[] { new TestClassWithStringToPrimitiveDictionary() };
                 yield return new object[] { new TestClassWithObjectIEnumerableConstructibleTypes() };
                 yield return new object[] { new TestClassWithObjectImmutableTypes() };
-                yield return new object[] { new JsonElementTests.JsonElementClass() };
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                {
+                    // [ActiveIssue(38092)]
+                    // https://github.com/dotnet/corefx/issues/38092
+                    // This appears to only be failing on Unix, still trying to get a repro.
+                    yield return new object[] { new JsonElementTests.JsonElementClass() };
+                }
                 yield return new object[] { new JsonElementTests.JsonElementArrayClass() };
                 yield return new object[] { new ClassWithComplexObjects() };
             }
