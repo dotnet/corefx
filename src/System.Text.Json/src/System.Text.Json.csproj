@@ -126,6 +126,7 @@
     <Compile Include="System\Text\Json\Writer\JsonWriterOptions.cs" />
     <Compile Include="System\Text\Json\Writer\SequenceValidity.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.cs" />
+    <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.Bytes.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.DateTime.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.DateTimeOffset.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.Decimal.cs" />
@@ -138,6 +139,7 @@
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.SignedNumber.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.String.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteProperties.UnsignedNumber.cs" />
+    <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.Bytes.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.Comment.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.DateTime.cs" />
     <Compile Include="System\Text\Json\Writer\Utf8JsonWriter.WriteValues.DateTimeOffset.cs" />
