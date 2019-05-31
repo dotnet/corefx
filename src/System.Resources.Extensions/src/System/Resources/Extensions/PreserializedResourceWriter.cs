@@ -92,7 +92,7 @@ namespace System.Resources.Extensions
                     // for primitive types that are not strings, convert the string value to the 
                     // primitive type value.  
                     // we intentionally avoid calling GetType on the user provided type name
-                    // and instead will only ever convert to one of the knwown.
+                    // and instead will only ever convert to one of the known types.
                     TypeConverter converter = TypeDescriptor.GetConverter(primitiveType);
 
                     if (converter == null)
