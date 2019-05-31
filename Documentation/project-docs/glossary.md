@@ -79,11 +79,17 @@ In this document, the following terms are used:
   Framework, so you can think of CoreFX as a fork of the .NET Framework library
   stack.
 
+* **CLI** Command Line Interface --or-- Common Language Runtime.
+  * Command Line Interface: A tool that has no graphical interface and is
+    intended to be used completely from a console/terminal.
+  * Common Language Interface: The [open specification][ECMA-355] that defines
+    IL, how to store IL as binary (assemblies), and how the runtime works. AKA: [ECMA-355][ECMA-355].
+
 ## Platforms
 
 ### .NET Framework
 
-**Also referred to as**: Desktop, full framework, in-box framework
+**Also referred to as**: Desktop, full framework, in-box framework, ~~CLR~~
 
 This refers to the .NET Framework that first shipped in 2002 and has been
 updated on a regular basis since then. It's the main framework folks target
@@ -315,3 +321,4 @@ stack. There are, however, various community projects in that space:
 [Granular]: https://github.com/yuvaltz/Granular
 [xunit]: https://github.com/xunit
 [mc.dot.net]: https://mc.dot.net/
+[ECMA-355]: http://www.ecma-international.org/publications/standards/Ecma-335.htm
