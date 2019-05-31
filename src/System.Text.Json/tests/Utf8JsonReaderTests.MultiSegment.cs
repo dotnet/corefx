@@ -1109,11 +1109,11 @@ namespace System.Text.Json.Tests
         [InlineData("//abc", "abc", 100)]
         public static void JsonWithSingleLineCommentWithRegularLineEndingMultiSegment(string jsonStringWithoutLineEnding, string expectedComment, int segmentSize)
         {
-            foreach (string lineEnding in new string[] { "\r", "\r ", "\r\n", "\r\n ", "\n", "\n " })
+            foreach (string lineEnding in new string[] { "\r", "\r ", "\r\n", "\r\n ", "\n", "\n ", "" })
             {
                 foreach (bool isFinalBlock in new bool[] { false, true })
                 {
-                    if (!isFinalBlock && lineEnding == "\r")
+                    if (!isFinalBlock && (lineEnding == "\r" || lineEnding == ""))
                     {
                         // In this case parser would return false on the first Read (and check for \n on the next segment)
                         // which is not the purpose of this test and is covered separately

@@ -2403,13 +2403,13 @@ namespace System.Text.Json
             int totalIdx = 0;
             while (true)
             {
-                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.StartingByteOfNonStandardLineSeparator);
+                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.StartingByteOfNonStandardSeparator);
                 dangerousLineSeparatorBytesConsumed = 0;
 
                 if (idx == -1)
                     return -1;
 
-                if (localBuffer[idx] != JsonConstants.StartingByteOfNonStandardLineSeparator)
+                if (localBuffer[idx] != JsonConstants.StartingByteOfNonStandardSeparator)
                     return totalIdx + idx;
 
                 int p = idx + 1;
@@ -2422,7 +2422,7 @@ namespace System.Text.Json
 
                 if (dangerousLineSeparatorBytesConsumed != 0)
                 {
-                    // this can only happen in the end of stream
+                    // this can only happen in the end of the local buffer
                     Debug.Assert(localBuffer.Length < 2);
                     return -1;
                 }
@@ -2516,11 +2516,11 @@ namespace System.Text.Json
                 {
                     byte marker = localBuffer[idx];
 
-                    int p = idx + 1;
-                    _consumed += p;
-                    _bytePositionInLine += p;
+                    int nextIdx = idx + 1;
+                    _consumed += nextIdx;
+                    _bytePositionInLine += nextIdx;
 
-                    localBuffer = localBuffer.Slice(p);
+                    localBuffer = localBuffer.Slice(nextIdx);
 
                     switch (marker)
                     {

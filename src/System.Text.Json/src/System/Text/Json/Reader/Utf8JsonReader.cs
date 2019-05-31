@@ -2300,8 +2300,6 @@ namespace System.Text.Json
                 // If we are here, we have definintely found a \r. So now to check if \n follows.
                 Debug.Assert(localBuffer[idx] == JsonConstants.CarriageReturn);
 
-                toConsume = idx;
-
                 if (idx < localBuffer.Length - 1)
                 {
                     if (localBuffer[idx + 1] == JsonConstants.LineFeed)
@@ -2351,17 +2349,22 @@ namespace System.Text.Json
             int totalIdx = 0;
             while (true)
             {
-                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.StartingByteOfNonStandardLineSeparator);
+                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.StartingByteOfNonStandardSeparator);
 
                 if (idx == -1)
+                {
                     return -1;
+                }
 
-                if (localBuffer[idx] != JsonConstants.StartingByteOfNonStandardLineSeparator)
-                    return totalIdx + idx;
+                totalIdx += idx;
 
-                int p = idx + 1;
-                localBuffer = localBuffer.Slice(p);
-                totalIdx += p;
+                if (localBuffer[idx] != JsonConstants.StartingByteOfNonStandardSeparator)
+                {
+                    return totalIdx;
+                }
+
+                totalIdx++;
+                localBuffer = localBuffer.Slice(idx + 1);
 
                 ThrowOnDangerousLineSeparator(localBuffer);
             }
@@ -2379,7 +2382,8 @@ namespace System.Text.Json
                 return;
             }
 
-            if (localBuffer[0] == 0x80 && (localBuffer[1] == 0xA8 || localBuffer[1] == 0xA9))
+            byte next = localBuffer[1];
+            if (localBuffer[0] == 0x80 && (next == 0xA8 || next == 0xA9))
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfLineSeparator);
         }
 
