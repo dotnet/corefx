@@ -4,7 +4,7 @@
     <NoWarn>$(NoWarn);NU1603;NU1605</NoWarn>
     <SwapNativeForIL Condition="'$(SwapNativeForIL)' == '' AND ('$(ConfigurationGroup)' == 'Debug' OR '$(Coverage)' == 'true')">true</SwapNativeForIL>
     <!-- uap10.0.16299 is missing IL -->
-    <SwapNativeForIL Condition="'$(TargetGroup)'=='uap10.0.16299'">false</SwapNativeForIL>
+    <SwapNativeForIL Condition="'$(TargetFramework)'=='uap10.0.16299'">false</SwapNativeForIL>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(DotNetBuildFromSource)' != 'true'">
@@ -16,9 +16,9 @@
     <PackageReference Include="transport.Microsoft.NETCore.Runtime.CoreCLR">
       <Version>$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)</Version>
       <!-- Following is version used in release/uwp6.0 -->
-      <Version Condition="'$(TargetGroup)'=='uap10.0.16299'">2.1.0-b-uwp6-25707-02</Version>
+      <Version Condition="'$(TargetFramework)'=='uap10.0.16299'">2.1.0-b-uwp6-25707-02</Version>
     </PackageReference>
-    <PackageReference Condition="'$(TargetGroup)' == 'uap' and '$(DotNetBuildFromSource)' != 'true'" Include="Microsoft.DotNet.UAP.TestTools" Version="$(MicrosoftDotNetUapTestToolsPackageVersion)" GeneratePathProperty="true" />
+    <PackageReference Condition="'$(TargetsUap)' == 'true' and '$(DotNetBuildFromSource)' != 'true'" Include="Microsoft.DotNet.UAP.TestTools" Version="$(MicrosoftDotNetUapTestToolsPackageVersion)" GeneratePathProperty="true" />
     <PackageReference Include="Microsoft.NETCore.TestHost" Version="$(MicrosoftNETCoreRuntimeCoreCLRPackageVersion)" />
     <PackageReference Include="runtime.native.System.Data.SqlClient.sni" Version="$(RuntimeNativeSystemDataSqlClientSniPackageVersion)" />
     <PackageReference Include="Microsoft.NETCore.DotNetHost" Version="$(MicrosoftNETCoreDotNetHostPackageVersion)" />
@@ -31,7 +31,7 @@
 
   <!-- Retrieve the UAP Tools to the TestHost folder -->
   <Target Name="CopyUAPToolsToTestHost"
-          Condition="'$(TargetGroup)' == 'uap' and '$(DotNetBuildFromSource)' != 'true'"
+          Condition="'$(TargetsUap)' == 'true' and '$(DotNetBuildFromSource)' != 'true'"
           AfterTargets="AfterResolveReferences">
 
     <PropertyGroup>

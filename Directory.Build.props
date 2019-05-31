@@ -92,6 +92,7 @@
   <PropertyGroup>    
     <DisableRepoRestore Condition="'$(IsTestProject)' == 'true'">true</DisableRepoRestore>
     <DisableRepoRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</DisableRepoRestore>
+    <DisableRepoRestore Condition="'$IsExternalProject)' == 'true'">true</DisableRepoRestore>
   </PropertyGroup>
 
   <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
