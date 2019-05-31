@@ -196,7 +196,7 @@ namespace System.Text.Json.Serialization
         {
             var reader = new Utf8JsonReader(buffer, isFinalBlock, readerState);
 
-            // If we haven't read in the entire stream's payload we'll need signify that we want
+            // If we haven't read in the entire stream's payload we'll need to signify that we want
             // to enable read ahead behaviors to ensure we have complete json objects and arrays
             // ({}, []) when needed. (Notably to successfully parse JsonElement via JsonDocument
             // to assign to object and JsonElement properties in the constructed .NET object.)
