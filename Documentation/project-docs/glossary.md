@@ -47,28 +47,6 @@ In this document, the following terms are used:
   persistent JIT compiler. It usually compiles code on the machine where the
   code will be executed, but compilation typically occurs at install time.
 
-* **CLR**. Common language runtime. The exact meaning depends on context, but it
-  usually refers to the runtime of the .NET Framework and includes several
-  components. The CLR is a virtual machine, i.e. it includes the facilities to
-  generate and compile code on-the-fly using a JIT compiler. The existing
-  Microsoft CLR implementation is Windows only.
-
-* **CoreCLR**. Core common language runtime. It's built from the same code base
-  as the CLR. Originally, CoreCLR was the runtime of Silverlight and was
-  designed to run on multiple platforms, specifically Windows and OS X. CoreCLR
-  is now part of .NET Core and represents a simplified version of the CLR. It's
-  still a [cross platform][core-build-status] runtime. CoreCLR is also a virtual
-  machine with a JIT.
-
-* **CoreRT**. Core runtime. In contrast to the CLR/CoreCLR, CoreRT is not a
-  virtual machine, i.e. it doesn't include the facilities to generate and run
-  code on-the-fly because it doesn't include a JIT. It does, however, include
-  the GC and the ability for runtime type identification (RTTI) as well as
-  reflection. However, its type system is designed so that metadata for
-  reflection can be omitted. This enables having an AOT tool chain that can link
-  away superfluous metadata and (more importantly) identify code that the
-  application doesn't use.
-
 * **CoreFX**. Core framework. Conceptually a set of `System.*` (and to a limited
   extent `Microsoft.*`) libraries that make up the lower layer of the .NET
   library stack. It's what most people would think of as the Base Class Library
@@ -83,7 +61,40 @@ In this document, the following terms are used:
   * Command Line Interface: A tool that has no graphical interface and is
     intended to be used completely from a console/terminal.
   * Common Language Interface: The [open specification][ECMA-355] that defines
-    IL, how to store IL as binary (assemblies), and how the runtime works. AKA: [ECMA-355][ECMA-355].
+    IL, how to store IL as binary (assemblies), and how the runtime works. AKA:
+    [ECMA-355][ECMA-355].
+
+## Runtimes
+
+### Common Language Runtime
+
+**Also referred to as**: CLR
+
+The CLR is a virtual machine, i.e. it includes the facilities to generate and
+compile code on-the-fly using a JIT compiler. The existing Microsoft CLR
+implementation is Windows only.
+
+### Core Common Language Runtime
+
+**Also referred to as**: CoreCLR
+
+It's built from the same code base as the CLR. Originally, CoreCLR was the
+runtime of Silverlight and was designed to run on multiple platforms,
+specifically Windows and OS X. CoreCLR is now part of .NET Core and represents a
+simplified version of the CLR. It's still a [cross platform][core-build-status]
+runtime. CoreCLR is also a virtual machine with a JIT.
+
+### Core Runtime
+
+**Also referred to as**: CoreRT
+
+In contrast to the CLR/CoreCLR, CoreRT is not a virtual machine, i.e. it doesn't
+include the facilities to generate and run code on-the-fly because it doesn't
+include a JIT. It does, however, include the GC and the ability for runtime type
+identification (RTTI) as well as reflection. However, its type system is
+designed so that metadata for reflection can be omitted. This enables having an
+AOT tool chain that can link away superfluous metadata and (more importantly)
+identify code that the application doesn't use.
 
 ## Platforms
 
