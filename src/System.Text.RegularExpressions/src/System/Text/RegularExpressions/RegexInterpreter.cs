@@ -18,7 +18,7 @@ namespace System.Text.RegularExpressions
         private int _codepos;
         private bool _rightToLeft;
         private bool _caseInsensitive;
-        private const int LoopTimeoutCheckCount = 2000; // A conservative value to guarantee the correct timeout handling.
+        private const int LoopTimeoutCheckCount = 2048; // A conservative value to guarantee the correct timeout handling.
 
         public RegexInterpreter(RegexCode code, CultureInfo culture)
         {
@@ -966,10 +966,10 @@ namespace System.Text.RegularExpressions
 
                             while (c-- > 0)
                             {
-                                // Check the timeout every 2000th iteration. The aditional if check
+                                // Check the timeout every 2000th iteration. The additional if check
                                 // in every iteration can be neglected as the cost of the CharInClass
                                 // check is many times higher.
-                                if (c % LoopTimeoutCheckCount == 0)
+                                if ((uint)c % LoopTimeoutCheckCount == 0)
                                 {
                                     CheckTimeout();
                                 }
@@ -1046,10 +1046,10 @@ namespace System.Text.RegularExpressions
 
                             for (i = c; i > 0; i--)
                             {
-                                // Check the timeout every 2000th iteration. The aditional if check
+                                // Check the timeout every 2000th iteration. The additional if check
                                 // in every iteration can be neglected as the cost of the CharInClass
                                 // check is many times higher.
-                                if (i % LoopTimeoutCheckCount == 0)
+                                if ((uint)i % LoopTimeoutCheckCount == 0)
                                 {
                                     CheckTimeout();
                                 }

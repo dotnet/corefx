@@ -380,7 +380,8 @@ namespace System.Text.RegularExpressions.Tests
             }).Dispose();
         }
 
-        [Theory]
+        // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
+        [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
         [InlineData(RegexOptions.Compiled)]
         [InlineData(RegexOptions.None)]
         public void Match_Timeout_Loop_Throws(RegexOptions options)
@@ -391,7 +392,8 @@ namespace System.Text.RegularExpressions.Tests
             Assert.Throws<RegexMatchTimeoutException>(() => regex.Match(input));
         }
 
-        [Theory]
+        // On 32-bit we can't test these high inputs as they cause OutOfMemoryExceptions.
+        [ConditionalTheory(typeof(Environment), nameof(Environment.Is64BitProcess))]
         [InlineData(RegexOptions.Compiled)]
         [InlineData(RegexOptions.None)]
         public void Match_Timeout_Repetition_Throws(RegexOptions options)

@@ -112,7 +112,7 @@ namespace System.Text.RegularExpressions
         private const int Lazybranchcountback2 = 8;    // back2 part of lazybranchcount
         private const int Forejumpback = 9;    // back part of forejump
         private const int Uniquecount = 10;
-        private const int LoopTimeoutCheckCount = 2000; // A conservative value to guarantee the correct timeout handling.
+        private const int LoopTimeoutCheckCount = 2048; // A conservative value to guarantee the correct timeout handling.
 
         static RegexCompiler()
         {
