@@ -33,6 +33,7 @@ namespace System.Text.Json.Serialization.Tests
             object obj = JsonSerializer.ReadAsync(
                 stream,
                 classType).Result;
+
             Assert.IsAssignableFrom(typeof(ITestClass), obj);
             ((ITestClass)obj).Verify();
 
@@ -42,6 +43,7 @@ namespace System.Text.Json.Serialization.Tests
                 stream,
                 classType,
                 new JsonSerializerOptions { DefaultBufferSize = 5 }).Result;
+
             Assert.IsAssignableFrom(typeof(ITestClass), obj);
             ((ITestClass)obj).Verify();
         }

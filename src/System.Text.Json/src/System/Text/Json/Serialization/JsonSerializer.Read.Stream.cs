@@ -196,9 +196,10 @@ namespace System.Text.Json.Serialization
         {
             var reader = new Utf8JsonReader(buffer, isFinalBlock, readerState);
 
-            // If we haven't read in all the data we need to read ahead when reading a json object
-            // or array into a single .NET object so the JsonDocument has all of the needed data
-            // to parse.
+            // If we haven't read in the entire stream's payload we'll need signify that we want
+            // to enable read ahead behaviors to ensure we have complete json objects and arrays
+            // ({}, []) when needed. (Notably to successfully parse JsonElement via JsonDocument
+            // to assign to object and JsonElement properties in the constructed .NET object.)
             options.ReadAhead = !isFinalBlock;
             readStack.BytesConsumed = 0;
 
