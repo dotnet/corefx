@@ -251,6 +251,35 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [Fact]
+        public async Task HttpRequest_BodylessMethod_LargeContentLength()
+        {
+            if (IsWinHttpHandler || IsNetfxHandler || IsUapHandler)
+            {
+                // Some platform handlers differ but we don't take it as failure.
+                return;
+            }
+
+            using (HttpClient client = CreateHttpClient())
+            {
+                await LoopbackServer.CreateServerAsync(async (server, uri) =>
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Head, uri);
+
+                    Task<HttpResponseMessage> requestTask = client.SendAsync(request);
+                    await server.AcceptConnectionAsync(async connection =>
+                    {
+                        // Content-Length greater than 2GB.
+                        var response = LoopbackServer.GetConnectionCloseResponse(
+                            HttpStatusCode.OK, "Content-Length: 2167849215\r\n\r\n");
+                        await connection.SendResponseAsync(response);
+
+                        await requestTask;
+                    });
+                });
+            }
+        }
+
         #region Helper methods
 
         private class MockContent : HttpContent
