@@ -420,11 +420,6 @@ namespace System.Text.Json
             return new InvalidOperationException(SR.CannotTranscodeInvalidUtf8, innerException);
         }
 
-        public static InvalidOperationException GetInvalidOperationException_ReadInvalidBase64()
-        {
-            return new InvalidOperationException(SR.CannotDecodeInvalidBase64);
-        }
-
         public static ArgumentException GetArgumentException_ReadInvalidUTF16(EncoderFallbackException innerException)
         {
             return new ArgumentException(SR.CannotTranscodeInvalidUtf16, innerException);
@@ -522,6 +517,9 @@ namespace System.Text.Json
                 case DateType.DateTimeOffset:
                     message = SR.FormatDateTimeOffset;
                     break;
+                case DateType.Base64String:
+                    message = SR.CannotDecodeInvalidBase64;
+                    break;
                 default:
                     Debug.Fail($"The DateType enum value: {dateType} is not part of the switch. Add the appropriate case and exception message.");
                     break;
@@ -585,6 +583,7 @@ namespace System.Text.Json
     internal enum DateType
     {
         DateTime,
-        DateTimeOffset
+        DateTimeOffset,
+        Base64String
     }
 }
