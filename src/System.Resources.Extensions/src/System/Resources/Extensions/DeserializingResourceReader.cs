@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.ComponentModel;
 using System.IO;
-using System.Reflection;
 using System.Runtime.Serialization.Formatters.Binary;
 
 namespace System.Resources.Extensions
@@ -12,7 +12,7 @@ namespace System.Resources.Extensions
     public partial class DeserializingResourceReader
     {
         private bool _assumeBinaryFormatter = false;
-        private BinaryFormatter _formatter = null;
+        private BinaryFormatter? _formatter = null;
 
         private bool ValidateReaderType(string readerType)
         {

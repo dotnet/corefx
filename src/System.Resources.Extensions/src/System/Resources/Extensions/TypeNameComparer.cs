@@ -1,9 +1,12 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more informanullable enable
+
+#nullable enable
 using System.Collections.Generic;
+using System.Numerics.Hashing;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Runtime.InteropServices;
-using System.Text;
 
 namespace System.Resources.Extensions
 {
@@ -14,10 +17,11 @@ namespace System.Resources.Extensions
     /// but is meant to serve as a best effort, avoiding false positives, in the 
     /// absense of real type meatadata.
     /// </summary>
-    internal class TypeNameComparer : IEqualityComparer<string>
+    internal sealed class TypeNameComparer : IEqualityComparer<string>
     {
         public static TypeNameComparer Instance { get; } = new TypeNameComparer();
 
+        // these match the set of whitespace characters allowed by the runtime's type parser
         private static readonly char[] s_whiteSpaceChars =
         {
             ' ', '\n', '\r', '\t'
@@ -40,7 +44,6 @@ namespace System.Resources.Extensions
             return comma == -1 ? assemblyName : assemblyName.Slice(0, comma).TrimEnd(s_whiteSpaceChars);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsMscorlib(ReadOnlySpan<char> assemblyName)
         {
             // to match IsMscorlib() in VM, which will ignore public key token and culture for corelib
@@ -115,9 +118,14 @@ namespace System.Resources.Extensions
             // non-allocating GetHashCode that hashes the type name portion of the string
             ReadOnlySpan<char> typeSpan = assemblyQualifiedTypeName.AsSpan().TrimStart(s_whiteSpaceChars);
             ReadOnlySpan<char> typeName = ReadTypeName(typeSpan);
-            ReadOnlySpan<byte> typeNameBytes = MemoryMarshal.AsBytes(typeName);
 
-            return Marvin.ComputeHash32(typeNameBytes, Marvin.DefaultSeed);
+            int hashCode =  0;
+            for(int i = 0; i < typeName.Length; i++)
+            {
+                hashCode = HashHelpers.Combine(hashCode, typeName[i].GetHashCode());
+            }
+
+            return hashCode;
         }
     }
 }

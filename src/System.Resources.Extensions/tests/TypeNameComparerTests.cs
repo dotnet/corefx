@@ -1,6 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using Xunit;
 
 namespace System.Resources.Extensions.Tests
@@ -21,6 +22,8 @@ namespace System.Resources.Extensions.Tests
         public static void IgnoresMscorlib(string typeName1, string typeName2)
         {
             Assert.Equal(typeName1, typeName2, TypeNameComparer.Instance);
+
+            Assert.Equal(TypeNameComparer.Instance.GetHashCode(typeName1), TypeNameComparer.Instance.GetHashCode(typeName2));
         }
 
         [Theory]
@@ -42,7 +45,10 @@ namespace System.Resources.Extensions.Tests
         {
             string typeName = "MyNamespace.MyType";
             string expectedAssemblyName = "MyAssembly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0123456789abcdef";
-            Assert.Equal($"{typeName}, {expectedAssemblyName}", $"{typeName}{assemblyNamePortion}", TypeNameComparer.Instance);
+            string typeName1 = $"{typeName}, {expectedAssemblyName}";
+            string typeName2 = $"{typeName}{assemblyNamePortion}";
+            Assert.Equal(typeName1, typeName2, TypeNameComparer.Instance);
+            Assert.Equal(TypeNameComparer.Instance.GetHashCode(typeName1), TypeNameComparer.Instance.GetHashCode(typeName2));
         }
 
         [Theory]
@@ -55,7 +61,10 @@ namespace System.Resources.Extensions.Tests
         {
             string expectedtypeName = "MyNamespace.MyType";
             string assemblyName = "MyAssembly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0123456789abcdef";
-            Assert.Equal($"{expectedtypeName}, {assemblyName}", $"{typeNamePortion}, {assemblyName}", TypeNameComparer.Instance);
+            string typeName1 = $"{expectedtypeName}, {assemblyName}";
+            string typeName2 = $"{typeNamePortion}, {assemblyName}";
+            Assert.Equal(typeName1, typeName2, TypeNameComparer.Instance);
+            Assert.Equal(TypeNameComparer.Instance.GetHashCode(typeName1), TypeNameComparer.Instance.GetHashCode(typeName2));
         }
 
         [Theory]
@@ -80,7 +89,10 @@ namespace System.Resources.Extensions.Tests
         {
             string typeName = "MyNamespace.MyType";
             string expectedAssemblyName = "MyAssembly, Version=1.0.0.0, Culture=neutral, PublicKeyToken=0123456789abcdef";
-            Assert.Equal($"{typeName}, {expectedAssemblyName}", $"{typeName}, {assemblyNamePortion}", TypeNameComparer.Instance);
+            string typeName1 = $"{typeName}, {expectedAssemblyName}";
+            string typeName2 = $"{typeName}, {assemblyNamePortion}";
+            Assert.Equal(typeName1, typeName2, TypeNameComparer.Instance);
+            Assert.Equal(TypeNameComparer.Instance.GetHashCode(typeName1), TypeNameComparer.Instance.GetHashCode(typeName2));
         }
 
         [Theory]
