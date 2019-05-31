@@ -157,6 +157,8 @@ namespace System.Text.Json
     }
     public static partial class JsonSerializer
     {
+        public static object ReadValue(ref Utf8JsonReader reader, Type returnType, JsonSerializerOptions options = null) { throw null; }
+        public static TValue ReadValue<TValue>(ref Utf8JsonReader reader, JsonSerializerOptions options = null) { throw null; }
         public static object Parse(System.ReadOnlySpan<byte> utf8Json, System.Type returnType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
         public static object Parse(string json, System.Type returnType, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
         public static TValue Parse<TValue>(System.ReadOnlySpan<byte> utf8Json, System.Text.Json.JsonSerializerOptions options = null) { throw null; }
