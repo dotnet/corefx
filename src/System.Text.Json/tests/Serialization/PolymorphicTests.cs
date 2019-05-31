@@ -391,7 +391,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void PolymorphicInterface_NotSupported()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<MyClass>(@"{ ""Value"": ""A value"", ""Thing"": { ""Number"": 123 } }"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<MyClass>(@"{ ""Value"": ""A value"", ""Thing"": { ""Number"": 123 } }"));
         }
 
         class MyClass

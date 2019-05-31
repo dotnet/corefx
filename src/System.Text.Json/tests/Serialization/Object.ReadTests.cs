@@ -163,7 +163,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadObjectFail_ReferenceTypeMissingParameterlessConstructor()
         {
-            Assert.Throws<InvalidOperationException>(() => JsonSerializer.Parse<PublicParameterizedConstructorTestClass>(@"{""Name"":""Name!""}"));
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<PublicParameterizedConstructorTestClass>(@"{""Name"":""Name!""}"));
         }
 
         class PublicParameterizedConstructorTestClass

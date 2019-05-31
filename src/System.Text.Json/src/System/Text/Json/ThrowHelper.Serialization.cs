@@ -126,13 +126,13 @@ namespace System.Text.Json
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowInvalidOperationException_DeserializeMissingParameterlessConstructor(Type invalidType)
         {
-            throw new InvalidOperationException(SR.Format(SR.DeserializeMissingParameterlessConstructor, invalidType));
+            throw new NotSupportedException(SR.Format(SR.DeserializeMissingParameterlessConstructor, invalidType));
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static void ThrowInvalidOperationException_DeserializePolymorphicInterface(Type invalidType)
         {
-            throw new InvalidOperationException(SR.Format(SR.DeserializePolymorphicInterface, invalidType));
+            throw new NotSupportedException(SR.Format(SR.DeserializePolymorphicInterface, invalidType));
         }
     }
 }
