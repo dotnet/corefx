@@ -166,7 +166,7 @@ namespace System.Text.Json.Serialization.Converters
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
-            return propertyInfo.CreateImmutableCollectionFromList(immutableCollectionType, delegateKey, sourceList, state.PropertyPath);
+            return propertyInfo.CreateImmutableCollectionFromList(immutableCollectionType, delegateKey, sourceList, state.JsonPath);
         }
 
         internal IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
@@ -179,7 +179,7 @@ namespace System.Text.Json.Serialization.Converters
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
-            return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.PropertyPath);
+            return propertyInfo.CreateImmutableCollectionFromDictionary(immutableCollectionType, delegateKey, sourceDictionary, state.JsonPath);
         }
     }
 }

@@ -215,7 +215,7 @@ namespace System.Text.Json.Serialization
                 }
                 else
                 {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.PropertyPath);
+                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
                 }
             }
             else
@@ -294,7 +294,7 @@ namespace System.Text.Json.Serialization
                 }
                 else
                 {
-                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.PropertyPath);
+                    ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
                 }
             }
             else
