@@ -13,7 +13,7 @@ namespace System.Reflection
         public virtual IList<LocalVariableInfo> LocalVariables => throw new ArgumentNullException("array");
         public virtual int MaxStackSize => 0;
         public virtual bool InitLocals => false;
-        public virtual byte[] GetILAsByteArray() => null;
+        public virtual byte[]? GetILAsByteArray() => null;
         public virtual IList<ExceptionHandlingClause> ExceptionHandlingClauses => throw new ArgumentNullException("array");
     }
 }

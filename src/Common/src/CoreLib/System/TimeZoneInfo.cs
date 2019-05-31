@@ -2,10 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.Serialization;
 using System.Threading;
@@ -30,7 +30,7 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed partial class TimeZoneInfo : IEquatable<TimeZoneInfo?>, ISerializable, IDeserializationCallback
+    public sealed partial class TimeZoneInfo : IEquatable<TimeZoneInfo>, ISerializable, IDeserializationCallback
     {
         private enum TimeZoneInfoResult
         {
@@ -52,7 +52,7 @@ namespace System
         private const string UtcId = "UTC";
         private const string LocalId = "Local";
 
-        private static readonly TimeZoneInfo s_utcTimeZone = CreateCustomTimeZone(UtcId, TimeSpan.Zero, UtcId, UtcId);
+        private static readonly TimeZoneInfo s_utcTimeZone = CreateCustomTimeZone(UtcId, TimeSpan.Zero, "(UTC) Coordinated Universal Time", "Coordinated Universal Time");
 
         private static CachedData s_cachedData = new CachedData();
 
@@ -294,7 +294,7 @@ namespace System
             AdjustmentRule result = rule;
             for (int i = 1; i < _adjustmentRules.Length; i++)
             {
-                // use ReferenceEquals here instead of AdjustmentRule.Equals because 
+                // use ReferenceEquals here instead of AdjustmentRule.Equals because
                 // ReferenceEquals is much faster. This is safe because all the callers
                 // of GetPreviousAdjustmentRule pass in a rule that was retrieved from
                 // _adjustmentRules.  A different approach will be needed if this ever changes.
@@ -765,7 +765,9 @@ namespace System
         /// Returns value equality. Equals does not compare any localizable
         /// String objects (DisplayName, StandardName, DaylightName).
         /// </summary>
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
         public bool Equals(TimeZoneInfo? other) =>
+#pragma warning restore CS8614
             other != null &&
             string.Equals(_id, other._id, StringComparison.OrdinalIgnoreCase) &&
             HasSameRules(other);
@@ -1064,7 +1066,7 @@ namespace System
 
             return result;
         }
-        
+
         private AdjustmentRule? GetAdjustmentRuleForTime(DateTime dateTime, bool dateTimeisUtc, out int? ruleIndex)
         {
             if (_adjustmentRules == null || _adjustmentRules.Length == 0)
@@ -1383,8 +1385,8 @@ namespace System
                 if (previousYearRule != null && previousYearRule.IsEndDateMarkerForEndOfYear())
                 {
                     DaylightTimeStruct previousDaylightTime = zone.GetDaylightTime(
-                        daylightTime.Start.Year - 1, 
-                        previousYearRule, 
+                        daylightTime.Start.Year - 1,
+                        previousYearRule,
                         previousYearRuleIndex);
                     startTime = previousDaylightTime.Start - utc - previousYearRule.BaseUtcOffsetDelta;
                     ignoreYearAdjustment = true;
@@ -1417,7 +1419,7 @@ namespace System
                     else
                     {
                         DaylightTimeStruct nextdaylightTime = zone.GetDaylightTime(
-                            daylightTime.End.Year + 1, 
+                            daylightTime.End.Year + 1,
                             nextYearRule,
                             nextYearRuleIndex);
                         endTime = nextdaylightTime.End - utc - nextYearRule.BaseUtcOffsetDelta - nextYearRule.DaylightDelta;
@@ -1739,7 +1741,7 @@ namespace System
             else
             {
                 rule = zone.GetAdjustmentRuleForTime(time, dateTimeisUtc: true, ruleIndex: out ruleIndex);
-                Debug.Assert(rule == null || ruleIndex.HasValue, 
+                Debug.Assert(rule == null || ruleIndex.HasValue,
                     "If GetAdjustmentRuleForTime returned an AdjustmentRule, ruleIndex should also be set.");
 
                 // As we get the associated rule using the adjusted targetTime, we should use the adjusted year (targetTime.Year) too as after adding the baseOffset,
@@ -1894,18 +1896,26 @@ namespace System
             if (result == TimeZoneInfoResult.Success)
             {
                 if (cachedData._systemTimeZones == null)
+                {
                     cachedData._systemTimeZones = new Dictionary<string, TimeZoneInfo>(StringComparer.OrdinalIgnoreCase);
+                    cachedData._systemTimeZones.Add(UtcId, s_utcTimeZone);
+                }
 
-                cachedData._systemTimeZones.Add(id, match!); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                // Avoid using multiple Utc objects to ensure consistency and correctness as we have some code
+                // uses reference equality with the Utc object.
+                if (!id.Equals(UtcId,  StringComparison.OrdinalIgnoreCase))
+                {
+                    cachedData._systemTimeZones.Add(id, match!);
+                }
 
-                if (dstDisabled && match!._supportsDaylightSavingTime) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                if (dstDisabled && match!._supportsDaylightSavingTime)
                 {
                     // we found a cache hit but we want a time zone without DST and this one has DST data
                     value = CreateCustomTimeZone(match._id, match._baseUtcOffset, match._displayName, match._standardDisplayName);
                 }
                 else
                 {
-                    value = new TimeZoneInfo(match!._id, match._baseUtcOffset, match._displayName, match._standardDisplayName, // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    value = new TimeZoneInfo(match!._id, match._baseUtcOffset, match._displayName, match._standardDisplayName,
                                           match._daylightDisplayName, match._adjustmentRules, disableDaylightSavingTime: false);
                 }
             }
@@ -1982,7 +1992,7 @@ namespace System
 
         private static readonly TimeSpan MaxOffset = TimeSpan.FromHours(14.0);
         private static readonly TimeSpan MinOffset = -MaxOffset;
-        
+
         /// <summary>
         /// Helper function that validates the TimeSpan is within +/- 14.0 hours
         /// </summary>
@@ -1995,7 +2005,7 @@ namespace System
                 + adjustmentRule.BaseUtcOffsetDelta
                 + (adjustmentRule.HasDaylightSaving ? adjustmentRule.DaylightDelta : TimeSpan.Zero);
         }
-        
+
         /// <summary>
         /// Helper function that performs adjustment rule validation
         /// </summary>
@@ -2010,7 +2020,7 @@ namespace System
         /// This method should not be called at all but is here in case something changes in the future
         /// or if really old time zones are present on the OS (no combination is known at the moment)
         /// </summary>
-        private static void NormalizeAdjustmentRuleOffset(TimeSpan baseUtcOffset, ref AdjustmentRule adjustmentRule)
+        private static void NormalizeAdjustmentRuleOffset(TimeSpan baseUtcOffset, [NotNull] ref AdjustmentRule adjustmentRule)
         {
             // Certain time zones such as:
             //       Time Zone  start date  end date    offset

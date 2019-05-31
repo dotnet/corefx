@@ -85,7 +85,6 @@ namespace System.Net.Security.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework does not recover well from underlying stream failures")]
         [Fact]
         public async Task Read_CorrectlyUnlocksAfterFailure()
         {
@@ -519,7 +518,6 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Relies on FlushAsync override not available in desktop")]
         public void SslStream_StreamToStream_FlushAsync_Propagated()
         {
             VirtualNetwork network = new VirtualNetwork();
@@ -704,7 +702,42 @@ namespace System.Net.Security.Tests
         }
     }
 
-    public sealed class SslStreamStreamToStreamTest_Async : SslStreamStreamToStreamTest
+    public abstract class SslStreamStreamToStreamTest_CancelableReadWriteAsync : SslStreamStreamToStreamTest
+    {
+        [Fact]
+        public async Task ReadAsync_WriteAsync_Precanceled_ThrowsOperationCanceledException()
+        {
+            var network = new VirtualNetwork();
+            using (var clientSslStream = new SslStream(new VirtualNetworkStream(network, isServer: false), false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(new VirtualNetworkStream(network, isServer: true)))
+            {
+                await DoHandshake(clientSslStream, serverSslStream);
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => ReadAsync(clientSslStream, new byte[1], 0, 1, new CancellationToken(true)));
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => WriteAsync(serverSslStream, new byte[1], 0, 1, new CancellationToken(true)));
+            }
+        }
+
+        [Fact]
+        public async Task ReadAsync_CanceledAfterStart_ThrowsOperationCanceledException()
+        {
+            var network = new VirtualNetwork();
+            using (var clientSslStream = new SslStream(new VirtualNetworkStream(network, isServer: false), false, AllowAnyServerCertificate))
+            using (var serverSslStream = new SslStream(new VirtualNetworkStream(network, isServer: true)))
+            {
+                await DoHandshake(clientSslStream, serverSslStream);
+
+                var cts = new CancellationTokenSource();
+
+                Task t = ReadAsync(clientSslStream, new byte[1], 0, 1, cts.Token);
+                Assert.False(t.IsCompleted);
+
+                cts.Cancel();
+                await Assert.ThrowsAnyAsync<OperationCanceledException>(() => t);
+            }
+        }
+    }
+
+    public sealed class SslStreamStreamToStreamTest_Async : SslStreamStreamToStreamTest_CancelableReadWriteAsync
     {
         protected override async Task DoHandshake(SslStream clientSslStream, SslStream serverSslStream)
         {
@@ -716,10 +749,10 @@ namespace System.Net.Security.Tests
             }
         }
 
-        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken)) =>
+        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
             stream.ReadAsync(buffer, offset, count, cancellationToken);
 
-        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken)) =>
+        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
             stream.WriteAsync(buffer, offset, count, cancellationToken);
     }
 
@@ -735,12 +768,12 @@ namespace System.Net.Security.Tests
             }
         }
 
-        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken)) =>
+        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
             cancellationToken.IsCancellationRequested ?
                 Task.FromCanceled<int>(cancellationToken) :
                 Task.Factory.FromAsync(stream.BeginRead, stream.EndRead, buffer, offset, count, null);
 
-        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken)) =>
+        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken) =>
             cancellationToken.IsCancellationRequested ?
                 Task.FromCanceled<int>(cancellationToken) :
                 Task.Factory.FromAsync(stream.BeginWrite, stream.EndWrite, buffer, offset, count, null);
@@ -758,7 +791,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken))
+        protected override Task<int> ReadAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -775,7 +808,7 @@ namespace System.Net.Security.Tests
             }
         }
 
-        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken = default(CancellationToken))
+        protected override Task WriteAsync(Stream stream, byte[] buffer, int offset, int count, CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested)
             {

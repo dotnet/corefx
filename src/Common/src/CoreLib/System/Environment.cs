@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
@@ -123,7 +122,7 @@ namespace System
                 {
                     Interlocked.CompareExchange(ref s_osVersion, GetOSVersion(), null);
                 }
-                return s_osVersion!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                return s_osVersion!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             }
         }
 
@@ -150,7 +149,7 @@ namespace System
                     versionSpan = versionSpan.Slice(0, separatorIndex);
 
                 // Return zeros rather then failing if the version string fails to parse
-                return Version.TryParse(versionSpan, out Version? version) ? version! : new Version(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                return Version.TryParse(versionSpan, out Version? version) ? version! : new Version(); // TODO-NULLABLE: Remove ! when nullable attributes are respected
             }
         }
 
@@ -162,13 +161,13 @@ namespace System
                 // we do this to avoid duplicating the Windows, Linux, macOS, and potentially other platform-specific implementations
                 // present in Process.  If it proves important, we could look at separating that functionality out of Process into
                 // Common files which could also be included here.
-                Type processType = Type.GetType("System.Diagnostics.Process, System.Diagnostics.Process, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
+                Type? processType = Type.GetType("System.Diagnostics.Process, System.Diagnostics.Process, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", throwOnError: false);
                 IDisposable? currentProcess = processType?.GetMethod("GetCurrentProcess")?.Invoke(null, BindingFlags.DoNotWrapExceptions, null, null, null) as IDisposable;
                 if (currentProcess != null)
                 {
                     using (currentProcess)
                     {
-                        object? result = processType!.GetMethod("get_WorkingSet64")?.Invoke(currentProcess, BindingFlags.DoNotWrapExceptions, null, null, null); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/2388
+                        object? result = processType!.GetMethod("get_WorkingSet64")?.Invoke(currentProcess, BindingFlags.DoNotWrapExceptions, null, null, null);
                         if (result is long) return (long)result;
                     }
                 }

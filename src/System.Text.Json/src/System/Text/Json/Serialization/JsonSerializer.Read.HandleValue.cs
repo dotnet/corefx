@@ -8,20 +8,24 @@ namespace System.Text.Json.Serialization
     {
         private static bool HandleValue(JsonTokenType tokenType, JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            if (state.Current.Skip())
+            if (state.Current.SkipProperty)
             {
                 return false;
             }
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-            if (jsonPropertyInfo == null || state.Current.JsonClassInfo.ClassType == ClassType.Unknown)
+            if (jsonPropertyInfo == null)
+            {
+                jsonPropertyInfo = state.Current.JsonClassInfo.CreateRootObject(options);
+            }
+            else if (state.Current.JsonClassInfo.ClassType == ClassType.Unknown)
             {
                 jsonPropertyInfo = state.Current.JsonClassInfo.CreatePolymorphicProperty(jsonPropertyInfo, typeof(object), options);
             }
 
-            bool lastCall = (!state.Current.IsProcessingEnumerableOrDictionary() && state.Current.ReturnValue == null);
+            bool lastCall = (!state.Current.IsProcessingEnumerableOrDictionary && state.Current.ReturnValue == null);
 
-            jsonPropertyInfo.Read(tokenType, options, ref state, ref reader);
+            jsonPropertyInfo.Read(tokenType, ref state, ref reader);
             return lastCall;
         }
     }

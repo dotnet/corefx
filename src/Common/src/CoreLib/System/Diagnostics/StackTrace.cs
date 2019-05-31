@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -227,7 +226,7 @@ namespace System.Diagnostics
                         isAsync = typeof(IAsyncStateMachine).IsAssignableFrom(declaringType);
                         if (isAsync || typeof(IEnumerator).IsAssignableFrom(declaringType))
                         {
-                            methodChanged = TryResolveStateMachineMethod(ref mb!, out declaringType); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                            methodChanged = TryResolveStateMachineMethod(ref mb!, out declaringType); // TODO-NULLABLE: Pass non-null string? to string ref (https://github.com/dotnet/roslyn/issues/34874)
                         }
                     }
 
@@ -236,7 +235,7 @@ namespace System.Diagnostics
                     if (declaringType != null)
                     {
                         // Append t.FullName, replacing '+' with '.'
-                        string fullName = declaringType.FullName;
+                        string fullName = declaringType.FullName!;
                         for (int i = 0; i < fullName.Length; i++)
                         {
                             char ch = fullName[i];
@@ -386,7 +385,7 @@ namespace System.Diagnostics
                     // of the original method. Non-iterator async state machines resolve directly to their builder methods
                     // so aren't marked as changed.
                     method = candidateMethod;
-                    declaringType = candidateMethod.DeclaringType;
+                    declaringType = candidateMethod.DeclaringType!;
                     return foundIteratorAttribute;
                 }
             }

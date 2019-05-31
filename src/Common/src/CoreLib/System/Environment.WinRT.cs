@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.IO;
 using Internal.Runtime.Augments;
 
@@ -13,6 +12,8 @@ namespace System
         public static string UserName => "Windows User";
 
         public static string UserDomainName => "Windows Domain";
+
+        internal static readonly bool IsWindows8OrAbove = true;
 
         private static string GetFolderPathCore(SpecialFolder folder, SpecialFolderOption option)
         {

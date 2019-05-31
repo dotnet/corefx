@@ -18,7 +18,6 @@ namespace System.Net.Http.Functional.Tests
     using Configuration = System.Net.Test.Common.Configuration;
 
     [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "SslProtocols not supported on UAP")]
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "SslProtocols property requires .NET 4.7.2")]
     public abstract partial class HttpClientHandler_SslProtocols_Test : HttpClientHandlerTestBase
     {
         public HttpClientHandler_SslProtocols_Test(ITestOutputHelper output) : base(output) { }
@@ -41,13 +40,11 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(SslProtocols.Tls11 | SslProtocols.Tls12)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls12)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12)]
-#if !netstandard
         [InlineData(SslProtocols.Tls13)]
         [InlineData(SslProtocols.Tls11 | SslProtocols.Tls13)]
         [InlineData(SslProtocols.Tls12 | SslProtocols.Tls13)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls13)]
         [InlineData(SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Tls12 | SslProtocols.Tls13)]
-#endif
         public void SetGetProtocols_Roundtrips(SslProtocols protocols)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
@@ -66,7 +63,7 @@ namespace System.Net.Http.Functional.Tests
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
@@ -102,14 +99,12 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { SslProtocols.Ssl2, true };
             }
 #pragma warning restore 0618
-#if !netstandard
             // These protocols are new, and might not be enabled everywhere yet
             if (PlatformDetection.IsUbuntu1810OrHigher)
             {
                 yield return new object[] { SslProtocols.Tls13, false };
                 yield return new object[] { SslProtocols.Tls13, true };
             }
-#endif
         }
 
         [ConditionalTheory]
@@ -130,7 +125,7 @@ namespace System.Net.Http.Functional.Tests
 #pragma warning restore 0618
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
@@ -180,7 +175,7 @@ namespace System.Net.Http.Functional.Tests
             using (HttpClientHandler handler = CreateHttpClientHandler())
             {
                 handler.SslProtocols = sslProtocols;
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     (await RemoteServerQuery.Run(() => client.GetAsync(url), remoteServerExceptionWrapper, url)).Dispose();
                 }
@@ -220,7 +215,7 @@ namespace System.Net.Http.Functional.Tests
         public async Task GetAsync_UnsupportedSSLVersion_Throws(SslProtocols sslProtocols, string url)
         {
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (HttpClient client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.SslProtocols = sslProtocols;
                 await Assert.ThrowsAsync<HttpRequestException>(() => RemoteServerQuery.Run(() => client.GetAsync(url), remoteServerExceptionWrapper, url));
@@ -236,7 +231,7 @@ namespace System.Net.Http.Functional.Tests
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;
 
@@ -283,7 +278,7 @@ namespace System.Net.Http.Functional.Tests
             }
 
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 handler.SslProtocols = allowedClientProtocols;
                 handler.ServerCertificateCustomValidationCallback = TestHelper.AllowAllCertificates;

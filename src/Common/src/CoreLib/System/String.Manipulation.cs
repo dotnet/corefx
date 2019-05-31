@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -627,21 +626,21 @@ namespace System
             }
         }
 
-        public static string Join(string? separator, IEnumerable<string> values)
+        public static string Join(string? separator, IEnumerable<string?> values)
         {
             if (values == null)
             {
                 throw new ArgumentNullException(nameof(values));
             }
 
-            using (IEnumerator<string> en = values.GetEnumerator())
+            using (IEnumerator<string?> en = values.GetEnumerator())
             {
                 if (!en.MoveNext())
                 {
                     return string.Empty;
                 }
 
-                string firstValue = en.Current;
+                string? firstValue = en.Current;
 
                 if (!en.MoveNext())
                 {

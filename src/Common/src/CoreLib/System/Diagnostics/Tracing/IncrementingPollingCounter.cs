@@ -36,6 +36,9 @@ namespace System.Diagnostics.Tracing
         /// <param name="eventSource">The event source.</param>
         public IncrementingPollingCounter(string name, EventSource eventSource, Func<double> totalValueProvider) : base(name, eventSource)
         {
+            if (totalValueProvider == null)
+                throw new ArgumentNullException(nameof(totalValueProvider));
+
             _totalValueProvider = totalValueProvider;
         }
 
@@ -53,7 +56,7 @@ namespace System.Diagnostics.Tracing
         {
             try
             {
-                lock(MyLock)
+                lock (MyLock)
                 {
                     _increment = _totalValueProvider();
                 }
@@ -64,7 +67,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        internal override void WritePayload(float intervalSec)
+        internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
         {
             UpdateMetric();
             lock (MyLock)     // Lock the counter
@@ -74,6 +77,8 @@ namespace System.Diagnostics.Tracing
                 payload.DisplayName = DisplayName ?? "";
                 payload.DisplayRateTimeScale = (DisplayRateTimeScale == TimeSpan.Zero) ? "" : DisplayRateTimeScale.ToString("c");
                 payload.IntervalSec = intervalSec;
+                payload.Series = $"Interval={pollingIntervalMillisec}"; // TODO: This may need to change when we support multi-session
+                payload.CounterType = "Sum";
                 payload.Metadata = GetMetadataString();
                 payload.Increment = _increment - _prevIncrement;
                 _prevIncrement = _increment;

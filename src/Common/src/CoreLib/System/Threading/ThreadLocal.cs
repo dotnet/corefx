@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 // A class that provides a simple, lightweight implementation of thread-local lazy-initialization, where a value is initialized once per accessing 
 // thread; this provides an alternative to using a ThreadStatic static variable and having 
@@ -202,7 +202,7 @@ namespace System.Threading
 
                     // And clear the references from the slot table to the linked slot and the value so that
                     // both can get garbage collected.
-                    slotArray[id].Value!._value = default!; // TODO-NULLABLE-GENERIC
+                    slotArray[id].Value!._value = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                     slotArray[id].Value = null;
                 }
             }
@@ -249,6 +249,7 @@ namespace System.Threading
         /// <typeparamref name="T"/> will be used.
         /// </remarks>
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        [MaybeNull]
         public T Value
         {
             get
@@ -305,6 +306,7 @@ namespace System.Threading
             }
         }
 
+        [return: MaybeNull]
         private T GetValueSlow()
         {
             // If the object has been disposed, the id will be -1.
@@ -320,7 +322,7 @@ namespace System.Threading
             T value;
             if (_valueFactory == null)
             {
-                value = default!; // TODO-NULLABLE-GENERIC
+                value = default!;
             }
             else
             {
@@ -454,23 +456,49 @@ namespace System.Threading
         /// <summary>Gets all of the threads' values in a list.</summary>
         private List<T>? GetValuesAsList()
         {
-            List<T> valueList = new List<T>();
+            LinkedSlot? linkedSlot = _linkedSlot;
             int id = ~_idComplement;
-            if (id == -1)
+            if (id == -1 || linkedSlot == null)
             {
                 return null;
             }
 
             // Walk over the linked list of slots and gather the values associated with this ThreadLocal instance.
-            Debug.Assert(_linkedSlot != null, "Should only be null if the instance was disposed.");
-            for (LinkedSlot? linkedSlot = _linkedSlot._next; linkedSlot != null; linkedSlot = linkedSlot._next)
+            var valueList = new List<T>();
+            for (linkedSlot = linkedSlot._next; linkedSlot != null; linkedSlot = linkedSlot._next)
             {
                 // We can safely read linkedSlot.Value. Even if this ThreadLocal has been disposed in the meantime, the LinkedSlot
                 // objects will never be assigned to another ThreadLocal instance.
-                valueList.Add(linkedSlot._value);
+                valueList.Add(linkedSlot._value!);
             }
 
             return valueList;
+        }
+
+        internal IEnumerable<T> ValuesAsEnumerable
+        {
+            get
+            {
+                if (!_trackAllValues)
+                {
+                    throw new InvalidOperationException(SR.ThreadLocal_ValuesNotAvailable);
+                }
+
+                LinkedSlot? linkedSlot = _linkedSlot;
+                int id = ~_idComplement;
+                if (id == -1 || linkedSlot == null)
+                {
+                    throw new ObjectDisposedException(SR.ThreadLocal_Disposed);
+                }
+
+                // Walk over the linked list of slots and gather the values associated with this ThreadLocal instance.
+                for (linkedSlot = linkedSlot._next; linkedSlot != null; linkedSlot = linkedSlot._next)
+                {
+                    // We can safely read linkedSlot.Value. Even if this ThreadLocal has been disposed in the meantime, the LinkedSlot
+                    // objects will never be assigned to another ThreadLocal instance.
+                    yield return linkedSlot._value!;
+                }
+            }
         }
 
         /// <summary>Gets the number of threads that have data in this instance.</summary>
@@ -511,6 +539,7 @@ namespace System.Threading
 
         /// <summary>Gets the value of the ThreadLocal&lt;T&gt; for debugging display purposes. It takes care of getting
         /// the value for the current thread in the ThreadLocal mode.</summary>
+        [MaybeNull]
         internal T ValueForDebugDisplay
         {
             get
@@ -520,7 +549,7 @@ namespace System.Threading
 
                 LinkedSlot? slot;
                 if (slotArray == null || id >= slotArray.Length || (slot = slotArray[id].Value) == null || !_initialized)
-                    return default!; // TODO-NULLABLE-GENERIC
+                    return default!;
                 return slot._value;
             }
         }
@@ -646,7 +675,7 @@ namespace System.Threading
             internal volatile LinkedSlotVolatile[]? _slotArray;
 
             // The value for this slot.
-            internal T _value = default!; // TODO-NULLABLE-GENERIC
+            [AllowNull, MaybeNull] internal T _value = default!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
         }
 
         /// <summary>

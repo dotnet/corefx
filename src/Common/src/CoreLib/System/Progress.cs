@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Threading;
 using System.Diagnostics;
 
@@ -82,9 +81,9 @@ namespace System
 
         /// <summary>Invokes the action and event callbacks.</summary>
         /// <param name="state">The progress value.</param>
-        private void InvokeHandlers(object state)
+        private void InvokeHandlers(object? state)
         {
-            T value = (T)state;
+            T value = (T)state!;
 
             Action<T>? handler = _handler;
             EventHandler<T> changedEvent = ProgressChanged;

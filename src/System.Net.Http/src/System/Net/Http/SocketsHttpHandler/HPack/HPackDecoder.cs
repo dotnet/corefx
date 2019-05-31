@@ -26,9 +26,7 @@ namespace System.Net.Http.HPack
         }
 
         public const int DefaultHeaderTableSize = 4096;
-
-        // TODO: add new configurable limit
-        public const int MaxStringOctets = 4096;
+        public const int DefaultStringOctetsSize = 4096;
 
         // http://httpwg.org/specs/rfc7541.html#rfc.section.6.1
         //   0   1   2   3   4   5   6   7
@@ -87,9 +85,9 @@ namespace System.Net.Http.HPack
         private readonly int _maxDynamicTableSize;
         private readonly DynamicTable _dynamicTable;
         private readonly IntegerDecoder _integerDecoder = new IntegerDecoder();
-        private readonly byte[] _stringOctets = new byte[MaxStringOctets];
-        private readonly byte[] _headerNameOctets = new byte[MaxStringOctets];
-        private readonly byte[] _headerValueOctets = new byte[MaxStringOctets];
+        private byte[] _stringOctets = new byte[DefaultStringOctetsSize];
+        private byte[] _headerNameOctets = new byte[DefaultStringOctetsSize];
+        private byte[] _headerValueOctets = new byte[DefaultStringOctetsSize];
 
         private State _state = State.Ready;
         private byte[] _headerName;
@@ -260,7 +258,15 @@ namespace System.Net.Http.HPack
 
                         if (_integerDecoder.StartDecode((byte)(b & ~HuffmanMask), StringLengthPrefix))
                         {
-                            OnStringLength(_integerDecoder.Value, nextState: State.HeaderValue);
+                            if (_integerDecoder.Value > 0)
+                            {
+                                OnStringLength(_integerDecoder.Value, nextState: State.HeaderValue);
+                            }
+                            else
+                            {
+                                OnStringLength(_integerDecoder.Value, nextState: State.Ready);
+                                OnHeaderComplete(onHeader, onHeaderState, new ReadOnlySpan<byte>(_headerName, 0, _headerNameLength), new ReadOnlySpan<byte>());
+                            }
                         }
                         else
                         {
@@ -285,12 +291,7 @@ namespace System.Net.Http.HPack
                             var headerNameSpan = new ReadOnlySpan<byte>(_headerName, 0, _headerNameLength);
                             var headerValueSpan = new ReadOnlySpan<byte>(_headerValueOctets, 0, _headerValueLength);
 
-                            onHeader(onHeaderState, headerNameSpan, headerValueSpan);
-
-                            if (_index)
-                            {
-                                _dynamicTable.Insert(headerNameSpan, headerValueSpan);
-                            }
+                            OnHeaderComplete(onHeader, onHeaderState, headerNameSpan, headerValueSpan);
                         }
 
                         break;
@@ -344,8 +345,7 @@ namespace System.Net.Http.HPack
         {
             if (length > _stringOctets.Length)
             {
-                // String length too large.
-                throw new HPackDecodingException();
+                _stringOctets = new byte[Math.Max(length, _stringOctets.Length * 2)];
             }
 
             _stringLength = length;
@@ -355,14 +355,19 @@ namespace System.Net.Http.HPack
 
         private void OnString(State nextState)
         {
-            int Decode(byte[] dst)
+            int Decode(ref byte[] dst)
             {
                 if (_huffman)
                 {
-                    return Huffman.Decode(new ReadOnlySpan<byte>(_stringOctets, 0, _stringLength), dst);
+                    return Huffman.Decode(new ReadOnlySpan<byte>(_stringOctets, 0, _stringLength), ref dst);
                 }
                 else
                 {
+                    if (dst.Length < _stringLength)
+                    {
+                        dst = new byte[Math.Max(_stringLength, dst.Length * 2)];
+                    }
+
                     Buffer.BlockCopy(_stringOctets, 0, dst, 0, _stringLength);
                     return _stringLength;
                 }
@@ -372,12 +377,12 @@ namespace System.Net.Http.HPack
             {
                 if (_state == State.HeaderName)
                 {
+                    _headerNameLength = Decode(ref _headerNameOctets);
                     _headerName = _headerNameOctets;
-                    _headerNameLength = Decode(_headerNameOctets);
                 }
                 else
                 {
-                    _headerValueLength = Decode(_headerValueOctets);
+                    _headerValueLength = Decode(ref _headerValueOctets);
                 }
             }
             catch (HuffmanDecodingException)
@@ -387,6 +392,18 @@ namespace System.Net.Http.HPack
             }
 
             _state = nextState;
+        }
+
+        // Called when we have complete header with name and value.
+        private void OnHeaderComplete(HeaderCallback onHeader, object onHeaderState, ReadOnlySpan<byte> headerName, ReadOnlySpan<byte> headerValue)
+        {
+            // Call provided callback.
+            onHeader(onHeaderState, headerName, headerValue);
+
+            if (_index)
+            {
+                _dynamicTable.Insert(headerName, headerValue);
+            }
         }
 
         private HeaderField GetHeader(int index)

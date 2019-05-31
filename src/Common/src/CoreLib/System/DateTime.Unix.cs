@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 namespace System
 {
     public readonly partial struct DateTime
@@ -19,8 +18,8 @@ namespace System
         }
 #endif
 
-        internal static DateTime FromFileTimeLeapSecondsAware(long fileTime) => default;
-        internal static long ToFileTimeLeapSecondsAware(long ticks) => default;
+        private static DateTime FromFileTimeLeapSecondsAware(long fileTime) => default;
+        private static long ToFileTimeLeapSecondsAware(long ticks) => default;
 
         // IsValidTimeWithLeapSeconds is not expected to be called at all for now on non-Windows platforms
         internal static bool IsValidTimeWithLeapSeconds(int year, int month, int day, int hour, int minute, int second, DateTimeKind kind) => false;

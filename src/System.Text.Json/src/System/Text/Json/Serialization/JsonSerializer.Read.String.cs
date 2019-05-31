@@ -15,12 +15,12 @@ namespace System.Text.Json.Serialization
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="json"/> is null.
         /// </exception>
-        /// <exception cref="JsonReaderException">
+        /// <exception cref="JsonException">
         /// Thrown when the JSON is invalid,
         /// <typeparamref name="TValue"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-        /// <remarks>Using a UTF-16 <see cref="System.String"/> is not as efficient as using the
+        /// <remarks>Using a <see cref="System.String"/> is not as efficient as using the
         /// UTF-8 methods since the implementation natively uses UTF-8.
         /// </remarks>
         public static TValue Parse<TValue>(string json, JsonSerializerOptions options = null)
@@ -41,12 +41,12 @@ namespace System.Text.Json.Serialization
         /// <exception cref="System.ArgumentNullException">
         /// Thrown if <paramref name="json"/> or <paramref name="returnType"/> is null.
         /// </exception>
-        /// <exception cref="JsonReaderException">
+        /// <exception cref="JsonException">
         /// Thrown when the JSON is invalid,
         /// the <paramref name="returnType"/> is not compatible with the JSON,
         /// or when there is remaining data in the Stream.
         /// </exception>
-        /// <remarks>Using a UTF-16 <see cref="System.String"/> is not as efficient as using the
+        /// <remarks>Using a <see cref="System.String"/> is not as efficient as using the
         /// UTF-8 methods since the implementation natively uses UTF-8.
         /// </remarks>
         public static object Parse(string json, Type returnType, JsonSerializerOptions options = null)
@@ -73,11 +73,11 @@ namespace System.Text.Json.Serialization
             var reader = new Utf8JsonReader(jsonBytes, isFinalBlock: true, readerState);
             object result = ReadCore(returnType, options, ref reader);
 
-            readerState = reader.CurrentState;
-            if (readerState.BytesConsumed != jsonBytes.Length)
+            if (reader.BytesConsumed != jsonBytes.Length)
             {
-                throw new JsonReaderException(SR.Format(SR.DeserializeDataRemaining,
-                    jsonBytes.Length, jsonBytes.Length - readerState.BytesConsumed), readerState);
+                readerState = reader.CurrentState;
+                ThrowHelper.ThrowJsonException_DeserializeDataRemaining(
+                    jsonBytes.Length, jsonBytes.Length - readerState.BytesConsumed);
             }
 
             return result;

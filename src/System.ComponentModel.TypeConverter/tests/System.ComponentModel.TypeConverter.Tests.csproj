@@ -5,9 +5,9 @@
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
     <RootNamespace />
     <AssemblyVersion>9.9.9.9</AssemblyVersion>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netstandard'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="Drawing\ColorConverterTests.cs" />
     <Compile Include="Drawing\PointConverterTests.cs" />
     <Compile Include="Drawing\RectangleConverterTests.cs" />
@@ -76,6 +76,7 @@
     <Compile Include="Design\DesigntimeLicenseContextTests.cs" />
     <Compile Include="Design\HelpKeywordAttributeTests.cs" />
     <Compile Include="Design\Serialization\MemberRelationshipServiceTests.cs" />
+    <Compile Include="Design\ServiceContainerTests.cs" />
     <Compile Include="Design\StandardToolWindowsTests.cs" />
     <Compile Include="Design\Serialization\SerializationStoreTests.cs" />
     <Compile Include="Design\Serialization\RootDesignerSerializerAttributeTests.cs" />
@@ -100,6 +101,7 @@
     <Compile Include="DescriptorTestComponent.cs" />
     <Compile Include="Mocks\MockEventDescriptor.cs" />
     <Compile Include="Mocks\MockPropertyDescriptor.cs" />
+    <Compile Include="Mocks\MockServiceProvider.cs" />
     <Compile Include="MultilineStringConverterTests.cs" />
     <Compile Include="NullableConverterTests.cs" />
     <Compile Include="PropertyDescriptorCollectionTests.cs" />
@@ -151,7 +153,7 @@
     <Compile Include="XTypeDescriptionProviderTests.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.componentmodel.typeconverter.testdata\1.0.1\content\**\*.*">
+    <SupplementalTestData Include="$(NuGetPackageRoot)system.componentmodel.typeconverter.testdata\1.0.1\content\**\*.*">
       <Link>%(RecursiveDir)%(Filename)%(Extension)</Link>
     </SupplementalTestData>
   </ItemGroup>

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Runtime;
 using System.Diagnostics;
@@ -111,7 +110,6 @@ namespace System.Text
         // Construction
         public EncoderReplacementFallbackBuffer(EncoderReplacementFallback fallback)
         {
-            // TODO-NULLABLE: NullReferenceException
             // 2X in case we're a surrogate pair
             _strDefault = fallback.DefaultString + fallback.DefaultString;
         }

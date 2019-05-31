@@ -15,6 +15,7 @@
     <StrongNameKeyId Condition="'$(IsTestProject)' == 'true'">$(TestStrongNameKeyId)</StrongNameKeyId>
   </PropertyGroup>
 
+  <Import Project="$(RepositoryEngineeringDir)Resources.targets" />
   <Import Project="Sdk.targets" Sdk="Microsoft.DotNet.Arcade.Sdk" />
 
   <PropertyGroup>
@@ -82,10 +83,6 @@
     <BinPlaceConfiguration Condition="'$(BinPlaceTestSharedFramework)' == 'true'" Include="netcoreapp-$(_bc_OSGroup)">
       <RuntimePath>$(NETCoreAppTestSharedFrameworkPath)</RuntimePath>
     </BinPlaceConfiguration>
-    <!-- Setup the ILCInputFolder directory for testing aot -->
-    <BinPlaceConfiguration Condition="'$(BinPlaceILCInputFolder)' == 'true'" Include="uapaot-Windows_NT">
-      <RuntimePath>$(ILCFXInputFolder)</RuntimePath>
-    </BinPlaceConfiguration>
     <!-- And the UAP folder for the F5 (CoreCLR UAP-debugging) scenario -->
     <BinPlaceConfiguration Condition="'$(BinPlaceUAPFramework)' == 'true'" Include="uap-Windows_NT">
       <RuntimePath>$(UAPTestSharedFrameworkPath)</RuntimePath>
@@ -125,29 +122,13 @@
   <Import Project="$(RepositoryEngineeringDir)blockReflectionAttribute.targets" />
   <Import Project="$(RepositoryEngineeringDir)codeOptimization.targets" />
   <Import Project="$(RepositoryEngineeringDir)depProj.targets" Condition="'$(MSBuildProjectExtension)' == '.depproj'" />
-  <Import Project="$(RepositoryEngineeringDir)Resources.targets" />
   <Import Project="$(RepositoryEngineeringDir)references.targets" />
   <Import Project="$(RepositoryEngineeringDir)resolveContract.targets" />
 
   <Import Project="$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets" Condition="Exists('$(ToolSetCommonDirectory)Tools.proj.nuget.g.targets')" />
 
-  <!-- permit a wrapping build system to contribute targets to this build -->
-  <Import Condition="Exists('$(MSBuildThisFileDirectory)..\open.targets')" Project="$(MSBuildThisFileDirectory)..\open.targets" />
-
   <Import Project="$(RepositoryEngineeringDir)referenceFromRuntime.targets" />
   <Import Project="$(RepositoryEngineeringDir)illink.targets" />
-
-  <ItemGroup Condition="'$(NuGetTargetMoniker)'=='.NETStandard,Version=v1.7'">
-    <!-- Temporarily suppress the message until we get a nuget version that knows about the mapping between netstandard1.7 and uapvNext -->
-    <SuppressPackageTargetFrameworkCompatibility Include="$(UAPvNextTFM)" />
-  </ItemGroup>
-
-  <Target Name="ProducesPackageId"
-          Returns="@(PackageIds)">
-    <ItemGroup>
-      <PackageIds Include="$(Id)" />
-    </ItemGroup>
-  </Target>
 
   <Target Name="ReportConfigurationErrorMessage"
           BeforeTargets="AssignProjectConfiguration"
@@ -170,6 +151,7 @@
       <_GenAPICmd>$(_GenAPICmd) --out "$(_RefSourceFileOutputPath)"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --exclude-attributes-list "$(_ExcludeAPIList)"</_GenAPICmd>
       <_GenAPICmd>$(_GenAPICmd) --header-file "$(_LicenseHeaderTxtPath)"</_GenAPICmd>
+      <_GenAPICmd Condition="'$(LangVersion)' != ''">$(_GenAPICmd) --lang-version "$(LangVersion)"</_GenAPICmd>
     </PropertyGroup>
 
     <Exec Command="$(_GenAPICmd)" />

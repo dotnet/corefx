@@ -66,7 +66,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectFalse_RedirectFromHttpToHttp_StatusCodeRedirect(int statusCode)
         {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            if (statusCode == 308 && (IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
             {
                 // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
                 return;
@@ -74,7 +74,7 @@ namespace System.Net.Http.Functional.Tests
 
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = false;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri uri = Configuration.Http.RedirectUriForDestinationUri(
                     secure: false,
@@ -101,18 +101,18 @@ namespace System.Net.Http.Functional.Tests
                 newMethod = "POST";
             }
 
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            if (statusCode == 308 && (IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
             {
                 // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
                 return;
             }
 
             HttpClientHandler handler = CreateHttpClientHandler();
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
                 {
-                    var request = new HttpRequestMessage(new HttpMethod(oldMethod), origUrl);
+                    var request = new HttpRequestMessage(new HttpMethod(oldMethod), origUrl) { Version = VersionFromUseHttp2 };
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(request);
 
@@ -168,11 +168,11 @@ namespace System.Net.Http.Functional.Tests
             }
 
             HttpClientHandler handler = CreateHttpClientHandler();
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
                 {
-                    var request = new HttpRequestMessage(HttpMethod.Post, origUrl);
+                    var request = new HttpRequestMessage(HttpMethod.Post, origUrl) { Version = VersionFromUseHttp2 };
                     request.Content = new StringContent(ExpectedContent);
                     request.Headers.TransferEncodingChunked = true;
 
@@ -226,7 +226,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpToHttp_StatusCodeOK(int statusCode)
         {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            if (statusCode == 308 && (IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
             {
                 // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
                 return;
@@ -234,7 +234,7 @@ namespace System.Net.Http.Functional.Tests
 
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri uri = Configuration.Http.RedirectUriForDestinationUri(
                     secure: false,
@@ -256,7 +256,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri uri = Configuration.Http.RedirectUriForDestinationUri(
                     secure: false,
@@ -272,14 +272,13 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework allows HTTPS to HTTP redirection")]
         [OuterLoop("Uses external server")]
         [Fact]
         public async Task GetAsync_AllowAutoRedirectTrue_RedirectFromHttpsToHttp_StatusCodeRedirect()
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri uri = Configuration.Http.RedirectUriForDestinationUri(
                     secure: true,
@@ -307,7 +306,7 @@ namespace System.Net.Http.Functional.Tests
 
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 await LoopbackServer.CreateServerAsync(async (server, url) =>
                 {
@@ -331,7 +330,7 @@ namespace System.Net.Http.Functional.Tests
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
             Uri targetUri = Configuration.Http.BasicAuthUriForCreds(secure: false, userName: Username, password: Password);
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri uri = Configuration.Http.RedirectUriForDestinationUri(
                     secure: false,
@@ -361,17 +360,10 @@ namespace System.Net.Http.Functional.Tests
                 _output.WriteLine("Skipping test due to Windows 10 version prior to Version 1703.");
                 return;
             }
-            else if (PlatformDetection.IsFullFramework)
-            {
-                // Skip this test if running on .NET Framework. Exceeding max redirections will not throw
-                // exception. Instead, it simply returns the 3xx response.
-                _output.WriteLine("Skipping test on .NET Framework due to behavior difference.");
-                return;
-            }
 
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.MaxAutomaticRedirections = maxHops;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Task<HttpResponseMessage> t = client.GetAsync(Configuration.Http.RedirectUriForDestinationUri(
                     secure: false,
@@ -410,7 +402,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri uri = Configuration.Http.RedirectUriForDestinationUri(
                     secure: false,
@@ -436,7 +428,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
                 {
@@ -461,7 +453,6 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Doesn't handle fragments according to https://tools.ietf.org/html/rfc7231#section-7.1.2")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Doesn't handle fragments according to https://tools.ietf.org/html/rfc7231#section-7.1.2")]
         [Theory]
         [InlineData("#origFragment", "", "#origFragment", false)]
@@ -495,7 +486,7 @@ namespace System.Net.Http.Functional.Tests
 
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AllowAutoRedirect = true;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 await LoopbackServer.CreateServerAsync(async (origServer, origUrl) =>
                 {
@@ -539,7 +530,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.Credentials = _credential;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri redirectUri = Configuration.Http.RedirectUriForCreds(
                     secure: false,
@@ -560,7 +551,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.Credentials = _credential;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 Uri redirectUri = Configuration.Http.RedirectUriForCreds(
                     secure: false,
@@ -585,7 +576,7 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task GetAsync_CredentialIsCredentialCacheUriRedirect_StatusCodeOK(int statusCode)
         {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            if (statusCode == 308 && (IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
             {
                 // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
                 return;
@@ -611,7 +602,7 @@ namespace System.Net.Http.Functional.Tests
             else
             {
                 handler.Credentials = credentialCache;
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     using (HttpResponseMessage response = await client.GetAsync(redirectUri))
                     {
@@ -627,14 +618,14 @@ namespace System.Net.Http.Functional.Tests
         [Theory, MemberData(nameof(RedirectStatusCodes))]
         public async Task DefaultHeaders_SetCredentials_ClearedOnRedirect(int statusCode)
         {
-            if (statusCode == 308 && (PlatformDetection.IsFullFramework || IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
+            if (statusCode == 308 && (IsWinHttpHandler && PlatformDetection.WindowsVersion < 10))
             {
                 // 308 redirects are not supported on old versions of WinHttp, or on .NET Framework.
                 return;
             }
 
             HttpClientHandler handler = CreateHttpClientHandler();
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 string credentialString = _credential.UserName + ":" + _credential.Password;
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", credentialString);

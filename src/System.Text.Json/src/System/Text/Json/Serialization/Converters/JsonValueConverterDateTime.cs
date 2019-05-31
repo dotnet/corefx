@@ -10,6 +10,12 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override bool TryRead(Type valueType, ref Utf8JsonReader reader, out DateTime value)
         {
+            if (reader.TokenType != JsonTokenType.String)
+            {
+                value = default;
+                return false;
+            }
+
             return reader.TryGetDateTime(out value);
         }
 
@@ -18,9 +24,9 @@ namespace System.Text.Json.Serialization.Converters
             writer.WriteStringValue(value);
         }
 
-        public override void Write(Span<byte> escapedPropertyName, DateTime value, Utf8JsonWriter writer)
+        public override void Write(JsonEncodedText propertyName, DateTime value, Utf8JsonWriter writer)
         {
-            writer.WriteString(escapedPropertyName, value);
+            writer.WriteString(propertyName, value);
         }
     }
 }

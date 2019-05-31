@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 namespace System.Runtime.InteropServices
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
@@ -15,7 +14,7 @@ namespace System.Runtime.InteropServices
 
         public ComSourceInterfacesAttribute(Type sourceInterface)
         {
-            Value = sourceInterface.FullName;
+            Value = sourceInterface.FullName!;
         }
 
         public ComSourceInterfacesAttribute(Type sourceInterface1, Type sourceInterface2)

@@ -30,7 +30,7 @@ namespace System.Diagnostics.Tracing
         /// </summary>
         /// <param name="name">The name.</param>
         /// <param name="eventSource">The event source.</param>
-        public DiagnosticCounter(string name, EventSource eventSource)
+        internal DiagnosticCounter(string name, EventSource eventSource)
         {
             if (name == null)
             {
@@ -59,7 +59,7 @@ namespace System.Diagnostics.Tracing
             if (_group != null)
             {
                 _group.Remove(this);
-                _group = null;
+                _group = null!; // TODO-NULLABLE: Avoid nulling out in Dispose
             }
         }
 
@@ -75,7 +75,7 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        public string DisplayName { get; set; }
+        public string? DisplayName { get; set; }
 
         public string Name { get; }
 
@@ -84,9 +84,9 @@ namespace System.Diagnostics.Tracing
         #region private implementation
 
         private CounterGroup _group;
-        private Dictionary<string, string> _metadata;
+        private Dictionary<string, string>? _metadata;
 
-        internal abstract void WritePayload(float intervalSec);
+        internal abstract void WritePayload(float intervalSec, int pollingIntervalMillisec);
 
         // arbitrarily we use name as the lock object.  
         internal object MyLock { get { return Name; } }

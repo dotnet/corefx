@@ -390,22 +390,22 @@ namespace System
     [System.FlagsAttribute]
     public enum AttributeTargets
     {
-        All = 32767,
         Assembly = 1,
-        Class = 4,
-        Constructor = 32,
-        Delegate = 4096,
-        Enum = 16,
-        Event = 512,
-        Field = 256,
-        GenericParameter = 16384,
-        Interface = 1024,
-        Method = 64,
         Module = 2,
-        Parameter = 2048,
-        Property = 128,
-        ReturnValue = 8192,
+        Class = 4,
         Struct = 8,
+        Enum = 16,
+        Constructor = 32,
+        Method = 64,
+        Property = 128,
+        Field = 256,
+        Event = 512,
+        Interface = 1024,
+        Parameter = 2048,
+        Delegate = 4096,
+        ReturnValue = 8192,
+        GenericParameter = 16384,
+        All = 32767,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class, Inherited=true)]
     public sealed partial class AttributeUsageAttribute : System.Attribute
@@ -732,9 +732,9 @@ namespace System
     }
     public enum DateTimeKind
     {
-        Local = 2,
         Unspecified = 0,
         Utc = 1,
+        Local = 2,
     }
     public readonly partial struct DateTimeOffset : System.IComparable, System.IComparable<System.DateTimeOffset>, System.IEquatable<System.DateTimeOffset>, System.IFormattable, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
     {
@@ -832,13 +832,13 @@ namespace System
     }
     public enum DayOfWeek
     {
-        Friday = 5,
-        Monday = 1,
-        Saturday = 6,
         Sunday = 0,
-        Thursday = 4,
+        Monday = 1,
         Tuesday = 2,
         Wednesday = 3,
+        Thursday = 4,
+        Friday = 5,
+        Saturday = 6,
     }
     public sealed partial class DBNull : System.IConvertible, System.Runtime.Serialization.ISerializable
     {
@@ -1270,8 +1270,10 @@ namespace System
         public static int CollectionCount(int generation) { throw null; }
         public static void EndNoGCRegion() { }
         public static long GetAllocatedBytesForCurrentThread() { throw null; }
+        public static System.GCMemoryInfo GetGCMemoryInfo() { throw null; }
         public static int GetGeneration(object obj) { throw null; }
         public static int GetGeneration(System.WeakReference wo) { throw null; }
+        public static long GetTotalAllocatedBytes(bool precise = false) { throw null; }
         public static long GetTotalMemory(bool forceFullCollection) { throw null; }
         public static void KeepAlive(object obj) { }
         public static void RegisterForFullGCNotification(int maxGenerationThreshold, int largeObjectHeapThreshold) { }
@@ -1294,13 +1296,22 @@ namespace System
         Forced = 1,
         Optimized = 2,
     }
+    public readonly struct GCMemoryInfo
+    {
+        private readonly int _dummyPrimitive;
+        public long FragmentedBytes { get { throw null; } }
+        public long HeapSizeBytes { get { throw null; } }
+        public long HighMemoryLoadThresholdBytes { get { throw null; } }
+        public long MemoryLoadBytes { get { throw null; } }
+        public long TotalAvailableMemoryBytes { get { throw null; } }
+    }
     public enum GCNotificationStatus
     {
-        Canceled = 2,
-        Failed = 1,
-        NotApplicable = 4,
         Succeeded = 0,
+        Failed = 1,
+        Canceled = 2,
         Timeout = 3,
+        NotApplicable = 4,
     }
     public partial class GenericUriParser : System.UriParser
     {
@@ -1309,18 +1320,18 @@ namespace System
     [System.FlagsAttribute]
     public enum GenericUriParserOptions
     {
-        AllowEmptyAuthority = 2,
         Default = 0,
-        DontCompressPath = 128,
-        DontConvertPathBackslashes = 64,
-        DontUnescapePathDotsAndSlashes = 256,
         GenericAuthority = 1,
-        Idn = 512,
-        IriParsing = 1024,
-        NoFragment = 32,
+        AllowEmptyAuthority = 2,
+        NoUserInfo = 4,
         NoPort = 8,
         NoQuery = 16,
-        NoUserInfo = 4,
+        NoFragment = 32,
+        DontConvertPathBackslashes = 64,
+        DontCompressPath = 128,
+        DontUnescapePathDotsAndSlashes = 256,
+        Idn = 512,
+        IriParsing = 1024,
     }
     public partial class GopherStyleUriParser : System.UriParser
     {
@@ -1724,7 +1735,7 @@ namespace System
         public MemberAccessException(string message) { }
         public MemberAccessException(string message, System.Exception inner) { }
     }
-    public readonly partial struct Memory<T> : IEquatable<Memory<T>>
+    public readonly partial struct Memory<T> : System.IEquatable<System.Memory<T>>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
@@ -1759,11 +1770,11 @@ namespace System
     }
     public enum MidpointRounding
     {
-        AwayFromZero = 1,
         ToEven = 0,
+        AwayFromZero = 1,
+        ToZero = 2,
         ToNegativeInfinity = 3,
         ToPositiveInfinity = 4,
-        ToZero = 2,
     }
     public partial class MissingFieldException : System.MissingMemberException, System.Runtime.Serialization.ISerializable
     {
@@ -1992,7 +2003,7 @@ namespace System
         public RankException(string message) { }
         public RankException(string message, System.Exception innerException) { }
     }
-    public readonly partial struct ReadOnlyMemory<T> : IEquatable<ReadOnlyMemory<T>>
+    public readonly partial struct ReadOnlyMemory<T> : System.IEquatable<System.ReadOnlyMemory<T>>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
@@ -2734,47 +2745,47 @@ namespace System
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public static void Deconstruct<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9>> value, out T1 item1, out T2 item2, out T3 item3, out T4 item4, out T5 item5, out T6 item6, out T7 item7, out T8 item8, out T9 item9) { throw null; }
         public static System.Tuple<T1> ToTuple<T1>(this System.ValueTuple<T1> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15>>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16>>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17>>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18>>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18, T19>>> value) { throw null; }
-        public static System.Tuple<T1, T2> ToTuple<T1, T2>(this System.ValueTuple<T1, T2> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18, T19, T20>>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20, T21>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18, T19, T20, T21>>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3> ToTuple<T1, T2, T3>(this System.ValueTuple<T1, T2, T3> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4> ToTuple<T1, T2, T3, T4>(this System.ValueTuple<T1, T2, T3, T4> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5> ToTuple<T1, T2, T3, T4, T5>(this System.ValueTuple<T1, T2, T3, T4, T5> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6> ToTuple<T1, T2, T3, T4, T5, T6>(this System.ValueTuple<T1, T2, T3, T4, T5, T6> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7> ToTuple<T1, T2, T3, T4, T5, T6, T7>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8>> value) { throw null; }
-        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9>> value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) value) { throw null; }
+        public static System.Tuple<T1, T2> ToTuple<T1, T2>(this (T1, T2) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20, T21>>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) value) { throw null; }
+        public static System.Tuple<T1, T2, T3> ToTuple<T1, T2, T3>(this (T1, T2, T3) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4> ToTuple<T1, T2, T3, T4>(this (T1, T2, T3, T4) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5> ToTuple<T1, T2, T3, T4, T5>(this (T1, T2, T3, T4, T5) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6> ToTuple<T1, T2, T3, T4, T5, T6>(this (T1, T2, T3, T4, T5, T6) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7> ToTuple<T1, T2, T3, T4, T5, T6, T7>(this (T1, T2, T3, T4, T5, T6, T7) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8>(this (T1, T2, T3, T4, T5, T6, T7, T8) value) { throw null; }
+        public static System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9>> ToTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this (T1, T2, T3, T4, T5, T6, T7, T8, T9) value) { throw null; }
         public static System.ValueTuple<T1> ToValueTuple<T1>(this System.Tuple<T1> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15>>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16>>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17>>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18>>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18, T19>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19>>> value) { throw null; }
-        public static System.ValueTuple<T1, T2> ToValueTuple<T1, T2>(this System.Tuple<T1, T2> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18, T19, T20>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20>>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9, T10, T11, T12, T13, T14, System.ValueTuple<T15, T16, T17, T18, T19, T20, T21>>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20, T21>>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3> ToValueTuple<T1, T2, T3>(this System.Tuple<T1, T2, T3> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4> ToValueTuple<T1, T2, T3, T4>(this System.Tuple<T1, T2, T3, T4> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5> ToValueTuple<T1, T2, T3, T4, T5>(this System.Tuple<T1, T2, T3, T4, T5> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6> ToValueTuple<T1, T2, T3, T4, T5, T6>(this System.Tuple<T1, T2, T3, T4, T5, T6> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7> ToValueTuple<T1, T2, T3, T4, T5, T6, T7>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8>> value) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8, T9>> ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15>>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16>>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17>>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18>>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19>>> value) { throw null; }
+        public static (T1, T2) ToValueTuple<T1, T2>(this System.Tuple<T1, T2> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20>>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14, T15, T16, T17, T18, T19, T20, T21>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9, T10, T11, T12, T13, T14, System.Tuple<T15, T16, T17, T18, T19, T20, T21>>> value) { throw null; }
+        public static (T1, T2, T3) ToValueTuple<T1, T2, T3>(this System.Tuple<T1, T2, T3> value) { throw null; }
+        public static (T1, T2, T3, T4) ToValueTuple<T1, T2, T3, T4>(this System.Tuple<T1, T2, T3, T4> value) { throw null; }
+        public static (T1, T2, T3, T4, T5) ToValueTuple<T1, T2, T3, T4, T5>(this System.Tuple<T1, T2, T3, T4, T5> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6) ToValueTuple<T1, T2, T3, T4, T5, T6>(this System.Tuple<T1, T2, T3, T4, T5, T6> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7) ToValueTuple<T1, T2, T3, T4, T5, T6, T7>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8>> value) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8, T9) ToValueTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>(this System.Tuple<T1, T2, T3, T4, T5, T6, T7, System.Tuple<T8, T9>> value) { throw null; }
     }
     public partial class Tuple<T1> : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable, System.Runtime.CompilerServices.ITuple
     {
@@ -3118,30 +3129,28 @@ namespace System
     }
     public enum TypeCode
     {
-        Boolean = 3,
-        Byte = 6,
-        Char = 4,
-        DateTime = 16,
-        DBNull = 2,
-        Decimal = 15,
-        Double = 14,
         Empty = 0,
-        Int16 = 7,
-        Int32 = 9,
-        Int64 = 11,
         Object = 1,
+        DBNull = 2,
+        Boolean = 3,
+        Char = 4,
         SByte = 5,
-        Single = 13,
-        String = 18,
+        Byte = 6,
+        Int16 = 7,
         UInt16 = 8,
+        Int32 = 9,
         UInt32 = 10,
+        Int64 = 11,
         UInt64 = 12,
+        Single = 13,
+        Double = 14,
+        Decimal = 15,
+        DateTime = 16,
+        String = 18,
     }
     [System.CLSCompliantAttribute(false)]
     public ref partial struct TypedReference
     {
-        private object _dummy;
-        private int _dummyPrimitive;
         public override bool Equals(object o) { throw null; }
         public override int GetHashCode() { throw null; }
         public static System.Type GetTargetType(System.TypedReference value) { throw null; }
@@ -3467,29 +3476,29 @@ namespace System
     [System.FlagsAttribute]
     public enum UriComponents
     {
-        AbsoluteUri = 127,
-        Fragment = 64,
-        Host = 4,
-        HostAndPort = 132,
-        HttpRequestUrl = 61,
-        KeepDelimiter = 1073741824,
-        NormalizedHost = 256,
-        Path = 16,
-        PathAndQuery = 48,
-        Port = 8,
-        Query = 32,
-        Scheme = 1,
-        SchemeAndServer = 13,
         SerializationInfoString = -2147483648,
-        StrongAuthority = 134,
-        StrongPort = 128,
+        Scheme = 1,
         UserInfo = 2,
+        Host = 4,
+        Port = 8,
+        SchemeAndServer = 13,
+        Path = 16,
+        Query = 32,
+        PathAndQuery = 48,
+        HttpRequestUrl = 61,
+        Fragment = 64,
+        AbsoluteUri = 127,
+        StrongPort = 128,
+        HostAndPort = 132,
+        StrongAuthority = 134,
+        NormalizedHost = 256,
+        KeepDelimiter = 1073741824,
     }
     public enum UriFormat
     {
-        SafeUnescaped = 3,
-        Unescaped = 2,
         UriEscaped = 1,
+        Unescaped = 2,
+        SafeUnescaped = 3,
     }
     public partial class UriFormatException : System.FormatException, System.Runtime.Serialization.ISerializable
     {
@@ -3501,17 +3510,17 @@ namespace System
     }
     public enum UriHostNameType
     {
+        Unknown = 0,
         Basic = 1,
         Dns = 2,
         IPv4 = 3,
         IPv6 = 4,
-        Unknown = 0,
     }
     public enum UriKind
     {
+        RelativeOrAbsolute = 0,
         Absolute = 1,
         Relative = 2,
-        RelativeOrAbsolute = 0,
     }
     public abstract partial class UriParser
     {
@@ -3528,10 +3537,10 @@ namespace System
     }
     public enum UriPartial
     {
+        Scheme = 0,
         Authority = 1,
         Path = 2,
         Query = 3,
-        Scheme = 0,
     }
     public partial struct ValueTuple : System.Collections.IStructuralComparable, System.Collections.IStructuralEquatable, System.IComparable, System.IComparable<System.ValueTuple>, System.IEquatable<System.ValueTuple>, System.Runtime.CompilerServices.ITuple
     {
@@ -3546,7 +3555,7 @@ namespace System
         public static (T1, T2, T3, T4, T5) Create<T1, T2, T3, T4, T5>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5) { throw null; }
         public static (T1, T2, T3, T4, T5, T6) Create<T1, T2, T3, T4, T5, T6>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6) { throw null; }
         public static (T1, T2, T3, T4, T5, T6, T7) Create<T1, T2, T3, T4, T5, T6, T7>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7) { throw null; }
-        public static System.ValueTuple<T1, T2, T3, T4, T5, T6, T7, System.ValueTuple<T8>> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8) { throw null; }
+        public static (T1, T2, T3, T4, T5, T6, T7, T8) Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 item1, T2 item2, T3 item3, T4 item4, T5 item5, T6 item6, T7 item7, T8 item8) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.ValueTuple other) { throw null; }
         public override int GetHashCode() { throw null; }
@@ -3813,10 +3822,10 @@ namespace System.Buffers
     }
     public enum OperationStatus
     {
-        DestinationTooSmall = 1,
         Done = 0,
-        InvalidData = 3,
+        DestinationTooSmall = 1,
         NeedMoreData = 2,
+        InvalidData = 3,
     }
     public delegate void ReadOnlySpanAction<T, in TArg>(System.ReadOnlySpan<T> span, TArg arg);
     public delegate void SpanAction<T, in TArg>(System.Span<T> span, TArg arg);
@@ -3925,7 +3934,7 @@ namespace System.Collections.Generic
     {
         int Compare(T x, T y);
     }
-    public partial interface IDictionary<TKey, TValue> : System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.IEnumerable
+    public partial interface IDictionary<TKey, TValue> : System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.IEnumerable where TKey : object
     {
         TValue this[TKey key] { get; set; }
         System.Collections.Generic.ICollection<TKey> Keys { get; }
@@ -3959,7 +3968,7 @@ namespace System.Collections.Generic
     {
         int Count { get; }
     }
-    public partial interface IReadOnlyDictionary<TKey, TValue> : System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyCollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.IEnumerable
+    public partial interface IReadOnlyDictionary<TKey, TValue> : System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.Generic.IReadOnlyCollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.IEnumerable where TKey : object
     {
         TValue this[TKey key] { get; }
         System.Collections.Generic.IEnumerable<TKey> Keys { get; }
@@ -4118,17 +4127,17 @@ namespace System.ComponentModel
     }
     public enum EditorBrowsableState
     {
-        Advanced = 2,
         Always = 0,
         Never = 1,
+        Advanced = 2,
     }
 }
 namespace System.Configuration.Assemblies
 {
     public enum AssemblyHashAlgorithm
     {
-        MD5 = 32771,
         None = 0,
+        MD5 = 32771,
         SHA1 = 32772,
         SHA256 = 32780,
         SHA384 = 32781,
@@ -4136,9 +4145,9 @@ namespace System.Configuration.Assemblies
     }
     public enum AssemblyVersionCompatibility
     {
-        SameDomain = 3,
         SameMachine = 1,
         SameProcess = 2,
+        SameDomain = 3,
     }
 }
 namespace System.Diagnostics
@@ -4160,12 +4169,49 @@ namespace System.Diagnostics
         [System.FlagsAttribute]
         public enum DebuggingModes
         {
-            Default = 1,
-            DisableOptimizations = 256,
-            EnableEditAndContinue = 4,
-            IgnoreSymbolStoreSequencePoints = 2,
             None = 0,
+            Default = 1,
+            IgnoreSymbolStoreSequencePoints = 2,
+            EnableEditAndContinue = 4,
+            DisableOptimizations = 256,
         }
+    }
+}
+namespace System.Diagnostics.CodeAnalysis
+{
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property, Inherited = false)]
+    public sealed class AllowNullAttribute : System.Attribute { }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property, Inherited = false)]
+    public sealed class DisallowNullAttribute : System.Attribute { }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Method, Inherited = false)]
+    public sealed class DoesNotReturnAttribute : System.Attribute { }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited = false)]
+    public sealed class DoesNotReturnIfAttribute : System.Attribute
+    {
+        public DoesNotReturnIfAttribute(bool parameterValue) { }
+        public bool ParameterValue { get { throw null; } }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue, Inherited = false)]
+    public sealed class MaybeNullAttribute : System.Attribute { }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited = false)]
+    public sealed class MaybeNullWhenAttribute : System.Attribute
+    {
+        public MaybeNullWhenAttribute(bool returnValue) { }
+        public bool ReturnValue { get { throw null; } }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Field | System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue, Inherited = false)]
+    public sealed class NotNullAttribute : System.Attribute { }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Parameter | System.AttributeTargets.Property | System.AttributeTargets.ReturnValue, AllowMultiple = true, Inherited = false)]
+    public sealed class NotNullIfNotNullAttribute : System.Attribute
+    {
+        public NotNullIfNotNullAttribute(string parameterName) { }
+        public string ParameterName { get { throw null; } }
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited = false)]
+    public sealed class NotNullWhenAttribute : System.Attribute
+    {
+        public NotNullWhenAttribute(bool returnValue) { }
+        public bool ReturnValue { get { throw null; } }
     }
 }
 namespace System.Globalization
@@ -4222,16 +4268,16 @@ namespace System.Globalization
     }
     public enum CalendarAlgorithmType
     {
+        Unknown = 0,
+        SolarCalendar = 1,
         LunarCalendar = 2,
         LunisolarCalendar = 3,
-        SolarCalendar = 1,
-        Unknown = 0,
     }
     public enum CalendarWeekRule
     {
         FirstDay = 0,
-        FirstFourDayWeek = 2,
         FirstFullWeek = 1,
+        FirstFourDayWeek = 2,
     }
     public static partial class CharUnicodeInfo
     {
@@ -4313,15 +4359,15 @@ namespace System.Globalization
     [System.FlagsAttribute]
     public enum CompareOptions
     {
+        None = 0,
         IgnoreCase = 1,
-        IgnoreKanaType = 8,
         IgnoreNonSpace = 2,
         IgnoreSymbols = 4,
+        IgnoreKanaType = 8,
         IgnoreWidth = 16,
-        None = 0,
-        Ordinal = 1073741824,
         OrdinalIgnoreCase = 268435456,
         StringSort = 536870912,
+        Ordinal = 1073741824,
     }
     public partial class CultureInfo : System.ICloneable, System.IFormatProvider
     {
@@ -4390,16 +4436,16 @@ namespace System.Globalization
     [System.FlagsAttribute]
     public enum CultureTypes
     {
-        AllCultures = 7,
-        [System.ObsoleteAttribute("This value has been deprecated.  Please use other values in CultureTypes.")]
-        FrameworkCultures = 64,
-        InstalledWin32Cultures = 4,
         NeutralCultures = 1,
-        ReplacementCultures = 16,
         SpecificCultures = 2,
+        InstalledWin32Cultures = 4,
+        AllCultures = 7,
         UserCustomCulture = 8,
+        ReplacementCultures = 16,
         [System.ObsoleteAttribute("This value has been deprecated.  Please use other values in CultureTypes.")]
         WindowsOnlyCultures = 32,
+        [System.ObsoleteAttribute("This value has been deprecated.  Please use other values in CultureTypes.")]
+        FrameworkCultures = 64,
     }
     public sealed partial class DateTimeFormatInfo : System.ICloneable, System.IFormatProvider
     {
@@ -4451,15 +4497,15 @@ namespace System.Globalization
     [System.FlagsAttribute]
     public enum DateTimeStyles
     {
-        AdjustToUniversal = 16,
-        AllowInnerWhite = 4,
+        None = 0,
         AllowLeadingWhite = 1,
         AllowTrailingWhite = 2,
+        AllowInnerWhite = 4,
         AllowWhiteSpaces = 7,
+        NoCurrentDateDefault = 8,
+        AdjustToUniversal = 16,
         AssumeLocal = 32,
         AssumeUniversal = 64,
-        NoCurrentDateDefault = 8,
-        None = 0,
         RoundtripKind = 128,
     }
     public partial class DaylightTime
@@ -4472,8 +4518,8 @@ namespace System.Globalization
     public enum DigitShapes
     {
         Context = 0,
-        NativeNational = 2,
         None = 1,
+        NativeNational = 2,
     }
     public abstract partial class EastAsianLunisolarCalendar : System.Globalization.Calendar
     {
@@ -4531,12 +4577,12 @@ namespace System.Globalization
     }
     public enum GregorianCalendarTypes
     {
-        Arabic = 10,
         Localized = 1,
+        USEnglish = 2,
         MiddleEastFrench = 9,
+        Arabic = 10,
         TransliteratedEnglish = 11,
         TransliteratedFrench = 12,
-        USEnglish = 2,
     }
     public partial class HebrewCalendar : System.Globalization.Calendar
     {
@@ -4760,23 +4806,23 @@ namespace System.Globalization
     [System.FlagsAttribute]
     public enum NumberStyles
     {
-        AllowCurrencySymbol = 256,
-        AllowDecimalPoint = 32,
-        AllowExponent = 128,
-        AllowHexSpecifier = 512,
-        AllowLeadingSign = 4,
-        AllowLeadingWhite = 1,
-        AllowParentheses = 16,
-        AllowThousands = 64,
-        AllowTrailingSign = 8,
-        AllowTrailingWhite = 2,
-        Any = 511,
-        Currency = 383,
-        Float = 167,
-        HexNumber = 515,
-        Integer = 7,
         None = 0,
+        AllowLeadingWhite = 1,
+        AllowTrailingWhite = 2,
+        AllowLeadingSign = 4,
+        Integer = 7,
+        AllowTrailingSign = 8,
+        AllowParentheses = 16,
+        AllowDecimalPoint = 32,
+        AllowThousands = 64,
         Number = 111,
+        AllowExponent = 128,
+        Float = 167,
+        AllowCurrencySymbol = 256,
+        Currency = 383,
+        Any = 511,
+        AllowHexSpecifier = 512,
+        HexNumber = 515,
     }
     public partial class PersianCalendar : System.Globalization.Calendar
     {
@@ -4964,8 +5010,8 @@ namespace System.Globalization
     [System.FlagsAttribute]
     public enum TimeSpanStyles
     {
-        AssumeNegative = 1,
         None = 0,
+        AssumeNegative = 1,
     }
     public partial class UmAlQuraCalendar : System.Globalization.Calendar
     {
@@ -4997,36 +5043,36 @@ namespace System.Globalization
     }
     public enum UnicodeCategory
     {
-        ClosePunctuation = 21,
-        ConnectorPunctuation = 18,
-        Control = 14,
-        CurrencySymbol = 26,
-        DashPunctuation = 19,
-        DecimalDigitNumber = 8,
-        EnclosingMark = 7,
-        FinalQuotePunctuation = 23,
-        Format = 15,
-        InitialQuotePunctuation = 22,
-        LetterNumber = 9,
-        LineSeparator = 12,
-        LowercaseLetter = 1,
-        MathSymbol = 25,
-        ModifierLetter = 3,
-        ModifierSymbol = 27,
-        NonSpacingMark = 5,
-        OpenPunctuation = 20,
-        OtherLetter = 4,
-        OtherNotAssigned = 29,
-        OtherNumber = 10,
-        OtherPunctuation = 24,
-        OtherSymbol = 28,
-        ParagraphSeparator = 13,
-        PrivateUse = 17,
-        SpaceSeparator = 11,
-        SpacingCombiningMark = 6,
-        Surrogate = 16,
-        TitlecaseLetter = 2,
         UppercaseLetter = 0,
+        LowercaseLetter = 1,
+        TitlecaseLetter = 2,
+        ModifierLetter = 3,
+        OtherLetter = 4,
+        NonSpacingMark = 5,
+        SpacingCombiningMark = 6,
+        EnclosingMark = 7,
+        DecimalDigitNumber = 8,
+        LetterNumber = 9,
+        OtherNumber = 10,
+        SpaceSeparator = 11,
+        LineSeparator = 12,
+        ParagraphSeparator = 13,
+        Control = 14,
+        Format = 15,
+        Surrogate = 16,
+        PrivateUse = 17,
+        ConnectorPunctuation = 18,
+        DashPunctuation = 19,
+        OpenPunctuation = 20,
+        ClosePunctuation = 21,
+        InitialQuotePunctuation = 22,
+        FinalQuotePunctuation = 23,
+        OtherPunctuation = 24,
+        MathSymbol = 25,
+        CurrencySymbol = 26,
+        ModifierSymbol = 27,
+        OtherSymbol = 28,
+        OtherNotAssigned = 29,
     }
 }
 namespace System.IO
@@ -5042,28 +5088,28 @@ namespace System.IO
     public enum FileAccess
     {
         Read = 1,
-        ReadWrite = 3,
         Write = 2,
+        ReadWrite = 3,
     }
     [System.FlagsAttribute]
     public enum FileAttributes
     {
-        Archive = 32,
-        Compressed = 2048,
-        Device = 64,
-        Directory = 16,
-        Encrypted = 16384,
-        Hidden = 2,
-        IntegrityStream = 32768,
-        Normal = 128,
-        NoScrubData = 131072,
-        NotContentIndexed = 8192,
-        Offline = 4096,
         ReadOnly = 1,
-        ReparsePoint = 1024,
-        SparseFile = 512,
+        Hidden = 2,
         System = 4,
+        Directory = 16,
+        Archive = 32,
+        Device = 64,
+        Normal = 128,
         Temporary = 256,
+        SparseFile = 512,
+        ReparsePoint = 1024,
+        Compressed = 2048,
+        Offline = 4096,
+        NotContentIndexed = 8192,
+        Encrypted = 16384,
+        IntegrityStream = 32768,
+        NoScrubData = 131072,
     }
     public partial class FileLoadException : System.IO.IOException
     {
@@ -5081,12 +5127,12 @@ namespace System.IO
     }
     public enum FileMode
     {
-        Append = 6,
-        Create = 2,
         CreateNew = 1,
+        Create = 2,
         Open = 3,
         OpenOrCreate = 4,
         Truncate = 5,
+        Append = 6,
     }
     public partial class FileNotFoundException : System.IO.IOException
     {
@@ -5105,23 +5151,23 @@ namespace System.IO
     [System.FlagsAttribute]
     public enum FileOptions
     {
-        Asynchronous = 1073741824,
-        DeleteOnClose = 67108864,
-        Encrypted = 16384,
-        None = 0,
-        RandomAccess = 268435456,
-        SequentialScan = 134217728,
         WriteThrough = -2147483648,
+        None = 0,
+        Encrypted = 16384,
+        DeleteOnClose = 67108864,
+        SequentialScan = 134217728,
+        RandomAccess = 268435456,
+        Asynchronous = 1073741824,
     }
     [System.FlagsAttribute]
     public enum FileShare
     {
-        Delete = 4,
-        Inheritable = 16,
         None = 0,
         Read = 1,
-        ReadWrite = 3,
         Write = 2,
+        ReadWrite = 3,
+        Delete = 4,
+        Inheritable = 16,
     }
     public partial class FileStream : System.IO.Stream
     {
@@ -5145,7 +5191,6 @@ namespace System.IO
         public override bool CanRead { get { throw null; } }
         public override bool CanSeek { get { throw null; } }
         public override bool CanWrite { get { throw null; } }
-        public override System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         [System.ObsoleteAttribute("This property has been deprecated.  Please use FileStream's SafeFileHandle property instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public virtual System.IntPtr Handle { get { throw null; } }
         public virtual bool IsAsync { get { throw null; } }
@@ -5155,6 +5200,7 @@ namespace System.IO
         public virtual Microsoft.Win32.SafeHandles.SafeFileHandle SafeFileHandle { get { throw null; } }
         public override System.IAsyncResult BeginRead(byte[] array, int offset, int numBytes, System.AsyncCallback callback, object state) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] array, int offset, int numBytes, System.AsyncCallback callback, object state) { throw null; }
+        public override System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         protected override void Dispose(bool disposing) { }
         public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
@@ -5180,8 +5226,8 @@ namespace System.IO
     }
     public enum HandleInheritability
     {
-        Inheritable = 1,
         None = 0,
+        Inheritable = 1,
     }
     public partial class IOException : System.SystemException
     {
@@ -5473,11 +5519,11 @@ namespace System.Reflection
     [System.FlagsAttribute]
     public enum AssemblyNameFlags
     {
-        EnableJITcompileOptimizer = 16384,
-        EnableJITcompileTracking = 32768,
         None = 0,
         PublicKey = 1,
         Retargetable = 256,
+        EnableJITcompileOptimizer = 16384,
+        EnableJITcompileTracking = 32768,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, Inherited=false)]
     public sealed partial class AssemblyProductAttribute : System.Attribute
@@ -5523,36 +5569,36 @@ namespace System.Reflection
     [System.FlagsAttribute]
     public enum BindingFlags
     {
-        CreateInstance = 512,
-        DeclaredOnly = 2,
         Default = 0,
-        DoNotWrapExceptions = 33554432,
-        ExactBinding = 65536,
-        FlattenHierarchy = 64,
-        GetField = 1024,
-        GetProperty = 4096,
         IgnoreCase = 1,
-        IgnoreReturn = 16777216,
+        DeclaredOnly = 2,
         Instance = 4,
-        InvokeMethod = 256,
-        NonPublic = 32,
-        OptionalParamBinding = 262144,
+        Static = 8,
         Public = 16,
+        NonPublic = 32,
+        FlattenHierarchy = 64,
+        InvokeMethod = 256,
+        CreateInstance = 512,
+        GetField = 1024,
+        SetField = 2048,
+        GetProperty = 4096,
+        SetProperty = 8192,
         PutDispProperty = 16384,
         PutRefDispProperty = 32768,
-        SetField = 2048,
-        SetProperty = 8192,
-        Static = 8,
+        ExactBinding = 65536,
         SuppressChangeType = 131072,
+        OptionalParamBinding = 262144,
+        IgnoreReturn = 16777216,
+        DoNotWrapExceptions = 33554432,
     }
     [System.FlagsAttribute]
     public enum CallingConventions
     {
-        Any = 3,
-        ExplicitThis = 64,
-        HasThis = 32,
         Standard = 1,
         VarArgs = 2,
+        Any = 3,
+        HasThis = 32,
+        ExplicitThis = 64,
     }
     public abstract partial class ConstructorInfo : System.Reflection.MethodBase
     {
@@ -5628,9 +5674,9 @@ namespace System.Reflection
         public CustomAttributeFormatException(string message) { }
         public CustomAttributeFormatException(string message, System.Exception inner) { }
     }
-    public partial struct CustomAttributeNamedArgument
+    public readonly partial struct CustomAttributeNamedArgument
     {
-        private object _dummy;
+        private readonly object _dummy;
         public CustomAttributeNamedArgument(System.Reflection.MemberInfo memberInfo, object value) { throw null; }
         public CustomAttributeNamedArgument(System.Reflection.MemberInfo memberInfo, System.Reflection.CustomAttributeTypedArgument typedArgument) { throw null; }
         public bool IsField { get { throw null; } }
@@ -5643,9 +5689,9 @@ namespace System.Reflection
         public static bool operator !=(System.Reflection.CustomAttributeNamedArgument left, System.Reflection.CustomAttributeNamedArgument right) { throw null; }
         public override string ToString() { throw null; }
     }
-    public partial struct CustomAttributeTypedArgument
+    public readonly partial struct CustomAttributeTypedArgument
     {
-        private object _dummy;
+        private readonly object _dummy;
         public CustomAttributeTypedArgument(object value) { throw null; }
         public CustomAttributeTypedArgument(System.Type argumentType, object value) { throw null; }
         public System.Type ArgumentType { get { throw null; } }
@@ -5666,9 +5712,9 @@ namespace System.Reflection
     public enum EventAttributes
     {
         None = 0,
+        SpecialName = 512,
         ReservedMask = 1024,
         RTSpecialName = 1024,
-        SpecialName = 512,
     }
     public abstract partial class EventInfo : System.Reflection.MemberInfo
     {
@@ -5712,32 +5758,32 @@ namespace System.Reflection
     public enum ExceptionHandlingClauseOptions
     {
         Clause = 0,
-        Fault = 4,
         Filter = 1,
         Finally = 2,
+        Fault = 4,
     }
     [System.FlagsAttribute]
     public enum FieldAttributes
     {
-        Assembly = 3,
+        PrivateScope = 0,
+        Private = 1,
         FamANDAssem = 2,
+        Assembly = 3,
         Family = 4,
         FamORAssem = 5,
+        Public = 6,
         FieldAccessMask = 7,
-        HasDefault = 32768,
-        HasFieldMarshal = 4096,
-        HasFieldRVA = 256,
+        Static = 16,
         InitOnly = 32,
         Literal = 64,
         NotSerialized = 128,
-        PinvokeImpl = 8192,
-        Private = 1,
-        PrivateScope = 0,
-        Public = 6,
-        ReservedMask = 38144,
-        RTSpecialName = 1024,
+        HasFieldRVA = 256,
         SpecialName = 512,
-        Static = 16,
+        RTSpecialName = 1024,
+        HasFieldMarshal = 4096,
+        PinvokeImpl = 8192,
+        HasDefault = 32768,
+        ReservedMask = 38144,
     }
     public abstract partial class FieldInfo : System.Reflection.MemberInfo
     {
@@ -5781,14 +5827,14 @@ namespace System.Reflection
     [System.FlagsAttribute]
     public enum GenericParameterAttributes
     {
-        Contravariant = 2,
-        Covariant = 1,
-        DefaultConstructorConstraint = 16,
         None = 0,
-        NotNullableValueTypeConstraint = 8,
-        ReferenceTypeConstraint = 4,
-        SpecialConstraintMask = 28,
+        Covariant = 1,
+        Contravariant = 2,
         VarianceMask = 3,
+        ReferenceTypeConstraint = 4,
+        NotNullableValueTypeConstraint = 8,
+        DefaultConstructorConstraint = 16,
+        SpecialConstraintMask = 28,
     }
     public partial interface ICustomAttributeProvider
     {
@@ -5798,10 +5844,10 @@ namespace System.Reflection
     }
     public enum ImageFileMachine
     {
-        AMD64 = 34404,
-        ARM = 452,
         I386 = 332,
+        ARM = 452,
         IA64 = 512,
+        AMD64 = 34404,
     }
     public partial struct InterfaceMapping
     {
@@ -5880,43 +5926,43 @@ namespace System.Reflection
     [System.FlagsAttribute]
     public enum MemberTypes
     {
-        All = 191,
         Constructor = 1,
-        Custom = 64,
         Event = 2,
         Field = 4,
         Method = 8,
-        NestedType = 128,
         Property = 16,
         TypeInfo = 32,
+        Custom = 64,
+        NestedType = 128,
+        All = 191,
     }
     [System.FlagsAttribute]
     public enum MethodAttributes
     {
-        Abstract = 1024,
-        Assembly = 3,
-        CheckAccessOnOverride = 512,
+        PrivateScope = 0,
+        ReuseSlot = 0,
+        Private = 1,
         FamANDAssem = 2,
+        Assembly = 3,
         Family = 4,
         FamORAssem = 5,
-        Final = 32,
-        HasSecurity = 16384,
-        HideBySig = 128,
-        MemberAccessMask = 7,
-        NewSlot = 256,
-        PinvokeImpl = 8192,
-        Private = 1,
-        PrivateScope = 0,
         Public = 6,
+        MemberAccessMask = 7,
+        UnmanagedExport = 8,
+        Static = 16,
+        Final = 32,
+        Virtual = 64,
+        HideBySig = 128,
+        NewSlot = 256,
+        VtableLayoutMask = 256,
+        CheckAccessOnOverride = 512,
+        Abstract = 1024,
+        SpecialName = 2048,
+        RTSpecialName = 4096,
+        PinvokeImpl = 8192,
+        HasSecurity = 16384,
         RequireSecObject = 32768,
         ReservedMask = 53248,
-        ReuseSlot = 0,
-        RTSpecialName = 4096,
-        SpecialName = 2048,
-        Static = 16,
-        UnmanagedExport = 8,
-        Virtual = 64,
-        VtableLayoutMask = 256,
     }
     public abstract partial class MethodBase : System.Reflection.MemberInfo
     {
@@ -5971,23 +6017,23 @@ namespace System.Reflection
     }
     public enum MethodImplAttributes
     {
+        IL = 0,
+        Managed = 0,
+        Native = 1,
+        OPTIL = 2,
+        CodeTypeMask = 3,
+        Runtime = 3,
+        ManagedMask = 4,
+        Unmanaged = 4,
+        NoInlining = 8,
+        ForwardRef = 16,
+        Synchronized = 32,
+        NoOptimization = 64,
+        PreserveSig = 128,
         AggressiveInlining = 256,
         AggressiveOptimization = 512,
-        CodeTypeMask = 3,
-        ForwardRef = 16,
-        IL = 0,
         InternalCall = 4096,
-        Managed = 0,
-        ManagedMask = 4,
         MaxMethodImplVal = 65535,
-        Native = 1,
-        NoInlining = 8,
-        NoOptimization = 64,
-        OPTIL = 2,
-        PreserveSig = 128,
-        Runtime = 3,
-        Synchronized = 32,
-        Unmanaged = 4,
     }
     public abstract partial class MethodInfo : System.Reflection.MethodBase
     {
@@ -6085,17 +6131,17 @@ namespace System.Reflection
     [System.FlagsAttribute]
     public enum ParameterAttributes
     {
+        None = 0,
+        In = 1,
+        Out = 2,
+        Lcid = 4,
+        Retval = 8,
+        Optional = 16,
         HasDefault = 4096,
         HasFieldMarshal = 8192,
-        In = 1,
-        Lcid = 4,
-        None = 0,
-        Optional = 16,
-        Out = 2,
         Reserved3 = 16384,
         Reserved4 = 32768,
         ReservedMask = 61440,
-        Retval = 8,
     }
     public partial class ParameterInfo : System.Reflection.ICustomAttributeProvider, System.Runtime.Serialization.IObjectReference
     {
@@ -6147,33 +6193,33 @@ namespace System.Reflection
     [System.FlagsAttribute]
     public enum PortableExecutableKinds
     {
-        ILOnly = 1,
         NotAPortableExecutableImage = 0,
-        PE32Plus = 4,
-        Preferred32Bit = 16,
+        ILOnly = 1,
         Required32Bit = 2,
+        PE32Plus = 4,
         Unmanaged32Bit = 8,
+        Preferred32Bit = 16,
     }
     public enum ProcessorArchitecture
     {
+        None = 0,
+        MSIL = 1,
+        X86 = 2,
+        IA64 = 3,
         Amd64 = 4,
         Arm = 5,
-        IA64 = 3,
-        MSIL = 1,
-        None = 0,
-        X86 = 2,
     }
     [System.FlagsAttribute]
     public enum PropertyAttributes
     {
-        HasDefault = 4096,
         None = 0,
+        SpecialName = 512,
+        RTSpecialName = 1024,
+        HasDefault = 4096,
         Reserved2 = 8192,
         Reserved3 = 16384,
         Reserved4 = 32768,
         ReservedMask = 62464,
-        RTSpecialName = 1024,
-        SpecialName = 512,
     }
     public abstract partial class PropertyInfo : System.Reflection.MemberInfo
     {
@@ -6220,21 +6266,23 @@ namespace System.Reflection
         public ReflectionTypeLoadException(System.Type[] classes, System.Exception[] exceptions) { }
         public ReflectionTypeLoadException(System.Type[] classes, System.Exception[] exceptions, string message) { }
         public System.Exception[] LoaderExceptions { get { throw null; } }
+        public override string Message { get { throw null; } }
         public System.Type[] Types { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
+        public override string ToString() { throw null; }
     }
     [System.FlagsAttribute]
     public enum ResourceAttributes
     {
-        Private = 2,
         Public = 1,
+        Private = 2,
     }
     [System.FlagsAttribute]
     public enum ResourceLocation
     {
+        Embedded = 1,
         ContainedInAnotherAssembly = 2,
         ContainedInManifestFile = 4,
-        Embedded = 1,
     }
     public static partial class RuntimeReflectionExtensions
     {
@@ -6281,38 +6329,38 @@ namespace System.Reflection
     [System.FlagsAttribute]
     public enum TypeAttributes
     {
-        Abstract = 128,
         AnsiClass = 0,
-        AutoClass = 131072,
         AutoLayout = 0,
-        BeforeFieldInit = 1048576,
         Class = 0,
-        ClassSemanticsMask = 32,
-        CustomFormatClass = 196608,
-        CustomFormatMask = 12582912,
-        ExplicitLayout = 16,
-        HasSecurity = 262144,
-        Import = 4096,
-        Interface = 32,
-        LayoutMask = 24,
-        NestedAssembly = 5,
-        NestedFamANDAssem = 6,
-        NestedFamily = 4,
-        NestedFamORAssem = 7,
-        NestedPrivate = 3,
-        NestedPublic = 2,
         NotPublic = 0,
         Public = 1,
-        ReservedMask = 264192,
-        RTSpecialName = 2048,
-        Sealed = 256,
-        SequentialLayout = 8,
-        Serializable = 8192,
-        SpecialName = 1024,
-        StringFormatMask = 196608,
-        UnicodeClass = 65536,
+        NestedPublic = 2,
+        NestedPrivate = 3,
+        NestedFamily = 4,
+        NestedAssembly = 5,
+        NestedFamANDAssem = 6,
+        NestedFamORAssem = 7,
         VisibilityMask = 7,
+        SequentialLayout = 8,
+        ExplicitLayout = 16,
+        LayoutMask = 24,
+        ClassSemanticsMask = 32,
+        Interface = 32,
+        Abstract = 128,
+        Sealed = 256,
+        SpecialName = 1024,
+        RTSpecialName = 2048,
+        Import = 4096,
+        Serializable = 8192,
         WindowsRuntime = 16384,
+        UnicodeClass = 65536,
+        AutoClass = 131072,
+        CustomFormatClass = 196608,
+        StringFormatMask = 196608,
+        HasSecurity = 262144,
+        ReservedMask = 264192,
+        BeforeFieldInit = 1048576,
+        CustomFormatMask = 12582912,
     }
     public partial class TypeDelegator : System.Reflection.TypeInfo
     {
@@ -6325,6 +6373,7 @@ namespace System.Reflection
         public override string FullName { get { throw null; } }
         public override System.Guid GUID { get { throw null; } }
         public override bool IsByRefLike { get { throw null; } }
+        public override bool IsCollectible { get { throw null; } }
         public override bool IsConstructedGenericType { get { throw null; } }
         public override bool IsGenericMethodParameter { get { throw null; } }
         public override bool IsGenericTypeParameter { get { throw null; } }
@@ -6410,16 +6459,16 @@ namespace System.Runtime
     }
     public enum GCLargeObjectHeapCompactionMode
     {
-        CompactOnce = 2,
         Default = 1,
+        CompactOnce = 2,
     }
     public enum GCLatencyMode
     {
         Batch = 0,
         Interactive = 1,
         LowLatency = 2,
-        NoGCRegion = 4,
         SustainedLowLatency = 3,
+        NoGCRegion = 4,
     }
     public static partial class GCSettings
     {
@@ -6540,11 +6589,10 @@ namespace System.Runtime.CompilerServices
         public void Add(TKey key, TValue value) { }
         public void AddOrUpdate(TKey key, TValue value) { }
         public void Clear() { }
-        ~ConditionalWeakTable() { }
         public TValue GetOrCreateValue(TKey key) { throw null; }
         public TValue GetValue(TKey key, System.Runtime.CompilerServices.ConditionalWeakTable<TKey, TValue>.CreateValueCallback createValueCallback) { throw null; }
         public bool Remove(TKey key) { throw null; }
-        System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TKey, TValue>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey,TValue>>.GetEnumerator() { throw null; }
+        System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TKey, TValue>> System.Collections.Generic.IEnumerable<System.Collections.Generic.KeyValuePair<TKey, TValue>>.GetEnumerator() { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public bool TryGetValue(TKey key, out TValue value) { throw null; }
         public delegate TValue CreateValueCallback(TKey key);
@@ -6645,8 +6693,8 @@ namespace System.Runtime.CompilerServices
     {
         public DiscardableAttribute() { }
     }
-    [System.AttributeUsageAttribute(AttributeTargets.Parameter, Inherited = false)]
-    public sealed class EnumeratorCancellationAttribute : Attribute
+    [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited=false)]
+    public sealed class EnumeratorCancellationAttribute : System.Attribute
     {
         public EnumeratorCancellationAttribute() { }
     }
@@ -6730,8 +6778,8 @@ namespace System.Runtime.CompilerServices
     }
     public enum LoadHint
     {
-        Always = 1,
         Default = 0,
+        Always = 1,
         Sometimes = 2,
     }
     public enum MethodCodeType
@@ -6753,15 +6801,15 @@ namespace System.Runtime.CompilerServices
     [System.FlagsAttribute]
     public enum MethodImplOptions
     {
-        AggressiveInlining = 256,
-        AggressiveOptimization = 512,
-        ForwardRef = 16,
-        InternalCall = 4096,
+        Unmanaged = 4,
         NoInlining = 8,
+        ForwardRef = 16,
+        Synchronized = 32,
         NoOptimization = 64,
         PreserveSig = 128,
-        Synchronized = 32,
-        Unmanaged = 4,
+        AggressiveInlining = 256,
+        AggressiveOptimization = 512,
+        InternalCall = 4096,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly, AllowMultiple=false)]
     public sealed partial class ReferenceAssemblyAttribute : System.Attribute
@@ -6916,15 +6964,15 @@ namespace System.Runtime.ConstrainedExecution
 {
     public enum Cer
     {
-        MayFail = 1,
         None = 0,
+        MayFail = 1,
         Success = 2,
     }
     public enum Consistency
     {
+        MayCorruptProcess = 0,
         MayCorruptAppDomain = 1,
         MayCorruptInstance = 2,
-        MayCorruptProcess = 0,
         WillNotCorruptState = 3,
     }
     public abstract partial class CriticalFinalizerObject
@@ -6970,10 +7018,10 @@ namespace System.Runtime.InteropServices
 {
     public enum CharSet
     {
-        Ansi = 2,
-        Auto = 4,
         None = 1,
+        Ansi = 2,
         Unicode = 3,
+        Auto = 4,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Delegate | System.AttributeTargets.Enum | System.AttributeTargets.Field | System.AttributeTargets.Interface | System.AttributeTargets.Method | System.AttributeTargets.Property | System.AttributeTargets.Struct, Inherited=false)]
     public sealed partial class ComVisibleAttribute : System.Attribute
@@ -7031,10 +7079,10 @@ namespace System.Runtime.InteropServices
     }
     public enum GCHandleType
     {
-        Normal = 2,
-        Pinned = 3,
         Weak = 0,
         WeakTrackResurrection = 1,
+        Normal = 2,
+        Pinned = 3,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited=false)]
     public sealed partial class InAttribute : System.Attribute
@@ -7043,9 +7091,9 @@ namespace System.Runtime.InteropServices
     }
     public enum LayoutKind
     {
-        Auto = 3,
-        Explicit = 2,
         Sequential = 0,
+        Explicit = 2,
+        Auto = 3,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Parameter, Inherited=false)]
     public sealed partial class OutAttribute : System.Attribute
@@ -7093,8 +7141,8 @@ namespace System.Runtime.Serialization
     public sealed partial class DeserializationBlockedException : System.Exception
     {
         public DeserializationBlockedException() { }
-        public DeserializationBlockedException(String message) { }
-        public DeserializationBlockedException(Exception innerException) { }
+        public DeserializationBlockedException(System.Exception innerException) { }
+        public DeserializationBlockedException(string message) { }
     }
     public partial interface IDeserializationCallback
     {
@@ -7259,15 +7307,15 @@ namespace System.Runtime.Serialization
     [System.FlagsAttribute]
     public enum StreamingContextStates
     {
-        All = 255,
-        Clone = 64,
-        CrossAppDomain = 128,
-        CrossMachine = 2,
         CrossProcess = 1,
+        CrossMachine = 2,
         File = 4,
-        Other = 32,
         Persistence = 8,
         Remoting = 16,
+        Other = 32,
+        Clone = 64,
+        CrossAppDomain = 128,
+        All = 255,
     }
 }
 namespace System.Runtime.Versioning
@@ -7290,8 +7338,8 @@ namespace System.Security
     }
     public enum PartialTrustVisibilityLevel
     {
-        NotVisibleByDefault = 1,
         VisibleToAllHosts = 0,
+        NotVisibleByDefault = 1,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Constructor | System.AttributeTargets.Delegate | System.AttributeTargets.Enum | System.AttributeTargets.Field | System.AttributeTargets.Interface | System.AttributeTargets.Method | System.AttributeTargets.Struct, AllowMultiple=false, Inherited=false)]
     public sealed partial class SecurityCriticalAttribute : System.Attribute
@@ -7304,8 +7352,8 @@ namespace System.Security
     [System.ObsoleteAttribute("SecurityCriticalScope is only used for .NET 2.0 transparency compatibility.")]
     public enum SecurityCriticalScope
     {
-        Everything = 1,
         Explicit = 0,
+        Everything = 1,
     }
     public partial class SecurityException : System.SystemException
     {
@@ -7337,9 +7385,9 @@ namespace System.Security
     }
     public enum SecurityRuleSet : byte
     {
+        None = (byte)0,
         Level1 = (byte)1,
         Level2 = (byte)2,
-        None = (byte)0,
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Constructor | System.AttributeTargets.Delegate | System.AttributeTargets.Enum | System.AttributeTargets.Field | System.AttributeTargets.Interface | System.AttributeTargets.Method | System.AttributeTargets.Struct, AllowMultiple=false, Inherited=false)]
     public sealed partial class SecuritySafeCriticalAttribute : System.Attribute
@@ -7352,6 +7400,7 @@ namespace System.Security
         public SecurityTransparentAttribute() { }
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Assembly | System.AttributeTargets.Class | System.AttributeTargets.Constructor | System.AttributeTargets.Delegate | System.AttributeTargets.Enum | System.AttributeTargets.Field | System.AttributeTargets.Interface | System.AttributeTargets.Method | System.AttributeTargets.Struct, AllowMultiple=false, Inherited=false)]
+    [System.ObsoleteAttribute("SecurityTreatAsSafe is only used for .NET 2.0 transparency compatibility.  Please use the SecuritySafeCriticalAttribute instead.")]
     public sealed partial class SecurityTreatAsSafeAttribute : System.Attribute
     {
         public SecurityTreatAsSafeAttribute() { }
@@ -7715,8 +7764,8 @@ namespace System.Text
         public override string ToString() { throw null; }
         public static System.Text.Rune ToUpper(System.Text.Rune value, System.Globalization.CultureInfo culture) { throw null; }
         public static System.Text.Rune ToUpperInvariant(System.Text.Rune value) { throw null; }
-        public static bool TryCreate(char ch, out System.Text.Rune result) { throw null; }
         public static bool TryCreate(char highSurrogate, char lowSurrogate, out System.Text.Rune result) { throw null; }
+        public static bool TryCreate(char ch, out System.Text.Rune result) { throw null; }
         public static bool TryCreate(int value, out System.Text.Rune result) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static bool TryCreate(uint value, out System.Text.Rune result) { throw null; }
@@ -7822,7 +7871,9 @@ namespace System.Text
         public string ToString(int startIndex, int length) { throw null; }
         public partial struct ChunkEnumerator
         {
+            private object _dummy;
             public System.ReadOnlyMemory<char> Current { get { throw null; } }
+            [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
             public System.Text.StringBuilder.ChunkEnumerator GetEnumerator() { throw null; }
             public bool MoveNext() { throw null; }
         }
@@ -7845,8 +7896,8 @@ namespace System.Text.Unicode
 {
     public static partial class Utf8
     {
-        public static System.Buffers.OperationStatus FromUtf16(ReadOnlySpan<char> source, Span<byte> destination, out int charsRead, out int bytesWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
-        public static System.Buffers.OperationStatus ToUtf16(ReadOnlySpan<byte> source, Span<char> destination, out int bytesRead, out int charsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
+        public static System.Buffers.OperationStatus FromUtf16(System.ReadOnlySpan<char> source, System.Span<byte> destination, out int charsRead, out int bytesWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
+        public static System.Buffers.OperationStatus ToUtf16(System.ReadOnlySpan<byte> source, System.Span<char> destination, out int bytesRead, out int charsWritten, bool replaceInvalidSequences = true, bool isFinalBlock = true) { throw null; }
     }
 }
 namespace System.Threading
@@ -7887,9 +7938,9 @@ namespace System.Threading
     }
     public enum LazyThreadSafetyMode
     {
-        ExecutionAndPublication = 2,
         None = 0,
         PublicationOnly = 1,
+        ExecutionAndPublication = 2,
     }
     public static partial class Timeout
     {
@@ -8031,31 +8082,31 @@ namespace System.Threading.Tasks
     [System.FlagsAttribute]
     public enum TaskContinuationOptions
     {
+        None = 0,
+        PreferFairness = 1,
+        LongRunning = 2,
         AttachedToParent = 4,
         DenyChildAttach = 8,
-        ExecuteSynchronously = 524288,
         HideScheduler = 16,
         LazyCancellation = 32,
-        LongRunning = 2,
-        None = 0,
-        NotOnCanceled = 262144,
-        NotOnFaulted = 131072,
+        RunContinuationsAsynchronously = 64,
         NotOnRanToCompletion = 65536,
+        NotOnFaulted = 131072,
         OnlyOnCanceled = 196608,
+        NotOnCanceled = 262144,
         OnlyOnFaulted = 327680,
         OnlyOnRanToCompletion = 393216,
-        PreferFairness = 1,
-        RunContinuationsAsynchronously = 64,
+        ExecuteSynchronously = 524288,
     }
     [System.FlagsAttribute]
     public enum TaskCreationOptions
     {
+        None = 0,
+        PreferFairness = 1,
+        LongRunning = 2,
         AttachedToParent = 4,
         DenyChildAttach = 8,
         HideScheduler = 16,
-        LongRunning = 2,
-        None = 0,
-        PreferFairness = 1,
         RunContinuationsAsynchronously = 64,
     }
     public partial class TaskFactory
@@ -8204,14 +8255,14 @@ namespace System.Threading.Tasks
     }
     public enum TaskStatus
     {
-        Canceled = 6,
         Created = 0,
-        Faulted = 7,
-        RanToCompletion = 5,
-        Running = 3,
         WaitingForActivation = 1,
-        WaitingForChildrenToComplete = 4,
         WaitingToRun = 2,
+        Running = 3,
+        WaitingForChildrenToComplete = 4,
+        RanToCompletion = 5,
+        Canceled = 6,
+        Faulted = 7,
     }
     public partial class Task<TResult> : System.Threading.Tasks.Task
     {
@@ -8333,15 +8384,15 @@ namespace System.Threading.Tasks.Sources
     [System.FlagsAttribute]
     public enum ValueTaskSourceOnCompletedFlags
     {
-        FlowExecutionContext = 2,
         None = 0,
         UseSchedulingContext = 1,
+        FlowExecutionContext = 2,
     }
     public enum ValueTaskSourceStatus
     {
-        Canceled = 3,
-        Faulted = 2,
         Pending = 0,
         Succeeded = 1,
+        Faulted = 2,
+        Canceled = 3,
     }
 }

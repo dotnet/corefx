@@ -5,10 +5,13 @@
 namespace System.Text.Json.Serialization
 {
     /// <summary>
-    /// Determines the naming policy used to convert a JSON name to another format, such as a camel-casing format.
+    /// Determines the naming policy used to convert a string-based name to another format, such as a camel-casing format.
     /// </summary>
     public abstract class JsonNamingPolicy
     {
+        /// <summary>
+        /// Initializes a new instance of <see cref="JsonNamingPolicy"/>.
+        /// </summary>
         protected JsonNamingPolicy() { }
 
         /// <summary>
@@ -17,7 +20,7 @@ namespace System.Text.Json.Serialization
         public static JsonNamingPolicy CamelCase { get; } = new JsonCamelCaseNamePolicy();
 
         /// <summary>
-        /// Converts the provided name.
+        /// When overridden in a derived class, converts the specified name according to the policy.
         /// </summary>
         /// <param name="name">The name to convert.</param>
         /// <returns>The converted name.</returns>

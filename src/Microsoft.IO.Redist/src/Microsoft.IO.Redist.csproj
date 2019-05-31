@@ -3,7 +3,7 @@
     <AssemblyName>Microsoft.IO.Redist</AssemblyName>
     <ProjectGuid>{FEF5811F-ED50-4407-A6B9-885EBD3206FB}</ProjectGuid>
     <Configurations>netfx-Debug;netfx-Release</Configurations>
-    <DefineConstants>$(DefineConstants);MS_IO_REDIST</DefineConstants>
+    <DefineConstants>$(DefineConstants);MS_IO_REDIST;INTERNAL_NULLABLE_ATTRIBUTES</DefineConstants>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);CS1573</NoWarn>
     <ClsCompliant>false</ClsCompliant>
@@ -34,6 +34,9 @@
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\ReadLinesIterator.cs" Link="Microsoft\IO\ReadLinesIterator.cs" />
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\SearchOption.cs" Link="Microsoft\IO\SearchOption.cs" />
     <Compile Include="..\..\System.IO.FileSystem\src\System\IO\SearchTarget.cs" Link="Microsoft\IO\SearchTarget.cs" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Diagnostics\CodeAnalysis\NullableAttributes.cs">
+      <Link>Common\System\Diagnostics\CodeAnalysis\NullableAttributes.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\IO\DriveInfoInternal.Windows.cs">
       <Link>Common\System\IO\DriveInfoInternal.Windows.cs</Link>
     </Compile>
@@ -91,13 +94,13 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.LongFileTime.cs">
       <Link>Common\Interop\Windows\Interop.LongFileTime.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.WIN32_FIND_DATA.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.WIN32_FIND_DATA.cs">
       <Link>Common\Interop\Windows\Interop.WIN32_FIND_DATA.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FILE_TIME.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FILE_TIME.cs">
       <Link>Common\Interop\Windows\Interop.FILE_TIME.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GET_FILEEX_INFO_LEVELS.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GET_FILEEX_INFO_LEVELS.cs">
       <Link>Common\Interop\Windows\Interop.GET_FILEEX_INFO_LEVELS.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FileOperations.cs">
@@ -115,13 +118,13 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.DeleteFile.cs">
       <Link>Common\Interop\Windows\Interop.DeleteFile.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetFileAttributesEx.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetFileAttributesEx.cs">
       <Link>Common\Interop\Windows\Interop.GetFileAttributesEx.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.CreateDirectory.cs">
       <Link>Common\Interop\Windows\Interop.CreateDirectory.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.WIN32_FILE_ATTRIBUTE_DATA.cs">
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.WIN32_FILE_ATTRIBUTE_DATA.cs">
       <Link>Common\Interop\Windows\Interop.WIN32_FILE_ATTRIBUTE_DATA.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FindNextFile.cs">
@@ -145,8 +148,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.FILE_INFO_BY_HANDLE_CLASS.cs">
       <Link>Common\Interop\Windows\Interop.FILE_INFO_BY_HANDLE_CLASS.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.MaxLengths.cs">
-      <Link>Common\Interop\Windows\Interop.MaxLengths.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.MAX_PATH.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.MAX_PATH.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.FileAttributes.cs">
       <Link>Common\Interop\Windows\Interop.FileAttributes.cs</Link>

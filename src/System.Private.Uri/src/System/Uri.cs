@@ -2538,7 +2538,7 @@ namespace System
                     }
                     else
                     {
-                        for (ushort i = 0; i < host.Length; ++i)
+                        for (int i = 0; i < host.Length; ++i)
                         {
                             if ((_info.Offset.Host + i) >= _info.Offset.End ||
                                 host[i] != _string[_info.Offset.Host + i])
@@ -2655,7 +2655,7 @@ namespace System
                 else
                 {
                     host = CreateHostStringHelper(host, 0, (ushort)host.Length, ref flags, ref _info.ScopeId);
-                    for (ushort i = 0; i < host.Length; ++i)
+                    for (int i = 0; i < host.Length; ++i)
                     {
                         if ((_info.Offset.Host + i) >= _info.Offset.End || host[i] != _string[_info.Offset.Host + i])
                         {
@@ -3404,6 +3404,12 @@ namespace System
                     throw e;
                 }
 
+                if (_string.Length > ushort.MaxValue)
+                {
+                    UriFormatException e = GetException(ParsingError.SizeLimit);
+                    throw e;
+                }
+
                 length = (ushort)_string.Length;
                 // We need to be sure that there isn't a '?' separated from the path by spaces.
                 if (_string == _originalUnicodeString)
@@ -3536,6 +3542,12 @@ namespace System
                         throw e;
                     }
 
+                    if (_string.Length > ushort.MaxValue)
+                    {
+                        UriFormatException e = GetException(ParsingError.SizeLimit);
+                        throw e;
+                    }
+
                     length = (ushort)_string.Length;
                     // We need to be sure that there isn't a '#' separated from the query by spaces.
                     if (_string == _originalUnicodeString)
@@ -3595,6 +3607,12 @@ namespace System
                     catch (ArgumentException)
                     {
                         UriFormatException e = GetException(ParsingError.BadFormat);
+                        throw e;
+                    }
+
+                    if (_string.Length > ushort.MaxValue)
+                    {
+                        UriFormatException e = GetException(ParsingError.SizeLimit);
                         throw e;
                     }
 
@@ -4093,6 +4111,12 @@ namespace System
                                 // Normalize user info
                                 userInfoString = IriHelper.EscapeUnescapeIri(pString, startInput, start + 1, UriComponents.UserInfo);
                                 newHost += userInfoString;
+
+                                if (newHost.Length > ushort.MaxValue)
+                                {
+                                    err = ParsingError.SizeLimit;
+                                    return idx;
+                                }
                             }
                             else
                             {
@@ -4583,7 +4607,7 @@ namespace System
                     foundEscaping = true;
                     res |= Check.ReservedFound;
                 }
-                else if (c > 'z' && c != '~')
+                else if (c > '~')
                 {
                     if (_iriParsing)
                     {
@@ -4671,6 +4695,10 @@ namespace System
                     {
                         res |= Check.NotIriCanonical;
                     }
+                }
+                else if (c >= '{' && c <= '}') // includes '{', '|', '}'
+                {
+                    needsEscaping = true;
                 }
                 else if (c == '%')
                 {
@@ -4873,7 +4901,7 @@ namespace System
                 }
 
                 char[] dest1 = new char[dest.Length];
-                Buffer.BlockCopy(dest, 0, dest1, 0, end << 1);
+                Buffer.BlockCopy(dest, 0, dest1, 0, end * sizeof(char));
                 fixed (char* pdest = dest1)
                 {
                     dest = UriHelper.UnescapeString(pdest, pos, end, dest, ref pos, '?', '#', c_DummyChar, mode,
@@ -5027,7 +5055,7 @@ namespace System
                                 //
                                 // just reusing a variable slot we perform //dest.Remove(i+1, dotCount + (lastSlash==0?0:1));
                                 lastSlash = (ushort)(i + 1 + dotCount + (lastSlash == 0 ? 0 : 1));
-                                Buffer.BlockCopy(dest, lastSlash << 1, dest, (i + 1) << 1, (destLength - lastSlash) << 1);
+                                Buffer.BlockCopy(dest, lastSlash * sizeof(char), dest, (i + 1) * sizeof(char), (destLength - lastSlash) * sizeof(char));
                                 destLength -= (lastSlash - i - 1);
 
                                 lastSlash = i;
@@ -5062,7 +5090,7 @@ namespace System
 
                             // just reusing a variable slot we perform //dest.Remove(i+1, lastSlash - i);
                             lastSlash = (ushort)(lastSlash + 1);
-                            Buffer.BlockCopy(dest, lastSlash << 1, dest, (i + 1) << 1, (destLength - lastSlash) << 1);
+                            Buffer.BlockCopy(dest, lastSlash * sizeof(char), dest, (i + 1) * sizeof(char), (destLength - lastSlash) * sizeof(char));
                             destLength -= (lastSlash - i - 1);
                         }
                         lastSlash = i;
@@ -5080,7 +5108,7 @@ namespace System
                     {
                         //remove first not rooted segment
                         lastSlash = (ushort)(lastSlash + 1);
-                        Buffer.BlockCopy(dest, lastSlash << 1, dest, start << 1, (destLength - lastSlash) << 1);
+                        Buffer.BlockCopy(dest, lastSlash * sizeof(char), dest, start * sizeof(char), (destLength - lastSlash) * sizeof(char));
                         destLength -= lastSlash;
                     }
                     else if (dotCount != 0)
@@ -5090,7 +5118,7 @@ namespace System
                         if (lastSlash == dotCount + 1 || (lastSlash == 0 && dotCount + 1 == destLength))
                         {
                             dotCount = (ushort)(dotCount + (lastSlash == 0 ? 0 : 1));
-                            Buffer.BlockCopy(dest, dotCount << 1, dest, start << 1, (destLength - dotCount) << 1);
+                            Buffer.BlockCopy(dest, dotCount * sizeof(char), dest, start * sizeof(char), (destLength - dotCount) * sizeof(char));
                             destLength -= dotCount;
                         }
                     }

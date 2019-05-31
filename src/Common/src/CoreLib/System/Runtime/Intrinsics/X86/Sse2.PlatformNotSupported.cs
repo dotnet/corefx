@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Runtime.CompilerServices;
 using System.Runtime.Intrinsics;
@@ -1450,16 +1449,6 @@ namespace System.Runtime.Intrinsics.X86
         /// </summary>
         public static unsafe void StoreHigh(double* address, Vector128<double> source) { throw new PlatformNotSupportedException(); }
 
-        /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(long* address, Vector128<long> source) { throw new PlatformNotSupportedException(); }
-        /// <summary>
-        /// void _mm_storel_epi64 (__m128i* mem_addr, __m128i a)
-        ///   MOVQ m64, xmm
-        /// </summary>
-        public static unsafe void StoreLow(ulong* address, Vector128<ulong> source) { throw new PlatformNotSupportedException(); }
         /// <summary>
         /// void _mm_storel_pd (double* mem_addr, __m128d a)
         ///   MOVLPD m64, xmm

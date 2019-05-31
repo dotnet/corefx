@@ -124,13 +124,13 @@ namespace System
             switch (folder)
             {
                 case SpecialFolder.ApplicationData:
-                    return ApplicationData.Current.RoamingFolder?.Path;
+                    return ApplicationData.Current.RoamingFolder?.Path ?? string.Empty;
                 case SpecialFolder.LocalApplicationData:
-                    return ApplicationData.Current.LocalFolder?.Path;
+                    return ApplicationData.Current.LocalFolder?.Path ?? string.Empty;
                 case SpecialFolder.System:
                     return SystemDirectory;
                 case SpecialFolder.Windows:
-                    return Path.GetDirectoryName(SystemDirectory);
+                    return Path.GetDirectoryName(SystemDirectory)!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                 default:
                     return string.Empty;
             }

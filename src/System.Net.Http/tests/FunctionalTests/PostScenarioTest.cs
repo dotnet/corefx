@@ -38,14 +38,19 @@ namespace System.Net.Http.Functional.Tests
         public PostScenarioTest(ITestOutputHelper output) : base(output) { }
 
         [ActiveIssue(30057, TargetFrameworkMonikers.Uap)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, ".NET Framework disposes request content after send")]
         [OuterLoop("Uses external servers")]
         [Theory, MemberData(nameof(EchoServers))]
         public async Task PostRewindableStreamContentMultipleTimes_StreamContentFullySent(Uri serverUri)
         {
+            if (IsCurlHandler)
+            {
+                // CurlHandler rewinds the stream at the end: https://github.com/dotnet/corefx/issues/23782
+                return;
+            }
+
             const string requestBody = "ABC";
 
-            using (var client = new HttpClient())
+            using (HttpClient client = CreateHttpClient())
             using (var ms = new MemoryStream(Encoding.UTF8.GetBytes(requestBody)))
             {
                 var content = new StreamContent(ms);
@@ -136,7 +141,6 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop("Uses external servers")]
         [Theory, MemberData(nameof(VerifyUploadServers))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "netfx behaves differently and will buffer content and use 'Content-Length' semantics")]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "WinRT behaves differently and will use 'Content-Length' semantics")]
         public async Task PostUsingNoSpecifiedSemantics_UsesChunkedSemantics(Uri serverUri)
         {
@@ -270,18 +274,18 @@ namespace System.Net.Http.Functional.Tests
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.PreAuthenticate = preAuthenticate;
             handler.Credentials = credential;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 // Send HEAD request to help bypass the 401 auth challenge for the latter POST assuming
                 // that the authentication will be cached and re-used later when PreAuthenticate is true.
-                var request = new HttpRequestMessage(HttpMethod.Head, serverUri);
+                var request = new HttpRequestMessage(HttpMethod.Head, serverUri) { Version = VersionFromUseHttp2 };
                 using (HttpResponseMessage response = await client.SendAsync(request))
                 {
                     Assert.Equal(HttpStatusCode.OK, response.StatusCode);
                 }
 
                 // Now send POST request.
-                request = new HttpRequestMessage(HttpMethod.Post, serverUri);
+                request = new HttpRequestMessage(HttpMethod.Post, serverUri) { Version = VersionFromUseHttp2 };
                 request.Content = requestContent;
                 requestContent.Headers.ContentLength = null;
                 request.Headers.TransferEncodingChunked = true;

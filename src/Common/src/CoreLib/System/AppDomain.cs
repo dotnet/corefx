@@ -4,7 +4,6 @@
 
 #pragma warning disable CS0067 // events are declared but not used
 
-#nullable enable
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
@@ -185,26 +184,28 @@ namespace System
 
         public static bool MonitoringIsEnabled
         {
-            get { return false; }
+            get { return true; }
             set
             {
                 if (!value)
                 {
                     throw new ArgumentException(SR.Arg_MustBeTrue);
                 }
-                throw new PlatformNotSupportedException(SR.PlatformNotSupported_AppDomain_ResMon);
             }
         }
 
-        public long MonitoringSurvivedMemorySize { get { throw CreateResMonNotAvailException(); } }
+        public long MonitoringSurvivedMemorySize => MonitoringSurvivedProcessMemorySize;
 
-        public static long MonitoringSurvivedProcessMemorySize { get { throw CreateResMonNotAvailException(); } }
+        public static long MonitoringSurvivedProcessMemorySize
+        {
+            get
+            {
+                GCMemoryInfo mi = GC.GetGCMemoryInfo();
+                return mi.HeapSizeBytes - mi.FragmentedBytes;
+            }
+        }
 
-        public long MonitoringTotalAllocatedMemorySize { get { throw CreateResMonNotAvailException(); } }
-
-        public TimeSpan MonitoringTotalProcessorTime { get { throw CreateResMonNotAvailException(); } }
-
-        private static Exception CreateResMonNotAvailException() => new InvalidOperationException(SR.PlatformNotSupported_AppDomain_ResMon);
+        public long MonitoringTotalAllocatedMemorySize => GC.GetTotalAllocatedBytes(precise: false);
 
         [ObsoleteAttribute("AppDomain.GetCurrentThreadId has been deprecated because it does not provide a stable Id when managed threads are running on fibers (aka lightweight threads). To get a stable identifier for a managed thread, use the ManagedThreadId property on Thread.  https://go.microsoft.com/fwlink/?linkid=14202", false)]
         public static int GetCurrentThreadId() => Environment.CurrentManagedThreadId;
@@ -389,7 +390,7 @@ namespace System
             return oh?.Unwrap();
         }
 
-        public IPrincipal? GetThreadPrincipal()
+        internal IPrincipal? GetThreadPrincipal()
         {
             IPrincipal? principal = _defaultPrincipal;
             if (principal == null)
@@ -399,8 +400,8 @@ namespace System
                     case PrincipalPolicy.UnauthenticatedPrincipal:
                         if (s_getUnauthenticatedPrincipal == null)
                         {
-                            Type type = Type.GetType("System.Security.Principal.GenericPrincipal, System.Security.Claims", throwOnError: true);
-                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Static);
+                            Type type = Type.GetType("System.Security.Principal.GenericPrincipal, System.Security.Claims", throwOnError: true)!;
+                            MethodInfo? mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Static);
                             Debug.Assert(mi != null);
                             // Don't throw PNSE if null like for WindowsPrincipal as UnauthenticatedPrincipal should
                             // be available on all platforms.
@@ -408,14 +409,14 @@ namespace System
                                 (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
                         }
 
-                        principal = s_getUnauthenticatedPrincipal!(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        principal = s_getUnauthenticatedPrincipal!(); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                         break;
 
                     case PrincipalPolicy.WindowsPrincipal:
                         if (s_getWindowsPrincipal == null)
                         {
-                            Type type = Type.GetType("System.Security.Principal.WindowsPrincipal, System.Security.Principal.Windows", throwOnError: true);
-                            MethodInfo mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Static);
+                            Type type = Type.GetType("System.Security.Principal.WindowsPrincipal, System.Security.Principal.Windows", throwOnError: true)!;
+                            MethodInfo? mi = type.GetMethod("GetDefaultInstance", BindingFlags.NonPublic | BindingFlags.Static);
                             if (mi == null)
                             {
                                 throw new PlatformNotSupportedException(SR.PlatformNotSupported_Principal);
@@ -424,7 +425,7 @@ namespace System
                                 (Func<IPrincipal>)mi.CreateDelegate(typeof(Func<IPrincipal>)));
                         }
 
-                        principal = s_getWindowsPrincipal!(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        principal = s_getWindowsPrincipal!(); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                         break;
                 }
             }

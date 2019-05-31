@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -247,7 +246,7 @@ namespace System.Buffers
                 // Under high pressure, release all thread locals
                 if (log.IsEnabled())
                 {
-                    foreach (KeyValuePair<T[]?[], object> tlsBuckets in s_allTlsBuckets)
+                    foreach (KeyValuePair<T[]?[], object?> tlsBuckets in s_allTlsBuckets)
                     {
                         T[]?[] buckets = tlsBuckets.Key;
                         for (int i = 0; i < buckets.Length; i++)

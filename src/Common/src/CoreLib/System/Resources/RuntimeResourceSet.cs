@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 /*============================================================
 **
 ** 
@@ -14,17 +13,20 @@
 ** 
 ===========================================================*/
 
-using System;
-using System.IO;
+#nullable enable
 using System.Collections;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Reflection;
-using System.Runtime.Versioning;
 using System.Diagnostics;
+using System.IO;
 
 namespace System.Resources
+#if RESOURCES_EXTENSIONS
+    .Extensions
+#endif
 {
+#if RESOURCES_EXTENSIONS
+    using ResourceReader = DeserializingResourceReader;
+#endif
     // A RuntimeResourceSet stores all the resources defined in one 
     // particular CultureInfo, with some loading optimizations.
     //
@@ -174,12 +176,12 @@ namespace System.Resources
         // for arbitrarily long times, since the object is usually a string
         // literal that will live for the lifetime of the appdomain.  The
         // value is a ResourceLocator instance, which might cache the object.
-        private Dictionary<string, ResourceLocator>? _resCache; // TODO-NULLABLE: should not be nulled out in Dispose
+        private Dictionary<string, ResourceLocator>? _resCache; // TODO-NULLABLE: Avoid nulling out in Dispose
 
 
         // For our special load-on-demand reader, cache the cast.  The 
         // RuntimeResourceSet's implementation knows how to treat this reader specially.
-        private ResourceReader? _defaultReader; // TODO-NULLABLE: should not be nulled out in Dispose
+        private ResourceReader? _defaultReader; // TODO-NULLABLE: Avoid nulling out in Dispose
 
         // This is a lookup table for case-insensitive lookups, and may be null.
         // Consider always using a case-insensitive resource cache, as we don't
@@ -192,6 +194,7 @@ namespace System.Resources
         // the resources once, adding them into the table.
         private bool _haveReadFromReader;
 
+#if !RESOURCES_EXTENSIONS
         internal RuntimeResourceSet(string fileName) : base(false)
         {
             _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
@@ -206,6 +209,26 @@ namespace System.Resources
             _defaultReader = new ResourceReader(stream, _resCache, permitDeserialization);
             Reader = _defaultReader;
         }
+#else
+        private IResourceReader Reader => _defaultReader!;
+
+        internal RuntimeResourceSet(IResourceReader reader) :
+            // explicitly do not call IResourceReader constructor since it caches all resources
+            // the purpose of RuntimeResourceSet is to lazily load and cache.
+            base()
+        {
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+
+            _defaultReader = reader as DeserializingResourceReader ?? throw new ArgumentException(SR.Format(SR.NotSupported_WrongResourceReader_Type, reader.GetType()), nameof(reader));
+            _resCache = new Dictionary<string, ResourceLocator>(FastResourceComparer.Default);
+            
+            // in the CoreLib version RuntimeResourceSet creates ResourceReader and passes this in, 
+            // in the custom case ManifestBasedResourceReader creates the ResourceReader and passes it in
+            // so we must initialize the cache here.
+            _defaultReader._resCache = _resCache;
+        }
+#endif
 
         protected override void Dispose(bool disposing)
         {

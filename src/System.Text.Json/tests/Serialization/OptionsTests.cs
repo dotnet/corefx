@@ -59,7 +59,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void AllowTrailingCommas()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<int[]>("[1,]"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<int[]>("[1,]"));
 
             var options = new JsonSerializerOptions();
             options.AllowTrailingCommas = true;
@@ -91,18 +91,74 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ExtensionDataUsesReaderOptions()
+        {
+            // We just verify trailing commas.
+            const string json = @"{""MyIntMissing"":2,}";
+
+            // Verify baseline without options.
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<ClassWithExtensionProperty>(json));
+
+            // Verify baseline with options.
+            var options = new JsonSerializerOptions();
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<ClassWithExtensionProperty>(json, options));
+
+            // Set AllowTrailingCommas to true.
+            options = new JsonSerializerOptions();
+            options.AllowTrailingCommas = true;
+            JsonSerializer.Parse<ClassWithExtensionProperty>(json, options);
+        }
+
+        [Fact]
+        public static void ExtensionDataUsesWriterOptions()
+        {
+            // We just verify whitespace.
+
+            ClassWithExtensionProperty obj = JsonSerializer.Parse<ClassWithExtensionProperty>(@"{""MyIntMissing"":2}");
+
+            // Verify baseline without options.
+            string json = JsonSerializer.ToString(obj);
+            Assert.False(HasNewLine());
+
+            // Verify baseline with options.
+            var options = new JsonSerializerOptions();
+            json = JsonSerializer.ToString(obj, options);
+            Assert.False(HasNewLine());
+
+            // Set AllowTrailingCommas to true.
+            options = new JsonSerializerOptions();
+            options.WriteIndented = true;
+            json = JsonSerializer.ToString(obj, options);
+            Assert.True(HasNewLine());
+
+            bool HasNewLine()
+            {
+                int iEnd = json.IndexOf("2", json.IndexOf("MyIntMissing"));
+                return json.Substring(iEnd + 1).StartsWith(Environment.NewLine);
+            }
+        }
+
+        [Fact]
         public static void ReadCommentHandling()
         {
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>("/* commment */"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<object>("/* commment */"));
 
             var options = new JsonSerializerOptions();
 
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<object>("/* commment */", options));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<object>("/* commment */", options));
 
             options = new JsonSerializerOptions();
-            options.ReadCommentHandling = JsonCommentHandling.Allow;
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
 
-            JsonSerializer.Parse<object>("/* commment */", options);
+            int value = JsonSerializer.Parse<int>("1 /* commment */", options);
+        }
+
+        [Fact]
+        public static void ReadCommentHandlingDoesNotSupportAllow()
+        {
+            var options = new JsonSerializerOptions();
+
+            Assert.Throws<ArgumentException>(() => options.ReadCommentHandling = JsonCommentHandling.Allow);
         }
 
         [Fact]
@@ -117,7 +173,7 @@ namespace System.Text.Json.Serialization.Tests
             options = new JsonSerializerOptions();
             options.MaxDepth = 1;
 
-            Assert.Throws<JsonReaderException>(() => JsonSerializer.Parse<BasicCompany>(BasicCompany.s_data, options));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<BasicCompany>(BasicCompany.s_data, options));
         }
     }
 }

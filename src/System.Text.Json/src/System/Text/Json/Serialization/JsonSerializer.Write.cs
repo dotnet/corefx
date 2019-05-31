@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Diagnostics;
 
 namespace System.Text.Json.Serialization
@@ -31,13 +30,14 @@ namespace System.Text.Json.Serialization
                         break;
                     case ClassType.Value:
                         Debug.Assert(current.JsonPropertyInfo.ClassType == ClassType.Value);
-                        current.JsonPropertyInfo.Write(options, ref current, writer);
+                        current.JsonPropertyInfo.Write(ref current, writer);
                         finishedSerializing = true;
                         break;
                     case ClassType.Object:
                         finishedSerializing = WriteObject(options, writer, ref state);
                         break;
                     case ClassType.Dictionary:
+                    case ClassType.ImmutableDictionary:
                         finishedSerializing = HandleDictionary(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                         break;
                     default:

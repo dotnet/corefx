@@ -2,30 +2,46 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
     internal partial class JsonClassInfo
     {
+        private JsonPropertyInfo AddPolicyProperty(Type propertyType, JsonSerializerOptions options)
+        {
+            // A policy property is not a real property on a type; instead it leverages the existing converter
+            // logic and generic support to avoid boxing. It is used with values types and elements from collections and
+            // dictionaries. Typically it would represent a CLR type such as System.String.
+            return AddProperty(
+                propertyType,
+                propertyInfo : null,        // Not a real property so this is null.
+                classType : typeof(object), // A dummy type (not used).
+                options : options);
+
+        }
         private JsonPropertyInfo AddProperty(Type propertyType, PropertyInfo propertyInfo, Type classType, JsonSerializerOptions options)
         {
             JsonPropertyInfo jsonInfo = CreateProperty(propertyType, propertyType, propertyInfo, classType, options);
 
-            // Convert interfaces to concrete types.
+            // Convert non-immutable dictionary interfaces to concrete types.
             if (propertyType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
             {
-                Type newPropertyType = jsonInfo.ElementClassInfo.GetPolicyProperty().GetConcreteType(propertyType);
-                if (propertyType != newPropertyType)
+                // If a polymorphic case, we have to wait until run-time values are processed.
+                if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
                 {
-                    jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
+                    Type newPropertyType = jsonInfo.ElementClassInfo.GetPolicyProperty().GetDictionaryConcreteType();
+                    if (propertyType != newPropertyType)
+                    {
+                        jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
+                    }
                 }
             }
 
             if (propertyInfo != null)
             {
-                _propertyRefs.Add(new PropertyRef(GetKey(jsonInfo.CompareName), jsonInfo));
+                _propertyRefs.Add(new PropertyRef(GetKey(jsonInfo.NameUsedToCompare), jsonInfo));
             }
             else
             {
@@ -36,14 +52,23 @@ namespace System.Text.Json.Serialization
             return jsonInfo;
         }
 
-        internal JsonPropertyInfo CreateProperty(Type declaredPropertyType, Type runtimePropertyType, PropertyInfo propertyInfo, Type parentClassType, JsonSerializerOptions options)
+        internal static JsonPropertyInfo CreateProperty(Type declaredPropertyType, Type runtimePropertyType, PropertyInfo propertyInfo, Type parentClassType, JsonSerializerOptions options)
         {
-            Type collectionElementType = null;
-            ClassType propertyClassType = GetClassType(runtimePropertyType);
-            if (propertyClassType == ClassType.Enumerable || propertyClassType == ClassType.Dictionary)
+            bool hasIgnoreAttribute = (JsonPropertyInfo.GetAttribute<JsonIgnoreAttribute>(propertyInfo) != null);
+            if (hasIgnoreAttribute)
             {
-                collectionElementType = GetElementType(runtimePropertyType);
-                // todo: if collectionElementType is object, create loosely-typed collection (JsonArray).
+                return JsonPropertyInfo.CreateIgnoredPropertyPlaceholder(propertyInfo, options);
+            }
+
+            Type collectionElementType = null;
+            switch (GetClassType(runtimePropertyType))
+            {
+                case ClassType.Enumerable:
+                case ClassType.Dictionary:
+                case ClassType.ImmutableDictionary:
+                case ClassType.Unknown:
+                    collectionElementType = GetElementType(runtimePropertyType, parentClassType, propertyInfo);
+                    break;
             }
 
             // Create the JsonPropertyInfo<TType, TProperty>
@@ -60,22 +85,23 @@ namespace System.Text.Json.Serialization
 
             JsonPropertyInfo jsonInfo = (JsonPropertyInfo)Activator.CreateInstance(
                 propertyInfoClassType,
-                BindingFlags.Instance | BindingFlags.NonPublic,
-                binder: null,
-                new object[] { parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, collectionElementType, options },
+                BindingFlags.Instance | BindingFlags.Public,
+                binder: null, 
+                args: null,
                 culture: null);
+
+            jsonInfo.Initialize(parentClassType, declaredPropertyType, runtimePropertyType, propertyInfo, collectionElementType, options);
 
             return jsonInfo;
         }
 
+        internal JsonPropertyInfo CreateRootObject(JsonSerializerOptions options)
+        {
+            return CreateProperty(Type, Type, null, Type, options);
+        }
+
         internal JsonPropertyInfo CreatePolymorphicProperty(JsonPropertyInfo property, Type runtimePropertyType, JsonSerializerOptions options)
         {
-            if (property == null)
-            {
-                // Used with root objects which are not really a property.
-                return CreateProperty(runtimePropertyType, runtimePropertyType, null, runtimePropertyType, options);
-            }
-
             JsonPropertyInfo runtimeProperty = CreateProperty(property.DeclaredPropertyType, runtimePropertyType, property?.PropertyInfo, Type, options);
             property.CopyRuntimeSettingsTo(runtimeProperty);
 

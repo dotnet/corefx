@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Runtime.CompilerServices;
 
 namespace System.Globalization
@@ -45,7 +44,9 @@ namespace System.Globalization
             return obj is SortVersion otherVersion && Equals(otherVersion);
         }
 
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
         public bool Equals(SortVersion? other)
+#pragma warning restore CS8614
         {
             if (other == null)
             {

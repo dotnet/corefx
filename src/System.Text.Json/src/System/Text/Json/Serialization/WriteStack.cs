@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -44,14 +45,23 @@ namespace System.Text.Json.Serialization
             Current.JsonClassInfo = nextClassInfo;
             Current.CurrentValue = nextValue;
 
-            if (nextClassInfo.ClassType == ClassType.Enumerable)
+            ClassType classType = nextClassInfo.ClassType;
+
+            if (classType == ClassType.Enumerable || nextClassInfo.ClassType == ClassType.Dictionary)
             {
-                Current.PopStackOnEndArray = true;
+                Current.PopStackOnEnd = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+            }
+            else if (classType == ClassType.ImmutableDictionary)
+            {
+                Current.PopStackOnEnd = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+
+                Current.IsImmutableDictionary = true;
             }
             else
             {
-                Debug.Assert(nextClassInfo.ClassType == ClassType.Object || nextClassInfo.ClassType == ClassType.Dictionary || nextClassInfo.ClassType == ClassType.Unknown);
+                Debug.Assert(nextClassInfo.ClassType == ClassType.Object || nextClassInfo.ClassType == ClassType.Unknown);
                 Current.PopStackOnEndObject = true;
             }
         }

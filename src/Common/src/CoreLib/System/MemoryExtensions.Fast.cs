@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.CompilerServices;
@@ -238,7 +237,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToLowerAsciiInvariant(source, destination);
             else
-                culture!.TextInfo.ChangeCaseToLower(source, destination); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                culture!.TextInfo.ChangeCaseToLower(source, destination); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             return source.Length;
         }
 
@@ -289,7 +288,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToUpperAsciiInvariant(source, destination);
             else
-                culture!.TextInfo.ChangeCaseToUpper(source, destination); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                culture!.TextInfo.ChangeCaseToUpper(source, destination); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             return source.Length;
         }
 
@@ -393,7 +392,7 @@ namespace System
                     ThrowHelper.ThrowArgumentOutOfRangeException();
                 return default;
             }
-            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException();
@@ -415,7 +414,7 @@ namespace System
                 return default;
             }
 
-            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
             int actualIndex = startIndex.GetOffset(array.Length);
@@ -442,7 +441,7 @@ namespace System
                 return default;
             }
 
-            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
             (int start, int length) = range.GetOffsetAndLength(array.Length);

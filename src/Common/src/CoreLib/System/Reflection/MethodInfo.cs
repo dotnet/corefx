@@ -12,25 +12,25 @@ namespace System.Reflection
 
         public override MemberTypes MemberType => MemberTypes.Method;
 
-        public virtual ParameterInfo ReturnParameter { get { throw NotImplemented.ByDesign; } }
-        public virtual Type ReturnType { get { throw NotImplemented.ByDesign; } }
+        public virtual ParameterInfo? ReturnParameter { get { throw NotImplemented.ByDesign; } }
+        public virtual Type? ReturnType { get { throw NotImplemented.ByDesign; } }
 
         public override Type[] GetGenericArguments() { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
-        public virtual MethodInfo GetGenericMethodDefinition() { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
-        public virtual MethodInfo MakeGenericMethod(params Type[] typeArguments) { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
+        public virtual MethodInfo? GetGenericMethodDefinition() { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
+        public virtual MethodInfo? MakeGenericMethod(params Type[] typeArguments) { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
 
-        public abstract MethodInfo GetBaseDefinition();
+        public abstract MethodInfo? GetBaseDefinition();
 
-        public abstract ICustomAttributeProvider ReturnTypeCustomAttributes { get; }
+        public abstract ICustomAttributeProvider? ReturnTypeCustomAttributes { get; }
 
         public virtual Delegate CreateDelegate(Type delegateType) { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
-        public virtual Delegate CreateDelegate(Type delegateType, object target) { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
+        public virtual Delegate CreateDelegate(Type delegateType, object? target) { throw new NotSupportedException(SR.NotSupported_SubclassOverride); }
 
-        public override bool Equals(object obj) => base.Equals(obj);
+        public override bool Equals(object? obj) => base.Equals(obj);
         public override int GetHashCode() => base.GetHashCode();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(MethodInfo left, MethodInfo right)
+        public static bool operator ==(MethodInfo? left, MethodInfo? right)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -41,7 +41,7 @@ namespace System.Reflection
             }
 
             // Try fast reference equality and opposite null check prior to calling the slower virtual Equals
-            if ((object)left == (object)right)
+            if ((object?)left == (object)right)
             {
                 return true;
             }
@@ -49,6 +49,6 @@ namespace System.Reflection
             return (left is null) ? false : left.Equals(right);
         }
 
-        public static bool operator !=(MethodInfo left, MethodInfo right) => !(left == right);
+        public static bool operator !=(MethodInfo? left, MethodInfo? right) => !(left == right);
     }
 }

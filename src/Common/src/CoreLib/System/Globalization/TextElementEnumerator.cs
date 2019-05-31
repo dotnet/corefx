@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections;
 using System.Diagnostics;
 
@@ -51,7 +50,9 @@ namespace System.Globalization
             return true;
         }
 
-        public object? Current => GetTextElement(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
+#pragma warning disable CS8612 // TODO-NULLABLE: Covariant return types (https://github.com/dotnet/roslyn/issues/23268)
+        public object Current => GetTextElement();
+#pragma warning restore CS8612
 
         public string GetTextElement()
         {

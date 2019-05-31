@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
@@ -523,7 +522,9 @@ namespace System
 
         // Determines the sorting relation of StrB to the current instance.
         //
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
         public int CompareTo(string? strB)
+#pragma warning restore CS8614
         {
             return string.Compare(this, strB, StringComparison.CurrentCulture);
         }
@@ -617,7 +618,9 @@ namespace System
         }
 
         // Determines whether two strings match.
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
         public bool Equals(string? value)
+#pragma warning restore CS8614
         {
             if (object.ReferenceEquals(this, value))
                 return true;

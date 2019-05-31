@@ -64,7 +64,7 @@ namespace System
             }
         }
 
-        public virtual string GetEnumName(object value)
+        public virtual string? GetEnumName(object value)
         {
             if (value == null)
                 throw new ArgumentNullException(nameof(value));
@@ -162,7 +162,7 @@ namespace System
         {
             ulong[] ulArray = new ulong[array.Length];
             for (int i = 0; i < array.Length; ++i)
-                ulArray[i] = Enum.ToUInt64(array.GetValue(i));
+                ulArray[i] = Enum.ToUInt64(array.GetValue(i)!);
 
             ulong ulValue = Enum.ToUInt64(value);
 

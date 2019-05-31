@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,7 +16,7 @@ namespace System.Text.Json.Serialization
         /// <returns>A task that represents the asynchronous write operation.</returns>
         /// <param name="value">The value to convert.</param>
         /// <param name="utf8Json">The UTF-8 <see cref="System.IO.Stream"/> to write to.</param>
-        /// <param name="options">Options to control the convertion behavior.</param>
+        /// <param name="options">Options to control the conversion behavior.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> which may be used to cancel the write operation.</param>
         public static Task WriteAsync<TValue>(TValue value, Stream utf8Json, JsonSerializerOptions options = null, CancellationToken cancellationToken = default)
         {
@@ -31,7 +30,7 @@ namespace System.Text.Json.Serialization
         /// <param name="value">The value to convert.</param>
         /// <param name="type">The type of the <paramref name="value"/> to convert.</param>
         /// <param name="utf8Json">The UTF-8 <see cref="System.IO.Stream"/> to write to.</param>
-        /// <param name="options">Options to control the convertion behavior.</param>
+        /// <param name="options">Options to control the conversion behavior.</param>
         /// <param name="cancellationToken">The <see cref="System.Threading.CancellationToken"/> which may be used to cancel the write operation.</param>
         public static Task WriteAsync(object value, Type type, Stream utf8Json, JsonSerializerOptions options = null, CancellationToken cancellationToken = default)
         {
@@ -52,7 +51,7 @@ namespace System.Text.Json.Serialization
 
             JsonWriterOptions writerOptions = options.GetWriterOptions();
 
-            using (var bufferWriter = new PooledBufferWriter<byte>(options.DefaultBufferSize))
+            using (var bufferWriter = new PooledByteBufferWriter(options.DefaultBufferSize))
             using (var writer = new Utf8JsonWriter(bufferWriter, writerOptions))
             {
                 if (value == null)
@@ -60,12 +59,8 @@ namespace System.Text.Json.Serialization
                     writer.WriteNullValue();
                     writer.Flush();
 
-#if BUILDING_INBOX_LIBRARY
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
-#else
-                    // todo: stackalloc or pool here?
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
-#endif
+                    await bufferWriter.WriteToStreamAsync(utf8Json, cancellationToken).ConfigureAwait(false);
+
                     return;
                 }
 
@@ -88,12 +83,8 @@ namespace System.Text.Json.Serialization
                     isFinalBlock = Write(writer, flushThreshold, options, ref state);
                     writer.Flush();
 
-#if BUILDING_INBOX_LIBRARY
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory, cancellationToken).ConfigureAwait(false);
-#else
-                    // todo: use pool here to avod extra alloc?
-                    await utf8Json.WriteAsync(bufferWriter.WrittenMemory.ToArray(), 0, bufferWriter.WrittenMemory.Length, cancellationToken).ConfigureAwait(false);
-#endif
+                    await bufferWriter.WriteToStreamAsync(utf8Json, cancellationToken).ConfigureAwait(false);
+
                     bufferWriter.Clear();
                 } while (!isFinalBlock);
             }

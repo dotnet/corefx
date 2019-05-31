@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.ExceptionServices;
@@ -127,7 +126,7 @@ namespace System
                 Interlocked.CompareExchange(ref s_switches, new Dictionary<string, bool>(), null);
             }
 
-            lock (s_switches!) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            lock (s_switches!) // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             {
                 s_switches[switchName] = isEnabled;
             }

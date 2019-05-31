@@ -3,30 +3,14 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
 {
-    public class SimpleTestClassWithObject : ITestClass
+    public class SimpleTestClassWithObject : SimpleTestClassWithSimpleObject
     {
-        public object MyInt16 { get; set; }
-        public object MyInt32 { get; set; }
-        public object MyInt64 { get; set; }
-        public object MyUInt16 { get; set; }
-        public object MyUInt32 { get; set; }
-        public object MyUInt64 { get; set; }
-        public object MyByte { get; set; }
-        public object MySByte { get; set; }
-        public object MyChar { get; set; }
-        public object MyString { get; set; }
-        public object MyDecimal { get; set; }
-        public object MyBooleanTrue { get; set; }
-        public object MyBooleanFalse { get; set; }
-        public object MySingle { get; set; }
-        public object MyDouble { get; set; }
-        public object MyDateTime { get; set; }
-        public object MyEnum { get; set; }
         public object MyInt16Array { get; set; }
         public object MyInt32Array { get; set; }
         public object MyInt64Array { get; set; }
@@ -53,8 +37,25 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringToStringDict { get; set; }
         public object MyStringToStringIDict { get; set; }
         public object MyStringToStringIReadOnlyDict { get; set; }
+        public object MyStringToStringImmutableDict { get; set; }
+        public object MyStringToStringIImmutableDict { get; set; }
+        public object MyStringToStringImmutableSortedDict { get; set; }
+        public object MyStringStackT { get; set; }
+        public object MyStringQueueT { get; set; }
+        public object MyStringHashSetT { get; set; }
+        public object MyStringLinkedListT { get; set; }
+        public object MyStringSortedSetT { get; set; }
+        public object MyStringIImmutableListT { get; set; }
+        public object MyStringIImmutableStackT { get; set; }
+        public object MyStringIImmutableQueueT { get; set; }
+        public object MyStringIImmutableSetT { get; set; }
+        public object MyStringImmutableHashSetT { get; set; }
+        public object MyStringImmutableListT { get; set; }
+        public object MyStringImmutableStackT { get; set; }
+        public object MyStringImmutablQueueT { get; set; }
+        public object MyStringImmutableSortedSetT { get; set; }
 
-        public static readonly string s_json =
+        public new static readonly string s_json =
                 @"{" +
                 @"""MyInt16"" : 1," +
                 @"""MyInt32"" : 2," +
@@ -98,30 +99,31 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringIReadOnlyListT"" : [""Hello""]," +
                 @"""MyStringToStringDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
-                @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}" +
+                @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringImmutableDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringIImmutableDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}," +
+                @"""MyStringStackT"" : [""Hello"", ""World""]," +
+                @"""MyStringQueueT"" : [""Hello"", ""World""]," +
+                @"""MyStringHashSetT"" : [""Hello""]," +
+                @"""MyStringLinkedListT"" : [""Hello""]," +
+                @"""MyStringSortedSetT"" : [""Hello""]," +
+                @"""MyStringIImmutableListT"" : [""Hello""]," +
+                @"""MyStringIImmutableStackT"" : [""Hello""]," +
+                @"""MyStringIImmutableQueueT"" : [""Hello""]," +
+                @"""MyStringIImmutableSetT"" : [""Hello""]," +
+                @"""MyStringImmutableHashSetT"" : [""Hello""]," +
+                @"""MyStringImmutableListT"" : [""Hello""]," +
+                @"""MyStringImmutableStackT"" : [""Hello""]," +
+                @"""MyStringImmutablQueueT"" : [""Hello""]," +
+                @"""MyStringImmutableSortedSetT"" : [""Hello""]" +
                 @"}";
 
-        public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
+        public new static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
-        public void Initialize()
+        public override void Initialize()
         {
-            MyInt16 = (short)1;
-            MyInt32 = (int)2;
-            MyInt64 = (long)3;
-            MyUInt16 = (ushort)4;
-            MyUInt32 = (uint)5;
-            MyUInt64 = (ulong)6;
-            MyByte = (byte)7;
-            MySByte = (sbyte)8;
-            MyChar = 'a';
-            MyString = "Hello";
-            MyBooleanTrue = true;
-            MyBooleanFalse = false;
-            MySingle = 1.1f;
-            MyDouble = 2.2d;
-            MyDecimal = 3.3m;
-            MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
-            MyEnum = SampleEnum.Two;
+            base.Initialize();
 
             MyInt16Array = new short[] { 1 };
             MyInt32Array = new int[] { 2 };
@@ -151,27 +153,31 @@ namespace System.Text.Json.Serialization.Tests
             MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
             MyStringToStringIReadOnlyDict = new Dictionary<string, string> { { "key", "value" } };
+
+            MyStringToStringImmutableDict = ImmutableDictionary.CreateRange((Dictionary<string, string>)MyStringToStringDict);
+            MyStringToStringIImmutableDict = ImmutableDictionary.CreateRange((Dictionary<string, string>)MyStringToStringDict);
+            MyStringToStringImmutableSortedDict = ImmutableSortedDictionary.CreateRange((Dictionary<string, string>)MyStringToStringDict);
+
+            MyStringStackT = new Stack<string>(new List<string>() { "Hello", "World" });
+            MyStringQueueT = new Queue<string>(new List<string>() { "Hello", "World" });
+            MyStringHashSetT = new HashSet<string>(new List<string>() { "Hello" });
+            MyStringLinkedListT = new LinkedList<string>(new List<string>() { "Hello" });
+            MyStringSortedSetT = new SortedSet<string>(new List<string>() { "Hello" });
+
+            MyStringIImmutableListT = ImmutableList.CreateRange(new List<string> { "Hello" });
+            MyStringIImmutableStackT = ImmutableStack.CreateRange(new List<string> { "Hello" });
+            MyStringIImmutableQueueT = ImmutableQueue.CreateRange(new List<string> { "Hello" });
+            MyStringIImmutableSetT = ImmutableHashSet.CreateRange(new List<string> { "Hello" });
+            MyStringImmutableHashSetT = ImmutableHashSet.CreateRange(new List<string> { "Hello" });
+            MyStringImmutableListT = ImmutableList.CreateRange(new List<string> { "Hello" });
+            MyStringImmutableStackT = ImmutableStack.CreateRange(new List<string> { "Hello" });
+            MyStringImmutablQueueT = ImmutableQueue.CreateRange(new List<string> { "Hello" });
+            MyStringImmutableSortedSetT = ImmutableSortedSet.CreateRange(new List<string> { "Hello" });
         }
 
-        public void Verify()
+        public override void Verify()
         {
-            Assert.Equal((short)1, MyInt16);
-            Assert.Equal((int)2, MyInt32);
-            Assert.Equal((long)3, MyInt64);
-            Assert.Equal((ushort)4, MyUInt16);
-            Assert.Equal((uint)5, MyUInt32);
-            Assert.Equal((ulong)6, MyUInt64);
-            Assert.Equal((byte)7, MyByte);
-            Assert.Equal((sbyte)8, MySByte);
-            Assert.Equal('a', MyChar);
-            Assert.Equal("Hello", MyString);
-            Assert.Equal(3.3m, MyDecimal);
-            Assert.Equal(false, MyBooleanFalse);
-            Assert.Equal(true, MyBooleanTrue);
-            Assert.Equal(1.1f, MySingle);
-            Assert.Equal(2.2d, MyDouble);
-            Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
-            Assert.Equal(SampleEnum.Two, MyEnum);
+            base.Verify();
 
             Assert.Equal((short)1, ((short[])MyInt16Array)[0]);
             Assert.Equal((int)2, ((int[])MyInt32Array)[0]);
@@ -201,6 +207,36 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("value", ((Dictionary<string, string>)MyStringToStringDict)["key"]);
             Assert.Equal("value", ((IDictionary<string, string>)MyStringToStringIDict)["key"]);
             Assert.Equal("value", ((IReadOnlyDictionary<string, string>)MyStringToStringIReadOnlyDict)["key"]);
+
+            Assert.Equal("value", ((ImmutableDictionary<string, string>)MyStringToStringImmutableDict)["key"]);
+            Assert.Equal("value", ((IImmutableDictionary<string, string>)MyStringToStringIImmutableDict)["key"]);
+            Assert.Equal("value", ((ImmutableSortedDictionary<string, string>)MyStringToStringImmutableSortedDict)["key"]);
+
+            Assert.Equal(2, ((Stack<string>)MyStringStackT).Count);
+            Assert.True(((Stack<string>)MyStringStackT).Contains("Hello"));
+            Assert.True(((Stack<string>)MyStringStackT).Contains("World"));
+
+            string[] expectedQueue = { "Hello", "World" };
+            int i = 0;
+            foreach (string item in ((Queue<string>)MyStringQueueT))
+            {
+                Assert.Equal(expectedQueue[i], item);
+                i++;
+            }
+
+            Assert.Equal("Hello", ((HashSet<string>)MyStringHashSetT).First());
+            Assert.Equal("Hello", ((LinkedList<string>)MyStringLinkedListT).First());
+            Assert.Equal("Hello", ((SortedSet<string>)MyStringSortedSetT).First());
+
+            Assert.Equal("Hello", ((IImmutableList<string>)MyStringIImmutableListT)[0]);
+            Assert.Equal("Hello", ((IImmutableStack<string>)MyStringIImmutableStackT).First());
+            Assert.Equal("Hello", ((IImmutableQueue<string>)MyStringIImmutableQueueT).First());
+            Assert.Equal("Hello", ((IImmutableSet<string>)MyStringIImmutableSetT).First());
+            Assert.Equal("Hello", ((ImmutableHashSet<string>)MyStringImmutableHashSetT).First());
+            Assert.Equal("Hello", ((ImmutableList<string>)MyStringImmutableListT)[0]);
+            Assert.Equal("Hello", ((ImmutableStack<string>)MyStringImmutableStackT).First());
+            Assert.Equal("Hello", ((ImmutableQueue<string>)MyStringImmutablQueueT).First());
+            Assert.Equal("Hello", ((ImmutableSortedSet<string>)MyStringImmutableSortedSetT).First());
         }
     }
 }

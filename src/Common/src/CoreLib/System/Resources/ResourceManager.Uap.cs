@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.IO;
 using System.Globalization;
@@ -71,7 +70,7 @@ namespace System.Resources
         internal static WindowsRuntimeResourceManagerBase GetWinRTResourceManager()
         {
 #if FEATURE_APPX
-            Type WinRTResourceManagerType = Type.GetType("System.Resources.WindowsRuntimeResourceManager, System.Runtime.WindowsRuntime", throwOnError: true);
+            Type WinRTResourceManagerType = Type.GetType("System.Resources.WindowsRuntimeResourceManager, System.Runtime.WindowsRuntime", throwOnError: true)!;
 #else // ENABLE_WINRT
             Assembly hiddenScopeAssembly = Assembly.Load(Internal.Runtime.Augments.RuntimeAugments.HiddenScopeAssemblyName);
             Type WinRTResourceManagerType = hiddenScopeAssembly.GetType("System.Resources.WindowsRuntimeResourceManager", true);

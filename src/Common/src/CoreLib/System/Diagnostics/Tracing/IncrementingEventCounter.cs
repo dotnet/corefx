@@ -43,7 +43,7 @@ namespace System.Diagnostics.Tracing
         /// <param name="increment">The value to increment by.</param>
         public void Increment(double increment = 1)
         {
-            lock(MyLock)
+            lock (MyLock)
             {
                 _increment += increment;
             }
@@ -55,7 +55,7 @@ namespace System.Diagnostics.Tracing
 
         public override string ToString() => $"IncrementingEventCounter '{Name}' Increment {_increment}";
 
-        internal override void WritePayload(float intervalSec)
+        internal override void WritePayload(float intervalSec, int pollingIntervalMillisec)
         {
             lock (MyLock)     // Lock the counter
             {
@@ -64,6 +64,8 @@ namespace System.Diagnostics.Tracing
                 payload.IntervalSec = intervalSec;
                 payload.DisplayName = DisplayName ?? "";
                 payload.DisplayRateTimeScale = (DisplayRateTimeScale == TimeSpan.Zero) ? "" : DisplayRateTimeScale.ToString("c");
+                payload.Series = $"Interval={pollingIntervalMillisec}"; // TODO: This may need to change when we support multi-session
+                payload.CounterType = "Sum";
                 payload.Metadata = GetMetadataString();
                 payload.Increment = _increment - _prevIncrement;
                 _prevIncrement = _increment;

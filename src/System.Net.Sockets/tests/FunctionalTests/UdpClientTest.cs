@@ -194,7 +194,7 @@ namespace System.Net.Sockets.Tests
             Assert.Throws<ObjectDisposedException>(() => udpClient.Send(null, 0, "localhost", 0));
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsPreciseGcSupported))]
         public void Finalize_NoExceptionsThrown()
         {
             WeakReference<UdpClient> udpClientWeakRef = CreateAndDiscardUdpClient();
@@ -691,7 +691,6 @@ namespace System.Net.Sockets.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void BeginSend_IPv6Socket_IPv4Dns_Success()
         {
             using (var receiver = new UdpClient("127.0.0.1", DiscardPort))
