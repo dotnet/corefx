@@ -148,7 +148,7 @@ namespace System.Text.Json.Serialization
                         {
                             if (!reader.Read())
                             {
-                                ThrowHelper.ThrowJsonReaderException(ref reader, ExceptionResource.ExpectedJsonTokens);
+                                ThrowHelper.ThrowJsonReaderException(ref reader, ExceptionResource.ExpectedOneCompleteToken);
                             }
                             break;
                         }
@@ -164,7 +164,7 @@ namespace System.Text.Json.Serialization
 
                             if (!reader.TrySkip())
                             {
-                                ThrowHelper.ThrowJsonReaderException(ref reader, ExceptionResource.ExpectedJsonTokens);
+                                ThrowHelper.ThrowJsonReaderException(ref reader, ExceptionResource.NotEnoughData);
                             }
 
                             long totalLength = reader.BytesConsumed - startingOffset;
@@ -308,14 +308,15 @@ namespace System.Text.Json.Serialization
                     ThrowHelper.ThrowJsonException_DeserializeDataRemaining(length, length - state.BytesConsumed);
                 }
             }
-            catch
+            catch (JsonException)
             {
-                // This really shouldn't happen since the document was already checked
-                // for consistency by Skip.  But if data mutations happened just after
-                // the calls to Read then the copy may not be valid.
+                reader = restore;
+                throw;
+            }
+            finally
+            {
                 rentedSpan.Clear();
                 ArrayPool<byte>.Shared.Return(rented);
-                throw;
             }
         }
     }
