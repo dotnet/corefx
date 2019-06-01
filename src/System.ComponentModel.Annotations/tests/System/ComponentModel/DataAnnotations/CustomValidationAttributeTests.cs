@@ -308,7 +308,7 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [Fact]
         public static void AllowMultiple()
         {
-            Assert.Equal(3 ,TypeDescriptor.GetAttributes(typeof(AllowMultipleClass)).Count);
+            Assert.Equal(3, TypeDescriptor.GetAttributes(typeof(AllowMultipleClass)).Count);
         }
 
         [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method1))]
