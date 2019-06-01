@@ -166,11 +166,11 @@ namespace System.Security.Cryptography
 
             // The common case is <= 4
             byte[] tmpBufferArray = null;
-            Span<byte> tmpBuffer = inputCount <= 4
-                ? stackalloc byte[4]
-                : inputCount <= 256
-                    ? stackalloc byte[256]
-                    : tmpBufferArray = ArrayPool<byte>.Shared.Rent(inputCount);
+            Span<byte> tmpBuffer = stackalloc byte[4];
+            if (inputCount > 4)
+            {
+                tmpBuffer = tmpBufferArray = ArrayPool<byte>.Shared.Rent(inputCount);
+            }
 
             tmpBuffer = GetTempBuffer(inputBuffer.AsSpan(inputOffset, inputCount), tmpBuffer);
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
@@ -266,11 +266,11 @@ namespace System.Security.Cryptography
 
             // Common case for bytesToTransform = 4
             byte[] transformBufferArray = null;
-            Span<byte> transformBuffer = bytesToTransform <= 4
-                ? stackalloc byte[4]
-                : bytesToTransform <= 256
-                    ? stackalloc byte[256]
-                    : transformBufferArray = ArrayPool<byte>.Shared.Rent(bytesToTransform);
+            Span<byte> transformBuffer = stackalloc byte[4];
+            if (bytesToTransform > 4)
+            {
+                transformBuffer = transformBufferArray = ArrayPool<byte>.Shared.Rent(bytesToTransform);
+            }
 
             transformBuffer = transformBuffer.Slice(0, bytesToTransform);
 
