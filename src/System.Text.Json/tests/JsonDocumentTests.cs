@@ -3191,7 +3191,7 @@ namespace System.Text.Json.Tests
         [InlineData("{\"sample\" : null}")]
         [InlineData("{\"sample\" : \"sample-value\"}")]
         [InlineData("{\"connectionId\" : \"123\"}")]
-        public static void ValueEquals_JsonTokenNotString_Success(string jsonString)
+        public static void ValueEquals_NotString_Throws(string jsonString)
         {
             const string ErrorMessage = "The requested operation requires an element of type 'String', but the target element has type 'Object'.";
             using (JsonDocument doc = JsonDocument.Parse(jsonString))
@@ -3205,27 +3205,75 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
-        public static void NameEquals_TakeJsonProperty_ReturnsPropertyName()
+        public static void NameEquals_GivenPropertyAndValue_TrueForPropertyName()
         {
             string jsonString = $"{{ \"aPropertyName\" : \"itsValue\" }}";
             using (JsonDocument doc = JsonDocument.Parse(jsonString))
             {
                 JsonElement jElement = doc.RootElement;
                 JsonProperty property = jElement.EnumerateObject().First();
-                Assert.True(property.NameEquals("aPropertyName"));
-                Assert.True(property.NameEquals("aPropertyName".AsSpan()));
-                byte[] expectedGetBytes = Encoding.UTF8.GetBytes("aPropertyName");
+
+                string text = "aPropertyName";
+                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(text);
+                Assert.True(property.NameEquals(text));
+                Assert.True(property.NameEquals(text.AsSpan()));
+                Assert.True(property.NameEquals(expectedGetBytes));
+
+                text = "itsValue";
+                expectedGetBytes = Encoding.UTF8.GetBytes(text);
+                Assert.False(property.NameEquals(text));
+                Assert.False(property.NameEquals(text.AsSpan()));
+                Assert.False(property.NameEquals(expectedGetBytes));
+            }
+        }
+
+        [Theory]
+        [InlineData("conne\\u0063tionId", "connectionId")]
+        [InlineData("connectionId", "connectionId")]
+        [InlineData("123", "123")]
+        [InlineData("My name is \\\"Ahson\\\"", "My name is \"Ahson\"")]
+        public static void NameEquals_UseGoodMatches_True(string propertyName, string otherText)
+        {
+            string jsonString = $"{{ \"{propertyName}\" : \"itsValue\" }}";
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                JsonProperty property = jElement.EnumerateObject().First();
+
+                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(otherText);
+                Assert.True(property.NameEquals(otherText));
+                Assert.True(property.NameEquals(otherText.AsSpan()));
                 Assert.True(property.NameEquals(expectedGetBytes));
             }
         }
 
         [Fact]
-        public static void NameEquals_InvalidInstance_Throws()
+        public static void NameEquals_Empty_Throws()
+        {
+            const string jsonString = "{\"\" : \"some-value\"}";
+            const string ErrorMessage = "The requested operation requires an element of type 'String', but the target element has type 'Object'.";
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                const string ThrowsAnyway = "throws-anyway";
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway.AsSpan()), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)), ErrorMessage);
+            }
+        }
+
+        [Theory]
+        [InlineData("hello")]
+        [InlineData("")]
+        [InlineData(null)]
+        public static void NameEquals_InvalidInstance_Throws(string text)
         {
             const string ErrorMessage = "Operation is not valid due to the current state of the object.";
             JsonProperty prop = default;
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals("hello"), ErrorMessage);
-            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals((string)null), ErrorMessage);
+            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text), ErrorMessage);
+            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text.AsSpan()), ErrorMessage);
+            byte[] expectedGetBytes = text == null ? null : Encoding.UTF8.GetBytes(text);
+            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(expectedGetBytes), ErrorMessage);
         }
 
         private static void BuildSegmentedReader(
