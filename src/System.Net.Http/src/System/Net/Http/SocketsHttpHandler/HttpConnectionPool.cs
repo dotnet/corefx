@@ -163,11 +163,11 @@ namespace System.Net.Http
                     //    of type PROTOCOL_ERROR."
                     // which suggests we should do:
                     //   _sslOptionsHttp2.AllowRenegotiation = false;
-                    // However, if AllowRenegotation is set to false, that will also prevent
+                    // However, if AllowRenegotiation is set to false, that will also prevent
                     // renegotation if the server denies the HTTP/2 request and causes a
                     // downgrade to HTTP/1.1, and the current APIs don't provide a mechanism
-                    // by which AllowRenegotation could be set back to true in that case.
-                    // For now, if an HTTP/2 server erroneously issues a renegotation, we'll
+                    // by which AllowRenegotiation could be set back to true in that case.
+                    // For now, if an HTTP/2 server erroneously issues a renegotiation, we'll
                     // allow it.
 
                     Debug.Assert(hostHeader != null);
