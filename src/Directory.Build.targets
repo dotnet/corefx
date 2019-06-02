@@ -64,6 +64,20 @@
            Condition="$([System.String]::Copy('%(Dependency.TargetFramework)').StartsWith('net4')) AND 
                       '$(_excludeCompile)' == 'true' AND
                       '%(Dependency.Identity)' != '_._'" />
-  </Target>  
+  </Target>
+
+  <!--
+    As we disabled implicit framework references but want to populate the framework node in the runtimeconfig's 
+    runtimeOptions node we manually set the RuntimeFramework. 
+    At that point restore and conflict resolution already happened therefore setting the item here has no side effects.
+   -->
+  <Target Name="SetRuntimeFrameworksBeforeGenerateConfigurationFiles"
+          BeforeTargets="GenerateBuildRuntimeConfigurationFiles">
+
+    <ItemGroup>
+      <RuntimeFramework Include="Microsoft.NETCore.App" Version="$(ProductVersion)" />
+    </ItemGroup>
+
+  </Target>
 
 </Project>
