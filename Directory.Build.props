@@ -90,12 +90,12 @@
   <Import Sdk="Microsoft.DotNet.CoreFxTesting" Project="Sdk.props" />
 
   <PropertyGroup>    
-    <DisableRepoRestore Condition="'$(IsTestProject)' == 'true'">true</DisableRepoRestore>
-    <DisableRepoRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</DisableRepoRestore>
-    <DisableRepoRestore Condition="'$(IsExternalProject)' == 'true'">true</DisableRepoRestore>
+    <EnableProjectRestore Condition="'$(IsTestProject)' == 'true'">true</EnableProjectRestore>
+    <EnableProjectRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</EnableProjectRestore>
+    <EnableProjectRestore Condition="'$(IsExternalProject)' == 'true'">true</EnableProjectRestore>
   </PropertyGroup>
 
-  <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
+  <Import Condition="'$(EnableProjectRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
 
   <!-- Common repo directories -->
   <PropertyGroup>
@@ -344,7 +344,7 @@
     Remove test-only dependencies during source-build: disable project that brings in XUnit.Runtime
     dependencies through 'ReferenceFromRuntime' property.
   -->
-  <ItemGroup Condition="'$(DotNetBuildFromSource)' == 'true' and '$(BuildTests)' != 'true'">
+  <ItemGroup Condition="('$(DotNetBuildFromSource)' == 'true' and '$(BuildTests)' != 'true') or '$(BuildingUAPAOTVertical)' == 'true'">
     <ProjectExclusions Include="$(SourceDir)CoreFx.Private.TestUtilities/**/*.csproj" />
   </ItemGroup>
   <!-- AOT only asset that we currently don't support. -->

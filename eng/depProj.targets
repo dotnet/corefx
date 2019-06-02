@@ -37,9 +37,6 @@ See the LICENSE file in the project root for more information.
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     <!-- We don't need the SDK to validate that we get runtime packages -->
     <EnsureRuntimePackageDependencies>false</EnsureRuntimePackageDependencies>
-    <!-- don't generate netcoreapp files -->
-    <GenerateDependencyFile>false</GenerateDependencyFile>
-    <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -51,9 +48,6 @@ See the LICENSE file in the project root for more information.
     <!-- Unless overridden, use no runtime identifier. This is transformed in packageresolve.targets. 
          We specify "None" here to avoid being assigned the default runtime for projects which set CopyNuGetImplementations=true. -->
     <NuGetRuntimeIdentifier Condition="'$(NuGetRuntimeIdentifier)' == ''">None</NuGetRuntimeIdentifier>
-
-    <!-- make sure we tell nuget targets to copy, even if output type would not by default -->
-    <CopyNuGetImplementations>true</CopyNuGetImplementations>
   </PropertyGroup>
 
   <Target Name="RemoveImplicitPackageReferences">
@@ -66,7 +60,7 @@ See the LICENSE file in the project root for more information.
   <Target Name="RunRestoreDuringBuild"
           DependsOnTargets="Restore"
           BeforeTargets="ResolvePackageAssets"
-          Condition="!('$(VSDesignTimeBuild)'=='true' and '$(VisualStudioVersion)' >= '14.0')" />
+          Condition="'$(VSDesignTimeBuild)' != 'true'" />
 
   <Target Name="CoreCompile">
 
@@ -100,12 +94,6 @@ See the LICENSE file in the project root for more information.
 
     <Error Condition="'@(NuGetDeploy)' == ''" Text="Error no assets were resolved from NuGet packages." />
     <Message Importance="High" Text="%(FullPath) (%(NuGetPackageId).%(NuGetPackageVersion)) -&gt; @(NuGetDeploy->'$(TargetDir)%(SubFolder)%(FileName)%(Extension)')" />
-
-    <!-- Include marker files if an extension has been provided -->
-    <!-- internal builds use this to distinguish files which have already been signed -->
-    <Touch Condition="'$(DeployMarkerExtension)' != ''" Files="@(NuGetDeploy->'$(TargetDir)%(FileName)$(DeployMarkerExtension)')" AlwaysCreate="true">
-      <Output TaskParameter="TouchedFiles" ItemName="FileWrites"/>
-    </Touch>
   </Target>
 
   <!-- Required by Common.Targets but not used for depproj -->
