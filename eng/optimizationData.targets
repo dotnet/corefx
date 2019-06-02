@@ -1,0 +1,28 @@
+﻿<Project>
+
+  <ItemGroup>
+    <IBCPackage Include="$(WindowsCoreFxOptimizationDataPackageId)" Version="$(optimizationwindows_ntx64IBCCoreFxPackageVersion)" />
+    <IBCPackage Include="$(LinuxCoreFxOptimizationDataPackageId)" Version="$(optimizationwindows_ntx64IBCCoreFxPackageVersion)" />
+    <PackageReference Include="@(IBCPackage)" PrivateAssets="all" IsImplicitlyDefined="true" />
+  </ItemGroup>
+  
+  <!-- IBC data packages don't follow NuGet conventions.  -->
+  <Target Name="GetIBCData"
+          Inputs="%(IBCPackage.Identity)"
+          Outputs="$(IbcOptimizationDataDir)"
+          AfterTargets="Restore">
+    <PropertyGroup>
+      <!-- evaluate the package property -->
+      <_ibcPkgSrc>$(NuGetPackageRoot)%(IBCPackage.Identity)/%(IBCPackage.Version)</_ibcPkgSrc>
+      <_ibcPkgDest>%(IBCPackage.Identity)</_ibcPkgDest>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <_optimizationDataSourceFile Include="$(_ibcPkgSrc)\**\*.dll;$(_ibcPkgSrc)\**\*.ibc" />
+    </ItemGroup>
+
+    <Copy SourceFiles="@(_optimizationDataSourceFile)"
+          DestinationFiles="$(IbcOptimizationDataDir)$(_ibcPkgDest)\%(RecursiveDir)%(Filename)%(Extension)" />
+  </Target>
+
+</Project>

@@ -92,7 +92,7 @@
   <PropertyGroup>    
     <DisableRepoRestore Condition="'$(IsTestProject)' == 'true'">true</DisableRepoRestore>
     <DisableRepoRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</DisableRepoRestore>
-    <DisableRepoRestore Condition="'$IsExternalProject)' == 'true'">true</DisableRepoRestore>
+    <DisableRepoRestore Condition="'$(IsExternalProject)' == 'true'">true</DisableRepoRestore>
   </PropertyGroup>
 
   <Import Condition="'$(DisableRepoRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
@@ -226,16 +226,6 @@
     <EnableSourceLink Condition="'$(ContinuousIntegrationBuild)' != 'true' and '$(OfficialBuildId)' == ''">false</EnableSourceLink>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <!-- Embed IBC data on release builds, if IBCMerge isn't available this will just log the commandline -->
-    <EnableNgenOptimization Condition="'$(EnableNgenOptimization)' == '' and '$(ConfigurationGroup)' == 'Release'">true</EnableNgenOptimization>
-
-    <WindowsCoreFxOptimizationDataPackageId>optimization.windows_nt-x64.IBC.CoreFx</WindowsCoreFxOptimizationDataPackageId>
-    <WindowsCoreFxOptimizationDataVersion>$(optimizationwindows_ntx64IBCCoreFxPackageVersion)</WindowsCoreFxOptimizationDataVersion>
-    <LinuxCoreFxOptimizationDataPackageId>optimization.linux-x64.IBC.CoreFx</LinuxCoreFxOptimizationDataPackageId>
-    <LinuxCoreFxOptimizationDataVersion>$(optimizationwindows_ntx64IBCCoreFxPackageVersion)</LinuxCoreFxOptimizationDataVersion>
-  </PropertyGroup>
-
   <!-- Set up Default symbol and optimization for Configuration -->
   <Choose>
     <When Condition="'$(ConfigurationGroup)'=='Debug'">
@@ -311,9 +301,6 @@
     <NetStandardRefPath>$(RefRootPath)netstandard/</NetStandardRefPath>
     <NetStandard21RefPath>$(RefRootPath)netstandard2.1/</NetStandard21RefPath>
     <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
-    <IbcOptimizationDataDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsDir)', 'ibc'))</IbcOptimizationDataDir>
-    <ILAsmToolPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ilasm'))</ILAsmToolPath>
-    <ILLinkDir>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ILLink'))</ILLinkDir>
 
     <!-- Helix properties -->
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
