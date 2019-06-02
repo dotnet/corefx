@@ -1,7 +1,7 @@
 <Project>
   <Import Project="..\Directory.Build.props" />
+
   <PropertyGroup>
-    <IsExternalProject>true</IsExternalProject>
     <SkipParseBuildConfigurations>true</SkipParseBuildConfigurations>
     <!-- let us control the output path -->
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>

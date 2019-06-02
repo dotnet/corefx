@@ -92,7 +92,6 @@
   <PropertyGroup>    
     <EnableProjectRestore Condition="'$(IsTestProject)' == 'true'">true</EnableProjectRestore>
     <EnableProjectRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</EnableProjectRestore>
-    <EnableProjectRestore Condition="'$(IsExternalProject)' == 'true'">true</EnableProjectRestore>
   </PropertyGroup>
 
   <Import Condition="'$(EnableProjectRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
@@ -292,15 +291,15 @@
 
     <TargetOutputRelPath Condition="'$(TargetGroup)'!=''">$(TargetGroup)/</TargetOutputRelPath>
 
-    <RuntimePath Condition="'$(RuntimePath)' == ''">$(ArtifactsBinDir)runtime/$(BuildConfiguration)/</RuntimePath>
-    <RefRootPath>$(ArtifactsBinDir)ref/</RefRootPath>
-    <BuildConfigurationRefPath>$(RefRootPath)$(_bc_TargetGroup)/</BuildConfigurationRefPath>
-    <BuildConfigurationRefPath Condition="$(_bc_TargetGroup.EndsWith('aot'))">$(RefRootPath)$(_bc_TargetGroup.TrimEnd('aot'))/</BuildConfigurationRefPath>
-    <RefPath>$(RefRootPath)$(TargetGroup)/</RefPath>
-    <RefPath Condition="$(TargetGroup.EndsWith('aot'))">$(RefRootPath)$(TargetGroup.TrimEnd('aot'))/</RefPath>
-    <NetStandardRefPath>$(RefRootPath)netstandard/</NetStandardRefPath>
-    <NetStandard21RefPath>$(RefRootPath)netstandard2.1/</NetStandard21RefPath>
-    <NetFxRefPath>$(RefRootPath)netfx/</NetFxRefPath>
+    <RuntimePath Condition="'$(RuntimePath)' == ''">$([MSBuild]::NormalizeDirectory('$(ArtifactsBinDir)', 'runtime', '$(BuildConfiguration)'))</RuntimePath>
+    <RefRootPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsBinDir)', 'ref'))</RefRootPath>
+    <BuildConfigurationRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', '$(_bc_TargetGroup)'))</BuildConfigurationRefPath>
+    <BuildConfigurationRefPath Condition="$(_bc_TargetGroup.EndsWith('aot'))">$([MSBuild]::NormalizeDirectory('$(RefRootPath)', '$(_bc_TargetGroup.TrimEnd('aot'))'))</BuildConfigurationRefPath>
+    <RefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', '$(TargetGroup)'))</RefPath>
+    <RefPath Condition="$(TargetGroup.EndsWith('aot'))">$([MSBuild]::NormalizeDirectory('$(RefRootPath)', '$(TargetGroup.TrimEnd('aot'))'))</RefPath>
+    <NetStandardRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netstandard'))</NetStandardRefPath>
+    <NetStandard21RefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netstandard2.1'))</NetStandard21RefPath>
+    <NetFxRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netfx'))</NetFxRefPath>
 
     <!-- Helix properties -->
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
