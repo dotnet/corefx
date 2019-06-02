@@ -10,6 +10,99 @@ namespace System.Text.Json.Serialization.Tests
     public static partial class ArrayTests
     {
         [Fact]
+        public static void WritePrimitiveArray()
+        {
+            var input = new int[] { 0, 1 };
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[0,1]", json);
+        }
+
+        [Fact]
+        public static void WriteArrayWithEnums()
+        {
+            var input = new SampleEnum[] { SampleEnum.One, SampleEnum.Two };
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[1,2]", json);
+        }
+
+        [Fact]
+        public static void WriteNullByteArray()
+        {
+            byte[] input = null;
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal($"null", json);
+        }
+
+        [Fact]
+        public static void WriteEmptyByteArray()
+        {
+            var input = new byte[] {};
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal(@"""""", json);
+        }
+
+        [Fact]
+        public static void WriteByteArray()
+        {
+            var input = new byte[] { 1, 2 };
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal($"\"{Convert.ToBase64String(input)}\"", json);
+        }
+
+        [Fact]
+        public static void WriteTwo2dByteArray()
+        {
+            var inner = new byte[] { 1, 2 };
+            var outer = new byte[2][] { inner, inner };
+            string json = JsonSerializer.ToString(outer);
+            Assert.Equal($"[\"{Convert.ToBase64String(inner)}\",\"{Convert.ToBase64String(inner)}\"]", json);
+        }
+
+        [Fact]
+        public static void WriteObjectArray()
+        {
+            string json;
+
+            {
+                SimpleTestClass[] input = new SimpleTestClass[] { new SimpleTestClass(), new SimpleTestClass() };
+                input[0].Initialize();
+                input[0].Verify();
+
+                input[1].Initialize();
+                input[1].Verify();
+
+                json = JsonSerializer.ToString(input);
+            }
+
+            {
+                SimpleTestClass[] output = JsonSerializer.Parse<SimpleTestClass[]>(json);
+                Assert.Equal(2, output.Length);
+                output[0].Verify();
+                output[1].Verify();
+            }
+        }
+
+        [Fact]
+        public static void WriteEmptyObjectArray()
+        {
+            object[] arr = new object[] { new object() };
+
+            string json = JsonSerializer.ToString(arr);
+            Assert.Equal("[{}]", json);
+        }
+
+        [Fact]
+        public static void WritePrimitiveJaggedArray()
+        {
+            var input = new int[2][];
+            input[0] = new int[] { 1, 2 };
+            input[1] = new int[] { 3, 4 };
+
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
         public static void WriteEmpty()
         {
             string json = JsonSerializer.ToString(new SimpleTestClass[] { });

@@ -5,12 +5,15 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Xunit;
 
 namespace System.Drawing.Primitives.Tests
 {
     public partial class ColorTests
     {
+        public static bool SupportsSystemEvents => PlatformDetection.IsWindows && !PlatformDetection.IsUap && PlatformDetection.IsNotWindowsNanoServer;
+
         public static readonly IEnumerable<object[]> NamedArgbValues =
             new[]
             {
@@ -460,7 +463,6 @@ namespace System.Drawing.Primitives.Tests
             yield return new object[] {Color.FromName("SomeName"), Color.FromName(someNameConstructed), true};
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // desktop incorrectly does "name.Equals(name)" in Equals
         [Theory]
         [MemberData(nameof(Equality_MemberData))]
         public void Equality(Color left, Color right, bool expected)
@@ -485,11 +487,50 @@ namespace System.Drawing.Primitives.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Cannot do DebuggerAttribute testing on UapAot: requires internal Reflection on framework types.")]
         public void DebuggerAttributesAreValid()
         {
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.Aquamarine);
             DebuggerAttributes.ValidateDebuggerDisplayReferences(Color.FromArgb(4, 3, 2, 1));
+        }
+
+        [ConditionalFact(nameof(SupportsSystemEvents))]
+        public void UserPreferenceChangingEventTest()
+        {
+            int element = 12; // Win32SystemColors.AppWorkSpace.
+            Color oldColor = System.Drawing.SystemColors.AppWorkspace;
+
+            // A call to ToArgb is necessary before changing the system colors because it initializes the knownColorTable.
+            int oldColorArgb = oldColor.ToArgb();
+            int oldColorAbgr = GetColorRefValue(oldColor);
+
+            Color newColor = oldColor != Color.Gold ? Color.Gold : Color.Silver;
+            int newColorArgb = newColor.ToArgb();
+            int newColorAbgr = GetColorRefValue(newColor);
+
+            Assert.NotEqual(newColorArgb, oldColorArgb);
+
+            try
+            {
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { newColorAbgr }));
+
+                RetryHelper.Execute(() =>
+                {
+                    Assert.Equal(newColorArgb, oldColor.ToArgb());
+                });
+            }
+            finally
+            {
+                Assert.Equal(1, SetSysColors(1, new int[] { element }, new int[] { oldColorAbgr }));
+            }
+        }
+
+        [DllImport("user32.dll", SetLastError = true)]
+        private static extern int SetSysColors(int cElements, int[] lpaElements, int[] lpaRgbValues);
+
+        private static int GetColorRefValue(Color color)
+        {
+            // The COLORREF value has the following hexadecimal form: 0x00bbggrr.
+            return color.B << 16 | color.G << 8 | color.R;
         }
     }
 }

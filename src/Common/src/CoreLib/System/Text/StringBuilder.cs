@@ -637,7 +637,7 @@ namespace System.Text
                         ThrowHelper.ThrowInvalidOperationException_InvalidOperation_EnumOpCantHappen();
                     }
 
-                    return new ReadOnlyMemory<char>(_currentChunk!.m_ChunkChars, 0, _currentChunk.m_ChunkLength); // TODO-NULLABLE: https://github.com/dotnet/csharplang#538
+                    return new ReadOnlyMemory<char>(_currentChunk!.m_ChunkChars, 0, _currentChunk.m_ChunkLength); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 }
             }
 
@@ -1335,7 +1335,7 @@ namespace System.Text
 
             if (values[0] != null)
             {
-                Append(values[0]!.ToString()); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                Append(values[0]!.ToString()); // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
             }
 
             for (int i = 1; i < values.Length; i++)
@@ -1343,7 +1343,7 @@ namespace System.Text
                 Append(separator, separatorLength);
                 if (values[i] != null)
                 {
-                    Append(values[i]!.ToString()); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                    Append(values[i]!.ToString()); // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                 }
             }
             return this;
@@ -1538,7 +1538,6 @@ namespace System.Text
             int pos = 0;
             int len = format.Length;
             char ch = '\x0';
-            StringBuilder? unescapedItemFormat = null;
 
             ICustomFormatter? cf = null;
             if (provider != null)
@@ -1665,7 +1664,7 @@ namespace System.Text
                 // Start of parsing of optional formatting parameter.
                 //
                 object? arg = args[index];
-                string? itemFormat = null;
+
                 ReadOnlySpan<char> itemFormatSpan = default; // used if itemFormat is null
                 // Is current character a colon? which indicates start of formatting parameter.
                 if (ch == ':')
@@ -1678,67 +1677,40 @@ namespace System.Text
                         // If reached end of text then error. (Unexpected end of text)
                         if (pos == len) FormatError();
                         ch = format[pos];
+
+                        if (ch == '}')
+                        {
+                            // Argument hole closed
+                            break;
+                        }
+                        else if (ch == '{')
+                        {
+                            // Braces inside the argument hole are not supported
+                            FormatError();
+                        }
+
                         pos++;
-
-                        // Is character a opening or closing brace?
-                        if (ch == '}' || ch == '{')
-                        {
-                            if (ch == '{')
-                            {
-                                // Yes, is next character also a opening brace, then treat as escaped. eg {{
-                                if (pos < len && format[pos] == '{')
-                                    pos++;
-                                else
-                                    // Error Argument Holes can not be nested.
-                                    FormatError();
-                            }
-                            else
-                            {
-                                // Yes, is next character also a closing brace, then treat as escaped. eg }}
-                                if (pos < len && format[pos] == '}')
-                                    pos++;
-                                else
-                                {
-                                    // No, then treat it as the closing brace of an Arg Hole.
-                                    pos--;
-                                    break;
-                                }
-                            }
-
-                            // Reaching here means the brace has been escaped
-                            // so we need to build up the format string in segments
-                            if (unescapedItemFormat == null)
-                            {
-                                unescapedItemFormat = new StringBuilder();
-                            }
-                            unescapedItemFormat.Append(format, startPos, pos - startPos - 1);
-                            startPos = pos;
-                        }
                     }
 
-                    if (unescapedItemFormat == null || unescapedItemFormat.Length == 0)
+                    if (pos > startPos)
                     {
-                        if (startPos != pos)
-                        {
-                            // There was no brace escaping, extract the item format as a single string
-                            itemFormatSpan = format.AsSpan(startPos, pos - startPos);
-                        }
-                    }
-                    else
-                    {
-                        unescapedItemFormat.Append(format, startPos, pos - startPos);
-                        itemFormatSpan = itemFormat = unescapedItemFormat.ToString();
-                        unescapedItemFormat.Clear();
+                        itemFormatSpan = format.AsSpan(startPos, pos - startPos);
                     }
                 }
-                // If current character is not a closing brace then error. (Unexpected Character)
-                if (ch != '}') FormatError();
+                else if (ch != '}')
+                {
+                    // Unexpected character
+                    FormatError();
+                }
+
                 // Construct the output for this arg hole.
                 pos++;
                 string? s = null;
+                string? itemFormat = null;
+                
                 if (cf != null)
                 {
-                    if (itemFormatSpan.Length != 0 && itemFormat == null)
+                    if (itemFormatSpan.Length != 0)
                     {
                         itemFormat = new string(itemFormatSpan);
                     }
@@ -1933,9 +1905,9 @@ namespace System.Text
                     }
                     else if (replacementsCount >= replacements.Length)
                     {
-                        Array.Resize(ref replacements!, replacements.Length * 3 / 2 + 4); // Grow by ~1.5x, but more in the begining // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                        Array.Resize(ref replacements!, replacements.Length * 3 / 2 + 4); // Grow by ~1.5x, but more in the begining // TODO-NULLABLE: Remove ! when nullable attributes are respected
                     }
-                    replacements![replacementsCount++] = indexInChunk; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    replacements![replacementsCount++] = indexInChunk; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                     indexInChunk += oldValue.Length;
                     count -= oldValue.Length;
                 }

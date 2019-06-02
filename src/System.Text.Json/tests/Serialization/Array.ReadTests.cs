@@ -3,14 +3,156 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Reflection;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
 {
     public static partial class ArrayTests
     {
+        [Fact]
+        public static void ReadObjectArray()
+        {
+            string data =
+                "[" +
+                SimpleTestClass.s_json +
+                "," +
+                SimpleTestClass.s_json +
+                "]";
+
+            SimpleTestClass[] i = JsonSerializer.Parse<SimpleTestClass[]>(Encoding.UTF8.GetBytes(data));
+
+            i[0].Verify();
+            i[1].Verify();
+        }
+
+        [Fact]
+        public static void ReadNullByteArray()
+        {
+            string json = @"null";
+            byte[] arr = JsonSerializer.Parse<byte[]>(json);
+            Assert.Null(arr);
+        }
+
+        [Fact]
+        public static void ReadEmptyByteArray()
+        {
+            string json = @"""""";
+            byte[] arr = JsonSerializer.Parse<byte[]>(json);
+            Assert.Equal(0, arr.Length);
+        }
+
+        [Fact]
+        public static void ReadByteArray()
+        {
+            string json = $"\"{Convert.ToBase64String(new byte[] { 1, 2 })}\"";
+            byte[] arr = JsonSerializer.Parse<byte[]>(json);
+
+            Assert.Equal(2, arr.Length);
+            Assert.Equal(1, arr[0]);
+            Assert.Equal(2, arr[1]);
+        }
+
+        [Fact]
+        public static void Read2dByteArray()
+        {
+            // Baseline for comparison.
+            Assert.Equal("AQI=", Convert.ToBase64String(new byte[] { 1, 2 }));
+
+            string json = "[\"AQI=\",\"AQI=\"]";
+            byte[][] arr = JsonSerializer.Parse<byte[][]>(json);
+            Assert.Equal(2, arr.Length);
+
+            Assert.Equal(2, arr[0].Length);
+            Assert.Equal(1, arr[0][0]);
+            Assert.Equal(2, arr[0][1]);
+
+            Assert.Equal(2, arr[1].Length);
+            Assert.Equal(1, arr[1][0]);
+            Assert.Equal(2, arr[1][1]);
+        }
+
+        [Fact]
+        public static void ReadByteArrayFail()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""1"""));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(@"""A==="""));
+        }
+
+        [Fact]
+        public static void ReadByteArrayAsJsonArrayFail()
+        {
+            string json = $"[1, 2]";
+            // Currently no support deserializing JSON arrays as byte[] - only Base64 string.
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<byte[]>(json));
+        }
+
+        [Fact]
+        public static void ReadByteListAsJsonArray()
+        {
+            string json = $"[1, 2]";
+            List<byte> list = JsonSerializer.Parse<List<byte>>(json);
+
+            Assert.Equal(2, list.Count);
+            Assert.Equal(1, list[0]);
+            Assert.Equal(2, list[1]);
+        }
+
+        [Fact]
+        public static void DeserializeObjectArray_36167()
+        {
+            // https://github.com/dotnet/corefx/issues/36167
+            object[] data = JsonSerializer.Parse<object[]>("[1]");
+            Assert.Equal(1, data.Length);
+            Assert.IsType<JsonElement>(data[0]);
+            Assert.Equal(1, ((JsonElement)data[0]).GetInt32());
+        }
+
+        [Fact]
+        public static void ReadEmptyObjectArray()
+        {
+            SimpleTestClass[] data = JsonSerializer.Parse<SimpleTestClass[]>("[{}]");
+            Assert.Equal(1, data.Length);
+            Assert.NotNull(data[0]);
+        }
+
+        [Fact]
+        public static void ReadPrimitiveJagged2dArray()
+        {
+            int[][] i = JsonSerializer.Parse<int[][]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+            Assert.Equal(1, i[0][0]);
+            Assert.Equal(2, i[0][1]);
+            Assert.Equal(3, i[1][0]);
+            Assert.Equal(4, i[1][1]);
+        }
+
+        [Fact]
+        public static void ReadPrimitiveJagged3dArray()
+        {
+            int[][][] i = JsonSerializer.Parse<int[][][]>(Encoding.UTF8.GetBytes(@"[[[11,12],[13,14]], [[21,22],[23,24]]]"));
+            Assert.Equal(11, i[0][0][0]);
+            Assert.Equal(12, i[0][0][1]);
+            Assert.Equal(13, i[0][1][0]);
+            Assert.Equal(14, i[0][1][1]);
+
+            Assert.Equal(21, i[1][0][0]);
+            Assert.Equal(22, i[1][0][1]);
+            Assert.Equal(23, i[1][1][0]);
+            Assert.Equal(24, i[1][1][1]);
+        }
+
+        [Fact]
+        public static void ReadArrayWithInterleavedComments()
+        {
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
+
+            int[][] i = JsonSerializer.Parse<int[][]>(Encoding.UTF8.GetBytes("[[1,2] // Inline [\n,[3, /* Multi\n]] Line*/4]]"), options);
+            Assert.Equal(1, i[0][0]);
+            Assert.Equal(2, i[0][1]);
+            Assert.Equal(3, i[1][0]);
+            Assert.Equal(4, i[1][1]);
+        }
+
         [Fact]
         public static void ReadEmpty()
         {
@@ -21,6 +163,37 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, list.Count);
         }
 
+        [Fact]
+        public static void ReadPrimitiveArray()
+        {
+            int[] i = JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            Assert.Equal(1, i[0]);
+            Assert.Equal(2, i[1]);
+
+            i = JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[]"));
+            Assert.Equal(0, i.Length);
+        }
+
+        [Fact]
+        public static void ReadArrayWithEnums()
+        {
+            SampleEnum[] i = JsonSerializer.Parse<SampleEnum[]>(Encoding.UTF8.GetBytes(@"[1,2]"));
+            Assert.Equal(SampleEnum.One, i[0]);
+            Assert.Equal(SampleEnum.Two, i[1]);
+        }
+
+        [Fact]
+        public static void ReadPrimitiveArrayFail()
+        {
+            // Invalid data
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<int[]>(Encoding.UTF8.GetBytes(@"[1,""a""]")));
+
+            // Invalid data
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<List<int?>>(Encoding.UTF8.GetBytes(@"[1,""a""]")));
+
+            // Multidimensional arrays currently not supported
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<int[,]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]")));
+        }
 
         public static IEnumerable<object[]> ReadNullJson
         {

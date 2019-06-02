@@ -41,6 +41,7 @@ jobs:
             _dockerContainer: ubuntu_1604_arm64_cross_container
             _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
             _buildExtraArguments: -warnAsError false
+            _publishTests: true
 
           musl_x64_Release:
              _BuildConfig: Release
@@ -50,6 +51,7 @@ jobs:
              _dockerContainer: alpine_36_container
              _buildScriptPrefix: ''
              _buildExtraArguments: /p:RuntimeOS=linux-musl
+             _publishTests: true
 
           ${{ if or(eq(parameters.testScope, 'outerloop'), eq(parameters.testScope, 'all')) }}:
             x64_Debug:
@@ -88,6 +90,7 @@ jobs:
               _dockerContainer: ubuntu_1604_arm_cross_container
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm '
               _buildExtraArguments: -warnAsError false
+              _publishTests: true
 
             musl_arm64_Release:
               _BuildConfig: Release
@@ -97,6 +100,7 @@ jobs:
               _dockerContainer: alpine_37_arm64_container
               _buildScriptPrefix: 'ROOTFS_DIR=/crossrootfs/arm64 '
               _buildExtraArguments: -warnAsError false /p:BuildNativeCompiler=--clang5.0 /p:RuntimeOS=linux-musl
+              _publishTests: true
 
       pool:
         name: Hosted Ubuntu 1604
@@ -111,7 +115,7 @@ jobs:
 
         - ${{ if eq(parameters.fullMatrix, 'false') }}:
           - linuxDefaultQueues: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+OpenSuse.42.Amd64.Open+\(Fedora.28.Amd64.Open\)ubuntu.1604.amd64.Open@mcr.microsoft.com/dotnet-buildtools/prereqs:fedora-28-helix-09ca40b-20190508143249
-          - alpineQueues: \(Alpine.38.Amd64.Open\)ubuntu.1604.amd64.Open@mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.8-helix-09ca40b-20190508143246
+          - alpineQueues: \(Alpine.39.Amd64.Open\)ubuntu.1604.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.9-helix-09ca40b-20190508143246
 
         - ${{ if eq(parameters.fullMatrix, 'true') }}:
           - linuxDefaultQueues: Centos.7.Amd64.Open+RedHat.7.Amd64.Open+Debian.8.Amd64.Open+Debian.9.Amd64.Open+Ubuntu.1604.Amd64.Open+Ubuntu.1804.Amd64.Open+Ubuntu.1810.Amd64.Open+OpenSuse.42.Amd64.Open+SLES.12.Amd64.Open+SLES.15.Amd64.Open+\(Fedora.28.Amd64.Open\)ubuntu.1604.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:fedora-28-helix-09ca40b-20190508143249+\(Fedora.29.Amd64.Open\)ubuntu.1604.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:fedora-29-09ca40b-20190508143249+\(Ubuntu.1904.Amd64.Open\)ubuntu.1604.amd64.open@mcr.microsoft.com/dotnet-buildtools/prereqs:ubuntu-19.04-helix-amd64-09ca40b-20190508143257

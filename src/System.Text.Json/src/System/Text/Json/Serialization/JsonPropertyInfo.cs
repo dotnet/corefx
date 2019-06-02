@@ -33,12 +33,15 @@ namespace System.Text.Json.Serialization
         public byte[] Name { get; private set; }
         public string NameAsString { get; private set; }
 
+        // The name from a Json value. This is cached for performance on first deserialize.
+        public byte[] JsonPropertyName { get; set; }
+
         // Used to support case-insensitive comparison
         public byte[] NameUsedToCompare { get; private set; }
         public string NameUsedToCompareAsString { get; private set; }
 
         // The escaped name passed to the writer.
-        public byte[] EscapedName { get; private set; }
+        public JsonEncodedText? EscapedName { get; private set; }
 
         public bool HasGetter { get; set; }
         public bool HasSetter { get; set; }
@@ -73,7 +76,7 @@ namespace System.Text.Json.Serialization
             {
                 if (_elementClassInfo == null && _elementType != null)
                 {
-                    Debug.Assert(ClassType == ClassType.Enumerable || ClassType == ClassType.Dictionary);
+                    Debug.Assert(ClassType == ClassType.Enumerable || ClassType == ClassType.Dictionary || ClassType == ClassType.ImmutableDictionary);
                     _elementClassInfo = Options.GetOrAddClass(_elementType);
                 }
 
@@ -171,41 +174,12 @@ namespace System.Text.Json.Serialization
             }
 
             // Cache the escaped name.
-#if true
-            // temporary behavior until the writer can accept escaped string.
-            EscapedName = Name;
-#else
-            int valueIdx = JsonWriterHelper.NeedsEscaping(_name);
-            if (valueIdx == -1)
-            {
-                _escapedName = _name;
-            }
-            else
-            {
-                byte[] pooledName = null;
-                int length = JsonWriterHelper.GetMaxEscapedLength(_name.Length, valueIdx);
-
-                Span<byte> escapedName = length <= JsonConstants.StackallocThreshold ?
-                    stackalloc byte[length] :
-                    (pooledName = ArrayPool<byte>.Shared.Rent(length));
-
-                JsonWriterHelper.EscapeString(_name, escapedName, 0, out int written);
-
-                _escapedName = escapedName.Slice(0, written).ToArray();
-
-                if (pooledName != null)
-                {
-                    // We clear the array because it is "user data" (although a property name).
-                    new Span<byte>(pooledName, 0, written).Clear();
-                    ArrayPool<byte>.Shared.Return(pooledName);
-                }
-            }
-#endif
+            EscapedName = JsonEncodedText.Encode(Name);
         }
 
         private void DetermineSerializationCapabilities()
         {
-            if (ClassType != ClassType.Enumerable && ClassType != ClassType.Dictionary)
+            if (ClassType != ClassType.Enumerable && ClassType != ClassType.Dictionary && ClassType != ClassType.ImmutableDictionary)
             {
                 // We serialize if there is a getter + not ignoring readonly properties.
                 ShouldSerialize = HasGetter && (HasSetter || !Options.IgnoreReadOnlyProperties);
@@ -240,6 +214,12 @@ namespace System.Text.Json.Serialization
                     {
                         EnumerableConverter = s_jsonArrayConverter;
                     }
+                    else if (ClassType == ClassType.ImmutableDictionary)
+                    {
+                        DefaultImmutableConverter.RegisterImmutableDictionary(
+                            RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, parentType: null, memberInfo: null), Options);
+                        EnumerableConverter = s_jsonImmutableConverter;
+                    }
                     else if (typeof(IEnumerable).IsAssignableFrom(RuntimePropertyType))
                     {
                         Type elementType = JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo);
@@ -262,8 +242,8 @@ namespace System.Text.Json.Serialization
                             RuntimePropertyType.FullName.StartsWith(DefaultImmutableConverter.ImmutableNamespace) &&
                             RuntimePropertyType.GetGenericArguments().Length == 1)
                         {
+                            DefaultImmutableConverter.RegisterImmutableCollection(RuntimePropertyType, elementType, Options);
                             EnumerableConverter = s_jsonImmutableConverter;
-                            ((DefaultImmutableConverter)EnumerableConverter).RegisterImmutableCollectionType(RuntimePropertyType, elementType, Options);
                         }
                     }
                 }
@@ -311,7 +291,9 @@ namespace System.Text.Json.Serialization
             return (TAttribute)propertyInfo?.GetCustomAttribute(typeof(TAttribute), inherit: false);
         }
 
-        public abstract IEnumerable CreateImmutableCollectionFromList(string delegateKey, IList sourceList);
+        public abstract IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string propertyPath);
+
+        public abstract IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath);
 
         public abstract IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList);
 

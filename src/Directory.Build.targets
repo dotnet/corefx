@@ -28,6 +28,14 @@
           Condition="'$(IsTestProject)' == 'true' and '$(IsTestSupportProject)' != 'true'"
           DependsOnTargets="BuildAndTest" />
 
+  <Target Name="ValidateTestProjectConfigurations"
+          BeforeTargets="CoreCompile"
+          Condition="'$(IsTestProject)' == 'true' and '$(IsTestSupportProject)' != 'true' and '$(TargetsNetStandard)' == 'true'">
+
+    <Error Text="Targeting .NET Standard in a test project isn't supported." />
+    
+  </Target>
+
   <PropertyGroup>
     <!--
     Hack workaround to skip the GenerateCompiledExpressionsTempFile target in
@@ -61,10 +69,6 @@
        by the NuGet package generation -->
   <Target Name="GetDocumentationFile"
           Returns="$(DocumentationFile)"/>
-
-  <Target Name="DumpTargets" BeforeTargets="ResolveProjectReferences">
-    <Message Text="DumpTargets> $(OutputPath), C=[$(Configuration)], CG=[$(ConfigurationGroup)], OG=[$(OSGroup)], TG=[$(TargetGroup)]" Importance="Low" />
-  </Target>
 
   <!-- This target will be moved into buildtools. Checked in here for now to add validationand in order not to block buildtools ingestion. -->
   <Target Name="ValidateExcludeCompileDesktop" AfterTargets="GetPackageDependencies" Inputs="%(Dependency.Identity);%(Dependency.TargetFramework)" Outputs="unused">

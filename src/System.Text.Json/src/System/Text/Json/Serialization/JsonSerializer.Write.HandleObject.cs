@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -103,6 +104,20 @@ namespace System.Text.Json.Serialization
                 return endOfEnumerable;
             }
 
+            // A property that returns an immutable dictionary keeps the same stack frame.
+            if (jsonPropertyInfo.ClassType == ClassType.ImmutableDictionary)
+            {
+                state.Current.IsImmutableDictionaryProperty = true;
+
+                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                if (endOfEnumerable)
+                {
+                    state.Current.NextProperty();
+                }
+
+                return endOfEnumerable;
+            }
+
             // A property that returns an object.
             if (!obtainedValue)
             {
@@ -126,7 +141,7 @@ namespace System.Text.Json.Serialization
             {
                 if (!jsonPropertyInfo.IgnoreNullValues)
                 {
-                    writer.WriteNull(jsonPropertyInfo.EscapedName);
+                    writer.WriteNull(jsonPropertyInfo.EscapedName.Value);
                 }
 
                 state.Current.NextProperty();

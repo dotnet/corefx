@@ -161,6 +161,25 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadObjectFail_ReferenceTypeMissingParameterlessConstructor()
+        {
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<PublicParameterizedConstructorTestClass>(@"{""Name"":""Name!""}"));
+        }
+
+        class PublicParameterizedConstructorTestClass
+        {
+            private readonly string _name;
+            public PublicParameterizedConstructorTestClass(string name)
+            {
+                _name = name;
+            }
+            public string Name
+            {
+                get { return _name; }
+            }
+        }
+
+        [Fact]
         public static void ParseUntyped()
         {
             // Not supported until we are able to deserialize into JsonElement.
@@ -173,6 +192,43 @@ namespace System.Text.Json.Serialization.Tests
         {
             TestClassWithStringToPrimitiveDictionary obj = JsonSerializer.Parse<TestClassWithStringToPrimitiveDictionary>(TestClassWithStringToPrimitiveDictionary.s_data);
             obj.Verify();
+        }
+
+        public class TestClassWithBadData
+        {
+            public TestChildClassWithBadData[] Children { get; set; }
+        }
+
+        public class TestChildClassWithBadData
+        {
+            public int MyProperty { get; set; }
+        }
+
+        [Fact]
+        public static void ReadConversionFails()
+        {
+            byte[] data = Encoding.UTF8.GetBytes(
+                @"{" +
+                    @"""Children"":[" +
+                        @"{""MyProperty"":""StringButShouldBeInt""}" +
+                    @"]" +
+                @"}");
+
+            bool exceptionThrown = false;
+
+            try
+            {
+                JsonSerializer.Parse<TestClassWithBadData>(data);
+            }
+            catch (JsonException exception)
+            {
+                exceptionThrown = true;
+
+                // Exception should contain path.
+                Assert.True(exception.ToString().Contains("Path: $.Children[0].MyProperty"));
+            }
+
+            Assert.True(exceptionThrown);
         }
     }
 }

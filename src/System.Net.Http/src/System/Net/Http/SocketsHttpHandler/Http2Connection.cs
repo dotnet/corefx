@@ -41,7 +41,7 @@ namespace System.Net.Http
         private int _initialWindowSize;
         private int _maxConcurrentStreams;
         private int _pendingWindowUpdate;
-        private int _idleSinceTickCount;
+        private long _idleSinceTickCount;
         private int _pendingWriters;
 
         private bool _disposed;
@@ -964,7 +964,7 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool mustFlush = false)
         {
             // Ensure we don't exceed the max concurrent streams setting.
             await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
@@ -1018,7 +1018,7 @@ namespace System.Net.Http
 
                 // If this is not the end of the stream, we can put off flushing the buffer
                 // since we know that there are going to be data frames following.
-                FinishWrite(mustFlush: (flags & FrameFlags.EndStream) != 0);
+                FinishWrite(mustFlush: mustFlush || (flags & FrameFlags.EndStream) != 0);
             }
             catch
             {
@@ -1027,6 +1027,7 @@ namespace System.Net.Http
                     RemoveStream(http2Stream);
                     http2Stream.Dispose();
                 }
+
                 throw;
             }
             finally
@@ -1138,7 +1139,7 @@ namespace System.Net.Http
         }
 
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
-        /// <param name="nowTicks">The current tick count.  Passed in to amortize the cost of calling Environment.TickCount.</param>
+        /// <param name="nowTicks">The current tick count.  Passed in to amortize the cost of calling Environment.TickCount64.</param>
         /// <param name="connectionLifetime">How long a connection can be open to be considered reusable.</param>
         /// <param name="connectionIdleTimeout">How long a connection can have been idle in the pool to be considered reusable.</param>
         /// <returns>
@@ -1149,7 +1150,7 @@ namespace System.Net.Http
         /// the nature of connection pooling.
         /// </returns>
 
-        public bool IsExpired(int nowTicks,
+        public bool IsExpired(long nowTicks,
                               TimeSpan connectionLifetime,
                               TimeSpan connectionIdleTimeout)
 
@@ -1162,9 +1163,9 @@ namespace System.Net.Http
             // Check idle timeout when there are not pending requests for a while.
             if ((connectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
                 (_httpStreams.Count == 0) &&
-                ((uint)(nowTicks - _idleSinceTickCount) > connectionIdleTimeout.TotalMilliseconds))
+                ((nowTicks - _idleSinceTickCount) > connectionIdleTimeout.TotalMilliseconds))
             {
-                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((uint)(nowTicks - _idleSinceTickCount))} > {connectionIdleTimeout}.");
+                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((nowTicks - _idleSinceTickCount))} > {connectionIdleTimeout}.");
 
                 return true;
             }
@@ -1174,12 +1175,12 @@ namespace System.Net.Http
 
         private void AbortStreams(int lastValidStream, Exception abortException)
         {
+            bool shouldInvalidate = false;
             lock (SyncObject)
             {
                 if (!_disposed)
                 {
-                    _pool.InvalidateHttp2Connection(this);
-
+                    shouldInvalidate = true;
                     _disposed = true;
                 }
 
@@ -1197,6 +1198,14 @@ namespace System.Net.Http
                 }
 
                 CheckForShutdown();
+            }
+
+            if (shouldInvalidate)
+            {
+                // Invalidate outside of lock to avoid race with HttpPool Dispose()
+                // We should not try to grab pool lock while holding connection lock as on disposing pool,
+                // we could hold pool lock while trying to grab connection lock in Dispose().
+                _pool.InvalidateHttp2Connection(this);
             }
         }
 
@@ -1354,13 +1363,52 @@ namespace System.Net.Http
             try
             {
                 // Send headers
-                http2Stream = await SendHeadersAsync(request, cancellationToken).ConfigureAwait(false);
+                bool shouldExpectContinue = request.Content != null && request.HasHeaders && request.Headers.ExpectContinue == true;
 
-                // Send request body, if any
-                await http2Stream.SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
+                http2Stream = await SendHeadersAsync(request, cancellationToken, mustFlush: shouldExpectContinue).ConfigureAwait(false);
+                if (shouldExpectContinue)
+                {
+                    // Send header and wait a little bit to see if server sends 100, reject code or nothing.
+                    if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing 100-Continue.");
+                    await http2Stream.SendRequestBodyWithExpect100ContinueAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    // Send request body, if any
+                    Task bodyTask = http2Stream.SendRequestBodyAsync(cancellationToken);
+                    // read response headers.
+                    Task responseHeadersTask = http2Stream.ReadResponseHeadersAsync();
 
-                // Wait for response headers to be read.
-                await http2Stream.ReadResponseHeadersAsync().ConfigureAwait(false);
+                    if (bodyTask == await Task.WhenAny(bodyTask, responseHeadersTask).ConfigureAwait(false) ||
+                        bodyTask.IsCompleted)
+                    {
+                        // The sending of the request body completed before receiving all of the request headers.
+                        Task t = bodyTask;
+                        bodyTask = null;
+                        try
+                        {
+                            await t.ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            if (NetEventSource.IsEnabled) Trace($"SendRequestBody Task failed. {e}");
+                            throw;
+                        }
+
+                        await responseHeadersTask.ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        // We received the response headers but the request body hasn't yet finished.
+                        // If the connection is aborted or if we get RST or GOAWAY from server, exception will be
+                        // stored in stream._abortException and propagated to up to caller if possible while processing response.
+                        _ = bodyTask.ContinueWith((t, state) => {
+                                Http2Connection c = (Http2Connection)state;
+                                if (NetEventSource.IsEnabled) c.Trace($"SendRequestBody Task failed. {t.Exception}");
+                             }, this, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                        bodyTask = null;
+                    }
+                }
             }
             catch (Exception e)
             {
@@ -1386,7 +1434,11 @@ namespace System.Net.Http
                     }
                 }
 
-                http2Stream?.Dispose();
+                if (http2Stream != null)
+                {
+                    RemoveStream(http2Stream);
+                    http2Stream.Dispose();
+                }
 
                 if (replacementException != null)
                 {
@@ -1448,7 +1500,7 @@ namespace System.Net.Http
                 if (_httpStreams.Count == 0)
                 {
                     // If this was last pending request, get timestamp so we can monitor idle time.
-                    _idleSinceTickCount = Environment.TickCount;
+                    _idleSinceTickCount = Environment.TickCount64;
                 }
 
                 if (_disposed)

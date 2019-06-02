@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
 {
@@ -51,6 +52,13 @@ namespace System.Text.Json.Serialization
                 Current.PopStackOnEnd = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
             }
+            else if (classType == ClassType.ImmutableDictionary)
+            {
+                Current.PopStackOnEnd = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+
+                Current.IsImmutableDictionary = true;
+            }
             else
             {
                 Debug.Assert(nextClassInfo.ClassType == ClassType.Object || nextClassInfo.ClassType == ClassType.Unknown);
@@ -62,43 +70,6 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(_index > 0);
             Current = _previous[--_index];
-        }
-
-        // Return a property path in the form of: [FullNameOfType].FirstProperty.SecondProperty.LastProperty
-        public string PropertyPath
-        {
-            get
-            {
-                StringBuilder path = new StringBuilder();
-
-                if (_previous == null || _index == 0)
-                {
-                    path.Append($"[{Current.JsonClassInfo.Type.FullName}]");
-                }
-                else
-                {
-                    path.Append($"[{_previous[0].JsonClassInfo.Type.FullName}]");
-
-                    for (int i = 0; i < _index; i++)
-                    {
-                        path.Append(GetPropertyName(_previous[i]));
-                    }
-                }
-
-                path.Append(GetPropertyName(Current));
-
-                return path.ToString();
-            }
-        }
-
-        private string GetPropertyName(in WriteStackFrame frame)
-        {
-            if (frame.JsonPropertyInfo != null && frame.JsonClassInfo.ClassType == ClassType.Object)
-            {
-                return $".{frame.JsonPropertyInfo.PropertyInfo.Name}";
-            }
-
-            return string.Empty;
         }
     }
 }

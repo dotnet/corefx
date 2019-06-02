@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{5F553243-042C-45C0-8E49-C739131E11C3}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <DefineConstants Condition="'$(TargetGroup)'!='netfx'">$(DefineConstants);BUILDING_INBOX_LIBRARY</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\IO\WrappedMemoryStream.cs">
@@ -35,9 +36,9 @@
     <Compile Include="Imported\DateTimeConverterTests.cs" />
     <Compile Include="Serialization\DictionaryTests.cs" />
     <Compile Include="Serialization\EnumTests.cs" />
+    <Compile Include="Serialization\ExceptionTests.cs" />
     <Compile Include="Serialization\ExtensionDataTests.cs" />
     <Compile Include="Serialization\JsonElementTests.cs" />
-    <Compile Include="Serialization\ExceptionTests.cs" />
     <Compile Include="Serialization\Null.ReadTests.cs" />
     <Compile Include="Serialization\Null.WriteTests.cs" />
     <Compile Include="Serialization\Object.ReadTests.cs" />
@@ -46,6 +47,7 @@
     <Compile Include="Serialization\PolymorphicTests.cs" />
     <Compile Include="Serialization\PropertyNameTests.cs" />
     <Compile Include="Serialization\PropertyVisibilityTests.cs" />
+    <Compile Include="Serialization\ReadValueTests.cs" />
     <Compile Include="Serialization\SpanTests.cs" />
     <Compile Include="Serialization\Stream.ReadTests.cs" />
     <Compile Include="Serialization\Stream.WriteTests.cs" />
@@ -75,7 +77,7 @@
   <ItemGroup>
     <Compile Include="..\src\System\Text\Json\BitStack.cs" Link="BitStack.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNETStandard)' == 'true'">
+  <ItemGroup Condition="'$(TargetsNetFx)' == 'true'">
     <Compile Include="$(CommonPath)\System\Buffers\ArrayBufferWriter.cs">
       <Link>CommonTest\System\Buffers\ArrayBufferWriter.cs</Link>
     </Compile>

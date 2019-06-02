@@ -44,17 +44,9 @@ namespace System.Tests
         public void TargetFrameworkTest()
         {
             string targetFrameworkName = ".NETCoreApp,Version=v2.1";
-            if (PlatformDetection.IsFullFramework)
-            {
-                targetFrameworkName = ".NETFramework,Version=v4.7.2";
-            }
-            else if (PlatformDetection.IsInAppContainer)
+            if (PlatformDetection.IsInAppContainer)
             {
                 targetFrameworkName = ".NETCore,Version=v5.0";
-            }
-            else if (PlatformDetection.IsNetNative)
-            {
-                targetFrameworkName = ".NETCoreApp,Version=v2.0";
             }
             
             RemoteExecutor.Invoke((_targetFrameworkName) => {
@@ -133,7 +125,7 @@ namespace System.Tests
             string expected = Assembly.GetEntryAssembly()?.GetName()?.Name;
 
             // GetEntryAssembly may be null (i.e. desktop)
-            if (expected == null || PlatformDetection.IsFullFramework)
+            if (expected == null)
                 expected = Assembly.GetExecutingAssembly().GetName().Name;
 
             Assert.Equal(expected, s);
@@ -249,7 +241,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void CreateDomainNonNetfx()
         {
             AssertExtensions.Throws<ArgumentNullException>("friendlyName", () => { AppDomain.CreateDomain(null); });
@@ -257,15 +248,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public void CreateDomainNetfx()
-        {
-            Assert.Throws<ArgumentNullException>(() => { AppDomain.CreateDomain(null); });
-            AppDomain.CreateDomain("test");
-        }
-
-        [Fact]
-        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void ExecuteAssemblyByName()
         {
             RemoteExecutor.Invoke(() => {
@@ -292,11 +274,7 @@ namespace System.Tests
             Assert.Throws<FileNotFoundException>(() => AppDomain.CurrentDomain.ExecuteAssembly("NonExistentFile.exe"));
 
             Func<int> executeAssembly = () => AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }, null, Configuration.Assemblies.AssemblyHashAlgorithm.SHA1);
-
-            if (PlatformDetection.IsFullFramework)
-                Assert.Equal(10, executeAssembly());
-            else
-                Assert.Throws<PlatformNotSupportedException>(() => executeAssembly());
+            Assert.Throws<PlatformNotSupportedException>(() => executeAssembly());
 
             Assert.Equal(5, AppDomain.CurrentDomain.ExecuteAssembly(name));
             Assert.Equal(10, AppDomain.CurrentDomain.ExecuteAssembly(name, new string[2] { "2", "3" }));
@@ -331,7 +309,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Netfx is more permissive and does not throw")]
         public void IsCompatibilitySwitchSet()
         {
             Assert.Throws<ArgumentNullException>(() => { AppDomain.CurrentDomain.IsCompatibilitySwitchSet(null); });
@@ -365,10 +342,6 @@ namespace System.Tests
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 
                 string actual = AppDomain.CurrentDomain.ToString();
-
-                // NetFx has additional line endings
-                if (PlatformDetection.IsFullFramework)
-                    actual = actual.Trim();
 
                 string expected = "Name:" + AppDomain.CurrentDomain.FriendlyName + Environment.NewLine + "There are no context policies.";
                 Assert.Equal(expected, actual);
@@ -413,54 +386,26 @@ namespace System.Tests
         [Fact]
         public void MonitoringIsEnabled()
         {
-            RemoteExecutor.Invoke(() => {
-                Assert.False(AppDomain.MonitoringIsEnabled);
-                Assert.Throws<ArgumentException>(() => { AppDomain.MonitoringIsEnabled = false; });
+            Assert.True(AppDomain.MonitoringIsEnabled);
+            Assert.Throws<ArgumentException>(() => { AppDomain.MonitoringIsEnabled = false; });
+            AppDomain.MonitoringIsEnabled = true;
 
-                if (PlatformDetection.IsFullFramework)
-                {
-                    AppDomain.MonitoringIsEnabled = true;
-                    Assert.True(AppDomain.MonitoringIsEnabled);
-                }
-                else
-                {
-                    Assert.Throws<PlatformNotSupportedException>(() => { AppDomain.MonitoringIsEnabled = true; });
-                }
-                return RemoteExecutor.SuccessExitCode;
-            }).Dispose();
-        }
+            object o = new object();
+            Assert.InRange(AppDomain.MonitoringSurvivedProcessMemorySize, 1, long.MaxValue);
+            Assert.InRange(AppDomain.CurrentDomain.MonitoringSurvivedMemorySize, 1, long.MaxValue);
+            Assert.InRange(AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize, 1, long.MaxValue);
+            GC.KeepAlive(o);
 
-        [Fact]
-        public void MonitoringSurvivedMemorySize()
-        {
-            Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.CurrentDomain.MonitoringSurvivedMemorySize; });
-        }
-
-        [Fact]
-        public void MonitoringSurvivedProcessMemorySize()
-        {
-            Assert.Throws<InvalidOperationException>(() => { var t = AppDomain.MonitoringSurvivedProcessMemorySize; });
-        }
-
-        [Fact]
-        public void MonitoringTotalAllocatedMemorySize()
-        {
-            Assert.Throws<InvalidOperationException>(() => {
-                var t = AppDomain.CurrentDomain.MonitoringTotalAllocatedMemorySize;
-            });
-        }
-
-        [Fact]
-        public void MonitoringTotalProcessorTime()
-        {
-            Assert.Throws<InvalidOperationException>(() => {
-                var t = AppDomain.CurrentDomain.MonitoringTotalProcessorTime;
-            });
+            using (Process p = Process.GetCurrentProcess())
+            {
+                TimeSpan processTime = p.UserProcessorTime;
+                TimeSpan monitoringTime = AppDomain.CurrentDomain.MonitoringTotalProcessorTime;
+                Assert.InRange(monitoringTime, processTime, TimeSpan.MaxValue);
+            }
         }
 
 #pragma warning disable 618
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetCurrentThreadId()
         {
             Assert.Equal(AppDomain.GetCurrentThreadId(), Environment.CurrentManagedThreadId);
@@ -529,7 +474,6 @@ namespace System.Tests
 #pragma warning restore 618
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void GetAssemblies()
         {
             RemoteExecutor.Invoke(() => {
@@ -569,7 +513,6 @@ namespace System.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Does not support Assembly.LoadFile")]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public void AssemblyLoad()
         {
             RemoteExecutor.Invoke(() => {
@@ -676,7 +619,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
         public void TypeResolve()
         {
             RemoteExecutor.Invoke(() => {
@@ -704,8 +646,7 @@ namespace System.Tests
         }
 
         [Fact]
-        [ActiveIssue(21680, TargetFrameworkMonikers.UapAot)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "In UWP the resources always exist in the resources.pri file even if the assembly is not loaded")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "In UWP the resources always exist in the resources.pri file even if the assembly is not loaded")]
         public void ResourceResolve()
         {
             RemoteExecutor.Invoke(() => {
