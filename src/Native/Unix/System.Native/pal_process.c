@@ -24,6 +24,9 @@
 #if HAVE_PIPE2
 #include <fcntl.h>
 #endif
+#if HAVE_STD_ATOMIC
+#include <stdatomic.h>
+#endif
 #include <pthread.h>
 
 #if HAVE_SCHED_SETAFFINITY || HAVE_SCHED_GETAFFINITY
@@ -68,9 +71,84 @@ c_static_assert(PAL_PRIO_PROCESS == (int)PRIO_PROCESS);
 c_static_assert(PAL_PRIO_PGRP == (int)PRIO_PGRP);
 c_static_assert(PAL_PRIO_USER == (int)PRIO_USER);
 
-#if !HAVE_PIPE2
-static pthread_mutex_t ProcessCreateLock = PTHREAD_MUTEX_INITIALIZER;
+// This lock algorithm doesn't have a name.
+// What's going on here is while fork() is being called, close() may not be called, and while close() is being called,
+// fork() may not be called. So we use a symmetric counted reference lock. The actual lock is wrapped inside a
+// condition variable because it is not portable to unlock a mutex from a different thread than the one that locked
+// the mutex. In the typical case of fork() not being called, the actual lock is acquired only for an instant. This
+// lock is called for more functions than close() if O_CLOEXEC or F_DUPFD_CLOEXEC or pipe2() is being emulated.
+// The innerds of this lock structure should look very much like a reader-writer lock. In fact this lock would make
+// perfect sense as protecting against two mutually incompatible readers.
+static pthread_mutex_t HandleForkLockManager = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t HandleForkLockWaiter = PTHREAD_MUTEX_INITIALIZER;
+static pthread_cond_t HandleForkSignaller = PTHREAD_COND_INITIALIZER;
+static enum HandleForkLockOwner HandleForkLockState = NoHolder;
+#if HAVE_STD_ATOMIC
+static _Atomic int HandleForkLockCounter = 0;
+
+static inline void IncrementHandleForkLockCounter()
+{
+    atomic_fetch_add(&HandleForkLockCounter, 1);
+}
+
+static inline bool DecrementHandleForkLockCounter()
+{
+    return atomic_fetch_sub(&HandleForkLockCounter, 1) == 1;
+}
+#else
+// C11 is not yet available to us. We must do atomic add the slow way.
+static pthread_mutex_t HandleForkLockAccumulator = PTHREAD_MUTEX_INITIALIZER;
+static _Atomic int HandleForkLockCounter = 0;
+
+static inline void IncrementHandleForkLockCounter()
+{
+    pthread_mutex_lock(&HandleForkLockAccumulator);
+    ++HandleForkLockCounter;
+    pthread_mutex_unlock(&HandleForkLockAccumulator);
+}
+
+static inline bool DecrementHandleForkLockCounter()
+{
+    bool result;
+    pthread_mutex_lock(&HandleForkLockAccumulator);
+    result = !(--HandleForkLockCounter);
+    pthread_mutex_unlock(&HandleForkLockAccumulator);
+    return result;
+}
 #endif
+
+void AcquireHandleForkLock(enum HandleForkLockOwner acquirer, int *thread_cancel_state)
+{
+    assert(acquirer);
+    if (thread_cancel_state)
+    {
+        // We block thread cancellation while holding the HandleForkLock to avoid all kinds of surprises.
+        pthread_setcancelstate(PTHREAD_CANCEL_DISABLE, thread_cancel_state);
+    }
+    pthread_mutex_lock(&HandleForkLockManager); // As soon as we start to acquire one kind, block acquiring the other kind.
+    pthread_mutex_lock(&HandleForkLockWaiter);
+    while (HandleForkLockState && HandleForkLockState != acquirer)
+        pthread_cond_wait(&HandleForkSignaller, &HandleForkLockWaiter);
+    HandleForkLockState = acquirer;
+    pthread_mutex_unlock(&HandleForkLockWaiter);
+    IncrementHandleForkLockCounter();
+    pthread_mutex_unlock(&HandleForkLockManager);
+}
+
+void ReleaseHandleForkLock(int *thread_cancel_state)
+{
+    if (DecrementHandleForkLockCounter())
+    {
+        pthread_mutex_lock(&HandleForkLockWaiter);
+        HandleForkLockState = NoHolder;
+        pthread_cond_signal(&HandleForkSignaller);
+        pthread_mutex_unlock(&HandleForkLockWaiter);
+    }
+    if (thread_cancel_state)
+    {
+        pthread_setcancelstate(*thread_cancel_state, thread_cancel_state);
+    }
+}
 
 enum
 {
@@ -220,9 +298,6 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
                                       int32_t* stdoutFd,
                                       int32_t* stderrFd)
 {
-#if !HAVE_PIPE2
-    bool haveProcessCreateLock = false;
-#endif
     bool success = true;
     int stdinFds[2] = {-1, -1}, stdoutFds[2] = {-1, -1}, stderrFds[2] = {-1, -1}, waitForChildToExecPipe[2] = {-1, -1};
     pid_t processId = -1;
@@ -273,20 +348,6 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         goto done;
     }
 
-#if !HAVE_PIPE2
-    // We do not have pipe2(); take the lock to emulate it race free.
-    // If another process were to be launched between the pipe creation and the fcntl call to set CLOEXEC on it, that
-    // file descriptor will be inherited into the other child process, eventually causing a deadlock either in the loop
-    // below that waits for that pipe to be closed or in StreamReader.ReadToEnd() in the calling code.
-    if (pthread_mutex_lock(&ProcessCreateLock) != 0)
-    {
-        // This check is pretty much just checking for trashed memory.
-        success = false;
-        goto done;
-    }
-    haveProcessCreateLock = true;
-#endif
-
     // Open pipes for any requests to redirect stdin/stdout/stderr and set the
     // close-on-exec flag to the pipe file descriptors.
     if ((redirectStdin  && SystemNative_Pipe(stdinFds,  PAL_O_CLOEXEC) != 0) ||
@@ -313,6 +374,9 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     // handle being raised in the child process correctly
     sigfillset(&signal_set);
     pthread_sigmask(SIG_SETMASK, &signal_set, &old_signal_set);
+
+    // Take the close-fork lock. This prevents O_CLOEXEC from swallowing IO errors.
+    AcquireHandleForkLock(LockedByFork, NULL);
 
 #if HAVE_VFORK && !(defined(__APPLE__)) // We don't trust vfork on OS X right now.
     // This platform has vfork(). vfork() is either a synonym for fork or provides shared memory
@@ -411,6 +475,8 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
         ExitChild(waitForChildToExecPipe[WRITE_END_OF_PIPE], errno); // execve failed
     }
 
+    ReleaseHandleForkLock(NULL);
+
     // Restore signal mask in the parent process immediately after fork() or vfork() call
     pthread_sigmask(SIG_SETMASK, &old_signal_set, &signal_set);
 
@@ -428,13 +494,6 @@ int32_t SystemNative_ForkAndExecProcess(const char* filename,
     *stderrFd = stderrFds[READ_END_OF_PIPE];
 
 done:;
-#if !HAVE_PIPE2
-    if (haveProcessCreateLock)
-    {
-        pthread_mutex_unlock(&ProcessCreateLock);
-    }
-#endif
-
     int priorErrno = errno;
 
     // Regardless of success or failure, close the parent's copy of the child's end of
@@ -484,11 +543,10 @@ done:;
         errno = priorErrno;
     }
 
-    // Restore thread cancel state
-    pthread_setcancelstate(thread_cancel_state, &thread_cancel_state);
-  
     free(getGroupsBuffer);
 
+    // Restore thread cancel state
+    pthread_setcancelstate(thread_cancel_state, &thread_cancel_state);
     return success ? 0 : -1;
 }
 
@@ -496,7 +554,13 @@ FILE* SystemNative_POpen(const char* command, const char* type)
 {
     assert(command != NULL);
     assert(type != NULL);
-    return popen(command, type);
+    int threadcancelstate;
+    // There's no way popen() is a direct system call and it can't participate in our lock scheme,
+    // so we lock out both sides of the HandleForkLock so nothing else gets messed up.
+    AcquireHandleForkLock(LockedByPOpen, &threadcancelstate);
+    FILE *result = popen(command, type);
+    ReleaseHandleForkLock(&threadcancelstate);
+    return result;
 }
 
 int32_t SystemNative_PClose(FILE* stream)

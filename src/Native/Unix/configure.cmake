@@ -119,6 +119,11 @@ check_symbol_exists(
     HAVE_STAT64)
 
 check_symbol_exists(
+    atomic_fetch_add
+    stdatomic.h
+    HAVE_STD_ATOMIC)
+
+check_symbol_exists(
     vfork
     unistd.h
     HAVE_VFORK)

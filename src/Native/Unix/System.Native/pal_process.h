@@ -273,3 +273,15 @@ DLLEXPORT int32_t SystemNative_SchedSetAffinity(int32_t pid, intptr_t* mask);
  */
 DLLEXPORT int32_t SystemNative_SchedGetAffinity(int32_t pid, intptr_t* mask);
 #endif
+
+enum HandleForkLockOwner {
+    NoHolder = 0,
+    LockedByHandle,
+    LockedByFork,
+    LockedByPOpen
+};
+
+// Not exported: acquires close or fork lock
+void AcquireHandleForkLock(enum HandleForkLockOwner acquirer, int *threadcancelstate);
+// Not exported: releases close or fork lock
+void ReleaseHandleForkLock(int *threadcancelstate);

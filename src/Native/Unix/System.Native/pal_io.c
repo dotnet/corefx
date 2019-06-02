@@ -6,6 +6,7 @@
 #include "pal_config.h"
 #include "pal_errno.h"
 #include "pal_io.h"
+#include "pal_process.h"
 #include "pal_utilities.h"
 #include "pal_safecrt.h"
 #include "pal_types.h"
@@ -262,6 +263,7 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
 // these two ifdefs are for platforms where we dont have the open version of CLOEXEC and thus
 // must simulate it by doing a fcntl with the SETFFD version after the open instead
 #if !HAVE_O_CLOEXEC
+    int pthread_cancel_state;
     int32_t old_flags = flags;
 #endif
     flags = ConvertOpenFlags(flags);
@@ -271,6 +273,9 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
         return -1;
     }
 
+#if !HAVE_O_CLOEXEC
+    AcquireHandleForkLock(LockedByHandle, &pthread_cancel_state);
+#endif
     int result;
     while ((result = open(path, flags, (mode_t)mode)) < 0 && errno == EINTR);
 #if !HAVE_O_CLOEXEC
@@ -278,13 +283,19 @@ intptr_t SystemNative_Open(const char* path, int32_t flags, int32_t mode)
     {
         fcntl(result, F_SETFD, FD_CLOEXEC);
     }
+    ReleaseHandleForkLock(LockedByHandle, &pthread_cancel_state);
 #endif
     return result;
 }
 
 int32_t SystemNative_Close(intptr_t fd)
 {
-    return close(ToFileDescriptor(fd));
+    int pthread_cancel_state;
+    int32_t closeresult;
+    AcquireHandleForkLock(LockedByHandle, &pthread_cancel_state);
+    closeresult = close(ToFileDescriptor(fd));
+    ReleaseHandleForkLock(&pthread_cancel_state);
+    return closeresult;
 }
 
 intptr_t SystemNative_Dup(intptr_t oldfd)
@@ -293,9 +304,12 @@ intptr_t SystemNative_Dup(intptr_t oldfd)
 #if HAVE_F_DUPFD_CLOEXEC
     while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD_CLOEXEC, 0)) < 0 && errno == EINTR);
 #else
+    int pthread_cancel_state;
+    AcquireHandleForkLock(LockedByHandle, &pthread_cancel_state);
     while ((result = fcntl(ToFileDescriptor(oldfd), F_DUPFD, 0)) < 0 && errno == EINTR);
     // do CLOEXEC here too
     fcntl(result, F_SETFD, FD_CLOEXEC);
+    ReleaseHandleForkLock(&pthread_cancel_state);
 #endif
     return result;
 }
@@ -475,6 +489,9 @@ int32_t SystemNative_CloseDir(DIR* dir)
 
 int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
 {
+#if !HAVE_PIPE2
+    int pthread_cancel_state;
+#endif
     switch (flags)
     {
         case 0:
@@ -495,6 +512,7 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
     // If pipe2 is available, use it.  This will handle O_CLOEXEC if it was set.
     while ((result = pipe2(pipeFds, flags)) < 0 && errno == EINTR);
 #else
+    AcquireHandleForkLock(LockedByHandle, &pthread_cancel_state);
     // Otherwise, use pipe.
     while ((result = pipe(pipeFds)) < 0 && errno == EINTR);
 
@@ -519,6 +537,7 @@ int32_t SystemNative_Pipe(int32_t pipeFds[2], int32_t flags)
             errno = tmpErrno;
         }
     }
+    ReleaseHandleForkLock(&pthread_cancel_state);
 #endif
     return result;
 }
