@@ -45,7 +45,7 @@
   <ItemGroup>
     <!-- TODO: Replace with P2P -->
     <None Include="$(RuntimePath)CoreFx.Private.TestUtilities.dll"
-          Condition="'$(IsTestProject)' == 'true'"
+          Condition="'$(IsTestProject)' == 'true' and '$(IsTestSupportProject)' != 'true'"
           CopyToOutputDirectory="PreserveNewest"
           Visible="false" />
   </ItemGroup>
