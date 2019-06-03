@@ -186,7 +186,7 @@ namespace System.Net.Http
                 // Normalize before calling this
                 Debug.Assert(ReferenceEquals(this, Normalize(this)));
 
-                return ReferenceEquals(this, HttpMethod.Head) || ReferenceEquals(this, HttpMethod.Put);
+                return ReferenceEquals(this, HttpMethod.Head);
             }
         }
     }
