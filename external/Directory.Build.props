@@ -6,7 +6,7 @@
     <RestoreOutputPath>$(IntermediateOutputPath)</RestoreOutputPath>
     <ProjectAssetsFile>$(RestoreOutputPath)/project.assets.json</ProjectAssetsFile>
     <MSBuildProjectExtensionsPath>$(IntermediateOutputPath)</MSBuildProjectExtensionsPath>
-    <SkipParseBuildConfigurations>true</SkipParseBuildConfigurations>
+    <SkipDeriveTargetFrameworks>true</SkipDeriveTargetFrameworks>
     <!-- let us control the output path -->
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
   </PropertyGroup>
