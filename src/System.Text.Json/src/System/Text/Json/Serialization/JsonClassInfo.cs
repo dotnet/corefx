@@ -97,7 +97,7 @@ namespace System.Text.Json.Serialization
 
                     foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                     {
-                        // We ignore public indexer
+                        // Ignore indexers
                         if (propertyInfo.GetIndexParameters().Length > 0)
                         {
                             continue;

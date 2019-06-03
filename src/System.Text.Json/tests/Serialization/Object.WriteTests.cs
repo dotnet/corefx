@@ -58,12 +58,12 @@ namespace System.Text.Json.Serialization.Tests
         public static void WriteObject_PublicIndexer()
         {
             var indexer = new Indexer();
-            indexer[42] = default;
+            indexer[42] = 42;
             indexer.NonIndexerProp = "Value";
             Assert.Equal(@"{""NonIndexerProp"":""Value""}", JsonSerializer.ToString(indexer));
         }
 
-        class Indexer
+        private class Indexer
         {
             private int _index = 0;
 

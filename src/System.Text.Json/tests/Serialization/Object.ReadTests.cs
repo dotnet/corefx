@@ -234,7 +234,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadObject_PublicIndexer()
         {
-            var indexer = JsonSerializer.Parse<Indexer>(@"{""NonIndexerProp"":""Value""}");
+            Indexer indexer = JsonSerializer.Parse<Indexer>(@"{""NonIndexerProp"":""Value""}");
             Assert.Equal("Value", indexer.NonIndexerProp);
         }
     }
