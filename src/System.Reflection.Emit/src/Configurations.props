@@ -3,7 +3,6 @@
     <PackageConfigurations>
       netstandard;
       netstandard1.1;
-      uap10.0.16299;
     </PackageConfigurations>
     <BuildConfigurations>
       netcoreapp-Windows_NT;
