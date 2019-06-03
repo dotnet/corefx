@@ -50,5 +50,5 @@
           Visible="false" />
   </ItemGroup>
 
-  <Import Condition="'$(EnableProjectRestore)' == 'true' and '$(IsSourceProject)' == 'true'" Project="$(RepositoryEngineeringDir)Analyzers.props" />
+  <Import Condition="'$(EnableProjectRestore)' == 'true' and '$(IsSourceProject)' == 'true' and '$(MSBuildProjectExtension)' != '.ilproj'" Project="$(RepositoryEngineeringDir)Analyzers.props" />
 </Project>

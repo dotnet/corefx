@@ -18,7 +18,7 @@
 
   <!-- Enable the repo-restored analyzers -->
   <PropertyGroup>
-    <EnableAnalyzers Condition="'$(EnableAnalyzers)' == '' AND '$(IsSourceProject)' == 'true'">true</EnableAnalyzers>
+    <EnableAnalyzers Condition="'$(EnableAnalyzers)' == '' and '$(IsSourceProject)' == 'true'">true</EnableAnalyzers>
   </PropertyGroup>
   
   <PropertyGroup>

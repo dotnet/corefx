@@ -92,6 +92,7 @@
   <PropertyGroup>    
     <EnableProjectRestore Condition="'$(IsTestProject)' == 'true'">true</EnableProjectRestore>
     <EnableProjectRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</EnableProjectRestore>
+    <EnableProjectRestore Condition="'$(MSBuildProjectExtension)' == '.ilproj'">true</EnableProjectRestore>
   </PropertyGroup>
 
   <Import Condition="'$(EnableProjectRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />

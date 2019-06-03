@@ -24,6 +24,7 @@
       <!-- Remove when uapaot is removed or when ref and src project restore is enabled. -->
       <_RestoreProjects Include="$(SourceDir)CoreFx.Private.TestUtilities\ref\CoreFx.Private.TestUtilities.csproj" Build="false" Condition="'$(BuildingUAPAOTVertical)' != 'true'" />
       <_RestoreProjects Include="$(SourceDir)CoreFx.Private.TestUtilities\src\CoreFx.Private.TestUtilities.csproj" Build="false" Condition="'$(BuildingUAPAOTVertical)' != 'true'" />
+      <_RestoreProjects Include="$(SourceDir)System.Runtime.CompilerServices.Unsafe\src\System.Runtime.CompilerServices.Unsafe.ilproj" Build="false" />
     </ItemGroup>
 
     <MSBuild Projects="@(_RestoreProjects)" Targets="Restore" Properties="$(ProjectProperties)" />
