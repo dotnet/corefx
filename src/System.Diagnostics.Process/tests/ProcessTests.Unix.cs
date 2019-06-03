@@ -301,7 +301,7 @@ namespace System.Diagnostics.Tests
         {
             const string Program = "sleep";
 
-            using (var px = Process.Start(Program, "30"))
+            using (var px = Process.Start(Program, "60"))
             {
                 try
                 {
@@ -323,7 +323,7 @@ namespace System.Diagnostics.Tests
             const string Program = "sleep";
 
             ProcessStartInfo psi = new ProcessStartInfo(Program);
-            psi.ArgumentList.Add("30");
+            psi.ArgumentList.Add("60");
             using (var px = Process.Start(psi))
             {
                 try
