@@ -359,7 +359,7 @@ namespace System
         //  DontEscape is true
         //
         [Obsolete("The constructor has been deprecated. Please new Uri(Uri, string). The dontEscape parameter is deprecated and is always false. https://go.microsoft.com/fwlink/?linkid=14202")]
-        public Uri(Uri baseUri, string relativeUri, bool dontEscape)
+        public Uri(Uri baseUri, string? relativeUri, bool dontEscape)
         {
             if (baseUri == null)
                 throw new ArgumentNullException(nameof(baseUri));
@@ -388,7 +388,7 @@ namespace System
         //  also be an absolute URI, in which case the resultant URI is constructed
         //  entirely from it
         //
-        public Uri(Uri baseUri, string relativeUri)
+        public Uri(Uri baseUri, string? relativeUri)
         {
             if ((object)baseUri == null)
                 throw new ArgumentNullException(nameof(baseUri));
@@ -1225,7 +1225,7 @@ namespace System
 
                 if (HostType == Flags.DnsHostType)
                 {
-                    host = DomainNameHelper.IdnEquivalent(host)!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                    host = DomainNameHelper.IdnEquivalent(host);
                 }
 
                 return host;
@@ -2479,7 +2479,7 @@ namespace System
                 }
             }
             Flags flags = _flags;
-            string host = CreateHostStringHelper(_string, _info.Offset.Host, _info.Offset.Path, ref flags, ref _info.ScopeId!);
+            string host = CreateHostStringHelper(_string, _info.Offset.Host, _info.Offset.Path, ref flags, ref _info.ScopeId);
 
             // now check on canonical host representation
             if (host.Length != 0)
@@ -2531,7 +2531,7 @@ namespace System
                 else if (NotAny(Flags.CanonicalDnsHost))
                 {
                     // Check to see if we can take the canonical host string out of m_String
-                    if ((object)_info.ScopeId != null)
+                    if ((object?)_info.ScopeId != null)
                     {
                         // IPv6 ScopeId is included when serializing a Uri
                         flags |= (Flags.HostNotCanonical | Flags.E_HostNotCanonical);
@@ -2558,7 +2558,7 @@ namespace System
             }
         }
 
-        private static string CreateHostStringHelper(string str, ushort idx, ushort end, ref Flags flags, ref string scopeId)
+        private static string CreateHostStringHelper(string str, ushort idx, ushort end, ref Flags flags, ref string? scopeId)
         {
             bool loopback = false;
             string host;
@@ -3406,7 +3406,7 @@ namespace System
 
                 if (_string.Length > ushort.MaxValue)
                 {
-                    UriFormatException e = GetException(ParsingError.SizeLimit);
+                    UriFormatException e = GetException(ParsingError.SizeLimit)!;
                     throw e;
                 }
 
@@ -3544,7 +3544,7 @@ namespace System
 
                     if (_string.Length > ushort.MaxValue)
                     {
-                        UriFormatException e = GetException(ParsingError.SizeLimit);
+                        UriFormatException e = GetException(ParsingError.SizeLimit)!;
                         throw e;
                     }
 
@@ -3612,7 +3612,7 @@ namespace System
 
                     if (_string.Length > ushort.MaxValue)
                     {
-                        UriFormatException e = GetException(ParsingError.SizeLimit);
+                        UriFormatException e = GetException(ParsingError.SizeLimit)!;
                         throw e;
                     }
 
@@ -4807,7 +4807,7 @@ namespace System
                 if (!IsWindowsSystem && InFact(Flags.BackslashInPath) && _syntax.NotAny(UriSyntaxFlags.ConvertPathSlashes) && _syntax.InFact(UriSyntaxFlags.FileLikeUri) && !IsImplicitFile)
                 {
                     string str = new string(dest, pos, end - pos);
-                    dest = UriHelper.EscapeString(str, 0, str.Length, dest, ref pos, true, '\\', c_DummyChar, '%');
+                    dest = UriHelper.EscapeString(str, 0, str.Length, dest, ref pos, true, '\\', c_DummyChar, '%')!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                     end = pos;
                 }
             }

@@ -204,8 +204,7 @@ namespace System
             return true;
         }
 
-        [return: NotNullIfNotNull("hostname")]
-        internal static string? IdnEquivalent(string hostname)
+        internal static string IdnEquivalent(string hostname)
         {
             bool allAscii = true;
             bool atLeastOneValidIdn = false;
