@@ -116,6 +116,13 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void EmptyDictionaryOfObject()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, string>>("\"headers\""));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<string>("{}"));
+        }
+
+        [Fact]
         public static void DictionaryOfObject_37569()
         {
             // https://github.com/dotnet/corefx/issues/37569

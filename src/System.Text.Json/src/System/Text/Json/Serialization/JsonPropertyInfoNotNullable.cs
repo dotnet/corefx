@@ -22,6 +22,10 @@ namespace System.Text.Json.Serialization
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
                 JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
+                if (state.Current.IsProcessingDictionary && state.Current.KeyName == null)
+                {
+                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                }
                 propertyInfo.ReadEnumerable(tokenType, ref state, ref reader);
             }
             else
