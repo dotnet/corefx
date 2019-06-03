@@ -481,13 +481,7 @@ namespace System.Net.Http
                 throw;
             }
 
-            // Response never has a body.
-            if (HttpMethod.Normalize(request.Method).NoResponseBody)
-            {
-                return FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts);
-            }
-
-            return completionOption == HttpCompletionOption.ResponseContentRead ?
+            return completionOption == HttpCompletionOption.ResponseContentRead && !HttpMethod.Normalize(request.Method).NoResponseBody ?
                 FinishSendAsyncBuffered(sendTask, request, cts, disposeCts) :
                 FinishSendAsyncUnbuffered(sendTask, request, cts, disposeCts);
         }

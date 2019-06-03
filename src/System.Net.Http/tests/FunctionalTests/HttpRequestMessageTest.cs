@@ -254,12 +254,6 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task HttpRequest_BodylessMethod_LargeContentLength()
         {
-            if (IsWinHttpHandler || IsNetfxHandler || IsUapHandler)
-            {
-                // Some platform handlers differ but we don't take it as failure.
-                return;
-            }
-
             using (HttpClient client = CreateHttpClient())
             {
                 await LoopbackServer.CreateServerAsync(async (server, uri) =>
@@ -276,6 +270,11 @@ namespace System.Net.Http.Functional.Tests
 
                         await requestTask;
                     });
+
+                    var result = requestTask.Result;
+                    Assert.NotNull(result);
+                    Assert.NotNull(result.Content);
+                    Assert.Equal(2167849215, result.Content.Headers.ContentLength);
                 });
             }
         }
