@@ -303,6 +303,13 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadClassWithObjectISetT()
+        {
+            TestClassWithObjectISetT obj = JsonSerializer.Parse<TestClassWithObjectISetT>(TestClassWithObjectISetT.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
         public static void ReadClassWithGenericIEnumerableT()
         {
             TestClassWithGenericIEnumerableT obj = JsonSerializer.Parse<TestClassWithGenericIEnumerableT>(TestClassWithGenericIEnumerableT.s_data);
@@ -334,6 +341,13 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadClassWithGenericIReadOnlyListT()
         {
             TestClassWithGenericIReadOnlyListT obj = JsonSerializer.Parse<TestClassWithGenericIReadOnlyListT>(TestClassWithGenericIReadOnlyListT.s_data);
+            obj.Verify();
+        }
+
+        [Fact]
+        public static void ReadClassWithGenericISetT()
+        {
+            TestClassWithGenericISetT obj = JsonSerializer.Parse<TestClassWithGenericISetT>(TestClassWithGenericISetT.s_data);
             obj.Verify();
         }
 

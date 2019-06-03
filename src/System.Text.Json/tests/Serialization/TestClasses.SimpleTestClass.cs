@@ -59,6 +59,7 @@ namespace System.Text.Json.Serialization.Tests
         public ICollection<string> MyStringICollectionT { get; set; }
         public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
         public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
+        public ISet<string> MyStringISetT { get; set; }
         public Dictionary<string, string> MyStringToStringDict { get; set; }
         public IDictionary<string, string> MyStringToStringIDict { get; set; }
         public IReadOnlyDictionary<string, string> MyStringToStringIReadOnlyDict { get; set; }
@@ -139,6 +140,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringICollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyListT"" : [""Hello""]," +
+                @"""MyStringISetT"" : [""Hello""]," +
                 @"""MyStringStackT"" : [""Hello"", ""World""]," +
                 @"""MyStringQueueT"" : [""Hello"", ""World""]," +
                 @"""MyStringHashSetT"" : [""Hello""]," +
@@ -229,6 +231,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringICollectionT = new string[] { "Hello" };
             MyStringIReadOnlyCollectionT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new string[] { "Hello" };
+            MyStringISetT = new HashSet<string> { "Hello" };
 
             MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
@@ -331,6 +334,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyStringICollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyCollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyListT[0]);
+            Assert.Equal("Hello", MyStringISetT.First());
 
             Assert.Equal("value", MyStringToStringDict["key"]);
             Assert.Equal("value", MyStringToStringIDict["key"]);

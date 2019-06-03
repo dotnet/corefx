@@ -286,6 +286,77 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void WriteISetTOfISetT()
+        {
+            ISet<ISet<int>> input = new HashSet<ISet<int>>
+            {
+                new HashSet<int>() { 1, 2 },
+                new HashSet<int>() { 3, 4 }
+            };
+
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(input));
+        }
+
+        [Fact]
+        public static void WriteISetTOfHashSetT()
+        {
+            ISet<HashSet<int>> input = new HashSet<HashSet<int>>
+            {
+                new HashSet<int>() { 1, 2 },
+                new HashSet<int>() { 3, 4 }
+            };
+
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WriteHashSetTOfISetT()
+        {
+            HashSet<ISet<int>> input = new HashSet<ISet<int>>
+            {
+                new HashSet<int>() { 1, 2 },
+                new HashSet<int>() { 3, 4 }
+            };
+
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WriteISetTOfArray()
+        {
+            ISet<int[]> input = new HashSet<int[]>
+            {
+                new int[] { 1, 2 },
+                new int[] { 3, 4 }
+            };
+
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WriteArrayOfISetT()
+        {
+            ISet<int>[] input = new HashSet<int>[2];
+            input[0] = new HashSet<int>() { 1, 2 };
+            input[1] = new HashSet<int>() { 3, 4 };
+
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[[1,2],[3,4]]", json);
+        }
+
+        [Fact]
+        public static void WritePrimitiveISetT()
+        {
+            ISet<int> input = new HashSet<int> { 1, 2 };
+
+            string json = JsonSerializer.ToString(input);
+            Assert.Equal("[1,2]", json);
+        }
+
+        [Fact]
         public static void WriteStackTOfStackT()
         {
             Stack<Stack<int>> input = new Stack<Stack<int>>(new List<Stack<int>>

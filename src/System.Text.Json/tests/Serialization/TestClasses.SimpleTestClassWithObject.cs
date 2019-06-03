@@ -34,6 +34,7 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringICollectionT { get; set; }
         public object MyStringIReadOnlyCollectionT { get; set; }
         public object MyStringIReadOnlyListT { get; set; }
+        public object MyStringISetT { get; set; }
         public object MyStringToStringDict { get; set; }
         public object MyStringToStringIDict { get; set; }
         public object MyStringToStringIReadOnlyDict { get; set; }
@@ -97,6 +98,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringICollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyListT"" : [""Hello""]," +
+                @"""MyStringISetT"" : [""Hello""]," +
                 @"""MyStringToStringDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}," +
@@ -149,6 +151,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringICollectionT = new string[] { "Hello" };
             MyStringIReadOnlyCollectionT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new string[] { "Hello" };
+            MyStringIReadOnlyListT = new HashSet<string> { "Hello" };
 
             MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
@@ -203,6 +206,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", ((ICollection<string>)MyStringICollectionT).First());
             Assert.Equal("Hello", ((IReadOnlyCollection<string>)MyStringIReadOnlyCollectionT).First());
             Assert.Equal("Hello", ((IReadOnlyList<string>)MyStringIReadOnlyListT)[0]);
+            Assert.Equal("Hello", ((ISet<string>)MyStringISetT).First());
 
             Assert.Equal("value", ((Dictionary<string, string>)MyStringToStringDict)["key"]);
             Assert.Equal("value", ((IDictionary<string, string>)MyStringToStringIDict)["key"]);

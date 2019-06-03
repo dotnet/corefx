@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
+using System.Collections.Generic;
 using System.Text.Json.Serialization.Converters;
 
 namespace System.Text.Json.Serialization
@@ -32,6 +33,22 @@ namespace System.Text.Json.Serialization
                 if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
                 {
                     Type newPropertyType = jsonInfo.ElementClassInfo.GetPolicyProperty().GetDictionaryConcreteType();
+                    if (propertyType != newPropertyType)
+                    {
+                        jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
+                    }
+                }
+            }
+            // Convert ISet to concrete HashSet
+            else if (JsonPropertyInfo.IsSetInterface(propertyType))
+            {
+                // If a polymorphic case, we have to wait until run-time values are processed.
+                if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
+                {
+                    JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
+                    JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+
+                    Type newPropertyType = elementPropertyInfo.GetHashSetConcreteType(propertyType);
                     if (propertyType != newPropertyType)
                     {
                         jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
