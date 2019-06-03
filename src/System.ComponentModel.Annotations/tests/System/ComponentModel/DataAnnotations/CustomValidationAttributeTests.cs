@@ -314,7 +314,6 @@ namespace System.ComponentModel.DataAnnotations.Tests
         [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method1))]
         [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method2))]
         [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method3))]
-        [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method3))]
         public class AllowMultipleClass 
         {
             public void Method1() { }
