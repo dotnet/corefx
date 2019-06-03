@@ -296,54 +296,34 @@ namespace System.Diagnostics.Tests
             }, verb ?? "<null>", isValid.ToString(), options).Dispose();
         }
 
-        [Theory, InlineData("vi")]
-        [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram(string programToOpenWith)
+        [Fact]
+        public void ProcessStart_OnLinux_UsesSpecifiedProgram()
         {
-            if (IsProgramInstalled(programToOpenWith))
+            string program = "sleep";
+
+            using (var px = Process.Start("sleep", "30"))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
-                using (var px = Process.Start(programToOpenWith, fileToOpen))
-                {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
-                    px.Kill();
-                    px.WaitForExit();
-                    Assert.True(px.HasExited);
-                }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.Equal(program, px.ProcessName);
+                px.Kill();
+                px.WaitForExit();
+                Assert.True(px.HasExited);
             }
         }
 
-        [Theory, InlineData("vi")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
+        public void ProcessStart_OnLinux_UsesSpecifiedProgramUsingArgumentList()
         {
-            if (PlatformDetection.IsAlpine)
-                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/31970)]
+            string program = "sleep";
 
-            if (IsProgramInstalled(programToOpenWith))
+            ProcessStartInfo psi = new ProcessStartInfo(program);
+            psi.ArgumentList.Add("30");
+            using (var px = Process.Start(psi))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList)}");
-                ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
-                psi.ArgumentList.Add(fileToOpen);
-                using (var px = Process.Start(psi))
-                {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
-                    px.Kill();
-                    px.WaitForExit();
-                    Assert.True(px.HasExited);
-                }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.Equal(program, px.ProcessName);
+                px.Kill();
+                px.WaitForExit();
+                Assert.True(px.HasExited);
             }
         }
 
