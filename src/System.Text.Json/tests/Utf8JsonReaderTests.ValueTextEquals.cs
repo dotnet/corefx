@@ -238,7 +238,7 @@ namespace System.Text.Json.Tests
                     {
                         if (json.ValueTextEquals(lookupSpan) && 
                             json.ValueTextEquals(lookupChars) && 
-                            json.ValueTextEquals(new string(lookupChars)))
+                            json.ValueTextEquals(new string(lookupChars.ToArray())))
                         {
                             found = true;
                             break;
@@ -258,7 +258,7 @@ namespace System.Text.Json.Tests
                     {
                         if (json.ValueTextEquals(lookupSpan) && 
                             json.ValueTextEquals(lookupChars) && 
-                            json.ValueTextEquals(new string(lookupChars)))
+                            json.ValueTextEquals(new string(lookupChars.ToArray())))
                         {
                             found = true;
                             break;
@@ -324,7 +324,7 @@ namespace System.Text.Json.Tests
                         {
                             if (json.ValueTextEquals(lookup) || 
                                 json.ValueTextEquals(lookupChars) || 
-                                json.ValueTextEquals(new string(lookupChars)))
+                                json.ValueTextEquals(new string(lookupChars.ToArray())))
                             {
                                 found = true;
                                 break;
@@ -344,7 +344,7 @@ namespace System.Text.Json.Tests
                         {
                             if (json.ValueTextEquals(lookup) || 
                                 json.ValueTextEquals(lookupChars) ||
-                                json.ValueTextEquals(new string(lookupChars)))
+                                json.ValueTextEquals(new string(lookupChars.ToArray())))
                             {
                                 found = true;
                                 break;
