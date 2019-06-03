@@ -311,8 +311,8 @@ namespace System.Diagnostics.Tests
                 {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
+                Assert.True(px.HasExited);
             }
         }
 
@@ -334,8 +334,8 @@ namespace System.Diagnostics.Tests
                 {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
+                Assert.True(px.HasExited);
             }
         }
 
