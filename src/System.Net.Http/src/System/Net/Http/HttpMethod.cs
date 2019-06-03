@@ -178,16 +178,5 @@ namespace System.Net.Http
                        !ReferenceEquals(this, HttpMethod.Options) && !ReferenceEquals(this, HttpMethod.Delete);
             }
         }
-
-        internal bool NoResponseBody
-        {
-            get
-            {
-                // Normalize before calling this
-                Debug.Assert(ReferenceEquals(this, Normalize(this)));
-
-                return ReferenceEquals(this, HttpMethod.Head);
-            }
-        }
     }
 }
