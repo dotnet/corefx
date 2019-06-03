@@ -539,6 +539,11 @@ namespace System.Security.Cryptography.X509Certificates.Tests
         [PlatformSpecific(TestPlatforms.Linux)] // Windows/OSX doesn't use SSL_CERT_{DIR,FILE}.
         private void X509Store_MachineStoreLoadSkipsInvalidFiles()
         {
+            if (geteuid() == 0)
+            {
+                throw new SkipTestException("Test can't be run as root"); // root can read '2.pem'
+            }
+
             // We create a folder for our machine store and use it by setting SSL_CERT_{DIR,FILE}.
             // In the store we'll add some invalid files, but we start and finish with a valid file.
             // This is to account for the order in which the store is populated.
@@ -577,6 +582,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 
         [DllImport("libc")]
         private static extern int chmod(string path, int mode);
+        [DllImport("libc")]
+        private static extern uint geteuid();
 #endif
     }
 }
