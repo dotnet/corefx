@@ -6,9 +6,6 @@
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" Condition="'$(TargetsNetCoreApp)' != 'true'">
-      <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\CoreLib\System\Collections\Concurrent\IProducerConsumerCollectionDebugView.cs">
       <Link>Common\CoreLib\System\Collections\Concurrent\IProducerConsumerCollectionDebugView.cs</Link>
     </Compile>

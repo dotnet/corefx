@@ -60,9 +60,6 @@
     <Compile Include="$(CommonTestPath)\System\RandomExtensions.cs">
       <Link>Common\System\RandomExtensions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonTestPath)\System\Collections\DictionaryExtensions.cs" Condition="'$(TargetsNetCoreApp)' != 'true'">
-      <Link>Common\System\Collections\DictionaryExtensions.cs</Link>
-    </Compile>
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
