@@ -299,14 +299,20 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void ProcessStart_OnLinux_UsesSpecifiedProgram()
         {
-            string program = "sleep";
+            const string Program = "sleep";
 
-            using (var px = Process.Start("sleep", "30"))
+            using (var px = Process.Start(Program, "30"))
             {
-                Assert.Equal(program, px.ProcessName);
-                px.Kill();
-                px.WaitForExit();
-                Assert.True(px.HasExited);
+                try
+                {
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
+                    px.Kill();
+                    px.WaitForExit();
+                    Assert.True(px.HasExited);
+                }
             }
         }
 
@@ -314,16 +320,22 @@ namespace System.Diagnostics.Tests
         [PlatformSpecific(TestPlatforms.Linux)]
         public void ProcessStart_OnLinux_UsesSpecifiedProgramUsingArgumentList()
         {
-            string program = "sleep";
+            const string Program = "sleep";
 
-            ProcessStartInfo psi = new ProcessStartInfo(program);
+            ProcessStartInfo psi = new ProcessStartInfo(Program);
             psi.ArgumentList.Add("30");
             using (var px = Process.Start(psi))
             {
-                Assert.Equal(program, px.ProcessName);
-                px.Kill();
-                px.WaitForExit();
-                Assert.True(px.HasExited);
+                try
+                {
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
+                    px.Kill();
+                    px.WaitForExit();
+                    Assert.True(px.HasExited);
+                }
             }
         }
 
