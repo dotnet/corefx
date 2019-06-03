@@ -8,17 +8,11 @@
   <PropertyGroup>
     <SkipTestsOnPlatform Condition="'$(TargetsUap)' == 'true' OR '$(ArchGroup)' == 'arm' OR '$(ArchGroup)' == 'arm64' OR '$(ArchGroup)' == 'armel'">true</SkipTestsOnPlatform>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
-    <!-- We're building netcoreap, run on the test CLI
-         Reuse the same runtimeconfig that the tests use. -->
-    <GeneratorRuntimeConfig>$(TestAssetsDir)netcoreapp.runtimeconfig.json</GeneratorRuntimeConfig>
-    <GeneratorCliPath>$(TestHostRootPath)</GeneratorCliPath>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(TargetsNetCoreApp)' != 'true'">
-    <!-- We're building some non-netcoreapp target, run on the Tools CLI.
-         Reuse the same runtimeconfig used by MSBuild. -->
+  <PropertyGroup>
+    <!-- Reuse the same runtimeconfig used by MSBuild. -->
     <GeneratorRuntimeConfig>$(MSBuildToolsPath)\msbuild.runtimeconfig.json</GeneratorRuntimeConfig>
-    <GeneratorCliPath>$(DotNetRoot)</GeneratorCliPath>
+    <GeneratorCliPath Condition="'$(TargetsNetCoreApp)' == 'true'">$(TestHostRootPath)</GeneratorCliPath>
+    <GeneratorCliPath Condition="'$(TargetsNetCoreApp)' != 'true'">$(DotNetRoot)</GeneratorCliPath>
   </PropertyGroup>
   <ItemGroup Condition=" '$(SkipTestsOnPlatform)' != 'true' ">
     <Compile Include=".\SGenTests.cs" />
@@ -28,7 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".\AlwaysPassTest.cs" />
-    <Content Include="$(GeneratorRuntimeConfig)">
+    <Content Include="$(GeneratorRuntimeConfig)" Condition="'$(GeneratorRuntimeConfig)' != ''">
       <!-- Rename it to match the Generator application name -->
       <Link>dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -48,7 +42,7 @@
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>
     <Message Text="Running Serialization Tool" Importance="normal" />
-    <Exec Command="$(GeneratorCliPath)dotnet $(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll --force --quiet" />
+    <Exec Command="$(GeneratorCliPath)dotnet --roll-forward Major $(OutputPath)dotnet-Microsoft.XmlSerializer.Generator.dll $(OutputPath)Microsoft.XmlSerializer.Generator.Tests.dll --force --quiet" />
     <Warning Condition="Exists('$(OutputPath)$(SerializerName).cs') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).cs" />
     <Csc Condition="Exists('$(OutputPath)$(SerializerName).cs') == 'true'" OutputAssembly="$(OutputPath)$(SerializerName).dll" References="@(ReferencePath);@(IntermediateAssembly)" EmitDebugInformation="$(DebugSymbols)" DebugType="$(DebugType)" Sources="$(OutputPath)$(SerializerName).cs" TargetType="Library" ToolExe="$(CscToolExe)" ToolPath="$(CscToolPath)" DisabledWarnings="$(NoWarn), 219" UseSharedCompilation="true" />
     <Warning Condition="Exists('$(OutputPath)$(SerializerName).dll') != 'true'" Text="Fail to generate $(OutputPath)$(SerializerName).dll" />
