@@ -2,15 +2,38 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.ComponentModel;
+// Copyright (c) 2007 James Newton-King
+//
+// Permission is hereby granted, free of charge, to any person
+// obtaining a copy of this software and associated documentation
+// files (the "Software"), to deal in the Software without
+// restriction, including without limitation the rights to use,
+// copy, modify, merge, publish, distribute, sublicense, and/or sell
+// copies of the Software, and to permit persons to whom the
+// Software is furnished to do so, subject to the following
+// conditions:
+//
+// The above copyright notice and this permission notice shall be
+// included in all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+// EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+// OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+// NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+// WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+// OTHER DEALINGS IN THE SOFTWARE.
+
 using System.Globalization;
 using Xunit;
+using System.Text.Json.Serialization;
 
-namespace System.Text.Json.Serialization.Tests
+namespace System.Text.Json.Tests
 {
     public class DateTimeConverterTests
     {
-        public static string GetUtcOffsetText(DateTime d)
+        internal static string GetUtcOffsetText(DateTime d)
         {
             TimeSpan utcOffset = TimeZoneInfo.Local.GetUtcOffset(d);
 
@@ -36,7 +59,6 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public void SerializeDateTimeOffset()
         {
-
             DateTimeOffset d = new DateTimeOffset(2000, 12, 15, 22, 11, 3, 55, TimeSpan.Zero);
             string result;
 
@@ -47,40 +69,14 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public void SerializeShouldChangeNonUTCDates()
-        {
-            DateTime localDateTime = new DateTime(2008, 1, 1, 1, 1, 1, 0, DateTimeKind.Local);
-
-            DateTimeTestClass c = new DateTimeTestClass();
-            c.DateTimeField = localDateTime;
-            c.PreField = "Pre";
-            c.PostField = "Post";
-            string json = JsonSerializer.ToString(c); 
-            c.DateTimeField = new DateTime(2008, 1, 1, 1, 1, 1, 0, DateTimeKind.Utc);
-            string json2 = JsonSerializer.ToString(c); 
-
-            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(localDateTime);
-
-            // if the current timezone is utc then local already equals utc
-            if (offset == TimeSpan.Zero)
-            {
-                Assert.Equal(json, json2);
-            }
-            else
-            {
-                Assert.NotEqual(json, json2);
-            }
-        }
-
-        [Fact]
         public void DeserializeDateTimeOffset()
         {
             // Intentionally use an offset that is unlikely in the real world,
             // so the test will be accurate regardless of the local time zone setting.
-            var offset = new TimeSpan(2, 15, 0);
-            var dto = new DateTimeOffset(2014, 1, 1, 0, 0, 0, 0, offset);
+            TimeSpan offset = new TimeSpan(2, 15, 0);
+            DateTimeOffset dto = new DateTimeOffset(2014, 1, 1, 0, 0, 0, 0, offset);
 
-            var test = JsonSerializer.Parse<DateTimeOffset>("\"2014-01-01T00:00:00+02:15\"");
+            DateTimeOffset test = JsonSerializer.Parse<DateTimeOffset>("\"2014-01-01T00:00:00+02:15\"");
 
             Assert.Equal(dto, test);
             Assert.Equal(dto.ToString("o"), test.ToString("o"));
@@ -95,8 +91,13 @@ namespace System.Text.Json.Serialization.Tests
             c.PreField = "Pre";
             c.PostField = "Post";
             string json = JsonSerializer.ToString(c);
-            Assert.Equal(@"{""PreField"":""Pre"",""DateTimeField"":""2008-12-12T04:12:12-08:00"",""DateTimeOffsetField"":""2008-12-12T04:12:12-08:00"",""PostField"":""Post""}", json);
-            //test the other edge case too
+
+            NullableDateTimeTestClass newOne = JsonSerializer.Parse<NullableDateTimeTestClass>(json);
+            Assert.Equal(newOne.DateTimeField, c.DateTimeField);
+            Assert.Equal(newOne.DateTimeOffsetField, c.DateTimeOffsetField);
+            Assert.Equal(newOne.PostField, c.PostField);
+            Assert.Equal(newOne.PreField, c.PreField);
+
             c.DateTimeField = null;
             c.DateTimeOffsetField = null;
             c.PreField = "Pre";
@@ -114,29 +115,36 @@ namespace System.Text.Json.Serialization.Tests
             c.PreField = "Pre";
             c.PostField = "Post";
             string json = JsonSerializer.ToString(c);
-            Assert.Equal(@"{""PreField"":""Pre"",""DateTimeField"":""2008-12-12T04:12:12-08:00"",""DateTimeOffsetField"":""2008-12-12T04:12:12-08:00"",""PostField"":""Post""}", json);
+            
+            NullableDateTimeTestClass newOne = JsonSerializer.Parse<NullableDateTimeTestClass>(json);
+            Assert.Equal(newOne.DateTimeField, c.DateTimeField);
+            Assert.Equal(newOne.DateTimeOffsetField, c.DateTimeOffsetField);
+            Assert.Equal(newOne.PostField, c.PostField);
+            Assert.Equal(newOne.PreField, c.PreField);
 
-            //test the other edge case too
+            //test the other edge case too (start of a year)
             c.DateTimeField = new DateTime(2008, 1, 1, 1, 1, 1, 0, DateTimeKind.Utc).ToLocalTime();
             c.DateTimeOffsetField = new DateTime(2008, 1, 1, 1, 1, 1, 0, DateTimeKind.Utc).ToLocalTime();
             c.PreField = "Pre";
             c.PostField = "Post";
             json = JsonSerializer.ToString(c);
-            Assert.Equal(@"{""PreField"":""Pre"",""DateTimeField"":""2007-12-31T17:01:01-08:00"",""DateTimeOffsetField"":""2007-12-31T17:01:01-08:00"",""PostField"":""Post""}", json);
+            
+            newOne = JsonSerializer.Parse<NullableDateTimeTestClass>(json);
+            Assert.Equal(newOne.DateTimeField, c.DateTimeField);
+            Assert.Equal(newOne.DateTimeOffsetField, c.DateTimeOffsetField);
+            Assert.Equal(newOne.PostField, c.PostField);
+            Assert.Equal(newOne.PreField, c.PreField);
         }
 
         [Fact]
         public void BlogCodeSample()
         {
-            PersonTest p = new PersonTest
+            Person p = new Person
             {
                 Name = "Keith",
                 BirthDate = new DateTime(1980, 3, 8),
                 LastModified = new DateTime(2009, 4, 12, 20, 44, 55),
             };
-
-            var options = new JsonSerializerOptions();
-            options.IgnoreNullValues = true;
 
             string jsonText = JsonSerializer.ToString(p, new JsonSerializerOptions { IgnoreNullValues = true});
 
@@ -144,29 +152,17 @@ namespace System.Text.Json.Serialization.Tests
         }
     }
 
-    public class PersonTest
-    {
-        public string Name { get; set; }
-
-        public DateTime BirthDate { get; set; }
-
-        public DateTime LastModified { get; set; }
-
-        public string Department { get; set; }
-    }
-
-    public class DateTimeTestClass
+    internal class DateTimeTestClass
     {
         public string PreField { get; set; }
 
-        [DefaultValue("")]
         public DateTime DateTimeField { get; set; }
 
         public DateTimeOffset DateTimeOffsetField { get; set; }
         public string PostField { get; set; }
     }
 
-    public class NullableDateTimeTestClass
+    internal class NullableDateTimeTestClass
     {
         public string PreField { get; set; }
         public DateTime? DateTimeField { get; set; }
