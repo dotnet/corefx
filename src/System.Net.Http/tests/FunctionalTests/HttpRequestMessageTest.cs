@@ -261,20 +261,23 @@ namespace System.Net.Http.Functional.Tests
                     var request = new HttpRequestMessage(HttpMethod.Head, uri);
 
                     Task<HttpResponseMessage> requestTask = client.SendAsync(request);
+                    
                     await server.AcceptConnectionAsync(async connection =>
                     {
                         // Content-Length greater than 2GB.
-                        var response = LoopbackServer.GetConnectionCloseResponse(
+                        string response = LoopbackServer.GetConnectionCloseResponse(
                             HttpStatusCode.OK, "Content-Length: 2167849215\r\n\r\n");
                         await connection.SendResponseAsync(response);
 
                         await requestTask;
                     });
 
-                    var result = requestTask.Result;
-                    Assert.NotNull(result);
-                    Assert.NotNull(result.Content);
-                    Assert.Equal(2167849215, result.Content.Headers.ContentLength);
+                    using (HttpResponseMessage result = requestTask.Result)
+                    {
+                        Assert.NotNull(result);
+                        Assert.NotNull(result.Content);
+                        Assert.Equal(2167849215, result.Content.Headers.ContentLength);
+                    }
                 });
             }
         }
