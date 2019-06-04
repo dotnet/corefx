@@ -210,15 +210,10 @@ namespace System.Diagnostics
                 return null;
             }
 
-            if (string.IsNullOrEmpty(path))
-            {
-                return null;
-            }
-
             try
             {
                 // Open the file with read and delete FileShare flags. This matches what dll loading does
-                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
+                return new FileStream(path!, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             }
             catch
             {
