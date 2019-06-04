@@ -14,6 +14,8 @@ namespace System
             None = 0,
             Create = SpecialFolderOptionValues.CSIDL_FLAG_CREATE,
             DoNotVerify = SpecialFolderOptionValues.CSIDL_FLAG_DONT_VERIFY,
+            DefaultPath = SpecialFolderOptionValues.CSIDL_FLAG_DEFAULT_PATH,
+            NotParentRelative = SpecialFolderOptionValues.CSIDL_FLAG_NOT_PARENT_RELATIVE,
         }
 
         // These values are specific to Windows and are known to SHGetFolderPath, however they are
@@ -31,6 +33,17 @@ namespace System
             /// Return an unverified folder path. Equivalent of KF_FLAG_DONT_VERIFY (0x00004000).
             /// </summary>
             internal const int CSIDL_FLAG_DONT_VERIFY = 0x4000;
+
+            /// <summary>
+            /// Return the default path for a known folder. Equivalent of KF_FLAG_DEFAULT_PATH (0x00000400).
+            /// </summary>
+            internal const int CSIDL_FLAG_DEFAULT_PATH = 0x400;
+
+            /// <summary>
+            /// Return the default path independent of the current location of its parent. CSIDL_FLAG_DEFAULT_PATH must also be set.
+            /// Equivalent of KF_FLAG_NOT_PARENT_RELATIVE (0x00000200).
+            /// </summary>
+            internal const int CSIDL_FLAG_NOT_PARENT_RELATIVE = 0x200;
         }
     }
 }
