@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -163,11 +164,9 @@ namespace System.Data.OleDb.Tests
             {
                 Console.WriteLine($"Code: {sehEx.ErrorCode}");
                 Exception baseException = sehEx.GetBaseException();
-                if (baseException != null)
-                {
-                    Console.WriteLine($"Base Exception error code : {baseException.HResult}");
-                    Console.WriteLine($"Base Exception message : {baseException.ToString()}");
-                }
+                Debug.Assert(baseException != null);
+                Console.WriteLine($"Base Exception error code : {baseException.HResult}");
+                Console.WriteLine($"Base Exception message : {baseException}");
                 Console.WriteLine($"Base Inner Exception: {sehEx.InnerException}");
                 
                 // This exception is not expected. So rethrow to indicate test failure.

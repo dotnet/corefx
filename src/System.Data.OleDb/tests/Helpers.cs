@@ -20,7 +20,7 @@ namespace System.Data.OleDb.Tests
             public static readonly string ProviderName;
             public static Nested Instance => s_instance;
             private static readonly Nested s_instance = new Nested();
-            private static readonly string s_expectedProviderName = @"Microsoft.ACE.OLEDB.12.0";
+            private const string ExpectedProviderName = @"Microsoft.ACE.OLEDB.12.0";
             private Nested() { }
             static Nested()
             {
@@ -38,8 +38,8 @@ namespace System.Data.OleDb.Tests
                 }
                 // skip if x86 or if both drivers available 
                 IsAvailable = !PlatformDetection.Is32BitProcess &&
-                        !(jetDriverInstalled && providerNames.Contains(s_expectedProviderName));
-                ProviderName = IsAvailable ? s_expectedProviderName : null;
+                        !(jetDriverInstalled && providerNames.Contains(ExpectedProviderName));
+                ProviderName = IsAvailable ? ExpectedProviderName : null;
             }
         }
     }
