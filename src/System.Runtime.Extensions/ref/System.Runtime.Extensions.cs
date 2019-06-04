@@ -215,6 +215,7 @@ namespace System
     {
         public static readonly object DBNull;
         public static object? ChangeType(object? value, System.Type conversionType) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("value")]
         public static object? ChangeType(object? value, System.Type conversionType, System.IFormatProvider? provider) { throw null; }
         public static object? ChangeType(object? value, System.TypeCode typeCode) { throw null; }
         public static object? ChangeType(object? value, System.TypeCode typeCode, System.IFormatProvider? provider) { throw null; }
@@ -521,7 +522,9 @@ namespace System
         public static string ToString(sbyte value, System.IFormatProvider? provider) { throw null; }
         public static string ToString(float value) { throw null; }
         public static string ToString(float value, System.IFormatProvider? provider) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("value")]
         public static string? ToString(string? value) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("value")]
         public static string? ToString(string? value, System.IFormatProvider? provider) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public static string ToString(ushort value) { throw null; }
@@ -678,7 +681,9 @@ namespace System
         public static long WorkingSet { get { throw null; } }
         public static void Exit(int exitCode) { }
         public static string ExpandEnvironmentVariables(string name) { throw null; }
+        [System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute]
         public static void FailFast(string? message) { }
+        [System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute]
         public static void FailFast(string? message, System.Exception? exception) { }
         public static string[] GetCommandLineArgs() { throw null; }
         public static string? GetEnvironmentVariable(string variable) { throw null; }
@@ -994,7 +999,9 @@ namespace System
         public abstract bool Equals(string? x, string? y);
         public static System.StringComparer FromComparison(System.StringComparison comparisonType) { throw null; }
         public int GetHashCode(object obj) { throw null; }
-        public abstract int GetHashCode(string? obj);
+#pragma warning disable CS8614 // Remove warning disable when nullable attributes are respected
+        public abstract int GetHashCode(string obj);
+#pragma warning restore CS8614
     }
     public static partial class StringNormalizationExtensions
     {
@@ -1036,7 +1043,8 @@ namespace System.CodeDom.Compiler
         public override System.Text.Encoding Encoding { get { throw null; } }
         public int Indent { get { throw null; } set { } }
         public System.IO.TextWriter InnerWriter { get { throw null; } }
-        public override string? NewLine { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
+        public override string NewLine { get { throw null; } set { } }
         public override void Close() { }
         public override void Flush() { }
         protected virtual void OutputTabs() { }
@@ -1398,6 +1406,7 @@ namespace System.IO
         public static readonly char[] InvalidPathChars;
         public static readonly char PathSeparator;
         public static readonly char VolumeSeparatorChar;
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("path")]
         public static string? ChangeExtension(string? path, string? extension) { throw null; }
         public static string Combine(string path1, string path2) { throw null; }
         public static string Combine(string path1, string path2, string path3) { throw null; }
@@ -1408,10 +1417,13 @@ namespace System.IO
         public static System.ReadOnlySpan<char> GetDirectoryName(System.ReadOnlySpan<char> path) { throw null; }
         public static string? GetDirectoryName(string? path) { throw null; }
         public static System.ReadOnlySpan<char> GetExtension(System.ReadOnlySpan<char> path) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("path")]
         public static string? GetExtension(string? path) { throw null; }
         public static System.ReadOnlySpan<char> GetFileName(System.ReadOnlySpan<char> path) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("path")]
         public static string? GetFileName(string? path) { throw null; }
         public static System.ReadOnlySpan<char> GetFileNameWithoutExtension(System.ReadOnlySpan<char> path) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("path")]
         public static string? GetFileNameWithoutExtension(string? path) { throw null; }
         public static string GetFullPath(string path) { throw null; }
         public static string GetFullPath(string path, string basePath) { throw null; }
@@ -1436,10 +1448,10 @@ namespace System.IO
         public static string Join(string? path1, string? path2, string? path3) { throw null; }
         public static string Join(string? path1, string? path2, string? path3, string? path4) { throw null; }
         public static string Join(params string?[] paths) { throw null; }
-        public static bool TryJoin(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.ReadOnlySpan<char> path3, System.Span<char> destination, out int charsWritten) { throw null; }
-        public static bool TryJoin(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.Span<char> destination, out int charsWritten) { throw null; }
         public static System.ReadOnlySpan<char> TrimEndingDirectorySeparator(System.ReadOnlySpan<char> path) { throw null; }
         public static string TrimEndingDirectorySeparator(string path) { throw null; }
+        public static bool TryJoin(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.ReadOnlySpan<char> path3, System.Span<char> destination, out int charsWritten) { throw null; }
+        public static bool TryJoin(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.Span<char> destination, out int charsWritten) { throw null; }
     }
     public partial class StreamReader : System.IO.TextReader
     {
@@ -1600,7 +1612,8 @@ namespace System.IO
         protected TextWriter(System.IFormatProvider? formatProvider) { }
         public abstract System.Text.Encoding Encoding { get; }
         public virtual System.IFormatProvider FormatProvider { get { throw null; } }
-        public virtual string? NewLine { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
+        public virtual string NewLine { get { throw null; } set { } }
         public virtual void Close() { }
         public void Dispose() { }
         protected virtual void Dispose(bool disposing) { }
