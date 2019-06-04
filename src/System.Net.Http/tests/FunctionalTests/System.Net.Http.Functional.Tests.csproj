@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C85CF035-7804-41FF-9557-48B7C948B58D}</ProjectGuid>
     <DefineConstants Condition="'$(TargetsWindows)'=='true'">$(DefineConstants);TargetsWindows</DefineConstants>
@@ -90,6 +90,7 @@
     <Compile Include="DelegatingHandlerTest.cs" />
     <Compile Include="FakeDiagnosticSourceListenerObserver.cs" />
     <Compile Include="FormUrlEncodedContentTest.cs" />
+    <Compile Include="HPackTest.cs" />
     <Compile Include="HttpClientHandlerTest.Authentication.cs" />
     <Compile Include="HttpClientHandlerTest.AutoRedirect.cs" />
     <Compile Include="HttpClientHandlerTest.cs" />

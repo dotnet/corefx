@@ -97,6 +97,7 @@ namespace System.Net.Http.HPack
         private int _headerValueLength;
         private bool _index;
         private bool _huffman;
+        private bool _headersObserved;
 
         public HPackDecoder(int maxDynamicTableSize = DefaultHeaderTableSize)
             : this(maxDynamicTableSize, new DynamicTable(maxDynamicTableSize))
@@ -111,7 +112,7 @@ namespace System.Net.Http.HPack
             _dynamicTable = dynamicTable;
         }
 
-        public void Decode(ReadOnlySpan<byte> data, HeaderCallback onHeader, object onHeaderState)
+        public void Decode(ReadOnlySpan<byte> data, bool endHeaders, HeaderCallback onHeader, object onHeaderState)
         {
             for (int i = 0; i < data.Length; i++)
             {
@@ -125,6 +126,8 @@ namespace System.Net.Http.HPack
                         // Look at this once we have more concrete perf data.
                         if ((b & IndexedHeaderFieldMask) == IndexedHeaderFieldRepresentation)
                         {
+                            _headersObserved = true;
+
                             int val = b & ~IndexedHeaderFieldMask;
 
                             if (_integerDecoder.StartDecode((byte)val, IndexedHeaderFieldPrefix))
@@ -138,6 +141,8 @@ namespace System.Net.Http.HPack
                         }
                         else if ((b & LiteralHeaderFieldWithIncrementalIndexingMask) == LiteralHeaderFieldWithIncrementalIndexingRepresentation)
                         {
+                            _headersObserved = true;
+
                             _index = true;
                             int val = b & ~LiteralHeaderFieldWithIncrementalIndexingMask;
 
@@ -156,6 +161,8 @@ namespace System.Net.Http.HPack
                         }
                         else if ((b & LiteralHeaderFieldWithoutIndexingMask) == LiteralHeaderFieldWithoutIndexingRepresentation)
                         {
+                            _headersObserved = true;
+
                             _index = false;
                             int val = b & ~LiteralHeaderFieldWithoutIndexingMask;
 
@@ -174,6 +181,8 @@ namespace System.Net.Http.HPack
                         }
                         else if ((b & LiteralHeaderFieldNeverIndexedMask) == LiteralHeaderFieldNeverIndexedRepresentation)
                         {
+                            _headersObserved = true;
+
                             _index = false;
                             int val = b & ~LiteralHeaderFieldNeverIndexedMask;
 
@@ -192,6 +201,15 @@ namespace System.Net.Http.HPack
                         }
                         else if ((b & DynamicTableSizeUpdateMask) == DynamicTableSizeUpdateRepresentation)
                         {
+                            // https://tools.ietf.org/html/rfc7541#section-4.2
+                            // This dynamic table size
+                            // update MUST occur at the beginning of the first header block
+                            // following the change to the dynamic table size.
+                            if (_headersObserved)
+                            {
+                                throw new HPackDecodingException("Dynamic table size update not at beginning of header block.");
+                            }
+
                             if (_integerDecoder.StartDecode((byte)(b & ~DynamicTableSizeUpdateMask), DynamicTableSizeUpdatePrefix))
                             {
                                 // TODO: validate that it's less than what's defined via SETTINGS
@@ -315,6 +333,16 @@ namespace System.Net.Http.HPack
                         throw new InternalException(_state);
                 }
             }
+
+            if (endHeaders)
+            {
+                if (_state != State.Ready)
+                {
+                    throw new HPackDecodingException("Incomplete header block.");
+                }
+
+                _headersObserved = false;
+            }
         }
 
         public void CompleteDecode()
@@ -385,10 +413,10 @@ namespace System.Net.Http.HPack
                     _headerValueLength = Decode(ref _headerValueOctets);
                 }
             }
-            catch (HuffmanDecodingException)
+            catch (HuffmanDecodingException ex)
             {
                 // Error in huffman encoding.
-                throw new HPackDecodingException();
+                throw new HPackDecodingException("Unable to decode Huffman-encoded string.", ex);
             }
 
             _state = nextState;

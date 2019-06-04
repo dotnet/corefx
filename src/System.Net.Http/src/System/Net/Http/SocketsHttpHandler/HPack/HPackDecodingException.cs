@@ -10,5 +10,13 @@ namespace System.Net.Http.HPack
         public HPackDecodingException()
         {
         }
+
+        public HPackDecodingException(string message) : base(message)
+        {
+        }
+
+        public HPackDecodingException(string message, Exception innerException) : base(message, innerException)
+        {
+        }
     }
 }
