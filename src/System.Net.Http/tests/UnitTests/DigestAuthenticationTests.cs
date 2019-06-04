@@ -77,9 +77,9 @@ namespace System.Net.Http.Tests
             yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", qop=\"auth\", stale=false", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)(?=.*qop=)(?=.*nc=)(?=.*cnonce=)", "(opaque=|algorithm=)", 8 };
             yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", stale=false", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)", "(qop=|cnonce=|opaque=|algorithm=)", 5 };
             yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", stale=false, algorithm=MD5", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)(?=.*algorithm=)", null, 6 };
-            yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", qop=\"auth\", stale=false, opaque=\"qMRqWgAAAAAA\"", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)(?=.*qop=)(?=.*nc=)(?=.*cnonce=)", "(algorithm=)", 9 };
+            yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", qop=\"auth\", stale=false, opaque=\"qMRqWgAAAAAA\"", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)(?=.*qop=)(?=.*nc=)(?=.*cnonce=)(?=.*opaque=)", "(algorithm=)", 9 };
             yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", stale=false, opaque=\"qMRqWgAAAAAA\"", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)(?=.*opaque=)", "(algorithm=)", 6 };
-            yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", stale=false, algorithm=MD5-sess, qop=\"auth\"", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)(?=.*qop=)(?=.*nc=)(?=.*cnonce=)", null, 9 };
+            yield return new object[] { "realm=\"NetCore\", nonce=\"qMRqWgAAAAAQMjIABgAAAFwEiEwAAAAA\", stale=false, algorithm=MD5-sess, qop=\"auth\"", "(?=.*username=)(?=.*realm=)(?=.*nonce=)(?=.*uri=)(?=.*response=)(?=.*qop=)(?=.*nc=)(?=.*cnonce=)(?=.*algorithm=)", null, 9 };
         }
 
         [Theory]
