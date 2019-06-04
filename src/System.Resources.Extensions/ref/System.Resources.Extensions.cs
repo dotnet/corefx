@@ -25,14 +25,13 @@ namespace System.Resources.Extensions
         public void AddResource(string name, System.IO.Stream value, bool closeAfterWrite = false) { }
         public void AddResource(string name, object value) { }
         public void AddResource(string name, string value) { }
-        public void AddResource(string name, string typeName, string value) { }
+        public void AddResource(string name, string value, string typeName) { }
         public void Close() { }
         public void Dispose() { }
         public void Generate() { }
 
-        public void AddBinaryFormattedResource(string name, byte[] value) { }
-        public void AddBinaryFormattedResource(string name, string typeName, byte[] value) { }
-        public void AddActivatorResource(string name, string typeName, System.IO.Stream value, bool closeAfterWrite = false) { }
-        public void AddTypeConverterResource(string name, string typeName, byte[] value) { }
+        public void AddBinaryFormattedResource(string name, byte[] value, string typeName = null) { }
+        public void AddActivatorResource(string name, System.IO.Stream value, string typeName, bool closeAfterWrite = false) { }
+        public void AddTypeConverterResource(string name, byte[] value, string typeName) { }
     }
 }
