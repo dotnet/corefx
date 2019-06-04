@@ -212,7 +212,8 @@ namespace System.Diagnostics
 
             try
             {
-                return File.OpenRead(path);
+                // Open the file with read and delete FileShare flags. This matches what dll loading does
+                return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             }
             catch
             {
