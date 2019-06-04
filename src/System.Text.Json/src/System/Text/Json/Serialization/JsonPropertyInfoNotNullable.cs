@@ -1,4 +1,4 @@
-﻿// Licensed to the .NET Foundation under one or more agreements.
+// Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
@@ -22,10 +22,6 @@ namespace System.Text.Json.Serialization
             {
                 // Forward the setter to the value-based JsonPropertyInfo.
                 JsonPropertyInfo propertyInfo = ElementClassInfo.GetPolicyProperty();
-                if (state.Current.IsProcessingDictionary && state.Current.KeyName == null)
-                {
-                    ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
-                }
                 propertyInfo.ReadEnumerable(tokenType, ref state, ref reader);
             }
             else
@@ -55,6 +51,18 @@ namespace System.Text.Json.Serialization
         public override void ReadEnumerable(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader)
         {
             Debug.Assert(ShouldDeserialize);
+
+            if (state.Current.IsProcessingDictionary && state.Current.KeyName == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                return;
+            }
+
+            if (state.Current.IsProcessingImmutableDictionary && state.Current.KeyName == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                return;
+            }
 
             if (ValueConverter == null || !ValueConverter.TryRead(RuntimePropertyType, ref reader, out TRuntimeProperty value))
             {
