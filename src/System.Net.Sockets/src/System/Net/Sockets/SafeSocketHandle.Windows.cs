@@ -236,7 +236,7 @@ namespace System.Net.Sockets
             {
                 // Try to cancel all pending IO.
                 return Interop.Kernel32.CancelIoEx(this, null);
-	        }
+            }
         }
     }
 }

@@ -1757,7 +1757,7 @@ static bool TryConvertSocketTypePlatformToPal(int platformSocketType, int32_t* p
             return true;
 
         default:
-            *palSocketType = (int32_t)palSocketType;
+            *palSocketType = (int32_t)platformSocketType;
             return false;
     }
 }

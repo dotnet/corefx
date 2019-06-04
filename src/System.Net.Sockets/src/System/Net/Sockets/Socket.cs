@@ -4461,6 +4461,7 @@ namespace System.Net.Sockets
                 {
                     errorCode = SocketError.NotSocket;
                 }
+
                 // Update the internal state of this socket according to the error before throwing.
                 SocketException socketException = SocketExceptionFactory.CreateSocketException((int)errorCode, endPointSnapshot);
                 UpdateStatusAfterSocketError(socketException);
@@ -5258,6 +5259,9 @@ namespace System.Net.Sockets
 
         private SocketError UpdateReceiveSocketErrorForCleanedUp(SocketError socketErrorIn, int bytesReceived)
         {
+            // We use bytesReceived for checking CleanedUp.
+            // When there is a SocketError, bytesReceived is zero.
+            // An interrupted UDP receive on Linux returns SocketError.Success and bytesReceived zero.
             if (bytesReceived == 0 && CleanedUp)
             {
                 return IsConnectionOriented ? SocketError.ConnectionAborted : SocketError.Interrupted;
