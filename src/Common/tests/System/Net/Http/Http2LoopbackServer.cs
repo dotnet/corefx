@@ -285,10 +285,6 @@ namespace System.Net.Test.Common
 
             IgnoreWindowUpdates();
             Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
-            if (frame != null)
-            {
-                throw new Exception($"Unexpected frame received while waiting for client shutdown: {frame}");
-            }
 
             _connectionStream.Close();
 
@@ -297,6 +293,11 @@ namespace System.Net.Test.Common
 
             _ignoreSettingsAck = false;
             _ignoreWindowUpdates = false;
+
+            if (frame != null)
+            {
+                throw new Exception($"Unexpected frame received while waiting for client shutdown: {frame}");
+            }
         }
 
         public async Task<int> ReadRequestHeaderAsync()

@@ -155,25 +155,6 @@ namespace System.Net.Http
             }
         }
 
-        /// <summary>Awaits a task, ignoring any resulting exceptions.</summary>
-        private static async Task IgnoreExceptionsAsync(ValueTask<int> task)
-        {
-            try { await task.ConfigureAwait(false); } catch { }
-        }
-
-        /// <summary>Awaits a task, logging any resulting exceptions (which are otherwise ignored).</summary>
-        private async Task LogExceptionsAsync(Task task)
-        {
-            try
-            {
-                await task.ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                if (NetEventSource.IsEnabled) Trace($"Exception from asynchronous processing: {e}");
-            }
-        }
-
         /// <summary>Do a non-blocking poll to see whether the connection has data available or has been closed.</summary>
         /// <remarks>If we don't have direct access to the underlying socket, we instead use a read-ahead task.</remarks>
         public bool PollRead()

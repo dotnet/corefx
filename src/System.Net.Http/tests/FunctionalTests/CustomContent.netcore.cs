@@ -31,6 +31,12 @@ namespace System.Net.Http.Functional.Tests
 
             public async override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
             {
+
+                if (_failException != null)
+                {
+                    throw _failException;
+                }
+
                 if (_delay > 0)
                 {
                     await Task.Delay(_delay);

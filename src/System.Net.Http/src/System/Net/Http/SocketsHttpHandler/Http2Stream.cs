@@ -106,14 +106,23 @@ namespace System.Net.Http
                     }
                     catch (Exception e)
                     {
-                         // We did not finish sending body so notify server.
+                         // Try to notify server if we did not finish sending request body.
                          _ = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
 
                         // if we decided abandon sending request and we get ObjectDisposed as result of it, just eat exception.
-                        if (_shouldSendRequestBody || (!(e is ObjectDisposedException) && !(e.InnerException is ObjectDisposedException)))
+                        if (!_shouldSendRequestBody && (e is ObjectDisposedException || e.InnerException is ObjectDisposedException))
                         {
-                            throw;
+                            return;
                         }
+
+                        if (_abortException == null)
+                        {
+                            // If we still processing response after receiving response headers, this will give us chance to propagate exception up.
+                            // Since we failed while Copying stream, wrapp it as IOException if needed.
+                            _abortException = e;
+                        }
+
+                        throw;
                     }
                 }
             }
@@ -490,7 +499,7 @@ namespace System.Net.Http
                 int windowUpdateSize = _pendingWindowUpdate;
                 _pendingWindowUpdate = 0;
 
-                Task ignored = _connection.SendWindowUpdateAsync(_streamId, windowUpdateSize);
+                _ = _connection.SendWindowUpdateAsync(_streamId, windowUpdateSize);
             }
 
             private (bool wait, int bytesRead) TryReadFromBuffer(Span<byte> buffer)
@@ -617,7 +626,7 @@ namespace System.Net.Http
                 bool signalWaiter;
                 lock (SyncObject)
                 {
-                    Task ignored = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
+                    _ = _connection.SendRstStreamAsync(_streamId, Http2ProtocolErrorCode.Cancel);
                     _abortException = new OperationCanceledException();
                     _state = StreamState.Aborted;
 

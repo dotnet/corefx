@@ -1399,11 +1399,11 @@ namespace System.Net.Http.Functional.Tests
         [InlineData(false, HttpStatusCode.Forbidden)]
         [InlineData(true, HttpStatusCode.OK)]
         [InlineData(false, HttpStatusCode.OK)]
-        public async Task sendAsync_ConcurentSendReceive_Ok(bool shouldWait, HttpStatusCode responseCode)
+        public async Task SendAsync_ConcurentSendReceive_Ok(bool shouldWait, HttpStatusCode responseCode)
         {
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
             string requestContent = new string('*', 300);
-            const string responseContent = "sendAsync_ConcurentSendReceive_Ok";
+            const string responseContent = "SendAsync_ConcurentSendReceive_Ok";
             var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger:1, count: 10);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
@@ -1452,6 +1452,67 @@ namespace System.Net.Http.Functional.Tests
                 await server.SendResponseHeadersAsync(streamId, endStream: true, isTrailingHeader : true, headers: headers);
                 await server.SendGoAway(streamId);
                 await server.WaitForConnectionShutdownAsync();
+            });
+        }
+
+        [Fact]
+        public async Task SendAsync_ConcurentSendReceive_Fail()
+        {
+            TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
+            string requestContent = new string('*', 300);
+            const string responseContent = "SendAsync_ConcurentSendReceive_Fail";
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger:1, count: 10);
+
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Version = new Version(2,0);
+                    request.Content = new StreamContent(stream);
+
+                    // This should fail either while getting response headers or while reading response body.
+                    HttpResponseMessage response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
+                    // Wait for request body start streaming.
+                    await tsc.Task.ConfigureAwait(false);
+                    // and inject distinct exception on ReqeuestStream.
+                    stream.SetException(new ArithmeticException("Injected test exception"));
+                    try
+                    {
+                         string responseBody = await response.Content.ReadAsStringAsync();
+                         Assert.True(false, "Should not be here");
+                    }
+                    catch (HttpRequestException e)
+                    {
+                        // Exception should be wrapped and inner should be what ever we injected on request stream.
+                        Assert.True(e.InnerException is IOException);
+                        Assert.True(e.InnerException.InnerException is ArithmeticException);
+                    };
+                }
+            },
+            async server =>
+            {
+                await server.EstablishConnectionAsync();
+
+                (int streamId, HttpRequestData requestData) = await server.ReadAndParseRequestHeaderAsync(readBody : false);
+                await server.SendResponseHeadersAsync(streamId, endStream: false, HttpStatusCode.OK);
+
+                // Wait for client so start sending body.
+                await tsc.Task.ConfigureAwait(false);
+
+                await server.SendResponseDataAsync(streamId, Encoding.ASCII.GetBytes(responseContent), endStream: false);
+                // Wait and send more data, just in case to give Client chance to read.
+                await Task.Delay(500);
+                await server.SendResponseDataAsync(streamId, Encoding.ASCII.GetBytes(responseContent), endStream: false);
+
+                var headers = new HttpHeaderData[] { new HttpHeaderData("x-last", "done") };
+                await server.SendResponseHeadersAsync(streamId, endStream: true, isTrailingHeader : true, headers: headers);
+                try
+                {
+                    await server.SendGoAway(streamId);
+                    await server.WaitForConnectionShutdownAsync();
+                }
+                catch { };
             });
         }
 

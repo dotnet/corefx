@@ -24,5 +24,24 @@ namespace System.Net.Http
             if (expired && NetEventSource.IsEnabled) Trace($"Connection no longer usable. Alive {TimeSpan.FromMilliseconds((nowTicks - CreationTickCount))} > {lifetime}.");
             return expired;
         }
+
+        /// <summary>Awaits a task, ignoring any resulting exceptions.</summary>
+        internal static async Task IgnoreExceptionsAsync(ValueTask<int> task)
+        {
+            try { await task.ConfigureAwait(false); } catch { }
+        }
+
+        /// <summary>Awaits a task, logging any resulting exceptions (which are otherwise ignored).</summary>
+        internal async Task LogExceptionsAsync(Task task)
+        {
+            try
+            {
+                await task.ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                if (NetEventSource.IsEnabled) Trace($"Exception from asynchronous processing: {e}");
+            }
+        }
     }
 }

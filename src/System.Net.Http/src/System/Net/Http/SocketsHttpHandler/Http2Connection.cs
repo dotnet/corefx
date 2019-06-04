@@ -484,7 +484,7 @@ namespace System.Net.Http
 
                 // Send acknowledgement
                 // Don't wait for completion, which could happen asynchronously.
-                Task ignored = SendSettingsAckAsync();
+                _ = SendSettingsAckAsync();
             }
         }
 
@@ -553,7 +553,7 @@ namespace System.Net.Http
 
             // Send PING ACK
             // Don't wait for completion, which could happen asynchronously.
-            Task ignored = SendPingAckAsync(_incomingBuffer.ActiveMemory.Slice(0, FrameHeader.PingLength));
+            _ = SendPingAckAsync(_incomingBuffer.ActiveMemory.Slice(0, FrameHeader.PingLength));
 
             _incomingBuffer.Discard(frameHeader.Length);
         }
@@ -733,32 +733,62 @@ namespace System.Net.Http
 
         private async Task SendSettingsAckAsync()
         {
-            await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
-            WriteFrameHeader(new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0));
+            try
+            {
+                await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
+                WriteFrameHeader(new FrameHeader(0, FrameType.Settings, FrameFlags.Ack, 0));
 
-            FinishWrite(mustFlush: true);
+                FinishWrite(mustFlush: true);
+            }
+            catch (Exception e)
+            {
+                if (!_disposed && _abortException == null)
+                {
+                    // Abort if needed.
+                    Abort(e);
+                }
+            }
         }
 
         private async Task SendPingAckAsync(ReadOnlyMemory<byte> pingContent)
         {
-            Debug.Assert(pingContent.Length == FrameHeader.PingLength);
+            try
+            {
+                Debug.Assert(pingContent.Length == FrameHeader.PingLength);
 
-            await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
-            WriteFrameHeader(new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0));
-            pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
-            _outgoingBuffer.Commit(FrameHeader.PingLength);
+                await StartWriteAsync(FrameHeader.Size + FrameHeader.PingLength).ConfigureAwait(false);
+                WriteFrameHeader(new FrameHeader(FrameHeader.PingLength, FrameType.Ping, FrameFlags.Ack, 0));
+                pingContent.CopyTo(_outgoingBuffer.AvailableMemory);
+                _outgoingBuffer.Commit(FrameHeader.PingLength);
 
-            FinishWrite(mustFlush: false);
+                FinishWrite(mustFlush: false);
+            }
+            catch (Exception e)
+            {
+                if (!_disposed && _abortException == null)
+                {
+                    // Abort if needed.
+                    Abort(e);
+                }
+            }
         }
 
         private async Task SendRstStreamAsync(int streamId, Http2ProtocolErrorCode errorCode)
         {
-            await StartWriteAsync(FrameHeader.Size + FrameHeader.RstStreamLength).ConfigureAwait(false);
-            WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
-            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
-            _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
+            try
+            {
+                await StartWriteAsync(FrameHeader.Size + FrameHeader.RstStreamLength).ConfigureAwait(false);
+                WriteFrameHeader(new FrameHeader(FrameHeader.RstStreamLength, FrameType.RstStream, FrameFlags.None, streamId));
+                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, (int)errorCode);
+                _outgoingBuffer.Commit(FrameHeader.RstStreamLength);
 
-            FinishWrite(mustFlush: true);
+                FinishWrite(mustFlush: true);
+            }
+            catch (Exception e)
+            {
+                // Log failure but ignore any error while trying to propagate error to server.
+                if (NetEventSource.IsEnabled) Trace($"Exception from SendRstStreamAsync: {e}");
+            }
         }
 
         private static (ReadOnlyMemory<byte> first, ReadOnlyMemory<byte> rest) SplitBuffer(ReadOnlyMemory<byte> buffer, int maxSize) =>
@@ -1075,25 +1105,48 @@ namespace System.Net.Http
 
         private async Task SendEndStreamAsync(int streamId)
         {
-            await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
+            try
+            {
+                await StartWriteAsync(FrameHeader.Size).ConfigureAwait(false);
 
-            WriteFrameHeader(new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId));
+                WriteFrameHeader(new FrameHeader(0, FrameType.Data, FrameFlags.EndStream, streamId));
 
-            FinishWrite(mustFlush: true);
+                FinishWrite(mustFlush: true);
+            }
+            catch (Exception e)
+            {
+                if (!_disposed && _abortException == null)
+                {
+                    // Abort if needed.
+                    Abort(e);
+                }
+            }
+
         }
 
         private async Task SendWindowUpdateAsync(int streamId, int amount)
         {
             Debug.Assert(amount > 0);
 
-            // We update both the connection-level and stream-level windows at the same time
-            await StartWriteAsync(FrameHeader.Size + FrameHeader.WindowUpdateLength).ConfigureAwait(false);
+            try
+            {
+                // We update both the connection-level and stream-level windows at the same time
+                await StartWriteAsync(FrameHeader.Size + FrameHeader.WindowUpdateLength).ConfigureAwait(false);
 
-            WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId));
-            BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
-            _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
+                WriteFrameHeader(new FrameHeader(FrameHeader.WindowUpdateLength, FrameType.WindowUpdate, FrameFlags.None, streamId));
+                BinaryPrimitives.WriteInt32BigEndian(_outgoingBuffer.AvailableSpan, amount);
+                _outgoingBuffer.Commit(FrameHeader.WindowUpdateLength);
 
-            FinishWrite(mustFlush: true);
+                FinishWrite(mustFlush: true);
+            }
+            catch (Exception e)
+            {
+                if (!_disposed && _abortException == null)
+                {
+                    // Abort if needed.
+                    Abort(e);
+                }
+            }
         }
 
         private void ExtendWindow(int amount)
@@ -1115,7 +1168,7 @@ namespace System.Net.Http
                 _pendingWindowUpdate = 0;
             }
 
-            Task ignored = SendWindowUpdateAsync(0, windowUpdateSize);
+            _ = SendWindowUpdateAsync(0, windowUpdateSize);
         }
 
         private void WriteFrameHeader(FrameHeader frameHeader)
@@ -1402,10 +1455,7 @@ namespace System.Net.Http
                         // We received the response headers but the request body hasn't yet finished.
                         // If the connection is aborted or if we get RST or GOAWAY from server, exception will be
                         // stored in stream._abortException and propagated to up to caller if possible while processing response.
-                        _ = bodyTask.ContinueWith((t, state) => {
-                                Http2Connection c = (Http2Connection)state;
-                                if (NetEventSource.IsEnabled) c.Trace($"SendRequestBody Task failed. {t.Exception}");
-                             }, this, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                        _ = LogExceptionsAsync(bodyTask);
                         bodyTask = null;
                     }
                 }
