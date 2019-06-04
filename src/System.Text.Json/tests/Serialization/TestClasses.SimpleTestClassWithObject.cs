@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -29,6 +30,9 @@ namespace System.Text.Json.Serialization.Tests
         public object MyDateTimeArray { get; set; }
         public object MyEnumArray { get; set; }
         public object MyStringList { get; set; }
+        public object MyStringIEnumerable { get; set; }
+        public object MyStringIList { get; set; }
+        public object MyStringICollection { get; set; }
         public object MyStringIEnumerableT { get; set; }
         public object MyStringIListT { get; set; }
         public object MyStringICollectionT { get; set; }
@@ -92,6 +96,9 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDateTimeArray"" : [""2019-01-30T12:01:02.0000000Z""]," +
                 @"""MyEnumArray"" : [2]," + // int by default
                 @"""MyStringList"" : [""Hello""]," +
+                @"""MyStringIEnumerable"" : [""Hello""]," +
+                @"""MyStringIList"" : [""Hello""]," +
+                @"""MyStringICollection"" : [""Hello""]," +
                 @"""MyStringIEnumerableT"" : [""Hello""]," +
                 @"""MyStringIListT"" : [""Hello""]," +
                 @"""MyStringICollectionT"" : [""Hello""]," +
@@ -144,6 +151,11 @@ namespace System.Text.Json.Serialization.Tests
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
 
             MyStringList = new List<string>() { "Hello" };
+
+            MyStringIEnumerable = new string[] { "Hello" };
+            MyStringIList = new string[] { "Hello" };
+            MyStringICollection = new string[] { "Hello" };
+
             MyStringIEnumerableT = new string[] { "Hello" };
             MyStringIListT = new string[] { "Hello" };
             MyStringICollectionT = new string[] { "Hello" };
@@ -198,6 +210,15 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(SampleEnum.Two, ((SampleEnum[])MyEnumArray)[0]);
 
             Assert.Equal("Hello", ((List<string>)MyStringList)[0]);
+
+            ((IEnumerable)MyStringIEnumerable).GetEnumerator().MoveNext();
+            Assert.Equal("Hello", (string)((IEnumerable)MyStringIEnumerable).GetEnumerator().Current);
+
+            Assert.Equal("Hello", (string)((IList)MyStringIList)[0]);
+
+            ((ICollection)MyStringICollection).GetEnumerator().MoveNext();
+            Assert.Equal("Hello", (string)((ICollection)MyStringICollection).GetEnumerator().Current);
+
             Assert.Equal("Hello", ((IEnumerable<string>)MyStringIEnumerableT).First());
             Assert.Equal("Hello", ((IList<string>)MyStringIListT)[0]);
             Assert.Equal("Hello", ((ICollection<string>)MyStringICollectionT).First());

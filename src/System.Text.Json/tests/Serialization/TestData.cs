@@ -23,6 +23,9 @@ namespace System.Text.Json.Serialization.Tests
                 yield return new object[] { typeof(TestClassWithNestedObjectInner), TestClassWithNestedObjectInner.s_data };
                 yield return new object[] { typeof(TestClassWithNestedObjectOuter), TestClassWithNestedObjectOuter.s_data };
                 yield return new object[] { typeof(TestClassWithObjectArray), TestClassWithObjectArray.s_data };
+                yield return new object[] { typeof(TestClassWithObjectIEnumerable), TestClassWithObjectIEnumerable.s_data };
+                yield return new object[] { typeof(TestClassWithObjectIList), TestClassWithObjectIList.s_data };
+                yield return new object[] { typeof(TestClassWithObjectICollection), TestClassWithObjectICollection.s_data };
                 yield return new object[] { typeof(TestClassWithObjectIEnumerableT), TestClassWithObjectIEnumerableT.s_data };
                 yield return new object[] { typeof(TestClassWithObjectIListT), TestClassWithObjectIListT.s_data };
                 yield return new object[] { typeof(TestClassWithObjectICollectionT), TestClassWithObjectICollectionT.s_data };
@@ -30,6 +33,9 @@ namespace System.Text.Json.Serialization.Tests
                 yield return new object[] { typeof(TestClassWithObjectIReadOnlyListT), TestClassWithObjectIReadOnlyListT.s_data };
                 yield return new object[] { typeof(TestClassWithStringArray), TestClassWithStringArray.s_data };
                 yield return new object[] { typeof(TestClassWithGenericList), TestClassWithGenericList.s_data };
+                yield return new object[] { typeof(TestClassWithGenericIEnumerable), TestClassWithGenericIEnumerable.s_data };
+                yield return new object[] { typeof(TestClassWithGenericIList), TestClassWithGenericIList.s_data };
+                yield return new object[] { typeof(TestClassWithGenericICollection), TestClassWithGenericICollection.s_data };
                 yield return new object[] { typeof(TestClassWithGenericIEnumerableT), TestClassWithGenericIEnumerableT.s_data };
                 yield return new object[] { typeof(TestClassWithGenericIListT), TestClassWithGenericIListT.s_data };
                 yield return new object[] { typeof(TestClassWithGenericICollectionT), TestClassWithGenericICollectionT.s_data };
@@ -58,6 +64,9 @@ namespace System.Text.Json.Serialization.Tests
                 yield return new object[] { new TestClassWithNestedObjectInner() };
                 yield return new object[] { new TestClassWithNestedObjectOuter() };
                 yield return new object[] { new TestClassWithObjectArray() };
+                yield return new object[] { new TestClassWithObjectIEnumerable() };
+                yield return new object[] { new TestClassWithObjectIList() };
+                yield return new object[] { new TestClassWithObjectICollection() };
                 yield return new object[] { new TestClassWithObjectIEnumerableT() };
                 yield return new object[] { new TestClassWithObjectIListT() };
                 yield return new object[] { new TestClassWithObjectICollectionT() };
@@ -65,6 +74,9 @@ namespace System.Text.Json.Serialization.Tests
                 yield return new object[] { new TestClassWithObjectIReadOnlyListT() };
                 yield return new object[] { new TestClassWithStringArray() };
                 yield return new object[] { new TestClassWithGenericList() };
+                yield return new object[] { new TestClassWithGenericIEnumerable() };
+                yield return new object[] { new TestClassWithGenericIList() };
+                yield return new object[] { new TestClassWithGenericICollection() };
                 yield return new object[] { new TestClassWithGenericIEnumerableT() };
                 yield return new object[] { new TestClassWithGenericIListT() };
                 yield return new object[] { new TestClassWithGenericICollectionT() };

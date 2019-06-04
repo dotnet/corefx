@@ -401,6 +401,11 @@ namespace System.Text.Json.Serialization
                 }
             }
 
+            if (IsNonGenericInterface(propertyType))
+            {
+                    return typeof(object);
+            }
+
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
         }
 
@@ -441,6 +446,11 @@ namespace System.Text.Json.Serialization
             }
 
             return ClassType.Object;
+        }
+
+        internal static bool IsNonGenericInterface(Type type)
+        {
+            return type == typeof(IEnumerable) || type == typeof(IList) || type == typeof(ICollection);
         }
     }
 }

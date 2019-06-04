@@ -73,6 +73,20 @@ namespace System.Text.Json.Serialization
                     return false;
                 }
 
+                if (PropertyInitialized)
+                {
+                    if ((IsEnumerable || IsDictionary || IsImmutableDictionary) &&
+                        JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown)
+                    {
+                        return true;
+                    }
+                    else if ((IsEnumerableProperty || IsDictionaryProperty || IsImmutableDictionaryProperty) &&
+                        JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown)
+                    {
+                        return true;
+                    }
+                }
+
                 // We've got a property info. If we're a Value or polymorphic Value
                 // (ClassType.Unknown), return true.
                 ClassType type = JsonPropertyInfo.ClassType;
@@ -151,8 +165,12 @@ namespace System.Text.Json.Serialization
                 return null;
             }
 
-            Type propType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            if (typeof(IList).IsAssignableFrom(propType))
+            Type propertyType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            if (JsonClassInfo.IsNonGenericInterface(propertyType))
+            {
+                return new List<object>();
+            }
+            else if (typeof(IList).IsAssignableFrom(propertyType))
             {
                 // If IList, add the members as we create them.
                 JsonClassInfo collectionClassInfo = state.Current.JsonPropertyInfo.RuntimeClassInfo;
@@ -161,7 +179,7 @@ namespace System.Text.Json.Serialization
             }
             else
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(propType, reader, state.JsonPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(propertyType, reader, state.JsonPath);
                 return null;
             }
         }

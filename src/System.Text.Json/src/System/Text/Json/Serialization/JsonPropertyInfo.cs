@@ -225,7 +225,8 @@ namespace System.Text.Json.Serialization
                         Type elementType = JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo);
 
                         // If the property type only has interface(s) exposed by JsonEnumerableT<T> then use JsonEnumerableT as the converter.
-                        if (RuntimePropertyType.IsAssignableFrom(typeof(JsonEnumerableT<>).MakeGenericType(elementType)))
+                        if (!JsonClassInfo.IsNonGenericInterface(RuntimePropertyType) &&
+                            RuntimePropertyType.IsAssignableFrom(typeof(JsonEnumerableT<>).MakeGenericType(elementType)))
                         {
                             EnumerableConverter = s_jsonEnumerableConverter;
                         }

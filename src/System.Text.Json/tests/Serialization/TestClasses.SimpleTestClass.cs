@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -54,6 +55,9 @@ namespace System.Text.Json.Serialization.Tests
         public int[][][] MyInt16ThreeDimensionArray { get; set; }
         public List<List<List<int>>> MyInt16ThreeDimensionList { get; set; }
         public List<string> MyStringList { get; set; }
+        public IEnumerable MyStringIEnumerable { get; set; }
+        public IList MyStringIList { get; set; }
+        public ICollection MyStringICollection { get; set; }
         public IEnumerable<string> MyStringIEnumerableT { get; set; }
         public IList<string> MyStringIListT { get; set; }
         public ICollection<string> MyStringICollectionT { get; set; }
@@ -134,6 +138,9 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyInt16ThreeDimensionArray"" : [[[11, 12],[13, 14]],[[21,22],[23,24]]]," +
                 @"""MyInt16ThreeDimensionList"" : [[[11, 12],[13, 14]],[[21,22],[23,24]]]," +
                 @"""MyStringList"" : [""Hello""]," +
+                @"""MyStringIEnumerable"" : [""Hello""]," +
+                @"""MyStringIList"" : [""Hello""]," +
+                @"""MyStringICollection"" : [""Hello""]," +
                 @"""MyStringIEnumerableT"" : [""Hello""]," +
                 @"""MyStringIListT"" : [""Hello""]," +
                 @"""MyStringICollectionT"" : [""Hello""]," +
@@ -224,6 +231,11 @@ namespace System.Text.Json.Serialization.Tests
             list2.Add(new List<int> { 23, 24 });
 
             MyStringList = new List<string>() { "Hello" };
+
+            MyStringIEnumerable = new string[] { "Hello" };
+            MyStringIList = new string[] { "Hello" };
+            MyStringICollection = new string[] { "Hello" };
+
             MyStringIEnumerableT = new string[] { "Hello" };
             MyStringIListT = new string[] { "Hello" };
             MyStringICollectionT = new string[] { "Hello" };
@@ -326,6 +338,50 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(24, MyInt16ThreeDimensionList[1][1][1]);
 
             Assert.Equal("Hello", MyStringList[0]);
+
+            IEnumerator enumerator = MyStringIEnumerable.GetEnumerator();
+            enumerator.MoveNext();
+            {
+                // Verifying after deserialization.
+                if (enumerator.Current is JsonElement currentJsonElement)
+                {
+                    Assert.Equal("Hello", currentJsonElement.GetString());
+                }
+                // Verifying test data.
+                else
+                {
+                    Assert.Equal("Hello", enumerator.Current);
+                }
+            }
+
+            {
+                // Verifying after deserialization.
+                if (MyStringIList[0] is JsonElement currentJsonElement)
+                {
+                    Assert.Equal("Hello", currentJsonElement.GetString());
+                }
+                // Verifying test data.
+                else
+                {
+                    Assert.Equal("Hello", enumerator.Current);
+                }
+            }
+
+            enumerator = MyStringICollection.GetEnumerator();
+            enumerator.MoveNext();
+            {
+                // Verifying after deserialization.
+                if (enumerator.Current is JsonElement currentJsonElement)
+                {
+                    Assert.Equal("Hello", currentJsonElement.GetString());
+                }
+                // Verifying test data.
+                else
+                {
+                    Assert.Equal("Hello", enumerator.Current);
+                }
+            }
+
             Assert.Equal("Hello", MyStringIEnumerableT.First());
             Assert.Equal("Hello", MyStringIListT[0]);
             Assert.Equal("Hello", MyStringICollectionT.First());

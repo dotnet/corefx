@@ -111,6 +111,9 @@ namespace System.Text.Json.Serialization.Tests
         public object /*Address*/ Address { get; set; }
         public object /*List<string>*/ List { get; set; }
         public object /*string[]*/ Array { get; set; }
+        public object /*IEnumerable of strings*/ IEnumerable { get; set; }
+        public object /*IList of strings */ IList { get; set; }
+        public object /*ICollection of strings */ ICollection { get; set; }
         public object /*IEnumerable<string>*/ IEnumerableT { get; set; }
         public object /*IList<string>*/ IListT { get; set; }
         public object /*ICollection<string>*/ ICollectionT { get; set; }
@@ -141,6 +144,9 @@ namespace System.Text.Json.Serialization.Tests
 
             List = new List<string> { "Hello", "World" };
             Array = new string[] { "Hello", "Again" };
+            IEnumerable = new List<string> { "Hello", "World" };
+            IList = new List<string> { "Hello", "World" };
+            ICollection = new List<string> { "Hello", "World" };
             IEnumerableT = new List<string> { "Hello", "World" };
             IListT = new List<string> { "Hello", "World" };
             ICollectionT = new List<string> { "Hello", "World" };
