@@ -29,7 +29,7 @@ namespace System.Text.Json
                         break;
                     case ClassType.Value:
                         Debug.Assert(current.JsonPropertyInfo.ClassType == ClassType.Value);
-                        current.JsonPropertyInfo.Write(ref current, writer);
+                        current.JsonPropertyInfo.Write(ref state, writer);
                         finishedSerializing = true;
                         break;
                     case ClassType.Object:

@@ -148,8 +148,8 @@ namespace System.Text.Json
     public partial struct JsonReaderOptions
     {
         private int _dummyPrimitive;
-        public bool AllowTrailingCommas { get { throw null; } set { } }
-        public System.Text.Json.JsonCommentHandling CommentHandling { get { throw null; } set { } }
+        public bool AllowTrailingCommas { readonly get { throw null; } set { } }
+        public System.Text.Json.JsonCommentHandling CommentHandling { readonly get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
     }
     public partial struct JsonReaderState
@@ -182,8 +182,10 @@ namespace System.Text.Json
     {
         public JsonSerializerOptions() { }
         public bool AllowTrailingCommas { get { throw null; } set { } }
+        public System.Collections.Generic.IList<System.Text.Json.Serialization.JsonConverter> Converters { get { throw null; } }
         public int DefaultBufferSize { get { throw null; } set { } }
         public System.Text.Json.JsonNamingPolicy DictionaryKeyPolicy { get { throw null; } set { } }
+        public System.Text.Json.Serialization.JsonConverter GetConverter(System.Type typeToConvert) { throw null; }
         public bool IgnoreNullValues { get { throw null; } set { } }
         public bool IgnoreReadOnlyProperties { get { throw null; } set { } }
         public int MaxDepth { get { throw null; } set { } }
@@ -233,13 +235,13 @@ namespace System.Text.Json
         public long BytesConsumed { get { throw null; } }
         public int CurrentDepth { get { throw null; } }
         public System.Text.Json.JsonReaderState CurrentState { get { throw null; } }
-        public bool HasValueSequence { get { throw null; } }
+        public readonly bool HasValueSequence { get { throw null; } }
         public bool IsFinalBlock { get { throw null; } }
         public System.SequencePosition Position { get { throw null; } }
-        public long TokenStartIndex { get { throw null; } }
+        public readonly long TokenStartIndex { get { throw null; } }
         public System.Text.Json.JsonTokenType TokenType { get { throw null; } }
-        public System.Buffers.ReadOnlySequence<byte> ValueSequence { get { throw null; } }
-        public System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
+        public readonly System.Buffers.ReadOnlySequence<byte> ValueSequence { get { throw null; } }
+        public readonly System.ReadOnlySpan<byte> ValueSpan { get { throw null; } }
         public bool GetBoolean() { throw null; }
         public byte[] GetBytesFromBase64() { throw null; }
         public string GetComment() { throw null; }
@@ -274,7 +276,7 @@ namespace System.Text.Json
         public bool TrySkip() { throw null; }
         public bool ValueTextEquals(System.ReadOnlySpan<byte> utf8Text) { throw null; }
         public bool ValueTextEquals(System.ReadOnlySpan<char> text) { throw null; }
-        public bool ValueTextEquals(string text) { throw null; }
+        public bool ValueTextEquals(string utf8Text) { throw null; }
     }
     public sealed partial class Utf8JsonWriter : System.IDisposable
     {
@@ -407,6 +409,31 @@ namespace System.Text.Json.Serialization
     public abstract partial class JsonAttribute : System.Attribute
     {
         protected JsonAttribute() { }
+    }
+    public abstract partial class JsonConverter
+    {
+        internal JsonConverter() { }
+        public abstract bool CanConvert(System.Type type);
+    }
+    [System.AttributeUsageAttribute(System.AttributeTargets.Class | System.AttributeTargets.Property | System.AttributeTargets.Struct, AllowMultiple=false)]
+    public partial class JsonConverterAttribute : System.Text.Json.Serialization.JsonAttribute
+    {
+        public JsonConverterAttribute(System.Type converterType) { }
+        public System.Type ConverterType { get { throw null; } }
+        public virtual System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert) { throw null; }
+    }
+    public abstract partial class JsonConverterFactory : System.Text.Json.Serialization.JsonConverter
+    {
+        protected internal JsonConverterFactory() { }
+        protected abstract System.Text.Json.Serialization.JsonConverter CreateConverter(System.Type typeToConvert);
+    }
+    public abstract partial class JsonConverter<T> : System.Text.Json.Serialization.JsonConverter
+    {
+        protected internal JsonConverter() { }
+        public override bool CanConvert(System.Type type) { throw null; }
+        public abstract T Read(ref System.Text.Json.Utf8JsonReader reader, System.Type type, System.Text.Json.JsonSerializerOptions options);
+        public virtual void Write(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonEncodedText propertyName, System.Text.Json.JsonSerializerOptions options) { }
+        public abstract void Write(System.Text.Json.Utf8JsonWriter writer, T value, System.Text.Json.JsonSerializerOptions options);
     }
     [System.AttributeUsageAttribute(System.AttributeTargets.Property, AllowMultiple=false)]
     public sealed partial class JsonExtensionDataAttribute : System.Text.Json.Serialization.JsonAttribute
