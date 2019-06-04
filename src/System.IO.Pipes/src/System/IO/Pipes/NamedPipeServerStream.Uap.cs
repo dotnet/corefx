@@ -11,27 +11,13 @@ namespace System.IO.Pipes
     /// </summary>
     public sealed partial class NamedPipeServerStream : PipeStream
     {
-        // Gets the username of the connected client.  Note that we will not have access to the client's 
-        // username until it has written at least once to the pipe (and has set its impersonationLevel 
-        // argument appropriately). 
-        public unsafe string GetImpersonationUserName()
+        // Depending on the Windows platform, we will try to reload a potentially missing DLL
+        // and reattempt the retrieval of the impersonation username.
+        private unsafe string HandleGetImpersonationUserNameError(int error, uint userNameMaxLength, char* userName)
         {
-            CheckWriteOperations();
-
-            const uint UserNameMaxLength = Interop.Kernel32.CREDUI_MAX_USERNAME_LENGTH + 1;
-            char* userName = stackalloc char[(int)UserNameMaxLength]; // ~1K
-
-            if (Interop.Kernel32.GetNamedPipeHandleStateW(InternalHandle, null, null, null, null, userName, UserNameMaxLength))
-            {
-                return new string(userName);
-            }
-
-            int error = Marshal.GetLastWin32Error();
+            // UAP does not allow calling LoadLibraryEx to try to load sspicli.dll like
+            // in Win32, so we won't retry and will directly throw the passed error.
             throw WinIOError(error);
         }
-
-        // -----------------------------
-        // ---- PAL layer ends here ----
-        // -----------------------------
     }
 }
