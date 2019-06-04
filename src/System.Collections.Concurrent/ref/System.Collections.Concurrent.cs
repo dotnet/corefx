@@ -141,8 +141,8 @@ namespace System.Collections.Concurrent
         void System.Collections.ICollection.CopyTo(System.Array array, int index) { }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
         public T[] ToArray() { throw null; }
-        public bool TryDequeue([System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)]out T result) { throw null; }
-        public bool TryPeek([System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)]out T result) { throw null; }
+        public bool TryDequeue([System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out T result) { throw null; }
+        public bool TryPeek([System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out T result) { throw null; }
     }
     public partial class ConcurrentStack<T> : System.Collections.Concurrent.IProducerConsumerCollection<T>, System.Collections.Generic.IEnumerable<T>, System.Collections.Generic.IReadOnlyCollection<T>, System.Collections.ICollection, System.Collections.IEnumerable
     {
@@ -179,7 +179,7 @@ namespace System.Collections.Concurrent
         void CopyTo(T[] array, int index);
         T[] ToArray();
         bool TryAdd(T item);
-        bool TryTake([System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)]out T item);
+        bool TryTake([System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out T item);
     }
     public abstract partial class OrderablePartitioner<TSource> : System.Collections.Concurrent.Partitioner<TSource>
     {
