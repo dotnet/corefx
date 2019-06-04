@@ -162,8 +162,12 @@ namespace System.Data.OleDb.Tests
             catch (SEHException sehEx)
             {
                 Console.WriteLine($"Code: {sehEx.ErrorCode}");
-                Console.WriteLine($"Base Exception error code : {sehEx.GetBaseException().HResult}");
-                Console.WriteLine($"Base Exception message : {sehEx.GetBaseException()?.ToString()}");
+                Exception baseException = sehEx.GetBaseException();
+                if (baseException != null)
+                {
+                    Console.WriteLine($"Base Exception error code : {baseException.HResult}");
+                    Console.WriteLine($"Base Exception message : {baseException.ToString()}");
+                }
                 Console.WriteLine($"Base Inner Exception: {sehEx.InnerException}");
                 
                 // This exception is not expected. So rethrow to indicate test failure.

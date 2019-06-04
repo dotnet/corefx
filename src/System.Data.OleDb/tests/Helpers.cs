@@ -24,7 +24,7 @@ namespace System.Data.OleDb.Tests
             private Nested() { }
             static Nested()
             {
-                bool shouldSkip = false; 
+                bool jetDriverInstalled = false;
                 // Get the sources rowset for the SQLOLEDB enumerator
                 DataTable table = (new OleDbEnumerator()).GetElements();
                 DataColumn providersRegistered = table.Columns["SOURCES_NAME"];
@@ -33,12 +33,12 @@ namespace System.Data.OleDb.Tests
                 {
                     var curProvider = (string)row[providersRegistered];
                     if (curProvider.Contains("JET"))
-                        shouldSkip = true; // JET driver installed 
+                        jetDriverInstalled = true;
                     providerNames.Add(curProvider);
                 }
                 // skip if x86 or if both drivers available 
-                shouldSkip |= PlatformDetection.Is32BitProcess;
-                IsAvailable = !shouldSkip && providerNames.Contains(s_expectedProviderName);
+                IsAvailable = !PlatformDetection.Is32BitProcess &&
+                        !(jetDriverInstalled && providerNames.Contains(s_expectedProviderName));
                 ProviderName = IsAvailable ? s_expectedProviderName : null;
             }
         }
