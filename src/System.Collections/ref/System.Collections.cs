@@ -53,7 +53,7 @@ namespace System.Collections.Generic
     {
         protected Comparer() { }
         public static System.Collections.Generic.Comparer<T> Default { get { throw null; } }
-        public abstract int Compare([System.Diagnostics.CodeAnalysis.AllowNullAttribute]T x, [System.Diagnostics.CodeAnalysis.AllowNullAttribute]T y);
+        public abstract int Compare([System.Diagnostics.CodeAnalysis.AllowNullAttribute] T x, [System.Diagnostics.CodeAnalysis.AllowNullAttribute] T y);
         public static System.Collections.Generic.Comparer<T> Create(System.Comparison<T> comparison) { throw null; }
         int System.Collections.IComparer.Compare(object? x, object? y) { throw null; }
     }
@@ -95,7 +95,7 @@ namespace System.Collections.Generic
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public virtual void OnDeserialization(object sender) { }
         public bool Remove(TKey key) { throw null; }
-        public bool Remove(TKey key, [System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)]out TValue value) { throw null; }
+        public bool Remove(TKey key, [System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out TValue value) { throw null; }
         void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.Add(System.Collections.Generic.KeyValuePair<TKey, TValue> keyValuePair) { }
         bool System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.Contains(System.Collections.Generic.KeyValuePair<TKey, TValue> keyValuePair) { throw null; }
         void System.Collections.Generic.ICollection<System.Collections.Generic.KeyValuePair<TKey, TValue>>.CopyTo(System.Collections.Generic.KeyValuePair<TKey, TValue>[] array, int index) { }
@@ -110,7 +110,7 @@ namespace System.Collections.Generic
         public void TrimExcess() { }
         public void TrimExcess(int capacity) { }
         public bool TryAdd(TKey key, TValue value) { throw null; }
-        public bool TryGetValue(TKey key, [System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)]out TValue value) { throw null; }
+        public bool TryGetValue(TKey key, [System.Diagnostics.CodeAnalysis.MaybeNullWhenAttribute(false)] out TValue value) { throw null; }
         public partial struct Enumerator : System.Collections.Generic.IEnumerator<System.Collections.Generic.KeyValuePair<TKey, TValue>>, System.Collections.IDictionaryEnumerator, System.Collections.IEnumerator, System.IDisposable
         {
             private object _dummy;
@@ -142,8 +142,6 @@ namespace System.Collections.Generic
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
             public partial struct Enumerator : System.Collections.Generic.IEnumerator<TKey>, System.Collections.IEnumerator, System.IDisposable
             {
-                [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
-                [System.Diagnostics.CodeAnalysis.MaybeNullAttribute]
                 private TKey _currentKey;
                 private object _dummy;
                 private int _dummyPrimitive;
@@ -172,8 +170,6 @@ namespace System.Collections.Generic
             System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
             public partial struct Enumerator : System.Collections.Generic.IEnumerator<TValue>, System.Collections.IEnumerator, System.IDisposable
             {
-                [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
-                [System.Diagnostics.CodeAnalysis.MaybeNullAttribute]
                 private TValue _currentValue;
                 private object _dummy;
                 private int _dummyPrimitive;
@@ -189,8 +185,8 @@ namespace System.Collections.Generic
     {
         protected EqualityComparer() { }
         public static System.Collections.Generic.EqualityComparer<T> Default { get { throw null; } }
-        public abstract bool Equals([System.Diagnostics.CodeAnalysis.AllowNullAttribute]T x, [System.Diagnostics.CodeAnalysis.AllowNullAttribute]T y);
-        public abstract int GetHashCode([System.Diagnostics.CodeAnalysis.DisallowNullAttribute]T obj);
+        public abstract bool Equals([System.Diagnostics.CodeAnalysis.AllowNullAttribute] T x, [System.Diagnostics.CodeAnalysis.AllowNullAttribute] T y);
+        public abstract int GetHashCode([System.Diagnostics.CodeAnalysis.DisallowNullAttribute] T obj);
         bool System.Collections.IEqualityComparer.Equals(object? x, object? y) { throw null; }
         int System.Collections.IEqualityComparer.GetHashCode(object? obj) { throw null; }
     }
@@ -330,12 +326,14 @@ namespace System.Collections.Generic
         public void CopyTo(T[] array) { }
         public void CopyTo(T[] array, int arrayIndex) { }
         public bool Exists(System.Predicate<T> match) { throw null; }
-        public [System.Diagnostics.CodeAnalysis.MaybeNullAttribute]T Find(System.Predicate<T> match) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.MaybeNullAttribute]
+        public T Find(System.Predicate<T> match) { throw null; }
         public System.Collections.Generic.List<T> FindAll(System.Predicate<T> match) { throw null; }
         public int FindIndex(int startIndex, int count, System.Predicate<T> match) { throw null; }
         public int FindIndex(int startIndex, System.Predicate<T> match) { throw null; }
         public int FindIndex(System.Predicate<T> match) { throw null; }
-        public [System.Diagnostics.CodeAnalysis.MaybeNullAttribute]T FindLast(System.Predicate<T> match) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.MaybeNullAttribute]
+        public T FindLast(System.Predicate<T> match) { throw null; }
         public int FindLastIndex(int startIndex, int count, System.Predicate<T> match) { throw null; }
         public int FindLastIndex(int startIndex, System.Predicate<T> match) { throw null; }
         public int FindLastIndex(System.Predicate<T> match) { throw null; }
@@ -373,8 +371,6 @@ namespace System.Collections.Generic
         public bool TrueForAll(System.Predicate<T> match) { throw null; }
         public partial struct Enumerator : System.Collections.Generic.IEnumerator<T>, System.Collections.IEnumerator, System.IDisposable
         {
-            [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
-            [System.Diagnostics.CodeAnalysis.MaybeNullAttribute]
             private T _current;
             private object _dummy;
             private int _dummyPrimitive;
