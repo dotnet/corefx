@@ -236,6 +236,7 @@ namespace System.Text.Json.Serialization.Tests
         {
             Indexer indexer = JsonSerializer.Parse<Indexer>(@"{""NonIndexerProp"":""Value""}");
             Assert.Equal("Value", indexer.NonIndexerProp);
+            Assert.Equal(-1, indexer[0]);
         }
     }
 }

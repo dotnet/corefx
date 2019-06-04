@@ -65,7 +65,7 @@ namespace System.Text.Json.Serialization.Tests
 
         private class Indexer
         {
-            private int _index = 0;
+            private int _index = -1;
 
             public int this[int index]
             {
