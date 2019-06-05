@@ -16,6 +16,7 @@
     <Compile Include="System\Data\Common\DataAdapterTest.cs" />
     <Compile Include="System\Data\Common\DataColumnMappingCollectionTest.cs" />
     <Compile Include="System\Data\Common\DataTableMappingCollectionTest.cs" />
+    <Compile Include="System\Data\Common\DataTableMappingCollectionTest2.cs" />
     <Compile Include="System\Data\Common\DbCommandBuilderTest.cs" />
     <Compile Include="System\Data\Common\DbConnectionStringBuilderTest.cs" />
     <Compile Include="System\Data\Common\DbDataAdapterTest.cs" />
