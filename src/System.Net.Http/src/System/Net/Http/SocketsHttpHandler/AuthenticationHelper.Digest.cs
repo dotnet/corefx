@@ -47,8 +47,8 @@ namespace System.Net.Http
             // It is mandatory for servers to implement sha-256 per RFC 7616
             // Keep MD5 for backward compatibility.
             string algorithm;
-            bool isAlgorithmSpecified;
-            if ((isAlgorithmSpecified = digestResponse.Parameters.TryGetValue(Algorithm, out algorithm)))
+            bool isAlgorithmSpecified = digestResponse.Parameters.TryGetValue(Algorithm, out algorithm);
+            if (isAlgorithmSpecified)
             {
                 if (!algorithm.Equals(Sha256, StringComparison.OrdinalIgnoreCase) &&
                     !algorithm.Equals(Md5, StringComparison.OrdinalIgnoreCase) &&
@@ -115,8 +115,8 @@ namespace System.Net.Http
 
             // Set qop, default is auth
             string qop = Auth;
-            bool isQopSpecified;
-            if ((isQopSpecified = digestResponse.Parameters.ContainsKey(Qop)))
+            bool isQopSpecified = digestResponse.Parameters.ContainsKey(Qop);
+            if (isQopSpecified)
             {
                 // Check if auth-int present in qop string
                 int index1 = digestResponse.Parameters[Qop].IndexOf(AuthInt, StringComparison.Ordinal);
