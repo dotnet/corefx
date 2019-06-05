@@ -9,12 +9,8 @@
 **
 ===========================================================*/
 
-using Microsoft.Win32;
-using System;
-using System.Collections;
 using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
@@ -146,6 +142,11 @@ namespace System.Security.AccessControl
         #endregion
 
         #region Protected Properties and Methods
+
+        /// <summary>
+        /// Gets the security descriptor for this instance.
+        /// </summary>
+        protected CommonSecurityDescriptor SecurityDescriptor => _securityDescriptor;
 
         protected void ReadLock()
         {

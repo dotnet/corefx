@@ -20,6 +20,15 @@ namespace System.Security.AccessControl
         private const int ReadAttributeAccessMask = 0x80;
 
         [Fact]
+        public void SetCustomDescriptor_Success()
+        {
+            // https://github.com/dotnet/corefx/issues/34151
+            var customObjectSecurity = new CustomDirectoryObjectSecurity();
+            customObjectSecurity.SetSecurityDescriptorSddlForm("D:PAI(A;OICI;0x1200a9;;;BU)");
+            customObjectSecurity.GetAccessRules(true, true, typeof(SecurityIdentifier));
+        }
+
+        [Fact]
         public void ObjectInitialization_DefaultConstructor_Success()
         {
             var customObjectSecurity = new CustomDirectoryObjectSecurity();
