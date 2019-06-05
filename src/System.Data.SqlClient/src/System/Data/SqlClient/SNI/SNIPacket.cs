@@ -45,10 +45,8 @@ namespace System.Data.SqlClient.SNI
         /// <summary>
         /// Packet data
         /// </summary>
-        public void Dispose()
-        {
-            Release();
-        }
+        public void Dispose() => Release();
+
         public int ReservedHeaderSize => _headerLength;
 
         /// <summary>
