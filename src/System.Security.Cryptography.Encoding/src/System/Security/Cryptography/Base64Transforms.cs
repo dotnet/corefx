@@ -30,7 +30,11 @@ namespace System.Security.Cryptography
         {
             // inputCount != InputBlockSize is not allowed
             ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount, InputBlockSize);
-            if (outputBuffer == null) ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
+
+            if (outputBuffer == null)
+            {
+                ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
+            }
 
             // For now, only convert 3 bytes to 4
             Span<byte> input = inputBuffer.AsSpan(inputOffset, InputBlockSize);
@@ -39,7 +43,9 @@ namespace System.Security.Cryptography
             OperationStatus status = Base64.EncodeToUtf8(input, output, out int consumed, out int written, isFinalBlock: false);
 
             if (written != OutputBlockSize)
+            {
                 ThrowHelper.ThrowCryptographicException();
+            }
 
             Debug.Assert(status == OperationStatus.NeedMoreData);
             Debug.Assert(consumed == InputBlockSize);
@@ -60,7 +66,7 @@ namespace System.Security.Cryptography
             }
             else if (inputCount > InputBlockSize)
             {
-                ThrowHelper.ThrowArgumentInvalidValue(ThrowHelper.ExceptionArgument.inputCount);
+                ThrowHelper.ThrowArgumentOutOfRange(ThrowHelper.ExceptionArgument.inputCount);
             }
 
             // Again, for now only a block at a time
@@ -70,7 +76,9 @@ namespace System.Security.Cryptography
             OperationStatus status = Base64.EncodeToUtf8(input, output, out int consumed, out int written, isFinalBlock: true);
 
             if (written != OutputBlockSize)
+            {
                 ThrowHelper.ThrowCryptographicException();
+            }
 
             Debug.Assert(status == OperationStatus.Done);
             Debug.Assert(consumed == inputCount);
@@ -78,11 +86,14 @@ namespace System.Security.Cryptography
             return output;
         }
 
-        public void Clear() => Dispose();
-
         // Must implement IDisposable, but in this case there's nothing to do.
 
         public void Dispose()
+        {
+            Clear();
+        }
+
+        public void Clear()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
@@ -134,7 +145,7 @@ namespace System.Security.Cryptography
             tmpBuffer = GetTempBuffer(inputBuffer.AsSpan(inputOffset, inputCount), tmpBuffer);
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
 
-            // To less data to decode: save data to _inputBuffer, so it can be transformed later
+            // To little data to decode: save data to _inputBuffer, so it can be transformed later
             if (bytesToTransform < InputBlockSize)
             {
                 tmpBuffer.CopyTo(_inputBuffer.AsSpan(_inputIndex));
@@ -169,17 +180,22 @@ namespace System.Security.Cryptography
             Span<byte> tmpBuffer = stackalloc byte[4];
             if (inputCount > 4)
             {
-                tmpBuffer = tmpBufferArray = ArrayPool<byte>.Shared.Rent(inputCount);
+                tmpBuffer = tmpBufferArray = CryptoPool.Rent(inputCount);
             }
 
             tmpBuffer = GetTempBuffer(inputBuffer.AsSpan(inputOffset, inputCount), tmpBuffer);
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
 
-            // To less data to decode
+            // To little data to decode
             if (bytesToTransform < InputBlockSize)
             {
                 // reinitialize the transform
                 Reset();
+
+                if (tmpBufferArray != null)
+                {
+                    CryptoPool.Return(tmpBufferArray, tmpBuffer.Length);
+                }
 
                 return Array.Empty<byte>();
             }
@@ -193,8 +209,7 @@ namespace System.Security.Cryptography
 
             if (tmpBufferArray != null)
             {
-                tmpBuffer.Clear();
-                ArrayPool<byte>.Shared.Return(tmpBufferArray);
+                CryptoPool.Return(tmpBufferArray, tmpBuffer.Length);
             }
 
             // reinitialize the transform
@@ -241,7 +256,7 @@ namespace System.Security.Cryptography
             // FORM FEED    12
             // CR           13
 
-            // https://github.com/dotnet/coreclr/issues/914
+            // RyuJIT produces better code with the ternary. This JIT-bug is tracked in https://github.com/dotnet/coreclr/issues/914
             return value == 32 || ((uint)value - 9 <= (13 - 9)) ? true : false;
         }
 
@@ -254,8 +269,16 @@ namespace System.Security.Cryptography
             int len = tmpBuffer.Length;
 
             // In Base64 there are maximum 2 padding chars
-            if (tmpBuffer[len - 2] == padding) outputSize--;
-            if (tmpBuffer[len - 1] == padding) outputSize--;
+
+            if (tmpBuffer[len - 2] == padding)
+            {
+                outputSize--;
+            }
+
+            if (tmpBuffer[len - 1] == padding)
+            {
+                outputSize--;
+            }
 
             return outputSize;
         }
@@ -269,7 +292,7 @@ namespace System.Security.Cryptography
             Span<byte> transformBuffer = stackalloc byte[4];
             if (bytesToTransform > 4)
             {
-                transformBuffer = transformBufferArray = ArrayPool<byte>.Shared.Rent(bytesToTransform);
+                transformBuffer = transformBufferArray = CryptoPool.Rent(bytesToTransform);
             }
 
             transformBuffer = transformBuffer.Slice(0, bytesToTransform);
@@ -286,28 +309,21 @@ namespace System.Security.Cryptography
 
             OperationStatus status = Base64.DecodeFromUtf8(transformBuffer, outputBuffer, out consumed, out written);
 
-            if (status == OperationStatus.InvalidData)
+            if (status != OperationStatus.Done)
             {
+                Debug.Assert(status == OperationStatus.InvalidData);
                 ThrowHelper.ThrowBase64FormatException();
             }
-            Debug.Assert(status == OperationStatus.Done);
 
             if (transformBufferArray != null)
             {
-                transformBuffer.Clear();
-                ArrayPool<byte>.Shared.Return(transformBufferArray);
+                CryptoPool.Return(transformBufferArray, transformBuffer.Length);
             }
         }
 
         public void Clear()
         {
-            if (_inputBuffer != null)
-            {
-                _inputBuffer.AsSpan().Clear();
-                _inputBuffer = null;
-            }
-
-            Reset();
+            Dispose();
         }
 
         // Reset the state of the transform so it can be used again
@@ -329,7 +345,13 @@ namespace System.Security.Cryptography
             // we always want to clear the input buffer
             if (disposing)
             {
-                Clear();
+                if (_inputBuffer != null)
+                {
+                    CryptographicOperations.ZeroMemory(_inputBuffer);
+                    _inputBuffer = null;
+                }
+
+                Reset();
             }
         }
 
@@ -345,8 +367,11 @@ namespace System.Security.Cryptography
         public static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
             if (inputBuffer == null) ThrowArgumentNull(ExceptionArgument.inputBuffer);
-            if ((uint)inputCount > inputBuffer.Length) ThrowArgumentInvalidValue(ExceptionArgument.inputCount);
-            if (inputOffset < 0) ThrowArgumentOutOfRangeNeedNonNegNum(ExceptionArgument.inputOffset);
+
+            if ((uint)inputCount > inputBuffer.Length) ThrowArgumentOutOfRange(ExceptionArgument.inputCount);
+
+            if (inputOffset < 0) ThrowArgumentOutOfRange(ExceptionArgument.inputOffset);
+
             if ((inputBuffer.Length - inputCount) < inputOffset) ThrowInvalidOffLen();
         }
 
@@ -354,12 +379,15 @@ namespace System.Security.Cryptography
         public static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, int inputBlockSize)
         {
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
-            if (inputCount != inputBlockSize) ThrowArgumentInvalidValue(ExceptionArgument.inputCount);
+
+            if (inputCount != inputBlockSize)
+            {
+                ThrowArgumentOutOfRange(ExceptionArgument.inputCount);
+            }
         }
 
         public static void ThrowArgumentNull(ExceptionArgument argument) => throw new ArgumentNullException(argument.ToString());
-        public static void ThrowArgumentOutOfRangeNeedNonNegNum(ExceptionArgument argument) => throw new ArgumentOutOfRangeException(argument.ToString(), SR.ArgumentOutOfRange_NeedNonNegNum);
-        public static void ThrowArgumentInvalidValue(ExceptionArgument argument) => throw new ArgumentException(SR.Argument_InvalidValue, argument.ToString());
+        public static void ThrowArgumentOutOfRange(ExceptionArgument argument) => throw new ArgumentOutOfRangeException(argument.ToString(), SR.ArgumentOutOfRange_NeedNonNegNum);
         public static void ThrowInvalidOffLen() => throw new ArgumentException(SR.Argument_InvalidOffLen);
         public static void ThrowObjectDisposed() => throw new ObjectDisposedException(null, SR.ObjectDisposed_Generic);
         public static void ThrowCryptographicException() => throw new CryptographicException(SR.Cryptography_SSE_InvalidDataSize);

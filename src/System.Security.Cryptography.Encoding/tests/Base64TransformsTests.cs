@@ -60,7 +60,7 @@ namespace System.Security.Cryptography.Encoding.Tests
                 InvalidInput_Base64Transform(transform);
 
                 // These exceptions only thrown in ToBase
-                AssertExtensions.Throws<ArgumentException>("inputCount", () => transform.TransformFinalBlock(data_5bytes, 0, 5));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformFinalBlock(data_5bytes, 0, 5));
             }
         }
 
@@ -85,8 +85,8 @@ namespace System.Security.Cryptography.Encoding.Tests
             AssertExtensions.Throws<ArgumentNullException>("inputBuffer", () => transform.TransformBlock(null, 0, 0, null, 0));
             AssertExtensions.Throws<ArgumentOutOfRangeException>("inputOffset", () => transform.TransformBlock(Array.Empty<byte>(), -1, 0, null, 0));
             AssertExtensions.Throws<ArgumentNullException>("outputBuffer", () => transform.TransformBlock(data_4bytes, 0, transform.InputBlockSize, null, 0));
-            AssertExtensions.Throws<ArgumentException>("inputCount", () => transform.TransformBlock(data_4bytes, 0, transform.InputBlockSize + 1, null, 0));
-            AssertExtensions.Throws<ArgumentException>("inputCount", () => transform.TransformBlock(Array.Empty<byte>(), 0, 1, null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformBlock(data_4bytes, 0, transform.InputBlockSize + 1, null, 0));
+            AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformBlock(Array.Empty<byte>(), 0, 1, null, 0));
             AssertExtensions.Throws<ArgumentException>(null, () => transform.TransformBlock(Array.Empty<byte>(), 1, 0, null, 0));
 
             AssertExtensions.Throws<ArgumentNullException>("inputBuffer", () => transform.TransformFinalBlock(null, 0, 0));
@@ -147,7 +147,7 @@ namespace System.Security.Cryptography.Encoding.Tests
                 Assert.True(inputBytes.Length > 4);
 
                 // Test passing blocks > 4 characters to TransformFinalBlock (not supported)
-                AssertExtensions.Throws<ArgumentException>("inputCount", () => transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length));
+                AssertExtensions.Throws<ArgumentOutOfRangeException>("inputCount", () => transform.TransformFinalBlock(inputBytes, 0, inputBytes.Length));
             }
         }
 
