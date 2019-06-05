@@ -346,9 +346,6 @@ namespace System.Net.Primitives.Functional.Tests
 
         public static IEnumerable<object[]> InvalidIpv6Addresses()
         {
-            yield return new object[] { "" }; // malformed
-            yield return new object[] { "[" }; // malformed
-            yield return new object[] { "[]" }; // malformed
             yield return new object[] { "[:]" }; // malformed
             yield return new object[] { ":::4df" };
             yield return new object[] { "4df:::" };
@@ -442,6 +439,9 @@ namespace System.Net.Primitives.Functional.Tests
             new object[] { "%12" }, // just scope
             new object[] { "[192.168.0.1]" }, // raw v4
             new object[] { "[1]" }, // incomplete
+            new object[] { "" }, // malformed
+            new object[] { "[" }, // malformed
+            new object[] { "[]" }, // malformed
         };
 
         [Theory]
