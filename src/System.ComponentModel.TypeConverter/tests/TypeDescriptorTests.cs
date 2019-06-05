@@ -77,10 +77,10 @@ namespace System.ComponentModel.Tests
             designerHost.AddDesigner(component, designer);
             component.AddService(typeof(IDesignerHost), designerHost);
 
-            var associatedObject = TypeDescriptor.GetAssociation(designer.GetType(), component);
+            object associatedObject = TypeDescriptor.GetAssociation(designer.GetType(), component);
 
-            Assert.IsType(designer.GetType(), associatedObject);
-            Assert.Equal(designer, associatedObject);
+            Assert.IsType<MockDesigner>(associatedObject);
+            Assert.Same(designer, associatedObject);
         }
 
         [Theory]
