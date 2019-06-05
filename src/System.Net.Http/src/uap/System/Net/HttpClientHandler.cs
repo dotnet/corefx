@@ -363,7 +363,7 @@ namespace System.Net.Http
             }
         }
 
-        public static bool SuppressAutomaticActivityPropagation
+        public static bool SuppressGlobalActivityPropagation 
         {
             get
             { 

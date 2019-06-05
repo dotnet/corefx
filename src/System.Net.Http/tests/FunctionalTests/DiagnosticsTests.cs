@@ -1038,7 +1038,7 @@ namespace System.Net.Http.Functional.Tests
         {
             RemoteExecutor.Invoke((useSocketsHttpHandlerString, useHttp2String) =>
             {
-                HttpClientHandler.SuppressAutomaticActivityPropagation = true;
+                HttpClientHandler.SuppressGlobalActivityPropagation  = true;
 
                 string eventKey = null;
                 bool anyEventLogged = false;
@@ -1064,7 +1064,7 @@ namespace System.Net.Http.Functional.Tests
 
                     Assert.False(anyEventLogged, $"{eventKey} event logged when Activity is suppressed globally");
                     diagnosticListenerObserver.Disable();
-                    HttpClientHandler.SuppressAutomaticActivityPropagation = false;
+                    HttpClientHandler.SuppressGlobalActivityPropagation  = false;
                 }
 
                 return RemoteExecutor.SuccessExitCode;
@@ -1077,7 +1077,7 @@ namespace System.Net.Http.Functional.Tests
         {
             RemoteExecutor.Invoke((useSocketsHttpHandlerString, useHttp2String) =>
             {
-                HttpClientHandler.SuppressAutomaticActivityPropagation = true;
+                HttpClientHandler.SuppressGlobalActivityPropagation  = true;
 
                 using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString, useHttp2String))
                 {
@@ -1090,7 +1090,7 @@ namespace System.Net.Http.Functional.Tests
                     Assert.False(response.RequestMessage.Headers.Contains("Correlation-Context"));
                 }
 
-                HttpClientHandler.SuppressAutomaticActivityPropagation = false;
+                HttpClientHandler.SuppressGlobalActivityPropagation  = false;
 
                 return RemoteExecutor.SuccessExitCode;
             }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();

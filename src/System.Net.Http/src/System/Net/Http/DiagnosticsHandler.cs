@@ -16,7 +16,7 @@ namespace System.Net.Http
     internal sealed class DiagnosticsHandler : DelegatingHandler
     {
         internal bool SuppressActivityPropagation { get; set; }
-        internal static bool SuppressAutomaticActivityPropagation { get; set; }
+        internal static bool SuppressGlobalActivityPropagation  { get; set; }
 
         /// <summary>
         /// DiagnosticHandler constructor
@@ -31,7 +31,7 @@ namespace System.Net.Http
         {
             // check if there is a parent Activity (and propagation is not suppressed)
             // or if someone listens to HttpHandlerDiagnosticListener
-            return !SuppressAutomaticActivityPropagation && (Activity.Current != null || s_diagnosticListener.IsEnabled());
+            return !SuppressGlobalActivityPropagation  && (Activity.Current != null || s_diagnosticListener.IsEnabled());
         }
 
         protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,

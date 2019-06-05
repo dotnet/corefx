@@ -444,12 +444,12 @@ namespace System.Net.Http
             set => _diagnosticsHandler.SuppressActivityPropagation = value;
         }
 
-        public static bool SuppressAutomaticActivityPropagation
+        public static bool SuppressGlobalActivityPropagation 
         {
-            get => DiagnosticsHandler.SuppressAutomaticActivityPropagation;
-            set => DiagnosticsHandler.SuppressAutomaticActivityPropagation = value;
+            get => DiagnosticsHandler.SuppressGlobalActivityPropagation ;
+            set => DiagnosticsHandler.SuppressGlobalActivityPropagation  = value;
         }
-        
+
         public IDictionary<string, object> Properties => _winHttpHandler != null ?
             _winHttpHandler.Properties :
             _socketsHttpHandler.Properties;
