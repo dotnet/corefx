@@ -187,7 +187,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ExtensionPropertyDictionaryStringObject()
         {
-            ClassWithExtensionPropertyAsObject obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{}");
+            ClassWithExtensionPropertyAlreadyInstantiated obj = JsonSerializer.Parse<ClassWithExtensionPropertyAlreadyInstantiated>(@"{}");
             obj.MyOverflow.Add("test", new object());
             Assert.Equal(@"{""MyOverflow"":{""test"":{}}}", JsonSerializer.ToString(obj));
         }

@@ -174,6 +174,7 @@ namespace System.Text.Json.Serialization
                             {
                                 if (!reader.TryGetDouble(out double d))
                                 {
+                                    // TODO FIX EXCEPTION
                                     throw new NotSupportedException();
                                 }
                                 extensionData.Add(keyName, d);
@@ -187,6 +188,7 @@ namespace System.Text.Json.Serialization
                         extensionData.Add(keyName, reader.GetBoolean());
                         break;
                     default:
+                        // TODO FIX EXCEPTION
                         throw new NotSupportedException();
                 }
             }
