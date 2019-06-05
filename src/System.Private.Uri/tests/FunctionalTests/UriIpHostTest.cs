@@ -321,7 +321,6 @@ namespace System.PrivateUri.Tests
         [InlineData(":1:2:3:4:5")] // leading single colon
         [InlineData(":1:2:3:4:5:6")] // leading single colon
         [InlineData(":1:2:3:4:5:6:7")] // leading single colon
-        [InlineData(":1:2:3:4:5:6:7:8")] // leading single colon
         [InlineData(":1:2:3:4:5:6:7:8:9")] // leading single colon
         [InlineData("::1:2:3:4:5:6:7:8")] // compressor with too many number groups
         [InlineData("1::2:3:4:5:6:7:8")] // compressor with too many number groups
@@ -348,6 +347,14 @@ namespace System.PrivateUri.Tests
         // TODO # 8330 Discrepency: IPAddress doesn't accept bad scopes, Uri does.
         //[InlineData("::%1a")] // Alpha numeric Scope
         public void UriIPv6Host_BadAddress(string address)
+        {
+            ParseBadIPv6Address(address);
+        }
+
+        [Theory]
+        [InlineData(":1:2:3:4:5:6:7:8")] // leading single colon
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework machines are not yet patched with the fix for this")]
+        public void UriIPv6Host_BadAddress_SkipOnFramework(string address)
         {
             ParseBadIPv6Address(address);
         }
