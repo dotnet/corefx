@@ -15,6 +15,9 @@ namespace System.Net.Http
     /// </summary>
     internal sealed class DiagnosticsHandler : DelegatingHandler
     {
+        internal bool SuppressActivityPropagation { get; set; }
+        internal static bool SuppressAutomaticActivityPropagation { get; set; }
+
         /// <summary>
         /// DiagnosticHandler constructor
         /// </summary>
@@ -26,31 +29,59 @@ namespace System.Net.Http
 
         internal static bool IsEnabled()
         {
-            //check if someone listens to HttpHandlerDiagnosticListener
-            return s_diagnosticListener.IsEnabled();
+            // check if there is a parent Activity (and propagation is not suppressed)
+            // or if someone listens to HttpHandlerDiagnosticListener
+            return !SuppressAutomaticActivityPropagation && (Activity.Current != null || s_diagnosticListener.IsEnabled());
         }
 
         protected internal override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            //HttpClientHandler is responsible to call DiagnosticsHandler.IsEnabled() before forwarding request here.
-            //This code will not be reached if no one listens to 'HttpHandlerDiagnosticListener', unless consumer unsubscribes
-            //from DiagnosticListener right after the check. So some requests happening right after subscription starts
-            //might not be instrumented. Similarly, when consumer unsubscribes, extra requests might be instrumented
+            // HttpClientHandler is responsible to call static DiagnosticsHandler.IsEnabled() before forwarding request here.
+            // This code will not be reached if Activity propagation is disabled unless consumer unsubscribes
+            // from DiagnosticListener right after the check. So some requests happening right after subscription starts
+            // might not be instrumented. Similarly, when consumer unsubscribes, extra requests might be instrumented
 
             if (request == null)
             {
                 throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
             }
 
+            // do not instrument if activity propagation is explicitly disabled by customer on this HttpClientHandler instance
+            if (SuppressActivityPropagation)
+            {
+                return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+            }
+
             Activity activity = null;
+
+            // if there is no listener, but propagation is enabled (with previous IsEnabled() and SuppressActivityPropagation check)
+            // do not write any events just start/stop Activity and propagate Ids
+            if (!s_diagnosticListener.IsEnabled())
+            {
+                activity = new Activity(DiagnosticsHandlerLoggingStrings.ActivityName);
+                activity.Start();
+                InjectHeaders(activity, request);
+
+                try
+                {
+                    return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
+                }
+                finally
+                {
+                    activity.Stop();
+                }
+            }
+            // otherwise there is a listener, run full instrumentation
+
             Guid loggingRequestId = Guid.Empty;
 
-            // If System.Net.Http.HttpRequestOut is on see if we should log the start (or just log the activity)
+            // If instrumentation without listener is enabled (or someone listens to System.Net.Http.HttpRequestOut)
+            // check if we should log the start (or just log the activity)
             if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityName, request))
             {
                 activity = new Activity(DiagnosticsHandlerLoggingStrings.ActivityName);
-                //Only send start event to users who subscribed for it, but start activity anyway
+                // Only send start event to users who subscribed for it, but start activity anyway
                 if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityStartName))
                 {
                     s_diagnosticListener.StartActivity(activity, new { Request = request });
@@ -60,7 +91,7 @@ namespace System.Net.Http
                     activity.Start();
                 }
             }
-            //try to write System.Net.Http.Request event (deprecated)
+            // try to write System.Net.Http.Request event (deprecated)
             if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.RequestWriteNameDeprecated))
             {
                 long timestamp = Stopwatch.GetTimestamp();
@@ -76,44 +107,12 @@ namespace System.Net.Http
             }
 
             // If we are on at all, we propagate any activity information
+            
             // unless tracing system or user injected Request-Id for backward compatibility reasons.
             Activity currentActivity = Activity.Current;
             if (currentActivity != null)
             {
-                if (currentActivity.IdFormat == ActivityIdFormat.W3C)
-                {
-                    if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName))
-                    {
-                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
-                        if (currentActivity.TraceStateString != null)
-                        {
-                            request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceStateHeaderName, currentActivity.TraceStateString);
-                        }
-                    }
-                }
-                else
-                {
-                    if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
-                    {
-                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
-                    }
-                }
-
-                //we expect baggage to be empty or contain a few items
-                using (IEnumerator<KeyValuePair<string, string>> e = currentActivity.Baggage.GetEnumerator())
-                {
-                    if (e.MoveNext())
-                    {
-                        var baggage = new List<string>();
-                        do
-                        {
-                            KeyValuePair<string, string> item = e.Current;
-                            baggage.Add(new NameValueHeaderValue(WebUtility.UrlEncode(item.Key), WebUtility.UrlEncode(item.Value)).ToString());
-                        }
-                        while (e.MoveNext());
-                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.CorrelationContextHeaderName, baggage);
-                    }
-                }
+                InjectHeaders(currentActivity, request);
             }
 
             Task<HttpResponseMessage> responseTask = null;
@@ -125,31 +124,31 @@ namespace System.Net.Http
             }
             catch (TaskCanceledException)
             {
-                //we'll report task status in HttpRequestOut.Stop
+                // we'll report task status in HttpRequestOut.Stop
                 throw;
             }
             catch (Exception ex)
             {
                 if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ExceptionEventName))
                 {
-                    //If request was initially instrumented, Activity.Current has all necessary context for logging
-                    //Request is passed to provide some context if instrumentation was disabled and to avoid
-                    //extensive Activity.Tags usage to tunnel request properties
+                    // If request was initially instrumented, Activity.Current has all necessary context for logging
+                    // Request is passed to provide some context if instrumentation was disabled and to avoid
+                    // extensive Activity.Tags usage to tunnel request properties
                     s_diagnosticListener.Write(DiagnosticsHandlerLoggingStrings.ExceptionEventName, new { Exception = ex, Request = request });
                 }
                 throw;
             }
             finally
             {
-                //always stop activity if it was started
+                // always stop activity if it was started
                 if (activity != null)
                 {
                     s_diagnosticListener.StopActivity(activity, new
                     {
                         Response = responseTask?.Status == TaskStatus.RanToCompletion ? responseTask.Result : null,
-                        //If request is failed or cancelled, there is no response, therefore no information about request;
-                        //pass the request in the payload, so consumers can have it in Stop for failed/canceled requests
-                        //and not retain all requests in Start 
+                        // If request is failed or cancelled, there is no response, therefore no information about request;
+                        // pass the request in the payload, so consumers can have it in Stop for failed/canceled requests
+                        // and not retain all requests in Start 
                         Request = request,
                         RequestTaskStatus = responseTask?.Status ?? TaskStatus.Faulted
                     });
@@ -172,6 +171,44 @@ namespace System.Net.Http
         }
 
         #region private
+
+        private static void InjectHeaders(Activity currentActivity, HttpRequestMessage request)
+        {
+            if (currentActivity.IdFormat == ActivityIdFormat.W3C)
+            {
+                if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName))
+                {
+                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceParentHeaderName, currentActivity.Id);
+                    if (currentActivity.TraceStateString != null)
+                    {
+                        request.Headers.Add(DiagnosticsHandlerLoggingStrings.TraceStateHeaderName, currentActivity.TraceStateString);
+                    }
+                }
+            }
+            else
+            {
+                if (!request.Headers.Contains(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName))
+                {
+                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.RequestIdHeaderName, currentActivity.Id);
+                }
+            }
+
+            // we expect baggage to be empty or contain a few items
+            using (IEnumerator<KeyValuePair<string, string>> e = currentActivity.Baggage.GetEnumerator())
+            {
+                if (e.MoveNext())
+                {
+                    var baggage = new List<string>();
+                    do
+                    {
+                        KeyValuePair<string, string> item = e.Current;
+                        baggage.Add(new NameValueHeaderValue(WebUtility.UrlEncode(item.Key), WebUtility.UrlEncode(item.Value)).ToString());
+                    }
+                    while (e.MoveNext());
+                    request.Headers.Add(DiagnosticsHandlerLoggingStrings.CorrelationContextHeaderName, baggage);
+                }
+            }
+        }
 
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(DiagnosticsHandlerLoggingStrings.DiagnosticListenerName);

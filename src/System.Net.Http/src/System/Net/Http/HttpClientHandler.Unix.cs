@@ -397,6 +397,18 @@ namespace System.Net.Http
             }
         }
 
+        public bool SuppressActivityPropagation
+        {
+            get => _diagnosticsHandler.SuppressActivityPropagation;
+            set => _diagnosticsHandler.SuppressActivityPropagation = value;
+        }
+
+        public static bool SuppressGlobalActivityPropagation
+        {
+            get => DiagnosticsHandler.SuppressGlobalActivityPropagation;
+            set => DiagnosticsHandler.SuppressGlobalActivityPropagation = value;
+        }
+
         public IDictionary<string, object> Properties => _curlHandler != null ?
             _curlHandler.Properties :
             _socketsHttpHandler.Properties;

@@ -438,6 +438,18 @@ namespace System.Net.Http
             }
         }
 
+        public bool SuppressActivityPropagation
+        {
+            get => _diagnosticsHandler.SuppressActivityPropagation;
+            set => _diagnosticsHandler.SuppressActivityPropagation = value;
+        }
+
+        public static bool SuppressAutomaticActivityPropagation
+        {
+            get => DiagnosticsHandler.SuppressAutomaticActivityPropagation;
+            set => DiagnosticsHandler.SuppressAutomaticActivityPropagation = value;
+        }
+        
         public IDictionary<string, object> Properties => _winHttpHandler != null ?
             _winHttpHandler.Properties :
             _socketsHttpHandler.Properties;
