@@ -20,7 +20,6 @@ namespace System.Reflection.Emit.Tests
             Assert.Equal(callingConvention, method.CallingConvention);
 
             Assert.Equal(returnType ?? typeof(void), method.ReturnType);
-            Assert.Null(method.ReturnParameter);
 
             ParameterInfo[] parameters = method.GetParameters();
             if (parameterTypes == null)
