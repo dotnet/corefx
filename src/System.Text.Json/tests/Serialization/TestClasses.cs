@@ -43,6 +43,8 @@ namespace System.Text.Json.Serialization.Tests
 
     public enum SampleUInt64Enum : ulong
     {
+        One = 0,
+        Two = 1,
         Max = ulong.MaxValue
     }
 
