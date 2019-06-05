@@ -2,10 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal sealed class ReflectionMemberAccessor : MemberAccessor
     {
@@ -23,6 +24,45 @@ namespace System.Text.Json.Serialization
 
         private static readonly MethodInfo s_createStructPropertySetterMethod = new SetPropertyByRefFactory<int, int>(CreateStructPropertySetter)
             .Method.GetGenericMethodDefinition();
+        public override JsonClassInfo.ConstructorDelegate CreateConstructor(Type type)
+        {
+            Debug.Assert(type != null);
+            ConstructorInfo realMethod = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
+
+            if (realMethod == null && !type.IsValueType)
+            {
+                return null;
+            }
+
+            return () => Activator.CreateInstance(type);
+        }
+
+        public override object ImmutableCollectionCreateRange(Type constructingType, Type elementType)
+        {
+            MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);
+
+            if (createRange == null)
+            {
+                return null;
+            }
+
+            return createRange.CreateDelegate(
+                typeof(JsonSerializerOptions.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+        }
+
+
+        public override object ImmutableDictionaryCreateRange(Type constructingType, Type elementType)
+        {
+            MethodInfo createRange = ImmutableDictionaryCreateRangeMethod(constructingType, elementType);
+
+            if (createRange == null)
+            {
+                return null;
+            }
+
+            return createRange.CreateDelegate(
+                typeof(JsonSerializerOptions.ImmutableDictCreateRangeDelegate<,>).MakeGenericType(typeof(string), elementType), null);
+        }
 
         public override Func<object, TProperty> CreatePropertyGetter<TClass, TProperty>(PropertyInfo propertyInfo)
         {
