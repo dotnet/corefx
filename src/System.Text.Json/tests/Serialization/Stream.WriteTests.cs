@@ -15,7 +15,7 @@ namespace System.Text.Json.Serialization.Tests
         public async static Task VerifyValueFail()
         {
             MemoryStream stream = new MemoryStream();
-            await Assert.ThrowsAsync<ArgumentNullException>(async () => await JsonSerializer.WriteAsync(stream, "", null));
+            await Assert.ThrowsAsync<ArgumentNullException>(async () => await JsonSerializer.WriteAsync(stream, "", (Type)null));
         }
 
         [Fact]
