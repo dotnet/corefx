@@ -339,7 +339,10 @@ namespace System.IO.Pipes.Tests
                     }
                     else
                     {
-                        Assert.Equal(expectedUserName, server.GetImpersonationUserName());
+                        string actualUserName = server.GetImpersonationUserName();
+                        Assert.NotNull(actualUserName);
+                        Assert.False(string.IsNullOrWhiteSpace(actualUserName));
+                        Assert.Equal(expectedUserName, actualUserName);
                     }
                 }
             }
