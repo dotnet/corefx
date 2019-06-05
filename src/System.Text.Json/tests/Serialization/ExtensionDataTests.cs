@@ -63,16 +63,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ExtensionPropertyAsObject()
-        {
-            string json = @"{""MyIntMissing"":2}";
-
-            ClassWithExtensionPropertyAsObject obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(json);
-            Assert.IsType<JsonElement>(obj.MyOverflow["MyIntMissing"]);
-            Assert.Equal(2, ((JsonElement)obj.MyOverflow["MyIntMissing"]).GetInt32());
-        }
-
-        [Fact]
         public static void ExtensionPropertyCamelCasing()
         {
             // Currently we apply no naming policy. If we do (such as a ExtensionPropertyNamingPolicy), we'd also have to add functionality to the JsonDocument.
@@ -178,26 +168,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void InvalidExtensionValue()
-        {
-            // Baseline
-            ClassWithExtensionPropertyAlreadyInstantiated obj = JsonSerializer.Parse<ClassWithExtensionPropertyAlreadyInstantiated>(@"{}");
-            obj.MyOverflow.Add("test", new object());
-
-            try
-            {
-                JsonSerializer.ToString(obj);
-                Assert.True(false, "InvalidOperationException should have thrown.");
-            }
-            catch (InvalidOperationException e)
-            {
-                // Verify the exception contains the property name and invalid type.
-                Assert.Contains("ClassWithExtensionPropertyAlreadyInstantiated.MyOverflow", e.Message);
-                Assert.Contains("System.Object", e.Message);
-            }
-        }
-
-        [Fact]
         public static void ObjectTree()
         {
             string json = @"{""MyIntMissing"":2, ""MyReference"":{""MyIntMissingChild"":3}}";
@@ -212,6 +182,49 @@ namespace System.Text.Json.Serialization.Tests
             Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
             Assert.Equal(1, child.MyOverflow.Count);
             Assert.Equal(3, child.MyOverflow["MyIntMissingChild"].GetInt32());
+        }
+
+        [Fact]
+        public static void ExtensionPropertyDictionaryStringObject()
+        {
+            ClassWithExtensionPropertyAsObject obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{}");
+            obj.MyOverflow.Add("test", new object());
+            Assert.Equal(@"{""MyOverflow"":{""test"":{}}}", JsonSerializer.ToString(obj));
+        }
+
+        [Fact]
+        public static void ExtensionPropertyDictionaryStringObject_Read()
+        {
+            ClassWithExtensionPropertyAsObject obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":1e-005}}");
+            Assert.IsType<double>(obj.MyOverflow["key"]);
+            Assert.Equal(1e-005, (double)obj.MyOverflow["key"]);
+
+            obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":1.1}}");
+            Assert.IsType<double>(obj.MyOverflow["key"]);
+            Assert.Equal(1.1, (double)obj.MyOverflow["key"]);
+
+            obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":1}}");
+            Assert.IsType<long>(obj.MyOverflow["key"]);
+            Assert.Equal(1, (long)obj.MyOverflow["key"]);
+
+            obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":-1}}");
+            Assert.IsType<long>(obj.MyOverflow["key"]);
+            Assert.Equal(-1, (long)obj.MyOverflow["key"]);
+
+            obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":""text""}}");
+            Assert.IsType<string>(obj.MyOverflow["key"]);
+            Assert.Equal("text", (string)obj.MyOverflow["key"]);
+
+            obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":true}}");
+            Assert.IsType<bool>(obj.MyOverflow["key"]);
+            Assert.True((bool)obj.MyOverflow["key"]);
+
+            obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":false}}");
+            Assert.IsType<bool>(obj.MyOverflow["key"]);
+            Assert.False((bool)obj.MyOverflow["key"]);
+
+            obj = JsonSerializer.Parse<ClassWithExtensionPropertyAsObject>(@"{""MyOverflow"":{""key"":{""obj"":""text""}}}");
+            Assert.IsType<JsonElement>(obj.MyOverflow["key"]);
         }
 
         public class ClassWithExtensionPropertyAlreadyInstantiated

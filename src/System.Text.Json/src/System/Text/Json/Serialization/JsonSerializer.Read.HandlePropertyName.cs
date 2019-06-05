@@ -143,17 +143,57 @@ namespace System.Text.Json.Serialization
                 jsonPropertyInfo.SetValueAsObject(state.Current.ReturnValue, extensionData);
             }
 
+            string keyName = JsonHelpers.Utf8GetString(unescapedPropertyName);
+
+            // Currently we don't apply any naming policy. If we do, we'd have to pass it onto the JsonDocument.
+
+            Type dictionaryValue = jsonPropertyInfo.DeclaredPropertyType.GetGenericArguments()[1];
             JsonElement jsonElement;
             using (JsonDocument jsonDocument = JsonDocument.ParseValue(ref reader))
             {
                 jsonElement = jsonDocument.RootElement.Clone();
             }
 
-            string keyName = JsonHelpers.Utf8GetString(unescapedPropertyName);
-
-            // Currently we don't apply any naming policy. If we do, we'd have to pass it onto the JsonDocument.
-
-            extensionData.Add(keyName, jsonElement);
+            if (dictionaryValue == typeof(JsonElement))
+            {
+                extensionData.Add(keyName, jsonElement);
+            }
+            else if (dictionaryValue == typeof(object))
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.EndObject:
+                        extensionData.Add(keyName, jsonElement);
+                        break;
+                    case JsonTokenType.String:
+                        extensionData.Add(keyName, reader.GetString());
+                        break;
+                    case JsonTokenType.Number:
+                        {
+                            if(!reader.TryGetInt64(out long l))
+                            {
+                                if (!reader.TryGetDouble(out double d))
+                                {
+                                    throw new NotSupportedException();
+                                }
+                                extensionData.Add(keyName, d);
+                                break;
+                            }
+                            extensionData.Add(keyName, l);
+                            break;
+                        }
+                    case JsonTokenType.True:
+                    case JsonTokenType.False:
+                        extensionData.Add(keyName, reader.GetBoolean());
+                        break;
+                    default:
+                        throw new NotSupportedException();
+                }
+            }
+            else
+            {
+                ThrowHelper.ThrowInvalidOperationException_SerializationDataExtensionPropertyInvalid(state.Current.JsonClassInfo, dictionaryValue);
+            }
         }
     }
 }
