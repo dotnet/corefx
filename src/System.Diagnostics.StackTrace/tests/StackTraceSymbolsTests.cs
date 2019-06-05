@@ -15,25 +15,10 @@ namespace System.Diagnostics.SymbolStore.Tests
         {
             var asmPath = typeof(StackTraceSymbolsTests).Assembly.Location;
             var pdbPath = Path.ChangeExtension(asmPath, ".pdb");
-            var targetPath = Path.ChangeExtension(pdbPath, ".moved");
 
             Assert.True(File.Exists(pdbPath));
-
-            try
-            {
-                new StackTrace(true).GetFrames();
-
-                File.Move(pdbPath, targetPath);
-
-                Assert.True(File.Exists(targetPath));
-            }
-            finally
-            {
-                if (File.Exists(targetPath))
-                {
-                    File.Move(targetPath, pdbPath);
-                }
-            }
+            new StackTrace(true).GetFrames();
+            File.Move(pdbPath, pdbPath);
         }
     }
 }
