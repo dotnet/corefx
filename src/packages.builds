@@ -27,9 +27,6 @@
     <Project Include="$(MSBuildThisFileDirectory)..\pkg\Microsoft.NETCore.Platforms\Microsoft.NETCore.Platforms.builds">
       <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
     </Project>
-    <Project Include="$(MSBuildThisFileDirectory)System.Threading.Tasks.Extensions\pkg\System.Threading.Tasks.Extensions.pkgproj">
-      <AdditionalProperties>$(AdditionalProperties)</AdditionalProperties>
-    </Project>
   </ItemGroup>
 
   <!-- Need the PackageIndexFile file property from baseline.props -->
