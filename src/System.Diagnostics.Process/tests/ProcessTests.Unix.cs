@@ -157,7 +157,6 @@ namespace System.Diagnostics.Tests
         }
 
         // Active issue https://github.com/dotnet/corefx/issues/37739
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotRedHatFamily6))]
         [PlatformSpecific(~TestPlatforms.OSX)] // On OSX, ProcessName returns the script interpreter.
         public void ProcessNameMatchesScriptName()
         {
@@ -172,6 +171,11 @@ namespace System.Diagnostics.Tests
             {
                 try
                 {
+                    string stat = File.ReadAllText($"/proc/{process.Id}/stat");
+                    Assert.Contains($"({scriptName})", stat);
+                    string cmdline = File.ReadAllText($"/proc/{process.Id}/cmdline");
+                    Assert.Equal($"/bin/sh\0{filename}\0", cmdline);
+
                     Assert.Equal(scriptName, process.ProcessName);
                 }
                 finally
@@ -296,54 +300,47 @@ namespace System.Diagnostics.Tests
             }, verb ?? "<null>", isValid.ToString(), options).Dispose();
         }
 
-        [Theory, InlineData("vi")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram(string programToOpenWith)
+        public void ProcessStart_OnLinux_UsesSpecifiedProgram()
         {
-            if (IsProgramInstalled(programToOpenWith))
+            const string Program = "sleep";
+
+            using (var px = Process.Start(Program, "60"))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
-                using (var px = Process.Start(programToOpenWith, fileToOpen))
+                try
                 {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.True(px.HasExited);
             }
         }
 
-        [Theory, InlineData("vi")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
+        public void ProcessStart_OnLinux_UsesSpecifiedProgramUsingArgumentList()
         {
-            if (PlatformDetection.IsAlpine)
-                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/31970)]
+            const string Program = "sleep";
 
-            if (IsProgramInstalled(programToOpenWith))
+            ProcessStartInfo psi = new ProcessStartInfo(Program);
+            psi.ArgumentList.Add("60");
+            using (var px = Process.Start(psi))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList)}");
-                ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
-                psi.ArgumentList.Add(fileToOpen);
-                using (var px = Process.Start(psi))
+                try
                 {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.True(px.HasExited);
             }
         }
 

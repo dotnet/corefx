@@ -11,25 +11,50 @@ namespace System.Text.Json
     {
         public abstract JsonClassInfo.ConstructorDelegate CreateConstructor(Type classType);
 
-        public abstract object ImmutableCreateRange(Type constructingType, Type elementType);
+        public abstract object ImmutableCollectionCreateRange(Type constructingType, Type elementType);
+        public abstract object ImmutableDictionaryCreateRange(Type constructingType, Type elementType);
 
-        protected MethodInfo ImmutableCreateRangeMethod(Type constructingType, Type elementType)
+        protected MethodInfo ImmutableCollectionCreateRangeMethod(Type constructingType, Type elementType)
+        {
+            MethodInfo createRangeMethod = FindImmutableCreateRangeMethod(constructingType);
+
+            if (createRangeMethod == null)
+            {
+                return null;
+            }
+
+            return createRangeMethod.MakeGenericMethod(elementType);
+        }
+
+        protected MethodInfo ImmutableDictionaryCreateRangeMethod(Type constructingType, Type elementType)
+        {
+            MethodInfo createRangeMethod = FindImmutableCreateRangeMethod(constructingType);
+
+            if (createRangeMethod == null)
+            {
+                return null;
+            }
+
+            return createRangeMethod.MakeGenericMethod(typeof(string), elementType);
+        }
+
+        private MethodInfo FindImmutableCreateRangeMethod(Type constructingType)
         {
             MethodInfo[] constructingTypeMethods = constructingType.GetMethods();
-            MethodInfo createRange = null;
 
             foreach (MethodInfo method in constructingTypeMethods)
             {
                 if (method.Name == "CreateRange" && method.GetParameters().Length == 1)
                 {
-                    createRange = method;
-                    break;
+                    return method;
                 }
             }
 
-            Debug.Assert(createRange != null);
-
-            return createRange.MakeGenericMethod(elementType);
+            // This shouldn't happen because constructingType should be an immutable type with
+            // a CreateRange method. `null` being returned here will cause a JsonException to be
+            // thrown when the desired CreateRange delegate is about to be invoked.
+            Debug.Fail("Could not create the appropriate CreateRange method.");
+            return null;
         }
     }
 }

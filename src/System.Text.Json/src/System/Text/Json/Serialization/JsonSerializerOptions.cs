@@ -18,6 +18,7 @@ namespace System.Text.Json
         internal static readonly JsonSerializerOptions s_defaultOptions = new JsonSerializerOptions();
 
         private readonly ConcurrentDictionary<Type, JsonClassInfo> _classes = new ConcurrentDictionary<Type, JsonClassInfo>();
+        private readonly ConcurrentDictionary<Type, JsonPropertyInfo> _objectJsonProperties = new ConcurrentDictionary<Type, JsonPropertyInfo>();
         private ClassMaterializer _classMaterializerStrategy;
         private JsonNamingPolicy _dictionayKeyPolicy;
         private JsonNamingPolicy _jsonPropertyNamingPolicy;
@@ -305,6 +306,24 @@ namespace System.Text.Json
             };
         }
 
+        internal JsonPropertyInfo GetJsonPropertyInfoFromClassInfo(JsonClassInfo classInfo, JsonSerializerOptions options)
+        {
+            if (classInfo.ClassType != ClassType.Object)
+            {
+                return classInfo.GetPolicyProperty();
+            }
+
+            Type objectType = classInfo.Type;
+
+            if (!_objectJsonProperties.TryGetValue(objectType, out JsonPropertyInfo propertyInfo))
+            {
+                propertyInfo = JsonClassInfo.CreateProperty(objectType, objectType, null, typeof(object), options);
+                _objectJsonProperties[objectType] = propertyInfo;
+            }
+
+            return propertyInfo;
+        }
+
         private void VerifyMutable()
         {
             // The default options are hidden and thus should be immutable.
@@ -315,10 +334,5 @@ namespace System.Text.Json
                 ThrowHelper.ThrowInvalidOperationException_SerializerOptionsImmutable();
             }
         }
-
-        /// <summary>
-        /// Internal flag to let us know that we need to read ahead in the inner read loop.
-        /// </summary>
-        internal bool ReadAhead { get; set; }
     }
 }

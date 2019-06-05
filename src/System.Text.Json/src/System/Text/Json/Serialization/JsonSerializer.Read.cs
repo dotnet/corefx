@@ -25,7 +25,7 @@ namespace System.Text.Json
 
                 while (true)
                 {
-                    if (options.ReadAhead)
+                    if (readStack.ReadAhead)
                     {
                         // When we're reading ahead we always have to save the state
                         // as we don't know if the next token is an opening object or
@@ -66,7 +66,7 @@ namespace System.Text.Json
                                 break;
                             }
                         }
-                        else if (readStack.Current.IsProcessingDictionary)
+                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingImmutableDictionary)
                         {
                             HandleStartDictionary(options, ref reader, ref readStack);
                         }
@@ -81,7 +81,7 @@ namespace System.Text.Json
                         {
                             readStack.Pop();
                         }
-                        else if (readStack.Current.IsProcessingDictionary)
+                        else if (readStack.Current.IsProcessingDictionary || readStack.Current.IsProcessingImmutableDictionary)
                         {
                             HandleEndDictionary(options, ref reader, ref readStack);
                         }
@@ -130,7 +130,7 @@ namespace System.Text.Json
             ref ReadStack readStack,
             ref JsonReaderState initialState)
         {
-            if (options.ReadAhead)
+            if (readStack.ReadAhead)
             {
                 // Attempt to skip to make sure we have all the data we need.
                 bool complete = reader.TrySkip();

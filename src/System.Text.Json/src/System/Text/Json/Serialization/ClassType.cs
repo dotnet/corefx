@@ -14,5 +14,6 @@ namespace System.Text.Json
         Value = 2,          // Data type with single value
         Enumerable = 3,     // IEnumerable
         Dictionary = 4,     // IDictionary
+        ImmutableDictionary = 5, // Immutable Dictionary
     }
 }
