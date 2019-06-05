@@ -50,6 +50,9 @@
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerable.NonGeneric.Tests.cs">
       <Link>Common\System\Collections\IEnumerable.NonGeneric.Tests.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Globalization\GlobalizationMode.cs">
+      <Link>Common\System\Globalization\Globalizationmode.cs</Link>
+    </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\CriticalHandleZeroOrMinusOneIsInvalid.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
