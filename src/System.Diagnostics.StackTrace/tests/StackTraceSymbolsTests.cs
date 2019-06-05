@@ -19,18 +19,21 @@ namespace System.Diagnostics.SymbolStore.Tests
 
             Assert.True(File.Exists(pdbPath));
 
-            try 
+            try
             {
-                throw new Exception();
-            }
-            catch (Exception ex)
-            {
-                // Force the PDB to be loaded
-                Assert.NotNull(ex.StackTrace);
-            }
+                new StackTrace(true).GetFrames();
 
-            File.Move(pdbPath, targetPath);
-            Assert.True(File.Exists(targetPath));
+                File.Move(pdbPath, targetPath);
+
+                Assert.True(File.Exists(targetPath));
+            }
+            finally
+            {
+                if (File.Exists(targetPath))
+                {
+                    File.Move(targetPath, pdbPath);
+                }
+            }
         }
     }
 }
