@@ -23,6 +23,9 @@
     <Compile Include="$(CommonPath)\Internal\Cryptography\Helpers.cs">
       <Link>Internal\Cryptography\Helpers.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\System\Security\Cryptography\CryptoPool.cs">
+      <Link>System\Security\Cryptography\CryptoPool.cs</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
     <Compile Include="Internal\Cryptography\AsnFormatter.Windows.cs" />
