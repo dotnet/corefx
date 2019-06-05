@@ -118,6 +118,7 @@ namespace System.Text.Json.Serialization.Tests
         [Theory]
         [InlineData(typeof(ImmutableDictionary<string, string>), "\"headers\"")]
         [InlineData(typeof(Dictionary<string, string>), "\"headers\"")]
+        [InlineData(typeof(PocoDictionary), "\"headers\"")]
         public static void InvalidJsonForValueShouldFail(Type type, string json)
         {
             Assert.Throws<JsonException>(() => JsonSerializer.Parse(json, type));
