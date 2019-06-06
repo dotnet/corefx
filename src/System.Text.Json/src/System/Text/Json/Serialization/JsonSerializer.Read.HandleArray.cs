@@ -162,6 +162,11 @@ namespace System.Text.Json
                 }
                 else
                 {
+                    if (state.Current.ReturnValue == null)
+                    {
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(value.GetType(), reader, state.JsonPath);
+                        return;
+                    }
                     ((IList)state.Current.ReturnValue).Add(value);
                 }
             }

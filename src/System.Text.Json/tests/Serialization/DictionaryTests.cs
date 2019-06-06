@@ -124,12 +124,33 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Throws<JsonException>(() => JsonSerializer.Parse(json, type));
         }
 
+        [InlineData(typeof(int[]), @"""test""")]
+        [InlineData(typeof(int[]), @"1")]
+        [InlineData(typeof(int[]), @"false")]
+        [InlineData(typeof(int[]), @"{}")]
+        [InlineData(typeof(int[]), @"[""test""")]
+        [InlineData(typeof(int[]), @"[true]")]
+        // [InlineData(typeof(int[]), @"[{}]")] Fix is in progress
+        [InlineData(typeof(int[]), @"[[]]")]
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": {}}")]
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": ""test""}")]
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": 1}")]
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": true}")]
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [""test""]}")]
+        [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [[]]}")]
+        // [InlineData(typeof(Dictionary<string, int[]>), @"{""test"": [{}]}")]  Fix is in progress
+        public static void InvalidJsonForArrayShouldFail(Type type, string json)
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse(json, type));
+        }
+
         [Fact]
         public static void InvalidEmptyDictionaryInput()
         {
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<string>("{}"));
         }
 
+        [Fact]
         public static void PocoWithDictionaryObject()
         {
             PocoDictionary dict = JsonSerializer.Parse<PocoDictionary>("{\n\t\"key\" : {\"a\" : \"b\", \"c\" : \"d\"}}");

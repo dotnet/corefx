@@ -58,6 +58,12 @@ namespace System.Text.Json
                 return;
             }
 
+            if (state.Current.IsProcessingEnumerable && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                return;
+            }
+
             if (ValueConverter == null || !ValueConverter.TryRead(RuntimePropertyType, ref reader, out TRuntimeProperty value))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
