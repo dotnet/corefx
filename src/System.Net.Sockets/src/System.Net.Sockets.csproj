@@ -295,9 +295,6 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.cs">
       <Link>Interop\Unix\System.Native\Interop.Fcntl.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Fcntl.cs">
-      <Link>Common\Interop\Unix\Interop.Fcntl.cs</Link>
-    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Disconnect.cs">
       <Link>Common\Interop\Unix\Interop.Disconnect.cs</Link>
     </Compile>
