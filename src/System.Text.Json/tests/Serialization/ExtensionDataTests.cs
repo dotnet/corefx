@@ -178,23 +178,54 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void InvalidExtensionValue()
+        public static void ExtensionPropertyObjectValue_Empty()
+        {
+            // Baseline
+            ClassWithExtensionPropertyAlreadyInstantiated obj = JsonSerializer.Parse<ClassWithExtensionPropertyAlreadyInstantiated>(@"{}");
+            Assert.Equal(@"{""MyOverflow"":{}}", JsonSerializer.ToString(obj));
+        }
+
+        [Fact]
+        public static void ExtensionPropertyObjectValue()
         {
             // Baseline
             ClassWithExtensionPropertyAlreadyInstantiated obj = JsonSerializer.Parse<ClassWithExtensionPropertyAlreadyInstantiated>(@"{}");
             obj.MyOverflow.Add("test", new object());
+            obj.MyOverflow.Add("test1", 1);
 
-            try
-            {
-                JsonSerializer.ToString(obj);
-                Assert.True(false, "InvalidOperationException should have thrown.");
-            }
-            catch (InvalidOperationException e)
-            {
-                // Verify the exception contains the property name and invalid type.
-                Assert.Contains("ClassWithExtensionPropertyAlreadyInstantiated.MyOverflow", e.Message);
-                Assert.Contains("System.Object", e.Message);
-            }
+            Assert.Equal(@"{""MyOverflow"":{""test"":{},""test1"":1}}", JsonSerializer.ToString(obj));
+        }
+
+        [Fact]
+        public static void ExtensionPropertyObjectValue_RoundTrip()
+        {
+            // Baseline
+            ClassWithExtensionPropertyAlreadyInstantiated obj = JsonSerializer.Parse<ClassWithExtensionPropertyAlreadyInstantiated>(@"{}");
+            obj.MyOverflow.Add("test", new object());
+            obj.MyOverflow.Add("test1", 1);
+            obj.MyOverflow.Add("test2", "text");
+            obj.MyOverflow.Add("test3", new DummyObj() { Prop = "Prop" });
+
+            ClassWithExtensionPropertyAlreadyInstantiated roundTripObj = JsonSerializer.Parse<ClassWithExtensionPropertyAlreadyInstantiated>(JsonSerializer.ToString(obj));
+
+            Assert.Equal(4, roundTripObj.MyOverflow.Count);
+
+            Assert.IsType<JsonElement>(roundTripObj.MyOverflow["test"]);
+            Assert.IsType<JsonElement>(roundTripObj.MyOverflow["test1"]);
+            Assert.IsType<JsonElement>(roundTripObj.MyOverflow["test2"]);
+            Assert.IsType<JsonElement>(roundTripObj.MyOverflow["test3"]);
+
+            Assert.Equal(JsonValueType.Object, ((JsonElement)roundTripObj.MyOverflow["test"]).Type);
+
+            Assert.Equal(JsonValueType.Number, ((JsonElement)roundTripObj.MyOverflow["test1"]).Type);
+            Assert.Equal(1, ((JsonElement)roundTripObj.MyOverflow["test1"]).GetInt32());
+            Assert.Equal(1, ((JsonElement)roundTripObj.MyOverflow["test1"]).GetInt64());
+
+            Assert.Equal(JsonValueType.String, ((JsonElement)roundTripObj.MyOverflow["test2"]).Type);
+            Assert.Equal("text", ((JsonElement)roundTripObj.MyOverflow["test2"]).GetString());
+
+            Assert.Equal(JsonValueType.Object, ((JsonElement)roundTripObj.MyOverflow["test3"]).Type);
+            Assert.Equal("Prop", ((JsonElement)roundTripObj.MyOverflow["test3"]).GetProperty("Prop").GetString());
         }
 
         [Fact]
@@ -212,6 +243,11 @@ namespace System.Text.Json.Serialization.Tests
             Assert.IsType<JsonElement>(child.MyOverflow["MyIntMissingChild"]);
             Assert.Equal(1, child.MyOverflow.Count);
             Assert.Equal(3, child.MyOverflow["MyIntMissingChild"].GetInt32());
+        }
+
+        public class DummyObj
+        {
+            public string Prop { get; set; }
         }
 
         public class ClassWithExtensionPropertyAlreadyInstantiated
