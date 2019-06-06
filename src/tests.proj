@@ -10,7 +10,7 @@
     <SerializeProjects Condition="'$(BuildingUAPVertical)' == 'true' or '$(Coverage)' == 'true'">true</SerializeProjects>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(BuildAllConfigurations)' != 'true' and '$(BuildingUAPAOTVertical)' != 'true'">
+  <ItemGroup Condition="'$(BuildAllConfigurations)' != 'true'">
     <Project Include="$(SourceDir)*\tests\**\*.Tests.csproj" />
 
     <!-- Harcoded list of non-csproj test projects to reduce time spent on file globbing. -->
