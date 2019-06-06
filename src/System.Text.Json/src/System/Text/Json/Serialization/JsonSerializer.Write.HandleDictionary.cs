@@ -27,7 +27,7 @@ namespace System.Text.Json
                 if (enumerable == null)
                 {
                     // Write a null object or enumerable.
-                    state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, writeNull : true);
+                    state.Current.WriteObjectOrArrayStart(ClassType.Dictionary, writer, writeNull: true);
                     return true;
                 }
 
@@ -37,32 +37,28 @@ namespace System.Text.Json
 
             if (state.Current.Enumerator.MoveNext())
             {
-                // Handle DataExtension.
-                if (ReferenceEquals(jsonPropertyInfo, state.Current.JsonClassInfo.DataExtensionProperty))
+                // Check for polymorphism.
+                if (elementClassInfo.ClassType == ClassType.Unknown)
                 {
-                    DictionaryEntry entry = ((IDictionaryEnumerator)state.Current.Enumerator).Entry;
+                    object currentValue = ((IDictionaryEnumerator)state.Current.Enumerator).Entry.Value;
+                    GetRuntimeClassInfo(currentValue, ref elementClassInfo, options);
+                }
 
-                    // for JsonElement values we emit a json property
-                    if (entry.Value is JsonElement element)
-                    {
-                        Debug.Assert(entry.Key is string);
-
-                        string propertyName = (string)entry.Key;
-                        element.WriteProperty(propertyName, writer);
-                    }
-                    // for object values we emit a dictionary
-                    else if (entry.Value is object)
-                    {
-                        WriteDictionary(jsonPropertyInfo, elementClassInfo, options, writer, ref state);
-                    }
-                    else
-                    {
-                        ThrowHelper.ThrowInvalidOperationException_SerializationDataExtensionPropertyInvalid(state.Current.JsonClassInfo, entry.Value.GetType());
-                    }
+                if (elementClassInfo.ClassType == ClassType.Value)
+                {
+                    elementClassInfo.GetPolicyProperty().WriteDictionary(ref state.Current, writer);
+                }
+                else if (state.Current.Enumerator.Current == null)
+                {
+                    writer.WriteNull(jsonPropertyInfo.Name);
                 }
                 else
                 {
-                    WriteDictionary(jsonPropertyInfo, elementClassInfo, options, writer, ref state);
+                    // An object or another enumerator requires a new stack frame.
+                    var enumerator = (IDictionaryEnumerator)state.Current.Enumerator;
+                    object value = enumerator.Value;
+                    state.Push(elementClassInfo, value);
+                    state.Current.KeyName = (string)enumerator.Key;
                 }
 
                 return false;
@@ -81,33 +77,6 @@ namespace System.Text.Json
             }
 
             return true;
-        }
-
-        private static void WriteDictionary(JsonPropertyInfo jsonPropertyInfo, JsonClassInfo elementClassInfo, JsonSerializerOptions options, Utf8JsonWriter writer, ref WriteStack state)
-        {
-            // Check for polymorphism.
-            if (elementClassInfo.ClassType == ClassType.Unknown)
-            {
-                object currentValue = ((IDictionaryEnumerator)state.Current.Enumerator).Entry.Value;
-                GetRuntimeClassInfo(currentValue, ref elementClassInfo, options);
-            }
-
-            if (elementClassInfo.ClassType == ClassType.Value)
-            {
-                elementClassInfo.GetPolicyProperty().WriteDictionary(ref state.Current, writer);
-            }
-            else if (state.Current.Enumerator.Current == null)
-            {
-                writer.WriteNull(jsonPropertyInfo.Name);
-            }
-            else
-            {
-                // An object or another enumerator requires a new stack frame.
-                var enumerator = (IDictionaryEnumerator)state.Current.Enumerator;
-                object value = enumerator.Value;
-                state.Push(elementClassInfo, value);
-                state.Current.KeyName = (string)enumerator.Key;
-            }
         }
 
         internal static void WriteDictionary<TProperty>(
