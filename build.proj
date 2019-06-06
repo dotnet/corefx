@@ -93,4 +93,6 @@
       <SolutionsToUpdate Include="@(_solutionsToUpdateFiles->'%(RootDir)%(Directory)')" Exclude="@(_solutionsToExcludeFromUpdate)" />
     </ItemGroup>
   </Target>
+
+  <Import Project="$(RepositoryEngineeringDir)uap-tools.targets" />
 </Project>

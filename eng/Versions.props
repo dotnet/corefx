@@ -24,6 +24,7 @@
     <NETStandardLibraryPackageId>NETStandard.Library</NETStandardLibraryPackageId>
     <WindowsCoreFxOptimizationDataPackageId>optimization.windows_nt-x64.ibc.corefx</WindowsCoreFxOptimizationDataPackageId>
     <LinuxCoreFxOptimizationDataPackageId>optimization.linux-x64.ibc.corefx</LinuxCoreFxOptimizationDataPackageId>
+    <MicrosoftDotNetUapTestToolsPackageId>microsoft.dotnet.uap.testtools</MicrosoftDotNetUapTestToolsPackageId>
   </PropertyGroup>
   <PropertyGroup>
     <!-- Arcade dependencies -->

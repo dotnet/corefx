@@ -10,7 +10,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <!-- Reuse the same runtimeconfig used by MSBuild. -->
-    <GeneratorRuntimeConfig>$(MSBuildToolsPath)\msbuild.runtimeconfig.json</GeneratorRuntimeConfig>
+    <GeneratorRuntimeConfig>$(MSBuildToolsPath)\MSBuild.runtimeconfig.json</GeneratorRuntimeConfig>
     <GeneratorCliPath Condition="'$(TargetsNetCoreApp)' == 'true'">$(TestHostRootPath)</GeneratorCliPath>
     <GeneratorCliPath Condition="'$(TargetsNetCoreApp)' != 'true'">$(DotNetRoot)</GeneratorCliPath>
   </PropertyGroup>
