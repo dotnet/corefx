@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text.Json.Serialization.Policies;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -143,7 +143,7 @@ namespace System.Text.Json.Serialization
                 Debug.Assert(entry.Key is string);
 
                 string propertyName = (string)entry.Key;
-                element.WriteAsProperty(propertyName, writer);
+                element.WriteProperty(propertyName, writer);
             }
             else
             {
