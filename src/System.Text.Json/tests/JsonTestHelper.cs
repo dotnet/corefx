@@ -17,6 +17,14 @@ namespace System.Text.Json
 {
     internal static class JsonTestHelper
     {
+#if BUILDING_INBOX_LIBRARY
+        public const string DoubleFormatString = "G";
+        public const string SingleFormatString = "G";
+#else
+        public const string DoubleFormatString = "G17";
+        public const string SingleFormatString = "G9";
+#endif
+
         public static string NewtonsoftReturnStringHelper(TextReader reader)
         {
             var sb = new StringBuilder();

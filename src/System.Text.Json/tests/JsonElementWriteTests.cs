@@ -50,7 +50,7 @@ namespace System.Text.Json.Tests
             // confirm the printing precision of double, like
             //
             //double precisePi = double.Parse(PrecisePi);
-            //Assert.NotEqual(PrecisePi, precisePi.ToString("R"));
+            //Assert.NotEqual(PrecisePi, precisePi.ToString(JsonTestHelper.DoubleFormatString));
 
             WriteSimpleValue(indented, PrecisePi);
         }
@@ -68,7 +68,7 @@ namespace System.Text.Json.Tests
             // confirm the printing precision of double, like
             //
             //double oneQuarticGoogol = double.Parse(OneQuarticGoogol);
-            //Assert.NotEqual(OneQuarticGoogol, oneQuarticGoogol.ToString("R"));
+            //Assert.NotEqual(OneQuarticGoogol, oneQuarticGoogol.ToString(JsonTestHelper.DoubleFormatString));
 
             WriteSimpleValue(indented, OneQuarticGoogol);
         }
