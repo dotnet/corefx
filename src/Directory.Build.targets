@@ -72,6 +72,7 @@
     At that point restore and conflict resolution already happened therefore setting the item here has no side effects.
    -->
   <Target Name="SetRuntimeFrameworksBeforeGenerateConfigurationFiles"
+          Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'"
           BeforeTargets="GenerateBuildRuntimeConfigurationFiles">
 
     <ItemGroup>

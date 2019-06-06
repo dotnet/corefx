@@ -55,11 +55,12 @@
     <RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeWinX64RuntimeNativeSystemDataSqlClientSniPackageVersion>
     <RuntimeNativeSystemDataSqlClientSniPackageVersion>4.4.0</RuntimeNativeSystemDataSqlClientSniPackageVersion>
     <!-- Testing -->
-    <MicrosoftNETTestSdkPackageVersion>16.0.1</MicrosoftNETTestSdkPackageVersion>
+    <MicrosoftNETTestSdkPackageVersion>15.9.2</MicrosoftNETTestSdkPackageVersion>
     <XUnitPackageVersion>2.4.1-pre.build.4059</XUnitPackageVersion>
     <TraceEventPackageVersion>2.0.5</TraceEventPackageVersion>
     <MicrosoftDotNetUapTestToolsPackageVersion>1.0.31</MicrosoftDotNetUapTestToolsPackageVersion>
     <NewtonsoftJsonPackageVersion>12.0.1</NewtonsoftJsonPackageVersion>
+    <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0-preview5-27626-15</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Test data -->
     <SystemIOCompressionTestDataPackageVersion>1.0.8</SystemIOCompressionTestDataPackageVersion>
     <SystemIOPackagingTestDataPackageVersion>1.0.1</SystemIOPackagingTestDataPackageVersion>
