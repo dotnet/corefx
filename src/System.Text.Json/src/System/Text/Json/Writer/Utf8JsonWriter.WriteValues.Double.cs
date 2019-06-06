@@ -18,7 +18,8 @@ namespace System.Text.Json
         /// Thrown if this would result in an invalid JSON to be written (while validation is enabled).
         /// </exception>
         /// <remarks>
-        /// Writes the <see cref="double"/> using the default <see cref="StandardFormat"/> (i.e. 'G').
+        /// Writes the <see cref="double"/> using a <see cref="StandardFormat"/> of 'G' on .NET Core
+        /// and 'G17' on .NET Framework.
         /// </remarks>
         public void WriteNumberValue(double value)
         {
@@ -88,7 +89,13 @@ namespace System.Text.Json
                 BytesPending += indent;
             }
 
-            bool result = Utf8Formatter.TryFormat(value, output.Slice(BytesPending), out int bytesWritten);
+#if BUILDING_INBOX_LIBRARY
+            var format = new StandardFormat('G');
+#else
+            var format = new StandardFormat('G', 17);
+#endif
+
+            bool result = Utf8Formatter.TryFormat(value, output.Slice(BytesPending), out int bytesWritten, format);
             Debug.Assert(result);
             BytesPending += bytesWritten;
         }
