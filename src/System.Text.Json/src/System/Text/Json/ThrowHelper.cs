@@ -630,7 +630,7 @@ namespace System.Text.Json
         TrailingCommaNotAllowedBeforeObjectEnd,
         InvalidCharacterAtStartOfComment,
         UnexpectedEndOfDataWhileReadingComment,
-		UnexpectedEndOfLineSeparator,
+        UnexpectedEndOfLineSeparator,
         ExpectedOneCompleteToken,
         NotEnoughData,
     }
