@@ -15,9 +15,6 @@ namespace System.Net.Http
     /// </summary>
     internal sealed class DiagnosticsHandler : DelegatingHandler
     {
-        internal bool SuppressActivityPropagation { get; set; }
-        internal static bool SuppressGlobalActivityPropagation  { get; set; }
-
         /// <summary>
         /// DiagnosticHandler constructor
         /// </summary>
@@ -47,15 +44,9 @@ namespace System.Net.Http
                 throw new ArgumentNullException(nameof(request), SR.net_http_handler_norequest);
             }
 
-            // do not instrument if activity propagation is explicitly disabled by customer on this HttpClientHandler instance
-            if (SuppressActivityPropagation)
-            {
-                return await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
-            }
-
             Activity activity = null;
 
-            // if there is no listener, but propagation is enabled (with previous IsEnabled() and SuppressActivityPropagation check)
+            // if there is no listener, but propagation is enabled (with previous IsEnabled() check)
             // do not write any events just start/stop Activity and propagate Ids
             if (!s_diagnosticListener.IsEnabled())
             {
@@ -171,6 +162,31 @@ namespace System.Net.Http
         }
 
         #region private
+
+        private const string SuppressActivityPropagationEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SUPPRESSACTIVITYPROPAGATION";
+        private const string SuppressActivityPropagationAppCtxSettingName = "System.Net.Http.SuppressActivityPropagation";
+
+        private static readonly bool SuppressGlobalActivityPropagation = GetSuppressActivityPropagationValue();
+
+        private static bool GetSuppressActivityPropagationValue()
+        {
+            // First check for the AppContext switch, giving it priority over the environment variable.
+            if (AppContext.TryGetSwitch(SuppressActivityPropagationAppCtxSettingName, out bool suppressActivityPropagation))
+            {
+                return suppressActivityPropagation;
+            }
+
+            // AppContext switch wasn't used. Check the environment variable to determine which handler should be used.
+            string envVar = Environment.GetEnvironmentVariable(SuppressActivityPropagationEnvironmentVariableSettingName);
+            if (envVar != null && (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1")))
+            {
+                // Suppress Activity propagation.
+                return true;
+            }
+
+            // Defaults to not suppressing Activity propagation.
+            return false;
+        }
 
         private static void InjectHeaders(Activity currentActivity, HttpRequestMessage request)
         {

@@ -350,31 +350,6 @@ namespace System.Net.Http
             }
         }
 
-        public bool SuppressActivityPropagation
-        {
-            get
-            { 
-                 // no DiagnosticsHandler on uap
-                return true;
-            }
-            set 
-            {
-                CheckDisposedOrStarted();
-            }
-        }
-
-        public static bool SuppressGlobalActivityPropagation 
-        {
-            get
-            { 
-                 // no DiagnosticsHandler on uap
-                return true;
-            }
-            set 
-            {
-            }
-        }
-
         #endregion Properties
 
         #region De/Constructors

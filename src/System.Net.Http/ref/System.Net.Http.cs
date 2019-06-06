@@ -107,8 +107,6 @@ namespace System.Net.Http
         public bool UseCookies { get { throw null; } set { } }
         public bool UseDefaultCredentials { get { throw null; } set { } }
         public bool UseProxy { get { throw null; } set { } }
-        public bool SuppressActivityPropagation { get { throw null; } set { } }
-        public static bool SuppressGlobalActivityPropagation { get { throw null; } set { } }
         protected override void Dispose(bool disposing) { }
         protected internal override System.Threading.Tasks.Task<System.Net.Http.HttpResponseMessage> SendAsync(System.Net.Http.HttpRequestMessage request, System.Threading.CancellationToken cancellationToken) { throw null; }
     }
