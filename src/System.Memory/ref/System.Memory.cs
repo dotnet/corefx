@@ -9,32 +9,32 @@ namespace System
 {
     public static partial class MemoryExtensions
     {
-        public static System.ReadOnlyMemory<char> AsMemory(this string text) { throw null; }
-        public static System.ReadOnlyMemory<char> AsMemory(this string text, System.Index startIndex) { throw null; }
-        public static System.ReadOnlyMemory<char> AsMemory(this string text, int start) { throw null; }
-        public static System.ReadOnlyMemory<char> AsMemory(this string text, int start, int length) { throw null; }
-        public static System.ReadOnlyMemory<char> AsMemory(this string text, System.Range range) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this string? text) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this string? text, System.Index startIndex) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this string? text, int start) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this string? text, int start, int length) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this string? text, System.Range range) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
-        public static System.Memory<T> AsMemory<T>(this T[] array) { throw null; }
-        public static System.Memory<T> AsMemory<T>(this T[] array, System.Index startIndex) { throw null; }
-        public static System.Memory<T> AsMemory<T>(this T[] array, int start) { throw null; }
-        public static System.Memory<T> AsMemory<T>(this T[] array, int start, int length) { throw null; }
-        public static System.Memory<T> AsMemory<T>(this T[] array, System.Range range) { throw null; }
-        public static System.ReadOnlySpan<char> AsSpan(this string text) { throw null; }
-        public static System.ReadOnlySpan<char> AsSpan(this string text, int start) { throw null; }
-        public static System.ReadOnlySpan<char> AsSpan(this string text, int start, int length) { throw null; }
+        public static System.Memory<T> AsMemory<T>(this T[]? array) { throw null; }
+        public static System.Memory<T> AsMemory<T>(this T[]? array, System.Index startIndex) { throw null; }
+        public static System.Memory<T> AsMemory<T>(this T[]? array, int start) { throw null; }
+        public static System.Memory<T> AsMemory<T>(this T[]? array, int start, int length) { throw null; }
+        public static System.Memory<T> AsMemory<T>(this T[]? array, System.Range range) { throw null; }
+        public static System.ReadOnlySpan<char> AsSpan(this string? text) { throw null; }
+        public static System.ReadOnlySpan<char> AsSpan(this string? text, int start) { throw null; }
+        public static System.ReadOnlySpan<char> AsSpan(this string? text, int start, int length) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, System.Index startIndex) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, System.Range range) { throw null; }
-        public static System.Span<T> AsSpan<T>(this T[] array) { throw null; }
-        public static System.Span<T> AsSpan<T>(this T[] array, System.Index startIndex) { throw null; }
-        public static System.Span<T> AsSpan<T>(this T[] array, int start) { throw null; }
-        public static System.Span<T> AsSpan<T>(this T[] array, int start, int length) { throw null; }
-        public static System.Span<T> AsSpan<T>(this T[] array, System.Range range) { throw null; }
+        public static System.Span<T> AsSpan<T>(this T[]? array) { throw null; }
+        public static System.Span<T> AsSpan<T>(this T[]? array, System.Index startIndex) { throw null; }
+        public static System.Span<T> AsSpan<T>(this T[]? array, int start) { throw null; }
+        public static System.Span<T> AsSpan<T>(this T[]? array, int start, int length) { throw null; }
+        public static System.Span<T> AsSpan<T>(this T[]? array, System.Range range) { throw null; }
         public static int BinarySearch<T>(this System.ReadOnlySpan<T> span, System.IComparable<T> comparable) { throw null; }
         public static int BinarySearch<T>(this System.Span<T> span, System.IComparable<T> comparable) { throw null; }
         public static int BinarySearch<T, TComparer>(this System.ReadOnlySpan<T> span, T value, TComparer comparer) where TComparer : System.Collections.Generic.IComparer<T> { throw null; }
@@ -45,8 +45,8 @@ namespace System
         public static bool Contains(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool Contains<T>(this System.ReadOnlySpan<T> span, T value) where T : System.IEquatable<T> { throw null; }
         public static bool Contains<T>(this System.Span<T> span, T value) where T : System.IEquatable<T> { throw null; }
-        public static void CopyTo<T>(this T[] source, System.Memory<T> destination) { }
-        public static void CopyTo<T>(this T[] source, System.Span<T> destination) { }
+        public static void CopyTo<T>(this T[]? source, System.Memory<T> destination) { }
+        public static void CopyTo<T>(this T[]? source, System.Span<T> destination) { }
         public static bool EndsWith(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool EndsWith<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
         public static bool EndsWith<T>(this System.Span<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
@@ -139,16 +139,16 @@ namespace System
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
-        public SequencePosition(object @object, int integer) { throw null; }
+        public SequencePosition(object? @object, int integer) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public bool Equals(System.SequencePosition other) { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public int GetInteger() { throw null; }
         [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
-        public object GetObject() { throw null; }
+        public object? GetObject() { throw null; }
     }
 }
 namespace System.Buffers
@@ -193,7 +193,7 @@ namespace System.Buffers
     {
         protected ReadOnlySequenceSegment() { }
         public System.ReadOnlyMemory<T> Memory { get { throw null; } protected set { } }
-        public System.Buffers.ReadOnlySequenceSegment<T> Next { get { throw null; } protected set { } }
+        public System.Buffers.ReadOnlySequenceSegment<T>? Next { get { throw null; } protected set { } }
         public long RunningIndex { get { throw null; } protected set { } }
     }
     public readonly partial struct ReadOnlySequence<T>
@@ -291,13 +291,13 @@ namespace System.Buffers
         public byte Precision { get { throw null; } }
         public char Symbol { get { throw null; } }
         public bool Equals(System.Buffers.StandardFormat other) { throw null; }
-        public override bool Equals(object obj) { throw null; }
+        public override bool Equals(object? obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public static bool operator ==(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
         public static implicit operator System.Buffers.StandardFormat (char symbol) { throw null; }
         public static bool operator !=(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
         public static System.Buffers.StandardFormat Parse(System.ReadOnlySpan<char> format) { throw null; }
-        public static System.Buffers.StandardFormat Parse(string format) { throw null; }
+        public static System.Buffers.StandardFormat Parse(string? format) { throw null; }
         public override string ToString() { throw null; }
         public static bool TryParse(System.ReadOnlySpan<char> format, out System.Buffers.StandardFormat result) { throw null; }
     }
@@ -461,7 +461,7 @@ namespace System.Runtime.InteropServices
         public static ref T AsRef<T>(System.Span<byte> span) where T : struct { throw null; }
         public static System.ReadOnlySpan<TTo> Cast<TFrom, TTo>(System.ReadOnlySpan<TFrom> span) where TFrom : struct where TTo : struct { throw null; }
         public static System.Span<TTo> Cast<TFrom, TTo>(System.Span<TFrom> span) where TFrom : struct where TTo : struct { throw null; }
-        public static System.Memory<T> CreateFromPinnedArray<T>(T[] array, int start, int length) { throw null; }
+        public static System.Memory<T> CreateFromPinnedArray<T>(T[]? array, int start, int length) { throw null; }
         public static System.ReadOnlySpan<T> CreateReadOnlySpan<T>(ref T reference, int length) { throw null; }
         public static System.Span<T> CreateSpan<T>(ref T reference, int length) { throw null; }
         public static ref T GetReference<T>(System.ReadOnlySpan<T> span) { throw null; }
@@ -469,9 +469,9 @@ namespace System.Runtime.InteropServices
         public static T Read<T>(System.ReadOnlySpan<byte> source) where T : struct { throw null; }
         public static System.Collections.Generic.IEnumerable<T> ToEnumerable<T>(System.ReadOnlyMemory<T> memory) { throw null; }
         public static bool TryGetArray<T>(System.ReadOnlyMemory<T> memory, out System.ArraySegment<T> segment) { throw null; }
-        public static bool TryGetMemoryManager<T, TManager>(System.ReadOnlyMemory<T> memory, out TManager manager) where TManager : System.Buffers.MemoryManager<T> { throw null; }
-        public static bool TryGetMemoryManager<T, TManager>(System.ReadOnlyMemory<T> memory, out TManager manager, out int start, out int length) where TManager : System.Buffers.MemoryManager<T> { throw null; }
-        public static bool TryGetString(System.ReadOnlyMemory<char> memory, out string text, out int start, out int length) { throw null; }
+        public static bool TryGetMemoryManager<T, TManager>(System.ReadOnlyMemory<T> memory, [System.Diagnostics.CodeAnalysis.NotNullWhenAttribute(true)] out TManager? manager) where TManager : System.Buffers.MemoryManager<T> { throw null; }
+        public static bool TryGetMemoryManager<T, TManager>(System.ReadOnlyMemory<T> memory, [System.Diagnostics.CodeAnalysis.NotNullWhenAttribute(true)] out TManager? manager, out int start, out int length) where TManager : System.Buffers.MemoryManager<T> { throw null; }
+        public static bool TryGetString(System.ReadOnlyMemory<char> memory, [System.Diagnostics.CodeAnalysis.NotNullWhenAttribute(true)] out string? text, out int start, out int length) { throw null; }
         public static bool TryRead<T>(System.ReadOnlySpan<byte> source, out T value) where T : struct { throw null; }
         public static bool TryWrite<T>(System.Span<byte> destination, ref T value) where T : struct { throw null; }
         public static void Write<T>(System.Span<byte> destination, ref T value) where T : struct { }
