@@ -48,14 +48,14 @@ namespace System.Text.Json
                         break;
                 }
 
-                if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)
-                {
-                    return false;
-                }
-
                 if (finishedSerializing && writer.CurrentDepth == 0)
                 {
                     continueWriting = false;
+                }
+
+                if (continueWriting && flushThreshold >= 0 && writer.BytesPending > flushThreshold)
+                {
+                    return false;
                 }
             } while (continueWriting);
 

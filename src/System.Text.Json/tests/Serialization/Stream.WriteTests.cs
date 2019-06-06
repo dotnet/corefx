@@ -2,7 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
@@ -58,6 +60,129 @@ namespace System.Text.Json.Serialization.Tests
             {
                 await ReadAsync(stream);
             }
+        }
+
+        [Fact]
+        [OuterLoop]
+        public static async Task WriteLargeJson()
+        {
+            using var httpClient = new HttpClient();
+            string json = await httpClient.GetStringAsync("https://raw.githubusercontent.com/davidfowl/AspNetCoreDiagnosticScenarios/master/Scenarios/pokemon.json");
+            JsonElement root = JsonSerializer.Parse<JsonElement>(json);
+            var ms = new MemoryStream();
+            await JsonSerializer.WriteAsync(ms, root, root.GetType(), new JsonSerializerOptions());
+            ms.Position = 0;
+            Assert.Equal(JsonSerializer.Parse<Rootobject>(json), JsonSerializer.Parse<Rootobject>(new StreamReader(ms).ReadToEnd()));
+        }
+
+        public class Rootobject : IEquatable<Rootobject>
+        {
+            public Pokemon[] pokemon { get; set; }
+
+            public bool Equals(Rootobject other)
+            {
+                foreach (Pokemon p in pokemon)
+                {
+                    if (!p.Equals(p))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        public class Pokemon : IEquatable<Pokemon>
+        {
+            public int id { get; set; }
+            public string num { get; set; }
+            public string name { get; set; }
+            public string img { get; set; }
+            public string[] type { get; set; }
+            public string height { get; set; }
+            public string weight { get; set; }
+            public string candy { get; set; }
+            public int candy_count { get; set; }
+            public string egg { get; set; }
+            public float spawn_chance { get; set; }
+            public float avg_spawns { get; set; }
+            public string spawn_time { get; set; }
+            public float[] multipliers { get; set; }
+            public string[] weaknesses { get; set; }
+            public Evolution[] next_evolution { get; set; }
+            public Evolution[] prev_evolution { get; set; }
+
+            public bool Equals(Pokemon other)
+            {
+                if (
+                        id != other.id || num != other.num || name != other.name ||
+                        img != other.img || height != other.height || weight != other.weight ||
+                        candy != other.candy || candy_count != other.candy_count || egg != other.egg ||
+                        spawn_chance != other.spawn_chance || avg_spawns != other.avg_spawns || spawn_time != other.spawn_time
+                    )
+                {
+                    return false;
+                }
+
+                if (!CompareArray(type, other.type))
+                {
+                    return false;
+                }
+
+                if (!CompareArray(multipliers, other.multipliers))
+                {
+                    return false;
+                }
+
+                if (!CompareArray(weaknesses, other.weaknesses))
+                {
+                    return false;
+                }
+
+                if (!CompareArray(next_evolution, other.next_evolution))
+                {
+                    return false;
+                }
+
+                if (!CompareArray(prev_evolution, other.prev_evolution))
+                {
+                    return false;
+                }
+
+                return true;
+
+                bool CompareArray<T>(T[] source, T[] target) 
+                    where T: IEquatable<T>
+                {
+                    if(source is null && target is null)
+                    {
+                        return true;
+                    }
+
+                    if (source.Length != target.Length)
+                    {
+                        return false;
+                    }
+
+                    for (int i = 0; i < target.Length; i++)
+                    {
+                        if (!source[i].Equals(target[i]))
+                        {
+                            return false;
+                        }
+                    }
+
+                    return true;
+                }
+            }
+        }
+
+        public class Evolution : IEquatable<Evolution>
+        {
+            public string num { get; set; }
+            public string name { get; set; }
+            public bool Equals(Evolution other) => num == other.num && name == other.name;
         }
 
         private static async Task WriteAsync(TestStream stream)
