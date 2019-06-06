@@ -2,8 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Diagnostics;
-using System.Text;
+using System.Text.Unicode;
 
 namespace System.Net.Http.Headers
 {
@@ -13,8 +14,6 @@ namespace System.Net.Http.Headers
     // Use HeaderDescriptor.TryGet to resolve an arbitrary header name to a HeaderDescriptor.
     internal readonly struct HeaderDescriptor : IEquatable<HeaderDescriptor>
     {
-        private static readonly Encoding s_utf8DecoderWithExceptionFallback = Encoding.GetEncoding("utf-8", EncoderFallback.ExceptionFallback, DecoderFallback.ExceptionFallback);
-
         private readonly string _headerName;
         private readonly KnownHeader _knownHeader;
 
@@ -116,9 +115,9 @@ namespace System.Net.Http.Headers
                     }
                 }
 
-                if (KnownHeader == KnownHeaders.Location)
+                if (_knownHeader == KnownHeaders.Location)
                 {
-                    // Normally Location should be in ISO-8859-1, ocassionally some servers respond with UTF-8 though
+                    // Normally Location should be in ISO-8859-1 but occasionally some servers respond with UTF-8.
                     if (TryDecodeUtf8(headerValue, out string decoded))
                     {
                         return decoded;
@@ -131,25 +130,19 @@ namespace System.Net.Http.Headers
 
         private static bool TryDecodeUtf8(ReadOnlySpan<byte> input, out string decoded)
         {
-            // TODO: Utilize vectorization helpers here if/when they're made public
-            bool possibleUtf8 = false;
-            for (int i = 0; i < input.Length; i++)
-            {
-                if (input[i] > 127)
-                {
-                    possibleUtf8 = true;
-                    break;
-                }
-            }
+            char[] rented = ArrayPool<char>.Shared.Rent(input.Length);
 
-            if (possibleUtf8)
+            try
             {
-                try
+                if (Utf8.ToUtf16(input, rented, out _, out int charsWritten, replaceInvalidSequences: false) == OperationStatus.Done)
                 {
-                    decoded = s_utf8DecoderWithExceptionFallback.GetString(input);
+                    decoded = new string(rented, 0, charsWritten);
                     return true;
                 }
-                catch (ArgumentException) { } // Not actually Utf-8
+            }
+            finally
+            {
+                ArrayPool<char>.Shared.Return(rented);
             }
 
             decoded = null;
