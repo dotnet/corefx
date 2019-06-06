@@ -2510,31 +2510,30 @@ namespace System.Text.Json
                     ignoreNextLfForLineTracking = false;
                 }
 
-                int idx = localBuffer.IndexOfAny(JsonConstants.LineFeed, JsonConstants.CarriageReturn, JsonConstants.Asterisk);
+                int idx = localBuffer.IndexOfAny(JsonConstants.Asterisk, JsonConstants.LineFeed, JsonConstants.CarriageReturn);
 
                 if (idx != -1)
                 {
-                    byte marker = localBuffer[idx];
-
                     int nextIdx = idx + 1;
-                    _consumed += nextIdx;
-                    _bytePositionInLine += nextIdx;
-
+                    byte marker = localBuffer[idx];
                     localBuffer = localBuffer.Slice(nextIdx);
+
+                    _consumed += nextIdx;
 
                     switch (marker)
                     {
                         case JsonConstants.Asterisk:
                             expectSlash = true;
+                            _bytePositionInLine += nextIdx;
                             break;
-                        case JsonConstants.CarriageReturn:
+                        case JsonConstants.LineFeed:
+                            _bytePositionInLine = 0;
+                            _lineNumber++;
+                            break;
+                        default: // JsonConstants.CarriageReturn:
                             _bytePositionInLine = 0;
                             _lineNumber++;
                             ignoreNextLfForLineTracking = true;
-                            break;
-                        default: // JsonConstants.LineFeed
-                            _bytePositionInLine = 0;
-                            _lineNumber++;
                             break;
                     }
                 }

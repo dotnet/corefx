@@ -2370,7 +2370,7 @@ namespace System.Text.Json
             }
         }
 
-        // assumes first byte (JsonConstants.MaybeDangerousLineSeparator) is already read
+        // assumes first byte (JsonConstants.StartingByteOfNonStandardSeparator) is already read
         private void ThrowOnDangerousLineSeparator(ReadOnlySpan<byte> localBuffer)
         {
             // \u2028 and \u2029 are considered respectively line and paragraph separators
@@ -2384,7 +2384,9 @@ namespace System.Text.Json
 
             byte next = localBuffer[1];
             if (localBuffer[0] == 0x80 && (next == 0xA8 || next == 0xA9))
+            {
                 ThrowHelper.ThrowJsonReaderException(ref this, ExceptionResource.UnexpectedEndOfLineSeparator);
+            }
         }
 
         private bool SkipMultiLineComment(ReadOnlySpan<byte> localBuffer, out int idx)
