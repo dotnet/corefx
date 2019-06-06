@@ -63,126 +63,26 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        [OuterLoop]
         public static async Task WriteLargeJson()
         {
-            using var httpClient = new HttpClient();
-            string json = await httpClient.GetStringAsync("https://raw.githubusercontent.com/davidfowl/AspNetCoreDiagnosticScenarios/master/Scenarios/pokemon.json");
-            JsonElement root = JsonSerializer.Parse<JsonElement>(json);
+            // Generating tailored json
+            int i = 0;
+            StringBuilder json = new StringBuilder();
+            json.Append("{");
+            while (true)
+            {
+                if (json.Length >= 14757)
+                {
+                    break;
+                }
+                json.AppendFormat(@"""Key_{0}"":""{0}"",", i);
+                i++;
+            }
+            json.Remove(json.Length - 1, 1).Append("}");
+
+            JsonElement root = JsonSerializer.Parse<JsonElement>(json.ToString());
             var ms = new MemoryStream();
-            await JsonSerializer.WriteAsync(ms, root, root.GetType(), new JsonSerializerOptions());
-            ms.Position = 0;
-            Assert.Equal(JsonSerializer.Parse<Rootobject>(json), JsonSerializer.Parse<Rootobject>(new StreamReader(ms).ReadToEnd()));
-        }
-
-        public class Rootobject : IEquatable<Rootobject>
-        {
-            public Pokemon[] pokemon { get; set; }
-
-            public bool Equals(Rootobject other)
-            {
-                foreach (Pokemon p in pokemon)
-                {
-                    if (!p.Equals(p))
-                    {
-                        return false;
-                    }
-                }
-
-                return true;
-            }
-        }
-
-        public class Pokemon : IEquatable<Pokemon>
-        {
-            public int id { get; set; }
-            public string num { get; set; }
-            public string name { get; set; }
-            public string img { get; set; }
-            public string[] type { get; set; }
-            public string height { get; set; }
-            public string weight { get; set; }
-            public string candy { get; set; }
-            public int candy_count { get; set; }
-            public string egg { get; set; }
-            public float spawn_chance { get; set; }
-            public float avg_spawns { get; set; }
-            public string spawn_time { get; set; }
-            public float[] multipliers { get; set; }
-            public string[] weaknesses { get; set; }
-            public Evolution[] next_evolution { get; set; }
-            public Evolution[] prev_evolution { get; set; }
-
-            public bool Equals(Pokemon other)
-            {
-                if (
-                        id != other.id || num != other.num || name != other.name ||
-                        img != other.img || height != other.height || weight != other.weight ||
-                        candy != other.candy || candy_count != other.candy_count || egg != other.egg ||
-                        spawn_chance != other.spawn_chance || avg_spawns != other.avg_spawns || spawn_time != other.spawn_time
-                    )
-                {
-                    return false;
-                }
-
-                if (!CompareArray(type, other.type))
-                {
-                    return false;
-                }
-
-                if (!CompareArray(multipliers, other.multipliers))
-                {
-                    return false;
-                }
-
-                if (!CompareArray(weaknesses, other.weaknesses))
-                {
-                    return false;
-                }
-
-                if (!CompareArray(next_evolution, other.next_evolution))
-                {
-                    return false;
-                }
-
-                if (!CompareArray(prev_evolution, other.prev_evolution))
-                {
-                    return false;
-                }
-
-                return true;
-
-                bool CompareArray<T>(T[] source, T[] target) 
-                    where T: IEquatable<T>
-                {
-                    if(source is null && target is null)
-                    {
-                        return true;
-                    }
-
-                    if (source.Length != target.Length)
-                    {
-                        return false;
-                    }
-
-                    for (int i = 0; i < target.Length; i++)
-                    {
-                        if (!source[i].Equals(target[i]))
-                        {
-                            return false;
-                        }
-                    }
-
-                    return true;
-                }
-            }
-        }
-
-        public class Evolution : IEquatable<Evolution>
-        {
-            public string num { get; set; }
-            public string name { get; set; }
-            public bool Equals(Evolution other) => num == other.num && name == other.name;
+            await JsonSerializer.WriteAsync(ms, root, root.GetType());
         }
 
         private static async Task WriteAsync(TestStream stream)
