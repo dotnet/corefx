@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1203,6 +1204,26 @@ namespace System.Text.Json.Tests
         }
 
         [Theory]
+        [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedStr)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+
+            Guid expected = new Guid(expectedStr);
+
+            Assert.True(json.Read(), "Read string value");
+            Assert.Equal(JsonTokenType.String, json.TokenType);
+
+            Assert.True(json.HasValueSequence);
+            Assert.False(json.ValueSequence.IsEmpty);
+            Assert.True(json.TryGetGuid(out Guid actual));
+            Assert.Equal(expected, actual);
+            Assert.Equal(expected, json.GetGuid());
+        }
+
+        [Theory]
         [MemberData(nameof(JsonGuidTestData.InvalidGuidTests), MemberType = typeof(JsonGuidTestData))]
         public static void TestingStringsInvalidConversionToGuid(string testString)
         {
@@ -1212,6 +1233,24 @@ namespace System.Text.Json.Tests
             Assert.True(json.Read(), "Read string value");
             Assert.Equal(JsonTokenType.String, json.TokenType);
 
+            Assert.False(json.TryGetGuid(out Guid actual));
+            Assert.Equal(Guid.Empty, actual);
+
+            JsonTestHelper.AssertThrows<FormatException>(json, (jsonReader) => jsonReader.GetGuid());
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.InvalidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TryGetGuid_HasValueSequence_False(string testString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+
+            Assert.True(json.Read(), "Read string value");
+            Assert.Equal(JsonTokenType.String, json.TokenType);
+            Assert.True(json.HasValueSequence);
+            Assert.Equal(string.IsNullOrEmpty(testString), json.ValueSequence.IsEmpty);
             Assert.False(json.TryGetGuid(out Guid actual));
             Assert.Equal(Guid.Empty, actual);
 
