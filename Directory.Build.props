@@ -92,7 +92,6 @@
   <PropertyGroup>    
     <EnableProjectRestore Condition="'$(IsTestProject)' == 'true'">true</EnableProjectRestore>
     <EnableProjectRestore Condition="'$(MSBuildProjectName)' == 'CoreFx.Private.TestUtilities'">true</EnableProjectRestore>
-    <EnableProjectRestore Condition="'$(MSBuildProjectExtension)' == '.ilproj'">true</EnableProjectRestore>
   </PropertyGroup>
 
   <Import Condition="'$(EnableProjectRestore)' != 'true'" Project="$(RepositoryEngineeringDir)repoRestore.props" />
@@ -302,6 +301,7 @@
     <NetStandardRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netstandard'))</NetStandardRefPath>
     <NetStandard21RefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netstandard2.1'))</NetStandard21RefPath>
     <NetFxRefPath>$([MSBuild]::NormalizeDirectory('$(RefRootPath)', 'netfx'))</NetFxRefPath>
+    <ILAsmToolPath>$([MSBuild]::NormalizeDirectory('$(ArtifactsToolsetDir)', 'ilasm'))</ILAsmToolPath>
 
     <!-- Helix properties -->
     <OSPlatformConfig>$(OSGroup).$(Platform).$(ConfigurationGroup)</OSPlatformConfig>
