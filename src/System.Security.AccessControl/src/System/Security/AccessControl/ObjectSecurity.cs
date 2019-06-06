@@ -35,7 +35,7 @@ namespace System.Security.AccessControl
 
         private readonly ReaderWriterLockSlim _lock = new ReaderWriterLockSlim(LockRecursionPolicy.SupportsRecursion);
 
-        internal CommonSecurityDescriptor _securityDescriptor;
+        internal readonly CommonSecurityDescriptor _securityDescriptor;
 
         private bool _ownerModified = false;
         private bool _groupModified = false;
