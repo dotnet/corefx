@@ -11,7 +11,7 @@ namespace System.IO.Pipes.Tests
     /// </summary>
     internal static partial class InteropTest
     {
-        private static bool TryHandleGetImpersonationUserNameError(SafePipeHandle handle, int error, uint userNameMaxLength, char* userName, out string impersonationUserName)
+        private static unsafe bool TryHandleGetImpersonationUserNameError(SafePipeHandle handle, int error, uint userNameMaxLength, char* userName, out string impersonationUserName)
         {
             // Uap does not allow loading libraries
             impersonationUserName = string.Empty;

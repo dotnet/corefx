@@ -297,14 +297,13 @@ namespace System.IO.Pipes.Tests
             {
                 using (var client = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation))
                 {
-                    uint expectedNumberOfServerInstances;
                     Task serverTask = server.WaitForConnectionAsync();
 
                     client.Connect();
                     await serverTask;
 
-                    Assert.True(InteropTest.TryGetNumberOfServerInstances(client.SafePipeHandle, out expectedNumberOfServerInstances), "GetNamedPipeHandleState failed");
-                    Assert.Equal((int)expectedNumberOfServerInstances, client.NumberOfServerInstances);
+                    Assert.True(InteropTest.TryGetNumberOfServerInstances(client.SafePipeHandle, out uint expectedNumberOfServerInstances), "GetNamedPipeHandleState failed");
+                    Assert.Equal(expectedNumberOfServerInstances, (uint)client.NumberOfServerInstances);
                 }
             }
         }
