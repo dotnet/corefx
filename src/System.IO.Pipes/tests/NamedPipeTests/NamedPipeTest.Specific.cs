@@ -308,7 +308,7 @@ namespace System.IO.Pipes.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))]
         [InlineData(TokenImpersonationLevel.None, false)]
         [InlineData(TokenImpersonationLevel.Anonymous, false)]
         [InlineData(TokenImpersonationLevel.Identification, true)]
