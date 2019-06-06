@@ -297,14 +297,14 @@ namespace System.IO.Pipes.Tests
             {
                 using (var client = new NamedPipeClientStream(".", pipeName, PipeDirection.InOut, PipeOptions.None, TokenImpersonationLevel.Impersonation))
                 {
-                    int expectedNumberOfServerInstances;
+                    uint expectedNumberOfServerInstances;
                     Task serverTask = server.WaitForConnectionAsync();
 
                     client.Connect();
                     await serverTask;
 
-                    Assert.True(Interop.TryGetNumberOfServerInstances(client.SafePipeHandle, out expectedNumberOfServerInstances), "GetNamedPipeHandleState failed");
-                    Assert.Equal(expectedNumberOfServerInstances, client.NumberOfServerInstances);
+                    Assert.True(InteropTest.TryGetNumberOfServerInstances(client.SafePipeHandle, out expectedNumberOfServerInstances), "GetNamedPipeHandleState failed");
+                    Assert.Equal((int)expectedNumberOfServerInstances, client.NumberOfServerInstances);
                 }
             }
         }
@@ -330,7 +330,7 @@ namespace System.IO.Pipes.Tests
                     client.Connect();
                     await serverTask;
 
-                    Assert.Equal(expectedResult, Interop.TryGetImpersonationUserName(server.SafePipeHandle, out expectedUserName));
+                    Assert.Equal(expectedResult, InteropTest.TryGetImpersonationUserName(server.SafePipeHandle, out expectedUserName));
 
                     if (!expectedResult)
                     {

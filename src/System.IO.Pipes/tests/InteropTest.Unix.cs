@@ -12,7 +12,7 @@ namespace System.IO.Pipes.Tests
     /// <summary>
     /// The class contains interop declarations and helpers methods for them.
     /// </summary>
-    internal static partial class Interop
+    internal static partial class InteropTest
     {
         [DllImport("libc", SetLastError = true)]
         private static extern unsafe int gethostname(byte* name, int len);
