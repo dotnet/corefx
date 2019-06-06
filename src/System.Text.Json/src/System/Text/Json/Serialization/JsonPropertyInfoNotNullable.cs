@@ -52,13 +52,7 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(ShouldDeserialize);
 
-            if (state.Current.IsProcessingDictionary && state.Current.KeyName == null)
-            {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
-                return;
-            }
-
-            if (state.Current.IsProcessingImmutableDictionary && state.Current.KeyName == null)
+            if (state.Current.KeyName == null && (state.Current.IsProcessingDictionary || state.Current.IsProcessingImmutableDictionary))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
                 return;
