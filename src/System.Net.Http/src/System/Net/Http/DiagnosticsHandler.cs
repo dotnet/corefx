@@ -63,15 +63,15 @@ namespace System.Net.Http
                     activity.Stop();
                 }
             }
-            // otherwise there is a listener, run full instrumentation
+
 
             Guid loggingRequestId = Guid.Empty;
-
-            // If instrumentation without listener is enabled (or someone listens to System.Net.Http.HttpRequestOut)
-            // check if we should log the start (or just log the activity)
+            
+            // There is a listener. Check if listener wants to be notified about HttpClient Activities
             if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityName, request))
             {
                 activity = new Activity(DiagnosticsHandlerLoggingStrings.ActivityName);
+
                 // Only send start event to users who subscribed for it, but start activity anyway
                 if (s_diagnosticListener.IsEnabled(DiagnosticsHandlerLoggingStrings.ActivityStartName))
                 {
@@ -97,9 +97,7 @@ namespace System.Net.Http
                 );
             }
 
-            // If we are on at all, we propagate any activity information
-            
-            // unless tracing system or user injected Request-Id for backward compatibility reasons.
+            // If we are on at all, we propagate current activity information
             Activity currentActivity = Activity.Current;
             if (currentActivity != null)
             {

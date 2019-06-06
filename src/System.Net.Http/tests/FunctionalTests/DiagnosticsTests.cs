@@ -22,6 +22,12 @@ namespace System.Net.Http.Functional.Tests
 
     public abstract class DiagnosticsTest : HttpClientHandlerTestBase
     {
+        private const string SuppressActivityPropagationEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SUPPRESSACTIVITYPROPAGATION";
+        private const string SuppressActivityPropagationAppCtxSettingName = "System.Net.Http.SuppressActivityPropagation";
+
+        private static bool SuppressActivityPropagationEnvironmentVariableIsNotSet =>
+            string.IsNullOrEmpty(Environment.GetEnvironmentVariable(SuppressActivityPropagationEnvironmentVariableSettingName));
+
         public DiagnosticsTest(ITestOutputHelper output) : base(output) { }
 
         [Fact]
@@ -1033,12 +1039,20 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop("Uses external server")]
-        [Fact]
-        public void SendAsync_SuppressedGlobalStaticPropagation()
+        [ConditionalTheory(nameof(SuppressActivityPropagationEnvironmentVariableIsNotSet))]
+        [InlineData("true", false)]
+        [InlineData("TRUE", false)]
+        [InlineData("tRuE", false)]
+        [InlineData("1", false)]
+        [InlineData("0", true)]
+        [InlineData("false", true)]
+        [InlineData("helloworld", true)]
+        [InlineData("", true)]
+        public void SendAsync_SuppressedGlobalStaticPropagationEnvVar(string envVarValue, bool isInstrumentationEnabled)
         {
-            RemoteExecutor.Invoke((useSocketsHttpHandlerString, useHttp2String) =>
+            RemoteExecutor.Invoke((innerEnvVarValue, innerIsInstrumentationEnabled) =>
             {
-                HttpClientHandler.SuppressGlobalActivityPropagation  = true;
+                Environment.SetEnvironmentVariable(SuppressActivityPropagationEnvironmentVariableSettingName, innerEnvVarValue);
 
                 string eventKey = null;
                 bool anyEventLogged = false;
@@ -1051,115 +1065,51 @@ namespace System.Net.Http.Functional.Tests
                 using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
                 {
                     diagnosticListenerObserver.Enable(s => s.Equals("System.Net.Http.HttpRequestOut"));
-                    using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString, useHttp2String))
+                    using (HttpClient client = new HttpClient())
                     {
                         Activity parent = new Activity("parent").Start();
                         using HttpResponseMessage response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
                         parent.Stop();
-                        Assert.False(response.RequestMessage.Headers.Contains("Request-Id"));
-                        Assert.False(response.RequestMessage.Headers.Contains("traceparent"));
-                        Assert.False(response.RequestMessage.Headers.Contains("tracestate"));
-                        Assert.False(response.RequestMessage.Headers.Contains("Correlation-Context"));
+                        Assert.Equal(bool.Parse(innerIsInstrumentationEnabled), response.RequestMessage.Headers.Contains(
+                            parent.IdFormat == ActivityIdFormat.Hierarchical ? "Request-Id" : "traceparent"));
                     }
 
-                    Assert.False(anyEventLogged, $"{eventKey} event logged when Activity is suppressed globally");
-                    diagnosticListenerObserver.Disable();
-                    HttpClientHandler.SuppressGlobalActivityPropagation  = false;
-                }
-
-                return RemoteExecutor.SuccessExitCode;
-            }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public void SendAsync_SuppressedGlobalStaticPropagationNoListener()
-        {
-            RemoteExecutor.Invoke((useSocketsHttpHandlerString, useHttp2String) =>
-            {
-                HttpClientHandler.SuppressGlobalActivityPropagation  = true;
-
-                using (HttpClient client = CreateHttpClient(useSocketsHttpHandlerString, useHttp2String))
-                {
-                    Activity parent = new Activity("parent").Start();
-                    using HttpResponseMessage response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
-                    parent.Stop();
-                    Assert.False(response.RequestMessage.Headers.Contains("Request-Id"));
-                    Assert.False(response.RequestMessage.Headers.Contains("traceparent"));
-                    Assert.False(response.RequestMessage.Headers.Contains("tracestate"));
-                    Assert.False(response.RequestMessage.Headers.Contains("Correlation-Context"));
-                }
-
-                HttpClientHandler.SuppressGlobalActivityPropagation  = false;
-
-                return RemoteExecutor.SuccessExitCode;
-            }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
-        }
-
-        [OuterLoop("Uses external server")]
-        [Fact]
-        public void SendAsync_SuppressedInstancePropagation()
-        {
-            RemoteExecutor.Invoke((useSocketsHttpHandlerString, useHttp2String) =>
-            {
-                string eventKey = null;
-                bool anyEventLogged = false;
-                var diagnosticListenerObserver = new FakeDiagnosticListenerObserver(kvp =>
-                {
-                    anyEventLogged = true;
-                    eventKey = kvp.Key;
-                });
-
-                using (DiagnosticListener.AllListeners.Subscribe(diagnosticListenerObserver))
-                {
-                    diagnosticListenerObserver.Enable(s => s.Equals("System.Net.Http.HttpRequestOut"));
-
-                    HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString, useHttp2String);
-                    handler.SuppressActivityPropagation = true;
-
-                    using (HttpClient client = new HttpClient(handler, true))
+                    if (!bool.Parse(innerIsInstrumentationEnabled))
                     {
-                        SetDefaultRequestVersion(client, GetVersion(bool.Parse(useHttp2String)));
-                        Activity parent = new Activity("parent").Start();
-                        using HttpResponseMessage response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
-                        parent.Stop();
-                        Assert.False(response.RequestMessage.Headers.Contains("Request-Id"));
-                        Assert.False(response.RequestMessage.Headers.Contains("traceparent"));
-                        Assert.False(response.RequestMessage.Headers.Contains("tracestate"));
-                        Assert.False(response.RequestMessage.Headers.Contains("Correlation-Context"));
+                        Assert.False(anyEventLogged, $"{eventKey} event logged when Activity is suppressed globally");
+                    }
+                    else
+                    {
+                        Assert.True(anyEventLogged, $"{eventKey} event was not logged logged when Activity is not suppressed");
                     }
 
-                    Assert.False(anyEventLogged, $"{eventKey} event logged when Activity is suppressed on handler instance");
                     diagnosticListenerObserver.Disable();
                 }
 
                 return RemoteExecutor.SuccessExitCode;
-            }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
+            }, envVarValue, isInstrumentationEnabled.ToString()).Dispose();
         }
 
         [OuterLoop("Uses external server")]
-        [Fact]
-        public void SendAsync_SuppressedInstancePropagationNoListener()
+        [InlineData(true, false)]
+        [InlineData(false, true)]
+        public void SendAsync_SuppressedGlobalStaticPropagationNoListenerAppCtx(bool switchValue, bool isInstrumentationEnabled)
         {
-            RemoteExecutor.Invoke((useSocketsHttpHandlerString, useHttp2String) =>
+            RemoteExecutor.Invoke((innerSwitchValue, innerIsInstrumentationEnabled) =>
             {
-                HttpClientHandler handler = CreateHttpClientHandler(useSocketsHttpHandlerString, useHttp2String);
-                handler.SuppressActivityPropagation = true;
+                AppContext.SetSwitch(SuppressActivityPropagationAppCtxSettingName, bool.Parse(innerSwitchValue));
 
-                using (HttpClient client = new HttpClient(handler, true))
+                using (HttpClient client = new HttpClient())
                 {
-                    SetDefaultRequestVersion(client, GetVersion(bool.Parse(useHttp2String)));
                     Activity parent = new Activity("parent").Start();
                     using HttpResponseMessage response = client.GetAsync(Configuration.Http.RemoteEchoServer).Result;
                     parent.Stop();
-                    Assert.False(response.RequestMessage.Headers.Contains("Request-Id"));
-                    Assert.False(response.RequestMessage.Headers.Contains("traceparent"));
-                    Assert.False(response.RequestMessage.Headers.Contains("tracestate"));
-                    Assert.False(response.RequestMessage.Headers.Contains("Correlation-Context"));
+                    Assert.Equal(bool.Parse(innerIsInstrumentationEnabled), response.RequestMessage.Headers.Contains(
+                        parent.IdFormat == ActivityIdFormat.Hierarchical ? "Request-Id" : "traceparent"));
                 }
 
                 return RemoteExecutor.SuccessExitCode;
-            }, UseSocketsHttpHandler.ToString(), UseHttp2.ToString()).Dispose();
+            }, switchValue.ToString(), isInstrumentationEnabled.ToString()).Dispose();
         }
 
         [ActiveIssue(23209)]
