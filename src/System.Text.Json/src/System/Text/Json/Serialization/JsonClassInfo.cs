@@ -408,7 +408,7 @@ namespace System.Text.Json
                 }
             }
 
-            if (IsNonGenericInterface(propertyType))
+            if (IsNonGenericInterface(propertyType) || propertyType == typeof(IDictionary))
             {
                     return typeof(object);
             }

@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -29,7 +30,7 @@ namespace System.Text.Json
             if (propertyType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
             {
                 // If a polymorphic case, we have to wait until run-time values are processed.
-                if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
+                if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown || propertyType == typeof(IDictionary))
                 {
                     Type newPropertyType = jsonInfo.ElementClassInfo.GetPolicyProperty().GetDictionaryConcreteType();
                     if (propertyType != newPropertyType)

@@ -38,9 +38,10 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringICollectionT { get; set; }
         public object MyStringIReadOnlyCollectionT { get; set; }
         public object MyStringIReadOnlyListT { get; set; }
-        public object MyStringToStringDict { get; set; }
         public object MyStringToStringIDict { get; set; }
-        public object MyStringToStringIReadOnlyDict { get; set; }
+        public object MyStringToStringGenericDict { get; set; }
+        public object MyStringToStringGenericIDict { get; set; }
+        public object MyStringToStringGenericIReadOnlyDict { get; set; }
         public object MyStringToStringImmutableDict { get; set; }
         public object MyStringToStringIImmutableDict { get; set; }
         public object MyStringToStringImmutableSortedDict { get; set; }
@@ -104,9 +105,10 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringICollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyListT"" : [""Hello""]," +
-                @"""MyStringToStringDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
-                @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringGenericDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringGenericIDict"" : {""key"" : ""value""}," +
+                @"""MyStringToStringGenericIReadOnlyDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringImmutableDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIImmutableDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}," +
@@ -162,13 +164,15 @@ namespace System.Text.Json.Serialization.Tests
             MyStringIReadOnlyCollectionT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new string[] { "Hello" };
 
-            MyStringToStringDict = new Dictionary<string, string> { { "key", "value" } };
-            MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
-            MyStringToStringIReadOnlyDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringGenericIDict = new Dictionary<string, string> { { "key", "value" } };
 
-            MyStringToStringImmutableDict = ImmutableDictionary.CreateRange((Dictionary<string, string>)MyStringToStringDict);
-            MyStringToStringIImmutableDict = ImmutableDictionary.CreateRange((Dictionary<string, string>)MyStringToStringDict);
-            MyStringToStringImmutableSortedDict = ImmutableSortedDictionary.CreateRange((Dictionary<string, string>)MyStringToStringDict);
+            MyStringToStringGenericDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringGenericIDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringToStringGenericIReadOnlyDict = new Dictionary<string, string> { { "key", "value" } };
+
+            MyStringToStringImmutableDict = ImmutableDictionary.CreateRange((Dictionary<string, string>)MyStringToStringGenericDict);
+            MyStringToStringIImmutableDict = ImmutableDictionary.CreateRange((Dictionary<string, string>)MyStringToStringGenericDict);
+            MyStringToStringImmutableSortedDict = ImmutableSortedDictionary.CreateRange((Dictionary<string, string>)MyStringToStringGenericDict);
 
             MyStringStackT = new Stack<string>(new List<string>() { "Hello", "World" });
             MyStringQueueT = new Queue<string>(new List<string>() { "Hello", "World" });
@@ -225,9 +229,17 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", ((IReadOnlyCollection<string>)MyStringIReadOnlyCollectionT).First());
             Assert.Equal("Hello", ((IReadOnlyList<string>)MyStringIReadOnlyListT)[0]);
 
-            Assert.Equal("value", ((Dictionary<string, string>)MyStringToStringDict)["key"]);
-            Assert.Equal("value", ((IDictionary<string, string>)MyStringToStringIDict)["key"]);
-            Assert.Equal("value", ((IReadOnlyDictionary<string, string>)MyStringToStringIReadOnlyDict)["key"]);
+
+            IEnumerator enumerator = ((IDictionary)MyStringToStringIDict).GetEnumerator();
+            enumerator.MoveNext();
+
+            DictionaryEntry entry = (DictionaryEntry)(enumerator.Current);
+            Assert.Equal("key", entry.Key);
+            Assert.Equal("value", entry.Value);
+
+            Assert.Equal("value", ((Dictionary<string, string>)MyStringToStringGenericDict)["key"]);
+            Assert.Equal("value", ((IDictionary<string, string>)MyStringToStringGenericIDict)["key"]);
+            Assert.Equal("value", ((IReadOnlyDictionary<string, string>)MyStringToStringGenericIReadOnlyDict)["key"]);
 
             Assert.Equal("value", ((ImmutableDictionary<string, string>)MyStringToStringImmutableDict)["key"]);
             Assert.Equal("value", ((IImmutableDictionary<string, string>)MyStringToStringIImmutableDict)["key"]);
