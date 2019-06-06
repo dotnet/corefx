@@ -199,7 +199,7 @@ namespace System.Collections.Generic
             _count = count;
         }
 
-        public HashSet(int capacity, IEqualityComparer<T> comparer)
+        public HashSet(int capacity, IEqualityComparer<T>? comparer)
             : this(comparer)
         {
             if (capacity < 0)
