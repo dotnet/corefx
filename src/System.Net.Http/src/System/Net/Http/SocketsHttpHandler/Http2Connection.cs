@@ -1399,6 +1399,8 @@ namespace System.Net.Http
                     }
                     else
                     {
+                        await responseHeadersTask;
+
                         // We received the response headers but the request body hasn't yet finished.
                         // If the connection is aborted or if we get RST or GOAWAY from server, exception will be
                         // stored in stream._abortException and propagated to up to caller if possible while processing response.
