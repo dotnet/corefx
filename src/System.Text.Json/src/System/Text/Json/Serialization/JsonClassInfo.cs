@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     [DebuggerDisplay("ClassType.{ClassType}, {Type.Name}")]
     internal sealed partial class JsonClassInfo
@@ -97,6 +98,12 @@ namespace System.Text.Json.Serialization
 
                     foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                     {
+                        // Ignore indexers
+                        if (propertyInfo.GetIndexParameters().Length > 0)
+                        {
+                            continue;
+                        }
+
                         // For now we only support public getters\setters
                         if (propertyInfo.GetMethod?.IsPublic == true ||
                             propertyInfo.SetMethod?.IsPublic == true)

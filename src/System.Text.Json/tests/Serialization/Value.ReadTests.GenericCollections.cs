@@ -364,14 +364,16 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadISetTOfHashSetT()
         {
             ISet<HashSet<int>> result = JsonSerializer.Parse<ISet<HashSet<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
-            int expected = 1;
 
-            foreach (HashSet<int> ie in result)
+            if (result.First().Contains(1))
             {
-                foreach (int i in ie)
-                {
-                    Assert.Equal(expected++, i);
-                }
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.Last());
             }
         }
 
@@ -379,14 +381,16 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadHashSetTOfISetT()
         {
             HashSet<ISet<int>> result = JsonSerializer.Parse<HashSet<ISet<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
-            int expected = 1;
 
-            foreach (HashSet<int> ie in result)
+            if (result.First().Contains(1))
             {
-                foreach (int i in ie)
-                {
-                    Assert.Equal(expected++, i);
-                }
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.Last());
             }
         }
 
@@ -394,14 +398,16 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadISetTOfArray()
         {
             ISet<int[]> result = JsonSerializer.Parse<ISet<int[]>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
-            int expected = 1;
 
-            foreach (int[] arr in result)
+            if (result.First().Contains(1))
             {
-                foreach (int i in arr)
-                {
-                    Assert.Equal(expected++, i);
-                }
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.Last());
             }
         }
 
@@ -409,27 +415,17 @@ namespace System.Text.Json.Serialization.Tests
         public static void ReadArrayOfISetT()
         {
             ISet<int>[] result = JsonSerializer.Parse<ISet<int>[]>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
-            int expected = 1;
 
-            foreach (ISet<int> arr in result)
-            {
-                foreach (int i in arr)
-                {
-                    Assert.Equal(expected++, i);
-                }
-            }
+            Assert.Equal(new HashSet<int> { 1, 2 }, result.First());
+            Assert.Equal(new HashSet<int> { 3, 4 }, result.Last());
         }
 
         [Fact]
         public static void ReadPrimitiveISetT()
         {
             ISet<int> result = JsonSerializer.Parse<ISet<int>>(Encoding.UTF8.GetBytes(@"[1,2]"));
-            int expected = 1;
 
-            foreach (int i in result)
-            {
-                Assert.Equal(expected++, i);
-            }
+            Assert.Equal(new HashSet<int> { 1, 2 }, result);
 
             result = JsonSerializer.Parse<ISet<int>>(Encoding.UTF8.GetBytes(@"[]"));
             Assert.Equal(0, result.Count());

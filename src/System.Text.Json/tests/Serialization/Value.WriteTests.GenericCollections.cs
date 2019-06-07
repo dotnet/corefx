@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -307,7 +308,20 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
+
+            // Because order isn't guaranteed, roundtrip data to ensure write was accurate.
+            input = JsonSerializer.Parse<ISet<HashSet<int>>>(json);
+
+            if (input.First().Contains(1))
+            {
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.Last());
+            }
         }
 
         [Fact]
@@ -320,7 +334,20 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
+
+            // Because order isn't guaranteed, roundtrip data to ensure write was accurate.
+            input = JsonSerializer.Parse<HashSet<ISet<int>>>(json);
+
+            if (input.First().Contains(1))
+            {
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.Last());
+            }
         }
 
         [Fact]
@@ -333,7 +360,8 @@ namespace System.Text.Json.Serialization.Tests
             };
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
+            Assert.True(json.Contains("[1,2]"));
+            Assert.True(json.Contains("[3,4]"));
         }
 
         [Fact]
@@ -344,7 +372,11 @@ namespace System.Text.Json.Serialization.Tests
             input[1] = new HashSet<int>() { 3, 4 };
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
+
+            // Because order isn't guaranteed, roundtrip data to ensure write was accurate.
+            input = JsonSerializer.Parse<ISet<int>[]>(json);
+            Assert.Equal(new HashSet<int> { 1, 2 }, input.First());
+            Assert.Equal(new HashSet<int> { 3, 4 }, input.Last());
         }
 
         [Fact]
@@ -353,7 +385,7 @@ namespace System.Text.Json.Serialization.Tests
             ISet<int> input = new HashSet<int> { 1, 2 };
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[1,2]", json);
+            Assert.True(json == "[1,2]" || json == "[2,1]");
         }
 
         [Fact]
@@ -458,7 +490,20 @@ namespace System.Text.Json.Serialization.Tests
             });
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
+
+            // Because order isn't guaranteed, roundtrip data to ensure write was accurate.
+            input = JsonSerializer.Parse<HashSet<HashSet<int>>>(json);
+
+            if (input.First().Contains(1))
+            {
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.Last());
+            }
         }
 
         [Fact]
@@ -471,7 +516,8 @@ namespace System.Text.Json.Serialization.Tests
             });
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
+            Assert.True(json.Contains("[1,2]"));
+            Assert.True(json.Contains("[3,4]"));
         }
 
         [Fact]
@@ -482,7 +528,11 @@ namespace System.Text.Json.Serialization.Tests
             input[1] = new HashSet<int>(new List<int> { 3, 4 });
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[[1,2],[3,4]]", json);
+
+            // Because order isn't guaranteed, roundtrip data to ensure write was accurate.
+            input = JsonSerializer.Parse<HashSet<int>[]>(json);
+            Assert.Equal(new HashSet<int> { 1, 2 }, input.First());
+            Assert.Equal(new HashSet<int> { 3, 4 }, input.Last());
         }
 
         [Fact]
@@ -491,7 +541,7 @@ namespace System.Text.Json.Serialization.Tests
             HashSet<int> input = new HashSet<int>(new List<int> { 1, 2 });
 
             string json = JsonSerializer.ToString(input);
-            Assert.Equal("[1,2]", json);
+            Assert.True(json == "[1,2]" || json == "[2,1]");
         }
 
         [Fact]

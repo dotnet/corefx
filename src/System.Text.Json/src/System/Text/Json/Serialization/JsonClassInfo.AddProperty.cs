@@ -3,10 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
-using System.Collections.Generic;
-using System.Text.Json.Serialization.Converters;
+using System.Text.Json.Serialization;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal partial class JsonClassInfo
     {
