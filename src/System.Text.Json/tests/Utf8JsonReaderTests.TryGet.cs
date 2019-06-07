@@ -1185,12 +1185,12 @@ namespace System.Text.Json.Tests
         [Theory]
         [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
         [MemberData(nameof(JsonGuidTestData.ValidHexGuidTests), MemberType = typeof(JsonGuidTestData))]
-        public static void TestingStringsConversionToGuid(string testString, string expectedStr)
+        public static void TestingStringsConversionToGuid(string testString, string expectedString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
             var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
 
-            Guid expected = new Guid(expectedStr);
+            Guid expected = new Guid(expectedString);
 
             Assert.True(json.Read(), "Read string value");
             Assert.Equal(JsonTokenType.String, json.TokenType);
@@ -1205,20 +1205,21 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
-        public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedStr)
+        public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedString)
         {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
             var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
 
-            Guid expected = new Guid(expectedStr);
-
-            Assert.True(json.Read(), "Read string value");
+            Guid expected = new Guid(expectedString);
+            
+            Assert.True(json.Read(), "json.Read()");
             Assert.Equal(JsonTokenType.String, json.TokenType);
 
-            Assert.True(json.HasValueSequence);
-            Assert.False(json.ValueSequence.IsEmpty);
-            Assert.True(json.TryGetGuid(out Guid actual));
+            Assert.True(json.HasValueSequence, "json.HasValueSequence");
+            Assert.False(json.ValueSequence.IsEmpty, "json.ValueSequence.IsEmpty");
+            Assert.True(json.ValueSpan.IsEmpty, "json.ValueSpan.IsEmpty");
+            Assert.True(json.TryGetGuid(out Guid actual), "TryGetGuid");
             Assert.Equal(expected, actual);
             Assert.Equal(expected, json.GetGuid());
         }
@@ -1247,11 +1248,12 @@ namespace System.Text.Json.Tests
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
             var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
 
-            Assert.True(json.Read(), "Read string value");
+            Assert.True(json.Read(), "json.Read()");
             Assert.Equal(JsonTokenType.String, json.TokenType);
-            Assert.True(json.HasValueSequence);
+            Assert.True(json.HasValueSequence, "json.HasValueSequence");
+            // If the string is empty, the ValueSequence is empty, because it contains all 0 bytes between the two characters
             Assert.Equal(string.IsNullOrEmpty(testString), json.ValueSequence.IsEmpty);
-            Assert.False(json.TryGetGuid(out Guid actual));
+            Assert.False(json.TryGetGuid(out Guid actual), "json.TryGetGuid(out Guid actual)");
             Assert.Equal(Guid.Empty, actual);
 
             JsonTestHelper.AssertThrows<FormatException>(json, (jsonReader) => jsonReader.GetGuid());
