@@ -2440,18 +2440,18 @@ namespace System.Text.Json
         private string DebugTokenType
             => TokenType switch
             {
-                JsonTokenType.Comment => "Comment",
-                JsonTokenType.EndArray => "EndArray",
-                JsonTokenType.EndObject => "EndObject",
-                JsonTokenType.False => "False",
-                JsonTokenType.None => "None",
-                JsonTokenType.Null => "Null",
-                JsonTokenType.Number => "Number",
-                JsonTokenType.PropertyName => "PropertyName",
-                JsonTokenType.StartArray => "StartArray",
-                JsonTokenType.StartObject => "StartObject",
-                JsonTokenType.String => "String",
-                JsonTokenType.True => "True",
+                JsonTokenType.Comment => nameof(JsonTokenType.Comment),
+                JsonTokenType.EndArray => nameof(JsonTokenType.EndArray),
+                JsonTokenType.EndObject => nameof(JsonTokenType.EndObject),
+                JsonTokenType.False => nameof(JsonTokenType.False),
+                JsonTokenType.None => nameof(JsonTokenType.None),
+                JsonTokenType.Null => nameof(JsonTokenType.Null),
+                JsonTokenType.Number => nameof(JsonTokenType.Number),
+                JsonTokenType.PropertyName => nameof(JsonTokenType.PropertyName),
+                JsonTokenType.StartArray => nameof(JsonTokenType.StartArray),
+                JsonTokenType.StartObject => nameof(JsonTokenType.StartObject),
+                JsonTokenType.String => nameof(JsonTokenType.String),
+                JsonTokenType.True => nameof(JsonTokenType.True),
                 _ => ((byte)TokenType).ToString()
             };
     }
