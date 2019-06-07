@@ -18,10 +18,12 @@
     <Compile Include="..\src\System\Text\Internal\AllowedCharactersBitmap.cs" Link="AllowedCharactersBitmap.cs" />
     <Compile Include="..\src\System\Text\Unicode\UnicodeHelpers.cs" Link="UnicodeHelpers.cs" />
     <Compile Include="..\src\System\Text\Unicode\UnicodeHelpers.generated.cs" Link="UnicodeHelpers.generated.cs" />
+    <Compile Include="..\..\Common\src\CoreLib\System\Text\UnicodeUtility.cs" Link="UnicodeUtility.cs" />
+    <Compile Include="..\..\Common\src\CoreLib\System\Text\UnicodeDebug.cs" Link="UnicodeDebug.cs" />
     <Compile Include="AllowedCharsBitmapTests.cs" />
     <Compile Include="TextEncoderTests.cs" />
+    <Compile Include="ConfigurableScalarTextEncoder.cs" />
     <Compile Include="ScalarTestEncoder.cs" />
-    <Compile Include="CommonTestEncoder.cs" />
     <Compile Include="EncoderCommon.cs" />
     <Compile Include="EncoderCommonTests.cs" />
     <Compile Include="EncoderExtensionsTests.cs" />
