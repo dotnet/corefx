@@ -370,6 +370,7 @@ namespace System.Text.Encodings.Web
                 }
             }
 
+            //(valueLength % 2 == 1) is added to process single last character. 
             if (!wasSurrogatePair || (valueLength % 2 == 1))
             {
                 firstChar = value[valueLength - 1];
