@@ -55,7 +55,7 @@
       <Link>Common\CoreLib\Interop\Windows\Interop.BOOL.cs</Link>
     </Compile>
   </ItemGroup>
-  <!-- WINDOWS: Shared CoreCLR and .NET Native -->
+  <!-- WINDOWS: Shared CoreCLR -->
   <ItemGroup Condition="'$(TargetsWindows)' == 'true'">
     <Compile Include="System\Runtime\Versioning\VersioningHelper.Windows.cs" />
     <Compile Include="System\Diagnostics\Stopwatch.Windows.cs" />
