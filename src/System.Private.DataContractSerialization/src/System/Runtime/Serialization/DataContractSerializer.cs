@@ -52,9 +52,6 @@ namespace System.Runtime.Serialization
 
         private static bool IsReflectionBackupAllowed()
         {
-            // The RemovableFeature annotation above is going to replace this with
-            // "return false" if reflection based serialization feature was removed
-            // at publishing time.
             return true;
         }
 

@@ -351,7 +351,6 @@ namespace System.Runtime.Serialization
             return false;
         }
 
-        [RemovableFeature(ReflectionBasedSerializationFeature.Name)]
         internal IXmlSerializable ReflectionCreateXmlSerializable(Type type)
         {
             if (type.IsValueType)

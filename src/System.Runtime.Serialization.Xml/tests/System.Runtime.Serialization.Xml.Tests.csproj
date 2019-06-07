@@ -16,8 +16,6 @@
     <Compile Include="$(TestSourceFolder)SerializationTestTypes\DCRSampleType.cs" />
     <Compile Include="$(TestSourceFolder)SerializationTestTypes\DCRTypeLibrary.cs" />
     <Compile Include="$(TestSourceFolder)SerializationTestTypes\Primitives.cs" />
-    <Compile Include="$(TestSourceFolder)SerializationTypes.CoreCLR.cs" />
-    <Compile Include="$(TestSourceFolder)DataContractSerializer.CoreCLR.cs" />
     <Compile Include="$(CommonTestPath)\System\IO\TempFile.cs">
       <Link>Common\System\IO\TempFile.cs</Link>
     </Compile>

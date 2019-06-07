@@ -11,7 +11,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="System\Diagnostics\StackFrameExtensions.cs" />
-    <Compile Include="System\Diagnostics\StackTraceSymbols.CoreCLR.cs" />
+    <Compile Include="System\Diagnostics\StackTraceSymbols.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\ISymbolBinder.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\ISymbolDocument.cs" />
     <Compile Include="System\Diagnostics\SymbolStore\ISymbolMethod.cs" />

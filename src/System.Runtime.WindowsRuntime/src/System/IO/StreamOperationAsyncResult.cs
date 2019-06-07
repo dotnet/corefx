@@ -281,6 +281,11 @@ namespace System.IO
             if (_userCompletionCallback != null)
                 _userCompletionCallback(this);
         }
+
+        private void ThrowWithIOExceptionDispatchInfo(Exception e)
+        {
+            WinRtIOHelper.NativeExceptionToIOExceptionInfo(ExceptionSupport.AttachRestrictedErrorInfo(_completedOperation.ErrorCode)).Throw();
+        }
     }  // class StreamOperationAsyncResult
 
     #endregion class StreamOperationAsyncResult
