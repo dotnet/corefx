@@ -22,8 +22,8 @@ namespace System.IO.Pipelines.Tests
         public async Task CopyToAsyncThrowsArgumentNullExceptionForNullDestination()
         {
             var pipe = new Pipe(s_testOptions);
-            var ex = await Assert.ThrowsAsync<ArgumentNullException>(() => pipe.Reader.CopyToAsync((Stream)null));
-            Assert.Equal("destination", ex.ParamName);
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("destination", () => pipe.Reader.CopyToAsync((Stream)null));
+            await AssertExtensions.ThrowsAsync<ArgumentNullException>("destination", () => pipe.Reader.CopyToAsync((PipeWriter)null));
         }
 
         [Fact]

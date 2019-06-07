@@ -104,7 +104,7 @@ namespace System.IO.Pipelines
                 return Task.FromCanceled(cancellationToken);
             }
 
-            static async ValueTask WriteAsync(PipeWriter destination, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken)
+            return CopyToAsyncCore(destination, async (destination, memory, cancellationToken) =>
             {
                 FlushResult result = await destination.WriteAsync(memory, cancellationToken).ConfigureAwait(false);
 
@@ -112,9 +112,8 @@ namespace System.IO.Pipelines
                 {
                     ThrowHelper.ThrowOperationCanceledException_FlushCanceled();
                 }
-            }
-
-            return CopyToAsyncCore(destination, WriteAsync, cancellationToken);
+            },
+            cancellationToken);
         }
 
         /// <summary>
@@ -135,12 +134,10 @@ namespace System.IO.Pipelines
                 return Task.FromCanceled(cancellationToken);
             }
 
-            static ValueTask WriteAsync(Stream destination, ReadOnlyMemory<byte> memory, CancellationToken cancellationToken)
-            {
-                return destination.WriteAsync(memory, cancellationToken);
-            }
-
-            return CopyToAsyncCore(destination, WriteAsync, cancellationToken);
+            return CopyToAsyncCore(
+                destination,
+                (destination, memory, cancellationToken) => destination.WriteAsync(memory, cancellationToken),
+                cancellationToken);
         }
 
         private async Task CopyToAsyncCore<TStream>(TStream destination, Func<TStream, ReadOnlyMemory<byte>, CancellationToken, ValueTask> writeAsync, CancellationToken cancellationToken)
