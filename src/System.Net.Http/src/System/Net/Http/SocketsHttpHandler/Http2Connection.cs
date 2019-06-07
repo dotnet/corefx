@@ -87,7 +87,7 @@ namespace System.Net.Http
             _outgoingBuffer = new ArrayBuffer(InitialConnectionBufferSize);
             _headerBuffer = new ArrayBuffer(InitialConnectionBufferSize);
 
-            _hpackDecoder = new HPackDecoder();
+            _hpackDecoder = new HPackDecoder(maxResponseHeadersLength: pool.Settings._maxResponseHeadersLength * 1024);
 
             _httpStreams = new Dictionary<int, Http2Stream>();
 
@@ -314,12 +314,17 @@ namespace System.Net.Http
 
             http2Stream.OnResponseHeadersStart();
 
-            _hpackDecoder.Decode(
+            int headerBudgetRemaining = http2Stream.HeaderBudgetRemaining;
+
+            int uncompressedLength = _hpackDecoder.Decode(
                 GetFrameData(_incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length), frameHeader.PaddedFlag, frameHeader.PriorityFlag),
                 frameHeader.EndHeadersFlag,
                 s_http2StreamOnResponseHeader,
-                http2Stream);
+                http2Stream,
+                headerBudgetRemaining);
             _incomingBuffer.Discard(frameHeader.Length);
+
+            headerBudgetRemaining -= uncompressedLength;
 
             while (!frameHeader.EndHeadersFlag)
             {
@@ -330,15 +335,20 @@ namespace System.Net.Http
                     throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                 }
 
-                _hpackDecoder.Decode(
+                uncompressedLength = _hpackDecoder.Decode(
                     _incomingBuffer.ActiveSpan.Slice(0, frameHeader.Length),
                     frameHeader.EndHeadersFlag,
                     s_http2StreamOnResponseHeader,
-                    http2Stream);
+                    http2Stream,
+                    headerBudgetRemaining);
                 _incomingBuffer.Discard(frameHeader.Length);
+
+                headerBudgetRemaining -= uncompressedLength;
             }
 
             _hpackDecoder.CompleteDecode();
+
+            http2Stream.HeaderBudgetRemaining = headerBudgetRemaining;
 
             http2Stream.OnResponseHeadersComplete(endStream);
 

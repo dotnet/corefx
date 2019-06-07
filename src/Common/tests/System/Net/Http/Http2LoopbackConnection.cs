@@ -324,13 +324,30 @@ namespace System.Net.Test.Common
             }
         }
 
-        private static int EncodeString(string value, Span<byte> headerBlock)
+        private static int EncodeString(string value, Span<byte> headerBlock, bool huffmanCode)
         {
-            int bytesGenerated = EncodeInteger(value.Length, 0, 0x80, headerBlock);
+            byte[] data = Encoding.ASCII.GetBytes(value);
+            byte prefix;
 
-            bytesGenerated += Encoding.ASCII.GetBytes(value.AsSpan(), headerBlock.Slice(bytesGenerated));
+            if (!huffmanCode)
+            {
+                prefix = 0;
+            }
+            else
+            {
+                int len = HuffmanEncoder.GetEncodedLength(data);
 
-            return bytesGenerated;
+                byte[] huffmanData = new byte[len];
+                HuffmanEncoder.Encode(data, huffmanData);
+
+                data = huffmanData;
+                prefix = 0x80;
+            }
+
+            int bytesGenerated = EncodeInteger(data.Length, prefix, 0x80, headerBlock);
+            data.AsSpan().CopyTo(headerBlock.Slice(bytesGenerated));
+
+            return bytesGenerated + data.Length;
         }
 
         private static readonly HttpHeaderData[] s_staticTable = new HttpHeaderData[]
@@ -460,10 +477,10 @@ namespace System.Net.Test.Common
 
         private static int EncodeHeader(HttpHeaderData headerData, Span<byte> headerBlock)
         {
-            // Always encode as literal, no indexing
+            // Always encode as literal, no indexing.
             int bytesGenerated = EncodeInteger(0, 0, 0b11110000, headerBlock);
-            bytesGenerated += EncodeString(headerData.Name, headerBlock.Slice(bytesGenerated));
-            bytesGenerated += EncodeString(headerData.Value, headerBlock.Slice(bytesGenerated));
+            bytesGenerated += EncodeString(headerData.Name, headerBlock.Slice(bytesGenerated), headerData.HuffmanCode);
+            bytesGenerated += EncodeString(headerData.Value, headerBlock.Slice(bytesGenerated), headerData.HuffmanCode);
             return bytesGenerated;
         }
 
@@ -530,7 +547,7 @@ namespace System.Net.Test.Common
                 (int bytesConsumed, HttpHeaderData headerData) = DecodeHeader(data.Span.Slice(i));
 
                 byte[] headerRaw = data.Span.Slice(i, bytesConsumed).ToArray();
-                headerData = new HttpHeaderData(headerData.Name, headerData.Value, headerRaw);
+                headerData = new HttpHeaderData(headerData.Name, headerData.Value, huffmanCode: headerData.HuffmanCode, headerRaw);
 
                 requestData.Headers.Add(headerData);
                 i += bytesConsumed;

@@ -81,6 +81,8 @@ namespace System.Net.Http
                 _pendingWindowUpdate = 0;
 
                 _streamWindow = new CreditManager(initialWindowSize);
+
+                HeaderBudgetRemaining = connection._pool.Settings._maxResponseHeadersLength * 1024;
             }
 
             private object SyncObject => _streamWindow;
@@ -88,6 +90,12 @@ namespace System.Net.Http
             public int StreamId => _streamId;
             public HttpRequestMessage Request => _request;
             public HttpResponseMessage Response => _response;
+
+            /// <summary>
+            /// The length, in bytes, of budget remaining for header decode.
+            /// Set initially via MaxResponseHeadersLength.
+            /// </summary>
+            public int HeaderBudgetRemaining { get; set; }
 
             public async Task SendRequestBodyAsync(CancellationToken cancellationToken)
             {
