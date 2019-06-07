@@ -1,7 +1,7 @@
 <Project>
    <!-- Retrieve the UAP Tools to the TestHost folder -->
   <Target Name="CopyUAPToolsToTestHost"
-          Condition="'$(BuildingUAPVertical)' == 'true' and '$(DotNetBuildFromSource)' != 'true'"
+          Condition="'$(TargetGroup)' == 'uap' and '$(DotNetBuildFromSource)' != 'true'"
           AfterTargets="Restore">
 
     <PropertyGroup>
