@@ -53,6 +53,7 @@ namespace System.Text.Json
                     continueWriting = false;
                 }
 
+                // If serialization is not yet end and we surpass beyond flush threshold return false and flush stream.
                 if (continueWriting && flushThreshold >= 0 && writer.BytesPending > flushThreshold)
                 {
                     return false;

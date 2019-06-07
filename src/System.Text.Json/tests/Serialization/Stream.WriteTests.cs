@@ -60,7 +60,7 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static async Task WriteLargeJson()
+        public static async Task RoundTripLargeJsonViaJsonElementAsync()
         {
             // Generating tailored json
             int i = 0;
