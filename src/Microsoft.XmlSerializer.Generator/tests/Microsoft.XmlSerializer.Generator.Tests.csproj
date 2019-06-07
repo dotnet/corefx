@@ -22,7 +22,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include=".\AlwaysPassTest.cs" />
-    <Content Include="$(GeneratorRuntimeConfig)" Condition="'$(GeneratorRuntimeConfig)' != ''">
+    <Content Include="$(GeneratorRuntimeConfig)">
       <!-- Rename it to match the Generator application name -->
       <Link>dotnet-Microsoft.XmlSerializer.Generator.runtimeconfig.json</Link>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

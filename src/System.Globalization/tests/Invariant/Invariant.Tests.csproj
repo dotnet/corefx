@@ -3,6 +3,7 @@
     <ProjectGuid>{9A8926D9-1D4C-4069-8965-A626F6CA8C29}</ProjectGuid>
     <Configurations>netcoreapp-Debug;netcoreapp-Release</Configurations>
     <TestRuntime>true</TestRuntime>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="InvariantMode.cs" />
