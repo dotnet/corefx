@@ -27,6 +27,7 @@ namespace System.Net.Http.HPack
 
         public const int DefaultHeaderTableSize = 4096;
         public const int DefaultStringOctetsSize = 4096;
+        public const int DefaultMaxRequestHeaderFieldSize = 65536;
 
         // http://httpwg.org/specs/rfc7541.html#rfc.section.6.1
         //   0   1   2   3   4   5   6   7
@@ -83,11 +84,12 @@ namespace System.Net.Http.HPack
         private const int StringLengthPrefix = 7;
 
         private readonly int _maxDynamicTableSize;
+        private readonly int _maxRequestHeaderFieldSize;
         private readonly DynamicTable _dynamicTable;
         private readonly IntegerDecoder _integerDecoder = new IntegerDecoder();
-        private byte[] _stringOctets = new byte[DefaultStringOctetsSize];
-        private byte[] _headerNameOctets = new byte[DefaultStringOctetsSize];
-        private byte[] _headerValueOctets = new byte[DefaultStringOctetsSize];
+        private byte[] _stringOctets;
+        private byte[] _headerNameOctets;
+        private byte[] _headerValueOctets;
 
         private State _state = State.Ready;
         private byte[] _headerName;
@@ -99,17 +101,22 @@ namespace System.Net.Http.HPack
         private bool _huffman;
         private bool _headersObserved;
 
-        public HPackDecoder(int maxDynamicTableSize = DefaultHeaderTableSize)
-            : this(maxDynamicTableSize, new DynamicTable(maxDynamicTableSize))
+        public HPackDecoder(int maxDynamicTableSize = DefaultHeaderTableSize, int maxRequestHeaderFieldSize = DefaultMaxRequestHeaderFieldSize)
+            : this(maxDynamicTableSize, maxRequestHeaderFieldSize, new DynamicTable(maxDynamicTableSize))
         {
-            _maxDynamicTableSize = maxDynamicTableSize;
         }
 
         // For testing.
-        internal HPackDecoder(int maxDynamicTableSize, DynamicTable dynamicTable)
+        internal HPackDecoder(int maxDynamicTableSize, int maxRequestHeaderFieldSize, DynamicTable dynamicTable)
         {
             _maxDynamicTableSize = maxDynamicTableSize;
+            _maxRequestHeaderFieldSize = maxRequestHeaderFieldSize;
             _dynamicTable = dynamicTable;
+
+            int stringSize = Math.Min(maxRequestHeaderFieldSize, DefaultStringOctetsSize);
+            _stringOctets = new byte[stringSize];
+            _headerNameOctets = new byte[stringSize];
+            _headerValueOctets = new byte[stringSize];
         }
 
         public void Decode(ReadOnlySpan<byte> data, bool endHeaders, HeaderCallback onHeader, object onHeaderState)
@@ -373,7 +380,12 @@ namespace System.Net.Http.HPack
         {
             if (length > _stringOctets.Length)
             {
-                _stringOctets = new byte[Math.Max(length, _stringOctets.Length * 2)];
+                if (length > _maxRequestHeaderFieldSize)
+                {
+                    throw new HPackDecodingException(SR.Format(SR.net_http_hpack_string_length_too_large, length, _maxRequestHeaderFieldSize));
+                }
+
+                EnsureHeaderFieldSize(ref _stringOctets, length);
             }
 
             _stringLength = length;
@@ -387,15 +399,19 @@ namespace System.Net.Http.HPack
             {
                 if (_huffman)
                 {
-                    return Huffman.Decode(new ReadOnlySpan<byte>(_stringOctets, 0, _stringLength), ref dst);
+                    if (!Huffman.TryDecode(new ReadOnlySpan<byte>(_stringOctets, 0, _stringLength), ref dst, _maxRequestHeaderFieldSize, out int decodedLength))
+                    {
+                        throw new HPackDecodingException(SR.Format(SR.net_http_hpack_huffman_string_length_too_large, decodedLength, dst.Length));
+                    }
+
+                    return decodedLength;
                 }
                 else
                 {
-                    if (dst.Length < _stringLength)
+                    if (_stringLength > dst.Length)
                     {
-                        dst = new byte[Math.Max(_stringLength, dst.Length * 2)];
+                        EnsureHeaderFieldSize(ref dst, _stringLength);
                     }
-
                     Buffer.BlockCopy(_stringOctets, 0, dst, 0, _stringLength);
                     return _stringLength;
                 }
@@ -420,6 +436,21 @@ namespace System.Net.Http.HPack
             }
 
             _state = nextState;
+        }
+
+        /// <summary>
+        /// Grows an array to at least a desired length
+        /// </summary>
+        /// <param name="array">The array to grow.</param>
+        /// <param name="desiredLength">The minimum desired length to grow to.</param>
+        private void EnsureHeaderFieldSize(ref byte[] array, int desiredLength)
+        {
+            Debug.Assert(desiredLength <= _maxRequestHeaderFieldSize);
+
+            int newSize = Math.Min(array.Length * 2, _maxRequestHeaderFieldSize);
+            newSize = Math.Max(newSize, desiredLength);
+
+            Array.Resize(ref array, newSize);
         }
 
         // Called when we have complete header with name and value.

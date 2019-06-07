@@ -519,4 +519,10 @@
   <data name="net_http_hpack_late_dynamic_table_size_update" xml:space="preserve">
     <value>Dynamic table size update received after beginning of header block.</value>
   </data>
+  <data name="net_http_hpack_huffman_string_length_too_large" xml:space="preserve">
+    <value>Huffman-coded header of length {0} exceeds configured maximum of {1} specified by MaxResponseHeadersLength.</value>
+  </data>
+  <data name="net_http_hpack_string_length_too_large" xml:space="preserve">
+    <value>Header of length {0} exceeds configured maximum of {1} specified by MaxResponseHeadersLength.</value>
+  </data>
 </root>

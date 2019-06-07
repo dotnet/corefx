@@ -14,12 +14,15 @@ using System.Text;
 using System.Net.Http.HPack;
 using Xunit;
 using System.Buffers;
+using System.Diagnostics;
+using System.Threading;
 
 namespace System.Net.Http.Unit.Tests.HPack
 {
     public class HPackDecoderTest
     {
         private const int DynamicTableInitialMaxSize = 4096;
+        private const int MaxRequestHeaderFieldSize = 8192;
 
         // Indexed Header Field Representation - Static Table - Index 2 (:method: GET)
         private static readonly byte[] _indexedHeaderStatic = new byte[] { 0x82 };
@@ -97,7 +100,7 @@ namespace System.Net.Http.Unit.Tests.HPack
         public HPackDecoderTest()
         {
             _dynamicTable = new DynamicTable(DynamicTableInitialMaxSize);
-            _decoder = new HPackDecoder(DynamicTableInitialMaxSize, _dynamicTable);
+            _decoder = new HPackDecoder(DynamicTableInitialMaxSize, MaxRequestHeaderFieldSize, _dynamicTable);
         }
 
         void OnHeader(object state, ReadOnlySpan<byte> headerName, ReadOnlySpan<byte> headerValue)
@@ -431,6 +434,48 @@ namespace System.Net.Http.Unit.Tests.HPack
             var exception = Assert.Throws<HPackDecodingException>(() =>
                 _decoder.Decode(new byte[] { 0x3f, 0xe2, 0x1f }, endHeaders: true, onHeader: OnHeader, onHeaderState: null));
             Assert.Empty(_decodedHeaders);
+        }
+
+        [Fact]
+        public void DecodesHuffmanStringLength_GreaterThanLimit_Error()
+        {
+            byte[] encoded = _literalHeaderFieldWithoutIndexingNewName
+                .Concat(new byte[] { 0x04, 0x2E, 0x4E, 0x45, 0x54 }) // 4-byte non-Huffman string for header name.
+                .Concat(_headerValueHuffman) // 5-byte string inside of 4-byte Huffman coding.
+                .ToArray();
+
+            var decoder = new HPackDecoder(maxRequestHeaderFieldSize: 4); // require 4-byte 
+            Assert.Throws<HPackDecodingException>(() => decoder.Decode(encoded, endHeaders: true, onHeader: OnHeader, onHeaderState: null));
+            Assert.Empty(_decodedHeaders);
+        }
+
+        [Fact]
+        public void DecodesStringLength_GreaterThanLimit_Error()
+        {
+            var encoded = _literalHeaderFieldWithoutIndexingNewName
+                .Concat(new byte[] { 0xff, 0x82, 0x3f }) // 8193 encoded with 7-bit prefix
+                .ToArray();
+
+            var exception = Assert.Throws<HPackDecodingException>(() => _decoder.Decode(encoded, endHeaders: true, onHeader: OnHeader, onHeaderState: null));
+            Assert.Empty(_decodedHeaders);
+        }
+
+        [Fact]
+        public void DecodesStringLength_LimitConfigurable()
+        {
+            var decoder = new HPackDecoder(DynamicTableInitialMaxSize, MaxRequestHeaderFieldSize + 1);
+            var string8193 = new string('a', MaxRequestHeaderFieldSize + 1);
+
+            var encoded = _literalHeaderFieldWithoutIndexingNewName
+                .Concat(new byte[] { 0x7f, 0x82, 0x3f }) // 8193 encoded with 7-bit prefix, no Huffman encoding
+                .Concat(Encoding.ASCII.GetBytes(string8193))
+                .Concat(new byte[] { 0x7f, 0x82, 0x3f }) // 8193 encoded with 7-bit prefix, no Huffman encoding
+                .Concat(Encoding.ASCII.GetBytes(string8193))
+                .ToArray();
+
+            decoder.Decode(encoded, endHeaders: true, onHeader: OnHeader, onHeaderState: null);
+
+            Assert.Equal(string8193, _decodedHeaders[string8193]);
         }
 
         public static readonly TheoryData<byte[]> _incompleteHeaderBlockData = new TheoryData<byte[]>

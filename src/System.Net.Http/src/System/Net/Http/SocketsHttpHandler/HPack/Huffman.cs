@@ -304,12 +304,15 @@ namespace System.Net.Http.HPack
         /// Decodes a Huffman encoded string from a byte array.
         /// </summary>
         /// <param name="src">The source byte array containing the encoded data.</param>
-        /// <param name="dstArray">The destination byte array to store the decoded data.  This may grow if its size is insufficient.</param>
-        /// <returns>The number of decoded symbols.</returns>
-        public static int Decode(ReadOnlySpan<byte> src, ref byte[] dstArray)
+        /// <param name="dst">The destination byte array to store the decoded data. Will be resized as needed or more, up to <paramref name="maxDecodedLength"/>.</param>
+        /// <param name="maxDecodedLength">The maximum length of characters to decode.</param>
+        /// <param name="decodedLength">Receives the number of decoded symbols.</param>
+        /// <returns>If the decoded length of <paramref name="src"/> was less than or equal to <paramref name="maxDecodedLength"/>, true. Otherwise, false. <paramref name="decodedLength"/> receives the exact required length.</returns>
+        public static bool TryDecode(ReadOnlySpan<byte> src, ref byte[] dst, int maxDecodedLength, out int decodedLength)
         {
-            Span<byte> dst = dstArray;
-            Debug.Assert(dst != null && dst.Length > 0);
+            Debug.Assert(dst != null);
+            Debug.Assert(dst.Length > 0);
+            Debug.Assert(dst.Length <= maxDecodedLength);
 
             int i = 0;
             int j = 0;
@@ -354,13 +357,19 @@ namespace System.Net.Http.HPack
                     throw new HuffmanDecodingException();
                 }
 
-                if (j == dst.Length)
+                if (j < dst.Length)
                 {
-                    Array.Resize(ref dstArray, dst.Length * 2);
-                    dst = dstArray;
+                    dst[j] = (byte)ch;
+                }
+                else if(dst.Length != maxDecodedLength)
+                {
+                    int newSize = Math.Min(dst.Length * 2, maxDecodedLength);
+                    Array.Resize(ref dst, newSize);
+
+                    dst[j] = (byte)ch;
                 }
 
-                dst[j++] = (byte)ch;
+                ++j;
 
                 // If we crossed a byte boundary, advance i so we start at the next byte that's not fully decoded.
                 lastDecodedBits += decodedBits;
@@ -370,7 +379,8 @@ namespace System.Net.Http.HPack
                 lastDecodedBits %= 8;
             }
 
-            return j;
+            decodedLength = j;
+            return j <= dst.Length;
         }
 
         /// <summary>
