@@ -1207,9 +1207,15 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
         public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedString)
         {
+            TryGetGuid_HasValueSequence_RetrievesGuid(testString, expectedString, isFinalBlock: true);
+            TryGetGuid_HasValueSequence_RetrievesGuid(testString, expectedString, isFinalBlock: false);
+        }
+
+        public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedString, bool isFinalBlock)
+        {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
-            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
 
             Guid expected = new Guid(expectedString);
             
@@ -1244,9 +1250,15 @@ namespace System.Text.Json.Tests
         [MemberData(nameof(JsonGuidTestData.InvalidGuidTests), MemberType = typeof(JsonGuidTestData))]
         public static void TryGetGuid_HasValueSequence_False(string testString)
         {
+            TryGetGuid_HasValueSequence_False(testString, isFinalBlock: true);
+            TryGetGuid_HasValueSequence_False(testString, isFinalBlock: false);
+        }
+
+        private static void TryGetGuid_HasValueSequence_False(string testString, bool isFinalBlock)
+        {
             byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
             ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
-            var json = new Utf8JsonReader(sequence, isFinalBlock: true, state: default);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
 
             Assert.True(json.Read(), "json.Read()");
             Assert.Equal(JsonTokenType.String, json.TokenType);
