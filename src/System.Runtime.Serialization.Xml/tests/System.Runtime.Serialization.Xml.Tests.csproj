@@ -35,7 +35,4 @@
     <Compile Include="SerializationTestTypes\SampleTypes.cs" />
     <Compile Include="SerializationTestTypes\SelfRefAndCycles.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
 </Project>

@@ -64,7 +64,4 @@
       <Link>SerializationTestTypes\SelfRefAndCycles.cs</Link>
     </Compile>
   </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(MsBuildThisFileDirectory)Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
 </Project>

@@ -36,7 +36,7 @@
     <ProjectReference Include="..\..\System.Reflection.Metadata\src\System.Reflection.Metadata.csproj" />
     <ProjectReference Include="..\..\System.Collections.Immutable\src\System.Collections.Immutable.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsAOT)'!='true'">
+  <ItemGroup>
     <Compile Include="System\Diagnostics\StackFrameExtensions.cs" />
   </ItemGroup>
   <ItemGroup>

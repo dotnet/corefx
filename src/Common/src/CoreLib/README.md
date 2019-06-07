@@ -6,7 +6,7 @@ The sources are synchronized with a mirroring tool that watches for new commits 
 
 ## Conventions
 
-Code in the shared directory should have no code specific to CoreCLR, CoreRT or CoreFX. Parts of classes that need to have different implementations on different runtimes should use partial classes and &#42;.CoreRT.cs/&#42;.CoreCLR.cs/&#42;.CoreFX.cs files in the non shared portion. Code that is different based on platform (Windows/Unix) is fine to leave in the shared portion. Remember to follow the [style guidelines](https://github.com/dotnet/corefx/blob/master/Documentation/coding-guidelines/coding-style.md).
+Code in the shared directory should have no code specific to CoreCLR, CoreRT or CoreFX. Parts of classes that need to have different implementations on different runtimes should use partial classes and &#42;.CoreCLR.cs/&#42;.CoreFX.cs files in the non shared portion. Code that is different based on platform (Windows/Unix) is fine to leave in the shared portion. Remember to follow the [style guidelines](https://github.com/dotnet/corefx/blob/master/Documentation/coding-guidelines/coding-style.md).
 
 ## Getting clean CI and merging the mirror PRs
 

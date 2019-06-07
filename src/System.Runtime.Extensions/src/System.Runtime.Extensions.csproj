@@ -6,7 +6,7 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <IsPartialFacadeAssembly>true</IsPartialFacadeAssembly>
     <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
-    <GenFacadesIgnoreMissingTypes Condition="'$(TargetsAOT)'=='true' OR '$(TargetGroup)' == 'uap'">true</GenFacadesIgnoreMissingTypes>
+    <GenFacadesIgnoreMissingTypes Condition="'$(TargetGroup)' == 'uap'">true</GenFacadesIgnoreMissingTypes>
     <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
     <Nullable>enable</Nullable>
   </PropertyGroup>
@@ -184,12 +184,9 @@
     <ProjectReference Include="..\..\System.Diagnostics.Debug\src\System.Diagnostics.Debug.csproj" />
     <ProjectReference Include="..\..\System.Runtime\src\System.Runtime.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'uapaot' or '$(TargetGroup)' == 'uap'">
+  <ItemGroup Condition="'$(TargetGroup)' == 'uap'">
     <Reference Include="mscorlib" />
     <Reference Include="Windows" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetsAOT)'=='true'">
-    <ReferenceFromRuntime Include="System.Private.Interop" />
   </ItemGroup>
   <ItemGroup>
     <ReferenceFromRuntime Include="System.Private.CoreLib" />
