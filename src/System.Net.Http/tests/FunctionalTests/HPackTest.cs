@@ -1,4 +1,8 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,14 +28,14 @@ namespace System.Net.Http.Functional.Tests
         {
         }
 
-        const string LiteralHeaderName = "x-literal-header";
-        const string LiteralHeaderValue = "testing 456";
+        private const string LiteralHeaderName = "x-literal-header";
+        private const string LiteralHeaderValue = "testing 456";
 
         [Theory]
         [MemberData(nameof(HeaderEncodingTestData))]
-        public Task HPack_HeaderEncoding(string headerName, string expectedValue, byte[] expectedEncoding)
+        public async Task HPack_HeaderEncoding(string headerName, string expectedValue, byte[] expectedEncoding)
         {
-            return Http2LoopbackServer.CreateClientAndServerAsync(
+            await Http2LoopbackServer.CreateClientAndServerAsync(
                 async uri =>
                 {
                     using HttpClient client = CreateHttpClient();

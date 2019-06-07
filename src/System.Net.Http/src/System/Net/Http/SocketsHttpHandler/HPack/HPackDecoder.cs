@@ -207,7 +207,7 @@ namespace System.Net.Http.HPack
                             // following the change to the dynamic table size.
                             if (_headersObserved)
                             {
-                                throw new HPackDecodingException("Dynamic table size update not at beginning of header block.");
+                                throw new HPackDecodingException(SR.net_http_hpack_late_dynamic_table_size_update);
                             }
 
                             if (_integerDecoder.StartDecode((byte)(b & ~DynamicTableSizeUpdateMask), DynamicTableSizeUpdatePrefix))
@@ -338,7 +338,7 @@ namespace System.Net.Http.HPack
             {
                 if (_state != State.Ready)
                 {
-                    throw new HPackDecodingException("Incomplete header block.");
+                    throw new HPackDecodingException(SR.net_http_hpack_incomplete_header_block);
                 }
 
                 _headersObserved = false;
@@ -416,7 +416,7 @@ namespace System.Net.Http.HPack
             catch (HuffmanDecodingException ex)
             {
                 // Error in huffman encoding.
-                throw new HPackDecodingException("Unable to decode Huffman-encoded string.", ex);
+                throw new HPackDecodingException(SR.net_http_hpack_huffman_decode_failed, ex);
             }
 
             _state = nextState;
