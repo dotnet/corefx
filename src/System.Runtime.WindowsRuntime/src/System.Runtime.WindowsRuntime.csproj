@@ -32,7 +32,7 @@
     <ProjectReference Include="..\..\System.Runtime.InteropServices.WindowsRuntime\src\System.Runtime.InteropServices.WindowsRuntime.csproj" />
     <ProjectReference Include="..\..\System.ObjectModel\src\System.ObjectModel.csproj" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetGroup)'=='uap'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)'=='true' or '$(TargetsUap)'=='uap'">
     <Compile Include="System\InternalHelpers.cs" />
     <Compile Include="System\IO\StreamOperationAsyncResult.cs" />
     <Compile Include="System\Runtime\InteropServices\WindowsRuntime\MarshalingHelpers.cs" />
@@ -49,7 +49,7 @@
     <Compile Include="System\Windows\Rect.cs" />
     <Compile Include="System\Windows\Size.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetsNETCoreApp)'=='true' or '$(TargetsUAP)'=='true'">
+  <ItemGroup Condition="'$(TargetsNETCoreApp)' == 'true' or '$(TargetsUAP)' == 'true'">
     <Compile Include="$(CommonPath)\CoreLib\System\WinRTFolderPaths.cs">
       <Link>Common\System\WinRTFolderPaths.cs</Link>
     </Compile>
@@ -78,7 +78,6 @@
     <Compile Include="System\IO\IStorageFolderHandleAccess.cs" />
     <Compile Include="System\IO\IStorageItemHandleAccess.cs" />
     <Compile Include="System\IO\NetFxToWinRtStreamAdapter.cs" />
-    <Compile Include="System\IO\StreamOperationAsyncResult.cs" />
     <Compile Include="System\IO\StreamOperationsImplementation.cs" />
     <Compile Include="System\IO\WindowsRuntimeStorageExtensions.cs" />
     <Compile Include="System\IO\WindowsRuntimeStreamExtensions.cs" />
