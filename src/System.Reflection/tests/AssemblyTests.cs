@@ -34,7 +34,7 @@ namespace System.Reflection.Tests
 
         public AssemblyTests() 
         {
-            // Assembly.Location not supported (properly) on UWP.
+            // Assembly.Location does not return the file path for single-file deployment targets.
             DestTestAssemblyPath = Path.Combine(base.TestDirectory, "TestAssembly.dll");
             LoadFromTestPath = Path.Combine(base.TestDirectory, "System.Reflection.Tests.dll");
             File.Copy(SourceTestAssemblyPath, DestTestAssemblyPath);

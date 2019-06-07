@@ -129,7 +129,6 @@ namespace System
 
         public static bool IsReflectionEmitSupported = true;
 
-        // Tracked in: https://github.com/dotnet/corert/issues/3643 in case we change our mind about this.
         public static bool IsInvokingStaticConstructorsSupported => true;
 
         // System.Security.Cryptography.Xml.XmlDsigXsltTransform.GetOutput() relies on XslCompiledTransform which relies
