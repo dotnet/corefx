@@ -370,7 +370,7 @@ namespace System.Text.Encodings.Web
                 }
             }
 
-            if (!wasSurrogatePair)
+            if (!wasSurrogatePair || (valueLength % 2 == 1))
             {
                 firstChar = value[valueLength - 1];
                 int nextScalar = UnicodeHelpers.GetScalarValueFromUtf16(firstChar, null, out wasSurrogatePair);
