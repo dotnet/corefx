@@ -22,7 +22,7 @@ namespace System.IO.Compression
         private ZLibNative.ZLibStreamHandle _zlibStream;    // The handle to the primary underlying zlib stream
         private GCHandle _inputBufferHandle;                // The handle to the buffer that provides input to _zlibStream
         private long _uncompressedSize;
-        private long _currenInflatedCount = 0;
+        private long _currentInflatedCount = 0;
 
         private object SyncLock => this;                    // Used to make writing to unmanaged structures atomic
 
@@ -119,12 +119,12 @@ namespace System.IO.Compression
         private int RestrictStreamWithUnCompressedSize(int bytesRead, out bool wasOverLimit)
         {
             wasOverLimit = false;
-            if (_uncompressedSize > 0 && _uncompressedSize - _currenInflatedCount < bytesRead)
+            if (_uncompressedSize > 0 && _uncompressedSize - _currentInflatedCount < bytesRead)
             {
                 wasOverLimit = true;
-                bytesRead = (int)(_uncompressedSize - _currenInflatedCount);
+                bytesRead = (int)(_uncompressedSize - _currentInflatedCount);
             }
-            _currenInflatedCount += bytesRead;
+            _currentInflatedCount += bytesRead;
             return bytesRead;
         }
 

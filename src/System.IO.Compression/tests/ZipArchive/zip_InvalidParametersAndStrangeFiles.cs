@@ -319,7 +319,6 @@ namespace System.IO.Compression.Tests
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update, true))
             {
                 ZipArchiveEntry e = archive.GetEntry(tamperedFileName);
-                Console.WriteLine(e.CompressedLength+ ", "+e.Length);
                 Stream s = null;
                 Assert.Throws<InvalidDataException>(() => s = e.Open());
                 Assert.Null(s);
