@@ -32,6 +32,9 @@
     <TestRunNamePrefix Condition="'$(IsPackageTesting)' == 'true'">PackageTests-$(ConfigurationGroup)-$(ArchGroup)</TestRunNamePrefix>
 
     <FailOnTestFailure Condition="'$(WaitForWorkItemCompletion)' != ''">$(WaitForWorkItemCompletion)</FailOnTestFailure>
+    
+    <!-- Disable until the flaky test support is fixed: https://github.com/dotnet/core-eng/issues/6663 -->
+    <DisableFlakyTestSupport>true</DisableFlakyTestSupport>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(HelixType)' == ''">
