@@ -87,7 +87,6 @@ namespace System.Text.Json.Serialization.Tests
         {
             byte[] array = JsonSerializer.Parse<byte[]>(JsonSerializer.ToString(new byte[11056]));
             var ms = new MemoryStream();
-            Console.WriteLine(array.Length);
             await JsonSerializer.WriteAsync(ms, array, array.GetType());
         }
 
