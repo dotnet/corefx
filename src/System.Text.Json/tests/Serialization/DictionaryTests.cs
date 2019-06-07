@@ -158,7 +158,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(dict.key["c"], "d");
         }
 
-        class PocoDictionary
+        public class PocoDictionary
         {
             public Dictionary<string, string> key { get; set; }
         }
@@ -181,7 +181,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(@"{""Id"":10}", element.ToString());
         }
 
-        class Poco
+        public class Poco
         {
             public int Id { get; set; }
         }
