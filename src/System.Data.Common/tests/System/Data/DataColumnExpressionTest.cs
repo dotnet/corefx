@@ -3,12 +3,59 @@
 
 using System.Collections.Generic;
 using System.Data.SqlTypes;
+using System.Linq;
 using Xunit;
 
 namespace System.Data.Tests
 {
     public class DataColumnExpressionTest
     {
+        [Theory]
+        [MemberData(nameof(Aggregations))]
+        public void Aggregation(Type dataType, string expression, object expectedResult)
+        {
+            var parentTable = new DataTable
+            {
+                Columns =
+                {
+                    new DataColumn("ParentId", typeof(int)),
+                    new DataColumn("ParentName", typeof(string)),
+                },
+            };
+            var childTable = new DataTable
+            {
+                Columns =
+                {
+                    new DataColumn("ChildId", typeof(int)),
+                    new DataColumn("ParentId", typeof(int)),
+                    new DataColumn("Data", dataType),
+                }
+            };
+
+            var dataSet = new DataSet()
+            {
+                Tables =
+                {
+                    parentTable,
+                    childTable,
+                },
+                Relations =
+                {
+                    new DataRelation("relation", parentTable.Columns[0], childTable.Columns[1]),
+                },
+            };
+
+            parentTable.Rows.Add(1, "parent1");
+            for (var i = 1; i <= 10; i++)
+            {
+                childTable.Rows.Add(i, 1, ChangeType(i * 2, dataType));
+            }
+            childTable.Rows.Add(11, 1, DBNull.Value);
+
+            parentTable.Columns.Add(new DataColumn("Aggregate", expectedResult.GetType(), expression));
+            Assert.Equal(expectedResult, parentTable.Rows[0][2]);
+        }
+
         [Theory]
         [MemberData(nameof(BinaryOperators))]
         public void BinaryOperator(Type operandType1, Type operandType2, Type resultType, string expression, object operand1, object operand2, object result)
@@ -23,7 +70,7 @@ namespace System.Data.Tests
             Assert.Equal(result, table.Rows[0][2]);
         }
 
-        public static object ChangeType(int value, Type type)
+        private static object ChangeType(int value, Type type)
         {
             if (type == typeof(SqlByte))
                 return new SqlByte((byte)value);
@@ -43,6 +90,49 @@ namespace System.Data.Tests
                 return new SqlMoney(value);
 
             return Convert.ChangeType(value, type);
+        }
+
+        public static IEnumerable<object[]> Aggregations()
+        {
+            var aggregations = new (string Operator, int Result)[]
+            {
+                ("sum", 110),
+                ("count", 10),
+                ("avg", 11),
+                ("min", 2),
+                ("max", 20),
+            };
+
+            var types = new[] { typeof(byte), typeof(sbyte), typeof(short), typeof(ushort), typeof(int), typeof(uint), typeof(long), typeof(ulong), typeof(float), typeof(double), typeof(decimal) };
+            var sqlTypes = new[] { typeof(SqlByte), typeof(SqlInt16), typeof(SqlInt32), typeof(SqlInt64), typeof(SqlSingle), typeof(SqlDouble), typeof(SqlDecimal), typeof(SqlMoney) };
+
+            foreach (var type in types.Concat(sqlTypes))
+            {
+                foreach (var aggregation in aggregations)
+                {
+                    var resultType = type;
+
+                    // BUG? sum(Column) is always promoted to SqlInt64
+                    if (aggregation.Operator == "sum" && (type == typeof(SqlByte) || type == typeof(SqlInt16) || type == typeof(SqlInt32)))
+                        resultType = typeof(SqlInt64);
+
+                    if (aggregation.Operator == "count" && (type == typeof(SqlByte) || type == typeof(SqlInt16)))
+                        resultType = typeof(SqlInt32);
+
+                    // BUG? sum(SqlMoney) yields SqlDecimal, but SqlDecimal can't be converted to SqlMoney
+                    if (aggregation.Operator == "sum" && type == typeof(SqlMoney))
+                        resultType = typeof(SqlDecimal);
+
+                    yield return new object[] { type, aggregation.Operator + "(Child.Data)", ChangeType(aggregation.Result, resultType) };
+                }
+
+                // BUG? Var() for SQL types can't convert to System.Double, but StDev can
+                if (type.Namespace == "System.Data.SqlTypes")
+                    yield return new object[] { type, "Var(Child.Data)", new SqlDouble(110.0 / 3) };
+                else
+                    yield return new object[] { type, "Var(Child.Data)", 110.0 / 3 };
+                yield return new object[] { type, "StDev(Child.Data)", Math.Sqrt(110.0 / 3) };
+            }
         }
 
         public static IEnumerable<object[]> BinaryOperators()
