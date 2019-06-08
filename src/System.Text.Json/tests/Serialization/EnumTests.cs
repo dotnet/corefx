@@ -103,7 +103,6 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("{ \"MyUInt64Enum\" : -1 }")]
         [InlineData("{ \"MyUInt64Enum\" : -1, \"MyUInt32Enum\" : -1 }")]
         [InlineData("{ \"MyUInt64Enum\" : -1, \"MyUInt32Enum\" : -1, \"MyByteEnum\" : -1 }")]
-        [ActiveIssue(38363)]
         public static void Parse_Negative1ForUInt64Enum_ShouldNotThrow(string json)
         {
             SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
