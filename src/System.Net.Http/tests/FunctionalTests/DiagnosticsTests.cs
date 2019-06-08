@@ -22,11 +22,11 @@ namespace System.Net.Http.Functional.Tests
 
     public abstract class DiagnosticsTest : HttpClientHandlerTestBase
     {
-        private const string SuppressActivityPropagationEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SUPPRESSACTIVITYPROPAGATION";
-        private const string SuppressActivityPropagationAppCtxSettingName = "System.Net.Http.SuppressActivityPropagation";
+        private const string EnableActivityPropagationEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_ENABLEACTIVITYPROPAGATION";
+        private const string EnableActivityPropagationAppCtxSettingName = "System.Net.Http.EnableActivityPropagation";
 
-        private static bool SuppressActivityPropagationEnvironmentVariableIsNotSet =>
-            string.IsNullOrEmpty(Environment.GetEnvironmentVariable(SuppressActivityPropagationEnvironmentVariableSettingName));
+        private static bool EnableActivityPropagationEnvironmentVariableIsNotSet =>
+            string.IsNullOrEmpty(Environment.GetEnvironmentVariable(EnableActivityPropagationEnvironmentVariableSettingName));
 
         public DiagnosticsTest(ITestOutputHelper output) : base(output) { }
 
@@ -1039,20 +1039,20 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [OuterLoop("Uses external server")]
-        [ConditionalTheory(nameof(SuppressActivityPropagationEnvironmentVariableIsNotSet))]
-        [InlineData("true", false)]
-        [InlineData("TRUE", false)]
-        [InlineData("tRuE", false)]
-        [InlineData("1", false)]
-        [InlineData("0", true)]
-        [InlineData("false", true)]
+        [ConditionalTheory(nameof(EnableActivityPropagationEnvironmentVariableIsNotSet))]
+        [InlineData("true", true)]
+        [InlineData("1", true)]
+        [InlineData("0", false)]
+        [InlineData("false", false)]
+        [InlineData("FALSE", false)]
+        [InlineData("fAlSe", false)]
         [InlineData("helloworld", true)]
         [InlineData("", true)]
         public void SendAsync_SuppressedGlobalStaticPropagationEnvVar(string envVarValue, bool isInstrumentationEnabled)
         {
             RemoteExecutor.Invoke((innerEnvVarValue, innerIsInstrumentationEnabled) =>
             {
-                Environment.SetEnvironmentVariable(SuppressActivityPropagationEnvironmentVariableSettingName, innerEnvVarValue);
+                Environment.SetEnvironmentVariable(EnableActivityPropagationEnvironmentVariableSettingName, innerEnvVarValue);
 
                 string eventKey = null;
                 bool anyEventLogged = false;
@@ -1097,7 +1097,7 @@ namespace System.Net.Http.Functional.Tests
         {
             RemoteExecutor.Invoke((innerSwitchValue, innerIsInstrumentationEnabled) =>
             {
-                AppContext.SetSwitch(SuppressActivityPropagationAppCtxSettingName, bool.Parse(innerSwitchValue));
+                AppContext.SetSwitch(EnableActivityPropagationAppCtxSettingName, bool.Parse(innerSwitchValue));
 
                 using (HttpClient client = new HttpClient())
                 {
