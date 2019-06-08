@@ -28,13 +28,11 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            // inputCount != InputBlockSize is not allowed
+            // inputCount < InputBlockSize is not allowed
             ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount, InputBlockSize);
 
             if (outputBuffer == null)
-            {
                 ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
-            }
 
             // For now, only convert 3 bytes to 4
             Span<byte> input = inputBuffer.AsSpan(inputOffset, InputBlockSize);
@@ -130,17 +128,22 @@ namespace System.Security.Cryptography
 
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
-            // inputCount != InputBlockSize is not allowed
-            ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount, InputBlockSize);
-            if (outputBuffer == null) ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
+            // inputCount != InputBlockSize is allowed
+            ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
             if (_inputBuffer == null)
-            {
                 ThrowHelper.ThrowObjectDisposed();
-            }
 
-            Debug.Assert(InputBlockSize == 4);
+            if (outputBuffer == null)
+                ThrowHelper.ThrowArgumentNull(ThrowHelper.ExceptionArgument.outputBuffer);
+
+            // The common case is inputCount = 4
+            byte[] tmpBufferArray = null;
             Span<byte> tmpBuffer = stackalloc byte[4];
+            if (inputCount > 4)
+            {
+                tmpBuffer = tmpBufferArray = CryptoPool.Rent(inputCount);
+            }
 
             tmpBuffer = GetTempBuffer(inputBuffer.AsSpan(inputOffset, inputCount), tmpBuffer);
             int bytesToTransform = _inputIndex + tmpBuffer.Length;
@@ -151,31 +154,34 @@ namespace System.Security.Cryptography
                 tmpBuffer.CopyTo(_inputBuffer.AsSpan(_inputIndex));
 
                 _inputIndex = bytesToTransform;
+
+                ReturnToCryptoPool(tmpBufferArray, tmpBuffer.Length);
+
                 return 0;
             }
 
             ConvertFromBase64(tmpBuffer, outputBuffer.AsSpan(outputOffset), out int consumed, out int written);
             Debug.Assert(consumed == bytesToTransform);
 
+            ReturnToCryptoPool(tmpBufferArray, tmpBuffer.Length);
+
             return written;
         }
 
         public byte[] TransformFinalBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            // inputCount > InputBlockSize is allowed
+            // inputCount != InputBlockSize is allowed
             ThrowHelper.ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
             if (_inputBuffer == null)
-            {
                 ThrowHelper.ThrowObjectDisposed();
-            }
 
             if (inputCount == 0)
             {
                 return Array.Empty<byte>();
             }
 
-            // The common case is <= 4
+            // The common case is inputCount <= 4
             byte[] tmpBufferArray = null;
             Span<byte> tmpBuffer = stackalloc byte[4];
             if (inputCount > 4)
@@ -192,10 +198,7 @@ namespace System.Security.Cryptography
                 // reinitialize the transform
                 Reset();
 
-                if (tmpBufferArray != null)
-                {
-                    CryptoPool.Return(tmpBufferArray, tmpBuffer.Length);
-                }
+                ReturnToCryptoPool(tmpBufferArray, tmpBuffer.Length);
 
                 return Array.Empty<byte>();
             }
@@ -207,10 +210,7 @@ namespace System.Security.Cryptography
             Debug.Assert(consumed == bytesToTransform);
             Debug.Assert(written == outputSize);
 
-            if (tmpBufferArray != null)
-            {
-                CryptoPool.Return(tmpBufferArray, tmpBuffer.Length);
-            }
+            ReturnToCryptoPool(tmpBufferArray, tmpBuffer.Length);
 
             // reinitialize the transform
             Reset();
@@ -315,9 +315,14 @@ namespace System.Security.Cryptography
                 ThrowHelper.ThrowBase64FormatException();
             }
 
-            if (transformBufferArray != null)
+            ReturnToCryptoPool(transformBufferArray, transformBuffer.Length);
+        }
+
+        private void ReturnToCryptoPool(byte[] array, int clearSize)
+        {
+            if (array != null)
             {
-                CryptoPool.Return(transformBufferArray, transformBuffer.Length);
+                CryptoPool.Return(array, clearSize);
             }
         }
 
@@ -366,13 +371,17 @@ namespace System.Security.Cryptography
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static void ValidateTransformBlock(byte[] inputBuffer, int inputOffset, int inputCount)
         {
-            if (inputBuffer == null) ThrowArgumentNull(ExceptionArgument.inputBuffer);
+            if (inputBuffer == null)
+                ThrowArgumentNull(ExceptionArgument.inputBuffer);
 
-            if ((uint)inputCount > inputBuffer.Length) ThrowArgumentOutOfRange(ExceptionArgument.inputCount);
+            if ((uint)inputCount > inputBuffer.Length)
+                ThrowArgumentOutOfRange(ExceptionArgument.inputCount);
 
-            if (inputOffset < 0) ThrowArgumentOutOfRange(ExceptionArgument.inputOffset);
+            if (inputOffset < 0)
+                ThrowArgumentOutOfRange(ExceptionArgument.inputOffset);
 
-            if ((inputBuffer.Length - inputCount) < inputOffset) ThrowInvalidOffLen();
+            if ((inputBuffer.Length - inputCount) < inputOffset)
+                ThrowInvalidOffLen();
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -380,10 +389,8 @@ namespace System.Security.Cryptography
         {
             ValidateTransformBlock(inputBuffer, inputOffset, inputCount);
 
-            if (inputCount != inputBlockSize)
-            {
+            if (inputCount < inputBlockSize)
                 ThrowArgumentOutOfRange(ExceptionArgument.inputCount);
-            }
         }
 
         public static void ThrowArgumentNull(ExceptionArgument argument) => throw new ArgumentNullException(argument.ToString());
