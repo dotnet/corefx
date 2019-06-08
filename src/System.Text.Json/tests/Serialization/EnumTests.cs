@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Xunit;
-using Newtonsoft.Json;
 
 namespace System.Text.Json.Serialization.Tests
 {
@@ -58,7 +57,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void Parse_MaxValues_QuotedVsNotQuoted_QuotedThrows()
         {
-            var json = $"{{ \"MyByteEnum\" : {byte.MaxValue}, \"MyUInt32Enum\" : {UInt32.MaxValue}, \"MyUInt64Enum\" : {ulong.MaxValue} }}";
+            string json = $"{{ \"MyByteEnum\" : {byte.MaxValue}, \"MyUInt32Enum\" : {UInt32.MaxValue}, \"MyUInt64Enum\" : {ulong.MaxValue} }}";
             SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
             Assert.Equal((SampleByteEnum)byte.MaxValue, result.MyByteEnum);
             Assert.Equal((SampleUInt32Enum)UInt32.MaxValue, result.MyUInt32Enum);
@@ -89,7 +88,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void Parse_Negative1_QuotedVsUnquoted_QuotedThrows()
         {
-            var json = "{ \"MyByteEnum\" : -1, \"MyUInt32Enum\" : -1 }";
+            string json = "{ \"MyByteEnum\" : -1, \"MyUInt32Enum\" : -1 }";
             SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
             Assert.Equal((SampleByteEnum)byte.MaxValue, result.MyByteEnum);
             Assert.Equal((SampleUInt32Enum)UInt32.MaxValue, result.MyUInt32Enum);
@@ -101,13 +100,24 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Theory]
+        [InlineData("{ \"MyUInt64Enum\" : -1 }")]
+        [InlineData("{ \"MyUInt64Enum\" : -1, \"MyUInt32Enum\" : -1 }")]
+        [InlineData("{ \"MyUInt64Enum\" : -1, \"MyUInt32Enum\" : -1, \"MyByteEnum\" : -1 }")]
+        [ActiveIssue(38363)]
+        public static void Parse_Negative1ForUInt64Enum_ShouldNotThrow(string json)
+        {
+            SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
+            Assert.Equal((SampleUInt64Enum)UInt64.MaxValue, result.MyUInt64Enum);
+        }
+
+        [Theory]
         [InlineData((ulong)byte.MaxValue + 1, (ulong)UInt32.MaxValue + 1, (SampleByteEnum)0, (SampleUInt32Enum)0)]
         [InlineData((ulong)byte.MaxValue + 2, (ulong)UInt32.MaxValue + 2, (SampleByteEnum)1, (SampleUInt32Enum)1)]
         [InlineData((ulong)byte.MaxValue + 13, (ulong)UInt32.MaxValue + 13, (SampleByteEnum)12, (SampleUInt32Enum)12)]
         [InlineData((ulong)byte.MaxValue * 2, (ulong)UInt32.MaxValue * 2, (SampleByteEnum)byte.MaxValue - 1, (SampleUInt32Enum)UInt32.MaxValue - 1)]
         public static void Parse_Ulong_JsonWithAcceptableInvalidNumber_Success(ulong i, ulong j, SampleByteEnum e1, SampleUInt32Enum e2)
         {
-            var json = $"{{ \"MyByteEnum\" : {i}, \"MyUInt32Enum\" : {j} }}";
+            string json = $"{{ \"MyByteEnum\" : {i}, \"MyUInt32Enum\" : {j} }}";
             SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
             Assert.Equal(e1, result.MyByteEnum);
             Assert.Equal(e2, result.MyUInt32Enum);
