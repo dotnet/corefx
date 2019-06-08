@@ -18,7 +18,6 @@ namespace System.Text.Json
             JsonSerializerOptions options,
             ref WriteStack state)
         {
-            bool continueWriting = true;
             bool finishedSerializing;
             do
             {
@@ -50,15 +49,15 @@ namespace System.Text.Json
 
                 if (finishedSerializing && writer.CurrentDepth == 0)
                 {
-                    continueWriting = false;
+                    break;
                 }
 
                 // If serialization is not yet end and we surpass beyond flush threshold return false and flush stream.
-                if (continueWriting && flushThreshold >= 0 && writer.BytesPending > flushThreshold)
+                if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)
                 {
                     return false;
                 }
-            } while (continueWriting);
+            } while (true);
 
             return true;
         }
