@@ -9,8 +9,24 @@ using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
 {
+    public enum SampleByteEnum : byte
+    {
+        One = 0,
+        Two = 1,
+        Max = byte.MaxValue
+    }
+
+    public enum SampleUInt32Enum : UInt32
+    {
+        One = 0,
+        Two = 1,
+        Max = UInt32.MaxValue
+    }
+
     public class SimpleTestClass : ITestClass
     {
+        public SampleByteEnum MyByteEnum { get; set; }
+        public SampleUInt32Enum MyUInt32Enum { get; set; }
         public short MyInt16 { get; set; }
         public int MyInt32 { get; set; }
         public long MyInt64 { get; set; }

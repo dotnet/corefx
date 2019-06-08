@@ -66,5 +66,15 @@ namespace System.Text.Json.Serialization.Tests
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonUInt64EnumMax);
             Assert.Equal(SampleUInt64Enum.Max, obj.MyUInt64Enum);
         }
+
+        [Fact]
+        public static void Tmp_Test()
+        {
+            string json = "{ \"MyByteEnum\" : -1, \"MyUInt32Enum\" : -1, \"MyUInt64Enum\" : -1 }";
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(json);
+            Assert.Equal(SampleUInt64Enum.Max, obj.MyUInt64Enum);
+            Assert.Equal(SampleUInt32Enum.Max, obj.MyUInt32Enum);
+            Assert.Equal(SampleByteEnum.Max, obj.MyByteEnum);
+        }
     }
 }

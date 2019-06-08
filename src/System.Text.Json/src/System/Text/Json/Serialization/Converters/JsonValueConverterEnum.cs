@@ -47,7 +47,8 @@ namespace System.Text.Json.Serialization.Converters
                     return true;
                 }
             }
-            else if (reader.TryGetInt64(out long longValue))
+
+            if (reader.TryGetInt64(out long longValue))
             {
                 value = (TValue)Enum.ToObject(valueType, longValue);
                 return true;
