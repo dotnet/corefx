@@ -10,6 +10,15 @@ namespace System.Text.Json.Serialization.Converters
         where TValue : struct, Enum
     {
         private static readonly bool s_isUint64 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ulong);
+        private static readonly bool s_isInt64 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(long);
+
+        private static readonly bool s_isUint32 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(uint);
+        private static readonly bool s_isInt32 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(int);
+
+        private static readonly bool s_isUshort = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
+        private static readonly bool s_isshort = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
+
+        private static readonly bool s_isByte = Enum.GetUnderlyingType(typeof(TValue)) == typeof(byte);
 
         public bool TreatAsString { get; private set; }
 
@@ -46,12 +55,106 @@ namespace System.Text.Json.Serialization.Converters
                     value = (TValue)Enum.ToObject(valueType, ulongValue);
                     return true;
                 }
+                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
+                {
+                    value = (TValue)Enum.ToObject(valueType, fallback);
+                    return true;
+                }
+
+                value = default;
+                return false;
             }
 
-            if (reader.TryGetInt64(out long longValue))
+            if (s_isInt64)
             {
-                value = (TValue)Enum.ToObject(valueType, longValue);
-                return true;
+                if (reader.TryGetInt64(out long ulongValue))
+                {
+                    value = (TValue)Enum.ToObject(valueType, ulongValue);
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (s_isUint32)
+            {
+                if (reader.TryGetUInt32(out uint uintValue))
+                {
+                    value = (TValue)Enum.ToObject(valueType, uintValue);
+                    return true;
+                } 
+                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
+                {
+                    value = (TValue)Enum.ToObject(valueType, fallback);
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (s_isInt32)
+            {
+                if (reader.TryGetInt32(out int intValue))
+                {
+                    value = (TValue)Enum.ToObject(valueType, intValue);
+                    return true;
+                } 
+
+                value = default;
+                return false;
+            }
+
+            if (s_isUshort)
+            {
+                if (reader.TryGetUInt32(out uint uintValue) && uintValue >= ushort.MinValue && uintValue <= ushort.MaxValue)
+                {
+                    value = (TValue)Enum.ToObject(valueType, uintValue);
+                    return true;
+                }
+                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
+                {
+                    value = (TValue)Enum.ToObject(valueType, fallback);
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (s_isshort)
+            {
+                if (reader.TryGetInt32(out int intValue) && intValue >= short.MinValue && intValue <= short.MaxValue)
+                {
+                    value = (TValue)Enum.ToObject(valueType, intValue);
+                    return true;
+                }
+                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
+                {
+                    value = (TValue)Enum.ToObject(valueType, fallback);
+                    return true;
+                }
+
+                value = default;
+                return false;
+            }
+
+            if (s_isByte)
+            {
+                if (reader.TryGetInt32(out int intValue) && intValue >= byte.MinValue && intValue <= byte.MinValue)
+                {
+                    value = (TValue)Enum.ToObject(valueType, intValue);
+                    return true;
+                }
+                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
+                {
+                    value = (TValue)Enum.ToObject(valueType, fallback);
+                    return true;
+                }
+
+                value = default;
+                return false;
             }
 
             value = default;
