@@ -238,5 +238,42 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Value", indexer.NonIndexerProp);
             Assert.Equal(-1, indexer[0]);
         }
+
+        [ActiveIssue(38414)]
+        [Fact]
+        public static void ReadStructWithSimpleClassTest() {
+            SimpleStructWithClass testObject = new SimpleStructWithClass();
+            testObject.Initialize();
+
+            string json = JsonSerializer.ToString(testObject, testObject.GetType());
+            SimpleStructWithClass obj = JsonSerializer.Parse<SimpleStructWithClass>(json);
+            obj.Verify();
+        }
+
+        [ActiveIssue(38490)]
+        [Fact]
+        public static void ReadStructObjectValueTest()
+        {
+            SimpleTestStruct testObject = new SimpleTestStruct();
+            testObject.Initialize();
+            testObject.MySimpleTestClass = new SimpleTestClass  { MyString = "Hello", MyDouble = 3.14 } ;
+
+            string json = JsonSerializer.ToString(testObject);
+            SimpleTestStruct parsedObject = JsonSerializer.Parse<SimpleTestStruct>(json);
+            parsedObject.Verify();            
+        }
+
+        [ActiveIssue(38490)]
+        [Fact]
+        public static void ReadSimpleTestClassWithTestStruct()
+        {
+            SimpleTestClass testObject = new SimpleTestClass();
+            testObject.Initialize();
+            testObject.MySimpleTestStruct = new SimpleTestStruct { MyString = "Hello", MyDouble = 3.14, MySimpleTestClass = new SimpleTestClass { MyString = "World"} };
+
+            string json = JsonSerializer.ToString(testObject);
+            SimpleTestClass parsedObject = JsonSerializer.Parse<SimpleTestClass>(json);
+            parsedObject.Verify();
+        }
     }
 }

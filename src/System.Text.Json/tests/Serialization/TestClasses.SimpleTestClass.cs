@@ -31,6 +31,9 @@ namespace System.Text.Json.Serialization.Tests
         public SampleEnum MyEnum { get; set; }
         public SampleInt64Enum MyInt64Enum { get; set; }
         public SampleUInt64Enum MyUInt64Enum { get; set; }
+        public SimpleStruct MySimpleStruct {get; set;}
+        public SimpleTestStruct MySimpleTestStruct { get; set; }
+
         public short[] MyInt16Array { get; set; }
         public int[] MyInt32Array { get; set; }
         public long[] MyInt64Array { get; set; }
@@ -103,12 +106,16 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyDateTime"" : ""2019-01-30T12:01:02.0000000Z""," +
                 @"""MyDateTimeOffset"" : ""2019-01-30T12:01:02.0000000+01:00""," +
                 @"""MyEnum"" : 2," + // int by default
+                @"""MyInt64Enum"" : -9223372036854775808," +
+                @"""MyUInt64Enum"" : 18446744073709551615," +
                 @"""MyStringToStringDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIReadOnlyDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringImmutableDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringIImmutableDict"" : {""key"" : ""value""}," +
-                @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}";
+                @"""MyStringToStringImmutableSortedDict"" : {""key"" : ""value""}," +
+                @"""MySimpleStruct"" : {""One"" : 11, ""Two"" : 1.9999, ""Three"" : 33}," +
+                @"""MySimpleTestStruct"" : {""MyInt64"" : 64, ""MyString"" :""Hello"", ""MyInt32Array"" : [32]}";
 
         private const string s_partialJsonArrays =
                 @"""MyInt16Array"" : [1]," +
@@ -177,7 +184,8 @@ namespace System.Text.Json.Serialization.Tests
             MyDateTime = new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc);
             MyDateTimeOffset = new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0));
             MyEnum = SampleEnum.Two;
-
+            MyInt64Enum = SampleInt64Enum.Min;
+            MyUInt64Enum = SampleUInt64Enum.Max;
             MyInt16Array = new short[] { 1 };
             MyInt32Array = new int[] { 2 };
             MyInt64Array = new long[] { 3 };
@@ -196,6 +204,8 @@ namespace System.Text.Json.Serialization.Tests
             MyDateTimeArray = new DateTime[] { new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc) };
             MyDateTimeOffsetArray = new DateTimeOffset[] { new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)) };
             MyEnumArray = new SampleEnum[] { SampleEnum.Two };
+            MySimpleStruct = new SimpleStruct { One = 11, Two = 1.9999};
+            MySimpleTestStruct = new SimpleTestStruct { MyInt64 = 64, MyString = "Hello", MyInt32Array = new int[] { 32 } };
 
             MyInt16TwoDimensionArray = new int[2][];
             MyInt16TwoDimensionArray[0] = new int[] { 10, 11 };
@@ -277,6 +287,13 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(new DateTime(2019, 1, 30, 12, 1, 2, DateTimeKind.Utc), MyDateTime);
             Assert.Equal(new DateTimeOffset(2019, 1, 30, 12, 1, 2, new TimeSpan(1, 0, 0)), MyDateTimeOffset);
             Assert.Equal(SampleEnum.Two, MyEnum);
+            Assert.Equal(SampleInt64Enum.Min, MyInt64Enum);
+            Assert.Equal(SampleUInt64Enum.Max, MyUInt64Enum);
+            Assert.Equal(11, MySimpleStruct.One);
+            Assert.Equal(1.9999, MySimpleStruct.Two);
+            Assert.Equal(64, MySimpleTestStruct.MyInt64);
+            Assert.Equal("Hello", MySimpleTestStruct.MyString);
+            Assert.Equal(32, MySimpleTestStruct.MyInt32Array[0]);
 
             Assert.Equal((short)1, MyInt16Array[0]);
             Assert.Equal((int)2, MyInt32Array[0]);

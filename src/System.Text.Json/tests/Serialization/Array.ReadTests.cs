@@ -174,6 +174,28 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(0, i.Length);
         }
 
+        [ActiveIssue(38435)]
+        [Fact]
+        public static void ReadInitializedArrayTest()
+        {
+            string serialized = "{\"Values\":[1,2,3]}";
+            AppState deserializedState = JsonSerializer.Parse<AppState>(serialized);
+
+            Assert.Equal(1, deserializedState.Values[0]);
+            Assert.Equal(2, deserializedState.Values[1]);
+            Assert.Equal(3, deserializedState.Values[2]);
+        }
+
+        public class AppState
+        {
+            public int[] Values { get; set; }
+
+            public AppState()
+            {
+                Values = Array.Empty<int>();
+            }
+        }
+
         [Fact]
         public static void ReadArrayWithEnums()
         {
