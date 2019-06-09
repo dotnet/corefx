@@ -11,16 +11,16 @@ namespace System.Text
     public abstract class EncodingProvider
     {
         public EncodingProvider() { }
-        public abstract Encoding GetEncoding(string name);
-        public abstract Encoding GetEncoding(int codepage);
+        public abstract Encoding? GetEncoding(string name);
+        public abstract Encoding? GetEncoding(int codepage);
 
         // GetEncoding should return either valid encoding or null. shouldn't throw any exception except on null name
-        public virtual Encoding GetEncoding(string name, EncoderFallback encoderFallback, DecoderFallback decoderFallback)
+        public virtual Encoding? GetEncoding(string name, EncoderFallback encoderFallback, DecoderFallback decoderFallback)
         {
-            Encoding enc = GetEncoding(name);
+            Encoding? enc = GetEncoding(name);
             if (enc != null)
             {
-                enc = (Encoding)GetEncoding(name).Clone();
+                enc = (Encoding)enc.Clone();
                 enc.EncoderFallback = encoderFallback;
                 enc.DecoderFallback = decoderFallback;
             }
@@ -28,12 +28,12 @@ namespace System.Text
             return enc;
         }
 
-        public virtual Encoding GetEncoding(int codepage, EncoderFallback encoderFallback, DecoderFallback decoderFallback)
+        public virtual Encoding? GetEncoding(int codepage, EncoderFallback encoderFallback, DecoderFallback decoderFallback)
         {
-            Encoding enc = GetEncoding(codepage);
+            Encoding? enc = GetEncoding(codepage);
             if (enc != null)
             {
-                enc = (Encoding)GetEncoding(codepage).Clone();
+                enc = (Encoding)enc.Clone();
                 enc.EncoderFallback = encoderFallback;
                 enc.DecoderFallback = decoderFallback;
             }
@@ -66,7 +66,7 @@ namespace System.Text
             }
         }
 
-        internal static Encoding GetEncodingFromProvider(int codepage)
+        internal static Encoding? GetEncodingFromProvider(int codepage)
         {
             if (s_providers == null)
                 return null;
@@ -74,7 +74,7 @@ namespace System.Text
             EncodingProvider[] providers = s_providers;
             foreach (EncodingProvider provider in providers)
             {
-                Encoding enc = provider.GetEncoding(codepage);
+                Encoding? enc = provider.GetEncoding(codepage);
                 if (enc != null)
                     return enc;
             }
@@ -82,7 +82,7 @@ namespace System.Text
             return null;
         }
 
-        internal static Encoding GetEncodingFromProvider(string encodingName)
+        internal static Encoding? GetEncodingFromProvider(string encodingName)
         {
             if (s_providers == null)
                 return null;
@@ -90,7 +90,7 @@ namespace System.Text
             EncodingProvider[] providers = s_providers;
             foreach (EncodingProvider provider in providers)
             {
-                Encoding enc = provider.GetEncoding(encodingName);
+                Encoding? enc = provider.GetEncoding(encodingName);
                 if (enc != null)
                     return enc;
             }
@@ -98,7 +98,7 @@ namespace System.Text
             return null;
         }
 
-        internal static Encoding GetEncodingFromProvider(int codepage, EncoderFallback enc, DecoderFallback dec)
+        internal static Encoding? GetEncodingFromProvider(int codepage, EncoderFallback enc, DecoderFallback dec)
         {
             if (s_providers == null)
                 return null;
@@ -106,15 +106,15 @@ namespace System.Text
             EncodingProvider[] providers = s_providers;
             foreach (EncodingProvider provider in providers)
             {
-                Encoding encing = provider.GetEncoding(codepage, enc, dec);
-                if (encing != null)
-                    return encing;
+                Encoding? encoding = provider.GetEncoding(codepage, enc, dec);
+                if (encoding != null)
+                    return encoding;
             }
 
             return null;
         }
 
-        internal static Encoding GetEncodingFromProvider(string encodingName, EncoderFallback enc, DecoderFallback dec)
+        internal static Encoding? GetEncodingFromProvider(string encodingName, EncoderFallback enc, DecoderFallback dec)
         {
             if (s_providers == null)
                 return null;
@@ -122,7 +122,7 @@ namespace System.Text
             EncodingProvider[] providers = s_providers;
             foreach (EncodingProvider provider in providers)
             {
-                Encoding encoding = provider.GetEncoding(encodingName, enc, dec);
+                Encoding? encoding = provider.GetEncoding(encodingName, enc, dec);
                 if (encoding != null)
                     return encoding;
             }
@@ -131,6 +131,6 @@ namespace System.Text
         }
 
         private static object s_InternalSyncObject = new object();
-        private static volatile EncodingProvider[] s_providers;
+        private static volatile EncodingProvider[]? s_providers;
     }
 }

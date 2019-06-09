@@ -16,13 +16,13 @@ namespace System
             HResult = HResults.COR_E_TYPEUNLOADED;
         }
 
-        public TypeUnloadedException(string message)
+        public TypeUnloadedException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_TYPEUNLOADED;
         }
 
-        public TypeUnloadedException(string message, Exception innerException)
+        public TypeUnloadedException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_TYPEUNLOADED;

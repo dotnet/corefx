@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
+using System.Buffers.Text;
 using System.Diagnostics;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -47,10 +49,6 @@ namespace System.Text.Json
                     return JsonValueType.Undefined;
             }
         }
-
-        // A digit is valid if it is in the range: [0..9]
-        // Otherwise, return false.
-        public static bool IsDigit(byte nextByte) => (uint)(nextByte - '0') <= '9' - '0';
 
         // Returns true if the TokenType is a primitive "value", i.e. String, Number, True, False, and Null
         // Otherwise, return false.
@@ -250,5 +248,76 @@ namespace System.Text.Json
                                                0x03ul << 32 |
                                                0x02ul << 40 |
                                                0x01ul << 48) + 1;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValidDateTimeOffsetParseLength(int length)
+        {
+            return JsonHelpers.IsInRangeInclusive(length, JsonConstants.MinimumDateTimeParseLength, JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsValidDateTimeOffsetParseLength(long length)
+        {
+            return JsonHelpers.IsInRangeInclusive(length, JsonConstants.MinimumDateTimeParseLength, JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+        }
+
+        public static bool TryGetEscapedDateTime(ReadOnlySpan<byte> source, out DateTime value)
+        {
+            int backslash = source.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(backslash != -1);
+
+            Debug.Assert(source.Length <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+            Span<byte> sourceUnescaped = stackalloc byte[source.Length];
+
+            Unescape(source, sourceUnescaped, backslash, out int written);
+            Debug.Assert(written > 0);
+
+            sourceUnescaped = sourceUnescaped.Slice(0, written);
+            Debug.Assert(!sourceUnescaped.IsEmpty);
+
+            value = default;
+            return (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out value, out int bytesConsumed)
+                && sourceUnescaped.Length == bytesConsumed;
+        }
+
+        public static bool TryGetEscapedDateTimeOffset(ReadOnlySpan<byte> source, out DateTimeOffset value)
+        {
+            int backslash = source.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(backslash != -1);
+
+            Debug.Assert(source.Length <= JsonConstants.MaximumEscapedDateTimeOffsetParseLength);
+            Span<byte> sourceUnescaped = stackalloc byte[source.Length];
+
+            Unescape(source, sourceUnescaped, backslash, out int written);
+            Debug.Assert(written > 0);
+
+            sourceUnescaped = sourceUnescaped.Slice(0, written);
+            Debug.Assert(!sourceUnescaped.IsEmpty);
+
+            value = default;
+            return (sourceUnescaped.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
+                && JsonHelpers.TryParseAsISO(sourceUnescaped, out value, out int bytesConsumed)
+                && sourceUnescaped.Length == bytesConsumed;
+        }
+
+        public static bool TryGetEscapedGuid(ReadOnlySpan<byte> source, out Guid value)
+        {
+            Debug.Assert(source.Length <= JsonConstants.MaximumEscapedGuidLength);
+
+            int idx = source.IndexOf(JsonConstants.BackSlash);
+            Debug.Assert(idx != -1);
+
+            Span<byte> utf8Unescaped = stackalloc byte[source.Length];
+
+            Unescape(source, utf8Unescaped, idx, out int written);
+            Debug.Assert(written > 0);
+
+            utf8Unescaped = utf8Unescaped.Slice(0, written);
+            Debug.Assert(!utf8Unescaped.IsEmpty);
+
+            value = default;
+            return (utf8Unescaped.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(utf8Unescaped, out value, out _, 'D');
+        }
     }
 }

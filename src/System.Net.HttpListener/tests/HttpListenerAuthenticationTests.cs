@@ -75,7 +75,6 @@ namespace System.Net.Tests
             await ValidateValidUser();
         }
 
-        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
         [Theory]
         [MemberData(nameof(BasicAuthenticationHeader_TestData))]
         public async Task BasicAuthentication_InvalidRequest_SendsStatusCodeClient(string header, HttpStatusCode statusCode)
@@ -107,7 +106,6 @@ namespace System.Net.Tests
             yield return new object[] { "abc", HttpStatusCode.InternalServerError };
         }
 
-        [ActiveIssue(19967, TargetFrameworkMonikers.NetFramework)]
         [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [ActiveIssue(20098, TestPlatforms.Unix)]
         [InlineData("ExampleRealm")]
         [InlineData("  ExampleRealm  ")]
@@ -166,7 +164,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
-        [ActiveIssue(20604)]
         public async Task NtlmAuthentication_Conversation_ReturnsExpectedType2Message()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Ntlm;
@@ -188,8 +185,7 @@ namespace System.Net.Tests
             yield return new object[] { "abcd", HttpStatusCode.BadRequest };
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
-        [ActiveIssue(20604)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support NTLM")]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NtlmAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
         {
@@ -212,7 +208,6 @@ namespace System.Net.Tests
         }
 
         [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
-        [ActiveIssue(20604)]
         public async Task NegotiateAuthentication_Conversation_ReturnsExpectedType2Message()
         {
             _listener.AuthenticationSchemes = AuthenticationSchemes.Negotiate;
@@ -226,8 +221,7 @@ namespace System.Net.Tests
             }
         }
 
-        [ConditionalFact(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
-        [ActiveIssue(20604)]
+        [ConditionalTheory(nameof(Helpers) + "." + nameof(Helpers.IsWindowsImplementation))] // [PlatformSpecific(TestPlatforms.Windows, "Managed impl doesn't support Negotiate")]
         [MemberData(nameof(InvalidNtlmNegotiateAuthentication_TestData))]
         public async Task NegotiateAuthentication_InvalidRequestHeaders_ReturnsExpectedStatusCode(string header, HttpStatusCode statusCode)
         {
@@ -238,7 +232,14 @@ namespace System.Net.Tests
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Negotiate", header);
 
                 HttpResponseMessage message = await AuthenticationFailure(client, statusCode);
-                Assert.Empty(message.Headers.WwwAuthenticate);
+                if (statusCode == HttpStatusCode.Unauthorized)
+                {
+                    Assert.NotEmpty(message.Headers.WwwAuthenticate);
+                }
+                else
+                {
+                    Assert.Empty(message.Headers.WwwAuthenticate);
+                }
             }
         }
 

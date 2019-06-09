@@ -39,7 +39,7 @@ namespace System.Globalization
         ============================================================================*/
         private static int GetAdvanceHijriDate()
         {
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey(InternationalRegKey))
+            using (RegistryKey? key = Registry.CurrentUser.OpenSubKey(InternationalRegKey))
             {
                 // Abort if we didn't find anything
                 if (key == null)
@@ -47,17 +47,17 @@ namespace System.Globalization
                     return 0;
                 }
 
-                object value = key.GetValue(HijriAdvanceRegKeyEntry);
+                object? value = key.GetValue(HijriAdvanceRegKeyEntry);
                 if (value == null)
                 {
                     return 0;
                 }
 
                 int hijriAdvance = 0;
-                string str = value.ToString();
+                string? str = value.ToString();
                 if (string.Compare(str, 0, HijriAdvanceRegKeyEntry, 0, HijriAdvanceRegKeyEntry.Length, StringComparison.OrdinalIgnoreCase) == 0)
                 {
-                    if (str.Length == HijriAdvanceRegKeyEntry.Length)
+                    if (str!.Length == HijriAdvanceRegKeyEntry.Length)
                         hijriAdvance = -1;
                     else
                     {

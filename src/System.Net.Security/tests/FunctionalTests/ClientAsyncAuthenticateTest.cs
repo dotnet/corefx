@@ -25,7 +25,6 @@ namespace System.Net.Security.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "CI uses old Framework version, which doesn't support using SslProtocols.None for default system behavior")]
         public async Task ClientAsyncAuthenticate_SslStreamClientServerNone_UseStrongCryptoSet()
         {
             SslProtocols protocol = SslProtocols.None;
@@ -106,7 +105,7 @@ namespace System.Net.Security.Tests
             // Servers are not expected to dynamically change versions.
         }
 
-        private static IEnumerable<object[]> ProtocolMismatchData()
+        public static IEnumerable<object[]> ProtocolMismatchData()
         {
 #pragma warning disable 0618
             yield return new object[] { SslProtocols.Ssl2, SslProtocols.Ssl3, typeof(Exception) };

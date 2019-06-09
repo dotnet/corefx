@@ -234,7 +234,7 @@ namespace System.Xml.Resolvers
                 {
                     return _fallbackResolver.GetEntity(absoluteUri, role, ofObjectToReturn);
                 }
-                throw new XmlException(SR.Format(SR.Xml_CannotResolveUrl, absoluteUri.ToString()));
+                throw new XmlException(SR.Format(SR.Xml_CannotResolveUrl, absoluteUri));
             }
 
             if (ofObjectToReturn == null || ofObjectToReturn == typeof(Stream) || ofObjectToReturn == typeof(object))
@@ -351,7 +351,7 @@ namespace System.Xml.Resolvers
                 }
                 int size = checked((int)ms.Position);
                 byte[] bytes = new byte[size];
-                Array.Copy(ms.ToArray(), bytes, size);
+                Array.Copy(ms.ToArray(), 0, bytes, 0, size);
                 Add(uri, new ByteArrayChunk(bytes));
             }
         }

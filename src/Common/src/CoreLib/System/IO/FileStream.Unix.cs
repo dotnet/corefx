@@ -29,7 +29,7 @@ namespace System.IO
         /// synchronously from ReadAsync which can be reused if the count matches the next request.
         /// Only initialized when <see cref="_useAsyncIO"/> is true.
         /// </summary>
-        private AsyncState _asyncState;
+        private AsyncState? _asyncState;
 
         /// <summary>Lazily-initialized value for whether the file supports seeking.</summary>
         private bool? _canSeek;
@@ -58,7 +58,7 @@ namespace System.IO
                 Interop.Sys.Permissions.S_IROTH | Interop.Sys.Permissions.S_IWOTH;
 
             // Open the file and store the safe handle.
-            return SafeFileHandle.Open(_path, openFlags, (int)OpenPermissions);
+            return SafeFileHandle.Open(_path!, openFlags, (int)OpenPermissions);
         }
 
         private static bool GetDefaultIsAsync(SafeFileHandle handle) => handle.IsAsync ?? DefaultIsAsync;
@@ -290,7 +290,7 @@ namespace System.IO
             // override may already exist on a derived type.
             if (_useAsyncIO && _writePos > 0)
             {
-                return new ValueTask(Task.Factory.StartNew(s => ((FileStream)s).Dispose(), this,
+                return new ValueTask(Task.Factory.StartNew(s => ((FileStream)s!).Dispose(), this,
                     CancellationToken.None, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default));
             }
 
@@ -364,7 +364,7 @@ namespace System.IO
             if (CanWrite)
             {
                 return Task.Factory.StartNew(
-                    state => ((FileStream)state).FlushOSBuffer(),
+                    state => ((FileStream)state!).FlushOSBuffer(),
                     this,
                     cancellationToken,
                     TaskCreationOptions.DenyChildAttach,
@@ -507,9 +507,10 @@ namespace System.IO
         /// <param name="cancellationToken">The token to monitor for cancellation requests.</param>
         /// <param name="synchronousResult">If the operation completes synchronously, the number of bytes read.</param>
         /// <returns>A task that represents the asynchronous read operation.</returns>
-        private Task<int> ReadAsyncInternal(Memory<byte> destination, CancellationToken cancellationToken, out int synchronousResult)
+        private Task<int>? ReadAsyncInternal(Memory<byte> destination, CancellationToken cancellationToken, out int synchronousResult)
         {
             Debug.Assert(_useAsyncIO);
+            Debug.Assert(_asyncState != null);
 
             if (!CanRead) // match Windows behavior; this gets thrown synchronously
             {
@@ -567,7 +568,8 @@ namespace System.IO
                 // whereas on Windows it may happen before the write has completed.
 
                 Debug.Assert(t.Status == TaskStatus.RanToCompletion);
-                var thisRef = (FileStream)s;
+                var thisRef = (FileStream)s!;
+                Debug.Assert(thisRef._asyncState != null);
                 try
                 {
                     Memory<byte> memory = thisRef._asyncState.Memory;
@@ -668,6 +670,7 @@ namespace System.IO
         private ValueTask WriteAsyncInternal(ReadOnlyMemory<byte> source, CancellationToken cancellationToken)
         {
             Debug.Assert(_useAsyncIO);
+            Debug.Assert(_asyncState != null);
 
             if (cancellationToken.IsCancellationRequested)
                 return new ValueTask(Task.FromCanceled(cancellationToken));
@@ -724,7 +727,8 @@ namespace System.IO
                 // whereas on Windows it may happen before the write has completed.
 
                 Debug.Assert(t.Status == TaskStatus.RanToCompletion);
-                var thisRef = (FileStream)s;
+                var thisRef = (FileStream)s!;
+                Debug.Assert(thisRef._asyncState != null);
                 try
                 {
                     ReadOnlyMemory<byte> readOnlyMemory = thisRef._asyncState.ReadOnlyMemory;
@@ -734,6 +738,11 @@ namespace System.IO
                 finally { thisRef._asyncState.Release(); }
             }, this, CancellationToken.None, TaskContinuationOptions.DenyChildAttach, TaskScheduler.Default));
         }
+
+        public override Task CopyToAsync(Stream destination, int bufferSize, CancellationToken cancellationToken) =>
+            // Windows version overrides this method, so the Unix version does as well, but it doesn't
+            // currently have any special optimizations to be done and so just calls to the base.
+            base.CopyToAsync(destination, bufferSize, cancellationToken);
 
         /// <summary>Sets the current position of this stream to the given value.</summary>
         /// <param name="offset">The point relative to origin from which to begin seeking. </param>

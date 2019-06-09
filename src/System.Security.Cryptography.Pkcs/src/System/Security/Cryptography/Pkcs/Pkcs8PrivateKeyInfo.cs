@@ -63,7 +63,7 @@ namespace System.Security.Cryptography.Pkcs
 
             if (!skipCopy)
             {
-                reader = new AsnReader(reader.GetEncodedValue().ToArray(), AsnEncodingRules.BER);
+                reader = new AsnReader(reader.ReadEncodedValue().ToArray(), AsnEncodingRules.BER);
             }
 
             int localRead = reader.PeekEncodedValue().Length;
@@ -197,7 +197,7 @@ namespace System.Security.Cryptography.Pkcs
             finally
             {
                 CryptographicOperations.ZeroMemory(decryptedMemory.Span);
-                ArrayPool<byte>.Shared.Return(decrypted.Array);
+                CryptoPool.Return(decrypted.Array, clearSize: 0);
             }
         }
 
@@ -229,7 +229,7 @@ namespace System.Security.Cryptography.Pkcs
             finally
             {
                 CryptographicOperations.ZeroMemory(decryptedMemory.Span);
-                ArrayPool<byte>.Shared.Return(decrypted.Array);
+                CryptoPool.Return(decrypted.Array, clearSize: 0);
             }
         }
 

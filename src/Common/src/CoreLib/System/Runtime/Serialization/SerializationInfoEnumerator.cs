@@ -10,17 +10,17 @@ namespace System.Runtime.Serialization
     public readonly struct SerializationEntry
     {
         private readonly string _name;
-        private readonly object _value;
+        private readonly object? _value;
         private readonly Type _type;
 
-        internal SerializationEntry(string entryName, object entryValue, Type entryType)
+        internal SerializationEntry(string entryName, object? entryValue, Type entryType)
         {
             _name = entryName;
             _value = entryValue;
             _type = entryType;
         }
 
-        public object Value => _value;
+        public object? Value => _value;
         public string Name => _name;
         public Type ObjectType => _type;
     }
@@ -28,13 +28,13 @@ namespace System.Runtime.Serialization
     public sealed class SerializationInfoEnumerator : IEnumerator
     {
         private readonly string[] _members;
-        private readonly object[] _data;
+        private readonly object?[] _data;
         private readonly Type[] _types;
         private readonly int _numItems;
         private int _currItem;
         private bool _current;
 
-        internal SerializationInfoEnumerator(string[] members, object[] info, Type[] types, int numItems)
+        internal SerializationInfoEnumerator(string[] members, object?[] info, Type[] types, int numItems)
         {
             Debug.Assert(members != null, "[SerializationInfoEnumerator.ctor]members!=null");
             Debug.Assert(info != null, "[SerializationInfoEnumerator.ctor]info!=null");
@@ -70,7 +70,7 @@ namespace System.Runtime.Serialization
             return _current;
         }
 
-        object IEnumerator.Current => Current;
+        object? IEnumerator.Current => Current;
 
         public SerializationEntry Current
         {
@@ -101,7 +101,7 @@ namespace System.Runtime.Serialization
                 return _members[_currItem];
             }
         }
-        public object Value
+        public object? Value
         {
             get
             {

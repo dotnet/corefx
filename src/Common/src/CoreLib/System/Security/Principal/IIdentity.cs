@@ -10,13 +10,16 @@ using System;
 
 namespace System.Security.Principal
 {
+#if PROJECTN
+    [Internal.Runtime.CompilerServices.RelocatedType("System.Security.Principal")]
+#endif
     public interface IIdentity
     {
         // Access to the name string
-        string Name { get; }
+        string? Name { get; }
 
         // Access to Authentication 'type' info
-        string AuthenticationType { get; }
+        string? AuthenticationType { get; }
 
         // Determine if this represents the unauthenticated identity
         bool IsAuthenticated { get; }

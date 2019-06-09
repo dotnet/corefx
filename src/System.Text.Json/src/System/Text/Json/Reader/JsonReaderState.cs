@@ -14,16 +14,14 @@ namespace System.Text.Json
     /// </summary>
     public struct JsonReaderState
     {
-        internal const int DefaultMaxDepth = 64;
-
         internal long _lineNumber;
         internal long _bytePositionInLine;
         internal long _bytesConsumed;
-        internal int _maxDepth;
         internal bool _inObject;
         internal bool _isNotPrimitive;
         internal char _numberFormat;
         internal bool _stringHasEscaping;
+        internal bool _trailingCommaBeforeComment;
         internal JsonTokenType _tokenType;
         internal JsonTokenType _previousTokenType;
         internal JsonReaderOptions _readerOptions;
@@ -46,13 +44,11 @@ namespace System.Text.Json
         /// <summary>
         /// Constructs a new <see cref="JsonReaderState"/> instance.
         /// </summary>
-        /// <param name="maxDepth">Sets the maximum depth allowed when reading JSON, with the default set as 64.
-        /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.</param>
         /// <param name="options">Defines the customized behavior of the <see cref="Utf8JsonReader"/>
-        /// that is different from the JSON RFC (for example how to handle comments).
-        /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid).</param>
+        /// that is different from the JSON RFC (for example how to handle comments or maximum depth allowed when reading).
+        /// By default, the <see cref="Utf8JsonReader"/> follows the JSON RFC strictly (i.e. comments within the JSON are invalid) and reads up to a maximum depth of 64.</param>
         /// <exception cref="ArgumentException">
-        /// Thrown when the max depth is set to a non-positive value (&lt;= 0)
+        /// Thrown when the max depth is set to a non-positive value (&lt; 0)
         /// </exception>
         /// <remarks>
         /// An instance of this state must be passed to the <see cref="Utf8JsonReader"/> ctor with the JSON data.
@@ -60,19 +56,16 @@ namespace System.Text.Json
         /// across async/await boundaries and hence this type is required to provide support for reading
         /// in more data asynchronously before continuing with a new instance of the <see cref="Utf8JsonReader"/>.
         /// </remarks>
-        public JsonReaderState(int maxDepth = DefaultMaxDepth, JsonReaderOptions options = default)
+        public JsonReaderState(JsonReaderOptions options = default)
         {
-            if (maxDepth <= 0)
-                throw ThrowHelper.GetArgumentException_MaxDepthMustBePositive();
-
             _lineNumber = default;
             _bytePositionInLine = default;
             _bytesConsumed = default;
-            _maxDepth = maxDepth;
             _inObject = default;
             _isNotPrimitive = default;
             _numberFormat = default;
             _stringHasEscaping = default;
+            _trailingCommaBeforeComment = default;
             _tokenType = default;
             _previousTokenType = default;
             _readerOptions = options;
@@ -90,11 +83,5 @@ namespace System.Text.Json
         /// to the JSON specification, which is the default behavior.
         /// </summary>
         public JsonReaderOptions Options => _readerOptions;
-
-        /// <summary>
-        /// Gets or sets the maximum depth allowed when reading JSON.
-        /// Reading past this depth will throw a <exception cref="JsonReaderException"/>.
-        /// </summary>
-        public int MaxDepth => _maxDepth;
     }
 }

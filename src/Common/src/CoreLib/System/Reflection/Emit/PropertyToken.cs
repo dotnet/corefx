@@ -17,7 +17,7 @@ namespace System.Reflection.Emit
 
         public override int GetHashCode() => Token;
 
-        public override bool Equals(object obj) => obj is PropertyToken pt && Equals(pt);
+        public override bool Equals(object? obj) => obj is PropertyToken pt && Equals(pt);
 
         public bool Equals(PropertyToken obj) => obj.Token == Token;
 

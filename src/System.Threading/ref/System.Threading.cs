@@ -32,7 +32,8 @@ namespace System.Threading
     }
     public readonly partial struct AsyncLocalValueChangedArgs<T>
     {
-        private readonly T _dummy;
+        private readonly T _PreviousValue_k__BackingField;
+        private readonly T _CurrentValue_k__BackingField;
         private readonly int _dummyPrimitive;
         public T CurrentValue { get { throw null; } }
         public T PreviousValue { get { throw null; } }
@@ -224,6 +225,7 @@ namespace System.Threading
     }
     public static partial class Monitor
     {
+        public static long LockContentionCount { get { throw null; } }
         public static void Enter(object obj) { }
         public static void Enter(object obj, ref bool lockTaken) { }
         public static void Exit(object obj) { }
@@ -264,7 +266,6 @@ namespace System.Threading
         public void AcquireWriterLock(System.TimeSpan timeout) { }
         public bool AnyWritersSince(int seqNum) { throw null; }
         public void DowngradeFromWriterLock(ref System.Threading.LockCookie lockCookie) { }
-        ~ReaderWriterLock() { }
         public System.Threading.LockCookie ReleaseLock() { throw null; }
         public void ReleaseReaderLock() { }
         public void ReleaseWriterLock() { }

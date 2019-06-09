@@ -22,7 +22,7 @@ namespace System.Text
             return Encoding.GetEncoding(CodePage);
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(object? value)
         {
             if (value is EncodingInfo that)
             {

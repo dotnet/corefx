@@ -22,13 +22,13 @@ namespace System.IO
             HResult = HResults.COR_E_DIRECTORYNOTFOUND;
         }
 
-        public DirectoryNotFoundException(string message)
+        public DirectoryNotFoundException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_DIRECTORYNOTFOUND;
         }
 
-        public DirectoryNotFoundException(string message, Exception innerException)
+        public DirectoryNotFoundException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_DIRECTORYNOTFOUND;

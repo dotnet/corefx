@@ -65,7 +65,7 @@ namespace System.Buffers.Text
         //
         // Enable use of ThrowHelper from TryParse() routines without introducing dozens of non-code-coveraged "value= default; bytesConsumed = 0; return false" boilerplate.
         //
-        public static bool TryParseThrowFormatException<T>(out T value, out int bytesConsumed)
+        public static bool TryParseThrowFormatException<T>(out T value, out int bytesConsumed) where T : struct
         {
             value = default;
             return TryParseThrowFormatException(out bytesConsumed);

@@ -8,13 +8,13 @@ namespace System.Runtime.InteropServices
     public sealed class TypeIdentifierAttribute : Attribute
     {
         public TypeIdentifierAttribute() { }
-        public TypeIdentifierAttribute(string scope, string identifier)
+        public TypeIdentifierAttribute(string? scope, string? identifier)
         {
             Scope = scope;
             Identifier = identifier;
         }
 
-        public string Scope { get; }
-        public string Identifier { get; }
+        public string? Scope { get; }
+        public string? Identifier { get; }
     }
 }

@@ -3,11 +3,12 @@ Developer Guide
 
 The repo can be built for the following platforms, using the provided setup and the following instructions.
 
-| Chip  | Windows | Linux | OS X | FreeBSD |
-| :---- | :-----: | :---: | :--: | :--: |
-| x64   | &#x25CF;| &#x25D2;| &#x25D2;| &#x25D2;|
-| x86   | &#x25EF;| &#x25EF;| &#x25EF;| &#x25EF;|
-| ARM32 | &#x25EF;| &#x25EF;| &#x25EF;| &#x25EF;|
+| Chip  | Windows  | Linux    | macOS    | FreeBSD  |
+| :---- | :------: | :------: | :------: | :------: |
+| x64   | &#x2714; | &#x2714; | &#x2714; | &#x2714; |
+| x86   | &#x2714; |          |          |          |
+| ARM   | &#x2714; | &#x2714; |          |          |
+| ARM64 | &#x2714; | &#x2714; |          |          |
 |       | [Instructions](../building/windows-instructions.md) | [Instructions](../building/unix-instructions.md) | [Instructions](../building/unix-instructions.md) | [Instructions](../building/unix-instructions.md) |
 
 
@@ -20,6 +21,7 @@ For information about the different options that are available use the argument 
 ```
 build -h
 ```
+On Unix, arguments can be passed in with a single `-` or double hyphen `--`.
 
 ### Build
 The CoreFX build has two logical components, the native build which produces the "shims" (which provide a stable interface between the OS and managed code) and
@@ -40,19 +42,13 @@ For more details on the build configurations see [project-guidelines](../coding-
 
 **Note:** You can chain multiple actions together but the order of execution is fixed and does not relate to the position of the argument in the command.
 
-The most common workflow for developers is to call `build` from the root once (preceded by a `clean -all` if you have built previously) and then go and work on the individual library that you are trying to make changes for. On windows folks will usually open up the solution file in the root of that library directory and work in VS.
+The most common workflow for developers is to call `build` from the root once and then go and work on the individual library that you are trying to make changes for.
 
-By default build only builds the product libraries and none of the tests. If you want to build the tests you can call `build -buildtests`. If you want to run the tests you can call `build -test`, `build -integrationTest` or `build -performanceTest`. To build and run the tests combine both arguments: `build -buildtests -test`. To build both the product libraries and the test libraries pass `build -build -buildtests` to the command line. If you want to further configure which test libraries to build you can pass `/p:TestProjectFilter=Tests|IntegrationTests|PerformanceTests` to the command. 
+By default build only builds the product libraries and none of the tests. If you want to build the tests you can call `build -buildtests`. If you want to run the tests you can call `build -test`. To build and run the tests combine both arguments: `build -buildtests -test`. To build both the product libraries and the test libraries pass `build -build -buildtests` to the command line.
 
 If you invoke the build script without any argument the default arguments will be executed `-restore -build`. Note that -restore and -build are only implicit if no actions are passed in.
 
 **Examples**
-- Clean and build the product libraries
-```
-clean -all
-build
-```
-
 - Building in release mode for platform x64 (restore and build are implicit here as no actions are passed in)
 ```
 build -c Release -arch x64
@@ -75,6 +71,10 @@ build -framework uap
 build /p:BuildNative=false
 ```
 
+- Clean the entire solution
+```
+build -clean
+```
 ### Build Native
 The native build produces shims over libc, openssl, gssapi, libcurl and libz.
 The build system uses CMake (2.8.12 or higher) to generate Makefiles using clang (3.5 or higher).
@@ -206,6 +206,12 @@ One can build in Debug or Release mode from the root by doing `build -c Release`
 
 One can build 32- or 64-bit binaries or for any architecture by specifying in the root `build -arch [value]` or in a project `/p:ArchGroup=[value]` after the `dotnet msbuild` command.
 
+### Benchmarks
+
+All Benchmarks have been moved to the [dotnet/performance/](https://github.com/dotnet/performance/) repository.
+
+Please read the [Benchmarking workflow for CoreFX](https://github.com/dotnet/performance/blob/master/docs/benchmarking-workflow-corefx.md) document to find out how to build and run the Benchmarks.
+
 ### Tests
 
 We use the OSS testing framework [xunit](http://xunit.github.io/).
@@ -260,11 +266,11 @@ The tests can also be filtered based on xunit trait attributes defined in [`Micr
 ```cs
 [OuterLoop()]
 ```
-Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `-outerloop` switch or `/p:OuterLoop=true` e.g.
+Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `-testscope outerloop` switch or `/p:TestScope=outerloop` e.g.
 
 ```cmd
-build -test -outerloop
-cd src/System.Text.RegularExpressions/tests && dotnet msbuild /t:RebuildAndTest /p:OuterLoop=true
+build -test -testscope outerloop
+cd src/System.Text.RegularExpressions/tests && dotnet msbuild /t:RebuildAndTest /p:TestScope=outerloop
 ```
 
 #### PlatformSpecificAttribute
@@ -427,24 +433,14 @@ If coverage succeeds, the individual report can be found at `$(TestPath)\report\
 
 Code coverage reports from the continuous integration system are available from the links on the front page of the corefx repo.
 
-### Building tests with .NET Native (Windows only)
+### Building tests with UWP (Windows only)
 
-.NET Native is a technology that allows compiling IL applications down into a native executable and minimal set of native DLLs, containing all needed functionality from the .NET Framework in native format.
-
+This will allow you to build and run against `uap`, the managed version of the UWP Framework subset, used when debugging UWP applications in Visual Studio:
 ```cmd
-:: To run a single project with the .NET Native toolchain, set the appropriate build flags:
-cd src\Microsoft.CSharp\tests
-dotnet msbuild /t:BuildAndTest /p:TargetGroup=uapaot
-```
-If native compilation succeeds, the test will build and run as a native executable named "xunit.console.exe" in a folder named "uapaot" in the test execution folder. The .NET Native toolchain, required to build with TargetGroup `uapaot` is currently not available for external contributors.
-
-A slight variation on these arguments will allow you to build and run against `uap`, the managed version of the UWP Framework subset, used when debugging UWP applications in Visual Studio:
-```cmd
-:: To run a single project with the .NET Native toolchain, set the appropriate build flags:
 cd src\Microsoft.CSharp\tests
 dotnet msbuild /t:BuildAndTest /p:TargetGroup=uap
 ```
-In this case, your test will get executed within the context of a wrapper UWP application, targeting the Managed uap as opposed to the .NET Native version.
+In this case, your test will get executed within the context of a wrapper UWP application, targeting the Managed uap.
 
 The CoreFX build and test suite is a work in progress, as are the [building and testing instructions](../README.md). The .NET Core team and the community are improving Linux and OS X support on a daily basis and are adding more tests for all platforms. See [CoreFX Issues](https://github.com/dotnet/corefx/issues) to find out about specific work items or report issues.
 

@@ -148,7 +148,7 @@ namespace System.Drawing
             }
             else if (_immutable)
             {
-                throw new ArgumentException(SR.Format(SR.CantChangeImmutableObjects, nameof(Brush)));
+                throw new ArgumentException(SR.Format(SR.CantChangeImmutableObjects, nameof(Pen)));
             }
 
             if (_nativePen != IntPtr.Zero)
@@ -794,14 +794,14 @@ namespace System.Drawing
 
                 if (value == null || value.Length == 0)
                 {
-                    throw new ArgumentException(SR.Format(SR.InvalidDashPattern));
+                    throw new ArgumentException(SR.InvalidDashPattern);
                 }
 
                 foreach (float val in value)
                 {
                     if (val <= 0)
                     {
-                        throw new ArgumentException(SR.Format(SR.InvalidDashPattern));
+                        throw new ArgumentException(SR.InvalidDashPattern);
                     }
                 }
 
@@ -848,14 +848,14 @@ namespace System.Drawing
 
                 if (value.Length <= 1)
                 {
-                    throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter));
+                    throw new ArgumentException(SR.GdiplusInvalidParameter);
                 }
 
                 foreach (float val in value)
                 {
                     if (val < 0 || val > 1)
                     {
-                        throw new ArgumentException(SR.Format(SR.GdiplusInvalidParameter));
+                        throw new ArgumentException(SR.GdiplusInvalidParameter);
                     }
                 }
 

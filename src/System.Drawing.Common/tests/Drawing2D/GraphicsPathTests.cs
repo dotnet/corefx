@@ -25,6 +25,7 @@
 
 using System.Collections.Generic;
 using System.ComponentModel;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.Drawing.Drawing2D.Tests
@@ -94,7 +95,7 @@ namespace System.Drawing.Drawing2D.Tests
             AssertExtensions.Throws<ArgumentNullException>("pts", () => new GraphicsPath((Point[])null, new byte[1]));
         }
 
-        private static IEnumerable<object[]> AddCurve_PointsTypesLengthMismatch_TestData()
+        public static IEnumerable<object[]> AddCurve_PointsTypesLengthMismatch_TestData()
         {
             yield return new object[] { 1, 2 };
             yield return new object[] { 2, 1 };
@@ -378,6 +379,12 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void AddArc_Values_Success()
         {
+            if (PlatformDetection.IsArmOrArm64Process)
+            {
+                //ActiveIssue: 35744
+                throw new SkipTestException("Precision on float numbers");
+            }
+
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
@@ -395,6 +402,12 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void AddArc_Rectangle_Success()
         {
+            if (PlatformDetection.IsArmOrArm64Process)
+            {
+                //ActiveIssue: 35744
+                throw new SkipTestException("Precision on float numbers");
+            }
+
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
@@ -498,7 +511,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddBeziers_InvalidFloatPointsLength_TestData()
+        public static IEnumerable<object[]> AddBeziers_InvalidFloatPointsLength_TestData()
         {
             yield return new object[] { new PointF[0] };
             yield return new object[] { new PointF[1] { new PointF(1f, 1f) } };
@@ -645,7 +658,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddCurve_InvalidFloatPointsLength_TestData()
+        public static IEnumerable<object[]> AddCurve_InvalidFloatPointsLength_TestData()
         {
             yield return new object[] { new PointF[0] };
             yield return new object[] { new PointF[1] { new PointF(1f, 1f) } };
@@ -662,7 +675,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddCurve_InvalidPointsLength_TestData()
+        public static IEnumerable<object[]> AddCurve_InvalidPointsLength_TestData()
         {
             yield return new object[] { new Point[0] };
             yield return new object[] { new Point[1] { new Point(1, 1) } };
@@ -679,7 +692,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddCurve_InvalidSegment_TestData()
+        public static IEnumerable<object[]> AddCurve_InvalidSegment_TestData()
         {
             yield return new object[] { 0 };
             yield return new object[] { -1 };
@@ -716,6 +729,12 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void AddClosedCurve_Points_Success()
         {
+            if (PlatformDetection.IsArmOrArm64Process)
+            {
+                //ActiveIssue: 35744
+                throw new SkipTestException("Precision on float numbers");
+            }
+
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
@@ -750,6 +769,12 @@ namespace System.Drawing.Drawing2D.Tests
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void AddClosedCurve_Tension_Success()
         {
+            if (PlatformDetection.IsArmOrArm64Process)
+            {
+                //ActiveIssue: 35744
+                throw new SkipTestException("Precision on float numbers");
+            }
+
             using (GraphicsPath gpi = new GraphicsPath())
             using (GraphicsPath gpf = new GraphicsPath())
             {
@@ -771,7 +796,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddClosedCurve_InvalidPointsLength_TestData()
+        public static IEnumerable<object[]> AddClosedCurve_InvalidPointsLength_TestData()
         {
             yield return new object[] { new Point[0] };
             yield return new object[] { new Point[1] { new Point(1, 1) } };
@@ -788,7 +813,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddClosedCurve_InvalidFloatPointsLength_TestData()
+        public static IEnumerable<object[]> AddClosedCurve_InvalidFloatPointsLength_TestData()
         {
             yield return new object[] { new PointF[0] };
             yield return new object[] { new PointF[1] { new PointF(1f, 1f) } };
@@ -1085,7 +1110,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddPolygon_InvalidFloadPointsLength_TestData()
+        public static IEnumerable<object[]> AddPolygon_InvalidFloadPointsLength_TestData()
         {
             yield return new object[] { new PointF[0] };
             yield return new object[] { new PointF[1] { new PointF(1f, 1f) } };
@@ -1102,7 +1127,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> AddPolygon_InvalidPointsLength_TestData()
+        public static IEnumerable<object[]> AddPolygon_InvalidPointsLength_TestData()
         {
             yield return new object[] { new Point[0] };
             yield return new object[] { new Point[1] { new Point(1, 1) } };
@@ -1983,7 +2008,7 @@ namespace System.Drawing.Drawing2D.Tests
 
         }
 
-        private static IEnumerable<object[]> Widen_PenSmallWidth_TestData()
+        public static IEnumerable<object[]> Widen_PenSmallWidth_TestData()
         {
             yield return new object[] { new Rectangle(1, 1, 2, 2), 0f, new RectangleF(0.5f, 0.5f, 3.0f, 3.0f) };
             yield return new object[] { new Rectangle(1, 1, 2, 2), 0.5f, new RectangleF(0.5f, 0.5f, 3.0f, 3.0f) };
@@ -2141,7 +2166,7 @@ namespace System.Drawing.Drawing2D.Tests
             }
         }
 
-        private static IEnumerable<object[]> Reverse_TestData()
+        public static IEnumerable<object[]> Reverse_TestData()
         {
             yield return new object[]
             {

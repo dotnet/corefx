@@ -130,7 +130,7 @@ namespace System
             }
         }
 
-        internal static bool TryParseExactMultiple(ReadOnlySpan<char> s, string[] formats,
+        internal static bool TryParseExactMultiple(ReadOnlySpan<char> s, string?[]? formats,
                                                    DateTimeFormatInfo dtfi, DateTimeStyles style, out DateTime result, out TimeSpan offset)
         {
             result = DateTime.MinValue;
@@ -148,7 +148,7 @@ namespace System
         }
 
 
-        internal static bool TryParseExactMultiple(ReadOnlySpan<char> s, string[] formats,
+        internal static bool TryParseExactMultiple(ReadOnlySpan<char> s, string?[]? formats,
                                                    DateTimeFormatInfo dtfi, DateTimeStyles style, out DateTime result)
         {
             result = DateTime.MinValue;
@@ -162,7 +162,7 @@ namespace System
             return false;
         }
 
-        internal static bool TryParseExactMultiple(ReadOnlySpan<char> s, string[] formats,
+        internal static bool TryParseExactMultiple(ReadOnlySpan<char> s, string?[]? formats,
                                                 DateTimeFormatInfo dtfi, DateTimeStyles style, ref DateTimeResult result)
         {
             if (formats == null)
@@ -191,7 +191,7 @@ namespace System
             //
             for (int i = 0; i < formats.Length; i++)
             {
-                if (formats[i] == null || formats[i].Length == 0)
+                if (formats[i] == null || formats[i]!.Length == 0) // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                 {
                     result.SetBadFormatSpecifierFailure();
                     return false;
@@ -3343,7 +3343,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 // Search leap year form.
                 if ((dtfi.FormatFlags & DateTimeFormatFlags.UseLeapYearMonth) != 0)
                 {
-                    int tempResult = str.MatchLongestWords(dtfi.internalGetLeapYearMonthNames(), ref maxMatchStrLen);
+                    int tempResult = str.MatchLongestWords(dtfi.InternalGetLeapYearMonthNames(), ref maxMatchStrLen);
                     // We found a longer match in the leap year month name.  Use this as the result.
                     // The result from MatchLongestWords is 0 ~ length of word array.
                     // So we increment the result by one to become the month value.
@@ -3414,7 +3414,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 // Search leap year form.
                 if ((dtfi.FormatFlags & DateTimeFormatFlags.UseLeapYearMonth) != 0)
                 {
-                    int tempResult = str.MatchLongestWords(dtfi.internalGetLeapYearMonthNames(), ref maxMatchStrLen);
+                    int tempResult = str.MatchLongestWords(dtfi.InternalGetLeapYearMonthNames(), ref maxMatchStrLen);
                     // We found a longer match in the leap year month name.  Use this as the result.
                     // The result from MatchLongestWords is 0 ~ length of word array.
                     // So we increment the result by one to become the month value.
@@ -3690,7 +3690,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 // DateTimeOffset.Parse should allow dates without a year, but only if there is also no time zone marker;
                 // e.g. "May 1 5pm" is OK, but "May 1 5pm -08:30" is not.  This is somewhat pragmatic, since we would
                 // have to rearchitect parsing completely to allow this one case to correctly handle things like leap
-                // years and leap months.  Is is an extremely corner case, and DateTime is basically incorrect in that
+                // years and leap months.  Is an extremely corner case, and DateTime is basically incorrect in that
                 // case today.
                 //
                 // values like "11:00Z" or "11:00 -3:00" are also acceptable
@@ -5099,18 +5099,18 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
                 case ParseFailureKind.Format:
                     return new FormatException(SR.GetResourceString(result.failureMessageID));
                 case ParseFailureKind.FormatWithParameter:
-                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID), result.failureMessageFormatArgument));
+                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID)!, result.failureMessageFormatArgument));
                 case ParseFailureKind.FormatBadDateTimeCalendar:
-                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID), new string(result.originalDateTimeString), result.calendar));
+                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID)!, new string(result.originalDateTimeString), result.calendar));
                 case ParseFailureKind.FormatWithOriginalDateTime:
-                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID), new string(result.originalDateTimeString)));
+                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID)!, new string(result.originalDateTimeString)));
                 case ParseFailureKind.FormatWithFormatSpecifier:
-                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID), new string(result.failedFormatSpecifier)));
+                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID)!, new string(result.failedFormatSpecifier)));
                 case ParseFailureKind.FormatWithOriginalDateTimeAndParameter:
-                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID), new string(result.originalDateTimeString), result.failureMessageFormatArgument));
+                    return new FormatException(SR.Format(SR.GetResourceString(result.failureMessageID)!, new string(result.originalDateTimeString), result.failureMessageFormatArgument));
                 default:
                     Debug.Fail("Unknown DateTimeParseFailure: " + result.failure.ToString());
-                    return null;
+                    return null!;
             }
         }
 
@@ -5996,7 +5996,7 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
 
         internal ParseFailureKind failure;
         internal string failureMessageID;
-        internal object failureMessageFormatArgument;
+        internal object? failureMessageFormatArgument;
         internal string failureArgumentName;
         internal ReadOnlySpan<char> originalDateTimeString;
         internal ReadOnlySpan<char> failedFormatSpecifier;
@@ -6044,14 +6044,14 @@ new DS[] { DS.ERROR, DS.TX_NNN,  DS.TX_NNN,  DS.TX_NNN,  DS.ERROR,   DS.ERROR,  
             this.failureMessageFormatArgument = null;
         }
 
-        internal void SetFailure(ParseFailureKind failure, string failureMessageID, object failureMessageFormatArgument)
+        internal void SetFailure(ParseFailureKind failure, string failureMessageID, object? failureMessageFormatArgument)
         {
             this.failure = failure;
             this.failureMessageID = failureMessageID;
             this.failureMessageFormatArgument = failureMessageFormatArgument;
         }
 
-        internal void SetFailure(ParseFailureKind failure, string failureMessageID, object failureMessageFormatArgument, string failureArgumentName)
+        internal void SetFailure(ParseFailureKind failure, string failureMessageID, object? failureMessageFormatArgument, string failureArgumentName)
         {
             this.failure = failure;
             this.failureMessageID = failureMessageID;

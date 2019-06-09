@@ -6,11 +6,12 @@ using System.Diagnostics;
 using System.IO;
 using System.IO.Pipes;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Net.Sockets.Tests
 {
-    public class CreateSocket : RemoteExecutorTestBase
+    public partial class CreateSocket
     {
         public static object[][] DualModeSuccessInputs = {
             new object[] { SocketType.Stream, ProtocolType.Tcp },
@@ -113,7 +114,6 @@ namespace System.Net.Sockets.Tests
             Assert.Contains(e.SocketErrorCode, new[] { SocketError.AccessDenied, SocketError.ProtocolNotSupported });
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Sockets are still inheritable on netfx: https://github.com/dotnet/corefx/pull/32903")]
         [Theory]
         [InlineData(true, 0)] // Accept
         [InlineData(false, 0)]
@@ -125,7 +125,7 @@ namespace System.Net.Sockets.Tests
         {
             // Run the test in another process so as to not have trouble with other tests
             // launching child processes that might impact inheritance.
-            RemoteInvoke((validateClientString, acceptApiString) =>
+            RemoteExecutor.Invoke((validateClientString, acceptApiString) =>
             {
                 bool validateClient = bool.Parse(validateClientString);
                 int acceptApi = int.Parse(acceptApiString);
@@ -158,7 +158,7 @@ namespace System.Net.Sockets.Tests
                             // Create a child process that blocks waiting to receive a signal on the anonymous pipe.
                             // The whole purpose of the child is to test whether handles are inherited, so we
                             // keep the child process alive until we're done validating that handles close as expected.
-                            using (RemoteInvoke(clientPipeHandle =>
+                            using (RemoteExecutor.Invoke(clientPipeHandle =>
                                    {
                                        using (var clientPipe = new AnonymousPipeClientStream(PipeDirection.In, clientPipeHandle))
                                        {

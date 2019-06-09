@@ -48,17 +48,7 @@ namespace System.Reflection.Tests
             Assert.Throws<InvalidOperationException>(() => method.GetMetadataToken());
         }
 
-        public static bool GetMetadataTokenSupported
-        {
-            get
-            {
-                if (!PlatformDetection.IsNetNative)
-                    return true;
-
-                // Expected false but in case .Net Native ever changes its mind...
-                return typeof(MetadataTokenTests).HasMetadataToken();
-            }
-        }
+        public static bool GetMetadataTokenSupported => true;
 
         public static bool IsReflectionEmitSupported => PlatformDetection.IsReflectionEmitSupported;
 

@@ -14,7 +14,7 @@ namespace System.Runtime.InteropServices
 
         public string Value { get; }
 
-        public string EntryPoint;
+        public string? EntryPoint;
         public CharSet CharSet;
         public bool SetLastError;
         public bool ExactSpelling;

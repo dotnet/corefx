@@ -2,27 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Security;
 using System.Diagnostics;
-using System.Runtime.ExceptionServices;
 using System.Runtime.CompilerServices;
-
-#if CORERT
-using Thread = Internal.Runtime.Augments.RuntimeThread;
-#endif
 
 namespace System.Threading.Tasks
 {
     // Task type used to implement: Task ContinueWith(Action<Task,...>)
     internal sealed class ContinuationTaskFromTask : Task
     {
-        private Task m_antecedent;
+        private Task? m_antecedent;
 
         public ContinuationTaskFromTask(
-            Task antecedent, Delegate action, object state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
+            Task antecedent, Delegate action, object? state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
             base(action, state, Task.InternalCurrentIfAttached(creationOptions), default, creationOptions, internalOptions, null)
         {
-            Debug.Assert(action is Action<Task> || action is Action<Task, object>,
+            Debug.Assert(action is Action<Task> || action is Action<Task, object?>,
                 "Invalid delegate type in ContinuationTaskFromTask");
             m_antecedent = antecedent;
         }
@@ -34,7 +28,7 @@ namespace System.Threading.Tasks
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
             // leak with long chains of continuations.
-            var antecedent = m_antecedent;
+            Task? antecedent = m_antecedent;
             Debug.Assert(antecedent != null,
                 "No antecedent was set for the ContinuationTaskFromTask.");
             m_antecedent = null;
@@ -50,7 +44,7 @@ namespace System.Threading.Tasks
                 return;
             }
 
-            if (m_action is Action<Task, object> actionWithState)
+            if (m_action is Action<Task, object?> actionWithState)
             {
                 actionWithState(antecedent, m_stateObject);
                 return;
@@ -62,13 +56,13 @@ namespace System.Threading.Tasks
     // Task type used to implement: Task<TResult> ContinueWith(Func<Task,...>)
     internal sealed class ContinuationResultTaskFromTask<TResult> : Task<TResult>
     {
-        private Task m_antecedent;
+        private Task? m_antecedent;
 
         public ContinuationResultTaskFromTask(
-            Task antecedent, Delegate function, object state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
+            Task antecedent, Delegate function, object? state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
             base(function, state, Task.InternalCurrentIfAttached(creationOptions), default, creationOptions, internalOptions, null)
         {
-            Debug.Assert(function is Func<Task, TResult> || function is Func<Task, object, TResult>,
+            Debug.Assert(function is Func<Task, TResult> || function is Func<Task, object?, TResult>,
                 "Invalid delegate type in ContinuationResultTaskFromTask");
             m_antecedent = antecedent;
         }
@@ -80,7 +74,7 @@ namespace System.Threading.Tasks
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
             // leak with long chains of continuations.
-            var antecedent = m_antecedent;
+            Task? antecedent = m_antecedent;
             Debug.Assert(antecedent != null,
                 "No antecedent was set for the ContinuationResultTaskFromTask.");
             m_antecedent = null;
@@ -96,7 +90,7 @@ namespace System.Threading.Tasks
                 return;
             }
 
-            if (m_action is Func<Task, object, TResult> funcWithState)
+            if (m_action is Func<Task, object?, TResult> funcWithState)
             {
                 m_result = funcWithState(antecedent, m_stateObject);
                 return;
@@ -108,13 +102,13 @@ namespace System.Threading.Tasks
     // Task type used to implement: Task ContinueWith(Action<Task<TAntecedentResult>,...>)
     internal sealed class ContinuationTaskFromResultTask<TAntecedentResult> : Task
     {
-        private Task<TAntecedentResult> m_antecedent;
+        private Task<TAntecedentResult>? m_antecedent;
 
         public ContinuationTaskFromResultTask(
-            Task<TAntecedentResult> antecedent, Delegate action, object state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
+            Task<TAntecedentResult> antecedent, Delegate action, object? state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
             base(action, state, Task.InternalCurrentIfAttached(creationOptions), default, creationOptions, internalOptions, null)
         {
-            Debug.Assert(action is Action<Task<TAntecedentResult>> || action is Action<Task<TAntecedentResult>, object>,
+            Debug.Assert(action is Action<Task<TAntecedentResult>> || action is Action<Task<TAntecedentResult>, object?>,
                 "Invalid delegate type in ContinuationTaskFromResultTask");
             m_antecedent = antecedent;
         }
@@ -126,7 +120,7 @@ namespace System.Threading.Tasks
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
             // leak with long chains of continuations.
-            var antecedent = m_antecedent;
+            Task<TAntecedentResult>? antecedent = m_antecedent;
             Debug.Assert(antecedent != null,
                 "No antecedent was set for the ContinuationTaskFromResultTask.");
             m_antecedent = null;
@@ -142,7 +136,7 @@ namespace System.Threading.Tasks
                 return;
             }
 
-            if (m_action is Action<Task<TAntecedentResult>, object> actionWithState)
+            if (m_action is Action<Task<TAntecedentResult>, object?> actionWithState)
             {
                 actionWithState(antecedent, m_stateObject);
                 return;
@@ -154,13 +148,13 @@ namespace System.Threading.Tasks
     // Task type used to implement: Task<TResult> ContinueWith(Func<Task<TAntecedentResult>,...>)
     internal sealed class ContinuationResultTaskFromResultTask<TAntecedentResult, TResult> : Task<TResult>
     {
-        private Task<TAntecedentResult> m_antecedent;
+        private Task<TAntecedentResult>? m_antecedent;
 
         public ContinuationResultTaskFromResultTask(
-            Task<TAntecedentResult> antecedent, Delegate function, object state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
+            Task<TAntecedentResult> antecedent, Delegate function, object? state, TaskCreationOptions creationOptions, InternalTaskOptions internalOptions) :
             base(function, state, Task.InternalCurrentIfAttached(creationOptions), default, creationOptions, internalOptions, null)
         {
-            Debug.Assert(function is Func<Task<TAntecedentResult>, TResult> || function is Func<Task<TAntecedentResult>, object, TResult>,
+            Debug.Assert(function is Func<Task<TAntecedentResult>, TResult> || function is Func<Task<TAntecedentResult>, object?, TResult>,
                 "Invalid delegate type in ContinuationResultTaskFromResultTask");
             m_antecedent = antecedent;
         }
@@ -172,7 +166,7 @@ namespace System.Threading.Tasks
         {
             // Get and null out the antecedent.  This is crucial to avoid a memory
             // leak with long chains of continuations.
-            var antecedent = m_antecedent;
+            Task<TAntecedentResult>? antecedent = m_antecedent;
             Debug.Assert(antecedent != null,
                 "No antecedent was set for the ContinuationResultTaskFromResultTask.");
             m_antecedent = null;
@@ -188,7 +182,7 @@ namespace System.Threading.Tasks
                 return;
             }
 
-            if (m_action is Func<Task<TAntecedentResult>, object, TResult> funcWithState)
+            if (m_action is Func<Task<TAntecedentResult>, object?, TResult> funcWithState)
             {
                 m_result = funcWithState(antecedent, m_stateObject);
                 return;
@@ -262,7 +256,7 @@ namespace System.Threading.Tasks
 #if PROJECTN
         [DependencyReductionRoot]
 #endif
-        internal abstract Delegate[] GetDelegateContinuationsForDebugger();
+        internal abstract Delegate[]? GetDelegateContinuationsForDebugger();
     }
 
     /// <summary>Provides the standard implementation of a task continuation.</summary>
@@ -287,7 +281,7 @@ namespace System.Threading.Tasks
             m_options = options;
             m_taskScheduler = scheduler;
             if (AsyncCausalityTracer.LoggingOn)
-                AsyncCausalityTracer.TraceOperationCreation(m_task, "Task.ContinueWith: " + task.m_action.Method.Name);
+                AsyncCausalityTracer.TraceOperationCreation(m_task, "Task.ContinueWith: " + task.m_action!.Method.Name);
 
             if (Task.s_asyncDebuggingEnabled)
                 Task.AddToActiveTasks(m_task);
@@ -347,7 +341,7 @@ namespace System.Threading.Tasks
             else continuationTask.InternalCancel(false);
         }
 
-        internal override Delegate[] GetDelegateContinuationsForDebugger()
+        internal override Delegate[]? GetDelegateContinuationsForDebugger()
         {
             if (m_task.m_action == null)
             {
@@ -356,15 +350,20 @@ namespace System.Threading.Tasks
 
             return new Delegate[] { m_task.m_action };
         }
+
     }
 
     /// <summary>Task continuation for awaiting with a current synchronization context.</summary>
     internal sealed class SynchronizationContextAwaitTaskContinuation : AwaitTaskContinuation
     {
         /// <summary>SendOrPostCallback delegate to invoke the action.</summary>
-        private static readonly SendOrPostCallback s_postCallback = state => ((Action)state)(); // can't use InvokeAction as it's SecurityCritical
+        private static readonly SendOrPostCallback s_postCallback = state =>
+        {
+            Debug.Assert(state is Action);
+            ((Action)state)();
+        };
         /// <summary>Cached delegate for PostAction</summary>
-        private static ContextCallback s_postActionCallback;
+        private static ContextCallback? s_postActionCallback;
         /// <summary>The context with which to run the action.</summary>
         private readonly SynchronizationContext m_syncContext;
 
@@ -407,8 +406,9 @@ namespace System.Threading.Tasks
 
         /// <summary>Calls InvokeOrPostAction(false) on the supplied SynchronizationContextAwaitTaskContinuation.</summary>
         /// <param name="state">The SynchronizationContextAwaitTaskContinuation.</param>
-        private static void PostAction(object state)
+        private static void PostAction(object? state)
         {
+            Debug.Assert(state is SynchronizationContextAwaitTaskContinuation);
             var c = (SynchronizationContextAwaitTaskContinuation)state;
 
             TplEventSource log = TplEventSource.Log;
@@ -442,7 +442,7 @@ namespace System.Threading.Tasks
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static ContextCallback GetPostActionCallback()
         {
-            ContextCallback callback = s_postActionCallback;
+            ContextCallback? callback = s_postActionCallback;
             if (callback == null) { s_postActionCallback = callback = PostAction; } // lazily initialize SecurityCritical delegate
             return callback;
         }
@@ -493,7 +493,7 @@ namespace System.Threading.Tasks
                 {
                     try
                     {
-                        ((Action)state)();
+                        ((Action)state!)();
                     }
                     catch (Exception exception)
                     {
@@ -519,7 +519,7 @@ namespace System.Threading.Tasks
     internal class AwaitTaskContinuation : TaskContinuation, IThreadPoolWorkItem
     {
         /// <summary>The ExecutionContext with which to run the continuation.</summary>
-        private readonly ExecutionContext m_capturedContext;
+        private readonly ExecutionContext? m_capturedContext;
         /// <summary>The action to invoke.</summary>
         protected readonly Action m_action;
 
@@ -543,7 +543,7 @@ namespace System.Threading.Tasks
         /// <param name="state">The state to pass to the action. Must not be null.</param>
         /// <param name="scheduler">The scheduler to target.</param>
         /// <returns>The created task.</returns>
-        protected Task CreateTask(Action<object> action, object state, TaskScheduler scheduler)
+        protected Task CreateTask(Action<object?> action, object? state, TaskScheduler scheduler)
         {
             Debug.Assert(action != null);
             Debug.Assert(scheduler != null);
@@ -619,7 +619,7 @@ namespace System.Threading.Tasks
         void IThreadPoolWorkItem.Execute()
         {
             var log = TplEventSource.Log;
-            ExecutionContext context = m_capturedContext;
+            ExecutionContext? context = m_capturedContext;
 
             if (!log.IsEnabled() && context == null)
             {
@@ -663,7 +663,11 @@ namespace System.Threading.Tasks
         }
 
         /// <summary>Cached delegate that invokes an Action passed as an object parameter.</summary>
-        private readonly static ContextCallback s_invokeContextCallback = (state) => ((Action)state)();
+        private readonly static ContextCallback s_invokeContextCallback = (state) =>
+        {
+            Debug.Assert(state is Action);
+            ((Action)state)();
+        };
         private readonly static Action<Action> s_invokeAction = (action) => action();
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -673,7 +677,7 @@ namespace System.Threading.Tasks
         /// <param name="callback">The callback to run.</param>
         /// <param name="state">The state to pass to the callback.</param>
         /// <param name="currentTask">A reference to Task.t_currentTask.</param>
-        protected void RunCallback(ContextCallback callback, object state, ref Task currentTask)
+        protected void RunCallback(ContextCallback callback, object? state, ref Task? currentTask)
         {
             Debug.Assert(callback != null);
             Debug.Assert(currentTask == Task.t_currentTask);
@@ -685,7 +689,7 @@ namespace System.Threading.Tasks
             {
                 if (prevCurrentTask != null) currentTask = null;
 
-                ExecutionContext context = m_capturedContext;
+                ExecutionContext? context = m_capturedContext;
                 if (context == null)
                 {
                     // If there's no captured context, just run the callback directly.
@@ -721,8 +725,8 @@ namespace System.Threading.Tasks
         /// </remarks>
         internal static void RunOrScheduleAction(Action action, bool allowInlining)
         {
-            ref Task currentTask = ref Task.t_currentTask;
-            Task prevCurrentTask = currentTask;
+            ref Task? currentTask = ref Task.t_currentTask;
+            Task? prevCurrentTask = currentTask;
 
             // If we're not allowed to run here, schedule the action
             if (!allowInlining || !IsValidLocationForInlining)
@@ -757,8 +761,8 @@ namespace System.Threading.Tasks
             // Same logic as in the RunOrScheduleAction(Action, ...) overload, except invoking
             // box.Invoke instead of action().
 
-            ref Task currentTask = ref Task.t_currentTask;
-            Task prevCurrentTask = currentTask;
+            ref Task? currentTask = ref Task.t_currentTask;
+            Task? prevCurrentTask = currentTask;
 
             // If we're not allowed to run here, schedule the action
             if (!allowInlining || !IsValidLocationForInlining)
@@ -802,7 +806,7 @@ namespace System.Threading.Tasks
         /// <summary>Schedules the action to be executed.  No ExecutionContext work is performed used.</summary>
         /// <param name="action">The action to invoke or queue.</param>
         /// <param name="task">The task scheduling the action.</param>
-        internal static void UnsafeScheduleAction(Action action, Task task)
+        internal static void UnsafeScheduleAction(Action action, Task? task)
         {
             AwaitTaskContinuation atc = new AwaitTaskContinuation(action, flowExecutionContext: false);
 

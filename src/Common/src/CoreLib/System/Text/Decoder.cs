@@ -22,16 +22,16 @@ namespace System.Text
     //
     public abstract class Decoder
     {
-        internal DecoderFallback _fallback = null;
+        internal DecoderFallback? _fallback = null;
 
-        internal DecoderFallbackBuffer _fallbackBuffer = null;
+        internal DecoderFallbackBuffer? _fallbackBuffer = null;
 
         protected Decoder()
         {
             // We don't call default reset because default reset probably isn't good if we aren't initialized.
         }
 
-        public DecoderFallback Fallback
+        public DecoderFallback? Fallback
         {
             get
             {

@@ -147,7 +147,7 @@ namespace System.Threading
         /// they both refer to the output of a single call to the same Register method of a 
         /// <see cref="T:System.Threading.CancellationToken">CancellationToken</see>. 
         /// </returns>
-        public override bool Equals(object obj) => obj is CancellationTokenRegistration && Equals((CancellationTokenRegistration)obj);
+        public override bool Equals(object? obj) => obj is CancellationTokenRegistration && Equals((CancellationTokenRegistration)obj);
 
         /// <summary>
         /// Determines whether the current <see cref="T:System.Threading.CancellationToken">CancellationToken</see> instance is equal to the 

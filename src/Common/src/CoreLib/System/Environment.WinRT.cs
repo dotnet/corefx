@@ -13,12 +13,14 @@ namespace System
 
         public static string UserDomainName => "Windows Domain";
 
+        internal static readonly bool IsWindows8OrAbove = true;
+
         private static string GetFolderPathCore(SpecialFolder folder, SpecialFolderOption option)
         {
             WinRTInteropCallbacks callbacks = WinRTInterop.UnsafeCallbacks;
             return callbacks != null && callbacks.IsAppxModel() ?
                 callbacks.GetFolderPath(folder, option) :
-                null;
+                string.Empty;
         }
     }
 }

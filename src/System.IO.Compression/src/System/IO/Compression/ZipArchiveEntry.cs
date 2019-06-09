@@ -823,6 +823,8 @@ namespace System.IO.Compression
                 }
                 else // if we are not in streaming mode, we have to decide if we want to write zip64 headers
                 {
+                    // We are in seekable mode so we will not need to write a data descriptor
+                    _generalPurposeBitFlag &= ~BitFlagValues.DataDescriptor;
                     if (SizesTooLarge()
 #if DEBUG_FORCE_ZIP64
                         || (_archive._forceZip64 && _archive.Mode == ZipArchiveMode.Update)
@@ -910,13 +912,21 @@ namespace System.IO.Compression
                 }
                 else
                 {
-                    // we know the sizes at this point, so just go ahead and write the headers
                     if (_uncompressedSize == 0)
-                        CompressionMethod = CompressionMethodValues.Stored;
-                    WriteLocalFileHeader(isEmptyFile: false);
-                    foreach (byte[] compressedBytes in _compressedBytes)
                     {
-                        _archive.ArchiveStream.Write(compressedBytes, 0, compressedBytes.Length);
+                        // reset size to ensure proper central directory size header
+                        _compressedSize = 0;
+                    }
+
+                    WriteLocalFileHeader(isEmptyFile: _uncompressedSize == 0);
+
+                    // according to ZIP specs, zero-byte files MUST NOT include file data
+                    if (_uncompressedSize != 0)
+                    {
+                        foreach (byte[] compressedBytes in _compressedBytes)
+                        {
+                            _archive.ArchiveStream.Write(compressedBytes, 0, compressedBytes.Length);
+                        }
                     }
                 }
             }
@@ -951,13 +961,16 @@ namespace System.IO.Compression
 
             // first step is, if we need zip64, but didn't allocate it, pretend we did a stream write, because
             // we can't go back and give ourselves the space that the extra field needs.
-            // we do this by setting the correct property in the bit flag
+            // we do this by setting the correct property in the bit flag to indicate we have a data descriptor
+            // and setting the version to Zip64 to indicate that descriptor contains 64-bit values
             if (pretendStreaming)
             {
+                VersionToExtractAtLeast(ZipVersionNeededValues.Zip64);
                 _generalPurposeBitFlag |= BitFlagValues.DataDescriptor;
 
-                _archive.ArchiveStream.Seek(_offsetOfLocalHeader + ZipLocalFileHeader.OffsetToBitFlagFromHeaderStart,
+                _archive.ArchiveStream.Seek(_offsetOfLocalHeader + ZipLocalFileHeader.OffsetToVersionFromHeaderStart,
                                             SeekOrigin.Begin);
+                writer.Write((ushort)_versionToExtract);
                 writer.Write((ushort)_generalPurposeBitFlag);
             }
 
@@ -991,8 +1004,6 @@ namespace System.IO.Compression
                                             SeekOrigin.Begin);
                 writer.Write(_uncompressedSize);
                 writer.Write(_compressedSize);
-
-                _archive.ArchiveStream.Seek(finalPosition, SeekOrigin.Begin);
             }
 
             // now go to the where we were. assume that this is the end of the data
@@ -1011,6 +1022,9 @@ namespace System.IO.Compression
 
         private void WriteDataDescriptor()
         {
+            // We enter here because we cannot seek, so the data descriptor bit should be on
+            Debug.Assert((_generalPurposeBitFlag & BitFlagValues.DataDescriptor) != 0);
+
             // data descriptor can be 32-bit or 64-bit sizes. 32-bit is more compatible, so use that if possible
             // signature is optional but recommended by the spec
 
@@ -1222,7 +1236,6 @@ namespace System.IO.Compression
                         // go back and finish writing
                         if (_entry._archive.ArchiveStream.CanSeek)
                             // finish writing local header if we have seek capabilities
-
                             _entry.WriteCrcAndSizesInLocalHeader(_usedZip64inLH);
                         else
                             // write out data descriptor if we don't have seek capabilities

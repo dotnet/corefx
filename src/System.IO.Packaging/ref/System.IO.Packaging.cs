@@ -5,7 +5,6 @@
 // Changes to this file must follow the http://aka.ms/api-review process.
 // ------------------------------------------------------------------------------
 
-
 namespace System.IO
 {
     public partial class FileFormatException : System.FormatException
@@ -24,10 +23,10 @@ namespace System.IO.Packaging
 {
     public enum CompressionOption
     {
-        Fast = 2,
-        Maximum = 1,
-        Normal = 0,
         NotCompressed = -1,
+        Normal = 0,
+        Maximum = 1,
+        Fast = 2,
         SuperFast = 3,
     }
     public enum EncryptionOption
@@ -105,15 +104,15 @@ namespace System.IO.Packaging
         public abstract string Category { get; set; }
         public abstract string ContentStatus { get; set; }
         public abstract string ContentType { get; set; }
-        public abstract System.Nullable<System.DateTime> Created { get; set; }
+        public abstract System.DateTime? Created { get; set; }
         public abstract string Creator { get; set; }
         public abstract string Description { get; set; }
         public abstract string Identifier { get; set; }
         public abstract string Keywords { get; set; }
         public abstract string Language { get; set; }
         public abstract string LastModifiedBy { get; set; }
-        public abstract System.Nullable<System.DateTime> LastPrinted { get; set; }
-        public abstract System.Nullable<System.DateTime> Modified { get; set; }
+        public abstract System.DateTime? LastPrinted { get; set; }
+        public abstract System.DateTime? Modified { get; set; }
         public abstract string Revision { get; set; }
         public abstract string Subject { get; set; }
         public abstract string Title { get; set; }
@@ -164,8 +163,8 @@ namespace System.IO.Packaging
     }
     public enum TargetMode
     {
-        External = 1,
         Internal = 0,
+        External = 1,
     }
     public sealed partial class ZipPackage : System.IO.Packaging.Package
     {

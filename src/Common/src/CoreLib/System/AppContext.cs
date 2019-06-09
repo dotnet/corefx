@@ -13,9 +13,9 @@ namespace System
 {
     public static partial class AppContext
     {
-        private static readonly Dictionary<string, object> s_dataStore = new Dictionary<string, object>();
-        private static Dictionary<string, bool> s_switches;
-        private static string s_defaultBaseDirectory;
+        private static readonly Dictionary<string, object?> s_dataStore = new Dictionary<string, object?>();
+        private static Dictionary<string, bool>? s_switches;
+        private static string? s_defaultBaseDirectory;
 
         public static string BaseDirectory
         {
@@ -23,12 +23,12 @@ namespace System
             {
                 // The value of APP_CONTEXT_BASE_DIRECTORY key has to be a string and it is not allowed to be any other type. 
                 // Otherwise the caller will get invalid cast exception
-                return (string)GetData("APP_CONTEXT_BASE_DIRECTORY") ??
-                    (s_defaultBaseDirectory ?? (s_defaultBaseDirectory = GetBaseDirectoryCore()));
+                return (string?)GetData("APP_CONTEXT_BASE_DIRECTORY") ??
+                    s_defaultBaseDirectory ?? (s_defaultBaseDirectory = GetBaseDirectoryCore());
             }
         }
 
-        public static string TargetFrameworkName
+        public static string? TargetFrameworkName
         {
             get
             {
@@ -38,12 +38,12 @@ namespace System
             }
         }
 
-        public static object GetData(string name)
+        public static object? GetData(string name)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
 
-            object data;
+            object? data;
             lock (s_dataStore)
             {
                 s_dataStore.TryGetValue(name, out data);
@@ -51,7 +51,7 @@ namespace System
             return data;
         }
 
-        public static void SetData(string name, object data)
+        public static void SetData(string name, object? data)
         {
             if (name == null)
                 throw new ArgumentNullException(nameof(name));
@@ -74,7 +74,7 @@ namespace System
         {
             AssemblyLoadContext.OnProcessExit();
 
-            ProcessExit?.Invoke(null /* AppDomain */, EventArgs.Empty);
+            ProcessExit?.Invoke(AppDomain.CurrentDomain, EventArgs.Empty);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace System
                 Interlocked.CompareExchange(ref s_switches, new Dictionary<string, bool>(), null);
             }
 
-            lock (s_switches)
+            lock (s_switches!) // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             {
                 s_switches[switchName] = isEnabled;
             }

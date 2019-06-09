@@ -10,6 +10,6 @@ internal partial class Interop
     internal partial class OleAut32
     {
         [DllImport(Libraries.OleAut32)]
-        internal static extern IntPtr SysAllocStringByteLen(byte[] str, uint len);
+        internal static extern IntPtr SysAllocStringByteLen(byte[]? str, uint len);
     }
 }

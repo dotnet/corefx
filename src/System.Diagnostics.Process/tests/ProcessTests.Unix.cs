@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Security;
 using Xunit;
+using Microsoft.DotNet.RemoteExecutor;
 using Microsoft.DotNet.XUnitExtensions;
 
 namespace System.Diagnostics.Tests
@@ -155,6 +156,37 @@ namespace System.Diagnostics.Tests
             }
         }
 
+        // Active issue https://github.com/dotnet/corefx/issues/37739
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotRedHatFamily6))]
+        [PlatformSpecific(~TestPlatforms.OSX)] // On OSX, ProcessName returns the script interpreter.
+        public void ProcessNameMatchesScriptName()
+        {
+            string scriptName = GetTestFileName();
+            string filename = Path.Combine(TestDirectory, scriptName);
+            File.WriteAllText(filename, $"#!/bin/sh\nsleep 600\n"); // sleep 10 min.
+            // set x-bit
+            int mode = Convert.ToInt32("744", 8);
+            Assert.Equal(0, chmod(filename, mode));
+
+            using (var process = Process.Start(new ProcessStartInfo { FileName = filename }))
+            {
+                try
+                {
+                    string stat = File.ReadAllText($"/proc/{process.Id}/stat");
+                    Assert.Contains($"({scriptName.Substring(0, 15)})", stat);
+                    string cmdline = File.ReadAllText($"/proc/{process.Id}/cmdline");
+                    Assert.Equal($"/bin/sh\0{filename}\0", cmdline);
+
+                    Assert.Equal(scriptName, process.ProcessName);
+                }
+                finally
+                {
+                    process.Kill();
+                    process.WaitForExit();
+                }
+            }
+        }
+
         [Fact]
         [PlatformSpecific(TestPlatforms.Linux)] // s_allowedProgramsToRun is Linux specific
         public void ProcessStart_UseShellExecute_OnUnix_FallsBackWhenNotRealExecutable()
@@ -173,7 +205,7 @@ namespace System.Diagnostics.Tests
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
-            RemoteInvoke(fileToOpen =>
+            RemoteExecutor.Invoke(fileToOpen =>
             {
                 using (var px = Process.Start(new ProcessStartInfo { UseShellExecute = true, FileName = fileToOpen }))
                 {
@@ -244,7 +276,7 @@ namespace System.Diagnostics.Tests
 
             RemoteInvokeOptions options = new RemoteInvokeOptions();
             options.StartInfo.EnvironmentVariables["PATH"] = path;
-            RemoteInvoke((argVerb, argValid) =>
+            RemoteExecutor.Invoke((argVerb, argValid) =>
             {
                 if (argVerb == "<null>")
                 {
@@ -269,54 +301,47 @@ namespace System.Diagnostics.Tests
             }, verb ?? "<null>", isValid.ToString(), options).Dispose();
         }
 
-        [Theory, InlineData("vi")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram(string programToOpenWith)
+        public void ProcessStart_OnLinux_UsesSpecifiedProgram()
         {
-            if (IsProgramInstalled(programToOpenWith))
+            const string Program = "sleep";
+
+            using (var px = Process.Start(Program, "60"))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgram)}");
-                using (var px = Process.Start(programToOpenWith, fileToOpen))
+                try
                 {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.True(px.HasExited);
             }
         }
 
-        [Theory, InlineData("vi")]
+        [Fact]
         [PlatformSpecific(TestPlatforms.Linux)]
-        [OuterLoop("Opens program")]
-        public void ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList(string programToOpenWith)
+        public void ProcessStart_OnLinux_UsesSpecifiedProgramUsingArgumentList()
         {
-            if (PlatformDetection.IsAlpine)
-                return; // [ActiveIssue(https://github.com/dotnet/corefx/issues/31970)]
+            const string Program = "sleep";
 
-            if (IsProgramInstalled(programToOpenWith))
+            ProcessStartInfo psi = new ProcessStartInfo(Program);
+            psi.ArgumentList.Add("60");
+            using (var px = Process.Start(psi))
             {
-                string fileToOpen = GetTestFilePath() + ".txt";
-                File.WriteAllText(fileToOpen, $"{nameof(ProcessStart_OpenFileOnLinux_UsesSpecifiedProgramUsingArgumentList)}");
-                ProcessStartInfo psi = new ProcessStartInfo(programToOpenWith);
-                psi.ArgumentList.Add(fileToOpen);
-                using (var px = Process.Start(psi))
+                try
                 {
-                    Assert.Equal(programToOpenWith, px.ProcessName);
+                    Assert.Equal(Program, px.ProcessName);
+                }
+                finally
+                {
                     px.Kill();
                     px.WaitForExit();
-                    Assert.True(px.HasExited);
                 }
-            }
-            else
-            {
-                Console.WriteLine($"Program specified to open file with {programToOpenWith} is not installed on this machine.");
+                Assert.True(px.HasExited);
             }
         }
 
@@ -501,56 +526,109 @@ namespace System.Diagnostics.Tests
             }
         }
 
-        /// <summary>
-        /// Tests when running as a normal user and starting a new process as the same user
-        /// works as expected.
-        /// </summary>
-        [Fact]
-        public void TestStartWithNormalUser()
+        private static int CheckUserAndGroupIds(string userId, string groupId, string groupIdsJoined, string checkGroupsExact)
         {
-            TestStartWithUserName(GetCurrentRealUserName());
+            Assert.Equal(userId, getuid().ToString());
+            Assert.Equal(userId, geteuid().ToString());
+            Assert.Equal(groupId, getgid().ToString());
+            Assert.Equal(groupId, getegid().ToString());
+
+            var expectedGroups = new HashSet<uint>(groupIdsJoined.Split(',').Select(s => uint.Parse(s)));
+
+            if (bool.Parse(checkGroupsExact))
+            {
+                AssertExtensions.Equal(expectedGroups, GetGroups());
+            }
+            else
+            {
+                Assert.Subset(expectedGroups, GetGroups());
+            }
+
+            return RemoteExecutor.SuccessExitCode;
+        }
+
+        [Fact]
+        [ActiveIssue(35933, TestPlatforms.AnyUnix)]
+        public unsafe void TestCheckChildProcessUserAndGroupIds()
+        {
+            string userName = GetCurrentRealUserName();
+            string userId = GetUserId(userName);
+            string userGroupId = GetUserGroupId(userName);
+            string userGroupIds = GetUserGroupIds(userName);
+            // If this test runs as the user, we expect to be able to match the user groups exactly.
+            // Except on OSX, where getgrouplist may return a list of groups truncated to NGROUPS_MAX.
+            bool checkGroupsExact = userId == geteuid().ToString() &&
+                                    !RuntimeInformation.IsOSPlatform(OSPlatform.OSX);
+
+            // Start as username
+            var invokeOptions = new RemoteInvokeOptions();
+            invokeOptions.StartInfo.UserName = userName;
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(CheckUserAndGroupIds, userId, userGroupId, userGroupIds, checkGroupsExact.ToString(),
+                                                            invokeOptions))
+            { }
         }
 
         /// <summary>
         /// Tests when running as root and starting a new process as a normal user,
         /// the new process doesn't have elevated privileges.
         /// </summary>
-        [Fact]
+        [Theory]
         [OuterLoop("Needs sudo access")]
         [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
-        public void TestStartWithRootUser()
+        [InlineData(true)]
+        [InlineData(false)]
+        public unsafe void TestCheckChildProcessUserAndGroupIdsElevated(bool useRootGroups)
         {
-            RunTestAsSudo(TestStartWithUserName, GetCurrentRealUserName());
-        }
-
-        public static int TestStartWithUserName(string realUserName)
-        {
-            Assert.NotNull(realUserName);
-            Assert.NotEqual("root", realUserName);
-
-            using (ProcessTests testObject = new ProcessTests())
+            Func<string, string, int> runsAsRoot = (string username, string useRootGroupsArg) =>
             {
-                using (Process p = testObject.CreateProcessPortable(GetCurrentEffectiveUserId))
+                // Verify we are root
+                Assert.Equal(0U, getuid());
+                Assert.Equal(0U, geteuid());
+                Assert.Equal(0U, getgid());
+                Assert.Equal(0U, getegid());
+
+                string userId = GetUserId(username);
+                string userGroupId = GetUserGroupId(username);
+                string userGroupIds = GetUserGroupIds(username);
+
+                if (bool.Parse(useRootGroupsArg))
                 {
-                    p.StartInfo.UserName = realUserName;
-                    Assert.True(p.Start());
-
-                    p.WaitForExit();
-
-                    // since the process was started with the current real user, even if this test
-                    // was run with 'sudo', the child process will be run as the normal real user.
-                    // Assert that the effective user of the child process was never 'root'
-                    // and was the real user of this process.
-                    Assert.NotEqual(0, p.ExitCode);
+                    uint rootGroups = 0;
+                    int setGroupsRv = setgroups(1, &rootGroups);
+                    Assert.Equal(0, setGroupsRv);
                 }
 
-                return 0;
-            }
+                // On systems with a low value of NGROUPS_MAX (e.g 16 on OSX), the groups may be truncated.
+                // On Linux NGROUPS_MAX is 65536, so we expect to see every group.
+                bool checkGroupsExact = RuntimeInformation.IsOSPlatform(OSPlatform.Linux);
+
+                // Start as username
+                var invokeOptions = new RemoteInvokeOptions();
+                invokeOptions.StartInfo.UserName = username;
+                using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(CheckUserAndGroupIds, userId, userGroupId, userGroupIds, checkGroupsExact.ToString(), invokeOptions))
+                { }
+
+                return RemoteExecutor.SuccessExitCode;
+            };
+
+            // Start as root
+            string userName = GetCurrentRealUserName();
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(runsAsRoot, userName, useRootGroups.ToString(),
+                                                            new RemoteInvokeOptions { RunAsSudo = true }))
+            { }
         }
 
-        public static int GetCurrentEffectiveUserId()
+        private static string GetUserId(string username)
+            => StartAndReadToEnd("id", new[] { "-u", username }).Trim('\n');
+
+        private static string GetUserGroupId(string username)
+            => StartAndReadToEnd("id", new[] { "-g", username }).Trim('\n');
+
+        private static string GetUserGroupIds(string username)
         {
-            return (int)geteuid();
+            string[] groupIds = StartAndReadToEnd("id", new[] { "-G", username })
+                                    .Split(new[] { ' ', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+            return string.Join(",", groupIds.Select(s => uint.Parse(s)).OrderBy(id => id));
         }
 
         private static string GetCurrentRealUserName()
@@ -563,18 +641,6 @@ namespace System.Diagnostics.Tests
             Assert.NotEqual("root", realUserName);
 
             return realUserName;
-        }
-
-        /// <summary>
-        /// Tests when running as root and starting a new process as a normal user,
-        /// the new process can't elevate back to root.
-        /// </summary>
-        [Fact]
-        [OuterLoop("Needs sudo access")]
-        [Trait(XunitConstants.Category, XunitConstants.RequiresElevation)]
-        public void TestStartWithRootUserCannotElevate()
-        {
-            RunTestAsSudo(TestStartWithUserNameCannotElevate, GetCurrentRealUserName());
         }
 
         /// <summary>
@@ -742,6 +808,63 @@ namespace System.Diagnostics.Tests
             Assert.True(foundRecycled);
         }
 
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task Kill_ExitedNonChildProcess_DoesNotThrow(bool killTree)
+        {
+            // In this test, we kill a process in a way the Process instance
+            // is not aware the process has terminated when we invoke Process.Kill.
+
+            using (Process nonChildProcess = CreateNonChildProcess())
+            {
+                // Kill the process.
+                int rv = kill(nonChildProcess.Id, SIGKILL);
+                Assert.Equal(0, rv);
+
+                // Wait until the process is reaped.
+                while (rv == 0)
+                {
+                    rv = kill(nonChildProcess.Id, 0);
+                    if (rv == 0)
+                    {
+                        // process still exists, wait some time.
+                        await Task.Delay(100);
+                    }
+                }
+
+                // Call Process.Kill.
+                nonChildProcess.Kill(killTree);
+            }
+
+            Process CreateNonChildProcess()
+            {
+                // Create a process that isn't a direct child.
+                int nonChildPid = -1;
+                RemoteInvokeHandle createNonChildProcess = RemoteExecutor.Invoke(arg =>
+                {
+                    RemoteInvokeHandle nonChildProcess = RemoteExecutor.Invoke(
+                        // Process that lives as long as the test process.
+                        testProcessPid => Process.GetProcessById(int.Parse(testProcessPid)).WaitForExit(), arg,
+                        // Don't pass our standard out to the sleepProcess or the ReadToEnd below won't return.
+                        new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true } });
+
+                    using (nonChildProcess)
+                    {
+                        Console.WriteLine(nonChildProcess.Process.Id);
+
+                        // Don't wait for the process to exit.
+                        nonChildProcess.Process = null;
+                    }
+                }, Process.GetCurrentProcess().Id.ToString(), new RemoteInvokeOptions { StartInfo = new ProcessStartInfo() { RedirectStandardOutput = true } });
+                using (createNonChildProcess)
+                {
+                    nonChildPid = int.Parse(createNonChildProcess.Process.StandardOutput.ReadToEnd());
+                }
+                return Process.GetProcessById(nonChildPid);
+            }
+        }
+
         private static IDictionary GetWaitStateDictionary(bool childDictionary)
         {
             Assembly assembly = typeof(Process).Assembly;
@@ -762,52 +885,14 @@ namespace System.Diagnostics.Tests
             return (int)referenCountField.GetValue(waitState);
         }
 
-        public static int TestStartWithUserNameCannotElevate(string realUserName)
-        {
-            Assert.NotNull(realUserName);
-            Assert.NotEqual("root", realUserName);
-
-            using (ProcessTests testObject = new ProcessTests())
-            {
-                using (Process p = testObject.CreateProcessPortable(SetEffectiveUserIdToRoot))
-                {
-                    p.StartInfo.UserName = realUserName;
-                    Assert.True(p.Start());
-
-                    p.WaitForExit();
-
-                    // seteuid(0) should not have succeeded, thus the exit code should be non-zero
-                    Assert.NotEqual(0, p.ExitCode);
-                }
-
-                return 0;
-            }
-        }
-
-        public static int SetEffectiveUserIdToRoot()
-        {
-            return seteuid(0);
-        }
-
         private void RunTestAsSudo(Func<string, int> testMethod, string arg)
         {
             RemoteInvokeOptions options = new RemoteInvokeOptions()
             {
-                Start = false,
                 RunAsSudo = true
             };
-            Process p = null;
-            using (RemoteInvokeHandle handle = RemoteInvoke(testMethod, arg, options))
-            {
-                p = handle.Process;
-                handle.Process = null;
-            }
-            AddProcessForDispose(p);
-
-            p.Start();
-            p.WaitForExit();
-
-            Assert.Equal(0, p.ExitCode);
+            using (RemoteInvokeHandle handle = RemoteExecutor.Invoke(testMethod, arg, options))
+            { }
         }
 
         [DllImport("libc")]
@@ -815,9 +900,44 @@ namespace System.Diagnostics.Tests
 
         [DllImport("libc")]
         private static extern uint geteuid();
+        [DllImport("libc")]
+        private static extern uint getuid();
+        [DllImport("libc")]
+        private static extern uint getegid();
+        [DllImport("libc")]
+        private static extern uint getgid();
+
+        [DllImport("libc", SetLastError = true)]
+        private unsafe static extern int getgroups(int size, uint* list);
+
+        private unsafe static HashSet<uint> GetGroups()
+        {
+            int maxSize = 128;
+            Span<uint> groups = stackalloc uint[maxSize];
+            fixed (uint* pGroups = groups)
+            {
+                int rv = getgroups(maxSize, pGroups);
+                if (rv == -1)
+                {
+                    // If this throws with EINVAL, maxSize should be increased.
+                    throw new Win32Exception();
+                }
+
+                // Return this as a HashSet to filter out duplicates.
+                return new HashSet<uint>(groups.Slice(0, rv).ToArray());
+            }
+        }
 
         [DllImport("libc")]
         private static extern int seteuid(uint euid);
+
+        [DllImport("libc")]
+        private static unsafe extern int setgroups(int length, uint* groups);
+
+        private const int SIGKILL = 9;
+
+        [DllImport("libc", SetLastError = true)]
+        private static extern int kill(int pid, int sig);
 
         private static readonly string[] s_allowedProgramsToRun = new string[] { "xdg-open", "gnome-open", "kfmclient" };
 
@@ -829,6 +949,23 @@ namespace System.Diagnostics.Tests
             int mode = Convert.ToInt32("744", 8);
             Assert.Equal(0, chmod(filename, mode));
             return filename;
+        }
+
+        private static string StartAndReadToEnd(string filename, string[] arguments)
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = filename,
+                RedirectStandardOutput = true
+            };
+            foreach (var arg in arguments)
+            {
+                psi.ArgumentList.Add(arg);
+            }
+            using (Process process = Process.Start(psi))
+            {
+                return process.StandardOutput.ReadToEnd();
+            }
         }
     }
 }

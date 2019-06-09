@@ -17,7 +17,7 @@ namespace System.Reflection.Emit
 
         public override int GetHashCode() => Token;
 
-        public override bool Equals(object obj) => obj is SignatureToken st && Equals(st);
+        public override bool Equals(object? obj) => obj is SignatureToken st && Equals(st);
 
         public bool Equals(SignatureToken obj) => obj.Token == Token;
 

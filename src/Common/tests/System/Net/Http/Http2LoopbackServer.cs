@@ -24,6 +24,7 @@ namespace System.Net.Test.Common
         private Uri _uri;
         private bool _ignoreSettingsAck;
         private bool _ignoreWindowUpdates;
+        public TimeSpan Timeout = TimeSpan.FromSeconds(30);
 
         public Uri Address
         {
@@ -67,12 +68,12 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(emptySettings).ConfigureAwait(false);
 
             // Receive and ACK the client settings frame.
-            Frame clientSettings = await ReadFrameAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            Frame clientSettings = await ReadFrameAsync(Timeout).ConfigureAwait(false);
             clientSettings.Flags = clientSettings.Flags | FrameFlags.Ack;
             await WriteFrameAsync(clientSettings).ConfigureAwait(false);
 
             // Receive the client ACK of the server settings frame.
-            clientSettings = await ReadFrameAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            clientSettings = await ReadFrameAsync(Timeout).ConfigureAwait(false);
         }
 
         public async Task WriteFrameAsync(Frame frame)
@@ -114,8 +115,17 @@ namespace System.Net.Test.Common
 
             // First read the frame headers, which should tell us how long the rest of the frame is.
             byte[] headerBytes = new byte[Frame.FrameHeaderLength];
-            if (!await FillBufferAsync(headerBytes, timeoutCts.Token).ConfigureAwait(false))
+
+            try
             {
+                if (!await FillBufferAsync(headerBytes, timeoutCts.Token).ConfigureAwait(false))
+                {
+                    return null;
+                }
+            }
+            catch (IOException)
+            {
+                // eat errors when client aborts connection and return null.
                 return null;
             }
 
@@ -131,12 +141,12 @@ namespace System.Net.Test.Common
             if (_ignoreSettingsAck && header.Type == FrameType.Settings && header.Flags == FrameFlags.Ack)
             {
                 _ignoreSettingsAck = false;
-                return await ReadFrameAsync(timeout);
+                return await ReadFrameAsync(timeout).ConfigureAwait(false);
             }
 
             if (_ignoreWindowUpdates && header.Type == FrameType.WindowUpdate)
             {
-                return await ReadFrameAsync(timeout);
+                return await ReadFrameAsync(timeout).ConfigureAwait(false);
             }
 
             // Construct the correct frame type and return it.
@@ -157,6 +167,18 @@ namespace System.Net.Test.Common
                 default:
                     return header;
             }
+        }
+
+        // Reset and return underlying networking objects.
+        public (Socket, Stream) ResetNetwork()
+        {
+            Socket oldSocket = _connectionSocket;
+            Stream oldStream = _connectionStream;
+            _connectionSocket = null;
+            _connectionStream = null;
+            _ignoreSettingsAck = false;
+
+            return (oldSocket, oldStream);
         }
 
         // Returns the first 24 bytes read, which should be the connection preface.
@@ -221,16 +243,16 @@ namespace System.Net.Test.Common
         // Accept connection and handle connection setup
         public async Task EstablishConnectionAsync(params SettingsEntry[] settingsEntries)
         {
-            await AcceptConnectionAsync();
+            await AcceptConnectionAsync().ConfigureAwait(false);
 
             // Receive the initial client settings frame.
-            Frame receivedFrame = await ReadFrameAsync(TimeSpan.FromSeconds(30));
+            Frame receivedFrame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
             Assert.Equal(FrameType.Settings, receivedFrame.Type);
             Assert.Equal(FrameFlags.None, receivedFrame.Flags);
             Assert.Equal(0, receivedFrame.StreamId);
 
             // Receive the initial client window update frame.
-            receivedFrame = await ReadFrameAsync(TimeSpan.FromSeconds(30));
+            receivedFrame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
             Assert.Equal(FrameType.WindowUpdate, receivedFrame.Type);
             Assert.Equal(FrameFlags.None, receivedFrame.Flags);
             Assert.Equal(0, receivedFrame.StreamId);
@@ -262,7 +284,7 @@ namespace System.Net.Test.Common
             ShutdownSend();
 
             IgnoreWindowUpdates();
-            Frame frame = await ReadFrameAsync(TimeSpan.FromSeconds(30)).ConfigureAwait(false);
+            Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
             if (frame != null)
             {
                 throw new Exception($"Unexpected frame received while waiting for client shutdown: {frame}");
@@ -280,7 +302,11 @@ namespace System.Net.Test.Common
         public async Task<int> ReadRequestHeaderAsync()
         {
             // Receive HEADERS frame for request.
-            Frame frame = await ReadFrameAsync(TimeSpan.FromSeconds(30));
+            Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            if (frame == null)
+            {
+                throw new IOException("Failed to read Headers frame.");
+            }
             Assert.Equal(FrameType.Headers, frame.Type);
             Assert.Equal(FrameFlags.EndHeaders | FrameFlags.EndStream, frame.Flags);
             return frame.StreamId;
@@ -401,7 +427,7 @@ namespace System.Net.Test.Common
             new HttpHeaderData("if-modified-since", ""),
             new HttpHeaderData("if-none-match", ""),
             new HttpHeaderData("if-range", ""),
-            new HttpHeaderData("if-unmodifiedsince", ""),
+            new HttpHeaderData("if-unmodified-since", ""),
             new HttpHeaderData("last-modified", ""),
             new HttpHeaderData("link", ""),
             new HttpHeaderData("location", ""),
@@ -491,13 +517,59 @@ namespace System.Net.Test.Common
             return bytesGenerated;
         }
 
-        public async Task<(int streamId, HttpRequestData requestData)> ReadAndParseRequestHeaderAsync()
+        public async Task<byte[]> ReadBodyAsync()
+        {
+            byte[] body = null;
+            Frame frame;
+
+            do
+            {
+                frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+                if (frame == null || frame.Type == FrameType.RstStream)
+                {
+                    throw new IOException( frame == null ? "End of stream" : "Got RST");
+                }
+
+                Assert.Equal(FrameType.Data, frame.Type);
+
+                if (frame.Length > 1)
+                {
+                    DataFrame dataFrame = (DataFrame)frame;
+
+                    if (body == null)
+                    {
+                        body = dataFrame.Data.ToArray();
+                    }
+                    else
+                    {
+                        byte[] newBuffer = new byte[body.Length + dataFrame.Data.Length];
+
+                        body.CopyTo(newBuffer, 0);
+                        dataFrame.Data.Span.CopyTo(newBuffer.AsSpan().Slice(body.Length));
+                        body= newBuffer;
+                    }
+                }
+            }
+            while ((frame.Flags & FrameFlags.EndStream) == 0);
+
+            return body;
+        }
+
+        public async Task<(int streamId, HttpRequestData requestData)> ReadAndParseRequestHeaderAsync(bool readBody = true)
         {
             HttpRequestData requestData = new HttpRequestData();
 
             // Receive HEADERS frame for request.
-            HeadersFrame headersFrame = (HeadersFrame) await ReadFrameAsync(TimeSpan.FromSeconds(30));
-            Assert.Equal(FrameFlags.EndHeaders | FrameFlags.EndStream, headersFrame.Flags);
+            Frame frame = await ReadFrameAsync(Timeout).ConfigureAwait(false);
+            if (frame == null)
+            {
+                throw new IOException("Failed to read Headers frame.");
+            }
+            Assert.Equal(FrameType.Headers, frame.Type);
+            HeadersFrame headersFrame = (HeadersFrame) frame;
+
+            // TODO CONTINUATION support
+            Assert.Equal(FrameFlags.EndHeaders, FrameFlags.EndHeaders & headersFrame.Flags);
 
             int streamId = headersFrame.StreamId;
 
@@ -514,6 +586,12 @@ namespace System.Net.Test.Common
             // Extract method and path
             requestData.Method = requestData.GetSingleHeaderValue(":method");
             requestData.Path = requestData.GetSingleHeaderValue(":path");
+
+            if (readBody && (frame.Flags & FrameFlags.EndStream) == 0)
+            {
+                // Read body until end of stream if needed.
+                requestData.Body = await ReadBodyAsync();
+            }
 
             return (streamId, requestData);
         }
@@ -540,14 +618,17 @@ namespace System.Net.Test.Common
             await WriteFrameAsync(headersFrame).ConfigureAwait(false);
         }
 
-        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null)
+        public async Task SendResponseHeadersAsync(int streamId, bool endStream = true, HttpStatusCode statusCode = HttpStatusCode.OK, bool isTrailingHeader = false, IList<HttpHeaderData> headers = null)
         {
             // For now, only support headers that fit in a single frame
             byte[] headerBlock = new byte[Frame.MaxFrameLength];
             int bytesGenerated = 0;
 
-            string statusCodeString = ((int)statusCode).ToString();
-            bytesGenerated += EncodeHeader(new HttpHeaderData(":status", statusCodeString), headerBlock.AsSpan());
+            if (!isTrailingHeader)
+            {
+                string statusCodeString = ((int)statusCode).ToString();
+                bytesGenerated += EncodeHeader(new HttpHeaderData(":status", statusCodeString), headerBlock.AsSpan());
+            }
 
             if (headers != null)
             {
@@ -583,7 +664,7 @@ namespace System.Net.Test.Common
                 throw new Exception("Response body too long");
             }
 
-            await SendResponseDataAsync(streamId, responseBody, true);
+            await SendResponseDataAsync(streamId, responseBody, true).ConfigureAwait(false);
         }
 
         public override void Dispose()
@@ -601,27 +682,38 @@ namespace System.Net.Test.Common
 
         public override async Task<HttpRequestData> HandleRequestAsync(HttpStatusCode statusCode = HttpStatusCode.OK, IList<HttpHeaderData> headers = null, string content = null)
         {
-            await EstablishConnectionAsync();
+            await EstablishConnectionAsync().ConfigureAwait(false);
 
-            (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync();
+            (int streamId, HttpRequestData requestData) = await ReadAndParseRequestHeaderAsync().ConfigureAwait(false);
 
             // We are about to close the connection, after we send the response.
             // So, send a GOAWAY frame now so the client won't inadvertantly try to reuse the connection.
-            await SendGoAway(streamId);
+            await SendGoAway(streamId).ConfigureAwait(false);
 
             if (content == null)
             {
-                await SendResponseHeadersAsync(streamId, true, statusCode, headers);
+                await SendResponseHeadersAsync(streamId, endStream: true, statusCode, isTrailingHeader: false, headers).ConfigureAwait(false);
             }
             else
             {
-                await SendResponseHeadersAsync(streamId, false, statusCode, headers);
-                await SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(content));
+                await SendResponseHeadersAsync(streamId, endStream: false, statusCode, isTrailingHeader: false, headers).ConfigureAwait(false);
+                await SendResponseBodyAsync(streamId, Encoding.ASCII.GetBytes(content)).ConfigureAwait(false);
             }
 
-            await WaitForConnectionShutdownAsync();
+            await WaitForConnectionShutdownAsync().ConfigureAwait(false);
 
             return requestData;
+        }
+
+        public async static Task CreateClientAndServerAsync(Func<Uri, Task> clientFunc, Func<Http2LoopbackServer, Task> serverFunc, int timeout = 60_000)
+        {
+            using (var server = Http2LoopbackServer.CreateServer())
+            {
+                Task clientTask = clientFunc(server.Address);
+                Task serverTask = serverFunc(server);
+
+                await new Task[] { clientTask, serverTask }.WhenAllOrAnyFailed(timeout);
+            }
         }
     }
 
@@ -629,7 +721,7 @@ namespace System.Net.Test.Common
     {
         public IPAddress Address { get; set; } = IPAddress.Loopback;
         public int ListenBacklog { get; set; } = 1;
-        public bool UseSsl { get; set; } = true;
+        public bool UseSsl { get; set; } = PlatformDetection.SupportsAlpn && !Capability.Http2ForceUnencryptedLoopback();
         public SslProtocols SslProtocols { get; set; } = SslProtocols.Tls12;
     }
 
@@ -637,11 +729,19 @@ namespace System.Net.Test.Common
     {
         public static readonly Http2LoopbackServerFactory Singleton = new Http2LoopbackServerFactory();
 
-        public override async Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync)
+        public static async Task CreateServerAsync(Func<Http2LoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 60_000)
         {
             using (var server = Http2LoopbackServer.CreateServer())
             {
-                await funcAsync(server, server.Address);
+                await funcAsync(server, server.Address).TimeoutAfter(millisecondsTimeout).ConfigureAwait(false);
+            }
+        }
+
+        public override async Task CreateServerAsync(Func<GenericLoopbackServer, Uri, Task> funcAsync, int millisecondsTimeout = 60_000)
+        {
+            using (var server = Http2LoopbackServer.CreateServer())
+            {
+                await funcAsync(server, server.Address).TimeoutAfter(millisecondsTimeout).ConfigureAwait(false);
             }
         }
 

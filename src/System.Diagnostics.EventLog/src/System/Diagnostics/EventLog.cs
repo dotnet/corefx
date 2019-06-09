@@ -611,7 +611,7 @@ namespace System.Diagnostics
                     }
 
                     if (inaccessibleLogs != null)
-                        throw new SecurityException(SR.Format(wantToCreate ? SR.SomeLogsInaccessibleToCreate : SR.SomeLogsInaccessible, inaccessibleLogs.ToString()));
+                        throw new SecurityException(SR.Format(wantToCreate ? SR.SomeLogsInaccessibleToCreate : SR.SomeLogsInaccessible, inaccessibleLogs));
 
                 }
                 finally
@@ -832,7 +832,7 @@ namespace System.Diagnostics
             if (largestNumber > insertionStrings.Length)
             {
                 string[] newStrings = new string[largestNumber];
-                Array.Copy(insertionStrings, newStrings, insertionStrings.Length);
+                Array.Copy(insertionStrings, 0, newStrings, 0, insertionStrings.Length);
                 for (int i = insertionStrings.Length; i < newStrings.Length; i++)
                 {
                     newStrings[i] = "%" + (i + 1);

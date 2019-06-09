@@ -611,7 +611,7 @@ namespace System.Globalization
             return true;
         }
 
-        internal static TimeSpan Parse(ReadOnlySpan<char> input, IFormatProvider formatProvider)
+        internal static TimeSpan Parse(ReadOnlySpan<char> input, IFormatProvider? formatProvider)
         {
             var parseResult = new TimeSpanResult(throwOnFailure: true, originalTimeSpanString: input);
             bool success = TryParseTimeSpan(input, TimeSpanStandardStyles.Any, formatProvider, ref parseResult);
@@ -619,7 +619,7 @@ namespace System.Globalization
             return parseResult.parsedTimeSpan;
         }
 
-        internal static bool TryParse(ReadOnlySpan<char> input, IFormatProvider formatProvider, out TimeSpan result)
+        internal static bool TryParse(ReadOnlySpan<char> input, IFormatProvider? formatProvider, out TimeSpan result)
         {
             var parseResult = new TimeSpanResult(throwOnFailure: false, originalTimeSpanString: input);
 
@@ -633,7 +633,7 @@ namespace System.Globalization
             return false;
         }
 
-        internal static TimeSpan ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, TimeSpanStyles styles)
+        internal static TimeSpan ParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider? formatProvider, TimeSpanStyles styles)
         {
             var parseResult = new TimeSpanResult(throwOnFailure: true, originalTimeSpanString: input);
             bool success = TryParseExactTimeSpan(input, format, formatProvider, styles, ref parseResult);
@@ -641,7 +641,7 @@ namespace System.Globalization
             return parseResult.parsedTimeSpan;
         }
 
-        internal static bool TryParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, TimeSpanStyles styles, out TimeSpan result)
+        internal static bool TryParseExact(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
         {
             var parseResult = new TimeSpanResult(throwOnFailure: false, originalTimeSpanString: input);
 
@@ -655,7 +655,7 @@ namespace System.Globalization
             return false;
         }
 
-        internal static TimeSpan ParseExactMultiple(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles)
+        internal static TimeSpan ParseExactMultiple(ReadOnlySpan<char> input, string[] formats, IFormatProvider? formatProvider, TimeSpanStyles styles)
         {
             var parseResult = new TimeSpanResult(throwOnFailure: true, originalTimeSpanString: input);
             bool success = TryParseExactMultipleTimeSpan(input, formats, formatProvider, styles, ref parseResult);
@@ -663,7 +663,7 @@ namespace System.Globalization
             return parseResult.parsedTimeSpan;
         }
 
-        internal static bool TryParseExactMultiple(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles, out TimeSpan result)
+        internal static bool TryParseExactMultiple(ReadOnlySpan<char> input, string[] formats, IFormatProvider? formatProvider, TimeSpanStyles styles, out TimeSpan result)
         {
             var parseResult = new TimeSpanResult(throwOnFailure: false, originalTimeSpanString: input);
 
@@ -678,7 +678,7 @@ namespace System.Globalization
         }
 
         /// <summary>Common private Parse method called by both Parse and TryParse.</summary>
-        private static bool TryParseTimeSpan(ReadOnlySpan<char> input, TimeSpanStandardStyles style, IFormatProvider formatProvider, ref TimeSpanResult result)
+        private static bool TryParseTimeSpan(ReadOnlySpan<char> input, TimeSpanStandardStyles style, IFormatProvider? formatProvider, ref TimeSpanResult result)
         {
             input = input.Trim();
             if (input.IsEmpty)
@@ -1215,7 +1215,7 @@ namespace System.Globalization
         }
 
         /// <summary>Common private ParseExact method called by both ParseExact and TryParseExact.</summary>
-        private static bool TryParseExactTimeSpan(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider formatProvider, TimeSpanStyles styles, ref TimeSpanResult result)
+        private static bool TryParseExactTimeSpan(ReadOnlySpan<char> input, ReadOnlySpan<char> format, IFormatProvider? formatProvider, TimeSpanStyles styles, ref TimeSpanResult result)
         {
             if (format.Length == 0)
             {
@@ -1669,7 +1669,7 @@ namespace System.Globalization
         }
 
         /// <summary>Common private ParseExactMultiple method called by both ParseExactMultiple and TryParseExactMultiple.</summary>
-        private static bool TryParseExactMultipleTimeSpan(ReadOnlySpan<char> input, string[] formats, IFormatProvider formatProvider, TimeSpanStyles styles, ref TimeSpanResult result)
+        private static bool TryParseExactMultipleTimeSpan(ReadOnlySpan<char> input, string[] formats, IFormatProvider? formatProvider, TimeSpanStyles styles, ref TimeSpanResult result)
         {
             if (formats == null)
             {

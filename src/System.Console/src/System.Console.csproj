@@ -39,6 +39,9 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetCPInfoEx.cs">
       <Link>Common\Interop\Windows\Interop.GetCPInfoEx.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.MAX_PATH.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.MAX_PATH.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -93,11 +96,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\User32\Interop.GetKeyState.cs">
       <Link>Common\Interop\Windows\Interop.GetKeyState.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetStdHandle.cs">
-      <Link>Common\Interop\Windows\Interop.GetStdHandle.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetStdHandle.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.GetStdHandle.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.HandleTypes.cs">
-      <Link>Common\Interop\Windows\Interop.HandleTypes.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.HandleTypes.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.HandleTypes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.MultiByteToWideChar.cs">
       <Link>Common\CoreLib\Interop\Windows\Interop.MultiByteToWideChar.cs</Link>
@@ -238,6 +241,9 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.RestoreAndHandleCtrl.cs">
       <Link>Common\Interop\Unix\Interop.RestoreAndHandleCtrl.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SetTerminalInvalidationHandler.cs">
+      <Link>Common\Interop\Unix\Interop.SetTerminalInvalidationHandler.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.SetSignalForBreak.cs">
       <Link>Common\Interop\Unix\Interop.SetSignalForBreak.cs</Link>
     </Compile>
@@ -256,8 +262,8 @@
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetWindowWidth.cs">
       <Link>Common\Interop\Unix\Interop.GetWindowWidth.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InitializeConsole.cs">
-      <Link>Common\Interop\Unix\Interop.InitializeConsole.cs</Link>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InitializeTerminalAndSignalHandling.cs">
+      <Link>Common\Interop\Unix\Interop.InitializeTerminalAndSignalHandling.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ReadStdinUnbuffered.cs">
       <Link>Common\Interop\Unix\Interop.ReadStdinUnbuffered.cs</Link>

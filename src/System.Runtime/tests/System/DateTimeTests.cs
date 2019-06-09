@@ -828,16 +828,18 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ToBinary_TestData()
         {
-            DateTime local = new DateTime(10, DateTimeKind.Local);
-            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(new DateTime(10));
+            const long Ticks = 123456789101112;
+
+            DateTime local = new DateTime(Ticks, DateTimeKind.Local);
+            TimeSpan offset = TimeZoneInfo.Local.GetUtcOffset(local);
             long localTicks = local.Ticks - offset.Ticks;
             if (localTicks < 0)
             {
                 localTicks |= 0x4000000000000000;
             }
 
-            yield return new object[] { new DateTime(10, DateTimeKind.Utc), 10 | ((long)DateTimeKind.Utc << 62) };
-            yield return new object[] { new DateTime(10, DateTimeKind.Unspecified), 10 | (( long)DateTimeKind.Unspecified << 62) };
+            yield return new object[] { new DateTime(Ticks, DateTimeKind.Utc), Ticks | ((long)DateTimeKind.Utc << 62) };
+            yield return new object[] { new DateTime(Ticks, DateTimeKind.Unspecified), Ticks | (( long)DateTimeKind.Unspecified << 62) };
             yield return new object[] { local, localTicks | ((long)DateTimeKind.Local << 62) };
 
             yield return new object[] { DateTime.MaxValue, 3155378975999999999 };
@@ -879,17 +881,23 @@ namespace System.Tests
 
         public static IEnumerable<object[]> ToFileTime_TestData()
         {
-            yield return new object[] { new DateTime(1601, 1, 1) };
-            yield return new object[] { new DateTime(1601, 1, 1).AddTicks(1) };
-            yield return new object[] { new DateTime(2018, 12, 24) };
-            yield return new object[] { new DateTime(2018, 11, 24, 17, 57, 30, 12) };
+            yield return new object[] { new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc) };
+            yield return new object[] { new DateTime(1601, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddTicks(1) };
+
+            yield return new object[] { new DateTime(2018, 12, 24, 0, 0, 0, DateTimeKind.Utc) };
+            yield return new object[] { new DateTime(2018, 11, 24, 17, 57, 30, 12, DateTimeKind.Utc) };
+
+            yield return new object[] { new DateTime(2018, 12, 24, 0, 0, 0, DateTimeKind.Local) };
+            yield return new object[] { new DateTime(2018, 11, 24, 17, 57, 30, 12, DateTimeKind.Local) };
         }
 
         [Theory]
         [MemberData(nameof(ToFileTime_TestData))]
         public void ToFileTime_Invoke_ReturnsExpected(DateTime date)
         {
-            Assert.Equal(date, DateTime.FromFileTime(date.ToFileTime()));
+            long fileTime = date.ToFileTime();
+            DateTime fromFileTime = date.Kind == DateTimeKind.Utc ? DateTime.FromFileTimeUtc(fileTime) : DateTime.FromFileTime(fileTime);
+            Assert.Equal(date, fromFileTime);
         }
 
         public static IEnumerable<object[]> ToFileTime_Overflow_TestData()
@@ -1122,7 +1130,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug and incorrectly parses this date")]
         public static void TryParse_TimeDesignators_NetCore()
         {
             DateTime result;
@@ -1135,26 +1142,6 @@ namespace System.Tests
             Assert.Equal(4, result.Month);
             Assert.Equal(21, result.Day);
             Assert.Equal(17, result.Hour);
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr fixed a bug where the .NET framework incorrectly parses this date")]
-        public static void TryParse_TimeDesignators_Netfx()
-        {
-            DateTime result;
-            Assert.True(DateTime.TryParse("4/21 5am", new CultureInfo("en-US"), DateTimeStyles.None, out result));
-            Assert.Equal(DateTime.Now.Month, result.Month);
-            Assert.Equal(DateTime.Now.Day, result.Day);
-            Assert.Equal(4, result.Hour);
-            Assert.Equal(0, result.Minute);
-            Assert.Equal(0, result.Second);
-
-            Assert.True(DateTime.TryParse("4/21 5pm", new CultureInfo("en-US"), DateTimeStyles.None, out result));
-            Assert.Equal(DateTime.Now.Month, result.Month);
-            Assert.Equal(DateTime.Now.Day, result.Day);
-            Assert.Equal(16, result.Hour);
-            Assert.Equal(0, result.Minute);
-            Assert.Equal(0, result.Second);
         }
 
         public static IEnumerable<object[]> StandardFormatSpecifiers()
@@ -1543,7 +1530,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Needs desktop port: https://github.com/dotnet/coreclr/issues/15896")]
         // Regression test for https://github.com/dotnet/coreclr/issues/15896
         public static void TryParseExact_EmptyAMPMDesignator()
         {
@@ -1712,15 +1698,8 @@ namespace System.Tests
                         "DateTime parsing expected to succeed at the boundary DateTime.MaxValue");
             Assert.Equal(DateTime.MaxValue, maxDateTime);
 
-            if (PlatformDetection.IsFullFramework)
-            {
-                AssertExtensions.Throws<ArgumentOutOfRangeException>("value", () => DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime)); // exceeded DateTime.MaxValue
-            }
-            else
-            {
-                Assert.False(DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime),
-                         "DateTime parsing expected to throw with any dates greater than DateTime.MaxValue");
-            }
+            Assert.False(DateTime.TryParse("9999-12-31T23:59:59.999999999Z", out var dateTime),
+              "DateTime parsing expected to throw with any dates greater than DateTime.MaxValue");
         }
 
         public static IEnumerable<object[]> Parse_ValidInput_Succeeds_MemberData()

@@ -20,9 +20,6 @@
 ** significantly extend its usage or allow 3rd parties to use it please discuss with the diagnostics team.
 ===========================================================*/
 
-using System;
-using System.Diagnostics;
-
 namespace System.Runtime.Versioning
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Method | AttributeTargets.Constructor,

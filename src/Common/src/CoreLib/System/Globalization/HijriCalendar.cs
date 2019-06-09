@@ -145,7 +145,7 @@ namespace System.Globalization
                 throw new ArgumentOutOfRangeException(
                     "time",
                     ticks,
-                    string.Format(
+                    SR.Format(
                         CultureInfo.InvariantCulture,
                         SR.ArgumentOutOfRange_CalendarRange,
                         s_calendarMinValue,
@@ -421,7 +421,7 @@ namespace System.Globalization
             {
                 throw new ArgumentOutOfRangeException(null, SR.ArgumentOutOfRange_BadYearMonthDay);
             }
-            
+
             return new DateTime(lDate * GregorianCalendar.TicksPerDay + TimeToTicks(hour, minute, second, millisecond));
         }
 

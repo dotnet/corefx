@@ -35,7 +35,7 @@ namespace System.Collections
             if (info == null)
                 throw new ArgumentNullException(nameof(info));
 
-            _compareInfo = (CompareInfo)info.GetValue("CompareInfo", typeof(CompareInfo));
+            _compareInfo = (CompareInfo)info.GetValue("CompareInfo", typeof(CompareInfo))!;
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -52,13 +52,13 @@ namespace System.Collections
         // If a doesn't implement IComparable and b does, -(b.CompareTo(a)) is returned.
         // Otherwise an exception is thrown.
         // 
-        public int Compare(object a, object b)
+        public int Compare(object? a, object? b)
         {
             if (a == b) return 0;
             if (a == null) return -1;
             if (b == null) return 1;
 
-            string sa = a as string;
+            string? sa = a as string;
             if (sa != null && b is string sb)
                 return _compareInfo.Compare(sa, sb);
 

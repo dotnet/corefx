@@ -15,12 +15,12 @@ namespace System.Reflection
         {
         }
 
-        public TargetException(string message)
+        public TargetException(string? message)
             : this(message, null)
         {
         }
 
-        public TargetException(string message, Exception inner)
+        public TargetException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_TARGET;

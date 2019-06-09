@@ -4,6 +4,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Security;
+using System.Threading;
 
 namespace System.Runtime.Serialization
 {
@@ -15,7 +17,7 @@ namespace System.Runtime.Serialization
         // Even though we have a dictionary, we're still keeping all the arrays around for back-compat. 
         // Otherwise we may run into potentially breaking behaviors like GetEnumerator() not returning entries in the same order they were added.
         private string[] _names;
-        private object[] _values;
+        private object?[] _values;
         private Type[] _types;
         private int _count;
         private Dictionary<string, int> _nameToIndex;
@@ -23,6 +25,141 @@ namespace System.Runtime.Serialization
         private string _rootTypeName;
         private string _rootTypeAssemblyName;
         private Type _rootType;
+        
+        internal static AsyncLocal<bool> AsyncDeserializationInProgress { get; } = new AsyncLocal<bool>();        
+
+#if !CORECLR
+        // On AoT, assume private members are reflection blocked, so there's no further protection required
+        // for the thread's DeserializationTracker
+        [ThreadStatic]
+        private static DeserializationTracker t_deserializationTracker;
+
+        private static DeserializationTracker GetThreadDeserializationTracker()
+        {
+            if (t_deserializationTracker == null)
+            {
+                t_deserializationTracker = new DeserializationTracker();
+            }
+
+            return t_deserializationTracker;
+        }
+#endif // !CORECLR
+
+        // Returns true if deserialization is currently in progress
+        public static bool DeserializationInProgress
+        {
+#if CORECLR
+            [DynamicSecurityMethod] // Methods containing StackCrawlMark local var must be marked DynamicSecurityMethod
+#endif
+            get
+            {
+                if (AsyncDeserializationInProgress.Value)
+                {
+                    return true;
+                }
+
+#if CORECLR
+                StackCrawlMark stackMark = StackCrawlMark.LookForMe;
+                DeserializationTracker tracker = Thread.GetThreadDeserializationTracker(ref stackMark);
+#else
+                DeserializationTracker tracker = GetThreadDeserializationTracker();
+#endif
+                bool result = tracker.DeserializationInProgress;
+                return result;
+            }
+        }
+
+        // Throws a DeserializationBlockedException if dangerous deserialization is currently
+        // in progress
+        public static void ThrowIfDeserializationInProgress()
+        {
+            if (DeserializationInProgress)
+            {
+                throw new DeserializationBlockedException();
+            }
+        }
+
+        // Throws a DeserializationBlockedException if dangerous deserialization is currently
+        // in progress and the AppContext switch Switch.System.Runtime.Serialization.SerializationGuard.{switchSuffix}
+        // is not true. The value of the switch is cached in cachedValue to avoid repeated lookups:
+        // 0: No value cached
+        // 1: The switch is true
+        // -1: The switch is false
+        public static void ThrowIfDeserializationInProgress(string switchSuffix, ref int cachedValue)
+        {
+            const string SwitchPrefix = "Switch.System.Runtime.Serialization.SerializationGuard.";
+            if (switchSuffix == null)
+            {
+                throw new ArgumentNullException(nameof(switchSuffix));
+            }
+            if (String.IsNullOrWhiteSpace(switchSuffix))
+            {
+                throw new ArgumentException(SR.Argument_EmptyName, nameof(switchSuffix));
+            }
+
+            if (cachedValue == 0)
+            {
+                bool isEnabled = false;
+                if (AppContext.TryGetSwitch(SwitchPrefix + switchSuffix, out isEnabled) && isEnabled)
+                {
+                    cachedValue = 1;
+                }
+                else
+                {
+                    cachedValue = -1;
+                }
+            }
+
+            if (cachedValue == 1)
+            {
+                return;
+            }
+            else if (cachedValue == -1)
+            {
+                if (DeserializationInProgress)
+                {
+                    throw new DeserializationBlockedException(SR.Format(SR.Serialization_DangerousDeserialization_Switch, SwitchPrefix + switchSuffix));
+                }
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException(nameof(cachedValue));
+            }
+        }
+
+        // Declares that the current thread and async context have begun deserialization.
+        // In this state, if the SerializationGuard or other related AppContext switches are set,
+        // actions likely to be dangerous during deserialization, such as starting a process will be blocked.
+        // Returns a DeserializationToken that must be disposed to remove the deserialization state.
+#if CORECLR
+        [DynamicSecurityMethod] // Methods containing StackCrawlMark local var must be marked DynamicSecurityMethod
+#endif
+        public static DeserializationToken StartDeserialization()
+        {
+            if (LocalAppContextSwitches.SerializationGuard)
+            {
+#if CORECLR
+                StackCrawlMark stackMark = StackCrawlMark.LookForMe;
+                DeserializationTracker tracker = Thread.GetThreadDeserializationTracker(ref stackMark);
+#else
+                DeserializationTracker tracker = GetThreadDeserializationTracker();
+#endif
+                if  (!tracker.DeserializationInProgress)
+                {
+                    lock (tracker)
+                    {
+                        if (!tracker.DeserializationInProgress)
+                        {
+                            AsyncDeserializationInProgress.Value = true;
+                            tracker.DeserializationInProgress = true;
+                            return new DeserializationToken(tracker);
+                        }
+                    }
+                }
+            }
+            
+            return new DeserializationToken(null);
+        }
 
         [CLSCompliant(false)]
         public SerializationInfo(Type type, IFormatterConverter converter) 
@@ -38,8 +175,8 @@ namespace System.Runtime.Serialization
             }
 
             _rootType = type;
-            _rootTypeName = type.FullName;
-            _rootTypeAssemblyName = type.Module.Assembly.FullName;
+            _rootTypeName = type.FullName!;
+            _rootTypeAssemblyName = type.Module.Assembly.FullName!;
 
             _names = new string[DefaultSize];
             _values = new object[DefaultSize];
@@ -100,8 +237,8 @@ namespace System.Runtime.Serialization
             if (!ReferenceEquals(_rootType, type))
             {
                 _rootType = type;
-                _rootTypeName = type.FullName;
-                _rootTypeAssemblyName = type.Module.Assembly.FullName;
+                _rootTypeName = type.FullName!;
+                _rootTypeAssemblyName = type.Module.Assembly.FullName!;
                 IsFullTypeNameSetExplicit = false;
                 IsAssemblyNameSetExplicit = false;
             }
@@ -144,7 +281,7 @@ namespace System.Runtime.Serialization
             _types = newTypes;
         }
 
-        public void AddValue(string name, object value, Type type)
+        public void AddValue(string name, object? value, Type type)
         {
             if (null == name)
             {
@@ -159,7 +296,7 @@ namespace System.Runtime.Serialization
             AddValueInternal(name, value, type);
         }
 
-        public void AddValue(string name, object value)
+        public void AddValue(string name, object? value)
         {
             if (null == value)
             {
@@ -245,7 +382,7 @@ namespace System.Runtime.Serialization
             AddValue(name, (object)value, typeof(DateTime));
         }
 
-        internal void AddValueInternal(string name, object value, Type type)
+        internal void AddValueInternal(string name, object? value, Type type)
         {
             if (_nameToIndex.ContainsKey(name))
             {
@@ -324,7 +461,7 @@ namespace System.Runtime.Serialization
         /// <param name="name"> The name of the element to find.</param>
         /// <param name="foundType"> The type of the element associated with the given name.</param>
         /// <returns>The value of the element at the position associated with name.</returns>
-        private object GetElement(string name, out Type foundType)
+        private object? GetElement(string name, out Type foundType)
         {
             int index = FindElement(name);
             if (index == -1)
@@ -340,7 +477,7 @@ namespace System.Runtime.Serialization
             return _values[index];
         }
 
-        private object GetElementNoThrow(string name, out Type foundType)
+        private object? GetElementNoThrow(string name, out Type? foundType)
         {
             int index = FindElement(name);
             if (index == -1)
@@ -357,7 +494,7 @@ namespace System.Runtime.Serialization
             return _values[index];
         }
 
-        public object GetValue(string name, Type type)
+        public object? GetValue(string name, Type type)
         {
             if ((object)type == null)
             {
@@ -366,10 +503,9 @@ namespace System.Runtime.Serialization
 
             if (!type.IsRuntimeImplemented())
                 throw new ArgumentException(SR.Argument_MustBeRuntimeType);
-            Type foundType;
-            object value;
 
-            value = GetElement(name, out foundType);
+            Type foundType;
+            object? value = GetElement(name, out foundType);
 
             if (ReferenceEquals(foundType, type) || type.IsAssignableFrom(foundType) || value == null)
             {
@@ -380,15 +516,13 @@ namespace System.Runtime.Serialization
             return _converter.Convert(value, type);
         }
 
-        internal object GetValueNoThrow(string name, Type type)
+        internal object? GetValueNoThrow(string name, Type type)
         {
-            Type foundType;
-            object value;
-
             Debug.Assert((object)type != null, "[SerializationInfo.GetValue]type ==null");
             Debug.Assert(type.IsRuntimeImplemented(), "[SerializationInfo.GetValue]type is not a runtime type");
 
-            value = GetElementNoThrow(name, out foundType);
+            Type? foundType;
+            object? value = GetElementNoThrow(name, out foundType);
             if (value == null)
                 return null;
 
@@ -405,111 +539,111 @@ namespace System.Runtime.Serialization
         public bool GetBoolean(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(bool)) ? (bool)value : _converter.ToBoolean(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(bool)) ? (bool)value! : _converter.ToBoolean(value!); // if value is null To* method will either deal with it or throw
         }
 
         public char GetChar(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(char)) ? (char)value : _converter.ToChar(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(char)) ? (char)value! : _converter.ToChar(value!);
         }
 
         [CLSCompliant(false)]
         public sbyte GetSByte(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(sbyte)) ? (sbyte)value : _converter.ToSByte(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(sbyte)) ? (sbyte)value! : _converter.ToSByte(value!);
         }
 
         public byte GetByte(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(byte)) ? (byte)value : _converter.ToByte(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(byte)) ? (byte)value! : _converter.ToByte(value!);
         }
 
         public short GetInt16(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(short)) ? (short)value : _converter.ToInt16(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(short)) ? (short)value! : _converter.ToInt16(value!);
         }
 
         [CLSCompliant(false)]
         public ushort GetUInt16(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(ushort)) ? (ushort)value : _converter.ToUInt16(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(ushort)) ? (ushort)value! : _converter.ToUInt16(value!);
         }
 
         public int GetInt32(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(int)) ? (int)value : _converter.ToInt32(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(int)) ? (int)value! : _converter.ToInt32(value!);
         }
 
         [CLSCompliant(false)]
         public uint GetUInt32(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(uint)) ? (uint)value : _converter.ToUInt32(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(uint)) ? (uint)value! : _converter.ToUInt32(value!);
         }
 
         public long GetInt64(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(long)) ? (long)value : _converter.ToInt64(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(long)) ? (long)value! : _converter.ToInt64(value!);
         }
 
         [CLSCompliant(false)]
         public ulong GetUInt64(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(ulong)) ? (ulong)value : _converter.ToUInt64(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(ulong)) ? (ulong)value! : _converter.ToUInt64(value!);
         }
 
         public float GetSingle(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(float)) ? (float)value : _converter.ToSingle(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(float)) ? (float)value! : _converter.ToSingle(value!);
         }
 
 
         public double GetDouble(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(double)) ? (double)value : _converter.ToDouble(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(double)) ? (double)value! : _converter.ToDouble(value!);
         }
 
         public decimal GetDecimal(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(decimal)) ? (decimal)value : _converter.ToDecimal(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(decimal)) ? (decimal)value! : _converter.ToDecimal(value!);
         }
 
         public DateTime GetDateTime(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(DateTime)) ? (DateTime)value : _converter.ToDateTime(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(DateTime)) ? (DateTime)value! : _converter.ToDateTime(value!);
         }
 
-        public string GetString(string name)
+        public string? GetString(string name)
         {
             Type foundType;
-            object value = GetElement(name, out foundType);
-            return ReferenceEquals(foundType, typeof(string)) || value == null ? (string)value : _converter.ToString(value);
+            object? value = GetElement(name, out foundType);
+            return ReferenceEquals(foundType, typeof(string)) || value == null ? (string?)value : _converter.ToString(value);
         }
     }
 }

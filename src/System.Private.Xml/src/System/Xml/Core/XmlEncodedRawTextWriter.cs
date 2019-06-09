@@ -1,3 +1,7 @@
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 
 // Licensed to the .NET Foundation under one or more agreements.
 // The .NET Foundation licenses this file to you under the MIT license.
@@ -1702,7 +1706,7 @@ namespace System.Xml
         {
             Debug.Assert(_lastMarkPos + 1 == _textContentMarks.Length);
             int[] newTextContentMarks = new int[_textContentMarks.Length * 2];
-            Array.Copy(_textContentMarks, newTextContentMarks, _textContentMarks.Length);
+            Array.Copy(_textContentMarks, 0, newTextContentMarks, 0, _textContentMarks.Length);
             _textContentMarks = newTextContentMarks;
         }
         // Write NewLineChars to the specified buffer position and return an updated position.

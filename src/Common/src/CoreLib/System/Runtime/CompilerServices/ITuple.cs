@@ -17,6 +17,6 @@ namespace System.Runtime.CompilerServices
         /// <summary>
         /// Get the element at position <param name="index"/>.
         /// </summary>
-        object this[int index] { get; }
+        object? this[int index] { get; }
     }
 }

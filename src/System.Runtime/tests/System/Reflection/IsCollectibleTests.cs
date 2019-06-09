@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.Loader;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Reflection.Tests
@@ -17,8 +18,7 @@ namespace System.Reflection.Tests
         protected override Assembly Load(AssemblyName assemblyName) => null;
     }
 
-    [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "AssemblyLoadContext not available in NetFx")]
-    public class IsCollectibleTests : RemoteExecutorTestBase
+    public class IsCollectibleTests
     {
         static public string asmNameString = "TestCollectibleAssembly";
         static public string asmPath = Path.Combine(Environment.CurrentDirectory, "TestCollectibleAssembly.dll");
@@ -38,30 +38,69 @@ namespace System.Reflection.Tests
         [Fact]
         public void Assembly_IsCollectibleFalse_WhenUsingAssemblyLoad()
         {
-            RemoteInvoke(() => {
+            RemoteExecutor.Invoke(() => {
                 Assembly asm = Assembly.LoadFrom(asmPath);
 
                 Assert.NotNull(asm);
-                
+
                 Assert.False(asm.IsCollectible);
 
-                return SuccessExitCode;
+                AssemblyLoadContext alc = AssemblyLoadContext.GetLoadContext(asm);
+                Assert.False(alc.IsCollectible);
+                Assert.Equal(AssemblyLoadContext.Default, alc);
+                Assert.Equal("Default", alc.Name);
+                Assert.Contains("\"Default\"", alc.ToString());
+                Assert.Contains("System.Runtime.Loader.DefaultAssemblyLoadContext", alc.ToString());
+                Assert.Contains(alc, AssemblyLoadContext.All);
+                Assert.Contains(asm, alc.Assemblies);
+
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
-        public void Assembly_IsCollectibleTrue_WhenUsingAssemblyLoadContext()
+        public void Assembly_IsCollectibleFalse_WhenUsingAssemblyLoadContext()
         {
-            RemoteInvoke(() => {
+            RemoteExecutor.Invoke(() => {
+                AssemblyLoadContext alc = new AssemblyLoadContext("Assembly_IsCollectibleFalse_WhenUsingAssemblyLoadContext");
+
+                Assembly asm = alc.LoadFromAssemblyPath(asmPath);
+
+                Assert.NotNull(asm);
+
+                Assert.False(asm.IsCollectible);
+                Assert.False(alc.IsCollectible);
+
+                Assert.Equal("Assembly_IsCollectibleFalse_WhenUsingAssemblyLoadContext", alc.Name);
+                Assert.Contains("Assembly_IsCollectibleFalse_WhenUsingAssemblyLoadContext", alc.ToString());
+                Assert.Contains("System.Runtime.Loader.AssemblyLoadContext", alc.ToString());
+                Assert.Contains(alc, AssemblyLoadContext.All);
+                Assert.Contains(asm, alc.Assemblies);
+
+                return RemoteExecutor.SuccessExitCode;
+            }).Dispose();
+        }
+
+        [Fact]
+        public void Assembly_IsCollectibleTrue_WhenUsingTestAssemblyLoadContext()
+        {
+            RemoteExecutor.Invoke(() => {
                 AssemblyLoadContext alc = new TestAssemblyLoadContext();
 
                 Assembly asm = alc.LoadFromAssemblyPath(asmPath);
 
                 Assert.NotNull(asm);
-                
-                Assert.True(asm.IsCollectible);
 
-                return SuccessExitCode;
+                Assert.True(asm.IsCollectible);
+                Assert.True(alc.IsCollectible);
+
+                Assert.Null(alc.Name);
+                Assert.Contains("\"\"", alc.ToString());
+                Assert.Contains("System.Reflection.Tests.TestAssemblyLoadContext", alc.ToString());
+                Assert.Contains(alc, AssemblyLoadContext.All);
+                Assert.Contains(asm, alc.Assemblies);
+
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -75,7 +114,7 @@ namespace System.Reflection.Tests
         [InlineData("MyStaticGenericMethod")]
         public void MemberInfo_IsCollectibleFalse_WhenUsingAssemblyLoad(string memberName)
         {
-            RemoteInvoke((marshalledName) => 
+            RemoteExecutor.Invoke((marshalledName) => 
             {
                 Type t1 = Type.GetType(
                     "TestCollectibleAssembly.MyTestClass, TestCollectibleAssembly, Version=1.0.0.0", 
@@ -92,7 +131,7 @@ namespace System.Reflection.Tests
 
                 Assert.False(member.IsCollectible);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, memberName).Dispose();
         }
 
@@ -106,7 +145,7 @@ namespace System.Reflection.Tests
         [InlineData("MyGenericMethod")]
         public void MemberInfoGeneric_IsCollectibleFalse_WhenUsingAssemblyLoad(string memberName)
         {
-            RemoteInvoke((marshalledName) => 
+            RemoteExecutor.Invoke((marshalledName) => 
             {
                 Type t1 = Type.GetType(
                     "TestCollectibleAssembly.MyGenericTestClass`1[System.Int32], TestCollectibleAssembly, Version=1.0.0.0", 
@@ -123,7 +162,7 @@ namespace System.Reflection.Tests
 
                 Assert.False(member.IsCollectible);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, memberName).Dispose();
         }
 
@@ -137,7 +176,7 @@ namespace System.Reflection.Tests
         [InlineData("MyStaticGenericMethod")]
         public void MemberInfo_IsCollectibleTrue_WhenUsingAssemblyLoadContext(string memberName)
         {
-            RemoteInvoke((marshalledName) => 
+            RemoteExecutor.Invoke((marshalledName) => 
             {
                 AssemblyLoadContext alc = new TestAssemblyLoadContext();
 
@@ -156,7 +195,7 @@ namespace System.Reflection.Tests
 
                 Assert.True(member.IsCollectible);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, memberName).Dispose();
         }
 
@@ -170,7 +209,7 @@ namespace System.Reflection.Tests
         [InlineData("MyGenericMethod")]
         public void MemberInfoGeneric_IsCollectibleTrue_WhenUsingAssemblyLoadContext(string memberName)
         {
-            RemoteInvoke((marshalledName) => 
+            RemoteExecutor.Invoke((marshalledName) => 
             {
                 AssemblyLoadContext alc = new TestAssemblyLoadContext();
 
@@ -189,14 +228,14 @@ namespace System.Reflection.Tests
 
                 Assert.True(member.IsCollectible);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }, memberName).Dispose();
         }
 
         [Fact]
         public void GenericWithCollectibleTypeParameter_IsCollectibleTrue_WhenUsingAssemblyLoadContext()
         {
-            RemoteInvoke(() => 
+            RemoteExecutor.Invoke(() => 
             {
                 AssemblyLoadContext alc = new TestAssemblyLoadContext();
 
@@ -211,7 +250,7 @@ namespace System.Reflection.Tests
 
                 Assert.True(t1.IsCollectible);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
     }

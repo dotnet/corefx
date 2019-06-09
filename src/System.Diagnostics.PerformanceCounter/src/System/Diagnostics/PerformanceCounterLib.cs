@@ -167,8 +167,8 @@ namespace System.Diagnostics
                                 {
                                     int[] adjustedCounterIndexes = new int[index3];
                                     int[] adjustedHelpIndexes = new int[index3];
-                                    Array.Copy(newCategoryEntry.CounterIndexes, adjustedCounterIndexes, index3);
-                                    Array.Copy(newCategoryEntry.HelpIndexes, adjustedHelpIndexes, index3);
+                                    Array.Copy(newCategoryEntry.CounterIndexes, 0, adjustedCounterIndexes, 0, index3);
+                                    Array.Copy(newCategoryEntry.HelpIndexes, 0, adjustedHelpIndexes, 0, index3);
                                     newCategoryEntry.CounterIndexes = adjustedCounterIndexes;
                                     newCategoryEntry.HelpIndexes = adjustedHelpIndexes;
                                 }
@@ -372,7 +372,7 @@ namespace System.Diagnostics
             if (!categoryExists)
             {
                 // Consider adding diagnostic logic here, may be we can dump the nameTable...
-                throw new InvalidOperationException(SR.Format(SR.MissingCategory));
+                throw new InvalidOperationException(SR.MissingCategory);
             }
 
             return counterExists;
@@ -457,7 +457,7 @@ namespace System.Diagnostics
                         iniWriter.Write(HelpSufix);
                         iniWriter.Write("=");
                         if (categoryHelp == null || categoryHelp == string.Empty)
-                            iniWriter.WriteLine(SR.Format(SR.HelpNotAvailable));
+                            iniWriter.WriteLine(SR.HelpNotAvailable);
                         else
                             iniWriter.WriteLine(categoryHelp);
 
@@ -793,7 +793,7 @@ namespace System.Diagnostics
             help = library.GetCategoryHelp(category);
 
             if (help == null)
-                throw new InvalidOperationException(SR.Format(SR.MissingCategory));
+                throw new InvalidOperationException(SR.MissingCategory);
 
             return help;
         }
@@ -824,7 +824,7 @@ namespace System.Diagnostics
                 }
             }
             if (sample == null)
-                throw new InvalidOperationException(SR.Format(SR.MissingCategory));
+                throw new InvalidOperationException(SR.MissingCategory);
 
             return sample;
         }
@@ -865,7 +865,7 @@ namespace System.Diagnostics
             }
 
             if (!categoryExists)
-                throw new InvalidOperationException(SR.Format(SR.MissingCategory));
+                throw new InvalidOperationException(SR.MissingCategory);
 
             return counters;
         }
@@ -896,7 +896,7 @@ namespace System.Diagnostics
             if (index2 < counters.Length)
             {
                 string[] adjustedCounters = new string[index2];
-                Array.Copy(counters, adjustedCounters, index2);
+                Array.Copy(counters, 0, adjustedCounters, 0, index2);
                 counters = adjustedCounters;
             }
 
@@ -1449,7 +1449,7 @@ namespace System.Diagnostics
             }
 
             if (!foundCategory)
-                throw new InvalidOperationException(SR.Format(SR.CantReadCategoryIndex, categoryIndex.ToString(CultureInfo.CurrentCulture)));
+                throw new InvalidOperationException(SR.Format(SR.CantReadCategoryIndex, categoryIndex.ToString()));
 
             ref readonly PERF_OBJECT_TYPE perfObject = ref MemoryMarshal.AsRef<PERF_OBJECT_TYPE>(data.Slice(pos));
 
@@ -1622,7 +1622,7 @@ namespace System.Diagnostics
                                     return multiSample._baseCounterDefinitionSample;
                             }
 
-                            throw new InvalidOperationException(SR.Format(SR.CounterLayout));
+                            throw new InvalidOperationException(SR.CounterLayout);
                         }
                         return sample;
                     }

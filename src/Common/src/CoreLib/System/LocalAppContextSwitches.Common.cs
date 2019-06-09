@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Runtime.CompilerServices;
 
 namespace System
@@ -25,7 +24,12 @@ namespace System
         private static bool GetCachedSwitchValueInternal(string switchName, ref int cachedSwitchValue)
         {
             bool isSwitchEnabled;
-            AppContext.TryGetSwitch(switchName, out isSwitchEnabled);
+            
+            bool hasSwitch = AppContext.TryGetSwitch(switchName, out isSwitchEnabled);
+            if (!hasSwitch)
+            {
+                isSwitchEnabled = GetSwitchDefaultValue(switchName);
+            }
 
             AppContext.TryGetSwitch(@"TestSwitch.LocalAppContext.DisableCaching", out bool disableCaching);
             if (!disableCaching)
@@ -34,6 +38,17 @@ namespace System
             }
 
             return isSwitchEnabled;
+        }
+
+        // Provides default values for switches if they're not always false by default
+        private static bool GetSwitchDefaultValue(string switchName)
+        {
+            if (switchName == "Switch.System.Runtime.Serialization.SerializationGuard")
+            {
+                return true;
+            }
+            
+            return false;
         }
     }
 }

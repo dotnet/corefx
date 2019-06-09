@@ -10,7 +10,7 @@ namespace System.Runtime.InteropServices.ComTypes
     public interface IEnumVARIANT
     {
         [PreserveSig]
-        int Next(int celt, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0), Out] object[] rgVar, IntPtr pceltFetched);
+        int Next(int celt, [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 0), Out] object?[] rgVar, IntPtr pceltFetched);
 
         [PreserveSig]
         int Skip(int celt);

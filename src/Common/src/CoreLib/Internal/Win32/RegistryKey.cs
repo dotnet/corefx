@@ -6,6 +6,7 @@ using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Security;
 
@@ -28,7 +29,7 @@ namespace Internal.Win32
         private const int MaxKeyLength = 255;
         private const int MaxValueLength = 16383;
 
-        private SafeRegistryHandle _hkey = null;
+        private SafeRegistryHandle _hkey;
 
         private RegistryKey(SafeRegistryHandle hkey)
         {
@@ -75,12 +76,12 @@ namespace Internal.Win32
             return new RegistryKey(new SafeRegistryHandle(hKey, false));
         }
 
-        public RegistryKey OpenSubKey(string name)
+        public RegistryKey? OpenSubKey(string name)
         {
             return OpenSubKey(name, false);
         }
 
-        public RegistryKey OpenSubKey(string name, bool writable)
+        public RegistryKey? OpenSubKey(string name, bool writable)
         {
             // Make sure that the name does not contain double slahes
             Debug.Assert(name.IndexOf("\\\\") == -1);
@@ -162,7 +163,7 @@ namespace Internal.Win32
             // add up quickly- we'll try to keep the memory pressure low and grow the buffer
             // only if needed.
 
-            char[] name = ArrayPool<char>.Shared.Rent(100);
+            char[]? name = ArrayPool<char>.Shared.Rent(100);
 
             try
             {
@@ -214,18 +215,19 @@ namespace Internal.Win32
             return names.ToArray();
         }
 
-        public object GetValue(string name)
+        public object? GetValue(string name)
         {
             return GetValue(name, null);
         }
 
-        public object GetValue(string name, object defaultValue)
+        [return: NotNullIfNotNull("defaultValue")]
+        public object? GetValue(string name, object? defaultValue)
         {
-            object data = defaultValue;
+            object? data = defaultValue;
             int type = 0;
             int datasize = 0;
 
-            int ret = Interop.Advapi32.RegQueryValueEx(_hkey, name, null, ref type, (byte[])null, ref datasize);
+            int ret = Interop.Advapi32.RegQueryValueEx(_hkey, name, null, ref type, (byte[]?)null, ref datasize);
 
             if (ret != 0)
             {
@@ -369,7 +371,7 @@ namespace Internal.Win32
                         // make sure the string is null terminated before processing the data
                         if (blob.Length > 0 && blob[blob.Length - 1] != (char)0)
                         {
-                            Array.Resize(ref blob, blob.Length + 1);
+                            Array.Resize(ref blob!, blob.Length + 1); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                         }
 
                         string[] strings = Array.Empty<string>();
@@ -386,7 +388,7 @@ namespace Internal.Win32
                                 nextNull++;
                             }
 
-                            string toAdd = null;
+                            string? toAdd = null;
                             if (nextNull < len)
                             {
                                 Debug.Assert(blob[nextNull] == (char)0, "blob[nextNull] should be 0");
@@ -414,13 +416,13 @@ namespace Internal.Win32
                             {
                                 if (strings.Length == stringsCount)
                                 {
-                                    Array.Resize(ref strings, stringsCount > 0 ? stringsCount * 2 : 4);
+                                    Array.Resize(ref strings!, stringsCount > 0 ? stringsCount * 2 : 4); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                                 }
-                                strings[stringsCount++] = toAdd;
+                                strings![stringsCount++] = toAdd; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                             }
                         }
 
-                        Array.Resize(ref strings, stringsCount);
+                        Array.Resize(ref strings!, stringsCount); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                         data = strings;
                     }
                     break;
@@ -455,7 +457,7 @@ namespace Internal.Win32
             }
         }
 
-        internal void Win32Error(int errorCode, string str)
+        internal void Win32Error(int errorCode, string? str)
         {
             switch (errorCode)
             {

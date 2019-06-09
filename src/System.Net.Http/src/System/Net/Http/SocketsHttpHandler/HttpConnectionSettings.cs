@@ -12,7 +12,9 @@ namespace System.Net.Http
     {
         private const string Http2SupportEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2SUPPORT";
         private const string Http2SupportAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.Http2Support";
-        
+        private const string Http2UnencryptedSupportEnvironmentVariableSettingName = "DOTNET_SYSTEM_NET_HTTP_SOCKETSHTTPHANDLER_HTTP2UNENCRYPTEDSUPPORT";
+        private const string Http2UnencryptedSupportAppCtxSettingName = "System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport";
+
         internal DecompressionMethods _automaticDecompression = HttpHandlerDefaults.DefaultAutomaticDecompression;
 
         internal bool _useCookies = HttpHandlerDefaults.DefaultUseCookies;
@@ -40,13 +42,17 @@ namespace System.Net.Http
 
         internal Version _maxHttpVersion;
 
+        internal bool _allowUnencryptedHttp2;
+
         internal SslClientAuthenticationOptions _sslOptions;
 
         internal IDictionary<string, object> _properties;
 
         public HttpConnectionSettings()
         {
-            _maxHttpVersion = AllowHttp2 ? HttpVersion.Version20 : HttpVersion.Version11;
+            bool allowHttp2 = AllowHttp2;
+            _maxHttpVersion = allowHttp2 ? HttpVersion.Version20 : HttpVersion.Version11;
+            _allowUnencryptedHttp2 = allowHttp2 && AllowUnencryptedHttp2;
         }
 
         /// <summary>Creates a copy of the settings but with some values normalized to suit the implementation.</summary>
@@ -57,17 +63,6 @@ namespace System.Net.Http
             {
                 _cookieContainer = new CookieContainer();
             }
-
-            // The implementation uses Environment.TickCount to track connection lifetimes, as Environment.TickCount
-            // is measurable faster than DateTime.UtcNow / Stopwatch.GetTimestamp, and we do it at least once per request.
-            // However, besides its lower resolution (which is fine for SocketHttpHandler's needs), due to being based on
-            // an Int32 rather than Int64, the difference between two tick counts is at most ~49 days.  This means that
-            // specifying a connection idle or lifetime of greater than 49 days would cause it to never be reached.  The
-            // chances of a connection being open anywhere near that long is close to zero, as is the chance that someone
-            // would choose to specify such a long timeout, but regardless, we avoid issues by capping the timeouts.
-            TimeSpan timeLimit = TimeSpan.FromDays(40); // something super long but significantly less than the 49 day limit
-            TimeSpan pooledConnectionLifetime = _pooledConnectionLifetime < timeLimit ? _pooledConnectionLifetime : timeLimit;
-            TimeSpan pooledConnectionIdleTimeout = _pooledConnectionIdleTimeout < timeLimit ? _pooledConnectionIdleTimeout : timeLimit;
 
             return new HttpConnectionSettings()
             {
@@ -84,14 +79,15 @@ namespace System.Net.Http
                 _maxResponseDrainSize = _maxResponseDrainSize,
                 _maxResponseDrainTime = _maxResponseDrainTime,
                 _maxResponseHeadersLength = _maxResponseHeadersLength,
-                _pooledConnectionLifetime = pooledConnectionLifetime,
-                _pooledConnectionIdleTimeout = pooledConnectionIdleTimeout,
+                _pooledConnectionLifetime = _pooledConnectionLifetime,
+                _pooledConnectionIdleTimeout = _pooledConnectionIdleTimeout,
                 _preAuthenticate = _preAuthenticate,
                 _properties = _properties,
                 _proxy = _proxy,
                 _sslOptions = _sslOptions?.ShallowClone(), // shallow clone the options for basic prevention of mutation issues while processing
                 _useCookies = _useCookies,
                 _useProxy = _useProxy,
+                _allowUnencryptedHttp2 = _allowUnencryptedHttp2,
             };
         }
 
@@ -99,6 +95,9 @@ namespace System.Net.Http
         {
             get
             {
+                // Default to allowing HTTP/2, but enable that to be overridden by an
+                // AppContext switch, or by an environment variable being set to false/0.
+
                 // First check for the AppContext switch, giving it priority over the environment variable.
                 if (AppContext.TryGetSwitch(Http2SupportAppCtxSettingName, out bool allowHttp2))
                 {
@@ -107,9 +106,35 @@ namespace System.Net.Http
 
                 // AppContext switch wasn't used. Check the environment variable.
                 string envVar = Environment.GetEnvironmentVariable(Http2SupportEnvironmentVariableSettingName);
+                if (envVar != null && (envVar.Equals("false", StringComparison.OrdinalIgnoreCase) || envVar.Equals("0")))
+                {
+                    // Disallow HTTP/2 protocol.
+                    return false;
+                }
+
+                // Default to a maximum of HTTP/2.
+                return true;
+            }
+        }
+
+        private static bool AllowUnencryptedHttp2
+        {
+            get
+            {
+                // Default to not allowing unencrypted HTTP/2, but enable that to be overridden
+                // by an AppContext switch, or by an environment variable being to to true/1.
+
+                // First check for the AppContext switch, giving it priority over the environment variable.
+                if (AppContext.TryGetSwitch(Http2UnencryptedSupportAppCtxSettingName, out bool allowHttp2))
+                {
+                    return allowHttp2;
+                }
+
+                // AppContext switch wasn't used. Check the environment variable.
+                string envVar = Environment.GetEnvironmentVariable(Http2UnencryptedSupportEnvironmentVariableSettingName);
                 if (envVar != null && (envVar.Equals("true", StringComparison.OrdinalIgnoreCase) || envVar.Equals("1")))
                 {
-                    // Allow HTTP/2.0 protocol.
+                    // Allow HTTP/2.0 protocol for HTTP endpoints.
                     return true;
                 }
 

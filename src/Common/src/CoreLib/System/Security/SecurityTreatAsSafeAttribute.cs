@@ -29,4 +29,3 @@ namespace System.Security
         public SecurityTreatAsSafeAttribute() { }
     }
 }
-

@@ -4,6 +4,7 @@
 
 using System.Diagnostics;
 using System.Globalization;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -177,7 +178,7 @@ namespace System
         // to determine whether it is lexicographically less, equal, or greater, and then returns
         // either a negative integer, 0, or a positive integer; respectively.
         //
-        public static int Compare(string strA, string strB)
+        public static int Compare(string? strA, string? strB)
         {
             return Compare(strA, strB, StringComparison.CurrentCulture);
         }
@@ -188,7 +189,7 @@ namespace System
         // negative integer, 0, or a positive integer is returned; respectively.
         // The case-sensitive option is set by ignoreCase
         //
-        public static int Compare(string strA, string strB, bool ignoreCase)
+        public static int Compare(string? strA, string? strB, bool ignoreCase)
         {
             var comparisonType = ignoreCase ? StringComparison.CurrentCultureIgnoreCase : StringComparison.CurrentCulture;
             return Compare(strA, strB, comparisonType);
@@ -197,7 +198,7 @@ namespace System
 
         // Provides a more flexible function for string comparison. See StringComparison 
         // for meaning of different comparisonType.
-        public static int Compare(string strA, string strB, StringComparison comparisonType)
+        public static int Compare(string? strA, string? strB, StringComparison comparisonType)
         {
             if (object.ReferenceEquals(strA, strB))
             {
@@ -250,14 +251,10 @@ namespace System
         // to determine whether it is lexicographically less, equal, or greater, and then a
         // negative integer, 0, or a positive integer is returned; respectively.
         //
-        public static int Compare(string strA, string strB, CultureInfo culture, CompareOptions options)
+        public static int Compare(string? strA, string? strB, CultureInfo? culture, CompareOptions options)
         {
-            if (culture == null)
-            {
-                throw new ArgumentNullException(nameof(culture));
-            }
-
-            return culture.CompareInfo.Compare(strA, strB, options);
+            CultureInfo compareCulture = culture ?? CultureInfo.CurrentCulture;
+            return compareCulture.CompareInfo.Compare(strA, strB, options);
         }
 
 
@@ -268,7 +265,7 @@ namespace System
         // The case-sensitive option is set by ignoreCase, and the culture is set
         // by culture
         //
-        public static int Compare(string strA, string strB, bool ignoreCase, CultureInfo culture)
+        public static int Compare(string? strA, string? strB, bool ignoreCase, CultureInfo? culture)
         {
             var options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
             return Compare(strA, strB, culture, options);
@@ -278,7 +275,7 @@ namespace System
         // at indexA of given length is compared with the substring of strB
         // beginning at indexB of the same length.
         //
-        public static int Compare(string strA, int indexA, string strB, int indexB, int length)
+        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length)
         {
             // NOTE: It's important we call the boolean overload, and not the StringComparison
             // one. The two have some subtly different behavior (see notes in the former).
@@ -289,7 +286,7 @@ namespace System
         // at indexA of given length is compared with the substring of strB
         // beginning at indexB of the same length.  Case sensitivity is determined by the ignoreCase boolean.
         //
-        public static int Compare(string strA, int indexA, string strB, int indexB, int length, bool ignoreCase)
+        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, bool ignoreCase)
         {
             // Ideally we would just forward to the string.Compare overload that takes
             // a StringComparison parameter, and just pass in CurrentCulture/CurrentCultureIgnoreCase.
@@ -327,7 +324,7 @@ namespace System
         // beginning at indexB of the same length.  Case sensitivity is determined by the ignoreCase boolean,
         // and the culture is set by culture.
         //
-        public static int Compare(string strA, int indexA, string strB, int indexB, int length, bool ignoreCase, CultureInfo culture)
+        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, bool ignoreCase, CultureInfo? culture)
         {
             var options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
             return Compare(strA, indexA, strB, indexB, length, culture, options);
@@ -338,13 +335,9 @@ namespace System
         // at indexA of length length is compared with the substring of strB
         // beginning at indexB of the same length.
         //
-        public static int Compare(string strA, int indexA, string strB, int indexB, int length, CultureInfo culture, CompareOptions options)
+        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, CultureInfo? culture, CompareOptions options)
         {
-            if (culture == null)
-            {
-                throw new ArgumentNullException(nameof(culture));
-            }
-
+            CultureInfo compareCulture = culture ?? CultureInfo.CurrentCulture;
             int lengthA = length;
             int lengthB = length;
 
@@ -358,10 +351,10 @@ namespace System
                 lengthB = Math.Min(lengthB, strB.Length - indexB);
             }
 
-            return culture.CompareInfo.Compare(strA, indexA, lengthA, strB, indexB, lengthB, options);
+            return compareCulture.CompareInfo.Compare(strA, indexA, lengthA, strB, indexB, lengthB, options);
         }
 
-        public static int Compare(string strA, int indexA, string strB, int indexB, int length, StringComparison comparisonType)
+        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, StringComparison comparisonType)
         {
             CheckStringComparison(comparisonType);
 
@@ -423,7 +416,7 @@ namespace System
 
         // Compares strA and strB using an ordinal (code-point) comparison.
         //
-        public static int CompareOrdinal(string strA, string strB)
+        public static int CompareOrdinal(string? strA, string? strB)
         {
             if (object.ReferenceEquals(strA, strB))
             {
@@ -456,7 +449,7 @@ namespace System
 
         // Compares strA and strB using an ordinal (code-point) comparison.
         //
-        public static int CompareOrdinal(string strA, int indexA, string strB, int indexB, int length)
+        public static int CompareOrdinal(string? strA, int indexA, string? strB, int indexB, int length)
         {
             if (strA == null || strB == null)
             {
@@ -504,7 +497,7 @@ namespace System
         // indicates the relationship. This method returns a value less than 0 if this is less than value, 0
         // if this is equal to value, or a value greater than 0 if this is greater than value.
         //
-        public int CompareTo(object value)
+        public int CompareTo(object? value)
         {
             if (value == null)
             {
@@ -521,7 +514,9 @@ namespace System
 
         // Determines the sorting relation of StrB to the current instance.
         //
-        public int CompareTo(string strB)
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
+        public int CompareTo(string? strB)
+#pragma warning restore CS8614
         {
             return string.Compare(this, strB, StringComparison.CurrentCulture);
         }
@@ -577,7 +572,7 @@ namespace System
             }
         }
 
-        public bool EndsWith(string value, bool ignoreCase, CultureInfo culture)
+        public bool EndsWith(string value, bool ignoreCase, CultureInfo? culture)
         {
             if (null == value)
             {
@@ -600,7 +595,7 @@ namespace System
         }
 
         // Determines whether two strings match.
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (object.ReferenceEquals(this, obj))
                 return true;
@@ -615,7 +610,9 @@ namespace System
         }
 
         // Determines whether two strings match.
-        public bool Equals(string value)
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
+        public bool Equals(string? value)
+#pragma warning restore CS8614
         {
             if (object.ReferenceEquals(this, value))
                 return true;
@@ -633,15 +630,15 @@ namespace System
             return EqualsHelper(this, value);
         }
 
-        public bool Equals(string value, StringComparison comparisonType)
+        public bool Equals(string? value, StringComparison comparisonType)
         {
-            if ((object)this == (object)value)
+            if (object.ReferenceEquals(this, value))
             {
                 CheckStringComparison(comparisonType);
                 return true;
             }
 
-            if ((object)value == null)
+            if (value is null)
             {
                 CheckStringComparison(comparisonType);
                 return false;
@@ -675,14 +672,14 @@ namespace System
 
 
         // Determines whether two Strings match.
-        public static bool Equals(string a, string b)
+        public static bool Equals(string? a, string? b)
         {
-            if ((object)a == (object)b)
+            if (object.ReferenceEquals(a,b))
             {
                 return true;
             }
 
-            if ((object)a == null || (object)b == null || a.Length != b.Length)
+            if (a is null || b is null || a.Length != b.Length)
             {
                 return false;
             }
@@ -690,15 +687,15 @@ namespace System
             return EqualsHelper(a, b);
         }
 
-        public static bool Equals(string a, string b, StringComparison comparisonType)
+        public static bool Equals(string? a, string? b, StringComparison comparisonType)
         {
-            if ((object)a == (object)b)
+            if (object.ReferenceEquals(a, b))
             {
                 CheckStringComparison(comparisonType);
                 return true;
             }
 
-            if ((object)a == null || (object)b == null)
+            if (a is null || b is null)
             {
                 CheckStringComparison(comparisonType);
                 return false;
@@ -730,12 +727,12 @@ namespace System
             }
         }
 
-        public static bool operator ==(string a, string b)
+        public static bool operator ==(string? a, string? b)
         {
             return string.Equals(a, b);
         }
 
-        public static bool operator !=(string a, string b)
+        public static bool operator !=(string? a, string? b)
         {
             return !string.Equals(a, b);
         }
@@ -746,7 +743,9 @@ namespace System
         public override int GetHashCode()
         {
             ulong seed = Marvin.DefaultSeed;
-            return Marvin.ComputeHash32(ref Unsafe.As<char, byte>(ref _firstChar), _stringLength * 2 /* in bytes, not chars */, (uint)seed, (uint)(seed >> 32));
+
+            // Multiplication below will not overflow since going from positive Int32 to UInt32.
+            return Marvin.ComputeHash32(ref Unsafe.As<char, byte>(ref _firstChar), (uint)_stringLength * 2 /* in bytes, not chars */, (uint)seed, (uint)(seed >> 32));
         }
 
         // Gets a hash code for this string and this comparison. If strings A and B and comparison C are such
@@ -765,7 +764,9 @@ namespace System
         public static int GetHashCode(ReadOnlySpan<char> value)
         {
             ulong seed = Marvin.DefaultSeed;
-            return Marvin.ComputeHash32(ref Unsafe.As<char, byte>(ref MemoryMarshal.GetReference(value)), value.Length * 2 /* in bytes, not chars */, (uint)seed, (uint)(seed >> 32));
+
+            // Multiplication below will not overflow since going from positive Int32 to UInt32.
+            return Marvin.ComputeHash32(ref Unsafe.As<char, byte>(ref MemoryMarshal.GetReference(value)), (uint)value.Length * 2 /* in bytes, not chars */, (uint)seed, (uint)(seed >> 32));
         }
 
         // A span-based equivalent of String.GetHashCode(StringComparison). Uses the specified comparison type.
@@ -820,15 +821,15 @@ namespace System
                 {
                     length -= 4;
                     // Where length is 4n-1 (e.g. 3,7,11,15,19) this additionally consumes the null terminator
-                    hash1 = (BitOps.RotateLeft(hash1, 5) + hash1) ^ ptr[0];
-                    hash2 = (BitOps.RotateLeft(hash2, 5) + hash2) ^ ptr[1];
+                    hash1 = (BitOperations.RotateLeft(hash1, 5) + hash1) ^ ptr[0];
+                    hash2 = (BitOperations.RotateLeft(hash2, 5) + hash2) ^ ptr[1];
                     ptr += 2;
                 }
 
                 if (length > 0)
                 {
                     // Where length is 4n-3 (e.g. 1,5,9,13,17) this additionally consumes the null terminator
-                    hash2 = (BitOps.RotateLeft(hash2, 5) + hash2) ^ ptr[0];
+                    hash2 = (BitOperations.RotateLeft(hash2, 5) + hash2) ^ ptr[0];
                 }
 
                 return (int)(hash1 + (hash2 * 1566083941));
@@ -839,7 +840,7 @@ namespace System
         //
         public bool StartsWith(string value)
         {
-            if ((object)value == null)
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
@@ -848,7 +849,7 @@ namespace System
 
         public bool StartsWith(string value, StringComparison comparisonType)
         {
-            if ((object)value == null)
+            if (value is null)
             {
                 throw new ArgumentNullException(nameof(value));
             }
@@ -899,7 +900,7 @@ namespace System
             }
         }
 
-        public bool StartsWith(string value, bool ignoreCase, CultureInfo culture)
+        public bool StartsWith(string value, bool ignoreCase, CultureInfo? culture)
         {
             if (null == value)
             {

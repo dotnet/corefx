@@ -135,7 +135,7 @@ namespace System.Net.Primitives.Functional.Tests
             Assert.Throws<ArgumentNullException>(() => cc.GetCookieHeader(null));
         }
 
-        private static IEnumerable<object[]> SetCookiesInvalidData()
+        public static IEnumerable<object[]> SetCookiesInvalidData()
         {
             yield return new object[] { u5, "=value" }; // No name
             yield return new object[] { u5, "$=value" }; // Invalid name
@@ -170,7 +170,6 @@ namespace System.Net.Primitives.Functional.Tests
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)] // .NET Framework will not perform domainTable clean up.
         public static void AddCookies_CapacityReached_OldCookiesRemoved(bool isFromSameDomain)
         {
             const int Capacity = 10;

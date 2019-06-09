@@ -599,10 +599,8 @@ namespace System.ComponentModel
                     }
                 }
 
-#if FEATURE_IDESIGNERHOST
                 // Not in our table. We have a default association with a designer 
                 // if that designer is a component.
-                //
                 if (associatedObject == primary)
                 {
                     IComponent component = primary as IComponent;
@@ -621,7 +619,6 @@ namespace System.ComponentModel
                                 // got here, we're probably hosed because the user just passed in
                                 // an object that this PropertyDescriptor can't munch on, but it's
                                 // clearer to use that object instance instead of it's designer.
-                                //
                                 if (designer != null && type.IsInstanceOfType(designer))
                                 {
                                     associatedObject = designer;
@@ -630,7 +627,6 @@ namespace System.ComponentModel
                         }
                     }
                 }
-#endif
             }
 
             return associatedObject;
@@ -1159,7 +1155,7 @@ namespace System.ComponentModel
                     name = ci.ToString(CultureInfo.InvariantCulture);
                 }
 
-                suffix = string.Format(CultureInfo.InvariantCulture, "_{0}", name);
+                suffix = "_" + name;
             }
 
             return suffix;
@@ -1555,6 +1551,11 @@ namespace System.ComponentModel
             {
                 Type type = instance.GetType();
 
+                if (type.IsCOMObject)
+                {
+                    type = ComObjectType;
+                }
+
                 if (createDelegator)
                 {
                     node = new TypeDescriptionNode(new DelegatingTypeDescriptionProvider(type));
@@ -1849,7 +1850,7 @@ namespace System.ComponentModel
                     break;
             }
 
-            // See if we can re-use the IList were were passed. If we can,
+            // See if we can re-use the IList that was passed. If we can,
             // it is more efficient to re-use its slots than to generate new ones.
             if (list == null || list.IsReadOnly)
             {
@@ -2889,8 +2890,29 @@ namespace System.ComponentModel
             }
         }
 
+        [TypeDescriptionProvider(typeof(ComNativeDescriptorProxy))]
         private sealed class TypeDescriptorComObject
         {
+        }
+
+        // This class is being used to aid in diagnosability. The alternative to having this proxy would be
+        // to set the fully qualified type name in the TypeDescriptionProvider attribute. The issue with the
+        // string method is the failure is silent during type load making diagnosing the issue difficult.
+        private sealed class ComNativeDescriptorProxy : TypeDescriptionProvider
+        {
+            private readonly TypeDescriptionProvider _comNativeDescriptor;
+
+            public ComNativeDescriptorProxy()
+            {
+                Assembly assembly = Assembly.Load("System.Windows.Forms");
+                Type realComNativeDescriptor = assembly.GetType("System.Windows.Forms.ComponentModel.Com2Interop.ComNativeDescriptor", throwOnError: true);
+                _comNativeDescriptor = (TypeDescriptionProvider)Activator.CreateInstance(realComNativeDescriptor);
+            }
+
+            public override ICustomTypeDescriptor GetTypeDescriptor(Type objectType, object instance)
+            {
+                return _comNativeDescriptor.GetTypeDescriptor(objectType, instance);
+            }
         }
 
         /// <summary>

@@ -1,8 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <Import Project="..\Directory.Build.props" />
   <PropertyGroup>
     <EnableDefaultItems>false</EnableDefaultItems>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <DisableImplicitFrameworkDefines>true</DisableImplicitFrameworkDefines>
     <DisableImplicitConfigurationDefines>true</DisableImplicitConfigurationDefines>
 
@@ -11,12 +11,7 @@
     <ComputeNETCoreBuildOutputFiles>false</ComputeNETCoreBuildOutputFiles>
     <GenerateRuntimeConfigurationFiles>false</GenerateRuntimeConfigurationFiles>
 
-    <!--
-      The Microsoft.NET.Sdk defaults the AssemblySearchPaths earlier than buildtools, so default
-      the correct search paths here. We are rather restrictive by design - only ref assemblies should
-      be resolved by default.
-    -->
-    <AssemblySearchPaths>$(AssemblySearchPaths);$(RefPath);{RawFileName}</AssemblySearchPaths>
+    <CodeAnalysisRuleset>$(MSBuildThisFileDirectory)CodeAnalysis.ruleset</CodeAnalysisRuleset>
   </PropertyGroup>
 
   <!-- Use msbuild path functions as that property is used in bash scripts. -->
@@ -26,8 +21,16 @@
   </ItemGroup>
 
   <ItemGroup>
-    <!-- Use IL version of System.Private.CoreLib and link to the testhost folder to probe additional assemblies. -->
-    <CoverageProbePath Include="shared\Microsoft.NETCore.App\9.9.9\il" />
+    <!-- Link to the testhost folder to probe additional assemblies. -->
     <CoverageProbePath Include="shared\Microsoft.NETCore.App\9.9.9" />
+  </ItemGroup>
+
+  <!--
+    The Utf8String package is experimental. We don't want tests to inadvertently take a dependency on this
+    feature unless they explicitly opt in to it. (Source projects explicitly reference their dependencies,
+    so they can't inadvertently take a dependency on it.)
+  -->
+  <ItemGroup Condition="'$(IsTestProject)' == 'true' AND '$(IncludeUtf8StringAsmRef)' != 'true'">
+    <DefaultReferenceExclusions Include="System.Utf8String.Experimental" />
   </ItemGroup>
 </Project>

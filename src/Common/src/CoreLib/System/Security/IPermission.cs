@@ -4,12 +4,15 @@
 
 namespace System.Security
 {
+#if PROJECTN
+    [Internal.Runtime.CompilerServices.RelocatedType("System.Runtime.Extensions")]
+#endif
     public partial interface IPermission : ISecurityEncodable
     {
         IPermission Copy();
         void Demand();
-        IPermission Intersect(IPermission target);
-        bool IsSubsetOf(IPermission target);
-        IPermission Union(IPermission target);
+        IPermission? Intersect(IPermission? target);
+        bool IsSubsetOf(IPermission? target);
+        IPermission? Union(IPermission? target);
     }
 }

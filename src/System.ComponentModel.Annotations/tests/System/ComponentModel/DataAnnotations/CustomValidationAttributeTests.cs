@@ -73,6 +73,14 @@ namespace System.ComponentModel.DataAnnotations.Tests
             Assert.Equal(method, attribute.Method);
         }
 
+        [Theory]
+        [InlineData(typeof(CustomValidator), nameof(CustomValidator.ValidationMethodDerivedReturnTypeReturnsSomeError))]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full .NET Frameworks had a restriction, that prevented to use custom ValidationResult. .NET Core allows to return class derived from ValidatioResult")]
+        public static void Ctor_Type_String_IgnoreNetFramework(Type validatorType, string method)
+        {
+            Ctor_Type_String(validatorType, method);
+        }
+
         [Fact]
         public void FormatErrorMessage_NotPerformedValidation_ContainsName()
         {
@@ -178,6 +186,15 @@ namespace System.ComponentModel.DataAnnotations.Tests
             AssertExtensions.Throws<ArgumentException>(null, () => attribute.Validate(new IConvertibleImplementor(), s_testValidationContext));
         }
 
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full .NET Frameworks had a restriction, that prevented to use custom ValidationResult. .NET Core allows to return class derived from ValidatioResult")]
+        public static void GetValidationResult_MethodReturnDerivedValidationResult_ReturnsExpected()
+        {
+            CustomValidationAttribute attribute = GetAttribute(nameof(CustomValidator.ValidationMethodDerivedReturnTypeReturnsSomeError));
+            ValidationResult validationResult = attribute.GetValidationResult(new object(), s_testValidationContext);
+            Assert.Equal(DerivedValidationResult.SomeError, validationResult);
+        }
+
         internal class NonPublicCustomValidator
         {
             public static ValidationResult ValidationMethodOneArg(object o) => ValidationResult.Success;
@@ -209,6 +226,9 @@ namespace System.ComponentModel.DataAnnotations.Tests
             {
                 return ValidationResult.Success;
             }
+
+            public static DerivedValidationResult ValidationMethodDerivedReturnTypeReturnsSomeError(object o) =>
+                DerivedValidationResult.SomeError;
 
             public static ValidationResult CorrectValidationMethodOneArg(object o)
             {
@@ -272,5 +292,34 @@ namespace System.ComponentModel.DataAnnotations.Tests
         }
 
         public struct GenericStruct<T> { }
+
+        public class DerivedValidationResult : ValidationResult
+        {
+            public DerivedValidationResult(string errorMessage): base(errorMessage)
+            {
+            }
+
+            public static readonly DerivedValidationResult SomeError =
+                new DerivedValidationResult("Some Error") { AdditionalData = "Additional Data" }; 
+
+            public string AdditionalData { get; set; }
+        }
+
+        [Fact]
+        public static void AllowMultiple()
+        {
+            Assert.Equal(3, TypeDescriptor.GetAttributes(typeof(AllowMultipleClass)).Count);
+        }
+
+        [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method1))]
+        [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method2))]
+        [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method3))]
+        [CustomValidation(typeof(AllowMultipleClass), nameof(AllowMultipleClass.Method3))]
+        public class AllowMultipleClass 
+        {
+            public void Method1() { }
+            public void Method2() { }
+            public void Method3() { }
+        }
     }
 }

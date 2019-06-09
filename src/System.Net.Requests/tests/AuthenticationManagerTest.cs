@@ -4,15 +4,15 @@
 
 using System.Collections;
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 #pragma warning disable CS0618 // obsolete warnings
 
 namespace System.Net.Tests
 {
-    public class AuthenticationManagerTest : RemoteExecutorTestBase
+    public class AuthenticationManagerTest
     {
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "AuthenticationManager supported on NETFX")]
         [Fact]
         public void Authenticate_NotSupported()
         {
@@ -29,7 +29,7 @@ namespace System.Net.Tests
         [Fact]
         public void Register_Unregister_ModuleCountUnchanged()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 int initialCount = GetModuleCount();
                 IAuthenticationModule module = new CustomModule();
@@ -37,13 +37,13 @@ namespace System.Net.Tests
                 AuthenticationManager.Unregister(module);
                 Assert.Equal(initialCount, GetModuleCount());
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();           
         }
 
         public void Register_UnregisterByScheme_ModuleCountUnchanged()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 int initialCount = GetModuleCount();
                 IAuthenticationModule module = new CustomModule();
@@ -51,7 +51,7 @@ namespace System.Net.Tests
                 AuthenticationManager.Unregister("custom");
                 Assert.Equal(initialCount, GetModuleCount());
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -61,7 +61,7 @@ namespace System.Net.Tests
             int count = 0;
             IEnumerator modules = AuthenticationManager.RegisteredModules;
             while (modules.MoveNext()) count++;
-            Assert.Equal(PlatformDetection.IsFullFramework ? 5 : 0, count);
+            Assert.Equal(0, count);
         }
 
         [Fact]
@@ -69,7 +69,7 @@ namespace System.Net.Tests
         {
             Assert.Null(AuthenticationManager.CredentialPolicy);
 
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 ICredentialPolicy cp = new DummyCredentialPolicy();
                 AuthenticationManager.CredentialPolicy = cp;
@@ -78,7 +78,7 @@ namespace System.Net.Tests
                 AuthenticationManager.CredentialPolicy = null;
                 Assert.Null(AuthenticationManager.CredentialPolicy);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
@@ -89,7 +89,7 @@ namespace System.Net.Tests
             Assert.Empty(AuthenticationManager.CustomTargetNameDictionary);
             Assert.Same(AuthenticationManager.CustomTargetNameDictionary, AuthenticationManager.CustomTargetNameDictionary);
 
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 string theKey = "http://www.contoso.com";
                 string theValue = "HTTP/www.contoso.com";
@@ -99,7 +99,7 @@ namespace System.Net.Tests
                 AuthenticationManager.CustomTargetNameDictionary.Clear();
                 Assert.Equal(0, AuthenticationManager.CustomTargetNameDictionary.Count);
 
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();            
         }
 

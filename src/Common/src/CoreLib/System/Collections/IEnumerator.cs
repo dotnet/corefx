@@ -25,7 +25,7 @@ namespace System.Collections
         // GetCurrent with no intervening calls to MoveNext 
         // will return the same object.
         // 
-        object Current
+        object? Current
         {
             get;
         }

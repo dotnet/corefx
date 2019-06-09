@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <ItemGroup>
     <ProjectReference Include="..\ref\System.Reflection.Emit.csproj">
@@ -13,6 +12,7 @@
     <HarvestIncludePaths Include="lib/netstandard1.3" />
     <InboxOnTargetFramework Include="monoandroid10;xamarinmac20" />
     <InboxOnTargetFramework Include="netcoreapp2.0" />
+    <InboxOnTargetFramework Include="netstandard2.1" />
     <InboxOnTargetFramework Include="net45" />
 
     <!-- this package is part of the implementation closure of NETStandard.Library

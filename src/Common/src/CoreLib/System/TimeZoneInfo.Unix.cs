@@ -5,11 +5,13 @@
 using System.Buffers;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Threading;
 using System.Security;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using Internal.IO;
@@ -32,7 +34,7 @@ namespace System
             string zoneAbbreviations;
             bool[] StandardTime;
             bool[] GmtTime;
-            string futureTransitionsPosixFormat;
+            string? futureTransitionsPosixFormat;
 
             // parse the raw TZif bytes; this method can throw ArgumentException when the data is malformed.
             TZif_ParseRaw(data, out t, out dts, out typeOfLocalTime, out transitionType, out zoneAbbreviations, out StandardTime, out GmtTime, out futureTransitionsPosixFormat);
@@ -106,7 +108,7 @@ namespace System
             ValidateTimeZoneInfo(_id, _baseUtcOffset, _adjustmentRules, out _supportsDaylightSavingTime);
         }
 
-        private unsafe void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, ref string displayName)
+        private unsafe void GetDisplayName(Interop.Globalization.TimeZoneDisplayNameType nameType, ref string? displayName)
         {
             if (GlobalizationMode.Invariant)
             {
@@ -114,7 +116,7 @@ namespace System
                 return;
             }
 
-            string timeZoneDisplayName;
+            string? timeZoneDisplayName;
             bool result = Interop.CallStringMethod(
                 (buffer, locale, id, type) =>
                 {
@@ -182,9 +184,7 @@ namespace System
             string timeZoneDirectory = GetTimeZoneDirectory();
             foreach (string timeZoneId in GetTimeZoneIds(timeZoneDirectory))
             {
-                TimeZoneInfo value;
-                Exception ex;
-                TryGetTimeZone(timeZoneId, false, out value, out ex, cachedData, alwaysFallbackToLocalMachine: true);  // populate the cache
+                TryGetTimeZone(timeZoneId, false, out _, out _, cachedData, alwaysFallbackToLocalMachine: true);  // populate the cache
             }
         }
 
@@ -202,7 +202,7 @@ namespace System
             return GetLocalTimeZoneFromTzFile();
         }
 
-        private static TimeZoneInfoResult TryGetTimeZoneFromLocalMachine(string id, out TimeZoneInfo value, out Exception e)
+        private static TimeZoneInfoResult TryGetTimeZoneFromLocalMachine(string id, out TimeZoneInfo? value, out Exception? e)
         {
             value = null;
             e = null;
@@ -260,7 +260,7 @@ namespace System
             {
                 using (StreamReader sr = new StreamReader(Path.Combine(timeZoneDirectory, ZoneTabFileName), Encoding.UTF8))
                 {
-                    string zoneTabFileLine;
+                    string? zoneTabFileLine;
                     while ((zoneTabFileLine = sr.ReadLine()) != null)
                     {
                         if (!string.IsNullOrEmpty(zoneTabFileLine) && zoneTabFileLine[0] != '#')
@@ -309,11 +309,11 @@ namespace System
         /// 3. Look for the data in GetTimeZoneDirectory()/localtime.
         /// 4. Use UTC if all else fails.
         /// </summary>
-        private static bool TryGetLocalTzFile(out byte[] rawData, out string id)
+        private static bool TryGetLocalTzFile([NotNullWhen(true)] out byte[]? rawData, [NotNullWhen(true)] out string? id)
         {
             rawData = null;
             id = null;
-            string tzVariable = GetTzEnvironmentVariable();
+            string? tzVariable = GetTzEnvironmentVariable();
 
             // If the env var is null, use the localtime file
             if (tzVariable == null)
@@ -344,9 +344,9 @@ namespace System
             return TryLoadTzFile(tzFilePath, ref rawData, ref id);
         }
 
-        private static string GetTzEnvironmentVariable()
+        private static string? GetTzEnvironmentVariable()
         {
-            string result = Environment.GetEnvironmentVariable(TimeZoneEnvironmentVariable);
+            string? result = Environment.GetEnvironmentVariable(TimeZoneEnvironmentVariable);
             if (!string.IsNullOrEmpty(result))
             {
                 if (result[0] == ':')
@@ -359,7 +359,7 @@ namespace System
             return result;
         }
 
-        private static bool TryLoadTzFile(string tzFilePath, ref byte[] rawData, ref string id)
+        private static bool TryLoadTzFile(string tzFilePath, [NotNullWhen(true)] ref byte[]? rawData, [NotNullWhen(true)] ref string? id)
         {
             if (File.Exists(tzFilePath))
             {
@@ -388,15 +388,15 @@ namespace System
         /// Finds the time zone id by using 'readlink' on the path to see if tzFilePath is
         /// a symlink to a file.
         /// </summary>
-        private static string FindTimeZoneIdUsingReadLink(string tzFilePath)
+        private static string? FindTimeZoneIdUsingReadLink(string tzFilePath)
         {
-            string id = null;
+            string? id = null;
 
-            string symlinkPath = Interop.Sys.ReadLink(tzFilePath);
+            string? symlinkPath = Interop.Sys.ReadLink(tzFilePath);
             if (symlinkPath != null)
             {
                 // symlinkPath can be relative path, use Path to get the full absolute path.
-                symlinkPath = Path.GetFullPath(symlinkPath, Path.GetDirectoryName(tzFilePath));
+                symlinkPath = Path.GetFullPath(symlinkPath, Path.GetDirectoryName(tzFilePath)!); // TODO-NULLABLE: Remove ! when nullable attributes are respected
 
                 string timeZoneDirectory = GetTimeZoneDirectory();
                 if (symlinkPath.StartsWith(timeZoneDirectory, StringComparison.Ordinal))
@@ -408,7 +408,7 @@ namespace System
             return id;
         }
 
-        private static string GetDirectoryEntryFullPath(ref Interop.Sys.DirectoryEntry dirent, string currentPath)
+        private static string? GetDirectoryEntryFullPath(ref Interop.Sys.DirectoryEntry dirent, string currentPath)
         {
             Span<char> nameBuffer = stackalloc char[Interop.Sys.DirectoryEntry.NameBufferSize];
             ReadOnlySpan<char> direntName = dirent.GetName(nameBuffer);
@@ -425,10 +425,10 @@ namespace System
         /// </summary>
         private static unsafe void EnumerateFilesRecursively(string path, Predicate<string> condition)
         {
-            List<string> toExplore = null; // List used as a stack
+            List<string>? toExplore = null; // List used as a stack
 
             int bufferSize = Interop.Sys.GetReadDirRBufferSize();
-            byte[] dirBuffer = null;
+            byte[]? dirBuffer = null;
             try
             {
                 dirBuffer = ArrayPool<byte>.Shared.Rent(bufferSize);
@@ -450,7 +450,7 @@ namespace System
                             Interop.Sys.DirectoryEntry dirent;
                             while (Interop.Sys.ReadDirR(dirHandle, dirBufferPtr, bufferSize, out dirent) == 0)
                             {
-                                string fullPath = GetDirectoryEntryFullPath(ref dirent, currentPath);
+                                string? fullPath = GetDirectoryEntryFullPath(ref dirent, currentPath);
                                 if (fullPath == null)
                                     continue;
 
@@ -614,11 +614,11 @@ namespace System
         /// </summary>
         private static TimeZoneInfo GetLocalTimeZoneFromTzFile()
         {
-            byte[] rawData;
-            string id;
+            byte[]? rawData;
+            string? id;
             if (TryGetLocalTzFile(out rawData, out id))
             {
-                TimeZoneInfo result = GetTimeZoneFromTzData(rawData, id);
+                TimeZoneInfo? result = GetTimeZoneFromTzData(rawData!, id!); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                 if (result != null)
                 {
                     return result;
@@ -629,7 +629,7 @@ namespace System
             return Utc;
         }
 
-        private static TimeZoneInfo GetTimeZoneFromTzData(byte[] rawData, string id)
+        private static TimeZoneInfo? GetTimeZoneFromTzData(byte[] rawData, string id)
         {
             if (rawData != null)
             {
@@ -652,7 +652,7 @@ namespace System
 
         private static string GetTimeZoneDirectory()
         {
-            string tzDirectory = Environment.GetEnvironmentVariable(TimeZoneDirectoryEnvironmentVariable);
+            string? tzDirectory = Environment.GetEnvironmentVariable(TimeZoneDirectoryEnvironmentVariable);
 
             if (tzDirectory == null)
             {
@@ -693,8 +693,8 @@ namespace System
                 throw new TimeZoneNotFoundException(SR.Format(SR.TimeZoneNotFound_MissingData, id));
             }
 
-            TimeZoneInfo value;
-            Exception e;
+            TimeZoneInfo? value;
+            Exception? e;
 
             TimeZoneInfoResult result;
 
@@ -707,7 +707,7 @@ namespace System
 
             if (result == TimeZoneInfoResult.Success)
             {
-                return value;
+                return value!;
             }
             else if (result == TimeZoneInfoResult.InvalidTimeZoneException)
             {
@@ -862,8 +862,8 @@ namespace System
         // BSD                              July 18, 2003                             BSD
         //
         //
-        private static void TZif_GenerateAdjustmentRules(out AdjustmentRule[] rules, TimeSpan baseUtcOffset, DateTime[] dts, byte[] typeOfLocalTime,
-            TZifType[] transitionType, bool[] StandardTime, bool[] GmtTime, string futureTransitionsPosixFormat)
+        private static void TZif_GenerateAdjustmentRules(out AdjustmentRule[]? rules, TimeSpan baseUtcOffset, DateTime[] dts, byte[] typeOfLocalTime,
+            TZifType[] transitionType, bool[] StandardTime, bool[] GmtTime, string? futureTransitionsPosixFormat)
         {
             rules = null;
 
@@ -886,7 +886,7 @@ namespace System
         }
 
         private static void TZif_GenerateAdjustmentRule(ref int index, TimeSpan timeZoneBaseUtcOffset, List<AdjustmentRule> rulesList, DateTime[] dts,
-            byte[] typeOfLocalTime, TZifType[] transitionTypes, bool[] StandardTime, bool[] GmtTime, string futureTransitionsPosixFormat)
+            byte[] typeOfLocalTime, TZifType[] transitionTypes, bool[] StandardTime, bool[] GmtTime, string? futureTransitionsPosixFormat)
         {
             // To generate AdjustmentRules, use the following approach:
             // The first AdjustmentRule will go from DateTime.MinValue to the first transition time greater than DateTime.MinValue.
@@ -987,13 +987,13 @@ namespace System
 
                 if (!string.IsNullOrEmpty(futureTransitionsPosixFormat))
                 {
-                    AdjustmentRule r = TZif_CreateAdjustmentRuleForPosixFormat(futureTransitionsPosixFormat, startTransitionDate, timeZoneBaseUtcOffset);
+                    AdjustmentRule? r = TZif_CreateAdjustmentRuleForPosixFormat(futureTransitionsPosixFormat, startTransitionDate, timeZoneBaseUtcOffset);
 
                     if (r != null)
                     {
                         if (!IsValidAdjustmentRuleOffest(timeZoneBaseUtcOffset, r))
                         {
-                            NormalizeAdjustmentRuleOffset(timeZoneBaseUtcOffset, ref r);
+                            NormalizeAdjustmentRuleOffset(timeZoneBaseUtcOffset, ref r!); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                         }
 
                         rulesList.Add(r);
@@ -1078,7 +1078,7 @@ namespace System
         /// <remarks>
         /// See http://man7.org/linux/man-pages/man3/tzset.3.html for the format and semantics of this POSX string.
         /// </remarks>
-        private static AdjustmentRule TZif_CreateAdjustmentRuleForPosixFormat(string posixFormat, DateTime startTransitionDate, TimeSpan timeZoneBaseUtcOffset)
+        private static AdjustmentRule? TZif_CreateAdjustmentRuleForPosixFormat(string posixFormat, DateTime startTransitionDate, TimeSpan timeZoneBaseUtcOffset)
         {
             if (TZif_ParsePosixFormat(posixFormat,
                 out ReadOnlySpan<char> standardName,
@@ -1506,15 +1506,15 @@ namespace System
             DateTimeOffset.FromUnixTimeSeconds(unixTime).UtcDateTime;
 
         private static void TZif_ParseRaw(byte[] data, out TZifHead t, out DateTime[] dts, out byte[] typeOfLocalTime, out TZifType[] transitionType,
-                                          out string zoneAbbreviations, out bool[] StandardTime, out bool[] GmtTime, out string futureTransitionsPosixFormat)
+                                          out string zoneAbbreviations, out bool[] StandardTime, out bool[] GmtTime, out string? futureTransitionsPosixFormat)
         {
             // initialize the out parameters in case the TZifHead ctor throws
-            dts = null;
-            typeOfLocalTime = null;
-            transitionType = null;
+            dts = null!;
+            typeOfLocalTime = null!;
+            transitionType = null!;
             zoneAbbreviations = string.Empty;
-            StandardTime = null;
-            GmtTime = null;
+            StandardTime = null!;
+            GmtTime = null!;
             futureTransitionsPosixFormat = null;
 
             // read in the 44-byte TZ header containing the count/length fields

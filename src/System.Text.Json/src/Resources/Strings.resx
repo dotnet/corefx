@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -118,7 +117,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="ArrayDepthTooLarge" xml:space="preserve">
-    <value>CurrentDepth ({0}) is larger than the maximum configured depth of {1}. Cannot read next JSON array.</value>
+    <value>The maximum configured depth of {0} has been exceeded. Cannot read next JSON array.</value>
   </data>
   <data name="CallFlushToAvoidDataLoss" xml:space="preserve">
     <value>The JSON writer needs to be flushed before getting the current state. There are {0} bytes that have not been committed to the output.</value>
@@ -138,11 +137,17 @@
   <data name="CannotTranscodeInvalidUtf8" xml:space="preserve">
     <value>Cannot transcode invalid UTF-8 JSON text to UTF-16 string.</value>
   </data>
-  <data name="CannotWriteInvalidUTF16" xml:space="preserve">
-    <value>Cannot write invalid UTF-16 text as JSON. Invalid surrogate value: '{0}'.</value>
+  <data name="CannotDecodeInvalidBase64" xml:space="preserve">
+    <value>Cannot decode JSON text that is not encoded as valid Base64 to bytes.</value>
   </data>
-  <data name="CannotWriteInvalidUTF8" xml:space="preserve">
-    <value>Cannot write invalid UTF-8 text as JSON. Invalid input: '{0}'.</value>
+  <data name="CannotTranscodeInvalidUtf16" xml:space="preserve">
+    <value>Cannot transcode invalid UTF-16 string to UTF-8 JSON text.</value>
+  </data>
+  <data name="CannotEncodeInvalidUTF16" xml:space="preserve">
+    <value>Cannot encode invalid UTF-16 text as JSON. Invalid surrogate value: '{0}'.</value>
+  </data>
+  <data name="CannotEncodeInvalidUTF8" xml:space="preserve">
+    <value>Cannot encode invalid UTF-8 text as JSON. Invalid input: '{0}'.</value>
   </data>
   <data name="CannotWritePropertyWithinArray" xml:space="preserve">
     <value>Cannot write a JSON property within an array or as the first JSON token. Current token type is '{0}'.</value>
@@ -177,6 +182,9 @@
   <data name="ExpectedJsonTokens" xml:space="preserve">
     <value>The input does not contain any JSON tokens. Expected the input to start with a valid JSON token, when isFinalBlock is true.</value>
   </data>
+  <data name="ExpectedOneCompleteToken" xml:space="preserve">
+    <value>The input does not contain any complete JSON tokens. Expected the input to have at least one valid, complete, JSON token.</value>
+  </data>
   <data name="ExpectedNextDigitEValueNotFound" xml:space="preserve">
     <value>'{0}' is an invalid end of a number. Expected 'E' or 'e'.</value>
   </data>
@@ -203,9 +211,6 @@
   </data>
   <data name="FailedToGetLargerSpan" xml:space="preserve">
     <value>The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing.</value>
-  </data>
-  <data name="FailedToGetMinimumSizeSpan" xml:space="preserve">
-    <value>The 'IBufferWriter' could not provide an output buffer that is large enough to continue writing. Need at least {0} bytes.</value>
   </data>
   <data name="FoundInvalidCharacter" xml:space="preserve">
     <value>'{0}' is invalid after a value. Expected either ',', '}}', or ']'.</value>
@@ -238,10 +243,10 @@
     <value>'{0}' is invalid without a matching open.</value>
   </data>
   <data name="ObjectDepthTooLarge" xml:space="preserve">
-    <value>CurrentDepth ({0}) is larger than the maximum configured depth of {1}. Cannot read next JSON object.</value>
+    <value>The maximum configured depth of {0} has been exceeded. Cannot read next JSON object.</value>
   </data>
   <data name="PropertyNameTooLarge" xml:space="preserve">
-    <value>The JSON property name of length {0} is too large and not supported by the JSON writer.</value>
+    <value>The JSON property name of length {0} is too large and not supported.</value>
   </data>
   <data name="FormatDecimal" xml:space="preserve">
     <value>The JSON value is either too large or too small for a Decimal.</value>
@@ -277,9 +282,105 @@
     <value>.NET number values such as positive and negative infinity cannot be written as valid JSON.</value>
   </data>
   <data name="ValueTooLarge" xml:space="preserve">
-    <value>The JSON value of length {0} is too large and not supported by the JSON writer.</value>
+    <value>The JSON value of length {0} is too large and not supported.</value>
   </data>
   <data name="ZeroDepthAtEnd" xml:space="preserve">
-    <value>Expected CurrentDepth ({0}) to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed.</value>
+    <value>Expected depth to be zero at the end of the JSON payload. There is an open JSON object or array that should be closed.</value>
+  </data>
+  <data name="DeserializeCannotBeNull" xml:space="preserve">
+    <value>The JSON value cannot be null.</value>
+  </data>
+  <data name="DeserializeDataRemaining" xml:space="preserve">
+    <value>The provided data of length {0} has remaining bytes {1}.</value>
+  </data>
+  <data name="DeserializeUnableToConvertValue" xml:space="preserve">
+    <value>The JSON value could not be converted to {0}.</value>
+  </data>
+  <data name="DeserializeWrongType" xml:space="preserve">
+    <value>The specified type {0} must derive from the specific value's type {1}.</value>
+  </data>
+  <data name="SerializationInvalidBufferSize" xml:space="preserve">
+    <value>The value must be greater than zero.</value>
+  </data>
+  <data name="BufferWriterAdvancedTooFar" xml:space="preserve">
+    <value>Cannot advance past the end of the buffer, which has a size of {0}.</value>
+  </data>
+  <data name="InvalidComparison" xml:space="preserve">
+    <value>Cannot compare the value of a token type '{0}' to text.</value>
+  </data>
+  <data name="FormatDateTime" xml:space="preserve">
+    <value>The JSON value is not in a supported DateTime format.</value>
+  </data>
+  <data name="FormatDateTimeOffset" xml:space="preserve">
+    <value>The JSON value is not in a supported DateTimeOffset format.</value>
+  </data>
+  <data name="FormatGuid" xml:space="preserve">
+    <value>The JSON value is not in a supported Guid format.</value>
+  </data>
+  <data name="ExpectedStartOfPropertyOrValueAfterComment" xml:space="preserve">
+    <value>'{0}' is an invalid start of a property name or value, after a comment.</value>
+  </data>
+  <data name="TrailingCommaNotAllowedBeforeArrayEnd" xml:space="preserve">
+    <value>The JSON array contains a trailing comma at the end which is not supported in this mode. Change the reader options.</value>
+  </data>
+  <data name="TrailingCommaNotAllowedBeforeObjectEnd" xml:space="preserve">
+    <value>The JSON object contains a trailing comma at the end which is not supported in this mode. Change the reader options.</value>
+  </data>
+  <data name="SerializerOptionsImmutable" xml:space="preserve">
+    <value>Serializer options cannot be changed once serialization or deserialization has occurred.</value>
+  </data>
+  <data name="StreamNotWritable" xml:space="preserve">
+    <value>Stream is not writable.</value>
+  </data>
+  <data name="CannotWriteCommentWithEmbeddedDelimiter" xml:space="preserve">
+    <value>Cannot write a comment value which contains the end of comment delimiter.</value>
+  </data>
+  <data name="SerializerPropertyNameConflict" xml:space="preserve">
+    <value>The JSON property name for '{0}.{1}' collides with another property.</value>
+  </data>
+  <data name="SerializerPropertyNameNull" xml:space="preserve">
+    <value>The JSON property name for '{0}.{1}' cannot be null.</value>
+  </data>
+  <data name="DeserializeDuplicateKey" xml:space="preserve">
+    <value>An item with the same property name '{0}' has already been added.</value>
+  </data>
+  <data name="DeserializeTypeNotSupported" xml:space="preserve">
+    <value>Deserialization of type {0} is not supported.</value>
+  </data>
+  <data name="SerializationDataExtensionPropertyInvalid" xml:space="preserve">
+    <value>The data extension property '{0}.{1}' does not match the required signature of IDictionary&lt;string, JsonElement&gt; or IDictionary&lt;string, object&gt;.</value>
+  </data>
+  <data name="SerializationDuplicateAttribute" xml:space="preserve">
+    <value>A class cannot have more than one property that has the attribute '{0}'.</value>
+  </data>
+  <data name="SerializationNotSupportedCollectionType" xml:space="preserve">
+    <value>The collection type '{0}' is not supported.</value>
+  </data>
+  <data name="SerializationDataExtensionPropertyInvalidElement" xml:space="preserve">
+    <value>The data extension property '{0}.{1}' cannot contain dictionary values of type '{2}'. Dictionary values must be of type JsonElement.</value>
+  </data>
+  <data name="SerializationNotSupportedCollection" xml:space="preserve">
+    <value>The collection type '{0}' on '{1}' is not supported.</value>
+  </data>
+  <data name="InvalidCharacterAtStartOfComment" xml:space="preserve">
+    <value>'{0}' is invalid after '/' at the beginning of the comment. Expected either '/' or '*'.</value>
+  </data>
+  <data name="UnexpectedEndOfDataWhileReadingComment" xml:space="preserve">
+    <value>Unexpected end of data while reading a comment.</value>
+  </data>
+  <data name="CannotSkip" xml:space="preserve">
+    <value>Cannot skip tokens on partial JSON. Either get the whole payload and create a Utf8JsonReader instance where isFinalBlock is true or call TrySkip.</value>
+  </data>
+  <data name="NotEnoughData" xml:space="preserve">
+    <value>There is not enough data to read through the entire JSON array or object.</value>
+  </data>
+  <data name="JsonSerializerDoesNotSupportComments" xml:space="preserve">
+    <value>Comments cannot be stored when deserializing objects, only the Skip and Disallow comment handling modes are supported.</value>
+  </data>
+  <data name="DeserializeMissingParameterlessConstructor" xml:space="preserve">
+    <value>Deserialization of reference types without parameterless constructor is not supported. Type '{0}'</value>
+  </data>
+  <data name="DeserializePolymorphicInterface" xml:space="preserve">
+    <value>Deserialization of interface types is not supported. Type '{0}'</value>
   </data>
 </root>

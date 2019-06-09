@@ -255,7 +255,7 @@ namespace System.Globalization
 
         internal override DateTime MaxDate => s_maxDate;
 
-        internal override EraInfo[] CalEraInfo => null;
+        internal override EraInfo[]? CalEraInfo => null;
 
         internal override int GetYearInfo(int lunarYear, int index)
         {

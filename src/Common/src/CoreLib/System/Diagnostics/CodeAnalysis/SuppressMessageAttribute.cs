@@ -31,9 +31,9 @@ namespace System.Diagnostics.CodeAnalysis
 
         public string Category { get; }
         public string CheckId { get; }
-        public string Scope { get; set; }
-        public string Target { get; set; }
-        public string MessageId { get; set; }
-        public string Justification { get; set; }
+        public string? Scope { get; set; }
+        public string? Target { get; set; }
+        public string? MessageId { get; set; }
+        public string? Justification { get; set; }
     }
 }

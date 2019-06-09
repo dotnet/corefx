@@ -33,12 +33,46 @@ namespace System.ComponentModel.TypeConverterTests
             _imgConvFrmTD = (ImageConverter)TypeDescriptor.GetConverter(_image);
         }
 
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [InlineData("48x48_multiple_entries_4bit.ico")]
+        [InlineData("256x256_seven_entries_multiple_bits.ico")]
+        [InlineData("pngwithheight_icon.ico")]
+        public void ImageConverterFromIconTest(string name)
+        {
+            using (var icon = new Icon(Helpers.GetTestBitmapPath(name)))
+            {
+                Bitmap IconBitmap = (Bitmap)_imgConv.ConvertFrom(icon);
+                Assert.NotNull(IconBitmap);
+                Assert.Equal(32, IconBitmap.Width);
+                Assert.Equal(32, IconBitmap.Height);
+                Assert.Equal(new Size(32, 32), IconBitmap.Size);
+            }
+        }
+
+        [ConditionalFact(Helpers.IsDrawingSupported)]
+        public void ImageWithOleHeader()
+        {
+            string path = Path.Combine("bitmaps", "TestImageWithOleHeader.bmp");
+            using (FileStream fileStream = File.Open(path, FileMode.Open))
+            {              
+                using (var ms = new MemoryStream())
+                {
+                    fileStream.CopyTo(ms);
+                    var converter = new ImageConverter();
+                    object image = converter.ConvertFrom(ms.ToArray());
+                    Assert.NotNull(image);
+                }
+            }
+        }
+
         [ConditionalFact(Helpers.IsDrawingSupported)]
         public void TestCanConvertFrom()
         {
             Assert.True(_imgConv.CanConvertFrom(typeof(byte[])), "byte[] (no context)");
             Assert.True(_imgConv.CanConvertFrom(null, typeof(byte[])), "byte[]");
             Assert.True(_imgConv.CanConvertFrom(null, _imageBytes.GetType()), "_imageBytes.GetType()");
+            Assert.True(_imgConv.CanConvertFrom(typeof(Icon)), "Icon (no context)");
+            Assert.True(_imgConv.CanConvertFrom(null, typeof(Icon)), "Icon");
             Assert.False(_imgConv.CanConvertFrom(null, typeof(string)), "string");
             Assert.False(_imgConv.CanConvertFrom(null, typeof(Rectangle)), "Rectangle");
             Assert.False(_imgConv.CanConvertFrom(null, typeof(Point)), "Point");
@@ -149,6 +183,15 @@ namespace System.ComponentModel.TypeConverterTests
 
             newImageBytes = (byte[])_imgConvFrmTD.ConvertTo(_image, _imageBytes.GetType());
             Assert.Equal(_imageBytes, newImageBytes);
+        }
+
+        [ConditionalFact(Helpers.IsDrawingSupported)]
+        public void ConvertTo_FromBitmapToByteArray()
+        {
+            Bitmap value = new Bitmap(64, 64);
+            ImageConverter converter = new ImageConverter();
+            byte[] converted = (byte[])converter.ConvertTo(value, typeof(byte[]));
+            Assert.NotNull(converted);
         }
 
         [ConditionalFact(Helpers.IsDrawingSupported)]

@@ -142,7 +142,7 @@ namespace System.Threading.Tasks
         /// <exception cref="T:System.NotSupportedException">
         /// This scheduler is unable to generate a list of queued tasks at this time.
         /// </exception>
-        protected abstract IEnumerable<Task> GetScheduledTasks();
+        protected abstract IEnumerable<Task>? GetScheduledTasks();
 
         /// <summary>
         /// Indicates the maximum concurrency level this 
@@ -174,17 +174,16 @@ namespace System.Threading.Tasks
             // Do not inline unstarted tasks (i.e., task.ExecutingTaskScheduler == null).
             // Do not inline TaskCompletionSource-style (a.k.a. "promise") tasks.
             // No need to attempt inlining if the task body was already run (i.e. either TASK_STATE_DELEGATE_INVOKED or TASK_STATE_CANCELED bits set)
-            TaskScheduler ets = task.ExecutingTaskScheduler;
+            TaskScheduler? ets = task.ExecutingTaskScheduler;
 
             // Delegate cross-scheduler inlining requests to target scheduler
             if (ets != this && ets != null) return ets.TryRunInline(task, taskWasPreviouslyQueued);
 
-            StackGuard currentStackGuard;
             if ((ets == null) ||
                 (task.m_action == null) ||
                 task.IsDelegateInvoked ||
                 task.IsCanceled ||
-                (currentStackGuard = Task.CurrentStackGuard).TryBeginInliningScope() == false)
+                !RuntimeHelpers.TryEnsureSufficientExecutionStack())
             {
                 return false;
             }
@@ -192,27 +191,19 @@ namespace System.Threading.Tasks
             // Task class will still call into TaskScheduler.TryRunInline rather than TryExecuteTaskInline() so that 
             // 1) we can adjust the return code from TryExecuteTaskInline in case a buggy custom scheduler lies to us
             // 2) we maintain a mechanism for the TLS lookup optimization that we used to have for the ConcRT scheduler (will potentially introduce the same for TP)
-            bool bInlined = false;
-            try
-            {
-                if (TplEventSource.Log.IsEnabled())
-                    task.FireTaskScheduledIfNeeded(this);
+            if (TplEventSource.Log.IsEnabled())
+                task.FireTaskScheduledIfNeeded(this);
 
-                bInlined = TryExecuteTaskInline(task, taskWasPreviouslyQueued);
-            }
-            finally
-            {
-                currentStackGuard.EndInliningScope();
-            }
+            bool inlined = TryExecuteTaskInline(task, taskWasPreviouslyQueued);
 
             // If the custom scheduler returned true, we should either have the TASK_STATE_DELEGATE_INVOKED or TASK_STATE_CANCELED bit set
             // Otherwise the scheduler is buggy
-            if (bInlined && !(task.IsDelegateInvoked || task.IsCanceled))
+            if (inlined && !(task.IsDelegateInvoked || task.IsCanceled))
             {
                 throw new InvalidOperationException(SR.TaskScheduler_InconsistentStateAfterTryExecuteTaskInline);
             }
 
-            return bInlined;
+            return inlined;
         }
 
         /// <summary>
@@ -263,7 +254,7 @@ namespace System.Threading.Tasks
         //
 
         // The global container that keeps track of TaskScheduler instances for debugging purposes.
-        private static ConditionalWeakTable<TaskScheduler, object> s_activeTaskSchedulers;
+        private static ConditionalWeakTable<TaskScheduler, object?>? s_activeTaskSchedulers;
 
         // An AppDomain-wide default manager.
         private static readonly TaskScheduler s_defaultTaskScheduler = new ThreadPoolTaskScheduler();
@@ -301,13 +292,13 @@ namespace System.Threading.Tasks
         /// <summary>Adds this scheduler ot the active schedulers tracking collection for debugging purposes.</summary>
         private void AddToActiveTaskSchedulers()
         {
-            ConditionalWeakTable<TaskScheduler, object> activeTaskSchedulers = s_activeTaskSchedulers;
+            ConditionalWeakTable<TaskScheduler, object?>? activeTaskSchedulers = s_activeTaskSchedulers;
             if (activeTaskSchedulers == null)
             {
-                Interlocked.CompareExchange(ref s_activeTaskSchedulers, new ConditionalWeakTable<TaskScheduler, object>(), null);
+                Interlocked.CompareExchange(ref s_activeTaskSchedulers, new ConditionalWeakTable<TaskScheduler, object?>(), null);
                 activeTaskSchedulers = s_activeTaskSchedulers;
             }
-            activeTaskSchedulers.Add(this, null);
+            activeTaskSchedulers!.Add(this, null); // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
         }
 
         /// <summary>
@@ -332,8 +323,7 @@ namespace System.Threading.Tasks
         {
             get
             {
-                TaskScheduler current = InternalCurrent;
-                return current ?? TaskScheduler.Default;
+                return InternalCurrent ?? Default;
             }
         }
 
@@ -344,11 +334,11 @@ namespace System.Threading.Tasks
         /// <remarks>
         /// When not called from within a task, <see cref="InternalCurrent"/> will return null.
         /// </remarks>
-        internal static TaskScheduler InternalCurrent
+        internal static TaskScheduler? InternalCurrent
         {
             get
             {
-                Task currentTask = Task.InternalCurrent;
+                Task? currentTask = Task.InternalCurrent;
                 return ((currentTask != null)
                     && ((currentTask.CreationOptions & TaskCreationOptions.HideScheduler) == 0)
                     ) ? currentTask.ExecutingTaskScheduler : null;
@@ -481,11 +471,11 @@ namespace System.Threading.Tasks
         /// <exception cref="T:System.NotSupportedException">
         /// This scheduler is unable to generate a list of queued tasks at this time.
         /// </exception>
-        internal Task[] GetScheduledTasksForDebugger()
+        internal Task[]? GetScheduledTasksForDebugger()
         {
             // this can throw InvalidOperationException indicating that they are unable to provide the info
             // at the moment. We should let the debugger receive that exception so that it can indicate it in the UI
-            IEnumerable<Task> activeTasksSource = GetScheduledTasks();
+            IEnumerable<Task>? activeTasksSource = GetScheduledTasks();
 
             if (activeTasksSource == null)
                 return null;
@@ -562,7 +552,7 @@ namespace System.Threading.Tasks
             }
 
             // returns the scheduler's GetScheduledTasks
-            public IEnumerable<Task> ScheduledTasks
+            public IEnumerable<Task>? ScheduledTasks
             {
                 get { return m_taskScheduler.GetScheduledTasks(); }
             }
@@ -587,15 +577,9 @@ namespace System.Threading.Tasks
         /// <exception cref="T:System.InvalidOperationException">This constructor expects <see cref="T:System.Threading.SynchronizationContext.Current"/> to be set.</exception>
         internal SynchronizationContextTaskScheduler()
         {
-            SynchronizationContext synContext = SynchronizationContext.Current;
-
-            // make sure we have a synccontext to work with
-            if (synContext == null)
-            {
+            m_synchronizationContext = SynchronizationContext.Current ??
+                // make sure we have a synccontext to work with
                 throw new InvalidOperationException(SR.TaskScheduler_FromCurrentSynchronizationContext_NoCurrent);
-            }
-
-            m_synchronizationContext = synContext;
         }
 
         /// <summary>
@@ -624,11 +608,12 @@ namespace System.Threading.Tasks
                 return TryExecuteTask(task);
             }
             else
+            {
                 return false;
+            }
         }
 
-        // not implemented
-        protected override IEnumerable<Task> GetScheduledTasks()
+        protected override IEnumerable<Task>? GetScheduledTasks()
         {
             return null;
         }
@@ -649,7 +634,11 @@ namespace System.Threading.Tasks
         }
 
         // preallocated SendOrPostCallback delegate
-        private static readonly SendOrPostCallback s_postCallback = s => ((Task)s).ExecuteEntry(); // with double-execute check because SC could be buggy
+        private static readonly SendOrPostCallback s_postCallback = s =>
+        {
+            Debug.Assert(s is Task);
+            ((Task)s).ExecuteEntry(); // with double-execute check because SC could be buggy
+        };
     }
 
     /// <summary>
@@ -664,7 +653,7 @@ namespace System.Threading.Tasks
     /// </remarks>
     public class UnobservedTaskExceptionEventArgs : EventArgs
     {
-        private AggregateException m_exception;
+        private AggregateException? m_exception;
         internal bool m_observed = false;
 
         /// <summary>
@@ -672,7 +661,7 @@ namespace System.Threading.Tasks
         /// with the unobserved exception.
         /// </summary>
         /// <param name="exception">The Exception that has gone unobserved.</param>
-        public UnobservedTaskExceptionEventArgs(AggregateException exception) { m_exception = exception; }
+        public UnobservedTaskExceptionEventArgs(AggregateException? exception) { m_exception = exception; }
 
         /// <summary>
         /// Marks the <see cref="Exception"/> as "observed," thus preventing it
@@ -688,6 +677,6 @@ namespace System.Threading.Tasks
         /// <summary>
         /// The Exception that went unobserved.
         /// </summary>
-        public AggregateException Exception { get { return m_exception; } }
+        public AggregateException? Exception { get { return m_exception; } }
     }
 }

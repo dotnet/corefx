@@ -222,7 +222,7 @@ namespace System.Globalization
             Digit200_300 = 1,
             Digit100 = 2,
             Digit10 = 3,    // 10 ~ 90
-            Digit1 = 4,     // 1, 2, 3, 4, 5, 8, 
+            Digit1 = 4,     // 1, 2, 3, 4, 5, 8,
             Digit6_7 = 5,
             Digit7 = 6,
             Digit9 = 7,
@@ -262,7 +262,7 @@ namespace System.Globalization
             new HebrewValue(HebrewToken.Digit1, 8) , // '\x05d7
             new HebrewValue(HebrewToken.Digit9, 9) , // '\x05d8
             new HebrewValue(HebrewToken.Digit10, 10) , // '\x05d9;          // Hebrew Letter Yod
-            new HebrewValue(HebrewToken.Invalid, -1) , // '\x05da; 
+            new HebrewValue(HebrewToken.Invalid, -1) , // '\x05da;
             new HebrewValue(HebrewToken.Digit10, 20) , // '\x05db;          // Hebrew Letter Kaf
             new HebrewValue(HebrewToken.Digit10, 30) , // '\x05dc;          // Hebrew Letter Lamed
             new HebrewValue(HebrewToken.Invalid, -1) , // '\x05dd;
@@ -315,7 +315,7 @@ namespace System.Globalization
             END = 100,          // A terminial state is reached.
         }
 
-        // 
+        //
         // The state machine for Hebrew number pasing.
         //
         private static readonly HS[] s_numberPasingState =
@@ -361,7 +361,7 @@ namespace System.Globalization
         private const int HebrewTokenCount = 10;
 
         ////////////////////////////////////////////////////////////////////////
-        //  
+        //
         //  Actions:
         //      Parse the Hebrew number by passing one character at a time.
         //      The state between characters are maintained at HebrewNumberPasingContext.

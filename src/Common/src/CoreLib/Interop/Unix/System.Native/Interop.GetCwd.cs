@@ -14,12 +14,12 @@ internal static partial class Interop
         private static extern unsafe byte* GetCwd(byte* buffer, int bufferLength);
 
         internal static unsafe string GetCwd()
-        {      
+        {
             const int StackLimit = 256;
-       
+
             // First try to get the path into a buffer on the stack
             byte* stackBuf = stackalloc byte[StackLimit];
-            string result = GetCwdHelper(stackBuf, StackLimit);
+            string? result = GetCwdHelper(stackBuf, StackLimit);
             if (result != null)
             {
                 return result;
@@ -50,7 +50,7 @@ internal static partial class Interop
             while (true);
         }
 
-        private static unsafe string GetCwdHelper(byte* ptr, int bufferSize)
+        private static unsafe string? GetCwdHelper(byte* ptr, int bufferSize)
         {
             // Call the real getcwd
             byte* result = GetCwd(ptr, bufferSize);

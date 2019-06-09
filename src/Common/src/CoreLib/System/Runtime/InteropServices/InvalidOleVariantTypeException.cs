@@ -20,13 +20,13 @@ namespace System.Runtime.InteropServices
             HResult = HResults.COR_E_INVALIDOLEVARIANTTYPE;
         }
 
-        public InvalidOleVariantTypeException(string message)
+        public InvalidOleVariantTypeException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_INVALIDOLEVARIANTTYPE;
         }
 
-        public InvalidOleVariantTypeException(string message, Exception inner)
+        public InvalidOleVariantTypeException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_INVALIDOLEVARIANTTYPE;

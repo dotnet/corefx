@@ -16,14 +16,9 @@ namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClientHandler_Decompression_Test : HttpClientHandlerTestBase
     {
-        private readonly ITestOutputHelper _output;
-
         public static readonly object[][] CompressedServers = System.Net.Test.Common.Configuration.Http.CompressedServers;
 
-        public HttpClientHandler_Decompression_Test(ITestOutputHelper output)
-        {
-            _output = output;
-        }
+        public HttpClientHandler_Decompression_Test(ITestOutputHelper output) : base(output) { }
 
         public static IEnumerable<object[]> DecompressedResponse_MethodSpecified_DecompressedContentReturned_MemberData()
         {
@@ -67,7 +62,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.AutomaticDecompression = methods;
                     Assert.Equal<byte>(expectedContent, await client.GetByteArrayAsync(uri));
@@ -133,7 +128,7 @@ namespace System.Net.Http.Functional.Tests
             await LoopbackServer.CreateClientAndServerAsync(async uri =>
             {
                 using (HttpClientHandler handler = CreateHttpClientHandler())
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     handler.AutomaticDecompression = methods;
                     Assert.Equal<byte>(compressedContent, await client.GetByteArrayAsync(uri));
@@ -155,7 +150,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 using (HttpResponseMessage response = await client.GetAsync(server))
                 {
@@ -177,7 +172,7 @@ namespace System.Net.Http.Functional.Tests
         {
             HttpClientHandler handler = CreateHttpClientHandler();
             handler.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             using (HttpResponseMessage response = await client.GetAsync(server, HttpCompletionOption.ResponseHeadersRead))
             {
                 Assert.Equal(HttpStatusCode.OK, response.StatusCode);
@@ -227,7 +222,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.AutomaticDecompression = methods;
 
-                using (var client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     if (!string.IsNullOrEmpty(manualAcceptEncodingHeaderValues))
                     {

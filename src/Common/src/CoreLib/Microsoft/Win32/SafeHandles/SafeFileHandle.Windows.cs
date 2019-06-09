@@ -39,7 +39,7 @@ namespace Microsoft.Win32.SafeHandles
             }
         }
 
-        internal ThreadPoolBoundHandle ThreadPoolBinding { get; set; }
+        internal ThreadPoolBoundHandle? ThreadPoolBinding { get; set; }
 
         override protected bool ReleaseHandle()
         {

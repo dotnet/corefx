@@ -10,6 +10,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -44,6 +45,8 @@ namespace System.Net.Http.Functional.Tests
 
         private VerboseTestLogging _log = VerboseTestLogging.GetInstance();
 
+        public HttpClientEKUTest(ITestOutputHelper output) : base(output) { }
+
         [ConditionalFact(nameof(CanTestCertificates))]
         public async Task HttpClient_NoEKUServerAuth_Ok()
         {
@@ -52,7 +55,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 
@@ -74,7 +77,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 
@@ -97,7 +100,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 
@@ -121,7 +124,7 @@ namespace System.Net.Http.Functional.Tests
 
             using (var server = new HttpsTestServer(options))
             using (HttpClientHandler handler = CreateHttpClientHandler())
-            using (var client = new HttpClient(handler))
+            using (HttpClient client = CreateHttpClient(handler))
             {
                 server.Start();
 

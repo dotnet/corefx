@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using Microsoft.Win32.SafeHandles;
-using System.Security;
 
 namespace System.Threading
 {
@@ -29,14 +28,14 @@ namespace System.Threading
         /// </summary>
         /// <param name="waitHandle">The <see cref="System.Threading.WaitHandle"/> to operate on.</param>
         /// <param name="value">A <see cref="System.Runtime.InteropServices.SafeHandle"/> representing the native operating system handle.</param>
-        public static void SetSafeWaitHandle(this WaitHandle waitHandle, SafeWaitHandle value)
+        public static void SetSafeWaitHandle(this WaitHandle waitHandle, SafeWaitHandle? value)
         {
             if (waitHandle == null)
             {
                 throw new ArgumentNullException(nameof(waitHandle));
             }
 
-            waitHandle.SafeWaitHandle = value;
+            waitHandle.SafeWaitHandle = value!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
         }
     }
 }

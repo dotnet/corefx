@@ -50,7 +50,7 @@ namespace System.Collections
         // to GetValue with no intervening calls to GetNext will
         // return the same object.
         // 
-        object Value
+        object? Value
         {
             get;
         }

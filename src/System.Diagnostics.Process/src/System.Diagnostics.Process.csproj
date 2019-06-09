@@ -86,6 +86,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsWindows)' == 'true'">
+    <Compile Include="$(CommonPath)\Microsoft\Win32\SafeHandles\SafeTokenHandle.cs">
+      <Link>Microsoft\Win32\SafeHandles\SafeTokenHandle.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Interop.Libraries.cs">
       <Link>Common\Interop\Windows\Interop.Libraries.cs</Link>
     </Compile>
@@ -107,8 +110,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetThreadTimes.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.GetThreadTimes.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetStdHandle.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.GetStdHandle.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.GetStdHandle.cs">
+      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.GetStdHandle.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.CreateProcess.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.CreateProcess.cs</Link>
@@ -236,8 +239,8 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.ThreadOptions.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.ThreadOptions.cs</Link>
     </Compile>
-    <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.HandleTypes.cs">
-      <Link>Common\Interop\Windows\Kernel32\Interop.HandleTypes.cs</Link>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.HandleTypes.cs">
+      <Link>Common\CoreLib\Interop\Windows\Kernel32\Interop.HandleTypes.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Windows\Advapi32\Interop.ProcessOptions.cs">
       <Link>Common\Interop\Windows\Advapi32\Interop.ProcessOptions.cs</Link>
@@ -272,9 +275,11 @@
     <Compile Include="$(CommonPath)\Interop\Windows\Kernel32\Interop.GetCPInfoEx.cs">
       <Link>Common\Interop\Windows\Kernel32\Interop.GetCPInfoEx.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\CoreLib\Interop\Windows\Kernel32\Interop.MAX_PATH.cs">
+      <Link>Common\CoreLib\Interop\Windows\Interop.MAX_PATH.cs</Link>
+    </Compile>
     <Compile Include="Microsoft\Win32\SafeHandles\SafeProcessHandle.Windows.cs" />
     <Compile Include="Microsoft\Win32\SafeHandles\SafeThreadHandle.cs" />
-    <Compile Include="Microsoft\Win32\SafeHandles\SafeTokenHandle.cs" />
     <Compile Include="System\Diagnostics\PerformanceCounterLib.cs" />
     <Compile Include="System\Diagnostics\Process.Windows.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Windows.cs" />
@@ -311,8 +316,14 @@
     <Compile Include="$(CommonPath)\CoreLib\Interop\Unix\System.Native\Interop.SysConf.cs">
       <Link>Common\Interop\Unix\Interop.SysConf.cs</Link>
     </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ConfigureTerminalForChildProcess.cs">
+      <Link>Common\Interop\Unix\Interop.ConfigureTerminalForChildProcess.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.ForkAndExecProcess.cs">
       <Link>Common\Interop\Unix\Interop.ForkAndExecProcess.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetGroupList.cs">
+      <Link>Common\Interop\Unix\Interop.GetGroupList.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetLine.cs">
       <Link>Common\Interop\Unix\Interop.GetLine.cs</Link>
@@ -328,6 +339,12 @@
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetSid.cs">
       <Link>Common\Interop\Unix\Interop.GetSid.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.GetUid.cs">
+      <Link>Common\Interop\Unix\Interop.GetUid.cs</Link>
+    </Compile>
+    <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.InitializeTerminalAndSignalHandling.cs">
+      <Link>Common\Interop\Unix\Interop.InitializeTerminalAndSignalHandling.cs</Link>
     </Compile>
     <Compile Include="$(CommonPath)\Interop\Unix\System.Native\Interop.Kill.cs">
       <Link>Common\Interop\Unix\Interop.Kill.cs</Link>
@@ -361,6 +378,9 @@
     <Compile Include="System\Diagnostics\Process.Linux.cs" />
     <Compile Include="System\Diagnostics\ProcessManager.Linux.cs" />
     <Compile Include="System\Diagnostics\ProcessThread.Linux.cs" />
+    <Compile Include="$(CommonPath)\Interop\Linux\cgroups\Interop.cgroups.cs">
+      <Link>Common\Interop\Linux\Interop.cgroups.cs</Link>
+    </Compile>
     <Compile Include="$(CommonPath)\Interop\Linux\procfs\Interop.ProcFsStat.cs">
       <Link>Common\Interop\Linux\Interop.ProcFsStat.cs</Link>
     </Compile>

@@ -113,7 +113,7 @@ namespace System.Buffers.Text
         //
         // Assuming the text doesn't look like a normal floating point, we attempt to parse it as one the special floating point values.
         //
-        private static bool TryParseAsSpecialFloatingPoint<T>(ReadOnlySpan<byte> source, T positiveInfinity, T negativeInfinity, T nan, out T value, out int bytesConsumed)
+        private static bool TryParseAsSpecialFloatingPoint<T>(ReadOnlySpan<byte> source, T positiveInfinity, T negativeInfinity, T nan, out T value, out int bytesConsumed) where T : struct
         {            
             int srcIndex = 0;
             int remaining = source.Length;

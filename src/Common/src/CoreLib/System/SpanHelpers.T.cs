@@ -57,7 +57,7 @@ namespace System
 
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
 
-            if (default(T) != null || (object)value != null)
+            if (default(T)! != null || (object)value != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -127,7 +127,7 @@ namespace System
             Debug.Assert(length >= 0);
 
             IntPtr index = (IntPtr)0; // Use IntPtr for arithmetic to avoid unnecessary 64->32->64 truncations
-            if (default(T) != null || (object)value != null)
+            if (default(T)! != null || (object)value != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -216,7 +216,7 @@ namespace System
 
             T lookUp;
             int index = 0;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while ((length - index) >= 8)
                 {
@@ -280,9 +280,9 @@ namespace System
                 for (index = 0; index < length; index++)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, index);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null)
+                        if ((object?)value0 is null || (object?)value1 is null)
                         {
                             goto Found;
                         }
@@ -321,7 +321,7 @@ namespace System
 
             T lookUp;
             int index = 0;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null && (object)value2 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null && (object)value2 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while ((length - index) >= 8)
                 {
@@ -385,9 +385,9 @@ namespace System
                 for (index = 0; index < length; index++)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, index);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null || (object)value2 is null)
+                        if ((object?)value0 is null || (object?)value1 is null || (object?)value2 is null)
                         {
                             goto Found;
                         }
@@ -484,7 +484,7 @@ namespace System
         {
             Debug.Assert(length >= 0);
 
-            if (default(T) != null || (object)value != null)
+            if (default(T)! != null || (object)value != null) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -567,7 +567,7 @@ namespace System
             Debug.Assert(length >= 0);
 
             T lookUp;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -631,9 +631,9 @@ namespace System
                 for (length--; length >= 0; length--)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, length);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null)
+                        if ((object?)value0 is null || (object?)value1 is null)
                         {
                             goto Found;
                         }
@@ -671,7 +671,7 @@ namespace System
             Debug.Assert(length >= 0);
 
             T lookUp;
-            if (default(T) != null || ((object)value0 != null && (object)value1 != null))
+            if (default(T)! != null || ((object)value0 != null && (object)value1 != null)) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
             {
                 while (length >= 8)
                 {
@@ -735,9 +735,9 @@ namespace System
                 for (length--; length >= 0; length--)
                 {
                     lookUp = Unsafe.Add(ref searchSpace, length);
-                    if ((object)lookUp is null)
+                    if ((object?)lookUp is null)
                     {
-                        if ((object)value0 is null || (object)value1 is null || (object)value2 is null)
+                        if ((object?)value0 is null || (object?)value1 is null || (object?)value2 is null)
                         {
                             goto Found;
                         }
@@ -805,35 +805,35 @@ namespace System
 
                 lookUp0 = Unsafe.Add(ref first, index);
                 lookUp1 = Unsafe.Add(ref second, index);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 1);
                 lookUp1 = Unsafe.Add(ref second, index + 1);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 2);
                 lookUp1 = Unsafe.Add(ref second, index + 2);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 3);
                 lookUp1 = Unsafe.Add(ref second, index + 3);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 4);
                 lookUp1 = Unsafe.Add(ref second, index + 4);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 5);
                 lookUp1 = Unsafe.Add(ref second, index + 5);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 6);
                 lookUp1 = Unsafe.Add(ref second, index + 6);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 7);
                 lookUp1 = Unsafe.Add(ref second, index + 7);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
 
                 index += 8;
@@ -845,19 +845,19 @@ namespace System
 
                 lookUp0 = Unsafe.Add(ref first, index);
                 lookUp1 = Unsafe.Add(ref second, index);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 1);
                 lookUp1 = Unsafe.Add(ref second, index + 1);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 2);
                 lookUp1 = Unsafe.Add(ref second, index + 2);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 lookUp0 = Unsafe.Add(ref first, index + 3);
                 lookUp1 = Unsafe.Add(ref second, index + 3);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
 
                 index += 4;
@@ -867,7 +867,7 @@ namespace System
             {
                 lookUp0 = Unsafe.Add(ref first, index);
                 lookUp1 = Unsafe.Add(ref second, index);
-                if (!(lookUp0?.Equals(lookUp1) ?? (object)lookUp1 is null))
+                if (!(lookUp0?.Equals(lookUp1) ?? (object?)lookUp1 is null))
                     goto NotEqual;
                 index += 1;
                 length--;
@@ -892,7 +892,7 @@ namespace System
             for (int i = 0; i < minLength; i++)
             {
                 T lookUp = Unsafe.Add(ref second, i);
-                int result = (Unsafe.Add(ref first, i)?.CompareTo(lookUp) ?? (((object)lookUp is null) ? 0 : -1));
+                int result = (Unsafe.Add(ref first, i)?.CompareTo(lookUp) ?? (((object?)lookUp is null) ? 0 : -1));
                 if (result != 0)
                     return result;
             }

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{1032D5F6-5AE7-4002-A0E4-FEBEADFEA977}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Debug;netcoreapp-Release;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonPath)\CoreLib\System\Threading\Tasks\TaskToApm.cs">
@@ -13,6 +13,7 @@
     <Compile Include="System\IO\Pipelines\FlushResult.cs" />
     <Compile Include="System\IO\Pipelines\InlineScheduler.cs" />
     <Compile Include="System\IO\Pipelines\IDuplexPipe.cs" />
+    <Compile Include="System\IO\Pipelines\BufferSegmentStack.cs" />
     <Compile Include="System\IO\Pipelines\Pipe.DefaultPipeReader.cs" />
     <Compile Include="System\IO\Pipelines\Pipe.DefaultPipeWriter.cs" />
     <Compile Include="System\IO\Pipelines\Pipe.cs" />
@@ -30,6 +31,10 @@
     <Compile Include="System\IO\Pipelines\ReadResult.cs" />
     <Compile Include="System\IO\Pipelines\ResultFlags.cs" />
     <Compile Include="System\IO\Pipelines\StreamPipeExtensions.cs" />
+    <Compile Include="System\IO\Pipelines\StreamPipeReader.cs" />
+    <Compile Include="System\IO\Pipelines\StreamPipeReaderOptions.cs" />
+    <Compile Include="System\IO\Pipelines\StreamPipeWriter.cs" />
+    <Compile Include="System\IO\Pipelines\StreamPipeWriterOptions.cs" />
     <Compile Include="System\IO\Pipelines\ThrowHelper.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">

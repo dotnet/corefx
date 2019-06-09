@@ -23,39 +23,26 @@ namespace System.Net.NetworkInformation
 
         private PingReply SendPingCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            try
-            {
-                PingReply reply = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
+            PingReply reply = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
                     SendIcmpEchoRequestOverRawSocket(address, buffer, timeout, options) :
                     SendWithPingUtility(address, buffer, timeout, options);
-
-                return reply;
-            }
-            finally
-            {
-                Finish();
-            }
+            return reply;
         }
 
         private async Task<PingReply> SendPingAsyncCore(IPAddress address, byte[] buffer, int timeout, PingOptions options)
         {
-            try
-            {
-                Task<PingReply> t = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
+            Task<PingReply> t = RawSocketPermissions.CanUseRawSockets(address.AddressFamily) ?
                     SendIcmpEchoRequestOverRawSocketAsync(address, buffer, timeout, options) :
                     SendWithPingUtilityAsync(address, buffer, timeout, options);
 
-                PingReply reply = await t.ConfigureAwait(false);
-                if (_canceled)
-                {
-                    throw new OperationCanceledException();
-                }
-                return reply;
-            }
-            finally
+            PingReply reply = await t.ConfigureAwait(false);
+
+            if (_canceled)
             {
-                Finish();
+                throw new OperationCanceledException();
             }
+
+            return reply;
         }
 
         private SocketConfig GetSocketConfig(IPAddress address, byte[] buffer, int timeout, PingOptions options)
@@ -325,15 +312,9 @@ namespace System.Net.NetworkInformation
                 Task timeoutTask = Task.Delay(timeout, cts.Token);
                 Task finished = await Task.WhenAny(processCompletion.Task, timeoutTask).ConfigureAwait(false);
 
-                if (finished == timeoutTask && !p.HasExited)
+                if (finished == timeoutTask)
                 {
-                    // Try to kill the ping process if it didn't return. If it is already in the process of exiting, 
-                    // a Win32Exception will be thrown.
-                    try
-                    {
-                        p.Kill();
-                    }
-                    catch (Win32Exception) { }
+                    p.Kill();
                     return CreateTimedOutPingReply();
                 }
                 else

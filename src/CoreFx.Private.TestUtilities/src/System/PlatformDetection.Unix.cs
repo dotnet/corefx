@@ -23,6 +23,7 @@ namespace System
         public static bool IsWindows10Version1703OrGreater => false;
         public static bool IsWindows10Version1709OrGreater => false;
         public static bool IsWindows10Version1803OrGreater => false;
+        public static bool IsWindows10Version1903OrGreater => false;
         public static bool IsNotOneCoreUAP =>  true;
         public static bool IsInAppContainer => false;
         public static int WindowsVersion => -1;
@@ -60,32 +61,25 @@ namespace System
         public static bool IsNetfx471OrNewer => false;
         public static bool IsNetfx472OrNewer => false;
 
-        public static bool IsDrawingSupported { get; } = GetGdiplusIsAvailable();
-        public static bool IsSoundPlaySupported { get; } = false;
+        public static bool SupportsSsl3 => (PlatformDetection.IsOSX || (RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && PlatformDetection.OpenSslVersion < new Version(1, 0, 2) && !PlatformDetection.IsDebian));
+
+        public static bool IsDrawingSupported { get; } =
+            RuntimeInformation.IsOSPlatform(OSPlatform.OSX)
+#if netcoreapp20
+                ? dlopen("libgdiplus.dylib", RTLD_LAZY) != IntPtr.Zero
+                : dlopen("libgdiplus.so", RTLD_LAZY) != IntPtr.Zero || dlopen("libgdiplus.so.0", RTLD_LAZY) != IntPtr.Zero;
 
         [DllImport("libdl")]
         private static extern IntPtr dlopen(string libName, int flags);
-        public const int RTLD_NOW = 0x002;
+        private const int RTLD_LAZY = 0x001;
+#else // use managed NativeLibrary API from .NET Core 3 onwards
+                ? NativeLibrary.TryLoad("libgdiplus.dylib", out _)
+                : NativeLibrary.TryLoad("libgdiplus.so", out _) || NativeLibrary.TryLoad("libgdiplus.so.0", out _);
+#endif
 
-        private static bool GetGdiplusIsAvailable()
-        {
-            IntPtr nativeLib;
+        public static bool IsInContainer => RuntimeInformation.IsOSPlatform(OSPlatform.Linux) && File.Exists("/.dockerenv");
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-            {
-                nativeLib = dlopen("libgdiplus.dylib", RTLD_NOW);
-            }
-            else
-            {
-                nativeLib = dlopen("libgdiplus.so", RTLD_NOW);
-                if (nativeLib == IntPtr.Zero)
-                {
-                    nativeLib = dlopen("libgdiplus.so.0", RTLD_NOW);
-                }
-            }
-
-            return nativeLib != IntPtr.Zero;
-        }
+        public static bool IsSoundPlaySupported { get; } = false;
 
         public static Version OSXVersion { get; } = ToVersion(PlatformApis.GetOSVersion());
 
@@ -145,6 +139,9 @@ namespace System
 
         public static bool IsMacOsHighSierraOrHigher { get; } =
             IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 13));
+
+        public static bool IsMacOsMojaveOrHigher { get; } =
+            IsOSX && (s_osxProductVersion.Major > 10 || (s_osxProductVersion.Major == 10 && s_osxProductVersion.Minor >= 14));
 
         private static readonly Version s_icuVersion = GetICUVersion();
         public static Version ICUVersion => s_icuVersion;

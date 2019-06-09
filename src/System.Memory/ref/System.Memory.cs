@@ -10,31 +10,31 @@ namespace System
     public static partial class MemoryExtensions
     {
         public static System.ReadOnlyMemory<char> AsMemory(this string text) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this string text, System.Index startIndex) { throw null; }
         public static System.ReadOnlyMemory<char> AsMemory(this string text, int start) { throw null; }
         public static System.ReadOnlyMemory<char> AsMemory(this string text, int start, int length) { throw null; }
-        public static System.ReadOnlyMemory<char> AsMemory(this string text, Index startIndex) { throw null; }
-        public static System.ReadOnlyMemory<char> AsMemory(this string text, Range range) { throw null; }
+        public static System.ReadOnlyMemory<char> AsMemory(this string text, System.Range range) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Memory<T> AsMemory<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
         public static System.Memory<T> AsMemory<T>(this T[] array) { throw null; }
+        public static System.Memory<T> AsMemory<T>(this T[] array, System.Index startIndex) { throw null; }
         public static System.Memory<T> AsMemory<T>(this T[] array, int start) { throw null; }
         public static System.Memory<T> AsMemory<T>(this T[] array, int start, int length) { throw null; }
-        public static System.Memory<T> AsMemory<T>(this T[] array, Index startIndex) { throw null; }
-        public static System.Memory<T> AsMemory<T>(this T[] array, Range range) { throw null; }
+        public static System.Memory<T> AsMemory<T>(this T[] array, System.Range range) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start) { throw null; }
         public static System.ReadOnlySpan<char> AsSpan(this string text, int start, int length) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment) { throw null; }
+        public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, System.Index startIndex) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, int start, int length) { throw null; }
-        public static Span<T> AsSpan<T>(this System.ArraySegment<T> segment, Index startIndex) { throw null; }
-        public static Span<T> AsSpan<T>(this System.ArraySegment<T> segment, Range range)  { throw null; }
+        public static System.Span<T> AsSpan<T>(this System.ArraySegment<T> segment, System.Range range) { throw null; }
         public static System.Span<T> AsSpan<T>(this T[] array) { throw null; }
+        public static System.Span<T> AsSpan<T>(this T[] array, System.Index startIndex) { throw null; }
         public static System.Span<T> AsSpan<T>(this T[] array, int start) { throw null; }
         public static System.Span<T> AsSpan<T>(this T[] array, int start, int length) { throw null; }
-        public static Span<T> AsSpan<T>(this T[] array, Index startIndex) { throw null; }
-        public static Span<T> AsSpan<T>(this T[] array, Range range) { throw null; }
+        public static System.Span<T> AsSpan<T>(this T[] array, System.Range range) { throw null; }
         public static int BinarySearch<T>(this System.ReadOnlySpan<T> span, System.IComparable<T> comparable) { throw null; }
         public static int BinarySearch<T>(this System.Span<T> span, System.IComparable<T> comparable) { throw null; }
         public static int BinarySearch<T, TComparer>(this System.ReadOnlySpan<T> span, T value, TComparer comparer) where TComparer : System.Collections.Generic.IComparer<T> { throw null; }
@@ -50,8 +50,8 @@ namespace System
         public static bool EndsWith(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static bool EndsWith<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
         public static bool EndsWith<T>(this System.Span<T> span, System.ReadOnlySpan<T> value) where T : System.IEquatable<T> { throw null; }
-        public static System.Text.SpanRuneEnumerator EnumerateRunes(this ReadOnlySpan<char> span) { throw null; }
-        public static System.Text.SpanRuneEnumerator EnumerateRunes(this Span<char> span) { throw null; }
+        public static System.Text.SpanRuneEnumerator EnumerateRunes(this System.ReadOnlySpan<char> span) { throw null; }
+        public static System.Text.SpanRuneEnumerator EnumerateRunes(this System.Span<char> span) { throw null; }
         public static bool Equals(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> other, System.StringComparison comparisonType) { throw null; }
         public static int IndexOf(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> value, System.StringComparison comparisonType) { throw null; }
         public static int IndexOfAny<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> values) where T : System.IEquatable<T> { throw null; }
@@ -92,38 +92,85 @@ namespace System
         public static int ToLowerInvariant(this System.ReadOnlySpan<char> source, System.Span<char> destination) { throw null; }
         public static int ToUpper(this System.ReadOnlySpan<char> source, System.Span<char> destination, System.Globalization.CultureInfo culture) { throw null; }
         public static int ToUpperInvariant(this System.ReadOnlySpan<char> source, System.Span<char> destination) { throw null; }
+        public static System.Memory<char> Trim(this System.Memory<char> memory) { throw null; }
+        public static System.ReadOnlyMemory<char> Trim(this System.ReadOnlyMemory<char> memory) { throw null; }
         public static System.ReadOnlySpan<char> Trim(this System.ReadOnlySpan<char> span) { throw null; }
         public static System.ReadOnlySpan<char> Trim(this System.ReadOnlySpan<char> span, char trimChar) { throw null; }
         public static System.ReadOnlySpan<char> Trim(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> trimChars) { throw null; }
+        public static System.Span<char> Trim(this System.Span<char> span) { throw null; }
+        public static System.Memory<char> TrimEnd(this System.Memory<char> memory) { throw null; }
+        public static System.ReadOnlyMemory<char> TrimEnd(this System.ReadOnlyMemory<char> memory) { throw null; }
         public static System.ReadOnlySpan<char> TrimEnd(this System.ReadOnlySpan<char> span) { throw null; }
         public static System.ReadOnlySpan<char> TrimEnd(this System.ReadOnlySpan<char> span, char trimChar) { throw null; }
         public static System.ReadOnlySpan<char> TrimEnd(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> trimChars) { throw null; }
+        public static System.Span<char> TrimEnd(this System.Span<char> span) { throw null; }
+        public static System.Memory<T> TrimEnd<T>(this System.Memory<T> memory, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.Memory<T> TrimEnd<T>(this System.Memory<T> memory, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlyMemory<T> TrimEnd<T>(this System.ReadOnlyMemory<T> memory, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlyMemory<T> TrimEnd<T>(this System.ReadOnlyMemory<T> memory, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlySpan<T> TrimEnd<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlySpan<T> TrimEnd<T>(this System.ReadOnlySpan<T> span, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.Span<T> TrimEnd<T>(this System.Span<T> span, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.Span<T> TrimEnd<T>(this System.Span<T> span, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.Memory<char> TrimStart(this System.Memory<char> memory) { throw null; }
+        public static System.ReadOnlyMemory<char> TrimStart(this System.ReadOnlyMemory<char> memory) { throw null; }
         public static System.ReadOnlySpan<char> TrimStart(this System.ReadOnlySpan<char> span) { throw null; }
         public static System.ReadOnlySpan<char> TrimStart(this System.ReadOnlySpan<char> span, char trimChar) { throw null; }
         public static System.ReadOnlySpan<char> TrimStart(this System.ReadOnlySpan<char> span, System.ReadOnlySpan<char> trimChars) { throw null; }
+        public static System.Span<char> TrimStart(this System.Span<char> span) { throw null; }
+        public static System.Memory<T> TrimStart<T>(this System.Memory<T> memory, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.Memory<T> TrimStart<T>(this System.Memory<T> memory, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlyMemory<T> TrimStart<T>(this System.ReadOnlyMemory<T> memory, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlyMemory<T> TrimStart<T>(this System.ReadOnlyMemory<T> memory, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlySpan<T> TrimStart<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlySpan<T> TrimStart<T>(this System.ReadOnlySpan<T> span, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.Span<T> TrimStart<T>(this System.Span<T> span, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.Span<T> TrimStart<T>(this System.Span<T> span, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.Memory<T> Trim<T>(this System.Memory<T> memory, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.Memory<T> Trim<T>(this System.Memory<T> memory, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlyMemory<T> Trim<T>(this System.ReadOnlyMemory<T> memory, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlyMemory<T> Trim<T>(this System.ReadOnlyMemory<T> memory, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlySpan<T> Trim<T>(this System.ReadOnlySpan<T> span, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.ReadOnlySpan<T> Trim<T>(this System.ReadOnlySpan<T> span, T trimElement) where T : System.IEquatable<T> { throw null; }
+        public static System.Span<T> Trim<T>(this System.Span<T> span, System.ReadOnlySpan<T> trimElements) where T : System.IEquatable<T> { throw null; }
+        public static System.Span<T> Trim<T>(this System.Span<T> span, T trimElement) where T : System.IEquatable<T> { throw null; }
     }
     public readonly partial struct SequencePosition : System.IEquatable<System.SequencePosition>
     {
         private readonly object _dummy;
         private readonly int _dummyPrimitive;
         public SequencePosition(object @object, int integer) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.SequencePosition other) { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public override int GetHashCode() { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public int GetInteger() { throw null; }
-        [System.ComponentModel.EditorBrowsableAttribute((System.ComponentModel.EditorBrowsableState)(1))]
+        [System.ComponentModel.EditorBrowsableAttribute(System.ComponentModel.EditorBrowsableState.Never)]
         public object GetObject() { throw null; }
     }
 }
 namespace System.Buffers
 {
+    public sealed partial class ArrayBufferWriter<T> : System.Buffers.IBufferWriter<T>
+    {
+        public ArrayBufferWriter() { }
+        public ArrayBufferWriter(int initialCapacity) { }
+        public int Capacity { get { throw null; } }
+        public int FreeCapacity { get { throw null; } }
+        public int WrittenCount { get { throw null; } }
+        public System.ReadOnlyMemory<T> WrittenMemory { get { throw null; } }
+        public System.ReadOnlySpan<T> WrittenSpan { get { throw null; } }
+        public void Advance(int count) { }
+        public void Clear() { }
+        public System.Memory<T> GetMemory(int sizeHint = 0) { throw null; }
+        public System.Span<T> GetSpan(int sizeHint = 0) { throw null; }
+    }
     public static partial class BuffersExtensions
     {
         public static void CopyTo<T>(this in System.Buffers.ReadOnlySequence<T> source, System.Span<T> destination) { }
-        public static System.Nullable<System.SequencePosition> PositionOf<T>(this in System.Buffers.ReadOnlySequence<T> source, T value) where T : System.IEquatable<T> { throw null; }
+        public static System.SequencePosition? PositionOf<T>(this in System.Buffers.ReadOnlySequence<T> source, T value) where T : System.IEquatable<T> { throw null; }
         public static T[] ToArray<T>(this in System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
         public static void Write<T>(this System.Buffers.IBufferWriter<T> writer, System.ReadOnlySpan<T> value) { }
     }
@@ -141,13 +188,6 @@ namespace System.Buffers
         public void Dispose() { }
         protected abstract void Dispose(bool disposing);
         public abstract System.Buffers.IMemoryOwner<T> Rent(int minBufferSize = -1);
-    }
-    public enum OperationStatus
-    {
-        DestinationTooSmall = 1,
-        Done = 0,
-        InvalidData = 3,
-        NeedMoreData = 2,
     }
     public abstract partial class ReadOnlySequenceSegment<T>
     {
@@ -167,6 +207,7 @@ namespace System.Buffers
         public ReadOnlySequence(T[] array, int start, int length) { throw null; }
         public System.SequencePosition End { get { throw null; } }
         public System.ReadOnlyMemory<T> First { get { throw null; } }
+        public System.ReadOnlySpan<T> FirstSpan { get { throw null; } }
         public bool IsEmpty { get { throw null; } }
         public bool IsSingleSegment { get { throw null; } }
         public long Length { get { throw null; } }
@@ -205,16 +246,18 @@ namespace System.Buffers
     }
     public ref partial struct SequenceReader<T> where T : unmanaged, System.IEquatable<T>
     {
+        private object _dummy;
+        private int _dummyPrimitive;
         public SequenceReader(System.Buffers.ReadOnlySequence<T> sequence) { throw null; }
-        public long Consumed { get { throw null; } }
-        public System.ReadOnlySpan<T> CurrentSpan { get { throw null; } }
-        public int CurrentSpanIndex { get { throw null; } }
-        public bool End { get { throw null; } }
-        public long Length { get { throw null; } }
-        public System.SequencePosition Position { get { throw null; } }
-        public long Remaining { get { throw null; } }
-        public System.Buffers.ReadOnlySequence<T> Sequence { get { throw null; } }
-        public System.ReadOnlySpan<T> UnreadSpan { get { throw null; } }
+        public readonly long Consumed { get { throw null; } }
+        public readonly System.ReadOnlySpan<T> CurrentSpan { get { throw null; } }
+        public readonly int CurrentSpanIndex { get { throw null; } }
+        public readonly bool End { get { throw null; } }
+        public readonly long Length { get { throw null; } }
+        public readonly System.SequencePosition Position { get { throw null; } }
+        public readonly long Remaining { get { throw null; } }
+        public readonly System.Buffers.ReadOnlySequence<T> Sequence { get { throw null; } }
+        public readonly System.ReadOnlySpan<T> UnreadSpan { get { throw null; } }
         public void Advance(long count) { }
         public long AdvancePast(T value) { throw null; }
         public long AdvancePastAny(System.ReadOnlySpan<T> values) { throw null; }
@@ -226,8 +269,8 @@ namespace System.Buffers
         public void Rewind(long count) { }
         public bool TryAdvanceTo(T delimiter, bool advancePastDelimiter = true) { throw null; }
         public bool TryAdvanceToAny(System.ReadOnlySpan<T> delimiters, bool advancePastDelimiter = true) { throw null; }
-        public bool TryCopyTo(System.Span<T> destination) { throw null; }
-        public bool TryPeek(out T value) { throw null; }
+        public readonly bool TryCopyTo(System.Span<T> destination) { throw null; }
+        public readonly bool TryPeek(out T value) { throw null; }
         public bool TryRead(out T value) { throw null; }
         public bool TryReadTo(out System.Buffers.ReadOnlySequence<T> sequence, System.ReadOnlySpan<T> delimiter, bool advancePastDelimiter = true) { throw null; }
         public bool TryReadTo(out System.Buffers.ReadOnlySequence<T> sequence, T delimiter, bool advancePastDelimiter = true) { throw null; }
@@ -255,8 +298,8 @@ namespace System.Buffers
         public static bool operator !=(System.Buffers.StandardFormat left, System.Buffers.StandardFormat right) { throw null; }
         public static System.Buffers.StandardFormat Parse(System.ReadOnlySpan<char> format) { throw null; }
         public static System.Buffers.StandardFormat Parse(string format) { throw null; }
-        public static bool TryParse(System.ReadOnlySpan<char> format, out StandardFormat result) { throw null; }
         public override string ToString() { throw null; }
+        public static bool TryParse(System.ReadOnlySpan<char> format, out System.Buffers.StandardFormat result) { throw null; }
     }
 }
 namespace System.Buffers.Binary
@@ -436,19 +479,18 @@ namespace System.Runtime.InteropServices
     public static partial class SequenceMarshal
     {
         public static bool TryGetArray<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ArraySegment<T> segment) { throw null; }
-        public static bool TryRead<T>(ref System.Buffers.SequenceReader<byte> reader, out T value) where T : unmanaged { throw null; }
         public static bool TryGetReadOnlyMemory<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.ReadOnlyMemory<T> memory) { throw null; }
         public static bool TryGetReadOnlySequenceSegment<T>(System.Buffers.ReadOnlySequence<T> sequence, out System.Buffers.ReadOnlySequenceSegment<T> startSegment, out int startIndex, out System.Buffers.ReadOnlySequenceSegment<T> endSegment, out int endIndex) { throw null; }
+        public static bool TryRead<T>(ref System.Buffers.SequenceReader<byte> reader, out T value) where T : unmanaged { throw null; }
     }
 }
 namespace System.Text
 {
     public ref partial struct SpanRuneEnumerator
     {
-        private readonly object _dummyReference;
-        private readonly int _dummyPrimitive;
-        public Rune Current { get { throw null; } }
-        public SpanRuneEnumerator GetEnumerator() { throw null; }
+        private int _dummyPrimitive;
+        public System.Text.Rune Current { get { throw null; } }
+        public System.Text.SpanRuneEnumerator GetEnumerator() { throw null; }
         public bool MoveNext() { throw null; }
     }
 }

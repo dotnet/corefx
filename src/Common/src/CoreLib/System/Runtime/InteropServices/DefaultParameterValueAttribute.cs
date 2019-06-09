@@ -13,11 +13,11 @@ namespace System.Runtime.InteropServices
     [AttributeUsageAttribute(AttributeTargets.Parameter)]
     public sealed class DefaultParameterValueAttribute : Attribute
     {
-        public DefaultParameterValueAttribute(object value)
+        public DefaultParameterValueAttribute(object? value)
         {
             Value = value;
         }
 
-        public object Value { get; }
+        public object? Value { get; }
     }
 }

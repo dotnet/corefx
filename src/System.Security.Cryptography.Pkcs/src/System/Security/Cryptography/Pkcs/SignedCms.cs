@@ -238,12 +238,12 @@ namespace System.Security.Cryptography.Pkcs
             {
                 AsnReader reader = new AsnReader(wrappedContent, AsnEncodingRules.BER);
 
-                if (reader.TryGetPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> inner))
+                if (reader.TryReadPrimitiveOctetStringBytes(out ReadOnlyMemory<byte> inner))
                 {
                     return inner;
                 }
 
-                rented = ArrayPool<byte>.Shared.Rent(wrappedContent.Length);
+                rented = CryptoPool.Rent(wrappedContent.Length);
 
                 if (!reader.TryCopyOctetStringBytes(rented, out bytesWritten))
                 {
@@ -260,8 +260,7 @@ namespace System.Security.Cryptography.Pkcs
             {
                 if (rented != null)
                 {
-                    rented.AsSpan(0, bytesWritten).Clear();
-                    ArrayPool<byte>.Shared.Return(rented);
+                    CryptoPool.Return(rented, bytesWritten);
                 }
             }
 

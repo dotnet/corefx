@@ -22,8 +22,10 @@ namespace System
             if (byteLength == 0)
                 return;
 
-#if CORECLR && (AMD64 || ARM64)
-            if (byteLength > 4096)
+#if !PROJECTN && (AMD64 || ARM64)
+            // The exact matrix on when RhZeroMemory is faster than InitBlockUnaligned is very complex. The factors to consider include
+            // type of hardware and memory aligment. This threshold was chosen as a good balance accross different configurations.
+            if (byteLength > 768)
                 goto PInvoke;
             Unsafe.InitBlockUnaligned(ref b, 0, (uint)byteLength);
             return;

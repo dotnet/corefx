@@ -140,10 +140,8 @@ namespace System.Threading.Channels.Tests
             Assert.Equal(producedTotal, consumedTotal);
         }
 
-        [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public async Task ReadAllAsync_MultipleEnumerationsToEnd(bool sameEnumerable)
+        [Fact]
+        public async Task ReadAllAsync_MultipleEnumerationsToEnd()
         {
             Channel<int> c = CreateChannel();
             
@@ -152,7 +150,6 @@ namespace System.Threading.Channels.Tests
 
             IAsyncEnumerable<int> enumerable = c.Reader.ReadAllAsync();
             IAsyncEnumerator<int> e = enumerable.GetAsyncEnumerator();
-            Assert.Same(enumerable, e);
 
             Assert.True(await e.MoveNextAsync());
             Assert.Equal(42, e.Current);
@@ -163,7 +160,7 @@ namespace System.Threading.Channels.Tests
             await e.DisposeAsync();
 
             e = enumerable.GetAsyncEnumerator();
-            Assert.NotSame(enumerable, e);
+            Assert.Same(enumerable, e);
 
             Assert.False(await e.MoveNextAsync());
             Assert.False(await e.MoveNextAsync());
@@ -211,8 +208,6 @@ namespace System.Threading.Channels.Tests
             IAsyncEnumerable<int> enumerable = c.Reader.ReadAllAsync();
 
             IAsyncEnumerator<int> e1 = enumerable.GetAsyncEnumerator();
-            Assert.Same(enumerable, e1);
-
             IAsyncEnumerator<int> e2 = (sameEnumerable ? enumerable : c.Reader.ReadAllAsync()).GetAsyncEnumerator();
             Assert.NotSame(e1, e2);
 
@@ -257,7 +252,7 @@ namespace System.Threading.Channels.Tests
             var cts = new CancellationTokenSource();
             cts.Cancel();
 
-            IAsyncEnumerator<int> e = c.Reader.ReadAllAsync().GetAsyncEnumerator(cts.Token);
+            IAsyncEnumerator<int> e = c.Reader.ReadAllAsync(cts.Token).GetAsyncEnumerator();
             ValueTask<bool> vt = e.MoveNextAsync();
             Assert.True(vt.IsCompleted);
             Assert.False(vt.IsCompletedSuccessfully);
@@ -271,7 +266,7 @@ namespace System.Threading.Channels.Tests
             Channel<int> c = CreateChannel();
             var cts = new CancellationTokenSource();
 
-            IAsyncEnumerator<int> e = c.Reader.ReadAllAsync().GetAsyncEnumerator(cts.Token);
+            IAsyncEnumerator<int> e = c.Reader.ReadAllAsync(cts.Token).GetAsyncEnumerator();
             ValueTask<bool> vt = e.MoveNextAsync();
             Assert.False(vt.IsCompleted);
 

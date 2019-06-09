@@ -14,12 +14,12 @@ namespace System
         {
         }
 
-        public InvalidTimeZoneException(string message)
+        public InvalidTimeZoneException(string? message)
             : base(message)
         {
         }
 
-        public InvalidTimeZoneException(string message, Exception innerException)
+        public InvalidTimeZoneException(string? message, Exception? innerException)
             : base(message, innerException)
         {
         }

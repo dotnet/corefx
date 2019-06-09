@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project>
   <PropertyGroup>
     <IsReferenceAssembly Condition="'$(IsReferenceAssembly)'=='' AND ($(MSBuildProjectFullPath.Contains('\ref\')) OR $(MSBuildProjectFullPath.Contains('/ref/')))">true</IsReferenceAssembly>
 
@@ -12,7 +11,13 @@
     <IntermediateOutputPath>$(ArtifactsObjDir)ref/$(MSBuildProjectName)/$(Configuration)</IntermediateOutputPath>
 
     <!-- disable warnings about unused fields -->
-    <NoWarn>$(NoWarn);0169;0649</NoWarn>
+    <NoWarn>$(NoWarn);CS0169;CS0649;CS8618</NoWarn>
+
+    <!-- disable CS8597 because we throw null on reference assemblies. -->
+    <NoWarn>$(NoWarn);CS8597</NoWarn>
+
+    <!-- We base calls from constructors with null literals. -->
+    <NoWarn>$(NoWarn);CS8625</NoWarn>
   </PropertyGroup>
 
   <ItemGroup Condition="'$(IsReferenceAssembly)'=='true'">

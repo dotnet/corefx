@@ -5,12 +5,12 @@
 using System.Configuration;
 using System.Diagnostics;
 using System.Globalization;
-
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.ConfigurationTests
 {
-    public class TimeSpanValidatorAttributeTests : RemoteExecutorTestBase
+    public class TimeSpanValidatorAttributeTests
     {
         [Fact]
         public void MinValueString_GetString()
@@ -114,10 +114,9 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MinValueString_TooSmall()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 
@@ -133,10 +132,9 @@ namespace System.ConfigurationTests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception messages are different")]
         public void MaxValueString_TooBig()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 CultureInfo.CurrentUICulture = CultureInfo.InvariantCulture;
 

@@ -18,7 +18,7 @@ namespace System.Threading
             SafeWaitHandle = handle;
         }
 
-        private void CreateSemaphoreCore(int initialCount, int maximumCount, string name, out bool createdNew)
+        private void CreateSemaphoreCore(int initialCount, int maximumCount, string? name, out bool createdNew)
         {
             Debug.Assert(initialCount >= 0);
             Debug.Assert(maximumCount >= 1);
@@ -43,7 +43,7 @@ namespace System.Threading
             this.SafeWaitHandle = myHandle;
         }
 
-        private static OpenExistingResult OpenExistingWorker(string name, out Semaphore result)
+        private static OpenExistingResult OpenExistingWorker(string name, out Semaphore? result)
         {
 #if PLATFORM_WINDOWS
             if (name == null)
@@ -79,7 +79,7 @@ namespace System.Threading
         private int ReleaseCore(int releaseCount)
         {
             int previousCount;
-            if (!Interop.Kernel32.ReleaseSemaphore(SafeWaitHandle, releaseCount, out previousCount))
+            if (!Interop.Kernel32.ReleaseSemaphore(SafeWaitHandle!, releaseCount, out previousCount))
                 throw new SemaphoreFullException();
 
             return previousCount;

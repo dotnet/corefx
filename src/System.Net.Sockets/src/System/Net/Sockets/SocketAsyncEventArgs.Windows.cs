@@ -43,6 +43,10 @@ namespace System.Net.Sockets
         private PreAllocatedOverlapped _preAllocatedOverlapped;
         private readonly StrongBox<SocketAsyncEventArgs> _strongThisRef = new StrongBox<SocketAsyncEventArgs>(); // state for _preAllocatedOverlapped; .Value set to this while operations in flight
 
+        // Cancellation support
+        private CancellationTokenRegistration _registrationToCancelPendingIO;
+        private unsafe NativeOverlapped* _pendingOverlappedForCancellation;
+
         private PinState _pinState;
         private enum PinState : byte { None = 0, MultipleBuffer, SendPackets }
 
@@ -92,6 +96,37 @@ namespace System.Net.Sockets
             Debug.Assert(_preAllocatedOverlapped != null, "_preAllocatedOverlapped is null");
 
             _currentSocket.SafeHandle.IOCPBoundHandle.FreeNativeOverlapped(overlapped);
+        }
+
+        private unsafe void RegisterToCancelPendingIO(NativeOverlapped* overlapped, CancellationToken cancellationToken)
+        {
+            Debug.Assert(_singleBufferHandleState == SingleBufferHandleState.InProcess);
+            Debug.Assert(_pendingOverlappedForCancellation == null);
+            _pendingOverlappedForCancellation = overlapped;
+            _registrationToCancelPendingIO = cancellationToken.UnsafeRegister(s =>
+            {
+                // Try to cancel the I/O.  We ignore the return value (other than for logging), as cancellation
+                // is opportunistic and we don't want to fail the operation because we couldn't cancel it.
+                var thisRef = (SocketAsyncEventArgs)s;
+                SafeSocketHandle handle = thisRef._currentSocket.SafeHandle;
+                if (!handle.IsClosed)
+                {
+                    try
+                    {
+                        bool canceled = Interop.Kernel32.CancelIoEx(handle, thisRef._pendingOverlappedForCancellation);
+                        if (NetEventSource.IsEnabled)
+                        {
+                            NetEventSource.Info(thisRef, canceled ?
+                                "Socket operation canceled." :
+                                $"CancelIoEx failed with error '{Marshal.GetLastWin32Error()}'.");
+                        }
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        // Ignore errors resulting from the SafeHandle being closed concurrently.
+                    }
+                }
+            }, this);
         }
 
         partial void StartOperationCommonCore()
@@ -152,8 +187,9 @@ namespace System.Net.Sockets
         /// <param name="socketError">The result status of the operation, as returned from the API call.</param>
         /// <param name="bytesTransferred">The number of bytes transferred, if the operation completed synchronously and successfully.</param>
         /// <param name="overlapped">The overlapped to be freed if the operation completed synchronously.</param>
+        /// <param name="cancellationToken">The cancellation token to use to cancel the operation.</param>
         /// <returns>The result status of the operation.</returns>
-        private unsafe SocketError ProcessIOCPResultWithSingleBufferHandle(SocketError socketError, int bytesTransferred, NativeOverlapped* overlapped)
+        private unsafe SocketError ProcessIOCPResultWithSingleBufferHandle(SocketError socketError, int bytesTransferred, NativeOverlapped* overlapped, CancellationToken cancellationToken = default)
         {
             // Note: We need to dispose of the overlapped iff the operation completed synchronously,
             // and if we do, we must do so before we mark the operation as completed.
@@ -194,6 +230,7 @@ namespace System.Net.Sockets
             // Return pending and we will continue in the completion port callback.
             if (_singleBufferHandleState == SingleBufferHandleState.InProcess)
             {
+                RegisterToCancelPendingIO(overlapped, cancellationToken);// must happen before we change state to Set to avoid race conditions
                 _singleBufferHandle = _buffer.Pin();
                 _singleBufferHandleState = SingleBufferHandleState.Set;
             }
@@ -288,11 +325,11 @@ namespace System.Net.Sockets
             }
         }
 
-        internal SocketError DoOperationReceive(SafeSocketHandle handle) => _bufferList == null ? 
-            DoOperationReceiveSingleBuffer(handle) :
+        internal SocketError DoOperationReceive(SafeSocketHandle handle, CancellationToken cancellationToken) => _bufferList == null ? 
+            DoOperationReceiveSingleBuffer(handle, cancellationToken) :
             DoOperationReceiveMultiBuffer(handle);
 
-        internal unsafe SocketError DoOperationReceiveSingleBuffer(SafeSocketHandle handle)
+        internal unsafe SocketError DoOperationReceiveSingleBuffer(SafeSocketHandle handle, CancellationToken cancellationToken)
         {
             fixed (byte* bufferPtr = &MemoryMarshal.GetReference(_buffer.Span))
             {
@@ -305,16 +342,15 @@ namespace System.Net.Sockets
 
                     SocketFlags flags = _socketFlags;
                     SocketError socketError = Interop.Winsock.WSARecv(
-                        handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                        handle,
                         ref wsaBuffer,
                         1,
                         out int bytesTransferred,
                         ref flags,
                         overlapped,
                         IntPtr.Zero);
-                    GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
-                    return ProcessIOCPResultWithSingleBufferHandle(socketError, bytesTransferred, overlapped);
+                    return ProcessIOCPResultWithSingleBufferHandle(socketError, bytesTransferred, overlapped, cancellationToken);
                 }
                 catch
                 {
@@ -332,14 +368,13 @@ namespace System.Net.Sockets
             {
                 SocketFlags flags = _socketFlags;
                 SocketError socketError = Interop.Winsock.WSARecv(
-                    handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                    handle,
                     _wsaBufferArray,
                     _bufferListInternal.Count,
                     out int bytesTransferred,
                     ref flags,
                     overlapped,
                     IntPtr.Zero);
-                GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                 return ProcessIOCPResult(socketError == SocketError.Success, bytesTransferred, overlapped);
             }
@@ -377,7 +412,7 @@ namespace System.Net.Sockets
 
                     SocketFlags flags = _socketFlags;
                     SocketError socketError = Interop.Winsock.WSARecvFrom(
-                        handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                        handle,
                         ref wsaBuffer,
                         1,
                         out int bytesTransferred,
@@ -386,7 +421,6 @@ namespace System.Net.Sockets
                         PtrSocketAddressBufferSize,
                         overlapped,
                         IntPtr.Zero);
-                    GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                     return ProcessIOCPResultWithSingleBufferHandle(socketError, bytesTransferred, overlapped);
                 }
@@ -406,7 +440,7 @@ namespace System.Net.Sockets
             {
                 SocketFlags flags = _socketFlags;
                 SocketError socketError = Interop.Winsock.WSARecvFrom(
-                    handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                    handle,
                     _wsaBufferArray,
                     _bufferListInternal.Count,
                     out int bytesTransferred,
@@ -415,7 +449,6 @@ namespace System.Net.Sockets
                     PtrSocketAddressBufferSize,
                     overlapped,
                     IntPtr.Zero);
-                GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                 return ProcessIOCPResult(socketError == SocketError.Success, bytesTransferred, overlapped);
             }
@@ -556,11 +589,11 @@ namespace System.Net.Sockets
             }
         }
 
-        internal unsafe SocketError DoOperationSend(SafeSocketHandle handle) => _bufferList == null ?
-            DoOperationSendSingleBuffer(handle) :
+        internal unsafe SocketError DoOperationSend(SafeSocketHandle handle, CancellationToken cancellationToken) => _bufferList == null ?
+            DoOperationSendSingleBuffer(handle, cancellationToken) :
             DoOperationSendMultiBuffer(handle);
 
-        internal unsafe SocketError DoOperationSendSingleBuffer(SafeSocketHandle handle)
+        internal unsafe SocketError DoOperationSendSingleBuffer(SafeSocketHandle handle, CancellationToken cancellationToken)
         {
             fixed (byte* bufferPtr = &MemoryMarshal.GetReference(_buffer.Span))
             {
@@ -572,16 +605,15 @@ namespace System.Net.Sockets
                     var wsaBuffer = new WSABuffer { Length = _count, Pointer = (IntPtr)(bufferPtr + _offset) };
 
                     SocketError socketError = Interop.Winsock.WSASend(
-                        handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                        handle,
                         ref wsaBuffer,
                         1,
                         out int bytesTransferred,
                         _socketFlags,
                         overlapped,
                         IntPtr.Zero);
-                    GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
-                    return ProcessIOCPResultWithSingleBufferHandle(socketError, bytesTransferred, overlapped);
+                    return ProcessIOCPResultWithSingleBufferHandle(socketError, bytesTransferred, overlapped, cancellationToken);
                 }
                 catch
                 {
@@ -598,14 +630,13 @@ namespace System.Net.Sockets
             try
             {
                 SocketError socketError = Interop.Winsock.WSASend(
-                    handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                    handle,
                     _wsaBufferArray,
                     _bufferListInternal.Count,
                     out int bytesTransferred,
                     _socketFlags,
                     overlapped,
                     IntPtr.Zero);
-                GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                 return ProcessIOCPResult(socketError == SocketError.Success, bytesTransferred, overlapped);
             }
@@ -742,7 +773,7 @@ namespace System.Net.Sockets
                     var wsaBuffer = new WSABuffer { Length = _count, Pointer = (IntPtr)(bufferPtr + _offset) };
 
                     SocketError socketError = Interop.Winsock.WSASendTo(
-                        handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                        handle,
                         ref wsaBuffer,
                         1,
                         out int bytesTransferred,
@@ -751,7 +782,6 @@ namespace System.Net.Sockets
                         _socketAddress.Size,
                         overlapped,
                         IntPtr.Zero);
-                    GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                     return ProcessIOCPResultWithSingleBufferHandle(socketError, bytesTransferred, overlapped);
                 }
@@ -770,7 +800,7 @@ namespace System.Net.Sockets
             try
             {
                 SocketError socketError = Interop.Winsock.WSASendTo(
-                    handle.DangerousGetHandle(), // to minimize chances of handle recycling from misuse, this should use DangerousAddRef/Release, but it adds too much overhead
+                    handle,
                     _wsaBufferArray,
                     _bufferListInternal.Count,
                     out int bytesTransferred,
@@ -779,7 +809,6 @@ namespace System.Net.Sockets
                     _socketAddress.Size,
                     overlapped,
                     IntPtr.Zero);
-                GC.KeepAlive(handle); // small extra safe guard against handle getting collected/finalized while P/Invoke in progress
 
                 return ProcessIOCPResult(socketError == SocketError.Success, bytesTransferred, overlapped);
             }
@@ -1151,12 +1180,25 @@ namespace System.Net.Sockets
 
             void CompleteCoreSpin() // separate out to help inline the fast path
             {
+                // The operation could complete so quickly that it races with the code
+                // initiating it.  Wait until that initiation code has completed before
+                // we try to undo the state it configures.
                 var sw = new SpinWait();
                 while (_singleBufferHandleState == SingleBufferHandleState.InProcess)
                 {
                     sw.SpinOnce();
                 }
 
+                // Remove any cancellation registration.  First dispose the registration
+                // to ensure that cancellation will either never fine or will have completed
+                // firing before we continue.  Only then can we safely null out the overlapped.
+                _registrationToCancelPendingIO.Dispose();
+                unsafe
+                {
+                    _pendingOverlappedForCancellation = null;
+                }
+
+                // Release any GC handles.
                 if (_singleBufferHandleState == SingleBufferHandleState.Set)
                 {
                     _singleBufferHandleState = SingleBufferHandleState.None;

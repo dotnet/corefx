@@ -44,7 +44,9 @@ namespace System
                 (DaylightTransitionStart != default && DaylightTransitionStart.TimeOfDay != DateTime.MinValue) ||
                 (DaylightTransitionEnd != default && DaylightTransitionEnd.TimeOfDay != DateTime.MinValue.AddMilliseconds(1));
 
-            public bool Equals(AdjustmentRule other) =>
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
+            public bool Equals(AdjustmentRule? other) =>
+#pragma warning restore CS8614
                 other != null &&
                 _dateStart == other._dateStart &&
                 _dateEnd == other._dateEnd &&
@@ -248,13 +250,13 @@ namespace System
                     throw new ArgumentNullException(nameof(info));
                 }
 
-                _dateStart = (DateTime)info.GetValue("DateStart", typeof(DateTime)); // Do not rename (binary serialization)
-                _dateEnd = (DateTime)info.GetValue("DateEnd", typeof(DateTime)); // Do not rename (binary serialization)
-                _daylightDelta = (TimeSpan)info.GetValue("DaylightDelta", typeof(TimeSpan)); // Do not rename (binary serialization)
-                _daylightTransitionStart = (TransitionTime)info.GetValue("DaylightTransitionStart", typeof(TransitionTime)); // Do not rename (binary serialization)
-                _daylightTransitionEnd = (TransitionTime)info.GetValue("DaylightTransitionEnd", typeof(TransitionTime)); // Do not rename (binary serialization)
+                _dateStart = (DateTime)info.GetValue("DateStart", typeof(DateTime))!; // Do not rename (binary serialization)
+                _dateEnd = (DateTime)info.GetValue("DateEnd", typeof(DateTime))!; // Do not rename (binary serialization)
+                _daylightDelta = (TimeSpan)info.GetValue("DaylightDelta", typeof(TimeSpan))!; // Do not rename (binary serialization)
+                _daylightTransitionStart = (TransitionTime)info.GetValue("DaylightTransitionStart", typeof(TransitionTime))!; // Do not rename (binary serialization)
+                _daylightTransitionEnd = (TransitionTime)info.GetValue("DaylightTransitionEnd", typeof(TransitionTime))!; // Do not rename (binary serialization)
 
-                object o = info.GetValueNoThrow("BaseUtcOffsetDelta", typeof(TimeSpan)); // Do not rename (binary serialization)
+                object? o = info.GetValueNoThrow("BaseUtcOffsetDelta", typeof(TimeSpan)); // Do not rename (binary serialization)
                 if (o != null)
                 {
                     _baseUtcOffsetDelta = (TimeSpan)o;

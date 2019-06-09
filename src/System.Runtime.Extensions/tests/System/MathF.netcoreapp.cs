@@ -4,6 +4,7 @@
 
 using Xunit;
 using Xunit.Sdk;
+using System.Collections.Generic;
 
 namespace System.Tests
 {
@@ -497,19 +498,7 @@ namespace System.Tests
         [InlineData( float.NegativeInfinity, float.PositiveInfinity, -0.785398163f, CrossPlatformMachineEpsilon)]          // expected: -(pi / 4)
         [InlineData( float.PositiveInfinity, float.NegativeInfinity,  2.35619449f,  CrossPlatformMachineEpsilon * 10)]     // expected:  (3 * pi / 4
         [InlineData( float.PositiveInfinity, float.PositiveInfinity,  0.785398163f, CrossPlatformMachineEpsilon)]          // expected:  (pi / 4)
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Atan2_IEEE(float y, float x, float expectedResult, float allowedVariance)
-        {
-            AssertEqual(expectedResult, MathF.Atan2(y, x), allowedVariance);
-        }
-
-        [Theory]
-        [InlineData( float.NegativeInfinity, float.NegativeInfinity,  float.NaN, 0.0f)]
-        [InlineData( float.NegativeInfinity, float.PositiveInfinity,  float.NaN, 0.0f)]
-        [InlineData( float.PositiveInfinity, float.NegativeInfinity,  float.NaN, 0.0f)]
-        [InlineData( float.PositiveInfinity, float.PositiveInfinity,  float.NaN, 0.0f)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Atan2_IEEE_Legacy(float y, float x, float expectedResult, float allowedVariance)
         {
             AssertEqual(expectedResult, MathF.Atan2(y, x), allowedVariance);
         }
@@ -1207,7 +1196,7 @@ namespace System.Tests
         [InlineData(-0.0f, 0.0f, 0.0f)]
         [InlineData(2.0f, -3.0f, 2.0f)]
         [InlineData(3.0f, -2.0f, 3.0f)]
-        [InlineData(float.PositiveInfinity, float.NaN, float.PositiveInfinity)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.NaN)]
         public static void Max(float x, float y, float expectedResult)
         {
             AssertEqual(expectedResult, MathF.Max(x, y), 0.0f);
@@ -1220,7 +1209,7 @@ namespace System.Tests
         [InlineData(-0.0f, 0.0f, 0.0f)]
         [InlineData(2.0f, -3.0f, -3.0f)]
         [InlineData(3.0f, -2.0f, 3.0f)]
-        [InlineData(float.PositiveInfinity, float.NaN, float.PositiveInfinity)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.NaN)]
         public static void MaxMagnitude(float x, float y, float expectedResult)
         {
             AssertEqual(expectedResult, MathF.MaxMagnitude(x, y), 0.0f);
@@ -1233,7 +1222,7 @@ namespace System.Tests
         [InlineData(-0.0f, 0.0f, -0.0f)]
         [InlineData(2.0f, -3.0f, -3.0f)]
         [InlineData(3.0f, -2.0f, -2.0f)]
-        [InlineData(float.PositiveInfinity, float.NaN, float.PositiveInfinity)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.NaN)]
         public static void Min(float x, float y, float expectedResult)
         {
             AssertEqual(expectedResult, MathF.Min(x, y), 0.0f);
@@ -1246,7 +1235,7 @@ namespace System.Tests
         [InlineData(-0.0f, 0.0f, -0.0f)]
         [InlineData(2.0f, -3.0f, 2.0f)]
         [InlineData(3.0f, -2.0f, -2.0f)]
-        [InlineData(float.PositiveInfinity, float.NaN, float.PositiveInfinity)]
+        [InlineData(float.PositiveInfinity, float.NaN, float.NaN)]
         public static void MinMagnitude(float x, float y, float expectedResult)
         {
             AssertEqual(expectedResult, MathF.MinMagnitude(x, y), 0.0f);
@@ -1408,22 +1397,50 @@ namespace System.Tests
         [InlineData( float.NaN, -0.0f,                   1.0f, CrossPlatformMachineEpsilon * 10)]
         [InlineData( float.NaN,  0.0f,                   1.0f, CrossPlatformMachineEpsilon * 10)]
         [InlineData( 1.0f,       float.NaN,              1.0f, CrossPlatformMachineEpsilon * 10)]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Pow_IEEE(float x, float y, float expectedResult, float allowedVariance)
         {
             AssertEqual(expectedResult, MathF.Pow(x, y), allowedVariance);
         }
 
-        [Theory]
-        [InlineData(-1.0f,      float.NegativeInfinity, float.NaN, 0.0f)]
-        [InlineData(-1.0f,      float.PositiveInfinity, float.NaN, 0.0f)]
-        [InlineData( float.NaN,-0.0f,                   float.NaN, 0.0f)]
-        [InlineData( float.NaN, 0.0f,                   float.NaN, 0.0f)]
-        [InlineData( 1.0f,      float.NaN,              float.NaN, 0.0f)]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        public static void Pow_IEEE_Legacy(float x, float y, float expectedResult, float allowedVariance)
+        public static IEnumerable<object[]> Round_Digits_TestData
         {
-            AssertEqual(expectedResult, MathF.Pow(x, y), allowedVariance);
+            get 
+            {
+                yield return new object[] {float.NaN, float.NaN, 3, MidpointRounding.ToEven};
+                yield return new object[] {float.PositiveInfinity, float.PositiveInfinity, 3, MidpointRounding.ToEven};
+                yield return new object[] {float.NegativeInfinity, float.NegativeInfinity, 3, MidpointRounding.ToEven};
+                yield return new object[] {0, 0, 3, MidpointRounding.ToEven};
+                yield return new object[] {3.42156f, 3.422f, 3, MidpointRounding.ToEven};
+                yield return new object[] {-3.42156f, -3.422f, 3, MidpointRounding.ToEven};
+
+                yield return new object[] {float.NaN, float.NaN, 3, MidpointRounding.AwayFromZero};
+                yield return new object[] {float.PositiveInfinity, float.PositiveInfinity, 3, MidpointRounding.AwayFromZero};
+                yield return new object[] {float.NegativeInfinity, float.NegativeInfinity, 3, MidpointRounding.AwayFromZero};
+                yield return new object[] {0, 0, 3, MidpointRounding.AwayFromZero};
+                yield return new object[] {3.42156f, 3.422f, 3, MidpointRounding.AwayFromZero};
+                yield return new object[] {-3.42156f, -3.422f, 3, MidpointRounding.AwayFromZero};
+
+                yield return new object[] {float.NaN, float.NaN, 3, MidpointRounding.ToZero};
+                yield return new object[] {float.PositiveInfinity, float.PositiveInfinity, 3, MidpointRounding.ToZero};
+                yield return new object[] {float.NegativeInfinity, float.NegativeInfinity, 3, MidpointRounding.ToZero};
+                yield return new object[] {0, 0, 3, MidpointRounding.ToZero};
+                yield return new object[] {3.42156f, 3.421f, 3, MidpointRounding.ToZero};
+                yield return new object[] {-3.42156f, -3.421f, 3, MidpointRounding.ToZero};
+
+                yield return new object[] {float.NaN, float.NaN, 3, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {float.PositiveInfinity, float.PositiveInfinity, 3, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {float.NegativeInfinity, float.NegativeInfinity, 3, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {0, 0, 3, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {3.42156f, 3.421f, 3, MidpointRounding.ToNegativeInfinity};
+                yield return new object[] {-3.42156f, -3.422f, 3, MidpointRounding.ToNegativeInfinity};
+
+                yield return new object[] {float.NaN, float.NaN, 3, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {float.PositiveInfinity, float.PositiveInfinity, 3, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {float.NegativeInfinity, float.NegativeInfinity, 3, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {0, 0, 3, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {3.42156f, 3.422f, 3, MidpointRounding.ToPositiveInfinity};
+                yield return new object[] {-3.42156f, -3.421f, 3, MidpointRounding.ToPositiveInfinity};
+              }
         }
 
         [Fact]
@@ -1439,15 +1456,22 @@ namespace System.Tests
             Assert.Equal(-2e7f, MathF.Round(-2e7f));
         }
 
-        [Fact]
-        public static void Round_Digits()
+        [Theory]
+        [InlineData(MidpointRounding.ToEven)]
+        [InlineData(MidpointRounding.AwayFromZero)]
+        [InlineData(MidpointRounding.ToNegativeInfinity)]
+        [InlineData(MidpointRounding.ToPositiveInfinity)]
+        public static void Round_Digits(MidpointRounding mode)
         {
-            AssertEqual(3.422f, MathF.Round(3.42156f, 3, MidpointRounding.AwayFromZero), CrossPlatformMachineEpsilon * 10);
-            AssertEqual(-3.422f, MathF.Round(-3.42156f, 3, MidpointRounding.AwayFromZero), CrossPlatformMachineEpsilon * 10);
-            Assert.Equal(0.0f, MathF.Round(0.0f, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(float.NaN, MathF.Round(float.NaN, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(float.PositiveInfinity, MathF.Round(float.PositiveInfinity, 3, MidpointRounding.AwayFromZero));
-            Assert.Equal(float.NegativeInfinity, MathF.Round(float.NegativeInfinity, 3, MidpointRounding.AwayFromZero));
+            Assert.Equal(float.PositiveInfinity, MathF.Round(float.PositiveInfinity, 3, mode));
+            Assert.Equal(float.NegativeInfinity, MathF.Round(float.NegativeInfinity, 3, mode));
+        }
+
+        [Theory]
+        [MemberData(nameof(Round_Digits_TestData))]
+        public static void Round_Digits(float x, float expected, int digits, MidpointRounding mode)
+        {
+           AssertEqual(expected, MathF.Round(x, digits, mode), CrossPlatformMachineEpsilon * 10);
         }
 
         [Theory]

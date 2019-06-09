@@ -2,9 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Buffers;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Text.RegularExpressions;
 using Newtonsoft.Json;
 using Xunit;
 
@@ -475,10 +477,11 @@ namespace System.Text.Json.Tests
         [Fact]
         public static void InvalidConversion()
         {
-            string jsonString = "[\"stringValue\", true, 1234]";
+            string jsonString = "[\"stringValue\", true, /* Comment within */ 1234] // Comment outside";
             byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
 
-            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
             while (json.Read())
             {
                 if (json.TokenType != JsonTokenType.String)
@@ -487,6 +490,69 @@ namespace System.Text.Json.Tests
                     {
                         string value = json.GetString();
                         Assert.True(false, "Expected GetString to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        byte[] value = json.GetBytesFromBase64();
+                        Assert.True(false, "Expected GetBytesFromBase64 to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetBytesFromBase64(out byte[] value);
+                        Assert.True(false, "Expected TryGetBytesFromBase64 to throw InvalidOperationException due to mismatch token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        DateTime value = json.GetDateTime();
+                        Assert.True(false, "Expected GetDateTime to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetDateTime(out DateTime value);
+                        Assert.True(false, "Expected TryGetDateTime to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        DateTimeOffset value = json.GetDateTimeOffset();
+                        Assert.True(false, "Expected GetDateTimeOffset to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    try
+                    {
+                        json.TryGetDateTimeOffset(out DateTimeOffset value);
+                        Assert.True(false, "Expected TryGetDateTimeOffset to throw InvalidOperationException due to mismatched token type.");
+                    }
+                    catch (InvalidOperationException)
+                    { }
+
+                    JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.GetGuid());
+
+                    JsonTestHelper.AssertThrows<InvalidOperationException>(json, (jsonReader) => jsonReader.TryGetGuid(out _));
+                }
+
+                if (json.TokenType != JsonTokenType.Comment)
+                {
+                    try
+                    {
+                        string value = json.GetComment();
+                        Assert.True(false, "Expected GetComment to throw InvalidOperationException due to mismatch token type.");
                     }
                     catch (InvalidOperationException)
                     { }
@@ -728,8 +794,6 @@ namespace System.Text.Json.Tests
             }
         }
 
-
-
         [Theory]
         [MemberData(nameof(InvalidUTF8Strings))]
         public static void TestingGetStringInvalidUTF8(byte[] dataUtf8)
@@ -764,6 +828,447 @@ namespace System.Text.Json.Tests
                     }
                 }
             }
+        }
+
+        [Fact]
+        public static void GetBase64Unescapes()
+        {
+            string jsonString = "\"\\u0031234\""; // equivalent to "\"1234\""
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            Assert.True(json.Read());
+
+            byte[] expected = Convert.FromBase64String("1234"); // new byte[3] { 215, 109, 248 }
+
+            byte[] value = json.GetBytesFromBase64();
+            Assert.Equal(expected, value);
+            Assert.True(json.TryGetBytesFromBase64(out value));
+            Assert.Equal(expected, value);
+        }
+
+        [Theory]
+        [InlineData("\"ABC=\"")]
+        [InlineData("\"AB+D\"")]
+        [InlineData("\"ABCD\"")]
+        [InlineData("\"ABC/\"")]
+        [InlineData("\"++++\"")]
+        [InlineData(null)]  // Large randomly generated string
+        public static void ValidBase64(string jsonString)
+        {
+            if (jsonString == null)
+            {
+                var random = new Random(42);
+                var charArray = new char[502];
+                charArray[0] = '"';
+                for (int i = 1; i < charArray.Length; i++)
+                {
+                    charArray[i] = (char)random.Next('A', 'Z'); // ASCII values (between 65 and 90) that constitute valid base 64 string.
+                }
+                charArray[charArray.Length - 1] = '"';
+                jsonString = new string(charArray);
+            }
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            Assert.True(json.Read());
+
+            byte[] expected = Convert.FromBase64String(jsonString.AsSpan(1, jsonString.Length - 2).ToString());
+
+            byte[] value = json.GetBytesFromBase64();
+            Assert.Equal(expected, value);
+            Assert.True(json.TryGetBytesFromBase64(out value));
+            Assert.Equal(expected, value);
+        }
+
+        [Theory]
+        [InlineData("\"ABC===\"")]
+        [InlineData("\"ABC\"")]
+        [InlineData("\"ABC!\"")]
+        [InlineData(null)]  // Large randomly generated string
+        public static void InvalidBase64(string jsonString)
+        {
+            if (jsonString == null)
+            {
+                var random = new Random(42);
+                var charArray = new char[500];
+                charArray[0] = '"';
+                for (int i = 1; i < charArray.Length; i++)
+                {
+                    charArray[i] = (char)random.Next('?', '\\'); // ASCII values (between 63 and 91) that don't need to be escaped.
+                }
+
+                charArray[256] = '\\';
+                charArray[257] = '"';
+                charArray[charArray.Length - 1] = '"';
+                jsonString = new string(charArray);
+            }
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            Assert.True(json.Read());
+            Assert.False(json.TryGetBytesFromBase64(out byte[] value));
+            Assert.Null(value);
+
+            try
+            {
+                byte[] val = json.GetBytesFromBase64();
+                Assert.True(false, "Expected InvalidOperationException when trying to decode base 64 string for invalid UTF-16 JSON text.");
+            }
+            catch (FormatException) { }
+        }
+
+        [Theory]
+        [InlineData("\"a\\uDD1E\"")]
+        [InlineData("\"a\\uDD1Eb\"")]
+        [InlineData("\"a\\uD834\"")]
+        [InlineData("\"a\\uD834\\u0030\"")]
+        [InlineData("\"a\\uD834\\uD834\"")]
+        [InlineData("\"a\\uD834b\"")]
+        [InlineData("\"a\\uDD1E\\uD834b\"")]
+        [InlineData("\"a\\\\uD834\\uDD1Eb\"")]
+        [InlineData("\"a\\uDD1E\\\\uD834b\"")]
+        public static void TestingGetBase64InvalidUTF16(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                Assert.True(json.Read());
+                Assert.Equal(JsonTokenType.String, json.TokenType);
+                try
+                {
+                    byte[] val = json.GetBytesFromBase64();
+                    Assert.True(false, "Expected InvalidOperationException when trying to decode base 64 string for invalid UTF-16 JSON text.");
+                }
+                catch (InvalidOperationException) { }
+
+                try
+                {
+                    json.TryGetBytesFromBase64(out byte[] val);
+                    Assert.True(false, "Expected InvalidOperationException when trying to decode base 64 string for invalid UTF-16 JSON text.");
+                }
+                catch (InvalidOperationException) { }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(InvalidUTF8Strings))]
+        public static void TestingGetBase64InvalidUTF8(byte[] dataUtf8)
+        {
+            foreach (JsonCommentHandling commentHandling in Enum.GetValues(typeof(JsonCommentHandling)))
+            {
+                var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = commentHandling });
+                var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                // It is expected that the Utf8JsonReader won't throw an exception here
+                Assert.True(json.Read());
+                Assert.Equal(JsonTokenType.String, json.TokenType);
+
+                while (json.Read())
+                    ;
+
+                json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+                while (json.Read())
+                {
+                    if (json.TokenType == JsonTokenType.String)
+                    {
+                        try
+                        {
+                            byte[] val = json.GetBytesFromBase64();
+                            Assert.True(false, "Expected InvalidOperationException when trying to decode base 64 string for invalid UTF-8 JSON text.");
+                        }
+                        catch (FormatException) { }
+
+                        Assert.False(json.TryGetBytesFromBase64(out byte[] value));
+                        Assert.Null(value);
+                    }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(GetCommentTestData))]
+        public static void TestingGetComment(string jsonData, string expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var reader = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+
+            Assert.True(reader.Read());
+            Assert.Equal(JsonTokenType.StartObject, reader.TokenType);
+
+            Assert.True(reader.Read());
+            Assert.Equal(JsonTokenType.Comment, reader.TokenType);
+            Assert.Equal(expected, reader.GetComment());
+
+            Assert.True(reader.Read());
+            Assert.Equal(JsonTokenType.EndObject, reader.TokenType);
+
+            Assert.False(reader.Read());
+        }
+
+        [Theory]
+        [MemberData(nameof(GetCommentUnescapeData))]
+        public static void TestGetCommentUnescape(string jsonData, string expected)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonData);
+            var state = new JsonReaderState(options: new JsonReaderOptions { CommentHandling = JsonCommentHandling.Allow });
+            var reader = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state);
+            bool commentFound = false;
+            while (reader.Read())
+            {
+                switch (reader.TokenType)
+                {
+                    case JsonTokenType.Comment:
+                        commentFound = true;
+                        string comment = reader.GetComment();
+                        Assert.Equal(expected, comment);
+                        Assert.NotEqual(Regex.Unescape(expected), comment);
+                        break;
+                    default:
+                        Assert.True(false);
+                        break;
+                }
+            }
+            Assert.True(commentFound);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestingStringsConversionToDateTime(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTime expected = DateTime.Parse(expectedString);
+
+                    Assert.True(json.TryGetDateTime(out DateTime actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTime());
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestingStringsConversionToDateTimeOffset(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTimeOffset expected = DateTimeOffset.Parse(expectedString);
+
+                    Assert.True(json.TryGetDateTimeOffset(out DateTimeOffset actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTimeOffset());
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601TestsWithUtcOffset), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestingStringsWithUTCOffsetToDateTime(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTime expected = DateTime.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
+                    Assert.True(json.TryGetDateTime(out DateTime actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTime());
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601TestsWithUtcOffset), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestingStringsWithUTCOffsetToDateTimeOffset(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    DateTimeOffset expected = DateTimeOffset.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
+                    Assert.True(json.TryGetDateTimeOffset(out DateTimeOffset actual));
+                    Assert.Equal(expected, actual);
+
+                    Assert.Equal(expected, json.GetDateTimeOffset());
+                }
+            }
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.InvalidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestingStringsInvalidConversionToDateTime(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                Assert.False(json.TryGetDateTime(out DateTime actualDateTime));
+
+                try
+                {
+                    DateTime value = json.GetDateTime();
+                    Assert.True(false, "Expected GetDateTime to throw FormatException due to invalid ISO 8601 input.");
+                }
+                catch (FormatException)
+                { }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.InvalidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void TestingStringsInvalidConversionToDateTimeOffset(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+            while (json.Read())
+            {
+                if (json.TokenType == JsonTokenType.String)
+                {
+                    Assert.False(json.TryGetDateTimeOffset(out DateTimeOffset actualDateTime));
+
+                    try
+                    {
+                        DateTimeOffset value = json.GetDateTimeOffset();
+                        Assert.True(false, "Expected GetDateTimeOffset to throw FormatException due to invalid ISO 8601 input.");
+                    }
+                    catch (FormatException)
+                    { }
+                }
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        [MemberData(nameof(JsonGuidTestData.ValidHexGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TestingStringsConversionToGuid(string testString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+
+            Guid expected = new Guid(expectedString);
+
+            Assert.True(json.Read(), "Read string value");
+            Assert.Equal(JsonTokenType.String, json.TokenType);
+
+            Assert.True(json.TryGetGuid(out Guid actual));
+            Assert.Equal(expected, actual);
+            Assert.Equal(expected, json.GetGuid());
+
+            Assert.Equal(dataUtf8.Length, json.BytesConsumed);
+            Assert.Equal(json.BytesConsumed, json.CurrentState.BytesConsumed);
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedString)
+        {
+            TryGetGuid_HasValueSequence_RetrievesGuid(testString, expectedString, isFinalBlock: true);
+            TryGetGuid_HasValueSequence_RetrievesGuid(testString, expectedString, isFinalBlock: false);
+        }
+
+        public static void TryGetGuid_HasValueSequence_RetrievesGuid(string testString, string expectedString, bool isFinalBlock)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
+
+            Guid expected = new Guid(expectedString);
+            
+            Assert.True(json.Read(), "json.Read()");
+            Assert.Equal(JsonTokenType.String, json.TokenType);
+
+            Assert.True(json.HasValueSequence, "json.HasValueSequence");
+            Assert.False(json.ValueSequence.IsEmpty, "json.ValueSequence.IsEmpty");
+            Assert.True(json.ValueSpan.IsEmpty, "json.ValueSpan.IsEmpty");
+            Assert.True(json.TryGetGuid(out Guid actual), "TryGetGuid");
+            Assert.Equal(expected, actual);
+            Assert.Equal(expected, json.GetGuid());
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.InvalidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TestingStringsInvalidConversionToGuid(string testString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+            var json = new Utf8JsonReader(dataUtf8, isFinalBlock: true, state: default);
+
+            Assert.True(json.Read(), "Read string value");
+            Assert.Equal(JsonTokenType.String, json.TokenType);
+
+            Assert.False(json.TryGetGuid(out Guid actual));
+            Assert.Equal(Guid.Empty, actual);
+
+            JsonTestHelper.AssertThrows<FormatException>(json, (jsonReader) => jsonReader.GetGuid());
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.InvalidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void TryGetGuid_HasValueSequence_False(string testString)
+        {
+            TryGetGuid_HasValueSequence_False(testString, isFinalBlock: true);
+            TryGetGuid_HasValueSequence_False(testString, isFinalBlock: false);
+        }
+
+        private static void TryGetGuid_HasValueSequence_False(string testString, bool isFinalBlock)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{testString}\"");
+            ReadOnlySequence<byte> sequence = JsonTestHelper.GetSequence(dataUtf8, 1);
+            var json = new Utf8JsonReader(sequence, isFinalBlock: isFinalBlock, state: default);
+
+            Assert.True(json.Read(), "json.Read()");
+            Assert.Equal(JsonTokenType.String, json.TokenType);
+            Assert.True(json.HasValueSequence, "json.HasValueSequence");
+            // If the string is empty, the ValueSequence is empty, because it contains all 0 bytes between the two characters
+            Assert.Equal(string.IsNullOrEmpty(testString), json.ValueSequence.IsEmpty);
+            Assert.False(json.TryGetGuid(out Guid actual), "json.TryGetGuid(out Guid actual)");
+            Assert.Equal(Guid.Empty, actual);
+
+            JsonTestHelper.AssertThrows<FormatException>(json, (jsonReader) => jsonReader.GetGuid());
         }
     }
 }

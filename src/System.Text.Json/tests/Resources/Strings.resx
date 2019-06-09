@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -20268,5 +20267,8 @@ tiline\"another\" String\\"],"str":"\"\""}</value>
     }
   }
 }</value>
+  </data>
+  <data name="BufferWriterAdvancedTooFar" xml:space="preserve">
+    <value>Cannot advance past the end of the buffer, which has a size of {0}.</value>
   </data>
 </root>

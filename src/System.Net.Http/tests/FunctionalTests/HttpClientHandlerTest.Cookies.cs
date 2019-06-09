@@ -7,7 +7,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Net.Test.Common;
 using System.Threading.Tasks;
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
@@ -20,6 +22,8 @@ namespace System.Net.Http.Functional.Tests
         private const string s_customCookieHeaderValue = "CustomCookie=456";
 
         private const string s_simpleContent = "Hello world!";
+
+        public HttpClientHandlerTest_Cookies(ITestOutputHelper output) : base(output) { }
 
         //
         // Send cookie tests
@@ -65,7 +69,7 @@ namespace System.Net.Http.Functional.Tests
                     handler.CookieContainer = CreateSingleCookieContainer(uri, cookieName, cookieValue);
                     handler.UseCookies = useCookies;
 
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient(handler))
                     {
                         await client.GetAsync(uri);
                     }
@@ -105,7 +109,7 @@ namespace System.Net.Http.Functional.Tests
                     }
                     handler.CookieContainer = cookieContainer;
 
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient(handler))
                     {
                         await client.GetAsync(uri);
                     }
@@ -121,19 +125,12 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_AddCookieHeader_CookieHeaderSent()
         {
-            if (IsNetfxHandler)
-            {
-                // Netfx handler does not support custom cookie header
-                return;
-            }
-
             await LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
                 {
-                    HttpClientHandler handler = CreateHttpClientHandler();
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient())
                     {
-                        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
                         requestMessage.Headers.Add("Cookie", s_customCookieHeaderValue);
 
                         await client.SendAsync(requestMessage);
@@ -150,25 +147,12 @@ namespace System.Net.Http.Functional.Tests
         [Fact]
         public async Task GetAsync_AddMultipleCookieHeaders_CookiesSent()
         {
-            if (IsNetfxHandler)
-            {
-                // Netfx handler does not support custom cookie header
-                return;
-            }
-
-            if (LoopbackServerFactory.IsHttp2 && UseSocketsHttpHandler)
-            {
-                // ISSUE #34377: We are not handling multi-valued headers correctly
-                return;
-            }
-
             await LoopbackServerFactory.CreateClientAndServerAsync(
                 async uri =>
                 {
-                    HttpClientHandler handler = CreateHttpClientHandler();
-                    using (HttpClient client = new HttpClient(handler))
+                    using (HttpClient client = CreateHttpClient())
                     {
-                        HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, uri);
+                        var requestMessage = new HttpRequestMessage(HttpMethod.Get, uri) { Version = VersionFromUseHttp2 };
                         requestMessage.Headers.Add("Cookie", "A=1");
                         requestMessage.Headers.Add("Cookie", "B=2");
                         requestMessage.Headers.Add("Cookie", "C=3");
@@ -193,26 +177,41 @@ namespace System.Net.Http.Functional.Tests
                 });
         }
 
-        [Fact]
-        public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent()
+        private string GetCookieValue(HttpRequestData request)
         {
-            if (IsNetfxHandler)
+            if (!LoopbackServerFactory.IsHttp2)
             {
-                // Netfx handler does not support custom cookie header
-                return;
+                // HTTP/1.x must have only one value.
+                return request.GetSingleHeaderValue("Cookie");
             }
 
+            string cookieHeaderValue = null;
+            string[] cookieHeaderValues = request.GetHeaderValues("Cookie");
+
+            foreach (string header in cookieHeaderValues)
+            {
+                if (cookieHeaderValue == null)
+                {
+                    cookieHeaderValue = header;
+                }
+                else
+                {
+                    // rfc7540 8.1.2.5 states multiple cookie headers should be represented as single value.
+                    cookieHeaderValue = String.Concat(cookieHeaderValue, "; ", header);
+                }
+            }
+
+            return cookieHeaderValue;
+        }
+
+        [ConditionalFact]
+        public async Task GetAsync_SetCookieContainerAndCookieHeader_BothCookiesSent()
+        {
             if (IsCurlHandler)
             {
                 // CurlHandler ignores container cookies when custom Cookie header is set.
                 // SocketsHttpHandler behaves the expected way. Not worth fixing in CurlHandler as it is going away.
-                return;
-            }
-
-            if (LoopbackServerFactory.IsHttp2 && UseSocketsHttpHandler)
-            {
-                // ISSUE #34377: We are not handling multi-valued headers correctly
-                return;
+                throw new SkipTestException("Platform limitation with curl");
             }
 
             await LoopbackServerFactory.CreateServerAsync(async (server, url) =>
@@ -220,9 +219,9 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                    var requestMessage = new HttpRequestMessage(HttpMethod.Get, url) { Version = VersionFromUseHttp2 };
                     requestMessage.Headers.Add("Cookie", s_customCookieHeaderValue);
 
                     Task<HttpResponseMessage> getResponseTask = client.SendAsync(requestMessage);
@@ -230,8 +229,7 @@ namespace System.Net.Http.Functional.Tests
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     HttpRequestData requestData = await serverTask;
-                    string cookieHeaderValue = requestData.GetSingleHeaderValue("Cookie");
-
+                    string cookieHeaderValue = GetCookieValue(requestData);
                     var cookies = cookieHeaderValue.Split(new string[] { "; " }, StringSplitOptions.None);
                     Assert.Contains(s_expectedCookieHeaderValue, cookies);
                     Assert.Contains(s_customCookieHeaderValue, cookies);
@@ -241,26 +239,14 @@ namespace System.Net.Http.Functional.Tests
         }
 
         [ActiveIssue(30051, TargetFrameworkMonikers.Uap)]
-        [Fact]
+        [ConditionalFact]
         public async Task GetAsync_SetCookieContainerAndMultipleCookieHeaders_BothCookiesSent()
         {
-            if (IsNetfxHandler)
-            {
-                // Netfx handler does not support custom cookie header
-                return;
-            }
-
             if (IsCurlHandler)
             {
                 // CurlHandler ignores container cookies when custom Cookie header is set.
                 // SocketsHttpHandler behaves the expected way. Not worth fixing in CurlHandler as it is going away.
-                return;
-            }
-
-            if (LoopbackServerFactory.IsHttp2 && UseSocketsHttpHandler)
-            {
-                // ISSUE #34377: We are not handling multi-valued headers correctly
-                return;
+                throw new SkipTestException("Platform limitation with curl");
             }
 
             await LoopbackServerFactory.CreateServerAsync(async (server, url) =>
@@ -268,9 +254,9 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
-                    HttpRequestMessage requestMessage = new HttpRequestMessage(HttpMethod.Get, url);
+                    var requestMessage = new HttpRequestMessage(HttpMethod.Get, url) { Version = VersionFromUseHttp2 };
                     requestMessage.Headers.Add("Cookie", "A=1");
                     requestMessage.Headers.Add("Cookie", "B=2");
 
@@ -279,9 +265,9 @@ namespace System.Net.Http.Functional.Tests
                     await TestHelper.WhenAllCompletedOrAnyFailed(getResponseTask, serverTask);
 
                     HttpRequestData requestData = await serverTask;
-                    string cookieHeaderValue = requestData.GetSingleHeaderValue("Cookie");
+                    string cookieHeaderValue = GetCookieValue(requestData);
 
-                    // Multiple Cookie header values are treated as any other header values and are 
+                    // Multiple Cookie header values are treated as any other header values and are
                     // concatenated using ", " as the separator.  The container cookie is concatenated to
                     // one of these values using the "; " cookie separator.
 
@@ -329,7 +315,7 @@ namespace System.Net.Http.Functional.Tests
                 handler.CookieContainer.Add(url2, new Cookie("cookie2", "value2"));
                 handler.CookieContainer.Add(unusedUrl, new Cookie("cookie3", "value3"));
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     client.DefaultRequestHeaders.ConnectionClose = true; // to avoid issues with connection pooling
                     await client.GetAsync(url1);
@@ -358,7 +344,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.UseCookies = useCookies;
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -388,7 +374,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -426,7 +412,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -452,7 +438,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.CookieContainer = CreateSingleCookieContainer(url);
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -481,7 +467,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<HttpRequestData> serverTask = server.HandleRequestAsync(
@@ -520,7 +506,7 @@ namespace System.Net.Http.Functional.Tests
 
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     client.DefaultRequestHeaders.ConnectionClose = true; // to avoid issues with connection pooling
                     await client.GetAsync(url1);
@@ -577,7 +563,7 @@ namespace System.Net.Http.Functional.Tests
                 HttpClientHandler handler = CreateHttpClientHandler();
                 handler.Credentials = new NetworkCredential("user", "pass");
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     await client.GetAsync(url);
 
@@ -638,7 +624,7 @@ namespace System.Net.Http.Functional.Tests
                 yield return new object[] { "ABC", "123", useCookies };
                 yield return new object[] { "Hello", "World", useCookies };
                 yield return new object[] { "foo", "bar", useCookies };
-
+                yield return new object[] { "Hello World", "value", useCookies };
                 yield return new object[] { ".AspNetCore.Session", "RAExEmXpoCbueP_QYM", useCookies };
 
                 yield return new object[]
@@ -677,6 +663,8 @@ namespace System.Net.Http.Functional.Tests
 
     public abstract class HttpClientHandlerTest_Cookies_Http11 : HttpClientHandlerTestBase
     {
+        public HttpClientHandlerTest_Cookies_Http11(ITestOutputHelper output) : base(output) { }
+
         [Fact]
         public async Task GetAsync_ReceiveMultipleSetCookieHeaders_CookieAdded()
         {
@@ -684,7 +672,7 @@ namespace System.Net.Http.Functional.Tests
             {
                 HttpClientHandler handler = CreateHttpClientHandler();
 
-                using (HttpClient client = new HttpClient(handler))
+                using (HttpClient client = CreateHttpClient(handler))
                 {
                     Task<HttpResponseMessage> getResponseTask = client.GetAsync(url);
                     Task<List<string>> serverTask = server.AcceptConnectionSendResponseAndCloseAsync(

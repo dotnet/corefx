@@ -290,8 +290,8 @@ namespace System.Runtime.InteropServices.ComTypes
         void GetDllEntry(int memid, INVOKEKIND invKind, IntPtr pBstrDllName, IntPtr pBstrName, IntPtr pwOrdinal);
         void GetRefTypeInfo(int hRef, out ITypeInfo ppTI);
         void AddressOfMember(int memid, INVOKEKIND invKind, out IntPtr ppv);
-        void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object pUnkOuter, [In] ref Guid riid, [MarshalAs(UnmanagedType.IUnknown), Out] out object ppvObj);
-        void GetMops(int memid, out string pBstrMops);
+        void CreateInstance([MarshalAs(UnmanagedType.IUnknown)] object? pUnkOuter, [In] ref Guid riid, [MarshalAs(UnmanagedType.IUnknown), Out] out object ppvObj);
+        void GetMops(int memid, out string? pBstrMops);
         void GetContainingTypeLib(out ITypeLib ppTLB, out int pIndex);
         [PreserveSig]
         void ReleaseTypeAttr(IntPtr pTypeAttr);

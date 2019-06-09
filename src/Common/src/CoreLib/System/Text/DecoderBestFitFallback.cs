@@ -14,8 +14,8 @@ namespace System.Text
     internal sealed class InternalDecoderBestFitFallback : DecoderFallback
     {
         // Our variables
-        internal Encoding _encoding = null;
-        internal char[] _arrayBestFit = null;
+        internal Encoding _encoding;
+        internal char[]? _arrayBestFit = null;
         internal char _cReplacement = '?';
 
         internal InternalDecoderBestFitFallback(Encoding encoding)
@@ -38,13 +38,13 @@ namespace System.Text
             }
         }
 
-        public override bool Equals(object value)
+        public override bool Equals(object? value)
         {
             if (value is InternalDecoderBestFitFallback that)
             {
-                return (_encoding.CodePage == that._encoding.CodePage);
+                return _encoding.CodePage == that._encoding.CodePage;
             }
-            return (false);
+            return false;
         }
 
         public override int GetHashCode()
@@ -62,7 +62,7 @@ namespace System.Text
         private InternalDecoderBestFitFallback _oFallback;
 
         // Private object for locking instead of locking on a public type for SQL reliability work.
-        private static object s_InternalSyncObject;
+        private static object? s_InternalSyncObject;
         private static object InternalSyncObject
         {
             get
@@ -70,9 +70,9 @@ namespace System.Text
                 if (s_InternalSyncObject == null)
                 {
                     object o = new object();
-                    Interlocked.CompareExchange<object>(ref s_InternalSyncObject, o, null);
+                    Interlocked.CompareExchange<object?>(ref s_InternalSyncObject, o, null);
                 }
-                return s_InternalSyncObject;
+                return s_InternalSyncObject!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             }
         }
 
@@ -172,6 +172,7 @@ namespace System.Text
         {
             // Need to figure out our best fit character, low is beginning of array, high is 1 AFTER end of array
             int lowBound = 0;
+            Debug.Assert(_oFallback._arrayBestFit != null);
             int highBound = _oFallback._arrayBestFit.Length;
             int index;
             char cCheck;

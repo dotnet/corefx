@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using Microsoft.DotNet.XUnitExtensions;
 using Xunit;
 
 namespace System.Net.Sockets.Tests
@@ -17,7 +17,6 @@ namespace System.Net.Sockets.Tests
     {
         private static bool SocketsReuseUnicastPortSupport => Capability.SocketsReuseUnicastPortSupport().HasValue;
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketGetOption()
         {
@@ -34,7 +33,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalFact(nameof(SocketsReuseUnicastPortSupport))]
         public void ReuseUnicastPort_CreateSocketSetOption()
         {
@@ -53,22 +51,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        // TODO: Issue #4887
-        // The socket option 'ReuseUnicastPost' only works on Windows 10 systems. In addition, setting the option
-        // is a no-op unless specialized network settings using PowerShell configuration are first applied to the
-        // machine. This is currently difficult to test in the CI environment. So, this test will be disabled for now
-        [OuterLoop] // TODO: Issue #11345
-        [ActiveIssue(4887)]
-        public void ReuseUnicastPort_CreateSocketSetOptionToOneAndGetOption_SocketsReuseUnicastPortSupport_OptionIsOne()
-        {
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-            socket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort, 1);
-            int optionValue = (int)socket.GetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseUnicastPort);
-            Assert.Equal(1, optionValue);
-        }
-
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void MulticastOption_CreateSocketSetGetOption_GroupAndInterfaceIndex_SetSucceeds_GetThrows()
         {
@@ -83,18 +65,17 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
+        [ActiveIssue(31609, TargetFrameworkMonikers.Uap)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Skip on Nano: dotnet/corefx #29929
         public async Task MulticastInterface_Set_AnyInterface_Succeeds()
         {
             // On all platforms, index 0 means "any interface"
             await MulticastInterface_Set_Helper(0);
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Skip on Nano: dotnet/corefx #29929
         [PlatformSpecific(TestPlatforms.Windows)] // see comment below
-        [ActiveIssue(21327, TargetFrameworkMonikers.Uap)] // UWP Apps are forbidden to send network traffic to the local Computer.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // UWP Apps are normally blocked to send network traffic on loopback.
         public async Task MulticastInterface_Set_Loopback_Succeeds()
         {
             // On Windows, we can apparently assume interface 1 is "loopback." On other platforms, this is not a
@@ -128,7 +109,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 var cts = new CancellationTokenSource();
-                Assert.True(await Task.WhenAny(receiveTask, Task.Delay(20_000, cts.Token)) == receiveTask, "Waiting for received data timed out");
+                Assert.True(await Task.WhenAny(receiveTask, Task.Delay(30_000, cts.Token)) == receiveTask, "Waiting for received data timed out");
                 cts.Cancel();
 
                 int bytesReceived = await receiveTask;
@@ -138,7 +119,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Fact]
         public void MulticastInterface_Set_InvalidIndex_Throws()
         {
@@ -150,13 +130,15 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
+        [ActiveIssue(31609, TargetFrameworkMonikers.Uap)]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Skip on Nano: dotnet/corefx #29929
+        [PlatformSpecific(~TestPlatforms.OSX)]
         public async Task MulticastInterface_Set_IPv6_AnyInterface_Succeeds()
         {
-            if (PlatformDetection.IsFedora || PlatformDetection.IsRedHatFamily7 || PlatformDetection.IsOSX)
+            if (PlatformDetection.IsRedHatFamily7)
             {
-                return; // [ActiveIssue(24008)]
+                // RH7 seems to have issues with multicast in Azure. Same code and setup can pass when executed outside of Azure.
+                throw new SkipTestException("IPv6 multicast environment not available");
             }
 
             // On all platforms, index 0 means "any interface"
@@ -177,7 +159,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Skip on Nano: dotnet/corefx #29929
         public void MulticastTTL_Set_IPv6_Succeeds()
         {
             using (Socket socket = new Socket(AddressFamily.InterNetworkV6, SocketType.Dgram, ProtocolType.Udp))
@@ -206,10 +188,9 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // ActiveIssue: dotnet/corefx #29929
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsNanoServer))] // Skip on Nano: dotnet/corefx #29929
         [PlatformSpecific(TestPlatforms.Windows)]
-        [ActiveIssue(21327, TargetFrameworkMonikers.Uap)] // UWP Apps are forbidden to send network traffic to the local Computer.
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // UWP Apps are normally blocked to send network traffic on loopback.
         public async void MulticastInterface_Set_IPv6_Loopback_Succeeds()
         {
             // On Windows, we can apparently assume interface 1 is "loopback." On other platforms, this is not a
@@ -243,7 +224,7 @@ namespace System.Net.Sockets.Tests
                 }
 
                 var cts = new CancellationTokenSource();
-                Assert.True(await Task.WhenAny(receiveTask, Task.Delay(20_000, cts.Token)) == receiveTask, "Waiting for received data timed out");
+                Assert.True(await Task.WhenAny(receiveTask, Task.Delay(30_000, cts.Token)) == receiveTask, "Waiting for received data timed out");
                 cts.Cancel();
 
                 int bytesReceived = await receiveTask;
@@ -264,7 +245,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // In WSL, the connect() call fails immediately.
         [InlineData(false)]
         [InlineData(true)]
@@ -404,7 +384,7 @@ namespace System.Net.Sockets.Tests
             ReuseAddress(exclusiveAddressUse, firstSocketReuseAddress, secondSocketReuseAddress, expectFailure);
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Windows defaults are different
         public void ExclusiveAddress_Default_Unix()
         {
@@ -416,7 +396,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Theory]
+        [ConditionalTheory(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         [InlineData(1)]
         [InlineData(0)]
         [PlatformSpecific(TestPlatforms.AnyUnix)] // Unix does not have separate options for ExclusiveAddressUse and ReuseAddress.
@@ -466,7 +446,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public void ExclusiveAddressUseTcp()
         {
             using (Socket a = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
@@ -522,7 +502,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [PlatformSpecific(TestPlatforms.Windows)]  // SetIPProtectionLevel not supported on Unix
         [InlineData(IPProtectionLevel.EdgeRestricted, AddressFamily.InterNetwork, SocketOptionLevel.IP)]
@@ -542,7 +521,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // SetIPProtectionLevel not supported on Unix
         [InlineData(IPProtectionLevel.EdgeRestricted, AddressFamily.InterNetwork)]
@@ -559,7 +537,6 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [OuterLoop] // TODO: Issue #11345
         [Theory]
         [InlineData(AddressFamily.InterNetwork)]
         [InlineData(AddressFamily.InterNetworkV6)]

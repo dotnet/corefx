@@ -6,6 +6,7 @@ using System.Globalization;
 using System.Diagnostics;
 using System.Text;
 using System.Runtime.CompilerServices;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System
 {
@@ -17,7 +18,7 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed class Version : ICloneable, IComparable, IComparable<Version>, IEquatable<Version>, ISpanFormattable
+    public sealed class Version : ICloneable, IComparable, IComparable<Version?>, IEquatable<Version>, ISpanFormattable
     {
         // AssemblyName depends on the order staying the same
         private readonly int _Major; // Do not rename (binary serialization)
@@ -135,23 +136,22 @@ namespace System
             get { return (short)(_Revision & 0xFFFF); }
         }
 
-        public int CompareTo(object version)
+        public int CompareTo(object? version)
         {
             if (version == null)
             {
                 return 1;
             }
 
-            Version v = version as Version;
-            if (v == null)
+            if (version is Version v)
             {
-                throw new ArgumentException(SR.Arg_MustBeVersion);
+                return CompareTo(v);
             }
 
-            return CompareTo(v);
+            throw new ArgumentException(SR.Arg_MustBeVersion);
         }
 
-        public int CompareTo(Version value)
+        public int CompareTo(Version? value)
         {
             return
                 object.ReferenceEquals(value, this) ? 0 :
@@ -163,12 +163,14 @@ namespace System
                 0;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return Equals(obj as Version);
         }
 
-        public bool Equals(Version obj)
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
+        public bool Equals(Version? obj)
+#pragma warning restore CS8614
         {
             return object.ReferenceEquals(obj, this) ||
                 (!(obj is null) &&
@@ -230,7 +232,7 @@ namespace System
             return false;
         }
 
-        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider provider)
+        bool ISpanFormattable.TryFormat(Span<char> destination, out int charsWritten, ReadOnlySpan<char> format, IFormatProvider? provider)
         {
             // format and provider are ignored.
             return TryFormat(destination, out charsWritten);
@@ -301,13 +303,13 @@ namespace System
                 throw new ArgumentNullException(nameof(input));
             }
 
-            return ParseVersion(input.AsSpan(), throwOnFailure: true);
+            return ParseVersion(input.AsSpan(), throwOnFailure: true)!;
         }
 
         public static Version Parse(ReadOnlySpan<char> input) =>
-            ParseVersion(input, throwOnFailure: true);
+            ParseVersion(input, throwOnFailure: true)!;
 
-        public static bool TryParse(string input, out Version result)
+        public static bool TryParse(string? input, [NotNullWhen(true)] out Version? result)
         {
             if (input == null)
             {
@@ -318,10 +320,10 @@ namespace System
             return (result = ParseVersion(input.AsSpan(), throwOnFailure: false)) != null;
         }
 
-        public static bool TryParse(ReadOnlySpan<char> input, out Version result) =>
+        public static bool TryParse(ReadOnlySpan<char> input, [NotNullWhen(true)] out Version? result) =>
             (result = ParseVersion(input, throwOnFailure: false)) != null;
 
-        private static Version ParseVersion(ReadOnlySpan<char> input, bool throwOnFailure)
+        private static Version? ParseVersion(ReadOnlySpan<char> input, bool throwOnFailure)
         {
             // Find the separator between major and minor.  It must exist.
             int majorEnd = input.IndexOf('.');
@@ -408,7 +410,7 @@ namespace System
 
         // Force inline as the true/false ternary takes it above ALWAYS_INLINE size even though the asm ends up smaller
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(Version v1, Version v2)
+        public static bool operator ==(Version? v1, Version? v2)
         {
             // Test "right" first to allow branch elimination when inlined for null checks (== null)
             // so it can become a simple test
@@ -422,31 +424,37 @@ namespace System
             return ReferenceEquals(v2, v1) ? true : v2.Equals(v1);
         }
 
-        public static bool operator !=(Version v1, Version v2)
+        public static bool operator !=(Version? v1, Version? v2)
         {
             return !(v1 == v2);
         }
 
-        public static bool operator <(Version v1, Version v2)
+        public static bool operator <(Version? v1, Version? v2)
         {
-            if ((object)v1 == null)
-                throw new ArgumentNullException(nameof(v1));
+            if (v1 is null)
+            {
+                return !(v2 is null);
+            }
+
             return (v1.CompareTo(v2) < 0);
         }
 
-        public static bool operator <=(Version v1, Version v2)
+        public static bool operator <=(Version? v1, Version? v2)
         {
-            if ((object)v1 == null)
-                throw new ArgumentNullException(nameof(v1));
+            if (v1 is null)
+            {
+                return true;
+            }
+
             return (v1.CompareTo(v2) <= 0);
         }
 
-        public static bool operator >(Version v1, Version v2)
+        public static bool operator >(Version? v1, Version? v2)
         {
             return (v2 < v1);
         }
 
-        public static bool operator >=(Version v1, Version v2)
+        public static bool operator >=(Version? v1, Version? v2)
         {
             return (v2 <= v1);
         }

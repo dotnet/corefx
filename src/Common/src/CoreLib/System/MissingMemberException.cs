@@ -16,19 +16,19 @@ namespace System
             HResult = HResults.COR_E_MISSINGMEMBER;
         }
 
-        public MissingMemberException(string message)
+        public MissingMemberException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_MISSINGMEMBER;
         }
 
-        public MissingMemberException(string message, Exception inner)
+        public MissingMemberException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.COR_E_MISSINGMEMBER;
         }
 
-        public MissingMemberException(string className, string memberName)
+        public MissingMemberException(string? className, string? memberName)
         {
             ClassName = className;
             MemberName = memberName;
@@ -39,7 +39,7 @@ namespace System
         {
             ClassName = info.GetString("MMClassName");
             MemberName = info.GetString("MMMemberName");
-            Signature = (byte[])info.GetValue("MMSignature", typeof(byte[]));
+            Signature = (byte[]?)info.GetValue("MMSignature", typeof(byte[]));
         }
 
         public override void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -69,8 +69,8 @@ namespace System
         // If ClassName != null, GetMessage will construct on the fly using it
         // and the other variables. This allows customization of the
         // format depending on the language environment.
-        protected string ClassName;
-        protected string MemberName;
-        protected byte[] Signature;
+        protected string? ClassName;
+        protected string? MemberName;
+        protected byte[]? Signature;
     }
 }

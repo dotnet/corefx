@@ -4,6 +4,7 @@
 
 using System.Buffers;
 using System.Collections;
+using System.Globalization;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
@@ -19,11 +20,29 @@ namespace System.Text.Json.Tests
 {
     public static class JsonDocumentTests
     {
+        private static readonly byte[] Utf8Bom = { 0xEF, 0xBB, 0xBF };
+
         private static readonly Dictionary<TestCaseType, string> s_expectedConcat =
             new Dictionary<TestCaseType, string>();
 
         private static readonly Dictionary<TestCaseType, string> s_compactJson =
             new Dictionary<TestCaseType, string>();
+
+        public static IEnumerable<object[]> BadBOMCases { get; } =
+            new object[][]
+            {
+                new object[] { "\u00EF" },
+                new object[] { "\u00EF1" },
+                new object[] { "\u00EF\u00BB" },
+                new object[] { "\u00EF\u00BB1" },
+                new object[] { "\u00EF\u00BB\u00BE" },
+                new object[] { "\u00EF\u00BB\u00BE1" },
+                new object[] { "\u00EF\u00BB\u00FB" },
+                new object[] { "\u00EF\u00BB\u00FB1" },
+
+                // Legal BOM, but no payload.
+                new object[] { "\u00EF\u00BB\u00BF" },
+            };
 
         public static IEnumerable<object[]> ReducedTestCases { get; } =
             new List<object[]>
@@ -82,6 +101,29 @@ namespace System.Text.Json.Tests
             Json4KB,
             Json40KB,
             Json400KB,
+        }
+
+        public enum ParseReaderScenario
+        {
+            NotStarted,
+            StartAtFirstToken,
+            StartAtNestedValue,
+            StartAtPropertyName,
+        }
+
+        public static IEnumerable<object[]> ParseReaderSuccessfulCases { get; } = BuildParseReaderSuccessfulCases().ToList();
+
+        private static IEnumerable<object[]> BuildParseReaderSuccessfulCases()
+        {
+            var scenarios = (ParseReaderScenario[])Enum.GetValues(typeof(ParseReaderScenario));
+
+            foreach (int segmentCount in new[] { 0, 1, 2, 15, 125 })
+            {
+                foreach (ParseReaderScenario scenario in scenarios)
+                {
+                    yield return new object[] { scenario, segmentCount };
+                }
+            }
         }
 
         private static string ReadHelloWorld(JToken obj)
@@ -263,6 +305,150 @@ namespace System.Text.Json.Tests
                     GetAwaiter().GetResult());
         }
 
+
+        [Fact]
+        public static void ParseJson_SeekableStream_Small()
+        {
+            byte[] data = { (byte)'1', (byte)'1' };
+
+            using (JsonDocument doc = JsonDocument.Parse(new MemoryStream(data)))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(11, root.GetInt32());
+            }
+        }
+
+        [Fact]
+        public static void ParseJson_UnseekableStream_Small()
+        {
+            byte[] data = { (byte)'1', (byte)'1' };
+
+            using (JsonDocument doc =
+                JsonDocument.Parse(new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, data: data)))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(11, root.GetInt32());
+            }
+        }
+
+        [Fact]
+        public static async Task ParseJson_SeekableStream_Small_Async()
+        {
+            byte[] data = { (byte)'1', (byte)'1' };
+
+            using (JsonDocument doc = await JsonDocument.ParseAsync(new MemoryStream(data)))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(11, root.GetInt32());
+            }
+        }
+
+        [Fact]
+        public static async Task ParseJson_UnseekableStream_Small_Async()
+        {
+            byte[] data = { (byte)'1', (byte)'1' };
+
+            using (JsonDocument doc = await JsonDocument.ParseAsync(
+                new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, data: data)))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Number, root.Type);
+                Assert.Equal(11, root.GetInt32());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ReducedTestCases))]
+        public static void ParseJson_SeekableStream_WithBOM(bool compactData, TestCaseType type, string jsonString)
+        {
+            ParseJson(
+                compactData,
+                type,
+                jsonString,
+                null,
+                bytes => JsonDocument.Parse(new MemoryStream(Utf8Bom.Concat(bytes).ToArray())));
+        }
+
+        [Theory]
+        [MemberData(nameof(ReducedTestCases))]
+        public static void ParseJson_SeekableStream_Async_WithBOM(bool compactData, TestCaseType type, string jsonString)
+        {
+            ParseJson(
+                compactData,
+                type,
+                jsonString,
+                null,
+                bytes => JsonDocument.ParseAsync(new MemoryStream(Utf8Bom.Concat(bytes).ToArray())).GetAwaiter().GetResult());
+        }
+
+        [Theory]
+        [MemberData(nameof(ReducedTestCases))]
+        public static void ParseJson_UnseekableStream_WithBOM(bool compactData, TestCaseType type, string jsonString)
+        {
+            ParseJson(
+                compactData,
+                type,
+                jsonString,
+                null,
+                bytes => JsonDocument.Parse(
+                    new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, Utf8Bom.Concat(bytes).ToArray())));
+        }
+
+        [Theory]
+        [MemberData(nameof(ReducedTestCases))]
+        public static void ParseJson_UnseekableStream_Async_WithBOM(bool compactData, TestCaseType type, string jsonString)
+        {
+            ParseJson(
+                compactData,
+                type,
+                jsonString,
+                null,
+                bytes => JsonDocument.ParseAsync(
+                        new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, Utf8Bom.Concat(bytes).ToArray())).
+                    GetAwaiter().GetResult());
+        }
+
+        [Theory]
+        [MemberData(nameof(BadBOMCases))]
+        public static void ParseJson_SeekableStream_BadBOM(string json)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(new MemoryStream(data)));
+        }
+
+        [Theory]
+        [MemberData(nameof(BadBOMCases))]
+        public static Task ParseJson_SeekableStream_Async_BadBOM(string json)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(json);
+            return Assert.ThrowsAnyAsync<JsonException>(() => JsonDocument.ParseAsync(new MemoryStream(data)));
+        }
+
+        [Theory]
+        [MemberData(nameof(BadBOMCases))]
+        public static void ParseJson_UnseekableStream_BadBOM(string json)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(json);
+
+            Assert.ThrowsAny<JsonException>(
+                () => JsonDocument.Parse(
+                    new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, data)));
+        }
+
+        [Theory]
+        [MemberData(nameof(BadBOMCases))]
+        public static Task ParseJson_UnseekableStream_Async_BadBOM(string json)
+        {
+            byte[] data = Encoding.UTF8.GetBytes(json);
+
+            return Assert.ThrowsAnyAsync<JsonException>(
+                () => JsonDocument.ParseAsync(
+                    new WrappedMemoryStream(canRead: true, canWrite: false, canSeek: false, data)));
+        }
+
         [Theory]
         [MemberData(nameof(ReducedTestCases))]
         public static void ParseJson_SequenceBytes_Single(bool compactData, TestCaseType type, string jsonString)
@@ -308,6 +494,8 @@ namespace System.Text.Json.Tests
 
             using (JsonDocument doc = stringDocBuilder?.Invoke(jsonString) ?? bytesDocBuilder?.Invoke(dataUtf8))
             {
+                Assert.NotNull(doc);
+
                 JsonElement rootElement = doc.RootElement;
 
                 Func<JToken, string> expectedFunc = null;
@@ -352,12 +540,12 @@ namespace System.Text.Json.Tests
             }
         }
 
-        private static string PrintJson(this JsonDocument document, int sizeHint=0)
+        private static string PrintJson(this JsonDocument document, int sizeHint = 0)
         {
             return PrintJson(document.RootElement, sizeHint);
         }
 
-        private static string PrintJson(this JsonElement element, int sizeHint=0)
+        private static string PrintJson(this JsonElement element, int sizeHint = 0)
         {
             StringBuilder sb = new StringBuilder(sizeHint);
             DepthFirstAppend(sb, element);
@@ -374,31 +562,31 @@ namespace System.Text.Json.Tests
                 case JsonValueType.True:
                 case JsonValueType.String:
                 case JsonValueType.Number:
-                {
-                    buf.Append(element.ToString());
-                    buf.Append(", ");
-                    break;
-                }
-                case JsonValueType.Object:
-                {
-                    foreach (JsonProperty prop in element.EnumerateObject())
                     {
-                        buf.Append(prop.Name);
+                        buf.Append(element.ToString());
                         buf.Append(", ");
-                        DepthFirstAppend(buf, prop.Value);
+                        break;
                     }
-
-                    break;
-                }
-                case JsonValueType.Array:
-                {
-                    foreach (JsonElement child in element.EnumerateArray())
+                case JsonValueType.Object:
                     {
-                        DepthFirstAppend(buf, child);
-                    }
+                        foreach (JsonProperty prop in element.EnumerateObject())
+                        {
+                            buf.Append(prop.Name);
+                            buf.Append(", ");
+                            DepthFirstAppend(buf, prop.Value);
+                        }
 
-                    break;
-                }
+                        break;
+                    }
+                case JsonValueType.Array:
+                    {
+                        foreach (JsonElement child in element.EnumerateArray())
+                        {
+                            DepthFirstAppend(buf, child);
+                        }
+
+                        break;
+                    }
             }
         }
 
@@ -493,6 +681,7 @@ namespace System.Text.Json.Tests
                 string street = address.GetProperty("street").GetString();
                 string city = address.GetProperty("city").GetString();
                 double zipCode = address.GetProperty("zip").GetDouble();
+                const string ThrowsAnyway = "throws-anyway";
 
                 Assert.Equal(30, age);
                 Assert.Equal("John", first);
@@ -512,6 +701,9 @@ namespace System.Text.Json.Tests
                 Assert.Throws<InvalidOperationException>(() => address.GetProperty("zip").GetString());
                 Assert.Throws<InvalidOperationException>(() => person.GetProperty("phoneNumbers").GetString());
                 Assert.Throws<InvalidOperationException>(() => person.GetString());
+                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => person.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
             }
         }
 
@@ -646,6 +838,15 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+                Assert.Throws<InvalidOperationException>(() => root.TryGetBytesFromBase64(out byte[] bytes));
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -729,6 +930,14 @@ namespace System.Text.Json.Tests
                 }
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -782,6 +991,14 @@ namespace System.Text.Json.Tests
                 Assert.Equal(value, root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -835,10 +1052,148 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
                 Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void ReadDateTimeAndDateTimeOffset(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                DateTime expectedDateTime = DateTime.Parse(expectedString);
+                DateTimeOffset expectedDateTimeOffset = DateTimeOffset.Parse(expectedString);
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.True(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.Equal(expectedDateTime, DateTimeVal);
+
+                Assert.True(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+                Assert.Equal(expectedDateTimeOffset, DateTimeOffsetVal);
+
+                Assert.Equal(expectedDateTime, root.GetDateTime());
+                Assert.Equal(expectedDateTimeOffset, root.GetDateTimeOffset());
+
+                Assert.Throws<InvalidOperationException>(() => root.GetInt32());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt32());
+                Assert.Throws<InvalidOperationException>(() => root.GetInt64());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
+                Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
+                Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
+                Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
+                Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.ValidISO8601TestsWithUtcOffset), MemberType = typeof(JsonDateTimeTestData))]
+        public static void ReadDateTimeAndDateTimeOffset_WithUtcOffset(string jsonString, string expectedString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                DateTime expectedDateTime = DateTime.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+                DateTimeOffset expectedDateTimeOffset = DateTimeOffset.ParseExact(expectedString, "O", CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.True(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.Equal(expectedDateTime, DateTimeVal);
+
+                Assert.True(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+                Assert.Equal(expectedDateTimeOffset, DateTimeOffsetVal);
+
+                Assert.Equal(expectedDateTime, root.GetDateTime());
+                Assert.Equal(expectedDateTimeOffset, root.GetDateTimeOffset());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonDateTimeTestData.InvalidISO8601Tests), MemberType = typeof(JsonDateTimeTestData))]
+        public static void ReadDateTimeAndDateTimeOffset_InvalidTests(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.False(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.False(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+
+                Assert.Throws<FormatException>(() => root.GetDateTime());
+                Assert.Throws<FormatException>(() => root.GetDateTimeOffset());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.ValidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        [MemberData(nameof(JsonGuidTestData.ValidHexGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void ReadGuid(string jsonString, string expectedStr)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{jsonString}\"");
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                Guid expected = new Guid(expectedStr);
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.True(root.TryGetGuid(out Guid GuidVal));
+                Assert.Equal(expected, GuidVal);
+
+                Assert.Equal(expected, root.GetGuid());
+
+                Assert.Throws<InvalidOperationException>(() => root.GetInt32());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt32());
+                Assert.Throws<InvalidOperationException>(() => root.GetInt64());
+                Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
+                Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
+                Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
+                Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
+                Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(JsonGuidTestData.InvalidGuidTests), MemberType = typeof(JsonGuidTestData))]
+        public static void ReadGuid_InvalidTests(string jsonString)
+        {
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes($"\"{jsonString}\"");
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8, default))
+            {
+                JsonElement root = doc.RootElement;
+
+                Assert.Equal(JsonValueType.String, root.Type);
+
+                Assert.False(root.TryGetGuid(out Guid GuidVal));
+
+                Assert.Throws<FormatException>(() => root.GetGuid());
             }
         }
 
@@ -890,6 +1245,14 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -954,6 +1317,14 @@ namespace System.Text.Json.Tests
                 Assert.Throws<FormatException>(() => root.GetUInt64());
 
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
                 Assert.Throws<InvalidOperationException>(() => root.GetArrayLength());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateArray());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
@@ -1002,6 +1373,15 @@ namespace System.Text.Json.Tests
                 Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
                 Assert.Throws<InvalidOperationException>(() => root.TryGetUInt64(out ulong _));
                 Assert.Throws<InvalidOperationException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+                Assert.Throws<InvalidOperationException>(() => root.TryGetBytesFromBase64(out byte[] _));
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+                Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+                Assert.Throws<InvalidOperationException>(() => root.GetGuid());
                 Assert.Throws<InvalidOperationException>(() => root.EnumerateObject());
                 Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
             }
@@ -1028,8 +1408,32 @@ namespace System.Text.Json.Tests
                 Assert.Throws<ObjectDisposedException>(() => root.GetUInt64());
                 Assert.Throws<ObjectDisposedException>(() => root.TryGetUInt64(out ulong _));
                 Assert.Throws<ObjectDisposedException>(() => root.GetString());
+                const string ThrowsAnyway = "throws-anyway";
+                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(ThrowsAnyway));
+                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+                Assert.Throws<ObjectDisposedException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+                Assert.Throws<ObjectDisposedException>(() => root.GetBytesFromBase64());
+                Assert.Throws<ObjectDisposedException>(() => root.TryGetBytesFromBase64(out byte[] _));
                 Assert.Throws<ObjectDisposedException>(() => root.GetBoolean());
                 Assert.Throws<ObjectDisposedException>(() => root.GetRawText());
+
+                Assert.Throws<ObjectDisposedException>(() =>
+                {
+                    Utf8JsonWriter writer = default;
+                    root.WriteValue(writer);
+                });
+
+                Assert.Throws<ObjectDisposedException>(() =>
+                {
+                    Utf8JsonWriter writer = default;
+                    root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
+                });
+
+                Assert.Throws<ObjectDisposedException>(() =>
+                {
+                    Utf8JsonWriter writer = default;
+                    root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
+                });
             }
         }
 
@@ -1052,14 +1456,41 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() => root.GetUInt64());
             Assert.Throws<InvalidOperationException>(() => root.TryGetUInt64(out ulong _));
             Assert.Throws<InvalidOperationException>(() => root.GetString());
+            const string ThrowsAnyway = "throws-anyway";
+            Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway));
+            Assert.Throws<InvalidOperationException>(() => root.ValueEquals(ThrowsAnyway.AsSpan()));
+            Assert.Throws<InvalidOperationException>(() => root.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)));
+            Assert.Throws<InvalidOperationException>(() => root.GetBytesFromBase64());
+            Assert.Throws<InvalidOperationException>(() => root.TryGetBytesFromBase64(out byte[] _));
+            Assert.Throws<InvalidOperationException>(() => root.GetDateTime());
+            Assert.Throws<InvalidOperationException>(() => root.GetDateTimeOffset());
+            Assert.Throws<InvalidOperationException>(() => root.GetGuid());
             Assert.Throws<InvalidOperationException>(() => root.GetBoolean());
             Assert.Throws<InvalidOperationException>(() => root.GetRawText());
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Utf8JsonWriter writer = default;
+                root.WriteValue(writer);
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Utf8JsonWriter writer = default;
+                root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
+            });
+
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                Utf8JsonWriter writer = default;
+                root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
+            });
         }
 
         [Fact]
         public static void CheckInvalidString()
         {
-            Assert.Throws<EncoderFallbackException>(() => JsonDocument.Parse("{ \"unpaired\uDFFE\": true }"));
+            Assert.Throws<ArgumentException>(() => JsonDocument.Parse("{ \"unpaired\uDFFE\": true }"));
         }
 
         [Theory]
@@ -1079,13 +1510,121 @@ namespace System.Text.Json.Tests
         {
             // The Arabic ligature Lam-Alef (U+FEFB) (which happens to, as a standalone, mean "no" in English)
             // is UTF-8 EF BB BB.  So let's leave out a BB and put it in quotes.
+            byte[] badUtf8 = new byte[] { 0x22, 0xEF, 0xBB, 0x22 };
+            using (JsonDocument doc = JsonDocument.Parse(badUtf8))
+            {
+                JsonElement root = doc.RootElement;
+
+                const string ErrorMessage = "Cannot transcode invalid UTF-8 JSON text to UTF-16 string.";
+                Assert.Equal(JsonValueType.String, root.Type);
+                AssertExtensions.Throws<InvalidOperationException>(() => root.GetString(), ErrorMessage);
+                Assert.Throws<InvalidOperationException>(() => root.GetRawText());
+                const string DummyString = "dummy-string";
+                Assert.False(root.ValueEquals(badUtf8));
+                Assert.False(root.ValueEquals(DummyString));
+                Assert.False(root.ValueEquals(DummyString.AsSpan()));
+                Assert.False(root.ValueEquals(Encoding.UTF8.GetBytes(DummyString)));
+            }
+        }
+
+        [Fact]
+        public static void GetBase64String_BadUtf8()
+        {
+            // The Arabic ligature Lam-Alef (U+FEFB) (which happens to, as a standalone, mean "no" in English)
+            // is UTF-8 EF BB BB.  So let's leave out a BB and put it in quotes.
             using (JsonDocument doc = JsonDocument.Parse(new byte[] { 0x22, 0xEF, 0xBB, 0x22 }))
             {
                 JsonElement root = doc.RootElement;
 
                 Assert.Equal(JsonValueType.String, root.Type);
-                Assert.Throws<InvalidOperationException>(() => root.GetString());
-                Assert.Throws<InvalidOperationException>(() => root.GetRawText());
+                Assert.Throws<FormatException>(() => root.GetBytesFromBase64());
+                Assert.False(root.TryGetBytesFromBase64(out byte[] value));
+                Assert.Null(value);
+            }
+        }
+
+        [Fact]
+        public static void GetBase64Unescapes()
+        {
+            string jsonString = "\"\\u0031234\""; // equivalent to "\"1234\""
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8))
+            {
+                byte[] expected = Convert.FromBase64String("1234"); // new byte[3] { 215, 109, 248 }
+
+                Assert.Equal(expected, doc.RootElement.GetBytesFromBase64());
+
+                Assert.True(doc.RootElement.TryGetBytesFromBase64(out byte[] value));
+                Assert.Equal(expected, value);
+            }
+        }
+
+        [Theory]
+        [InlineData("\"ABC=\"")]
+        [InlineData("\"AB+D\"")]
+        [InlineData("\"ABCD\"")]
+        [InlineData("\"ABC/\"")]
+        [InlineData("\"++++\"")]
+        [InlineData(null)]  // Large randomly generated string
+        public static void ReadBase64String(string jsonString)
+        {
+            if (jsonString == null)
+            {
+                var random = new Random(42);
+                var charArray = new char[502];
+                charArray[0] = '"';
+                for (int i = 1; i < charArray.Length; i++)
+                {
+                    charArray[i] = (char)random.Next('A', 'Z'); // ASCII values (between 65 and 90) that constitute valid base 64 string.
+                }
+                charArray[charArray.Length - 1] = '"';
+                jsonString = new string(charArray);
+            }
+
+            byte[] expected = Convert.FromBase64String(jsonString.AsSpan(1, jsonString.Length - 2).ToString());
+
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                Assert.Equal(expected, doc.RootElement.GetBytesFromBase64());
+
+                Assert.True(doc.RootElement.TryGetBytesFromBase64(out byte[] value));
+                Assert.Equal(expected, value);
+            }
+        }
+
+        [Theory]
+        [InlineData("\"ABC===\"")]
+        [InlineData("\"ABC\"")]
+        [InlineData("\"ABC!\"")]
+        [InlineData(null)]  // Large randomly generated string
+        public static void InvalidBase64(string jsonString)
+        {
+            if (jsonString == null)
+            {
+                var random = new Random(42);
+                var charArray = new char[500];
+                charArray[0] = '"';
+                for (int i = 1; i < charArray.Length; i++)
+                {
+                    charArray[i] = (char)random.Next('?', '\\'); // ASCII values (between 63 and 91) that don't need to be escaped.
+                }
+
+                charArray[256] = '\\';
+                charArray[257] = '"';
+                charArray[charArray.Length - 1] = '"';
+                jsonString = new string(charArray);
+            }
+
+            byte[] dataUtf8 = Encoding.UTF8.GetBytes(jsonString);
+
+            using (JsonDocument doc = JsonDocument.Parse(dataUtf8))
+            {
+                Assert.False(doc.RootElement.TryGetBytesFromBase64(out byte[] value));
+                Assert.Null(value);
+
+                Assert.Throws<FormatException>(() => doc.RootElement.GetBytesFromBase64());
             }
         }
 
@@ -1201,22 +1740,22 @@ namespace System.Text.Json.Tests
         [InlineData("[ 1")]
         public static Task CheckUnparsable(string json)
         {
-            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(json));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(json));
 
             byte[] utf8 = Encoding.UTF8.GetBytes(json);
-            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(utf8));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(utf8));
 
             ReadOnlySequence<byte> singleSeq = new ReadOnlySequence<byte>(utf8);
-            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(singleSeq));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(singleSeq));
 
             ReadOnlySequence<byte> multiSegment = JsonTestHelper.SegmentInto(utf8, 6);
-            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(multiSegment));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(multiSegment));
 
             Stream stream = new MemoryStream(utf8);
-            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(stream));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(stream));
 
             stream.Seek(0, SeekOrigin.Begin);
-            return Assert.ThrowsAsync<JsonReaderException>(() => JsonDocument.ParseAsync(stream));
+            return Assert.ThrowsAnyAsync<JsonException>(() => JsonDocument.ParseAsync(stream));
         }
 
         [Fact]
@@ -1247,7 +1786,60 @@ namespace System.Text.Json.Tests
 
             string badJson = $"[{okayJson}]";
 
-            Assert.Throws<JsonReaderException>(() => JsonDocument.Parse(badJson));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(badJson));
+        }
+
+        [Fact]
+        public static void HonorReaderOptionsMaxDepth()
+        {
+            const int OkayCount = 65;
+            string okayJson = new string('[', OkayCount) + "2" + new string(']', OkayCount);
+            int depth = 0;
+
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = OkayCount }))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Array, root.Type);
+
+                JsonElement cur = root;
+
+                while (cur.Type == JsonValueType.Array)
+                {
+                    Assert.Equal(1, cur.GetArrayLength());
+                    cur = cur[0];
+                    depth++;
+                }
+
+                Assert.Equal(JsonValueType.Number, cur.Type);
+                Assert.Equal(2, cur.GetInt32());
+                Assert.Equal(OkayCount, depth);
+            }
+
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = 32 }));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = 0 }));
+            Assert.ThrowsAny<JsonException>(() => JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = 64 }));
+        }
+
+        [Fact]
+        public static void LargeMaxDepthIsAllowed()
+        {
+            // MaxDepthOverflow * 8 > int.MaxValue
+            const int MaxDepthOverflow = 1 << 28; //268_435_456;
+
+            string okayJson = "[]";
+
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = MaxDepthOverflow }))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Array, root.Type);
+            }
+
+            using (JsonDocument doc = JsonDocument.Parse(okayJson, new JsonReaderOptions { MaxDepth = int.MaxValue }))
+            {
+                JsonElement root = doc.RootElement;
+                Assert.Equal(JsonValueType.Array, root.Type);
+            }
         }
 
         [Fact]
@@ -1283,6 +1875,24 @@ namespace System.Text.Json.Tests
                 "readerOptions",
                 () => JsonDocument.Parse(stream, options));
 
+            AssertExtensions.Throws<ArgumentException>(
+                "reader",
+                () =>
+                {
+                    JsonReaderState state = new JsonReaderState(options);
+                    Utf8JsonReader reader = new Utf8JsonReader(utf8, isFinalBlock: false, state);
+                    JsonDocument.ParseValue(ref reader);
+                });
+
+            AssertExtensions.Throws<ArgumentException>(
+                "reader",
+                () =>
+                {
+                    JsonReaderState state = new JsonReaderState(options);
+                    Utf8JsonReader reader = new Utf8JsonReader(utf8, isFinalBlock: false, state);
+                    JsonDocument.TryParseValue(ref reader, out _);
+                });
+
             stream.Seek(0, SeekOrigin.Begin);
             return AssertExtensions.ThrowsAsync<ArgumentException>(
                 "readerOptions",
@@ -1301,6 +1911,17 @@ namespace System.Text.Json.Tests
                 AssertExtensions.Throws<ArgumentNullException>(
                     "propertyName",
                     () => doc.RootElement.TryGetProperty((string)null, out _));
+            }
+        }
+
+        [Fact]
+        public static void GetPropertyInvalidUtf16()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("{\"name\":\"value\"}"))
+            {
+                Assert.Throws<ArgumentException>(() => doc.RootElement.GetProperty("unpaired\uDFFE"));
+
+                Assert.Throws<ArgumentException>(() => doc.RootElement.TryGetProperty("unpaired\uDFFE", out _));
             }
         }
 
@@ -1418,8 +2039,8 @@ namespace System.Text.Json.Tests
         public static void GetRawText()
         {
             const string json =
-                // Don't let there be a newline before the first embedded quote,
-                // because the index would change across CRLF vs LF compile environments.
+// Don't let there be a newline before the first embedded quote,
+// because the index would change across CRLF vs LF compile environments.
 @"{  ""  weird  property  name""
                   :
        {
@@ -1903,6 +2524,502 @@ namespace System.Text.Json.Tests
         }
 
         [Fact]
+        public static void ParseDefaultReader()
+        {
+            Assert.ThrowsAny<JsonException>(() =>
+            {
+                Utf8JsonReader reader = default;
+                JsonDocument.ParseValue(ref reader);
+            });
+
+            {
+                Utf8JsonReader reader = default;
+                Assert.False(JsonDocument.TryParseValue(ref reader, out JsonDocument document));
+                Assert.Null(document);
+            }
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseReaderSuccessfulCases))]
+        public static void ParseReaderAtNumber(ParseReaderScenario scenario, int segmentCount)
+        {
+            ParseReaderInScenario(
+                scenario,
+                "963258741012365478965412325874125896325874123654789",
+                JsonTokenType.Number,
+                segmentCount);
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseReaderSuccessfulCases))]
+        public static void ParseReaderAtString(ParseReaderScenario scenario, int segmentCount)
+        {
+            ParseReaderInScenario(
+                scenario,
+                "\"Now is the time for all good men to come to the aid of their country\"",
+                JsonTokenType.String,
+                segmentCount);
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseReaderSuccessfulCases))]
+        public static void ParseReaderAtObject(ParseReaderScenario scenario, int segmentCount)
+        {
+            ParseReaderInScenario(
+                scenario,
+                "{ \"hello\": 3, \"world\": false }",
+                JsonTokenType.StartObject,
+                segmentCount);
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseReaderSuccessfulCases))]
+        public static void ParseReaderAtArray(ParseReaderScenario scenario, int segmentCount)
+        {
+            ParseReaderInScenario(
+                scenario,
+                "[ { \"hello\": 3, \"world\": false }, 5, 2, 1, \"hello\", null, false, true ]",
+                JsonTokenType.StartArray,
+                segmentCount);
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseReaderSuccessfulCases))]
+        public static void ParseReaderAtTrue(ParseReaderScenario scenario, int segmentCount)
+        {
+            ParseReaderInScenario(scenario, "true", JsonTokenType.True, segmentCount);
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseReaderSuccessfulCases))]
+        public static void ParseReaderAtFalse(ParseReaderScenario scenario, int segmentCount)
+        {
+            ParseReaderInScenario(scenario, "false", JsonTokenType.False, segmentCount);
+        }
+
+        [Theory]
+        [MemberData(nameof(ParseReaderSuccessfulCases))]
+        public static void ParseReaderAtNull(ParseReaderScenario scenario, int segmentCount)
+        {
+            ParseReaderInScenario(scenario, "null", JsonTokenType.Null, segmentCount);
+        }
+
+        private static void ParseReaderInScenario(
+            ParseReaderScenario scenario,
+            string valueJson,
+            JsonTokenType tokenType,
+            int segmentCount)
+        {
+            switch (scenario)
+            {
+                case ParseReaderScenario.NotStarted:
+                case ParseReaderScenario.StartAtFirstToken:
+                    ParseReaderAtStart(
+                        scenario == ParseReaderScenario.StartAtFirstToken,
+                        valueJson,
+                        tokenType,
+                        segmentCount);
+                    break;
+                case ParseReaderScenario.StartAtNestedValue:
+                    ParseReaderAtNestedValue(valueJson, tokenType, segmentCount);
+                    break;
+                case ParseReaderScenario.StartAtPropertyName:
+                    ParseReaderAtPropertyName(valueJson, tokenType, segmentCount);
+                    break;
+            }
+        }
+
+        private static void ParseReaderAtStart(
+            bool readFirst,
+            string valueJson,
+            JsonTokenType tokenType,
+            int segmentCount)
+        {
+            string json = $"      {valueJson}   5";
+            byte[] utf8 = Encoding.UTF8.GetBytes(json);
+            JsonReaderState state = default;
+
+            BuildSegmentedReader(out Utf8JsonReader reader, utf8, segmentCount, state);
+
+            if (readFirst)
+            {
+                Assert.True(reader.Read(), "Move to first token");
+            }
+
+            using (JsonDocument document = JsonDocument.ParseValue(ref reader))
+            {
+                Assert.Equal(valueJson, document.RootElement.GetRawText());
+            }
+
+            Exception ex;
+            long position = reader.BytesConsumed;
+
+            try
+            {
+                reader.Read();
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.NotNull(ex);
+            Assert.IsAssignableFrom<JsonException>(ex);
+
+            BuildSegmentedReader(out reader, utf8.AsMemory((int)position), 0, state, true);
+
+            Assert.True(reader.Read(), "Read trailing number");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+        }
+
+        private static void ParseReaderAtNestedValue(
+            string valueJson,
+            JsonTokenType tokenType,
+            int segmentCount)
+        {
+            // Open-ended value (missing final ])
+            string json = $"[ 0, 1, 2, 3, 4, {valueJson}     , 6, 7, 8, 9 ";
+            byte[] utf8 = Encoding.UTF8.GetBytes(json);
+            JsonReaderState state = default;
+
+            BuildSegmentedReader(out Utf8JsonReader reader, utf8, segmentCount, state);
+
+            Assert.True(reader.Read(), "Read [");
+            Assert.Equal(JsonTokenType.StartArray, reader.TokenType);
+            Assert.True(reader.Read(), "Read 0");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 1");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 2");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 3");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 4");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+
+            Assert.True(reader.Read(), "Read desired value");
+            Assert.Equal(tokenType, reader.TokenType);
+            long currentPosition = reader.BytesConsumed;
+
+            using (JsonDocument document = JsonDocument.ParseValue(ref reader))
+            {
+                Assert.Equal(valueJson, document.RootElement.GetRawText());
+            }
+
+            switch (tokenType)
+            {
+                case JsonTokenType.StartArray:
+                    Assert.Equal(JsonTokenType.EndArray, reader.TokenType);
+                    Assert.InRange(reader.BytesConsumed, currentPosition + 1, long.MaxValue);
+                    break;
+                case JsonTokenType.StartObject:
+                    Assert.Equal(JsonTokenType.EndObject, reader.TokenType);
+                    Assert.InRange(reader.BytesConsumed, currentPosition + 1, long.MaxValue);
+                    break;
+                default:
+                    Assert.Equal(tokenType, reader.TokenType);
+                    Assert.Equal(currentPosition, reader.BytesConsumed);
+                    break;
+            }
+
+            Assert.True(reader.Read(), "Read 6");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 7");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 8");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 9");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+
+            Assert.False(reader.Read());
+        }
+
+        private static void ParseReaderAtPropertyName(
+            string valueJson,
+            JsonTokenType tokenType,
+            int segmentCount)
+        {
+            // Open-ended value
+            string json = $"{{ \"this\": [ {{ \"is\": {{ \"the\": {{ \"target\": {valueJson}    , \"capiche\" : [ 6, 7, 8, 9 ] ";
+            byte[] utf8 = Encoding.UTF8.GetBytes(json);
+            JsonReaderState state = default;
+
+            BuildSegmentedReader(out Utf8JsonReader reader, utf8, segmentCount, state);
+
+            Assert.True(reader.Read(), "Read root object start");
+            Assert.Equal(JsonTokenType.StartObject, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"this\" property name");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"this\" StartArray");
+            Assert.Equal(JsonTokenType.StartArray, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"this\" StartObject");
+            Assert.Equal(JsonTokenType.StartObject, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"is\" property name");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"is\" StartObject");
+            Assert.Equal(JsonTokenType.StartObject, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"the\" property name");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"the\" StartObject");
+            Assert.Equal(JsonTokenType.StartObject, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"target\" property name");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+
+            long currentPosition = reader.BytesConsumed;
+
+            using (JsonDocument document = JsonDocument.ParseValue(ref reader))
+            {
+                Assert.Equal(valueJson, document.RootElement.GetRawText());
+            }
+
+            // The reader will have moved.
+            Assert.InRange(reader.BytesConsumed, currentPosition + 1, long.MaxValue);
+
+            switch (tokenType)
+            {
+                case JsonTokenType.StartArray:
+                    Assert.Equal(JsonTokenType.EndArray, reader.TokenType);
+                    break;
+                case JsonTokenType.StartObject:
+                    Assert.Equal(JsonTokenType.EndObject, reader.TokenType);
+                    break;
+                default:
+                    Assert.Equal(tokenType, reader.TokenType);
+                    break;
+            }
+
+            Assert.True(reader.Read(), "Read \"capiche\" property name");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"capiche\" StartArray");
+            Assert.Equal(JsonTokenType.StartArray, reader.TokenType);
+            Assert.True(reader.Read(), "Read 6");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 7");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 8");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read 9");
+            Assert.Equal(JsonTokenType.Number, reader.TokenType);
+            Assert.True(reader.Read(), "Read \"capiche\" EndArray");
+            Assert.Equal(JsonTokenType.EndArray, reader.TokenType);
+
+            Assert.False(reader.Read());
+        }
+
+        [Theory]
+        [InlineData(JsonTokenType.EndObject)]
+        [InlineData(JsonTokenType.EndArray)]
+        public static void ParseReaderAtInvalidStart(JsonTokenType tokenType)
+        {
+            string jsonString;
+
+            switch (tokenType)
+            {
+                case JsonTokenType.EndObject:
+                    jsonString = "[ { } ]";
+                    break;
+                case JsonTokenType.EndArray:
+                    jsonString = "[ [ ] ]";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(tokenType));
+            }
+
+            byte[] jsonUtf8 = Encoding.UTF8.GetBytes(jsonString);
+            JsonReaderState state = default;
+
+            Utf8JsonReader reader = new Utf8JsonReader(
+                jsonUtf8,
+                isFinalBlock: false,
+                state);
+
+            Assert.True(reader.Read(), "Move to first [");
+            Assert.True(reader.Read(), "Move to internal start");
+            Assert.True(reader.Read(), "Move to internal end");
+
+            Exception ex;
+
+            long initialPosition = reader.BytesConsumed;
+
+            try
+            {
+                using (JsonDocument.ParseValue(ref reader))
+                {
+                }
+
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.NotNull(ex);
+            Assert.IsAssignableFrom<JsonException>(ex);
+
+            Assert.Equal(initialPosition, reader.BytesConsumed);
+
+            Assert.False(JsonDocument.TryParseValue(ref reader, out JsonDocument doc));
+            Assert.Null(doc);
+            Assert.Equal(initialPosition, reader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(15)]
+        public static void ParseReaderThrowsWhileReading(int segmentCount)
+        {
+            const string jsonString = "[ { \"this\": { \"is\": [ invalid ] } } ]";
+            byte[] utf8Json = Encoding.UTF8.GetBytes(jsonString);
+            JsonReaderState state = default;
+
+            BuildSegmentedReader(out Utf8JsonReader reader, utf8Json, segmentCount, state);
+
+            Assert.True(reader.Read(), "Read StartArray");
+            Assert.True(reader.Read(), "Read StartObject");
+            Assert.True(reader.Read(), "Read \"this\" PropertyName");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            long startPosition = reader.BytesConsumed;
+
+            Exception ex;
+
+            try
+            {
+                using (JsonDocument.ParseValue(ref reader))
+                {
+                }
+
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.NotNull(ex);
+            Assert.IsAssignableFrom<JsonException>(ex);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+
+            JsonDocument doc = null;
+
+            try
+            {
+                JsonDocument.TryParseValue(ref reader, out doc);
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.NotNull(ex);
+            Assert.IsAssignableFrom<JsonException>(ex);
+            Assert.Null(doc);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(15)]
+        public static void ParseReaderTerminatesWhileReading(int segmentCount)
+        {
+            const string jsonString = "[ { \"this\": { \"is\": [ ";
+            byte[] utf8Json = Encoding.UTF8.GetBytes(jsonString);
+            JsonReaderState state = default;
+
+            BuildSegmentedReader(out Utf8JsonReader reader, utf8Json, segmentCount, state);
+
+            Assert.True(reader.Read(), "Read StartArray");
+            Assert.True(reader.Read(), "Read StartObject");
+            Assert.True(reader.Read(), "Read \"this\" PropertyName");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            long startPosition = reader.BytesConsumed;
+
+            Exception ex;
+
+            try
+            {
+                using (JsonDocument.ParseValue(ref reader))
+                {
+                }
+
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.NotNull(ex);
+            Assert.IsAssignableFrom<JsonException>(ex);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+
+            Assert.False(JsonDocument.TryParseValue(ref reader, out JsonDocument doc));
+            Assert.Null(doc);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+        }
+
+        [Theory]
+        [InlineData(0)]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(15)]
+        public static void ParseReaderTerminatesAfterPropertyName(int segmentCount)
+        {
+            const string jsonString = "[ { \"this\": ";
+            byte[] utf8Json = Encoding.UTF8.GetBytes(jsonString);
+            JsonReaderState state = default;
+
+            BuildSegmentedReader(out Utf8JsonReader reader, utf8Json, segmentCount, state);
+
+            Assert.True(reader.Read(), "Read StartArray");
+            Assert.True(reader.Read(), "Read StartObject");
+            Assert.True(reader.Read(), "Read \"this\" PropertyName");
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            long startPosition = reader.BytesConsumed;
+
+            Exception ex;
+
+            try
+            {
+                using (JsonDocument.ParseValue(ref reader))
+                {
+                }
+
+                ex = null;
+            }
+            catch (Exception e)
+            {
+                ex = e;
+            }
+
+            Assert.NotNull(ex);
+            Assert.IsAssignableFrom<JsonException>(ex);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+
+            Assert.False(JsonDocument.TryParseValue(ref reader, out JsonDocument doc));
+            Assert.Null(doc);
+
+            Assert.Equal(JsonTokenType.PropertyName, reader.TokenType);
+            Assert.Equal(startPosition, reader.BytesConsumed);
+        }
+
+        [Fact]
         public static void EnsureResizeSucceeds()
         {
             // This test increases coverage, so it's based on a lot of implementation detail,
@@ -1962,6 +3079,233 @@ namespace System.Text.Json.Tests
                     Assert.Equal(i, int.Parse(root[i].GetString()));
                 }
             }
+        }
+
+        [Fact]
+        public static void ValueEquals_Null_TrueForNullFalseForEmpty()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("   null   "))
+            {
+                JsonElement jElement = doc.RootElement;
+                Assert.True(jElement.ValueEquals((string)null));
+                Assert.True(jElement.ValueEquals(default(ReadOnlySpan<char>)));
+                Assert.True(jElement.ValueEquals((ReadOnlySpan<byte>)null));
+                Assert.True(jElement.ValueEquals(default(ReadOnlySpan<byte>)));
+                
+                Assert.False(jElement.ValueEquals(Array.Empty<byte>()));
+                Assert.False(jElement.ValueEquals(""));
+                Assert.False(jElement.ValueEquals("".AsSpan()));
+            }
+        }
+
+        [Fact]
+        public static void ValueEquals_EmptyJsonString_True()
+        {
+            using (JsonDocument doc = JsonDocument.Parse("\"\""))
+            {
+                JsonElement jElement = doc.RootElement;
+                Assert.True(jElement.ValueEquals(""));
+                Assert.True(jElement.ValueEquals("".AsSpan()));
+                Assert.True(jElement.ValueEquals(default(ReadOnlySpan<char>)));
+                Assert.True(jElement.ValueEquals(default(ReadOnlySpan<byte>)));
+                Assert.True(jElement.ValueEquals(Array.Empty<byte>()));
+            }
+        }
+
+        [Fact]
+        public static void ValueEquals_TestTextEqualsLargeMatch_True()
+        {
+            string lookup = new string('a', 320);
+            string jsonString = "\"" + lookup + "\"";
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                Assert.True(jElement.ValueEquals((string)lookup));
+                Assert.True(jElement.ValueEquals((ReadOnlySpan<char>)lookup.AsSpan()));
+            }
+        }
+
+        [Theory]
+        [InlineData("\"conne\\u0063tionId\"", "connectionId")]
+        [InlineData("\"connectionId\"", "connectionId")]
+        [InlineData("\"123\"", "123")]
+        [InlineData("\"My name is \\\"Ahson\\\"\"", "My name is \"Ahson\"")]
+        public static void ValueEquals_JsonTokenStringType_True(string jsonString, string expected)
+        {
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                Assert.True(jElement.ValueEquals(expected));
+                Assert.True(jElement.ValueEquals(expected.AsSpan()));
+                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(expected);
+                Assert.True(jElement.ValueEquals(expectedGetBytes));
+            }
+        }
+
+        [Theory]
+        [InlineData("\"conne\\u0063tionId\"", "c")]
+        public static void ValueEquals_DestinationTooSmallComparesEscaping_False(string jsonString, string other)
+        {
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                Assert.False(jElement.ValueEquals(other));
+                Assert.False(jElement.ValueEquals(other.AsSpan()));
+                byte[] otherGetBytes = Encoding.UTF8.GetBytes(other);
+                Assert.False(jElement.ValueEquals(otherGetBytes));
+            }
+        }
+
+        [Theory]
+        [ActiveIssue(38178)]
+        [InlineData("\"hello\"", new char[1] { (char)0xDC01 })]    // low surrogate - invalid
+        [InlineData("\"hello\"", new char[1] { (char)0xD801 })]    // high surrogate - missing pair
+        public static void InvalidUTF16Search(string jsonString, char[] lookup)
+        {
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                Assert.False(jElement.ValueEquals(lookup));
+            }
+        }
+
+        [Theory]
+        [InlineData("\"connectionId\"", "\"conne\\u0063tionId\"")]
+        [InlineData("\"conne\\u0063tionId\"", "connecxionId")] // intentionally making mismatch after escaped character
+        [InlineData("\"conne\\u0063tionId\"", "bonnectionId")] // intentionally changing the expected starting character
+        public static void ValueEquals_JsonTokenStringType_False(string jsonString, string otherText)
+        {
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                Assert.False(jElement.ValueEquals(otherText));
+                Assert.False(jElement.ValueEquals(otherText.AsSpan()));
+                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(otherText);
+                Assert.False(jElement.ValueEquals(expectedGetBytes));
+            }
+        }
+
+        [Theory]
+        [InlineData("{}")]
+        [InlineData("{\"\" : \"\"}")]
+        [InlineData("{\"sample\" : \"\"}")]
+        [InlineData("{\"sample\" : null}")]
+        [InlineData("{\"sample\" : \"sample-value\"}")]
+        [InlineData("{\"connectionId\" : \"123\"}")]
+        public static void ValueEquals_NotString_Throws(string jsonString)
+        {
+            const string ErrorMessage = "The requested operation requires an element of type 'String', but the target element has type 'Object'.";
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                const string ThrowsAnyway = "throws-anyway";
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway.AsSpan()), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)), ErrorMessage);
+            }
+        }
+
+        [Fact]
+        public static void NameEquals_GivenPropertyAndValue_TrueForPropertyName()
+        {
+            string jsonString = $"{{ \"aPropertyName\" : \"itsValue\" }}";
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                JsonProperty property = jElement.EnumerateObject().First();
+
+                string text = "aPropertyName";
+                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(text);
+                Assert.True(property.NameEquals(text));
+                Assert.True(property.NameEquals(text.AsSpan()));
+                Assert.True(property.NameEquals(expectedGetBytes));
+
+                text = "itsValue";
+                expectedGetBytes = Encoding.UTF8.GetBytes(text);
+                Assert.False(property.NameEquals(text));
+                Assert.False(property.NameEquals(text.AsSpan()));
+                Assert.False(property.NameEquals(expectedGetBytes));
+            }
+        }
+
+        [Theory]
+        [InlineData("conne\\u0063tionId", "connectionId")]
+        [InlineData("connectionId", "connectionId")]
+        [InlineData("123", "123")]
+        [InlineData("My name is \\\"Ahson\\\"", "My name is \"Ahson\"")]
+        public static void NameEquals_UseGoodMatches_True(string propertyName, string otherText)
+        {
+            string jsonString = $"{{ \"{propertyName}\" : \"itsValue\" }}";
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                JsonProperty property = jElement.EnumerateObject().First();
+
+                byte[] expectedGetBytes = Encoding.UTF8.GetBytes(otherText);
+                Assert.True(property.NameEquals(otherText));
+                Assert.True(property.NameEquals(otherText.AsSpan()));
+                Assert.True(property.NameEquals(expectedGetBytes));
+            }
+        }
+
+        [Fact]
+        public static void NameEquals_Empty_Throws()
+        {
+            const string jsonString = "{\"\" : \"some-value\"}";
+            const string ErrorMessage = "The requested operation requires an element of type 'String', but the target element has type 'Object'.";
+            using (JsonDocument doc = JsonDocument.Parse(jsonString))
+            {
+                JsonElement jElement = doc.RootElement;
+                const string ThrowsAnyway = "throws-anyway";
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(ThrowsAnyway.AsSpan()), ErrorMessage);
+                AssertExtensions.Throws<InvalidOperationException>(() => jElement.ValueEquals(Encoding.UTF8.GetBytes(ThrowsAnyway)), ErrorMessage);
+            }
+        }
+
+        [Theory]
+        [InlineData("hello")]
+        [InlineData("")]
+        [InlineData(null)]
+        public static void NameEquals_InvalidInstance_Throws(string text)
+        {
+            const string ErrorMessage = "Operation is not valid due to the current state of the object.";
+            JsonProperty prop = default;
+            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text), ErrorMessage);
+            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(text.AsSpan()), ErrorMessage);
+            byte[] expectedGetBytes = text == null ? null : Encoding.UTF8.GetBytes(text);
+            AssertExtensions.Throws<InvalidOperationException>(() => prop.NameEquals(expectedGetBytes), ErrorMessage);
+        }
+
+        private static void BuildSegmentedReader(
+            out Utf8JsonReader reader,
+            ReadOnlyMemory<byte> data,
+            int segmentCount,
+            in JsonReaderState state,
+            bool isFinalBlock = false)
+        {
+            if (segmentCount == 0)
+            {
+                reader = new Utf8JsonReader(
+                    data.Span,
+                    isFinalBlock,
+                    state);
+            }
+            else if (segmentCount == 1)
+            {
+                reader = new Utf8JsonReader(
+                    new ReadOnlySequence<byte>(data),
+                    isFinalBlock,
+                    state);
+            }
+            else
+            {
+                reader = new Utf8JsonReader(
+                    JsonTestHelper.SegmentInto(data, segmentCount),
+                    isFinalBlock,
+                    state);
+            }
+
         }
 
         private static string GetExpectedConcat(TestCaseType testCaseType, string jsonString)

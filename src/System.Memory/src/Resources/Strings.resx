@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<root>
+﻿<root>
   <!-- 
     Microsoft ResX Schema 
     
@@ -143,5 +142,8 @@
   </data>
   <data name="UnexpectedSegmentType" xml:space="preserve">
     <value>Unexpected segment type.</value>
+  </data>
+  <data name="BufferWriterAdvancedTooFar" xml:space="preserve">
+    <value>Cannot advance past the end of the buffer, which has a size of {0}.</value>
   </data>
 </root>

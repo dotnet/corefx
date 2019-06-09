@@ -201,7 +201,7 @@ namespace System.Net.Sockets
                 saea.SetBuffer(buffer);
                 saea.SocketFlags = socketFlags;
                 saea.WrapExceptionsInIOExceptions = fromNetworkStream;
-                return saea.ReceiveAsync(this);
+                return saea.ReceiveAsync(this, cancellationToken);
             }
             else
             {
@@ -350,7 +350,7 @@ namespace System.Net.Sockets
                 saea.SetBuffer(MemoryMarshal.AsMemory(buffer));
                 saea.SocketFlags = socketFlags;
                 saea.WrapExceptionsInIOExceptions = false;
-                return saea.SendAsync(this);
+                return saea.SendAsync(this, cancellationToken);
             }
             else
             {
@@ -828,6 +828,8 @@ namespace System.Net.Sockets
             /// it's already being reused by someone else.
             /// </remarks>
             private short _token;
+            /// <summary>The cancellation token used for the current operation.</summary>
+            private CancellationToken _cancellationToken;
 
             /// <summary>Initializes the event args.</summary>
             public AwaitableSocketAsyncEventArgs() :
@@ -842,6 +844,7 @@ namespace System.Net.Sockets
 
             private void Release()
             {
+                _cancellationToken = default;
                 _token++;
                 Volatile.Write(ref _continuation, s_availableSentinel);
             }
@@ -863,7 +866,7 @@ namespace System.Net.Sockets
                     ExecutionContext ec = _executionContext;
                     if (ec == null)
                     {
-                        InvokeContinuation(c, continuationState, forceAsync: false);
+                        InvokeContinuation(c, continuationState, forceAsync: false, requiresExecutionContextFlow: false);
                     }
                     else
                     {
@@ -874,7 +877,7 @@ namespace System.Net.Sockets
                         ExecutionContext.Run(ec, runState =>
                         {
                             var t = (Tuple<AwaitableSocketAsyncEventArgs, Action<object>, object>)runState;
-                            t.Item1.InvokeContinuation(t.Item2, t.Item3, forceAsync: false);
+                            t.Item1.InvokeContinuation(t.Item2, t.Item3, forceAsync: false, requiresExecutionContextFlow: false);
                         }, Tuple.Create(this, c, continuationState));
                     }
                 }
@@ -882,12 +885,13 @@ namespace System.Net.Sockets
 
             /// <summary>Initiates a receive operation on the associated socket.</summary>
             /// <returns>This instance.</returns>
-            public ValueTask<int> ReceiveAsync(Socket socket)
+            public ValueTask<int> ReceiveAsync(Socket socket, CancellationToken cancellationToken)
             {
                 Debug.Assert(Volatile.Read(ref _continuation) == null, $"Expected null continuation to indicate reserved for use");
 
-                if (socket.ReceiveAsync(this))
+                if (socket.ReceiveAsync(this, cancellationToken))
                 {
+                    _cancellationToken = cancellationToken;
                     return new ValueTask<int>(this, _token);
                 }
 
@@ -903,12 +907,13 @@ namespace System.Net.Sockets
 
             /// <summary>Initiates a send operation on the associated socket.</summary>
             /// <returns>This instance.</returns>
-            public ValueTask<int> SendAsync(Socket socket)
+            public ValueTask<int> SendAsync(Socket socket, CancellationToken cancellationToken)
             {
                 Debug.Assert(Volatile.Read(ref _continuation) == null, $"Expected null continuation to indicate reserved for use");
 
-                if (socket.SendAsync(this))
+                if (socket.SendAsync(this, cancellationToken))
                 {
+                    _cancellationToken = cancellationToken;
                     return new ValueTask<int>(this, _token);
                 }
 
@@ -993,9 +998,10 @@ namespace System.Net.Sockets
                     // avoid a stack dive.  However, since all of the queueing mechanisms flow
                     // ExecutionContext, and since we're still in the same context where we
                     // captured it, we can just ignore the one we captured.
+                    bool requiresExecutionContextFlow = _executionContext != null;
                     _executionContext = null;
                     UserToken = null; // we have the state in "state"; no need for the one in UserToken
-                    InvokeContinuation(continuation, state, forceAsync: true);
+                    InvokeContinuation(continuation, state, forceAsync: true, requiresExecutionContextFlow);
                 }
                 else if (prevContinuation != null)
                 {
@@ -1005,7 +1011,7 @@ namespace System.Net.Sockets
                 }
             }
 
-            private void InvokeContinuation(Action<object> continuation, object state, bool forceAsync)
+            private void InvokeContinuation(Action<object> continuation, object state, bool forceAsync, bool requiresExecutionContextFlow)
             {
                 object scheduler = _scheduler;
                 _scheduler = null;
@@ -1028,7 +1034,14 @@ namespace System.Net.Sockets
                 }
                 else if (forceAsync)
                 {
-                    ThreadPool.QueueUserWorkItem(continuation, state, preferLocal: true);
+                    if (requiresExecutionContextFlow)
+                    {
+                        ThreadPool.QueueUserWorkItem(continuation, state, preferLocal: true);
+                    }
+                    else
+                    {
+                        ThreadPool.UnsafeQueueUserWorkItem(continuation, state, preferLocal: true);
+                    }
                 }
                 else
                 {
@@ -1051,12 +1064,13 @@ namespace System.Net.Sockets
 
                 SocketError error = SocketError;
                 int bytes = BytesTransferred;
+                CancellationToken cancellationToken = _cancellationToken;
 
                 Release();
 
                 if (error != SocketError.Success)
                 {
-                    ThrowException(error);
+                    ThrowException(error, cancellationToken);
                 }
                 return bytes;
             }
@@ -1069,12 +1083,13 @@ namespace System.Net.Sockets
                 }
 
                 SocketError error = SocketError;
+                CancellationToken cancellationToken = _cancellationToken;
 
                 Release();
 
                 if (error != SocketError.Success)
                 {
-                    ThrowException(error);
+                    ThrowException(error, cancellationToken);
                 }
             }
 
@@ -1082,7 +1097,15 @@ namespace System.Net.Sockets
 
             private void ThrowMultipleContinuationsException() => throw new InvalidOperationException(SR.InvalidOperation_MultipleContinuations);
 
-            private void ThrowException(SocketError error) => throw CreateException(error);
+            private void ThrowException(SocketError error, CancellationToken cancellationToken)
+            {
+                if (error == SocketError.OperationAborted)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+
+                throw CreateException(error);
+            }
 
             private Exception CreateException(SocketError error)
             {

@@ -9,28 +9,33 @@ using System.Reflection;
 using System.Runtime.Remoting;
 using System.Security;
 using System.Security.Permissions;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 
 namespace System.Tests
 {
+    class AGenericClass<T>
+    {
+    }
+
     public partial class AppDomainTests
     {
         [Fact]
         public void GetSetupInformation()
         {
-            RemoteInvoke(() => {
+            RemoteExecutor.Invoke(() => {
                 Assert.Equal(AppContext.BaseDirectory, AppDomain.CurrentDomain.SetupInformation.ApplicationBase);
                 Assert.Equal(AppContext.TargetFrameworkName, AppDomain.CurrentDomain.SetupInformation.TargetFrameworkName);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }
 
         [Fact]
         public static void GetPermissionSet()
         {
-            RemoteInvoke(() => {
+            RemoteExecutor.Invoke(() => {
                 Assert.Equal(new PermissionSet(PermissionState.Unrestricted), AppDomain.CurrentDomain.PermissionSet);
-                return SuccessExitCode;
+                return RemoteExecutor.SuccessExitCode;
             }).Dispose();
         }    
  
@@ -195,6 +200,48 @@ namespace System.Tests
             yield return new object[] { "assemblyresolvetestapp", "assemblyresolvetestapp.privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[0], CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
             yield return new object[] { "AssemblyResolveTestApp", "AssemblyResolveTestApp.PrivateClassSample", false, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
             yield return new object[] { "assemblyresolvetestapp", "assemblyresolvetestapp.privateclasssample", true, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, Type.DefaultBinder, new object[1] { 1 }, CultureInfo.InvariantCulture, null, "AssemblyResolveTestApp.PrivateClassSample" };
+        }
+
+        [Fact]
+        public void AssemblyResolve_FirstChanceException()
+        {
+            RemoteExecutor.Invoke(() => {
+                Assembly assembly = typeof(AppDomainTests).Assembly;
+
+                Exception firstChanceExceptionThrown = null;
+
+                EventHandler<System.Runtime.ExceptionServices.FirstChanceExceptionEventArgs> firstChanceHandler = (source, args) =>
+                {
+                    firstChanceExceptionThrown = args.Exception;
+                };
+
+                AppDomain.CurrentDomain.FirstChanceException += firstChanceHandler;
+
+                ResolveEventHandler assemblyResolveHandler = (sender, e) =>
+                {
+                    Assert.Equal(assembly, e.RequestingAssembly);
+                    Assert.Null(firstChanceExceptionThrown);
+                    return null;
+                };
+
+                AppDomain.CurrentDomain.AssemblyResolve += assemblyResolveHandler;
+
+                Func<System.Runtime.Loader.AssemblyLoadContext, AssemblyName, Assembly> resolvingHandler = (context, name) =>
+                {
+                    return null;
+                };
+
+                // The issue resolved by coreclr#24450, was only reproduced when there was a Resolving handler present
+                System.Runtime.Loader.AssemblyLoadContext.Default.Resolving += resolvingHandler;
+
+                assembly.GetType("System.Tests.AGenericClass`1[[Bogus, BogusAssembly]]", false);
+                Assert.Null(firstChanceExceptionThrown);
+
+                Exception thrown = Assert.Throws<FileNotFoundException>(() => assembly.GetType("System.Tests.AGenericClass`1[[Bogus, AnotherBogusAssembly]]", true));
+                Assert.Same(firstChanceExceptionThrown, thrown);
+
+                return RemoteExecutor.SuccessExitCode;
+            }).Dispose();
         }
     }
 }

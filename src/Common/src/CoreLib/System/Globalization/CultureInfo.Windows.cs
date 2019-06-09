@@ -24,14 +24,10 @@ namespace System.Globalization
             if (GlobalizationMode.Invariant)
                 return CultureInfo.InvariantCulture;
 
-            const uint LOCALE_SNAME = 0x0000005c;
-            const string LOCALE_NAME_USER_DEFAULT = null;
-            const string LOCALE_NAME_SYSTEM_DEFAULT = "!x-sys-default-locale";
-
-            string strDefault = CultureData.GetLocaleInfoEx(LOCALE_NAME_USER_DEFAULT, LOCALE_SNAME);
+            string? strDefault = CultureData.GetLocaleInfoEx(Interop.Kernel32.LOCALE_NAME_USER_DEFAULT, Interop.Kernel32.LOCALE_SNAME);
             if (strDefault == null)
             {
-                strDefault = CultureData.GetLocaleInfoEx(LOCALE_NAME_SYSTEM_DEFAULT, LOCALE_SNAME);
+                strDefault = CultureData.GetLocaleInfoEx(Interop.Kernel32.LOCALE_NAME_SYSTEM_DEFAULT, Interop.Kernel32.LOCALE_SNAME);
 
                 if (strDefault == null)
                 {
@@ -43,7 +39,7 @@ namespace System.Globalization
             return GetCultureByName(strDefault);
         }
 
-        private static CultureInfo GetUserDefaultUICulture()
+        private unsafe static CultureInfo GetUserDefaultUICulture()
         {
 #if !ENABLE_WINRT
             if (GlobalizationMode.Invariant)
@@ -53,18 +49,21 @@ namespace System.Globalization
             uint langCount = 0;
             uint bufLen = 0;
 
-            if (Interop.Kernel32.GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, out langCount, null, ref bufLen))
+            if (Interop.Kernel32.GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &langCount, null, &bufLen) != Interop.BOOL.FALSE)
             {
                 char[] languages = new char[bufLen];
-                if (Interop.Kernel32.GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, out langCount, languages, ref bufLen))
+                fixed (char* pLanguages = languages)
                 {
-                    int index = 0;
-                    while (languages[index] != (char)0 && index < languages.Length)
+                    if (Interop.Kernel32.GetUserPreferredUILanguages(MUI_LANGUAGE_NAME, &langCount, pLanguages, &bufLen) != Interop.BOOL.FALSE)
                     {
-                        index++;
-                    }
+                        int index = 0;
+                        while (languages[index] != (char)0 && index < languages.Length)
+                        {
+                            index++;
+                        }
 
-                    return GetCultureByName(new string(languages, 0, index));
+                        return GetCultureByName(new string(languages, 0, index));
+                    }
                 }
             }
 #endif
@@ -73,7 +72,7 @@ namespace System.Globalization
         }
 
 #if FEATURE_APPX
-        internal static CultureInfo GetCultureInfoForUserPreferredLanguageInAppX()
+        internal static CultureInfo? GetCultureInfoForUserPreferredLanguageInAppX()
         {
             // If a call to GetCultureInfoForUserPreferredLanguageInAppX() generated a recursive
             // call to itself, return null, since we don't want to stack overflow.  For example,
@@ -85,7 +84,7 @@ namespace System.Globalization
                 return null;
             }
 
-            CultureInfo toReturn = null;
+            CultureInfo? toReturn;
 
             try
             {

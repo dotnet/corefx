@@ -68,8 +68,8 @@ namespace System.Collections.Immutable
             /// </summary>
             private Node()
             {
-                Contract.Ensures(this.IsEmpty);
                 _frozen = true; // the empty node is *always* frozen.
+                Debug.Assert(this.IsEmpty);
             }
 
             /// <summary>
@@ -253,7 +253,7 @@ namespace System.Collections.Immutable
                 }
             }
 
-#if FEATURE_ITEMREFAPI
+#if !NETSTANDARD10
             /// <summary>
             /// Gets a read-only reference to the element of the set at the given index.
             /// </summary>
@@ -612,7 +612,6 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(tree, nameof(tree));
                 Debug.Assert(!tree.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 if (tree._right.IsEmpty)
                 {
@@ -632,7 +631,6 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(tree, nameof(tree));
                 Debug.Assert(!tree.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 if (tree._left.IsEmpty)
                 {
@@ -652,7 +650,6 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(tree, nameof(tree));
                 Debug.Assert(!tree.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 if (tree._right.IsEmpty)
                 {
@@ -672,7 +669,6 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(tree, nameof(tree));
                 Debug.Assert(!tree.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 if (tree._left.IsEmpty)
                 {
@@ -733,7 +729,6 @@ namespace System.Collections.Immutable
             {
                 Requires.NotNull(tree, nameof(tree));
                 Debug.Assert(!tree.IsEmpty);
-                Contract.Ensures(Contract.Result<Node>() != null);
 
                 if (IsRightHeavy(tree))
                 {

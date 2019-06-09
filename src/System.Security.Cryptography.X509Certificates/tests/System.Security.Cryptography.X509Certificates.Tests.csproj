@@ -8,7 +8,8 @@
     <DefineConstants Condition="'$(HaveCertificateCreation)'!='true'">$(DefineConstants);NO_EPHEMERALKEYSET_AVAILABLE</DefineConstants>
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)'=='uap'">$(DefineConstants);HAVE_THUMBPRINT_OVERLOADS</DefineConstants>
     <DefineConstants Condition="'$(TargetsUnix)' == 'true'">$(DefineConstants);Unix</DefineConstants>
-    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Cert.cs" />
@@ -50,8 +51,10 @@
     <Compile Include="CertificateCreation\RSAPssX509SignatureGeneratorTests.cs" />
     <Compile Include="CertificateCreation\SubjectAltNameBuilderTests.cs" />
     <Compile Include="DSAOther.cs" />
+    <Compile Include="DynamicChainTests.cs" />
     <Compile Include="ECDsaOther.cs" />
     <Compile Include="RSAOther.cs" />
+    <Compile Include="TestDataGenerator.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true' AND '$(TargetsOSX)' != 'true' ">
     <Compile Include="X509FilesystemTests.Unix.cs" />
@@ -83,7 +86,6 @@
       <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
     </Compile>
     <Compile Include="HostnameMatchTests.Unix.cs" />
-    <Compile Include="TestEnvironmentConfiguration.Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true'">
     <Compile Include="X509StoreMutableTests.OSX.cs" />
@@ -125,12 +127,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.security.cryptography.x509certificates.testdata\1.0.2-prerelease\content\**\*.*" />
+    <SupplementalTestData Include="$(NuGetPackageRoot)system.security.cryptography.x509certificates.testdata\1.0.3\content\**\*.*" DestinationDir="TestData" />
   </ItemGroup>
 </Project>

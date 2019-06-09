@@ -179,7 +179,9 @@ namespace System.Net.WebSockets
             _receiveBuffer = new byte[ReceiveBufferMinLength];
 
             // Set up the abort source so that if it's triggered, we transition the instance appropriately.
-            _abortSource.Token.Register(s =>
+            // There's no need to store the resulting CancellationTokenRegistration, as this instance owns
+            // the CancellationTokenSource, and the lifetime of that CTS matches the lifetime of the registration.
+            _abortSource.Token.UnsafeRegister(s =>
             {
                 var thisRef = (ManagedWebSocket)s;
 
@@ -782,7 +784,11 @@ namespace System.Net.WebSockets
             lock (StateUpdateLock)
             {
                 _receivedCloseFrame = true;
-                if (_state < WebSocketState.CloseReceived)
+                if (_sentCloseFrame && _state < WebSocketState.Closed)
+                {
+                    _state = WebSocketState.Closed;
+                }
+                else if (_state < WebSocketState.CloseReceived)
                 {
                     _state = WebSocketState.CloseReceived;
                 }
@@ -1059,50 +1065,56 @@ namespace System.Net.WebSockets
                 await SendCloseFrameAsync(closeStatus, statusDescription, cancellationToken).ConfigureAwait(false);
             }
 
-            // We should now either be in a CloseSent case (because we just sent one), or in a CloseReceived state, in case
+            // We should now either be in a CloseSent case (because we just sent one), or in a Closed state, in case
             // there was a concurrent receive that ended up handling an immediate close frame response from the server.
             // Of course it could also be Aborted if something happened concurrently to cause things to blow up.
             Debug.Assert(
                 State == WebSocketState.CloseSent ||
-                State == WebSocketState.CloseReceived ||
+                State == WebSocketState.Closed ||
                 State == WebSocketState.Aborted,
                 $"Unexpected state {State}.");
 
-            // Wait until we've received a close response
-            byte[] closeBuffer = ArrayPool<byte>.Shared.Rent(MaxMessageHeaderLength + MaxControlPayloadLength);
-            try
+            // We only need to wait for a received close frame if we are in the CloseSent State. If we are in the Closed
+            // State then it means we already received a close frame. If we are in the Aborted State, then we should not
+            // wait for a close frame as per RFC 6455 Section 7.1.7 "Fail the WebSocket Connection".
+            if (State == WebSocketState.CloseSent)
             {
-                while (!_receivedCloseFrame)
+                // Wait until we've received a close response
+                byte[] closeBuffer = ArrayPool<byte>.Shared.Rent(MaxMessageHeaderLength + MaxControlPayloadLength);
+                try
                 {
-                    Debug.Assert(!Monitor.IsEntered(StateUpdateLock), $"{nameof(StateUpdateLock)} must never be held when acquiring {nameof(ReceiveAsyncLock)}");
-                    Task receiveTask;
-                    lock (ReceiveAsyncLock)
+                    while (!_receivedCloseFrame)
                     {
-                        // Now that we're holding the ReceiveAsyncLock, double-check that we've not yet received the close frame.
-                        // It could have been received between our check above and now due to a concurrent receive completing.
-                        if (_receivedCloseFrame)
+                        Debug.Assert(!Monitor.IsEntered(StateUpdateLock), $"{nameof(StateUpdateLock)} must never be held when acquiring {nameof(ReceiveAsyncLock)}");
+                        Task receiveTask;
+                        lock (ReceiveAsyncLock)
                         {
-                            break;
+                            // Now that we're holding the ReceiveAsyncLock, double-check that we've not yet received the close frame.
+                            // It could have been received between our check above and now due to a concurrent receive completing.
+                            if (_receivedCloseFrame)
+                            {
+                                break;
+                            }
+
+                            // We've not yet processed a received close frame, which means we need to wait for a received close to complete.
+                            // There may already be one in flight, in which case we want to just wait for that one rather than kicking off
+                            // another (we don't support concurrent receive operations).  We need to kick off a new receive if either we've
+                            // never issued a receive or if the last issued receive completed for reasons other than a close frame.  There is
+                            // a race condition here, e.g. if there's a in-flight receive that completes after we check, but that's fine: worst
+                            // case is we then await it, find that it's not what we need, and try again.
+                            receiveTask = _lastReceiveAsync;
+                            _lastReceiveAsync = receiveTask = ValidateAndReceiveAsync(receiveTask, closeBuffer, cancellationToken);
                         }
 
-                        // We've not yet processed a received close frame, which means we need to wait for a received close to complete.
-                        // There may already be one in flight, in which case we want to just wait for that one rather than kicking off
-                        // another (we don't support concurrent receive operations).  We need to kick off a new receive if either we've
-                        // never issued a receive or if the last issued receive completed for reasons other than a close frame.  There is
-                        // a race condition here, e.g. if there's a in-flight receive that completes after we check, but that's fine: worst
-                        // case is we then await it, find that it's not what we need, and try again.
-                        receiveTask = _lastReceiveAsync;
-                        _lastReceiveAsync = receiveTask = ValidateAndReceiveAsync(receiveTask, closeBuffer, cancellationToken);
+                        // Wait for whatever receive task we have.  We'll then loop around again to re-check our state.
+                        Debug.Assert(receiveTask != null);
+                        await receiveTask.ConfigureAwait(false);
                     }
-
-                    // Wait for whatever receive task we have.  We'll then loop around again to re-check our state.
-                    Debug.Assert(receiveTask != null);
-                    await receiveTask.ConfigureAwait(false);
                 }
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(closeBuffer);
+                finally
+                {
+                    ArrayPool<byte>.Shared.Return(closeBuffer);
+                }
             }
 
             // We're closed.  Close the connection and update the status.
@@ -1153,7 +1165,11 @@ namespace System.Net.WebSockets
             lock (StateUpdateLock)
             {
                 _sentCloseFrame = true;
-                if (_state <= WebSocketState.CloseReceived)
+                if (_receivedCloseFrame && _state < WebSocketState.Closed)
+                {
+                    _state = WebSocketState.Closed;
+                }
+                else if (_state < WebSocketState.CloseSent)
                 {
                     _state = WebSocketState.CloseSent;
                 }
@@ -1261,64 +1277,73 @@ namespace System.Net.WebSockets
         {
             Debug.Assert(maskIndex < sizeof(int));
 
-            int maskShift = maskIndex * 8;
-            int shiftedMask = (int)(((uint)mask >> maskShift) | ((uint)mask << (32 - maskShift)));
-
-            // Try to use SIMD.  We can if the number of bytes we're trying to mask is at least as much
-            // as the width of a vector and if the width is an even multiple of the mask.
-            if (Vector.IsHardwareAccelerated &&
-                Vector<byte>.Count % sizeof(int) == 0 &&
-                toMask.Length >= Vector<byte>.Count)
+            fixed (byte* toMaskBeg = &MemoryMarshal.GetReference(toMask))
             {
-                Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(shiftedMask));
-                Span<Vector<byte>> toMaskVector = MemoryMarshal.Cast<byte, Vector<byte>>(toMask);
-                for (int i = 0; i < toMaskVector.Length; i++)
+                byte* toMaskPtr = toMaskBeg;
+                byte* toMaskEnd = toMaskBeg + toMask.Length;
+                byte* maskPtr = (byte*)&mask;
+
+                if (toMaskEnd - toMaskPtr >= sizeof(int))
                 {
-                    toMaskVector[i] ^= maskVector;
-                }
+                    // align our pointer to sizeof(int)
 
-                // Fall through to processing any remaining bytes that were less than a vector width.
-                toMask = toMask.Slice(Vector<byte>.Count * toMaskVector.Length);
-            }
-
-            // If there are any bytes remaining (either we couldn't use vectors, or the count wasn't
-            // an even multiple of the vector width), process them without vectors.
-            int count = toMask.Length;
-            if (count > 0)
-            {
-                fixed (byte* toMaskPtr = &MemoryMarshal.GetReference(toMask))
-                {
-                    byte* p = toMaskPtr;
-
-                    // Try to go an int at a time if the remaining data is 4-byte aligned and there's enough remaining.
-                    if (((long)p % sizeof(int)) == 0)
+                    while ((ulong)toMaskPtr % sizeof(int) != 0)
                     {
-                        while (count >= sizeof(int))
-                        {
-                            count -= sizeof(int);
-                            *((int*)p) ^= shiftedMask;
-                            p += sizeof(int);
-                        }
+                        Debug.Assert(toMaskPtr < toMaskEnd);
 
-                        // We don't need to update the maskIndex, as its mod-4 value won't have changed.
-                        // `p` points to the remainder.
+                        *toMaskPtr++ ^= maskPtr[maskIndex];
+                        maskIndex = (maskIndex + 1) & 3;
                     }
 
-                    // Process any remaining data a byte at a time.
-                    if (count > 0)
+                    int rolledMask = (int)BitOperations.RotateRight((uint)mask, maskIndex * 8);
+
+                    // use SIMD if possible.
+
+                    if (Vector.IsHardwareAccelerated && Vector<byte>.Count % sizeof(int) == 0 && (toMaskEnd - toMaskPtr) >= Vector<byte>.Count)
                     {
-                        byte* maskPtr = (byte*)&mask;
-                        byte* end = p + count;
-                        while (p < end)
+                        // align our pointer to Vector<byte>.Count
+
+                        while ((ulong)toMaskPtr % (uint)Vector<byte>.Count != 0)
                         {
-                            *p++ ^= maskPtr[maskIndex];
-                            maskIndex = (maskIndex + 1) & 3;
+                            Debug.Assert(toMaskPtr < toMaskEnd);
+
+                            *(int*)toMaskPtr ^= rolledMask;
+                            toMaskPtr += sizeof(int);
+                        }
+
+                        // use SIMD.
+
+                        if (toMaskEnd - toMaskPtr >= Vector<byte>.Count)
+                        {
+                            Vector<byte> maskVector = Vector.AsVectorByte(new Vector<int>(rolledMask));
+
+                            do
+                            {
+                                *(Vector<byte>*)toMaskPtr ^= maskVector;
+                                toMaskPtr += Vector<byte>.Count;
+                            }
+                            while (toMaskEnd - toMaskPtr >= Vector<byte>.Count);
                         }
                     }
+
+                    // process remaining data (or all, if couldn't use SIMD) 4 bytes at a time.
+
+                    while (toMaskEnd - toMaskPtr >= sizeof(int))
+                    {
+                        *(int*)toMaskPtr ^= rolledMask;
+                        toMaskPtr += sizeof(int);
+                    }
+                }
+
+                // do any remaining data a byte at a time.
+
+                while (toMaskPtr != toMaskEnd)
+                {
+                    *toMaskPtr++ ^= maskPtr[maskIndex];
+                    maskIndex = (maskIndex + 1) & 3;
                 }
             }
 
-            // Return the updated index.
             return maskIndex;
         }
 

@@ -32,7 +32,7 @@ namespace System.Threading
             return new CompressedStack();
         }
 
-        public static void Run(CompressedStack compressedStack, ContextCallback callback, object state)
+        public static void Run(CompressedStack compressedStack, ContextCallback callback, object? state)
         {
             if (compressedStack == null)
             {

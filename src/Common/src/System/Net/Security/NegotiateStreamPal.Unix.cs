@@ -3,14 +3,15 @@
 // See the LICENSE file in the project root for more information.
 
 using System.IO;
-using System.Security;
-using System.Security.Principal;
-using System.Threading;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security;
 using System.Security.Authentication;
 using System.Security.Authentication.ExtendedProtection;
+using System.Security.Principal;
+using System.Text;
+using System.Threading;
 using Microsoft.Win32.SafeHandles;
 
 namespace System.Net.Security
@@ -99,9 +100,7 @@ namespace System.Net.Security
             SafeGssCredHandle credential,
             bool isNtlm,
             ChannelBinding channelBinding,
-            bool isNtlmFallback,
-            SafeGssNameHandle targetNameKerberos,
-            SafeGssNameHandle targetNameNtlm,
+            SafeGssNameHandle targetName,
             Interop.NetSecurityNative.GssFlags inFlags,
             byte[] buffer,
             out byte[] outputBuffer,
@@ -126,8 +125,10 @@ namespace System.Net.Security
             // EstablishSecurityContext is called multiple times in a session.
             // In each call, we need to pass the context handle from the previous call.
             // For the first call, the context handle will be null.
+            bool newContext = false;
             if (context == null)
             {
+                newContext = true;
                 context = new SafeGssContextHandle();
             }
 
@@ -143,9 +144,7 @@ namespace System.Net.Security
                                                           isNtlm,
                                                           cbtAppData,
                                                           cbtAppDataSize,
-                                                          isNtlmFallback,
-                                                          targetNameKerberos,
-                                                          targetNameNtlm,
+                                                          targetName,
                                                           (uint)inFlags,
                                                           buffer,
                                                           (buffer == null) ? 0 : buffer.Length,
@@ -156,6 +155,11 @@ namespace System.Net.Security
                 if ((status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE) &&
                     (status != Interop.NetSecurityNative.Status.GSS_S_CONTINUE_NEEDED))
                 {
+                    if (newContext)
+                    {
+                        context.Dispose();
+                        context = null;
+                    }
                     throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
                 }
 
@@ -169,6 +173,78 @@ namespace System.Net.Security
             return status == Interop.NetSecurityNative.Status.GSS_S_COMPLETE;
         }
 
+        private static bool GssAcceptSecurityContext(
+            ref SafeGssContextHandle context,
+            byte[] buffer,
+            out byte[] outputBuffer,
+            out uint outFlags)
+        {
+            bool newContext = false;
+            if (context == null)
+            {
+                newContext = true;
+                context = new SafeGssContextHandle();
+            }
+
+            Interop.NetSecurityNative.GssBuffer token = default(Interop.NetSecurityNative.GssBuffer);
+            Interop.NetSecurityNative.Status status;
+
+            try
+            {
+                Interop.NetSecurityNative.Status minorStatus;
+                status = Interop.NetSecurityNative.AcceptSecContext(out minorStatus,
+                                                                    ref context,
+                                                                    buffer,
+                                                                    buffer?.Length ?? 0,
+                                                                    ref token,
+                                                                    out outFlags);
+
+                if ((status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE) &&
+                    (status != Interop.NetSecurityNative.Status.GSS_S_CONTINUE_NEEDED))
+                {
+                    if (newContext)
+                    {
+                        context.Dispose();
+                        context = null;
+                    }
+                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
+                }
+
+                outputBuffer = token.ToByteArray();
+            }
+            finally
+            {
+                token.Dispose();
+            }
+
+            return status == Interop.NetSecurityNative.Status.GSS_S_COMPLETE;
+        }
+
+        private static string GssGetUser(
+            ref SafeGssContextHandle context)
+        {
+            Interop.NetSecurityNative.GssBuffer token = default(Interop.NetSecurityNative.GssBuffer);
+
+            try
+            {
+                Interop.NetSecurityNative.Status status
+                    = Interop.NetSecurityNative.GetUser(out var minorStatus,
+                                                        context,
+                                                        ref token);
+
+                if (status != Interop.NetSecurityNative.Status.GSS_S_COMPLETE)
+                {
+                    throw new Interop.NetSecurityNative.GssApiException(status, minorStatus);
+                }
+
+                return Encoding.UTF8.GetString(token.ToByteArray());
+            }
+            finally
+            {
+                token.Dispose();
+            }
+        }
+
         private static SecurityStatusPal EstablishSecurityContext(
           SafeFreeNegoCredentials credential,
           ref SafeDeleteContext context,
@@ -180,17 +256,15 @@ namespace System.Net.Security
           ref ContextFlagsPal outFlags)
         {
             bool isNtlmOnly = credential.IsNtlmOnly;
-            bool initialContext = false;
 
             if (context == null)
             {
                 if (NetEventSource.IsEnabled)
                 {
                     string protocol = isNtlmOnly ? "NTLM" : "SPNEGO";
-                    NetEventSource.Info($"EstablishSecurityContext: protocol = {protocol}, target = {targetName}");
+                    NetEventSource.Info(null, $"requested protocol = {protocol}, target = {targetName}");
                 }
 
-                initialContext = true;
                 context = new SafeDeleteNegoContext(credential, targetName);
             }
 
@@ -207,19 +281,23 @@ namespace System.Net.Security
                    credential.GssCredential,
                    isNtlmOnly,
                    channelBinding,
-                   negoContext.IsNtlmFallback,
-                   negoContext.TargetNameKerberos,
-                   negoContext.TargetNameNtlm,
+                   negoContext.TargetName,
                    inputFlags,
                    incomingBlob,
                    out resultBuffer,
                    out outputFlags,
                    out isNtlmUsed);
 
-                // Remember if SPNEGO did a fallback from Kerberos to NTLM while generating the initial context.                 
-                if (initialContext && !isNtlmOnly && isNtlmUsed)
+                if (done)
                 {
-                    negoContext.IsNtlmFallback = true;
+                    if (NetEventSource.IsEnabled)
+                    {
+                        string protocol = isNtlmOnly ? "NTLM" : isNtlmUsed ? "SPNEGO-NTLM" : "SPNEGO-Kerberos";
+                        NetEventSource.Info(null, $"actual protocol = {protocol}");
+                    }
+
+                    // Populate protocol used for authentication
+                    negoContext.SetAuthenticationPackage(isNtlmUsed);
                 }
 
                 Debug.Assert(resultBuffer != null, "Unexpected null buffer returned by GssApi");
@@ -232,17 +310,6 @@ namespace System.Net.Security
                 if (null == negoContext.GssContext)
                 {
                     negoContext.SetGssContext(contextHandle);
-                }
-
-                // Populate protocol used for authentication
-                if (done)
-                {
-                    negoContext.SetAuthenticationPackage(isNtlmUsed);
-                    if (NetEventSource.IsEnabled)
-                    {
-                        string protocol = isNtlmOnly ? "NTLM" : isNtlmUsed ? "SPNEGO-NTLM" : "SPNEGO-Kerberos";
-                        NetEventSource.Info($"EstablishSecurityContext: completed handshake, protocol = {protocol}");
-                    }
                 }
 
                 SecurityStatusPalErrorCode errorCode = done ?
@@ -306,7 +373,61 @@ namespace System.Net.Security
             ref byte[] resultBlob,
             ref ContextFlagsPal contextFlags)
         {
-            throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
+            if (securityContext == null)
+            {
+                securityContext = new SafeDeleteNegoContext((SafeFreeNegoCredentials)credentialsHandle);
+            }
+
+            SafeDeleteNegoContext negoContext = (SafeDeleteNegoContext)securityContext;
+            try
+            {
+                SafeGssContextHandle contextHandle = negoContext.GssContext;
+                bool done = GssAcceptSecurityContext(
+                   ref contextHandle,
+                   incomingBlob,
+                   out resultBlob,
+                   out uint outputFlags);
+
+                Debug.Assert(resultBlob != null, "Unexpected null buffer returned by GssApi");
+                Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
+
+                // Save the inner context handle for further calls to NetSecurity
+                Debug.Assert(negoContext.GssContext == null || contextHandle == negoContext.GssContext);
+                if (null == negoContext.GssContext)
+                {
+                    negoContext.SetGssContext(contextHandle);
+                }
+
+                contextFlags = ContextFlagsAdapterPal.GetContextFlagsPalFromInterop(
+                    (Interop.NetSecurityNative.GssFlags)outputFlags, isServer: true);
+
+                SecurityStatusPalErrorCode errorCode = done ?
+                    (negoContext.IsNtlmUsed && resultBlob.Length > 0 ? SecurityStatusPalErrorCode.OK : SecurityStatusPalErrorCode.CompleteNeeded) :
+                    SecurityStatusPalErrorCode.ContinueNeeded;
+
+                return new SecurityStatusPal(errorCode);
+            }
+            catch (Exception ex)
+            {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(null, ex);
+                return new SecurityStatusPal(SecurityStatusPalErrorCode.InternalError, ex);
+            }
+        }
+
+        private static string GetUser(
+            ref SafeDeleteContext securityContext)
+        {
+            SafeDeleteNegoContext negoContext = (SafeDeleteNegoContext)securityContext;
+            try
+            {
+                SafeGssContextHandle contextHandle = negoContext.GssContext;
+                return GssGetUser(ref contextHandle);
+            }
+            catch (Exception ex)
+            {
+                if (NetEventSource.IsEnabled) NetEventSource.Error(null, ex);
+                throw;
+            }
         }
 
         internal static Win32Exception CreateExceptionFromError(SecurityStatusPal statusCode)
@@ -327,11 +448,6 @@ namespace System.Net.Security
 
         internal static SafeFreeCredentials AcquireCredentialsHandle(string package, bool isServer, NetworkCredential credential)
         {
-            if (isServer)
-            {
-                throw new PlatformNotSupportedException(SR.net_nego_server_not_supported);
-            }
-
             bool isEmptyCredential = string.IsNullOrWhiteSpace(credential.UserName) ||
                                      string.IsNullOrWhiteSpace(credential.Password);
             bool ntlmOnly = string.Equals(package, NegotiationInfoClass.NTLM, StringComparison.OrdinalIgnoreCase);

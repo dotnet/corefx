@@ -9,20 +9,20 @@ namespace System.Globalization
 {
     public partial class JapaneseCalendar : Calendar
     {
-        private static EraInfo[] GetJapaneseEras()
+        private static EraInfo[]? GetJapaneseEras()
         {
             if (GlobalizationMode.Invariant)
             {
                 return null;
             }
 
-            string[] eraNames;
+            string[]? eraNames;
             if (!CalendarData.EnumCalendarInfo("ja-JP", CalendarId.JAPAN, CalendarDataType.EraNames, out eraNames))
             {
                 return null;
             }
 
-            string[] abbrevEnglishEraNames;
+            string[]? abbrevEnglishEraNames;
             if (!CalendarData.EnumCalendarInfo("en", CalendarId.JAPAN, CalendarDataType.AbbrevEraNames, out abbrevEnglishEraNames))
             {
                 return null;
@@ -47,7 +47,7 @@ namespace System.Globalization
                 }
 
                 eras.Add(new EraInfo(i, dt.Year, dt.Month, dt.Day, dt.Year - 1, 1, lastMaxYear - dt.Year + 1,
-                    eraNames[i], GetAbbreviatedEraName(eraNames, i), abbrevEnglishEraNames[i]));
+                    eraNames![i], GetAbbreviatedEraName(eraNames, i), abbrevEnglishEraNames![i]));
 
                 lastMaxYear = dt.Year;
             }

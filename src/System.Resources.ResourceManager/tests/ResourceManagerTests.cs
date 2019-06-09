@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
@@ -12,6 +11,8 @@ using System.Drawing.Imaging;
 using System.Linq;
 using System.Resources;
 using System.Diagnostics;
+using Microsoft.DotNet.RemoteExecutor;
+using Xunit;
 
 [assembly:NeutralResourcesLanguage("en")]
 
@@ -24,7 +25,7 @@ namespace System.Resources.Tests
         }
     }
 
-    public class ResourceManagerTests : RemoteExecutorTestBase
+    public class ResourceManagerTests
     {
         [Fact]
         public static void ExpectMissingManifestResourceException()
@@ -148,7 +149,7 @@ namespace System.Resources.Tests
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "UWP does not use satellite assemblies in most cases")]
         public static void GetString_ExpectEvents()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 // Events only fire first time.  Remote to make sure test runs in a separate process
                 Remote_ExpectEvents();
@@ -206,7 +207,7 @@ namespace System.Resources.Tests
 
         [Theory]
         [MemberData(nameof(EnglishResourceData))]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapNotUapAot, "When getting resources from PRI file the casing doesn't matter, if it is there it will always find and return the resource")]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "When getting resources from PRI file the casing doesn't matter, if it is there it will always find and return the resource")]
         public static void IgnoreCase(string key, string expectedValue)
         {
             var manager = new ResourceManager("System.Resources.Tests.Resources.TestResx", typeof(ResourceManagerTests).GetTypeInfo().Assembly);
@@ -277,6 +278,19 @@ namespace System.Resources.Tests
             Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key, new CultureInfo("en-US"))));
         }
 
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)]
+        [ConditionalTheory(Helpers.IsDrawingSupported)]
+        [MemberData(nameof(EnglishImageResourceData))]
+        public static void GetObject_Images_ResourceSet(string key, object expectedValue)
+        {
+            var manager = new ResourceManager(
+                "System.Resources.Tests.Resources.TestResx.netstandard17",
+                typeof(ResourceManagerTests).GetTypeInfo().Assembly,
+                typeof(ResourceSet));
+            Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key)));
+            Assert.Equal(GetImageData(expectedValue), GetImageData(manager.GetObject(key, new CultureInfo("en-US"))));
+        }
+
         [Theory]
         [MemberData(nameof(EnglishResourceData))]
         public static void GetResourceSet_Strings(string key, string expectedValue)
@@ -313,7 +327,7 @@ namespace System.Resources.Tests
         public static void File_GetObject(string key, object expectedValue, bool requiresBinaryFormatter = false)
         {
             var manager = ResourceManager.CreateFileBasedResourceManager("TestResx.netstandard17", Directory.GetCurrentDirectory(), null);
-            if (requiresBinaryFormatter && !PlatformDetection.IsFullFramework)
+            if (requiresBinaryFormatter)
             {
                 Assert.Throws<NotSupportedException>(() => manager.GetObject(key));
                 Assert.Throws<NotSupportedException>(() => manager.GetObject(key, new CultureInfo("en-US")));
@@ -332,7 +346,7 @@ namespace System.Resources.Tests
             var manager = ResourceManager.CreateFileBasedResourceManager("TestResx.netstandard17", Directory.GetCurrentDirectory(), null);
             var culture = new CultureInfo("en-US");
             ResourceSet set = manager.GetResourceSet(culture, true, true);
-            if (requiresBinaryFormatter && !PlatformDetection.IsFullFramework)
+            if (requiresBinaryFormatter)
             {
                 Assert.Throws<NotSupportedException>(() => set.GetObject(key));
             }
@@ -365,7 +379,6 @@ namespace System.Resources.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "UwpAot currently allows custom assembly in ResourceManager constructor")]
         public static void ConstructorNonRuntimeAssembly()
         {
             MockAssembly assembly = new MockAssembly();

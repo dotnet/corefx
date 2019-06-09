@@ -11,7 +11,7 @@ namespace System
 {
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public abstract class StringComparer : IComparer, IEqualityComparer, IComparer<string>, IEqualityComparer<string>
+    public abstract class StringComparer : IComparer, IEqualityComparer, IComparer<string?>, IEqualityComparer<string?>
     {
         private static readonly CultureAwareComparer s_invariantCulture = new CultureAwareComparer(CultureInfo.InvariantCulture, CompareOptions.None);
         private static readonly CultureAwareComparer s_invariantCultureIgnoreCase = new CultureAwareComparer(CultureInfo.InvariantCulture, CompareOptions.IgnoreCase);
@@ -108,7 +108,7 @@ namespace System
             return new CultureAwareComparer(culture, options);
         }
 
-        public int Compare(object x, object y)
+        public int Compare(object? x, object? y)
         {
             if (x == y) return 0;
             if (x == null) return -1;
@@ -130,7 +130,7 @@ namespace System
             throw new ArgumentException(SR.Argument_ImplementIComparable);
         }
 
-        public new bool Equals(object x, object y)
+        public new bool Equals(object? x, object? y)
         {
             if (x == y) return true;
             if (x == null || y == null) return false;
@@ -159,9 +159,11 @@ namespace System
             return obj.GetHashCode();
         }
 
-        public abstract int Compare(string x, string y);
-        public abstract bool Equals(string x, string y);
+        public abstract int Compare(string? x, string? y);
+        public abstract bool Equals(string? x, string? y);
+#pragma warning disable CS8614 // Remove warning disable when nullable attributes are respected
         public abstract int GetHashCode(string obj);
+#pragma warning restore CS8614
     }
 
     [Serializable]
@@ -188,7 +190,7 @@ namespace System
 
         private CultureAwareComparer(SerializationInfo info, StreamingContext context)
         {
-            _compareInfo = (CompareInfo)info.GetValue("_compareInfo", typeof(CompareInfo));
+            _compareInfo = (CompareInfo)info.GetValue("_compareInfo", typeof(CompareInfo))!;
             bool ignoreCase = info.GetBoolean("_ignoreCase");
 
             var obj = info.GetValueNoThrow("_options", typeof(CompareOptions));
@@ -199,7 +201,7 @@ namespace System
             _options |= ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
         }
 
-        public override int Compare(string x, string y)
+        public override int Compare(string? x, string? y)
         {
             if (object.ReferenceEquals(x, y)) return 0;
             if (x == null) return -1;
@@ -207,7 +209,7 @@ namespace System
             return _compareInfo.Compare(x, y, _options);
         }
 
-        public override bool Equals(string x, string y)
+        public override bool Equals(string? x, string? y)
         {
             if (object.ReferenceEquals(x, y)) return true;
             if (x == null || y == null) return false;
@@ -224,7 +226,7 @@ namespace System
         }
 
         // Equals method for the comparer itself.
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return
                 obj is CultureAwareComparer comparer &&
@@ -256,7 +258,7 @@ namespace System
             _ignoreCase = ignoreCase;
         }
 
-        public override int Compare(string x, string y)
+        public override int Compare(string? x, string? y)
         {
             if (ReferenceEquals(x, y))
                 return 0;
@@ -273,7 +275,7 @@ namespace System
             return string.CompareOrdinal(x, y);
         }
 
-        public override bool Equals(string x, string y)
+        public override bool Equals(string? x, string? y)
         {
             if (ReferenceEquals(x, y))
                 return true;
@@ -300,14 +302,14 @@ namespace System
 
             if (_ignoreCase)
             {
-                return obj.GetHashCodeOrdinalIgnoreCase();
+                return obj!.GetHashCodeOrdinalIgnoreCase(); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
 
-            return obj.GetHashCode();
+            return obj!.GetHashCode(); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         // Equals method for the comparer itself. 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (!(obj is OrdinalComparer comparer))
             {
@@ -330,9 +332,9 @@ namespace System
         {
         }
 
-        public override int Compare(string x, string y) => string.CompareOrdinal(x, y);
+        public override int Compare(string? x, string? y) => string.CompareOrdinal(x, y);
 
-        public override bool Equals(string x, string y) => string.Equals(x, y);
+        public override bool Equals(string? x, string? y) => string.Equals(x, y);
 
         public override int GetHashCode(string obj)
         {
@@ -340,7 +342,7 @@ namespace System
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
             }
-            return obj.GetHashCode();
+            return obj!.GetHashCode(); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)
@@ -357,9 +359,9 @@ namespace System
         {
         }
 
-        public override int Compare(string x, string y) => string.Compare(x, y, StringComparison.OrdinalIgnoreCase);
+        public override int Compare(string? x, string? y) => string.Compare(x, y, StringComparison.OrdinalIgnoreCase);
 
-        public override bool Equals(string x, string y)
+        public override bool Equals(string? x, string? y)
         {
             if (ReferenceEquals(x, y))
             {
@@ -385,7 +387,7 @@ namespace System
             {
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.obj);
             }
-            return obj.GetHashCodeOrdinalIgnoreCase();
+            return obj!.GetHashCodeOrdinalIgnoreCase(); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         public void GetObjectData(SerializationInfo info, StreamingContext context)

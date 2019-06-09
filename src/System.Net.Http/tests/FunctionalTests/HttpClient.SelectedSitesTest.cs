@@ -8,11 +8,14 @@ using System.Reflection;
 using System.Threading.Tasks;
 
 using Xunit;
+using Xunit.Abstractions;
 
 namespace System.Net.Http.Functional.Tests
 {
     public abstract class HttpClient_SelectedSites_Test : HttpClientHandlerTestBase
     {
+        public HttpClient_SelectedSites_Test(ITestOutputHelper output) : base(output) { }
+
         public static bool IsSelectedSitesTestEnabled() 
         {
             string envVar = Environment.GetEnvironmentVariable("CORFX_NET_HTTP_SELECTED_SITES");
@@ -111,7 +114,7 @@ namespace System.Net.Http.Functional.Tests
 
         private HttpClient CreateHttpClientForSiteVisit()
         {
-            HttpClient httpClient = new HttpClient(CreateHttpClientHandler(UseSocketsHttpHandler));
+            HttpClient httpClient = CreateHttpClient(CreateHttpClientHandler(UseSocketsHttpHandler));
 
             // Some extra headers since some sites only give proper responses when they are present.
             httpClient.DefaultRequestHeaders.Add(

@@ -1,4 +1,8 @@
-﻿using System;
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
+using System;
 using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
@@ -12,13 +16,41 @@ namespace System.IO.Pipelines.Tests
     {
         public delegate Task WriteAsyncDelegate(Stream stream, byte[] data);
 
+        [Fact]
+        public async Task DisposingPipeWriterStreamCompletesPipeWriter()
+        {
+            var pipe = new Pipe();
+            Stream s = pipe.Writer.AsStream();
+
+            var writerCompletedTask = new TaskCompletionSource<bool>();
+            pipe.Reader.OnWriterCompleted(delegate { writerCompletedTask.SetResult(true); }, null);
+
+            // Call Dispose{Async} multiple times; all should succeed.
+            for (int i = 0; i < 2; i++)
+            {
+                s.Dispose();
+                await s.DisposeAsync();
+            }
+
+            // Make sure OnWriterCompleted was invoked.
+            await writerCompletedTask.Task;
+
+            // Unable to write after disposing.
+            await Assert.ThrowsAsync<InvalidOperationException>(async () => await s.WriteAsync(new byte[1]));
+
+            // Reads still work and return 0.
+            ReadResult rr = await pipe.Reader.ReadAsync();
+            Assert.True(rr.IsCompleted);
+            Assert.Equal(0, rr.Buffer.Length);
+        }
+
         [Theory]
         [MemberData(nameof(WriteCalls))]
         public async Task WritingToPipeStreamWritesToUnderlyingPipeWriter(WriteAsyncDelegate writeAsync)
         {
             byte[] helloBytes = Encoding.ASCII.GetBytes("Hello World");
             var pipe = new Pipe();
-            var stream = new PipeWriterStream(pipe.Writer);
+            var stream = new PipeWriterStream(pipe.Writer, leaveOpen: false);
 
             await writeAsync(stream, helloBytes);
 
@@ -135,6 +167,15 @@ namespace System.IO.Pipelines.Tests
             Assert.True(pipeWriter.FlushCalled);
         }
 
+        [Fact]
+        public void AsStreamDoNotCompleteWriter()
+        {
+            var pipeWriter = new NotImplementedPipeWriter();
+
+            // would throw in Complete if it was actually invoked
+            pipeWriter.AsStream(leaveOpen: true).Dispose();
+        }
+
         public class TestPipeWriter : PipeWriter
         {
             public bool FlushCalled { get; set; }
@@ -181,6 +222,21 @@ namespace System.IO.Pipelines.Tests
                 WriteAsyncCalled = true;
                 return default;
             }
+        }
+
+        public class NotImplementedPipeWriter : PipeWriter
+        {
+            public NotImplementedPipeWriter()
+            {
+            }
+
+            public override void Advance(int bytes) => throw new NotImplementedException();
+            public override void CancelPendingFlush() => throw new NotImplementedException();
+            public override void Complete(Exception exception = null) => throw new NotImplementedException();
+            public override ValueTask<FlushResult> FlushAsync(CancellationToken cancellationToken = default) => throw new NotImplementedException();
+            public override Memory<byte> GetMemory(int sizeHint = 0) => throw new NotImplementedException();
+            public override Span<byte> GetSpan(int sizeHint = 0) => throw new NotImplementedException();
+            public override void OnReaderCompleted(Action<Exception, object> callback, object state) => throw new NotImplementedException();
         }
 
         public static IEnumerable<object[]> WriteCalls

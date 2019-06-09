@@ -3,8 +3,9 @@
     <ProjectGuid>{B1BF7CE0-CAB5-4FA2-A39C-450B05D5DB1C}</ProjectGuid>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>1718</NoWarn>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;netstandard-Debug;netstandard-Release;uap-Debug;uap-Release;uapaot-Debug;uapaot-Release</Configurations>
     <TestRuntime>true</TestRuntime>
+    <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
+    <Configurations>netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\EnumTypes.cs">
@@ -53,6 +54,7 @@
     <Compile Include="Microsoft\Win32\SafeHandles\SafeHandleZeroOrMinusOneIsInvalid.cs" />
     <Compile Include="System\AccessViolationExceptionTests.cs" />
     <Compile Include="System\ActivatorTests.cs" />
+    <Compile Include="System\ActivatorTests.Generic.cs" />
     <Compile Include="System\ArgumentExceptionTests.cs" />
     <Compile Include="System\ArgumentNullExceptionTests.cs" />
     <Compile Include="System\ArgumentOutOfRangeExceptionTests.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="System\BufferTests.cs" />
     <Compile Include="System\ByteTests.cs" />
     <Compile Include="System\CharTests.cs" />
+    <Compile Include="System\CLSCompliantAttributeTests.cs" />
     <Compile Include="System\DateTimeTests.cs" />
     <Compile Include="System\DateTimeOffsetTests.cs" />
     <Compile Include="System\DBNullTests.cs" />
@@ -170,7 +173,25 @@
     <Compile Include="System\IO\IOExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongExceptionTests.cs" />
     <Compile Include="System\IO\PathTooLongException.InteropTests.cs" />
-    <Compile Include="System\Reflection\AssemblyAttributesTests.cs" />
+    <Compile Include="System\Reflection\AssemblyAlgorithmIdAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyCompanyAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyConfigurationAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyCopyrightAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyCultureAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyDefaultAliasAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyDelaySignAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyDescriptionAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyFileVersionAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyFlagsAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyInformationalVersionAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyKeyFileAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyKeyNameAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyMetadataAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyProductAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblySignatureKeyAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyTitleAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyTrademarkAttributeTests.cs" />
+    <Compile Include="System\Reflection\AssemblyVersionAttributeTests.cs" />
     <Compile Include="System\Reflection\CustomAttributeDataTests.cs" />
     <Compile Include="System\Reflection\CustomAttributesTestData.cs" />
     <Compile Include="System\Reflection\CustomAttribute_Named_Typed_ArgumentTests.cs" />
@@ -178,7 +199,10 @@
     <Compile Include="System\Reflection\MethodBaseTests.cs" />
     <Compile Include="System\Reflection\MethodBodyTests.cs" />
     <Compile Include="System\Reflection\ModuleTests.cs" />
+    <Compile Include="System\Reflection\ObfuscateAssemblyAttributeTests.cs" />
+    <Compile Include="System\Reflection\ObfuscationAttributeTests.cs" />
     <Compile Include="System\Reflection\PointerTests.cs" />
+    <Compile Include="System\Reflection\ReflectionContextTests.cs" />
     <Compile Include="System\Reflection\ReflectionTypeLoadExceptionTests.cs" />
     <Compile Include="System\Reflection\StrongNameKeyPairTests.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.cs" />
@@ -210,10 +234,11 @@
   <ItemGroup Condition=" '$(TargetsUnix)' == 'true'">
     <Compile Include="System\ExitCodeTests.Unix.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' != 'netfx' And '$(TargetGroup)' != 'netstandard'">
+  <ItemGroup>
     <Compile Include="System\HashCodeTests.netcoreapp.cs" />
     <Compile Include="Helpers.netcoreapp.cs" />
     <Compile Include="System\ActivatorTests.netcoreapp.cs" />
+    <Compile Include="System\AmbiguousImplementationExceptionTests.cs" />
     <Compile Include="System\ArrayTests.netcoreapp.cs" />
     <Compile Include="System\ArraySegmentTests.netcoreapp.cs" />
     <Compile Include="System\BooleanTests.netcoreapp.cs" />
@@ -247,7 +272,8 @@
     <Compile Include="System\ComponentModel\DefaultValueAttributeTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\BindingFlagsDoNotWrap.netcoreapp.cs" />
     <Compile Include="System\Reflection\InvokeRefReturn.netcoreapp.cs" />
-    <Compile Include="System\Reflection\IsCollectibleTests.cs" Condition="'$(TargetGroup)' != 'uapaot'"/><!-- missing method 'AssemblyLoadContext..ctor(bool) -->
+    <Compile Include="System\Reflection\IsCollectibleTests.cs" />
+    <!-- missing method 'AssemblyLoadContext..ctor(bool) -->
     <Compile Include="System\Reflection\MethodBaseTests.netcoreapp.cs" />
     <Compile Include="System\Reflection\SignatureTypes.netcoreapp.cs" />
     <Compile Include="System\Reflection\TypeDelegatorTests.netcoreapp.cs" />
@@ -259,24 +285,27 @@
     <Compile Include="System\Runtime\CompilerServices\RuntimeFeatureTests.netcoreapp.cs" />
     <Compile Include="System\Runtime\CompilerServices\RuntimeWrappedExceptionTests.cs" />
     <Compile Include="System\Runtime\ExceptionServices\ExceptionDispatchInfoTests.netcoreapp.cs" />
+    <Compile Include="System\Text\ASCIIUtilityTests.netcoreapp.cs" />
     <Compile Include="System\Text\RuneTests.netcoreapp.cs" />
     <Compile Include="System\Text\RuneTests.TestData.netcoreapp.cs" />
     <Compile Include="System\Text\StringBuilderTests.netcoreapp.cs" />
+    <Compile Include="System\Text\Unicode\Utf16UtilityTests.ValidateChars.netcoreapp.cs" />
+    <Compile Include="System\Text\Unicode\Utf8Tests.netcoreapp.cs" />
+    <Compile Include="System\Text\Unicode\Utf8Tests.ToBytes.netcoreapp.cs" />
+    <Compile Include="System\Text\Unicode\Utf8Tests.ToChars.netcoreapp.cs" />
+    <Compile Include="System\Text\Unicode\Utf8UtilityTests.ValidateBytes.netcoreapp.cs" />
     <Compile Include="System\Type\TypePropertyTests.netcoreapp.cs" />
     <Compile Include="System\Type\TypeTests.netcoreapp.cs" />
     <Compile Include="System\ArgIteratorTests.netcoreapp.cs" />
     <Compile Include="System\DoubleTests.netcoreapp.cs" />
     <Compile Include="System\SingleTests.netcoreapp.cs" />
+    <Compile Include="$(CommonPath)\..\tests\System\RealFormatterTestsBase.netcoreapp.cs" Link="System\RealFormatterTestsBase.netcoreapp.cs" />
+    <Compile Include="System\RealFormatterTests.netcoreapp.cs" />
     <Compile Include="$(CommonPath)\..\tests\System\RealParserTestsBase.netcoreapp.cs" Link="System\RealParserTestsBase.netcoreapp.cs" />
     <Compile Include="System\RealParserTests.netcoreapp.cs" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetGroup)' != 'netcoreapp'">
     <Compile Include="System\StringSplitExtensions.cs" />
-  </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)' == 'netfx' Or '$(TargetGroup)' == 'netstandard'">
-    <Compile Include="$(CommonTestPath)\Tests\System\SpanExtensions.netstandard.cs">
-      <Link>System\SpanExtensions.netstandard.cs</Link>
-    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\Collections\IEnumerable.Generic.Serialization.Tests.cs">
@@ -291,10 +320,6 @@
     <Compile Include="$(CommonTestPath)\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs">
       <Link>Common\System\Runtime\Serialization\Formatters\BinaryFormatterHelpers.cs</Link>
     </Compile>
-    <ProjectReference Include="$(CommonTestPath)\System\Diagnostics\RemoteExecutorConsoleApp\RemoteExecutorConsoleApp.csproj">
-      <Project>{69e46a6f-9966-45a5-8945-2559fe337827}</Project>
-      <Name>RemoteExecutorConsoleApp</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="TestLoadAssembly\TestLoadAssembly.csproj">
@@ -304,13 +329,10 @@
     <ProjectReference Include="TestCollectibleAssembly\TestCollectibleAssembly.csproj">
       <Name>TestCollectibleAssembly</Name>
     </ProjectReference>
-    <Reference Include="TestModule\System.Reflection.TestModule.dll">
-    </Reference>
+    <ProjectReference Include="TestModule\System.Reflection.TestModule.ilproj" />
+    <ProjectReference Include="TestStructs\System.TestStructs.ilproj" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />
-  </ItemGroup>
-  <ItemGroup>
-    <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />
   </ItemGroup>
 </Project>

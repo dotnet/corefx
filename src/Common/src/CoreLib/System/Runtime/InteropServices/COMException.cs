@@ -23,19 +23,19 @@ namespace System.Runtime.InteropServices
             HResult = HResults.E_FAIL;
         }
 
-        public COMException(string message)
+        public COMException(string? message)
             : base(message)
         {
             HResult = HResults.E_FAIL;
         }
 
-        public COMException(string message, Exception inner)
+        public COMException(string? message, Exception? inner)
             : base(message, inner)
         {
             HResult = HResults.E_FAIL;
         }
 
-        public COMException(string message, int errorCode)
+        public COMException(string? message, int errorCode)
             : base(message)
         {
             HResult = errorCode;
@@ -58,13 +58,13 @@ namespace System.Runtime.InteropServices
                 s.Append(": ").Append(message);
             }
 
-            Exception innerException = InnerException;
+            Exception? innerException = InnerException;
             if (innerException != null)
             {
                 s.Append(" ---> ").Append(innerException.ToString());
             }
 
-            string stackTrace = StackTrace;
+            string? stackTrace = StackTrace;
             if (stackTrace != null)
                 s.Append(Environment.NewLine).Append(stackTrace);
 

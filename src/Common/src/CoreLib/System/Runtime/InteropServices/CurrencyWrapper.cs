@@ -7,19 +7,19 @@ namespace System.Runtime.InteropServices
     // Wrapper that is converted to a variant with VT_CURRENCY.
     public sealed class CurrencyWrapper
     {
-        public CurrencyWrapper(Decimal obj)
+        public CurrencyWrapper(decimal obj)
         {
             WrappedObject = obj;
         }
 
-        public CurrencyWrapper(Object obj)
+        public CurrencyWrapper(object obj)
         {
-            if (!(obj is Decimal))
+            if (!(obj is decimal))
                 throw new ArgumentException(SR.Arg_MustBeDecimal, nameof(obj));
 
-            WrappedObject = (Decimal)obj;
+            WrappedObject = (decimal)obj;
         }
 
-        public Decimal WrappedObject { get; }
+        public decimal WrappedObject { get; }
     }
 }

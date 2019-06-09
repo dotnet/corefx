@@ -563,7 +563,7 @@ namespace System.Tests
             Assert.Equal(dateTimeOffset.DateTime.TimeOfDay, dateTimeOffset.TimeOfDay);
         }
 
-        private static IEnumerable<object[]> UnixTime_TestData()
+        public static IEnumerable<object[]> UnixTime_TestData()
         {
             yield return new object[] { TestTime.FromMilliseconds(DateTimeOffset.MinValue, -62135596800000) };
             yield return new object[] { TestTime.FromMilliseconds(DateTimeOffset.MaxValue, 253402300799999) };
@@ -817,7 +817,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "The full .NET framework has a bug and incorrectly parses this date")]
         public static void TryParse_TimeDesignators_NetCore()
         {
             DateTimeOffset result;
@@ -832,26 +831,6 @@ namespace System.Tests
             Assert.Equal(4, result.Month);
             Assert.Equal(21, result.Day);
             Assert.Equal(17, result.Hour);
-            Assert.Equal(0, result.Minute);
-            Assert.Equal(0, result.Second);
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "The coreclr fixed a bug where the .NET framework incorrectly parses this date")]
-        public static void TryParse_TimeDesignators_Netfx()
-        {
-            DateTimeOffset result;
-            Assert.True(DateTimeOffset.TryParse("4/21 5am", new CultureInfo("en-US"), DateTimeStyles.None, out result));
-            Assert.Equal(DateTimeOffset.Now.Month, result.Month);
-            Assert.Equal(DateTimeOffset.Now.Day, result.Day);
-            Assert.Equal(4, result.Hour);
-            Assert.Equal(0, result.Minute);
-            Assert.Equal(0, result.Second);
-
-            Assert.True(DateTimeOffset.TryParse("4/21 5pm", new CultureInfo("en-US"), DateTimeStyles.None, out result));
-            Assert.Equal(DateTimeOffset.Now.Month, result.Month);
-            Assert.Equal(DateTimeOffset.Now.Day, result.Day);
-            Assert.Equal(16, result.Hour);
             Assert.Equal(0, result.Minute);
             Assert.Equal(0, result.Second);
         }

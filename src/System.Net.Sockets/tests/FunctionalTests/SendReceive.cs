@@ -7,6 +7,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.DotNet.RemoteExecutor;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -43,7 +44,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [ActiveIssue(16945)] // Packet loss, potentially due to other tests running at the same time
+        [ActiveIssue(16945)]
         [OuterLoop] // TODO: Issue #11345
         [Theory]
         [MemberData(nameof(Loopbacks))]
@@ -54,7 +55,7 @@ namespace System.Net.Sockets.Tests
             // TODO #5185: Harden against packet loss
             const int DatagramSize = 256;
             const int DatagramsToSend = 256;
-            const int AckTimeout = 1000;
+            const int AckTimeout = 10000;
             const int TestTimeout = 30000;
 
             var left = new Socket(leftAddress.AddressFamily, SocketType.Dgram, ProtocolType.Udp);
@@ -68,6 +69,8 @@ namespace System.Net.Sockets.Tests
 
             var receiverAck = new SemaphoreSlim(0);
             var senderAck = new SemaphoreSlim(0);
+
+            _output.WriteLine($"{DateTime.Now}: Sending data from {rightEndpoint} to {leftEndpoint}");
 
             var receivedChecksums = new uint?[DatagramsToSend];
             Task leftThread = Task.Run(async () =>
@@ -88,7 +91,8 @@ namespace System.Net.Sockets.Tests
                         receivedChecksums[datagramId] = Fletcher32.Checksum(recvBuffer, 0, result.ReceivedBytes);
 
                         receiverAck.Release();
-                        Assert.True(await senderAck.WaitAsync(TestTimeout));
+                        bool gotAck = await senderAck.WaitAsync(TestTimeout);
+                        Assert.True(gotAck, $"{DateTime.Now}: Timeout waiting {TestTimeout} for senderAck in iteration {i}");
                     }
                 }
             });
@@ -105,7 +109,8 @@ namespace System.Net.Sockets.Tests
 
                     int sent = await SendToAsync(right, new ArraySegment<byte>(sendBuffer), leftEndpoint);
 
-                    Assert.True(await receiverAck.WaitAsync(AckTimeout));
+                    bool gotAck = await receiverAck.WaitAsync(AckTimeout);
+                    Assert.True(gotAck, $"{DateTime.Now}: Timeout waiting {AckTimeout} for receiverAck in iteration {i} after sending {sent}. Receiver is in {leftThread.Status}");
                     senderAck.Release();
 
                     Assert.Equal(DatagramSize, sent);
@@ -793,8 +798,8 @@ namespace System.Net.Sockets.Tests
                         if (received <= 0) break;
                         totalReceived += received;
                     }
-                    Assert.Equal(sendBuffer.Length, totalReceived);
                     await sendTask;
+                    Assert.Equal(sendBuffer.Length, totalReceived);
                 }
             }
         }
@@ -1014,7 +1019,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public void SendIovMaxUdp_SuccessOrMessageSize()
         {
             // sending more than IOV_MAX segments causes EMSGSIZE on some platforms.
@@ -1055,7 +1060,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         public async Task ReceiveIovMaxUdp_SuccessOrMessageSize()
         {
             // receiving more than IOV_MAX segments causes EMSGSIZE on some platforms.
@@ -1127,7 +1132,7 @@ namespace System.Net.Sockets.Tests
             await receiveTask;
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         [PlatformSpecific(~TestPlatforms.Windows)] // All data is sent, even when very large (100M).
         public void SocketSendWouldBlock_ReturnsBytesSent()
         {
@@ -1156,7 +1161,7 @@ namespace System.Net.Sockets.Tests
             }
         }
 
-        [Fact]
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotWindowsSubsystemForLinux))] // [ActiveIssue(11057)]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
         public async Task Socket_ReceiveFlags_Success()
         {
@@ -1234,7 +1239,7 @@ namespace System.Net.Sockets.Tests
             // TODO #5185: harden against packet loss
             const int DatagramSize = 256;
             const int DatagramsToSend = 256;
-            const int AckTimeout = 10000;
+            const int AckTimeout = 20000;
             const int TestTimeout = 60000;
 
             using (var left = new UdpClient(new IPEndPoint(leftAddress, 0)))
@@ -1385,7 +1390,7 @@ namespace System.Net.Sockets.Tests
         [Fact]
         public void BlockingRead_DoesntRequireAnotherThreadPoolThread()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 // Set the max number of worker threads to a low value.
                 ThreadPool.GetMaxThreads(out int workerThreads, out int completionPortThreads);

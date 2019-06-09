@@ -24,13 +24,13 @@ namespace System.Threading
             HResult = HResults.COR_E_THREADINTERRUPTED;
         }
 
-        public ThreadInterruptedException(string message)
+        public ThreadInterruptedException(string? message)
             : base(message)
         {
             HResult = HResults.COR_E_THREADINTERRUPTED;
         }
 
-        public ThreadInterruptedException(string message, Exception innerException)
+        public ThreadInterruptedException(string? message, Exception? innerException)
             : base(message, innerException)
         {
             HResult = HResults.COR_E_THREADINTERRUPTED;

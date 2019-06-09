@@ -3,16 +3,34 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections.Generic;
-using Xunit;
 using System.Diagnostics.Tracing;
 using System.Text;
 using System.Threading;
+using Microsoft.DotNet.RemoteExecutor;
+using Xunit;
 
 namespace System.Diagnostics.Tests
 {
     //Complex types are not supported on EventSource for .NET 4.5
-    public class DiagnosticSourceEventSourceBridgeTests : RemoteExecutorTestBase
+    public class DiagnosticSourceEventSourceBridgeTests
     {
+        // To avoid interactions between tests when they are run in parallel, we run all these tests in their 
+        // own sub-process using RemoteExecutor.Invoke()  However this makes it very inconvinient to debug the test.   
+        // By seting this #if to true you stub out RemoteInvoke and the code will run in-proc which is useful 
+        // in debugging.
+#if false    
+        class NullDispose : IDisposable
+        {
+            public void Dispose()
+            {
+            }
+        }
+        static IDisposable RemoteExecutor.Invoke(Action a)
+        {
+            a();
+            return new NullDispose();
+        }
+#endif 
         /// <summary>
         /// Tests the basic functionality of turning on specific EventSources and specifying 
         /// the events you want.
@@ -20,7 +38,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestSpecificEvents()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("TestSpecificEventsSource"))
@@ -102,10 +120,9 @@ namespace System.Diagnostics.Tests
         /// Test that things work properly for Linux newline conventions. 
         /// </summary>
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot,"This is linux specific test")]
         public void LinuxNewLineConventions()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("LinuxNewLineConventionsSource"))
@@ -164,7 +181,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWildCardSourceName()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener1 = new DiagnosticListener("TestWildCardSourceName1"))
@@ -228,7 +245,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestWildCardEventName()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("TestWildCardEventNameSource"))
@@ -267,6 +284,34 @@ namespace System.Diagnostics.Tests
                     eventSourceListener.ResetEventCountAndLastEvent();
 
                     /***************************************************************************************/
+                    // Emit an event with the same schema as the first event.   (uses first-event cache)
+                    val = new MyClass() { };
+                    if (diagnosticSourceListener.IsEnabled("TestEvent1"))
+                        diagnosticSourceListener.Write("TestEvent1", new { propStr = "hiThere", propInt = 5, cls = val });
+
+                    Assert.Equal(1, eventSourceListener.EventCount); // Exactly one more event has been emitted.
+                    Assert.Equal("TestWildCardEventNameSource", eventSourceListener.LastEvent.SourceName);
+                    Assert.Equal("TestEvent1", eventSourceListener.LastEvent.EventName);
+                    Assert.Equal(3, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Equal(val.GetType().FullName, eventSourceListener.LastEvent.Arguments["cls"]);  // ToString on cls is the class name
+                    Assert.Equal("hiThere", eventSourceListener.LastEvent.Arguments["propStr"]);
+                    Assert.Equal("5", eventSourceListener.LastEvent.Arguments["propInt"]);
+                    eventSourceListener.ResetEventCountAndLastEvent();
+
+                    /***************************************************************************************/
+                    // Emit an event with the same schema as the second event.  (uses dictionary cache)
+                    if (diagnosticSourceListener.IsEnabled("TestEvent1"))
+                        diagnosticSourceListener.Write("TestEvent1", new { propStr2 = "hi3", cls = val });
+
+                    Assert.Equal(1, eventSourceListener.EventCount); // Exactly one more event has been emitted.
+                    Assert.Equal("TestWildCardEventNameSource", eventSourceListener.LastEvent.SourceName);
+                    Assert.Equal("TestEvent1", eventSourceListener.LastEvent.EventName);
+                    Assert.Equal(2, eventSourceListener.LastEvent.Arguments.Count);
+                    Assert.Equal(val.GetType().FullName, eventSourceListener.LastEvent.Arguments["cls"]);  // ToString on cls is the class name
+                    Assert.Equal("hi3", eventSourceListener.LastEvent.Arguments["propStr2"]);
+                    eventSourceListener.ResetEventCountAndLastEvent();
+
+                    /***************************************************************************************/
                     // Emit an event from another diagnostic source with the same event name.  
                     // It will be filtered out.  
                     using (var diagnosticSourceListener2 = new DiagnosticListener("TestWildCardEventNameSource2"))
@@ -287,7 +332,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestNulls()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("TestNullsTestSource"))
@@ -368,7 +413,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestNoImplicitTransforms()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("TestNoImplicitTransformsSource"))
@@ -401,7 +446,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestBadProperties()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("TestBadPropertiesSource"))
@@ -433,7 +478,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestMessages()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("TestMessagesSource"))
@@ -466,7 +511,7 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestActivities()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 using (var diagnosticSourceListener = new DiagnosticListener("TestActivitiesSource"))
@@ -539,13 +584,27 @@ namespace System.Diagnostics.Tests
         [Fact]
         public void TestShortcutKeywords()
         {
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (var eventSourceListener = new TestDiagnosticSourceEventListener())
                 // These are look-alikes for the real ones.  
                 using (var aspNetCoreSource = new DiagnosticListener("Microsoft.AspNetCore"))
                 using (var entityFrameworkCoreSource = new DiagnosticListener("Microsoft.EntityFrameworkCore"))
                 {
+                    // Sadly we have a problem where if something else has turned on Microsoft-Diagnostics-DiagnosticSource then
+                    // its keywords are ORed with our and because the shortcuts require that IgnoreShortCutKeywords is OFF 
+                    // Something outside this test (the debugger seems to do this), will cause the test to fail.  
+                    // Currently we simply give up in that case (but it really is a deeper problem. 
+                    var IgnoreShortCutKeywords = (EventKeywords)0x0800;
+                    foreach (var eventSource in EventSource.GetSources())
+                    {
+                        if (eventSource.Name == "Microsoft-Diagnostics-DiagnosticSource")
+                        {
+                            if (eventSource.IsEnabled(EventLevel.Informational, IgnoreShortCutKeywords))
+                                return; // Don't do the testing.  
+                        }
+                    }
+
                     // These are from DiagnosticSourceEventListener.  
                     var Messages = (EventKeywords)0x1;
                     var Events = (EventKeywords)0x2;
@@ -648,7 +707,7 @@ namespace System.Diagnostics.Tests
         public void Stress_WriteConcurrently_DoesntCrash()
         {
             const int StressTimeSeconds = 4;
-            RemoteInvoke(() =>
+            RemoteExecutor.Invoke(() =>
             {
                 using (new TurnOnAllEventListener())
                 using (var source = new DiagnosticListener("testlistener"))
@@ -669,7 +728,7 @@ namespace System.Diagnostics.Tests
                             }
                             ce.Signal();
                         })
-                        {  IsBackground = true }.Start();
+                        { IsBackground = true }.Start();
                     }
                     ce.Wait();
                 }
@@ -712,7 +771,7 @@ namespace System.Diagnostics.Tests
 
         public int EventCount;
         public DiagnosticSourceEvent LastEvent;
-#if DEBUG 
+#if DEBUG
         // Here just for debugging.  Lets you see the last 3 events that were sent.  
         public DiagnosticSourceEvent SecondLast;
         public DiagnosticSourceEvent ThirdLast;
@@ -725,7 +784,7 @@ namespace System.Diagnostics.Tests
         {
             EventCount = 0;
             LastEvent = null;
-#if DEBUG 
+#if DEBUG
             SecondLast = null;
             ThirdLast = null;
 #endif
@@ -736,13 +795,13 @@ namespace System.Diagnostics.Tests
         /// </summary>
         public Predicate<DiagnosticSourceEvent> Filter;
 
-#region private 
+        #region private 
         private void UpdateLastEvent(DiagnosticSourceEvent anEvent)
         {
             if (Filter != null && !Filter(anEvent))
                 return;
 
-#if DEBUG 
+#if DEBUG
             ThirdLast = SecondLast;
             SecondLast = LastEvent;
 #endif
@@ -750,7 +809,7 @@ namespace System.Diagnostics.Tests
             EventCount++;
             LastEvent = anEvent;
         }
-#endregion
+        #endregion
     }
 
     /// <summary>
@@ -798,7 +857,7 @@ namespace System.Diagnostics.Tests
         /// <summary>
         /// Will be called when a DiagnosticSource event is fired. 
         /// </summary>
-        public event Action<DiagnosticSourceEvent> EventWritten;
+        public new event Action<DiagnosticSourceEvent> EventWritten;
 
         /// <summary>
         /// It is possible that there are other events besides those that are being forwarded from 

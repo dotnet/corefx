@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Globalization;
 
 namespace Internal.Resources
@@ -11,11 +10,11 @@ namespace Internal.Resources
     // allowing us to ask for a WinRT-specific ResourceManager.
     public abstract class WindowsRuntimeResourceManagerBase
     {
-        public abstract bool Initialize(string libpath, string reswFilename, out PRIExceptionInfo exceptionInfo);
+        public abstract bool Initialize(string libpath, string reswFilename, out PRIExceptionInfo? exceptionInfo);
 
-        public abstract string GetString(string stringName, string startingCulture, string neutralResourcesCulture);
+        public abstract string GetString(string stringName, string? startingCulture, string? neutralResourcesCulture);
 
-        public abstract CultureInfo GlobalResourceContextBestFitCultureInfo
+        public abstract CultureInfo? GlobalResourceContextBestFitCultureInfo
         {
             get;
         }
@@ -26,7 +25,7 @@ namespace Internal.Resources
         /// Check whether CultureData exists for specified cultureName
         /// This API is used for WindowsRuntimeResourceManager in System.Runtime.WindowsRuntime
         /// </summary>
-        public static bool IsValidCulture(string cultureName)
+        public static bool IsValidCulture(string? cultureName)
         {
             return CultureData.GetCultureData(cultureName, /* useUserOverride */ true) != null;
         }

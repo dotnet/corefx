@@ -79,7 +79,7 @@ namespace System.Buffers
         /// <summary>
         /// Converts a classic .NET format string into a StandardFormat
         /// </summary>
-        public static StandardFormat Parse(string format) => format == null ? default : Parse(format.AsSpan());
+        public static StandardFormat Parse(string? format) => format == null ? default : Parse(format.AsSpan());
 
         /// <summary>
         /// Tries to convert a <see cref="ReadOnlySpan{Char}"/> into a StandardFormat. A return value indicates whether the conversion succeeded or failed.
@@ -129,7 +129,7 @@ namespace System.Buffers
         /// <summary>
         /// Returns true if both the Symbol and Precision are equal.
         /// </summary>
-        public override bool Equals(object obj) => obj is StandardFormat other && Equals(other);
+        public override bool Equals(object? obj) => obj is StandardFormat other && Equals(other);
 
         /// <summary>
         /// Compute a hash code.

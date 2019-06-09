@@ -17,12 +17,9 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics.Tracing;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Internal.Runtime.CompilerServices;
-
-using Thread = Internal.Runtime.Augments.RuntimeThread;
 
 namespace System.Threading
 {
@@ -36,7 +33,7 @@ namespace System.Threading
         public static readonly ThreadPoolWorkQueue workQueue = new ThreadPoolWorkQueue();
 
         /// <summary>Shim used to invoke <see cref="IAsyncStateMachineBox.MoveNext"/> of the supplied <see cref="IAsyncStateMachineBox"/>.</summary>
-        internal static readonly Action<object> s_invokeAsyncStateMachineBox = state =>
+        internal static readonly Action<object?> s_invokeAsyncStateMachineBox = state =>
         {
             if (!(state is IAsyncStateMachineBox box))
             {
@@ -119,7 +116,7 @@ namespace System.Threading
         internal sealed class WorkStealingQueue
         {
             private const int INITIAL_SIZE = 32;
-            internal volatile object[] m_array = new object[INITIAL_SIZE]; // SOS's ThreadPool command depends on this name
+            internal volatile object?[] m_array = new object[INITIAL_SIZE]; // SOS's ThreadPool command depends on this name
             private volatile int m_mask = INITIAL_SIZE - 1;
 
 #if DEBUG
@@ -191,7 +188,7 @@ namespace System.Threading
                         if (count >= m_mask)
                         {
                             // We're full; expand the queue by doubling its size.
-                            var newArray = new object[m_array.Length << 1];
+                            var newArray = new object?[m_array.Length << 1];
                             for (int i = 0; i < m_array.Length; i++)
                                 newArray[i] = m_array[(i + head) & m_mask];
 
@@ -219,7 +216,7 @@ namespace System.Threading
                 // Fast path: check the tail. If equal, we can skip the lock.
                 if (m_array[(m_tailIndex - 1) & m_mask] == obj)
                 {
-                    object unused = LocalPop();
+                    object? unused = LocalPop();
                     Debug.Assert(unused == null || unused == obj);
                     return unused != null;
                 }
@@ -270,10 +267,10 @@ namespace System.Threading
                 return false;
             }
 
-            public object LocalPop() => m_headIndex < m_tailIndex ? LocalPopCore() : null;
+            public object? LocalPop() => m_headIndex < m_tailIndex ? LocalPopCore() : null;
 
             [SuppressMessage("Microsoft.Concurrency", "CA8001", Justification = "Reviewed for thread safety")]
-            private object LocalPopCore()
+            private object? LocalPopCore()
             {
                 while (true)
                 {
@@ -291,7 +288,7 @@ namespace System.Threading
                     if (m_headIndex <= tail)
                     {
                         int idx = tail & m_mask;
-                        object obj = Volatile.Read(ref m_array[idx]);
+                        object? obj = Volatile.Read(ref m_array[idx]);
 
                         // Check for nulls in the array.
                         if (obj == null) continue;
@@ -311,7 +308,7 @@ namespace System.Threading
                             {
                                 // Element still available. Take it.
                                 int idx = tail & m_mask;
-                                object obj = Volatile.Read(ref m_array[idx]);
+                                object? obj = Volatile.Read(ref m_array[idx]);
 
                                 // Check for nulls in the array.
                                 if (obj == null) continue;
@@ -337,7 +334,7 @@ namespace System.Threading
 
             public bool CanSteal => m_headIndex < m_tailIndex;
 
-            public object TrySteal(ref bool missedSteal)
+            public object? TrySteal(ref bool missedSteal)
             {
                 while (true)
                 {
@@ -356,7 +353,7 @@ namespace System.Threading
                                 if (head < m_tailIndex)
                                 {
                                     int idx = head & m_mask;
-                                    object obj = Volatile.Read(ref m_array[idx]);
+                                    object? obj = Volatile.Read(ref m_array[idx]);
 
                                     // Check for nulls in the array.
                                     if (obj == null) continue;
@@ -381,6 +378,26 @@ namespace System.Threading
                     }
 
                     return null;
+                }
+            }
+
+            public int Count
+            {
+                get
+                {
+                    bool lockTaken = false;
+                    try
+                    {
+                        m_foreignLock.Enter(ref lockTaken);
+                        return Math.Max(0, m_tailIndex - m_headIndex);
+                    }
+                    finally
+                    {
+                        if (lockTaken)
+                        {
+                            m_foreignLock.Exit(useMemoryBarrier: false);
+                        }
+                    }
                 }
             }
         }
@@ -459,7 +476,7 @@ namespace System.Threading
             if (loggingEnabled)
                 System.Diagnostics.Tracing.FrameworkEventSource.Log.ThreadPoolEnqueueWorkObject(callback);
 
-            ThreadPoolWorkQueueThreadLocals tl = null;
+            ThreadPoolWorkQueueThreadLocals? tl = null;
             if (!forceGlobal)
                 tl = ThreadPoolWorkQueueThreadLocals.threadLocals;
 
@@ -481,10 +498,10 @@ namespace System.Threading
             return tl != null && tl.workStealingQueue.LocalFindAndPop(callback);
         }
 
-        public object Dequeue(ThreadPoolWorkQueueThreadLocals tl, ref bool missedSteal)
+        public object? Dequeue(ThreadPoolWorkQueueThreadLocals tl, ref bool missedSteal)
         {
             WorkStealingQueue localWsq = tl.workStealingQueue;
-            object callback;
+            object? callback;
 
             if ((callback = localWsq.LocalPop()) == null && // first try the local queue
                 !workItems.TryDequeue(out callback)) // then try the global queue
@@ -513,6 +530,21 @@ namespace System.Threading
 
             return callback;
         }
+
+        public long LocalCount
+        {
+            get
+            {
+                long count = 0;
+                foreach (WorkStealingQueue workStealingQueue in WorkStealingQueueList.Queues)
+                {
+                    count += workStealingQueue.Count;
+                }
+                return count;
+            }
+        }
+
+        public long GlobalCount => workItems.Count;
 
         /// <summary>
         /// Dispatches work items to this thread.
@@ -548,7 +580,7 @@ namespace System.Threading
             // false later, but only if we're absolutely certain that the queue is empty.
             //
             bool needAnotherThread = true;
-            object outerWorkItem = null;
+            object? outerWorkItem = null;
             try
             {
                 //
@@ -560,8 +592,8 @@ namespace System.Threading
                 Thread currentThread = tl.currentThread;
 
                 // Start on clean ExecutionContext and SynchronizationContext
-                currentThread.ExecutionContext = null;
-                currentThread.SynchronizationContext = null;
+                currentThread._executionContext = null;
+                currentThread._synchronizationContext = null;
 
                 //
                 // Loop until our quantum expires or there is no work.
@@ -570,7 +602,7 @@ namespace System.Threading
                 {
                     bool missedSteal = false;
                     // Use operate on workItem local to try block so it can be enregistered 
-                    object workItem = outerWorkItem = workQueue.Dequeue(tl, ref missedSteal);
+                    object? workItem = outerWorkItem = workQueue.Dequeue(tl, ref missedSteal);
 
                     if (workItem == null)
                     {
@@ -711,13 +743,14 @@ namespace System.Threading
             currentThread = Thread.CurrentThread;
         }
 
-        private void CleanUp()
+        ~ThreadPoolWorkQueueThreadLocals()
         {
+            // Transfer any pending workitems into the global queue so that they will be executed by another thread
             if (null != workStealingQueue)
             {
                 if (null != workQueue)
                 {
-                    object cb;
+                    object? cb;
                     while ((cb = workStealingQueue.LocalPop()) != null)
                     {
                         Debug.Assert(null != cb);
@@ -728,22 +761,11 @@ namespace System.Threading
                 ThreadPoolWorkQueue.WorkStealingQueueList.Remove(workStealingQueue);
             }
         }
-
-        ~ThreadPoolWorkQueueThreadLocals()
-        {
-            // Since the purpose of calling CleanUp is to transfer any pending workitems into the global
-            // queue so that they will be executed by another thread, there's no point in doing this cleanup
-            // if we're in the process of shutting down or unloading the AD.  In those cases, the work won't
-            // execute anyway.  And there are subtle race conditions involved there that would lead us to do the wrong
-            // thing anyway.  So we'll only clean up if this is a "normal" finalization.
-            if (!Environment.HasShutdownStarted)
-                CleanUp();
-        }
     }
 
-    public delegate void WaitCallback(object state);
+    public delegate void WaitCallback(object? state);
 
-    public delegate void WaitOrTimerCallback(object state, bool timedOut);  // signaled or timed out
+    public delegate void WaitOrTimerCallback(object? state, bool timedOut);  // signaled or timed out
 
     internal abstract class QueueUserWorkItemCallbackBase : IThreadPoolWorkItem
     {
@@ -754,8 +776,7 @@ namespace System.Threading
         ~QueueUserWorkItemCallbackBase()
         {
             Debug.Assert(
-                executed != 0 || Environment.HasShutdownStarted,
-                "A QueueUserWorkItemCallback was never called!");
+                executed != 0, "A QueueUserWorkItemCallback was never called!");
         }
 #endif
 
@@ -772,19 +793,20 @@ namespace System.Threading
 
     internal sealed class QueueUserWorkItemCallback : QueueUserWorkItemCallbackBase
     {
-        private WaitCallback _callback; // SOS's ThreadPool command depends on this name
-        private readonly object _state;
+        private WaitCallback? _callback; // SOS's ThreadPool command depends on this name
+        private readonly object? _state;
         private readonly ExecutionContext _context;
 
         private static readonly Action<QueueUserWorkItemCallback> s_executionContextShim = quwi =>
         {
+            Debug.Assert(quwi._callback != null);
             WaitCallback callback = quwi._callback;
             quwi._callback = null;
 
             callback(quwi._state);
         };
 
-        internal QueueUserWorkItemCallback(WaitCallback callback, object state, ExecutionContext context)
+        internal QueueUserWorkItemCallback(WaitCallback callback, object? state, ExecutionContext context)
         {
             Debug.Assert(context != null);
 
@@ -803,7 +825,7 @@ namespace System.Threading
 
     internal sealed class QueueUserWorkItemCallback<TState> : QueueUserWorkItemCallbackBase
     {
-        private Action<TState> _callback; // SOS's ThreadPool command depends on this name
+        private Action<TState>? _callback; // SOS's ThreadPool command depends on this name
         private readonly TState _state;
         private readonly ExecutionContext _context;
 
@@ -820,6 +842,7 @@ namespace System.Threading
         {
             base.Execute();
 
+            Debug.Assert(_callback != null);
             Action<TState> callback = _callback;
             _callback = null;
 
@@ -829,10 +852,10 @@ namespace System.Threading
 
     internal sealed class QueueUserWorkItemCallbackDefaultContext : QueueUserWorkItemCallbackBase
     {
-        private WaitCallback _callback; // SOS's ThreadPool command depends on this name
-        private readonly object _state;
+        private WaitCallback? _callback; // SOS's ThreadPool command depends on this name
+        private readonly object? _state;
 
-        internal QueueUserWorkItemCallbackDefaultContext(WaitCallback callback, object state)
+        internal QueueUserWorkItemCallbackDefaultContext(WaitCallback callback, object? state)
         {
             Debug.Assert(callback != null);
 
@@ -845,6 +868,7 @@ namespace System.Threading
             ExecutionContext.CheckThreadPoolAndContextsAreDefault();
             base.Execute();
 
+            Debug.Assert(_callback != null);
             WaitCallback callback = _callback;
             _callback = null;
 
@@ -856,7 +880,7 @@ namespace System.Threading
 
     internal sealed class QueueUserWorkItemCallbackDefaultContext<TState> : QueueUserWorkItemCallbackBase
     {
-        private Action<TState> _callback; // SOS's ThreadPool command depends on this name
+        private Action<TState>? _callback; // SOS's ThreadPool command depends on this name
         private readonly TState _state;
 
         internal QueueUserWorkItemCallbackDefaultContext(Action<TState> callback, TState state)
@@ -872,6 +896,7 @@ namespace System.Threading
             ExecutionContext.CheckThreadPoolAndContextsAreDefault();
             base.Execute();
 
+            Debug.Assert(_callback != null);
             Action<TState> callback = _callback;
             _callback = null;
 
@@ -881,15 +906,15 @@ namespace System.Threading
         }
     }
 
-    internal class _ThreadPoolWaitOrTimerCallback
+    internal sealed class _ThreadPoolWaitOrTimerCallback
     {
         private WaitOrTimerCallback _waitOrTimerCallback;
-        private ExecutionContext _executionContext;
-        private object _state;
+        private ExecutionContext? _executionContext;
+        private object? _state;
         private static readonly ContextCallback _ccbt = new ContextCallback(WaitOrTimerCallback_Context_t);
         private static readonly ContextCallback _ccbf = new ContextCallback(WaitOrTimerCallback_Context_f);
 
-        internal _ThreadPoolWaitOrTimerCallback(WaitOrTimerCallback waitOrTimerCallback, object state, bool flowExecutionContext)
+        internal _ThreadPoolWaitOrTimerCallback(WaitOrTimerCallback waitOrTimerCallback, object? state, bool flowExecutionContext)
         {
             _waitOrTimerCallback = waitOrTimerCallback;
             _state = state;
@@ -901,15 +926,15 @@ namespace System.Threading
             }
         }
 
-        private static void WaitOrTimerCallback_Context_t(object state) =>
+        private static void WaitOrTimerCallback_Context_t(object? state) =>
             WaitOrTimerCallback_Context(state, timedOut: true);
 
-        private static void WaitOrTimerCallback_Context_f(object state) =>
+        private static void WaitOrTimerCallback_Context_f(object? state) =>
             WaitOrTimerCallback_Context(state, timedOut: false);
 
-        private static void WaitOrTimerCallback_Context(object state, bool timedOut)
+        private static void WaitOrTimerCallback_Context(object? state, bool timedOut)
         {
-            _ThreadPoolWaitOrTimerCallback helper = (_ThreadPoolWaitOrTimerCallback)state;
+            _ThreadPoolWaitOrTimerCallback helper = (_ThreadPoolWaitOrTimerCallback)state!;
             helper._waitOrTimerCallback(helper._state, timedOut);
         }
 
@@ -918,7 +943,7 @@ namespace System.Threading
         {
             Debug.Assert(helper != null, "Null state passed to PerformWaitOrTimerCallback!");
             // call directly if it is an unsafe call OR EC flow is suppressed
-            ExecutionContext context = helper._executionContext;
+            ExecutionContext? context = helper._executionContext;
             if (context == null)
             {
                 WaitOrTimerCallback callback = helper._waitOrTimerCallback;
@@ -937,7 +962,7 @@ namespace System.Threading
         public static RegisteredWaitHandle RegisterWaitForSingleObject(
              WaitHandle waitObject,
              WaitOrTimerCallback callBack,
-             object state,
+             object? state,
              uint millisecondsTimeOutInterval,
              bool executeOnlyOnce    // NOTE: we do not allow other options that allow the callback to be queued as an APC
              )
@@ -951,7 +976,7 @@ namespace System.Threading
         public static RegisteredWaitHandle UnsafeRegisterWaitForSingleObject(
              WaitHandle waitObject,
              WaitOrTimerCallback callBack,
-             object state,
+             object? state,
              uint millisecondsTimeOutInterval,
              bool executeOnlyOnce    // NOTE: we do not allow other options that allow the callback to be queued as an APC
              )
@@ -964,7 +989,7 @@ namespace System.Threading
         public static RegisteredWaitHandle RegisterWaitForSingleObject(
              WaitHandle waitObject,
              WaitOrTimerCallback callBack,
-             object state,
+             object? state,
              int millisecondsTimeOutInterval,
              bool executeOnlyOnce    // NOTE: we do not allow other options that allow the callback to be queued as an APC
              )
@@ -977,7 +1002,7 @@ namespace System.Threading
         public static RegisteredWaitHandle UnsafeRegisterWaitForSingleObject(
              WaitHandle waitObject,
              WaitOrTimerCallback callBack,
-             object state,
+             object? state,
              int millisecondsTimeOutInterval,
              bool executeOnlyOnce    // NOTE: we do not allow other options that allow the callback to be queued as an APC
              )
@@ -990,7 +1015,7 @@ namespace System.Threading
         public static RegisteredWaitHandle RegisterWaitForSingleObject(
             WaitHandle waitObject,
             WaitOrTimerCallback callBack,
-            object state,
+            object? state,
             long millisecondsTimeOutInterval,
             bool executeOnlyOnce    // NOTE: we do not allow other options that allow the callback to be queued as an APC
         )
@@ -1005,7 +1030,7 @@ namespace System.Threading
         public static RegisteredWaitHandle UnsafeRegisterWaitForSingleObject(
             WaitHandle waitObject,
             WaitOrTimerCallback callBack,
-            object state,
+            object? state,
             long millisecondsTimeOutInterval,
             bool executeOnlyOnce    // NOTE: we do not allow other options that allow the callback to be queued as an APC
         )
@@ -1020,7 +1045,7 @@ namespace System.Threading
         public static RegisteredWaitHandle RegisterWaitForSingleObject(
                           WaitHandle waitObject,
                           WaitOrTimerCallback callBack,
-                          object state,
+                          object? state,
                           TimeSpan timeout,
                           bool executeOnlyOnce
                           )
@@ -1036,7 +1061,7 @@ namespace System.Threading
         public static RegisteredWaitHandle UnsafeRegisterWaitForSingleObject(
                           WaitHandle waitObject,
                           WaitOrTimerCallback callBack,
-                          object state,
+                          object? state,
                           TimeSpan timeout,
                           bool executeOnlyOnce
                           )
@@ -1052,7 +1077,7 @@ namespace System.Threading
         public static bool QueueUserWorkItem(WaitCallback callBack) =>
             QueueUserWorkItem(callBack, null);
 
-        public static bool QueueUserWorkItem(WaitCallback callBack, object state)
+        public static bool QueueUserWorkItem(WaitCallback callBack, object? state)
         {
             if (callBack == null)
             {
@@ -1061,11 +1086,11 @@ namespace System.Threading
 
             EnsureInitialized();
 
-            ExecutionContext context = ExecutionContext.Capture();
+            ExecutionContext? context = ExecutionContext.Capture();
 
             object tpcallBack = (context == null || context.IsDefault) ?
-                new QueueUserWorkItemCallbackDefaultContext(callBack, state) :
-                (object)new QueueUserWorkItemCallback(callBack, state, context);
+                new QueueUserWorkItemCallbackDefaultContext(callBack!, state) :
+                (object)new QueueUserWorkItemCallback(callBack!, state, context);
 
             ThreadPoolGlobals.workQueue.Enqueue(tpcallBack, forceGlobal: true);
 
@@ -1081,11 +1106,11 @@ namespace System.Threading
 
             EnsureInitialized();
 
-            ExecutionContext context = ExecutionContext.Capture();
+            ExecutionContext? context = ExecutionContext.Capture();
 
             object tpcallBack = (context == null || context.IsDefault) ?
-                new QueueUserWorkItemCallbackDefaultContext<TState>(callBack, state) :
-                (object)new QueueUserWorkItemCallback<TState>(callBack, state, context);
+                new QueueUserWorkItemCallbackDefaultContext<TState>(callBack!, state) :
+                (object)new QueueUserWorkItemCallback<TState>(callBack!, state, context);
 
             ThreadPoolGlobals.workQueue.Enqueue(tpcallBack, forceGlobal: !preferLocal);
 
@@ -1113,19 +1138,19 @@ namespace System.Threading
                     ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.state);
                 }
 
-                UnsafeQueueUserWorkItemInternal((object)state, preferLocal);
+                UnsafeQueueUserWorkItemInternal((object)state!, preferLocal);
                 return true;
             }
 
             EnsureInitialized();
 
             ThreadPoolGlobals.workQueue.Enqueue(
-                new QueueUserWorkItemCallbackDefaultContext<TState>(callBack, state), forceGlobal: !preferLocal);
+                new QueueUserWorkItemCallbackDefaultContext<TState>(callBack!, state), forceGlobal: !preferLocal);
 
             return true;
         }
 
-        public static bool UnsafeQueueUserWorkItem(WaitCallback callBack, object state)
+        public static bool UnsafeQueueUserWorkItem(WaitCallback callBack, object? state)
         {
             if (callBack == null)
             {
@@ -1134,7 +1159,7 @@ namespace System.Threading
 
             EnsureInitialized();
 
-            object tpcallBack = new QueueUserWorkItemCallbackDefaultContext(callBack, state);
+            object tpcallBack = new QueueUserWorkItemCallbackDefaultContext(callBack!, state);
 
             ThreadPoolGlobals.workQueue.Enqueue(tpcallBack, forceGlobal: true);
 
@@ -1154,7 +1179,7 @@ namespace System.Threading
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.callBack);
             }
 
-            UnsafeQueueUserWorkItemInternal(callBack, preferLocal);
+            UnsafeQueueUserWorkItemInternal(callBack!, preferLocal);
             return true;
         }
 
@@ -1190,10 +1215,10 @@ namespace System.Threading
             {
                 if (wsq != null && wsq.m_array != null)
                 {
-                    object[] items = wsq.m_array;
+                    object?[] items = wsq.m_array;
                     for (int i = 0; i < items.Length; i++)
                     {
-                        object item = items[i];
+                        object? item = items[i];
                         if (item != null)
                         {
                             yield return item;
@@ -1208,10 +1233,10 @@ namespace System.Threading
             ThreadPoolWorkQueue.WorkStealingQueue wsq = ThreadPoolWorkQueueThreadLocals.threadLocals.workStealingQueue;
             if (wsq != null && wsq.m_array != null)
             {
-                object[] items = wsq.m_array;
+                object?[] items = wsq.m_array;
                 for (int i = 0; i < items.Length; i++)
                 {
-                    object item = items[i];
+                    object? item = items[i];
                     if (item != null)
                         yield return item;
                 }
@@ -1250,5 +1275,23 @@ namespace System.Threading
 
         internal static object[] GetLocallyQueuedWorkItemsForDebugger() =>
             ToObjectArray(GetLocallyQueuedWorkItems());
+
+        /// <summary>
+        /// Gets the number of work items that are currently queued to be processed.
+        /// </summary>
+        /// <remarks>
+        /// For a thread pool implementation that may have different types of work items, the count includes all types that can
+        /// be tracked, which may only be the user work items including tasks. Some implementations may also include queued
+        /// timer and wait callbacks in the count. On Windows, the count is unlikely to include the number of pending IO
+        /// completions, as they get posted directly to an IO completion port.
+        /// </remarks>
+        public static long PendingWorkItemCount
+        {
+            get
+            {
+                ThreadPoolWorkQueue workQueue = ThreadPoolGlobals.workQueue;
+                return workQueue.LocalCount + workQueue.GlobalCount + PendingUnmanagedWorkItemCount;
+            }
+        }
     }
 }

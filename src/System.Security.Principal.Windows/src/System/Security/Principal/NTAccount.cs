@@ -247,7 +247,7 @@ namespace System.Security.Principal
                 // Construct an array of unicode strings
                 //
 
-                Interop.UNICODE_STRING[] Names = new Interop.UNICODE_STRING[sourceAccounts.Count];
+                Interop.Advapi32.MARSHALLED_UNICODE_STRING[] Names = new Interop.Advapi32.MARSHALLED_UNICODE_STRING[sourceAccounts.Count];
 
                 int currentName = 0;
                 foreach (IdentityReference id in sourceAccounts)
@@ -265,7 +265,7 @@ namespace System.Security.Principal
                     {
                         // this should never happen since we are already validating account name length in constructor and 
                         // it is less than this limit
-                        Debug.Assert(false, "NTAccount::TranslateToSids - source account name is too long.");
+                        Debug.Fail("NTAccount::TranslateToSids - source account name is too long.");
                         throw new InvalidOperationException();
                     }
 
@@ -314,7 +314,7 @@ namespace System.Security.Principal
 
                     if (unchecked((int)win32ErrorCode) != Interop.Errors.ERROR_TRUSTED_RELATIONSHIP_FAILURE)
                     {
-                        Debug.Assert(false, string.Format(CultureInfo.InvariantCulture, "Interop.LsaLookupNames(2) returned unrecognized error {0}", win32ErrorCode));
+                        Debug.Fail($"Interop.LsaLookupNames(2) returned unrecognized error {win32ErrorCode}");
                     }
 
                     throw new Win32Exception(unchecked((int)win32ErrorCode));

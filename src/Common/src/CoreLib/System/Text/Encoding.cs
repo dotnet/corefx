@@ -3,11 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
-using System.Globalization;
-using System.Threading;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using System.Runtime.Serialization;
-using System.Diagnostics.CodeAnalysis;
 
 namespace System.Text
 {
@@ -74,7 +72,7 @@ namespace System.Text
     // generally executes faster.
     //
 
-    public abstract class Encoding : ICloneable
+    public abstract partial class Encoding : ICloneable
     {
         // For netcore we use UTF8 as default encoding since ANSI isn't available
         private static readonly UTF8Encoding.UTF8EncodingSealed s_defaultEncoding  = new UTF8Encoding.UTF8EncodingSealed(encoderShouldEmitUTF8Identifier: false);
@@ -156,15 +154,15 @@ namespace System.Text
 
         internal int _codePage = 0;
 
-        internal CodePageDataItem _dataItem = null;
+        internal CodePageDataItem? _dataItem = null;
 
         // Because of encoders we may be read only
         [OptionalField(VersionAdded = 2)]
         private bool _isReadOnly = true;
 
         // Encoding (encoder) fallback
-        internal EncoderFallback encoderFallback = null;
-        internal DecoderFallback decoderFallback = null;
+        internal EncoderFallback encoderFallback = null!;
+        internal DecoderFallback decoderFallback = null!;
 
         protected Encoding() : this(0)
         {
@@ -189,7 +187,7 @@ namespace System.Text
         // This constructor is needed to allow any sub-classing implementation to provide encoder/decoder fallback objects 
         // because the encoding object is always created as read-only object and don't allow setting encoder/decoder fallback 
         // after the creation is done. 
-        protected Encoding(int codePage, EncoderFallback encoderFallback, DecoderFallback decoderFallback)
+        protected Encoding(int codePage, EncoderFallback? encoderFallback, DecoderFallback? decoderFallback)
         {
             // Validate code page
             if (codePage < 0)
@@ -257,7 +255,7 @@ namespace System.Text
 
         public static Encoding GetEncoding(int codepage)
         {
-            Encoding result = EncodingProvider.GetEncodingFromProvider(codepage);
+            Encoding? result = EncodingProvider.GetEncodingFromProvider(codepage);
             if (result != null)
                 return result;
 
@@ -293,7 +291,7 @@ namespace System.Text
         public static Encoding GetEncoding(int codepage,
             EncoderFallback encoderFallback, DecoderFallback decoderFallback)
         {
-            Encoding baseEncoding = EncodingProvider.GetEncodingFromProvider(codepage, encoderFallback, decoderFallback);
+            Encoding? baseEncoding = EncodingProvider.GetEncodingFromProvider(codepage, encoderFallback, decoderFallback);
 
             if (baseEncoding != null)
                 return baseEncoding;
@@ -313,7 +311,7 @@ namespace System.Text
         //
         public static Encoding GetEncoding(string name)
         {
-            Encoding baseEncoding = EncodingProvider.GetEncodingFromProvider(name);
+            Encoding? baseEncoding = EncodingProvider.GetEncodingFromProvider(name);
             if (baseEncoding != null)
                 return baseEncoding;
 
@@ -331,7 +329,7 @@ namespace System.Text
         public static Encoding GetEncoding(string name,
             EncoderFallback encoderFallback, DecoderFallback decoderFallback)
         {
-            Encoding baseEncoding = EncodingProvider.GetEncodingFromProvider(name, encoderFallback, decoderFallback);
+            Encoding? baseEncoding = EncodingProvider.GetEncodingFromProvider(name, encoderFallback, decoderFallback);
             if (baseEncoding != null)
                 return baseEncoding;
 
@@ -341,7 +339,7 @@ namespace System.Text
             // Otherwise, the code below will throw exception when trying to call
             // EncodingTable.GetCodePageFromName().
             //
-            return (GetEncoding(EncodingTable.GetCodePageFromName(name), encoderFallback, decoderFallback));
+            return GetEncoding(EncodingTable.GetCodePageFromName(name), encoderFallback, decoderFallback);
         }
 
         // Return a list of all EncodingInfo objects describing all of our encodings
@@ -372,7 +370,7 @@ namespace System.Text
         // Returns the name for this encoding that can be used with mail agent body tags.
         // If the encoding may not be used, the string is empty.
 
-        public virtual string BodyName
+        public virtual string? BodyName
         {
             get
             {
@@ -380,12 +378,12 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return (_dataItem.BodyName);
+                return _dataItem!.BodyName;
             }
         }
 
         // Returns the human-readable description of the encoding ( e.g. Hebrew (DOS)).
-        public virtual string EncodingName
+        public virtual string? EncodingName
         {
             get
             {
@@ -394,14 +392,14 @@ namespace System.Text
                     GetDataItem();
                 }
                 
-                return _dataItem.DisplayName;
+                return _dataItem!.DisplayName;
             }
         }
 
         // Returns the name for this encoding that can be used with mail agent header
         // tags.  If the encoding may not be used, the string is empty.
 
-        public virtual string HeaderName
+        public virtual string? HeaderName
         {
             get
             {
@@ -409,12 +407,12 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return (_dataItem.HeaderName);
+                return _dataItem!.HeaderName;
             }
         }
 
         // Returns the IANA preferred name for this encoding.
-        public virtual string WebName
+        public virtual string? WebName
         {
             get
             {
@@ -422,7 +420,7 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return (_dataItem.WebName);
+                return _dataItem!.WebName;
             }
         }
 
@@ -436,7 +434,7 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return (_dataItem.UIFamilyCodePage);
+                return _dataItem!.UIFamilyCodePage;
             }
         }
 
@@ -451,7 +449,7 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return ((_dataItem.Flags & MIMECONTF_BROWSER) != 0);
+                return (_dataItem!.Flags & MIMECONTF_BROWSER) != 0;
             }
         }
 
@@ -465,7 +463,7 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return ((_dataItem.Flags & MIMECONTF_SAVABLE_BROWSER) != 0);
+                return (_dataItem!.Flags & MIMECONTF_SAVABLE_BROWSER) != 0;
             }
         }
 
@@ -479,7 +477,7 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return ((_dataItem.Flags & MIMECONTF_MAILNEWS) != 0);
+                return (_dataItem!.Flags & MIMECONTF_MAILNEWS) != 0;
             }
         }
 
@@ -495,7 +493,7 @@ namespace System.Text
                 {
                     GetDataItem();
                 }
-                return ((_dataItem.Flags & MIMECONTF_SAVABLE_MAILNEWS) != 0);
+                return (_dataItem!.Flags & MIMECONTF_SAVABLE_MAILNEWS) != 0;
             }
         }
 
@@ -559,12 +557,15 @@ namespace System.Text
             return newEncoding;
         }
 
-
         public bool IsReadOnly
         {
             get
             {
                 return (_isReadOnly);
+            }
+            private protected set
+            {
+                _isReadOnly = value;
             }
         }
 
@@ -666,16 +667,6 @@ namespace System.Text
             }
         }
 
-        // For NLS Encodings, workhorse takes an encoder (may be null)
-        // Always validate parameters before calling internal version, which will only assert.
-        internal virtual unsafe int GetByteCount(char* chars, int count, EncoderNLS encoder)
-        {
-            Debug.Assert(chars != null);
-            Debug.Assert(count >= 0);
-
-            return GetByteCount(chars, count);
-        }
-
         // Returns a byte array containing the encoded representation of the given
         // character array.
         //
@@ -770,14 +761,6 @@ namespace System.Text
             if (s == null)
                 throw new ArgumentNullException(nameof(s));
             return GetBytes(s.ToCharArray(), charIndex, charCount, bytes, byteIndex);
-        }
-
-        // This is our internal workhorse
-        // Always validate parameters before calling internal version, which will only assert.
-        internal virtual unsafe int GetBytes(char* chars, int charCount,
-                                                byte* bytes, int byteCount, EncoderNLS encoder)
-        {
-            return GetBytes(chars, charCount, bytes, byteCount);
         }
 
         // We expect this to be the workhorse for NLS Encodings, but for existing
@@ -898,13 +881,6 @@ namespace System.Text
             }
         }
 
-        // This is our internal workhorse
-        // Always validate parameters before calling internal version, which will only assert.
-        internal virtual unsafe int GetCharCount(byte* bytes, int count, DecoderNLS decoder)
-        {
-            return GetCharCount(bytes, count);
-        }
-
         // Returns a character array containing the decoded representation of a
         // given byte array.
         //
@@ -1010,15 +986,6 @@ namespace System.Text
                 return GetChars(bytesPtr, bytes.Length, charsPtr, chars.Length);
             }
         }
-
-        // This is our internal workhorse
-        // Always validate parameters before calling internal version, which will only assert.
-        internal virtual unsafe int GetChars(byte* bytes, int byteCount,
-                                                char* chars, int charCount, DecoderNLS decoder)
-        {
-            return GetChars(bytes, byteCount, chars, charCount);
-        }
-
 
         [CLSCompliant(false)]
         public unsafe string GetString(byte* bytes, int byteCount)
@@ -1188,7 +1155,7 @@ namespace System.Text
 
         private static Encoding BigEndianUTF32 => UTF32Encoding.s_bigEndianDefault;
 
-        public override bool Equals(object value)
+        public override bool Equals(object? value)
         {
             if (value is Encoding that)
                 return (_codePage == that._codePage) &&
@@ -1215,6 +1182,7 @@ namespace System.Text
             return Array.Empty<char>();
         }
 
+        [DoesNotReturn]
         internal void ThrowBytesOverflow()
         {
             // Special message to include fallback type in case fallback's GetMaxCharCount is broken
@@ -1223,7 +1191,7 @@ namespace System.Text
                 SR.Format(SR.Argument_EncodingConversionOverflowBytes, EncodingName, EncoderFallback.GetType()), "bytes");
         }
 
-        internal void ThrowBytesOverflow(EncoderNLS encoder, bool nothingEncoded)
+        internal void ThrowBytesOverflow(EncoderNLS? encoder, bool nothingEncoded)
         {
             if (encoder == null || encoder._throwOnOverflow || nothingEncoded)
             {
@@ -1235,9 +1203,18 @@ namespace System.Text
             }
 
             // If we didn't throw, we are in convert and have to remember our flushing
-            encoder.ClearMustFlush();
+            encoder!.ClearMustFlush();
         }
 
+        [DoesNotReturn]
+        [StackTraceHidden]
+        internal static void ThrowConversionOverflow()
+        {
+            throw new ArgumentException(SR.Argument_ConversionOverflow);
+        }
+
+        [DoesNotReturn]
+        [StackTraceHidden]
         internal void ThrowCharsOverflow()
         {
             // Special message to include fallback type in case fallback's GetMaxCharCount is broken
@@ -1246,7 +1223,7 @@ namespace System.Text
                 SR.Format(SR.Argument_EncodingConversionOverflowChars, EncodingName, DecoderFallback.GetType()), "chars");
         }
 
-        internal void ThrowCharsOverflow(DecoderNLS decoder, bool nothingDecoded)
+        internal void ThrowCharsOverflow(DecoderNLS? decoder, bool nothingDecoded)
         {
             if (decoder == null || decoder._throwOnOverflow || nothingDecoded)
             {
@@ -1259,7 +1236,7 @@ namespace System.Text
             }
 
             // If we didn't throw, we are in convert and have to remember our flushing
-            decoder.ClearMustFlush();
+            decoder!.ClearMustFlush();
         }
 
         internal sealed class DefaultEncoder : Encoder, IObjectReference
@@ -1408,13 +1385,13 @@ namespace System.Text
             private unsafe char* _charEnd;
             private int _charCountResult = 0;
             private Encoding _enc;
-            private DecoderNLS _decoder;
+            private DecoderNLS? _decoder;
             private unsafe byte* _byteStart;
             private unsafe byte* _byteEnd;
             private unsafe byte* _bytes;
             private DecoderFallbackBuffer _fallbackBuffer;
 
-            internal unsafe EncodingCharBuffer(Encoding enc, DecoderNLS decoder, char* charStart, int charCount,
+            internal unsafe EncodingCharBuffer(Encoding enc, DecoderNLS? decoder, char* charStart, int charCount,
                                                     byte* byteStart, int byteCount)
             {
                 _enc = enc;
@@ -1584,10 +1561,10 @@ namespace System.Text
             private unsafe char* _charEnd;
             private int _byteCountResult = 0;
             private Encoding _enc;
-            private EncoderNLS _encoder;
+            private EncoderNLS? _encoder;
             internal EncoderFallbackBuffer fallbackBuffer;
 
-            internal unsafe EncodingByteBuffer(Encoding inEncoding, EncoderNLS inEncoder,
+            internal unsafe EncodingByteBuffer(Encoding inEncoding, EncoderNLS? inEncoder,
                         byte* inByteStart, int inByteCount, char* inCharStart, int inCharCount)
             {
                 _enc = inEncoding;
@@ -1610,7 +1587,7 @@ namespace System.Text
                     if (_encoder._throwOnOverflow && _encoder.InternalHasFallbackBuffer &&
                         this.fallbackBuffer.Remaining > 0)
                         throw new ArgumentException(SR.Format(SR.Argument_EncoderFallbackNotEmpty,
-                            _encoder.Encoding.EncodingName, _encoder.Fallback.GetType()));
+                            _encoder.Encoding.EncodingName, _encoder.Fallback!.GetType()));
                 }
                 fallbackBuffer.InternalInitialize(_chars, _charEnd, _encoder, _bytes != null);
             }
@@ -1635,17 +1612,17 @@ namespace System.Text
 
             internal bool AddByte(byte b1)
             {
-                return (AddByte(b1, 0));
+                return AddByte(b1, 0);
             }
 
             internal bool AddByte(byte b1, byte b2)
             {
-                return (AddByte(b1, b2, 0));
+                return AddByte(b1, b2, 0);
             }
 
             internal bool AddByte(byte b1, byte b2, int moreBytesExpected)
             {
-                return (AddByte(b1, 1 + moreBytesExpected) && AddByte(b2, moreBytesExpected));
+                return AddByte(b1, 1 + moreBytesExpected) && AddByte(b2, moreBytesExpected);
             }
 
             internal bool AddByte(byte b1, byte b2, byte b3)
@@ -1655,17 +1632,17 @@ namespace System.Text
 
             internal bool AddByte(byte b1, byte b2, byte b3, int moreBytesExpected)
             {
-                return (AddByte(b1, 2 + moreBytesExpected) &&
+                return AddByte(b1, 2 + moreBytesExpected) &&
                         AddByte(b2, 1 + moreBytesExpected) &&
-                        AddByte(b3, moreBytesExpected));
+                        AddByte(b3, moreBytesExpected);
             }
 
             internal bool AddByte(byte b1, byte b2, byte b3, byte b4)
             {
-                return (AddByte(b1, 3) &&
+                return AddByte(b1, 3) &&
                         AddByte(b2, 2) &&
                         AddByte(b3, 1) &&
-                        AddByte(b4, 0));
+                        AddByte(b4, 0);
             }
 
             internal unsafe void MovePrevious(bool bThrow)
@@ -1696,7 +1673,7 @@ namespace System.Text
                 get
                 {
                     // See if fallbackBuffer is not empty or if there's data left in chars buffer.
-                    return ((fallbackBuffer.Remaining > 0) || (_chars < _charEnd));
+                    return (fallbackBuffer.Remaining > 0) || (_chars < _charEnd);
                 }
             }
 

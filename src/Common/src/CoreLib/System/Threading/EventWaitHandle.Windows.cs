@@ -18,7 +18,7 @@ namespace System.Threading
             SafeWaitHandle = handle;
         }
 
-        private void CreateEventCore(bool initialState, EventResetMode mode, string name, out bool createdNew)
+        private void CreateEventCore(bool initialState, EventResetMode mode, string? name, out bool createdNew)
         {
 #if !PLATFORM_WINDOWS
             if (name != null)
@@ -43,7 +43,7 @@ namespace System.Threading
             SafeWaitHandle = handle;
         }
 
-        private static OpenExistingResult OpenExistingWorker(string name, out EventWaitHandle result)
+        private static OpenExistingResult OpenExistingWorker(string name, out EventWaitHandle? result)
         {
 #if PLATFORM_WINDOWS
             if (name == null)
@@ -76,7 +76,7 @@ namespace System.Threading
 
         public bool Reset()
         {
-            bool res = Interop.Kernel32.ResetEvent(_waitHandle);
+            bool res = Interop.Kernel32.ResetEvent(SafeWaitHandle);
             if (!res)
                 throw Win32Marshal.GetExceptionForLastWin32Error();
             return res;
@@ -84,7 +84,7 @@ namespace System.Threading
         
         public bool Set()
         {
-            bool res = Interop.Kernel32.SetEvent(_waitHandle);
+            bool res = Interop.Kernel32.SetEvent(SafeWaitHandle);
             if (!res)
                 throw Win32Marshal.GetExceptionForLastWin32Error();
             return res;

@@ -5,7 +5,7 @@
 namespace System.Runtime.InteropServices
 {
     [AttributeUsage(AttributeTargets.Parameter | AttributeTargets.Field | AttributeTargets.ReturnValue, Inherited = false)]
-    public sealed class MarshalAsAttribute : Attribute
+    public sealed partial class MarshalAsAttribute : Attribute
     {
         public MarshalAsAttribute(UnmanagedType unmanagedType)
         {
@@ -20,7 +20,7 @@ namespace System.Runtime.InteropServices
 
         // Fields used with SubType = SafeArray.
         public VarEnum SafeArraySubType;
-        public Type SafeArrayUserDefinedSubType;
+        public Type? SafeArrayUserDefinedSubType;
 
         // Field used with iid_is attribute (interface pointers).
         public int IidParameterIndex;
@@ -32,8 +32,8 @@ namespace System.Runtime.InteropServices
         public int SizeConst;                // constant C
 
         // Fields used with SubType = CustomMarshaler
-        public string MarshalType;              // Name of marshaler class
-        public Type MarshalTypeRef;           // Type of marshaler class
-        public string MarshalCookie;            // cookie to pass to marshaler
+        public string? MarshalType;              // Name of marshaler class
+        public Type? MarshalTypeRef;           // Type of marshaler class
+        public string? MarshalCookie;            // cookie to pass to marshaler
     }
 }

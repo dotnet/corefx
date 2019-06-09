@@ -237,7 +237,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToLowerAsciiInvariant(source, destination);
             else
-                culture.TextInfo.ChangeCaseToLower(source, destination);
+                culture!.TextInfo.ChangeCaseToLower(source, destination); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             return source.Length;
         }
 
@@ -288,7 +288,7 @@ namespace System
             if (GlobalizationMode.Invariant)
                 TextInfo.ToUpperAsciiInvariant(source, destination);
             else
-                culture.TextInfo.ChangeCaseToUpper(source, destination);
+                culture!.TextInfo.ChangeCaseToUpper(source, destination); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             return source.Length;
         }
 
@@ -384,7 +384,7 @@ namespace System
         /// Creates a new span over the portion of the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this T[] array, int start)
+        public static Span<T> AsSpan<T>(this T[]? array, int start)
         {
             if (array == null)
             {
@@ -392,7 +392,7 @@ namespace System
                     ThrowHelper.ThrowArgumentOutOfRangeException();
                 return default;
             }
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException();
@@ -404,7 +404,7 @@ namespace System
         /// Creates a new span over the portion of the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this T[] array, Index startIndex)
+        public static Span<T> AsSpan<T>(this T[]? array, Index startIndex)
         {
             if (array == null)
             {
@@ -414,7 +414,7 @@ namespace System
                 return default;
             }
 
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
             int actualIndex = startIndex.GetOffset(array.Length);
@@ -428,7 +428,7 @@ namespace System
         /// Creates a new span over the portion of the target array.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Span<T> AsSpan<T>(this T[] array, Range range)
+        public static Span<T> AsSpan<T>(this T[]? array, Range range)
         {
             if (array == null)
             {
@@ -441,7 +441,7 @@ namespace System
                 return default;
             }
 
-            if (default(T) == null && array.GetType() != typeof(T[]))
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
             (int start, int length) = range.GetOffsetAndLength(array.Length);
@@ -454,7 +454,7 @@ namespace System
         /// <param name="text">The target string.</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsSpan(this string text)
+        public static ReadOnlySpan<char> AsSpan(this string? text)
         {
             if (text == null)
                 return default;
@@ -472,7 +472,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsSpan(this string text, int start)
+        public static ReadOnlySpan<char> AsSpan(this string? text, int start)
         {
             if (text == null)
             {
@@ -498,7 +498,7 @@ namespace System
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static ReadOnlySpan<char> AsSpan(this string text, int start, int length)
+        public static ReadOnlySpan<char> AsSpan(this string? text, int start, int length)
         {
             if (text == null)
             {
@@ -522,7 +522,7 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <remarks>Returns default when <paramref name="text"/> is null.</remarks>
-        public static ReadOnlyMemory<char> AsMemory(this string text)
+        public static ReadOnlyMemory<char> AsMemory(this string? text)
         {
             if (text == null)
                 return default;
@@ -537,7 +537,7 @@ namespace System
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;text.Length).
         /// </exception>
-        public static ReadOnlyMemory<char> AsMemory(this string text, int start)
+        public static ReadOnlyMemory<char> AsMemory(this string? text, int start)
         {
             if (text == null)
             {
@@ -555,7 +555,7 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <param name="startIndex">The index at which to begin this slice.</param>
-        public static ReadOnlyMemory<char> AsMemory(this string text, Index startIndex)
+        public static ReadOnlyMemory<char> AsMemory(this string? text, Index startIndex)
         {
             if (text == null)
             {
@@ -580,7 +580,7 @@ namespace System
         /// <exception cref="System.ArgumentOutOfRangeException">
         /// Thrown when the specified <paramref name="start"/> index or <paramref name="length"/> is not in range.
         /// </exception>
-        public static ReadOnlyMemory<char> AsMemory(this string text, int start, int length)
+        public static ReadOnlyMemory<char> AsMemory(this string? text, int start, int length)
         {
             if (text == null)
             {
@@ -604,7 +604,7 @@ namespace System
         /// <summary>Creates a new <see cref="ReadOnlyMemory{T}"/> over the portion of the target string.</summary>
         /// <param name="text">The target string.</param>
         /// <param name="range">The range used to indicate the start and length of the sliced string.</param>
-        public static ReadOnlyMemory<char> AsMemory(this string text, Range range)
+        public static ReadOnlyMemory<char> AsMemory(this string? text, Range range)
         {
             if (text == null)
             {

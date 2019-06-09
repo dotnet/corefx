@@ -4,9 +4,12 @@
 
 namespace System.Security
 {
+#if PROJECTN
+    [Internal.Runtime.CompilerServices.RelocatedType("System.Runtime.Extensions")]
+#endif
     public partial interface ISecurityEncodable
     {
         void FromXml(SecurityElement e);
-        SecurityElement ToXml();
+        SecurityElement? ToXml();
     }
 }

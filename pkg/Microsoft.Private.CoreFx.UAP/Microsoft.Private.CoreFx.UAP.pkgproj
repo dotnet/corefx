@@ -1,5 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project DefaultTargets="Build">
   <Import Project="$([MSBuild]::GetDirectoryNameOfFileAbove($(MSBuildThisFileDirectory), Directory.Build.props))\Directory.Build.props" />
   <PropertyGroup>
     <PackageVersion>4.7.0</PackageVersion>
@@ -8,8 +7,9 @@
     <TargetFramework>$(TargetFrameworkName)$(TargetFrameworkVersion)</TargetFramework>
     <RefBinDir>$(UAPPackageRefPath)</RefBinDir>
     <LibBinDir>$(UAPPackageRuntimePath)</LibBinDir>
-    <LibBinDir Condition="$(PackageTargetRuntime.EndsWith('-aot'))">$(UAPAOTPackageRuntimePath)</LibBinDir>
     <IsFrameworkPackage>true</IsFrameworkPackage>
+    <!-- we cannot build native on Unix -->
+    <IncludeNativeFiles Condition="'$(OS)' != 'Windows_NT'">false</IncludeNativeFiles>
     <!-- Private packages need symbols -->
     <IncludeSymbolsInPackage Condition="'$(IncludeSymbolsInPackage)' == ''">true</IncludeSymbolsInPackage>
 
@@ -54,11 +54,6 @@
         System.Security.Cryptography.Cng;
         System.Security.Principal.Windows;
         System.Threading.Tasks.Extensions;
-      </Value>
-    </ValidatePackageSuppression>
-    <ValidatePackageSuppression Condition="'$(PackageTargetRuntime)' != '' AND '$(TargetGroup)' == 'uapaot'" Include="PermitInbox">
-      <Value>
-        System.Private.Reflection.Metadata.Ecma335;
       </Value>
     </ValidatePackageSuppression>
     <!-- Permit missing Inbox since this used to be a shim and it is now OOB -->
