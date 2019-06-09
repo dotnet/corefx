@@ -98,6 +98,7 @@ namespace System.Threading.Tests
             }
         }
 
+        [Fact]
         public void MemoryBarrierProcessWide()
         {
             // Stress MemoryBarrierProcessWide correctness using a simple AsymmetricLock
