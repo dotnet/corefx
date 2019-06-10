@@ -50,6 +50,99 @@ namespace System.Text.Json.Serialization.Tests
         private const string Int32MaxPlus1 = "2147483648"; // int.MaxValue + 1;
         private const string Int32MinMinus1 = "-2147483649"; // int.MinValue - 1
 
+        private const string UInt16MaxPlus1 = "65536"; // ushort.MaxValue + 1;
+        private const string MinusUInt16MaxMinus1 = "-65536"; // -ushort.MaxValue - 1
+
+        private const string Int16MaxPlus1 = "32768"; // int.MaxValue + 1;
+        private const string Int16MinMinus1 = "-32769"; // int.MinValue - 1
+
+        private const string ByteMaxPlus1 = "256"; // byte.MaxValue + 1;
+        private const string MinusByteMaxMinus1 = "-257"; // -byte.MaxValue - 1
+
+        [Fact]
+        public static void Parse_MinusByteMaxMinus1_Throws()
+        {
+            Assert.Equal(int.Parse(MinusByteMaxMinus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : {MinusByteMaxMinus1} }}").MyEnum);
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : {MinusByteMaxMinus1} }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : {MinusByteMaxMinus1} }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : {MinusByteMaxMinus1} }}"));
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : \"{MinusByteMaxMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : \"{MinusByteMaxMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : \"{MinusByteMaxMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : \"{MinusByteMaxMinus1}\" }}"));
+        }
+
+        [Fact]
+        public static void Parse_ByteMaxPlus1_Throws()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : {ByteMaxPlus1} }}"));
+            Assert.Equal(int.Parse(ByteMaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : {ByteMaxPlus1} }}").MyEnum);
+            Assert.Equal(int.Parse(ByteMaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : {ByteMaxPlus1} }}").MyUInt32Enum);
+            Assert.Equal(int.Parse(ByteMaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : {ByteMaxPlus1} }}").MyUInt64Enum);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : \"{ByteMaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : \"{ByteMaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : \"{ByteMaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : \"{ByteMaxPlus1}\" }}"));
+        }
+
+        [Fact]
+        public static void Parse_Int16MinMinus1_Throws()
+        {
+            Assert.Equal(int.Parse(Int16MinMinus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : {Int16MinMinus1} }}").MyEnum);
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : {Int16MinMinus1} }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : {Int16MinMinus1} }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : {Int16MinMinus1} }}"));
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : \"{Int16MinMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : \"{Int16MinMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : \"{Int16MinMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : \"{Int16MinMinus1}\" }}"));
+        }
+
+        [Fact]
+        public static void Parse_Int16MaxPlus1_Throws()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : {Int16MaxPlus1} }}"));
+            Assert.Equal(int.Parse(Int16MaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : {Int16MaxPlus1} }}").MyEnum);
+            Assert.Equal(int.Parse(Int16MaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : {Int16MaxPlus1} }}").MyUInt32Enum);
+            Assert.Equal(int.Parse(Int16MaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : {Int16MaxPlus1} }}").MyUInt64Enum);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : \"{Int16MaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : \"{Int16MaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : \"{Int16MaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : \"{Int16MaxPlus1}\" }}"));
+        }
+
+        [Fact]
+        public static void Parse_MinusUInt16MaxMinus1_Throws()
+        {
+            Assert.Equal(int.Parse(MinusUInt16MaxMinus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : {MinusUInt16MaxMinus1} }}").MyEnum);
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : {MinusUInt16MaxMinus1} }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : {MinusUInt16MaxMinus1} }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : {MinusUInt16MaxMinus1} }}"));
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : \"{MinusUInt16MaxMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : \"{MinusUInt16MaxMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : \"{MinusUInt16MaxMinus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : \"{MinusUInt16MaxMinus1}\" }}"));
+        }
+
+        [Fact]
+        public static void Parse_UInt16MaxPlus1_Throws()
+        {
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : {UInt16MaxPlus1} }}"));
+            Assert.Equal(int.Parse(UInt16MaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : {UInt16MaxPlus1} }}").MyEnum);
+            Assert.Equal(int.Parse(UInt16MaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : {UInt16MaxPlus1} }}").MyUInt32Enum);
+            Assert.Equal(int.Parse(UInt16MaxPlus1), (int)JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : {UInt16MaxPlus1} }}").MyUInt64Enum);
+
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyEnum\" : \"{UInt16MaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyByteEnum\" : \"{UInt16MaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt32Enum\" : \"{UInt16MaxPlus1}\" }}"));
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>($"{{ \"MyUInt64Enum\" : \"{UInt16MaxPlus1}\" }}"));
+        }
+
         [Fact]
         public static void Parse_Int32MinMinus1_Throws()
         {
