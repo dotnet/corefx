@@ -112,6 +112,94 @@ namespace System.Linq.Tests
         }
 
         [Fact]
+        public void MinDoubleDoesntCheckAllStartLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => i == 1 ? double.NaN : (double)i);
+            Assert.True(double.IsNaN(source.Min()));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
+        public void MinNullableDoubleDoesntCheckAllLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => (double?)(i == 1 ? double.NaN : (double)i));
+            Assert.True(double.IsNaN(source.Min().GetValueOrDefault()));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
+        public void MinSingleDoesntCheckAllLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => i == 1 ? float.NaN : (float)i);
+            Assert.True(float.IsNaN(source.Min()));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
+        public void MinNullableSingleDoesntCheckAllLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => (float?)(i == 1 ? float.NaN : (float)i));
+            Assert.True(float.IsNaN(source.Min().GetValueOrDefault()));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
+        public void MinDoubleSelectorDoesntCheckAllStartLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => i == 1 ? double.NaN : (double)i);
+            Assert.True(double.IsNaN(source.Min(x => x + 1d)));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
+        public void MinNullableDoubleSelectorDoesntCheckAllLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => (double?)(i == 1 ? double.NaN : (double)i));
+            Assert.True(double.IsNaN(source.Min(x => x + 1d).GetValueOrDefault()));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
+        public void MinSingleSelectorDoesntCheckAllLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => i == 1 ? float.NaN : (float)i);
+            Assert.True(float.IsNaN(source.Min(x => x + 1f)));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
+        public void MinNullableSingleSelectorDoesntCheckAllLeadingWithNaN()
+        {
+            var tracker = new TrackingEnumerable(10);
+            var source = tracker.Select(i => (float?)(i == 1 ? float.NaN : (float)i));
+            Assert.True(float.IsNaN(source.Min(x => x + 1f).GetValueOrDefault()));
+
+            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.Equal(1, tracker.Moves);
+        }
+
+        [Fact]
         public void SingleWithPredicateDoesntCheckAll()
         {
             var tracker = new TrackingEnumerable(10);
