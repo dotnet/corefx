@@ -9,16 +9,17 @@ namespace System.Text.Json.Serialization.Converters
     internal sealed class JsonValueConverterEnum<TValue> : JsonValueConverter<TValue>
         where TValue : struct, Enum
     {
-        private static readonly bool s_isUint64 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ulong);
+        private static readonly bool s_isUInt64 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ulong);
         private static readonly bool s_isInt64 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(long);
 
-        private static readonly bool s_isUint32 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(uint);
+        private static readonly bool s_isUInt32 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(uint);
         private static readonly bool s_isInt32 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(int);
 
-        private static readonly bool s_isUshort = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
-        private static readonly bool s_isshort = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
+        private static readonly bool s_isUInt16 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
+        private static readonly bool s_isInt16 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
 
         private static readonly bool s_isByte = Enum.GetUnderlyingType(typeof(TValue)) == typeof(byte);
+        private static readonly bool s_isSByte = Enum.GetUnderlyingType(typeof(TValue)) == typeof(sbyte);
 
         public bool TreatAsString { get; private set; }
 
@@ -48,113 +49,65 @@ namespace System.Text.Json.Serialization.Converters
                 return false;
             }
 
-            if (s_isUint64)
+            if (s_isUInt64 && reader.TryGetUInt64(out ulong uint64))
             {
-                if (reader.TryGetUInt64(out ulong ulongValue))
-                {
-                    value = (TValue)Enum.ToObject(valueType, ulongValue);
-                    return true;
-                }
-                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
-                {
-                    value = (TValue)Enum.ToObject(valueType, fallback);
-                    return true;
-                }
-
-                value = default;
-                return false;
+                value = (TValue)Enum.ToObject(valueType, uint64);
+                return true;
             }
 
-            if (s_isInt64)
+            if (s_isInt64 && reader.TryGetInt64(out long int64))
             {
-                if (reader.TryGetInt64(out long ulongValue))
-                {
-                    value = (TValue)Enum.ToObject(valueType, ulongValue);
-                    return true;
-                }
-
-                value = default;
-                return false;
+                value = (TValue)Enum.ToObject(valueType, int64);
+                return true;
             }
 
-            if (s_isUint32)
+            if (s_isUInt32 && reader.TryGetUInt32(out uint uint32))
             {
-                if (reader.TryGetUInt32(out uint uintValue))
-                {
-                    value = (TValue)Enum.ToObject(valueType, uintValue);
-                    return true;
-                } 
-                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
-                {
-                    value = (TValue)Enum.ToObject(valueType, fallback);
-                    return true;
-                }
-
-                value = default;
-                return false;
+                value = (TValue)Enum.ToObject(valueType, uint32);
+                return true;
             }
 
-            if (s_isInt32)
+            if (s_isInt32 && reader.TryGetInt32(out int int32))
             {
-                if (reader.TryGetInt32(out int intValue))
-                {
-                    value = (TValue)Enum.ToObject(valueType, intValue);
-                    return true;
-                } 
-
-                value = default;
-                return false;
+                value = (TValue)Enum.ToObject(valueType, int32);
+                return true;
             }
 
-            if (s_isUshort)
-            {
-                if (reader.TryGetUInt32(out uint uintValue) && uintValue >= ushort.MinValue && uintValue <= ushort.MaxValue)
-                {
-                    value = (TValue)Enum.ToObject(valueType, uintValue);
-                    return true;
-                }
-                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
-                {
-                    value = (TValue)Enum.ToObject(valueType, fallback);
-                    return true;
-                }
+            // When utf8reader/writer will support all primitive types we should remove custom bound checks
+            // https://github.com/dotnet/corefx/issues/36125
 
-                value = default;
-                return false;
+            if (s_isUInt16 && reader.TryGetUInt32(out uint uint16) && uint16 >= ushort.MinValue && uint16 <= ushort.MaxValue)
+            {
+                value = (TValue)Enum.ToObject(valueType, uint16);
+                return true;
             }
 
-            if (s_isshort)
+            if (s_isInt16 && reader.TryGetInt32(out int int16) && int16 >= short.MinValue && int16 <= short.MaxValue)
             {
-                if (reader.TryGetInt32(out int intValue) && intValue >= short.MinValue && intValue <= short.MaxValue)
-                {
-                    value = (TValue)Enum.ToObject(valueType, intValue);
-                    return true;
-                }
-                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
-                {
-                    value = (TValue)Enum.ToObject(valueType, fallback);
-                    return true;
-                }
-
-                value = default;
-                return false;
+                value = (TValue)Enum.ToObject(valueType, int16);
+                return true;
             }
 
-            if (s_isByte)
+            if (s_isByte && reader.TryGetUInt32(out uint ubyte8) && ubyte8 >= byte.MinValue && ubyte8 <= byte.MaxValue)
             {
-                if (reader.TryGetInt32(out int intValue) && intValue >= byte.MinValue && intValue <= byte.MinValue)
-                {
-                    value = (TValue)Enum.ToObject(valueType, intValue);
-                    return true;
-                }
-                else if (reader.TryGetInt64(out long fallback) && fallback == -1)
-                {
-                    value = (TValue)Enum.ToObject(valueType, fallback);
-                    return true;
-                }
+                value = (TValue)Enum.ToObject(valueType, ubyte8);
+                return true;
+            }
 
-                value = default;
-                return false;
+            if (s_isSByte && reader.TryGetInt32(out int byte8) && byte8 >= sbyte.MinValue && byte8 <= sbyte.MaxValue)
+            {
+                value = (TValue)Enum.ToObject(valueType, byte8);
+                return true;
+            }
+
+            // We try to parse with widest signed number type to handle -1 = MaxValue cases for unsigned numbers
+            if (s_isUInt64 || s_isUInt32 || s_isUInt16 || s_isByte)
+            {
+                if (reader.TryGetInt64(out long isMinusOne) && isMinusOne == -1)
+                {
+                    value = (TValue)Enum.ToObject(valueType, isMinusOne);
+                    return true;
+                }
             }
 
             value = default;
@@ -167,7 +120,7 @@ namespace System.Text.Json.Serialization.Converters
             {
                 writer.WriteStringValue(value.ToString());
             }
-            else if (s_isUint64)
+            else if (s_isUInt64)
             {
                 // Use the ulong converter to prevent conversion into a signed\long value.
                 ulong ulongValue = Convert.ToUInt64(value);
@@ -187,7 +140,7 @@ namespace System.Text.Json.Serialization.Converters
             {
                 writer.WriteString(propertyName, value.ToString());
             }
-            else if (s_isUint64)
+            else if (s_isUInt64)
             {
                 // Use the ulong converter to prevent conversion into a signed\long value.
                 ulong ulongValue = Convert.ToUInt64(value);
