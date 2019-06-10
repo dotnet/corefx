@@ -349,5 +349,15 @@ namespace System.Diagnostics.Tests
                 Assert.Contains("", eventlog.Entries.LastOrDefault()?.Message ?? "");
             }
         }
+
+        [ConditionalFact(typeof(Helpers), nameof(Helpers.SupportsEventLogs))]
+        public void GetEventLogEntriesTest()
+        {
+            foreach (var eventLog in EventLog.GetEventLogs())
+            {
+                // Accessing eventlog properties should not throw.
+                int _ = eventLog.Entries.Count;
+            }
+        }
     }
 }
