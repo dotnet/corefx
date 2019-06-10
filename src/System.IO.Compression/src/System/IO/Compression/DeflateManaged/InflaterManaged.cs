@@ -137,14 +137,13 @@ namespace System.IO.Compression
                     _formatReader.Validate();
                 }
             }
-            count = RestrictStreamWithUnCompressedSize(count);
-
-            return count;
+            
+            return RestrictStreamWithUnCompressedSize(count);
         }
 
         private int RestrictStreamWithUnCompressedSize(int bytesRead)
         {
-            if (_uncompressedSize > 0 && _uncompressedSize - _currentInflatedCount < bytesRead)
+            if (_uncompressedSize > -1 && _uncompressedSize - _currentInflatedCount < bytesRead)
             {
                 bytesRead = (int)(_uncompressedSize - _currentInflatedCount);
                 _state = InflaterState.Done;

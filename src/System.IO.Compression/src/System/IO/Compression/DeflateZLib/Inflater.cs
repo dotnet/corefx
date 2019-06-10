@@ -98,13 +98,7 @@ namespace System.IO.Compression
                         _finished = true;
                     }
                 }
-
-                bytesRead = RestrictStreamWithUnCompressedSize(bytesRead);
-
-             //   if (wasOverLimit)
-               //     throw new InvalidDataException(SR.GenericInvalidData);
-
-                return bytesRead;
+                return RestrictStreamWithUnCompressedSize(bytesRead);
             }
             finally
             {
@@ -118,10 +112,8 @@ namespace System.IO.Compression
 
         private int RestrictStreamWithUnCompressedSize(int bytesRead)
         {
-          //  wasOverLimit = false;
-            if (_uncompressedSize > 0 && _uncompressedSize - _currentInflatedCount < bytesRead)
+            if (_uncompressedSize > -1 && _uncompressedSize - _currentInflatedCount < bytesRead)
             {
-        //        wasOverLimit = true;
                 bytesRead = (int)(_uncompressedSize - _currentInflatedCount);
                 _finished = true;
                 _zlibStream.AvailIn = 0;
