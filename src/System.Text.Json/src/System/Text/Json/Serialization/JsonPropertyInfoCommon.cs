@@ -93,14 +93,18 @@ namespace System.Text.Json
             return typeof(Dictionary<string, TRuntimeProperty>);
         }
 
-        public override Type GetListConcreteType()
+        public override Type GetConcreteType(Type parentType)
         {
-            return typeof(List<TDeclaredProperty>);
-        }
+            if (JsonClassInfo.IsSupportedByAssigningFromList(parentType))
+            {
+                return typeof(List<TDeclaredProperty>);
+            }
+            else if (JsonClassInfo.IsSetInterface(parentType))
+            {
+                return typeof(HashSet<TDeclaredProperty>);
+            }
 
-        public override Type GetHashSetConcreteType(Type parentType)
-        {
-            return typeof(HashSet<TDeclaredProperty>);
+            return parentType;
         }
 
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
