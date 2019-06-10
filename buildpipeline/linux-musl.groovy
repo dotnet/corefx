@@ -6,7 +6,7 @@
 // CGroup - Build configuration.
 // TestOuter - If true, runs outerloop, if false runs just innerloop
 
-simpleDockerNode('microsoft/dotnet-buildtools-prereqs:alpine-3.6-3148f11-20171119021156') {
+simpleDockerNode('microsoft/dotnet-buildtools-prereqs:alpine-3.9-helix-09ca40b-20190521001803') {
     stage ('Checkout source') {
         checkoutRepo()
     }
