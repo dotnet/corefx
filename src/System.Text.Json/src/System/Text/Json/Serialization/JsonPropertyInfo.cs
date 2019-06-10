@@ -17,7 +17,8 @@ namespace System.Text.Json
     {
         // Cache the converters so they don't get created for every enumerable property.
         private static readonly JsonEnumerableConverter s_jsonArrayConverter = new DefaultArrayConverter();
-        private static readonly JsonEnumerableConverter s_jsonIEnumerableConstuctibleConverter = new DefaultIEnumerableConstructibleConverter();
+        private static readonly JsonEnumerableConverter s_jsonGenericIEnumerableConstuctibleConverter = new DefaultGenericIEnumerableConstructibleConverter();
+        private static readonly JsonEnumerableConverter s_jsonICollectionConverter = new DefaultICollectionConverter();
         private static readonly JsonEnumerableConverter s_jsonImmutableConverter = new DefaultImmutableConverter();
 
         private JsonClassInfo _runtimeClassInfo;
@@ -214,30 +215,37 @@ namespace System.Text.Json
                     {
                         EnumerableConverter = s_jsonArrayConverter;
                     }
+                    else if (ClassType == ClassType.Dictionary && JsonClassInfo.HasConstructorThatTakesIDictionary(RuntimePropertyType))
+                    {
+                        EnumerableConverter = s_jsonICollectionConverter;
+                    }
                     else if (ClassType == ClassType.ImmutableDictionary)
                     {
                         DefaultImmutableConverter.RegisterImmutableDictionary(
-                            RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, parentType: null, memberInfo: null), Options);
+                            RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo), Options);
                         EnumerableConverter = s_jsonImmutableConverter;
                     }
                     else if (typeof(IEnumerable).IsAssignableFrom(RuntimePropertyType))
                     {
-                        Type elementType = JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo);
-
-                        // If IList can't be assigned from the property type (we populate and return an IList directly)
+                        if (JsonClassInfo.IsSupportedByConstructingWithIList(RuntimePropertyType))
+                        {
+                            EnumerableConverter = s_jsonICollectionConverter;
+                        }
+                        // Else if IList can't be assigned from the property type (we populate and return an IList directly)
                         // and the type can be constructed with an IEnumerable<T>, then use the
                         // IEnumerableConstructible converter to create the instance.
-                        if (!typeof(IList).IsAssignableFrom(RuntimePropertyType) &&
-                            RuntimePropertyType.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null)
+                        else if (!typeof(IList).IsAssignableFrom(RuntimePropertyType) && JsonClassInfo.HasConstructorThatTakesGenericIEnumerable(RuntimePropertyType))
                         {
-                            EnumerableConverter = s_jsonIEnumerableConstuctibleConverter;
+                            EnumerableConverter = s_jsonGenericIEnumerableConstuctibleConverter;
                         }
                         // Else if it's a System.Collections.Immutable type with one generic argument.
                         else if (RuntimePropertyType.IsGenericType &&
                             RuntimePropertyType.FullName.StartsWith(DefaultImmutableConverter.ImmutableNamespace) &&
                             RuntimePropertyType.GetGenericArguments().Length == 1)
                         {
-                            DefaultImmutableConverter.RegisterImmutableCollection(RuntimePropertyType, elementType, Options);
+                            DefaultImmutableConverter.RegisterImmutableCollection(RuntimePropertyType,
+                                JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo),
+                                Options);
                             EnumerableConverter = s_jsonImmutableConverter;
                         }
                     }

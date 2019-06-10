@@ -408,7 +408,10 @@ namespace System.Text.Json
                 }
             }
 
-            if (propertyType.IsAssignableFrom(typeof(IList)) || propertyType.IsAssignableFrom(typeof(IDictionary)))
+            if (propertyType.IsAssignableFrom(typeof(IList)) ||
+                propertyType.IsAssignableFrom(typeof(IDictionary)) ||
+                IsSupportedByConstructingWithIList(propertyType) ||
+                HasConstructorThatTakesIDictionary(propertyType))
             {
                 return typeof(object);
             }
@@ -468,6 +471,10 @@ namespace System.Text.Json
 
         private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
 
+        internal const string StackTypeName = "System.Collections.Stack";
+        internal const string QueueTypeName = "System.Collections.Queue";
+        internal const string ArrayListTypeName = "System.Collections.ArrayList";
+
         internal static bool IsSupportedByAssigningFromList(Type type)
         {
             if (type.IsGenericType)
@@ -501,6 +508,30 @@ namespace System.Text.Json
         internal static bool IsSetInterface(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
+        }
+
+        internal static bool HasConstructorThatTakesGenericIEnumerable(Type type)
+        {
+            Type elementType = GetElementType(type, parentType: null, memberInfo: null);
+            return type.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null;
+        }
+
+        internal static bool IsSupportedByConstructingWithIList(Type type)
+        {
+            switch (type.FullName)
+            {
+                case StackTypeName:
+                case QueueTypeName:
+                case ArrayListTypeName:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        internal static bool HasConstructorThatTakesIDictionary(Type type)
+        {
+            return type.GetConstructor(new Type[] { typeof(IDictionary) }) != null;
         }
     }
 }
