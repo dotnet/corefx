@@ -279,11 +279,6 @@ namespace System.Text.Json
             return jsonPropertyInfo;
         }
 
-        public static bool IsSetInterface(Type type)
-        {
-            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
-        }
-
         public abstract object GetValueAsObject(object obj);
 
         public static TAttribute GetAttribute<TAttribute>(PropertyInfo propertyInfo) where TAttribute : Attribute
@@ -300,9 +295,8 @@ namespace System.Text.Json
         public abstract IList CreateConverterList();
 
         public abstract Type GetDictionaryConcreteType();
-        public abstract Type GetHashSetConcreteType(Type parentType);
 
-        public abstract Type GetListConcreteType();
+        public abstract Type GetConcreteType(Type type);
 
         public abstract void Read(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader);
         public abstract void ReadEnumerable(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader);

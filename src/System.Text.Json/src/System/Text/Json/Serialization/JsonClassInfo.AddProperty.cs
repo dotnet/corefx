@@ -39,31 +39,17 @@ namespace System.Text.Json
                     }
                 }
             }
-            else if (jsonInfo.ClassType == ClassType.Enumerable && !propertyType.IsArray && IsSupportedByAssigningFromList(propertyType))
+            else if (jsonInfo.ClassType == ClassType.Enumerable &&
+                !propertyType.IsArray &&
+                (IsSupportedByAssigningFromList(propertyType) || IsSetInterface(propertyType)))
             {
                 JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
                 JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
 
-                Type newPropertyType = elementPropertyInfo.GetListConcreteType();
+                Type newPropertyType = elementPropertyInfo.GetConcreteType(propertyType);
                 if ((propertyType != newPropertyType) && propertyType.IsAssignableFrom(newPropertyType))
                 {
                     jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
-                }
-            }
-            // Convert ISet to concrete HashSet
-            else if (JsonPropertyInfo.IsSetInterface(propertyType))
-            {
-                // If a polymorphic case, we have to wait until run-time values are processed.
-                if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
-                {
-                    JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
-                    JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
-
-                    Type newPropertyType = elementPropertyInfo.GetHashSetConcreteType(propertyType);
-                    if (propertyType != newPropertyType)
-                    {
-                        jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
-                    }
                 }
             }
 

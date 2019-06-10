@@ -497,5 +497,10 @@ namespace System.Text.Json
                 }
             }
         }
+
+        internal static bool IsSetInterface(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
+        }
     }
 }
