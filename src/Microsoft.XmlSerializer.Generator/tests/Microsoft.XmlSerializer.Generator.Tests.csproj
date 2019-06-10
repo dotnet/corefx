@@ -4,8 +4,6 @@
     <DefineConstants>$(DefineConstants);XMLSERIALIZERGENERATORTESTS</DefineConstants>
     <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
     <CoverageSupported>false</CoverageSupported>
-  </PropertyGroup>
-  <PropertyGroup>
     <SkipTestsOnPlatform Condition="'$(TargetsUap)' == 'true' OR '$(ArchGroup)' == 'arm' OR '$(ArchGroup)' == 'arm64' OR '$(ArchGroup)' == 'armel'">true</SkipTestsOnPlatform>
   </PropertyGroup>
   <PropertyGroup>
@@ -37,7 +35,7 @@
   </ItemGroup>
   <!-- This target runs before binplacing as it needs to provide a test assembly to binplace, and depends on CopyFilesToOutputDirectory
        so that the Generator app dll and runtimeconfig will be copied to the OutputPath -->
-  <Target Name="GenerateSerializationAssembly" DependsOnTargets="CopyFilesToOutputDirectory" BeforeTargets="GetBinPlaceItems" Condition=" '$(SkipTestsOnPlatform)' != 'true' ">
+  <Target Name="GenerateSerializationAssembly" DependsOnTargets="CopyFilesToOutputDirectory" AfterTargets="PrepareForRun" Condition=" '$(SkipTestsOnPlatform)' != 'true' ">
     <PropertyGroup>
       <SerializerName>$(AssemblyName).XmlSerializers</SerializerName>
     </PropertyGroup>
