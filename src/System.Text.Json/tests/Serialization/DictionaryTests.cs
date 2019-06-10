@@ -100,6 +100,30 @@ namespace System.Text.Json.Serialization.Tests
                 json = JsonSerializer.ToString<object>(obj);
                 Assert.True(JsonString == json);
             }
+
+            {
+                Hashtable obj = JsonSerializer.Parse<Hashtable>(JsonString);
+                Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
+                Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
+
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
+                SortedList obj = JsonSerializer.Parse<SortedList>(JsonString);
+                Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
+                Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
+
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
         }
 
         [Fact]
