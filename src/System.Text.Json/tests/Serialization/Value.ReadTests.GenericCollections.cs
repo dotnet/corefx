@@ -357,7 +357,18 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ReadISetTOfISetT_Throws()
         {
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<ISet<ISet<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]")));
+            ISet<ISet<int>> result = JsonSerializer.Parse<ISet<ISet<int>>>(Encoding.UTF8.GetBytes(@"[[1,2],[3,4]]"));
+
+            if (result.First().Contains(1))
+            {
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, result.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, result.Last());
+            }
         }
 
         [Fact]

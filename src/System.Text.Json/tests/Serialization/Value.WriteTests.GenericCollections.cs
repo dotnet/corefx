@@ -295,7 +295,21 @@ namespace System.Text.Json.Serialization.Tests
                 new HashSet<int>() { 3, 4 }
             };
 
-            Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(input));
+            string json = JsonSerializer.ToString(input);
+
+            // Because order isn't guaranteed, roundtrip data to ensure write was accurate.
+            input = JsonSerializer.Parse<ISet<ISet<int>>>(json);
+
+            if (input.First().Contains(1))
+            {
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.First());
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.Last());
+            }
+            else
+            {
+                Assert.Equal(new HashSet<int> { 3, 4 }, input.First());
+                Assert.Equal(new HashSet<int> { 1, 2 }, input.Last());
+            }
         }
 
         [Fact]

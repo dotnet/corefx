@@ -95,15 +95,7 @@ namespace System.Text.Json
 
         public override Type GetHashSetConcreteType(Type parentType)
         {
-            // Because we use HashSet<T> as the runtime property type of ISet<T>, attempting to deserialize ISet<ISet<T>>
-            // will yield a HashSet<HashSet<T>> which violates the "TRuntimeProperty : TDeclaredProperty" constraint on
-            // JsonPropertyInfoNotNullable. Therefore, we throw a NotSupportedException here.
-            if (IsSetInterface(DeclaredPropertyType))
-            {
-                throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(parentType, null, null);
-            }
-
-            return typeof(HashSet<TRuntimeProperty>);
+            return typeof(HashSet<TDeclaredProperty>);
         }
 
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
