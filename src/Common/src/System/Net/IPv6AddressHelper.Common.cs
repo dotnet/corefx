@@ -312,14 +312,11 @@ namespace System
                             numberIsValid = false;
                         }
 
-                        start = i + 1;
+                        start = i;
                         for (++i; i < address.Length && address[i] != ']' && address[i] != '/'; ++i)
                         {
                         }
-                        if (address.Length > start && i - start > 0)
-                            scopeId = new string(address.Slice(start, i - start));
-                        else
-                            scopeId = string.Empty;
+                        scopeId = new string(address.Slice(start, i - start));
                         // ignore prefix if any
                         for (; i < address.Length && address[i] != ']'; ++i)
                         {

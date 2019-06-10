@@ -2693,5 +2693,7 @@ int32_t SystemNative_SendFile(intptr_t out_fd, intptr_t in_fd, int64_t offset, i
 uint32_t SystemNative_InterfaceNameToIndex(char* interfaceName)
 {
     assert(interfaceName != NULL);
+    if (interfaceName[0] == '%')
+        interfaceName++;
     return if_nametoindex(interfaceName);
 }

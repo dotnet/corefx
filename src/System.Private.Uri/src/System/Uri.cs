@@ -1193,7 +1193,7 @@ namespace System
                 if (HostType == Flags.IPv6HostType)
                 {
                     ret = _info.ScopeId != null ?
-                        string.Concat(ret.AsSpan(1, ret.Length - 2), "%", _info.ScopeId) :
+                        string.Concat(ret.AsSpan(1, ret.Length - 2), _info.ScopeId) :
                         ret.Substring(1, ret.Length - 2);
                 }
                 // Validate that this basic host qualifies as Dns safe,

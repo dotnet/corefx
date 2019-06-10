@@ -212,9 +212,9 @@ namespace System.Net
                 string scopeId = null;
                 IPv6AddressHelper.Parse(ipSpan, numbers, 0, ref scopeId);
 
-                if (!string.IsNullOrEmpty(scopeId))
+                if (scopeId?.Length > 1)
                 {
-                    if (uint.TryParse(scopeId, NumberStyles.None, CultureInfo.InvariantCulture, out scope))
+                    if (uint.TryParse(scopeId.AsSpan(1), NumberStyles.None, CultureInfo.InvariantCulture, out scope))
                     {
                         return true; // scopeId is a numeric value
                     }
