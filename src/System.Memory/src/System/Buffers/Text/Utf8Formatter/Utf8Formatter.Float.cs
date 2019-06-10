@@ -76,10 +76,6 @@ namespace System.Buffers.Text
             {
                 case 'g':
                 case 'G':
-                    if (format.Precision != StandardFormat.NoPrecision)
-                        throw new NotSupportedException(SR.Argument_GWithPrecisionNotSupported);
-                    break;
-
                 case 'f':
                 case 'F':
                 case 'e':
