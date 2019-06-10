@@ -122,6 +122,39 @@ namespace System.Memory.Tests
             Assert.Throws<ArgumentOutOfRangeException>("length", () => buffer.Slice(buffer.Start, -1L));
         }
 
+        [Fact]
+        public void Slice_DefaultSequencePosition()
+        {
+            var firstSegment = new BufferSegment<byte>(new byte[1]);
+            BufferSegment<byte> secondSegment = firstSegment.Append(new byte[1]);
+
+            var sequence = new ReadOnlySequence<byte>(firstSegment, 0, secondSegment, 1);
+            var slicedSequence = sequence.Slice(default(SequencePosition));
+            Assert.Equal(sequence, slicedSequence);
+
+            // Slice(default, default) should return an empty sequence
+            slicedSequence = sequence.Slice(default(SequencePosition), default(SequencePosition));
+            Assert.Equal(0, slicedSequence.Length);
+
+            // Slice(x, default) returns empty is x = 0. Otherwise throws
+            slicedSequence = sequence.Slice(0, default(SequencePosition));
+            Assert.Equal(0, slicedSequence.Length);
+
+            try
+            {
+                slicedSequence = sequence.Slice(1, default(SequencePosition));
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                Assert.Equal(0, slicedSequence.Length);
+            }
+
+            // Slice(default, x) returns sequence from the beginning to x
+            slicedSequence = sequence.Slice(default(SequencePosition), 1);
+            Assert.Equal(1, slicedSequence.Length);
+            Assert.Equal(sequence.Start, slicedSequence.Start);
+        }
+
         #endregion
 
         #region Enumerator

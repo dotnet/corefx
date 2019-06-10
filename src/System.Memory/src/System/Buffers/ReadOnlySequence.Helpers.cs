@@ -354,8 +354,9 @@ namespace System.Buffers
                 // Multi-Segment Sequence
                 // Storing this in a local since it is used twice within InRange()
                 ulong startRange = (ulong)(((ReadOnlySequenceSegment<T>)startObject!).RunningIndex + startIndex);
+                long runningIndex = ((ReadOnlySequenceSegment<T>?)position.GetObject())?.RunningIndex ?? 0;
                 if (!InRange(
-                    (ulong)(((ReadOnlySequenceSegment<T>)position.GetObject()!).RunningIndex + sliceStartIndex),
+                    (ulong)(runningIndex + sliceStartIndex),
                     startRange,
                     (ulong)(((ReadOnlySequenceSegment<T>)endObject!).RunningIndex + endIndex)))
                 {
@@ -389,9 +390,11 @@ namespace System.Buffers
                 // Multi-Segment Sequence
                 // This optimization works because we know sliceStartIndex, sliceEndIndex, startIndex, and endIndex are all >= 0
                 Debug.Assert(sliceStartIndex >= 0 && startIndex >= 0 && endIndex >= 0);
+                long startRunningIndex = ((ReadOnlySequenceSegment<T>?)sliceStartObject)?.RunningIndex ?? 0;
+                long endRunningIndex = ((ReadOnlySequenceSegment<T>?)sliceEndObject)?.RunningIndex ?? 0;
 
-                ulong sliceStartRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceStartObject!).RunningIndex + sliceStartIndex);
-                ulong sliceEndRange = (ulong)(((ReadOnlySequenceSegment<T>)sliceEndObject!).RunningIndex + sliceEndIndex);
+                ulong sliceStartRange = (ulong)(startRunningIndex + sliceStartIndex);
+                ulong sliceEndRange = (ulong)(endRunningIndex + sliceEndIndex);
 
                 if (sliceStartRange > sliceEndRange)
                     ThrowHelper.ThrowArgumentOutOfRangeException_PositionOutOfRange();
@@ -451,34 +454,25 @@ namespace System.Buffers
         private static int GetIndex(int Integer) => Integer & ReadOnlySequence.IndexBitMask;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end)
+        private ReadOnlySequence<T> SliceImpl(in object? startObject, in int startIndex, in object? endObject, in int endIndex)
         {
             // In this method we reset high order bits from indices
             // of positions that were passed in
             // and apply type bits specific for current ReadOnlySequence type
 
             return new ReadOnlySequence<T>(
-                start.GetObject(),
-                GetIndex(start) | (_startInteger & ReadOnlySequence.FlagBitMask),
-                end.GetObject(),
-                GetIndex(end) | (_endInteger & ReadOnlySequence.FlagBitMask)
+                startObject,
+                startIndex | (_startInteger & ReadOnlySequence.FlagBitMask),
+                endObject,
+                endIndex | (_endInteger & ReadOnlySequence.FlagBitMask)
             );
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private ReadOnlySequence<T> SliceImpl(in SequencePosition start)
-        {
-            // In this method we reset high order bits from indices
-            // of positions that were passed in
-            // and apply type bits specific for current ReadOnlySequence type
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start, in SequencePosition end) => SliceImpl(start.GetObject(), GetIndex(start), end.GetObject(), GetIndex(end));
 
-            return new ReadOnlySequence<T>(
-                start.GetObject(),
-                GetIndex(start) | (_startInteger & ReadOnlySequence.FlagBitMask),
-                _endObject,
-                _endInteger
-            );
-        }
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private ReadOnlySequence<T> SliceImpl(in SequencePosition start) => SliceImpl(start.GetObject(), GetIndex(start), _endObject, _endInteger);
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private long GetLength()
@@ -578,7 +572,7 @@ namespace System.Buffers
 
             // In all other cases, value is valid, and we return true.
 
-            // Equivalent to: return (start <= value && value <= start)
+            // Equivalent to: return (start <= value && value <= end)
             return (value - start) <= (end - start);
         }
 

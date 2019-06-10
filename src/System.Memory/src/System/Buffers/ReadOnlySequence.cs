@@ -271,7 +271,7 @@ namespace System.Buffers
                 ThrowHelper.ThrowStartOrEndArgumentValidationException(start);
 
             uint sliceEndIndex = (uint)GetIndex(end);
-            object? sliceEndObject = end.GetObject();
+            object? sliceEndObject = end.GetObject() ?? _startObject;
 
             uint startIndex = (uint)GetIndex(_startInteger);
             object? startObject = _startObject;
@@ -329,7 +329,7 @@ namespace System.Buffers
         FoundInFirstSegment:
             // startIndex + start <= int.MaxValue
             Debug.Assert(start <= int.MaxValue - startIndex);
-            return SliceImpl(new SequencePosition(startObject, (int)startIndex + (int)start), end);
+            return SliceImpl(startObject, (int)startIndex + (int)start, sliceEndObject, (int)sliceEndIndex);
         }
 
         /// <summary>
@@ -342,7 +342,7 @@ namespace System.Buffers
         {
             // Check start before length
             uint sliceStartIndex = (uint)GetIndex(start);
-            object? sliceStartObject = start.GetObject();
+            object? sliceStartObject = start.GetObject() ?? _startObject;
 
             uint startIndex = (uint)GetIndex(_startInteger);
             object? startObject = _startObject;
@@ -406,7 +406,7 @@ namespace System.Buffers
         FoundInFirstSegment:
             // sliceStartIndex + length <= int.MaxValue
             Debug.Assert(length <= int.MaxValue - sliceStartIndex);
-            return SliceImpl(start, new SequencePosition(sliceStartObject, (int)sliceStartIndex + (int)length));
+            return SliceImpl(sliceStartObject, (int)sliceStartIndex, sliceStartObject, (int)sliceStartIndex + (int)length);
         }
 
         /// <summary>
@@ -455,7 +455,7 @@ namespace System.Buffers
         public ReadOnlySequence<T> Slice(SequencePosition start)
         {
             BoundsCheck(start);
-            return SliceImpl(start);
+            return SliceImpl(start.GetObject() == null ? Start : start);
         }
 
         /// <summary>
