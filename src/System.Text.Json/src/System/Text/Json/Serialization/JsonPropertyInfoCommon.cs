@@ -93,6 +93,11 @@ namespace System.Text.Json
             return typeof(Dictionary<string, TRuntimeProperty>);
         }
 
+        public override Type GetListConcreteType()
+        {
+            return typeof(List<TDeclaredProperty>);
+        }
+
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.

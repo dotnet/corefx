@@ -2,6 +2,8 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -36,6 +38,17 @@ namespace System.Text.Json
                     {
                         jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
                     }
+                }
+            }
+            else if (jsonInfo.ClassType == ClassType.Enumerable && !propertyType.IsArray && IsSupportedByAssigningFromList(propertyType))
+            {
+                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+
+                Type newPropertyType = elementPropertyInfo.GetListConcreteType();
+                if ((propertyType != newPropertyType) && propertyType.IsAssignableFrom(newPropertyType))
+                {
+                    jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
                 }
             }
 
