@@ -137,21 +137,18 @@ namespace System.IO.Compression
                     _formatReader.Validate();
                 }
             }
-            count = RestrictStreamWithUnCompressedSize(count, out bool wasOverLimit);
-
-            if (wasOverLimit)
-                throw new InvalidDataException(SR.GenericInvalidData);
+            count = RestrictStreamWithUnCompressedSize(count);
 
             return count;
         }
 
-        private int RestrictStreamWithUnCompressedSize(int bytesRead, out bool wasOverLimit)
+        private int RestrictStreamWithUnCompressedSize(int bytesRead)
         {
-            wasOverLimit = false;
             if (_uncompressedSize > 0 && _uncompressedSize - _currentInflatedCount < bytesRead)
             {
-                wasOverLimit = true;
                 bytesRead = (int)(_uncompressedSize - _currentInflatedCount);
+                _state = InflaterState.Done;
+                _output._bytesUsed = 0;
             }
             _currentInflatedCount += bytesRead;
             return bytesRead;

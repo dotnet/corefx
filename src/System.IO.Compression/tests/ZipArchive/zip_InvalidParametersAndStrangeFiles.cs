@@ -137,6 +137,7 @@ namespace System.IO.Compression.Tests
             string filename = zfile(zipname);
             MemoryStream stream = await LocalMemoryStream.readAppFileAsync(filename);
             string tamperedFileName = "binary.wmv";
+
             int nameOffset = PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header
             PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 22, nameOffset + tamperedFileName.Length); // patch in central directory too
 
@@ -147,12 +148,10 @@ namespace System.IO.Compression.Tests
                 {
                     using (Stream source = e.Open())
                     {
-                        Assert.Throws<InvalidDataException>(() => source.CopyTo(ms));
-                        Assert.False(source.CanSeek);   // should be not seekable
-                        Assert.Throws<NotSupportedException>(() => source.Position);
-                        byte[] buffer = new byte[1024];
-                        Assert.Throws<InvalidDataException>(() => source.Read(buffer, 0, buffer.Length)); // shouldn't be able read more  
-                        Assert.True(e.Length >= ms.Length);     // Only allow to decompress up to uncompressed size
+                        source.CopyTo(ms);
+                        Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
+                        byte[] buffer = new byte[4096];
+                        Assert.Equal(0, source.Read(buffer, 0, buffer.Length)); // shouldn't be able read more                        
                         ms.Seek(0, SeekOrigin.Begin);
                         int read;
                         while ((read = ms.Read(buffer, 0, buffer.Length)) != 0)
@@ -172,6 +171,7 @@ namespace System.IO.Compression.Tests
             string filename = zfile(zipname);
             MemoryStream stream = await LocalMemoryStream.readAppFileAsync(filename);
             string tamperedFileName = "binary.wmv";
+
             int nameOffset = PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header
             PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 22, nameOffset + tamperedFileName.Length); // patch in central directory too
 
@@ -182,23 +182,17 @@ namespace System.IO.Compression.Tests
                 {
                     using (Stream source = e.Open())
                     {
-                        byte[] buffer = new byte[1024];
-                        Assert.Throws<InvalidDataException>(() =>
-                        {
-                            int read;
-                            while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
-                            {
-                                ms.Write(buffer, 0, read);
-                            }
-                        });
-                        Assert.False(source.CanSeek);   // should be not seekable
-                        Assert.Throws<NotSupportedException>(() => source.Position);
-                        Assert.Throws<InvalidDataException>(() => source.CopyTo(ms)); // shouldn't be able copy more    
-                        Assert.True(e.Length >= ms.Length);     // Only allow to decompress up to uncompressed size
-                        ms.Seek(0, SeekOrigin.Begin);
+                        byte[] buffer = new byte[4096];
                         int read;
+                        while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
+                        {
+                            ms.Write(buffer, 0, read);
+                        }
+                        Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
+                        Assert.Equal(0, source.Read(buffer, 0, buffer.Length)); // shouldn't be able read more     
+                        ms.Seek(0, SeekOrigin.Begin);
                         while ((read = ms.Read(buffer, 0, buffer.Length)) != 0)
-                        { // No need to do anything, just making sure all bytes readable
+                        { // No need to do anything, just making sure all bytes readable from output stream
                         }
                         Assert.Equal(ms.Position, ms.Length); // all bytes must be read
                     }
@@ -213,8 +207,10 @@ namespace System.IO.Compression.Tests
             string filename = compat("deflate64.zip");
             MemoryStream stream = await LocalMemoryStream.readAppFileAsync(filename);
             string tamperedFileName = "binary.wmv";
+
             int nameOffset = PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header
             PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 22, nameOffset + tamperedFileName.Length); // patch in central directory too
+
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
             {
                 ZipArchiveEntry e = archive.GetEntry(tamperedFileName);
@@ -222,14 +218,11 @@ namespace System.IO.Compression.Tests
                 {
                     using (Stream source = e.Open())
                     {
-                        Assert.Throws<InvalidDataException>(() => source.CopyTo(ms));
-                        Assert.False(source.CanSeek);   // should be not seekable
-                        Assert.Throws<NotSupportedException>(() => source.Position);
-                        byte[] buffer = new byte[1024];
-                        Assert.Throws<InvalidDataException>(() => source.Read(buffer, 0, buffer.Length)); // shouldn't be able read more  
-                        Assert.True(e.Length >= ms.Length);     // Only allow to decompress up to uncompressed size
+                        source.CopyTo(ms);
+                        Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
                         ms.Seek(0, SeekOrigin.Begin);
                         int read;
+                        byte[] buffer = new byte[1024];
                         while ((read = ms.Read(buffer, 0, buffer.Length)) != 0)
                         { // No need to do anything, just making sure all bytes readable
                         }
@@ -246,8 +239,10 @@ namespace System.IO.Compression.Tests
             string filename = compat("deflate64.zip");
             MemoryStream stream = await LocalMemoryStream.readAppFileAsync(filename);
             string tamperedFileName = "binary.wmv";
+
             int nameOffset = PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header
             PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 22, nameOffset + tamperedFileName.Length); // patch in central directory too
+
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
             {
                 ZipArchiveEntry e = archive.GetEntry(tamperedFileName);
@@ -256,15 +251,13 @@ namespace System.IO.Compression.Tests
                     using (Stream source = e.Open())
                     {
                         byte[] buffer = new byte[10000];
-                        Assert.Throws<InvalidDataException>(() =>
+                        int read;
+                        while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
                         {
-                            int read;
-                            while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
-                            {
-                                ms.Write(buffer, 0, read);
-                            }
-                        });
-                        Assert.True(e.Length >= ms.Length);     // Only allow to decompress up to uncompressed size
+                            ms.Write(buffer, 0, read);
+                        }
+                        Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
+                        Assert.Equal(0, source.Read(buffer, 0, buffer.Length)); // Shouldn't be readable more
                     }
                 }
             }
@@ -278,6 +271,7 @@ namespace System.IO.Compression.Tests
             string filename = zfile(zipname);
             MemoryStream stream = await LocalMemoryStream.readAppFileAsync(filename);
             string tamperedFileName = "binary.wmv";
+
             PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header only
 
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Read))
@@ -296,7 +290,6 @@ namespace System.IO.Compression.Tests
             {
                 string tamperedFileName = "binary.wmv";
                 var testStream = new WrappedStream(s, false, true, false, null);
-
                 await CreateFromDir(zfolder(folder), testStream, ZipArchiveMode.Create);
               
                 PatchDataDescriptorRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), s, 8);  // patch uncompressed size in file header only
@@ -310,18 +303,144 @@ namespace System.IO.Compression.Tests
         }
 
         [Fact]
-        public static async Task AppendToEntryCorruptedFile()
+        public static async Task AppendToEntry_CorruptedFile()
         {
             MemoryStream stream = await StreamHelpers.CreateTempCopyStream(zfile("normal.zip"));
             string tamperedFileName = "binary.wmv";
+            int updatedUncompressedLength = 1310976;
+            string append = "\r\n\r\nThe answer my friend, is blowin' in the wind.";
+            byte[] data = Encoding.ASCII.GetBytes(append);
+            long oldCompressedSize = 0;
+
             int nameOffset = PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header
             PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 22, nameOffset + tamperedFileName.Length); // patch in central directory too
+
             using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update, true))
             {
                 ZipArchiveEntry e = archive.GetEntry(tamperedFileName);
-                Stream s = null;
-                Assert.Throws<InvalidDataException>(() => s = e.Open());
-                Assert.Null(s);
+                oldCompressedSize = e.CompressedLength;
+                using (Stream s = e.Open())
+                {
+                    Assert.Equal(updatedUncompressedLength, s.Length); // original was 2+ Mb
+                    s.Seek(0, SeekOrigin.End);                  
+                    s.Write(data, 0, data.Length);
+                    Assert.Equal(updatedUncompressedLength + data.Length, s.Length);
+                }
+            }
+
+            using (ZipArchive modifiedArchive = new ZipArchive(stream, ZipArchiveMode.Read))
+            {
+                ZipArchiveEntry e = modifiedArchive.GetEntry(tamperedFileName);
+                using (Stream s = e.Open())
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        s.CopyTo(ms);
+                        Assert.Equal(updatedUncompressedLength + data.Length, ms.Length);
+                        ms.Seek(updatedUncompressedLength, SeekOrigin.Begin);
+                        byte[] read = new byte[data.Length];
+                        ms.Read(read, 0, data.Length);
+                        Assert.Equal(append, Encoding.ASCII.GetString(read));
+                    }
+                }
+                Assert.True(oldCompressedSize > e.CompressedLength); // old compressed size must be reduced by Uncomressed size limit
+            }
+        }
+
+        [Fact]
+        public static async Task OverwriteEntry_CorruptedFile()
+        {
+            MemoryStream stream = await StreamHelpers.CreateTempCopyStream(zfile("normal.zip"));
+            string tamperedFileName = "binary.wmv";
+            int updatedUncompressedLength = 1310976;
+            string overwrite = "\r\n\r\nThe answer my friend, is blowin' in the wind.";
+            byte[] data = Encoding.ASCII.GetBytes(overwrite);
+
+            int nameOffset = PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header
+            PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 22, nameOffset + tamperedFileName.Length); // patch in central directory too
+
+            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update, true))
+            {
+                ZipArchiveEntry e = archive.GetEntry(tamperedFileName);
+                string fileName = zmodified(Path.Combine("overwrite", "first.txt"));
+                var file = FileData.GetFile(fileName);
+
+                using (var s = new MemoryStream(data))
+                {
+                    using (Stream es = e.Open())
+                    {
+                        Assert.Equal(updatedUncompressedLength, es.Length);
+                        es.SetLength(0);
+                        s.CopyTo(es);
+                        Assert.Equal(data.Length, es.Length);
+                    }
+                }
+            }
+
+            using (ZipArchive modifiedArchive = new ZipArchive(stream, ZipArchiveMode.Read))
+            {
+                ZipArchiveEntry e = modifiedArchive.GetEntry(tamperedFileName);
+                using (Stream s = e.Open())
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        s.CopyTo(ms);
+                        Assert.Equal(data.Length, ms.Length);
+                        Assert.Equal(overwrite, Encoding.ASCII.GetString(ms.GetBuffer(), 0, data.Length));
+                    }
+                }
+            }
+        }
+
+        [Fact]
+        public static async Task AddFileToArchive_CorruptedFile()
+        {
+            string tamperedFileName = "binary.wmv";
+            string addingFile = "added.txt";
+            MemoryStream stream = await StreamHelpers.CreateTempCopyStream(zfile("normal.zip"));
+            MemoryStream file = await StreamHelpers.CreateTempCopyStream(zmodified(Path.Combine("addFile", addingFile)));
+
+            int nameOffset = PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 8);  // patch uncompressed size in file header
+            PatchDataRelativeToFileName(Encoding.ASCII.GetBytes(tamperedFileName), stream, 22, nameOffset + tamperedFileName.Length); // patch in central directory too          
+
+            using (ZipArchive archive = new ZipArchive(stream, ZipArchiveMode.Update, true))
+            {
+                ZipArchiveEntry e = archive.CreateEntry(addingFile);
+                using (Stream es = e.Open())
+                {
+                    file.CopyTo(es);
+                }
+            }
+
+            using (ZipArchive modifiedArchive = new ZipArchive(stream, ZipArchiveMode.Read))
+            {
+                ZipArchiveEntry e = modifiedArchive.GetEntry(tamperedFileName);
+                using (Stream s = e.Open())
+                {
+                    using (var ms = new MemoryStream())
+                    {
+                        s.CopyTo(ms);
+                        Assert.Equal(e.Length, ms.Length);  // tampered file should read up to uncompressed size
+                    }
+                }
+
+                ZipArchiveEntry addedEntry = modifiedArchive.GetEntry(addingFile);
+                Assert.NotNull(addedEntry);
+                Assert.Equal(addedEntry.Length, file.Length);
+
+                using (Stream s = addedEntry.Open())
+                {
+                    int read = 0;
+                    byte[] buffer1 = new byte[1024];
+                    byte[] buffer2 = new byte[1024];
+                    file.Seek(0, SeekOrigin.Begin);
+
+                    while ((read = s.Read(buffer1, 0, buffer1.Length)) != 0 )
+                    {
+                        file.Read(buffer2, 0, buffer2.Length);
+                        Assert.Equal(buffer1, buffer2);
+                    }
+                }     
             }
         }
 

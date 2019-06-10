@@ -23,7 +23,7 @@ namespace System.IO.Compression
 
         private readonly byte[] _window = new byte[WindowSize]; // The window is 2^18 bytes
         private int _end;       // this is the position to where we should write next byte
-        private int _bytesUsed; // The number of bytes in the output window which is not consumed.
+        internal int _bytesUsed; // The number of bytes in the output window which is not consumed.
 
         /// <summary>Add a byte to output window.</summary>
         public void Write(byte b)
