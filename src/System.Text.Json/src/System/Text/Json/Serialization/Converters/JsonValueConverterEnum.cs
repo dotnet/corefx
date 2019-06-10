@@ -100,16 +100,6 @@ namespace System.Text.Json.Serialization.Converters
                 return true;
             }
 
-            // We try to parse with widest signed number type to handle -1 = MaxValue cases for unsigned numbers
-            if (s_isUInt64 || s_isUInt32 || s_isUInt16 || s_isByte)
-            {
-                if (reader.TryGetInt64(out long isMinusOne) && isMinusOne == -1)
-                {
-                    value = (TValue)Enum.ToObject(valueType, isMinusOne);
-                    return true;
-                }
-            }
-
             value = default;
             return false;
         }

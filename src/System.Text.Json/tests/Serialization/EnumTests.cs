@@ -287,10 +287,9 @@ namespace System.Text.Json.Serialization.Tests
         public static void Parse_Negative1_QuotedVsUnquoted_QuotedThrows()
         {
             string json = "{ \"MyByteEnum\" : -1, \"MyUInt32Enum\" : -1 }";
-            SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
-            Assert.Equal((SampleByteEnum)byte.MaxValue, result.MyByteEnum);
-            Assert.Equal((SampleUInt32Enum)UInt32.MaxValue, result.MyUInt32Enum);
 
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>(json));
+            
             // Quoted throws
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>("{ \"MyByteEnum\" : \"-1\" }"));
             Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>("{ \"MyUInt32Enum\" : \"-1\" }"));
@@ -301,10 +300,9 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("{ \"MyUInt64Enum\" : -1 }")]
         [InlineData("{ \"MyUInt64Enum\" : -1, \"MyUInt32Enum\" : -1 }")]
         [InlineData("{ \"MyUInt64Enum\" : -1, \"MyUInt32Enum\" : -1, \"MyByteEnum\" : -1 }")]
-        public static void Parse_Negative1ForUInt64Enum_ShouldNotThrow(string json)
+        public static void Parse_Negative1ForUInt64Enum_Throw(string json)
         {
-            SimpleTestClass result = JsonSerializer.Parse<SimpleTestClass>(json);
-            Assert.Equal((SampleUInt64Enum)UInt64.MaxValue, result.MyUInt64Enum);
+            Assert.Throws<JsonException>(() => JsonSerializer.Parse<SimpleTestClass>(json));
         }
 
         [Theory]
