@@ -408,9 +408,9 @@ namespace System.Text.Json
                 }
             }
 
-            if (IsNonGenericInterface(propertyType) || propertyType == typeof(IDictionary))
+            if (propertyType.IsAssignableFrom(typeof(IList)) || propertyType.IsAssignableFrom(typeof(IDictionary)))
             {
-                    return typeof(object);
+                return typeof(object);
             }
 
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
@@ -435,7 +435,7 @@ namespace System.Text.Json
                 return ClassType.ImmutableDictionary;
             }
 
-            if (typeof(IDictionary).IsAssignableFrom(type) || 
+            if (typeof(IDictionary).IsAssignableFrom(type) ||
                 (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
                 type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
             {
@@ -455,9 +455,47 @@ namespace System.Text.Json
             return ClassType.Object;
         }
 
-        internal static bool IsNonGenericInterface(Type type)
+        private const string EnumerableGenericInterfaceTypeName = "System.Collections.Generic.IEnumerable`1";
+        private const string EnumerableInterfaceTypeName = "System.Collections.IEnumerable";
+
+        private const string ListGenericInterfaceTypeName = "System.Collections.Generic.IList`1";
+        private const string ListInterfaceTypeName = "System.Collections.IList";
+
+        private const string CollectionGenericInterfaceTypeName = "System.Collections.Generic.ICollection`1";
+        private const string CollectionInterfaceTypeName = "System.Collections.ICollection";
+
+        private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
+
+        private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
+
+        internal static bool IsSupportedByAssigningFromList(Type type)
         {
-            return type == typeof(IEnumerable) || type == typeof(IList) || type == typeof(ICollection);
+            if (type.IsGenericType)
+            {
+                switch (type.GetGenericTypeDefinition().FullName)
+                {
+                    case EnumerableGenericInterfaceTypeName:
+                    case ListGenericInterfaceTypeName:
+                    case CollectionGenericInterfaceTypeName:
+                    case ReadOnlyListGenericInterfaceTypeName:
+                    case ReadOnlyCollectionGenericInterfaceTypeName:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+            else
+            {
+                switch (type.FullName)
+                {
+                    case EnumerableInterfaceTypeName:
+                    case ListInterfaceTypeName:
+                    case CollectionInterfaceTypeName:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
         }
     }
 }

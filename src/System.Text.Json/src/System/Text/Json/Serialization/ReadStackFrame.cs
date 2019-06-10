@@ -166,11 +166,7 @@ namespace System.Text.Json
             }
 
             Type propertyType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            if (JsonClassInfo.IsNonGenericInterface(propertyType))
-            {
-                return new List<object>();
-            }
-            else if (typeof(IList).IsAssignableFrom(propertyType))
+            if (typeof(IList).IsAssignableFrom(propertyType))
             {
                 // If IList, add the members as we create them.
                 JsonClassInfo collectionClassInfo = state.Current.JsonPropertyInfo.RuntimeClassInfo;

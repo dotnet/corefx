@@ -17,7 +17,6 @@ namespace System.Text.Json
     {
         // Cache the converters so they don't get created for every enumerable property.
         private static readonly JsonEnumerableConverter s_jsonArrayConverter = new DefaultArrayConverter();
-        private static readonly JsonEnumerableConverter s_jsonEnumerableConverter = new DefaultEnumerableConverter();
         private static readonly JsonEnumerableConverter s_jsonIEnumerableConstuctibleConverter = new DefaultIEnumerableConstructibleConverter();
         private static readonly JsonEnumerableConverter s_jsonImmutableConverter = new DefaultImmutableConverter();
 
@@ -225,16 +224,10 @@ namespace System.Text.Json
                     {
                         Type elementType = JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo);
 
-                        // If the property type only has interface(s) exposed by JsonEnumerableT<T> then use JsonEnumerableT as the converter.
-                        if (!JsonClassInfo.IsNonGenericInterface(RuntimePropertyType) &&
-                            RuntimePropertyType.IsAssignableFrom(typeof(JsonEnumerableT<>).MakeGenericType(elementType)))
-                        {
-                            EnumerableConverter = s_jsonEnumerableConverter;
-                        }
-                        // Else if IList can't be assigned from the property type (we populate and return an IList directly)
+                        // If IList can't be assigned from the property type (we populate and return an IList directly)
                         // and the type can be constructed with an IEnumerable<T>, then use the
                         // IEnumerableConstructible converter to create the instance.
-                        else if (!typeof(IList).IsAssignableFrom(RuntimePropertyType) &&
+                        if (!typeof(IList).IsAssignableFrom(RuntimePropertyType) &&
                             RuntimePropertyType.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null)
                         {
                             EnumerableConverter = s_jsonIEnumerableConstuctibleConverter;
@@ -302,6 +295,8 @@ namespace System.Text.Json
         public abstract IList CreateConverterList();
 
         public abstract Type GetDictionaryConcreteType();
+
+        public abstract Type GetListConcreteType();
 
         public abstract void Read(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader);
         public abstract void ReadEnumerable(JsonTokenType tokenType, ref ReadStack state, ref Utf8JsonReader reader);

@@ -39,6 +39,17 @@ namespace System.Text.Json
                     }
                 }
             }
+            else if (jsonInfo.ClassType == ClassType.Enumerable && !propertyType.IsArray && IsSupportedByAssigningFromList(propertyType))
+            {
+                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+
+                Type newPropertyType = elementPropertyInfo.GetListConcreteType();
+                if ((propertyType != newPropertyType) && propertyType.IsAssignableFrom(newPropertyType))
+                {
+                    jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
+                }
+            }
 
             if (propertyInfo != null)
             {
