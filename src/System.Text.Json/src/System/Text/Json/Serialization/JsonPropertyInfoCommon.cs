@@ -98,6 +98,11 @@ namespace System.Text.Json
             return typeof(List<TDeclaredProperty>);
         }
 
+        public override Type GetHashSetConcreteType(Type parentType)
+        {
+            return typeof(HashSet<TDeclaredProperty>);
+        }
+
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.

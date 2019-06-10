@@ -152,6 +152,13 @@ namespace System.Text.Json.Serialization.Tests
             json = JsonSerializer.ToString<object>(genericIReadonlyList);
             Assert.Equal(ExpectedJson, json);
 
+            ISet<object> iset = new HashSet<object> { 1, true, address, null, "foo" };
+            json = JsonSerializer.ToString(iset);
+            Assert.Equal(ExpectedJson, json);
+
+            json = JsonSerializer.ToString<object>(iset);
+            Assert.Equal(ExpectedJson, json);
+
             Stack<object> stack = new Stack<object>(new List<object> { 1, true, address, null, "foo" });
             json = JsonSerializer.ToString(stack);
             Assert.Equal(ReversedExpectedJson, json);
@@ -289,6 +296,7 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Contains(@"""ICollectionT"":[""Hello"",""World""]", json);
                 Assert.Contains(@"""IReadOnlyCollectionT"":[""Hello"",""World""]", json);
                 Assert.Contains(@"""IReadOnlyListT"":[""Hello"",""World""]", json);
+                Assert.Contains(@"""ISetT"":[""Hello"",""World""]", json);
                 Assert.Contains(@"""StackT"":[""World"",""Hello""]", json);
                 Assert.Contains(@"""QueueT"":[""Hello"",""World""]", json);
                 Assert.Contains(@"""HashSetT"":[""Hello"",""World""]", json);

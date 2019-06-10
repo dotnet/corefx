@@ -46,35 +46,6 @@ namespace System.Text.Json.Serialization.Converters
 
         private static ConcurrentDictionary<string, object> s_createRangeDelegates = new ConcurrentDictionary<string, object>();
 
-        private static string GetConstructingTypeName(string immutableCollectionTypeName)
-        {
-            switch (immutableCollectionTypeName)
-            {
-                case ImmutableListGenericTypeName:
-                case ImmutableListGenericInterfaceTypeName:
-                    return ImmutableListTypeName;
-                case ImmutableStackGenericTypeName:
-                case ImmutableStackGenericInterfaceTypeName:
-                    return ImmutableStackTypeName;
-                case ImmutableQueueGenericTypeName:
-                case ImmutableQueueGenericInterfaceTypeName:
-                    return ImmutableQueueTypeName;
-                case ImmutableSortedSetGenericTypeName:
-                    return ImmutableSortedSetTypeName;
-                case ImmutableHashSetGenericTypeName:
-                case ImmutableSetGenericInterfaceTypeName:
-                    return ImmutableHashSetTypeName;
-                case ImmutableDictionaryGenericTypeName:
-                case ImmutableDictionaryGenericInterfaceTypeName:
-                    return ImmutableDictionaryTypeName;
-                case ImmutableSortedDictionaryGenericTypeName:
-                    return ImmutableSortedDictionaryTypeName;
-                default:
-                    // TODO: Refactor exception throw following serialization exception changes.
-                    throw new NotSupportedException(SR.Format(SR.DeserializeTypeNotSupported, immutableCollectionTypeName));
-            }
-        }
-
         private static string GetDelegateKey(
             Type immutableCollectionType,
             Type elementType,
@@ -84,7 +55,38 @@ namespace System.Text.Json.Serialization.Converters
             // Use the generic type definition of the immutable collection to determine an appropriate constructing type,
             // i.e. a type that we can invoke the `CreateRange<elementType>` method on, which returns an assignable immutable collection.
             underlyingType = immutableCollectionType.GetGenericTypeDefinition();
-            constructingTypeName = GetConstructingTypeName(underlyingType.FullName);
+
+            switch (underlyingType.FullName)
+            {
+                case ImmutableListGenericTypeName:
+                case ImmutableListGenericInterfaceTypeName:
+                    constructingTypeName = ImmutableListTypeName;
+                    break;
+                case ImmutableStackGenericTypeName:
+                case ImmutableStackGenericInterfaceTypeName:
+                    constructingTypeName = ImmutableStackTypeName;
+                    break;
+                case ImmutableQueueGenericTypeName:
+                case ImmutableQueueGenericInterfaceTypeName:
+                    constructingTypeName = ImmutableQueueTypeName;
+                    break;
+                case ImmutableSortedSetGenericTypeName:
+                    constructingTypeName = ImmutableSortedSetTypeName;
+                    break;
+                case ImmutableHashSetGenericTypeName:
+                case ImmutableSetGenericInterfaceTypeName:
+                    constructingTypeName = ImmutableHashSetTypeName;
+                    break;
+                case ImmutableDictionaryGenericTypeName:
+                case ImmutableDictionaryGenericInterfaceTypeName:
+                    constructingTypeName = ImmutableDictionaryTypeName;
+                    break;
+                case ImmutableSortedDictionaryGenericTypeName:
+                    constructingTypeName = ImmutableSortedDictionaryTypeName;
+                    break;
+                default:
+                    throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(immutableCollectionType, null, null);
+            }
 
             return $"{constructingTypeName}:{elementType.FullName}";
         }

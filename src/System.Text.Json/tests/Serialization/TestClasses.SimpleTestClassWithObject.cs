@@ -38,6 +38,7 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringICollectionT { get; set; }
         public object MyStringIReadOnlyCollectionT { get; set; }
         public object MyStringIReadOnlyListT { get; set; }
+        public object MyStringISetT { get; set; }
         public object MyStringToStringIDict { get; set; }
         public object MyStringToStringGenericDict { get; set; }
         public object MyStringToStringGenericIDict { get; set; }
@@ -105,6 +106,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringICollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyListT"" : [""Hello""]," +
+                @"""MyStringISetT"" : [""Hello""]," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericIDict"" : {""key"" : ""value""}," +
@@ -163,6 +165,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringICollectionT = new string[] { "Hello" };
             MyStringIReadOnlyCollectionT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new string[] { "Hello" };
+            MyStringIReadOnlyListT = new HashSet<string> { "Hello" };
 
             MyStringToStringGenericIDict = new Dictionary<string, string> { { "key", "value" } };
 
@@ -228,6 +231,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", ((ICollection<string>)MyStringICollectionT).First());
             Assert.Equal("Hello", ((IReadOnlyCollection<string>)MyStringIReadOnlyCollectionT).First());
             Assert.Equal("Hello", ((IReadOnlyList<string>)MyStringIReadOnlyListT)[0]);
+            Assert.Equal("Hello", ((ISet<string>)MyStringISetT).First());
 
 
             IEnumerator enumerator = ((IDictionary)MyStringToStringIDict).GetEnumerator();
