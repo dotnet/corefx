@@ -812,8 +812,12 @@ namespace System.IO
 
         private static string GetRelativePath(string relativeTo, string path, StringComparison comparisonType)
         {
-            if (string.IsNullOrEmpty(relativeTo)) throw new ArgumentNullException(nameof(relativeTo));
-            if (PathInternal.IsEffectivelyEmpty(path.AsSpan())) throw new ArgumentNullException(nameof(path));
+            if (relativeTo == null)
+                throw new ArgumentNullException(nameof(relativeTo));
+            if (relativeTo.Length == 0)
+                throw new ArgumentException(nameof(relativeTo));
+            if (PathInternal.IsEffectivelyEmpty(path.AsSpan()))
+                throw new ArgumentNullException(nameof(path));
             Debug.Assert(comparisonType == StringComparison.Ordinal || comparisonType == StringComparison.OrdinalIgnoreCase);
 
             relativeTo = GetFullPath(relativeTo);
