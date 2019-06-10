@@ -96,6 +96,7 @@
 * JSON schema support
   - Specification for providing metadata to annotate and provide structural
     validation of JSON documents ([currently draft-07](http://json-schema.org/))
+* Here's the full [list of features](../docs/FeatureList.md) that are supported for 3.0, planned for vNext, and those we won't be supporting.
 
 ## API Discussions & Issues
 
