@@ -14,6 +14,7 @@ namespace System.IO.Compression.Tests
 {
     public class zip_InvalidParametersAndStrangeFiles : ZipFileTestBase
     {
+        private static readonly int bufferSize = 4096;
         private static void ConstructorThrows<TException>(Func<ZipArchive> constructor, string Message) where TException : Exception
         {
             try
@@ -148,9 +149,9 @@ namespace System.IO.Compression.Tests
                 {
                     using (Stream source = e.Open())
                     {
-                        source.CopyTo(ms);
+                        await source.CopyToAsync(ms, bufferSize);
                         Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
-                        byte[] buffer = new byte[4096];
+                        byte[] buffer = new byte[bufferSize];
                         Assert.Equal(0, source.Read(buffer, 0, buffer.Length)); // shouldn't be able read more                        
                         ms.Seek(0, SeekOrigin.Begin);
                         int read;
@@ -182,7 +183,7 @@ namespace System.IO.Compression.Tests
                 {
                     using (Stream source = e.Open())
                     {
-                        byte[] buffer = new byte[4096];
+                        byte[] buffer = new byte[bufferSize];
                         int read;
                         while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
                         {
@@ -222,7 +223,7 @@ namespace System.IO.Compression.Tests
                         Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
                         ms.Seek(0, SeekOrigin.Begin);
                         int read;
-                        byte[] buffer = new byte[1024];
+                        byte[] buffer = new byte[bufferSize];
                         while ((read = ms.Read(buffer, 0, buffer.Length)) != 0)
                         { // No need to do anything, just making sure all bytes readable
                         }
@@ -335,7 +336,7 @@ namespace System.IO.Compression.Tests
                 {
                     using (var ms = new MemoryStream())
                     {
-                        s.CopyTo(ms);
+                        await s.CopyToAsync(ms, bufferSize);
                         Assert.Equal(updatedUncompressedLength + data.Length, ms.Length);
                         ms.Seek(updatedUncompressedLength, SeekOrigin.Begin);
                         byte[] read = new byte[data.Length];
@@ -371,7 +372,7 @@ namespace System.IO.Compression.Tests
                     {
                         Assert.Equal(updatedUncompressedLength, es.Length);
                         es.SetLength(0);
-                        s.CopyTo(es);
+                        await s.CopyToAsync(es, bufferSize);
                         Assert.Equal(data.Length, es.Length);
                     }
                 }
@@ -384,7 +385,7 @@ namespace System.IO.Compression.Tests
                 {
                     using (var ms = new MemoryStream())
                     {
-                        s.CopyTo(ms);
+                        await s.CopyToAsync(ms, bufferSize);
                         Assert.Equal(data.Length, ms.Length);
                         Assert.Equal(overwrite, Encoding.ASCII.GetString(ms.GetBuffer(), 0, data.Length));
                     }
@@ -419,7 +420,7 @@ namespace System.IO.Compression.Tests
                 {
                     using (var ms = new MemoryStream())
                     {
-                        s.CopyTo(ms);
+                        await s.CopyToAsync(ms, bufferSize);
                         Assert.Equal(e.Length, ms.Length);  // tampered file should read up to uncompressed size
                     }
                 }
