@@ -60,7 +60,6 @@ namespace System.Text.Json.Serialization.Converters
             Type elementType = state.Current.GetElementType();
 
             string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, elementType, out _, out _);
-            Debug.Assert(options.CreateRangeDelegatesContainsKey(delegateKey));
 
             JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
             JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);

@@ -42,6 +42,18 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             {
+                SortedDictionary<string, string> obj = JsonSerializer.Parse<SortedDictionary<string, string>>(JsonString);
+                Assert.Equal("World", obj["Hello"]);
+                Assert.Equal("World2", obj["Hello2"]);
+
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
+
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
+
+            {
                 IDictionary<string, string> obj = JsonSerializer.Parse<IDictionary<string, string>>(JsonString);
                 Assert.Equal("World", obj["Hello"]);
                 Assert.Equal("World2", obj["Hello2"]);
