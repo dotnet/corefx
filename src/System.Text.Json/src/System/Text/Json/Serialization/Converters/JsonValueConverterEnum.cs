@@ -49,57 +49,90 @@ namespace System.Text.Json.Serialization.Converters
                 return false;
             }
 
-            if (s_isUInt64 && reader.TryGetUInt64(out ulong uint64))
+            if (s_isInt32)
             {
-                value = (TValue)Enum.ToObject(valueType, uint64);
-                return true;
+                if (reader.TryGetInt32(out int int32))
+                {
+                    value = (TValue)Enum.ToObject(valueType, int32);
+                    return true;
+                }
+                goto False;
             }
 
-            if (s_isInt64 && reader.TryGetInt64(out long int64))
+            if (s_isByte)
             {
-                value = (TValue)Enum.ToObject(valueType, int64);
-                return true;
+                if (reader.TryGetUInt32(out uint ubyte8) && JsonHelpers.IsInRangeInclusive(ubyte8, byte.MinValue, byte.MaxValue))
+                {
+                    value = (TValue)Enum.ToObject(valueType, ubyte8);
+                    return true;
+                }
+                goto False;
             }
 
-            if (s_isUInt32 && reader.TryGetUInt32(out uint uint32))
+            if (s_isUInt64)
             {
-                value = (TValue)Enum.ToObject(valueType, uint32);
-                return true;
+                if (reader.TryGetUInt64(out ulong uint64))
+                {
+                    value = (TValue)Enum.ToObject(valueType, uint64);
+                    return true;
+                }
+                goto False;
             }
 
-            if (s_isInt32 && reader.TryGetInt32(out int int32))
+            if (s_isInt64)
             {
-                value = (TValue)Enum.ToObject(valueType, int32);
-                return true;
+                if (reader.TryGetInt64(out long int64))
+                {
+                    value = (TValue)Enum.ToObject(valueType, int64);
+                    return true;
+                }
+                goto False;
+            }
+
+            if (s_isUInt32)
+            {
+                if (reader.TryGetUInt32(out uint uint32))
+                {
+                    value = (TValue)Enum.ToObject(valueType, uint32);
+                    return true;
+                }
+                goto False;
             }
 
             // When utf8reader/writer will support all primitive types we should remove custom bound checks
             // https://github.com/dotnet/corefx/issues/36125
 
-            if (s_isUInt16 && reader.TryGetUInt32(out uint uint16) && uint16 >= ushort.MinValue && uint16 <= ushort.MaxValue)
+            if (s_isUInt16)
             {
-                value = (TValue)Enum.ToObject(valueType, uint16);
-                return true;
+                if (reader.TryGetUInt32(out uint uint16) && JsonHelpers.IsInRangeInclusive(uint16, ushort.MinValue, ushort.MaxValue))
+                {
+                    value = (TValue)Enum.ToObject(valueType, uint16);
+                    return true;
+                }
+                goto False;
             }
 
-            if (s_isInt16 && reader.TryGetInt32(out int int16) && int16 >= short.MinValue && int16 <= short.MaxValue)
+            if (s_isInt16)
             {
-                value = (TValue)Enum.ToObject(valueType, int16);
-                return true;
+                if (reader.TryGetInt32(out int int16) && JsonHelpers.IsInRangeInclusive(int16, short.MinValue, short.MaxValue))
+                {
+                    value = (TValue)Enum.ToObject(valueType, int16);
+                    return true;
+                }
+                goto False;
             }
 
-            if (s_isByte && reader.TryGetUInt32(out uint ubyte8) && ubyte8 >= byte.MinValue && ubyte8 <= byte.MaxValue)
+            if (s_isSByte)
             {
-                value = (TValue)Enum.ToObject(valueType, ubyte8);
-                return true;
+                if (reader.TryGetInt32(out int byte8) && JsonHelpers.IsInRangeInclusive(byte8, sbyte.MinValue, sbyte.MaxValue))
+                {
+                    value = (TValue)Enum.ToObject(valueType, byte8);
+                    return true;
+                }
+                goto False;
             }
 
-            if (s_isSByte && reader.TryGetInt32(out int byte8) && byte8 >= sbyte.MinValue && byte8 <= sbyte.MaxValue)
-            {
-                value = (TValue)Enum.ToObject(valueType, byte8);
-                return true;
-            }
-
+        False:
             value = default;
             return false;
         }
