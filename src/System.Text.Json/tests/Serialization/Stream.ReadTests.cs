@@ -100,5 +100,53 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.Null(valueTypeCollection);
             }
         }
+
+        public class TestDataGenerator : TheoryData<byte[], JsonSerializerOptions, ulong>
+        {
+            public TestDataGenerator()
+            {
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, default, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 1 }, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 2 }, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 3 }, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 4 }, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 15 }, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 15 }, 1111111111111111111);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 16 }, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 16 }, 1111111111111111111);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49 }, new JsonSerializerOptions { DefaultBufferSize = 17 }, 1);
+                Add(new byte[] { 0xEF, 0xBB, 0xBF, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49 }, new JsonSerializerOptions { DefaultBufferSize = 17 }, 1111111111111111111);
+            }
+        }
+
+        [Theory]
+        [ClassData(typeof(TestDataGenerator))]
+        public static async Task TestBOMWithSingleJsonValue(byte[] utf8BomAndValueArray, JsonSerializerOptions options, ulong expected)
+        {
+            ulong value;
+            using (Stream stream = new MemoryStream(utf8BomAndValueArray))
+            {
+                value = await JsonSerializer.ReadAsync<ulong>(stream, options);
+            }
+            Assert.Equal(expected, value);
+        }
+
+        [Fact]
+        public static async Task TestBOMWithNoJsonValue()
+        {
+            byte[] utf8BomAndValueArray = new byte[] { 0xEF, 0xBB, 0xBF };
+            byte value;
+            using (Stream stream = new MemoryStream(utf8BomAndValueArray))
+            {
+                try
+                {
+                    value = await JsonSerializer.ReadAsync<byte>(stream);
+                    Assert.True(false, "Expected exception was not thrown");
+                }
+                catch (JsonException)
+                {
+                }
+            }
+        }
     }
 }
