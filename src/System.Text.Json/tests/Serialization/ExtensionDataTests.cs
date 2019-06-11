@@ -197,6 +197,12 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ExtensionPropertyObjectValue_Issue_38238()
+        {
+            Assert.Equal(@"{""Name"":""Test"",""Extensions"":{""foo"":1}}", JsonSerializer.ToString(new TestModel_Issue_38238()));
+        }
+
+        [Fact]
         public static void ExtensionPropertyObjectValue_RoundTrip()
         {
             // Baseline
@@ -204,11 +210,13 @@ namespace System.Text.Json.Serialization.Tests
             obj.MyOverflow.Add("test", new object());
             obj.MyOverflow.Add("test1", 1);
             obj.MyOverflow.Add("test2", "text");
-            obj.MyOverflow.Add("test3", new DummyObj() { Prop = "Prop" });
+            obj.MyOverflow.Add("test3", new DummyObj() { Prop = "ObjectProp" });
+            obj.MyOverflow.Add("test4", new DummyStruct() { Prop = "StructProp" });
+            obj.MyOverflow.Add("test5", new Dictionary<string, object>() { { "Key", "Value" }, { "Key1", "Value1" }, });
 
             ClassWithExtensionPropertyAlreadyInstantiated roundTripObj = JsonSerializer.Parse<ClassWithExtensionPropertyAlreadyInstantiated>(JsonSerializer.ToString(obj));
 
-            Assert.Equal(4, roundTripObj.MyOverflow.Count);
+            Assert.Equal(6, roundTripObj.MyOverflow.Count);
 
             Assert.IsType<JsonElement>(roundTripObj.MyOverflow["test"]);
             Assert.IsType<JsonElement>(roundTripObj.MyOverflow["test1"]);
@@ -225,7 +233,14 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("text", ((JsonElement)roundTripObj.MyOverflow["test2"]).GetString());
 
             Assert.Equal(JsonValueType.Object, ((JsonElement)roundTripObj.MyOverflow["test3"]).Type);
-            Assert.Equal("Prop", ((JsonElement)roundTripObj.MyOverflow["test3"]).GetProperty("Prop").GetString());
+            Assert.Equal("ObjectProp", ((JsonElement)roundTripObj.MyOverflow["test3"]).GetProperty("Prop").GetString());
+
+            Assert.Equal(JsonValueType.Object, ((JsonElement)roundTripObj.MyOverflow["test4"]).Type);
+            Assert.Equal("StructProp", ((JsonElement)roundTripObj.MyOverflow["test4"]).GetProperty("Prop").GetString());
+
+            Assert.Equal(JsonValueType.Object, ((JsonElement)roundTripObj.MyOverflow["test5"]).Type);
+            Assert.Equal("Value", ((JsonElement)roundTripObj.MyOverflow["test5"]).GetProperty("Key").GetString());
+            Assert.Equal("Value1", ((JsonElement)roundTripObj.MyOverflow["test5"]).GetProperty("Key1").GetString());
         }
 
         [Fact]
@@ -245,7 +260,22 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal(3, child.MyOverflow["MyIntMissingChild"].GetInt32());
         }
 
+        [Fact]
+        public static void ExtensionProperty_InvalidDictionary()
+        {
+            ClassWithInvalidExtensionPropertyStringString obj1 = new ClassWithInvalidExtensionPropertyStringString();
+            Assert.Throws<InvalidOperationException>(() => JsonSerializer.ToString(obj1));
+
+            ClassWithInvalidExtensionPropertyObjectString obj2 = new ClassWithInvalidExtensionPropertyObjectString();
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(obj2));
+        }
+
         public class DummyObj
+        {
+            public string Prop { get; set; }
+        }
+
+        public struct DummyStruct
         {
             public string Prop { get; set; }
         }
@@ -282,6 +312,18 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, int> MyOverflow { get; set; }
         }
 
+        public class ClassWithInvalidExtensionPropertyStringString
+        {
+            [JsonExtensionData]
+            public Dictionary<string, string> MyOverflow { get; set; }
+        }
+
+        public class ClassWithInvalidExtensionPropertyObjectString
+        {
+            [JsonExtensionData]
+            public Dictionary<DummyObj, string> MyOverflow { get; set; }
+        }
+
         public class ClassWithTwoExtensionPropertys
         {
             [JsonExtensionData]
@@ -297,6 +339,17 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, JsonElement> MyOverflow { get; set; }
 
             public ClassWithExtensionProperty MyReference { get; set; }
+        }
+
+        // Match model in issue https://github.com/dotnet/corefx/issues/38238
+        public class TestModel_Issue_38238
+        {
+            public string Name { get; set; } = "Test";
+
+            public Dictionary<string, object> Extensions { get; set; } = new Dictionary<string, object>()
+            {
+                ["foo"] = 1,
+            };
         }
     }
 }
