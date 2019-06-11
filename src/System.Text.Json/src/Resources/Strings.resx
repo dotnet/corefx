@@ -1,4 +1,3 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -398,5 +397,17 @@
   </data>
   <data name="SerializeUnableToSerialize" xml:space="preserve">
     <value>The object or value could not be serialized. Path: {0}.</value>
+  </data>
+  <data name="FormatByte" xml:space="preserve">
+    <value>The JSON value is either of incorrect numeric format, or too large or too small for a Byte.</value>
+  </data>
+  <data name="FormatInt16" xml:space="preserve">
+    <value>The JSON value is either of incorrect numeric format, or too large or too small for an Int16.</value>
+  </data>
+  <data name="FormatSByte" xml:space="preserve">
+    <value>The JSON value is either of incorrect numeric format, or too large or too small for an SByte.</value>
+  </data>
+  <data name="FormatUInt16" xml:space="preserve">
+    <value>The JSON value is either of incorrect numeric format, or too large or too small for a UInt16.</value>
   </data>
 </root>

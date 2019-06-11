@@ -12,8 +12,12 @@ namespace System.Text.Json.Tests
 {
     internal class JsonNumberTestData
     {
+        public static List<byte> Bytes { get; set; }
+        public static List<sbyte> SBytes { get; set; }
+        public static List<short> Shorts { get; set; }
         public static List<int> Ints { get; set; }
         public static List<long> Longs { get; set; }
+        public static List<ushort> UShorts { get; set; }
         public static List<uint> UInts { get; set; }
         public static List<ulong> ULongs { get; set; }
         public static List<float> Floats { get; set; }
@@ -28,6 +32,52 @@ namespace System.Text.Json.Tests
             const int numberOfItems = 1_000;
 
             // Make sure we have 1_005 values in each numeric list.
+
+            #region generate bytes and sbytes
+            Bytes = new List<byte>
+            {
+                byte.MinValue,
+                byte.MaxValue,
+                64,
+                128,
+                144
+            };
+
+            SBytes = new List<sbyte>
+            {
+                0,
+                64,
+                -64,
+                sbyte.MinValue,
+                sbyte.MaxValue
+            };
+
+            byte[] byteArr = new byte[numberOfItems];
+            random.NextBytes(byteArr);
+
+            Bytes.AddRange(byteArr);
+
+            foreach (var item in byteArr)
+            {
+                SBytes.Add((sbyte)item);
+            }
+            #endregion
+
+            #region generate shorts
+            Shorts = new List<short>
+            {
+                0,
+                20123,
+                -20123,
+                short.MaxValue,
+                short.MinValue
+            };
+            byte[] b16 = new byte[2];
+            for (int i = 0; i < numberOfItems; i++)
+            {
+                Shorts.Add(BitConverter.ToInt16(b16));
+            }
+            #endregion
 
             #region generate ints
             Ints = new List<int>
@@ -62,6 +112,22 @@ namespace System.Text.Json.Tests
                 else
                     value += int.MaxValue;
                 Longs.Add(value);
+            }
+            #endregion
+
+            #region generate shorts
+            UShorts = new List<ushort>
+            {
+                ushort.MaxValue,
+                ushort.MinValue,
+                12345,
+                34567,
+                64321
+            };
+            byte[] ub16 = new byte[2];
+            for (int i = 0; i < numberOfItems; i++)
+            {
+                UShorts.Add(BitConverter.ToUInt16(ub16));
             }
             #endregion
 
@@ -163,6 +229,21 @@ namespace System.Text.Json.Tests
             var builder = new StringBuilder();
             builder.Append("{");
 
+            for (int i = 0; i < Bytes.Count; i++)
+            {
+                builder.Append("\"byte").Append(i).Append("\": ");
+                builder.Append(Bytes[i]).Append(", ");
+            }
+            for (int i = 0; i < SBytes.Count; i++)
+            {
+                builder.Append("\"sbyte").Append(i).Append("\": ");
+                builder.Append(SBytes[i]).Append(", ");
+            }
+            for (int i = 0; i < Shorts.Count; i++)
+            {
+                builder.Append("\"short").Append(i).Append("\": ");
+                builder.Append(Shorts[i]).Append(", ");
+            }
             for (int i = 0; i < Ints.Count; i++)
             {
                 builder.Append("\"int").Append(i).Append("\": ");
@@ -172,6 +253,11 @@ namespace System.Text.Json.Tests
             {
                 builder.Append("\"long").Append(i).Append("\": ");
                 builder.Append(Longs[i]).Append(", ");
+            }
+            for (int i = 0; i < UShorts.Count; i++)
+            {
+                builder.Append("\"ushort").Append(i).Append("\": ");
+                builder.Append(UShorts[i]).Append(", ");
             }
             for (int i = 0; i < UInts.Count; i++)
             {
