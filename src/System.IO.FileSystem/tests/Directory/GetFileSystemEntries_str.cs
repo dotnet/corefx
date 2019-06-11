@@ -234,7 +234,7 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsWhitespaceOnlyPath(string invalid)
         {
-            Assert.Throws<ArgumentException>(() => GetEntries(invalid));
+            Assert.Throws<DirectoryNotFoundException>(() => GetEntries(invalid));
         }
 
         [Theory,

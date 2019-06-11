@@ -25,6 +25,12 @@ namespace System.IO.Enumeration
             if (Path.IsPathRooted(expression))
                 throw new ArgumentException(SR.Arg_Path2IsRooted, nameof(expression));
 
+            if (expression.Contains('\0'))
+                throw new ArgumentException(SR.Argument_InvalidPathChars, expression);
+
+            if (directory.Contains('\0'))
+                throw new ArgumentException(SR.Argument_InvalidPathChars, directory);
+
             // We always allowed breaking the passed ref directory and filter to be separated
             // any way the user wanted. Looking for "C:\foo\*.cs" could be passed as "C:\" and
             // "foo\*.cs" or "C:\foo" and "*.cs", for example. As such we need to combine and
@@ -39,12 +45,21 @@ namespace System.IO.Enumeration
                 // Need to fix up the input paths
                 directory = Path.Join(directory.AsSpan(), directoryName);
                 expression = expression.Substring(directoryName.Length + 1);
+
+                // Directory came in here normalized, but because it was just modified,
+                // it cannot be considered normalized anymore
+                options.IsNormalized = false;
             }
 
             switch (options.MatchType)
             {
                 case MatchType.Win32:
-                    if (string.IsNullOrEmpty(expression) || expression == "." || expression == "*.*")
+                    if (expression == "*")
+                    {
+                        // Most common case
+                        break;
+                    }
+                    else if (string.IsNullOrEmpty(expression) || expression == "." || expression == "*.*")
                     {
                         // Historically we always treated "." as "*"
                         expression = "*";

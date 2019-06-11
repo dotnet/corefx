@@ -89,7 +89,6 @@ namespace System.IO
         /// </remarks>
         public MatchType MatchType { get; set; }
 
-
         /// <summary>
         /// For APIs that allow specifying a match expression this will allow you to specify case matching behavior.
         /// </summary>
@@ -102,5 +101,10 @@ namespace System.IO
         /// Set to true to return "." and ".." directory entries.
         /// </summary>
         public bool ReturnSpecialDirectories { get; set; }
+        
+        /// <summary>
+        /// Set to true if the path is normalized, false otherwise.
+        /// </summary>
+        internal bool IsNormalized { get; set; } 
     }
 }

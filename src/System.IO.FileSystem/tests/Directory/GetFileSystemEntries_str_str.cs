@@ -633,7 +633,6 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.Windows)]
         public void WindowsSearchPatternInvalid_Core()
         {
-            GetEntries(TestDirectory, "\0");
             GetEntries(TestDirectory, "|");
 
             Assert.All(Path.GetInvalidFileNameChars().Except(OldWildcards).Except(NewWildcards), invalidChar =>
@@ -643,6 +642,9 @@ namespace System.IO.Tests
                     case '\\':
                     case '/':
                         Assert.Throws<DirectoryNotFoundException>(() => GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString())));
+                        break;
+                    case '\0':
+                        Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
                         break;
                     default:
                         GetEntries(Directory.GetCurrentDirectory(), string.Format("te{0}st", invalidChar.ToString()));

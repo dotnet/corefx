@@ -20,6 +20,8 @@ namespace System.IO
 {
     public sealed partial class DirectoryInfo : FileSystemInfo
     {
+        private bool _isNormalized = false;
+
         public DirectoryInfo(string path)
         {
             Init(originalPath: path,
@@ -45,6 +47,8 @@ namespace System.IO
                     Path.GetFileName(Path.TrimEndingDirectorySeparator(fullPath.AsSpan()))).ToString();
 
             FullPath = fullPath;
+
+            _isNormalized = isNormalized;
         }
 
         public DirectoryInfo Parent
@@ -165,7 +169,7 @@ namespace System.IO
         public IEnumerable<FileSystemInfo> EnumerateFileSystemInfos(string searchPattern, EnumerationOptions enumerationOptions)
             => InternalEnumerateInfos(FullPath, searchPattern, SearchTarget.Both, enumerationOptions);
 
-        internal static IEnumerable<FileSystemInfo> InternalEnumerateInfos(
+        private IEnumerable<FileSystemInfo> InternalEnumerateInfos(
             string path,
             string searchPattern,
             SearchTarget searchTarget,
@@ -174,6 +178,8 @@ namespace System.IO
             Debug.Assert(path != null);
             if (searchPattern == null)
                 throw new ArgumentNullException(nameof(searchPattern));
+
+            options.IsNormalized = _isNormalized;
 
             FileSystemEnumerableFactory.NormalizeInputs(ref path, ref searchPattern, options);
 
