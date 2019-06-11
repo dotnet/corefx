@@ -1284,6 +1284,6 @@ namespace System.Text.Json
             }
         }
 
-        private string DebuggerDisplay => $"TokenType = {TokenType} : \"{ToString()}\"";
+        private string DebuggerDisplay => $"Type = {Type} : \"{ToString()}\"";
     }
 }
