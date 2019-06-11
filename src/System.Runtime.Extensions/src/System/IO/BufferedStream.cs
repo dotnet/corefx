@@ -49,7 +49,7 @@ namespace System.IO
         private const int MaxShadowBufferSize = 81920;  // Make sure not to get to the Large Object Heap.
         private const int DefaultBufferSize = 4096;
 
-        private Stream _stream;                            // Underlying stream.  Close sets _stream to null.
+        private Stream? _stream;                            // Underlying stream.  Close sets _stream to null.
         private byte[]? _buffer;                            // Shared read/write buffer.  Alloc on first use.
         private readonly int _bufferSize;                   // Length of internal buffer (not counting the shadow buffer).
         private int _readPos;                               // Read pointer within shared buffer.
@@ -149,7 +149,8 @@ namespace System.IO
         {
             get
             {
-                return _stream;
+                // _stream can be null when disposed. However we don't want to make UnderlyingStream nullable just for that scenario, since doing operations after dispose is invalid anyway.
+                return _stream!;
             }
         }
 
@@ -243,7 +244,7 @@ namespace System.IO
             }
             finally
             {
-                _stream = null!;
+                _stream = null;
                 _buffer = null;
 
                 // Call base.Dispose(bool) to cleanup async IO resources
@@ -269,7 +270,7 @@ namespace System.IO
             }
             finally
             {
-                _stream = null!;
+                _stream = null;
                 _buffer = null;
             }
         }
