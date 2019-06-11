@@ -18,6 +18,11 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyEnum"" : 2" +
                 @"}";
 
+        private static readonly string s_jsonInt16Enum =
+                @"{" +
+                @"""MyInt16Enum"" : 2" +
+                @"}";
+
         private static readonly string s_jsonInt64EnumMin =
                 @"{" +
                 @"""MyInt64Enum"" : " + long.MinValue +
@@ -33,10 +38,20 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyUInt64Enum"" : " + ulong.MaxValue +
                 @"}";
 
+        private static readonly string s_jsonUInt16EnumMax =
+                @"{" +
+                @"""MyUInt16Enum"" : " + ushort.MaxValue +
+                @"}";
+
         private static readonly string s_jsonByteEnum =
                 @"{" +
                 @"""MyByteEnum"" : " + byte.MaxValue +
                 @"}";
+
+        private static readonly string s_jsonSByteEnum =
+        @"{" +
+        @"""MySByteEnum"" : " + sbyte.MaxValue +
+        @"}";
 
         private const string UInt64MaxPlus1 = "18446744073709551616"; // ulong.MaxValue + 1;
         private const string MinusUInt64MaxMinus1 = "-18446744073709551616"; // -ulong.MaxValue - 1
@@ -332,6 +347,13 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void EnumAsInt16()
+        {
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonInt16Enum);
+            Assert.Equal(SampleEnumInt16.Two, obj.MyInt16Enum);
+        }
+
+        [Fact]
         public static void EnumAsInt64Min()
         {
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonInt64EnumMin);
@@ -353,10 +375,24 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void EnumAsUInt16Max()
+        {
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonUInt16EnumMax);
+            Assert.Equal(SampleEnumUInt16.Max, obj.MyUInt16Enum);
+        }
+
+        [Fact]
         public static void EnumAsByteMax()
         {
             SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonByteEnum);
             Assert.Equal(SampleByteEnum.Max, obj.MyByteEnum);
+        }
+
+        [Fact]
+        public static void EnumAsSByteMax()
+        {
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(s_jsonSByteEnum);
+            Assert.Equal(SampleSByteEnum.Max, obj.MySByteEnum);
         }
     }
 }

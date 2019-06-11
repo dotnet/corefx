@@ -16,7 +16,7 @@ namespace System.Text.Json.Serialization.Converters
         private static readonly bool s_isInt32 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(int);
 
         private static readonly bool s_isUInt16 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
-        private static readonly bool s_isInt16 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(ushort);
+        private static readonly bool s_isInt16 = Enum.GetUnderlyingType(typeof(TValue)) == typeof(short);
 
         private static readonly bool s_isByte = Enum.GetUnderlyingType(typeof(TValue)) == typeof(byte);
         private static readonly bool s_isSByte = Enum.GetUnderlyingType(typeof(TValue)) == typeof(sbyte);
