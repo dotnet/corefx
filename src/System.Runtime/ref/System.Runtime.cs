@@ -808,7 +808,7 @@ namespace System
         public System.TimeSpan Subtract(System.DateTimeOffset value) { throw null; }
         public System.DateTimeOffset Subtract(System.TimeSpan value) { throw null; }
         int System.IComparable.CompareTo(object? obj) { throw null; }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public long ToFileTime() { throw null; }
         public System.DateTimeOffset ToLocalTime() { throw null; }
@@ -974,7 +974,7 @@ namespace System
         ushort System.IConvertible.ToUInt16(System.IFormatProvider? provider) { throw null; }
         uint System.IConvertible.ToUInt32(System.IFormatProvider? provider) { throw null; }
         ulong System.IConvertible.ToUInt64(System.IFormatProvider? provider) { throw null; }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
         public static byte ToByte(System.Decimal value) { throw null; }
         public static double ToDouble(System.Decimal d) { throw null; }
         public static short ToInt16(System.Decimal value) { throw null; }
@@ -2650,7 +2650,7 @@ namespace System
         public bool IsDaylightSavingTime(System.DateTime dateTime) { throw null; }
         public bool IsDaylightSavingTime(System.DateTimeOffset dateTimeOffset) { throw null; }
         public bool IsInvalidTime(System.DateTime dateTime) { throw null; }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public string ToSerializedString() { throw null; }
         public override string ToString() { throw null; }
@@ -2668,7 +2668,7 @@ namespace System
             public static System.TimeZoneInfo.AdjustmentRule CreateAdjustmentRule(System.DateTime dateStart, System.DateTime dateEnd, System.TimeSpan daylightDelta, System.TimeZoneInfo.TransitionTime daylightTransitionStart, System.TimeZoneInfo.TransitionTime daylightTransitionEnd) { throw null; }
             public bool Equals(System.TimeZoneInfo.AdjustmentRule? other) { throw null; }
             public override int GetHashCode() { throw null; }
-            void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+            void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
             void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         }
         public readonly partial struct TransitionTime : System.IEquatable<System.TimeZoneInfo.TransitionTime>, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
@@ -2687,7 +2687,7 @@ namespace System
             public override int GetHashCode() { throw null; }
             public static bool operator ==(System.TimeZoneInfo.TransitionTime t1, System.TimeZoneInfo.TransitionTime t2) { throw null; }
             public static bool operator !=(System.TimeZoneInfo.TransitionTime t1, System.TimeZoneInfo.TransitionTime t2) { throw null; }
-            void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+            void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
             void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         }
     }
@@ -3408,9 +3408,9 @@ namespace System
         [System.ObsoleteAttribute("The constructor has been deprecated. Please use new Uri(string). The dontEscape parameter is deprecated and is always false. https://go.microsoft.com/fwlink/?linkid=14202")]
         public Uri(string uriString, bool dontEscape) { }
         public Uri(string uriString, System.UriKind uriKind) { }
-        public Uri(System.Uri baseUri, string relativeUri) { }
+        public Uri(System.Uri baseUri, string? relativeUri) { }
         [System.ObsoleteAttribute("The constructor has been deprecated. Please new Uri(Uri, string). The dontEscape parameter is deprecated and is always false. https://go.microsoft.com/fwlink/?linkid=14202")]
-        public Uri(System.Uri baseUri, string relativeUri, bool dontEscape) { }
+        public Uri(System.Uri baseUri, string? relativeUri, bool dontEscape) { }
         public Uri(System.Uri baseUri, System.Uri relativeUri) { }
         public string AbsolutePath { get { throw null; } }
         public string AbsoluteUri { get { throw null; } }
@@ -3436,17 +3436,17 @@ namespace System
         public string UserInfo { get { throw null; } }
         [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Canonicalize() { }
-        public static System.UriHostNameType CheckHostName(string name) { throw null; }
-        public static bool CheckSchemeName(string schemeName) { throw null; }
+        public static System.UriHostNameType CheckHostName(string? name) { throw null; }
+        public static bool CheckSchemeName(string? schemeName) { throw null; }
         [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void CheckSecurity() { }
-        public static int Compare(System.Uri uri1, System.Uri uri2, System.UriComponents partsToCompare, System.UriFormat compareFormat, System.StringComparison comparisonType) { throw null; }
+        public static int Compare(System.Uri? uri1, System.Uri? uri2, System.UriComponents partsToCompare, System.UriFormat compareFormat, System.StringComparison comparisonType) { throw null; }
         public override bool Equals(object? comparand) { throw null; }
         [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Escape() { }
         public static string EscapeDataString(string stringToEscape) { throw null; }
         [System.ObsoleteAttribute("The method has been deprecated. Please use GetComponents() or static EscapeUriString() to escape a Uri component or a string. https://go.microsoft.com/fwlink/?linkid=14202")]
-        protected static string EscapeString(string str) { throw null; }
+        protected static string EscapeString(string? str) { throw null; }
         public static string EscapeUriString(string stringToEscape) { throw null; }
         public static int FromHex(char digit) { throw null; }
         public string GetComponents(System.UriComponents components, System.UriFormat format) { throw null; }
@@ -3465,19 +3465,19 @@ namespace System
         [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual bool IsReservedCharacter(char character) { throw null; }
         public bool IsWellFormedOriginalString() { throw null; }
-        public static bool IsWellFormedUriString(string uriString, System.UriKind uriKind) { throw null; }
+        public static bool IsWellFormedUriString(string? uriString, System.UriKind uriKind) { throw null; }
         [System.ObsoleteAttribute("The method has been deprecated. Please use MakeRelativeUri(Uri uri). https://go.microsoft.com/fwlink/?linkid=14202")]
         public string MakeRelative(System.Uri toUri) { throw null; }
         public System.Uri MakeRelativeUri(System.Uri uri) { throw null; }
-        public static bool operator ==(System.Uri uri1, System.Uri uri2) { throw null; }
-        public static bool operator !=(System.Uri uri1, System.Uri uri2) { throw null; }
+        public static bool operator ==(System.Uri? uri1, System.Uri? uri2) { throw null; }
+        public static bool operator !=(System.Uri? uri1, System.Uri? uri2) { throw null; }
         [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Parse() { }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
         public override string ToString() { throw null; }
-        public static bool TryCreate(string uriString, System.UriKind uriKind, out System.Uri result) { throw null; }
-        public static bool TryCreate(System.Uri baseUri, string relativeUri, out System.Uri result) { throw null; }
-        public static bool TryCreate(System.Uri baseUri, System.Uri relativeUri, out System.Uri result) { throw null; }
+        public static bool TryCreate(string? uriString, System.UriKind uriKind, out System.Uri? result) { throw null; }
+        public static bool TryCreate(System.Uri? baseUri, string? relativeUri, out System.Uri? result) { throw null; }
+        public static bool TryCreate(System.Uri? baseUri, System.Uri? relativeUri, out System.Uri? result) { throw null; }
         [System.ObsoleteAttribute("The method has been deprecated. Please use GetComponents() or static UnescapeDataString() to unescape a Uri component or a string. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual string Unescape(string path) { throw null; }
         public static string UnescapeDataString(string stringToUnescape) { throw null; }
@@ -3513,8 +3513,8 @@ namespace System
     {
         public UriFormatException() { }
         protected UriFormatException(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
-        public UriFormatException(string textString) { }
-        public UriFormatException(string textString, System.Exception e) { }
+        public UriFormatException(string? textString) { }
+        public UriFormatException(string? textString, System.Exception? e) { }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo serializationInfo, System.Runtime.Serialization.StreamingContext streamingContext) { }
     }
     public enum UriHostNameType
@@ -3535,14 +3535,14 @@ namespace System
     {
         protected UriParser() { }
         protected virtual string GetComponents(System.Uri uri, System.UriComponents components, System.UriFormat format) { throw null; }
-        protected virtual void InitializeAndValidate(System.Uri uri, out System.UriFormatException parsingError) { throw null; }
+        protected virtual void InitializeAndValidate(System.Uri uri, out System.UriFormatException? parsingError) { throw null; }
         protected virtual bool IsBaseOf(System.Uri baseUri, System.Uri relativeUri) { throw null; }
         public static bool IsKnownScheme(string schemeName) { throw null; }
         protected virtual bool IsWellFormedOriginalString(System.Uri uri) { throw null; }
         protected virtual System.UriParser OnNewUri() { throw null; }
         protected virtual void OnRegister(string schemeName, int defaultPort) { }
         public static void Register(System.UriParser uriParser, string schemeName, int defaultPort) { }
-        protected virtual string Resolve(System.Uri baseUri, System.Uri relativeUri, out System.UriFormatException parsingError) { throw null; }
+        protected virtual string? Resolve(System.Uri baseUri, System.Uri? relativeUri, out System.UriFormatException? parsingError) { throw null; }
     }
     public enum UriPartial
     {
@@ -4380,7 +4380,7 @@ namespace System.Globalization
         public virtual int LastIndexOf(string source, string value, int startIndex, System.Globalization.CompareOptions options) { throw null; }
         public virtual int LastIndexOf(string source, string value, int startIndex, int count) { throw null; }
         public virtual int LastIndexOf(string source, string value, int startIndex, int count, System.Globalization.CompareOptions options) { throw null; }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
         public override string ToString() { throw null; }
     }
     [System.FlagsAttribute]
@@ -5003,7 +5003,7 @@ namespace System.Globalization
         public override bool Equals(object? obj) { throw null; }
         public override int GetHashCode() { throw null; }
         public static System.Globalization.TextInfo ReadOnly(System.Globalization.TextInfo textInfo) { throw null; }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
         public virtual char ToLower(char c) { throw null; }
         public virtual string ToLower(string str) { throw null; }
         public override string ToString() { throw null; }
@@ -5542,7 +5542,7 @@ namespace System.Reflection
         public void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public byte[]? GetPublicKey() { throw null; }
         public byte[]? GetPublicKeyToken() { throw null; }
-        public void OnDeserialization(object sender) { }
+        public void OnDeserialization(object? sender) { }
         public static bool ReferenceMatchesDefinition(System.Reflection.AssemblyName? reference, System.Reflection.AssemblyName? definition) { throw null; }
         public void SetPublicKey(byte[]? publicKey) { }
         public void SetPublicKeyToken(byte[]? publicKeyToken) { }
@@ -6337,7 +6337,7 @@ namespace System.Reflection
         protected StrongNameKeyPair(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public StrongNameKeyPair(string keyPairContainer) { }
         public byte[] PublicKey { get { throw null; } }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
     public partial class TargetException : System.ApplicationException
@@ -6871,7 +6871,7 @@ namespace System.Runtime.CompilerServices
         public static new bool Equals(object? o1, object? o2) { throw null; }
         public static void ExecuteCodeWithGuaranteedCleanup(System.Runtime.CompilerServices.RuntimeHelpers.TryCode code, System.Runtime.CompilerServices.RuntimeHelpers.CleanupCode backoutCode, object? userData) { }
         public static int GetHashCode(object o) { throw null; }
-        public static object GetObjectValue(object obj) { throw null; }
+        public static object? GetObjectValue(object? obj) { throw null; }
         public static T[] GetSubArray<T>(T[] array, System.Range range) { throw null; }
         public static object GetUninitializedObject(System.Type type) { throw null; }
         public static void InitializeArray(System.Array array, System.RuntimeFieldHandle fldHandle) { }
@@ -7177,7 +7177,7 @@ namespace System.Runtime.Serialization
     }
     public partial interface IDeserializationCallback
     {
-        void OnDeserialization(object sender);
+        void OnDeserialization(object? sender);
     }
     [System.CLSCompliantAttribute(false)]
     public partial interface IFormatterConverter
@@ -7642,13 +7642,13 @@ namespace System.Text
         protected Encoding(int codePage, System.Text.EncoderFallback? encoderFallback, System.Text.DecoderFallback? decoderFallback) { }
         public static System.Text.Encoding ASCII { get { throw null; } }
         public static System.Text.Encoding BigEndianUnicode { get { throw null; } }
-        public virtual string? BodyName { get { throw null; } }
+        public virtual string BodyName { get { throw null; } }
         public virtual int CodePage { get { throw null; } }
         public System.Text.DecoderFallback DecoderFallback { get { throw null; } set { } }
         public static System.Text.Encoding Default { get { throw null; } }
         public System.Text.EncoderFallback EncoderFallback { get { throw null; } set { } }
-        public virtual string? EncodingName { get { throw null; } }
-        public virtual string? HeaderName { get { throw null; } }
+        public virtual string EncodingName { get { throw null; } }
+        public virtual string HeaderName { get { throw null; } }
         public virtual bool IsBrowserDisplay { get { throw null; } }
         public virtual bool IsBrowserSave { get { throw null; } }
         public virtual bool IsMailNewsDisplay { get { throw null; } }
@@ -7660,7 +7660,7 @@ namespace System.Text
         public static System.Text.Encoding UTF32 { get { throw null; } }
         public static System.Text.Encoding UTF7 { get { throw null; } }
         public static System.Text.Encoding UTF8 { get { throw null; } }
-        public virtual string? WebName { get { throw null; } }
+        public virtual string WebName { get { throw null; } }
         public virtual int WindowsCodePage { get { throw null; } }
         public virtual object Clone() { throw null; }
         public static byte[] Convert(System.Text.Encoding srcEncoding, System.Text.Encoding dstEncoding, byte[] bytes) { throw null; }
@@ -7846,10 +7846,10 @@ namespace System.Text
         public System.Text.StringBuilder Append(uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public System.Text.StringBuilder Append(ulong value) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object? arg0) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object? arg0, object? arg1) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, object? arg0, object? arg1, object? arg2) { throw null; }
-        public System.Text.StringBuilder AppendFormat(System.IFormatProvider provider, string format, params object?[] args) { throw null; }
+        public System.Text.StringBuilder AppendFormat(System.IFormatProvider? provider, string format, object? arg0) { throw null; }
+        public System.Text.StringBuilder AppendFormat(System.IFormatProvider? provider, string format, object? arg0, object? arg1) { throw null; }
+        public System.Text.StringBuilder AppendFormat(System.IFormatProvider? provider, string format, object? arg0, object? arg1, object? arg2) { throw null; }
+        public System.Text.StringBuilder AppendFormat(System.IFormatProvider? provider, string format, params object?[] args) { throw null; }
         public System.Text.StringBuilder AppendFormat(string format, object? arg0) { throw null; }
         public System.Text.StringBuilder AppendFormat(string format, object? arg0, object? arg1) { throw null; }
         public System.Text.StringBuilder AppendFormat(string format, object? arg0, object? arg1, object? arg2) { throw null; }
