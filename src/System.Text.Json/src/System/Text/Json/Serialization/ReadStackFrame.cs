@@ -32,7 +32,9 @@ namespace System.Text.Json
         // Has an array or dictionary property been initialized.
         public bool PropertyInitialized;
 
-        // Support Immutable dictionary types.
+        // Support IDictionary constructible types, i.e. types that we
+        // support by passing and IDictionary to their constructors:
+        // immutable dictionaries, Hashtable, SortedList
         public IDictionary TempDictionaryValues;
 
         // For performance, we order the properties by the first deserialize and PropertyIndex helps find the right slot quicker.
@@ -42,14 +44,14 @@ namespace System.Text.Json
         // The current JSON data for a property does not match a given POCO, so ignore the property (recursively).
         public bool Drain;
 
-        public bool IsImmutableDictionary => JsonClassInfo.ClassType == ClassType.ImmutableDictionary;
+        public bool IsIDictionaryConstructible => JsonClassInfo.ClassType == ClassType.IDictionaryConstructible;
         public bool IsDictionary => JsonClassInfo.ClassType == ClassType.Dictionary;
 
         public bool IsDictionaryProperty => JsonPropertyInfo != null &&
             !JsonPropertyInfo.IsPropertyPolicy &&
             JsonPropertyInfo.ClassType == ClassType.Dictionary;
-        public bool IsImmutableDictionaryProperty => JsonPropertyInfo != null &&
-            !JsonPropertyInfo.IsPropertyPolicy && (JsonPropertyInfo.ClassType == ClassType.ImmutableDictionary);
+        public bool IsIDictionaryConstructibleProperty => JsonPropertyInfo != null &&
+            !JsonPropertyInfo.IsPropertyPolicy && (JsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible);
 
         public bool IsEnumerable => JsonClassInfo.ClassType == ClassType.Enumerable;
 
@@ -58,9 +60,9 @@ namespace System.Text.Json
             !JsonPropertyInfo.IsPropertyPolicy &&
             JsonPropertyInfo.ClassType == ClassType.Enumerable;
 
-        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsProcessingDictionary || IsProcessingImmutableDictionary;
+        public bool IsProcessingEnumerableOrDictionary => IsProcessingEnumerable || IsProcessingDictionary || IsProcessingIDictionaryConstructible;
         public bool IsProcessingDictionary => IsDictionary || IsDictionaryProperty;
-        public bool IsProcessingImmutableDictionary => IsImmutableDictionary || IsImmutableDictionaryProperty;
+        public bool IsProcessingIDictionaryConstructible => IsIDictionaryConstructible || IsIDictionaryConstructibleProperty;
         public bool IsProcessingEnumerable => IsEnumerable || IsEnumerableProperty;
 
         public bool IsProcessingValue
@@ -75,12 +77,12 @@ namespace System.Text.Json
 
                 if (PropertyInitialized)
                 {
-                    if ((IsEnumerable || IsDictionary || IsImmutableDictionary) &&
+                    if ((IsEnumerable || IsDictionary || IsIDictionaryConstructible) &&
                         JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown)
                     {
                         return true;
                     }
-                    else if ((IsEnumerableProperty || IsDictionaryProperty || IsImmutableDictionaryProperty) &&
+                    else if ((IsEnumerableProperty || IsDictionaryProperty || IsIDictionaryConstructibleProperty) &&
                         JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown)
                     {
                         return true;
@@ -94,8 +96,8 @@ namespace System.Text.Json
                     KeyName != null  && (
                     (IsDictionary && JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
                     (IsDictionaryProperty && JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
-                    (IsImmutableDictionary && JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
-                    (IsImmutableDictionaryProperty && JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown)
+                    (IsIDictionaryConstructible && JsonClassInfo.ElementClassInfo.ClassType == ClassType.Unknown) ||
+                    (IsIDictionaryConstructibleProperty && JsonPropertyInfo.ElementClassInfo.ClassType == ClassType.Unknown)
                     );
             }
         }
@@ -111,7 +113,7 @@ namespace System.Text.Json
             if (JsonClassInfo.ClassType == ClassType.Value ||
                 JsonClassInfo.ClassType == ClassType.Enumerable ||
                 JsonClassInfo.ClassType == ClassType.Dictionary ||
-                JsonClassInfo.ClassType == ClassType.ImmutableDictionary)
+                JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
             }
@@ -182,12 +184,12 @@ namespace System.Text.Json
 
         public Type GetElementType()
         {
-            if (IsEnumerableProperty || IsDictionaryProperty || IsImmutableDictionaryProperty)
+            if (IsEnumerableProperty || IsDictionaryProperty || IsIDictionaryConstructibleProperty)
             {
                 return JsonPropertyInfo.ElementClassInfo.Type;
             }
 
-            if (IsEnumerable || IsDictionary || IsImmutableDictionary)
+            if (IsEnumerable || IsDictionary || IsIDictionaryConstructible)
             {
                 return JsonClassInfo.ElementClassInfo.Type;
             }

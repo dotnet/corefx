@@ -101,29 +101,29 @@ namespace System.Text.Json.Serialization.Tests
                 Assert.True(JsonString == json);
             }
 
-            //{
-            //    Hashtable obj = JsonSerializer.Parse<Hashtable>(JsonString);
-            //    Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
-            //    Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
+            {
+                Hashtable obj = JsonSerializer.Parse<Hashtable>(JsonString);
+                Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
+                Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
 
-            //    string json = JsonSerializer.ToString(obj);
-            //    Assert.Equal(JsonString, json);
+                string json = JsonSerializer.ToString(obj);
+                Assert.True(JsonString == json || ReorderedJsonString == json);
 
-            //    json = JsonSerializer.ToString<object>(obj);
-            //    Assert.Equal(JsonString, json);
-            //}
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.True(JsonString == json || ReorderedJsonString == json);
+            }
 
-            //{
-            //    SortedList obj = JsonSerializer.Parse<SortedList>(JsonString);
-            //    Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
-            //    Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
+            {
+                SortedList obj = JsonSerializer.Parse<SortedList>(JsonString);
+                Assert.Equal("World", ((JsonElement)obj["Hello"]).GetString());
+                Assert.Equal("World2", ((JsonElement)obj["Hello2"]).GetString());
 
-            //    string json = JsonSerializer.ToString(obj);
-            //    Assert.Equal(JsonString, json);
+                string json = JsonSerializer.ToString(obj);
+                Assert.Equal(JsonString, json);
 
-            //    json = JsonSerializer.ToString<object>(obj);
-            //    Assert.Equal(JsonString, json);
-            //}
+                json = JsonSerializer.ToString<object>(obj);
+                Assert.Equal(JsonString, json);
+            }
         }
 
         [Fact]
@@ -711,28 +711,11 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void HashtableFail()
         {
-            //{
-            //    string json = @"{""Key"":""Value""}";
-
-            //     Verify we can deserialize into Dictionary<,>
-            //    JsonSerializer.Parse<Dictionary<string, string>>(json);
-
-            //     We don't support non-generic IDictionary
-            //    Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<Hashtable>(json));
-            //}
-
-            //{
-            //    Hashtable ht = new Hashtable();
-            //    ht.Add("Key", "Value");
-
-            //    Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(ht));
-            //}
-
-            //{
-            //    IDictionary ht = new Hashtable();
-            //    ht.Add("Key", "Value");
-            //    Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(ht));
-            //}
+            {
+                IDictionary ht = new Hashtable();
+                ht.Add("Key", "Value");
+                Assert.Throws<NotSupportedException>(() => JsonSerializer.ToString(ht));
+            }
         }
 
         [Fact]

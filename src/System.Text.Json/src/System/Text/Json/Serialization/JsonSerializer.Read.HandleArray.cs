@@ -128,7 +128,7 @@ namespace System.Text.Json
                     state.Current.ReturnValue = value;
                     return true;
                 }
-                else if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsImmutableDictionary)
+                else if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsIDictionaryConstructible)
                 {
                     // Returning a non-converted list.
                     return true;
@@ -202,7 +202,7 @@ namespace System.Text.Json
                     ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
                 }
             }
-            else if (state.Current.IsImmutableDictionary || (state.Current.IsImmutableDictionaryProperty && !setPropertyDirectly))
+            else if (state.Current.IsIDictionaryConstructible || (state.Current.IsIDictionaryConstructibleProperty && !setPropertyDirectly))
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 IDictionary dictionary = (IDictionary)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.TempDictionaryValues);
@@ -281,7 +281,7 @@ namespace System.Text.Json
                     ThrowHelper.ThrowJsonException_DeserializeDuplicateKey(key, reader, state.JsonPath);
                 }
             }
-            else if (state.Current.IsProcessingImmutableDictionary)
+            else if (state.Current.IsProcessingIDictionaryConstructible)
             {
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 IDictionary<string, TProperty> dictionary = (IDictionary<string, TProperty>)state.Current.TempDictionaryValues;

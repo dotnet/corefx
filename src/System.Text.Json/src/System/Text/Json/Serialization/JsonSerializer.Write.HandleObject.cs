@@ -105,7 +105,7 @@ namespace System.Text.Json
             }
 
             // A property that returns an immutable dictionary keeps the same stack frame.
-            if (jsonPropertyInfo.ClassType == ClassType.ImmutableDictionary)
+            if (jsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible)
             {
                 state.Current.IsImmutableDictionaryProperty = true;
 

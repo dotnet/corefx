@@ -52,7 +52,7 @@ namespace System.Text.Json
                 Current.PopStackOnEnd = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
             }
-            else if (classType == ClassType.ImmutableDictionary)
+            else if (classType == ClassType.IDictionaryConstructible)
             {
                 Current.PopStackOnEnd = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();

@@ -79,7 +79,7 @@ namespace System.Text.Json
             {
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
-                case ClassType.ImmutableDictionary:
+                case ClassType.IDictionaryConstructible:
                 case ClassType.Unknown:
                     collectionElementType = GetElementType(runtimePropertyType, parentClassType, propertyInfo);
                     break;

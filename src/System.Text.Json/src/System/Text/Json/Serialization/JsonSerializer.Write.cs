@@ -37,7 +37,7 @@ namespace System.Text.Json
                         finishedSerializing = WriteObject(options, writer, ref state);
                         break;
                     case ClassType.Dictionary:
-                    case ClassType.ImmutableDictionary:
+                    case ClassType.IDictionaryConstructible:
                         finishedSerializing = HandleDictionary(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                         break;
                     default:

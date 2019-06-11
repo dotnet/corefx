@@ -47,7 +47,7 @@ namespace System.Text.Json
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
             }
-            else if (JsonClassInfo.ClassType == ClassType.ImmutableDictionary)
+            else if (JsonClassInfo.ClassType == ClassType.IDictionaryConstructible)
             {
                 JsonPropertyInfo = JsonClassInfo.GetPolicyProperty();
                 IsImmutableDictionary = true;
@@ -70,7 +70,7 @@ namespace System.Text.Json
                 Debug.Assert(writeNull == false);
 
                 // Write start without a property name.
-                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.ImmutableDictionary)
+                if (classType == ClassType.Object || classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible)
                 {
                     writer.WriteStartObject();
                     StartObjectWritten = true;
@@ -91,7 +91,7 @@ namespace System.Text.Json
             }
             else if (classType == ClassType.Object ||
                 classType == ClassType.Dictionary ||
-                classType == ClassType.ImmutableDictionary)
+                classType == ClassType.IDictionaryConstructible)
             {
                 writer.WriteStartObject(propertyName);
                 StartObjectWritten = true;

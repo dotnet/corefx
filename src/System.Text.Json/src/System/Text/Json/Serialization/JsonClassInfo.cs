@@ -138,7 +138,7 @@ namespace System.Text.Json
                         ElementClassInfo = options.GetOrAddClass(elementType);
                     }
                     break;
-                case ClassType.ImmutableDictionary:
+                case ClassType.IDictionaryConstructible:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
                         AddPolicyProperty(type, options);
@@ -395,7 +395,7 @@ namespace System.Text.Json
                 Type[] args = propertyType.GetGenericArguments();
                 ClassType classType = GetClassType(propertyType);
 
-                if ((classType == ClassType.Dictionary || classType == ClassType.ImmutableDictionary) &&
+                if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible) &&
                     args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
                     args[0].UnderlyingSystemType == typeof(string))
                 {
@@ -411,7 +411,7 @@ namespace System.Text.Json
             if (propertyType.IsAssignableFrom(typeof(IList)) ||
                 propertyType.IsAssignableFrom(typeof(IDictionary)) ||
                 IsSupportedByConstructingWithIList(propertyType) ||
-                HasConstructorThatTakesIDictionary(propertyType))
+                IsSupportedByConstructingWithIDictionary(propertyType))
             {
                 return typeof(object);
             }
@@ -433,9 +433,9 @@ namespace System.Text.Json
                 return ClassType.Value;
             }
 
-            if (DefaultImmutableConverter.TypeIsImmutableDictionary(type))
+            if (DefaultImmutableDictionaryConverter.IsImmutableDictionary(type) || IsSupportedByConstructingWithIDictionary(type))
             {
-                return ClassType.ImmutableDictionary;
+                return ClassType.IDictionaryConstructible;
             }
 
             if (typeof(IDictionary).IsAssignableFrom(type) ||
@@ -458,6 +458,8 @@ namespace System.Text.Json
             return ClassType.Object;
         }
 
+        internal const string ImmutableNamespaceName = "System.Collections.Immutable";
+
         private const string EnumerableGenericInterfaceTypeName = "System.Collections.Generic.IEnumerable`1";
         private const string EnumerableInterfaceTypeName = "System.Collections.IEnumerable";
 
@@ -470,6 +472,9 @@ namespace System.Text.Json
         private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
 
         private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
+
+        private const string HashtableTypeName = "System.Collections.Hashtable";
+        private const string SortedListTypeName = "System.Collections.SortedList";
 
         internal const string StackTypeName = "System.Collections.Stack";
         internal const string QueueTypeName = "System.Collections.Queue";
@@ -529,9 +534,16 @@ namespace System.Text.Json
             }
         }
 
-        internal static bool HasConstructorThatTakesIDictionary(Type type)
+        internal static bool IsSupportedByConstructingWithIDictionary(Type type)
         {
-            return type.GetConstructor(new Type[] { typeof(IDictionary) }) != null;
+            switch (type.FullName)
+            {
+                case HashtableTypeName:
+                case SortedListTypeName:
+                    return true;
+                default:
+                    return false;
+            }
         }
     }
 }
