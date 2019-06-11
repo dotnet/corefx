@@ -37,26 +37,26 @@ namespace System.Data.Common
 
         object IList.this[int index]
         {
-            get { return GetParameter(index); }
-            set { SetParameter(index, (DbParameter)value); }
+            get => GetParameter(index);
+            set => SetParameter(index, (DbParameter)value);
         }
 
         object IDataParameterCollection.this[string parameterName]
         {
-            get { return GetParameter(parameterName); }
-            set { SetParameter(parameterName, (DbParameter)value); }
+            get => GetParameter(parameterName);
+            set => SetParameter(parameterName, (DbParameter)value);
         }
 
         public DbParameter this[int index]
         {
-            get { return GetParameter(index); }
-            set { SetParameter(index, value); }
+            get => GetParameter(index);
+            set => SetParameter(index, value);
         }
 
         public DbParameter this[string parameterName]
         {
-            get { return GetParameter(parameterName) as DbParameter; }
-            set { SetParameter(parameterName, value); }
+            get => GetParameter(parameterName) as DbParameter;
+            set => SetParameter(parameterName, value);
         }
 
         public abstract int Add(object value);

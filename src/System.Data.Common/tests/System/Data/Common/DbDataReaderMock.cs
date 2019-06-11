@@ -54,26 +54,11 @@ namespace System.Data.Tests.Common
             _testDataTable.Clear();
         }
 
-        public override int Depth
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override int Depth => throw new NotImplementedException();
+        public override int FieldCount => throw new NotImplementedException();
 
-        public override int FieldCount
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool GetBoolean(int ordinal)
-        {
-            return (bool)GetValue(ordinal);
-        }
-
-        public override byte GetByte(int ordinal)
-        {
-            return (byte)GetValue(ordinal);
-        }
-
+        public override bool GetBoolean(int ordinal) => (bool)GetValue(ordinal);
+        public override byte GetByte(int ordinal) => (byte)GetValue(ordinal);
         public override long GetBytes(int ordinal, long dataOffset, byte[] buffer, int bufferOffset, int length)
         {
             object value = GetValue(ordinal);
@@ -88,11 +73,7 @@ namespace System.Data.Tests.Common
             return bytesToRead;
         }
 
-        public override char GetChar(int ordinal)
-        {
-            return (char)GetValue(ordinal);
-        }
-
+        public override char GetChar(int ordinal) => (char)GetValue(ordinal);
         public override long GetChars(int ordinal, long dataOffset, char[] buffer, int bufferOffset, int length)
         {
             object value = GetValue(ordinal);
@@ -107,65 +88,18 @@ namespace System.Data.Tests.Common
             return bytesToRead;
         }
 
-        public override string GetDataTypeName(int ordinal)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override DateTime GetDateTime(int ordinal)
-        {
-            return (DateTime)GetValue(ordinal);
-        }
-
-        public override decimal GetDecimal(int ordinal)
-        {
-            return (decimal)GetValue(ordinal);
-        }
-
-        public override double GetDouble(int ordinal)
-        {
-            return (double)GetValue(ordinal);
-        }
-
-        public override global::System.Collections.IEnumerator GetEnumerator()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override Type GetFieldType(int ordinal)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override float GetFloat(int ordinal)
-        {
-            return (float)GetValue(ordinal);
-        }
-
-        public override Guid GetGuid(int ordinal)
-        {
-            return (Guid)GetValue(ordinal);
-        }
-
-        public override short GetInt16(int ordinal)
-        {
-            return (short)GetValue(ordinal);
-        }
-
-        public override int GetInt32(int ordinal)
-        {
-            return (int)GetValue(ordinal);
-        }
-
-        public override long GetInt64(int ordinal)
-        {
-            return (long)GetValue(ordinal);
-        }
-
-        public override string GetName(int ordinal)
-        {
-            return _testDataTable.Columns[ordinal].ColumnName;
-        }
+        public override string GetDataTypeName(int ordinal) => throw new NotImplementedException();
+        public override DateTime GetDateTime(int ordinal) => (DateTime)GetValue(ordinal);
+        public override decimal GetDecimal(int ordinal) => (decimal)GetValue(ordinal);
+        public override double GetDouble(int ordinal) => (double)GetValue(ordinal);
+        public override global::System.Collections.IEnumerator GetEnumerator() => throw new NotImplementedException();
+        public override Type GetFieldType(int ordinal) => throw new NotImplementedException();
+        public override float GetFloat(int ordinal) => (float)GetValue(ordinal);
+        public override Guid GetGuid(int ordinal) => (Guid)GetValue(ordinal);
+        public override short GetInt16(int ordinal) => (short)GetValue(ordinal);
+        public override int GetInt32(int ordinal) => (int)GetValue(ordinal);
+        public override long GetInt64(int ordinal) => (long)GetValue(ordinal);
+        public override string GetName(int ordinal) => _testDataTable.Columns[ordinal].ColumnName;
 
         public override int GetOrdinal(string name)
         {
@@ -183,45 +117,14 @@ namespace System.Data.Tests.Common
             return -1;
         }
 
-        public override DataTable GetSchemaTable()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override string GetString(int ordinal)
-        {
-            return (string)_testDataTable.Rows[_currentRowIndex][ordinal];
-        }
-
-        public override object GetValue(int ordinal)
-        {
-            return _testDataTable.Rows[_currentRowIndex][ordinal];
-        }
-
-        public override int GetValues(object[] values)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override bool HasRows
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool IsClosed
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override bool IsDBNull(int ordinal)
-        {
-            return _testDataTable.Rows[_currentRowIndex][ordinal] == DBNull.Value;
-        }
-
-        public override bool NextResult()
-        {
-            throw new NotImplementedException();
-        }
+        public override DataTable GetSchemaTable() => throw new NotImplementedException();
+        public override string GetString(int ordinal) => (string)_testDataTable.Rows[_currentRowIndex][ordinal];
+        public override object GetValue(int ordinal) => _testDataTable.Rows[_currentRowIndex][ordinal];
+        public override int GetValues(object[] values) => throw new NotImplementedException();
+        public override bool HasRows => throw new NotImplementedException();
+        public override bool IsClosed => throw new NotImplementedException();
+        public override bool IsDBNull(int ordinal) => _testDataTable.Rows[_currentRowIndex][ordinal] == DBNull.Value;
+        public override bool NextResult() => throw new NotImplementedException();
 
         public override bool Read()
         {
@@ -229,20 +132,9 @@ namespace System.Data.Tests.Common
             return _currentRowIndex < _testDataTable.Rows.Count;
         }
 
-        public override int RecordsAffected
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override object this[string name]
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public override object this[int ordinal]
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public override int RecordsAffected => throw new NotImplementedException();
+        public override object this[string name] => throw new NotImplementedException();
+        public override object this[int ordinal] => throw new NotImplementedException();
     }
 }
 

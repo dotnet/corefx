@@ -78,10 +78,8 @@ namespace System.Data.Common
 
         public abstract int GetOrdinal(string name);
 
-        public virtual DataTable GetSchemaTable()
-        {
+        public virtual DataTable GetSchemaTable() =>
             throw new NotSupportedException();
-        }
 
         public abstract bool GetBoolean(int ordinal);
 
@@ -98,10 +96,8 @@ namespace System.Data.Common
 
         IDataReader IDataRecord.GetData(int ordinal) => GetDbDataReader(ordinal);
 
-        protected virtual DbDataReader GetDbDataReader(int ordinal)
-        {
+        protected virtual DbDataReader GetDbDataReader(int ordinal) =>
             throw ADP.NotSupported();
-        }
 
         public abstract DateTime GetDateTime(int ordinal);
 
@@ -119,27 +115,19 @@ namespace System.Data.Common
 
         public abstract long GetInt64(int ordinal);
 
+        // NOTE: This is virtual because not all providers may choose to support
+        //       this method, since it was added in Whidbey.
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public virtual Type GetProviderSpecificFieldType(int ordinal)
-        {
-            // NOTE: This is virtual because not all providers may choose to support
-            //       this method, since it was added in Whidbey.
-            return GetFieldType(ordinal);
-        }
+        public virtual Type GetProviderSpecificFieldType(int ordinal) =>
+            GetFieldType(ordinal);
 
-        [
-        EditorBrowsable(EditorBrowsableState.Never)
-        ]
-        public virtual object GetProviderSpecificValue(int ordinal)
-        {
-            // NOTE: This is virtual because not all providers may choose to support
-            //       this method, since it was added in Whidbey
-            return GetValue(ordinal);
-        }
+        // NOTE: This is virtual because not all providers may choose to support
+        //       this method, since it was added in Whidbey
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public virtual object GetProviderSpecificValue(int ordinal) =>
+            GetValue(ordinal);
 
-        [
-        EditorBrowsable(EditorBrowsableState.Never)
-        ]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public virtual int GetProviderSpecificValues(object[] values) => GetValues(values);
 
         public abstract string GetString(int ordinal);
@@ -163,17 +151,10 @@ namespace System.Data.Common
             }
         }
 
-        public virtual TextReader GetTextReader(int ordinal)
-        {
-            if (IsDBNull(ordinal))
-            {
-                return new StringReader(string.Empty);
-            }
-            else
-            {
-                return new StringReader(GetString(ordinal));
-            }
-        }
+        public virtual TextReader GetTextReader(int ordinal) =>
+            IsDBNull(ordinal)
+                ? new StringReader(string.Empty)
+                : new StringReader(GetString(ordinal));
 
         public abstract object GetValue(int ordinal);
 
@@ -188,16 +169,14 @@ namespace System.Data.Common
             {
                 return ADP.CreatedTaskWithCancellation<T>();
             }
-            else
+
+            try
             {
-                try
-                {
-                    return Task.FromResult<T>(GetFieldValue<T>(ordinal));
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException<T>(e);
-                }
+                return Task.FromResult<T>(GetFieldValue<T>(ordinal));
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<T>(e);
             }
         }
 
@@ -213,16 +192,14 @@ namespace System.Data.Common
             {
                 return ADP.CreatedTaskWithCancellation<bool>();
             }
-            else
+
+            try
             {
-                try
-                {
-                    return IsDBNull(ordinal) ? ADP.TrueTask : ADP.FalseTask;
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException<bool>(e);
-                }
+                return IsDBNull(ordinal) ? ADP.TrueTask : ADP.FalseTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<bool>(e);
             }
         }
 
@@ -238,16 +215,14 @@ namespace System.Data.Common
             {
                 return ADP.CreatedTaskWithCancellation<bool>();
             }
-            else
+
+            try
             {
-                try
-                {
-                    return Read() ? ADP.TrueTask : ADP.FalseTask;
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException<bool>(e);
-                }
+                return Read() ? ADP.TrueTask : ADP.FalseTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<bool>(e);
             }
         }
 
@@ -259,16 +234,14 @@ namespace System.Data.Common
             {
                 return ADP.CreatedTaskWithCancellation<bool>();
             }
-            else
+
+            try
             {
-                try
-                {
-                    return NextResult() ? ADP.TrueTask : ADP.FalseTask;
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException<bool>(e);
-                }
+                return NextResult() ? ADP.TrueTask : ADP.FalseTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<bool>(e);
             }
         }
     }

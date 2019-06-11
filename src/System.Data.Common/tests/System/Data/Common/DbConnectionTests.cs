@@ -26,96 +26,27 @@ namespace System.Data.Common.Tests
 
             public override string ConnectionString
             {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-
-                set
-                {
-                    throw new NotImplementedException();
-                }
+                get => throw new NotImplementedException();
+                set => throw new NotImplementedException();
             }
 
-            public override string Database
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
-
-            public override string DataSource
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
-
-            public override string ServerVersion
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
-
-            public override ConnectionState State
-            {
-                get
-                {
-                    throw new NotImplementedException();
-                }
-            }
-
-            public override void ChangeDatabase(string databaseName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Close()
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Open()
-            {
-                throw new NotImplementedException();
-            }
-
-            protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
-            {
-                throw new NotImplementedException();
-            }
-
-            protected override DbCommand CreateDbCommand()
-            {
-                throw new NotImplementedException();
-            }
+            public override string Database => throw new NotImplementedException();
+            public override string DataSource => throw new NotImplementedException();
+            public override string ServerVersion => throw new NotImplementedException();
+            public override ConnectionState State => throw new NotImplementedException();
+            public override void ChangeDatabase(string databaseName) => throw new NotImplementedException();
+            public override void Close() => throw new NotImplementedException();
+            public override void Open() => throw new NotImplementedException();
+            protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) => throw new NotImplementedException();
+            protected override DbCommand CreateDbCommand() => throw new NotImplementedException();
         }
 
         private class DbProviderFactoryConnection : DbConnection
         {
-            protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void ChangeDatabase(string databaseName)
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Close()
-            {
-                throw new NotImplementedException();
-            }
-
-            public override void Open()
-            {
-                throw new NotImplementedException();
-            }
+            protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel) => throw new NotImplementedException();
+            public override void ChangeDatabase(string databaseName) => throw new NotImplementedException();
+            public override void Close() => throw new NotImplementedException();
+            public override void Open() => throw new NotImplementedException();
 
             public override string ConnectionString { get; set; }
             public override string Database { get; }
@@ -123,10 +54,7 @@ namespace System.Data.Common.Tests
             public override string DataSource { get; }
             public override string ServerVersion { get; }
 
-            protected override DbCommand CreateDbCommand()
-            {
-                throw new NotImplementedException();
-            }
+            protected override DbCommand CreateDbCommand() => throw new NotImplementedException();
             
             protected override DbProviderFactory DbProviderFactory => TestDbProviderFactory.Instance;
         }

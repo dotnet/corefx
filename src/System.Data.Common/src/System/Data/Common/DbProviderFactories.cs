@@ -45,10 +45,8 @@ namespace System.Data.Common
             return factory != null;
         }
 
-        public static DbProviderFactory GetFactory(string providerInvariantName)
-        {
-            return GetFactory(providerInvariantName, throwOnError: true);
-        }
+        public static DbProviderFactory GetFactory(string providerInvariantName) =>
+            GetFactory(providerInvariantName, throwOnError: true);
 
         public static DbProviderFactory GetFactory(DataRow providerRow)
         {
@@ -99,10 +97,8 @@ namespace System.Data.Common
             return toReturn;
         }
 
-        public static IEnumerable<string> GetProviderInvariantNames()
-        {
-            return _registeredFactories.Keys.ToList();
-        }
+        public static IEnumerable<string> GetProviderInvariantNames() =>
+            _registeredFactories.Keys.ToList();
 
         public static void RegisterFactory(string providerInvariantName, string factoryTypeAssemblyQualifiedName)
         {
@@ -113,10 +109,8 @@ namespace System.Data.Common
             _registeredFactories[providerInvariantName] = new ProviderRegistration(factoryTypeAssemblyQualifiedName, null);
         }
         
-        public static void RegisterFactory(string providerInvariantName, Type providerFactoryClass)
-        {
+        public static void RegisterFactory(string providerInvariantName, Type providerFactoryClass) =>
             RegisterFactory(providerInvariantName, GetFactoryInstance(providerFactoryClass));
-        }
 
         public static void RegisterFactory(string providerInvariantName, DbProviderFactory factory)
         {
@@ -126,10 +120,8 @@ namespace System.Data.Common
             _registeredFactories[providerInvariantName] = new ProviderRegistration(factory.GetType().AssemblyQualifiedName, factory);
         }
         
-        public static bool UnregisterFactory(string providerInvariantName)
-        {
-            return !string.IsNullOrWhiteSpace(providerInvariantName) && _registeredFactories.TryRemove(providerInvariantName, out _);
-        }
+        public static bool UnregisterFactory(string providerInvariantName) =>
+            !string.IsNullOrWhiteSpace(providerInvariantName) && _registeredFactories.TryRemove(providerInvariantName, out _);
         
         private static DbProviderFactory GetFactory(string providerInvariantName, bool throwOnError)
         {

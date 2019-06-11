@@ -35,122 +35,60 @@ namespace System.Data.Common
         {
         }
 
-        protected DbDataAdapter(DbDataAdapter adapter) : base(adapter)
-        {
+        protected DbDataAdapter(DbDataAdapter adapter) : base(adapter) =>
             CloneFrom(adapter);
-        }
 
-        private IDbDataAdapter _IDbDataAdapter
-        {
-            get
-            {
-                return this;
-            }
-        }
+        private IDbDataAdapter _IDbDataAdapter => this;
 
-        [
-        Browsable(false),
-        DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        ]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DbCommand DeleteCommand
         {
-            get
-            {
-                return (DbCommand)(_IDbDataAdapter.DeleteCommand);
-            }
-            set
-            {
-                _IDbDataAdapter.DeleteCommand = value;
-            }
+            get => (DbCommand)(_IDbDataAdapter.DeleteCommand);
+            set => _IDbDataAdapter.DeleteCommand = value;
         }
 
         IDbCommand IDbDataAdapter.DeleteCommand
         {
-            get
-            {
-                return _deleteCommand;
-            }
-            set
-            {
-                _deleteCommand = value;
-            }
+            get => _deleteCommand;
+            set => _deleteCommand = value;
         }
 
         protected internal CommandBehavior FillCommandBehavior
         {
-            get
-            {
-                return (_fillCommandBehavior | CommandBehavior.SequentialAccess);
-            }
-            set
-            {
-                _fillCommandBehavior = (value | CommandBehavior.SequentialAccess);
-            }
+            get => (_fillCommandBehavior | CommandBehavior.SequentialAccess);
+            set => _fillCommandBehavior = (value | CommandBehavior.SequentialAccess);
         }
 
-        [
-        Browsable(false),
-        DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        ]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DbCommand InsertCommand
         {
-            get
-            {
-                return (DbCommand)(_IDbDataAdapter.InsertCommand);
-            }
-            set
-            {
-                _IDbDataAdapter.InsertCommand = value;
-            }
+            get => (DbCommand)(_IDbDataAdapter.InsertCommand);
+            set => _IDbDataAdapter.InsertCommand = value;
         }
 
         IDbCommand IDbDataAdapter.InsertCommand
         {
-            get
-            {
-                return _insertCommand;
-            }
-            set
-            {
-                _insertCommand = value;
-            }
+            get => _insertCommand;
+            set => _insertCommand = value;
         }
 
-        [
-        Browsable(false),
-        DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        ]
+        [Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DbCommand SelectCommand
         {
-            get
-            {
-                return (DbCommand)(_IDbDataAdapter.SelectCommand);
-            }
-            set
-            {
-                _IDbDataAdapter.SelectCommand = value;
-            }
+            get => (DbCommand)(_IDbDataAdapter.SelectCommand);
+            set => _IDbDataAdapter.SelectCommand = value;
         }
 
         IDbCommand IDbDataAdapter.SelectCommand
         {
-            get
-            {
-                return _selectCommand;
-            }
-            set
-            {
-                _selectCommand = value;
-            }
+            get => _selectCommand;
+            set => _selectCommand = value;
         }
 
         [DefaultValue(1)]
         public virtual int UpdateBatchSize
         {
-            get
-            {
-                return 1;
-            }
+            get => 1;
             set
             {
                 if (1 != value)
@@ -166,70 +104,41 @@ namespace System.Data.Common
         ]
         public DbCommand UpdateCommand
         {
-            get
-            {
-                return (DbCommand)(_IDbDataAdapter.UpdateCommand);
-            }
-            set
-            {
-                _IDbDataAdapter.UpdateCommand = value;
-            }
+            get => (DbCommand)(_IDbDataAdapter.UpdateCommand);
+            set => _IDbDataAdapter.UpdateCommand = value;
         }
 
         IDbCommand IDbDataAdapter.UpdateCommand
         {
-            get
-            {
-                return _updateCommand;
-            }
-            set
-            {
-                _updateCommand = value;
-            }
+            get => _updateCommand;
+            set => _updateCommand = value;
         }
 
-        private System.Data.MissingMappingAction UpdateMappingAction
-        {
-            get
-            {
-                if (System.Data.MissingMappingAction.Passthrough == MissingMappingAction)
-                {
-                    return System.Data.MissingMappingAction.Passthrough;
-                }
-                return System.Data.MissingMappingAction.Error;
-            }
-        }
+        private System.Data.MissingMappingAction UpdateMappingAction =>
+            System.Data.MissingMappingAction.Passthrough == MissingMappingAction
+                ? System.Data.MissingMappingAction.Passthrough
+                : System.Data.MissingMappingAction.Error;
 
         private System.Data.MissingSchemaAction UpdateSchemaAction
         {
             get
             {
                 System.Data.MissingSchemaAction action = MissingSchemaAction;
-                if ((System.Data.MissingSchemaAction.Add == action) || (System.Data.MissingSchemaAction.AddWithKey == action))
-                {
-                    return System.Data.MissingSchemaAction.Ignore;
-                }
-                return System.Data.MissingSchemaAction.Error;
+                return ((System.Data.MissingSchemaAction.Add == action) || (System.Data.MissingSchemaAction.AddWithKey == action))
+                    ? System.Data.MissingSchemaAction.Ignore
+                    : System.Data.MissingSchemaAction.Error;
             }
         }
 
-        protected virtual int AddToBatch(IDbCommand command)
-        {
-            // Called to add a single command to the batch of commands that need
-            // to be executed as a batch, when batch updates are requested.  It
-            // must return an identifier that can be used to identify the command
-            // to GetBatchedParameter later.
+        // Called to add a single command to the batch of commands that need
+        // to be executed as a batch, when batch updates are requested.  It
+        // must return an identifier that can be used to identify the command
+        // to GetBatchedParameter later.
+        protected virtual int AddToBatch(IDbCommand command) => throw ADP.NotSupported();
 
-            throw ADP.NotSupported();
-        }
-
-        protected virtual void ClearBatch()
-        {
-            // Called when batch updates are requested to clear out the contents
-            // of the batch, whether or not it's been executed.
-
-            throw ADP.NotSupported();
-        }
+        // Called when batch updates are requested to clear out the contents
+        // of the batch, whether or not it's been executed.
+        protected virtual void ClearBatch() => throw ADP.NotSupported();
 
         object ICloneable.Clone()
         {
@@ -249,20 +158,14 @@ namespace System.Data.Common
             _IDbDataAdapter.DeleteCommand = CloneCommand(pfrom.DeleteCommand);
         }
 
-        private IDbCommand CloneCommand(IDbCommand command)
-        {
-            return (IDbCommand)((command is ICloneable) ? ((ICloneable)command).Clone() : null);
-        }
+        private IDbCommand CloneCommand(IDbCommand command) =>
+            (IDbCommand)((command is ICloneable) ? ((ICloneable)command).Clone() : null);
 
-        protected virtual RowUpdatedEventArgs CreateRowUpdatedEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-        {
-            return new RowUpdatedEventArgs(dataRow, command, statementType, tableMapping);
-        }
+        protected virtual RowUpdatedEventArgs CreateRowUpdatedEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping) =>
+            new RowUpdatedEventArgs(dataRow, command, statementType, tableMapping);
 
-        protected virtual RowUpdatingEventArgs CreateRowUpdatingEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping)
-        {
-            return new RowUpdatingEventArgs(dataRow, command, statementType, tableMapping);
-        }
+        protected virtual RowUpdatingEventArgs CreateRowUpdatingEvent(DataRow dataRow, IDbCommand command, StatementType statementType, DataTableMapping tableMapping) =>
+            new RowUpdatingEventArgs(dataRow, command, statementType, tableMapping);
 
         protected override void Dispose(bool disposing)
         {
@@ -280,13 +183,9 @@ namespace System.Data.Common
             base.Dispose(disposing); // notify base classes
         }
 
-        protected virtual int ExecuteBatch()
-        {
-            // Called to execute the batched update command, returns the number
-            // of rows affected, just as ExecuteNonQuery would.
-
-            throw ADP.NotSupported();
-        }
+        // Called to execute the batched update command, returns the number
+        // of rows affected, just as ExecuteNonQuery would.
+        protected virtual int ExecuteBatch() => throw ADP.NotSupported();
 
         public DataTable FillSchema(DataTable dataTable, SchemaType schemaType)
         {
@@ -662,14 +561,11 @@ namespace System.Data.Common
             return rowsAddedToDataSet;
         }
 
-        protected virtual IDataParameter GetBatchedParameter(int commandIdentifier, int parameterIndex)
-        {
-            // Called to retrieve a parameter from a specific bached command, the
-            // first argument is the value that was returned by AddToBatch when it
-            // was called for the command.
-
+        // Called to retrieve a parameter from a specific bached command, the
+        // first argument is the value that was returned by AddToBatch when it
+        // was called for the command.
+        protected virtual IDataParameter GetBatchedParameter(int commandIdentifier, int parameterIndex) =>
             throw ADP.NotSupported();
-        }
 
         protected virtual bool GetBatchedRecordsAffected(int commandIdentifier, out int recordsAffected, out Exception error)
         {
@@ -726,13 +622,10 @@ namespace System.Data.Common
             return tableMapping;
         }
 
-        protected virtual void InitializeBatching()
-        {
-            // Called when batch updates are requested to prepare for processing
-            // of a batch of commands.
-
+        // Called when batch updates are requested to prepare for processing
+        // of a batch of commands.
+        protected virtual void InitializeBatching() =>
             throw ADP.NotSupported();
-        }
 
         protected virtual void OnRowUpdated(RowUpdatedEventArgs value)
         {
@@ -826,18 +719,13 @@ namespace System.Data.Common
             }
         }
 
-        protected virtual void TerminateBatching()
-        {
-            // Called when batch updates are requested to cleanup after a batch
-            // update has been completed.
-
+        // Called when batch updates are requested to cleanup after a batch
+        // update has been completed.
+        protected virtual void TerminateBatching() =>
             throw ADP.NotSupported();
-        }
 
-        public override int Update(DataSet dataSet)
-        {
-            return Update(dataSet, DbDataAdapter.DefaultSourceTableName);
-        }
+        public override int Update(DataSet dataSet) =>
+            Update(dataSet, DbDataAdapter.DefaultSourceTableName);
 
         public int Update(DataRow[] dataRows)
         {
@@ -1770,6 +1658,7 @@ namespace System.Data.Common
             }
             return connection;
         }
+
         private static DataRowVersion GetParameterSourceVersion(StatementType statementType, IDataParameter parameter)
         {
             switch (statementType)

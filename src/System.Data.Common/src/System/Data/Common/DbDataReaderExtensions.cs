@@ -64,10 +64,7 @@ namespace System.Data.Common
             return GetColumnSchemaCompatibility(reader);
         }
 
-        public static bool CanGetColumnSchema(this DbDataReader reader)
-        {
-            return true;
-        }
+        public static bool CanGetColumnSchema(this DbDataReader reader) => true;
 
         private static ReadOnlyCollection<DbColumn> GetColumnSchemaCompatibility(DbDataReader reader)
         {
@@ -81,6 +78,4 @@ namespace System.Data.Common
             return new ReadOnlyCollection<DbColumn>(columnSchema);
         }
     }
-
-
 }

@@ -52,10 +52,8 @@ namespace System.Data.Common
         public DbTransaction BeginTransaction() =>
             BeginDbTransaction(IsolationLevel.Unspecified);
 
-        public DbTransaction BeginTransaction(IsolationLevel isolationLevel)
-        {
-            return BeginDbTransaction(isolationLevel);
-        }
+        public DbTransaction BeginTransaction(IsolationLevel isolationLevel) =>
+            BeginDbTransaction(isolationLevel);
 
         IDbTransaction IDbConnection.BeginTransaction() =>
             BeginDbTransaction(IsolationLevel.Unspecified);
@@ -138,27 +136,19 @@ namespace System.Data.Common
 
         protected abstract DbCommand CreateDbCommand();
 
-        public virtual void EnlistTransaction(System.Transactions.Transaction transaction)
-        {
+        public virtual void EnlistTransaction(System.Transactions.Transaction transaction) =>
             throw ADP.NotSupported();
-        }
 
         // these need to be here so that GetSchema is visible when programming to a dbConnection object.
         // they are overridden by the real implementations in DbConnectionBase
-        public virtual DataTable GetSchema()
-        {
+        public virtual DataTable GetSchema() =>
             throw ADP.NotSupported();
-        }
 
-        public virtual DataTable GetSchema(string collectionName)
-        {
+        public virtual DataTable GetSchema(string collectionName) =>
             throw ADP.NotSupported();
-        }
 
-        public virtual DataTable GetSchema(string collectionName, string[] restrictionValues)
-        {
+        public virtual DataTable GetSchema(string collectionName, string[] restrictionValues) =>
             throw ADP.NotSupported();
-        }
         
         protected virtual void OnStateChange(StateChangeEventArgs stateChange)
         {
@@ -180,17 +170,15 @@ namespace System.Data.Common
             {
                 return Task.FromCanceled(cancellationToken);
             }
-            else
+
+            try
             {
-                try
-                {
-                    Open();
-                    return Task.CompletedTask;
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException(e);
-                }
+                Open();
+                return Task.CompletedTask;
+            }
+            catch (Exception e)
+            {
+                return Task.FromException(e);
             }
         }
     }

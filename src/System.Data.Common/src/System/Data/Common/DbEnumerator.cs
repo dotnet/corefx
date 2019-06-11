@@ -76,10 +76,7 @@ namespace System.Data.Common
         }
 
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public void Reset()
-        {
-            throw ADP.NotSupported();
-        }
+        public void Reset() => throw ADP.NotSupported();
 
         private void BuildSchemaInfo()
         {
@@ -130,15 +127,9 @@ namespace System.Data.Common
 
             public override object GetValue(object component) => ((IDataRecord)component)[_ordinal];
 
-            public override void ResetValue(object component)
-            {
-                throw ADP.NotSupported();
-            }
+            public override void ResetValue(object component) => throw ADP.NotSupported();
 
-            public override void SetValue(object component, object value)
-            {
-                throw ADP.NotSupported();
-            }
+            public override void SetValue(object component, object value) => throw ADP.NotSupported();
 
             public override bool ShouldSerializeValue(object component) => false;
         }

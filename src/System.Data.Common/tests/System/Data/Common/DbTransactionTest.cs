@@ -43,35 +43,12 @@ namespace System.Data.Tests.Common
 
         private class MockTransaction : DbTransaction
         {
-            protected override DbConnection DbConnection
-            {
-                get { return null; }
-            }
-
-            public override IsolationLevel IsolationLevel
-            {
-                get { return IsolationLevel.RepeatableRead; }
-            }
-
-            public bool IsCommitted
-            {
-                get { return _isCommitted; }
-            }
-
-            public bool IsRolledback
-            {
-                get { return _isRolledback; }
-            }
-
-            public bool IsDisposed
-            {
-                get { return _isDisposed; }
-            }
-
-            public bool Disposing
-            {
-                get { return _disposing; }
-            }
+            protected override DbConnection DbConnection => null;
+            public override IsolationLevel IsolationLevel => IsolationLevel.RepeatableRead;
+            public bool IsCommitted => _isCommitted;
+            public bool IsRolledback => _isRolledback;
+            public bool IsDisposed => _isDisposed;
+            public bool Disposing => _disposing;
 
             public override void Commit()
             {

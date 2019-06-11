@@ -32,26 +32,26 @@ namespace System.Data.Common
 
         byte IDbDataParameter.Precision
         {
-            get { return 0; }
+            get => 0;
             set { }
         }
 
         byte IDbDataParameter.Scale
         {
-            get { return 0; }
+            get => 0;
             set { }
         }
 
         public virtual byte Precision
         {
-            get { return ((IDbDataParameter)this).Precision; }
-            set { ((IDbDataParameter)this).Precision = value; }
+            get => ((IDbDataParameter)this).Precision;
+            set => ((IDbDataParameter)this).Precision = value;
         }
 
         public virtual byte Scale
         {
-            get { return ((IDbDataParameter)this).Scale; }
-            set { ((IDbDataParameter)this).Scale = value; }
+            get => ((IDbDataParameter)this).Scale;
+            set => ((IDbDataParameter)this).Scale = value;
         }
 
         public abstract int Size { get; set; }
@@ -67,7 +67,7 @@ namespace System.Data.Common
         [DefaultValue(DataRowVersion.Current)]
         public virtual DataRowVersion SourceVersion
         {
-            get { return DataRowVersion.Default; }
+            get => DataRowVersion.Default;
             set { }
         }
 

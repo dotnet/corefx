@@ -29,14 +29,14 @@ namespace System.Data.Common
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DbConnection Connection
         {
-            get { return DbConnection; }
-            set { DbConnection = value; }
+            get => DbConnection;
+            set => DbConnection = value;
         }
 
         IDbConnection IDbCommand.Connection
         {
-            get { return DbConnection; }
-            set { DbConnection = (DbConnection)value; }
+            get => DbConnection;
+            set => DbConnection = (DbConnection)value;
         }
 
         protected abstract DbConnection DbConnection { get; set; }
@@ -66,14 +66,14 @@ namespace System.Data.Common
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public DbTransaction Transaction
         {
-            get { return DbTransaction; }
-            set { DbTransaction = value; }
+            get => DbTransaction;
+            set => DbTransaction = value;
         }
 
         IDbTransaction IDbCommand.Transaction
         {
-            get { return DbTransaction; }
-            set { DbTransaction = (DbTransaction)value; }
+            get => DbTransaction;
+            set => DbTransaction = (DbTransaction)value;
         }
 
         [DefaultValue(System.Data.UpdateRowSource.Both)]
@@ -123,26 +123,24 @@ namespace System.Data.Common
             {
                 return ADP.CreatedTaskWithCancellation<int>();
             }
-            else
-            {
-                CancellationTokenRegistration registration = new CancellationTokenRegistration();
-                if (cancellationToken.CanBeCanceled)
-                {
-                    registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
-                }
 
-                try
-                {
-                    return Task.FromResult(ExecuteNonQuery());
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException<int>(e);
-                }
-                finally
-                {
-                    registration.Dispose();
-                }
+            var registration = new CancellationTokenRegistration();
+            if (cancellationToken.CanBeCanceled)
+            {
+                registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
+            }
+
+            try
+            {
+                return Task.FromResult(ExecuteNonQuery());
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<int>(e);
+            }
+            finally
+            {
+                registration.Dispose();
             }
         }
 
@@ -164,26 +162,24 @@ namespace System.Data.Common
             {
                 return ADP.CreatedTaskWithCancellation<DbDataReader>();
             }
-            else
-            {
-                CancellationTokenRegistration registration = new CancellationTokenRegistration();
-                if (cancellationToken.CanBeCanceled)
-                {
-                    registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
-                }
 
-                try
-                {
-                    return Task.FromResult<DbDataReader>(ExecuteReader(behavior));
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException<DbDataReader>(e);
-                }
-                finally
-                {
-                    registration.Dispose();
-                }
+            var registration = new CancellationTokenRegistration();
+            if (cancellationToken.CanBeCanceled)
+            {
+                registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
+            }
+
+            try
+            {
+                return Task.FromResult<DbDataReader>(ExecuteReader(behavior));
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<DbDataReader>(e);
+            }
+            finally
+            {
+                registration.Dispose();
             }
         }
 
@@ -196,26 +192,24 @@ namespace System.Data.Common
             {
                 return ADP.CreatedTaskWithCancellation<object>();
             }
-            else
-            {
-                CancellationTokenRegistration registration = new CancellationTokenRegistration();
-                if (cancellationToken.CanBeCanceled)
-                {
-                    registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
-                }
 
-                try
-                {
-                    return Task.FromResult<object>(ExecuteScalar());
-                }
-                catch (Exception e)
-                {
-                    return Task.FromException<object>(e);
-                }
-                finally
-                {
-                    registration.Dispose();
-                }
+            var registration = new CancellationTokenRegistration();
+            if (cancellationToken.CanBeCanceled)
+            {
+                registration = cancellationToken.Register(s => ((DbCommand)s).CancelIgnoreFailure(), this);
+            }
+
+            try
+            {
+                return Task.FromResult<object>(ExecuteScalar());
+            }
+            catch (Exception e)
+            {
+                return Task.FromException<object>(e);
+            }
+            finally
+            {
+                registration.Dispose();
             }
         }
 
