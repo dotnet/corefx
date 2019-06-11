@@ -13,7 +13,6 @@ namespace System.Xaml.Permissions
     [Serializable]
     public sealed class XamlLoadPermission : CodeAccessPermission, IUnrestrictedPermission
     {
-        private IList<XamlAccessLevel> _emptyAccessLevel = new ReadOnlyCollection<XamlAccessLevel>(Array.Empty<XamlAccessLevel>());
         public XamlLoadPermission(PermissionState state) { }
         public XamlLoadPermission(XamlAccessLevel allowedAccess) { }
         public XamlLoadPermission(IEnumerable<XamlAccessLevel> allowedAccess) { }
@@ -23,23 +22,14 @@ namespace System.Xaml.Permissions
         [ComVisible(false)]
         public override int GetHashCode() { return base.GetHashCode(); }
 #endif 
-        public IList<XamlAccessLevel> AllowedAccess 
-        { 
-            get 
-            {
-                return _emptyAccessLevel;
-            }
-            private set
-            {
-            }
-        }
-        public override IPermission Copy() { return default(IPermission); }
+        public IList<XamlAccessLevel> AllowedAccess { get; private set; } = new ReadOnlyCollection<XamlAccessLevel>(Array.Empty<XamlAccessLevel>());
+        public override IPermission Copy() { return new XamlLoadPermission(new PermissionState()); }
         public override void FromXml(SecurityElement elem) { }
-        public bool Includes(XamlAccessLevel requestedAccess) { return false;  }
-        public override IPermission Intersect(IPermission target) { return default(IPermission); }
-        public override bool IsSubsetOf(IPermission target) { return false; }
+        public bool Includes(XamlAccessLevel requestedAccess) { return true; }
+        public override IPermission Intersect(IPermission target) { return new XamlLoadPermission(new PermissionState()); }
+        public override bool IsSubsetOf(IPermission target) { return true; }
         public override SecurityElement ToXml() { return default(SecurityElement); }
-        public override IPermission Union(IPermission other) { return default(IPermission); }
+        public override IPermission Union(IPermission other) { return new XamlLoadPermission(new PermissionState()); }
         public bool IsUnrestricted() { return true; }
     }
 }
