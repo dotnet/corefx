@@ -715,7 +715,7 @@ namespace System.Net.Http.Functional.Tests
                     streamId = await server.ReadRequestHeaderAsync();
                     await server.SendDefaultResponseAsync(streamId);
                 })
-            }.WhenAllOrAnyFailed();
+            }.WhenAllOrAnyFailed(TestHelper.PassingTestTimeoutMilliseconds);
 
             return streamId;
         }
