@@ -2277,7 +2277,10 @@ namespace System
     {
         public STAThreadAttribute() { }
     }
-    public sealed partial class String : System.Collections.Generic.IEnumerable<char>, System.Collections.IEnumerable, System.ICloneable, System.IComparable, System.IComparable<string>, System.IConvertible, System.IEquatable<string>
+    public sealed partial class String : System.Collections.Generic.IEnumerable<char>, System.Collections.IEnumerable, System.ICloneable, System.IComparable, System.IComparable<string?>, System.IConvertible, 
+#nullable disable
+        System.IEquatable<string>
+#nullable restore
     {
         public static readonly string Empty;
         [System.CLSCompliantAttribute(false)]
@@ -2603,7 +2606,10 @@ namespace System
         public virtual System.DateTime ToLocalTime(System.DateTime time) { throw null; }
         public virtual System.DateTime ToUniversalTime(System.DateTime time) { throw null; }
     }
-    public sealed partial class TimeZoneInfo : System.IEquatable<System.TimeZoneInfo>, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
+    public sealed partial class TimeZoneInfo : System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable,
+#nullable disable
+        System.IEquatable<System.TimeZoneInfo>
+#nullable restore
     {
         internal TimeZoneInfo() { }
         public System.TimeSpan BaseUtcOffset { get { throw null; } }
@@ -2648,7 +2654,10 @@ namespace System
         void System.Runtime.Serialization.ISerializable.GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         public string ToSerializedString() { throw null; }
         public override string ToString() { throw null; }
-        public sealed partial class AdjustmentRule : System.IEquatable<System.TimeZoneInfo.AdjustmentRule>, System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable
+        public sealed partial class AdjustmentRule : System.Runtime.Serialization.IDeserializationCallback, System.Runtime.Serialization.ISerializable,
+#nullable disable
+            System.IEquatable<System.TimeZoneInfo.AdjustmentRule>
+#nullable restore
         {
             internal AdjustmentRule() { }
             public System.DateTime DateEnd { get { throw null; } }
@@ -3151,7 +3160,6 @@ namespace System
     [System.CLSCompliantAttribute(false)]
     public ref partial struct TypedReference
     {
-        private int _dummyPrimitive;
         public override bool Equals(object? o) { throw null; }
         public override int GetHashCode() { throw null; }
         public static System.Type GetTargetType(System.TypedReference value) { throw null; }
@@ -3433,7 +3441,7 @@ namespace System
         [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void CheckSecurity() { }
         public static int Compare(System.Uri uri1, System.Uri uri2, System.UriComponents partsToCompare, System.UriFormat compareFormat, System.StringComparison comparisonType) { throw null; }
-        public override bool Equals(object comparand) { throw null; }
+        public override bool Equals(object? comparand) { throw null; }
         [System.ObsoleteAttribute("The method has been deprecated. It is not used by the system. https://go.microsoft.com/fwlink/?linkid=14202")]
         protected virtual void Escape() { }
         public static string EscapeDataString(string stringToEscape) { throw null; }
@@ -3729,7 +3737,10 @@ namespace System
         public override int GetHashCode() { throw null; }
         public override string? ToString() { throw null; }
     }
-    public sealed partial class Version : System.ICloneable, System.IComparable, System.IComparable<System.Version?>, System.IEquatable<System.Version>
+    public sealed partial class Version : System.ICloneable, System.IComparable, System.IComparable<System.Version?>,
+#nullable disable
+        System.IEquatable<System.Version>
+#nullable restore
     {
         public Version() { }
         public Version(int major, int minor) { }
@@ -4899,7 +4910,10 @@ namespace System.Globalization
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
     }
-    public sealed partial class SortVersion : System.IEquatable<System.Globalization.SortVersion?>
+    public sealed partial class SortVersion :
+#nullable disable
+        System.IEquatable<System.Globalization.SortVersion>
+#nullable restore
     {
         public SortVersion(int fullVersion, System.Guid sortId) { }
         public int FullVersion { get { throw null; } }
@@ -4965,7 +4979,9 @@ namespace System.Globalization
     public partial class TextElementEnumerator : System.Collections.IEnumerator
     {
         internal TextElementEnumerator() { }
+#pragma warning disable CS8612 // TODO-NULLABLE: Covariant return types (https://github.com/dotnet/roslyn/issues/23268)
         public object Current { get { throw null; } }
+#pragma warning restore CS8612
         public int ElementIndex { get { throw null; } }
         public string GetTextElement() { throw null; }
         public bool MoveNext() { throw null; }
