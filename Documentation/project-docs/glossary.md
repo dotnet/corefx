@@ -59,7 +59,8 @@ In this document, the following terms are used:
 
 * **CLI** Command Line Interface --or-- Common Language Infastructure.
   * Command Line Interface: A tool that has no graphical interface and is
-    intended to be used completely from a console/terminal.
+    intended to be used completely from a console/terminal. Also is commonly
+    used as shorthand for the [.NET tooling][dotnet-tooling].
   * Common Language Infastructure: The [open specification][ECMA-355] that defines
     IL, how to store IL as binary (assemblies), and how the runtime works. AKA:
     [ECMA-355][ECMA-355].
@@ -333,3 +334,4 @@ stack. There are, however, various community projects in that space:
 [xunit]: https://github.com/xunit
 [mc.dot.net]: https://mc.dot.net/
 [ECMA-355]: http://www.ecma-international.org/publications/standards/Ecma-335.htm
+[dotnet-tooling]: https://docs.microsoft.com/en-us/dotnet/core/tools/
