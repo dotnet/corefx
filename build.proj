@@ -26,14 +26,6 @@
     <MSBuild Projects="@(_RestoreProjects)" Properties="$(ProjectProperties)" />
   </Target>
 
-  <Target Name="_IsProjectRestoreSupported"
-          Returns="@(_ValidProjectsForRestore)">
-
-    <ItemGroup>
-      <_ValidProjectsForRestore Include="$(MSBuildProjectFullPath)" />
-    </ItemGroup>
-  </Target>
-
   <Target Name="BuildNative">
     <ItemGroup>
       <_BuildNativeProjects Include="src\Native\build-native.proj" />
@@ -114,7 +106,8 @@
   <!-- set up inputs for UpdateVSConfigurations in a target to avoid globbing all the time -->
   <Target Name="_setProjectsToUpdate" BeforeTargets="UpdateVSConfigurations">
     <ItemGroup>
-      <ProjectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*csproj" />
+      <ProjectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*csproj" 
+                        Exclude="$(MSBuildThisFileDirectory)src/shims/**/*.*csproj"/>
       <ProjectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*ilproj" />
       <ProjectsToUpdate Include="$(MSBuildThisFileDirectory)src/**/*.*vbproj" />
       <_solutionsToUpdateFiles Include="$(MSBuildThisFileDirectory)src/*/Directory.Build.props" />

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Reflection;
 using System.Collections;
 using System.Collections.Generic;
@@ -122,7 +121,7 @@ namespace System
             for (int i = 0; i < flds.Length; i++)
             {
                 names[i] = flds[i].Name;
-                values[i] = flds[i].GetRawConstantValue();
+                values[i] = flds[i].GetRawConstantValue()!;
             }
 
             // Insertion Sort these values in ascending order.

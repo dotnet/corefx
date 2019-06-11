@@ -2,15 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 
 namespace System.Runtime.InteropServices
 {
     public static partial class Marshal
     {
-        // TODO-NULLABLE: This has different behavior from the other PtrToString(IntPtr, int) functions
-        //                This is due to PtrToStringUTF8 on Unix and is being resolved independently
         public static string? PtrToStringAuto(IntPtr ptr, int len)
         {
             return PtrToStringUni(ptr, len);

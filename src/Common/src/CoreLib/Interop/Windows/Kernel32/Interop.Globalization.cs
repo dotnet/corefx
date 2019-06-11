@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Runtime.InteropServices;
 
@@ -102,8 +101,8 @@ internal static partial class Interop
                     int cchStr);
 
 #if !ENABLE_WINRT
-        [DllImport("Kernel32.dll", CharSet = CharSet.Auto)]
-        internal static extern bool GetUserPreferredUILanguages(uint dwFlags, out uint pulNumLanguages, char[]? pwszLanguagesBuffer, ref uint pcchLanguagesBuffer);
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        internal static extern Interop.BOOL GetUserPreferredUILanguages(uint dwFlags, uint* pulNumLanguages, char* pwszLanguagesBuffer, uint* pcchLanguagesBuffer);
 #endif //!ENABLE_WINRT
 
         [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.IO;
 using System.Globalization;
 using System.Reflection;
@@ -304,7 +303,7 @@ namespace System.Resources
 
             lock (localResourceSets)
             {
-#pragma warning disable CS8619 // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/35131
+#pragma warning disable CS8619 // TODO-NULLABLE: Deconstruct KeyValuePair (https://github.com/dotnet/roslyn/issues/35131)
                 foreach ((_, ResourceSet resourceSet) in localResourceSets)
 #pragma warning restore CS8619
                 {
@@ -490,7 +489,7 @@ namespace System.Resources
                 // that had resources.
                 foreach (CultureInfo updateCultureInfo in mgr)
                 {
-                    AddResourceSet(localResourceSets, updateCultureInfo.Name, ref rs!); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34874
+                    AddResourceSet(localResourceSets, updateCultureInfo.Name, ref rs!); // TODO-NULLABLE: Pass non-null string? to string ref (https://github.com/dotnet/roslyn/issues/34874)
 
                     // stop when we've added current or reached invariant (top of chain)
                     if (updateCultureInfo == foundCulture)

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -53,7 +52,7 @@ namespace Microsoft.Win32.SafeHandles
 
                 bool isDirectory = (error.Error == Interop.Error.ENOENT) &&
                     ((flags & Interop.Sys.OpenFlags.O_CREAT) != 0
-                    || !DirectoryExists(Path.GetDirectoryName(PathInternal.TrimEndingDirectorySeparator(path!))!));
+                    || !DirectoryExists(Path.GetDirectoryName(Path.TrimEndingDirectorySeparator(path!))!));
 
                 Interop.CheckIo(
                     error.Error,

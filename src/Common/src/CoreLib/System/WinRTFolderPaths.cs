@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using Windows.Foundation.Metadata;
 using Windows.Storage;
 using System.IO;
@@ -131,7 +130,7 @@ namespace System
                 case SpecialFolder.System:
                     return SystemDirectory;
                 case SpecialFolder.Windows:
-                    return Path.GetDirectoryName(SystemDirectory)!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    return Path.GetDirectoryName(SystemDirectory)!; // TODO-NULLABLE: Remove ! when nullable attributes are respected
                 default:
                     return string.Empty;
             }

@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -23,7 +23,7 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed partial class String : IComparable, IEnumerable, IConvertible, IEnumerable<char>, IComparable<string?>, IEquatable<string?>, ICloneable
+    public sealed partial class String : IComparable, IEnumerable, IConvertible, IEnumerable<char>, IComparable<string>, IEquatable<string>, ICloneable
     {
         /*
          * CONSTRUCTORS
@@ -437,7 +437,7 @@ namespace System
         }
 
         [NonVersionable]
-        public static bool IsNullOrEmpty(string? value)
+        public static bool IsNullOrEmpty([NotNullWhen(false)] string? value)
         {
             // Using 0u >= (uint)value.Length rather than
             // value.Length == 0 as it will elide the bounds check to
@@ -448,7 +448,7 @@ namespace System
             return (value == null || 0u >= (uint)value.Length) ? true : false;
         }
 
-        public static bool IsNullOrWhiteSpace(string? value)
+        public static bool IsNullOrWhiteSpace([NotNullWhen(false)] string? value)
         {
             if (value == null) return true;
 
@@ -676,6 +676,7 @@ namespace System
             return length;
         }
 
+        [DoesNotReturn]
         private static void ThrowMustBeNullTerminatedString()
         {
             throw new ArgumentException(SR.Arg_MustBeNullTerminatedString);

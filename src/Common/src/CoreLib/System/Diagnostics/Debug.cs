@@ -2,9 +2,10 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 // Do not remove this, it is needed to retain calls to these conditional methods in release builds
 #define DEBUG
+
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Diagnostics
@@ -86,19 +87,19 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition)
+        public static void Assert([DoesNotReturnIf(false)] bool condition)
         {
             Assert(condition, string.Empty, string.Empty);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition, string? message)
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string? message)
         {
             Assert(condition, message, string.Empty);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition, string? message, string? detailMessage)
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string? message, string? detailMessage)
         {
             if (!condition)
             {
@@ -122,19 +123,21 @@ namespace System.Diagnostics
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
+        [DoesNotReturn]
         public static void Fail(string? message)
         {
             Fail(message, string.Empty);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
+        [DoesNotReturn]
         public static void Fail(string? message, string? detailMessage)
         {
             s_provider.Fail(message, detailMessage);
         }
 
         [System.Diagnostics.Conditional("DEBUG")]
-        public static void Assert(bool condition, string? message, string detailMessageFormat, params object?[] args)
+        public static void Assert([DoesNotReturnIf(false)] bool condition, string? message, string detailMessageFormat, params object?[] args)
         {
             Assert(condition, message, string.Format(detailMessageFormat, args));
         }

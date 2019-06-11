@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Globalization;
 using System.Numerics;
@@ -252,14 +251,10 @@ namespace System
         // to determine whether it is lexicographically less, equal, or greater, and then a
         // negative integer, 0, or a positive integer is returned; respectively.
         //
-        public static int Compare(string? strA, string? strB, CultureInfo culture, CompareOptions options)
+        public static int Compare(string? strA, string? strB, CultureInfo? culture, CompareOptions options)
         {
-            if (culture == null)
-            {
-                throw new ArgumentNullException(nameof(culture));
-            }
-
-            return culture.CompareInfo.Compare(strA, strB, options);
+            CultureInfo compareCulture = culture ?? CultureInfo.CurrentCulture;
+            return compareCulture.CompareInfo.Compare(strA, strB, options);
         }
 
 
@@ -270,7 +265,7 @@ namespace System
         // The case-sensitive option is set by ignoreCase, and the culture is set
         // by culture
         //
-        public static int Compare(string? strA, string? strB, bool ignoreCase, CultureInfo culture)
+        public static int Compare(string? strA, string? strB, bool ignoreCase, CultureInfo? culture)
         {
             var options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
             return Compare(strA, strB, culture, options);
@@ -329,7 +324,7 @@ namespace System
         // beginning at indexB of the same length.  Case sensitivity is determined by the ignoreCase boolean,
         // and the culture is set by culture.
         //
-        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, bool ignoreCase, CultureInfo culture)
+        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, bool ignoreCase, CultureInfo? culture)
         {
             var options = ignoreCase ? CompareOptions.IgnoreCase : CompareOptions.None;
             return Compare(strA, indexA, strB, indexB, length, culture, options);
@@ -340,13 +335,9 @@ namespace System
         // at indexA of length length is compared with the substring of strB
         // beginning at indexB of the same length.
         //
-        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, CultureInfo culture, CompareOptions options)
+        public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, CultureInfo? culture, CompareOptions options)
         {
-            if (culture == null)
-            {
-                throw new ArgumentNullException(nameof(culture));
-            }
-
+            CultureInfo compareCulture = culture ?? CultureInfo.CurrentCulture;
             int lengthA = length;
             int lengthB = length;
 
@@ -360,7 +351,7 @@ namespace System
                 lengthB = Math.Min(lengthB, strB.Length - indexB);
             }
 
-            return culture.CompareInfo.Compare(strA, indexA, lengthA, strB, indexB, lengthB, options);
+            return compareCulture.CompareInfo.Compare(strA, indexA, lengthA, strB, indexB, lengthB, options);
         }
 
         public static int Compare(string? strA, int indexA, string? strB, int indexB, int length, StringComparison comparisonType)
@@ -523,7 +514,9 @@ namespace System
 
         // Determines the sorting relation of StrB to the current instance.
         //
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
         public int CompareTo(string? strB)
+#pragma warning restore CS8614
         {
             return string.Compare(this, strB, StringComparison.CurrentCulture);
         }
@@ -617,7 +610,9 @@ namespace System
         }
 
         // Determines whether two strings match.
+#pragma warning disable CS8614 // TODO-NULLABLE: Covariant interface arguments (https://github.com/dotnet/roslyn/issues/35817)
         public bool Equals(string? value)
+#pragma warning restore CS8614
         {
             if (object.ReferenceEquals(this, value))
                 return true;

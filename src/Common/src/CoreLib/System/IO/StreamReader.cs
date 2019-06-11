@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -85,6 +84,7 @@ namespace System.IO
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowAsyncIOInProgress() =>
             throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
@@ -1238,7 +1238,7 @@ namespace System.IO
             return new ValueTask<int>(t);
         }
 
-        private async Task<int> ReadBufferAsync()
+        private async ValueTask<int> ReadBufferAsync()
         {
             _charLen = 0;
             _charPos = 0;

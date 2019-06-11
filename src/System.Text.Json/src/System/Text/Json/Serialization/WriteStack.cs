@@ -4,8 +4,9 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal struct WriteStack
     {
@@ -50,6 +51,13 @@ namespace System.Text.Json.Serialization
             {
                 Current.PopStackOnEnd = true;
                 Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+            }
+            else if (classType == ClassType.ImmutableDictionary)
+            {
+                Current.PopStackOnEnd = true;
+                Current.JsonPropertyInfo = Current.JsonClassInfo.GetPolicyProperty();
+
+                Current.IsImmutableDictionary = true;
             }
             else
             {

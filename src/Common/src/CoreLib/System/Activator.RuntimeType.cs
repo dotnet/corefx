@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Reflection;
 using System.Globalization;
 using System.Runtime.Loader;
@@ -117,7 +116,7 @@ namespace System
                 if (assemblyName.ContentType == AssemblyContentType.WindowsRuntime)
                 {
                     // WinRT type - we have to use Type.GetType
-                    type = Type.GetType(typeName + ", " + assemblyString, true /*throwOnError*/, ignoreCase);
+                    type = Type.GetType(typeName + ", " + assemblyString, throwOnError: true, ignoreCase);
                 }
                 else
                 {
@@ -132,7 +131,7 @@ namespace System
                 type = assembly!.GetType(typeName, throwOnError: true, ignoreCase);
             }
 
-            object? o = CreateInstance(type, bindingAttr, binder, args, culture, activationAttributes);
+            object? o = CreateInstance(type!, bindingAttr, binder, args, culture, activationAttributes);
 
             return o != null ? new ObjectHandle(o) : null;          
         }

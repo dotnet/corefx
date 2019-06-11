@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 /*============================================================
 **
 ** 
@@ -14,6 +13,7 @@
 ** 
 ===========================================================*/
 
+#nullable enable
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -176,12 +176,12 @@ namespace System.Resources
         // for arbitrarily long times, since the object is usually a string
         // literal that will live for the lifetime of the appdomain.  The
         // value is a ResourceLocator instance, which might cache the object.
-        private Dictionary<string, ResourceLocator>? _resCache; // TODO-NULLABLE: should not be nulled out in Dispose
+        private Dictionary<string, ResourceLocator>? _resCache; // TODO-NULLABLE: Avoid nulling out in Dispose
 
 
         // For our special load-on-demand reader, cache the cast.  The 
         // RuntimeResourceSet's implementation knows how to treat this reader specially.
-        private ResourceReader? _defaultReader; // TODO-NULLABLE: should not be nulled out in Dispose
+        private ResourceReader? _defaultReader; // TODO-NULLABLE: Avoid nulling out in Dispose
 
         // This is a lookup table for case-insensitive lookups, and may be null.
         // Consider always using a case-insensitive resource cache, as we don't

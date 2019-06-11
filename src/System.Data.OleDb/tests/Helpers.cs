@@ -1,17 +1,16 @@
 // Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
-using System;
 using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Xunit;
 
 namespace System.Data.OleDb.Tests
 {
     public static class Helpers
     {
         public const string IsDriverAvailable = nameof(Helpers) + "." + nameof(GetIsDriverAvailable);
+        public const string IsAceDriverAvailable = nameof(Helpers) + "." + nameof(GetIsAceDriverAvailable);
         public static bool GetIsDriverAvailable() => Nested.IsAvailable;
+        public static bool GetIsAceDriverAvailable() => GetIsDriverAvailable() && !PlatformDetection.Is32BitProcess;
         public static string ProviderName => Nested.ProviderName;
         public static string GetTableName(string memberName) => memberName + ".csv";
 
@@ -35,7 +34,7 @@ namespace System.Data.OleDb.Tests
                 string providerName = PlatformDetection.Is32BitProcess ? 
                     @"Microsoft.Jet.OLEDB.4.0" : 
                     @"Microsoft.ACE.OLEDB.12.0";
-                IsAvailable = providerNames.Contains(providerName);
+                IsAvailable = false; // ActiveIssue #37823 // providerNames.Contains(providerName);
                 ProviderName = IsAvailable ? providerName : null;
             }
         }

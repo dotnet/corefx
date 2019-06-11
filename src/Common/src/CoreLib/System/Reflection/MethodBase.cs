@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Globalization;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
@@ -17,7 +16,7 @@ namespace System.Reflection
         public abstract MethodAttributes Attributes { get; }
         public virtual MethodImplAttributes MethodImplementationFlags => GetMethodImplementationFlags();
         public abstract MethodImplAttributes GetMethodImplementationFlags();
-        public virtual MethodBody GetMethodBody() { throw new InvalidOperationException(); }
+        public virtual MethodBody? GetMethodBody() { throw new InvalidOperationException(); }
         public virtual CallingConventions CallingConvention => CallingConventions.Standard;
 
         public bool IsAbstract => (Attributes & MethodAttributes.Abstract) != 0;

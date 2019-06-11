@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Buffers;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -399,7 +398,6 @@ namespace System.Text
             // opportunity for any code before us to make forward progress, so we must fail immediately.
 
             _encoding.ThrowCharsOverflow(this, nothingDecoded: true);
-            // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
             throw null!; // will never reach this point
         }
 

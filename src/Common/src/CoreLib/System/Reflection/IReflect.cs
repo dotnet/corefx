@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Globalization;
 
 namespace System.Reflection
@@ -68,7 +67,7 @@ namespace System.Reflection
         // For the default binder, the most specific method will be selected.
         // 
         // This will invoke a specific member...
-        object? InvokeMember(string name, BindingFlags invokeAttr, Binder? binder, object? target, object[]? args, ParameterModifier[]? modifiers, CultureInfo? culture, string[]? namedParameters);
+        object? InvokeMember(string name, BindingFlags invokeAttr, Binder? binder, object? target, object?[]? args, ParameterModifier[]? modifiers, CultureInfo? culture, string[]? namedParameters);
 
         // Return the underlying Type that represents the IReflect Object.  For expando object,
         // this is the (Object) IReflectInstance.GetType().  For Type object it is this.

@@ -2,26 +2,24 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using Xunit;
 using System.Collections.Generic;
-using System.Data.OleDb;
-using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
+using Xunit;
 
 namespace System.Data.OleDb.Tests
 {
+    [Collection("System.Data.OleDb")] // not let tests run in parallel
     public class OleDbParameterTests : OleDbTestBase
     {
         [ConditionalFact(Helpers.IsDriverAvailable)]
         public void OleDbParameterCollection_MultipleScenarios_Success()
         {
-            OleDbParameterCollection opc = new OleDbCommand().Parameters;
+            OleDbParameterCollection opc = command.Parameters;
 
             Assert.True(opc.Count == 0);
-            Assert.False(((Collections.IList)opc).IsReadOnly);
-            Assert.False(((Collections.IList)opc).IsFixedSize);
-            Assert.False(((Collections.IList)opc).IsSynchronized);
+            Assert.False(opc.IsReadOnly);
+            Assert.False(opc.IsFixedSize);
+            Assert.False(opc.IsSynchronized);
             Assert.Throws<IndexOutOfRangeException>(() => opc[0].ParameterName);
             Assert.Throws<IndexOutOfRangeException>(() => opc["@p1"].ParameterName);
             Assert.Throws<ArgumentNullException>(() => opc.Add(null));

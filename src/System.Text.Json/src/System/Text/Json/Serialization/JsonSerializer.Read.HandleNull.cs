@@ -2,22 +2,21 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Collections;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
         private static bool HandleNull(ref Utf8JsonReader reader, ref ReadStack state, JsonSerializerOptions options)
         {
-            if (state.Current.Skip())
+            if (state.Current.SkipProperty)
             {
                 return false;
             }
 
-            // If we don't have a valid property, that means we read "null" for a root object so just return.
-            if (state.Current.JsonPropertyInfo == null)
+            // If null is read at the top level and the type is nullable, then the root is "null" so just return.
+            if (reader.CurrentDepth == 0 && (state.Current.JsonPropertyInfo == null || state.Current.JsonPropertyInfo.CanBeNull))
             {
                 Debug.Assert(state.IsLastFrame);
                 Debug.Assert(state.Current.ReturnValue == null);
@@ -27,18 +26,19 @@ namespace System.Text.Json.Serialization
             JsonPropertyInfo propertyInfo = state.Current.JsonPropertyInfo;
             if (!propertyInfo.CanBeNull)
             {
-                ThrowHelper.ThrowJsonReaderException_DeserializeCannotBeNull(reader, state);
+                ThrowHelper.ThrowJsonException_DeserializeCannotBeNull(reader, state.JsonPath);
             }
 
-            if (state.Current.IsEnumerable || state.Current.IsDictionary)
+            if (state.Current.IsEnumerable || state.Current.IsDictionary || state.Current.IsImmutableDictionary)
             {
-                ApplyObjectToEnumerable(null, options, ref state.Current);
+                ApplyObjectToEnumerable(null, ref state, ref reader);
                 return false;
             }
 
-            if (state.Current.IsPropertyEnumerable)
+            if (state.Current.IsEnumerableProperty || state.Current.IsDictionaryProperty || state.Current.IsImmutableDictionaryProperty)
             {
-                state.Current.JsonPropertyInfo.ApplyNullValue(options, ref state);
+                bool setPropertyToNull = !state.Current.PropertyInitialized;
+                ApplyObjectToEnumerable(null, ref state, ref reader, setPropertyDirectly: setPropertyToNull);
                 return false;
             }
 

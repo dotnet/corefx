@@ -107,7 +107,6 @@ namespace System.Net.Mail.Tests
             }
         }
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         [Fact]
         public void ServicePoint_NetCoreApp_AddressIsAccessible()
         {
@@ -116,17 +115,6 @@ namespace System.Net.Mail.Tests
                 Assert.Equal("mailto", smtp.ServicePoint.Address.Scheme);
                 Assert.Equal("localhost", smtp.ServicePoint.Address.Host);
                 Assert.Equal(25, smtp.ServicePoint.Address.Port);
-            }
-        }
-
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework)]
-        [Fact]
-        public void ServicePoint_NetFramework_AddressIsInaccessible()
-        {
-            using (var smtp = new SmtpClient("localhost", 25))
-            {
-                ServicePoint sp = smtp.ServicePoint;
-                Assert.Throws<NotSupportedException>(() => sp.Address);
             }
         }
 
@@ -388,7 +376,6 @@ namespace System.Net.Mail.Tests
         }
 
 
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "NETFX doesn't have the fix for encoding")]
         [Theory]
         [InlineData(false, false, false)]
         [InlineData(false, false, true)] // Received subjectText.

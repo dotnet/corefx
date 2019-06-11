@@ -2,9 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading;
 
 namespace System.Collections.Concurrent
@@ -100,7 +100,7 @@ namespace System.Collections.Concurrent
 
             // Initialize the segment and add all of the data to it.
             _tail = _head = new ConcurrentQueueSegment<T>(length);
-            foreach (T item in collection!) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            foreach (T item in collection!) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 Enqueue(item);
             }
@@ -147,7 +147,7 @@ namespace System.Collections.Concurrent
 
             // Otherwise, fall back to the slower path that first copies the contents
             // to an array, and then uses that array's non-generic CopyTo to do the copy.
-            ToArray().CopyTo(array!, index); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            ToArray().CopyTo(array!, index); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace System.Collections.Concurrent
         /// cref="ICollection"/>. This property is not supported.
         /// </summary>
         /// <exception cref="NotSupportedException">The SyncRoot property is not supported.</exception>
-        object ICollection.SyncRoot { get { ThrowHelper.ThrowNotSupportedException(ExceptionResource.ConcurrentCollection_SyncRoot_NotSupported); return default!; } } // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+        object ICollection.SyncRoot { get { ThrowHelper.ThrowNotSupportedException(ExceptionResource.ConcurrentCollection_SyncRoot_NotSupported); return default!; } } // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
 
         /// <summary>Returns an enumerator that iterates through a collection.</summary>
         /// <returns>An <see cref="IEnumerator"/> that can be used to iterate through the collection.</returns>
@@ -462,7 +462,7 @@ namespace System.Collections.Concurrent
 
             // Get the number of items to be enumerated
             long count = GetCount(head, headHead, tail, tailTail);
-            if (index > array!.Length - count) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            if (index > array!.Length - count) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Arg_ArrayPlusOffTooSmall);
             }
@@ -679,12 +679,12 @@ namespace System.Collections.Concurrent
         /// true if an element was removed and returned from the beginning of the
         /// <see cref="ConcurrentQueue{T}"/> successfully; otherwise, false.
         /// </returns>
-        public bool TryDequeue(out T result) => // TODO-GENERIC-NULLABLE
+        public bool TryDequeue([MaybeNullWhen(false)] out T result) =>
             _head.TryDequeue(out result) || // fast-path that operates just on the head segment
             TryDequeueSlow(out result); // slow path that needs to fix up segments
 
         /// <summary>Tries to dequeue an item, removing empty segments as needed.</summary>
-        private bool TryDequeueSlow(out T item)
+        private bool TryDequeueSlow([MaybeNullWhen(false)] out T item)
         {
             while (true)
             {
@@ -702,7 +702,7 @@ namespace System.Collections.Concurrent
                 // check and this check, another item could have arrived).
                 if (head._nextSegment == null)
                 {
-                    item = default!; // TODO-NULLABLE-GENERIC
+                    item = default!;
                     return false;
                 }
 
@@ -743,13 +743,13 @@ namespace System.Collections.Concurrent
         /// For determining whether the collection contains any items, use of the <see cref="IsEmpty"/>
         /// property is recommended rather than peeking.
         /// </remarks>
-        public bool TryPeek(out T result) => TryPeek(out result, resultUsed: true); // TODO-GENERIC-NULLABLE
+        public bool TryPeek([MaybeNullWhen(false)] out T result) => TryPeek(out result, resultUsed: true);
 
         /// <summary>Attempts to retrieve the value for the first element in the queue.</summary>
         /// <param name="result">The value of the first element, if found.</param>
         /// <param name="resultUsed">true if the result is needed; otherwise false if only the true/false outcome is needed.</param>
         /// <returns>true if an element was found; otherwise, false.</returns>
-        private bool TryPeek(out T result, bool resultUsed)
+        private bool TryPeek([MaybeNullWhen(false)] out T result, bool resultUsed)
         {
             // Starting with the head segment, look through all of the segments
             // for the first one we can find that's not empty.
@@ -796,7 +796,7 @@ namespace System.Collections.Concurrent
                 // and we'll traverse to that segment.
             }
 
-            result = default!; // TODO-NULLABLE-GENERIC
+            result = default!;
             return false;
         }
 

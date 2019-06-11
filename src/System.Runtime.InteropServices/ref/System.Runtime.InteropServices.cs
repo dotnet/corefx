@@ -136,6 +136,7 @@ namespace System.Runtime.InteropServices
     public partial struct ArrayWithOffset
     {
         private object _dummy;
+        private int _dummyPrimitive;
         public ArrayWithOffset(object array, int offset) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public bool Equals(System.Runtime.InteropServices.ArrayWithOffset obj) { throw null; }
@@ -210,12 +211,16 @@ namespace System.Runtime.InteropServices
         public ComAwareEventInfo(System.Type type, string eventName) { }
         public override System.Reflection.EventAttributes Attributes { get { throw null; } }
         public override System.Type DeclaringType { get { throw null; } }
+        public override int MetadataToken { get { throw null; } }
+        public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
         public override System.Type ReflectedType { get { throw null; } }
         public override void AddEventHandler(object target, System.Delegate handler) { }
         public override System.Reflection.MethodInfo GetAddMethod(bool nonPublic) { throw null; }
         public override object[] GetCustomAttributes(bool inherit) { throw null; }
         public override object[] GetCustomAttributes(System.Type attributeType, bool inherit) { throw null; }
+        public override System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { throw null; }
+        public override System.Reflection.MethodInfo[] GetOtherMethods(bool nonPublic) { throw null; }
         public override System.Reflection.MethodInfo GetRaiseMethod(bool nonPublic) { throw null; }
         public override System.Reflection.MethodInfo GetRemoveMethod(bool nonPublic) { throw null; }
         public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
@@ -1253,6 +1258,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void EnumConnectionPoints(out System.Runtime.InteropServices.ComTypes.IEnumConnectionPoints ppEnum);
         void FindConnectionPoint(ref System.Guid riid, out System.Runtime.InteropServices.ComTypes.IConnectionPoint ppCP);
     }
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IDataObject
     {
         int DAdvise(ref System.Runtime.InteropServices.ComTypes.FORMATETC pFormatetc, System.Runtime.InteropServices.ComTypes.ADVF advf, System.Runtime.InteropServices.ComTypes.IAdviseSink adviseSink, out int connection);
@@ -1318,6 +1324,7 @@ namespace System.Runtime.InteropServices.ComTypes
         void Reset();
         int Skip(int celt);
     }
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IEnumSTATDATA
     {
         void Clone(out System.Runtime.InteropServices.ComTypes.IEnumSTATDATA newEnum);

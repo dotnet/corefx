@@ -6,6 +6,7 @@
 #if netcoreapp
 using Internal.Runtime.CompilerServices;
 #endif
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics.Hashing;
 using System.Runtime.CompilerServices;
@@ -60,7 +61,13 @@ namespace System.Numerics
             get
             {
                 ThrowHelper.ThrowForUnsupportedVectorBaseType<T>();
+#if PROJECTN
+                // Hits an active bug in ProjectN (887908). This code path is actually only used rarely,
+                // since get_Count is an intrinsic.
+                throw new NotImplementedException();
+#else
                 return Unsafe.SizeOf<Vector<T>>() / Unsafe.SizeOf<T>();
+#endif
             }
         }
 
@@ -5351,6 +5358,7 @@ namespace System.Numerics
         #endregion Same-Size Conversion
 
         #region Throw Helpers
+        [DoesNotReturn]
         internal static void ThrowInsufficientNumberOfElementsException(int requiredElementCount)
         {
             throw new IndexOutOfRangeException(SR.Format(SR.Arg_InsufficientNumberOfElements, requiredElementCount, "values"));

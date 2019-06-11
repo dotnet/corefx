@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -11,6 +10,7 @@ using System.Runtime.CompilerServices;
 using Encoding = System.Text.Encoding;
 
 using Microsoft.Reflection;
+using System.Diagnostics.CodeAnalysis;
 
 #if ES_BUILD_STANDALONE
 using Environment = Microsoft.Diagnostics.Tracing.Internal.Environment;
@@ -422,10 +422,10 @@ namespace System.Diagnostics.Tracing
             return result;
         }
 
-        public static AttributeType GetCustomAttribute<AttributeType>(PropertyInfo propInfo)
-            where AttributeType : Attribute?
+        public static AttributeType? GetCustomAttribute<AttributeType>(PropertyInfo propInfo)
+            where AttributeType : Attribute
         {
-            AttributeType result = null!; // TODO-NULLABLE-GENERIC: re-review
+            AttributeType? result = null;
 #if (ES_BUILD_PCL || ES_BUILD_PN)
             foreach (var attrib in propInfo.GetCustomAttributes<AttributeType>(false))
             {
@@ -442,10 +442,10 @@ namespace System.Diagnostics.Tracing
             return result;
         }
 
-        public static AttributeType GetCustomAttribute<AttributeType>(Type type)
-            where AttributeType : Attribute?
+        public static AttributeType? GetCustomAttribute<AttributeType>(Type type)
+            where AttributeType : Attribute
         {
-            AttributeType result = null!; // TODO-NULLABLE-GENERIC: re-review
+            AttributeType? result = null;
 #if (ES_BUILD_PCL || ES_BUILD_PN)
             foreach (var attrib in type.GetTypeInfo().GetCustomAttributes<AttributeType>(false))
             {
@@ -538,9 +538,9 @@ namespace System.Diagnostics.Tracing
 
             recursionCheck.Add(dataType);
 
-            var eventAttrib = Statics.GetCustomAttribute<EventDataAttribute?>(dataType);
+            var eventAttrib = Statics.GetCustomAttribute<EventDataAttribute>(dataType);
             if (eventAttrib != null ||
-                Statics.GetCustomAttribute<CompilerGeneratedAttribute?>(dataType) != null ||
+                Statics.GetCustomAttribute<CompilerGeneratedAttribute>(dataType) != null ||
                 IsGenericMatch(dataType, typeof(KeyValuePair<,>)))
             {
                 var analysis = new TypeAnalysis(dataType, eventAttrib, recursionCheck);

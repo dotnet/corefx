@@ -15,8 +15,6 @@ namespace System.Security.Cryptography.X509Certificates.Tests
 {
     public static class ChainTests
     {
-        internal static bool CanModifyStores { get; } = TestEnvironmentConfiguration.CanModifyStores;
-
         private static bool TrustsMicrosoftDotComRoot
         {
             get
@@ -125,8 +123,8 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
+        [Fact]
         [PlatformSpecific(TestPlatforms.AnyUnix)]
-        [ConditionalFact(nameof(CanModifyStores))]
         public static void VerifyChainFromHandle_Unix()
         {
             using (var microsoftDotCom = new X509Certificate2(TestData.MicrosoftDotComSslCertBytes))
@@ -461,7 +459,7 @@ namespace System.Security.Cryptography.X509Certificates.Tests
             }
         }
 
-        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot), nameof(CanModifyStores))]
+        [ConditionalFact(nameof(TrustsMicrosoftDotComRoot))]
         [OuterLoop(/* Modifies user certificate store */)]
         public static void BuildChain_MicrosoftDotCom_WithRootCertInUserAndSystemRootCertStores()
         {
@@ -858,7 +856,6 @@ tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
             }
         }
 
-        [ActiveIssue(36124, TestPlatforms.Windows)]
         [Fact]
         public static void BuildInvalidSignatureTwice()
         {
@@ -898,9 +895,9 @@ tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
                     }
                     else
                     {
-                        Assert.False(valid, $"Chain is valid on execution {iter}");
-
-                        Assert.Equal(3, chain.ChainElements.Count);
+                        // These asserts are "most informative first".
+                        // (There was an interval where valid was reporting as true in CI, but
+                        // that is the least informative failure)
 
                         // Clear UntrustedRoot, if it happened.
                         allFlags &= ~X509ChainStatusFlags.UntrustedRoot;
@@ -908,6 +905,10 @@ tHP28fj0LUop/QFojSZPsaPAW6JvoQ0t4hd6WoyX6z7FsA==
                         Assert.Equal(
                             X509ChainStatusFlags.NotSignatureValid,
                             allFlags);
+
+                        Assert.Equal(3, chain.ChainElements.Count);
+
+                        Assert.False(valid, $"Chain is valid on execution {iter}");
                     }
 
                     chainHolder.DisposeChainElements();

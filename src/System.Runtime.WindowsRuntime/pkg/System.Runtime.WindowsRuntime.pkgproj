@@ -22,7 +22,7 @@
 
     <!-- We can't harvest an assert to more than one path -->
     <!-- Disable support for netcoreapp1.0 - netcoreapp2.0 for now.  To support these we need to build the src project for the old TFMs 
-    <File Include="$(PackagesDir)\System.Runtime.WindowsRuntime\4.3.0\runtimes\win8\lib\netstandard1.3\System.Runtime.WindowsRuntime.dll">
+    <File Include="$(NuGetPackageRoot)System.Runtime.WindowsRuntime\4.3.0\runtimes\win8\lib\netstandard1.3\System.Runtime.WindowsRuntime.dll">
       <TargetPath>runtimes/win/lib/netcoreapp1.0</TargetPath>
       <TargetFramework>netcoreapp1.0</TargetFramework>
     </File>  -->
@@ -54,15 +54,11 @@
         The included build targets explicitly reference System.Runtime
         and add the facade references to the compiler.
     -->
-    <PackageFile Include=".\build\net45\System.Runtime.WindowsRuntime.targets">
-      <TargetPath>\build\net45\</TargetPath>
-    </PackageFile>
-    <PackageFile Include=".\build\net451\System.Runtime.WindowsRuntime.targets">
-      <TargetPath>\build\net451\</TargetPath>
-    </PackageFile>
-    <PackageFile Include=".\build\net461\System.Runtime.WindowsRuntime.targets">
-      <TargetPath>\build\net461\</TargetPath>
-    </PackageFile>
+    <_buildTargetsTFMs Include="net45;net451;net461" 
+                    TFM="%(Identity)"
+                    SourceFile=".\build\%(TFM)\$(Id).targets" />
+    <PackageFile Include="@(_buildTargetsTFMs->'%(SourceFile)')" TargetPath="build\%(TFM)\" />
+    <PackageFile Include="@(_buildTargetsTFMs->'%(SourceFile)')" TargetPath="buildTransitive\%(TFM)\" />
 
     <!-- this package is part of the implementation closure of NETStandard.Library
          therefore it cannot reference NETStandard.Library -->

@@ -670,6 +670,7 @@ namespace System
         public static string SystemDirectory { get { throw null; } }
         public static int SystemPageSize { get { throw null; } }
         public static int TickCount { get { throw null; } }
+        public static long TickCount64 { get { throw null; } }
         public static string UserDomainName { get { throw null; } }
         public static bool UserInteractive { get { throw null; } }
         public static string UserName { get { throw null; } }
@@ -772,8 +773,8 @@ namespace System
     }
     public static partial class Math
     {
-        public const double E = 2.7182818284590451;
-        public const double PI = 3.1415926535897931;
+        public const double E = 2.718281828459045;
+        public const double PI = 3.141592653589793;
         public static decimal Abs(decimal value) { throw null; }
         public static double Abs(double value) { throw null; }
         public static short Abs(short value) { throw null; }
@@ -885,8 +886,8 @@ namespace System
     }
     public static partial class MathF
     {
-        public const float E = 2.71828175f;
-        public const float PI = 3.14159274f;
+        public const float E = 2.7182817f;
+        public const float PI = 3.1415927f;
         public static float Abs(float x) { throw null; }
         public static float Acos(float x) { throw null; }
         public static float Acosh(float x) { throw null; }
@@ -994,8 +995,6 @@ namespace System
         public static System.StringComparer FromComparison(System.StringComparison comparisonType) { throw null; }
         public int GetHashCode(object obj) { throw null; }
         public abstract int GetHashCode(string obj);
-        bool System.Collections.IEqualityComparer.Equals(object x, object y) { throw null; }
-        int System.Collections.IEqualityComparer.GetHashCode(object obj) { throw null; }
     }
     public static partial class StringNormalizationExtensions
     {
@@ -1316,6 +1315,8 @@ namespace System.IO
         public System.IO.Stream UnderlyingStream { get { throw null; } }
         public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object state) { throw null; }
+        public override void CopyTo(System.IO.Stream destination, int bufferSize) { }
+        public override System.Threading.Tasks.Task CopyToAsync(System.IO.Stream destination, int bufferSize, System.Threading.CancellationToken cancellationToken) { throw null; }
         protected override void Dispose(bool disposing) { }
         public override System.Threading.Tasks.ValueTask DisposeAsync() { throw null; }
         public override int EndRead(System.IAsyncResult asyncResult) { throw null; }
@@ -1323,12 +1324,16 @@ namespace System.IO
         public override void Flush() { }
         public override System.Threading.Tasks.Task FlushAsync(System.Threading.CancellationToken cancellationToken) { throw null; }
         public override int Read(byte[] array, int offset, int count) { throw null; }
+        public override int Read(System.Span<byte> destination) { throw null; }
         public override System.Threading.Tasks.Task<int> ReadAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask<int> ReadAsync(System.Memory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override int ReadByte() { throw null; }
         public override long Seek(long offset, System.IO.SeekOrigin origin) { throw null; }
         public override void SetLength(long value) { }
         public override void Write(byte[] array, int offset, int count) { }
+        public override void Write(System.ReadOnlySpan<byte> buffer) { }
         public override System.Threading.Tasks.Task WriteAsync(byte[] buffer, int offset, int count, System.Threading.CancellationToken cancellationToken) { throw null; }
+        public override System.Threading.Tasks.ValueTask WriteAsync(System.ReadOnlyMemory<byte> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteByte(byte value) { }
     }
     public partial class EndOfStreamException : System.IO.IOException
@@ -1398,6 +1403,8 @@ namespace System.IO
         public static string Combine(string path1, string path2, string path3) { throw null; }
         public static string Combine(string path1, string path2, string path3, string path4) { throw null; }
         public static string Combine(params string[] paths) { throw null; }
+        public static bool EndsInDirectorySeparator(System.ReadOnlySpan<char> path) { throw null; }
+        public static bool EndsInDirectorySeparator(string path) { throw null; }
         public static System.ReadOnlySpan<char> GetDirectoryName(System.ReadOnlySpan<char> path) { throw null; }
         public static string GetDirectoryName(string path) { throw null; }
         public static System.ReadOnlySpan<char> GetExtension(System.ReadOnlySpan<char> path) { throw null; }
@@ -1424,10 +1431,15 @@ namespace System.IO
         public static bool IsPathRooted(string path) { throw null; }
         public static string Join(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2) { throw null; }
         public static string Join(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.ReadOnlySpan<char> path3) { throw null; }
+        public static string Join(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.ReadOnlySpan<char> path3, System.ReadOnlySpan<char> path4) { throw null; }
         public static string Join(string path1, string path2) { throw null; }
         public static string Join(string path1, string path2, string path3) { throw null; }
+        public static string Join(string path1, string path2, string path3, string path4) { throw null; }
+        public static string Join(params string[] paths) { throw null; }
         public static bool TryJoin(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.ReadOnlySpan<char> path3, System.Span<char> destination, out int charsWritten) { throw null; }
         public static bool TryJoin(System.ReadOnlySpan<char> path1, System.ReadOnlySpan<char> path2, System.Span<char> destination, out int charsWritten) { throw null; }
+        public static System.ReadOnlySpan<char> TrimEndingDirectorySeparator(System.ReadOnlySpan<char> path) { throw null; }
+        public static string TrimEndingDirectorySeparator(string path) { throw null; }
     }
     public partial class StreamReader : System.IO.TextReader
     {
@@ -1437,7 +1449,7 @@ namespace System.IO
         public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding) { }
         public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks) { }
         public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize) { }
-        public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize, bool leaveOpen) { }
+        public StreamReader(System.IO.Stream stream, System.Text.Encoding encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = -1, bool leaveOpen = false) { }
         public StreamReader(string path) { }
         public StreamReader(string path, bool detectEncodingFromByteOrderMarks) { }
         public StreamReader(string path, System.Text.Encoding encoding) { }
@@ -1470,7 +1482,7 @@ namespace System.IO
         public StreamWriter(System.IO.Stream stream) { }
         public StreamWriter(System.IO.Stream stream, System.Text.Encoding encoding) { }
         public StreamWriter(System.IO.Stream stream, System.Text.Encoding encoding, int bufferSize) { }
-        public StreamWriter(System.IO.Stream stream, System.Text.Encoding encoding, int bufferSize, bool leaveOpen) { }
+        public StreamWriter(System.IO.Stream stream, System.Text.Encoding encoding = null, int bufferSize = -1, bool leaveOpen = false) { }
         public StreamWriter(string path) { }
         public StreamWriter(string path, bool append) { }
         public StreamWriter(string path, bool append, System.Text.Encoding encoding) { }
@@ -1488,12 +1500,20 @@ namespace System.IO
         public override void Write(char[] buffer, int index, int count) { }
         public override void Write(System.ReadOnlySpan<char> buffer) { }
         public override void Write(string value) { }
+        public override void Write(string format, object arg0) { }
+        public override void Write(string format, object arg0, object arg1) { }
+        public override void Write(string format, object arg0, object arg1, object arg2) { }
+        public override void Write(string format, params object[] arg) { }
         public override System.Threading.Tasks.Task WriteAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
         public override void WriteLine(System.ReadOnlySpan<char> buffer) { }
         public override void WriteLine(string value) { }
+        public override void WriteLine(string format, object arg0) { }
+        public override void WriteLine(string format, object arg0, object arg1) { }
+        public override void WriteLine(string format, object arg0, object arg1, object arg2) { }
+        public override void WriteLine(string format, params object[] arg) { }
         public override System.Threading.Tasks.Task WriteLineAsync() { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(char[] buffer, int index, int count) { throw null; }
@@ -1535,15 +1555,19 @@ namespace System.IO
         public override void Write(char[] buffer, int index, int count) { }
         public override void Write(System.ReadOnlySpan<char> buffer) { }
         public override void Write(string value) { }
+        public override void Write(System.Text.StringBuilder value) { }
         public override System.Threading.Tasks.Task WriteAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(char[] buffer, int index, int count) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task WriteAsync(string value) { throw null; }
+        public override System.Threading.Tasks.Task WriteAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override void WriteLine(System.ReadOnlySpan<char> buffer) { }
+        public override void WriteLine(System.Text.StringBuilder value) { }
         public override System.Threading.Tasks.Task WriteLineAsync(char value) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(char[] buffer, int index, int count) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(System.ReadOnlyMemory<char> buffer, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
         public override System.Threading.Tasks.Task WriteLineAsync(string value) { throw null; }
+        public override System.Threading.Tasks.Task WriteLineAsync(System.Text.StringBuilder value, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) { throw null; }
     }
     public abstract partial class TextReader : System.MarshalByRefObject, System.IDisposable
     {
@@ -1658,7 +1682,7 @@ namespace System.Net
 }
 namespace System.Numerics
 {
-    public static class BitOperations
+    public static partial class BitOperations
     {
         [System.CLSCompliantAttribute(false)]
         public static int LeadingZeroCount(uint value) { throw null; }
@@ -1673,13 +1697,13 @@ namespace System.Numerics
         [System.CLSCompliantAttribute(false)]
         public static int PopCount(ulong value) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static uint RotateLeft(uint value, int bitOffset) { throw null; }
+        public static uint RotateLeft(uint value, int offset) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static ulong RotateLeft(ulong value, int bitOffset) { throw null; }
+        public static ulong RotateLeft(ulong value, int offset) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static uint RotateRight(uint value, int bitOffset) { throw null; }
+        public static uint RotateRight(uint value, int offset) { throw null; }
         [System.CLSCompliantAttribute(false)]
-        public static ulong RotateRight(ulong value, int bitOffset) { throw null; }
+        public static ulong RotateRight(ulong value, int offset) { throw null; }
         public static int TrailingZeroCount(int value) { throw null; }
         public static int TrailingZeroCount(long value) { throw null; }
         [System.CLSCompliantAttribute(false)]
@@ -1713,6 +1737,7 @@ namespace System.Runtime.CompilerServices
         public SwitchExpressionException(object unmatchedValue) { }
         public SwitchExpressionException(string message) { }
         public SwitchExpressionException(string message, System.Exception innerException) { }
+        public override string Message { get { throw null; } }
         public object UnmatchedValue { get { throw null; } }
         public override void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
     }
