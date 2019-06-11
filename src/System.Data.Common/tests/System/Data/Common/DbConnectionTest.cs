@@ -2,11 +2,13 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Data.Common.Tests
 {
-    public class DbConnectionTest
+    public partial class DbConnectionTest
     {
         private static volatile bool _wasFinalized;
 
@@ -84,6 +86,13 @@ namespace System.Data.Common.Tests
             Assert.NotNull(factory);
             Assert.Same(typeof(TestDbProviderFactory), factory.GetType());
             Assert.Same(TestDbProviderFactory.Instance, factory);
+        }
+
+        [Fact]
+        public async Task OpenAsyncCanceled()
+        {
+            Task t = new FinalizingConnection().OpenAsync(new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
         }
     }
 }

@@ -22,6 +22,8 @@
 // WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Data.Tests.Common
@@ -172,6 +174,34 @@ namespace System.Data.Tests.Common
             Assert.Equal(".NET", txt);
 
             Assert.False(_dataReader.Read());
+        }
+
+        [Fact]
+        public async Task NextResultAsyncCanceled()
+        {
+            Task t = _dataReader.NextResultAsync(new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+        }
+
+        [Fact]
+        public async Task ReadAsyncCanceled()
+        {
+            Task t = _dataReader.ReadAsync(new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+        }
+
+        [Fact]
+        public async Task GetValueAsyncCanceled()
+        {
+            Task t = _dataReader.GetFieldValueAsync<string>(0, new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+        }
+
+        [Fact]
+        public async Task IsDBNullAsyncCanceled()
+        {
+            Task t = _dataReader.IsDBNullAsync(0, new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
         }
     }
 }

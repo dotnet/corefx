@@ -1,11 +1,13 @@
 ﻿// Licensed to the .NET Foundation under one or more agreements.
 // See the LICENSE file in the project root for more information.
 
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace System.Data.Common.Tests
 {
-    public class DbCommandTest
+    public partial class DbCommandTest
     {
         private static volatile bool _wasFinalized;
 
@@ -82,6 +84,34 @@ namespace System.Data.Common.Tests
             GC.Collect();
             GC.WaitForPendingFinalizers();
             Assert.True(_wasFinalized);
+        }
+
+        [Fact]
+        public async Task ExecuteReaderAsyncCanceled1()
+        {
+            Task t = new FinalizingCommand().ExecuteReaderAsync(new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+        }
+
+        [Fact]
+        public async Task ExecuteReaderAsyncCanceled2()
+        {
+            Task t = new FinalizingCommand().ExecuteReaderAsync(CommandBehavior.Default, new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+        }
+
+        [Fact]
+        public async Task ExecuteNonQueryAsyncCanceled()
+        {
+            Task t = new FinalizingCommand().ExecuteNonQueryAsync(new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+        }
+
+        [Fact]
+        public async Task ExecuteScalarAsyncCanceled()
+        {
+            Task t = new FinalizingCommand().ExecuteScalarAsync(new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
         }
     }
 }

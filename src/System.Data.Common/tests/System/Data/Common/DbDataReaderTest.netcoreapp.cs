@@ -322,15 +322,24 @@ namespace System.Data.Tests.Common
         }
 
         [Fact]
-        public Task GetValueAsyncByColumnNameCanceledTest()
+        public async Task GetValueAsyncCanceled2()
         {
-            return Assert.ThrowsAsync<TaskCanceledException>(() => _dataReader.GetFieldValueAsync<string>("text_col", new CancellationToken(true)));
+            Task t = _dataReader.GetFieldValueAsync<string>("text_col", new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
         }
 
         [Fact]
-        public Task IsDbNullAsyncByColumnNameCanceledTest()
+        public async Task IsDBNullAsyncCanceled2()
         {
-            return Assert.ThrowsAsync<TaskCanceledException>(() => _dataReader.IsDBNullAsync("dbnull_col", new CancellationToken(true)));
+            Task t = _dataReader.IsDBNullAsync("dbnull_col", new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
+        }
+
+        [Fact]
+        public async Task CloseAsyncCanceled()
+        {
+            Task t = _dataReader.CloseAsync(new CancellationToken(true));
+            await Assert.ThrowsAsync<TaskCanceledException>(() => t);
         }
 
         private void SkipRows(int rowsToSkip)

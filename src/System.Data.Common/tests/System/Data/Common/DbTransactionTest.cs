@@ -27,7 +27,7 @@ using Xunit;
 
 namespace System.Data.Tests.Common
 {
-    public class DbTransactionTest
+    public partial class DbTransactionTest
     {
         [Fact]
         public void DisposeTest()
