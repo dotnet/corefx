@@ -7,7 +7,6 @@
     <OmitResources Condition="'$(IsPartialFacadeAssembly)' == 'true'">true</OmitResources>
     <UsePackageTargetRuntimeDefaults Condition="'$(IsPartialFacadeAssembly)' != 'true'">true</UsePackageTargetRuntimeDefaults>
     <IncludeDllSafeSearchPathAttribute>true</IncludeDllSafeSearchPathAttribute>
-    <DefineConstants Condition="'$(TargetGroup)' == 'netstandard2.1'">$(DefineConstants);netstandard2_1</DefineConstants>
     <NoWarn>$(NoWarn);CS1574;CS3016</NoWarn>
     <Configurations>net461-Windows_NT-Debug;net461-Windows_NT-Release;netcoreapp-Debug;netcoreapp-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netfx-Windows_NT-Debug;netfx-Windows_NT-Release;netstandard-Debug;netstandard-Release;netstandard-Windows_NT-Debug;netstandard-Windows_NT-Release;netstandard2.1-Debug;netstandard2.1-Release;netstandard2.1-Windows_NT-Debug;netstandard2.1-Windows_NT-Release</Configurations>
   </PropertyGroup>
