@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Data.Common.Tests
 {
-    public class DbExceptionTests
+    public class DbExceptionTest
     {
         [Fact]
         public void Ctor_Parameterless_UsesDefaults()

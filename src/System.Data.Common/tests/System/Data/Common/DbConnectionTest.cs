@@ -6,7 +6,7 @@ using Xunit;
 
 namespace System.Data.Common.Tests
 {
-    public class DbConnectionTests
+    public class DbConnectionTest
     {
         private static volatile bool _wasFinalized;
 

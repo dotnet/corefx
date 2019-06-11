@@ -11,7 +11,7 @@ using Xunit;
 
 namespace System.Xml.Tests
 {
-    public class XmlDataDocumentTests
+    public class XmlDataDocumentTest
     {
         [Fact]
         public static void XmlDataDocument_DataSet()

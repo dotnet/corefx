@@ -8,10 +8,10 @@
   <ItemGroup>
     <Compile Include="System\Data\Common\DataColumnMappingTest.cs" />
     <Compile Include="System\Data\Common\DataTableMappingTest.cs" />
-    <Compile Include="System\Data\Common\DbCommandTests.cs" />
-    <Compile Include="System\Data\Common\DbConnectionTests.cs" />
+    <Compile Include="System\Data\Common\DbCommandTest.cs" />
+    <Compile Include="System\Data\Common\DbConnectionTest.cs" />
     <Compile Include="System\Data\Common\DbDataReaderTest.netcoreapp.cs" Condition="'$(TargetsNetCoreApp)' == 'true'" />
-    <Compile Include="System\Data\Common\DbExceptionTests.cs" />
+    <Compile Include="System\Data\Common\DbExceptionTest.cs" />
     <Compile Include="DataProvider.cs" />
     <Compile Include="System\Data\Common\DataAdapterTest.cs" />
     <Compile Include="System\Data\Common\DataColumnMappingCollectionTest.cs" />
@@ -117,8 +117,8 @@
     </Compile>
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
-    <Compile Include="System\Data\Common\DbProviderFactoriesTests.netcoreapp.cs" />
-    <Compile Include="System\Xml\XmlDataDocumentTests.cs" />
+    <Compile Include="System\Data\Common\DbProviderFactoriesTest.netcoreapp.cs" />
+    <Compile Include="System\Xml\XmlDataDocumentTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />

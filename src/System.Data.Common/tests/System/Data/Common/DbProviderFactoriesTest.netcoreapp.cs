@@ -17,7 +17,7 @@ namespace System.Data.Common
         private TestProviderFactory() { }
     }
 
-    public class DbProviderFactoriesTests
+    public class DbProviderFactoriesTest
     {
         [Fact]
         public void GetFactoryClassesDataTableShapeTest()
