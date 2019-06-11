@@ -53,7 +53,7 @@ jobs:
 
       variables:
         - ${{ if eq(parameters.isOfficialBuild, 'false') }}:
-          - macOSQueues: OSX.1012.Amd64.Open+OSX.1013.Amd64.Open
+          - macOSQueues: OSX.1013.Amd64.Open
 
         - ${{ if eq(parameters.isOfficialBuild, 'true') }}:
-          - macOSQueues: OSX.1012.Amd64.Open+OSX.1013.Amd64.Open+OSX.1014.Amd64.Open
+          - macOSQueues: OSX.1013.Amd64.Open+OSX.1014.Amd64.Open
