@@ -34,7 +34,7 @@ public static partial class TimerMetricsTests
                                 null,
                                 ThreadTestHelpers.UnexpectedTimeoutMilliseconds,
                                 ThreadTestHelpers.UnexpectedTimeoutMilliseconds));
-                        Assert.True(Timer.Count >= timers.Count);
+                        Assert.True(Timer.ActiveCount >= timers.Count);
                     }
                 }
             };
@@ -56,7 +56,7 @@ public static partial class TimerMetricsTests
             // verify that the timer count has decreased
             while (timers.Count > 0)
             {
-                int timerCountBeforeRemove = Timer.Count;
+                int timerCountBeforeRemove = Timer.ActiveCount;
                 int endIndex = timers.Count - processorCount * 8;
                 for (int i = timers.Count - 1; i >= Math.Max(0, endIndex); --i)
                 {
@@ -66,7 +66,7 @@ public static partial class TimerMetricsTests
 
                 if (endIndex >= 0)
                 {
-                    Assert.True(Timer.Count < timerCountBeforeRemove);
+                    Assert.True(Timer.ActiveCount < timerCountBeforeRemove);
                 }
             }
         }).Dispose();
