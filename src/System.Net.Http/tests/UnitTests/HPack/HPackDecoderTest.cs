@@ -2,6 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+// Note: this is largely a copy of tests from ASP.NET, with minimal changes
+// needed to support API differences. As such, it has some stylistic
+// non-conformities that are kept around to allow easier diffing in future.
+// See https://github.com/aspnet/AspNetCore/blob/master/src/Servers/Kestrel/Core/test/HPackDecoderTests.cs
+
 using System;
 using System.Linq;
 using System.Collections.Generic;
