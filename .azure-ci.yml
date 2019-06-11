@@ -13,7 +13,7 @@ resources:
   - container: ubuntu_1604_arm64_cross_container
     image: microsoft/dotnet-buildtools-prereqs:ubuntu-16.04-cross-arm64-a3ae44b-20180315221921
   - container: alpine_39_container
-    image: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.9-helix-09ca40b-20190521001803
+    image: mcr.microsoft.com/dotnet-buildtools/prereqs:alpine-3.9-WithNode-0fc54a3-20190611191928
 
 jobs:
 - job: uwp_aot_x86_release
