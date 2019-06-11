@@ -57,10 +57,10 @@ In this document, the following terms are used:
   Framework, so you can think of CoreFX as a fork of the .NET Framework library
   stack.
 
-* **CLI** Command Line Interface --or-- Common Language Runtime.
+* **CLI** Command Line Interface --or-- Common Language Infastructure.
   * Command Line Interface: A tool that has no graphical interface and is
     intended to be used completely from a console/terminal.
-  * Common Language Interface: The [open specification][ECMA-355] that defines
+  * Common Language Infastructure: The [open specification][ECMA-355] that defines
     IL, how to store IL as binary (assemblies), and how the runtime works. AKA:
     [ECMA-355][ECMA-355].
 
@@ -269,7 +269,7 @@ defacto standard for JSON serialization and deserialization in .NET. It is [open
 source][Newtonsoft.Json] and support almost every platform .NET code can run on
 (.NET Framework 2.0, 3.0, 3.5, 4.0, and 4.5; Mono; MonoTouch/Xamarin.iOS;
 MonoDroid/Xamarin.Android; Silverlight 3, 4, and 5; Windows Phone 8, 8, and 8.1;
-Windows 8 Store; .NET Core).  
+Windows 8 Store; .NET Core).
 
 ### Windows Forms
 
