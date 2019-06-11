@@ -63,13 +63,13 @@
     <NewtonsoftJsonPackageVersion>12.0.1</NewtonsoftJsonPackageVersion>
     <MicrosoftExtensionsDependencyModelPackageVersion>3.0.0-preview5-27626-15</MicrosoftExtensionsDependencyModelPackageVersion>
     <!-- Test data -->
-    <SystemIOCompressionTestDataPackageVersion>1.0.11</SystemIOCompressionTestDataPackageVersion>
-    <SystemIOPackagingTestDataPackageVersion>1.0.3</SystemIOPackagingTestDataPackageVersion>
-    <SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>1.0.6</SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>
-    <SystemNetTestDataPackageVersion>1.0.5</SystemNetTestDataPackageVersion>
-    <SystemComponentModelTypeConverterTestDataPackageVersion>1.0.3</SystemComponentModelTypeConverterTestDataPackageVersion>
-    <SystemDrawingCommonTestDataPackageVersion>1.0.11</SystemDrawingCommonTestDataPackageVersion>
-    <SystemWindowsExtensionsTestDataPackageVersion>1.0.4</SystemWindowsExtensionsTestDataPackageVersion>
+    <SystemIOCompressionTestDataPackageVersion>1.0.13</SystemIOCompressionTestDataPackageVersion>
+    <SystemIOPackagingTestDataPackageVersion>1.0.4</SystemIOPackagingTestDataPackageVersion>
+    <SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>1.0.7</SystemSecurityCryptographyX509CertificatesTestDataPackageVersion>
+    <SystemNetTestDataPackageVersion>1.0.6</SystemNetTestDataPackageVersion>
+    <SystemComponentModelTypeConverterTestDataPackageVersion>1.0.4</SystemComponentModelTypeConverterTestDataPackageVersion>
+    <SystemDrawingCommonTestDataPackageVersion>1.0.12</SystemDrawingCommonTestDataPackageVersion>
+    <SystemWindowsExtensionsTestDataPackageVersion>1.0.5</SystemWindowsExtensionsTestDataPackageVersion>
     <!-- Code coverage package version -->
     <CoverletConsolePackageVersion>1.5.0</CoverletConsolePackageVersion>
     <DotNetReportGeneratorGlobalToolPackageVersion>4.1.4</DotNetReportGeneratorGlobalToolPackageVersion>
