@@ -23,13 +23,13 @@ namespace System.Xaml.Permissions
         public override int GetHashCode() { return base.GetHashCode(); }
 #endif 
         public IList<XamlAccessLevel> AllowedAccess { get; private set; } = new ReadOnlyCollection<XamlAccessLevel>(Array.Empty<XamlAccessLevel>());
-        public override IPermission Copy() { return new XamlLoadPermission(new PermissionState()); }
+        public override IPermission Copy() { return new XamlLoadPermission(PermissionState.Unrestricted); }
         public override void FromXml(SecurityElement elem) { }
         public bool Includes(XamlAccessLevel requestedAccess) { return true; }
-        public override IPermission Intersect(IPermission target) { return new XamlLoadPermission(new PermissionState()); }
+        public override IPermission Intersect(IPermission target) { return new XamlLoadPermission(PermissionState.Unrestricted); }
         public override bool IsSubsetOf(IPermission target) { return true; }
         public override SecurityElement ToXml() { return default(SecurityElement); }
-        public override IPermission Union(IPermission other) { return new XamlLoadPermission(new PermissionState()); }
+        public override IPermission Union(IPermission other) { return new XamlLoadPermission(PermissionState.Unrestricted); }
         public bool IsUnrestricted() { return true; }
     }
 }
