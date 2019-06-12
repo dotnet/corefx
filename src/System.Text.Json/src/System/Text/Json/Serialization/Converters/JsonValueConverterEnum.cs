@@ -49,7 +49,8 @@ namespace System.Text.Json.Serialization.Converters
                     {
                         if (reader.TryGetInt32(out int byte8) && JsonHelpers.IsInRangeInclusive(byte8, sbyte.MinValue, sbyte.MaxValue))
                         {
-                            value = Unsafe.As<int, TValue>(ref byte8);
+                            sbyte byte8Value = (sbyte)byte8;
+                            value = Unsafe.As<sbyte, TValue>(ref byte8Value);
                             return true;
                         }
                         break;
@@ -58,7 +59,8 @@ namespace System.Text.Json.Serialization.Converters
                     {
                         if (reader.TryGetUInt32(out uint ubyte8) && JsonHelpers.IsInRangeInclusive(ubyte8, byte.MinValue, byte.MaxValue))
                         {
-                            value = Unsafe.As<uint, TValue>(ref ubyte8);
+                            byte ubyte8Value = (byte)ubyte8;
+                            value = Unsafe.As<byte, TValue>(ref ubyte8Value);
                             return true;
                         }
                         break;
@@ -67,7 +69,8 @@ namespace System.Text.Json.Serialization.Converters
                     {
                         if (reader.TryGetInt32(out int int16) && JsonHelpers.IsInRangeInclusive(int16, short.MinValue, short.MaxValue))
                         {
-                            value = Unsafe.As<int, TValue>(ref int16);
+                            short shortValue = (short)int16;
+                            value = Unsafe.As<short, TValue>(ref shortValue);
                             return true;
                         }
                         break;
@@ -76,7 +79,8 @@ namespace System.Text.Json.Serialization.Converters
                     {
                         if (reader.TryGetUInt32(out uint uint16) && JsonHelpers.IsInRangeInclusive(uint16, ushort.MinValue, ushort.MaxValue))
                         {
-                            value = Unsafe.As<uint, TValue>(ref uint16);
+                            ushort ushortValue = (ushort)uint16;
+                            value = Unsafe.As<ushort, TValue>(ref ushortValue);
                             return true;
                         }
                         break;
