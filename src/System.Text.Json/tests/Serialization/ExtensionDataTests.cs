@@ -197,12 +197,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void ExtensionPropertyObjectValue_Issue_38238()
-        {
-            Assert.Equal(@"{""Name"":""Test"",""Extensions"":{""foo"":1}}", JsonSerializer.ToString(new TestModel_Issue_38238()));
-        }
-
-        [Fact]
         public static void ExtensionPropertyObjectValue_RoundTrip()
         {
             // Baseline
@@ -339,17 +333,6 @@ namespace System.Text.Json.Serialization.Tests
             public Dictionary<string, JsonElement> MyOverflow { get; set; }
 
             public ClassWithExtensionProperty MyReference { get; set; }
-        }
-
-        // Match model in issue https://github.com/dotnet/corefx/issues/38238
-        public class TestModel_Issue_38238
-        {
-            public string Name { get; set; } = "Test";
-
-            public Dictionary<string, object> Extensions { get; set; } = new Dictionary<string, object>()
-            {
-                ["foo"] = 1,
-            };
         }
     }
 }
