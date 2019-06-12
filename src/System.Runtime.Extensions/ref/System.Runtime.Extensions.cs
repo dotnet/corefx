@@ -1785,7 +1785,10 @@ namespace System.Runtime.Versioning
         Stable = 2,
         SideBySide = 4,
     }
-    public sealed partial class FrameworkName : System.IEquatable<System.Runtime.Versioning.FrameworkName?>
+    public sealed partial class FrameworkName :
+#nullable disable
+        System.IEquatable<System.Runtime.Versioning.FrameworkName>
+#nullable restore
     {
         public FrameworkName(string frameworkName) { }
         public FrameworkName(string identifier, System.Version version) { }
