@@ -679,6 +679,7 @@ namespace System
         public static string UserName { get { throw null; } }
         public static System.Version Version { get { throw null; } }
         public static long WorkingSet { get { throw null; } }
+        [System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute]
         public static void Exit(int exitCode) { }
         public static string ExpandEnvironmentVariables(string name) { throw null; }
         [System.Diagnostics.CodeAnalysis.DoesNotReturnAttribute]
@@ -981,7 +982,7 @@ namespace System
         public virtual double NextDouble() { throw null; }
         protected virtual double Sample() { throw null; }
     }
-    public delegate System.Reflection.Assembly ResolveEventHandler(object? sender, System.ResolveEventArgs args);
+    public delegate System.Reflection.Assembly? ResolveEventHandler(object? sender, System.ResolveEventArgs args);
     public abstract partial class StringComparer : System.Collections.Generic.IComparer<string?>, System.Collections.Generic.IEqualityComparer<string?>, System.Collections.IComparer, System.Collections.IEqualityComparer
     {
         protected StringComparer() { }
@@ -1014,21 +1015,28 @@ namespace System
     {
         public UriBuilder() { }
         public UriBuilder(string uri) { }
-        public UriBuilder(string schemeName, string hostName) { }
-        public UriBuilder(string scheme, string host, int portNumber) { }
-        public UriBuilder(string scheme, string host, int port, string pathValue) { }
-        public UriBuilder(string scheme, string host, int port, string path, string extraValue) { }
+        public UriBuilder(string? schemeName, string? hostName) { }
+        public UriBuilder(string? scheme, string? host, int portNumber) { }
+        public UriBuilder(string? scheme, string? host, int port, string? pathValue) { }
+        public UriBuilder(string? scheme, string? host, int port, string? path, string? extraValue) { }
         public UriBuilder(System.Uri uri) { }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
         public string Fragment { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
         public string Host { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
         public string Password { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
         public string Path { get { throw null; } set { } }
         public int Port { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
         public string Query { get { throw null; } set { } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
         public string Scheme { get { throw null; } set { } }
         public System.Uri Uri { get { throw null; } }
+        [System.Diagnostics.CodeAnalysis.AllowNullAttribute]
         public string UserName { get { throw null; } set { } }
-        public override bool Equals(object rparam) { throw null; }
+        public override bool Equals(object? rparam) { throw null; }
         public override int GetHashCode() { throw null; }
         public override string ToString() { throw null; }
     }
@@ -1192,7 +1200,7 @@ namespace System.Collections
         protected virtual int GetHash(object key) { throw null; }
         public virtual void GetObjectData(System.Runtime.Serialization.SerializationInfo info, System.Runtime.Serialization.StreamingContext context) { }
         protected virtual bool KeyEquals(object? item, object key) { throw null; }
-        public virtual void OnDeserialization(object sender) { }
+        public virtual void OnDeserialization(object? sender) { }
         public virtual void Remove(object key) { }
         public static System.Collections.Hashtable Synchronized(System.Collections.Hashtable table) { throw null; }
         System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() { throw null; }
@@ -1320,7 +1328,7 @@ namespace System.IO
         public override bool CanWrite { get { throw null; } }
         public override long Length { get { throw null; } }
         public override long Position { get { throw null; } set { } }
-        public System.IO.Stream? UnderlyingStream { get { throw null; } }
+        public System.IO.Stream UnderlyingStream { get { throw null; } }
         public override System.IAsyncResult BeginRead(byte[] buffer, int offset, int count, System.AsyncCallback callback, object? state) { throw null; }
         public override System.IAsyncResult BeginWrite(byte[] buffer, int offset, int count, System.AsyncCallback callback, object? state) { throw null; }
         public override void CopyTo(System.IO.Stream destination, int bufferSize) { }
@@ -1683,13 +1691,19 @@ namespace System.Net
 {
     public static partial class WebUtility
     {
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("value")]
         public static string? HtmlDecode(string? value) { throw null; }
         public static void HtmlDecode(string? value, System.IO.TextWriter output) { }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("value")]
         public static string? HtmlEncode(string? value) { throw null; }
         public static void HtmlEncode(string? value, System.IO.TextWriter output) { }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("encodedValue")]
         public static string? UrlDecode(string? encodedValue) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("encodedValue")]
         public static byte[]? UrlDecodeToBytes(byte[]? encodedValue, int offset, int count) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("value")]
         public static string? UrlEncode(string? value) { throw null; }
+        [return: System.Diagnostics.CodeAnalysis.NotNullIfNotNullAttribute("value")]
         public static byte[]? UrlEncodeToBytes(byte[]? value, int offset, int count) { throw null; }
     }
 }
@@ -1878,7 +1892,7 @@ namespace System.Security
         public static void RevertAssert() { }
         public System.Security.IPermission? SetPermission(System.Security.IPermission? perm) { throw null; }
         protected virtual System.Security.IPermission? SetPermissionImpl(System.Security.IPermission? perm) { throw null; }
-        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object sender) { }
+        void System.Runtime.Serialization.IDeserializationCallback.OnDeserialization(object? sender) { }
         public override string ToString() { throw null; }
         public virtual System.Security.SecurityElement? ToXml() { throw null; }
         public System.Security.PermissionSet? Union(System.Security.PermissionSet? other) { throw null; }
