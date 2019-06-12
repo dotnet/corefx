@@ -45,22 +45,11 @@ namespace System.Text.Json.Serialization.Converters
 
             switch (s_enumTypeCode)
             {
-                case TypeCode.Empty:
-                case TypeCode.Object:
-                case TypeCode.DBNull:
-                case TypeCode.Boolean:
-                case TypeCode.Char:
-                case TypeCode.Decimal:
-                case TypeCode.Double:
-                case TypeCode.DateTime:
-                case TypeCode.String:
-                case TypeCode.Single:
-                    break;
                 case TypeCode.SByte:
                     {
                         if (reader.TryGetInt32(out int byte8) && JsonHelpers.IsInRangeInclusive(byte8, sbyte.MinValue, sbyte.MaxValue))
                         {
-                            value = (TValue)Enum.ToObject(valueType, byte8);
+                            value = Unsafe.As<int, TValue>(ref byte8);
                             return true;
                         }
                         break;
@@ -69,7 +58,7 @@ namespace System.Text.Json.Serialization.Converters
                     {
                         if (reader.TryGetUInt32(out uint ubyte8) && JsonHelpers.IsInRangeInclusive(ubyte8, byte.MinValue, byte.MaxValue))
                         {
-                            value = (TValue)Enum.ToObject(valueType, ubyte8);
+                            value = Unsafe.As<uint, TValue>(ref ubyte8);
                             return true;
                         }
                         break;
@@ -78,7 +67,7 @@ namespace System.Text.Json.Serialization.Converters
                     {
                         if (reader.TryGetInt32(out int int16) && JsonHelpers.IsInRangeInclusive(int16, short.MinValue, short.MaxValue))
                         {
-                            value = (TValue)Enum.ToObject(valueType, int16);
+                            value = Unsafe.As<int, TValue>(ref int16);
                             return true;
                         }
                         break;
@@ -87,7 +76,7 @@ namespace System.Text.Json.Serialization.Converters
                     {
                         if (reader.TryGetUInt32(out uint uint16) && JsonHelpers.IsInRangeInclusive(uint16, ushort.MinValue, ushort.MaxValue))
                         {
-                            value = (TValue)Enum.ToObject(valueType, uint16);
+                            value = Unsafe.As<uint, TValue>(ref uint16);
                             return true;
                         }
                         break;
