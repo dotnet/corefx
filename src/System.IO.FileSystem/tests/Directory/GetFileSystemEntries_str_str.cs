@@ -671,8 +671,8 @@ namespace System.IO.Tests
         [PlatformSpecific(TestPlatforms.AnyUnix)]  // Unix-invalid search patterns throws no exception 
         public void UnixSearchPatternInvalid()
         {
-            GetEntries(TestDirectory, "\0");
-            GetEntries(TestDirectory, string.Format("te{0}st", "\0".ToString()));
+            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, "\0"));
+            Assert.Throws<ArgumentException>(() => GetEntries(TestDirectory, string.Format("te{0}st", "\0".ToString())));
         }
 
         [Fact]
