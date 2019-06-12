@@ -12,7 +12,7 @@ namespace System.Net.Sockets.Tests
 {
     public partial class DisposedSocket
     {
-        //[ActiveIssue(37044, TestPlatforms.AnyUnix)]
+        [ActiveIssue(37044, TestPlatforms.AnyUnix)]
         [Theory]
         [InlineData(false)]
         [InlineData(true)]
