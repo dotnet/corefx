@@ -116,9 +116,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => i == 1 ? double.NaN : (double)i);
-            Assert.True(double.IsNaN(source.Min()));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(double.IsNaN(source.Min()));
             Assert.Equal(1, tracker.Moves);
         }
 
@@ -127,9 +126,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => (double?)(i == 1 ? double.NaN : (double)i));
-            Assert.True(double.IsNaN(source.Min().GetValueOrDefault()));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(double.IsNaN(source.Min().GetValueOrDefault()));
             Assert.Equal(1, tracker.Moves);
         }
 
@@ -138,9 +136,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => i == 1 ? float.NaN : (float)i);
-            Assert.True(float.IsNaN(source.Min()));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(float.IsNaN(source.Min()));
             Assert.Equal(1, tracker.Moves);
         }
 
@@ -149,9 +146,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => (float?)(i == 1 ? float.NaN : (float)i));
-            Assert.True(float.IsNaN(source.Min().GetValueOrDefault()));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(float.IsNaN(source.Min().GetValueOrDefault()));
             Assert.Equal(1, tracker.Moves);
         }
 
@@ -160,9 +156,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => i == 1 ? double.NaN : (double)i);
-            Assert.True(double.IsNaN(source.Min(x => x + 1d)));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(double.IsNaN(source.Min(x => x + 1d)));
             Assert.Equal(1, tracker.Moves);
         }
 
@@ -171,9 +166,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => (double?)(i == 1 ? double.NaN : (double)i));
-            Assert.True(double.IsNaN(source.Min(x => x + 1d).GetValueOrDefault()));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(double.IsNaN(source.Min(x => x + 1d).GetValueOrDefault()));
             Assert.Equal(1, tracker.Moves);
         }
 
@@ -182,9 +176,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => i == 1 ? float.NaN : (float)i);
-            Assert.True(float.IsNaN(source.Min(x => x + 1f)));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(float.IsNaN(source.Min(x => x + 1f)));
             Assert.Equal(1, tracker.Moves);
         }
 
@@ -193,9 +186,8 @@ namespace System.Linq.Tests
         {
             var tracker = new TrackingEnumerable(10);
             var source = tracker.Select(i => (float?)(i == 1 ? float.NaN : (float)i));
-            Assert.True(float.IsNaN(source.Min(x => x + 1f).GetValueOrDefault()));
 
-            //see https://github.com/dotnet/corefx/issues/38392.
+            Assert.True(float.IsNaN(source.Min(x => x + 1f).GetValueOrDefault()));
             Assert.Equal(1, tracker.Moves);
         }
 
