@@ -23,14 +23,14 @@ namespace System.Security.Permissions
         public override IPermission Copy() { return new WebBrowserPermission(); }
         public override SecurityElement ToXml() { return default(SecurityElement); }
         public override void FromXml(SecurityElement securityElement) { }
-        public WebBrowserPermissionLevel Level { get; set; }
+        public WebBrowserPermissionLevel Level { get { return WebBrowserPermissionLevel.Unrestricted; } set { } }
     }
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
     sealed public class WebBrowserPermissionAttribute : CodeAccessSecurityAttribute
     {
         public WebBrowserPermissionAttribute(SecurityAction action) : base(action) { }
-        public override IPermission CreatePermission() { return default(IPermission); }
-        public WebBrowserPermissionLevel Level { get; set; }
+        public override IPermission CreatePermission() { return new WebBrowserPermission(); }
+        public WebBrowserPermissionLevel Level { get { return WebBrowserPermissionLevel.Unrestricted; } set { } }
     }
 }

@@ -13,6 +13,7 @@ namespace System.Xaml.Permissions
         private XamlAccessLevel(string assemblyName, string typeName)
         {
             AssemblyNameString = assemblyName;
+            PrivateAccessToTypeName = typeName;
         }
 
         public static XamlAccessLevel AssemblyAccessTo(Assembly assembly)
@@ -27,15 +28,16 @@ namespace System.Xaml.Permissions
 
         public static XamlAccessLevel PrivateAccessTo(Type type)
         {
-            return new XamlAccessLevel(type.Assembly.FullName, null);
+            return new XamlAccessLevel(type.Assembly.FullName, type.FullName);
         }
 
         public static XamlAccessLevel PrivateAccessTo(string assemblyQualifiedTypeName)
         {
             int nameBoundary = assemblyQualifiedTypeName.IndexOf(',');
+            string typeName = assemblyQualifiedTypeName.Substring(0, nameBoundary).Trim();
             string assemblyFullName = assemblyQualifiedTypeName.Substring(nameBoundary + 1).Trim();
             AssemblyName assemblyName = new AssemblyName(assemblyFullName);
-            return new XamlAccessLevel(assemblyName.FullName, null);
+            return new XamlAccessLevel(assemblyName.FullName, typeName);
         }
 
         public AssemblyName AssemblyAccessToAssemblyName

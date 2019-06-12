@@ -43,17 +43,17 @@ namespace System.Security.Permissions
         public override IPermission Copy() { return new MediaPermission(); }
         public override SecurityElement ToXml() { return default(SecurityElement); }
         public override void FromXml(SecurityElement securityElement) { }
-        public MediaPermissionAudio Audio { get; }
-        public MediaPermissionVideo Video { get; }
-        public MediaPermissionImage Image { get; }
+        public MediaPermissionAudio Audio { get { return MediaPermissionAudio.AllAudio; } }
+        public MediaPermissionVideo Video { get { return MediaPermissionVideo.AllVideo; } }
+        public MediaPermissionImage Image { get { return MediaPermissionImage.AllImage; } }
     }
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Constructor | AttributeTargets.Class | AttributeTargets.Struct | AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
     sealed public class MediaPermissionAttribute : CodeAccessSecurityAttribute
     {
         public MediaPermissionAttribute(SecurityAction action) : base(action) { }
-        public override IPermission CreatePermission() { return default(IPermission); }
-        public MediaPermissionAudio Audio { get; set; }
-        public MediaPermissionVideo Video { get; set; }
-        public MediaPermissionImage Image { get; set; }
+        public override IPermission CreatePermission() { return new MediaPermission(); }
+        public MediaPermissionAudio Audio { get { return MediaPermissionAudio.AllAudio; } set { } }
+        public MediaPermissionVideo Video { get { return MediaPermissionVideo.AllVideo; } set { } }
+        public MediaPermissionImage Image { get { return MediaPermissionImage.AllImage; } set { } }
     }
 }

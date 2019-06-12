@@ -16,7 +16,7 @@ namespace System.Xaml.Permissions
         public XamlLoadPermission(PermissionState state) { }
         public XamlLoadPermission(XamlAccessLevel allowedAccess) { }
         public XamlLoadPermission(IEnumerable<XamlAccessLevel> allowedAccess) { }
-#if NETCOREAPP3_0
+#if NETCOREAPP
         [ComVisible(false)]
         public override bool Equals(object obj) { return false; }
         [ComVisible(false)]
