@@ -15,24 +15,13 @@ namespace Microsoft.Framework.WebEncoders
     {
         [Theory]
         [InlineData("&#x1F4A9;", "\U0001f4a9")]
+        [InlineData("&#x1F602;2", "\U0001F6022")]
+        [InlineData("&#x1F602; 21", "\U0001F602 21")]
+        [InlineData("x&#x1F602;y", "x\U0001F602y")]
         public void TestSurrogate(string expected, string actual)
         {
             Assert.Equal(expected, System.Text.Encodings.Web.HtmlEncoder.Default.Encode(actual));
             
-            using (var writer = new StringWriter())
-            {
-                System.Text.Encodings.Web.HtmlEncoder.Default.Encode(writer, actual);
-                Assert.Equal(expected, writer.GetStringBuilder().ToString());
-            }
-        }
-
-        [Theory]
-        [InlineData("&#x1F602;2", "😂2")]
-        [InlineData("&#x1F602; 21", "😂 21")]
-        public void TestCombinationOfSurrogatesAndNonSurrogateCharacter(string expected, string actual)
-        {
-            Assert.Equal(expected, System.Text.Encodings.Web.HtmlEncoder.Default.Encode(actual));
-
             using (var writer = new StringWriter())
             {
                 System.Text.Encodings.Web.HtmlEncoder.Default.Encode(writer, actual);
