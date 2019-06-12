@@ -320,7 +320,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.False(json.TryGetByte(out byte _));
+                    Assert.False(json.TryGetByte(out byte value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -359,7 +360,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.False(json.TryGetSByte(out sbyte _));
+                    Assert.False(json.TryGetSByte(out sbyte value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -398,7 +400,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.False(json.TryGetInt16(out short _));
+                    Assert.False(json.TryGetInt16(out short value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 
@@ -516,7 +519,8 @@ namespace System.Text.Json.Tests
             {
                 if (json.TokenType == JsonTokenType.Number)
                 {
-                    Assert.False(json.TryGetUInt16(out ushort _));
+                    Assert.False(json.TryGetUInt16(out ushort value));
+                    Assert.Equal(default, value);
                     Assert.True(json.TryGetDouble(out double doubleValue));
                     Assert.Equal(expected, doubleValue);
 

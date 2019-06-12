@@ -470,9 +470,9 @@ namespace System.Text.Json
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="byte"/>.
-        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="byte"/> value.
-        /// Returns false otherwise.
+        /// Returns <see langword="false"/> otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
@@ -486,14 +486,22 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out byte tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as an <see cref="sbyte"/>.
-        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
         /// parsed to an <see cref="sbyte"/> value.
-        /// Returns false otherwise.
+        /// Returns <see langword="false"/> otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
@@ -508,14 +516,22 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out sbyte tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="short"/>.
-        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="short"/> value.
-        /// Returns false otherwise.
+        /// Returns <see langword="false"/> otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
@@ -529,7 +545,15 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out short tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
@@ -592,9 +616,9 @@ namespace System.Text.Json
 
         /// <summary>
         /// Parses the current JSON token value from the source as a <see cref="ushort"/>.
-        /// Returns true if the entire UTF-8 encoded token value can be successfully 
+        /// Returns <see langword="true"/> if the entire UTF-8 encoded token value can be successfully 
         /// parsed to a <see cref="ushort"/> value.
-        /// Returns false otherwise.
+        /// Returns <see langword="false"/> otherwise.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to get the value of a JSON token that is not a <see cref="JsonTokenType.Number"/>.
@@ -609,7 +633,15 @@ namespace System.Text.Json
             }
 
             ReadOnlySpan<byte> span = HasValueSequence ? ValueSequence.ToArray() : ValueSpan;
-            return Utf8Parser.TryParse(span, out value, out int bytesConsumed) && span.Length == bytesConsumed;
+            if (Utf8Parser.TryParse(span, out ushort tmp, out int bytesConsumed)
+                && span.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
+            value = 0;
+            return false;
         }
 
         /// <summary>
