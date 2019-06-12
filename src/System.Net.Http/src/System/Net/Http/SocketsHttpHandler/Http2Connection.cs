@@ -41,10 +41,11 @@ namespace System.Net.Http
         private int _initialWindowSize;
         private int _maxConcurrentStreams;
         private int _pendingWindowUpdate;
-        private int _idleSinceTickCount;
+        private long _idleSinceTickCount;
         private int _pendingWriters;
 
         private bool _disposed;
+        private Exception _abortException;
 
         // If an in-progress write is canceled we need to be able to immediately
         // report a cancellation to the user, but also block the connection until
@@ -138,7 +139,7 @@ namespace System.Net.Http
 
             _expectingSettingsAck = true;
 
-            ProcessIncomingFrames();
+            _ = ProcessIncomingFramesAsync();
         }
 
         private async Task EnsureIncomingBytesAsync(int minReadBytes)
@@ -162,9 +163,9 @@ namespace System.Net.Http
             {
                 await _stream.WriteAsync(_outgoingBuffer.ActiveMemory).ConfigureAwait(false);
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Abort();
+                Abort(e);
                 throw;
             }
             finally
@@ -173,17 +174,24 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask<FrameHeader> ReadFrameAsync()
+        private async ValueTask<FrameHeader> ReadFrameAsync(bool initialFrame = false)
         {
             // Read frame header
             await EnsureIncomingBytesAsync(FrameHeader.Size).ConfigureAwait(false);
             FrameHeader frameHeader = FrameHeader.ReadFrom(_incomingBuffer.ActiveSpan);
-            _incomingBuffer.Discard(FrameHeader.Size);
 
             if (frameHeader.Length > FrameHeader.MaxLength)
             {
-                throw new Http2ProtocolException(Http2ProtocolErrorCode.FrameSizeError);
+                if (initialFrame && NetEventSource.IsEnabled)
+                {
+                    string response = System.Text.Encoding.ASCII.GetString(_incomingBuffer.ActiveSpan.Slice(0, Math.Min(20, _incomingBuffer.ActiveSpan.Length)));
+                    Trace($"HTTP/2 handshake failed. Server returned {response}");
+                }
+
+                _incomingBuffer.Discard(FrameHeader.Size);
+                throw new Http2ProtocolException(initialFrame ? Http2ProtocolErrorCode.ProtocolError : Http2ProtocolErrorCode.FrameSizeError);
             }
+            _incomingBuffer.Discard(FrameHeader.Size);
 
             // Read frame contents
             await EnsureIncomingBytesAsync(frameHeader.Length).ConfigureAwait(false);
@@ -191,18 +199,17 @@ namespace System.Net.Http
             return frameHeader;
         }
 
-        private async void ProcessIncomingFrames()
+        private async Task ProcessIncomingFramesAsync()
         {
             try
             {
-                // Receive the initial SETTINGS frame from the peer.
-                FrameHeader frameHeader = await ReadFrameAsync().ConfigureAwait(false);
+                FrameHeader frameHeader = await ReadFrameAsync(initialFrame: true).ConfigureAwait(false);
                 if (frameHeader.Type != FrameType.Settings || frameHeader.AckFlag)
                 {
                     throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
                 }
 
-                // Process the SETTINGS frame.  This will send an ACK.
+                // Process the initial SETTINGS frame. This will send an ACK.
                 ProcessSettingsFrame(frameHeader);
 
                 // Keep processing frames as they arrive.
@@ -251,9 +258,14 @@ namespace System.Net.Http
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception e)
             {
-                Abort();
+                if (NetEventSource.IsEnabled) Trace($"ProcessIncomingFramesAsync: {e.Message}");
+
+                if (!_disposed)
+                {
+                    Abort(e);
+                }
             }
         }
 
@@ -604,12 +616,11 @@ namespace System.Net.Http
                 return;
             }
 
+            var protocolError = (Http2ProtocolErrorCode)BinaryPrimitives.ReadInt32BigEndian(_incomingBuffer.ActiveSpan);
+
             _incomingBuffer.Discard(frameHeader.Length);
 
-            // CONSIDER: We ignore the error code in the RST_STREAM frame.
-            // We could read this and report it to the user as part of the request exception.
-
-            http2Stream.OnResponseAbort();
+            http2Stream.OnResponseAbort(new Http2ProtocolException(protocolError));
 
             RemoveStream(http2Stream);
         }
@@ -630,9 +641,10 @@ namespace System.Net.Http
                 throw new Http2ProtocolException(Http2ProtocolErrorCode.ProtocolError);
             }
 
-            int lastValidStream = (int)((uint)((_incomingBuffer.ActiveSpan[0] << 24) | (_incomingBuffer.ActiveSpan[1] << 16) | (_incomingBuffer.ActiveSpan[2] << 8) | _incomingBuffer.ActiveSpan[3]) & 0x7FFFFFFF);
+            int lastValidStream = (int)(BinaryPrimitives.ReadUInt32BigEndian(_incomingBuffer.ActiveSpan) & 0x7FFFFFFF);
+            var errorCode = (Http2ProtocolErrorCode)BinaryPrimitives.ReadInt32BigEndian(_incomingBuffer.ActiveSpan.Slice(sizeof(int)));
 
-            AbortStreams(lastValidStream);
+            AbortStreams(lastValidStream, new Http2ProtocolException(errorCode));
 
             _incomingBuffer.Discard(frameHeader.Length);
         }
@@ -713,9 +725,9 @@ namespace System.Net.Http
             }
 
             // If the connection has been aborted, then fail now instead of trying to send more data.
-            if (IsAborted())
+            if (_disposed)
             {
-                throw new IOException(SR.net_http_invalid_response);
+                throw new IOException(SR.net_http_request_aborted);
             }
         }
 
@@ -952,7 +964,7 @@ namespace System.Net.Http
             }
         }
 
-        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        private async ValueTask<Http2Stream> SendHeadersAsync(HttpRequestMessage request, CancellationToken cancellationToken, bool mustFlush = false)
         {
             // Ensure we don't exceed the max concurrent streams setting.
             await _concurrentStreams.RequestCreditAsync(1, cancellationToken).ConfigureAwait(false);
@@ -1006,7 +1018,7 @@ namespace System.Net.Http
 
                 // If this is not the end of the stream, we can put off flushing the buffer
                 // since we know that there are going to be data frames following.
-                FinishWrite(mustFlush: (flags & FrameFlags.EndStream) != 0);
+                FinishWrite(mustFlush: mustFlush || (flags & FrameFlags.EndStream) != 0);
             }
             catch
             {
@@ -1015,6 +1027,7 @@ namespace System.Net.Http
                     RemoveStream(http2Stream);
                     http2Stream.Dispose();
                 }
+
                 throw;
             }
             finally
@@ -1113,20 +1126,20 @@ namespace System.Net.Http
             _outgoingBuffer.Commit(FrameHeader.Size);
         }
 
-        private void Abort()
+         /// <summary>Abort all streams and cause further processing to fail.</summary>
+         /// <param name="abortException">Exception causing Abort to be called.</param>
+        private void Abort(Exception abortException)
         {
             // The connection has failed, e.g. failed IO or a connection-level frame error.
-            // Abort all streams and cause further processing to fail.
-            AbortStreams(0);
-        }
-
-        private bool IsAborted()
-        {
-            return _disposed;
+            if (_abortException == null)
+            {
+                _abortException = abortException;
+            }
+            AbortStreams(0, abortException);
         }
 
         /// <summary>Gets whether the connection exceeded any of the connection limits.</summary>
-        /// <param name="nowTicks">The current tick count.  Passed in to amortize the cost of calling Environment.TickCount.</param>
+        /// <param name="nowTicks">The current tick count.  Passed in to amortize the cost of calling Environment.TickCount64.</param>
         /// <param name="connectionLifetime">How long a connection can be open to be considered reusable.</param>
         /// <param name="connectionIdleTimeout">How long a connection can have been idle in the pool to be considered reusable.</param>
         /// <returns>
@@ -1137,7 +1150,7 @@ namespace System.Net.Http
         /// the nature of connection pooling.
         /// </returns>
 
-        public bool IsExpired(int nowTicks,
+        public bool IsExpired(long nowTicks,
                               TimeSpan connectionLifetime,
                               TimeSpan connectionIdleTimeout)
 
@@ -1150,9 +1163,9 @@ namespace System.Net.Http
             // Check idle timeout when there are not pending requests for a while.
             if ((connectionIdleTimeout != Timeout.InfiniteTimeSpan) &&
                 (_httpStreams.Count == 0) &&
-                ((uint)(nowTicks - _idleSinceTickCount) > connectionIdleTimeout.TotalMilliseconds))
+                ((nowTicks - _idleSinceTickCount) > connectionIdleTimeout.TotalMilliseconds))
             {
-                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((uint)(nowTicks - _idleSinceTickCount))} > {connectionIdleTimeout}.");
+                if (NetEventSource.IsEnabled) Trace($"Connection no longer usable. Idle {TimeSpan.FromMilliseconds((nowTicks - _idleSinceTickCount))} > {connectionIdleTimeout}.");
 
                 return true;
             }
@@ -1160,14 +1173,14 @@ namespace System.Net.Http
             return LifetimeExpired(nowTicks, connectionLifetime);
         }
 
-        private void AbortStreams(int lastValidStream)
+        private void AbortStreams(int lastValidStream, Exception abortException)
         {
+            bool shouldInvalidate = false;
             lock (SyncObject)
             {
                 if (!_disposed)
                 {
-                    _pool.InvalidateHttp2Connection(this);
-
+                    shouldInvalidate = true;
                     _disposed = true;
                 }
 
@@ -1178,13 +1191,21 @@ namespace System.Net.Http
 
                     if (streamId > lastValidStream)
                     {
-                        kvp.Value.OnResponseAbort();
+                        kvp.Value.OnResponseAbort(abortException);
 
                         _httpStreams.Remove(kvp.Value.StreamId);
                     }
                 }
 
                 CheckForShutdown();
+            }
+
+            if (shouldInvalidate)
+            {
+                // Invalidate outside of lock to avoid race with HttpPool Dispose()
+                // We should not try to grab pool lock while holding connection lock as on disposing pool,
+                // we could hold pool lock while trying to grab connection lock in Dispose().
+                _pool.InvalidateHttp2Connection(this);
             }
         }
 
@@ -1312,7 +1333,7 @@ namespace System.Net.Http
         private enum FrameFlags : byte
         {
             None = 0,
-            
+
             // Some frame types define bits differently.  Define them all here for simplicity.
 
             EndStream =     0b00000001,
@@ -1338,36 +1359,66 @@ namespace System.Net.Http
 
         public sealed override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            // TODO: ISSUE 31310: Cancellation support
-
             Http2Stream http2Stream = null;
             try
             {
                 // Send headers
-                http2Stream = await SendHeadersAsync(request, cancellationToken).ConfigureAwait(false);
+                bool shouldExpectContinue = request.Content != null && request.HasHeaders && request.Headers.ExpectContinue == true;
 
-                // Send request body, if any
-                await http2Stream.SendRequestBodyAsync(cancellationToken).ConfigureAwait(false);
+                http2Stream = await SendHeadersAsync(request, cancellationToken, mustFlush: shouldExpectContinue).ConfigureAwait(false);
+                if (shouldExpectContinue)
+                {
+                    // Send header and wait a little bit to see if server sends 100, reject code or nothing.
+                    if (NetEventSource.IsEnabled) Trace($"Request content is not null, start processing 100-Continue.");
+                    await http2Stream.SendRequestBodyWithExpect100ContinueAsync(cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    // Send request body, if any
+                    Task bodyTask = http2Stream.SendRequestBodyAsync(cancellationToken);
+                    // read response headers.
+                    Task responseHeadersTask = http2Stream.ReadResponseHeadersAsync();
 
-                // Wait for response headers to be read.
-                await http2Stream.ReadResponseHeadersAsync().ConfigureAwait(false);
+                    if (bodyTask == await Task.WhenAny(bodyTask, responseHeadersTask).ConfigureAwait(false) ||
+                        bodyTask.IsCompleted)
+                    {
+                        // The sending of the request body completed before receiving all of the request headers.
+                        Task t = bodyTask;
+                        bodyTask = null;
+                        try
+                        {
+                            await t.ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            if (NetEventSource.IsEnabled) Trace($"SendRequestBody Task failed. {e}");
+                            throw;
+                        }
+
+                        await responseHeadersTask.ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        // We received the response headers but the request body hasn't yet finished.
+                        // If the connection is aborted or if we get RST or GOAWAY from server, exception will be
+                        // stored in stream._abortException and propagated to up to caller if possible while processing response.
+                        _ = bodyTask.ContinueWith((t, state) => {
+                                Http2Connection c = (Http2Connection)state;
+                                if (NetEventSource.IsEnabled) c.Trace($"SendRequestBody Task failed. {t.Exception}");
+                             }, this, CancellationToken.None, TaskContinuationOptions.OnlyOnFaulted, TaskScheduler.Default);
+                        bodyTask = null;
+                    }
+                }
             }
             catch (Exception e)
             {
-                http2Stream?.Dispose();
+                Exception replacementException = null;
 
-                if (e is IOException)
+                if (e is IOException ||
+                    e is ObjectDisposedException ||
+                    e is Http2ProtocolException)
                 {
-                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
-                }
-                else if (e is ObjectDisposedException)
-                {
-                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
-                }
-                else if (e is Http2ProtocolException)
-                {
-                    // ISSUE 31315: Determine if/how to expose HTTP2 error codes
-                    throw new HttpRequestException(SR.net_http_client_execution_error, e);
+                    replacementException = new HttpRequestException(SR.net_http_client_execution_error, _abortException ?? e);
                 }
                 else if (e is OperationCanceledException oce)
                 {
@@ -1377,17 +1428,23 @@ namespace System.Net.Http
                         http2Stream.Cancel();
                     }
 
-                    if (oce.CancellationToken == cancellationToken)
+                    if (oce.CancellationToken != cancellationToken)
                     {
-                        throw;
+                        replacementException = new OperationCanceledException(oce.Message, oce, cancellationToken);
                     }
+                }
 
-                    throw new OperationCanceledException(cancellationToken);
-                }
-                else
+                if (http2Stream != null)
                 {
-                    throw;
+                    RemoveStream(http2Stream);
+                    http2Stream.Dispose();
                 }
+
+                if (replacementException != null)
+                {
+                    throw replacementException;
+                }
+                throw;
             }
 
             return http2Stream.Response;
@@ -1397,11 +1454,18 @@ namespace System.Net.Http
         {
             lock (SyncObject)
             {
-                if (_disposed || _nextStream == MaxStreamId)
+                if (_nextStream == MaxStreamId || _disposed)
                 {
+                    if (_abortException != null)
+                    {
+                        // Aborted because protocol error or IO.
+                        throw new ObjectDisposedException(nameof(Http2Connection));
+                    }
+
+                    // We run out of IDs or we have race condition between receiving GOAWAY and processing requests.
                     // Throw a retryable request exception. This will cause retry logic to kick in
                     // and perform another connection attempt. The user should never see this exception.
-                    throw new HttpRequestException(null, null, true);
+                    throw new HttpRequestException(null, null, allowRetry: true);
                 }
 
                 int streamId = _nextStream;
@@ -1423,7 +1487,10 @@ namespace System.Net.Http
             {
                 if (!_httpStreams.Remove(http2Stream.StreamId, out Http2Stream removed))
                 {
-                    Debug.Fail("_httpStreams.Remove failed");
+                    // Stream can be removed from background ProcessIncomingFramesAsync() when endOfStream is set
+                    // or when we hit various error conditions in SendAsync() call.
+                    // Skip logic below if stream was already removed.
+                    return;
                 }
 
                 _concurrentStreams.AdjustCredit(1);
@@ -1433,7 +1500,7 @@ namespace System.Net.Http
                 if (_httpStreams.Count == 0)
                 {
                     // If this was last pending request, get timestamp so we can monitor idle time.
-                    _idleSinceTickCount = Environment.TickCount;
+                    _idleSinceTickCount = Environment.TickCount64;
                 }
 
                 if (_disposed)
@@ -1443,50 +1510,17 @@ namespace System.Net.Http
             }
         }
 
-        // TODO: ISSUE 31315: Should this be public?
-        internal enum Http2ProtocolErrorCode
-        {
-            NoError = 0x0,
-            ProtocolError = 0x1,
-            InternalError = 0x2,
-            FlowControlError = 0x3,
-            SettingsTimeout = 0x4,
-            StreamClosed = 0x5,
-            FrameSizeError = 0x6,
-            RefusedStream = 0x7,
-            Cancel = 0x8,
-            CompressionError = 0x9,
-            ConnectError = 0xa,
-            EnhanceYourCalm = 0xb,
-            InadequateSecurity = 0xc,
-            Http11Required = 0xd
-        }
-
-        // TODO: ISSUE 31315: Should this be public?
-        internal class Http2ProtocolException : Exception
-        {
-            private readonly Http2ProtocolErrorCode _errorCode;
-
-            public Http2ProtocolException(Http2ProtocolErrorCode errorCode)
-                : base($"Http2 Protocol Error, errorCode = {errorCode}")
-            {
-                _errorCode = errorCode;
-            }
-
-            public Http2ProtocolErrorCode ErrorCode => _errorCode;
-        }
-
-        internal static async ValueTask<int> ReadAtLeastAsync(Stream stream, Memory<byte> buffer, int minReadBytes)
+        private static async ValueTask<int> ReadAtLeastAsync(Stream stream, Memory<byte> buffer, int minReadBytes)
         {
             Debug.Assert(buffer.Length >= minReadBytes);
 
             int totalBytesRead = 0;
             while (totalBytesRead < minReadBytes)
             {
-                int bytesRead = await stream.ReadAsync(buffer).ConfigureAwait(false);
+                int bytesRead = await stream.ReadAsync(buffer.Slice(totalBytesRead)).ConfigureAwait(false);
                 if (bytesRead == 0)
                 {
-                    throw new IOException(SR.net_http_invalid_response);
+                    throw new IOException(SR.Format(SR.net_http_invalid_response_premature_eof_bytecount, minReadBytes));
                 }
 
                 totalBytesRead += bytesRead;

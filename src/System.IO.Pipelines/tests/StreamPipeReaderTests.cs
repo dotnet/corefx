@@ -484,10 +484,11 @@ namespace System.IO.Pipelines.Tests
         [Fact]
         public void OnWriterCompletedThrowsNotSupportedException()
         {
+            bool fired = false;
             PipeReader reader = PipeReader.Create(Stream.Null);
-
-            Assert.Throws<NotSupportedException>(() => reader.OnWriterCompleted((_, __) => { }, null));
+            reader.OnWriterCompleted((_, __) => { fired = true; }, null);
             reader.Complete();
+            Assert.False(fired);
         }
 
         [Fact]
@@ -527,6 +528,17 @@ namespace System.IO.Pipelines.Tests
         {
             Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: -1));
             Assert.Throws<ArgumentOutOfRangeException>(() => new StreamPipeReaderOptions(minimumReadSize: 0));
+        }
+
+        [Fact]
+        public void LeaveUnderlyingStreamOpen()
+        {
+            var stream = new MemoryStream();
+            var reader = PipeReader.Create(stream, new StreamPipeReaderOptions(leaveOpen: true));
+
+            reader.Complete();
+
+            Assert.True(stream.CanRead);
         }
 
         private static async Task<string> ReadFromPipeAsString(PipeReader reader)
@@ -583,7 +595,7 @@ namespace System.IO.Pipelines.Tests
                 return bytes;
             }
 
-#if !netstandard
+#if netcoreapp
             public override async ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken = default)
             {
                 if (_throwOnNextCallToRead)

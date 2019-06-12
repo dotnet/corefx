@@ -18,14 +18,14 @@ namespace System.Diagnostics.Tracing
     /// </summary>
     internal sealed class InvokeTypeInfo : TraceLoggingTypeInfo
     {
-        internal readonly PropertyAnalysis[] properties;
+        internal readonly PropertyAnalysis[]? properties;
 
         public InvokeTypeInfo(
             Type type,
             TypeAnalysis typeAnalysis)
             : base(
                 type,
-                typeAnalysis.name,
+                typeAnalysis.name!,
                 typeAnalysis.level,
                 typeAnalysis.opcode,
                 typeAnalysis.keywords,
@@ -37,7 +37,7 @@ namespace System.Diagnostics.Tracing
 
         public override void WriteMetadata(
             TraceLoggingMetadataCollector collector,
-            string name,
+            string? name,
             EventFieldFormat format)
         {
             var groupCollector = collector.AddGroup(name);
@@ -72,12 +72,12 @@ namespace System.Diagnostics.Tracing
             }
         }
 
-        public override object GetData(object value)
+        public override object? GetData(object? value)
         {
             if (this.properties != null)
             {
                 var membersNames = new List<string>();
-                var memebersValues = new List<object>();
+                var memebersValues = new List<object?>();
                 for (int i = 0; i < this.properties.Length; i++)
                 {
                     var propertyValue = properties[i].propertyInfo.GetValue(value);

@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Runtime.Intrinsics;
 using System.Runtime.Intrinsics.X86;
@@ -325,6 +324,11 @@ namespace System.Text.Unicode
                             // or palignr available to us, we'll do this as a loop. We won't look at
                             // the very last high surrogate char element since we don't yet know if
                             // the next vector read will have a low surrogate char element.
+                            
+                            if (lowSurrogateChars[0] != 0)
+                            {
+                                goto Error; // error: start of buffer contains standalone low surrogate char
+                            }
 
                             ushort surrogatePairsCount = 0;
                             for (int i = 0; i < Vector<ushort>.Count - 1; i++)

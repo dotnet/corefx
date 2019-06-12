@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 namespace System.Runtime.CompilerServices
 {
     [AttributeUsage(AttributeTargets.Field | AttributeTargets.Parameter, Inherited = false)]
@@ -15,6 +14,8 @@ namespace System.Runtime.CompilerServices
             _date = new DateTime(ticks);
         }
 
-        public override object? Value => _date; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
+#pragma warning disable CS8608
+        public override object Value => _date;
+#pragma warning restore CS8608
     }
 }

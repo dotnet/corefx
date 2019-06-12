@@ -256,13 +256,12 @@ namespace System.Tests
 
         [Fact]
         [SkipOnTargetFramework(TargetFrameworkMonikers.Uap, "Assembly.LoadFile is not supported in AppX.")]
-        [ActiveIssue("dotnet/coreclr#24154")]
         public static void CreateInstanceAssemblyResolve()
         {
             RemoteExecutor.Invoke(() =>
             {
                 AppDomain.CurrentDomain.AssemblyResolve += (object sender, ResolveEventArgs args) => Assembly.LoadFile(Path.Combine(Directory.GetCurrentDirectory(), "TestLoadAssembly.dll"));
-                Assert.Throws<FileNotFoundException>(() => Activator.CreateInstance(",,,,", "PublicClassSample"));
+                Assert.Throws<FileLoadException>(() => Activator.CreateInstance(",,,,", "PublicClassSample"));
             }).Dispose();
         }
 
@@ -276,30 +275,6 @@ namespace System.Tests
 
             Assert.Throws<ArgumentException>("type", () => Activator.CreateInstance(typeBuilder));
             Assert.Throws<NotSupportedException>(() => Activator.CreateInstance(typeBuilder, new object[0]));
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "AssemblyBuilderAccess.ReflectionOnly is not supported in .NET Core")]
-        public void CreateInstance_ReflectionOnlyType_ThrowsInvalidOperationException()
-        {
-            AssemblyName assemblyName = new AssemblyName("Assembly");
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, (AssemblyBuilderAccess)6);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
-            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type", TypeAttributes.Public);
-
-            Assert.Throws<InvalidOperationException>(() => Activator.CreateInstance(typeBuilder.CreateType()));
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.NetFramework, "AssemblyBuilderAccess.Save is not supported in .NET Core")]
-        public void CreateInstance_DynamicTypeWithoutRunAccess_ThrowsNotSupportedException()
-        {
-            AssemblyName assemblyName = new AssemblyName("Assembly");
-            AssemblyBuilder assemblyBuilder = AssemblyBuilder.DefineDynamicAssembly(assemblyName, (AssemblyBuilderAccess)2);
-            ModuleBuilder moduleBuilder = assemblyBuilder.DefineDynamicModule("Module");
-            TypeBuilder typeBuilder = moduleBuilder.DefineType("Type", TypeAttributes.Public);
-
-            Assert.Throws<NotSupportedException>(() => Activator.CreateInstance(typeBuilder.CreateType()));
         }
     }
 }

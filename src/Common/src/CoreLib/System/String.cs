@@ -2,11 +2,11 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Buffers;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -23,7 +23,15 @@ namespace System
 
     [Serializable]
     [System.Runtime.CompilerServices.TypeForwardedFrom("mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
-    public sealed partial class String : IComparable, IEnumerable, IConvertible, IEnumerable<char>, IComparable<string?>, IEquatable<string?>, ICloneable
+    public sealed partial class String : IComparable, IEnumerable, IConvertible, IEnumerable<char>, IComparable<string?>,
+        // IEquatable<string> is invariant by design.  However, the lack of covariance means that String?
+        // couldn't be used in places constrained to T : IEquatable<String>.  As a workaround, until the
+        // language provides a mechanism for this, we make the generic type argument oblivious, in conjunction
+        // with making all such constraints oblivious as well.
+#nullable disable
+        IEquatable<string>,
+#nullable restore
+        ICloneable
     {
         /*
          * CONSTRUCTORS
@@ -437,7 +445,7 @@ namespace System
         }
 
         [NonVersionable]
-        public static bool IsNullOrEmpty(string? value)
+        public static bool IsNullOrEmpty([NotNullWhen(false)] string? value)
         {
             // Using 0u >= (uint)value.Length rather than
             // value.Length == 0 as it will elide the bounds check to
@@ -448,7 +456,7 @@ namespace System
             return (value == null || 0u >= (uint)value.Length) ? true : false;
         }
 
-        public static bool IsNullOrWhiteSpace(string? value)
+        public static bool IsNullOrWhiteSpace([NotNullWhen(false)] string? value)
         {
             if (value == null) return true;
 
@@ -676,6 +684,7 @@ namespace System
             return length;
         }
 
+        [DoesNotReturn]
         private static void ThrowMustBeNullTerminatedString()
         {
             throw new ArgumentException(SR.Arg_MustBeNullTerminatedString);
@@ -774,17 +783,15 @@ namespace System
 
         public bool IsNormalized(NormalizationForm normalizationForm)
         {
-#if CORECLR
-            if (this.IsFastSort())
+            if (this.IsAscii())
             {
-                // If its FastSort && one of the 4 main forms, then its already normalized
+                // If its ASCII && one of the 4 main forms, then its already normalized
                 if (normalizationForm == NormalizationForm.FormC ||
                     normalizationForm == NormalizationForm.FormKC ||
                     normalizationForm == NormalizationForm.FormD ||
                     normalizationForm == NormalizationForm.FormKD)
                     return true;
             }
-#endif
             return Normalization.IsNormalized(this, normalizationForm);
         }
 
@@ -795,18 +802,24 @@ namespace System
 
         public string Normalize(NormalizationForm normalizationForm)
         {
-#if CORECLR
             if (this.IsAscii())
             {
-                // If its FastSort && one of the 4 main forms, then its already normalized
+                // If its ASCII && one of the 4 main forms, then its already normalized
                 if (normalizationForm == NormalizationForm.FormC ||
                     normalizationForm == NormalizationForm.FormKC ||
                     normalizationForm == NormalizationForm.FormD ||
                     normalizationForm == NormalizationForm.FormKD)
                     return this;
             }
-#endif
             return Normalization.Normalize(this, normalizationForm);
+        }
+
+        private unsafe bool IsAscii()
+        {
+            fixed (char* str = &_firstChar)
+            {
+                return ASCIIUtility.GetIndexOfFirstNonAsciiChar(str, (uint)Length) == (uint)Length;
+            }
         }
     }
 }

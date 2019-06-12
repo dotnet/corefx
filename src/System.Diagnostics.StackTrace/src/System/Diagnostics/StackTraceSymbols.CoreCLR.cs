@@ -13,14 +13,14 @@ namespace System.Diagnostics
 {
     internal class StackTraceSymbols : IDisposable
     {
-        private readonly ConditionalWeakTable<Assembly, MetadataReaderProvider> _metadataCache;
+        private readonly ConditionalWeakTable<Assembly, MetadataReaderProvider?> _metadataCache;
 
         /// <summary>
         /// Create an instance of this class.
         /// </summary>
         public StackTraceSymbols()
         {
-            _metadataCache = new ConditionalWeakTable<Assembly, MetadataReaderProvider>();
+            _metadataCache = new ConditionalWeakTable<Assembly, MetadataReaderProvider?>();
         }
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace System.Diagnostics
         /// </summary>
         void IDisposable.Dispose()
         {
-            foreach ((Assembly _, MetadataReaderProvider provider) in _metadataCache)
+            foreach ((Assembly _, MetadataReaderProvider? provider) in _metadataCache)
             {
                 provider?.Dispose();
             }
@@ -50,15 +50,15 @@ namespace System.Diagnostics
         /// <param name="sourceFile">source file return</param>
         /// <param name="sourceLine">line number return</param>
         /// <param name="sourceColumn">column return</param>
-        internal void GetSourceLineInfo(Assembly assembly, string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize, 
-            IntPtr inMemoryPdbAddress, int inMemoryPdbSize, int methodToken, int ilOffset, 
-            out string sourceFile, out int sourceLine, out int sourceColumn)
+        internal void GetSourceLineInfo(Assembly assembly, string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize,
+            IntPtr inMemoryPdbAddress, int inMemoryPdbSize, int methodToken, int ilOffset,
+            out string? sourceFile, out int sourceLine, out int sourceColumn)
         {
             sourceFile = null;
             sourceLine = 0;
             sourceColumn = 0;
 
-            MetadataReader reader = TryGetReader(assembly, assemblyPath, loadedPeAddress, loadedPeSize, inMemoryPdbAddress, inMemoryPdbSize);
+            MetadataReader? reader = TryGetReader(assembly, assemblyPath, loadedPeAddress, loadedPeSize, inMemoryPdbAddress, inMemoryPdbSize);
             if (reader != null)
             {
                 Handle handle = MetadataTokens.Handle(methodToken);
@@ -114,7 +114,7 @@ namespace System.Diagnostics
         /// underlying ConditionalWeakTable doesn't keep the assembly alive, so cached types will be
         /// correctly invalidated when the Assembly is unloaded by the GC.
         /// </remarks>
-        private unsafe MetadataReader TryGetReader(Assembly assembly, string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize, IntPtr inMemoryPdbAddress, int inMemoryPdbSize)
+        private unsafe MetadataReader? TryGetReader(Assembly assembly, string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize, IntPtr inMemoryPdbAddress, int inMemoryPdbSize)
         {
             if ((loadedPeAddress == IntPtr.Zero || assemblyPath == null) && inMemoryPdbAddress == IntPtr.Zero)
             {
@@ -124,7 +124,7 @@ namespace System.Diagnostics
 
             // The ConditionalWeakTable's GetValue + callback will atomically create the cache entry for us
             // so we are protected from multiple threads racing to get/create the same MetadataReaderProvider
-            MetadataReaderProvider provider = _metadataCache.GetValue(assembly, (assembly) =>
+            MetadataReaderProvider? provider = _metadataCache.GetValue(assembly, (assembly) =>
             {
                 return (inMemoryPdbAddress != IntPtr.Zero) ?
                             TryOpenReaderForInMemoryPdb(inMemoryPdbAddress, inMemoryPdbSize) :
@@ -135,7 +135,7 @@ namespace System.Diagnostics
             return provider?.GetMetadataReader();
         }
 
-        private static unsafe MetadataReaderProvider TryOpenReaderForInMemoryPdb(IntPtr inMemoryPdbAddress, int inMemoryPdbSize)
+        private static unsafe MetadataReaderProvider? TryOpenReaderForInMemoryPdb(IntPtr inMemoryPdbAddress, int inMemoryPdbSize)
         {
             Debug.Assert(inMemoryPdbAddress != IntPtr.Zero);
 
@@ -161,7 +161,7 @@ namespace System.Diagnostics
             }
         }
 
-        private static unsafe PEReader TryGetPEReader(string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize)
+        private static unsafe PEReader? TryGetPEReader(string? assemblyPath, IntPtr loadedPeAddress, int loadedPeSize)
         {
             // TODO: https://github.com/dotnet/corefx/issues/11406
             //if (loadedPeAddress != IntPtr.Zero && loadedPeSize > 0)
@@ -169,7 +169,7 @@ namespace System.Diagnostics
             //    return new PEReader((byte*)loadedPeAddress, loadedPeSize, isLoadedImage: true);
             //}
 
-            Stream peStream = TryOpenFile(assemblyPath);
+            Stream? peStream = TryOpenFile(assemblyPath);
             if (peStream != null)
             {
                 return new PEReader(peStream);
@@ -178,7 +178,7 @@ namespace System.Diagnostics
             return null;
         }
 
-        private static MetadataReaderProvider TryOpenReaderFromAssemblyFile(string assemblyPath, IntPtr loadedPeAddress, int loadedPeSize)
+        private static MetadataReaderProvider? TryOpenReaderFromAssemblyFile(string? assemblyPath, IntPtr loadedPeAddress, int loadedPeSize)
         {
             using (var peReader = TryGetPEReader(assemblyPath, loadedPeAddress, loadedPeSize))
             {
@@ -201,7 +201,7 @@ namespace System.Diagnostics
             return null;
         }
 
-        private static Stream TryOpenFile(string path)
+        private static Stream? TryOpenFile(string? path)
         {
             if (!File.Exists(path))
             {
@@ -210,7 +210,8 @@ namespace System.Diagnostics
 
             try
             {
-                return File.OpenRead(path);
+                // Open the file with read and delete FileShare flags. This matches what dll loading does
+                return new FileStream(path!, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete);
             }
             catch
             {

@@ -96,7 +96,7 @@ namespace System.Net
 
         private static Uri CreateProxyUri(string address) =>
             address == null ? null :
-            address.IndexOf("://") == -1 ? new Uri("http://" + address) :
+            address.IndexOf("://", StringComparison.Ordinal) == -1 ? new Uri("http://" + address) :
             new Uri(address);
 
         private void UpdateRegExList(bool canThrow)
@@ -184,7 +184,7 @@ namespace System.Net
             // Perf note: The .NET Framework caches this and then uses network change notifications to track
             // whether the set should be recomputed.  We could consider doing the same if this is observed as
             // a bottleneck, but that tracking has its own costs.
-            IPAddress[] localAddresses = Dns.GetHostEntryAsync(Dns.GetHostName()).GetAwaiter().GetResult().AddressList; // TODO: Use synchronous GetHostEntry when available
+            IPAddress[] localAddresses = Dns.GetHostEntry(Dns.GetHostName()).AddressList;
             for (int i = 0; i < localAddresses.Length; i++)
             {
                 if (ipAddress.Equals(localAddresses[i]))

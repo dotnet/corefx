@@ -10,7 +10,6 @@
 //
 // =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
 
-#nullable enable
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -21,19 +20,6 @@ using Internal.Runtime.CompilerServices;
 
 namespace System.Threading.Tasks
 {
-    /// <summary>
-    /// Utility class for allocating structs as heap variables
-    /// </summary>
-    internal class Shared<T>
-    {
-        internal T Value;
-
-        internal Shared(T value)
-        {
-            this.Value = value;
-        }
-    }
-
     /// <summary>
     /// Represents the current stage in the lifecycle of a <see cref="Task"/>.
     /// </summary>
@@ -208,12 +194,14 @@ namespace System.Threading.Tasks
         {
             Debug.Assert(task != null, "Null Task objects can't be added to the ActiveTasks collection");
 
+#pragma warning disable CS8634 // TODO-NULLABLE: Remove warning disable when nullable attributes are respected
             LazyInitializer.EnsureInitialized(ref s_currentActiveTasks, () => new Dictionary<int, Task>());
+#pragma warning restore CS8634
 
             int taskId = task.Id;
-            lock (s_currentActiveTasks!) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            lock (s_currentActiveTasks!) // TODO-NULLABLE: Remove ! when nullable attributes are respected
             {
-                s_currentActiveTasks![taskId] = task; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                s_currentActiveTasks[taskId] = task;
             }
             //always return true to keep signature as bool for backwards compatibility
             return true;
@@ -249,7 +237,7 @@ namespace System.Threading.Tasks
             // Cancellation fields (token, registration, and internally requested)
 
             internal CancellationToken m_cancellationToken; // Task's cancellation token, if it has one
-            internal Shared<CancellationTokenRegistration>? m_cancellationRegistration; // Task's registration with the cancellation token
+            internal StrongBox<CancellationTokenRegistration>? m_cancellationRegistration; // Task's registration with the cancellation token
             internal volatile int m_internalCancellationRequested; // Its own field because multiple threads legally try to set it.
 
             // Parenting fields
@@ -428,7 +416,7 @@ namespace System.Threading.Tasks
         /// <exception cref="T:System.ArgumentNullException">
         /// The <paramref name="action"/> argument is null.
         /// </exception>
-        public Task(Action<object?> action, object? state) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        public Task(Action<object?> action, object? state)
             : this(action, state, null, default, TaskCreationOptions.None, InternalTaskOptions.None, null)
         {
         }
@@ -445,7 +433,7 @@ namespace System.Threading.Tasks
         /// <exception cref="T:System.ObjectDisposedException">The provided <see cref="System.Threading.CancellationToken">CancellationToken</see>
         /// has already been disposed.
         /// </exception>
-        public Task(Action<object?> action, object? state, CancellationToken cancellationToken) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        public Task(Action<object?> action, object? state, CancellationToken cancellationToken)
             : this(action, state, null, cancellationToken, TaskCreationOptions.None, InternalTaskOptions.None, null)
         {
         }
@@ -466,7 +454,7 @@ namespace System.Threading.Tasks
         /// The <paramref name="creationOptions"/> argument specifies an invalid value for <see
         /// cref="T:System.Threading.Tasks.TaskCreationOptions"/>.
         /// </exception>
-        public Task(Action<object?> action, object? state, TaskCreationOptions creationOptions) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        public Task(Action<object?> action, object? state, TaskCreationOptions creationOptions)
             : this(action, state, Task.InternalCurrentIfAttached(creationOptions), default, creationOptions, InternalTaskOptions.None, null)
         {
         }
@@ -491,7 +479,7 @@ namespace System.Threading.Tasks
         /// <exception cref="T:System.ObjectDisposedException">The provided <see cref="System.Threading.CancellationToken">CancellationToken</see>
         /// has already been disposed.
         /// </exception>
-        public Task(Action<object?> action, object? state, CancellationToken cancellationToken, TaskCreationOptions creationOptions) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        public Task(Action<object?> action, object? state, CancellationToken cancellationToken, TaskCreationOptions creationOptions)
             : this(action, state, Task.InternalCurrentIfAttached(creationOptions), cancellationToken, creationOptions, InternalTaskOptions.None, null)
         {
         }
@@ -635,7 +623,7 @@ namespace System.Threading.Tasks
                         if (antecedent == null)
                         {
                             // if no antecedent was specified, use this task's reference as the cancellation state object
-                            ctr = cancellationToken.UnsafeRegister(t => ((Task)t!).InternalCancel(false), this); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                            ctr = cancellationToken.UnsafeRegister(t => ((Task)t!).InternalCancel(false), this);
                         }
                         else
                         {
@@ -657,7 +645,7 @@ namespace System.Threading.Tasks
                             new Tuple<Task, Task, TaskContinuation>(this, antecedent, continuation));
                         }
 
-                        props.m_cancellationRegistration = new Shared<CancellationTokenRegistration>(ctr);
+                        props.m_cancellationRegistration = new StrongBox<CancellationTokenRegistration>(ctr);
                     }
                 }
             }
@@ -1051,7 +1039,7 @@ namespace System.Threading.Tasks
                 ThrowHelper.ThrowArgumentNullException(ExceptionArgument.scheduler);
             }
 
-            InternalRunSynchronously(scheduler!, waitForCompletion: true); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            InternalRunSynchronously(scheduler!, waitForCompletion: true); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
         }
 
         //
@@ -1357,7 +1345,9 @@ namespace System.Threading.Tasks
         /// <returns>The initialized contingent properties object.</returns>
         internal ContingentProperties EnsureContingentPropertiesInitialized()
         {
-            return LazyInitializer.EnsureInitialized(ref m_contingentProperties, () => new ContingentProperties())!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+#pragma warning disable CS8634 // TODO-NULLABLE: Remove warning disable when nullable attributes are respected
+            return LazyInitializer.EnsureInitialized(ref m_contingentProperties, () => new ContingentProperties())!;
+#pragma warning restore CS8634
         }
 
         /// <summary>
@@ -1526,7 +1516,7 @@ namespace System.Threading.Tasks
                     }
                 }
 
-                return contingentProps.m_completionEvent!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                return contingentProps.m_completionEvent!; // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             }
         }
 
@@ -1816,7 +1806,7 @@ namespace System.Threading.Tasks
 
             lock (props)
             {
-                props.m_exceptionsHolder!.Add(exceptionObject, representsCancellation); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                props.m_exceptionsHolder!.Add(exceptionObject, representsCancellation); // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             }
         }
 
@@ -3614,13 +3604,13 @@ namespace System.Threading.Tasks
             CreationOptionsFromContinuationOptions(continuationOptions, out creationOptions, out internalOptions);
 
             Task continuationTask = new ContinuationTaskFromTask(
-                this, continuationAction!, null, // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                this, continuationAction!, null, // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 creationOptions, internalOptions
             );
 
             // Register the continuation.  If synchronous execution is requested, this may
             // actually invoke the continuation before returning.
-            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
 
             return continuationTask;
         }
@@ -3804,13 +3794,13 @@ namespace System.Threading.Tasks
             CreationOptionsFromContinuationOptions(continuationOptions, out creationOptions, out internalOptions);
 
             Task continuationTask = new ContinuationTaskFromTask(
-                this, continuationAction!, state, // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                this, continuationAction!, state, // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 creationOptions, internalOptions
             );
 
             // Register the continuation.  If synchronous execution is requested, this may
             // actually invoke the continuation before returning.
-            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
 
             return continuationTask;
         }
@@ -4007,13 +3997,13 @@ namespace System.Threading.Tasks
             CreationOptionsFromContinuationOptions(continuationOptions, out creationOptions, out internalOptions);
 
             Task<TResult> continuationTask = new ContinuationResultTaskFromTask<TResult>(
-                this, continuationFunction!, null, // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                this, continuationFunction!, null, // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 creationOptions, internalOptions
             );
 
             // Register the continuation.  If synchronous execution is requested, this may
             // actually invoke the continuation before returning.
-            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
 
             return continuationTask;
         }
@@ -4214,13 +4204,13 @@ namespace System.Threading.Tasks
             CreationOptionsFromContinuationOptions(continuationOptions, out creationOptions, out internalOptions);
 
             Task<TResult> continuationTask = new ContinuationResultTaskFromTask<TResult>(
-                this, continuationFunction!, state, // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                this, continuationFunction!, state, // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 creationOptions, internalOptions
             );
 
             // Register the continuation.  If synchronous execution is requested, this may
             // actually invoke the continuation before returning.
-            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            ContinueWithCore(continuationTask, scheduler!, cancellationToken, continuationOptions); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
 
             return continuationTask;
         }
@@ -4725,7 +4715,7 @@ namespace System.Threading.Tasks
             bool returnValue = true;
 
             // Collects incomplete tasks in "waitedOnTaskList"
-            for (int i = tasks!.Length - 1; i >= 0; i--) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            for (int i = tasks!.Length - 1; i >= 0; i--) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 Task task = tasks[i];
 
@@ -4734,7 +4724,7 @@ namespace System.Threading.Tasks
                     ThrowHelper.ThrowArgumentException(ExceptionResource.Task_WaitMulti_NullTask, ExceptionArgument.tasks);
                 }
 
-                bool taskIsCompleted = task!.IsCompleted; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                bool taskIsCompleted = task!.IsCompleted; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 if (!taskIsCompleted)
                 {
                     // try inlining the task only if we have an infinite timeout and an empty cancellation token
@@ -5090,7 +5080,7 @@ namespace System.Threading.Tasks
             // Make a pass through the loop to check for any tasks that may have
             // already been completed, and to verify that no tasks are null.
 
-            for (int taskIndex = 0; taskIndex < tasks!.Length; taskIndex++) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            for (int taskIndex = 0; taskIndex < tasks!.Length; taskIndex++) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 Task task = tasks[taskIndex];
 
@@ -5099,7 +5089,7 @@ namespace System.Threading.Tasks
                     ThrowHelper.ThrowArgumentException(ExceptionResource.Task_WaitMulti_NullTask, ExceptionArgument.tasks);
                 }
 
-                if (signaledTaskIndex == -1 && task!.IsCompleted) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                if (signaledTaskIndex == -1 && task!.IsCompleted) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 {
                     // We found our first completed task.  Store it, but we can't just return here,
                     // as we still need to validate the whole array for nulls.
@@ -5151,7 +5141,7 @@ namespace System.Threading.Tasks
             if (exception == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exception);
 
             var task = new Task();
-            bool succeeded = task.TrySetException(exception!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            bool succeeded = task.TrySetException(exception!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             Debug.Assert(succeeded, "This should always succeed on a new task.");
             return task;
         }
@@ -5165,7 +5155,7 @@ namespace System.Threading.Tasks
             if (exception == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.exception);
 
             var task = new Task<TResult>();
-            bool succeeded = task.TrySetException(exception!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            bool succeeded = task.TrySetException(exception!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             Debug.Assert(succeeded, "This should always succeed on a new task.");
             return task;
         }
@@ -5188,7 +5178,7 @@ namespace System.Threading.Tasks
         {
             if (!cancellationToken.IsCancellationRequested)
                 ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.cancellationToken);
-            return new Task<TResult>(true, default!, TaskCreationOptions.None, cancellationToken); // TODO-NULLABLE-GENERIC
+            return new Task<TResult>(true, default!, TaskCreationOptions.None, cancellationToken); // TODO-NULLABLE: Remove ! when nullable attributes are respected
         }
 
         /// <summary>Creates a <see cref="Task"/> that's completed due to cancellation with the specified exception.</summary>
@@ -5325,7 +5315,7 @@ namespace System.Threading.Tasks
                 return Task.FromCanceled(cancellationToken);
 
             // Kick off initial Task, which will call the user-supplied function and yield a Task.
-            Task<Task?> task1 = Task<Task?>.Factory.StartNew(function!, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            Task<Task?> task1 = Task<Task?>.Factory.StartNew(function!, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
 
             // Create a promise-style Task to be used as a proxy for the operation
             // Set lookForOce == true so that unwrap logic can be on the lookout for OCEs thrown as faults from task1, to support in-delegate cancellation.
@@ -5370,7 +5360,7 @@ namespace System.Threading.Tasks
                 return Task.FromCanceled<TResult>(cancellationToken);
 
             // Kick off initial Task, which will call the user-supplied function and yield a Task.
-            Task<Task<TResult>?> task1 = Task<Task<TResult>?>.Factory.StartNew(function!, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            Task<Task<TResult>?> task1 = Task<Task<TResult>?>.Factory.StartNew(function!, cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
 
             // Create a promise-style Task to be used as a proxy for the operation
             // Set lookForOce == true so that unwrap logic can be on the lookout for OCEs thrown as faults from task1, to support in-delegate cancellation.
@@ -5493,7 +5483,7 @@ namespace System.Threading.Tasks
 
                 if (millisecondsDelay != Timeout.Infinite) // no need to create the timer if it's an infinite timeout
                 {
-                    _timer = new TimerQueueTimer(state => ((DelayPromise)state!).CompleteTimedOut(), this, (uint)millisecondsDelay, Timeout.UnsignedInfinite, flowExecutionContext: false); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    _timer = new TimerQueueTimer(state => ((DelayPromise)state!).CompleteTimedOut(), this, (uint)millisecondsDelay, Timeout.UnsignedInfinite, flowExecutionContext: false);
                     if (IsCanceled)
                     {
                         // Handle rare race condition where cancellation occurs prior to our having created and stored the timer, in which case
@@ -5532,7 +5522,7 @@ namespace System.Threading.Tasks
                 Debug.Assert(token.CanBeCanceled);
 
                 _token = token;
-                _registration = token.UnsafeRegister(state => ((DelayPromiseWithCancellation)state!).CompleteCanceled(), this); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                _registration = token.UnsafeRegister(state => ((DelayPromiseWithCancellation)state!).CompleteCanceled(), this);
             }
 
             private void CompleteCanceled()
@@ -5597,7 +5587,7 @@ namespace System.Threading.Tasks
                 foreach (var task in tasks)
                 {
                     if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                    taskArray[index++] = task!; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                    taskArray[index++] = task!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 }
                 return InternalWhenAll(taskArray);
             }
@@ -5605,10 +5595,10 @@ namespace System.Threading.Tasks
             // Do some argument checking and convert tasks to a List (and later an array).
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
             List<Task> taskList = new List<Task>();
-            foreach (Task task in tasks!) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            foreach (Task task in tasks!) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                taskList.Add(task!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                taskList.Add(task!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
 
             // Delegate the rest to InternalWhenAll()
@@ -5647,7 +5637,7 @@ namespace System.Threading.Tasks
             // Do some argument checking and make a defensive copy of the tasks array
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
 
-            int taskCount = tasks!.Length; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            int taskCount = tasks!.Length; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             if (taskCount == 0) return InternalWhenAll(tasks); // Small optimization in the case of an empty array.
 
             Task[] tasksCopy = new Task[taskCount];
@@ -5655,7 +5645,7 @@ namespace System.Threading.Tasks
             {
                 Task task = tasks[i];
                 if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                tasksCopy[i] = task!; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                tasksCopy[i] = task!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
 
             // The rest can be delegated to InternalWhenAll()
@@ -5841,7 +5831,7 @@ namespace System.Threading.Tasks
                 foreach (var task in tasks)
                 {
                     if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                    taskArray[index++] = task!; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                    taskArray[index++] = task!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
                 }
                 return InternalWhenAll<TResult>(taskArray);
             }
@@ -5849,10 +5839,10 @@ namespace System.Threading.Tasks
             // Do some argument checking and convert tasks into a List (later an array)
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
             List<Task<TResult>> taskList = new List<Task<TResult>>();
-            foreach (Task<TResult> task in tasks!) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            foreach (Task<TResult> task in tasks!) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                taskList.Add(task!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                taskList.Add(task!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
 
             // Delegate the rest to InternalWhenAll<TResult>().
@@ -5894,7 +5884,7 @@ namespace System.Threading.Tasks
             // Do some argument checking and make a defensive copy of the tasks array
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
 
-            int taskCount = tasks!.Length; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            int taskCount = tasks!.Length; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             if (taskCount == 0) return InternalWhenAll<TResult>(tasks); // small optimization in the case of an empty task array
 
             Task<TResult>[] tasksCopy = new Task<TResult>[taskCount];
@@ -5902,7 +5892,7 @@ namespace System.Threading.Tasks
             {
                 Task<TResult> task = tasks[i];
                 if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                tasksCopy[i] = task!; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                tasksCopy[i] = task!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
 
             // Delegate the rest to InternalWhenAll<TResult>()
@@ -6061,7 +6051,7 @@ namespace System.Threading.Tasks
         public static Task<Task> WhenAny(params Task[] tasks)
         {
             if (tasks == null) ThrowHelper.ThrowArgumentNullException(ExceptionArgument.tasks);
-            if (tasks!.Length == 0) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            if (tasks!.Length == 0) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_EmptyTaskList, ExceptionArgument.tasks);
             }
@@ -6074,7 +6064,7 @@ namespace System.Threading.Tasks
             {
                 Task task = tasks[i];
                 if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                tasksCopy[i] = task!; // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                tasksCopy[i] = task!; // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
 
             // Previously implemented CommonCWAnyLogic() can handle the rest
@@ -6103,10 +6093,10 @@ namespace System.Threading.Tasks
             // Make a defensive copy, as the user may manipulate the tasks collection
             // after we return but before the WhenAny asynchronously completes.
             List<Task> taskList = new List<Task>();
-            foreach (Task task in tasks!) // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+            foreach (Task task in tasks!) // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             {
                 if (task == null) ThrowHelper.ThrowArgumentException(ExceptionResource.Task_MultiTaskContinuation_NullTask, ExceptionArgument.tasks);
-                taskList.Add(task!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/538
+                taskList.Add(task!); // TODO-NULLABLE: Remove ! when [DoesNotReturn] respected
             }
 
             if (taskList.Count == 0)
@@ -6598,7 +6588,7 @@ namespace System.Threading.Tasks
             ThreadPool.UnsafeQueueUserWorkItem(state =>
             {
                 // InvokeCore(completingTask);
-                var tuple = (Tuple<UnwrapPromise<TResult>, Task>)state!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                var tuple = (Tuple<UnwrapPromise<TResult>, Task>)state!;
                 tuple.Item1.InvokeCore(tuple.Item2);
             }, Tuple.Create<UnwrapPromise<TResult>, Task>(this, completingTask));
         }
@@ -6674,7 +6664,7 @@ namespace System.Threading.Tasks
                     if (Task.s_asyncDebuggingEnabled)
                         RemoveFromActiveTasks(this);
 
-                    result = TrySetResult(taskTResult != null ? taskTResult.Result : default!); // TODO-NULLABLE-GENERIC
+                    result = TrySetResult(taskTResult != null ? taskTResult.Result : default!); // TODO-NULLABLE: Remove ! when nullable attributes are respected
                     break;
             }
             return result;

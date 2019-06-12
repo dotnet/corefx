@@ -62,7 +62,6 @@ namespace System.Tests
         }
 
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.UapAot, "Exception.TargetSite always returns null on UapAot.")]
         public static void Exception_TargetSite_Jit()
         {
             bool caught = false;
@@ -76,26 +75,6 @@ namespace System.Tests
                 caught = true;
 
                 Assert.Equal(MethodInfo.GetCurrentMethod(), ex.TargetSite);
-            }
-
-            Assert.True(caught);
-        }
-
-        [Fact]
-        [SkipOnTargetFramework(~TargetFrameworkMonikers.UapAot, "Exception.TargetSite always returns null on UapAot.")]
-        public static void Exception_TargetSite_Aot()
-        {
-            bool caught = false;
-
-            try
-            {
-                throw new Exception();
-            }
-            catch (Exception ex)
-            {
-                caught = true;
-
-                Assert.Null(ex.TargetSite);
             }
 
             Assert.True(caught);
@@ -120,14 +99,11 @@ namespace System.Tests
         {
             try
             {
-                if (!PlatformDetection.IsFullFramework)
-                    rethrownExceptionStackFrame = GetSourceInformation(1);
+                rethrownExceptionStackFrame = GetSourceInformation(1);
                 throw new Exception("Boom!");
             }
             catch
             {
-                if (PlatformDetection.IsFullFramework)
-                    rethrownExceptionStackFrame = GetSourceInformation(1);
                 throw;
             }
         }
@@ -151,14 +127,11 @@ namespace System.Tests
         {
             try
             {
-                if (!PlatformDetection.IsFullFramework)
-                    rethrownExceptionStackFrame = GetSourceInformation(1);
+                rethrownExceptionStackFrame = GetSourceInformation(1);
                 ThrowException(); Assert.True(false, "Workaround for Linux Release builds (https://github.com/dotnet/corefx/pull/28059#issuecomment-378335456)");
             }
             catch
             {
-                if (PlatformDetection.IsFullFramework)
-                    rethrownExceptionStackFrame = GetSourceInformation(1);
                 throw;
             }
             rethrownExceptionStackFrame = (null, null, 0);
@@ -208,15 +181,35 @@ namespace System.Tests
         }
     }
 
-    public class ExceptionDerivedTests : Exception
+    public class DerivedException : Exception
     {
+        public override string Message
+        {
+            get => "DerivedException.Message";
+        }
+
+        public override string ToString()
+        {
+            return "DerivedException.ToString()";
+        }
+
         [Fact]
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
         public static void Exception_SerializeObjectState()
         {
-            var excp = new ExceptionDerivedTests();
+            var excp = new DerivedException();
             Assert.Throws<PlatformNotSupportedException>(() => excp.SerializeObjectState += (exception, eventArgs) => eventArgs.AddSerializedState(null));
             Assert.Throws<PlatformNotSupportedException>(() => excp.SerializeObjectState -= (exception, eventArgs) => eventArgs.AddSerializedState(null));
+        }
+
+        [Fact]
+        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework)]
+        public static void Exception_OverriddenToStringOnInnerException()
+        {
+            var inner = new DerivedException();
+            var excp = new Exception("msg", inner);
+
+            Assert.Contains("DerivedException.ToString()", excp.ToString());
+            Assert.DoesNotContain("DerivedException.Message", excp.ToString());
         }
     }
 

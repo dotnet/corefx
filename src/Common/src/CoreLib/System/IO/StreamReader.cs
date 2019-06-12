@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Text;
@@ -85,6 +84,7 @@ namespace System.IO
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowAsyncIOInProgress() =>
             throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
@@ -135,17 +135,25 @@ namespace System.IO
         {
         }
 
-        public StreamReader(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize, bool leaveOpen)
+        public StreamReader(Stream stream, Encoding? encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = -1, bool leaveOpen = false)
         {
-            if (stream == null || encoding == null)
+            if (stream == null)
             {
-                throw new ArgumentNullException(stream == null ? nameof(stream) : nameof(encoding));
+                throw new ArgumentNullException(nameof(stream));
+            }
+            if (encoding == null)
+            {
+                encoding = Encoding.UTF8;
             }
             if (!stream.CanRead)
             {
                 throw new ArgumentException(SR.Argument_StreamNotReadable);
             }
-            if (bufferSize <= 0)
+            if (bufferSize == -1)
+            {
+                bufferSize = DefaultBufferSize;
+            }
+            else if (bufferSize <= 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(bufferSize), SR.ArgumentOutOfRange_NeedPosNum);
             }
@@ -1230,7 +1238,7 @@ namespace System.IO
             return new ValueTask<int>(t);
         }
 
-        private async Task<int> ReadBufferAsync()
+        private async ValueTask<int> ReadBufferAsync()
         {
             _charLen = 0;
             _charPos = 0;

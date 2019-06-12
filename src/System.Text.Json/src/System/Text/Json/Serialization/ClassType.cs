@@ -2,7 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     /// <summary>
     /// Determines how a given class is treated when it is (de)serialized.
@@ -14,5 +14,6 @@ namespace System.Text.Json.Serialization
         Value = 2,          // Data type with single value
         Enumerable = 3,     // IEnumerable
         Dictionary = 4,     // IDictionary
+        ImmutableDictionary = 5, // Immutable Dictionary
     }
 }

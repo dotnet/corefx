@@ -216,7 +216,6 @@ namespace System.Tests
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
         [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_ArgumentException()
@@ -233,14 +232,12 @@ namespace System.Tests
                 handle.Process = null;
                 p.WaitForExit();
                 string consoleOutput = p.StandardError.ReadToEnd();
-                Assert.Contains("Exception details:", consoleOutput);
                 Assert.Contains("ArgumentException:", consoleOutput);
                 Assert.Contains("bad arg", consoleOutput);
             }
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
         [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_StackOverflowException()
@@ -258,14 +255,12 @@ namespace System.Tests
                 handle.Process = null;
                 p.WaitForExit();
                 string consoleOutput = p.StandardError.ReadToEnd();
-                Assert.Contains("Exception details:", consoleOutput);
                 Assert.Contains("StackOverflowException", consoleOutput);
                 Assert.Contains("SO exception", consoleOutput);
             }
         }
 
         [Trait(XunitConstants.Category, XunitConstants.IgnoreForCI)] // fail fast crashes the process
-        [SkipOnTargetFramework(TargetFrameworkMonikers.NetFramework, "Full framework does not have dotnet/coreclr#16622")]
         [ActiveIssue("29869", TargetFrameworkMonikers.Uap)]
         [Fact]
         public void FailFast_ExceptionStackTrace_InnerException()
@@ -283,7 +278,6 @@ namespace System.Tests
                 handle.Process = null;
                 p.WaitForExit();
                 string consoleOutput = p.StandardError.ReadToEnd();
-                Assert.Contains("Exception details:", consoleOutput);
                 Assert.Contains("first exception", consoleOutput);
                 Assert.Contains("inner exception", consoleOutput);
                 Assert.Contains("ArgumentException", consoleOutput);
@@ -487,7 +481,7 @@ namespace System.Tests
         [InlineData(Environment.SpecialFolder.SystemX86)]
         [InlineData(Environment.SpecialFolder.Windows)]
         [PlatformSpecific(TestPlatforms.Windows)]  // Tests OS-specific environment
-        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap | TargetFrameworkMonikers.UapAot)] // Don't run on UAP
+        [SkipOnTargetFramework(TargetFrameworkMonikers.Uap)] // Don't run on UAP
         public unsafe void GetFolderPath_Windows(Environment.SpecialFolder folder)
         {
             string knownFolder = Environment.GetFolderPath(folder);

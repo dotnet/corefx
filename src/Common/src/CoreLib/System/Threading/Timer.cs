@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-#nullable enable
 using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.Threading.Tasks;
@@ -470,14 +469,8 @@ namespace System.Threading
                 }
                 else
                 {
-                    if (
-#if CORECLR
-                        // Don't emit this event during EventPipeController.  This avoids initializing FrameworkEventSource during start-up which is expensive relative to the rest of start-up.
-                        !EventPipeController.Initializing &&
-#endif
-                        FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
+                    if (FrameworkEventSource.Log.IsEnabled(EventLevel.Informational, FrameworkEventSource.Keywords.ThreadTransfer))
                         FrameworkEventSource.Log.ThreadTransferSendObj(this, 1, string.Empty, true, (int)dueTime, (int)period);
-
                     success = _associatedTimerQueue.UpdateTimer(this, dueTime, period);
                 }
             }
@@ -619,7 +612,7 @@ namespace System.Threading
 
             if (toSignal is WaitHandle wh)
             {
-                EventWaitHandle.Set(wh.SafeWaitHandle!); // TODO-NULLABLE: https://github.com/dotnet/csharplang/issues/2384
+                EventWaitHandle.Set(wh.SafeWaitHandle);
             }
             else
             {

@@ -5,7 +5,7 @@
 using System.Collections;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -17,34 +17,24 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(state.Current.JsonPropertyInfo.ClassType == ClassType.Enumerable);
 
-            JsonPropertyInfo jsonPropertyInfo = state.Current.JsonPropertyInfo;
-            if (!jsonPropertyInfo.ShouldSerialize)
-            {
-                // Ignore writing this property.
-                return true;
-            }
-
             if (state.Current.Enumerator == null)
             {
-                IEnumerable enumerable = (IEnumerable)jsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue, options);
+                IEnumerable enumerable = (IEnumerable)state.Current.JsonPropertyInfo.GetValueAsObject(state.Current.CurrentValue);
 
                 if (enumerable == null)
                 {
-                    // Write a null object or enumerable.
-                    writer.WriteNull(jsonPropertyInfo.Name);
+                    if (!state.Current.JsonPropertyInfo.IgnoreNullValues)
+                    {
+                        // Write a null object or enumerable.
+                        state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer, writeNull: true);
+                    }
+
                     return true;
                 }
 
                 state.Current.Enumerator = enumerable.GetEnumerator();
 
-                if (jsonPropertyInfo.Name == null)
-                {
-                    writer.WriteStartArray();
-                }
-                else
-                {
-                    writer.WriteStartArray(jsonPropertyInfo.Name);
-                }
+                state.Current.WriteObjectOrArrayStart(ClassType.Enumerable, writer);
             }
 
             if (state.Current.Enumerator.MoveNext())
@@ -58,7 +48,7 @@ namespace System.Text.Json.Serialization
 
                 if (elementClassInfo.ClassType == ClassType.Value)
                 {
-                    elementClassInfo.GetPolicyProperty().WriteEnumerable(options, ref state.Current, writer);
+                    elementClassInfo.GetPolicyProperty().WriteEnumerable(ref state.Current, writer);
                 }
                 else if (state.Current.Enumerator.Current == null)
                 {
@@ -78,7 +68,7 @@ namespace System.Text.Json.Serialization
             // We are done enumerating.
             writer.WriteEndArray();
 
-            if (state.Current.PopStackOnEndArray)
+            if (state.Current.PopStackOnEnd)
             {
                 state.Pop();
             }

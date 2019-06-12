@@ -38,16 +38,17 @@ namespace System.Transactions
     [System.FlagsAttribute]
     public enum EnlistmentOptions
     {
-        EnlistDuringPrepareRequired = 1,
         None = 0,
+        EnlistDuringPrepareRequired = 1,
     }
     public enum EnterpriseServicesInteropOption
     {
+        None = 0,
         Automatic = 1,
         Full = 2,
-        None = 0,
     }
     public delegate System.Transactions.Transaction HostCurrentTransactionCallback();
+    [System.Runtime.InteropServices.InterfaceTypeAttribute(System.Runtime.InteropServices.ComInterfaceType.InterfaceIsIUnknown)]
     public partial interface IDtcTransaction
     {
         void Abort(System.IntPtr reason, int retaining, int async);
@@ -77,12 +78,12 @@ namespace System.Transactions
     }
     public enum IsolationLevel
     {
-        Chaos = 5,
+        Serializable = 0,
+        RepeatableRead = 1,
         ReadCommitted = 2,
         ReadUncommitted = 3,
-        RepeatableRead = 1,
-        Serializable = 0,
         Snapshot = 4,
+        Chaos = 5,
         Unspecified = 6,
     }
     public partial interface ITransactionPromoter
@@ -238,8 +239,8 @@ namespace System.Transactions
     }
     public enum TransactionScopeAsyncFlowOption
     {
-        Enabled = 1,
         Suppress = 0,
+        Enabled = 1,
     }
     public enum TransactionScopeOption
     {
@@ -250,9 +251,9 @@ namespace System.Transactions
     public delegate void TransactionStartedEventHandler(object sender, System.Transactions.TransactionEventArgs e);
     public enum TransactionStatus
     {
-        Aborted = 2,
         Active = 0,
         Committed = 1,
+        Aborted = 2,
         InDoubt = 3,
     }
 }

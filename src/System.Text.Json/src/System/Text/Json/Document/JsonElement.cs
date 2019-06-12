@@ -2,8 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
+using System.Buffers;
+using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
@@ -15,9 +19,6 @@ namespace System.Text.Json
         private readonly JsonDocument _parent;
         private readonly int _idx;
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal JsonElement(JsonDocument parent, int idx)
         {
             // parent is usually not null, but the Current property
@@ -351,6 +352,57 @@ namespace System.Text.Json
             CheckValidInstance();
 
             return _parent.GetString(_idx, JsonTokenType.String);
+        }
+
+        /// <summary>
+        ///   Attempts to represent the current JSON string as bytes assuming it is base 64 encoded.
+        /// </summary>
+        /// <param name="value">Receives the value.</param>
+        /// <remarks>
+        ///  This method does not create a byte[] representation of values other than bsae 64 encoded JSON strings.
+        /// </remarks>
+        /// <returns>
+        ///   <see langword="true"/> if the entire token value is encoded as valid base 64 text and can be successfully decoded to bytes.
+        ///   <see langword="false"/> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public bool TryGetBytesFromBase64(out byte[] value)
+        {
+            CheckValidInstance();
+
+            return _parent.TryGetValue(_idx, out value);
+        }
+
+        /// <summary>
+        ///   Gets the value of the element as bytes.
+        /// </summary>
+        /// <remarks>
+        ///   This method does not create a byte[] representation of values other than base 64 encoded JSON strings.
+        /// </remarks>
+        /// <returns>The value decode to bytes.</returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <exception cref="FormatException">
+        ///   The value is not encoded as base 64 text and hence cannot be decoded to bytes.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        /// <seealso cref="ToString"/>
+        public byte[] GetBytesFromBase64()
+        {
+            if (TryGetBytesFromBase64(out byte[] value))
+            {
+                return value;
+            }
+
+            throw new FormatException();
         }
 
         /// <summary>
@@ -893,9 +945,6 @@ namespace System.Text.Json
             throw new FormatException();
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal string GetPropertyName()
         {
             CheckValidInstance();
@@ -919,9 +968,6 @@ namespace System.Text.Json
             return _parent.GetRawValueAsString(_idx);
         }
 
-        /// <summary>
-        ///   This is an implementation detail and MUST NOT be called by source-package consumers.
-        /// </summary>
         internal string GetPropertyRawText()
         {
             CheckValidInstance();
@@ -930,7 +976,105 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Compares <paramref name="text" /> to the string value of this element.
+        /// </summary>
+        /// <param name="text">The text to compare against.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the string value of this element matches <paramref name="text"/>,
+        ///   <see langword="false" /> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <remarks>
+        ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
+        ///   the result of calling <see cref="GetString" />, but avoids creating the string instance.
+        /// </remarks>
+        public bool ValueEquals(string text)
+        {
+            // CheckValidInstance is done in the helper
+
+            if (TokenType == JsonTokenType.Null)
+            {
+                return text == null;
+            }
+
+            return TextEqualsHelper(text.AsSpan(), isPropertyName: false);
+        }
+
+        /// <summary>
+        ///   Compares the text represented by <paramref name="utf8Text" /> to the string value of this element.
+        /// </summary>
+        /// <param name="utf8Text">The UTF-8 encoded text to compare against.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the string value of this element has the same UTF-8 encoding as
+        ///   <paramref name="utf8Text" />, <see langword="false" /> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <remarks>
+        ///   This method is functionally equal to doing an ordinal comparison of the string produced by UTF-8 decoding
+        ///   <paramref name="utf8Text" /> with the result of calling <see cref="GetString" />, but avoids creating the
+        ///   string instances.
+        /// </remarks>
+        public bool ValueEquals(ReadOnlySpan<byte> utf8Text)
+        {
+            // CheckValidInstance is done in the helper
+
+            if (TokenType == JsonTokenType.Null)
+            {
+                // This is different than Length == 0, in that it tests true for null, but false for ""
+                return utf8Text == default;
+            }
+
+            return TextEqualsHelper(utf8Text, isPropertyName: false);
+        }
+
+        /// <summary>
+        ///   Compares <paramref name="text" /> to the string value of this element.
+        /// </summary>
+        /// <param name="text">The text to compare against.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the string value of this element matches <paramref name="text"/>,
+        ///   <see langword="false" /> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <remarks>
+        ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
+        ///   the result of calling <see cref="GetString" />, but avoids creating the string instance.
+        /// </remarks>
+        public bool ValueEquals(ReadOnlySpan<char> text)
+        {
+            // CheckValidInstance is done in the helper
+
+            if (TokenType == JsonTokenType.Null)
+            {
+                // This is different than Length == 0, in that it tests true for null, but false for ""
+                return text == default;
+            }
+
+            return TextEqualsHelper(text, isPropertyName: false);
+        }
+
+        internal bool TextEqualsHelper(ReadOnlySpan<byte> utf8Text, bool isPropertyName)
+        {
+            CheckValidInstance();
+
+            return _parent.TextEquals(_idx, utf8Text, isPropertyName);
+        }
+
+        internal bool TextEqualsHelper(ReadOnlySpan<char> text, bool isPropertyName)
+        {
+            CheckValidInstance();
+
+            return _parent.TextEquals(_idx, text, isPropertyName);
+        }
+
+        /// <summary>
+        ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="propertyName">The name for this value within the JSON object.</param>
         /// <param name="writer">The writer.</param>
@@ -940,7 +1084,21 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsProperty(ReadOnlySpan<char> propertyName, Utf8JsonWriter writer)
+        public void WriteProperty(string propertyName, Utf8JsonWriter writer)
+            => WriteProperty(propertyName.AsSpan(), writer);
+
+        /// <summary>
+        ///   Write the element into the provided writer as a named JSON object property.
+        /// </summary>
+        /// <param name="propertyName">The name for this value within the JSON object.</param>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteProperty(ReadOnlySpan<char> propertyName, Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -948,7 +1106,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="utf8PropertyName">
         ///   The name for this value within the JSON object, as UTF-8 text.
@@ -960,7 +1118,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, Utf8JsonWriter writer)
+        public void WriteProperty(ReadOnlySpan<byte> utf8PropertyName, Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -968,7 +1126,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a value.
+        ///   Write the element into the provided writer as a JSON value.
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
@@ -977,7 +1135,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsValue(Utf8JsonWriter writer)
+        public void WriteValue(Utf8JsonWriter writer)
         {
             CheckValidInstance();
 

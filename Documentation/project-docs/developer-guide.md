@@ -8,7 +8,7 @@ The repo can be built for the following platforms, using the provided setup and 
 | x64   | &#x2714; | &#x2714; | &#x2714; | &#x2714; |
 | x86   | &#x2714; |          |          |          |
 | ARM   | &#x2714; | &#x2714; |          |          |
-| ARM64 |          | &#x2714; |          |          |
+| ARM64 | &#x2714; | &#x2714; |          |          |
 |       | [Instructions](../building/windows-instructions.md) | [Instructions](../building/unix-instructions.md) | [Instructions](../building/unix-instructions.md) | [Instructions](../building/unix-instructions.md) |
 
 
@@ -266,11 +266,11 @@ The tests can also be filtered based on xunit trait attributes defined in [`Micr
 ```cs
 [OuterLoop()]
 ```
-Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `-outerloop` switch or `/p:OuterLoop=true` e.g.
+Tests marked as `OuterLoop` are for scenarios that don't need to run every build. They may take longer than normal tests, cover seldom hit code paths, or require special setup or resources to execute. These tests are excluded by default when testing through `dotnet msbuild` but can be enabled manually by adding the `-testscope outerloop` switch or `/p:TestScope=outerloop` e.g.
 
 ```cmd
-build -test -outerloop
-cd src/System.Text.RegularExpressions/tests && dotnet msbuild /t:RebuildAndTest /p:OuterLoop=true
+build -test -testscope outerloop
+cd src/System.Text.RegularExpressions/tests && dotnet msbuild /t:RebuildAndTest /p:TestScope=outerloop
 ```
 
 #### PlatformSpecificAttribute
@@ -433,24 +433,14 @@ If coverage succeeds, the individual report can be found at `$(TestPath)\report\
 
 Code coverage reports from the continuous integration system are available from the links on the front page of the corefx repo.
 
-### Building tests with .NET Native (Windows only)
+### Building tests with UWP (Windows only)
 
-.NET Native is a technology that allows compiling IL applications down into a native executable and minimal set of native DLLs, containing all needed functionality from the .NET Framework in native format.
-
+This will allow you to build and run against `uap`, the managed version of the UWP Framework subset, used when debugging UWP applications in Visual Studio:
 ```cmd
-:: To run a single project with the .NET Native toolchain, set the appropriate build flags:
-cd src\Microsoft.CSharp\tests
-dotnet msbuild /t:BuildAndTest /p:TargetGroup=uapaot
-```
-If native compilation succeeds, the test will build and run as a native executable named "xunit.console.exe" in a folder named "uapaot" in the test execution folder. The .NET Native toolchain, required to build with TargetGroup `uapaot` is currently not available for external contributors.
-
-A slight variation on these arguments will allow you to build and run against `uap`, the managed version of the UWP Framework subset, used when debugging UWP applications in Visual Studio:
-```cmd
-:: To run a single project with the .NET Native toolchain, set the appropriate build flags:
 cd src\Microsoft.CSharp\tests
 dotnet msbuild /t:BuildAndTest /p:TargetGroup=uap
 ```
-In this case, your test will get executed within the context of a wrapper UWP application, targeting the Managed uap as opposed to the .NET Native version.
+In this case, your test will get executed within the context of a wrapper UWP application, targeting the Managed uap.
 
 The CoreFX build and test suite is a work in progress, as are the [building and testing instructions](../README.md). The .NET Core team and the community are improving Linux and OS X support on a daily basis and are adding more tests for all platforms. See [CoreFX Issues](https://github.com/dotnet/corefx/issues) to find out about specific work items or report issues.
 

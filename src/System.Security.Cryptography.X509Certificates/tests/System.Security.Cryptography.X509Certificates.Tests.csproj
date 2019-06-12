@@ -9,7 +9,7 @@
     <DefineConstants Condition="'$(TargetGroup)'=='netcoreapp' OR '$(TargetGroup)'=='uap'">$(DefineConstants);HAVE_THUMBPRINT_OVERLOADS</DefineConstants>
     <DefineConstants Condition="'$(TargetsUnix)' == 'true'">$(DefineConstants);Unix</DefineConstants>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
-    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;netstandard-Debug;netstandard-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
+    <Configurations>netcoreapp-OSX-Debug;netcoreapp-OSX-Release;netcoreapp-Unix-Debug;netcoreapp-Unix-Release;netcoreapp-Windows_NT-Debug;netcoreapp-Windows_NT-Release;uap-Windows_NT-Debug;uap-Windows_NT-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Cert.cs" />
@@ -86,7 +86,6 @@
       <Link>Common\System\IO\PersistedFiles.Names.Unix.cs</Link>
     </Compile>
     <Compile Include="HostnameMatchTests.Unix.cs" />
-    <Compile Include="TestEnvironmentConfiguration.Unix.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetsOSX)' == 'true'">
     <Compile Include="X509StoreMutableTests.OSX.cs" />
@@ -128,6 +127,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(PackagesDir)system.security.cryptography.x509certificates.testdata\1.0.3\content\**\*.*" DestinationDir="TestData" />
+    <SupplementalTestData Include="$(NuGetPackageRoot)system.security.cryptography.x509certificates.testdata\1.0.3\content\**\*.*" DestinationDir="TestData" />
   </ItemGroup>
 </Project>

@@ -7,11 +7,11 @@ namespace System.Runtime.InteropServices
     // Wrapper that is converted to a variant with VT_BYREF | VT_VARIANT.
     public sealed class VariantWrapper
     {
-        public VariantWrapper(Object obj)
+        public VariantWrapper(object? obj)
         {
             WrappedObject = obj;
         }
 
-        public Object WrappedObject { get; }
+        public object? WrappedObject { get; }
     }
 }

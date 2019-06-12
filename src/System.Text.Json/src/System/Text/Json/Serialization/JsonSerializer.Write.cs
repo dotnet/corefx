@@ -2,10 +2,9 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -19,7 +18,6 @@ namespace System.Text.Json.Serialization
             JsonSerializerOptions options,
             ref WriteStack state)
         {
-            bool continueWriting = true;
             bool finishedSerializing;
             do
             {
@@ -31,13 +29,14 @@ namespace System.Text.Json.Serialization
                         break;
                     case ClassType.Value:
                         Debug.Assert(current.JsonPropertyInfo.ClassType == ClassType.Value);
-                        current.JsonPropertyInfo.Write(options, ref current, writer);
+                        current.JsonPropertyInfo.Write(ref current, writer);
                         finishedSerializing = true;
                         break;
                     case ClassType.Object:
                         finishedSerializing = WriteObject(options, writer, ref state);
                         break;
                     case ClassType.Dictionary:
+                    case ClassType.ImmutableDictionary:
                         finishedSerializing = HandleDictionary(current.JsonClassInfo.ElementClassInfo, options, writer, ref state);
                         break;
                     default:
@@ -48,16 +47,17 @@ namespace System.Text.Json.Serialization
                         break;
                 }
 
+                if (finishedSerializing && writer.CurrentDepth == 0)
+                {
+                    break;
+                }
+
+                // If serialization is not yet end and we surpass beyond flush threshold return false and flush stream.
                 if (flushThreshold >= 0 && writer.BytesPending > flushThreshold)
                 {
                     return false;
                 }
-
-                if (finishedSerializing && writer.CurrentDepth == 0)
-                {
-                    continueWriting = false;
-                }
-            } while (continueWriting);
+            } while (true);
 
             return true;
         }
