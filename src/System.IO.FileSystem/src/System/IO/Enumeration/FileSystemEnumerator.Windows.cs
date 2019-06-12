@@ -49,8 +49,19 @@ namespace System.IO.Enumeration
         public FileSystemEnumerator(string directory, EnumerationOptions options = null)
         {
             _originalRootDirectory = directory ?? throw new ArgumentNullException(nameof(directory));
-            _options = options ?? EnumerationOptions.Default;
-            _rootDirectory = Path.TrimEndingDirectorySeparator(options.IsNormalized ? directory : Path.GetFullPath(directory));
+
+            string path;
+            if (options != null)
+            {
+                _options = options;
+                path = options.IsNormalized ? directory : Path.GetFullPath(directory);
+            }
+            else
+            {
+                _options = EnumerationOptions.Default;
+                path = Path.GetFullPath(directory);
+            }
+            _rootDirectory = Path.TrimEndingDirectorySeparator(path);
 
             // We'll only suppress the media insertion prompt on the topmost directory as that is the
             // most likely scenario and we don't want to take the perf hit for large enumerations.
