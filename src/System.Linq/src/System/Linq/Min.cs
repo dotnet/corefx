@@ -221,7 +221,7 @@ namespace System.Linq
                 float valueVal = value.GetValueOrDefault();
                 if (float.IsNaN(valueVal))
                 {
-                    return valueVal;
+                    return value;
                 }
 
                 while (e.MoveNext())
@@ -308,7 +308,7 @@ namespace System.Linq
                 double valueVal = value.GetValueOrDefault();
                 if (double.IsNaN(valueVal))
                 {
-                    return valueVal;
+                    return value;
                 }
 
                 while (e.MoveNext())
@@ -700,7 +700,7 @@ namespace System.Linq
                 float valueVal = value.GetValueOrDefault();
                 if (float.IsNaN(valueVal))
                 {
-                    return valueVal;
+                    return value;
                 }
 
                 while (e.MoveNext())
@@ -797,7 +797,7 @@ namespace System.Linq
                 double valueVal = value.GetValueOrDefault();
                 if (double.IsNaN(valueVal))
                 {
-                    return valueVal;
+                    return value;
                 }
 
                 while (e.MoveNext())
