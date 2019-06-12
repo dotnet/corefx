@@ -3,7 +3,6 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Collections;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json.Serialization;
@@ -80,7 +79,10 @@ namespace System.Text.Json
             {
                 if (_elementClassInfo == null && _elementType != null)
                 {
-                    Debug.Assert(ClassType == ClassType.Enumerable || ClassType == ClassType.Dictionary || ClassType == ClassType.IDictionaryConstructible);
+                    Debug.Assert(ClassType == ClassType.Enumerable ||
+                        ClassType == ClassType.Dictionary ||
+                        ClassType == ClassType.IDictionaryConstructible ||
+                        ClassType == ClassType.KeyValuePair);
                     _elementClassInfo = Options.GetOrAddClass(_elementType);
                 }
 
@@ -185,7 +187,10 @@ namespace System.Text.Json
 
         private void DetermineSerializationCapabilities()
         {
-            if (ClassType != ClassType.Enumerable && ClassType != ClassType.Dictionary && ClassType != ClassType.IDictionaryConstructible)
+            if (ClassType != ClassType.Enumerable &&
+                ClassType != ClassType.Dictionary &&
+                ClassType != ClassType.IDictionaryConstructible &&
+                ClassType != ClassType.KeyValuePair)
             {
                 // We serialize if there is a getter + not ignoring readonly properties.
                 ShouldSerialize = HasGetter && (HasSetter || !Options.IgnoreReadOnlyProperties);
@@ -220,10 +225,6 @@ namespace System.Text.Json
                     {
                         EnumerableConverter = s_jsonArrayConverter;
                     }
-                    else if (JsonClassInfo.IsSupportedByConstructingWithIDictionary(RuntimePropertyType))
-                    {
-                        DictionaryConverter = s_jsonIDictionaryConverter;
-                    }
                     else if (ClassType == ClassType.IDictionaryConstructible)
                     {
                         if (RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName))
@@ -232,14 +233,14 @@ namespace System.Text.Json
                             RuntimePropertyType, JsonClassInfo.GetElementType(RuntimePropertyType, ParentClassType, PropertyInfo), Options);
                             DictionaryConverter = s_jsonImmutableDictionaryConverter;
                         }
-                        else
+                        else if (JsonClassInfo.IsDeserializedByConstructingWithIDictionary(RuntimePropertyType))
                         {
                             DictionaryConverter = s_jsonIDictionaryConverter;
                         }
                     }
                     else if (typeof(IEnumerable).IsAssignableFrom(RuntimePropertyType))
                     {
-                        if (JsonClassInfo.IsSupportedByConstructingWithIList(RuntimePropertyType))
+                        if (JsonClassInfo.IsDeserializedByConstructingWithIList(RuntimePropertyType))
                         {
                             EnumerableConverter = s_jsonICollectionConverter;
                         }
@@ -313,6 +314,8 @@ namespace System.Text.Json
         public abstract IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList);
 
         public abstract IList CreateConverterList();
+
+        public abstract ValueType CreateKeyValuePairFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options);
 
         public abstract Type GetDictionaryConcreteType();
 

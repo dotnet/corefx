@@ -4,6 +4,8 @@
 
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
+using System.Text.Json.Serialization.Policies;
 
 namespace System.Text.Json
 {
@@ -52,7 +54,7 @@ namespace System.Text.Json
         {
             Debug.Assert(ShouldDeserialize);
 
-            if (state.Current.KeyName == null && (state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructible))
+            if (state.Current.KeyName == null && (state.Current.IsProcessingDictionary || state.Current.IsProcessingIDictionaryConstructibleOrKeyValuePair))
             {
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
                 return;
@@ -60,7 +62,38 @@ namespace System.Text.Json
 
             if (ValueConverter == null || !ValueConverter.TryRead(RuntimePropertyType, ref reader, out TRuntimeProperty value))
             {
+                if (state.Current.IsProcessingKeyValuePair && state.Current.KeyName == "Key")
+                {
+                    // Handle the special case where the input KeyValuePair is of form {"Key": "MyKey", "Value": 1}
+                    // (as opposed to form {"MyKey": 1}) and the value type is not string.
+                    // If we have one, the ValueConverter failed to read the current token because it should be of type string
+                    // (we only support string keys) but we initially tried to read it as type TRuntimeProperty.
+                    // We have TRuntimeProperty not string because for deserialization, we parse the KeyValuePair as a
+                    // dictionary before creating a KeyValuePair instance in a converter-like manner with the parsed values.
+                    // Because it's dictionary-like parsing, we set the element type of the dictionary earlier on to the KeyValuePair's value
+                    // type, which led us here.
+                    // If there's no ValueConverter, the runtime type of the KeyValuePair's value is probably an object, dictionary or enumerable.
+                    JsonValueConverter<string> stringConverter = DefaultConverters<string>.s_converter;
+                    if (!stringConverter.TryRead(typeof(string), ref reader, out string strValue))
+                    {
+                        ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(typeof(string), reader, state.JsonPath);
+                    }
+
+                    object objValue = strValue;
+
+                    JsonSerializer.ApplyValueToEnumerable(ref objValue, ref state, ref reader);
+                    return;
+                }
+
                 ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                return;
+            }
+
+            if (state.Current.IsProcessingKeyValuePair)
+            {
+                // The value is being appliead to a Dictionary<string, object>, so we need to cast to object here.
+                object objValue = value;
+                JsonSerializer.ApplyValueToEnumerable(ref objValue, ref state, ref reader);
                 return;
             }
 

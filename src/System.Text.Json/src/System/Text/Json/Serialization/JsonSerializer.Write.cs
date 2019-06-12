@@ -34,6 +34,7 @@ namespace System.Text.Json
                         finishedSerializing = true;
                         break;
                     case ClassType.Object:
+                    case ClassType.KeyValuePair:
                         finishedSerializing = WriteObject(options, writer, ref state);
                         break;
                     case ClassType.Dictionary:

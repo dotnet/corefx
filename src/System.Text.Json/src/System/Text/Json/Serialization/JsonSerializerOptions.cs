@@ -313,6 +313,11 @@ namespace System.Text.Json
 
         internal JsonPropertyInfo GetJsonPropertyInfoFromClassInfo(JsonClassInfo classInfo, JsonSerializerOptions options)
         {
+            if (classInfo.ClassType == ClassType.KeyValuePair)
+            {
+                return classInfo.GetPolicyPropertyOfKeyValuePair();
+            }
+
             if (classInfo.ClassType != ClassType.Object)
             {
                 return classInfo.GetPolicyProperty();

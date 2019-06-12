@@ -19,8 +19,10 @@ namespace System.Text.Json
         Enumerable = 3,
         // IDictionary
         Dictionary = 4,
-        // Is supported by passing a IDictionary to its constructor
-        // i.e. immutable dictionaries, Hashtable, SortedList
+        // Is deserialized by passing a IDictionary to its constructor
+        // i.e. immutable dictionaries, Hashtable, SortedList,
         IDictionaryConstructible = 5,
+        // KeyValuePair
+        KeyValuePair = 6,
     }
 }

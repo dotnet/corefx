@@ -95,7 +95,7 @@ namespace System.Text.Json
 
         public override Type GetConcreteType(Type parentType)
         {
-            if (JsonClassInfo.IsSupportedByAssigningFromList(parentType))
+            if (JsonClassInfo.IsDeserializedByAssigningFromList(parentType))
             {
                 return typeof(List<TDeclaredProperty>);
             }
@@ -110,11 +110,11 @@ namespace System.Text.Json
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string propertyPath, JsonSerializerOptions options)
+        public override IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
             if (!options.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, propertyPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
             }
 
             JsonSerializerOptions.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
@@ -126,11 +126,11 @@ namespace System.Text.Json
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath, JsonSerializerOptions options)
+        public override IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
             if (!options.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
             {
-                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, propertyPath);
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(collectionType, jsonPath);
             }
 
             JsonSerializerOptions.ImmutableDictCreateRangeDelegate<string, TRuntimeProperty> createRangeDelegate = (
@@ -142,6 +142,30 @@ namespace System.Text.Json
         public override IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList)
         {
             return (IEnumerable)Activator.CreateInstance(enumerableType, CreateGenericIEnumerableFromList(sourceList));
+        }
+
+        public override ValueType CreateKeyValuePairFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        {
+            Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+
+            // Form {"MyKey": 1}.
+            if (sourceDictionary.Count == 1)
+            {
+                IDictionaryEnumerator enumerator = sourceDictionary.GetEnumerator();
+                enumerator.MoveNext();
+
+                return KeyValuePair.Create((string)enumerator.Key, (TRuntimeProperty)enumerator.Value);
+            }
+            // Form {"Key": "MyKey", "Value": 1}.
+            else if (sourceDictionary.Count == 2 &&
+                sourceDictionary["Key"] is string key &&
+                sourceDictionary["Value"] is TRuntimeProperty value
+                )
+            {
+                    return KeyValuePair.Create(key, value);
+            }
+
+            throw ThrowHelper.GetJsonException_DeserializeUnableToConvertValue(enumerableType, state.JsonPath);
         }
 
         private IEnumerable<TRuntimeProperty> CreateGenericIEnumerableFromList(IList sourceList)

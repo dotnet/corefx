@@ -41,7 +41,7 @@ namespace System.Text.Json
             }
             else if (jsonInfo.ClassType == ClassType.Enumerable &&
                 !propertyType.IsArray &&
-                (IsSupportedByAssigningFromList(propertyType) || IsSetInterface(propertyType)))
+                (IsDeserializedByAssigningFromList(propertyType) || IsSetInterface(propertyType)))
             {
                 JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
                 JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
@@ -80,6 +80,7 @@ namespace System.Text.Json
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
                 case ClassType.IDictionaryConstructible:
+                case ClassType.KeyValuePair:
                 case ClassType.Unknown:
                     collectionElementType = GetElementType(runtimePropertyType, parentClassType, propertyInfo);
                     break;

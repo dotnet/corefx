@@ -39,6 +39,7 @@ namespace System.Text.Json.Serialization.Tests
         public object MyStringIReadOnlyCollectionT { get; set; }
         public object MyStringIReadOnlyListT { get; set; }
         public object MyStringISetT { get; set; }
+        public object MyStringToStringKeyValuePair { get; set; }
         public object MyStringToStringIDict { get; set; }
         public object MyStringToStringGenericDict { get; set; }
         public object MyStringToStringGenericIDict { get; set; }
@@ -107,6 +108,7 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyListT"" : [""Hello""]," +
                 @"""MyStringISetT"" : [""Hello""]," +
+                @"""MyStringToStringKeyValuePair"" : {""Key"" : ""myKey"", ""Value"" : ""myValue""}," +
                 @"""MyStringToStringIDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericDict"" : {""key"" : ""value""}," +
                 @"""MyStringToStringGenericIDict"" : {""key"" : ""value""}," +
@@ -167,7 +169,10 @@ namespace System.Text.Json.Serialization.Tests
             MyStringIReadOnlyListT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new HashSet<string> { "Hello" };
 
-            MyStringToStringGenericIDict = new Dictionary<string, string> { { "key", "value" } };
+            MyStringISetT = new HashSet<string> { "Hello" };
+
+            MyStringToStringKeyValuePair = KeyValuePair.Create("myKey", "myValue");
+            MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
 
             MyStringToStringGenericDict = new Dictionary<string, string> { { "key", "value" } };
             MyStringToStringGenericIDict = new Dictionary<string, string> { { "key", "value" } };
@@ -248,6 +253,9 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("value", ((ImmutableDictionary<string, string>)MyStringToStringImmutableDict)["key"]);
             Assert.Equal("value", ((IImmutableDictionary<string, string>)MyStringToStringIImmutableDict)["key"]);
             Assert.Equal("value", ((ImmutableSortedDictionary<string, string>)MyStringToStringImmutableSortedDict)["key"]);
+
+            Assert.Equal("myKey", ((KeyValuePair<string, string>)MyStringToStringKeyValuePair).Key);
+            Assert.Equal("myValue", ((KeyValuePair<string, string>)MyStringToStringKeyValuePair).Value);
 
             Assert.Equal(2, ((Stack<string>)MyStringStackT).Count);
             Assert.True(((Stack<string>)MyStringStackT).Contains("Hello"));
