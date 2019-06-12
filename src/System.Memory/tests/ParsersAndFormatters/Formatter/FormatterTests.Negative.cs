@@ -19,8 +19,6 @@ namespace System.Buffers.Text.Tests
         [Theory]
         [MemberData(nameof(TestData.IntegerTypesTheoryData), MemberType = typeof(TestData))]
         [InlineData(typeof(decimal))]
-        [InlineData(typeof(double))]
-        [InlineData(typeof(float))]
         public static void TestGFormatWithPrecisionNotSupported(Type type)
         {
             object value = Activator.CreateInstance(type);

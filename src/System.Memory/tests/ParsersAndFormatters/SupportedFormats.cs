@@ -69,8 +69,8 @@ namespace System.Buffers.Text.Tests
         {
             get
             {
-                yield return new SupportedFormat('G', supportsPrecision: false) { IsDefault = true };
-                yield return new SupportedFormat('g', supportsPrecision: false) { FormatSynonymFor = 'G', ParseSynonymFor = 'G' };
+                yield return new SupportedFormat('G', supportsPrecision: true) { IsDefault = true };
+                yield return new SupportedFormat('g', supportsPrecision: true) { FormatSynonymFor = 'G', ParseSynonymFor = 'G' };
                 yield return new SupportedFormat('E', supportsPrecision: true);
                 yield return new SupportedFormat('e', supportsPrecision: true) { ParseSynonymFor = 'E' };
                 yield return new SupportedFormat('F', supportsPrecision: true);
