@@ -8,7 +8,7 @@ namespace System.ComponentModel
     /// Specifies the display name for a property or event.
     /// The default is the name of the property or event.
     /// </summary>
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Event | AttributeTargets.Class | AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.All)]
     public class DisplayNameAttribute : Attribute
     {
         /// <summary>
