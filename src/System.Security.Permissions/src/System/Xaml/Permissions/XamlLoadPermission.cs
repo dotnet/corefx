@@ -16,12 +16,10 @@ namespace System.Xaml.Permissions
         public XamlLoadPermission(PermissionState state) { }
         public XamlLoadPermission(XamlAccessLevel allowedAccess) { }
         public XamlLoadPermission(IEnumerable<XamlAccessLevel> allowedAccess) { }
-#if NETCOREAPP
         [ComVisible(false)]
         public override bool Equals(object obj) { return false; }
         [ComVisible(false)]
         public override int GetHashCode() { return base.GetHashCode(); }
-#endif 
         public IList<XamlAccessLevel> AllowedAccess { get; private set; } = new ReadOnlyCollection<XamlAccessLevel>(Array.Empty<XamlAccessLevel>());
         public override IPermission Copy() { return new XamlLoadPermission(PermissionState.Unrestricted); }
         public override void FromXml(SecurityElement elem) { }
