@@ -1141,7 +1141,9 @@ namespace System.Text.Json.Tests
                 Assert.Equal(JsonValueType.String, root.Type);
 
                 Assert.False(root.TryGetDateTime(out DateTime DateTimeVal));
+                Assert.Equal(default, DateTimeVal);
                 Assert.False(root.TryGetDateTimeOffset(out DateTimeOffset DateTimeOffsetVal));
+                Assert.Equal(default, DateTimeOffsetVal);
 
                 Assert.Throws<FormatException>(() => root.GetDateTime());
                 Assert.Throws<FormatException>(() => root.GetDateTimeOffset());
@@ -1192,6 +1194,7 @@ namespace System.Text.Json.Tests
                 Assert.Equal(JsonValueType.String, root.Type);
 
                 Assert.False(root.TryGetGuid(out Guid GuidVal));
+                Assert.Equal(default, GuidVal);
 
                 Assert.Throws<FormatException>(() => root.GetGuid());
             }
@@ -1420,19 +1423,19 @@ namespace System.Text.Json.Tests
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
                     Utf8JsonWriter writer = default;
-                    root.WriteAsValue(writer);
+                    root.WriteValue(writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
                     Utf8JsonWriter writer = default;
-                    root.WriteAsProperty(ReadOnlySpan<char>.Empty, writer);
+                    root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
                 });
 
                 Assert.Throws<ObjectDisposedException>(() =>
                 {
                     Utf8JsonWriter writer = default;
-                    root.WriteAsProperty(ReadOnlySpan<byte>.Empty, writer);
+                    root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
                 });
             }
         }
@@ -1471,19 +1474,19 @@ namespace System.Text.Json.Tests
             Assert.Throws<InvalidOperationException>(() =>
             {
                 Utf8JsonWriter writer = default;
-                root.WriteAsValue(writer);
+                root.WriteValue(writer);
             });
 
             Assert.Throws<InvalidOperationException>(() =>
             {
                 Utf8JsonWriter writer = default;
-                root.WriteAsProperty(ReadOnlySpan<char>.Empty, writer);
+                root.WriteProperty(ReadOnlySpan<char>.Empty, writer);
             });
 
             Assert.Throws<InvalidOperationException>(() =>
             {
                 Utf8JsonWriter writer = default;
-                root.WriteAsProperty(ReadOnlySpan<byte>.Empty, writer);
+                root.WriteProperty(ReadOnlySpan<byte>.Empty, writer);
             });
         }
 
@@ -1641,10 +1644,15 @@ namespace System.Text.Json.Tests
                 const string NotPresent = "Not Present";
                 byte[] notPresentUtf8 = Encoding.UTF8.GetBytes(NotPresent);
 
-                Assert.False(root.TryGetProperty(NotPresent, out _));
-                Assert.False(root.TryGetProperty(NotPresent.AsSpan(), out _));
-                Assert.False(root.TryGetProperty(notPresentUtf8, out _));
-                Assert.False(root.TryGetProperty(new string('z', 512), out _));
+                JsonElement element;
+                Assert.False(root.TryGetProperty(NotPresent, out element));
+                Assert.Equal(default, element);
+                Assert.False(root.TryGetProperty(NotPresent.AsSpan(), out element));
+                Assert.Equal(default, element);
+                Assert.False(root.TryGetProperty(notPresentUtf8, out element));
+                Assert.Equal(default, element);
+                Assert.False(root.TryGetProperty(new string('z', 512), out element));
+                Assert.Equal(default, element);
 
                 Assert.Throws<KeyNotFoundException>(() => root.GetProperty(NotPresent));
                 Assert.Throws<KeyNotFoundException>(() => root.GetProperty(NotPresent.AsSpan()));

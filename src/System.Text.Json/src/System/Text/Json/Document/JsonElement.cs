@@ -2,18 +2,15 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System;
-using System.Buffers;
-using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 
 namespace System.Text.Json
 {
     /// <summary>
     ///   Represents a specific JSON value within a <see cref="JsonDocument"/>.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly partial struct JsonElement
     {
         private readonly JsonDocument _parent;
@@ -1074,7 +1071,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="propertyName">The name for this value within the JSON object.</param>
         /// <param name="writer">The writer.</param>
@@ -1084,11 +1081,11 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsProperty(string propertyName, Utf8JsonWriter writer)
-            => WriteAsProperty(propertyName.AsSpan(), writer);
+        public void WriteProperty(string propertyName, Utf8JsonWriter writer)
+            => WriteProperty(propertyName.AsSpan(), writer);
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="propertyName">The name for this value within the JSON object.</param>
         /// <param name="writer">The writer.</param>
@@ -1098,7 +1095,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsProperty(ReadOnlySpan<char> propertyName, Utf8JsonWriter writer)
+        public void WriteProperty(ReadOnlySpan<char> propertyName, Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -1106,7 +1103,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="utf8PropertyName">
         ///   The name for this value within the JSON object, as UTF-8 text.
@@ -1118,7 +1115,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, Utf8JsonWriter writer)
+        public void WriteProperty(ReadOnlySpan<byte> utf8PropertyName, Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -1126,7 +1123,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a value.
+        ///   Write the element into the provided writer as a JSON value.
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
@@ -1135,7 +1132,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsValue(Utf8JsonWriter writer)
+        public void WriteValue(Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -1286,5 +1283,7 @@ namespace System.Text.Json
                 throw new InvalidOperationException();
             }
         }
+
+        private string DebuggerDisplay => $"Type = {Type} : \"{ToString()}\"";
     }
 }

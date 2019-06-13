@@ -117,7 +117,7 @@ jobs:
           - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.ES.Open
 
         - ${{ if eq(parameters.fullMatrix, 'true') }}:
-          - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.Open+Windows.10.Amd64.ServerRS5.Open          
+          - netcoreappWindowsQueues: Windows.7.Amd64.Open+Windows.81.Amd64.Open+Windows.10.Amd64.ClientRS4.Open+Windows.10.Amd64.ServerRS5.Open+Windows.10.Amd64.Client19H1.Open
 
     # There is no point of running legs without outerloop tests, when in an outerloop build.
     - ${{ if and(ne(parameters.testScope, 'outerloop'), ne(parameters.testScope, 'all')) }}:
@@ -166,26 +166,20 @@ jobs:
             displayName: Build Packages and Tests
 
       # Legs without HELIX testing
+    - ${{ if eq(parameters.fullMatrix, 'true') }}:
       - job: WindowsNoTest
         displayName: Windows
         strategy:
           matrix:
-            ${{ if eq(parameters.fullMatrix, 'false') }}:
-              UWP_NETNative_x86_Release:
-                _BuildConfig: Release
-                _architecture: x86
-                _framework: uapaot
+            arm_Release:
+              _BuildConfig: Release
+              _architecture: arm
+              _framework: netcoreapp
 
-            ${{ if eq(parameters.fullMatrix, 'true') }}:
-              arm_Release:
-                _BuildConfig: Release
-                _architecture: arm
-                _framework: netcoreapp
-
-              UAP_arm_Release:
-                _BuildConfig: Release
-                _architecture: arm
-                _framework: uap
+            UAP_arm_Release:
+              _BuildConfig: Release
+              _architecture: arm
+              _framework: uap
 
         pool:
           name: Hosted VS2017

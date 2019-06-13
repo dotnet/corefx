@@ -1045,7 +1045,6 @@ namespace System.Net.Http.Functional.Tests
 
         [OuterLoop]
         [Fact]
-        [ActiveIssue(30032)]
         public async Task ConnectTimeout_TimesOutSSLAuth_Throws()
         {
             var releaseServer = new TaskCompletionSource<bool>();
@@ -1057,7 +1056,7 @@ namespace System.Net.Http.Functional.Tests
                     handler.ConnectTimeout = TimeSpan.FromSeconds(1);
 
                     var sw = Stopwatch.StartNew();
-                    await Assert.ThrowsAsync<TaskCanceledException>(() =>
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(() =>
                         invoker.SendAsync(new HttpRequestMessage(HttpMethod.Get,
                             new UriBuilder(uri) { Scheme = "https" }.ToString()) { Version = VersionFromUseHttp2 }, default));
                     sw.Stop();
@@ -1206,9 +1205,9 @@ namespace System.Net.Http.Functional.Tests
 
             // These tests check that the algorithm parameter is treated in case insensitive way.
             // WinHTTP only supports plain MD5, so other algorithms are included here.
-            yield return new object[] { $"Digest realm=\"testrealm\", algorithm=md5-Sess, nonce=\"testnonce\"", true };
+            yield return new object[] { $"Digest realm=\"testrealm\", algorithm=md5-Sess, nonce=\"testnonce\", qop=\"auth\"", true };
             yield return new object[] { $"Digest realm=\"testrealm\", algorithm=sha-256, nonce=\"testnonce\"", true };
-            yield return new object[] { $"Digest realm=\"testrealm\", algorithm=sha-256-SESS, nonce=\"testnonce\"", true };
+            yield return new object[] { $"Digest realm=\"testrealm\", algorithm=sha-256-SESS, nonce=\"testnonce\", qop=\"auth\"", true };
         }
     }
 
@@ -2164,6 +2163,60 @@ namespace System.Net.Http.Functional.Tests
 
                 return RemoteExecutor.SuccessExitCode;
             }).Dispose();
+        }
+    }
+
+    public sealed class SocketsHttpHandlerTest_LocationHeader
+    {
+        private static readonly byte[] s_redirectResponseBefore = Encoding.ASCII.GetBytes(
+            "HTTP/1.1 301 Moved Permanently\r\n" +
+            "Connection: close\r\n" +
+            "Transfer-Encoding: chunked\r\n" +
+            "Location: ");
+
+        private static readonly byte[] s_redirectResponseAfter = Encoding.ASCII.GetBytes(
+            "\r\n" +
+            "Server: Loopback\r\n" +
+            "\r\n" +
+            "0\r\n\r\n");
+
+        [Theory]
+        // US-ASCII only
+        [InlineData("http://a/", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/' })]
+        [InlineData("http://a/asdasd", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', (byte)'a', (byte)'s', (byte)'d', (byte)'a', (byte)'s', (byte)'d' })]
+        // 2, 3, 4 byte UTF-8 characters
+        [InlineData("http://a/\u00A2", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', 0xC2, 0xA2 })]
+        [InlineData("http://a/\u20AC", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', 0xE2, 0x82, 0xAC })]
+        [InlineData("http://a/\uD800\uDF48", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', 0xF0, 0x90, 0x8D, 0x88 })]
+        // 3 Polish letters
+        [InlineData("http://a/\u0105\u015B\u0107", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', 0xC4, 0x85, 0xC5, 0x9B, 0xC4, 0x87 })]
+        // Negative cases - should be interpreted as ISO-8859-1
+        // Invalid utf-8 sequence (continuation without start)
+        [InlineData("http://a/%C2%80", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', 0b10000000 })]
+        // Invalid utf-8 sequence (not allowed character)
+        [InlineData("http://a/\u00C3\u0028", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', 0xC3, 0x28 })]
+        // Incomplete utf-8 sequence
+        [InlineData("http://a/\u00C2", new byte[] { (byte)'h', (byte)'t', (byte)'t', (byte)'p', (byte)':', (byte)'/', (byte)'/', (byte)'a', (byte)'/', 0xC2 })]
+        public async void LocationHeader_DecodesUtf8_Success(string expected, byte[] location)
+        {
+            await LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (HttpClientHandler handler = new HttpClientHandler())
+                {
+                    handler.AllowAutoRedirect = false;
+
+                    using (HttpClient client = new HttpClient(handler))
+                    {
+                        HttpResponseMessage response = await client.GetAsync(url);
+                        Assert.Equal(expected, response.Headers.Location.ToString());
+                    }
+                }
+            }, server => server.AcceptConnectionSendCustomResponseAndCloseAsync(PreperateResponseWithRedirect(location)));
+        }
+
+        private static byte[] PreperateResponseWithRedirect(byte[] location)
+        {
+            return s_redirectResponseBefore.Concat(location).Concat(s_redirectResponseAfter).ToArray();
         }
     }
 
