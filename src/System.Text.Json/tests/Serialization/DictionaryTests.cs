@@ -790,6 +790,21 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void DeserializeDictionaryWithDuplicateKeys()
+        {
+            // Strongly-typed IDictionary<,> case.
+            Dictionary<string, string> deserialize = JsonSerializer.Parse<Dictionary<string, string>>(@"{""Hello"":""World"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", deserialize["Hello"]);
+
+            deserialize = JsonSerializer.Parse<Dictionary<string, string>>(@"{""Hello"":""World"", ""myKey"" : ""myValue"", ""Hello"":""NewValue""}");
+            Assert.Equal("NewValue", deserialize["Hello"]);
+
+            // Weakly-typed IDictionary case.
+            Dictionary<string, object> deserializeObject = JsonSerializer.Parse<Dictionary<string, object>>(@"{""Hello"":""World"", ""Hello"": null}");
+            Assert.Null(deserializeObject["Hello"]);
+        }
+
+        [Fact]
         public static void ClassWithNoSetter()
         {
             string json = @"{""MyDictionary"":{""Key"":""Value""}}";
