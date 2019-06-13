@@ -33,13 +33,6 @@
   -->
   <ItemGroup>
     <PackageReference Include="System.IO.Compression.TestData" Version="$(SystemIOCompressionTestDataPackageVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
+    <None Include="$(PkgSystem_IO_Compression_TestData)\contentFiles\any\any\**\*" />
   </ItemGroup>
-  <Target Name="CopyTestDataToOutput" AfterTargets="CopyFilesToOutputDirectory">
-    <ItemGroup>
-      <_testDataContentFile Include="$(PkgSystem_IO_Compression_TestData)\contentFiles\any\any\**\*" />
-    </ItemGroup>
-    <Copy SourceFiles="@(_testDataContentFile)" 
-          DestinationFolder="$(OutDir)%(_testDataContentFile.RecursiveDir)"
-          SkipUnchangedFiles="true" />
-  </Target>
 </Project>

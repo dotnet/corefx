@@ -5,7 +5,9 @@
   </ItemGroup>
 
   <!-- the intellisense package doesn't use nuget conventions so we need to select manually -->
-  <Target Name="GetDocFiles" AfterTargets="Restore">
+  <Target Name="GetDocFiles"
+          AfterTargets="Restore">
+
     <ItemGroup>
       <DocFile Include="$(NuGetPackageRoot)microsoft.private.intellisense/$(MicrosoftPrivateIntellisensePackageVersion)/xmldocs/netcoreapp/**/*.xml"/>
       <DocFile>
@@ -36,7 +38,9 @@
     
     <Copy SourceFiles="@(DocFile)"
           DestinationFiles="$(XmlDocDir)\%(SubFolder)%(FileName)%(Extension)"
-          SkipUnchangedFiles="true" />
+          SkipUnchangedFiles="true"
+          UseHardlinksIfPossible="true" />
+
   </Target>
 
 </Project>

@@ -9,8 +9,9 @@
   <!-- IBC data packages don't follow NuGet conventions.  -->
   <Target Name="GetIBCData"
           Inputs="%(IBCPackage.Identity)"
-          Outputs="$(IbcOptimizationDataDir)"
+          Outputs="unused"
           AfterTargets="Restore">
+
     <PropertyGroup>
       <!-- evaluate the package property -->
       <_ibcPkgSrc>$(NuGetPackageRoot)%(IBCPackage.Identity)/%(IBCPackage.Version)</_ibcPkgSrc>
@@ -22,7 +23,10 @@
     </ItemGroup>
 
     <Copy SourceFiles="@(_optimizationDataSourceFile)"
-          DestinationFiles="$(IbcOptimizationDataDir)$(_ibcPkgDest)\%(RecursiveDir)%(Filename)%(Extension)" />
+          DestinationFiles="$(IbcOptimizationDataDir)$(_ibcPkgDest)\%(RecursiveDir)%(Filename)%(Extension)"
+          SkipUnchangedFiles="true"
+          UseHardlinksIfPossible="true" />
+
   </Target>
 
 </Project>

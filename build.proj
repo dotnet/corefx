@@ -93,5 +93,5 @@
     </ItemGroup>
   </Target>
 
-  <Import Project="$(RepositoryEngineeringDir)uap-tools.targets" />
+  <Import Project="$(RepositoryEngineeringDir)restore\uap-tools.targets" />
 </Project>

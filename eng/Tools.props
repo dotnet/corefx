@@ -61,8 +61,8 @@
 
   </Target>
 
-  <Import Project="$(RepositoryEngineeringDir)docs.targets" Condition="'$(DotNetBuildFromSource)' != 'true'" />
-  <Import Project="$(RepositoryEngineeringDir)optimizationData.targets" Condition="'$(DotNetBuildFromSource)' != 'true' and '$(EnableNgenOptimization)' == 'true'" />
-  <Import Project="$(RepositoryEngineeringDir)illink-restore.targets" Condition="'$(ILLinkTrimAssembly)' != 'false'" />
+  <Import Project="$(RepositoryEngineeringDir)restore\docs.targets" Condition="'$(DotNetBuildFromSource)' != 'true'" />
+  <Import Project="$(RepositoryEngineeringDir)restore\optimizationData.targets" Condition="'$(DotNetBuildFromSource)' != 'true' and '$(EnableNgenOptimization)' == 'true'" />
+  <Import Project="$(RepositoryEngineeringDir)restore\illink.targets" Condition="'$(ILLinkTrimAssembly)' != 'false'" />
 
 </Project>

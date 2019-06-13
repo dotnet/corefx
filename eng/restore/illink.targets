@@ -7,8 +7,6 @@
   </ItemGroup>
 
   <Target Name="IncludeToolsFiles"
-          Inputs="%(ILLinkTfm.Identity)"
-          Outputs="$(ILLinkDir)"
           AfterTargets="Restore">
 
     <ItemGroup>
@@ -17,7 +15,8 @@
 
     <Copy SourceFiles="@(_illinkSrcFiles)"
           DestinationFolder="$(ILLinkDir)%(ILLinkTfm.Identity)"
-          SkipUnchangedFiles="true" />
+          SkipUnchangedFiles="true"
+          UseHardlinksIfPossible="true" />
 
   </Target>
 </Project>
