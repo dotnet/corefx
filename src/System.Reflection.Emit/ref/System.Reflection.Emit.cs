@@ -10,18 +10,42 @@ namespace System.Reflection.Emit
     public sealed partial class AssemblyBuilder : System.Reflection.Assembly
     {
         internal AssemblyBuilder() { }
+        public override string CodeBase { get { throw null; } }
+        public override System.Reflection.MethodInfo EntryPoint { get { throw null; } }
         public override string FullName { get { throw null; } }
+        public override bool GlobalAssemblyCache { get { throw null; } }
+        public override long HostContext { get { throw null; } }
+        public override string ImageRuntimeVersion { get { throw null; } }
+        public override bool IsCollectible { get { throw null; } }
         public override bool IsDynamic { get { throw null; } }
+        public override string Location { get { throw null; } }
         public override System.Reflection.Module ManifestModule { get { throw null; } }
+        public override bool ReflectionOnly { get { throw null; } }
         public static System.Reflection.Emit.AssemblyBuilder DefineDynamicAssembly(System.Reflection.AssemblyName name, System.Reflection.Emit.AssemblyBuilderAccess access) { throw null; }
         public static System.Reflection.Emit.AssemblyBuilder DefineDynamicAssembly(System.Reflection.AssemblyName name, System.Reflection.Emit.AssemblyBuilderAccess access, System.Collections.Generic.IEnumerable<System.Reflection.Emit.CustomAttributeBuilder> assemblyAttributes) { throw null; }
         public System.Reflection.Emit.ModuleBuilder DefineDynamicModule(string name) { throw null; }
         public override bool Equals(object obj) { throw null; }
+        public override object[] GetCustomAttributes(bool inherit) { throw null; }
+        public override object[] GetCustomAttributes(System.Type attributeType, bool inherit) { throw null; }
+        public override System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { throw null; }
         public System.Reflection.Emit.ModuleBuilder GetDynamicModule(string name) { throw null; }
+        public override System.Type[] GetExportedTypes() { throw null; }
+        public override System.IO.FileStream GetFile(string name) { throw null; }
+        public override System.IO.FileStream[] GetFiles(bool getResourceModules) { throw null; }
         public override int GetHashCode() { throw null; }
+        public override System.Reflection.Module[] GetLoadedModules(bool getResourceModules) { throw null; }
         public override System.Reflection.ManifestResourceInfo GetManifestResourceInfo(string resourceName) { throw null; }
         public override string[] GetManifestResourceNames() { throw null; }
         public override System.IO.Stream GetManifestResourceStream(string name) { throw null; }
+        public override System.IO.Stream GetManifestResourceStream(System.Type type, string name) { throw null; }
+        public override System.Reflection.Module GetModule(string name) { throw null; }
+        public override System.Reflection.Module[] GetModules(bool getResourceModules) { throw null; }
+        public override System.Reflection.AssemblyName GetName(bool copiedName) { throw null; }
+        public override System.Reflection.AssemblyName[] GetReferencedAssemblies() { throw null; }
+        public override System.Reflection.Assembly GetSatelliteAssembly(System.Globalization.CultureInfo culture) { throw null; }
+        public override System.Reflection.Assembly GetSatelliteAssembly(System.Globalization.CultureInfo culture, System.Version version) { throw null; }
+        public override System.Type GetType(string name, bool throwOnError, bool ignoreCase) { throw null; }
+        public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
         public void SetCustomAttribute(System.Reflection.ConstructorInfo con, byte[] binaryAttribute) { }
         public void SetCustomAttribute(System.Reflection.Emit.CustomAttributeBuilder customBuilder) { }
     }
@@ -132,6 +156,7 @@ namespace System.Reflection.Emit
         public override System.Type DeclaringType { get { throw null; } }
         public override System.RuntimeFieldHandle FieldHandle { get { throw null; } }
         public override System.Type FieldType { get { throw null; } }
+        public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
         public override System.Type ReflectedType { get { throw null; } }
         public override object[] GetCustomAttributes(bool inherit) { throw null; }
@@ -226,6 +251,9 @@ namespace System.Reflection.Emit
         public bool InitLocals { get { throw null; } set { } }
         public override bool IsGenericMethod { get { throw null; } }
         public override bool IsGenericMethodDefinition { get { throw null; } }
+        public override bool IsSecurityCritical { get { throw null; } }
+        public override bool IsSecuritySafeCritical { get { throw null; } }
+        public override bool IsSecurityTransparent { get { throw null; } }
         public override System.RuntimeMethodHandle MethodHandle { get { throw null; } }
         public override System.Reflection.Module Module { get { throw null; } }
         public override string Name { get { throw null; } }
@@ -262,7 +290,11 @@ namespace System.Reflection.Emit
         internal ModuleBuilder() { }
         public override System.Reflection.Assembly Assembly { get { throw null; } }
         public override string FullyQualifiedName { get { throw null; } }
+        public override int MDStreamVersion { get { throw null; } }
+        public override int MetadataToken { get { throw null; } }
+        public override System.Guid ModuleVersionId { get { throw null; } }
         public override string Name { get { throw null; } }
+        public override string ScopeName { get { throw null; } }
         public void CreateGlobalFunctions() { }
         public System.Reflection.Emit.EnumBuilder DefineEnum(string name, System.Reflection.TypeAttributes visibility, System.Type underlyingType) { throw null; }
         public System.Reflection.Emit.MethodBuilder DefineGlobalMethod(string name, System.Reflection.MethodAttributes attributes, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes) { throw null; }
@@ -279,7 +311,26 @@ namespace System.Reflection.Emit
         public System.Reflection.Emit.FieldBuilder DefineUninitializedData(string name, int size, System.Reflection.FieldAttributes attributes) { throw null; }
         public override bool Equals(object obj) { throw null; }
         public System.Reflection.MethodInfo GetArrayMethod(System.Type arrayClass, string methodName, System.Reflection.CallingConventions callingConvention, System.Type returnType, System.Type[] parameterTypes) { throw null; }
+        public override object[] GetCustomAttributes(bool inherit) { throw null; }
+        public override object[] GetCustomAttributes(System.Type attributeType, bool inherit) { throw null; }
+        public override System.Collections.Generic.IList<System.Reflection.CustomAttributeData> GetCustomAttributesData() { throw null; }
+        public override System.Reflection.FieldInfo GetField(string name, System.Reflection.BindingFlags bindingAttr) { throw null; }
+        public override System.Reflection.FieldInfo[] GetFields(System.Reflection.BindingFlags bindingFlags) { throw null; }
         public override int GetHashCode() { throw null; }
+        public override System.Reflection.MethodInfo[] GetMethods(System.Reflection.BindingFlags bindingFlags) { throw null; }
+        public override void GetPEKind(out System.Reflection.PortableExecutableKinds peKind, out System.Reflection.ImageFileMachine machine) { throw null; }
+        public override System.Type GetType(string className) { throw null; }
+        public override System.Type GetType(string className, bool ignoreCase) { throw null; }
+        public override System.Type GetType(string className, bool throwOnError, bool ignoreCase) { throw null; }
+        public override System.Type[] GetTypes() { throw null; }
+        public override bool IsDefined(System.Type attributeType, bool inherit) { throw null; }
+        public override bool IsResource() { throw null; }
+        public override System.Reflection.FieldInfo ResolveField(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { throw null; }
+        public override System.Reflection.MemberInfo ResolveMember(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { throw null; }
+        public override System.Reflection.MethodBase ResolveMethod(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { throw null; }
+        public override byte[] ResolveSignature(int metadataToken) { throw null; }
+        public override string ResolveString(int metadataToken) { throw null; }
+        public override System.Type ResolveType(int metadataToken, System.Type[] genericTypeArguments, System.Type[] genericMethodArguments) { throw null; }
         public void SetCustomAttribute(System.Reflection.ConstructorInfo con, byte[] binaryAttribute) { }
         public void SetCustomAttribute(System.Reflection.Emit.CustomAttributeBuilder customBuilder) { }
     }
