@@ -66,19 +66,4 @@
                       '%(Dependency.Identity)' != '_._'" />
   </Target>
 
-  <!--
-    As we disabled implicit framework references but want to populate the framework node in the runtimeconfig's 
-    runtimeOptions node we manually set the RuntimeFramework. 
-    At that point restore and conflict resolution already happened therefore setting the item here has no side effects.
-   -->
-  <Target Name="SetRuntimeFrameworksBeforeGenerateConfigurationFiles"
-          Condition="'$(GenerateRuntimeConfigurationFiles)' == 'true'"
-          BeforeTargets="GenerateBuildRuntimeConfigurationFiles">
-
-    <ItemGroup>
-      <RuntimeFramework Include="Microsoft.NETCore.App" Version="$(ProductVersion)" />
-    </ItemGroup>
-
-  </Target>
-
 </Project>
