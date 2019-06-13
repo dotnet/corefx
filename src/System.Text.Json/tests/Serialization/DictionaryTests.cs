@@ -5,6 +5,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using Newtonsoft.Json;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -131,14 +132,27 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void ImplementsIDictionaryOfObject()
         {
-            var values = new IDictionaryWrapper(new Dictionary<string, object>
+            var input = new StringToObjectIDictionaryWrapper(new Dictionary<string, object>
             {
                 { "Name", "David" },
                 { "Age", 32 }
             });
 
-            var json = JsonSerializer.ToString(values, typeof(IDictionary<string, object>));
+            string json = JsonSerializer.ToString(input, typeof(IDictionary<string, object>));
             Assert.Equal(@"{""Name"":""David"",""Age"":32}", json);
+        }
+
+        [Fact]
+        public static void ImplementsIDictionaryOfString()
+        {
+            var input = new StringToStringIDictionaryWrapper(new Dictionary<string, string>
+            {
+                { "Name", "David" },
+                { "Job", "Software Architect" }
+            });
+
+            string json = JsonSerializer.ToString(input, typeof(IDictionary<string, string>));
+            Assert.Equal(@"{""Name"":""David"",""Job"":""Software Architect""}", json);
         }
 
         [Theory]
