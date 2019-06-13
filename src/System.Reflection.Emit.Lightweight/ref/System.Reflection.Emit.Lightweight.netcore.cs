@@ -31,6 +31,10 @@ namespace System.Reflection.Emit
     }
     public sealed partial class DynamicMethod : System.Reflection.MethodInfo
     {
+        public override bool IsSecurityCritical { get { throw null; } }
+        public override bool IsSecuritySafeCritical { get { throw null; } }
+        public override bool IsSecurityTransparent { get { throw null; } }
+        public override System.Reflection.Module Module { get { throw null; } }
         public System.Reflection.Emit.DynamicILInfo GetDynamicILInfo() { throw null; }
     }
 }
