@@ -11,13 +11,14 @@ using System.Security.Permissions;
 namespace System.Xaml.Permissions
 {
     [Serializable]
+    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     public sealed class XamlLoadPermission : CodeAccessPermission, IUnrestrictedPermission
     {
         public XamlLoadPermission(PermissionState state) { }
         public XamlLoadPermission(XamlAccessLevel allowedAccess) { }
         public XamlLoadPermission(IEnumerable<XamlAccessLevel> allowedAccess) { }
         [ComVisible(false)]
-        public override bool Equals(object obj) { return false; }
+        public override bool Equals(object obj) { return ReferenceEquals(this, obj); }
         [ComVisible(false)]
         public override int GetHashCode() { return base.GetHashCode(); }
         public IList<XamlAccessLevel> AllowedAccess { get; private set; } = new ReadOnlyCollection<XamlAccessLevel>(Array.Empty<XamlAccessLevel>());
