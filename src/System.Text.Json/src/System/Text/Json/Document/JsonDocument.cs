@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Buffers;
 using System.Buffers.Text;
 using System.Diagnostics;
@@ -257,6 +258,92 @@ namespace System.Text.Json
             return lastString;
         }
 
+        internal bool TextEquals(int index, ReadOnlySpan<char> otherText, bool isPropertyName)
+        {
+            CheckNotDisposed();
+
+            int matchIndex = isPropertyName ? index - DbRow.Size : index;
+
+            (int lastIdx, string lastString) = _lastIndexAndString;
+        
+            if (lastIdx == matchIndex)
+            {
+                return otherText.SequenceEqual(lastString.AsSpan());
+            }
+
+            byte[] otherUtf8TextArray = null;
+
+            int length = checked(otherText.Length * JsonConstants.MaxExpansionFactorWhileTranscoding);
+            Span<byte> otherUtf8Text = length <= JsonConstants.StackallocThreshold ?
+                stackalloc byte[JsonConstants.StackallocThreshold] :
+                (otherUtf8TextArray = ArrayPool<byte>.Shared.Rent(length));
+
+            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(otherText);
+            OperationStatus status = JsonWriterHelper.ToUtf8(utf16Text, otherUtf8Text, out int consumed, out int written);
+            Debug.Assert(status != OperationStatus.DestinationTooSmall);
+            bool result;
+            if (status > OperationStatus.DestinationTooSmall)   // Equivalent to: (status == NeedMoreData || status == InvalidData)
+            {
+                result = false;
+            }
+            else
+            {
+                Debug.Assert(status == OperationStatus.Done);
+                Debug.Assert(consumed == utf16Text.Length);
+
+                result = TextEquals(index, otherUtf8Text.Slice(0, written), isPropertyName);
+            }
+
+            if (otherUtf8TextArray != null)
+            {
+                otherUtf8Text.Slice(0, written).Clear();
+                ArrayPool<byte>.Shared.Return(otherUtf8TextArray);
+            }
+
+            return result;
+        }
+
+        internal bool TextEquals(int index, ReadOnlySpan<byte> otherUtf8Text, bool isPropertyName)
+        {
+            CheckNotDisposed();
+
+            int matchIndex = isPropertyName ? index - DbRow.Size : index;
+
+            DbRow row = _parsedData.Get(matchIndex);
+
+            CheckExpectedType(
+                isPropertyName? JsonTokenType.PropertyName : JsonTokenType.String,
+                row.TokenType);
+
+            ReadOnlySpan<byte> data = _utf8Json.Span;
+            ReadOnlySpan<byte> segment = data.Slice(row.Location, row.SizeOrLength);
+
+            if (otherUtf8Text.Length > segment.Length)
+            {
+                return false;
+            }
+
+            if (row.HasComplexChildren)
+            {
+                if (otherUtf8Text.Length < segment.Length / JsonConstants.MaxExpansionFactorWhileEscaping)
+                {
+                    return false;
+                }
+
+                int idx = segment.IndexOf(JsonConstants.BackSlash);
+                Debug.Assert(idx != -1);
+
+                if (!otherUtf8Text.StartsWith(segment.Slice(0, idx)))
+                {
+                    return false;
+                }
+
+                return JsonReaderHelper.UnescapeAndCompare(segment.Slice(idx), otherUtf8Text.Slice(idx));
+            }
+
+            return segment.SequenceEqual(otherUtf8Text);
+        }
+
         internal string GetNameOfPropertyValue(int index)
         {
             // The property name is one row before the property value
@@ -304,7 +391,7 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
@@ -326,7 +413,7 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
@@ -348,7 +435,7 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
@@ -370,7 +457,7 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
@@ -394,7 +481,7 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
@@ -418,7 +505,7 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
@@ -442,7 +529,7 @@ namespace System.Text.Json
                 return true;
             }
 
-            value = default;
+            value = 0;
             return false;
         }
 
@@ -471,10 +558,16 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(segment, out DateTime tmp, out int bytesConsumed)
+                && segment.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
-                && segment.Length == bytesConsumed;
+            return false;
         }
 
         internal bool TryGetValue(int index, out DateTimeOffset value)
@@ -502,10 +595,16 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength
+                && JsonHelpers.TryParseAsISO(segment, out DateTimeOffset tmp, out int bytesConsumed)
+                && segment.Length == bytesConsumed)
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (segment.Length <= JsonConstants.MaximumDateTimeOffsetParseLength)
-                && JsonHelpers.TryParseAsISO(segment, out value, out int bytesConsumed)
-                && segment.Length == bytesConsumed;
+            return false;
         }
 
         internal bool TryGetValue(int index, out Guid value)
@@ -533,8 +632,15 @@ namespace System.Text.Json
 
             Debug.Assert(segment.IndexOf(JsonConstants.BackSlash) == -1);
 
+            if (segment.Length == JsonConstants.MaximumFormatGuidLength
+                && Utf8Parser.TryParse(segment, out Guid tmp, out _, 'D'))
+            {
+                value = tmp;
+                return true;
+            }
+
             value = default;
-            return (segment.Length == JsonConstants.MaximumFormatGuidLength) && Utf8Parser.TryParse(segment, out value, out _, 'D');
+            return false;
         }
 
         internal string GetRawValueAsString(int index)

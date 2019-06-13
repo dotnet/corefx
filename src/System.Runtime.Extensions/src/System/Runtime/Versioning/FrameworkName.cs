@@ -6,7 +6,10 @@ using System.Diagnostics;
 
 namespace System.Runtime.Versioning
 {
-    public sealed class FrameworkName : IEquatable<FrameworkName?>
+    public sealed class FrameworkName :
+#nullable disable
+        IEquatable<FrameworkName>
+#nullable restore
     {
         private readonly string _identifier;
         private readonly Version _version = null!;
@@ -99,9 +102,7 @@ namespace System.Runtime.Versioning
             return Identifier.GetHashCode() ^ Version.GetHashCode() ^ Profile.GetHashCode();
         }
 
-#pragma warning disable CS8609 // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/23268
         public override string ToString()
-#pragma warning restore CS8609
         {
             return FullName;
         }

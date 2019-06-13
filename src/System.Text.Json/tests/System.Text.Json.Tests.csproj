@@ -11,6 +11,7 @@
     <Compile Include="BitStackTests.cs" />
     <Compile Include="BufferFactory.cs" />
     <Compile Include="BufferSegment.cs" />
+    <Compile Include="DebuggerTests.cs" />
     <Compile Include="FixedSizedBufferWriter.cs" />
     <Compile Include="InvalidBufferWriter.cs" />
     <Compile Include="JsonDateTimeTestData.cs" />
@@ -23,6 +24,12 @@
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
     <Compile Include="JsonWriterOptionsTests.cs" />
+    <Compile Include="NewtonsoftTests\CamelCaseTests.cs" />
+    <Compile Include="NewtonsoftTests\CustomObjectConverterTests.cs" />
+    <Compile Include="NewtonsoftTests\DateTimeConverterTests.cs" />
+    <Compile Include="NewtonsoftTests\EnumConverterTests.cs" />
+    <Compile Include="NewtonsoftTests\ImmutableCollectionsTests.cs" />
+    <Compile Include="NewtonsoftTests\JsonSerializerTests.cs" />
     <Compile Include="Serialization\Array.ReadTests.cs" />
     <Compile Include="Serialization\Array.WriteTests.cs" />
     <Compile Include="Serialization\CacheTests.cs" />
@@ -64,8 +71,8 @@
     <Compile Include="TestClasses.ClassWithComplexObjects.cs" />
     <Compile Include="Utf8JsonReaderTests.cs" />
     <Compile Include="Utf8JsonReaderTests.MultiSegment.cs" />
-    <Compile Include="Utf8JsonReaderTests.TextEquals.cs" />
     <Compile Include="Utf8JsonReaderTests.TryGet.cs" />
+    <Compile Include="Utf8JsonReaderTests.ValueTextEquals.cs" />
     <Compile Include="Utf8JsonWriterTests.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -19,6 +19,7 @@ namespace System.Text.Json
     /// To be able to set max depth while reading OR allow skipping comments, create an instance of 
     /// <see cref="JsonReaderState"/> and pass that in to the reader.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public ref partial struct Utf8JsonReader
     {
         private ReadOnlySpan<byte> _buffer;
@@ -392,7 +393,7 @@ namespace System.Text.Json
         /// <summary>
         /// Compares the UTF-8 encoded text to the unescaped JSON token value in the source and returns true if they match.
         /// </summary>
-        /// <param name="otherUtf8Text">The UTF-8 encoded text to compare against.</param>
+        /// <param name="utf8Text">The UTF-8 encoded text to compare against.</param>
         /// <returns>True if the JSON token value in the source matches the UTF-8 encoded look up text.</returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to find a text match on a JSON token that is not a string
@@ -407,13 +408,36 @@ namespace System.Text.Json
         /// The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
         /// if required. The look up text is matched as is, without any modifications to it.
         /// </remarks>
-        public bool TextEquals(ReadOnlySpan<byte> otherUtf8Text)
+        public bool ValueTextEquals(ReadOnlySpan<byte> utf8Text)
         {
             if (!IsTokenTypeString(TokenType))
             {
                 throw ThrowHelper.GetInvalidOperationException_ExpectedStringComparison(TokenType);
             }
-            return TextEqualsHelper(otherUtf8Text);
+            return TextEqualsHelper(utf8Text);
+        }
+
+        /// <summary>
+        /// Compares the string text to the unescaped JSON token value in the source and returns true if they match.
+        /// </summary>
+        /// <param name="utf8Text">The text to compare against.</param>
+        /// <returns>True if the JSON token value in the source matches the look up text.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown if trying to find a text match on a JSON token that is not a string
+        /// (i.e. other than <see cref="JsonTokenType.String"/> or <see cref="JsonTokenType.PropertyName"/>).
+        /// <seealso cref="TokenType" />
+        /// </exception>
+        /// <remarks>
+        /// If the look up text is invalid UTF-8 text, the method will return false since you cannot have 
+        /// invalid UTF-8 within the JSON payload.
+        /// </remarks>
+        /// <remarks>
+        /// The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
+        /// if required. The look up text is matched as is, without any modifications to it.
+        /// </remarks>
+        public bool ValueTextEquals(string utf8Text)
+        {
+            return ValueTextEquals(utf8Text.AsSpan());
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -435,7 +459,7 @@ namespace System.Text.Json
         /// <summary>
         /// Compares the text to the unescaped JSON token value in the source and returns true if they match.
         /// </summary>
-        /// <param name="otherText">The text to compare against.</param>
+        /// <param name="text">The text to compare against.</param>
         /// <returns>True if the JSON token value in the source matches the look up text.</returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown if trying to find a text match on a JSON token that is not a string
@@ -450,14 +474,14 @@ namespace System.Text.Json
         /// The comparison of the JSON token value in the source and the look up text is done by first unescaping the JSON value in source,
         /// if required. The look up text is matched as is, without any modifications to it.
         /// </remarks>
-        public bool TextEquals(ReadOnlySpan<char> otherText)
+        public bool ValueTextEquals(ReadOnlySpan<char> text)
         {
             if (!IsTokenTypeString(TokenType))
             {
                 throw ThrowHelper.GetInvalidOperationException_ExpectedStringComparison(TokenType);
             }
 
-            if (MatchNotPossible(otherText.Length))
+            if (MatchNotPossible(text.Length))
             {
                 return false;
             }
@@ -466,9 +490,8 @@ namespace System.Text.Json
 
             Span<byte> otherUtf8Text;
 
-            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(otherText);
+            int length = checked(text.Length * JsonConstants.MaxExpansionFactorWhileTranscoding);
 
-            int length = checked(utf16Text.Length * JsonConstants.MaxExpansionFactorWhileTranscoding);
             if (length > JsonConstants.StackallocThreshold)
             {
                 otherUtf8TextArray = ArrayPool<byte>.Shared.Rent(length);
@@ -479,21 +502,26 @@ namespace System.Text.Json
                 // Cannot create a span directly since it gets passed to instance methods on a ref struct.
                 unsafe
                 {
-                    byte* ptr = stackalloc byte[length];
-                    otherUtf8Text = new Span<byte>(ptr, length);
+                    byte* ptr = stackalloc byte[JsonConstants.StackallocThreshold];
+                    otherUtf8Text = new Span<byte>(ptr, JsonConstants.StackallocThreshold);
                 }
             }
 
+            ReadOnlySpan<byte> utf16Text = MemoryMarshal.AsBytes(text);
             OperationStatus status = JsonWriterHelper.ToUtf8(utf16Text, otherUtf8Text, out int consumed, out int written);
             Debug.Assert(status != OperationStatus.DestinationTooSmall);
+            bool result;
             if (status > OperationStatus.DestinationTooSmall)   // Equivalent to: (status == NeedMoreData || status == InvalidData)
             {
-                return false;
+                result = false;
             }
-            Debug.Assert(status == OperationStatus.Done);
-            Debug.Assert(consumed == utf16Text.Length);
+            else
+            {
+                Debug.Assert(status == OperationStatus.Done);
+                Debug.Assert(consumed == utf16Text.Length);
 
-            bool result = TextEqualsHelper(otherUtf8Text.Slice(0, written));
+                result = TextEqualsHelper(otherUtf8Text.Slice(0, written));
+            }
 
             if (otherUtf8TextArray != null)
             {
@@ -2407,5 +2435,28 @@ namespace System.Text.Json
             _tokenType = JsonTokenType.Comment;
             return true;
         }
+
+        private string DebuggerDisplay => $"TokenType = {DebugTokenType} (TokenStartIndex = {TokenStartIndex}) Consumed = {BytesConsumed}";
+
+        // Using TokenType.ToString() (or {TokenType}) fails to render in the debug window. The
+        // message "The runtime refused to evaluate the expression at this time." is shown. This
+        // is a workaround until we root cause and fix the issue.
+        private string DebugTokenType
+            => TokenType switch
+            {
+                JsonTokenType.Comment => nameof(JsonTokenType.Comment),
+                JsonTokenType.EndArray => nameof(JsonTokenType.EndArray),
+                JsonTokenType.EndObject => nameof(JsonTokenType.EndObject),
+                JsonTokenType.False => nameof(JsonTokenType.False),
+                JsonTokenType.None => nameof(JsonTokenType.None),
+                JsonTokenType.Null => nameof(JsonTokenType.Null),
+                JsonTokenType.Number => nameof(JsonTokenType.Number),
+                JsonTokenType.PropertyName => nameof(JsonTokenType.PropertyName),
+                JsonTokenType.StartArray => nameof(JsonTokenType.StartArray),
+                JsonTokenType.StartObject => nameof(JsonTokenType.StartObject),
+                JsonTokenType.String => nameof(JsonTokenType.String),
+                JsonTokenType.True => nameof(JsonTokenType.True),
+                _ => ((byte)TokenType).ToString()
+            };
     }
 }

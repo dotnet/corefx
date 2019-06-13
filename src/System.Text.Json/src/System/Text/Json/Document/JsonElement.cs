@@ -2,7 +2,6 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-using System.Buffers.Text;
 using System.Collections.Generic;
 using System.Diagnostics;
 
@@ -11,6 +10,7 @@ namespace System.Text.Json
     /// <summary>
     ///   Represents a specific JSON value within a <see cref="JsonDocument"/>.
     /// </summary>
+    [DebuggerDisplay("{DebuggerDisplay,nq}")]
     public readonly partial struct JsonElement
     {
         private readonly JsonDocument _parent;
@@ -973,21 +973,105 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Compares <paramref name="text" /> to the string value of this element.
         /// </summary>
-        /// <param name="propertyName">The name for this value within the JSON object.</param>
-        /// <param name="writer">The writer.</param>
+        /// <param name="text">The text to compare against.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the string value of this element matches <paramref name="text"/>,
+        ///   <see langword="false" /> otherwise.
+        /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
         /// </exception>
-        /// <exception cref="ObjectDisposedException">
-        ///   The parent <see cref="JsonDocument"/> has been disposed.
-        /// </exception>
-        public void WriteAsProperty(string propertyName, Utf8JsonWriter writer)
-            => WriteAsProperty(propertyName.AsSpan(), writer);
+        /// <remarks>
+        ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
+        ///   the result of calling <see cref="GetString" />, but avoids creating the string instance.
+        /// </remarks>
+        public bool ValueEquals(string text)
+        {
+            // CheckValidInstance is done in the helper
+
+            if (TokenType == JsonTokenType.Null)
+            {
+                return text == null;
+            }
+
+            return TextEqualsHelper(text.AsSpan(), isPropertyName: false);
+        }
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Compares the text represented by <paramref name="utf8Text" /> to the string value of this element.
+        /// </summary>
+        /// <param name="utf8Text">The UTF-8 encoded text to compare against.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the string value of this element has the same UTF-8 encoding as
+        ///   <paramref name="utf8Text" />, <see langword="false" /> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <remarks>
+        ///   This method is functionally equal to doing an ordinal comparison of the string produced by UTF-8 decoding
+        ///   <paramref name="utf8Text" /> with the result of calling <see cref="GetString" />, but avoids creating the
+        ///   string instances.
+        /// </remarks>
+        public bool ValueEquals(ReadOnlySpan<byte> utf8Text)
+        {
+            // CheckValidInstance is done in the helper
+
+            if (TokenType == JsonTokenType.Null)
+            {
+                // This is different than Length == 0, in that it tests true for null, but false for ""
+                return utf8Text == default;
+            }
+
+            return TextEqualsHelper(utf8Text, isPropertyName: false);
+        }
+
+        /// <summary>
+        ///   Compares <paramref name="text" /> to the string value of this element.
+        /// </summary>
+        /// <param name="text">The text to compare against.</param>
+        /// <returns>
+        ///   <see langword="true" /> if the string value of this element matches <paramref name="text"/>,
+        ///   <see langword="false" /> otherwise.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is not <see cref="JsonValueType.String"/>.
+        /// </exception>
+        /// <remarks>
+        ///   This method is functionally equal to doing an ordinal comparison of <paramref name="text" /> and
+        ///   the result of calling <see cref="GetString" />, but avoids creating the string instance.
+        /// </remarks>
+        public bool ValueEquals(ReadOnlySpan<char> text)
+        {
+            // CheckValidInstance is done in the helper
+
+            if (TokenType == JsonTokenType.Null)
+            {
+                // This is different than Length == 0, in that it tests true for null, but false for ""
+                return text == default;
+            }
+
+            return TextEqualsHelper(text, isPropertyName: false);
+        }
+
+        internal bool TextEqualsHelper(ReadOnlySpan<byte> utf8Text, bool isPropertyName)
+        {
+            CheckValidInstance();
+
+            return _parent.TextEquals(_idx, utf8Text, isPropertyName);
+        }
+
+        internal bool TextEqualsHelper(ReadOnlySpan<char> text, bool isPropertyName)
+        {
+            CheckValidInstance();
+
+            return _parent.TextEquals(_idx, text, isPropertyName);
+        }
+
+        /// <summary>
+        ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="propertyName">The name for this value within the JSON object.</param>
         /// <param name="writer">The writer.</param>
@@ -997,7 +1081,21 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsProperty(ReadOnlySpan<char> propertyName, Utf8JsonWriter writer)
+        public void WriteProperty(string propertyName, Utf8JsonWriter writer)
+            => WriteProperty(propertyName.AsSpan(), writer);
+
+        /// <summary>
+        ///   Write the element into the provided writer as a named JSON object property.
+        /// </summary>
+        /// <param name="propertyName">The name for this value within the JSON object.</param>
+        /// <param name="writer">The writer.</param>
+        /// <exception cref="InvalidOperationException">
+        ///   This value's <see cref="Type"/> is <see cref="JsonValueType.Undefined"/>.
+        /// </exception>
+        /// <exception cref="ObjectDisposedException">
+        ///   The parent <see cref="JsonDocument"/> has been disposed.
+        /// </exception>
+        public void WriteProperty(ReadOnlySpan<char> propertyName, Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -1005,7 +1103,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a named object property.
+        ///   Write the element into the provided writer as a named JSON object property.
         /// </summary>
         /// <param name="utf8PropertyName">
         ///   The name for this value within the JSON object, as UTF-8 text.
@@ -1017,7 +1115,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsProperty(ReadOnlySpan<byte> utf8PropertyName, Utf8JsonWriter writer)
+        public void WriteProperty(ReadOnlySpan<byte> utf8PropertyName, Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -1025,7 +1123,7 @@ namespace System.Text.Json
         }
 
         /// <summary>
-        ///   Write the element into the provided writer as a value.
+        ///   Write the element into the provided writer as a JSON value.
         /// </summary>
         /// <param name="writer">The writer.</param>
         /// <exception cref="InvalidOperationException">
@@ -1034,7 +1132,7 @@ namespace System.Text.Json
         /// <exception cref="ObjectDisposedException">
         ///   The parent <see cref="JsonDocument"/> has been disposed.
         /// </exception>
-        public void WriteAsValue(Utf8JsonWriter writer)
+        public void WriteValue(Utf8JsonWriter writer)
         {
             CheckValidInstance();
 
@@ -1185,5 +1283,7 @@ namespace System.Text.Json
                 throw new InvalidOperationException();
             }
         }
+
+        private string DebuggerDisplay => $"Type = {Type} : \"{ToString()}\"";
     }
 }
