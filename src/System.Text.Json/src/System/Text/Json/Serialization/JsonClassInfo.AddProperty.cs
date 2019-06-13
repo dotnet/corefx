@@ -28,14 +28,13 @@ namespace System.Text.Json.Serialization
             // Convert non-immutable dictionary interfaces to concrete types.
             if (propertyType.IsInterface && jsonInfo.ClassType == ClassType.Dictionary)
             {
-                // If a polymorphic case, we have to wait until run-time values are processed.
-                if (jsonInfo.ElementClassInfo.ClassType != ClassType.Unknown)
+                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+
+                Type newPropertyType = elementPropertyInfo.GetDictionaryConcreteType();
+                if (propertyType != newPropertyType)
                 {
-                    Type newPropertyType = jsonInfo.ElementClassInfo.GetPolicyProperty().GetDictionaryConcreteType();
-                    if (propertyType != newPropertyType)
-                    {
-                        jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
-                    }
+                    jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
                 }
             }
 
