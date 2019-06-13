@@ -25,22 +25,6 @@
     <Error Condition="'$(MSBuildLastTaskResult)'=='false'" />
   </Target>
 
-  <Target Name="GetFilesToPackage"
-          DependsOnTargets="FilterProjects"
-          Returns="@(FilesToPackage)">
-    <MSBuild Targets="GetFilesToPackage"
-             Projects="@(Project)"
-             BuildInParallel="true"
-             Properties="$(ProjectProperties)"
-             ContinueOnError="ErrorAndContinue" >
-      <Output TaskParameter="TargetOutputs"
-              ItemName="FilesToPackage" />
-    </MSBuild>
-
-    <!-- Given we ErrorAndContinue we need to propagate the error if the overall task failed -->
-    <Error Condition="'$(MSBuildLastTaskResult)'=='false'" />
-  </Target>
-
   <PropertyGroup>
     <TraversalBuildDependsOn>BuildAllProjects;$(TraversalBuildDependsOn);</TraversalBuildDependsOn>
   </PropertyGroup>
