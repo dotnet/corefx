@@ -18,6 +18,7 @@ namespace Microsoft.Framework.WebEncoders
         [InlineData("&#x1F602;2", "\U0001F6022")]
         [InlineData("&#x1F602; 21", "\U0001F602 21")]
         [InlineData("x&#x1F602;y", "x\U0001F602y")]
+        [InlineData("&#x1F602;x&#x1F602;y", "\U0001F602x\U0001F602y")]
         public void TestSurrogate(string expected, string actual)
         {
             Assert.Equal(expected, System.Text.Encodings.Web.HtmlEncoder.Default.Encode(actual));
