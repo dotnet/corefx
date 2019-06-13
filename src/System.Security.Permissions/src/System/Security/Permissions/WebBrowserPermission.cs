@@ -9,9 +9,6 @@ namespace System.Security.Permissions
         Safe,
         Unrestricted
     }
-
-    [Serializable()]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("WindowsBase, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35")]
     sealed public class WebBrowserPermission : CodeAccessPermission, IUnrestrictedPermission
     {
         public WebBrowserPermission() { }

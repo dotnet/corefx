@@ -18,6 +18,7 @@
     <Compile Include="PrincipalPermissionTests.cs" />
     <Compile Include="SecurityElementTests.cs" />
     <Compile Include="TrustManagerContextTests.cs" />
+    <Compile Include="XamlAccessLevelTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\$(AssemblyName).rd.xml" />

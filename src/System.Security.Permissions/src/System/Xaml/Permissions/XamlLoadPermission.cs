@@ -10,8 +10,6 @@ using System.Security.Permissions;
 
 namespace System.Xaml.Permissions
 {
-    [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public sealed class XamlLoadPermission : CodeAccessPermission, IUnrestrictedPermission
     {
         public XamlLoadPermission(PermissionState state) { }

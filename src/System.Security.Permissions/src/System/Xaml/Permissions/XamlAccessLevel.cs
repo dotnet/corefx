@@ -7,8 +7,6 @@ using System.Security;
 
 namespace System.Xaml.Permissions
 {
-    [Serializable]
-    [System.Runtime.CompilerServices.TypeForwardedFrom("System.Xaml, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089")]
     public class XamlAccessLevel
     {
         private XamlAccessLevel(string assemblyName, string typeName)
