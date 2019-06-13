@@ -188,6 +188,13 @@ namespace System.Security.Permissions.Tests
         }
 
         [Fact]
+        public static void MediaPermissionAttributeCallMethods()
+        {
+            MediaPermissionAttribute mpa = new MediaPermissionAttribute(new Permissions.SecurityAction());
+            IPermission ip = mpa.CreatePermission();
+        }
+
+        [Fact]
         public static void PrincipalPermissionCallMethods()
         {
             PrincipalPermission pp = new PrincipalPermission(new Permissions.PermissionState());
