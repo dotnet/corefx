@@ -27,7 +27,19 @@
       <Link>Common\CoreLib\System\Threading\Tasks\TaskToApm.cs</Link>
     </Compile>
   </ItemGroup>
+  <!--
+    Manually copy the contentFiles over as on macOS 10.12 unicode characters cause items to be flagged with buildaction compile.
+    TODO: Remove when macOS 10.12 support ended.
+  -->
   <ItemGroup>
-    <PackageReference Include="System.IO.Compression.TestData" Version="$(SystemIOCompressionTestDataPackageVersion)" />
+    <PackageReference Include="System.IO.Compression.TestData" Version="$(SystemIOCompressionTestDataPackageVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
   </ItemGroup>
+  <Target Name="CopyTestDataToOutput" AfterTargets="CopyFilesToOutputDirectory">
+    <ItemGroup>
+      <_testDataContentFile Include="$(PkgSystem_IO_Compression_TestData)\contentFiles\any\any\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(_testDataContentFile)" 
+          DestinationFolder="$(OutDir)%(_testDataContentFile.RecursiveDir)"
+          SkipUnchangedFiles="true" />
+  </Target>
 </Project>
