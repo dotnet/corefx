@@ -1049,8 +1049,20 @@ namespace System.Diagnostics
 
             Span<ulong> span = stackalloc ulong[2];
 
-            Utf8Parser.TryParse(idData.Slice(0, 16), out span[0], out _, 'x');
-            Utf8Parser.TryParse(idData.Slice(16, 16), out span[1], out _, 'x');
+            if (!Utf8Parser.TryParse(idData.Slice(0, 16), out span[0], out _, 'x'))
+            {
+                // Invalid Id, use random https://github.com/dotnet/corefx/issues/38486
+                _hexString = CreateRandom()._hexString;
+                return;
+            }
+
+            if (!Utf8Parser.TryParse(idData.Slice(16, 16), out span[1], out _, 'x'))
+            {
+                // Invalid Id, use random https://github.com/dotnet/corefx/issues/38486
+                _hexString = CreateRandom()._hexString;
+                return;
+            }
+
             if (BitConverter.IsLittleEndian)
             {
                 span[0] = BinaryPrimitives.ReverseEndianness(span[0]);
@@ -1145,9 +1157,9 @@ namespace System.Diagnostics
             for (; i < idData.Length; i++)
             {
                 char c = idData[i];
-                if (!IsHexadecimalChar(c))
+                if (!IsHexadecimalLowercaseChar(c))
                 {
-                    break;
+                    return false;
                 }
 
                 if (c != '0')
@@ -1156,18 +1168,13 @@ namespace System.Diagnostics
                 }
             }
 
-            if (i < idData.Length || !isNonZero)
-            {
-                return false;
-            }
-
-            return true;
+            return isNonZero;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool IsHexadecimalChar(char c)
+        private static bool IsHexadecimalLowercaseChar(char c)
         {
-            // Between 0 - 9 or uppercased between a - f
+            // Between 0 - 9 or lowercased between a - f
             return (uint)(c - '0') <= 9 || (uint)(c - 'a') <= ('f' - 'a');
         }
     }
@@ -1264,7 +1271,13 @@ namespace System.Diagnostics
                 throw new ArgumentOutOfRangeException(nameof(idData));
             }
 
-            Utf8Parser.TryParse(idData, out ulong id, out _, 'x');
+            if (!Utf8Parser.TryParse(idData, out ulong id, out _, 'x'))
+            {
+                // Invalid Id, use random https://github.com/dotnet/corefx/issues/38486
+                _hexString = CreateRandom()._hexString;
+                return;
+            }
+
             if (BitConverter.IsLittleEndian)
             {
                 id = BinaryPrimitives.ReverseEndianness(id);
