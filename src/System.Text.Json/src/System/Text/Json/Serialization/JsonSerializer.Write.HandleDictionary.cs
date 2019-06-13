@@ -30,9 +30,9 @@ namespace System.Text.Json
                     return true;
                 }
 
-                if (enumerable is IDictionary IDict)
+                if (enumerable is IDictionary dict)
                 {
-                    state.Current.Enumerator = IDict.GetEnumerator();
+                    state.Current.Enumerator = dict.GetEnumerator();
                 }
                 else
                 {

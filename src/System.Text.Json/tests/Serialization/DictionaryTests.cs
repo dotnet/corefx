@@ -140,6 +140,11 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(input, typeof(IDictionary<string, object>));
             Assert.Equal(@"{""Name"":""David"",""Age"":32}", json);
+
+            IDictionary<string, object> obj = JsonSerializer.Parse<IDictionary<string, object>>(json);
+            Assert.Equal(2, obj.Count);
+            Assert.Equal("David", ((JsonElement)obj["Name"]).GetString());
+            Assert.Equal(32, ((JsonElement)obj["Age"]).GetInt32());
         }
 
         [Fact]
@@ -153,6 +158,11 @@ namespace System.Text.Json.Serialization.Tests
 
             string json = JsonSerializer.ToString(input, typeof(IDictionary<string, string>));
             Assert.Equal(@"{""Name"":""David"",""Job"":""Software Architect""}", json);
+
+            IDictionary<string, string> obj = JsonSerializer.Parse<IDictionary<string, string>>(json);
+            Assert.Equal(2, obj.Count);
+            Assert.Equal("David", obj["Name"]);
+            Assert.Equal("Software Architect", obj["Job"]);
         }
 
         [Theory]
