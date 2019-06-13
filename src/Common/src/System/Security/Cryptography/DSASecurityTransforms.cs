@@ -86,8 +86,7 @@ namespace System.Security.Cryptography
                     const string ExportPassword = "DotnetExportPassphrase";
                     SecKeyPair keys = GetKeys();
 
-                    if (keys.PublicKey == null ||
-                        (includePrivateParameters && keys.PrivateKey == null))
+                    if (includePrivateParameters && keys.PrivateKey == null)
                     { 
                         throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
                     }

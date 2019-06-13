@@ -92,8 +92,7 @@ namespace System.Security.Cryptography
                 const string ExportPassword = "DotnetExportPassphrase";
                 SecKeyPair keys = GetKeys();
 
-                if (keys.PublicKey == null ||
-                    (includePrivateParameters && keys.PrivateKey == null))
+                if (includePrivateParameters && keys.PrivateKey == null)
                 { 
                     throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
                 }
@@ -695,8 +694,8 @@ namespace System.Security.Cryptography
                 {
                     if (_keys != null)
                     {
+                        // Do not set _keys to null, in order to prevent rehydration.
                         _keys.Dispose();
-                        _keys = null;
                     }
                 }
 
@@ -742,6 +741,11 @@ namespace System.Security.Cryptography
 
                 if (current != null)
                 {
+                    if (current.PublicKey == null)
+                    {
+                        throw new ObjectDisposedException(nameof(RSA));
+                    }
+
                     return current;
                 }
 

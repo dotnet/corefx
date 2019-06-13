@@ -7,13 +7,19 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography.Apple;
 using System.Security.Cryptography.Asn1;
-using Internal.Cryptography;
 
 namespace System.Security.Cryptography
 {
     internal sealed class EccSecurityTransforms : IDisposable
     {
         private SecKeyPair _keys;
+        private readonly string _disposedName;
+
+        internal EccSecurityTransforms(string disposedTypeName)
+        {
+            Debug.Assert(disposedTypeName != null);
+            _disposedName = disposedTypeName;
+        }
 
         public void Dispose()
         {
@@ -70,6 +76,11 @@ namespace System.Security.Cryptography
 
             if (current != null)
             {
+                if (current.PublicKey == null)
+                {
+                    throw new ObjectDisposedException(_disposedName);
+                }
+
                 return current;
             }
 
@@ -97,8 +108,7 @@ namespace System.Security.Cryptography
             const string ExportPassword = "DotnetExportPassphrase";
             SecKeyPair keys = GetOrGenerateKeys(keySizeInBits);
 
-            if (keys.PublicKey == null ||
-                (includePrivateParameters && keys.PrivateKey == null))
+            if (includePrivateParameters && keys.PrivateKey == null)
             { 
                 throw new CryptographicException(SR.Cryptography_OpenInvalidHandle);
             }
