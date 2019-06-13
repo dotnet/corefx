@@ -129,7 +129,7 @@ namespace System.Diagnostics
                 {
                     // Convert flags to binary.  
                     Span<char> flagsChars = stackalloc char[2];
-                    ActivityTraceId.ByteToHexDigits(flagsChars, _w3CIdFlags);
+                    ActivityTraceId.ByteToHexDigits(flagsChars, (byte)((~ActivityTraceFlagsIsSet) & _w3CIdFlags));
                     string id = "00-" + _traceId + "-" + _spanId + "-" + flagsChars.ToString();
 
                     Interlocked.CompareExchange(ref _id, id, null);
