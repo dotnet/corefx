@@ -19,6 +19,10 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"1997-07-16T19:20:30.45\"", "1997-07-16T19:20:30.45" };
             yield return new object[] { "\"1997-07-16T19:20:30.4555555\"", "1997-07-16T19:20:30.4555555" };
 
+            // Explicitly test that the forward slash is supported
+            yield return new object[] { "\"0997/07/16\"", "0997/07/16" };
+            yield return new object[] { "\"1997/07/16\"", "1997/07/16" };
+
             // Skip test T24:00 till #35830 is fixed.
             // yield return new object[] { "\"1997-07-16T24:00\"", "1997-07-16T24:00" };
 

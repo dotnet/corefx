@@ -80,7 +80,7 @@ namespace System.Text.Json
                 year = (int)(digit1 * 1000 + digit2 * 100 + digit3 * 10 + digit4);
             }
 
-            if (source[4] != JsonConstants.Hyphen)
+            if (source[4] != JsonConstants.Hyphen && source[4] != JsonConstants.Slash)
             {
                 goto ReturnFalse;
             }
@@ -91,7 +91,7 @@ namespace System.Text.Json
                 goto ReturnFalse;
             }
 
-            if (source[7] != JsonConstants.Hyphen)
+            if (source[7] != JsonConstants.Hyphen && source[4] != JsonConstants.Slash)
             {
                 goto ReturnFalse;
             }
