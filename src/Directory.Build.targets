@@ -44,22 +44,6 @@
     <GenerateCompiledExpressionsTempFilePathForEditing></GenerateCompiledExpressionsTempFilePathForEditing>
   </PropertyGroup>
 
-  <Target Name="GetFilesToPackage"
-          DependsOnTargets="FilterProjects"
-          Returns="@(FilesToPackage)">
-    <MSBuild Targets="GetFilesToPackage"
-             Projects="@(Project)"
-             BuildInParallel="true"
-             Properties="$(ProjectProperties)"
-             ContinueOnError="ErrorAndContinue" >
-      <Output TaskParameter="TargetOutputs"
-              ItemName="FilesToPackage" />
-    </MSBuild>
-
-    <!-- Given we ErrorAndContinue we need to propagate the error if the overall task failed -->
-    <Error Condition="'$(MSBuildLastTaskResult)'=='false'" />
-  </Target>
-
   <!-- Returns the assembly version of the project for consumption
        by the NuGet package generation -->
   <Target Name="GetAssemblyVersion"
