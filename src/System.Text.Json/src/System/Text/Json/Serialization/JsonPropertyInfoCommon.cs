@@ -162,7 +162,7 @@ namespace System.Text.Json
                 sourceDictionary["Value"] is TRuntimeProperty value
                 )
             {
-                    return KeyValuePair.Create(key, value);
+                return new KeyValuePair<string, TRuntimeProperty>(key, value);
             }
 
             throw ThrowHelper.GetJsonException_DeserializeUnableToConvertValue(enumerableType, state.JsonPath);

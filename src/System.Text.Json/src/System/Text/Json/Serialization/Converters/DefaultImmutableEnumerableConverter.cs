@@ -37,7 +37,7 @@ namespace System.Text.Json.Serialization.Converters
         private const string ImmutableSortedDictionaryTypeName = "System.Collections.Immutable.ImmutableSortedDictionary";
         private const string ImmutableSortedDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableSortedDictionary`2";
 
-        internal static string GetDelegateKey(
+        public static string GetDelegateKey(
             Type immutableCollectionType,
             Type elementType,
             out Type underlyingType,
@@ -82,7 +82,7 @@ namespace System.Text.Json.Serialization.Converters
             return $"{constructingTypeName}:{elementType.FullName}";
         }
 
-        internal static void RegisterImmutableCollection(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
+        public static void RegisterImmutableCollection(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
         {
             // Get a unique identifier for a delegate which will point to the appropiate CreateRange method.
             string delegateKey = GetDelegateKey(immutableCollectionType, elementType, out Type underlyingType, out string constructingTypeName);

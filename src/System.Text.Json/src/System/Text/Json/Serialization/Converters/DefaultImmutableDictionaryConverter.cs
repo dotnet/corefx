@@ -14,7 +14,7 @@ namespace System.Text.Json.Serialization.Converters
         private const string ImmutableDictionaryGenericInterfaceTypeName = "System.Collections.Immutable.IImmutableDictionary`2";
         private const string ImmutableSortedDictionaryGenericTypeName = "System.Collections.Immutable.ImmutableSortedDictionary`2";
 
-        internal static void RegisterImmutableDictionary(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
+        public static void RegisterImmutableDictionary(Type immutableCollectionType, Type elementType, JsonSerializerOptions options)
         {
             // Get a unique identifier for a delegate which will point to the appropiate CreateRange method.
             string delegateKey = DefaultImmutableEnumerableConverter.GetDelegateKey(immutableCollectionType, elementType, out Type underlyingType, out string constructingTypeName);
@@ -36,7 +36,7 @@ namespace System.Text.Json.Serialization.Converters
             options.TryAddCreateRangeDelegate(delegateKey, createRangeDelegate);
         }
 
-        internal static bool IsImmutableDictionary(Type type)
+        public static bool IsImmutableDictionary(Type type)
         {
             if (!type.IsGenericType)
             {

@@ -154,12 +154,11 @@ namespace System.Text.Json
                         ElementClassInfo = options.GetOrAddClass(elementType);
                     }
                     break;
+                // TODO: Utilize converter mechanism to handle (de)serialization of KeyValuePair
+                // when it goes through: https://github.com/dotnet/corefx/issues/36639.
                 case ClassType.KeyValuePair:
                     {
-                        // For KeyValuePair, we would ordinarily treat it as ClassType.Object for both serialization and deserialization
-                        // if it had public setters for the Key and Value properties (for deserialization).
-
-                        // For deserialization, we treat it ClassType.IDictionaryConstructible so we can parse it like a dictionary
+                        // For deserialization, we treat it as ClassType.IDictionaryConstructible so we can parse it like a dictionary
                         // before using converter-like logic to create a KeyValuePair instance.
 
                         // Add a single property that maps to the class type so we can have policies applied.
@@ -173,34 +172,19 @@ namespace System.Text.Json
                         // Create a ClassInfo that maps to the element type which is used for deserialization and policies.
                         ElementClassInfo = options.GetOrAddClass(elementType);
 
-                        // For deserialization, we treat it like ClassType.Object to utilize the public getters.
-                        var propertyNames = new HashSet<string>(StringComparer.Ordinal);
+                        // For serialization, we treat it like ClassType.Object to utilize the public getters.
 
-                        foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
-                        {
-                            // Ignore indexers
-                            if (propertyInfo.GetIndexParameters().Length > 0)
-                            {
-                                continue;
-                            }
+                        // Add Key property
+                        PropertyInfo propertyInfo = type.GetProperty("Key", BindingFlags.Public | BindingFlags.Instance);
+                        JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
+                        Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
+                        jsonPropertyInfo.ClearUnusedValuesAfterAdd();
 
-                            // For now we only support public getters\setters
-                            if (propertyInfo.GetMethod?.IsPublic == true ||
-                                propertyInfo.SetMethod?.IsPublic == true)
-                            {
-                                JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
-
-                                Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
-
-                                // If the JsonPropertyNameAttribute or naming policy results in collisions, throw an exception.
-                                if (!propertyNames.Add(jsonPropertyInfo.NameUsedToCompareAsString))
-                                {
-                                    ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameConflict(this, jsonPropertyInfo);
-                                }
-
-                                jsonPropertyInfo.ClearUnusedValuesAfterAdd();
-                            }
-                        }
+                        // Add Value property.
+                        propertyInfo = type.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+                        jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
+                        Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
+                        jsonPropertyInfo.ClearUnusedValuesAfterAdd();
                     }
                     break;
                 case ClassType.Value:
@@ -477,7 +461,7 @@ namespace System.Text.Json
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
         }
 
-        internal static ClassType GetClassType(Type type)
+        public static ClassType GetClassType(Type type)
         {
             Debug.Assert(type != null);
 
@@ -522,7 +506,7 @@ namespace System.Text.Json
             return ClassType.Object;
         }
 
-        internal const string ImmutableNamespaceName = "System.Collections.Immutable";
+        public const string ImmutableNamespaceName = "System.Collections.Immutable";
 
         private const string EnumerableGenericInterfaceTypeName = "System.Collections.Generic.IEnumerable`1";
         private const string EnumerableInterfaceTypeName = "System.Collections.IEnumerable";
@@ -540,11 +524,11 @@ namespace System.Text.Json
         private const string HashtableTypeName = "System.Collections.Hashtable";
         private const string SortedListTypeName = "System.Collections.SortedList";
 
-        internal const string StackTypeName = "System.Collections.Stack";
-        internal const string QueueTypeName = "System.Collections.Queue";
-        internal const string ArrayListTypeName = "System.Collections.ArrayList";
+        public const string StackTypeName = "System.Collections.Stack";
+        public const string QueueTypeName = "System.Collections.Queue";
+        public const string ArrayListTypeName = "System.Collections.ArrayList";
 
-        internal static bool IsDeserializedByAssigningFromList(Type type)
+        public static bool IsDeserializedByAssigningFromList(Type type)
         {
             if (type.IsGenericType)
             {
@@ -574,18 +558,18 @@ namespace System.Text.Json
             }
         }
 
-        internal static bool IsSetInterface(Type type)
+        public static bool IsSetInterface(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
         }
 
-        internal static bool HasConstructorThatTakesGenericIEnumerable(Type type)
+        public static bool HasConstructorThatTakesGenericIEnumerable(Type type)
         {
             Type elementType = GetElementType(type, parentType: null, memberInfo: null);
             return type.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null;
         }
 
-        internal static bool IsDeserializedByConstructingWithIList(Type type)
+        public static bool IsDeserializedByConstructingWithIList(Type type)
         {
             switch (type.FullName)
             {
@@ -598,7 +582,7 @@ namespace System.Text.Json
             }
         }
 
-        internal static bool IsDeserializedByConstructingWithIDictionary(Type type)
+        public static bool IsDeserializedByConstructingWithIDictionary(Type type)
         {
             switch (type.FullName)
             {
@@ -610,7 +594,7 @@ namespace System.Text.Json
             }
         }
 
-        private static bool IsKeyValuePair(Type type)
+        public static bool IsKeyValuePair(Type type)
         {
             return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
         }

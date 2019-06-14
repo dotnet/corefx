@@ -46,6 +46,8 @@ namespace System.Text.Json
                 JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
                 JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
 
+                // Get a runtime type for the property. e.g. ISet<T> -> HashSet<T>, ICollection -> List<object>
+                // We use the element's JsonPropertyInfo so we can utilize the generic support.
                 Type newPropertyType = elementPropertyInfo.GetConcreteType(propertyType);
                 if ((propertyType != newPropertyType) && propertyType.IsAssignableFrom(newPropertyType))
                 {

@@ -60,6 +60,13 @@ namespace System.Text.Json
                 return;
             }
 
+            // We need an initialized array in order to store the values.
+            if (state.Current.IsProcessingEnumerable && state.Current.TempEnumerableValues == null && state.Current.ReturnValue == null)
+            {
+                ThrowHelper.ThrowJsonException_DeserializeUnableToConvertValue(RuntimePropertyType, reader, state.JsonPath);
+                return;
+            }
+
             if (ValueConverter == null || !ValueConverter.TryRead(RuntimePropertyType, ref reader, out TRuntimeProperty value))
             {
                 if (state.Current.IsProcessingKeyValuePair && state.Current.KeyName == "Key")
@@ -91,7 +98,7 @@ namespace System.Text.Json
 
             if (state.Current.IsProcessingKeyValuePair)
             {
-                // The value is being appliead to a Dictionary<string, object>, so we need to cast to object here.
+                // The value is being applied to a Dictionary<string, object>, so we need to cast to object here.
                 object objValue = value;
                 JsonSerializer.ApplyValueToEnumerable(ref objValue, ref state, ref reader);
                 return;

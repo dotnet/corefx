@@ -23,6 +23,8 @@ namespace System.Text.Json
         // i.e. immutable dictionaries, Hashtable, SortedList,
         IDictionaryConstructible = 5,
         // KeyValuePair
+        // TODO: Utilize converter mechanism to handle (de)serialization of KeyValuePair
+        // when it goes through: https://github.com/dotnet/corefx/issues/36639.
         KeyValuePair = 6,
     }
 }
