@@ -9,6 +9,7 @@ namespace MS.Internal.Xml.XPath
     internal class XPathDescendantIterator : XPathAxisIterator
     {
         private int _level = 0;
+        private bool _done = false;
 
         public XPathDescendantIterator(XPathNavigator nav, XPathNodeType type, bool matchSelf) : base(nav, type, matchSelf) { }
         public XPathDescendantIterator(XPathNavigator nav, string name, string namespaceURI, bool matchSelf) : base(nav, name, namespaceURI, matchSelf) { }
@@ -16,6 +17,7 @@ namespace MS.Internal.Xml.XPath
         public XPathDescendantIterator(XPathDescendantIterator it) : base(it)
         {
             _level = it._level;
+            _done = it._done;
         }
 
         public override XPathNodeIterator Clone()
@@ -25,6 +27,11 @@ namespace MS.Internal.Xml.XPath
 
         public override bool MoveNext()
         {
+            if (_done)
+            {
+                return false;
+            }
+
             if (first)
             {
                 first = false;
