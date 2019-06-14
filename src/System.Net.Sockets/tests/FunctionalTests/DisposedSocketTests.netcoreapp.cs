@@ -18,15 +18,12 @@ namespace System.Net.Sockets.Tests
         public async Task NonDisposedSocket_SafeHandlesCollected(bool clientAsync)
         {
             List<WeakReference> handles = await CreateHandlesAsync(clientAsync);
-            int count = -1;
-
-            for (int i = 0; i < 10 && count != 0; i++)
+            RetryHelper.Execute(() =>
             {
                 GC.Collect();
                 GC.WaitForPendingFinalizers();
-                count = handles.Count(h => h.IsAlive);
-            }
-            Assert.Equal(0, count);
+                Assert.Equal(0, handles.Count(h => h.IsAlive));
+            });
         }
 
         [MethodImpl(MethodImplOptions.NoInlining)]
@@ -66,8 +63,6 @@ namespace System.Net.Sockets.Tests
                             Assert.Equal(1, client.Receive(new byte[1]));
                         }
                     }
-
-                    client = null;
                 }
             }
 
