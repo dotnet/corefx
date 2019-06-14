@@ -8,22 +8,17 @@
   
   <!-- IBC data packages don't follow NuGet conventions.  -->
   <Target Name="GetIBCData"
-          Inputs="%(IBCPackage.Identity)"
-          Outputs="unused"
           AfterTargets="Restore">
-
-    <PropertyGroup>
-      <!-- evaluate the package property -->
-      <_ibcPkgSrc>$(NuGetPackageRoot)%(IBCPackage.Identity)/%(IBCPackage.Version)</_ibcPkgSrc>
-      <_ibcPkgDest>%(IBCPackage.Identity)</_ibcPkgDest>
-    </PropertyGroup>
-
+    
     <ItemGroup>
-      <_optimizationDataSourceFile Include="$(_ibcPkgSrc)\**\*.dll;$(_ibcPkgSrc)\**\*.ibc" />
+      <IBCPackage>
+        <PackagePath>$(NuGetPackageRoot)%(IBCPackage.Identity)\%(IBCPackage.Version)</PackagePath>
+      </IBCPackage>
+      <_optimizationDataSourceFile Include="%(IBCPackage.PackagePath)\**\*.dll;%(IBCPackage.PackagePath)\**\*.ibc" Package="%(IBCPackage.Identity)" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_optimizationDataSourceFile)"
-          DestinationFiles="$(IbcOptimizationDataDir)$(_ibcPkgDest)\%(RecursiveDir)%(Filename)%(Extension)"
+          DestinationFiles="@(_optimizationDataSourceFile->'$(IbcOptimizationDataDir)%(Package)\%(RecursiveDir)%(Filename)%(Extension)')"
           SkipUnchangedFiles="true"
           UseHardlinksIfPossible="true" />
 
