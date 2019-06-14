@@ -54,6 +54,7 @@ namespace MS.Internal.Xml.XPath
                     {
                         if (_level == 0)
                         {
+                            _done = true;
                             return false;
                         }
                         if (nav.MoveToNext())
