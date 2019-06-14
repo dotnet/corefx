@@ -163,8 +163,6 @@ namespace System.Security.Cryptography.Dsa.Tests
                     key.KeySize = 576;
                     SignData(key, data, HashAlgorithmName.SHA256);
                 });
-
-            Assert.False(true);
         }
 
         protected virtual void UseAfterDispose(DSA dsa, byte[] data, byte[] sig)
