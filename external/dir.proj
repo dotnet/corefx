@@ -17,6 +17,7 @@
     <Project Include="binplacePackages/binplacePackages.depproj" />
   </ItemGroup>
 
+  <!-- Set up project references to use the sdk restore target. -->
   <Target Name="IncludeProjectReferences" DependsOnTargets="FilterProjects">
     <ItemGroup>
       <ProjectReference Include="@(Project)" />
@@ -25,6 +26,7 @@
 
   <Import Sdk="Microsoft.NET.Sdk" Project="Sdk.targets" />
 
+  <!-- Overwrite the SDK build target. -->
   <Target Name="Build" DependsOnTargets="FilterProjects">
     <MSBuild Targets="Build"
              Projects="@(Project)"

@@ -2,19 +2,17 @@
 
   <ItemGroup>
     <PackageReference Include="illink.tasks" Version="$(ILLinkTasksPackageVersion)" PrivateAssets="all" IsImplicitlyDefined="true" />
-    <ILLinkTfm Include="netcoreapp2.0" />
-    <ILLinkTfm Include="net46" />
   </ItemGroup>
 
   <Target Name="IncludeToolsFiles"
           AfterTargets="Restore">
 
     <ItemGroup>
-      <_illinkSrcFiles Include="$(NuGetPackageRoot)illink.tasks\$(ILLinkTasksPackageVersion)\tools\%(ILLinkTfm.Identity)\*.*" />
+      <_illinkSrcFiles Include="$(NuGetPackageRoot)illink.tasks\$(ILLinkTasksPackageVersion)\tools\**\*" />
     </ItemGroup>
 
     <Copy SourceFiles="@(_illinkSrcFiles)"
-          DestinationFolder="$(ILLinkDir)%(ILLinkTfm.Identity)"
+          DestinationFolder="$(ILLinkDir)%(_illinkSrcFiles.RecursiveDir)"
           SkipUnchangedFiles="true"
           UseHardlinksIfPossible="true" />
 
