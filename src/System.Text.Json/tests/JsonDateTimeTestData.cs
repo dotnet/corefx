@@ -143,6 +143,10 @@ namespace System.Text.Json.Tests
             yield return new object[] { "\"0997-07-166\"" };
             yield return new object[] { "\"1997-07-1sdsad\"" };
             yield return new object[] { "\"1997-07-16T19200\"" };
+            
+            // Explicitly test that the back slash is not supported
+            yield return new object[] { "\"0997\\\\07\\\\16\"" };
+            yield return new object[] { "\"1997\\\\07\\\\16\"" };
 
             // Invalid YYYY-MM-DDThh:mm
             yield return new object[] { "\"1997-07-16T1\"" };
