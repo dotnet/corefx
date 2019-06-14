@@ -147,7 +147,7 @@ namespace System.Security.Cryptography.Dsa.Tests
             // Ensure the key is populated, then dispose it.
             using (key)
             {
-                sig = SignData(key, data, HashAlgorithmName.SHA256);
+                sig = SignData(key, data, HashAlgorithmName.SHA1);
             }
 
             key.Dispose();
@@ -161,17 +161,17 @@ namespace System.Security.Cryptography.Dsa.Tests
                 () =>
                 {
                     key.KeySize = 576;
-                    SignData(key, data, HashAlgorithmName.SHA256);
+                    SignData(key, data, HashAlgorithmName.SHA1);
                 });
         }
 
         protected virtual void UseAfterDispose(DSA dsa, byte[] data, byte[] sig)
         {
             Assert.Throws<ObjectDisposedException>(
-                () => SignData(dsa, data, HashAlgorithmName.SHA256));
+                () => SignData(dsa, data, HashAlgorithmName.SHA1));
 
             Assert.Throws<ObjectDisposedException>(
-                () => VerifyData(dsa, data, sig, HashAlgorithmName.SHA256));
+                () => VerifyData(dsa, data, sig, HashAlgorithmName.SHA1));
         }
 
         [ConditionalFact(nameof(SupportsKeyGeneration))]
