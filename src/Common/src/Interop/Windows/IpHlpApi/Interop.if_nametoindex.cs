@@ -9,7 +9,11 @@ internal static partial class Interop
 {
     internal static partial class IpHlpApi
     {
+#if !uap
         [DllImport(Interop.Libraries.IpHlpApi, SetLastError = true)]
         internal extern static uint if_nametoindex(string name);
+#else
+        internal static uint if_nametoindex(string name) => 0;
+#endif
     }
 }
