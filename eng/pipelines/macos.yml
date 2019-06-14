@@ -39,7 +39,7 @@ jobs:
               _publishTests: true
 
       pool:
-        name: Hosted macOS
+        name: Hosted macOS High Sierra
 
       preBuildSteps:
         - script: |
