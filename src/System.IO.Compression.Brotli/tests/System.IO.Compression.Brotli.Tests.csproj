@@ -33,6 +33,6 @@
   -->
   <ItemGroup>
     <PackageReference Include="System.IO.Compression.TestData" Version="$(SystemIOCompressionTestDataPackageVersion)" ExcludeAssets="contentFiles" GeneratePathProperty="true" />
-    <None Include="$(PkgSystem_IO_Compression_TestData)\contentFiles\any\any\**\*" />
+    <None Include="$(PkgSystem_IO_Compression_TestData)\contentFiles\any\any\**\*" CopyToOutputDirectory="PreserveNewest" Visible="false" />
   </ItemGroup>
 </Project>
