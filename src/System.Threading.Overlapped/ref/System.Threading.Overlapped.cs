@@ -21,8 +21,8 @@ namespace System.Threading
     {
         public Overlapped() { }
         [System.ObsoleteAttribute("This constructor is not 64-bit compatible.  Use the constructor that takes an IntPtr for the event handle.  https://go.microsoft.com/fwlink/?linkid=14202")]
-        public Overlapped(int offsetLo, int offsetHi, int hEvent, System.IAsyncResult ar) { }
-        public Overlapped(int offsetLo, int offsetHi, System.IntPtr hEvent, System.IAsyncResult ar) { }
+        public Overlapped(int offsetLo, int offsetHi, int hEvent, System.IAsyncResult? ar) { }
+        public Overlapped(int offsetLo, int offsetHi, System.IntPtr hEvent, System.IAsyncResult? ar) { }
         public System.IAsyncResult? AsyncResult { get { throw null; } set { } }
         [System.ObsoleteAttribute("This property is not 64-bit compatible.  Use EventHandleIntPtr instead.  https://go.microsoft.com/fwlink/?linkid=14202")]
         public int EventHandle { get { throw null; } set { } }
