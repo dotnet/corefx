@@ -460,7 +460,7 @@ namespace System.IO.Compression
                 bool isCompressedSizeInZip64 = compressedSize == ZipHelper.Mask32Bit;
                 Zip64ExtraField zip64;
 
-                // Ideally we should also check if the minimunVersion is 64 bit or above, but there could zip files for which this version is not set correctly
+                // Ideally we should also check if the minimumVersion is 64 bit or above, but there could zip files for which this version is not set correctly
                 if (isUncompressedSizeInZip64 || isCompressedSizeInZip64)
                 {
                     zip64 = Zip64ExtraField.GetJustZip64Block(new SubReadStream(reader.BaseStream, reader.BaseStream.Position, extraFieldLength), isUncompressedSizeInZip64, isCompressedSizeInZip64, false, false);
