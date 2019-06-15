@@ -205,8 +205,7 @@ namespace System.Text.Json
             {
                 IDictionaryEnumerator enumerator = sourceDictionary.GetEnumerator();
                 enumerator.MoveNext();
-
-                return KeyValuePair.Create((string)enumerator.Key, (TRuntimeProperty)enumerator.Value);
+                return new KeyValuePair<string, TRuntimeProperty>((string)enumerator.Key, (TRuntimeProperty)enumerator.Value);
             }
             // Form {"Key": "MyKey", "Value": 1}.
             else if (sourceDictionary.Count == 2 &&
