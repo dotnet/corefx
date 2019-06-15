@@ -147,7 +147,7 @@ namespace System.Security.Cryptography.Dsa.Tests
                 {
                     key.CreateSignature(hash);
                 }
-                catch (CryptographicException) when (!SupportsKeyGeneration)
+                catch (PlatformNotSupportedException) when (!SupportsKeyGeneration)
                 {
                 }
             }
