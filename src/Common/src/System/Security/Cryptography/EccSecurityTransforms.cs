@@ -13,6 +13,7 @@ namespace System.Security.Cryptography
     internal sealed class EccSecurityTransforms : IDisposable
     {
         private SecKeyPair _keys;
+        private bool _disposed;
         private readonly string _disposedName;
 
         internal EccSecurityTransforms(string disposedTypeName)
@@ -21,15 +22,22 @@ namespace System.Security.Cryptography
             _disposedName = disposedTypeName;
         }
 
+        internal void DisposeKey()
+        {
+            _keys.Dispose();
+            _keys = null;
+        }
+
         public void Dispose()
         {
-            _keys?.Dispose();
-            _keys = null;
+            DisposeKey();
+            _disposed = true;
         }
 
         internal int GenerateKey(ECCurve curve)
         {
             curve.Validate();
+            ThrowIfDisposed();
 
             if (!curve.IsNamed)
             {
@@ -70,17 +78,22 @@ namespace System.Security.Cryptography
             return newPair;
         }
 
+        internal void ThrowIfDisposed()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(_disposedName);
+            }
+        }
+
         internal SecKeyPair GetOrGenerateKeys(int keySizeInBits)
         {
+            ThrowIfDisposed();
+
             SecKeyPair current = _keys;
 
             if (current != null)
             {
-                if (current.PublicKey == null)
-                {
-                    throw new ObjectDisposedException(_disposedName);
-                }
-
                 return current;
             }
 
@@ -96,6 +109,8 @@ namespace System.Security.Cryptography
 
         private void SetKey(SecKeyPair keyPair)
         {
+            ThrowIfDisposed();
+
             SecKeyPair current = _keys;
             _keys = keyPair;
             current?.Dispose();
@@ -147,6 +162,7 @@ namespace System.Security.Cryptography
         internal int ImportParameters(ECParameters parameters)
         {
             parameters.Validate();
+            ThrowIfDisposed();
 
             bool isPrivateKey = parameters.D != null;
             SecKeyPair newKeys;
@@ -216,6 +232,8 @@ namespace System.Security.Cryptography
             ReadOnlySpan<byte> source,
             out int bytesRead)
         {
+            ThrowIfDisposed();
+
             fixed (byte* ptr = &MemoryMarshal.GetReference(source))
             {
                 using (MemoryManager<byte> manager = new PointerMemoryManager<byte>(ptr, source.Length))
