@@ -304,7 +304,11 @@ namespace System.Security.Cryptography.Rsa.Tests
 
             Assert.Throws<ObjectDisposedException>(() => rsa.ExportParameters(false));
             Assert.Throws<ObjectDisposedException>(() => rsa.ExportParameters(true));
-            Assert.Throws<ObjectDisposedException>(() => rsa.ImportParameters(TestData.RSA1024Params));
+
+            if (!(PlatformDetection.IsFullFramework && rsa.GetType().Name.EndsWith("Cng")))
+            {
+                Assert.Throws<ObjectDisposedException>(() => rsa.ImportParameters(TestData.RSA1024Params));
+            }
         }
 
         internal static void AssertKeyEquals(in RSAParameters expected, in RSAParameters actual)

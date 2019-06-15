@@ -171,8 +171,13 @@ namespace System.Security.Cryptography.EcDsa.Tests
 
             UseAfterDispose(ecdsa, data, sig);
 
-            Assert.Throws<ObjectDisposedException>(() => ecdsa.GenerateKey(ECCurve.NamedCurves.nistP256));
-            Assert.Throws<ObjectDisposedException>(() => ecdsa.ImportParameters(EccTestData.GetNistP256ReferenceKey()));
+            if (!(PlatformDetection.IsFullFramework && ecdsa.GetType().Name.EndsWith("Cng")))
+            {
+                Assert.Throws<ObjectDisposedException>(() => ecdsa.GenerateKey(ECCurve.NamedCurves.nistP256));
+
+                Assert.Throws<ObjectDisposedException>(
+                    () => ecdsa.ImportParameters(EccTestData.GetNistP256ReferenceKey()));
+            }
 
             // Either set_KeySize or SignData should throw.
             Assert.Throws<ObjectDisposedException>(
