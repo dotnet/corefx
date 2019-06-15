@@ -38,37 +38,49 @@ namespace System.Text.Json
         public System.Text.Json.JsonElement.ObjectEnumerator EnumerateObject() { throw null; }
         public int GetArrayLength() { throw null; }
         public bool GetBoolean() { throw null; }
+        public byte GetByte() { throw null; }
         public byte[] GetBytesFromBase64() { throw null; }
         public System.DateTime GetDateTime() { throw null; }
         public System.DateTimeOffset GetDateTimeOffset() { throw null; }
         public decimal GetDecimal() { throw null; }
         public double GetDouble() { throw null; }
         public System.Guid GetGuid() { throw null; }
+        public int GetInt16() { throw null; }
         public int GetInt32() { throw null; }
         public long GetInt64() { throw null; }
         public System.Text.Json.JsonElement GetProperty(System.ReadOnlySpan<byte> utf8PropertyName) { throw null; }
         public System.Text.Json.JsonElement GetProperty(System.ReadOnlySpan<char> propertyName) { throw null; }
         public System.Text.Json.JsonElement GetProperty(string propertyName) { throw null; }
         public string GetRawText() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public sbyte GetSByte() { throw null; }
         public float GetSingle() { throw null; }
         public string GetString() { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public uint GetUInt16() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public uint GetUInt32() { throw null; }
         [System.CLSCompliantAttribute(false)]
         public ulong GetUInt64() { throw null; }
         public override string ToString() { throw null; }
+        public bool TryGetByte(out byte value) { throw null; }
         public bool TryGetBytesFromBase64(out byte[] value) { throw null; }
         public bool TryGetDateTime(out System.DateTime value) { throw null; }
         public bool TryGetDateTimeOffset(out System.DateTimeOffset value) { throw null; }
         public bool TryGetDecimal(out decimal value) { throw null; }
         public bool TryGetDouble(out double value) { throw null; }
         public bool TryGetGuid(out System.Guid value) { throw null; }
+        public bool TryGetInt16(out short value) { throw null; }
         public bool TryGetInt32(out int value) { throw null; }
         public bool TryGetInt64(out long value) { throw null; }
         public bool TryGetProperty(System.ReadOnlySpan<byte> utf8PropertyName, out System.Text.Json.JsonElement value) { throw null; }
         public bool TryGetProperty(System.ReadOnlySpan<char> propertyName, out System.Text.Json.JsonElement value) { throw null; }
         public bool TryGetProperty(string propertyName, out System.Text.Json.JsonElement value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public bool TryGetSByte(out sbyte value) { throw null; }
         public bool TryGetSingle(out float value) { throw null; }
+        [System.CLSCompliantAttribute(false)]
+        public bool TryGetUInt16(out ushort value) { throw null; }
         [System.CLSCompliantAttribute(false)]
         public bool TryGetUInt32(out uint value) { throw null; }
         [System.CLSCompliantAttribute(false)]
