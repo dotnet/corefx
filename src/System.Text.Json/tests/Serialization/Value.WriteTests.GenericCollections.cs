@@ -627,7 +627,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void WritePrimitiveKeyValuePair()
         {
-            KeyValuePair<string, int> input = KeyValuePair.Create("Key", 123) ;
+            KeyValuePair<string, int> input = new KeyValuePair<string, int>("Key", 123) ;
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal(@"{""Key"":""Key"",""Value"":123}", json);
@@ -649,7 +649,7 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void WriteKeyValuePairOfList()
         {
-            KeyValuePair<string, List<int>> input = KeyValuePair.Create("Key", new List<int> { 1, 2, 3 });
+            KeyValuePair<string, List<int>> input = new KeyValuePair<string, List<int>>("Key", new List<int> { 1, 2, 3 });
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal(@"{""Key"":""Key"",""Value"":[1,2,3]}", json);
@@ -658,7 +658,8 @@ namespace System.Text.Json.Serialization.Tests
         [Fact]
         public static void WriteKeyValuePairOfKeyValuePair()
         {
-            KeyValuePair<string, KeyValuePair<string, int>> input = KeyValuePair.Create("Key", KeyValuePair.Create("Key", 1));
+            KeyValuePair<string, KeyValuePair<string, int>> input = new KeyValuePair<string, KeyValuePair<string, int>>(
+                "Key", new KeyValuePair<string, int>("Key", 1));
 
             string json = JsonSerializer.ToString(input);
             Assert.Equal(@"{""Key"":""Key"",""Value"":{""Key"":""Key"",""Value"":1}}", json);

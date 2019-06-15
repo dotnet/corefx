@@ -254,7 +254,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringIReadOnlyListT = new string[] { "Hello" };
             MyStringISetT = new HashSet<string> { "Hello" };
 
-            MyStringToStringKeyValuePair = KeyValuePair.Create("myKey", "myValue");
+            MyStringToStringKeyValuePair = new KeyValuePair<string, string>("myKey", "myValue");
             MyStringToStringIDict = new Dictionary<string, string> { { "key", "value" } };
 
             MyStringToStringGenericDict = new Dictionary<string, string> { { "key", "value" } };
