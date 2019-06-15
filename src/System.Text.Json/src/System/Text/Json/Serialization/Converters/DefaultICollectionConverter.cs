@@ -12,13 +12,9 @@ namespace System.Text.Json.Serialization.Converters
         public override IEnumerable CreateFromList(ref ReadStack state, IList sourceList, JsonSerializerOptions options)
         {
             Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            return (IEnumerable)Activator.CreateInstance(enumerableType, sourceList);
-        }
-
-        internal IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
-        {
-            Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            return (IDictionary)Activator.CreateInstance(enumerableType, sourceDictionary);
+            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
+            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+            return propertyInfo.CreateIEnumerableInstance(enumerableType, sourceList, state.JsonPath, options);
         }
     }
 }

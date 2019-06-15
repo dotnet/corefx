@@ -16,11 +16,10 @@ namespace System.Text.Json
     {
         // Cache the converters so they don't get created for every enumerable property.
         private static readonly JsonEnumerableConverter s_jsonArrayConverter = new DefaultArrayConverter();
-        private static readonly JsonEnumerableConverter s_jsonGenericIEnumerableConstuctibleConverter = new DefaultGenericIEnumerableConstructibleConverter();
         private static readonly JsonEnumerableConverter s_jsonICollectionConverter = new DefaultICollectionConverter();
+        private static readonly JsonDictionaryConverter s_jsonIDictionaryConverter = new DefaultIDictionaryConverter();
         private static readonly JsonEnumerableConverter s_jsonImmutableEnumerableConverter = new DefaultImmutableEnumerableConverter();
         private static readonly JsonDictionaryConverter s_jsonImmutableDictionaryConverter = new DefaultImmutableDictionaryConverter();
-        private static readonly JsonDictionaryConverter s_jsonIDictionaryConverter = new DefaultIDictionaryConverter();
 
 
         private JsonClassInfo _runtimeClassInfo;
@@ -240,18 +239,11 @@ namespace System.Text.Json
                     }
                     else if (typeof(IEnumerable).IsAssignableFrom(RuntimePropertyType))
                     {
-                        if (JsonClassInfo.IsDeserializedByConstructingWithIList(RuntimePropertyType))
+                        if (JsonClassInfo.IsDeserializedByConstructingWithIList(RuntimePropertyType) ||
+                            (!typeof(IList).IsAssignableFrom(RuntimePropertyType) && JsonClassInfo.HasConstructorThatTakesGenericIEnumerable(RuntimePropertyType)))
                         {
                             EnumerableConverter = s_jsonICollectionConverter;
                         }
-                        // Else if IList can't be assigned from the property type (we populate and return an IList directly)
-                        // and the type can be constructed with an IEnumerable<T>, then use the
-                        // IEnumerableConstructible converter to create the instance.
-                        else if (!typeof(IList).IsAssignableFrom(RuntimePropertyType) && JsonClassInfo.HasConstructorThatTakesGenericIEnumerable(RuntimePropertyType))
-                        {
-                            EnumerableConverter = s_jsonGenericIEnumerableConstuctibleConverter;
-                        }
-                        // Else if it's a System.Collections.Immutable type with one generic argument.
                         else if (RuntimePropertyType.IsGenericType &&
                             RuntimePropertyType.FullName.StartsWith(JsonClassInfo.ImmutableNamespaceName) &&
                             RuntimePropertyType.GetGenericArguments().Length == 1)
@@ -307,15 +299,17 @@ namespace System.Text.Json
             return (TAttribute)propertyInfo?.GetCustomAttribute(typeof(TAttribute), inherit: false);
         }
 
-        public abstract IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string propertyPath, JsonSerializerOptions options);
+        public abstract IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options);
 
-        public abstract IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath, JsonSerializerOptions options);
+        public abstract IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options);
 
-        public abstract IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList);
+        public abstract IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string propertyPath, JsonSerializerOptions options);
+
+        public abstract IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string propertyPath, JsonSerializerOptions options);
 
         public abstract IList CreateConverterList();
 
-        public abstract ValueType CreateKeyValuePairFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options);
+        public abstract ValueType CreateKeyValuePairInstance(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options);
 
         public abstract Type GetDictionaryConcreteType();
 

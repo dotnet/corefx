@@ -521,8 +521,8 @@ namespace System.Text.Json
 
         private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
 
-        private const string HashtableTypeName = "System.Collections.Hashtable";
-        private const string SortedListTypeName = "System.Collections.SortedList";
+        public const string HashtableTypeName = "System.Collections.Hashtable";
+        public const string SortedListTypeName = "System.Collections.SortedList";
 
         public const string StackTypeName = "System.Collections.Stack";
         public const string QueueTypeName = "System.Collections.Queue";

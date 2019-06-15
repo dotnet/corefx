@@ -107,10 +107,67 @@ namespace System.Text.Json
             return parentType;
         }
 
+        public override IEnumerable CreateIEnumerableInstance(Type parentType, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        {
+            if (parentType.IsGenericType)
+            {
+                Type genericTypeDefinition = parentType.GetGenericTypeDefinition();
+                IEnumerable<TDeclaredProperty> items = CreateGenericTDeclaredPropertyIEnumerable(sourceList);
+
+                if (genericTypeDefinition == typeof(Stack<>))
+                {
+                    return new Stack<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(Queue<>))
+                {
+                    return new Queue<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(HashSet<>))
+                {
+                    return new HashSet<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(LinkedList<>))
+                {
+                    return new LinkedList<TDeclaredProperty>(items);
+                }
+                else if (genericTypeDefinition == typeof(SortedSet<>))
+                {
+                    return new SortedSet<TDeclaredProperty>(items);
+                }
+
+                return (IEnumerable)Activator.CreateInstance(parentType, items);
+            }
+            else
+            {
+                if (parentType == typeof(ArrayList))
+                {
+                    return new ArrayList(sourceList);
+                }
+                // Stack and Queue go into this condition, unless we add a ref to System.Collections.NonGeneric.
+                else
+                {
+                    return (IEnumerable)Activator.CreateInstance(parentType, sourceList);
+                }
+            }
+        }
+
+        public override IDictionary CreateIDictionaryInstance(Type parentType, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        {
+            if (parentType.FullName == JsonClassInfo.HashtableTypeName)
+            {
+                return new Hashtable(sourceDictionary);
+            }
+            // SortedList goes into this condition, unless we add a ref to System.Collections.NonGeneric.
+            else
+            {
+                return (IDictionary)Activator.CreateInstance(parentType, sourceDictionary);
+            }
+        }
+
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IEnumerable CreateImmutableCollectionFromList(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
+        public override IEnumerable CreateImmutableCollectionInstance(Type collectionType, string delegateKey, IList sourceList, string jsonPath, JsonSerializerOptions options)
         {
             if (!options.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
             {
@@ -120,13 +177,13 @@ namespace System.Text.Json
             JsonSerializerOptions.ImmutableCreateRangeDelegate<TRuntimeProperty> createRangeDelegate = (
                 (JsonSerializerOptions.ImmutableCreateRangeDelegate<TRuntimeProperty>)createRangeDelegateObj);
 
-            return (IEnumerable)createRangeDelegate.Invoke(CreateGenericIEnumerableFromList(sourceList));
+            return (IEnumerable)createRangeDelegate.Invoke(CreateGenericTRuntimePropertyIEnumerable(sourceList));
         }
 
         // Creates an IEnumerable<TRuntimePropertyType> and populates it with the items in the
         // sourceList argument then uses the delegateKey argument to identify the appropriate cached
         // CreateRange<TRuntimePropertyType> method to create and return the desired immutable collection type.
-        public override IDictionary CreateImmutableCollectionFromDictionary(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
+        public override IDictionary CreateImmutableDictionaryInstance(Type collectionType, string delegateKey, IDictionary sourceDictionary, string jsonPath, JsonSerializerOptions options)
         {
             if (!options.TryGetCreateRangeDelegate(delegateKey, out object createRangeDelegateObj))
             {
@@ -139,12 +196,7 @@ namespace System.Text.Json
             return (IDictionary)createRangeDelegate.Invoke(CreateGenericIEnumerableFromDictionary(sourceDictionary));
         }
 
-        public override IEnumerable CreateIEnumerableConstructibleType(Type enumerableType, IList sourceList)
-        {
-            return (IEnumerable)Activator.CreateInstance(enumerableType, CreateGenericIEnumerableFromList(sourceList));
-        }
-
-        public override ValueType CreateKeyValuePairFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
+        public override ValueType CreateKeyValuePairInstance(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
         {
             Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
 
@@ -168,11 +220,19 @@ namespace System.Text.Json
             throw ThrowHelper.GetJsonException_DeserializeUnableToConvertValue(enumerableType, state.JsonPath);
         }
 
-        private IEnumerable<TRuntimeProperty> CreateGenericIEnumerableFromList(IList sourceList)
+        private IEnumerable<TRuntimeProperty> CreateGenericTRuntimePropertyIEnumerable(IList sourceList)
         {
             foreach (object item in sourceList)
             {
                 yield return (TRuntimeProperty)item;
+            }
+        }
+
+        private IEnumerable<TDeclaredProperty> CreateGenericTDeclaredPropertyIEnumerable(IList sourceList)
+        {
+            foreach (object item in sourceList)
+            {
+                yield return (TDeclaredProperty)item;
             }
         }
 

@@ -11,8 +11,10 @@ namespace System.Text.Json.Serialization.Converters
     {
         public override IDictionary CreateFromDictionary(ref ReadStack state, IDictionary sourceDictionary, JsonSerializerOptions options)
         {
-            Type enumerableType = state.Current.JsonPropertyInfo.RuntimePropertyType;
-            return (IDictionary)Activator.CreateInstance(enumerableType, sourceDictionary);
+            Type dictionaryType = state.Current.JsonPropertyInfo.RuntimePropertyType;
+            JsonClassInfo elementClassInfo = state.Current.JsonPropertyInfo.ElementClassInfo;
+            JsonPropertyInfo propertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+            return propertyInfo.CreateIDictionaryInstance(dictionaryType, sourceDictionary, state.JsonPath, options);
         }
     }
 }

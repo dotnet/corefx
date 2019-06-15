@@ -116,7 +116,7 @@ namespace System.Text.Json
                 Debug.Assert(state.Current.TempDictionaryValues != null);
                 state.Current.JsonPropertyInfo.SetValueAsObject(
                     state.Current.ReturnValue,
-                    propertyInfo.CreateKeyValuePairFromDictionary(ref state, state.Current.TempDictionaryValues, options));
+                    propertyInfo.CreateKeyValuePairInstance(ref state, state.Current.TempDictionaryValues, options));
                 state.Current.ResetProperty();
             }
             else
@@ -138,7 +138,7 @@ namespace System.Text.Json
                             propertyInfo = elementClassInfo.GetPolicyProperty();
                         }
 
-                        value = propertyInfo.CreateKeyValuePairFromDictionary(ref state, state.Current.TempDictionaryValues, options);
+                        value = propertyInfo.CreateKeyValuePairInstance(ref state, state.Current.TempDictionaryValues, options);
                     }
                     else
                     {
