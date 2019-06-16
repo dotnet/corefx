@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -37,6 +38,21 @@ namespace System.Text.Json
                     jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
                 }
             }
+            else if (jsonInfo.ClassType == ClassType.Enumerable &&
+                !propertyType.IsArray &&
+                (IsDeserializedByAssigningFromList(propertyType) || IsSetInterface(propertyType)))
+            {
+                JsonClassInfo elementClassInfo = jsonInfo.ElementClassInfo;
+                JsonPropertyInfo elementPropertyInfo = options.GetJsonPropertyInfoFromClassInfo(elementClassInfo, options);
+
+                // Get a runtime type for the property. e.g. ISet<T> -> HashSet<T>, ICollection -> List<object>
+                // We use the element's JsonPropertyInfo so we can utilize the generic support.
+                Type newPropertyType = elementPropertyInfo.GetConcreteType(propertyType);
+                if ((propertyType != newPropertyType) && propertyType.IsAssignableFrom(newPropertyType))
+                {
+                    jsonInfo = CreateProperty(propertyType, newPropertyType, propertyInfo, classType, options);
+                }
+            }
 
             if (propertyInfo != null)
             {
@@ -64,7 +80,8 @@ namespace System.Text.Json
             {
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
-                case ClassType.ImmutableDictionary:
+                case ClassType.IDictionaryConstructible:
+                case ClassType.KeyValuePair:
                 case ClassType.Unknown:
                     collectionElementType = GetElementType(runtimePropertyType, parentClassType, propertyInfo);
                     break;
