@@ -96,7 +96,7 @@ namespace System.Globalization.Tests
         public void EnglishName(string name, string[] expected)
         {
             string result = new RegionInfo(name).EnglishName;
-            Assert.True(expected.Contains(result), $"RegionInfo.EnglishName({name})='{result}' not fond in the possible names ({String.Join(", ", expected)}) ");
+            Assert.True(expected.Contains(result), $"RegionInfo.EnglishName({name})='{result}' not found in the possible names ({String.Join(", ", expected)}) ");
         }
 
         [Theory]
