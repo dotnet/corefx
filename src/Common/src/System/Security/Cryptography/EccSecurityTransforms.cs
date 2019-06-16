@@ -24,7 +24,7 @@ namespace System.Security.Cryptography
 
         internal void DisposeKey()
         {
-            _keys.Dispose();
+            _keys?.Dispose();
             _keys = null;
         }
 
