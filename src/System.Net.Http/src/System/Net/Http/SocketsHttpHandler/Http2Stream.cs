@@ -137,7 +137,7 @@ namespace System.Net.Http
                 bool sendRequestContent;
 
                 _shouldSendRequestBodyWaiter = allowExpect100ToContinue;
-                Task response = ReadResponseHeadersAsync();
+                Task response = ReadResponseHeadersAsync(cancellationToken);
 
                 using (var expect100Timer = new Timer(
                             s => ((TaskCompletionSource<bool>)s).TrySetResult(true),
@@ -451,7 +451,7 @@ namespace System.Net.Http
                 }
             }
 
-            public async Task ReadResponseHeadersAsync()
+            public async Task ReadResponseHeadersAsync(CancellationToken cancellationToken)
             {
                 // Wait for response headers to be read.
                 bool emptyResponse;
@@ -462,6 +462,10 @@ namespace System.Net.Http
                 if (wait)
                 {
                     await GetWaiterTask().ConfigureAwait(false);
+                    if (cancellationToken.IsCancellationRequested)
+                    {
+                        throw new OperationCanceledException();
+                    }
                     (wait, emptyResponse) = TryEnsureHeaders();
                     Debug.Assert(!wait);
                 }

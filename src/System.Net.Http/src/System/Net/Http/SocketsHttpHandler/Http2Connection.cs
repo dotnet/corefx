@@ -1432,7 +1432,7 @@ namespace System.Net.Http
                     // Send request body, if any
                     Task bodyTask = http2Stream.SendRequestBodyAsync(cancellationToken);
                     // read response headers.
-                    Task responseHeadersTask = http2Stream.ReadResponseHeadersAsync();
+                    Task responseHeadersTask = http2Stream.ReadResponseHeadersAsync(cancellationToken);
 
                     if (bodyTask == await Task.WhenAny(bodyTask, responseHeadersTask).ConfigureAwait(false) ||
                         bodyTask.IsCompleted)

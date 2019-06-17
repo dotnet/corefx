@@ -20,13 +20,16 @@ namespace System.Net.Http.Functional.Tests
             private byte[] _content;
             private readonly TaskCompletionSource<bool> _sendingDone;
             private int _iteration;
+            private CancellationToken _cancellationToken;
 
-            internal SlowTestStream(byte[] content, TaskCompletionSource<bool> tsc, int count=10, int trigger=1) : base(content, false)
+            internal SlowTestStream(byte[] content, TaskCompletionSource<bool> tsc, CancellationToken cancellationToken, int count=10, int trigger=1) : base(content, false)
             {
                 _sendingDone = tsc;
                 _trigger = trigger;
                 _count = count;
                 _content = content;
+                _cancellationToken = cancellationToken;
+
             }
 
             public async override ValueTask<int> ReadAsync(Memory<byte> destination, CancellationToken cancellationToken)
@@ -35,6 +38,11 @@ namespace System.Net.Http.Functional.Tests
                 if (_failException != null)
                 {
                     throw _failException;
+                }
+                // Until #9071 is resolved and we can cancel HttpContent
+                if (cancellationToken.IsCancellationRequested || _cancellationToken.IsCancellationRequested)
+                {
+                    throw new OperationCanceledException();
                 }
 
                 if (_delay > 0)
@@ -45,7 +53,7 @@ namespace System.Net.Http.Functional.Tests
                 _iteration++;
                 if (_iteration == _trigger)
                 {
-                    _sendingDone.TrySetResult(true);
+                    _sendingDone?.TrySetResult(true);
                 }
 
                 if (_count == _iteration)

@@ -1321,6 +1321,44 @@ namespace System.Net.Http.Functional.Tests
             }
         }
 
+        [OuterLoop("Uses Task.Delay")]
+        [ConditionalFact(nameof(SupportsAlpn))]
+        public async Task Http2_PendingSend_SendsReset()
+        {
+            var cts = new CancellationTokenSource();
+
+            string content = new string('*', 300);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), null, cts.Token, count: 10);
+            await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
+            {
+                using (HttpClient client = CreateHttpClient())
+                {
+                    var request = new HttpRequestMessage(HttpMethod.Post, url);
+                    request.Version = new Version(2,0);
+                    request.Content = new StreamContent(stream);
+
+                    await Assert.ThrowsAnyAsync<OperationCanceledException>(async () => await client.SendAsync(request, cts.Token));
+                }
+            },
+            async server =>
+            {
+                await server.EstablishConnectionAsync();
+
+                (int streamId, HttpRequestData requestData) = await server.ReadAndParseRequestHeaderAsync(readBody : false);
+
+                // Cancel client after receiving Headers.
+                cts.Cancel();
+                Frame frame;
+                do
+                {
+                    frame = await server.ReadFrameAsync(TimeSpan.FromMilliseconds(TestHelper.PassingTestTimeoutMilliseconds)).ConfigureAwait(false);
+                    Assert.NotNull(frame); // We should get Rst before closing connection.
+                    Assert.Equal(0, (int)(frame.Flags & FrameFlags.EndStream));
+                 } while (frame.Type != FrameType.RstStream);
+            });
+        }
+
+
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
@@ -1365,7 +1403,7 @@ namespace System.Net.Http.Functional.Tests
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
             string content = new string('*', 300);
 
-            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), tsc, trigger:3, count: 30);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(content), tsc, CancellationToken.None, trigger:3, count: 30);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
@@ -1415,7 +1453,7 @@ namespace System.Net.Http.Functional.Tests
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
             string requestContent = new string('*', 300);
             const string responseContent = "SendAsync_ConcurentSendReceive_Ok";
-            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger:1, count: 10);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, CancellationToken.None, trigger:1, count: 10);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
@@ -1472,7 +1510,7 @@ namespace System.Net.Http.Functional.Tests
             TaskCompletionSource<bool> tsc = new TaskCompletionSource<bool>();
             string requestContent = new string('*', 300);
             const string responseContent = "SendAsync_ConcurentSendReceive_Fail";
-            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, trigger:1, count: 10);
+            var stream = new CustomContent.SlowTestStream(Encoding.UTF8.GetBytes(requestContent), tsc, CancellationToken.None, trigger:1, count: 10);
 
             await Http2LoopbackServer.CreateClientAndServerAsync(async url =>
             {
