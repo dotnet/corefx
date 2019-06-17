@@ -963,5 +963,21 @@ namespace System.SpanTests
                 Assert.Equal(-1, index);
             }
         }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.IndexOfAnyNullSequenceData), MemberType = typeof(TestHelpers))]
+        public static void IndexOfAnyNullSequence_String(string[] spanInput, string[] searchInput, int expected)
+        {
+            ReadOnlySpan<string> theStrings = spanInput;
+            Assert.Equal(expected, theStrings.IndexOfAny(searchInput));
+        }
+
+        [Theory]
+        [MemberData(nameof(TestHelpers.IndexOfAnyNullData), MemberType = typeof(TestHelpers))]
+        public static void IndexOfAnyNull_String(string[] spanInput, string[] searchInput, int expected)
+        {
+            ReadOnlySpan<string> theStrings = spanInput;
+            Assert.Equal(expected, theStrings.IndexOfAny(searchInput[0], searchInput[1]));
+        }
     }
 }
