@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
@@ -229,6 +230,14 @@ namespace System.Text.Json.Serialization.Tests
             }
 
             Assert.True(exceptionThrown);
+        }
+
+        [Fact]
+        public static void ReadObject_PublicIndexer()
+        {
+            Indexer indexer = JsonSerializer.Parse<Indexer>(@"{""NonIndexerProp"":""Value""}");
+            Assert.Equal("Value", indexer.NonIndexerProp);
+            Assert.Equal(-1, indexer[0]);
         }
     }
 }

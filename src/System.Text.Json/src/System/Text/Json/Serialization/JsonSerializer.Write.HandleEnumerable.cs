@@ -5,7 +5,7 @@
 using System.Collections;
 using System.Diagnostics;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -60,6 +60,12 @@ namespace System.Text.Json.Serialization
                     // An object or another enumerator requires a new stack frame.
                     object nextValue = state.Current.Enumerator.Current;
                     state.Push(elementClassInfo, nextValue);
+
+                    if (elementClassInfo.ClassType == ClassType.KeyValuePair)
+                    {
+                        state.Current.JsonPropertyInfo = elementClassInfo.GetPolicyPropertyOfKeyValuePair();
+                        state.Current.PropertyIndex++;
+                    }
                 }
 
                 return false;

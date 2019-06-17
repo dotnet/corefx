@@ -7,9 +7,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text.Json.Serialization;
 using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     [DebuggerDisplay("ClassType.{ClassType}, {Type.Name}")]
     internal sealed partial class JsonClassInfo
@@ -93,29 +94,37 @@ namespace System.Text.Json.Serialization
             switch (ClassType)
             {
                 case ClassType.Object:
-                    var propertyNames = new HashSet<string>(StringComparer.Ordinal);
-
-                    foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                     {
-                        // For now we only support public getters\setters
-                        if (propertyInfo.GetMethod?.IsPublic == true ||
-                            propertyInfo.SetMethod?.IsPublic == true)
+                        var propertyNames = new HashSet<string>(StringComparer.Ordinal);
+
+                        foreach (PropertyInfo propertyInfo in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic))
                         {
-                            JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
-
-                            Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
-
-                            // If the JsonPropertyNameAttribute or naming policy results in collisions, throw an exception.
-                            if (!propertyNames.Add(jsonPropertyInfo.NameUsedToCompareAsString))
+                            // Ignore indexers
+                            if (propertyInfo.GetIndexParameters().Length > 0)
                             {
-                                ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameConflict(this, jsonPropertyInfo);
+                                continue;
                             }
 
-                            jsonPropertyInfo.ClearUnusedValuesAfterAdd();
-                        }
-                    }
+                            // For now we only support public getters\setters
+                            if (propertyInfo.GetMethod?.IsPublic == true ||
+                                propertyInfo.SetMethod?.IsPublic == true)
+                            {
+                                JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
 
-                    DetermineExtensionDataProperty();
+                                Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
+
+                                // If the JsonPropertyNameAttribute or naming policy results in collisions, throw an exception.
+                                if (!propertyNames.Add(jsonPropertyInfo.NameUsedToCompareAsString))
+                                {
+                                    ThrowHelper.ThrowInvalidOperationException_SerializerPropertyNameConflict(this, jsonPropertyInfo);
+                                }
+
+                                jsonPropertyInfo.ClearUnusedValuesAfterAdd();
+                            }
+                        }
+
+                        DetermineExtensionDataProperty();
+                    }
                     break;
                 case ClassType.Enumerable:
                 case ClassType.Dictionary:
@@ -131,7 +140,7 @@ namespace System.Text.Json.Serialization
                         ElementClassInfo = options.GetOrAddClass(elementType);
                     }
                     break;
-                case ClassType.ImmutableDictionary:
+                case ClassType.IDictionaryConstructible:
                     {
                         // Add a single property that maps to the class type so we can have policies applied.
                         AddPolicyProperty(type, options);
@@ -143,6 +152,39 @@ namespace System.Text.Json.Serialization
 
                         // Create a ClassInfo that maps to the element type which is used for (de)serialization and policies.
                         ElementClassInfo = options.GetOrAddClass(elementType);
+                    }
+                    break;
+                // TODO: Utilize converter mechanism to handle (de)serialization of KeyValuePair
+                // when it goes through: https://github.com/dotnet/corefx/issues/36639.
+                case ClassType.KeyValuePair:
+                    {
+                        // For deserialization, we treat it as ClassType.IDictionaryConstructible so we can parse it like a dictionary
+                        // before using converter-like logic to create a KeyValuePair instance.
+
+                        // Add a single property that maps to the class type so we can have policies applied.
+                        AddPolicyProperty(type, options);
+
+                        Type elementType = GetElementType(type, parentType: null, memberInfo: null);
+
+                        // Make this Dictionary<string, object> to accomodate input of form {"Key": "MyKey", "Value": 1}.
+                        CreateObject = options.ClassMaterializerStrategy.CreateConstructor(typeof(Dictionary<string, object>));
+
+                        // Create a ClassInfo that maps to the element type which is used for deserialization and policies.
+                        ElementClassInfo = options.GetOrAddClass(elementType);
+
+                        // For serialization, we treat it like ClassType.Object to utilize the public getters.
+
+                        // Add Key property
+                        PropertyInfo propertyInfo = type.GetProperty("Key", BindingFlags.Public | BindingFlags.Instance);
+                        JsonPropertyInfo jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
+                        Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
+                        jsonPropertyInfo.ClearUnusedValuesAfterAdd();
+
+                        // Add Value property.
+                        propertyInfo = type.GetProperty("Value", BindingFlags.Public | BindingFlags.Instance);
+                        jsonPropertyInfo = AddProperty(propertyInfo.PropertyType, propertyInfo, type, options);
+                        Debug.Assert(jsonPropertyInfo.NameUsedToCompareAsString != null);
+                        jsonPropertyInfo.ClearUnusedValuesAfterAdd();
                     }
                     break;
                 case ClassType.Value:
@@ -282,6 +324,13 @@ namespace System.Text.Json.Serialization
             return _propertyRefs[0].Info;
         }
 
+        internal JsonPropertyInfo GetPolicyPropertyOfKeyValuePair()
+        {
+            // We have 3 here. One for the KeyValuePair itself, one for Key property, and one for the Value property.
+            Debug.Assert(_propertyRefs.Count == 3);
+            return _propertyRefs[0].Info;
+        }
+
         internal JsonPropertyInfo GetProperty(int index)
         {
             Debug.Assert(index < _propertyRefs.Count);
@@ -367,10 +416,10 @@ namespace System.Text.Json.Serialization
             return key;
         }
 
-        // Return the element type of the IEnumerable, or return null if not an IEnumerable.
+        // Return the element type of the IEnumerable or KeyValuePair, or return null if not an IEnumerable or KayValuePair.
         public static Type GetElementType(Type propertyType, Type parentType, MemberInfo memberInfo)
         {
-            if (!typeof(IEnumerable).IsAssignableFrom(propertyType))
+            if (!typeof(IEnumerable).IsAssignableFrom(propertyType) && !IsKeyValuePair(propertyType))
             {
                 return null;
             }
@@ -388,7 +437,7 @@ namespace System.Text.Json.Serialization
                 Type[] args = propertyType.GetGenericArguments();
                 ClassType classType = GetClassType(propertyType);
 
-                if ((classType == ClassType.Dictionary || classType == ClassType.ImmutableDictionary) &&
+                if ((classType == ClassType.Dictionary || classType == ClassType.IDictionaryConstructible || classType == ClassType.KeyValuePair) &&
                     args.Length >= 2 && // It is >= 2 in case there is a IDictionary<TKey, TValue, TSomeExtension>.
                     args[0].UnderlyingSystemType == typeof(string))
                 {
@@ -401,10 +450,18 @@ namespace System.Text.Json.Serialization
                 }
             }
 
+            if (propertyType.IsAssignableFrom(typeof(IList)) ||
+                propertyType.IsAssignableFrom(typeof(IDictionary)) ||
+                IsDeserializedByConstructingWithIList(propertyType) ||
+                IsDeserializedByConstructingWithIDictionary(propertyType))
+            {
+                return typeof(object);
+            }
+
             throw ThrowHelper.GetNotSupportedException_SerializationNotSupportedCollection(propertyType, parentType, memberInfo);
         }
 
-        internal static ClassType GetClassType(Type type)
+        public static ClassType GetClassType(Type type)
         {
             Debug.Assert(type != null);
 
@@ -418,16 +475,22 @@ namespace System.Text.Json.Serialization
                 return ClassType.Value;
             }
 
-            if (DefaultImmutableConverter.TypeIsImmutableDictionary(type))
+            if (DefaultImmutableDictionaryConverter.IsImmutableDictionary(type) ||
+                IsDeserializedByConstructingWithIDictionary(type))
             {
-                return ClassType.ImmutableDictionary;
+                return ClassType.IDictionaryConstructible;
             }
 
-            if (typeof(IDictionary).IsAssignableFrom(type) || 
+            if (typeof(IDictionary).IsAssignableFrom(type) ||
                 (type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(IDictionary<,>) ||
                 type.GetGenericTypeDefinition() == typeof(IReadOnlyDictionary<,>))))
             {
                 return ClassType.Dictionary;
+            }
+
+            if (IsKeyValuePair(type))
+            {
+                return ClassType.KeyValuePair;
             }
 
             if (typeof(IEnumerable).IsAssignableFrom(type))
@@ -441,6 +504,99 @@ namespace System.Text.Json.Serialization
             }
 
             return ClassType.Object;
+        }
+
+        public const string ImmutableNamespaceName = "System.Collections.Immutable";
+
+        private const string EnumerableGenericInterfaceTypeName = "System.Collections.Generic.IEnumerable`1";
+        private const string EnumerableInterfaceTypeName = "System.Collections.IEnumerable";
+
+        private const string ListGenericInterfaceTypeName = "System.Collections.Generic.IList`1";
+        private const string ListInterfaceTypeName = "System.Collections.IList";
+
+        private const string CollectionGenericInterfaceTypeName = "System.Collections.Generic.ICollection`1";
+        private const string CollectionInterfaceTypeName = "System.Collections.ICollection";
+
+        private const string ReadOnlyListGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyList`1";
+
+        private const string ReadOnlyCollectionGenericInterfaceTypeName = "System.Collections.Generic.IReadOnlyCollection`1";
+
+        public const string HashtableTypeName = "System.Collections.Hashtable";
+        public const string SortedListTypeName = "System.Collections.SortedList";
+
+        public const string StackTypeName = "System.Collections.Stack";
+        public const string QueueTypeName = "System.Collections.Queue";
+        public const string ArrayListTypeName = "System.Collections.ArrayList";
+
+        public static bool IsDeserializedByAssigningFromList(Type type)
+        {
+            if (type.IsGenericType)
+            {
+                switch (type.GetGenericTypeDefinition().FullName)
+                {
+                    case EnumerableGenericInterfaceTypeName:
+                    case ListGenericInterfaceTypeName:
+                    case CollectionGenericInterfaceTypeName:
+                    case ReadOnlyListGenericInterfaceTypeName:
+                    case ReadOnlyCollectionGenericInterfaceTypeName:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+            else
+            {
+                switch (type.FullName)
+                {
+                    case EnumerableInterfaceTypeName:
+                    case ListInterfaceTypeName:
+                    case CollectionInterfaceTypeName:
+                        return true;
+                    default:
+                        return false;
+                }
+            }
+        }
+
+        public static bool IsSetInterface(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ISet<>);
+        }
+
+        public static bool HasConstructorThatTakesGenericIEnumerable(Type type)
+        {
+            Type elementType = GetElementType(type, parentType: null, memberInfo: null);
+            return type.GetConstructor(new Type[] { typeof(List<>).MakeGenericType(elementType) }) != null;
+        }
+
+        public static bool IsDeserializedByConstructingWithIList(Type type)
+        {
+            switch (type.FullName)
+            {
+                case StackTypeName:
+                case QueueTypeName:
+                case ArrayListTypeName:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsDeserializedByConstructingWithIDictionary(Type type)
+        {
+            switch (type.FullName)
+            {
+                case HashtableTypeName:
+                case SortedListTypeName:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        public static bool IsKeyValuePair(Type type)
+        {
+            return type.IsGenericType && type.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
         }
     }
 }

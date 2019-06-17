@@ -101,11 +101,6 @@
     "CommonTypes": []
   },
   {
-    "Name": "Microsoft.NETCore.Runtime.Native",
-    "Description": "Support libraries for the .NET Core runtime used by .NETNative.",
-    "CommonTypes": []
-  },
-  {
     "Name": "Microsoft.NETCore.Targets",
     "Description": "Provides supporting infrastructure for portable projects: support identifiers that define framework and runtime for support targets and packages that reference the minimum supported package versions when targeting these.",
     "CommonTypes": []
@@ -173,11 +168,6 @@
   {
     "Name": "Microsoft.TargetingPack.Private.CoreCLR",
     "Description": "Contains a private targeting pack which contains only the CoreCLR mscorlib reference assembly. Used for producing platform specific libraries such as facades.",
-    "CommonTypes": []
-  },
-  {
-    "Name": "Microsoft.TargetingPack.Private.NETNative",
-    "Description": "Contains a private targeting pack which contains only the System.Private.* libraries that ship with the .NET Native ILC toolchain. Used for producing platform specific libraries such as facades.",
     "CommonTypes": []
   },
   {

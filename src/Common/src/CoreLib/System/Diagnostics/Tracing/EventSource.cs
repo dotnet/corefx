@@ -3429,7 +3429,7 @@ namespace System.Diagnostics.Tracing
                             // overwrite inline message with the localized message
                             if (msg != null) eventAttribute.Message = msg;
 
-                            AddEventDescriptor(ref eventData!, eventName, eventAttribute, args, hasRelatedActivityID); // TODO-NULLABLE: Remove ! when nullable attributes are respected
+                            AddEventDescriptor(ref eventData, eventName, eventAttribute, args, hasRelatedActivityID);
                         }
                     }
                 }
@@ -3440,7 +3440,7 @@ namespace System.Diagnostics.Tracing
                 if (source != null)
                 {
                     Debug.Assert(eventData != null);
-                    TrimEventDescriptors(ref eventData!); // TODO-NULLABLE: Pass non-null string? to string ref (https://github.com/dotnet/roslyn/issues/34874)
+                    TrimEventDescriptors(ref eventData);
                     source.m_eventData = eventData;     // officially initialize it. We do this at most once (it is racy otherwise). 
 #if FEATURE_MANAGED_ETW_CHANNELS
                     source.m_channelData = manifest.GetChannelData();
@@ -3521,19 +3521,19 @@ namespace System.Diagnostics.Tracing
             if (!reflectionOnly && (staticFieldType == typeof(EventOpcode)) || AttributeTypeNamesMatch(staticFieldType, typeof(EventOpcode)))
             {
                 if (providerEnumKind != "Opcodes") goto Error;
-                int value = (int)staticField.GetRawConstantValue();
+                int value = (int)staticField.GetRawConstantValue()!;
                 manifest.AddOpcode(staticField.Name, value);
             }
             else if (!reflectionOnly && (staticFieldType == typeof(EventTask)) || AttributeTypeNamesMatch(staticFieldType, typeof(EventTask)))
             {
                 if (providerEnumKind != "Tasks") goto Error;
-                int value = (int)staticField.GetRawConstantValue();
+                int value = (int)staticField.GetRawConstantValue()!;
                 manifest.AddTask(staticField.Name, value);
             }
             else if (!reflectionOnly && (staticFieldType == typeof(EventKeywords)) || AttributeTypeNamesMatch(staticFieldType, typeof(EventKeywords)))
             {
                 if (providerEnumKind != "Keywords") goto Error;
-                ulong value = unchecked((ulong)(long)staticField.GetRawConstantValue());
+                ulong value = unchecked((ulong)(long)staticField.GetRawConstantValue()!);
                 manifest.AddKeyword(staticField.Name, value);
             }
 #if FEATURE_MANAGED_ETW_CHANNELS && FEATURE_ADVANCED_MANAGED_ETW_CHANNELS
@@ -3730,7 +3730,7 @@ namespace System.Diagnostics.Tracing
 #if ES_BUILD_STANDALONE
             (new ReflectionPermission(ReflectionPermissionFlag.MemberAccess)).Assert();
 #endif
-            byte[] instrs = method.GetMethodBody().GetILAsByteArray()!;
+            byte[] instrs = method.GetMethodBody()!.GetILAsByteArray()!;
             int retVal = -1;
             for (int idx = 0; idx < instrs.Length;)
             {
@@ -5828,7 +5828,7 @@ namespace System.Diagnostics.Tracing
                     bool anyValuesWritten = false;
                     foreach (FieldInfo staticField in staticFields)
                     {
-                        object constantValObj = staticField.GetRawConstantValue();
+                        object? constantValObj = staticField.GetRawConstantValue();
 
                         if (constantValObj != null)
                         {
