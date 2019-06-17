@@ -23,6 +23,12 @@ namespace System.Text.Json
             return IsInRangeInclusive(value ^ 0xD800U, 0x800U, 0x10FFFFU);
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsCommentHandlingSupported(JsonCommentHandling value, JsonCommentHandling upperBound)
+        {
+            return IsInRangeInclusive((byte)value, (byte)JsonCommentHandling.Disallow, (byte)upperBound);
+        }
+
         /// <summary>
         /// Returns <see langword="true"/> if <paramref name="value"/> is between
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.

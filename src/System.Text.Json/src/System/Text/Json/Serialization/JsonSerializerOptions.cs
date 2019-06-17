@@ -226,7 +226,7 @@ namespace System.Text.Json
             set
             {
                 VerifyMutable();
-                if (value == JsonCommentHandling.Allow)
+                if (!JsonHelpers.IsCommentHandlingSupported(value, JsonCommentHandling.Skip))
                 {
                     throw new ArgumentException(SR.JsonSerializerDoesNotSupportComments, nameof(value));
                 }

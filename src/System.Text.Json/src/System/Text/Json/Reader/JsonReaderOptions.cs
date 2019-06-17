@@ -12,17 +12,34 @@ namespace System.Text.Json
         internal const int DefaultMaxDepth = 64;
 
         private int _maxDepth;
+        private JsonCommentHandling _commentHandling;
 
         /// <summary>
         /// Defines how the <see cref="Utf8JsonReader"/> should handle comments when reading through the JSON.
         /// By default <exception cref="JsonException"/> is thrown if a comment is encountered.
         /// </summary>
-        public JsonCommentHandling CommentHandling { get; set; }
+        /// <exception cref="ArgumentException">
+        /// Thrown when the comment handling enum is set to a value that is not supported (i.e. not within the <see cref="JsonCommentHandling"/> enum range).
+        /// </exception>
+        public JsonCommentHandling CommentHandling
+        {
+            get => _commentHandling;
+            set
+            {
+                if (!JsonHelpers.IsCommentHandlingSupported(value, JsonCommentHandling.Allow))
+                    throw ThrowHelper.GetArgumentException_CommentEnumMustBeInRange();
+
+                _commentHandling = value;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the maximum depth allowed when reading JSON, with the default (i.e. 0) indicating a max depth of 64.
         /// Reading past this depth will throw a <exception cref="JsonException"/>.
         /// </summary>
+        /// <exception cref="ArgumentException">
+        /// Thrown when the max depth is set to a value that is not supported (i.e less than zero).
+        /// </exception>
         public int MaxDepth
         {
             get => _maxDepth;

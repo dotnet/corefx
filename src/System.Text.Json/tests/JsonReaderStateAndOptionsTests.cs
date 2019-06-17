@@ -67,6 +67,30 @@ namespace System.Text.Json.Tests
 
         [Theory]
         [InlineData(-1)]
+        [InlineData(3)]
+        [InlineData(byte.MaxValue)]
+        [InlineData(byte.MaxValue + 4)] // Other values, like byte.MaxValue + 1 overflows to 0 (i.e. JsonCommentHandling.Disallow), which is valid.
+        public static void TestCommentHandlingInvalid(int enumValue)
+        {
+            try
+            {
+                var options = new JsonReaderOptions { CommentHandling = (JsonCommentHandling)enumValue };
+                Assert.True(false, "Expected ArgumentException was not thrown. CommentHandling enum must be valid.");
+            }
+            catch (ArgumentException)
+            { }
+
+            try
+            {
+                var state = new JsonReaderState(new JsonReaderOptions { CommentHandling = (JsonCommentHandling)enumValue });
+                Assert.True(false, "Expected ArgumentException was not thrown. CommentHandling enum must be valid.");
+            }
+            catch (ArgumentException)
+            { }
+        }
+
+        [Theory]
+        [InlineData(-1)]
         public static void TestDepthInvalid(int depth)
         {
             try

@@ -14,6 +14,11 @@ namespace System.Text.Json
             return GetArgumentException(SR.MaxDepthMustBePositive);
         }
 
+        public static ArgumentException GetArgumentException_CommentEnumMustBeInRange()
+        {
+            return GetArgumentException(SR.CommentHandlingMustBeValid);
+        }
+
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static ArgumentException GetArgumentException(string message)
         {
