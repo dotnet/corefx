@@ -73,7 +73,7 @@
       },
       "inputs": {
         "filename": "rm",
-        "arguments": "-rf $(PB_GitDirectory)",
+        "arguments": "-rf \"$(PB_GitDirectory)\"",
         "workingFolder": "",
         "failOnStandardError": "false"
       }
