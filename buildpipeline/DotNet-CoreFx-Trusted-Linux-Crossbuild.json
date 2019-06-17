@@ -62,6 +62,25 @@
     {
       "environment": {},
       "enabled": true,
+      "continueOnError": true,
+      "alwaysRun": false,
+      "displayName": "Delete files from $(PB_GitDirectory) again",
+      "timeoutInMinutes": 0,
+      "task": {
+        "id": "d9bafed4-0b18-4f58-968d-86655b4d2ce9",
+        "versionSpec": "1.*",
+        "definitionType": "task"
+      },
+      "inputs": {
+        "filename": "rm",
+        "arguments": "-rf $(PB_GitDirectory)",
+        "workingFolder": "",
+        "failOnStandardError": "false"
+      }
+    },
+    {
+      "environment": {},
+      "enabled": true,
       "continueOnError": false,
       "alwaysRun": false,
       "displayName": "Local git clone",
