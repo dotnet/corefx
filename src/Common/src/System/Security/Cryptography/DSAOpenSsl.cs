@@ -328,7 +328,7 @@ namespace System.Security.Cryptography
 
             private void SetKey(SafeDsaHandle newKey)
             {
-                ThrowIfDisposed();
+                // Do not call ThrowIfDisposed here, as it breaks the SafeEvpPKey ctor
 
                 // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
                 // with the already loaded key.
