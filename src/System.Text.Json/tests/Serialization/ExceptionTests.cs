@@ -35,7 +35,7 @@ namespace System.Text.Json.Serialization.Tests
             try
             {
                 JsonSerializer.Parse<IDictionary<string, string>>(@"{""Key"":1, ""Key"":2}");
-                Assert.True(false, "Expected JsonException was not thrown.");
+                Assert.True(false, "We follow 'Last value wins' approach for duplicate keys.");
             }
             catch (JsonException e)
             {
