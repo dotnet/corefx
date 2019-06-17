@@ -140,22 +140,6 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
-        public static void DuplicateKeysFail()
-        {
-            // Non-generic IDictionary case.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<IDictionary>(
-                @"{""Hello"":""World"", ""Hello"":""World""}"));
-
-            // Strongly-typed IDictionary<,> case.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, string>>(
-                @"{""Hello"":""World"", ""Hello"":""World""}"));
-
-            // Weakly-typed IDictionary case.
-            Assert.Throws<JsonException>(() => JsonSerializer.Parse<Dictionary<string, object>>(
-                @"{""Hello"":null, ""Hello"":null}"));
-        }
-
-        [Fact]
         public static void DictionaryOfObject()
         {
             {
