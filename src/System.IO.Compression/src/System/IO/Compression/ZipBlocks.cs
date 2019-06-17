@@ -466,17 +466,24 @@ namespace System.IO.Compression
                     zip64 = Zip64ExtraField.GetJustZip64Block(new SubReadStream(reader.BaseStream, reader.BaseStream.Position, extraFieldLength), isUncompressedSizeInZip64, isCompressedSizeInZip64, false, false);
 
                     if (zip64.UncompressedSize != null)
+                    {
                         uncompressedSize = zip64.UncompressedSize.Value;
+                    }
+
                     if (zip64.CompressedSize != null)
+                    {
                         compressedSize = zip64.CompressedSize.Value;
+                    }
                 }
 
                 reader.BaseStream.AdvanceToPosition(endExtraFields);
             }
             else
-            {            
+            {
                 if (reader.BaseStream.Length < reader.BaseStream.Position + extraFieldLength + entry.CompressedLength + 4)
+                {
                     return false;
+                }
 
                 reader.BaseStream.Seek(extraFieldLength + entry.CompressedLength, SeekOrigin.Current); // seek to end of compressed file from which Data descriptor starts             
                 uint dataDescriptorSignature = reader.ReadUInt32();
@@ -492,7 +499,9 @@ namespace System.IO.Compression
                 seekSize += (is64bit ? 8 : 4) * 2;   // if Zip64 read by 8 bytes else 4 bytes 2 times (compressed and uncompressed size)
 
                 if (reader.BaseStream.Length < reader.BaseStream.Position + seekSize)
+                {
                     return false;
+                }
 
                 // dataDescriptorSignature is optional, if it was the DataDescriptorSignature we need to skip CRC 4 bytes else we can assume CRC is alreadyskipped
                 if (wasDataDescriptorSignatureRead)
@@ -510,11 +519,16 @@ namespace System.IO.Compression
                 }
                 reader.BaseStream.Seek( -seekSize - entry.CompressedLength - 4,  SeekOrigin.Current); // Seek back to the beginning of compressed stream
             }
+
             if (entry.CompressedLength != compressedSize)
+            {
                 return false;
+            }
 
             if (entry.Length != uncompressedSize)
+            {
                 return false;
+            }
 
             return true;
         }

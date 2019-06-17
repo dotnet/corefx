@@ -65,7 +65,7 @@ namespace System.IO.Compression
         private readonly bool _deflate64;
         private HuffmanTree _codeLengthTree;
         private long _uncompressedSize = -1;
-        private long _currentInflatedCount = 0;
+        private long _currentInflatedCount;
 
         private IFileFormatReader _formatReader; // class to decode header and footer (e.g. gzip)
 
@@ -109,6 +109,8 @@ namespace System.IO.Compression
             do
             {
                 int copied = _output.CopyTo(bytes, offset, length);
+                copied = RestrictStreamWithUnCompressedSize(copied);
+
                 if (copied > 0)
                 {
                     if (_hasFormatReader)
@@ -138,7 +140,7 @@ namespace System.IO.Compression
                 }
             }
             
-            return RestrictStreamWithUnCompressedSize(count);
+            return count;
         }
 
         private int RestrictStreamWithUnCompressedSize(int bytesRead)

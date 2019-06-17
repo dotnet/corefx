@@ -21,8 +21,8 @@ namespace System.IO.Compression
         private int _windowBits;                            // The WindowBits parameter passed to Inflater construction
         private ZLibNative.ZLibStreamHandle _zlibStream;    // The handle to the primary underlying zlib stream
         private GCHandle _inputBufferHandle;                // The handle to the buffer that provides input to _zlibStream
-        private long _uncompressedSize;
-        private long _currentInflatedCount = 0;
+        private long _uncompressedSize = -1;
+        private long _currentInflatedCount;
 
         private object SyncLock => this;                    // Used to make writing to unmanaged structures atomic
 

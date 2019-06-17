@@ -190,7 +190,7 @@ namespace System.IO.Compression.Tests
                             ms.Write(buffer, 0, read);
                         }
                         Assert.True(e.Length == ms.Length);     // Only allow to decompress up to uncompressed size
-                        Assert.Equal(0, source.Read(buffer, 0, buffer.Length)); // shouldn't be able read more     
+                        Assert.Equal(0, source.Read(buffer, 0, bufferSize)); // shouldn't be able read more 
                         ms.Seek(0, SeekOrigin.Begin);
                         while ((read = ms.Read(buffer, 0, buffer.Length)) != 0)
                         { // No need to do anything, just making sure all bytes readable from output stream
@@ -251,7 +251,7 @@ namespace System.IO.Compression.Tests
                 {
                     using (Stream source = e.Open())
                     {
-                        byte[] buffer = new byte[10000];
+                        byte[] buffer = new byte[bufferSize];
                         int read;
                         while ((read = source.Read(buffer, 0, buffer.Length)) != 0)
                         {
