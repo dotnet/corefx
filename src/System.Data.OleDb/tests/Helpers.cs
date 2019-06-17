@@ -24,21 +24,16 @@ namespace System.Data.OleDb.Tests
             private Nested() { }
             static Nested()
             {
-                bool jetDriverInstalled = false;
                 // Get the sources rowset for the SQLOLEDB enumerator
                 DataTable table = (new OleDbEnumerator()).GetElements();
                 DataColumn providersRegistered = table.Columns["SOURCES_NAME"];
                 List<object> providerNames = new List<object>();
                 foreach (DataRow row in table.Rows)
                 {
-                    var curProvider = (string)row[providersRegistered];
-                    if (curProvider.Contains("JET"))
-                        jetDriverInstalled = true;
-                    providerNames.Add(curProvider);
+                    providerNames.Add((string)row[providersRegistered]);
                 }
-                // skip if x86 or if both drivers available 
-                IsAvailable = !PlatformDetection.Is32BitProcess &&
-                        !(jetDriverInstalled && providerNames.Contains(ExpectedProviderName));
+                // skip if x86 or if the expected driver not available 
+                IsAvailable = !PlatformDetection.Is32BitProcess && providerNames.Contains(ExpectedProviderName);
                 ProviderName = IsAvailable ? ExpectedProviderName : null;
             }
         }
