@@ -33,7 +33,7 @@ namespace System.Buffers.Tests
         public void WritingToEmptyBufferFailsWithException()
         {
             IBufferWriter<byte> bufferWriter = new EmptyBufferWriter();
-            Assert.Throws<ArgumentOutOfRangeException>(() => bufferWriter.Write(new byte[1]));
+            Assert.Throws<ArgumentOutOfRangeException>(paramName: "writer", testCode: () => bufferWriter.Write(new byte[1]));
         }
 
         private class EmptyBufferWriter : IBufferWriter<byte>
