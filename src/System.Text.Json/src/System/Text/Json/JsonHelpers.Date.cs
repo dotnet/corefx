@@ -57,6 +57,9 @@ namespace System.Text.Json
         // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45-0100)
         // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45+01)
         // YYYY-MM-DDThh:mm:ss.sTZD (eg 1997-07-16T19:20:30.45-01)
+        // ---------------------------------
+        // The - and / values may be used interchangeably as input here eg:
+        // YYYY/MM/DD (eg 1997/07/16)
         private static bool TryParseDateTimeOffset(ReadOnlySpan<byte> source, out DateTimeOffset value, out int bytesConsumed, out DateTimeKind kind)
         {
             // Source does not have enough characters for YYYY-MM-DD
