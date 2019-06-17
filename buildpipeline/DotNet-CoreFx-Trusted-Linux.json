@@ -56,7 +56,7 @@
       },
       "inputs": {
         "SourceFolder": "$(PB_GitDirectory)",
-        "Contents": "**\n.gitignore\n.editorconfig\n.gitattributes\n.gitmirrorall\n.git/**\n.git"
+        "Contents": "**\n.gitignore\n.editorconfig\n.gitattributes\n.gitmirrorall\n.git/**\n.git\n.azure-ci.yml"
       }
     },
     {
