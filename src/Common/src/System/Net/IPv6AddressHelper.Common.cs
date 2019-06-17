@@ -2,6 +2,7 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+#nullable enable
 using System.Diagnostics;
 
 namespace System
@@ -156,11 +157,6 @@ namespace System
                                 {
                                     goto case '/';
                                 }
-                                else if (name[i] < '0' || name[i] > '9')
-                                {
-                                    // scope ID must only contain digits
-                                    return false;
-                                }
                             }
                             break;
                         case ']':
@@ -291,7 +287,7 @@ namespace System
         //  Nothing
         //
 
-        internal static void Parse(ReadOnlySpan<char> address, Span<ushort> numbers, int start, ref string scopeId)
+        internal static void Parse(ReadOnlySpan<char> address, Span<ushort> numbers, int start, ref string? scopeId)
         {
             int number = 0;
             int index = 0;

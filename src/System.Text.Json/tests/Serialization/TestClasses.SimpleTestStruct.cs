@@ -56,6 +56,7 @@ namespace System.Text.Json.Serialization.Tests
         public ICollection<string> MyStringICollectionT { get; set; }
         public IReadOnlyCollection<string> MyStringIReadOnlyCollectionT { get; set; }
         public IReadOnlyList<string> MyStringIReadOnlyListT { get; set; }
+        public ISet<string> MyStringISetT { get; set; }
 
         public static readonly string s_json = $"{{{s_partialJsonProperties},{s_partialJsonArrays}}}";
         public static readonly string s_json_flipped = $"{{{s_partialJsonArrays},{s_partialJsonProperties}}}";
@@ -107,7 +108,8 @@ namespace System.Text.Json.Serialization.Tests
                 @"""MyStringIListT"" : [""Hello""]," +
                 @"""MyStringICollectionT"" : [""Hello""]," +
                 @"""MyStringIReadOnlyCollectionT"" : [""Hello""]," +
-                @"""MyStringIReadOnlyListT"" : [""Hello""]";
+                @"""MyStringIReadOnlyListT"" : [""Hello""]," +
+                @"""MyStringISetT"" : [""Hello""]";
 
         public static readonly byte[] s_data = Encoding.UTF8.GetBytes(s_json);
 
@@ -160,6 +162,7 @@ namespace System.Text.Json.Serialization.Tests
             MyStringICollectionT = new string[] { "Hello" };
             MyStringIReadOnlyCollectionT = new string[] { "Hello" };
             MyStringIReadOnlyListT = new string[] { "Hello" };
+            MyStringISetT = new HashSet<string> { "Hello" };
         }
 
         public void Verify()
@@ -212,6 +215,7 @@ namespace System.Text.Json.Serialization.Tests
             Assert.Equal("Hello", MyStringICollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyCollectionT.First());
             Assert.Equal("Hello", MyStringIReadOnlyListT[0]);
+            Assert.Equal("Hello", MyStringISetT.First());
         }
     }
 }

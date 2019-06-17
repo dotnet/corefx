@@ -11,6 +11,7 @@
     <Compile Include="BitStackTests.cs" />
     <Compile Include="BufferFactory.cs" />
     <Compile Include="BufferSegment.cs" />
+    <Compile Include="DebuggerTests.cs" />
     <Compile Include="FixedSizedBufferWriter.cs" />
     <Compile Include="InvalidBufferWriter.cs" />
     <Compile Include="JsonDateTimeTestData.cs" />
@@ -23,6 +24,12 @@
     <Compile Include="JsonReaderStateAndOptionsTests.cs" />
     <Compile Include="JsonTestHelper.cs" />
     <Compile Include="JsonWriterOptionsTests.cs" />
+    <Compile Include="NewtonsoftTests\CamelCaseTests.cs" />
+    <Compile Include="NewtonsoftTests\CustomObjectConverterTests.cs" />
+    <Compile Include="NewtonsoftTests\DateTimeConverterTests.cs" />
+    <Compile Include="NewtonsoftTests\EnumConverterTests.cs" />
+    <Compile Include="NewtonsoftTests\ImmutableCollectionsTests.cs" />
+    <Compile Include="NewtonsoftTests\JsonSerializerTests.cs" />
     <Compile Include="Serialization\Array.ReadTests.cs" />
     <Compile Include="Serialization\Array.WriteTests.cs" />
     <Compile Include="Serialization\CacheTests.cs" />
@@ -46,6 +53,7 @@
     <Compile Include="Serialization\Stream.ReadTests.cs" />
     <Compile Include="Serialization\Stream.WriteTests.cs" />
     <Compile Include="Serialization\TestClasses.cs" />
+    <Compile Include="Serialization\TestClasses.Dictionary.cs" />
     <Compile Include="Serialization\TestClasses.Polymorphic.cs" />
     <Compile Include="Serialization\TestClasses.SimpleTestClass.cs" />
     <Compile Include="Serialization\TestClasses.SimpleTestClassWithNullables.cs" />
@@ -57,9 +65,11 @@
     <Compile Include="Serialization\Value.ReadTests.cs" />
     <Compile Include="Serialization\Value.ReadTests.GenericCollections.cs" />
     <Compile Include="Serialization\Value.ReadTests.ImmutableCollections.cs" />
+    <Compile Include="Serialization\Value.ReadTests.NonGenericCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.cs" />
     <Compile Include="Serialization\Value.WriteTests.GenericCollections.cs" />
     <Compile Include="Serialization\Value.WriteTests.ImmutableCollections.cs" />
+    <Compile Include="Serialization\Value.WriteTests.NonGenericCollections.cs" />
     <Compile Include="TestCaseType.cs" />
     <Compile Include="TestClasses.ClassWithComplexObjects.cs" />
     <Compile Include="Utf8JsonReaderTests.cs" />
@@ -77,8 +87,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <ReferenceFromRuntime Include="Newtonsoft.Json" />
-    <!-- Copy external dependency into the test output directory. -->
-    <SupplementalTestData Include="$(RuntimePath)Newtonsoft.Json.dll" />
+    <PackageReference Include="Newtonsoft.Json" Version="$(NewtonsoftJsonPackageVersion)" />
   </ItemGroup>
 </Project>

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <ProjectGuid>{C85CF035-7804-41FF-9557-48B7C948B58D}</ProjectGuid>
     <DefineConstants Condition="'$(TargetsWindows)'=='true'">$(DefineConstants);TargetsWindows</DefineConstants>
@@ -80,6 +80,9 @@
     <Compile Include="$(CommonTestPath)\System\Threading\TrackingSynchronizationContext.cs">
       <Link>Common\System\Threading\TrackingSynchronizationContext.cs</Link>
     </Compile>
+    <Compile Include="$(CommonTestPath)\System\Threading\Tasks\GetStateMachineData.cs">
+      <Link>Common\System\Threading\Tasks\GetStateMachineData.cs</Link>
+    </Compile>
     <Compile Include="$(CommonTestPath)\System\Threading\Tasks\TaskTimeoutExtensions.cs">
       <Link>Common\System\Threading\Tasks\TaskTimeoutExtensions.cs</Link>
     </Compile>
@@ -149,6 +152,7 @@
     <Compile Include="HttpClientHandlerTest.Http1.cs" />
     <Compile Include="HttpClientHandlerTest.Http2.cs" />
     <Compile Include="CustomContent.netcore.cs" />
+    <Compile Include="HPackTest.cs" />
     <Compile Include="$(CommonTestPath)\System\Net\Http\Http2Frames.cs">
       <Link>Common\System\Net\Http\Http2Frames.cs</Link>
     </Compile>
@@ -168,7 +172,7 @@
     <Compile Include="XUnitAssemblyAttributes.cs" />
   </ItemGroup>
   <ItemGroup>
-    <SupplementalTestData Include="$(NuGetPackageRoot)system.net.testdata\1.0.2\content\**\*.*" DestinationDir="TestData" />
+    <PackageReference Include="System.Net.TestData" Version="$(SystemNetTestDataPackageVersion)" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetsOSX)'=='true'">
     <TestCommandLines Include="ulimit -Sn 4096" />
