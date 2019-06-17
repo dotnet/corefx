@@ -29,31 +29,33 @@ namespace System.Buffers.Tests
             Assert.Equal("Hello World!", bufferWriter.ToString());
         }
 
-        [Fact]
-        public void WritingToEmptyBufferFailsWithException()
+        [Theory]
+        [InlineData(1, 0)]
+        [InlineData(10, 9)]
+        public void WritingToTooSmallSingleSegmentBufferFailsWithException(int inputSize, int destinationSize)
         {
-            IBufferWriter<byte> emptyBufferWriter = new MultiSegmentArrayBufferWriter<byte>(
-                new byte[][] { Array.Empty<byte>() }
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { new byte[destinationSize] }
             );
 
-            Assert.Throws<ArgumentOutOfRangeException>(paramName: "writer", testCode: () => emptyBufferWriter.Write(new byte[1]));
+            Assert.Throws<ArgumentOutOfRangeException>(paramName: "writer", testCode: () => bufferWriter.Write(new byte[inputSize]));
         }
 
-        [Fact]
-        public void WritingToMultiSegmentBufferWithEmptySegmentFailsWithException()
+        [Theory]
+        [InlineData(10, 2, 2)]
+        [InlineData(10, 9, 0)]
+        public void WritingToTooSmallMultiSegmentBufferFailsWithException(int inputSize, int firstSegmentSize, int secondSegmentSize)
         {
-            const int nonEmptySegmentSize = 10;
-
-            IBufferWriter<byte> multiSegmentBufferWriterWithEmptySegment = new MultiSegmentArrayBufferWriter<byte>(
+            IBufferWriter<byte> bufferWriter = new MultiSegmentArrayBufferWriter<byte>(
                 new byte[][] {
-                    new byte[nonEmptySegmentSize],
-                    Array.Empty<byte>()
+                    new byte[firstSegmentSize],
+                    new byte[secondSegmentSize]
                 }
             );
 
             Assert.Throws<ArgumentOutOfRangeException>(
                 paramName: "writer", 
-                testCode: () => multiSegmentBufferWriterWithEmptySegment.Write(new byte[nonEmptySegmentSize + 1]));
+                testCode: () => bufferWriter.Write(new byte[inputSize]));
         }
 
         private class MultiSegmentArrayBufferWriter<T> : IBufferWriter<T>
@@ -71,9 +73,9 @@ namespace System.Buffers.Tests
                 _segmentIndex++;
             }
 
-            public Memory<T> GetMemory(int sizeHint = 0) => _segments[_segmentIndex];
+            public Memory<T> GetMemory(int sizeHint = 0) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Memory<T>.Empty;
 
-            public Span<T> GetSpan(int sizeHint) => _segments[_segmentIndex];
+            public Span<T> GetSpan(int sizeHint) => _segmentIndex < _segments.Length ? _segments[_segmentIndex] : Span<T>.Empty;
         }
 
         private class TestBufferWriterSingleSegment : IBufferWriter<byte>
