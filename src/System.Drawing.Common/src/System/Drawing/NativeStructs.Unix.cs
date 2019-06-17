@@ -54,6 +54,7 @@ namespace System.Drawing
         internal string lfFaceName;
     }
 
+    [StructLayout(LayoutKind.Sequential)]
     internal struct GdipImageCodecInfo  /*Size 76 bytes*/
     {
         internal Guid Clsid;
