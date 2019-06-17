@@ -84,7 +84,7 @@ namespace System
             {
                 if (args[i] != null)
                 {
-                    argTypes[i] = args[i]!.GetType(); //TODO-NULLABLE https://github.com/dotnet/csharplang/issues/2388
+                    argTypes[i] = args[i]!.GetType();
                 }
             }
 #endregion
@@ -106,7 +106,7 @@ namespace System
                     continue;
 
                 // Validate the parameters.
-                ParameterInfo[] par = candidates[i]!.GetParametersNoCopy(); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                ParameterInfo[] par = candidates[i]!.GetParametersNoCopy(); // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
 
 #region Match method by parameter count
                 if (par.Length == 0)
@@ -114,7 +114,7 @@ namespace System
 #region No formal parameters
                     if (args.Length != 0)
                     {
-                        if ((candidates[i]!.CallingConvention & CallingConventions.VarArgs) == 0) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34644
+                        if ((candidates[i]!.CallingConvention & CallingConventions.VarArgs) == 0) // TODO-NULLABLE: Indexer nullability tracked (https://github.com/dotnet/roslyn/issues/34644)
                             continue;
                     }
 
@@ -737,7 +737,7 @@ namespace System
             throw new NotSupportedException(SR.NotSupported_ChangeType);
         }
 
-        public sealed override void ReorderArgumentArray(ref object[] args, object state)
+        public sealed override void ReorderArgumentArray(ref object?[] args, object state)
         {
             BinderState binderState = (BinderState)state;
             ReorderParams(binderState._argsMap, args);
@@ -745,7 +745,9 @@ namespace System
             {
                 int paramArrayPos = args.Length - 1;
                 if (args.Length == binderState._originalSize)
-                    args[paramArrayPos] = ((object[])args[paramArrayPos])[0];
+                {
+                    args[paramArrayPos] = ((object[])args[paramArrayPos]!)[0];
+                }
                 else
                 {
                     // must be args.Length < state.originalSize
@@ -753,7 +755,7 @@ namespace System
                     Array.Copy(args, 0, newArgs, 0, paramArrayPos);
                     for (int i = paramArrayPos, j = 0; i < newArgs.Length; i++, j++)
                     {
-                        newArgs[i] = ((object[])args[paramArrayPos])[j];
+                        newArgs[i] = ((object[])args[paramArrayPos]!)[j];
                     }
                     args = newArgs;
                 }

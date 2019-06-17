@@ -17,14 +17,14 @@ namespace System
         private static Dictionary<string, bool>? s_switches;
         private static string? s_defaultBaseDirectory;
 
-        public static string? BaseDirectory
+        public static string BaseDirectory
         {
             get
             {
                 // The value of APP_CONTEXT_BASE_DIRECTORY key has to be a string and it is not allowed to be any other type. 
                 // Otherwise the caller will get invalid cast exception
                 return (string?)GetData("APP_CONTEXT_BASE_DIRECTORY") ??
-                    (s_defaultBaseDirectory ?? (s_defaultBaseDirectory = GetBaseDirectoryCore()));
+                    s_defaultBaseDirectory ?? (s_defaultBaseDirectory = GetBaseDirectoryCore());
             }
         }
 
@@ -74,7 +74,7 @@ namespace System
         {
             AssemblyLoadContext.OnProcessExit();
 
-            ProcessExit?.Invoke(null /* AppDomain */, EventArgs.Empty);
+            ProcessExit?.Invoke(AppDomain.CurrentDomain, EventArgs.Empty);
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace System
                 Interlocked.CompareExchange(ref s_switches, new Dictionary<string, bool>(), null);
             }
 
-            lock (s_switches!) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            lock (s_switches!) // TODO-NULLABLE: Remove ! when compiler specially-recognizes CompareExchange for nullability
             {
                 s_switches[switchName] = isEnabled;
             }

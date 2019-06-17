@@ -2,13 +2,13 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
         private static bool HandleValue(JsonTokenType tokenType, JsonSerializerOptions options, ref Utf8JsonReader reader, ref ReadStack state)
         {
-            if (state.Current.Skip())
+            if (state.Current.SkipProperty)
             {
                 return false;
             }
@@ -25,7 +25,7 @@ namespace System.Text.Json.Serialization
 
             bool lastCall = (!state.Current.IsProcessingEnumerableOrDictionary && state.Current.ReturnValue == null);
 
-            jsonPropertyInfo.Read(tokenType, options, ref state, ref reader);
+            jsonPropertyInfo.Read(tokenType, ref state, ref reader);
             return lastCall;
         }
     }

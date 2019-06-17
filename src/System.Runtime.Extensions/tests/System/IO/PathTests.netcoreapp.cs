@@ -237,7 +237,7 @@ namespace System.IO.Tests
         };
 
         [Theory,
-    MemberData(nameof(GetFullPathBasePath_ArgumentException))]
+            MemberData(nameof(GetFullPathBasePath_ArgumentException))]
         public static void GetFullPath_BasePath_Input(string path, string basePath, string paramName)
         {
             Assert.Throws<ArgumentException>(paramName, () => Path.GetFullPath(path, basePath));

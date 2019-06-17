@@ -84,6 +84,7 @@ namespace System.IO
             }
         }
 
+        [DoesNotReturn]
         private static void ThrowAsyncIOInProgress() =>
             throw new InvalidOperationException(SR.InvalidOperation_AsyncIOInProgress);
 
@@ -1237,7 +1238,7 @@ namespace System.IO
             return new ValueTask<int>(t);
         }
 
-        private async Task<int> ReadBufferAsync()
+        private async ValueTask<int> ReadBufferAsync()
         {
             _charLen = 0;
             _charPos = 0;

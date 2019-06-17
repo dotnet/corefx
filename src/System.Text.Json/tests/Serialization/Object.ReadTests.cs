@@ -2,12 +2,20 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System.Collections.Generic;
 using Xunit;
 
 namespace System.Text.Json.Serialization.Tests
 {
     public static partial class ObjectTests
     {
+        [Fact]
+        public static void ReadSimpleStruct()
+        {
+            SimpleTestStruct obj = JsonSerializer.Parse<SimpleTestStruct>(SimpleTestStruct.s_json);
+            obj.Verify();
+        }
+
         [Fact]
         public static void ReadSimpleClass()
         {
@@ -29,21 +37,11 @@ namespace System.Text.Json.Serialization.Tests
         [InlineData("/* Multi\nLine\nComment */ ", "\t// trailing comment\n ")]
         public static void ReadSimpleClassIgnoresLeadingOrTrailingTrivia(string leadingTrivia, string trailingTrivia)
         {
-            {
-                var options = new JsonSerializerOptions();
-                options.ReadCommentHandling = JsonCommentHandling.Skip;
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
 
-                SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(leadingTrivia + SimpleTestClass.s_json + trailingTrivia, options);
-                obj.Verify();
-            }
-
-            {
-                var options = new JsonSerializerOptions();
-                options.ReadCommentHandling = JsonCommentHandling.Allow;
-
-                SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(leadingTrivia + SimpleTestClass.s_json + trailingTrivia, options);
-                obj.Verify();
-            }
+            SimpleTestClass obj = JsonSerializer.Parse<SimpleTestClass>(leadingTrivia + SimpleTestClass.s_json + trailingTrivia, options);
+            obj.Verify();
         }
 
         [Fact]
@@ -125,13 +123,16 @@ namespace System.Text.Json.Serialization.Tests
 
             ClassWithComplexObjects obj = JsonSerializer.Parse<ClassWithComplexObjects>(leadingTrivia + ClassWithComplexObjects.s_json + trailingTrivia, options);
             obj.Verify();
+        }
 
-            // Throws due to JsonDocument.TryParse not supporting Allow
-            //var options = new JsonSerializerOptions();
-            //options.ReadCommentHandling = JsonCommentHandling.Allow;
-            //
-            //obj = JsonSerializer.Parse<ClassWithComplexObjects>(leadingTrivia + ClassWithComplexObjects.s_json + trailingTrivia, options);
-            //obj.Verify();
+        [Fact]
+        public static void ReadClassWithNestedComments()
+        {
+            var options = new JsonSerializerOptions();
+            options.ReadCommentHandling = JsonCommentHandling.Skip;
+
+            TestClassWithNestedObjectCommentsOuter obj = JsonSerializer.Parse<TestClassWithNestedObjectCommentsOuter>(TestClassWithNestedObjectCommentsOuter.s_data, options);
+            obj.Verify();
         }
 
         [Fact]
@@ -161,6 +162,25 @@ namespace System.Text.Json.Serialization.Tests
         }
 
         [Fact]
+        public static void ReadObjectFail_ReferenceTypeMissingParameterlessConstructor()
+        {
+            Assert.Throws<NotSupportedException>(() => JsonSerializer.Parse<PublicParameterizedConstructorTestClass>(@"{""Name"":""Name!""}"));
+        }
+
+        class PublicParameterizedConstructorTestClass
+        {
+            private readonly string _name;
+            public PublicParameterizedConstructorTestClass(string name)
+            {
+                _name = name;
+            }
+            public string Name
+            {
+                get { return _name; }
+            }
+        }
+
+        [Fact]
         public static void ParseUntyped()
         {
             // Not supported until we are able to deserialize into JsonElement.
@@ -173,6 +193,51 @@ namespace System.Text.Json.Serialization.Tests
         {
             TestClassWithStringToPrimitiveDictionary obj = JsonSerializer.Parse<TestClassWithStringToPrimitiveDictionary>(TestClassWithStringToPrimitiveDictionary.s_data);
             obj.Verify();
+        }
+
+        public class TestClassWithBadData
+        {
+            public TestChildClassWithBadData[] Children { get; set; }
+        }
+
+        public class TestChildClassWithBadData
+        {
+            public int MyProperty { get; set; }
+        }
+
+        [Fact]
+        public static void ReadConversionFails()
+        {
+            byte[] data = Encoding.UTF8.GetBytes(
+                @"{" +
+                    @"""Children"":[" +
+                        @"{""MyProperty"":""StringButShouldBeInt""}" +
+                    @"]" +
+                @"}");
+
+            bool exceptionThrown = false;
+
+            try
+            {
+                JsonSerializer.Parse<TestClassWithBadData>(data);
+            }
+            catch (JsonException exception)
+            {
+                exceptionThrown = true;
+
+                // Exception should contain path.
+                Assert.True(exception.ToString().Contains("Path: $.Children[0].MyProperty"));
+            }
+
+            Assert.True(exceptionThrown);
+        }
+
+        [Fact]
+        public static void ReadObject_PublicIndexer()
+        {
+            Indexer indexer = JsonSerializer.Parse<Indexer>(@"{""NonIndexerProp"":""Value""}");
+            Assert.Equal("Value", indexer.NonIndexerProp);
+            Assert.Equal(-1, indexer[0]);
         }
     }
 }

@@ -2,7 +2,7 @@
   <Import Project="$(CommonTestPath)\Tests.props" />
   <PropertyGroup>
     <ProjectGuid>{101EB757-55A4-4F48-841C-C088640B8F57}</ProjectGuid>
-    <Configurations>netcoreapp-Debug;netcoreapp-Release;netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;uap-Debug;uap-Release</Configurations>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(CommonTestPath)\System\IO\PositionValueStream.cs">
@@ -20,7 +20,7 @@
     <Compile Include="SymmetricAlgorithm\Minimal.cs" />
     <Compile Include="SymmetricAlgorithm\Trivial.cs" />
   </ItemGroup>
-  <ItemGroup Condition="'$(TargetGroup)'=='netcoreapp'">
+  <ItemGroup Condition="'$(TargetsNetCoreApp)' == 'true'">
     <Compile Include="CryptoStream.netcoreapp.cs" />
     <Compile Include="FixedTimeEqualsTests.cs" />
     <Compile Include="HashAlgorithmTest.netcoreapp.cs" />

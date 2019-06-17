@@ -3,8 +3,9 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Diagnostics;
+using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     public static partial class JsonSerializer
     {
@@ -13,8 +14,6 @@ namespace System.Text.Json.Serialization
             Utf8JsonWriter writer,
             ref WriteStack state)
         {
-            JsonClassInfo classInfo = state.Current.JsonClassInfo;
-
             // Write the start.
             if (!state.Current.StartObjectWritten)
             {
@@ -24,6 +23,7 @@ namespace System.Text.Json.Serialization
             // Determine if we are done enumerating properties.
             // If the ClassType is unknown, there will be a policy property applied. There is probably
             // a better way to identify policy properties- maybe not put them in the normal property bag?
+            JsonClassInfo classInfo = state.Current.JsonClassInfo;
             if (classInfo.ClassType != ClassType.Unknown && state.Current.PropertyIndex != classInfo.PropertyCount)
             {
                 HandleObject(options, writer, ref state);
@@ -51,9 +51,15 @@ namespace System.Text.Json.Serialization
         {
             Debug.Assert(
                 state.Current.JsonClassInfo.ClassType == ClassType.Object ||
+                state.Current.JsonClassInfo.ClassType == ClassType.KeyValuePair ||
                 state.Current.JsonClassInfo.ClassType == ClassType.Unknown);
 
             JsonPropertyInfo jsonPropertyInfo = state.Current.JsonClassInfo.GetProperty(state.Current.PropertyIndex);
+            if (!jsonPropertyInfo.ShouldSerialize)
+            {
+                state.Current.NextProperty();
+                return true;
+            }
 
             bool obtainedValue = false;
             object currentValue = null;
@@ -70,7 +76,7 @@ namespace System.Text.Json.Serialization
 
             if (jsonPropertyInfo.ClassType == ClassType.Value)
             {
-                jsonPropertyInfo.Write(options, ref state.Current, writer);
+                jsonPropertyInfo.Write(ref state.Current, writer);
                 state.Current.NextProperty();
                 return true;
             }
@@ -99,6 +105,20 @@ namespace System.Text.Json.Serialization
                 return endOfEnumerable;
             }
 
+            // A property that returns an immutable dictionary keeps the same stack frame.
+            if (jsonPropertyInfo.ClassType == ClassType.IDictionaryConstructible)
+            {
+                state.Current.IsIDictionaryConstructibleProperty = true;
+
+                bool endOfEnumerable = HandleDictionary(jsonPropertyInfo.ElementClassInfo, options, writer, ref state);
+                if (endOfEnumerable)
+                {
+                    state.Current.NextProperty();
+                }
+
+                return endOfEnumerable;
+            }
+
             // A property that returns an object.
             if (!obtainedValue)
             {
@@ -112,17 +132,24 @@ namespace System.Text.Json.Serialization
 
                 state.Current.NextProperty();
 
-                JsonClassInfo nextClassInfo = options.GetOrAddClass(jsonPropertyInfo.RuntimePropertyType);
+                JsonClassInfo nextClassInfo = jsonPropertyInfo.RuntimeClassInfo;
                 state.Push(nextClassInfo, currentValue);
 
                 // Set the PropertyInfo so we can obtain the property name in order to write it.
                 state.Current.JsonPropertyInfo = previousPropertyInfo;
+
+                if (state.Current.JsonPropertyInfo.ClassType == ClassType.KeyValuePair)
+                {
+                    // Advance to the next property, since the first one is the KeyValuePair type itself,
+                    // not its first property (Key or Value).
+                    state.Current.PropertyIndex++;
+                }
             }
             else
             {
                 if (!jsonPropertyInfo.IgnoreNullValues)
                 {
-                    writer.WriteNull(jsonPropertyInfo._escapedName);
+                    writer.WriteNull(jsonPropertyInfo.EscapedName.Value);
                 }
 
                 state.Current.NextProperty();

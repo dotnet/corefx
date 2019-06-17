@@ -4,23 +4,48 @@
 
 using System.Diagnostics;
 using System.Reflection;
-using System.Text.Json.Serialization.Converters;
 
-namespace System.Text.Json.Serialization
+namespace System.Text.Json
 {
     internal sealed class ReflectionMaterializer : ClassMaterializer
     {
         public override JsonClassInfo.ConstructorDelegate CreateConstructor(Type type)
         {
+            Debug.Assert(type != null);
+            ConstructorInfo realMethod = type.GetConstructor(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, binder: null, Type.EmptyTypes, modifiers: null);
+
+            if (realMethod == null && !type.IsValueType)
+            {
+                return null;
+            }
+
             return () => Activator.CreateInstance(type);
         }
 
-        public override object ImmutableCreateRange(Type constructingType, Type elementType)
+        public override object ImmutableCollectionCreateRange(Type constructingType, Type elementType)
         {
-            MethodInfo createRange = ImmutableCreateRangeMethod(constructingType, elementType);
+            MethodInfo createRange = ImmutableCollectionCreateRangeMethod(constructingType, elementType);
+
+            if (createRange == null)
+            {
+                return null;
+            }
 
             return createRange.CreateDelegate(
-                typeof(DefaultImmutableConverter.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+                typeof(JsonSerializerOptions.ImmutableCreateRangeDelegate<>).MakeGenericType(elementType), null);
+        }
+
+        public override object ImmutableDictionaryCreateRange(Type constructingType, Type elementType)
+        {
+            MethodInfo createRange = ImmutableDictionaryCreateRangeMethod(constructingType, elementType);
+
+            if (createRange == null)
+            {
+                return null;
+            }
+
+            return createRange.CreateDelegate(
+                typeof(JsonSerializerOptions.ImmutableDictCreateRangeDelegate<,>).MakeGenericType(typeof(string), elementType), null);
         }
     }
 }

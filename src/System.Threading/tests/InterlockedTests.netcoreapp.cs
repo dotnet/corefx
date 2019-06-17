@@ -98,7 +98,7 @@ namespace System.Threading.Tests
             }
         }
 
-        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // issue: https://github.com/dotnet/coreclr/issues/20215
+        [ConditionalFact(typeof(PlatformDetection), nameof(PlatformDetection.IsNotArm64Process))] // [ActiveIssue(38400)]
         public void MemoryBarrierProcessWide()
         {
             // Stress MemoryBarrierProcessWide correctness using a simple AsymmetricLock

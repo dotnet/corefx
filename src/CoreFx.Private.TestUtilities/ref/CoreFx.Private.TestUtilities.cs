@@ -63,13 +63,13 @@ namespace System
         public static bool IsInvokingStaticConstructorsSupported { get { throw null; } }
         public static bool IsMacOsHighSierraOrHigher { get { throw null; } }
         public static bool IsMacOsMojaveOrHigher { get { throw null; } }
+        public static bool IsMonoRuntime { get { throw null; } }
         public static bool IsNetBSD { get { throw null; } }
         public static bool IsNetCore { get { throw null; } }
         public static bool IsNetfx462OrNewer { get { throw null; } }
         public static bool IsNetfx470OrNewer { get { throw null; } }
         public static bool IsNetfx471OrNewer { get { throw null; } }
         public static bool IsNetfx472OrNewer { get { throw null; } }
-        public static bool IsNetNative { get { throw null; } }
         public static bool IsNonZeroLowerBoundArraySupported { get { throw null; } }
         public static bool IsNotArm64Process { get { throw null; } }
         public static bool IsNotArmNorArm64Process { get { throw null; } }
@@ -78,8 +78,6 @@ namespace System
         public static bool IsNotInAppContainer { get { throw null; } }
         public static bool IsNotIntMaxValueArrayIndexSupported { get { throw null; } }
         public static bool IsNotMacOsHighSierraOrHigher { get { throw null; } }
-        public static bool IsNotNetNative { get { throw null; } }
-        public static bool IsNotNetNativeRunningAsConsoleApp { get { throw null; } }
         public static bool IsNotOneCoreUAP { get { throw null; } }
         public static bool IsNotOSX { get { throw null; } }
         public static bool IsNotRedHatFamily { get { throw null; } }
@@ -93,6 +91,7 @@ namespace System
         public static bool IsNotWinRTSupported { get { throw null; } }
         public static bool IsOpenSUSE { get { throw null; } }
         public static bool IsOSX { get { throw null; } }
+        public static bool IsPreciseGcSupported { get { throw null; } }
         public static bool IsRedHatFamily { get { throw null; } }
         public static bool IsRedHatFamily6 { get { throw null; } }
         public static bool IsRedHatFamily7 { get { throw null; } }

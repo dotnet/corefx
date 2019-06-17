@@ -54,7 +54,7 @@ namespace System
                 this = default;
                 return; // returns default
             }
-            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
 
             _object = array;
@@ -72,7 +72,7 @@ namespace System
                 this = default;
                 return; // returns default
             }
-            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
             if ((uint)start > (uint)array.Length)
                 ThrowHelper.ThrowArgumentOutOfRangeException();
@@ -92,7 +92,7 @@ namespace System
         /// <remarks>Returns default when <paramref name="array"/> is null.</remarks>
         /// <exception cref="System.ArrayTypeMismatchException">Thrown when <paramref name="array"/> is covariant and array's type is not exactly T[].</exception>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;=Length).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in the range (&lt;0 or &gt;Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory(T[]? array, int start, int length)
@@ -104,7 +104,7 @@ namespace System
                 this = default;
                 return; // returns default
             }
-            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/34757
+            if (default(T)! == null && array.GetType() != typeof(T[])) // TODO-NULLABLE: default(T) == null warning (https://github.com/dotnet/roslyn/issues/34757)
                 ThrowHelper.ThrowArrayTypeMismatchException();
 #if BIT64
             // See comment in Span<T>.Slice for how this works.
@@ -243,7 +243,7 @@ namespace System
         /// </summary>
         /// <param name="start">The index at which to begin this slice.</param>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;=Length).
+        /// Thrown when the specified <paramref name="start"/> index is not in range (&lt;0 or &gt;Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> Slice(int start)
@@ -263,7 +263,7 @@ namespace System
         /// <param name="start">The index at which to begin this slice.</param>
         /// <param name="length">The desired length for the slice (exclusive).</param>
         /// <exception cref="System.ArgumentOutOfRangeException">
-        /// Thrown when the specified <paramref name="start"/> or end index is not in range (&lt;0 or &gt;=Length).
+        /// Thrown when the specified <paramref name="start"/> or end index is not in range (&lt;0 or &gt;Length).
         /// </exception>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public Memory<T> Slice(int start, int length)

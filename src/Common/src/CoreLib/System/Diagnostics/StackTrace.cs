@@ -226,7 +226,7 @@ namespace System.Diagnostics
                         isAsync = typeof(IAsyncStateMachine).IsAssignableFrom(declaringType);
                         if (isAsync || typeof(IEnumerator).IsAssignableFrom(declaringType))
                         {
-                            methodChanged = TryResolveStateMachineMethod(ref mb!, out declaringType); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                            methodChanged = TryResolveStateMachineMethod(ref mb, out declaringType);
                         }
                     }
 

@@ -60,15 +60,6 @@ namespace System.Text.Json
         /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
         /// </summary>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static bool IsInRangeInclusive(double value, double lowerBound, double upperBound)
-            // For floating-point, do a direct comparison as it is more accurate than subtracting.
-            => (value >= lowerBound) && (value <= upperBound);
-
-        /// <summary>
-        /// Returns <see langword="true"/> if <paramref name="value"/> is between
-        /// <paramref name="lowerBound"/> and <paramref name="upperBound"/>, inclusive.
-        /// </summary>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInRangeInclusive(JsonTokenType value, JsonTokenType lowerBound, JsonTokenType upperBound)
             => (value - lowerBound) <= (upperBound - lowerBound);
 
@@ -77,5 +68,19 @@ namespace System.Text.Json
         /// Otherwise, returns <see langword="false"/>.
         /// </summary>
         public static bool IsDigit(byte value) => (uint)(value - '0') <= '9' - '0';
+
+        /// <summary>
+        /// Calls Encoding.UTF8.GetString that supports netstandard.
+        /// </summary>
+        /// <param name="bytes">The utf8 bytes to convert.</param>
+        /// <returns></returns>
+        internal static string Utf8GetString(ReadOnlySpan<byte> bytes)
+        {
+            return Encoding.UTF8.GetString(bytes
+#if netstandard
+                        .ToArray()
+#endif
+                );
+        }
     }
 }

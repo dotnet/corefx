@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Configurations>netstandard-Debug;netstandard-Release</Configurations>
+    <Configurations>netcoreapp-Debug;netcoreapp-Release;netfx-Debug;netfx-Release;uap-Debug;uap-Release</Configurations>
     <TestDataPackageVersion>1.0.9</TestDataPackageVersion>
     <IncludeRemoteExecutor>true</IncludeRemoteExecutor>
   </PropertyGroup>
@@ -11,8 +11,17 @@
     <Compile Include="MyResourceType.cs" />
     <Compile Include="TestData.cs" />
     <Compile Include="BinaryResourceWriterUnitTest.cs" />
-    <SupplementalTestData Include="$(PackagesDir)system.drawing.common.testdata\$(TestDataPackageVersion)\content\**\*.*" Link="%(RecursiveDir)%(Filename)%(Extension)" />
+    <Compile Include="$(CommonPath)\CoreLib\System\Numerics\Hashing\HashHelpers.cs">
+      <Link>System\Numerics\Hashing\HashHelpers.cs</Link>
+    </Compile>
+    <Compile Include="..\src\System\Resources\Extensions\TypeNameComparer.cs">
+      <Link>TypeNameComparer.cs</Link>
+    </Compile>
+    <Compile Include="TypeNameComparerTests.cs" />
     <EmbeddedResource Include="TestData.resources" WithCulture="false" Type="Non-Resx" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Drawing.Common.TestData" Version="$(SystemDrawingCommonTestDataPackageVersion)" />    
   </ItemGroup>
   <!-- use the following target to regenerate the test resources file
        This is done from a test application and checked in so that we don't run

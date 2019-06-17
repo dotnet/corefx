@@ -42,7 +42,7 @@ namespace System.IO
         {
             // Lazily-initialize _asyncActiveSemaphore.  As we're never accessing the SemaphoreSlim's
             // WaitHandle, we don't need to worry about Disposing it.
-            return LazyInitializer.EnsureInitialized<SemaphoreSlim>(ref _asyncActiveSemaphore!, () => new SemaphoreSlim(1, 1)); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            return LazyInitializer.EnsureInitialized<SemaphoreSlim>(ref _asyncActiveSemaphore!, () => new SemaphoreSlim(1, 1)); // TODO-NULLABLE: Remove ! when nullable attributes are respected
         }
 
         public abstract bool CanRead
@@ -255,7 +255,7 @@ namespace System.IO
 
         public virtual Task FlushAsync(CancellationToken cancellationToken)
         {
-            return Task.Factory.StartNew(state => ((Stream)state!).Flush(), this, // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+            return Task.Factory.StartNew(state => ((Stream)state!).Flush(), this,
                 cancellationToken, TaskCreationOptions.DenyChildAttach, TaskScheduler.Default);
         }
 
@@ -380,7 +380,7 @@ namespace System.IO
         {
             if (MemoryMarshal.TryGetArray(buffer, out ArraySegment<byte> array))
             {
-                return new ValueTask<int>(ReadAsync(array.Array!, array.Offset, array.Count, cancellationToken)); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                return new ValueTask<int>(ReadAsync(array.Array!, array.Offset, array.Count, cancellationToken));
             }
             else
             {
@@ -511,7 +511,7 @@ namespace System.IO
                 asyncWaiter.ContinueWith((t, state) =>
                 {
                     Debug.Assert(t.IsCompletedSuccessfully, "The semaphore wait should always complete successfully.");
-                    var rwt = (ReadWriteTask)state!; // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    var rwt = (ReadWriteTask)state!;
                     Debug.Assert(rwt._stream != null);
                     rwt._stream.RunReadWriteTask(rwt); // RunReadWriteTask(readWriteTask);
                 }, readWriteTask, default, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default);
@@ -691,7 +691,7 @@ namespace System.IO
         {
             if (MemoryMarshal.TryGetArray(buffer, out ArraySegment<byte> array))
             {
-                return new ValueTask(WriteAsync(array.Array!, array.Offset, array.Count, cancellationToken)); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                return new ValueTask(WriteAsync(array.Array!, array.Offset, array.Count, cancellationToken));
             }
             else
             {
@@ -1061,7 +1061,7 @@ namespace System.IO
             {
                 get
                 {
-                    return LazyInitializer.EnsureInitialized<ManualResetEvent>(ref _waitHandle!, () => new ManualResetEvent(true)); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+                    return LazyInitializer.EnsureInitialized<ManualResetEvent>(ref _waitHandle!, () => new ManualResetEvent(true)); // Remove ! when nullable attributes are respected
                 }
             }
 

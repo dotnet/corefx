@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace System.Collections.Generic
 {
@@ -10,7 +11,7 @@ namespace System.Collections.Generic
     // Keys can be any non-null object.  Values can be any object.
     // You can look up a value in an IDictionary via the default indexed
     // property, Items.
-    public interface IDictionary<TKey, TValue> : ICollection<KeyValuePair<TKey, TValue>> where TKey : object
+    public interface IDictionary<TKey, TValue> : ICollection<KeyValuePair<TKey, TValue>> where TKey : notnull
     {
         // Interfaces are not serializable
         // The Item property provides methods to read and edit entries 
@@ -45,6 +46,6 @@ namespace System.Collections.Generic
         //
         bool Remove(TKey key);
 
-        bool TryGetValue(TKey key, out TValue value); // TODO-NULLABLE: https://github.com/dotnet/roslyn/issues/26761
+        bool TryGetValue(TKey key, [MaybeNullWhen(false)] out TValue value);
     }
 }
