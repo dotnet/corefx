@@ -142,6 +142,10 @@ namespace System.Buffers
                 if (input.Length > 0)
                 {
                     destination = writer.GetSpan();
+
+                    if (destination.IsEmpty)
+                        ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.writer);
+
                     continue;
                 }
 

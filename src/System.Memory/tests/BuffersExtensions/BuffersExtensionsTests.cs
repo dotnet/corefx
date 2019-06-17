@@ -32,17 +32,48 @@ namespace System.Buffers.Tests
         [Fact]
         public void WritingToEmptyBufferFailsWithException()
         {
-            IBufferWriter<byte> bufferWriter = new EmptyBufferWriter();
-            Assert.Throws<ArgumentOutOfRangeException>(paramName: "writer", testCode: () => bufferWriter.Write(new byte[1]));
+            IBufferWriter<byte> emptyBufferWriter = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] { Array.Empty<byte>() }
+            );
+
+            Assert.Throws<ArgumentOutOfRangeException>(paramName: "writer", testCode: () => emptyBufferWriter.Write(new byte[1]));
         }
 
-        private class EmptyBufferWriter : IBufferWriter<byte>
+        [Fact]
+        public void WritingToMultiSegmentBufferWithEmptySegmentFailsWithException()
         {
-            public void Advance(int _) { }
+            const int nonEmptySegmentSize = 10;
 
-            public Memory<byte> GetMemory(int sizeHint = 0) => Memory<byte>.Empty;
+            IBufferWriter<byte> multiSegmentBufferWriterWithEmptySegment = new MultiSegmentArrayBufferWriter<byte>(
+                new byte[][] {
+                    new byte[nonEmptySegmentSize],
+                    Array.Empty<byte>()
+                }
+            );
 
-            public Span<byte> GetSpan(int sizeHint) => Span<byte>.Empty;
+            Assert.Throws<ArgumentOutOfRangeException>(
+                paramName: "writer", 
+                testCode: () => multiSegmentBufferWriterWithEmptySegment.Write(new byte[nonEmptySegmentSize + 1]));
+        }
+
+        private class MultiSegmentArrayBufferWriter<T> : IBufferWriter<T>
+        {
+            private readonly T[][] _segments;
+            private int _segmentIndex;
+
+            public MultiSegmentArrayBufferWriter(T[][] segments) => _segments = segments;
+
+            public void Advance(int size)
+            {
+                if (size != _segments[_segmentIndex].Length)
+                    throw new NotSupportedException("By design");
+
+                _segmentIndex++;
+            }
+
+            public Memory<T> GetMemory(int sizeHint = 0) => _segments[_segmentIndex];
+
+            public Span<T> GetSpan(int sizeHint) => _segments[_segmentIndex];
         }
 
         private class TestBufferWriterSingleSegment : IBufferWriter<byte>
