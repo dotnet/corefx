@@ -55,7 +55,7 @@ namespace System.Drawing
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct GdipImageCodecInfo  /*Size 76 bytes*/
+    internal struct GdipImageCodecInfo
     {
         internal Guid Clsid;
         internal Guid FormatID;
