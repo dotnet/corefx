@@ -328,6 +328,8 @@ namespace System.Security.Cryptography
 
             private void SetKey(SafeDsaHandle newKey)
             {
+                ThrowIfDisposed();
+
                 // Use ForceSet instead of the property setter to ensure that LegalKeySizes doesn't interfere
                 // with the already loaded key.
                 ForceSetKeySize(BitsPerByte * Interop.Crypto.DsaKeySize(newKey));
